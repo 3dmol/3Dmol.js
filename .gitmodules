@@ -1,0 +1,6 @@
+[submodule "three.js"]
+	path = three.js
+	url = git://github.com/mrdoob/three.js.git
+[submodule "GLmol"]
+	path = GLmol
+	url = https://github.com/dkoes/GLmol.git
