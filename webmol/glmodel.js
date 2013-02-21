@@ -16,7 +16,7 @@ WebMol.GLModel = (function() {
 	};
 
 	defaultAtomStyle = {
-		stick : {}
+		sphere : {}
 	};
 
 	var Nucleotides = [ '  G', '  A', '  T', '  C', '  U', ' DG', ' DA', ' DT',
