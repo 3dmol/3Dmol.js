@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html >
+<html style="height:100%; padding: 0; margin: 0">
     <head>
         <title>WebMol Test</title>
         <!-- data-main attribute tells require.js to load
@@ -23,10 +23,9 @@
         });
         </script>
     </head>
-    <body >
-        <div style="padding: 0; margine: 0; height:100%">
+    <body style="height:95%; padding: 1em; margin: 0">
         <h1>WebMol</h1>
-        <div id="viewerdiv" style="width: 90%; height: 800px; border: 2px solid black"></div>
+        <div id="viewerdiv" style="width: 90%; height: 80%; border: 2px solid black"></div>
         <input type="button" value="Stick" onclick="viewer.setStyle({stick:{}}); viewer.render();"></input>
         <input type="button" value="Line" onclick="viewer.setStyle({line:{}}); viewer.render();"></input>
         <input type="button" value="Cross" onclick="viewer.setStyle({cross:{}}); viewer.render();"></input>
@@ -34,7 +33,7 @@
         <input type="button" value="Cartoon" onclick="viewer.setStyle({cartoon:{}}); viewer.render();"></input>
         <br>
         <input type="button" value="Recenter" onclick="viewer.zoomTo();"></input>
-        </div>
+        
             <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata">
 HEADER    IMMUNE SYSTEM                           13-APR-00   1EU3              
 TITLE     CRYSTAL STRUCTURE OF THE SUPERANTIGEN SMEZ-2 (ZINC BOUND)             
