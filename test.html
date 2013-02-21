@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html >
     <head>
         <title>WebMol Test</title>
         <!-- data-main attribute tells require.js to load
@@ -9,21 +9,32 @@
         <script src="GLmol/src/js/GLmol.js"></script>
         <script src="webmol/webmol.js"></script>
         <script src="webmol/glmodel.js"></script>
+        <script src="webmol/glcartoon.js"></script>
         <script src="webmol/glviewer.js"></script>
         <script>
+        var viewer = null;
         $(document).ready(function() {
-            var viewer = WebMol.createViewer("viewerdiv");	
+            viewer = WebMol.createViewer("viewerdiv");	
             viewer.setBackgroundColor(0xffffff);
             var m = viewer.addModel($("#moldata").val(),"pdb");
-            viewer.setStyle({line:{linewidth: 2}});
+
             viewer.zoomTo();
             viewer.render();
         });
         </script>
     </head>
-    <body>
+    <body >
+        <div style="padding: 0; margine: 0; height:100%">
         <h1>WebMol</h1>
-        <div id="viewerdiv" style="width: 600px; height: 480px; border: 2px solid black"></div>
+        <div id="viewerdiv" style="width: 90%; height: 800px; border: 2px solid black"></div>
+        <input type="button" value="Stick" onclick="viewer.setStyle({stick:{}}); viewer.render();"></input>
+        <input type="button" value="Line" onclick="viewer.setStyle({line:{}}); viewer.render();"></input>
+        <input type="button" value="Cross" onclick="viewer.setStyle({cross:{}}); viewer.render();"></input>
+        <input type="button" value="Sphere" onclick="viewer.setStyle({sphere:{}}); viewer.render();"></input>
+        <input type="button" value="Cartoon" onclick="viewer.setStyle({cartoon:{}}); viewer.render();"></input>
+        <br>
+        <input type="button" value="Recenter" onclick="viewer.zoomTo();"></input>
+        </div>
             <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata">
 HEADER    IMMUNE SYSTEM                           13-APR-00   1EU3              
 TITLE     CRYSTAL STRUCTURE OF THE SUPERANTIGEN SMEZ-2 (ZINC BOUND)             

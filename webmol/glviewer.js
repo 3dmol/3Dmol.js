@@ -6,9 +6,6 @@ var WebMol = WebMol || {};
 WebMol.glmolViewer = (function() {
 	// private class variables
 
-	var aaScale = 1; // or 2
-
-
 
 	// private class helper functions
 	
@@ -58,8 +55,8 @@ WebMol.glmolViewer = (function() {
 		
 		var models = []; //atomistic molecular models
 
-		var WIDTH = container.width() * aaScale;
-		var HEIGHT = container.height() * aaScale;
+		var WIDTH = container.width();
+		var HEIGHT = container.height();
 		//set dimensions
 		$(container).width(WIDTH);
 		$(container).height(HEIGHT);
@@ -68,12 +65,10 @@ WebMol.glmolViewer = (function() {
 		var NEAR = 1, FAR = 800;
 		var CAMERA_Z = -150;
 		var renderer = new THREE.WebGLRenderer({
-			antialias : true
+			antialias : true,
 		});
-		renderer.sortObjects = false; // hopefully improve performance
-		// 'antialias: true' now works in Firefox too!
-		// setting this.aaScale = 2 will enable antialias in older Firefox but
-		// GPU load increases.
+		//renderer.sortObjects = false; // hopefully improve performance
+
 		renderer.domElement.style.width = "100%";
 		renderer.domElement.style.height = "100%";
 		container.append(renderer.domElement);
@@ -87,15 +82,14 @@ WebMol.glmolViewer = (function() {
 		orthoscopicCamera.position.z = CAMERA_Z;
 		orthoscopicCamera.lookAt(new TV3(0, 0, 0));
 
-		var self = this;
 		$(window).resize(function() { // only window can capture resize event
-			self.WIDTH = self.container.width() * self.aaScale;
-			self.HEIGHT = self.container.height() * self.aaScale;
-			self.ASPECT = self.WIDTH / self.HEIGHT;
-			self.renderer.setSize(self.WIDTH, self.HEIGHT);
-			self.camera.aspect = self.ASPECT;
-			self.camera.updateProjectionMatrix();
-			self.show();
+			WIDTH = container.width();
+			HEIGHT = container.height();
+			ASPECT = WIDTH / HEIGHT;
+			renderer.setSize(WIDTH, HEIGHT);
+			camera.aspect = ASPECT;
+			camera.updateProjectionMatrix();
+			show();
 		});
 
 		var scene = null;
@@ -384,6 +378,7 @@ WebMol.glmolViewer = (function() {
 			rotationGroup.position.z = maxD * 0.35
 					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150;
 			rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
+			show();
 		};
 		
 		//given molecular data and its format (pdb, sdf or xyz)

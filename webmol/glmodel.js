@@ -8,16 +8,15 @@ var WebMol = WebMol || {};
 WebMol.GLModel = (function() {
 	// class variables go here
 	var defaultAtomStyle = {
-		sphere : null,
-		icosahedron : null,
+		sphere : {},
 		stick : null,
-		line : {},
+		line : null,
 		cross : null,
 		cartoon : null
 	};
 
 	defaultAtomStyle = {
-		sphere : {}
+		stick : {}
 	};
 
 	var Nucleotides = [ '  G', '  A', '  T', '  C', '  U', ' DG', ' DA', ' DT',
@@ -368,12 +367,33 @@ WebMol.GLModel = (function() {
 		return true;
 	};
 
+	//set all the faces of the provided geometry to the specified color
+	var setGeometryColor = function(geo, color) {
+		var c = new TCo(color);
+		for(var i = 0; i < geo.faces.length; i++) {
+			var face = geo.faces[i];
+			face.color = c;
+		}
+	};
+	
 	// sphere drawing
 	var defaultSphereRadius = 1.5;
 	var sphereQuality = 16; // 16;
 	var sphereGeometry = new THREE.SphereGeometry(1, sphereQuality,
 			sphereQuality);
 
+	//return proper radius for atom given style
+	var getRadiusFromStyle = function(atom, style) {
+		var r = defaultSphereRadius;
+		if (typeof (style.radius) != "undefined")
+			r = style.radius;
+		else if (vdwRadii[atom.elem])
+			r = vdwRadii[atom.elem];
+
+		if (typeof (style.scale) != "undefined")
+			r *= style.scale;
+		return r;
+	}
 	var drawAtomSphere = function(atom) {
 		if (!atom.style.sphere)
 			return;
@@ -388,14 +408,7 @@ WebMol.GLModel = (function() {
 			color : color
 		});
 		var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-		var r = defaultSphereRadius;
-		if (typeof (style.fixedRadius) != "undefined")
-			r = style.fixedRadius;
-		else if (vdwRadii[atom.elem])
-			r = vdwRadii[atom.elem];
-
-		if (typeof (style.scale) != "undefined")
-			r *= style.scale;
+		var r = getRadiusFromStyle(atom,style);
 
 		sphere.scale.x = sphere.scale.y = sphere.scale.z = r;
 		sphere.position.x = atom.x;
@@ -406,40 +419,6 @@ WebMol.GLModel = (function() {
 		atom.globj.add(sphere);
 	}
 
-	// icosohedral drawing
-	var icosahedronGeo = new THREE.IcosahedronGeometry(1);
-	var drawAtomIcosahedron = function(atom) {
-		if (!atom.style.icosahedron)
-			return;
-		var style = atom.style.icosahedron;
-		if (style.hidden)
-			return;
-
-		var color = atom.color;
-		if (typeof (style.color) != "undefined")
-			color = style.color;
-		var mat = new THREE.MeshLambertMaterial({
-			color : color
-		});
-		var sphere = new THREE.Mesh(icosahedronGeo, mat);
-
-		var r = defaultSphereRadius;
-		if (typeof (style.fixedRadius) != "undefined")
-			r = style.fixedRadius;
-		else if (vdwRadii[atom.elem])
-			r = vdwRadii[atom.elem];
-
-		if (typeof (style.scale) != "undefined")
-			r *= style.scale;
-
-		sphere.scale.x = sphere.scale.y = sphere.scale.z = r;
-		sphere.position.x = atom.x;
-		sphere.position.y = atom.y;
-		sphere.position.z = atom.z;
-
-		atom.globj = atom.globj || new THREE.Object3D();
-		atom.globj.add(sphere);
-	};
 
 	// cross drawing
 	var drawAtomCross = function(atom) {
@@ -449,7 +428,8 @@ WebMol.GLModel = (function() {
 		if (style.hidden)
 			return;
 		var geo = new THREE.Geometry();
-		var delta = style.delta || 0.5;
+		var delta = getRadiusFromStyle(atom,style);
+		
 		var points = [ [ delta, 0, 0 ], [ -delta, 0, 0 ], [ 0, delta, 0 ],
 				[ 0, -delta, 0 ], [ 0, 0, delta ], [ 0, 0, -delta ] ];
 
@@ -523,21 +503,19 @@ WebMol.GLModel = (function() {
 	var defaultStickRadius = .25;
 	var cylinderQuality = 16;
 	var cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, cylinderQuality,
-			1, false);
+			1, true);
 	cylinderGeometry.faceUvs = [];
 	var faceVertexUvs = [];
 
+	//returns mesh of cylinder
 	var drawCylinder = function(obj, from, to, radius, color) {
 		if (!from || !to)
 			return;
 
 		var midpoint = new TV3().addVectors(from, to).multiplyScalar(0.5);
-		var color = new TCo(color);
 
-		var cylinderMaterial = new THREE.MeshLambertMaterial({
-			color : color.getHex()
-		});
-		var cylinder = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
+		setGeometryColor(cylinderGeometry, color)
+		var cylinder = new THREE.Mesh(cylinderGeometry);
 		cylinder.position = midpoint;
 		cylinder.lookAt(from);
 		cylinder.updateMatrix();
@@ -546,9 +524,11 @@ WebMol.GLModel = (function() {
 				.distanceTo(to));
 		m.rotateX(Math.PI / 2);
 		cylinder.matrix.multiply(m);
-		obj.add(cylinder);
+		return cylinder;
 	};
 
+	//draws cylinders and small spheres (at bond radius)
+	//cylinder geometries are merged for better interactive performance
 	var drawBondSticks = function(atom, atoms) {
 		if (!atom.style.stick)
 			return;
@@ -556,8 +536,15 @@ WebMol.GLModel = (function() {
 		if (style.hidden)
 			return;
 
-		var geo = new THREE.Geometry();
 		var bondR = style.radius || defaultStickRadius;
+
+		var c1 = atom.color;
+		if (typeof (style.color) != "undefined") {
+			c1 = style.color;
+		}
+		
+		atom.globj = atom.globj || new THREE.Object3D();
+		var geo = new THREE.Geometry();
 
 		for ( var i = 0; i < atom.bonds.length; i++) {
 			var j = atom.bonds[i]; // our neighbor
@@ -571,29 +558,34 @@ WebMol.GLModel = (function() {
 				var p2 = new TV3(atom2.x, atom2.y, atom2.z);
 				var mp = new TV3().addVectors(p1, p2).multiplyScalar(0.5);
 
-				var c1 = atom.color;
 				var c2 = atom2.color;
 				if (typeof (style.color) != "undefined") {
-					c1 = style.color;
 					c2 = style.color;
 				}
 
-				atom.globj = atom.globj || new THREE.Object3D();
-				drawCylinder(atom.globj, p1, mp, bondR, c1);
-				drawCylinder(atom.globj, p2, mp, bondR, c2);
+				var mesh1 = drawCylinder(atom.globj, p1, mp, bondR, c1);
+				THREE.GeometryUtils.merge(geo,mesh1);
+				var mesh2 = drawCylinder(atom.globj, p2, mp, bondR, c2);
+				THREE.GeometryUtils.merge(geo,mesh2);
 			}
 		}
 
-		// for junctions draw sphere
+		var cylinderMaterial = new THREE.MeshLambertMaterial({
+			vertexColors : true
+		});
+		atom.globj.add(new THREE.Mesh(geo, cylinderMaterial));
+
+		// for junctions draw sphere; merge the sphere geometries was really really slow
 		var savedstyle = atom.style;
 		atom.style = {
 			sphere : {
-				fixedRadius : bondR,
-				color : style.color
+				radius : bondR,
+				color : c1
 			}
 		};
 		drawAtomSphere(atom);
-		atom.style = savedstyle;
+		atom.style = savedstyle;				
+
 	};
 
 	// go through all the atoms and regenerate their geometries
@@ -601,22 +593,28 @@ WebMol.GLModel = (function() {
 	// recalculation
 	var createMolObj = function(atoms) {
 		var ret = new THREE.Object3D();
-
+		var cartoonAtoms = [];
 		for ( var i = 0; i < atoms.length; i++) {
 			var atom = atoms[i];
 			// recreate gl info for each atom as necessary
 			if (atom && atom.style && atom.globj == null) {
 				drawAtomSphere(atom);
-				drawAtomIcosahedron(atom);
 				drawAtomCross(atom);
 				drawBondLines(atom, atoms);
 				drawBondSticks(atom, atoms);
+				if(typeof(atom.style.cartoon) != "undefined" &&
+						!atom.style.cartoon.hidden) {
+					cartoonAtoms.push(atom);
+				}
 			}
 			if (atom && atom.globj)
 				ret.add(atom.globj);
 		}
 
-		// TODO: create cartoons as needed
+		//create cartoon if needed - this is a whole model analysis
+		if(cartoonAtoms.length > 0) {
+			WebMol.drawCartoon(ret, cartoonAtoms, false);
+		}
 		return ret;
 	};
 
@@ -626,7 +624,6 @@ WebMol.GLModel = (function() {
 		var atoms = [];
 		var id = mid;
 		var molObj = null;
-		var redrawCartoon = true; // set when cartoon style changed
 
 		this.getID = function() {
 			return id;
@@ -672,8 +669,7 @@ WebMol.GLModel = (function() {
 			// style, although these checks will only catch cases where both
 			// are either null or undefined
 			for ( var i = 0; i < atoms.length; i++) {
-				if (atoms[i].style.cartoon != mystyle.cartoon)
-					redrawCartoon = true;
+
 				atoms[i].style = mystyle;
 				atoms[i].globj = null; // need to recalculate
 
