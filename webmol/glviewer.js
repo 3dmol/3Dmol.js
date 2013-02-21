@@ -402,6 +402,15 @@ WebMol.glmolViewer = (function() {
 				models.pop();
 		}
 
+		//apply sel to all models and apply style
+		this.setStyle = function(style, sel) {
+			for(var i = 0; i < models.length; i++) {
+				if(models[i]) {
+					models[i].setStyle(style,sel);
+				}
+			}
+		};
+		
 		//add a surface
 		this.addSurface = function(type, style, atomsel, allsel) {
 			

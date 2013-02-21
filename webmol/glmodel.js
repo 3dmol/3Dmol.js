@@ -16,6 +16,10 @@ WebMol.GLModel = (function() {
 		cartoon : null
 	};
 
+	defaultAtomStyle = {
+		sphere : {}
+	};
+
 	var Nucleotides = [ '  G', '  A', '  T', '  C', '  U', ' DG', ' DA', ' DT',
 			' DC', ' DU' ];
 	var ElementColors = {
@@ -34,7 +38,7 @@ WebMol.GLModel = (function() {
 	};
 	var defaultColor = 0xCCCCCC;
 	var defaultlineWidth = 1.5;
-	
+
 	// Reference: A. Bondi, J. Phys. Chem., 1964, 68, 441.
 	var vdwRadii = {
 		"H" : 1.2,
@@ -60,7 +64,8 @@ WebMol.GLModel = (function() {
 	// given a selection specification, return true if atom is selected
 	var atomIsSelected = function(atom, sel) {
 
-		if(typeof(sel) === "undefined") return true; //undef gets all
+		if (typeof (sel) === "undefined")
+			return true; // undef gets all
 		for ( var key in sel) {
 			if (sel.hasOwnProperty(key)) {
 				// if something is in sel, atom must have it
@@ -89,10 +94,19 @@ WebMol.GLModel = (function() {
 	// return true if atom1 and atom2 are probably bonded to each other
 	// based on distance alone
 	var areConnected = function(atom1, atom2) {
+		var max = 3.42;
 
-		var distSquared = (atom1.x - atom2.x) * (atom1.x - atom2.x)
-				+ (atom1.y - atom2.y) * (atom1.y - atom2.y)
-				+ (atom1.z - atom2.z) * (atom1.z - atom2.z);
+		var xdiff = atom1.x - atom2.x;
+		if (xdiff > max)
+			return false;
+		var ydiff = atom1.y - atom2.y;
+		if (ydiff > max)
+			return false;
+		var zdiff = atom1.z - atom2.z;
+		if (zdiff > max)
+			return false;
+
+		var distSquared = xdiff * xdiff + ydiff * ydiff + zdiff * zdiff;
 
 		// if (atom1.altLoc != atom2.altLoc) return false;
 		if (isNaN(distSquared))
@@ -114,10 +128,13 @@ WebMol.GLModel = (function() {
 	var setAtomDefaults = function(atoms, id) {
 		for ( var i = 0; i < atoms.length; i++) {
 			var atom = atoms[i];
-			atom.style = atom.style || defaultAtomStyle;
-			atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
-			atom.model = id;
-			atom.globj = null;
+			if (atom) {
+				atom.style = atom.style || defaultAtomStyle;
+				atom.color = atom.color || ElementColors[atom.elem]
+						|| defaultColor;
+				atom.model = id;
+				atom.globj = null;
+			}
 		}
 	}
 
@@ -162,9 +179,9 @@ WebMol.GLModel = (function() {
 
 		return true;
 	};
-	
-	//put atoms specified in sdf fromat in str into atoms
-	//adds to atoms, does not replace
+
+	// put atoms specified in sdf fromat in str into atoms
+	// adds to atoms, does not replace
 	var parseSDF = function(atoms, str) {
 
 		var lines = str.split("\n");
@@ -178,7 +195,7 @@ WebMol.GLModel = (function() {
 		if (lines.length < 4 + atomCount + bondCount)
 			return;
 		var start = atoms.length;
-		var end = start+atomCount;
+		var end = start + atomCount;
 		for ( var i = start; i < end; i++) {
 			var line = lines[offset];
 			offset++;
@@ -196,8 +213,8 @@ WebMol.GLModel = (function() {
 		for (i = 0; i < bondCount; i++) {
 			var line = lines[offset];
 			offset++;
-			var from = parseInt(line.substr(0, 3))-1+start;
-			var to = parseInt(line.substr(3, 3))-1+start;
+			var from = parseInt(line.substr(0, 3)) - 1 + start;
+			var to = parseInt(line.substr(3, 3)) - 1 + start;
 			var order = parseInt(line.substr(6, 3));
 			atoms[from].bonds.push(to);
 			atoms[from].bondOrder.push(order);
@@ -208,21 +225,164 @@ WebMol.GLModel = (function() {
 		return true;
 	};
 
+	// parse pdb file from str and create atoms
+	var parsePDB = function(atoms, str) {
+
+		var atoms_cnt = 0;
+		var start = atoms.length;
+		var protein = {
+			sheet : [],
+			helix : []
+		}; // get secondary structure straight from pdb
+
+		var serialToIndex = []; //map from pdb serial to index in atoms
+		lines = str.split("\n");
+		for ( var i = 0; i < lines.length; i++) {
+			line = lines[i].replace(/^\s*/, ''); // remove indent
+			var recordName = line.substr(0, 6);
+			if (recordName == 'ATOM  ' || recordName == 'HETATM') {
+				var atom, resn, chain, resi, x, y, z, hetflag, elem, serial, altLoc, b;
+				altLoc = line.substr(16, 1);
+				if (altLoc != ' ' && altLoc != 'A')
+					continue; // FIXME: ad hoc
+				serial = parseInt(line.substr(6, 5));
+				atom = line.substr(12, 4).replace(/ /g, "");
+				resn = line.substr(17, 3);
+				chain = line.substr(21, 1);
+				resi = parseInt(line.substr(22, 5));
+				x = parseFloat(line.substr(30, 8));
+				y = parseFloat(line.substr(38, 8));
+				z = parseFloat(line.substr(46, 8));
+				b = parseFloat(line.substr(60, 8));
+				elem = line.substr(76, 2).replace(/ /g, "");
+				if (elem == '') { // for some incorrect PDB files
+					elem = line.substr(12, 4).replace(/ /g, "");
+				}
+				if (line[0] == 'H')
+					hetflag = true;
+				else
+					hetflag = false;
+				serialToIndex[serial] = atoms.length;
+				atoms.push({
+					'resn' : resn,
+					'x' : x,
+					'y' : y,
+					'z' : z,
+					'elem' : elem,
+					'hetflag' : hetflag,
+					'chain' : chain,
+					'resi' : resi,
+					'serial' : serial,
+					'atom' : atom,
+					'bonds' : [],
+					'ss' : 'c',
+					'bonds' : [],
+					'bondOrder' : [],
+					'b' : b});
+			} else if (recordName == 'SHEET ') {
+				var startChain = line.substr(21, 1);
+				var startResi = parseInt(line.substr(22, 4));
+				var endChain = line.substr(32, 1);
+				var endResi = parseInt(line.substr(33, 4));
+				protein.sheet
+						.push([ startChain, startResi, endChain, endResi ]);
+			} else if (recordName == 'CONECT') {
+				// MEMO: We don't have to parse SSBOND, LINK because both are
+				// also
+				// described in CONECT. But what about 2JYT???
+				var from = parseInt(line.substr(6, 5));
+				var fromAtom = atoms[serialToIndex[from]];
+				for ( var j = 0; j < 4; j++) {
+					var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
+					if (isNaN(to))
+						continue;
+					var toAtom = atoms[serialToIndex[to]];
+					if (fromAtom != undefined) {
+						fromAtom.bonds.push(serialToIndex[to]);
+						fromAtom.bondOrder.push(1);
+					}
+				}
+			} else if (recordName == 'HELIX ') {
+				var startChain = line.substr(19, 1);
+				var startResi = parseInt(line.substr(21, 4));
+				var endChain = line.substr(31, 1);
+				var endResi = parseInt(line.substr(33, 4));
+				protein.helix
+						.push([ startChain, startResi, endChain, endResi ]);
+			}
+
+		}
+
+		var starttime = (new Date()).getTime();
+		// assign bonds - yuck, can't count on connect records
+		for ( var i = start; i < atoms.length; i++) {
+			// n^2 behavior.. should at least sort by z
+			for ( var j = i + 1; j < atoms.length; j++) {
+				if (areConnected(atoms[i], atoms[j])) {
+					if (atoms[i].bonds.indexOf(j) == -1) {
+						// only add if not already there
+						atoms[i].bonds.push(j);
+						atoms[i].bondOrder.push(1);
+						atoms[j].bonds.push(i);
+						atoms[j].bondOrder.push(1);
+					}
+				}
+			}
+		}
+		console.log("bond connecting " + ((new Date()).getTime()-starttime));
+		// Assign secondary structures
+		for (i = start; i < atoms.length; i++) {
+			atom = atoms[i];
+			if (atom == undefined)
+				continue;
+
+			var found = false;
+			// MEMO: Can start chain and end chain differ?
+			for (j = 0; j < protein.sheet.length; j++) {
+				if (atom.chain != protein.sheet[j][0])
+					continue;
+				if (atom.resi < protein.sheet[j][1])
+					continue;
+				if (atom.resi > protein.sheet[j][3])
+					continue;
+				atom.ss = 's';
+				if (atom.resi == protein.sheet[j][1])
+					atom.ssbegin = true;
+				if (atom.resi == protein.sheet[j][3])
+					atom.ssend = true;
+			}
+			for (j = 0; j < protein.helix.length; j++) {
+				if (atom.chain != protein.helix[j][0])
+					continue;
+				if (atom.resi < protein.helix[j][1])
+					continue;
+				if (atom.resi > protein.helix[j][3])
+					continue;
+				atom.ss = 'h';
+				if (atom.resi == protein.helix[j][1])
+					atom.ssbegin = true;
+				else if (atom.resi == protein.helix[j][3])
+					atom.ssend = true;
+			}
+		}
+		return true;
+	};
+
 	// sphere drawing
 	var defaultSphereRadius = 1.5;
 	var sphereQuality = 16; // 16;
 	var sphereGeometry = new THREE.SphereGeometry(1, sphereQuality,
 			sphereQuality);
-	
+
 	var drawAtomSphere = function(atom) {
 		if (!atom.style.sphere)
 			return;
 		var style = atom.style.sphere;
 		if (style.hidden)
 			return;
-		
+
 		var color = atom.color;
-		if(typeof(style.color) != "undefined")
+		if (typeof (style.color) != "undefined")
 			color = style.color;
 		var sphereMaterial = new THREE.MeshLambertMaterial({
 			color : color
@@ -241,7 +401,7 @@ WebMol.GLModel = (function() {
 		sphere.position.x = atom.x;
 		sphere.position.y = atom.y;
 		sphere.position.z = atom.z;
-		
+
 		atom.globj = atom.globj || new THREE.Object3D();
 		atom.globj.add(sphere);
 	}
@@ -256,13 +416,13 @@ WebMol.GLModel = (function() {
 			return;
 
 		var color = atom.color;
-		if(typeof(style.color) != "undefined")
+		if (typeof (style.color) != "undefined")
 			color = style.color;
 		var mat = new THREE.MeshLambertMaterial({
 			color : color
 		});
 		var sphere = new THREE.Mesh(icosahedronGeo, mat);
-		
+
 		var r = defaultSphereRadius;
 		if (typeof (style.fixedRadius) != "undefined")
 			r = style.fixedRadius;
@@ -276,12 +436,12 @@ WebMol.GLModel = (function() {
 		sphere.position.x = atom.x;
 		sphere.position.y = atom.y;
 		sphere.position.z = atom.z;
-		
+
 		atom.globj = atom.globj || new THREE.Object3D();
 		atom.globj.add(sphere);
 	};
-	
-	//cross drawing
+
+	// cross drawing
 	var drawAtomCross = function(atom) {
 		if (!atom.style.cross)
 			return;
@@ -296,10 +456,10 @@ WebMol.GLModel = (function() {
 		var c = new TCo(atom.color);
 		for ( var j = 0; j < 6; j++) {
 			geo.vertices.push(new TV3(atom.x + points[j][0], atom.y
-						+ points[j][1], atom.z + points[j][2]));
-				geo.colors.push(c);
+					+ points[j][1], atom.z + points[j][2]));
+			geo.colors.push(c);
 		}
-		
+
 		var lineMaterial = new THREE.LineBasicMaterial({
 			linewidth : (style.linewidth || defaultlineWidth)
 		});
@@ -308,66 +468,65 @@ WebMol.GLModel = (function() {
 		atom.globj = atom.globj || new THREE.Object3D();
 		atom.globj.add(line);
 	};
-	
-	//bonds - both atoms must match bond style
-	//standardize on only drawing for lowest to highest
-	
+
+	// bonds - both atoms must match bond style
+	// standardize on only drawing for lowest to highest
+
 	var drawBondLines = function(atom, atoms) {
 		if (!atom.style.line)
 			return;
 		var style = atom.style.line;
 		if (style.hidden)
 			return;
-		
+
 		var geo = new THREE.Geometry();
 
-		for(var i = 0; i < atom.bonds.length; i++) {
-			var j = atom.bonds[i]; //our neighbor
-			if(i < j) {//only draw if less
-				//TODO: handle bond orders
+		for ( var i = 0; i < atom.bonds.length; i++) {
+			var j = atom.bonds[i]; // our neighbor
+			if (i < j) {// only draw if less
+				// TODO: handle bond orders
 				var atom2 = atoms[j];
-				if(!atom2.style.line)
-					continue; //don't sweat the details
+				if (!atom2.style.line)
+					continue; // don't sweat the details
 				var vs = geo.vertices, cs = geo.colors;
 				var p1 = new TV3(atom.x, atom.y, atom.z);
 				var p2 = new TV3(atom2.x, atom2.y, atom2.z);
 				var mp = p1.clone().add(p2).multiplyScalar(0.5);
 
 				var c1 = new TCo(atom.color), c2 = new TCo(atom2.color);
+				
+				if(typeof(style.color) != "undefined") {
+					c1 = c2 = new TCo(style.color);
+				}
 				vs.push(p1);
 				cs.push(c1);
 				vs.push(mp);
 				cs.push(c1);
 				vs.push(p2);
 				cs.push(c2);
-				vs.push(mp);
-				cs.push(c2);	
 			}
 		}
-		
+
 		var lineMaterial = new THREE.LineBasicMaterial({
 			linewidth : (style.lineWidth || defaultlineWidth)
 		});
-		
-		if(!style.color)
-			lineMaterial.vertexColors = true;
-		else
-			lineMaterial.color = new TCo(style.color);
+
+		lineMaterial.vertexColors = true;
 
 		var line = new THREE.Line(geo, lineMaterial);
-		line.type = THREE.LinePieces;
+		line.type = THREE.LineStrip;
 		atom.globj = atom.globj || new THREE.Object3D();
-		atom.globj.add(line);		
+		atom.globj.add(line);
 	};
-	
-	//bonds as cylinders
+
+	// bonds as cylinders
 	var defaultStickRadius = .25;
 	var cylinderQuality = 16;
-	var cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1,
-			cylinderQuality, 1, false);
+	var cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, cylinderQuality,
+			1, false);
 	cylinderGeometry.faceUvs = [];
 	var faceVertexUvs = [];
-	
+
 	var drawCylinder = function(obj, from, to, radius, color) {
 		if (!from || !to)
 			return;
@@ -389,49 +548,54 @@ WebMol.GLModel = (function() {
 		cylinder.matrix.multiply(m);
 		obj.add(cylinder);
 	};
-	
+
 	var drawBondSticks = function(atom, atoms) {
 		if (!atom.style.stick)
 			return;
 		var style = atom.style.stick;
 		if (style.hidden)
 			return;
-		
+
 		var geo = new THREE.Geometry();
 		var bondR = style.radius || defaultStickRadius;
-		
-		for(var i = 0; i < atom.bonds.length; i++) {
-			var j = atom.bonds[i]; //our neighbor
-			if(i < j) {//only draw if less
-				//TODO: handle bond orders
+
+		for ( var i = 0; i < atom.bonds.length; i++) {
+			var j = atom.bonds[i]; // our neighbor
+			if (i < j) {// only draw if less
+				// TODO: handle bond orders
 				var atom2 = atoms[j];
-				if(!atom2.style.stick)
-					continue; //don't sweat the details
+				if (!atom2.style.stick)
+					continue; // don't sweat the details
 
 				var p1 = new TV3(atom.x, atom.y, atom.z);
 				var p2 = new TV3(atom2.x, atom2.y, atom2.z);
-				var mp = new TV3().addVectors(p1,p2).multiplyScalar(0.5);
+				var mp = new TV3().addVectors(p1, p2).multiplyScalar(0.5);
 
 				var c1 = atom.color;
 				var c2 = atom2.color;
-				if(typeof(style.color) != "undefined") {
+				if (typeof (style.color) != "undefined") {
 					c1 = style.color;
 					c2 = style.color;
 				}
-				
+
 				atom.globj = atom.globj || new THREE.Object3D();
 				drawCylinder(atom.globj, p1, mp, bondR, c1);
-				drawCylinder(atom.globj, p2, mp, bondR, c2);				
+				drawCylinder(atom.globj, p2, mp, bondR, c2);
 			}
 		}
-		
-		//for junctions draw sphere
+
+		// for junctions draw sphere
 		var savedstyle = atom.style;
-		atom.style = {sphere: {fixedRadius: bondR, color: style.color}};
+		atom.style = {
+			sphere : {
+				fixedRadius : bondR,
+				color : style.color
+			}
+		};
 		drawAtomSphere(atom);
 		atom.style = savedstyle;
 	};
-	
+
 	// go through all the atoms and regenerate their geometries
 	// at some point we should optimize this to avoid unnecessary
 	// recalculation
@@ -440,7 +604,7 @@ WebMol.GLModel = (function() {
 
 		for ( var i = 0; i < atoms.length; i++) {
 			var atom = atoms[i];
-			//recreate gl info for each atom as necessary
+			// recreate gl info for each atom as necessary
 			if (atom && atom.style && atom.globj == null) {
 				drawAtomSphere(atom);
 				drawAtomIcosahedron(atom);
@@ -448,11 +612,11 @@ WebMol.GLModel = (function() {
 				drawBondLines(atom, atoms);
 				drawBondSticks(atom, atoms);
 			}
-			if(atom.globj)
+			if (atom && atom.globj)
 				ret.add(atom.globj);
 		}
-		
-		//TODO: create cartoons as needed
+
+		// TODO: create cartoons as needed
 		return ret;
 	};
 
@@ -476,6 +640,7 @@ WebMol.GLModel = (function() {
 				parseXYZ(atoms, data);
 				break;
 			case "pdb":
+				parsePDB(atoms, data);
 				break;
 			case "sdf":
 				parseSDF(atoms, data);
@@ -496,20 +661,32 @@ WebMol.GLModel = (function() {
 			}
 			return ret;
 		}
-		
+
 		// style the select atoms with style
 		this.setStyle = function(style, sel) {
 			var atoms = this.selectedAtoms(sel);
-			//do a copy to enforce style changes through this function
+			// do a copy to enforce style changes through this function
 			var mystyle = $.extend(true, {}, style);
-			
-			for(var i = 0; i < atoms.length; i++) {
-				if(atoms[i].style.cartoon != mystyle.cartoon)
+
+			// somethings we only calculate if there is a change in a certain
+			// style, although these checks will only catch cases where both
+			// are either null or undefined
+			for ( var i = 0; i < atoms.length; i++) {
+				if (atoms[i].style.cartoon != mystyle.cartoon)
 					redrawCartoon = true;
 				atoms[i].style = mystyle;
-				atoms[i].globj = null; //need to recalculate
+				atoms[i].globj = null; // need to recalculate
+
+				if (atoms[i].style.line != mystyle.line
+						|| atoms[i].style.stick != mystyle.stick) {
+					var bonds = atoms[i].bonds;
+					for ( var i = 0; i < bonds.length; i++) {
+						var atomj = atoms[bonds[i]];
+						atomj.globj = null;
+					}
+				}
 			}
-				
+
 		};
 
 		// return 3d data for this model
@@ -517,7 +694,6 @@ WebMol.GLModel = (function() {
 			molObj = createMolObj(atoms);
 			return molObj;
 		};
-
 
 	}
 	;
