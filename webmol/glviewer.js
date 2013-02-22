@@ -45,9 +45,6 @@ WebMol.glmolViewer = (function() {
 			// three.js not loaded, take matters into our own hands
 			throw "Missing Three.js";
 		}
-		if (typeof (GLmol) === "undefined") {
-			throw "Missing GLmol.js";
-		}
 
 		// set variables
 		var container = element;

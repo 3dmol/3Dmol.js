@@ -7,33 +7,59 @@
         <script  src="js/jquery-1.9.1.js"></script>
         <script src="three.js/build/three.js"></script>
         <script src="GLmol/src/js/GLmol.js"></script>
+        <script src="Jmol/appletweb/Jmol.js"></script>
         <script src="webmol/webmol.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/glviewer.js"></script>
         <script>
-        var viewer = null;
+        var glviewer = null;
+        var jviewer = null;
         $(document).ready(function() {
-            viewer = WebMol.createViewer("viewerdiv");	
-            viewer.setBackgroundColor(0xffffff);
-            var m = viewer.addModel($("#moldata").val(),"pdb");
+        	var moldata = $("#moldata").val();
+            glviewer = WebMol.createViewer("gldiv");	
+            glviewer.setBackgroundColor(0xffffff);
+            var m = glviewer.addModel(moldata,"pdb");
 
-            viewer.zoomTo();
-            viewer.render();
+            glviewer.zoomTo();
+            glviewer.render();
+            
+            jviewer = WebMol.createViewer("jmoldiv");    
+            jviewer.setBackgroundColor(0xffffff);
+            var m = jviewer.addModel(moldata,"pdb");
+
+            jviewer.zoomTo();
+            jviewer.render();
+            
         });
         </script>
     </head>
     <body style="height:95%; padding: 1em; margin: 0">
-        <h1>WebMol</h1>
-        <div id="viewerdiv" style="width: 90%; height: 80%; border: 2px solid black"></div>
-        <input type="button" value="Stick" onclick="viewer.setStyle({stick:{}}); viewer.render();"></input>
-        <input type="button" value="Line" onclick="viewer.setStyle({line:{}}); viewer.render();"></input>
-        <input type="button" value="Cross" onclick="viewer.setStyle({cross:{}}); viewer.render();"></input>
-        <input type="button" value="Sphere" onclick="viewer.setStyle({sphere:{}}); viewer.render();"></input>
-        <input type="button" value="Cartoon" onclick="viewer.setStyle({cartoon:{}}); viewer.render();"></input>
+        <h1>WebMol</h1><br>
+        <table>
+        <tr><td>
+         <div id="gldiv" style="width: 45%; height: 80%; border: 2px solid black; "></div>       
         <br>
-        <input type="button" value="Recenter" onclick="viewer.zoomTo();"></input>
-        
+        <input type="button" value="Stick" onclick="glviewer.setStyle({stick:{}}); glviewer.render();"></input>
+        <input type="button" value="Line" onclick="glviewer.setStyle({line:{}}); glviewer.render();"></input>
+        <input type="button" value="Cross" onclick="glviewer.setStyle({cross:{}}); glviewer.render();"></input>
+        <input type="button" value="Sphere" onclick="glviewer.setStyle({sphere:{}}); glviewer.render();"></input>
+        <input type="button" value="Cartoon" onclick="glviewer.setStyle({cartoon:{}}); glviewer.render();"></input>
+        <br>
+        <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
+        </td>
+        <td>
+        <div id="jmoldiv" style="width: 45%; height: 80%; border: 2px solid black; "></div>
+        <input type="button" value="Stick" onclick="jviewer.setStyle({stick:{}}); jviewer.render();"></input>
+        <input type="button" value="Line" onclick="jviewer.setStyle({line:{}}); jviewer.render();"></input>
+        <input type="button" value="Cross" onclick="jviewer.setStyle({cross:{}}); jviewer.render();"></input>
+        <input type="button" value="Sphere" onclick="jviewer.setStyle({sphere:{}}); jviewer.render();"></input>
+        <input type="button" value="Cartoon" onclick="jviewer.setStyle({cartoon:{}}); jviewer.render();"></input>
+        <br>
+        <input type="button" value="Recenter" onclick="jewer.zoomTo();"></input>
+        </td>
+        </tr>
+        </table>
             <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata">
 HEADER    IMMUNE SYSTEM                           13-APR-00   1EU3              
 TITLE     CRYSTAL STRUCTURE OF THE SUPERANTIGEN SMEZ-2 (ZINC BOUND)             
