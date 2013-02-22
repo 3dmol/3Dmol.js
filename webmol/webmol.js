@@ -34,7 +34,7 @@ var WebMol = (function() {
 			var kind = config.order[i];
 			var fname =kind+"Viewer";
 			
-			if(typeof(my[fname] == "function"))
+			if(typeof(my[fname]) === "function")
 			{
 				return new my[fname](element, config.width, config.height, config.callback);
 			}
