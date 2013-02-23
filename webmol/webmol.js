@@ -40,6 +40,7 @@ var WebMol = (function() {
 					return new my[fname](element, config.width, config.height, config.callback);
 				}
 				catch(e) {
+					console.log("error with "+kind+":"+e);
 				}
 			}
 		}

@@ -411,9 +411,17 @@ WebMol.glmolViewer = (function() {
 		this.removeSurface = function(surf) {
 			
 		}
+		
+		try {
+		if(typeof(callback) === "function")
+			callback(this);
+		}
+		catch(e) {
+			//errors in callback shouldn't invalidate the viewer
+			console.log("error with glviewer callback: "+e);
+		}
 	}
 
-	if(typeof(callback) === "function")
-		callback(this);
+
 	return GLViewer;
 })();

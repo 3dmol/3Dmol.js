@@ -26,8 +26,8 @@
             glviewer = WebMol.createViewer("gldiv", {callback : function(viewer) {
                 viewer.setBackgroundColor(0xffff);
                 var m = viewer.addModel(moldata,"pdb");
-                      glviewer.zoomTo();
-                     glviewer.render();
+                      viewer.zoomTo();
+                     viewer.render();
             }});	
 
             jviewer = WebMol.createViewer("jmoldiv",{order: ["jmol"], callback:
@@ -63,7 +63,7 @@
         <input type="button" value="Sphere" onclick="jviewer.setStyle({sphere:{}}); jviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="jviewer.setStyle({cartoon:{}}); jviewer.render();"></input>
         <br>
-        <input type="button" value="Recenter" onclick="jewer.zoomTo();"></input>
+        <input type="button" value="Recenter" onclick="jviewer.zoomTo();"></input>
         </td>
         </tr>
         </table>
