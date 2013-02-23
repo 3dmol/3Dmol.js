@@ -36,10 +36,15 @@ var WebMol = (function() {
 			
 			if(typeof(my[fname]) === "function")
 			{
-				return new my[fname](element, config.width, config.height, config.callback);
+				try {
+					return new my[fname](element, config.width, config.height, config.callback);
+				}
+				catch(e) {
+				}
 			}
 		}
-		throw "Unable to instantiate webmol viewer: "+config.order;
+		alert("Unable to instantiate webmol viewer: "+config.order);
+		return null;
 	}
 	
 	return my;

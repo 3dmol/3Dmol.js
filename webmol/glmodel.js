@@ -240,7 +240,7 @@ WebMol.GLModel = (function() {
 			line = lines[i].replace(/^\s*/, ''); // remove indent
 			var recordName = line.substr(0, 6);
 			if (recordName == 'ATOM  ' || recordName == 'HETATM') {
-				var atom, resn, chain, resi, x, y, z, hetflag, elem, serial, altLoc, b;
+				var atom, resn, chain, resi, icode, x, y, z, hetflag, elem, serial, altLoc, b;
 				altLoc = line.substr(16, 1);
 				if (altLoc != ' ' && altLoc != 'A')
 					continue; // FIXME: ad hoc
@@ -248,7 +248,8 @@ WebMol.GLModel = (function() {
 				atom = line.substr(12, 4).replace(/ /g, "");
 				resn = line.substr(17, 3);
 				chain = line.substr(21, 1);
-				resi = parseInt(line.substr(22, 5));
+				resi = parseInt(line.substr(22, 4));
+				icode = line.substr(26,1);)
 				x = parseFloat(line.substr(30, 8));
 				y = parseFloat(line.substr(38, 8));
 				z = parseFloat(line.substr(46, 8));
@@ -271,6 +272,7 @@ WebMol.GLModel = (function() {
 					'hetflag' : hetflag,
 					'chain' : chain,
 					'resi' : resi,
+					'icode' : icode,
 					'serial' : serial,
 					'atom' : atom,
 					'bonds' : [],
@@ -650,7 +652,7 @@ WebMol.GLModel = (function() {
 			setAtomDefaults(atoms, id);
 		};
 
-		// return list of atoms selected by sel
+		// return list of atoms selected by sel, this is specific to glmodel
 		this.selectedAtoms = function(sel) {
 			var ret = [];
 			for ( var i = 0; i < atoms.length; i++) {
@@ -689,7 +691,7 @@ WebMol.GLModel = (function() {
 
 		};
 
-		// return 3d data for this model
+		// return 3d data for this model, this is specific to glmodel
 		this.globj = function() {
 			molObj = createMolObj(atoms);
 			return molObj;

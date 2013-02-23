@@ -413,5 +413,7 @@ WebMol.glmolViewer = (function() {
 		}
 	}
 
+	if(typeof(callback) === "function")
+		callback(this);
 	return GLViewer;
 })();

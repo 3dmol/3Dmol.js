@@ -15,6 +15,7 @@
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/glviewer.js"></script>
         <script src="webmol/jmolviewer.js"></script>
+        <script src="webmol/jmolmodel.js"></script>
         
         <script>
         var glviewer = null;
@@ -22,20 +23,20 @@
         $(document).ready(function() {
         	var moldata = $("#moldata").val();
         	
-            glviewer = WebMol.createViewer("gldiv");	
-            glviewer.setBackgroundColor(0xffffff);
-            var m = glviewer.addModel(moldata,"pdb");
+            glviewer = WebMol.createViewer("gldiv", {callback : function(viewer) {
+                viewer.setBackgroundColor(0xffff);
+                var m = viewer.addModel(moldata,"pdb");
+                      glviewer.zoomTo();
+                     glviewer.render();
+            }});	
 
-            glviewer.zoomTo();
-            glviewer.render();
-            
-            jviewer = WebMol.createViewer("jmoldiv",{order: ["jmol"]});	
-            jviewer.setBackgroundColor(0);
-            var m = jviewer.addModel(moldata,"pdb");
-
-            jviewer.zoomTo();
-            jviewer.render();
-            
+            jviewer = WebMol.createViewer("jmoldiv",{order: ["jmol"], callback:
+                function(viewer) {
+            	  viewer.setBackgroundColor(0);
+            	   var m = viewer.addModel(moldata,"pdb");
+            	         jviewer.zoomTo();
+            	         jviewer.render();            	
+            }});	         
         });
         </script>
     </head>
