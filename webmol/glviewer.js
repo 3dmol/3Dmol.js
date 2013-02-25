@@ -2,14 +2,33 @@
 
 var WebMol = WebMol || {};
 
+THREE.Geometry.prototype.colorAll = function(color) {
+	for ( var i = 0; i < this.faces.length; i++) {
+		this.faces[i].color = color;
+	}
+};
+
+THREE.Matrix4.prototype.isIdentity = function() {
+	for ( var i = 0; i < 4; i++)
+		for ( var j = 0; j < 4; j++)
+			if (this.elements[i * 4 + j] != (i == j) ? 1 : 0)
+				return false;
+	return true;
+};
+
+var TV3 = THREE.Vector3, TF3 = THREE.Face3, TCo = THREE.Color;
+
+
+
 // a webmol unified interace to gmol
 WebMol.glmolViewer = (function() {
 	// private class variables
-
+	var numWorkers = 4; // number of threads for surface generation
+	var maxVolume = 64000; // how much to break up surface calculations
 
 	// private class helper functions
-	
-	//computes the bounding box around the provided atoms
+
+	// computes the bounding box around the provided atoms
 	var getExtent = function(atomlist) {
 		var xmin = ymin = zmin = 9999;
 		var xmax = ymax = zmax = -9999;
@@ -25,7 +44,7 @@ WebMol.glmolViewer = (function() {
 			xsum += atom.x;
 			ysum += atom.y;
 			zsum += atom.z;
-			
+
 			xmin = (xmin < atom.x) ? xmin : atom.x;
 			ymin = (ymin < atom.y) ? ymin : atom.y;
 			zmin = (zmin < atom.z) ? zmin : atom.z;
@@ -49,22 +68,23 @@ WebMol.glmolViewer = (function() {
 		// set variables
 		var container = element;
 		var id = container.id;
-		
-		var models = []; //atomistic molecular models
 
+		var models = []; // atomistic molecular models
+		var surfaces = [];
+		
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
-		//set dimensions
+		// set dimensions
 		$(container).width(WIDTH);
 		$(container).height(HEIGHT);
-		
+
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
 		var CAMERA_Z = -150;
 		var renderer = new THREE.WebGLRenderer({
 			antialias : true,
 		});
-		//renderer.sortObjects = false; // hopefully improve performance
+		// renderer.sortObjects = false; // hopefully improve performance
 
 		renderer.domElement.style.width = "100%";
 		renderer.domElement.style.height = "100%";
@@ -109,7 +129,7 @@ WebMol.glmolViewer = (function() {
 		var cz = 0;
 		var cslabNear = 0;
 		var cslabFar = 0;
-		
+
 		var setSlabAndFog = function() {
 			var center = rotationGroup.position.z - camera.position.z;
 			if (center < 1)
@@ -134,8 +154,8 @@ WebMol.glmolViewer = (function() {
 			// if (scene.fog.near > center) scene.fog.near = center;
 			scene.fog.far = camera.far;
 		};
-		
-		//display scene
+
+		// display scene
 		var show = function() {
 			if (!scene)
 				return;
@@ -158,8 +178,8 @@ WebMol.glmolViewer = (function() {
 			rotationGroup.add(modelGroup);
 
 			scene.add(rotationGroup);
-			
-			//setup lights
+
+			// setup lights
 			var directionalLight = new THREE.DirectionalLight(0xFFFFFF);
 			directionalLight.position = new TV3(0.2, 0.2, -1).normalize();
 			directionalLight.intensity = 1.2;
@@ -170,7 +190,6 @@ WebMol.glmolViewer = (function() {
 
 		initializeScene();
 
-		
 		// enable mouse support
 		var glDOM = $(renderer.domElement);
 
@@ -185,9 +204,9 @@ WebMol.glmolViewer = (function() {
 			var x = ev.pageX, y = ev.pageY;
 			if (ev.originalEvent.targetTouches
 					&& ev.originalEvent.targetTouches[0]) {
-					x = ev.originalEvent.targetTouches[0].pageX;
-					y = ev.originalEvent.targetTouches[0].pageY;
-				}
+				x = ev.originalEvent.targetTouches[0].pageX;
+				y = ev.originalEvent.targetTouches[0].pageY;
+			}
 			if (x == undefined)
 				return;
 			isDragging = true;
@@ -201,23 +220,22 @@ WebMol.glmolViewer = (function() {
 			cslabFar = slabFar;
 		});
 
-		glDOM.bind('DOMMouseScroll mousewheel',
-				function(ev) { // Zoom
+		glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
 			ev.preventDefault();
 			if (!scene)
 				return;
 			var scaleFactor = (rotationGroup.position.z - CAMERA_Z) * 0.85;
 			if (ev.originalEvent.detail) { // Webkit
 				rotationGroup.position.z += scaleFactor
-				* ev.originalEvent.detail / 10;
+						* ev.originalEvent.detail / 10;
 			} else if (ev.originalEvent.wheelDelta) { // Firefox
 				rotationGroup.position.z -= scaleFactor
-				* ev.originalEvent.wheelDelta / 400;
+						* ev.originalEvent.wheelDelta / 400;
 			}
 
 			show();
 		});
-		
+
 		glDOM.bind("contextmenu", function(ev) {
 			ev.preventDefault();
 		});
@@ -225,19 +243,17 @@ WebMol.glmolViewer = (function() {
 			isDragging = false;
 		});
 
-		glDOM.bind('mousemove touchmove',
-				function(ev) { // touchmove
+		glDOM.bind('mousemove touchmove', function(ev) { // touchmove
 			ev.preventDefault();
 			if (!scene)
 				return;
 			if (!isDragging)
 				return;
 			var mode = 0;
-			var modeRadio = $('input[name=' + id
-					+ '_mouseMode]:checked');
+			var modeRadio = $('input[name=' + id + '_mouseMode]:checked');
 			if (modeRadio.length > 0)
 				mode = parseInt(modeRadio.val());
-			
+
 			var x = ev.pageX, y = ev.pageY;
 			if (ev.originalEvent.targetTouches
 					&& ev.originalEvent.targetTouches[0]) {
@@ -249,26 +265,23 @@ WebMol.glmolViewer = (function() {
 			var dx = (x - mouseStartX) / WIDTH;
 			var dy = (y - mouseStartY) / HEIGHT;
 			var r = Math.sqrt(dx * dx + dy * dy);
-			if (mode == 3
-					|| (mouseButton == 3 && ev.ctrlKey)) { // Slab
+			if (mode == 3 || (mouseButton == 3 && ev.ctrlKey)) { // Slab
 				slabNear = cslabNear + dx * 100;
 				slabFar = cslabFar + dy * 100;
-			} else if (mode == 2 || mouseButton == 3
-					|| ev.shiftKey) { // Zoom
+			} else if (mode == 2 || mouseButton == 3 || ev.shiftKey) { // Zoom
 				var scaleFactor = (rotationGroup.position.z - CAMERA_Z) * 0.85;
 				if (scaleFactor < 80)
 					scaleFactor = 80;
-				rotationGroup.position.z = cz - dy* scaleFactor;
-			} else if (mode == 1 || mouseButton == 2
-					|| ev.ctrlKey) { // Translate
+				rotationGroup.position.z = cz - dy * scaleFactor;
+			} else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
 				var scaleFactor = (rotationGroup.position.z - CAMERA_Z) * 0.85;
 				if (scaleFactor < 20)
 					scaleFactor = 20;
-				var translationByScreen = new TV3(-dx
-						* scaleFactor, -dy * scaleFactor, 0);
+				var translationByScreen = new TV3(-dx * scaleFactor, -dy
+						* scaleFactor, 0);
 				var q = rotationGroup.quaternion;
-				var qinv = new THREE.Quaternion(q.x, q.y, q.z,
-						q.w).inverse().normalize();
+				var qinv = new THREE.Quaternion(q.x, q.y, q.z, q.w).inverse()
+						.normalize();
 				var translation = translationByScreen.applyQuaternion(qinv);
 				modelGroup.position.x = currentModelPos.x + translation.x;
 				modelGroup.position.y = currentModelPos.y + translation.y;
@@ -285,7 +298,6 @@ WebMol.glmolViewer = (function() {
 			}
 			show();
 		});
-		
 
 		// public methods
 		this.setBackgroundColor = function(hex, a) {
@@ -307,7 +319,6 @@ WebMol.glmolViewer = (function() {
 			$(htmlElement).height(h);
 			renderer.setSize(WIDTH, HEIGHT);
 		};
-
 
 		// return specified model
 		this.getModel = function(id) {
@@ -336,28 +347,41 @@ WebMol.glmolViewer = (function() {
 			rotationGroup.quaternion.w = arg[7];
 			show();
 		}
-		
+
 		// apply styles, models, etc in viewer
 		this.render = function() {
 
 			var view = this.getView();
 			initializeScene();
-			
-			for(var i = 0; i < models.length; i++) {
-				modelGroup.add(models[i].globj());
-			}				
-			
+
+			for ( var i = 0; i < models.length; i++) {
+				if(models[i]) {
+					modelGroup.add(models[i].globj());
+				}
+			}
+
+			for( var i = 0; i < surfaces.length; i++) {
+				if(surfaces[i]) {
+					var smesh = new THREE.Mesh(surfaces[i].geo, surfaces[i].mat);
+					modelGroup.add(smesh);
+				}
+			}
 			this.setView(view);
 		};
-		
-		//zoom to atom selection
-		this.zoomTo = function(sel) {
+
+		function getAtomsFromSel(sel) {
 			var atoms = [];
-			for(var i = 0; i < models.length; i++) {
-				if(models[i]) {
+			for ( var i = 0; i < models.length; i++) {
+				if (models[i]) {
 					atoms = atoms.concat(models[i].selectedAtoms(sel));
 				}
 			}
+			return atoms;
+		}
+
+		// zoom to atom selection
+		this.zoomTo = function(sel) {
+			var atoms = getAtomsFromSel(sel);
 			var tmp = getExtent(atoms);
 			var center = new TV3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.multiplyScalar(-1);
@@ -370,58 +394,372 @@ WebMol.glmolViewer = (function() {
 
 			slabNear = -maxD / 1.9;
 			slabFar = maxD / 3;
-			
 
 			rotationGroup.position.z = maxD * 0.35
 					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150;
 			rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
 			show();
 		};
-		
-		//given molecular data and its format (pdb, sdf or xyz)
-		//create a model and add it, returning the model identifier
+
+		// given molecular data and its format (pdb, sdf or xyz)
+		// create a model and add it, returning the model identifier
 		this.addModel = function(data, format) {
 			var m = new WebMol.GLModel(models.length);
 			m.addMolData(data, format);
 			models.push(m);
 			return m;
 		};
-		
+
 		this.removeModel = function(model) {
 			delete models[m.getID()];
-			//clear off back of model array
-			while(model.length > 0 && typeof(models[models.length-1]) === "undefined")
+			// clear off back of model array
+			while (model.length > 0
+					&& typeof (models[models.length - 1]) === "undefined")
 				models.pop();
 		}
 
-		//apply sel to all models and apply style
+		// apply sel to all models and apply style
 		this.setStyle = function(style, sel) {
-			for(var i = 0; i < models.length; i++) {
-				if(models[i]) {
-					models[i].setStyle(style,sel);
+			for ( var i = 0; i < models.length; i++) {
+				if (models[i]) {
+					models[i].setStyle(style, sel);
 				}
 			}
 		};
+
+		var getAtomsWithin = function(atomlist, extent) {
+			var ret = [];
+
+			for ( var i = 0; i < atomlist.length; i++) {
+				var atom = atomlist[i];
+				if (typeof (atom) == "undefined")
+					continue;
+
+				if (atom.x < extent[0][0] || atom.x > extent[1][0])
+					continue;
+				if (atom.y < extent[0][1] || atom.y > extent[1][1])
+					continue;
+				if (atom.z < extent[0][2] || atom.z > extent[1][2])
+					continue;
+				ret.push(i);
+			}
+			return ret;
+		};
+		/*
+		 * Break up bounding box/atoms into smaller pieces so we can parallelize
+		 * with webworkers and also limit the size of the working memory Returns
+		 * a list of bounding boxes with the corresponding atoms. These extents
+		 * are expanded by 4 angstroms on each side.
+		 */
+		var carveUpExtent = function(extent, atomlist, atomstoshow) {
+			var ret = [];
+			var volume = function(extent) {
+				var w = extent[1][0] - extent[0][0];
+				var h = extent[1][1] - extent[0][1];
+				var d = extent[1][2] - extent[0][2];
+				return w * h * d;
+			}; // volume
+			var copyExtent = function(extent) {
+				// copy just the dimensions
+				var ret = [];
+				ret[0] = [ extent[0][0], extent[0][1], extent[0][2] ];
+				ret[1] = [ extent[1][0], extent[1][1], extent[1][2] ];
+				return ret;
+			}; // copyExtent
+			var splitExtentR = function(extent) {
+				// recursively split until volume is below maxVol
+				if (volume(extent) < maxVolume) {
+					return [ extent ];
+				} else {
+					// find longest edge
+					var w = extent[1][0] - extent[0][0];
+					var h = extent[1][1] - extent[0][1];
+					var d = extent[1][2] - extent[0][2];
+					var index = 0;
+					if (w > h && w > d) {
+						index = 0;
+					} else if (h > w && h > d) {
+						index = 1;
+					} else {
+						index = 2;
+					}
+
+					// create two halves, splitting at index
+					var a = copyExtent(extent);
+					var b = copyExtent(extent);
+					var mid = (extent[1][index] - extent[0][index]) / 2
+							+ extent[0][index];
+					a[1][index] = mid;
+					b[0][index] = mid;
+
+					var alist = splitExtentR(a);
+					var blist = splitExtentR(b);
+					return alist.concat(blist);
+				}
+			}; // splitExtentR
+
+			// divide up extent
+			var splits = splitExtentR(extent);
+			var ret = [];
+			// now compute atoms within expanded (this could be more efficient)
+			var off = 6; // enough for water and 2*r, also depends on scale
+			// factor
+			for ( var i = 0, n = splits.length; i < n; i++) {
+				var e = copyExtent(splits[i]);
+				e[0][0] -= off;
+				e[0][1] -= off;
+				e[0][2] -= off;
+				e[1][0] += off;
+				e[1][1] += off;
+				e[1][2] += off;
+
+				var atoms = getAtomsWithin(atomlist, e);
+				var toshow = getAtomsWithin(atomstoshow, splits[i]);
+
+				// ultimately, divide up by atom for best meshing
+				ret.push({
+					extent : splits[i],
+					atoms : atoms,
+					toshow : toshow
+				});
+			}
+
+			return ret;
+		};
+
+		// create a mesh defined from the passed vertices and faces and material
+		var generateSurfaceMesh = function(atoms, VandF, mat) {
+			var geo = new THREE.Geometry();
+			// reconstruct vertices and faces
+			geo.vertices = [];
+			var v = VandF.vertices;
+			for ( var i = 0; i < v.length; i++) {
+				geo.vertices.push(new THREE.Vector3(v[i].x, v[i].y, v[i].z));
+			}
+
+			geo.faces = [];
+			var faces = VandF.faces;
+			for ( var i = 0; i < faces.length; i++) {
+				var A = v[faces[i].a].atomid;
+				var B = v[faces[i].b].atomid;
+				var C = v[faces[i].c].atomid;
+
+				var f = new THREE.Face3(faces[i].a, faces[i].b, faces[i].c);
+				f.vertexColors = [ new THREE.Color(atoms[A].color),
+						new THREE.Color(atoms[B].color),
+						new THREE.Color(atoms[C].color) ];
+				geo.faces.push(f);
+			}
+
+			geo.computeFaceNormals();
+			geo.computeVertexNormals(false);
+
+			var mesh = new THREE.Mesh(geo, mat);
+			mesh.doubleSided = true;
+
+			return mesh;
+		};
 		
-		//add a surface
-		this.addSurface = function(type, style, atomsel, allsel) {
-			
+		// do same thing as worker in main thread
+		var generateMeshSyncHelper = function(type, expandedExtent, extendedAtoms,
+				atomsToShow, atoms) {
+			var time = new Date();
+			var ps = new ProteinSurface();
+			ps.initparm(expandedExtent, (type == 1) ? false : true);
+
+			var time2 = new Date();
+			console.log("initialize " + (time2 - time) + "ms");
+
+			ps.fillvoxels(atoms, extendedAtoms);
+
+			var time3 = new Date();
+			console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time)
+					+ "ms");
+
+			ps.buildboundary();
+
+			if (type == 4 || type == 2)
+				ps.fastdistancemap();
+			if (type == 2) {
+				ps.boundingatom(false);
+				ps.fillvoxelswaals(atoms, extendedAtoms);
+			}
+
+			var time4 = new Date();
+			console.log("buildboundaryetc " + (time4 - time3) + "  "
+					+ (time4 - time) + "ms");
+
+			ps.marchingcube(type);
+
+			var time5 = new Date();
+			console.log("marching cube " + (time5 - time4) + "  " + (time5 - time)
+					+ "ms");
+			ps.laplaciansmooth(1);
+			return ps.getFacesAndVertices(atomsToShow);
+		};
+
+
+		function getMatWithStyle(style) {
+			var mat = new THREE.MeshLambertMaterial();
+			mat.vertexColors = THREE.VertexColors;
+
+			for ( var prop in style) {
+				if (prop === "color") {
+					mat[prop] = new TCo(style.color);
+					delete mat.vertexColors; //ignore
+				}
+				else if (style.hasOwnProperty(prop))
+					mat[prop] = style[prop];
+			}
+			return mat;
+		}
+		// add a surface
+		this.addSurface = function(type, style, atomsel, allsel, focus) {
+			// type 1: VDW 3: SAS 4: MS 2: SES
+			// if sync is true, does all work in main thread, otherwise uses
+			// workers
+			// with workers, must ensure group is the actual modelgroup since
+			// surface
+			// will get added asynchronously
+			// all atoms in atomlist are used to compute surfacees, but only the
+			// surfaces
+			// of atomsToShow are displayed (e.g., for showing cavities)
+			// if focusSele is specified, will start rending surface around the
+			// atoms specified by this selection
+			var atomsToShow = getAtomsFromSel(atomsel);
+			var atomlist = getAtomsFromSel(allsel);
+			var focusSele = getAtomsFromSel(focus);
+
+			var time = new Date();
+
+			var mat = getMatWithStyle(style);
+			var extent = getExtent(atomsToShow);
+
+			var extents = carveUpExtent(extent, atomlist, atomsToShow);
+
+			if (focusSele && focusSele.length && focusSele.length > 0) {
+				var seleExtent = getExtent(focusSele);
+				// sort by how close to center of seleExtent
+				var sortFunc = function(a, b) {
+					var distSq = function(ex, sele) {
+						// distance from e (which has no center of mass) and
+						// sele which does
+						var e = ex.extent;
+						var x = e[1][0] - e[0][0];
+						var y = e[1][1] - e[0][1];
+						var z = e[1][2] - e[0][2];
+						var dx = (x - sele[2][0]);
+						dx *= dx;
+						var dy = (y - sele[2][1]);
+						dy *= dy;
+						var dz = (z - sele[2][2]);
+						dz *= dz;
+
+						return dx + dy + dz;
+					};
+					var d1 = distSq(a, seleExtent);
+					var d2 = distSq(b, seleExtent);
+					return d1 - d2;
+				};
+				extents.sort(sortFunc);
+			}
+
+			console.log("Extents " + extents.length + "  "
+					+ (+new Date() - time) + "ms");
+
+			var surfobj = {geo: new THREE.Geometry(), mat: mat};
+			var surfid = surfaces.length;
+			surfaces.push(surfobj);
+			var reducedAtoms = [];
+			// to reduce amount data transfered, just pass x,y,z,serial and elem
+			for ( var i = 0, n = atomlist.length; i < n; i++) {
+				var atom = atomlist[i];
+				reducedAtoms[i] = {
+					x : atom.x,
+					y : atom.y,
+					z : atom.z,
+					serial : i,
+					elem : atom.elem
+				};
+			}
+
+			var sync = true;
+			if (sync) { // don't use worker, still break up for memory purposes
+
+				for ( var i = 0; i < extents.length; i++) {
+					var VandF = generateMeshSyncHelper(type, extents[i].extent,
+							extents[i].atoms, extents[i].toshow, reducedAtoms);
+					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+					THREE.GeometryUtils.merge(surfobj.geo, mesh);
+					modelGroup.add(mesh);
+					show();
+				}
+			} else { // use worker
+				// use worker
+				var workers = [];
+				if (type < 0)
+					type = 0; // negative reserved for atom data
+				for ( var i = 0; i < numWorkers; i++) {
+					var w = new Worker('webmol/SurfaceWorker.js');
+					workers.push(w);
+					w.postMessage({
+						type : -1,
+						atoms : reducedAtoms
+					});
+				}
+				for ( var i = 0; i < extents.length; i++) {
+					var worker = workers[i % workers.length];
+					worker.onmessage = function(event) {
+						var VandF = event.data;
+						var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+						THREE.GeometryUtils.merge(surfobj.geo, mesh);
+						modelGroup.add(mesh);
+						show();
+						console.log("async mesh generation "
+								+ (+new Date() - time) + "ms");
+					};
+
+					worker.onerror = function(event) {
+						console.log(event.message + " (" + event.filename + ":"
+								+ event.lineno + ")");
+					};
+
+					worker.postMessage({
+						type : type,
+						expandedExtent : extents[i].extent,
+						extendedAtoms : extents[i].atoms,
+						atomsToShow : extents[i].toshow,
+					});
+				}
+			}
+
+			console.log("full mesh generation " + (+new Date() - time) + "ms");
+
+			return surfid;
+		};
+		
+		//set the material to something else
+		this.setSurfaceMaterialStyle = function(surf, style) {
+			if(surfaces[surf]) {
+				surfaces[surf].mat = getMatWithStyle(style);
+				this.render();
+			}
 		}
 
+		//given the id returned by surfid, remove surface
 		this.removeSurface = function(surf) {
-			
+			delete surfaces[surf];
+			this.render();
 		}
-		
+
 		try {
-		if(typeof(callback) === "function")
-			callback(this);
-		}
-		catch(e) {
-			//errors in callback shouldn't invalidate the viewer
-			console.log("error with glviewer callback: "+e);
+			if (typeof (callback) === "function")
+				callback(this);
+		} catch (e) {
+			// errors in callback shouldn't invalidate the viewer
+			console.log("error with glviewer callback: " + e);
 		}
 	}
-
 
 	return GLViewer;
 })();

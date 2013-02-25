@@ -74,6 +74,7 @@ WebMol.jmolModel = (function() {
 			Jmol.loadInline(japp, data);
 			// figure out what model was just created
 			jmolid = getCurJMolID(japp);
+			this.setStyle(defaultAtomStyle);
 		};
 
 		// create an or statement if necessary from select= sel[i]
@@ -96,7 +97,7 @@ WebMol.jmolModel = (function() {
 		this.jmolSelect = function(sel) {
 			var ret = [ "model=" + jmolid ];
 			for ( var i in sel) {
-				if (sel.hasOWnProperty(i)) {
+				if (sel.hasOwnProperty(i)) {
 					switch (i) {
 					case "resn": // residue name
 						if (typeof (sel[i]) != "undefined") {

@@ -370,14 +370,6 @@ WebMol.GLModel = (function() {
 		return true;
 	};
 
-	// set all the faces of the provided geometry to the specified color
-	var setGeometryColor = function(geo, color) {
-		var c = new TCo(color);
-		for ( var i = 0; i < geo.faces.length; i++) {
-			var face = geo.faces[i];
-			face.color = c;
-		}
-	};
 
 	function GLModel(mid) {
 
@@ -521,7 +513,7 @@ WebMol.GLModel = (function() {
 
 			var midpoint = new TV3().addVectors(from, to).multiplyScalar(0.5);
 
-			setGeometryColor(cylinderGeometry, color)
+			cylinderGeometry.colorAll(new TCo(color));
 			var cylinder = new THREE.Mesh(cylinderGeometry);
 			cylinder.position = midpoint;
 			cylinder.lookAt(from);
@@ -605,7 +597,7 @@ WebMol.GLModel = (function() {
 			for ( var i = 0; i < atoms.length; i++) {
 				var atom = atoms[i];
 				// recreate gl info for each atom as necessary
-				if (atom && atom.style && atom.globj == null) {
+				if (atom && atom.style) {
 					drawAtomSphere(atom);
 					drawAtomCross(atom);
 					drawBondLines(atom, atoms);

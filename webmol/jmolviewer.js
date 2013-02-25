@@ -13,7 +13,7 @@ WebMol.jmolViewer = (function() {
 		var japp = null;
 		var container = element;
 		var models = []; // atomistic molecular models
-
+		var surfaceCounter = 0;
 		// check dependencies
 		if (typeof (Jmol) === "undefined") {
 			// three.js not loaded, take matters into our own hands
@@ -59,8 +59,8 @@ WebMol.jmolViewer = (function() {
 
 		};
 
-		// zoom to atom selection
-		this.zoomTo = function(sel) {
+		//return atom expression representing sel in jmol
+		function getJMolSel(sel) {
 			var sel = sel || {};
 			// apply to all models unless sell specifies a model by id
 			var ms = [];
@@ -81,10 +81,13 @@ WebMol.jmolViewer = (function() {
 					ors.push("(" + m.jmolSelect(sel) + ")");
 				}
 			}
-
-			var script = "zoomto " + ors.join(" or ");
+			return ors.join(" or ");
+		}
+		
+		// zoom to atom selection
+		this.zoomTo = function(sel) {
+			var script = "zoomto 0 " + getJMolSel(sel);
 			Jmol.script(japp, script);
-
 		};
 
 		// given molecular data and its format (pdb, sdf or xyz)
@@ -126,11 +129,31 @@ WebMol.jmolViewer = (function() {
 
 		// add a surface
 		this.addSurface = function(type, style, atomsel, allsel) {
-
+			var surfid = "id"+surfaceCounter++;
+			var s = getJMolSel(atomsel);
+			var a = getJMolSel(allsel);
+			
+			var ST = WebMol.SurfaceType;
+			var type = "molecular";
+			switch(type) {
+			case ST.VDW:
+				type = "vdw";
+				break;
+			case ST.SAS:
+				type = "sasurface";
+				break;
+			case ST.SES:
+				type = "solvent 1.4";
+				break;
+			}
+			var script = ("isosurface "+surfid+" select \""+s+"\" ignore \"not ("+a+")\" "+type);
+			console.log(script);
+			Jmol.script(japp,script);		
+			return surfid;
 		}
 
 		this.removeSurface = function(surf) {
-
+			Jmol.script(japp, "isosurface "+surf+" delete");
 		}
 
 

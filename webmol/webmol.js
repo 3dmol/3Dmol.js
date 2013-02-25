@@ -51,4 +51,9 @@ var WebMol = (function() {
 	return my;
 })();
 
+WebMol.SurfaceType = {
+		VDW : 1,
+		SAS : 3,
+		SES : 2
+	};
 	
