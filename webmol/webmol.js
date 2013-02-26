@@ -28,6 +28,8 @@ var WebMol = (function() {
 			config.height = $(element).height();
 		if(!config.order)
 			config.order = ["glmol","jmol"];
+		if(!config.defaultcolors)
+			config.defaultcolors = WebMol.defaultElementColors;
 		
 		//try to create the appropriate viewer
 		for(var i = 0; i < config.order.length; i++) {
@@ -37,7 +39,7 @@ var WebMol = (function() {
 			if(typeof(my[fname]) === "function")
 			{
 				try {
-					return new my[fname](element, config.width, config.height, config.callback);
+					return new my[fname](element, config.width, config.height, config.callback, config.defaultcolors);
 				}
 				catch(e) {
 					console.log("error with "+kind+":"+e);

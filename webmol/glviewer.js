@@ -18,8 +18,6 @@ THREE.Matrix4.prototype.isIdentity = function() {
 
 var TV3 = THREE.Vector3, TF3 = THREE.Face3, TCo = THREE.Color;
 
-
-
 // a webmol unified interace to gmol
 WebMol.glmolViewer = (function() {
 	// private class variables
@@ -58,7 +56,7 @@ WebMol.glmolViewer = (function() {
 	};
 
 	// The constructor
-	function GLViewer(element, width, height, callback) {
+	function GLViewer(element, width, height, callback, defaultcolors) {
 		// check dependencies
 		if (typeof (THREE) === "undefined") {
 			// three.js not loaded, take matters into our own hands
@@ -71,7 +69,7 @@ WebMol.glmolViewer = (function() {
 
 		var models = []; // atomistic molecular models
 		var surfaces = [];
-		
+
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
 		// set dimensions
@@ -182,7 +180,7 @@ WebMol.glmolViewer = (function() {
 			// setup lights
 			var directionalLight = new THREE.DirectionalLight(0xFFFFFF);
 			directionalLight.position = new TV3(0.2, 0.2, -1).normalize();
-			directionalLight.intensity = 1.2;
+			directionalLight.intensity = 1.1;
 			scene.add(directionalLight);
 			var ambientLight = new THREE.AmbientLight(0x202020);
 			scene.add(ambientLight);
@@ -355,13 +353,13 @@ WebMol.glmolViewer = (function() {
 			initializeScene();
 
 			for ( var i = 0; i < models.length; i++) {
-				if(models[i]) {
-					modelGroup.add(models[i].globj());
+				if (models[i]) {
+					modelGroup.add(models[i].globj().clone());
 				}
 			}
 
-			for( var i = 0; i < surfaces.length; i++) {
-				if(surfaces[i]) {
+			for ( var i = 0; i < surfaces.length; i++) {
+				if (surfaces[i]) {
 					var smesh = new THREE.Mesh(surfaces[i].geo, surfaces[i].mat);
 					modelGroup.add(smesh);
 				}
@@ -404,7 +402,7 @@ WebMol.glmolViewer = (function() {
 		// given molecular data and its format (pdb, sdf or xyz)
 		// create a model and add it, returning the model identifier
 		this.addModel = function(data, format) {
-			var m = new WebMol.GLModel(models.length);
+			var m = new WebMol.GLModel(models.length, defaultcolors);
 			m.addMolData(data, format);
 			models.push(m);
 			return m;
@@ -539,15 +537,26 @@ WebMol.glmolViewer = (function() {
 
 			geo.faces = [];
 			var faces = VandF.faces;
+
+			// set colors for vertices
+			var colors = [];
+			for ( var i = 0; i < atoms.length; i++) {
+				var atom = atoms[i];
+				if (atom) {
+					if (typeof(atom.surfaceColor) != "undefined") {
+						colors[i] = new THREE.Color(atom.surfaceColor);
+					}
+					else if (atom.color) // map from atom
+						colors[i] = new THREE.Color(atom.color)
+				}
+			}
 			for ( var i = 0; i < faces.length; i++) {
 				var A = v[faces[i].a].atomid;
 				var B = v[faces[i].b].atomid;
 				var C = v[faces[i].c].atomid;
 
 				var f = new THREE.Face3(faces[i].a, faces[i].b, faces[i].c);
-				f.vertexColors = [ new THREE.Color(atoms[A].color),
-						new THREE.Color(atoms[B].color),
-						new THREE.Color(atoms[C].color) ];
+				f.vertexColors = [ colors[A], colors[B], colors[C] ];
 				geo.faces.push(f);
 			}
 
@@ -559,10 +568,10 @@ WebMol.glmolViewer = (function() {
 
 			return mesh;
 		};
-		
+
 		// do same thing as worker in main thread
-		var generateMeshSyncHelper = function(type, expandedExtent, extendedAtoms,
-				atomsToShow, atoms) {
+		var generateMeshSyncHelper = function(type, expandedExtent,
+				extendedAtoms, atomsToShow, atoms) {
 			var time = new Date();
 			var ps = new ProteinSurface();
 			ps.initparm(expandedExtent, (type == 1) ? false : true);
@@ -592,12 +601,11 @@ WebMol.glmolViewer = (function() {
 			ps.marchingcube(type);
 
 			var time5 = new Date();
-			console.log("marching cube " + (time5 - time4) + "  " + (time5 - time)
-					+ "ms");
+			console.log("marching cube " + (time5 - time4) + "  "
+					+ (time5 - time) + "ms");
 			ps.laplaciansmooth(1);
 			return ps.getFacesAndVertices(atomsToShow);
 		};
-
 
 		function getMatWithStyle(style) {
 			var mat = new THREE.MeshLambertMaterial();
@@ -606,13 +614,49 @@ WebMol.glmolViewer = (function() {
 			for ( var prop in style) {
 				if (prop === "color") {
 					mat[prop] = new TCo(style.color);
-					delete mat.vertexColors; //ignore
+					delete mat.vertexColors; // ignore
 				}
-				else if (style.hasOwnProperty(prop))
+				else if(prop == "map") {
+					//ignore				
+				} else if (style.hasOwnProperty(prop))
 					mat[prop] = style[prop];
 			}
+			if (typeof (style.opacity) != "undefined") {
+				if (style.opacity == 1)
+					mat.transparent = false;
+				else
+					mat.transparent = true;
+			}
+
 			return mat;
 		}
+		
+		//get the min and max values of the specified property in the provided atoms
+		function getPropertyRange(atomlist, prop) {
+			var min = Number.POSITIVE_INFINITY;
+			var max = Number.NEGATIVE_INFINITY;
+			
+			for(var i = 0, n = atomlist.length; i < n; i++) {
+				var atom = atomlist[i];
+				if(atom.properties && typeof(atom.properties[prop]) != "undefined") {
+					var val = atom.properties[prop];
+					if(val < min)
+						min = val;
+					if(val > max)
+						max = val;
+				}
+			}
+			
+			if(!isFinite(min) && !isFinite(max))
+				min = max = 0;
+			else if(!isFinite(min))
+				min = max;
+			else if(!isFinite(max))
+				max = min;
+			
+			return [min,max];
+		}
+		
 		// add a surface
 		this.addSurface = function(type, style, atomsel, allsel, focus) {
 			// type 1: VDW 3: SAS 4: MS 2: SES
@@ -634,6 +678,21 @@ WebMol.glmolViewer = (function() {
 
 			var mat = getMatWithStyle(style);
 			var extent = getExtent(atomsToShow);
+
+			if (style.map && style.map.prop) {
+				// map color space using already set atom properties
+				var prop = style.map.prop;
+				var scheme = style.map.scheme || new WebMol.RWB();
+				var range = scheme.range();
+				if(!range) {
+					range = getPropertyRange(atomsToShow, prop);					
+				}
+				
+				for(var i = 0, n = atomsToShow.length; i < n; i++) {
+					var atom = atomsToShow[i];
+					atom.surfaceColor = scheme.valueToHex(atom.properties[prop], range);
+				}
+			}
 
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
@@ -667,7 +726,10 @@ WebMol.glmolViewer = (function() {
 			console.log("Extents " + extents.length + "  "
 					+ (+new Date() - time) + "ms");
 
-			var surfobj = {geo: new THREE.Geometry(), mat: mat};
+			var surfobj = {
+				geo : new THREE.Geometry(),
+				mat : mat
+			};
 			var surfid = surfaces.length;
 			surfaces.push(surfobj);
 			var reducedAtoms = [];
@@ -737,21 +799,40 @@ WebMol.glmolViewer = (function() {
 
 			return surfid;
 		};
-		
-		//set the material to something else
+
+		// set the material to something else
 		this.setSurfaceMaterialStyle = function(surf, style) {
-			if(surfaces[surf]) {
+			if (surfaces[surf]) {
 				surfaces[surf].mat = getMatWithStyle(style);
 				this.render();
 			}
 		}
 
-		//given the id returned by surfid, remove surface
+		// given the id returned by surfid, remove surface
 		this.removeSurface = function(surf) {
 			delete surfaces[surf];
 			this.render();
 		}
 
+		// props is a list of objects that select certain atoms and enumerate
+		// properties for those atoms
+		this.mapAtomProperties = function(props) {
+			for ( var i = 0, n = props.length; i < n; i++) {
+				var prop = props[i];
+				if (prop.props) {
+					var atoms = getAtomsFromSel(prop);
+					for ( var p in prop.props) {
+						if (prop.props.hasOwnProperty(p)) {
+							//set each atom
+							for(var a = 0, na = atoms.length; a < na; a++) {
+								if(!atoms[a].properties) atoms[a].properties = {};
+								atoms[a].properties[p] = prop.props[p];
+							}
+						}
+					}
+				}
+			}
+		};
 		try {
 			if (typeof (callback) === "function")
 				callback(this);

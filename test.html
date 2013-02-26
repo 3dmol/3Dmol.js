@@ -10,6 +10,8 @@
 		<script type="text/javascript" src="Jmol/appletweb/JmolApplet.js"></script>
 		<script type="text/javascript" src="Jmol/appletweb/JmolApi.js"></script>       
 		<script src="webmol/webmol.js"></script>
+        <script src="webmol/properties.js"></script>
+		<script src="webmol/colors.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/ProteinSurface4.js"></script>
@@ -17,6 +19,7 @@
         <script src="webmol/glviewer.js"></script>
         <script src="webmol/jmolviewer.js"></script>
         <script src="webmol/jmolmodel.js"></script>
+        <script src="webmol/colorschemes.js"></script>
         
         
         <script>
@@ -25,17 +28,20 @@
         $(document).ready(function() {
         	var moldata = $("#moldata").val();
         	
-            glviewer = WebMol.createViewer("gldiv", {callback : function(viewer) {
+            glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
                 var m = viewer.addModel(moldata,"pdb");
+                viewer.mapAtomProperties(WebMol.partialCharges);
+
                       viewer.zoomTo();
                      viewer.render();
             }});	
 
-            jviewer = WebMol.createViewer("jmoldiv",{order: ["jmol"], callback:
+            jviewer = WebMol.createViewer("jmoldiv",{order: ["jmol"], defaultcolors: WebMol.rasmolElementColors, callback:
                 function(viewer) {
             	  viewer.setBackgroundColor(0);
             	   var m = viewer.addModel(moldata,"pdb");
+            	   viewer.mapAtomProperties(WebMol.partialCharges);
             	         jviewer.zoomTo();
             	         jviewer.render();            	
             }});	         
@@ -55,10 +61,10 @@
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({cartoon:{}}); glviewer.render();"></input>
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A'}, {chain:'A'},{chain:'B'});"></input>
-        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {color:0xff}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
+        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1);"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2);"></input>
-        <input type="button" value="T" onclick="glviewer.setSurfaceMaterialStyle(surf1,{transparent: true, opacity: .5});"></input>
+        <input type="button" value="T" onclick="glviewer.setSurfaceMaterialStyle(surf1,{ opacity: .5});"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
         </td>
@@ -72,17 +78,17 @@
         <input type="button" value="Cartoon" onclick="jviewer.setStyle({cartoon:{}}); jviewer.render();"></input>
                <br>
         <input type="button" value="Surface1" onclick="surf1 = jviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A'}, {chain:'A'},{chain:'B'});"></input>
-        <input type="button" value="Surface2" onclick="surf2 = jviewer.addSurface(WebMol.SurfaceType.VDW, {color:0xff}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
+        <input type="button" value="Surface2" onclick="surf2 = jviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
        <input type="button" value="RM Surface1" onclick="jviewer.removeSurface(surf1);"></input>
         <input type="button" value="RM Surface2" onclick="jviewer.removeSurface(surf2);"></input>
-        <input type="button" value="T" onclick="jviewer.setSurfaceMaterialStyle(surf1,{transparent: true, opacity: .5});"></input>
+        <input type="button" value="T" onclick="jviewer.setSurfaceMaterialStyle(surf1,{ color: 0xffff, opacity: .4});"></input>
         
         <br>
         <input type="button" value="Recenter" onclick="jviewer.zoomTo();"></input>
         </td>
         </tr>
         </table>
-            <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata">                      
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata">           
 HEADER    COMPLEX (ONCOGENE PROTEIN/PEPTIDE)      30-SEP-96   1YCR              
 TITLE     MDM2 BOUND TO THE TRANSACTIVATION DOMAIN OF P53                       
 COMPND    MOL_ID: 1;                                                            
@@ -1214,7 +1220,7 @@ ATOM    818  ND2 ASN B  29      12.963 -18.387  -4.023  1.00 51.64           N
 ATOM    819  OXT ASN B  29      16.296 -17.351   0.139  1.00 30.36           O  
 TER     820      ASN B  29                                                      
 MASTER      247    0    0    5    2    0    0    6  818    2    0   11          
-END                                                                                                                                                                                                                                                                                                          
- </textarea>
+END                                                                             
+</textarea>        
     </body>
 </html>

@@ -99,10 +99,17 @@ WebMol.jmolModel = (function() {
 			for ( var i in sel) {
 				if (sel.hasOwnProperty(i)) {
 					switch (i) {
+					case "atom": //atom name
+						if (typeof (sel[i]) != "undefined") {
+							ret.push(constructOrStatement(sel[i], function(x) {
+								return "atomName=\"" + x + "\"";
+							}));
+						}
+						break;
 					case "resn": // residue name
 						if (typeof (sel[i]) != "undefined") {
 							ret.push(constructOrStatement(sel[i], function(x) {
-								return "[" + x + "]";
+								return x;
 							}));
 						}
 						break;

@@ -21,21 +21,7 @@ WebMol.GLModel = (function() {
 
 	var Nucleotides = [ '  G', '  A', '  T', '  C', '  U', ' DG', ' DA', ' DT',
 			' DC', ' DU' ];
-	var ElementColors = {
-		"H" : 0xCCCCCC,
-		"C" : 0xAAAAAA,
-		"O" : 0xCC0000,
-		"N" : 0x0000CC,
-		"S" : 0xCCCC00,
-		"P" : 0x6622CC,
-		"F" : 0x00CC00,
-		"CL" : 0x00CC00,
-		"BR" : 0x882200,
-		"I" : 0x6600AA,
-		"FE" : 0xCC6600,
-		"CA" : 0x8888AA
-	};
-	var defaultColor = 0xCCCCCC;
+
 	var defaultlineWidth = 1.5;
 
 	// Reference: A. Bondi, J. Phys. Chem., 1964, 68, 441.
@@ -66,7 +52,7 @@ WebMol.GLModel = (function() {
 		if (typeof (sel) === "undefined")
 			return true; // undef gets all
 		for ( var key in sel) {
-			if (sel.hasOwnProperty(key)) {
+			if (sel.hasOwnProperty(key) && key != "props") {
 				// if something is in sel, atom must have it
 				if (typeof (atom[key]) === "undefined")
 					return false;
@@ -123,20 +109,6 @@ WebMol.GLModel = (function() {
 		return 1;
 	};
 
-	// set default style and colors for atoms
-	var setAtomDefaults = function(atoms, id) {
-		for ( var i = 0; i < atoms.length; i++) {
-			var atom = atoms[i];
-			if (atom) {
-				atom.style = atom.style || defaultAtomStyle;
-				atom.color = atom.color || ElementColors[atom.elem]
-						|| defaultColor;
-				atom.model = id;
-				atom.globj = null;
-			}
-		}
-	}
-
 	// read an XYZ file from str and put the result in atoms
 	var parseXYZ = function(atoms, str) {
 
@@ -164,6 +136,7 @@ WebMol.GLModel = (function() {
 			atom.hetflag = true;
 			atom.bonds = [];
 			atom.bondOrder = [];
+			atom.properties = {};
 			atoms[i] = atom;
 		}
 		for ( var i = start; i < end; i++)
@@ -207,6 +180,7 @@ WebMol.GLModel = (function() {
 			atom.atom = atom.elem = line.substr(31, 3).replace(/ /g, "");
 			atom.bonds = [];
 			atom.bondOrder = [];
+			atom.properties = {};
 			atoms[i] = atom;
 		}
 		for (i = 0; i < bondCount; i++) {
@@ -256,7 +230,7 @@ WebMol.GLModel = (function() {
 				b = parseFloat(line.substr(60, 8));
 				elem = line.substr(76, 2).replace(/ /g, "");
 				if (elem == '') { // for some incorrect PDB files
-					elem = line.substr(12, 4).replace(/ /g, "");
+					elem = line.substr(12, 2).replace(/ /g, "");
 				}
 				if (line[0] == 'H')
 					hetflag = true;
@@ -279,6 +253,7 @@ WebMol.GLModel = (function() {
 					'ss' : 'c',
 					'bonds' : [],
 					'bondOrder' : [],
+					'properties' : {},
 					'b' : b
 				});
 			} else if (recordName == 'SHEET ') {
@@ -371,7 +346,17 @@ WebMol.GLModel = (function() {
 	};
 
 
-	function GLModel(mid) {
+	function GLModel(mid, defaultcolors) {
+		// private variables
+		var atoms = [];
+		var id = mid;
+		var molObj = null;
+		var defaultColor = WebMol.defaultElementColor;
+		
+		if(defaultcolors)
+			ElementColors = defaultcolors;
+		else
+			ElementColors = WebMol.defaultElementColors;
 
 		//drawing functions must be associated with model object since
 		//geometries can't span multiple canvases
@@ -405,7 +390,9 @@ WebMol.GLModel = (function() {
 			if (typeof (style.color) != "undefined")
 				color = style.color;
 			var sphereMaterial = new THREE.MeshLambertMaterial({
-				color : color
+				color : color,
+				ambient: 0x000000,
+				 
 			});
 			var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 			var r = getRadiusFromStyle(atom, style);
@@ -570,7 +557,9 @@ WebMol.GLModel = (function() {
 			}
 
 			var cylinderMaterial = new THREE.MeshLambertMaterial({
-				vertexColors : true
+				vertexColors : true,
+				ambient: 0x000000,
+				reflectivity: 0
 			});
 			atom.globj.add(new THREE.Mesh(geo, cylinderMaterial));
 
@@ -597,7 +586,7 @@ WebMol.GLModel = (function() {
 			for ( var i = 0; i < atoms.length; i++) {
 				var atom = atoms[i];
 				// recreate gl info for each atom as necessary
-				if (atom && atom.style) {
+				if (atom && atom.style && atom.globj == null) {
 					drawAtomSphere(atom);
 					drawAtomCross(atom);
 					drawBondLines(atom, atoms);
@@ -610,7 +599,6 @@ WebMol.GLModel = (function() {
 				if (atom && atom.globj)
 					ret.add(atom.globj);
 			}
-
 			// create cartoon if needed - this is a whole model analysis
 			if (cartoonAtoms.length > 0) {
 				WebMol.drawCartoon(ret, cartoonAtoms, false);
@@ -618,14 +606,25 @@ WebMol.GLModel = (function() {
 			return ret;
 		};
 
-		// private variables
-		var atoms = [];
-		var id = mid;
-		var molObj = null;
 
 		this.getID = function() {
 			return id;
 		};
+		
+		
+		// set default style and colors for atoms
+		var setAtomDefaults = function(atoms, id) {
+			for ( var i = 0; i < atoms.length; i++) {
+				var atom = atoms[i];
+				if (atom) {
+					atom.style = atom.style || defaultAtomStyle;
+					atom.color = atom.color || ElementColors[atom.elem]
+							|| defaultColor;
+					atom.model = id;
+					atom.globj = null;
+				}
+			}
+		}
 
 		// add atoms to this model from molecular data string
 		this.addMolData = function(data, format) {
@@ -685,7 +684,10 @@ WebMol.GLModel = (function() {
 
 		// return 3d data for this model, this is specific to glmodel
 		this.globj = function() {
+			var time = new Date();
 			molObj = createMolObj(atoms);
+			var time2 = new Date();
+			console.log("object creation time: "+(time2-time));
 			return molObj;
 		};
 

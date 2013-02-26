@@ -8,8 +8,15 @@ WebMol.jmolViewer = (function() {
 	var instance = 0;
 	// private class helper functions
 
+	function jmolColor(c) {
+		var hex = c.toString(16);
+		// must have padding zeroes
+		hex = "000000".substr(0, 6 - hex.length) + hex;
+		return "[x" + hex + "]";
+	}
+
 	// The constructor
-	function jmolViewer(element, width, height, callback) {
+	function jmolViewer(element, width, height, callback, defaultcolors) {
 		var japp = null;
 		var container = element;
 		var models = []; // atomistic molecular models
@@ -20,12 +27,13 @@ WebMol.jmolViewer = (function() {
 			throw "Missing JMol.js";
 		}
 
+		var defaultcolorsstr = "jmol";
+		if (defaultcolors == WebMol.rasmolElementColors)
+			defaultcolorsstr = "rasmol";
+
 		// public methods
 		this.setBackgroundColor = function(hex, a) {
-			var hex = hex.toString(16);
-			// must have padding zeroes
-			hex = "000000".substr(0, 6 - hex.length) + hex;
-			Jmol.script(japp, "set backgroundColor \"[x" + hex + "]\"");
+			Jmol.script(japp, "set backgroundColor \"" + jmolColor(hex))+"\"";
 		};
 
 		this.setWidth = function(w) {
@@ -59,14 +67,15 @@ WebMol.jmolViewer = (function() {
 
 		};
 
-		//return atom expression representing sel in jmol
+		// return atom expression representing sel in jmol
 		function getJMolSel(sel) {
 			var sel = sel || {};
 			// apply to all models unless sell specifies a model by id
 			var ms = [];
 			if (typeof sel.model == "undefined") {
-				for(var i = 0; i < models.length; i++) {
-					if(models[i]) ms.push(i);
+				for ( var i = 0; i < models.length; i++) {
+					if (models[i])
+						ms.push(i);
 				}
 			} else { // specific to some models
 				var ms = sel.model;
@@ -83,7 +92,7 @@ WebMol.jmolViewer = (function() {
 			}
 			return ors.join(" or ");
 		}
-		
+
 		// zoom to atom selection
 		this.zoomTo = function(sel) {
 			var script = "zoomto 0 " + getJMolSel(sel);
@@ -110,8 +119,9 @@ WebMol.jmolViewer = (function() {
 			var sel = sel || {};
 			var ms = [];
 			if (typeof sel.model == "undefined") {
-				for(var i = 0; i < models.length; i++) {
-					if(models[i]) ms.push(i);
+				for ( var i = 0; i < models.length; i++) {
+					if (models[i])
+						ms.push(i);
 				}
 			} else { // specific to some models
 				var ms = sel.model;
@@ -129,33 +139,88 @@ WebMol.jmolViewer = (function() {
 
 		// add a surface
 		this.addSurface = function(type, style, atomsel, allsel) {
-			var surfid = "id"+surfaceCounter++;
+			var surfid = "id" + surfaceCounter++;
 			var s = getJMolSel(atomsel);
 			var a = getJMolSel(allsel);
-			
+
 			var ST = WebMol.SurfaceType;
-			var type = "molecular";
-			switch(type) {
+			var t = "molecular";
+			switch (type) {
 			case ST.VDW:
-				type = "vdw";
+				t = "vdw";
 				break;
 			case ST.SAS:
-				type = "sasurface";
+				t = "sasurface";
 				break;
 			case ST.SES:
-				type = "solvent 1.4";
+				t = "solvent 1.4";
 				break;
 			}
-			var script = ("isosurface "+surfid+" select \""+s+"\" ignore \"not ("+a+")\" "+type);
+			
+
+			
+			var script = "isosurface " + surfid + " select \"" + s
+					+ "\" ignore \"not (" + a + ")\" " + t + " ";
+
+			if(style.map && style.map.prop) {
+				//map color space using already set atom properties
+				var prop = style.map.prop;
+				var scheme = style.map.scheme || new WebMol.RWB();
+				script += " colorscheme \""+scheme.jmolID()+"\" ";
+				var range = scheme.range();
+				if(range) {
+					script += " color range "+range[0]+" "+range[1] + " ";
+				}
+				script += "map property " + prop+" ";
+			}
+			
+			if (style.color) {
+				script += "color " + jmolColor(style.color);
+				if(style.opacity)
+					script += " translucent "+(1-style.opacity);
+			}
+			else if (style.opacity)
+				script += "color translucent "
+						+ (1 - style.opacity);
+
 			console.log(script);
-			Jmol.script(japp,script);		
+			Jmol.script(japp, script);
 			return surfid;
-		}
+		};
+
+		this.setSurfaceMaterialStyle = function(surfid, style) {
+			var script = "";
+			if (style.color)
+				script += "color $" + surfid + " " + jmolColor(style.color)
+						+ ";";
+			if (style.opacity)
+				script += "color $" + surfid + " translucent "
+						+ (1 - style.opacity) + ";";
+			console.log(script);
+			Jmol.script(japp, script);
+		};
 
 		this.removeSurface = function(surf) {
-			Jmol.script(japp, "isosurface "+surf+" delete");
-		}
+			Jmol.script(japp, "isosurface " + surf + " delete");
+		};
 
+		// take a list of property objects that define selections of atoms
+		// and store the named properties in the atom
+		this.mapAtomProperties = function(props) {
+			var script = "";
+			for ( var i = 0; i < props.length; i++) {
+				var p = props[i];
+				if (p.props) {
+					var sel = "{" + getJMolSel(p) + "}.";
+					for( var prop in p.props) {
+						if(p.props.hasOwnProperty(prop)) {
+							script += sel + prop + " = " + p.props[prop] + ";";
+						}
+					}
+				}
+			}
+			Jmol.script(japp, script);
+		};
 
 		var Info = {
 			addSelectionOptions : false,
@@ -174,19 +239,19 @@ WebMol.jmolViewer = (function() {
 			width : width
 		};
 
-		if (typeof (callback) === "function" && callback) {
-			// have to let the java applet initialize before doing anything with
-			// it
-			// readyFunction doesn't work for multiple reasons
-			var callbackname = "__jmolInitHack" + instance;
-			var self = this;
-			WebMol[callbackname] = function() {
-				// delete WebMol[callbackname];
+		// have to let the java applet initialize before doing anything with
+		// it
+		// readyFunction doesn't work for multiple reasons
+		var callbackname = "__jmolInitHack" + instance;
+		var self = this;
+		WebMol[callbackname] = function() {
+			Jmol.script(japp, "set defaultcolorscheme " + defaultcolorsstr);
+			delete WebMol[callbackname];
+			if (typeof (callback) === "function" && callback)
 				callback(self);
-			};
-			Info.script += "javascript WebMol." + callbackname + "();";
+		};
+		Info.script += "javascript WebMol." + callbackname + "();";
 
-		}
 		Jmol.setDocument(false);
 		japp = Jmol.getApplet("japp" + instance, Info)
 		instance++;
