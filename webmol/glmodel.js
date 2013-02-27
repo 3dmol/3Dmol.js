@@ -102,7 +102,7 @@ WebMol.GLModel = (function() {
 		if (distSquared > 1.3
 				&& (atom1.elem == 'H' || atom2.elem == 'H' || atom1.elem == 'D' || atom2.elem == 'D'))
 			return 0;
-		if (distSquared < 3.42 && (atom1.elem == 'S' || atom2.elem == 'S'))
+		if (distSquared < 3.6 && (atom1.elem == 'S' || atom2.elem == 'S'))
 			return 1;
 		if (distSquared > 2.78)
 			return 0;
@@ -380,13 +380,22 @@ WebMol.GLModel = (function() {
 		var sphereVertexCache = {
 			cache : {},
 			getVerticesForRadius : function(radius) {
-				
-				if(typeof(this.cache[radius]) != "undefined")
+
+				if (typeof (this.cache[radius]) != "undefined")
 					return this.cache[radius];
-				
-				var obj = {vertices:[], verticesRows: [], normals: []};
-				var widthSegments = 16;
-				var heightSegments = 12;
+
+				var obj = {
+					vertices : [],
+					verticesRows : [],
+					normals : []
+				};
+				// scale quality with radius heuristically
+				var widthSegments = 12;
+				var heightSegments = 10;
+				if (radius < 1) {
+					widthSegments = 8;
+					heightSegments = 6;
+				}
 
 				var phiStart = 0;
 				var phiLength = Math.PI * 2;
@@ -412,9 +421,9 @@ WebMol.GLModel = (function() {
 						vertex.z = radius * Math.sin(phiStart + u * phiLength)
 								* Math.sin(thetaStart + v * thetaLength);
 
-						var n = new THREE.Vector3(vertex.x,vertex.y,vertex.z);
+						var n = new THREE.Vector3(vertex.x, vertex.y, vertex.z);
 						n.normalize();
-						
+
 						obj.vertices.push(vertex);
 						obj.normals.push(n);
 
@@ -425,7 +434,7 @@ WebMol.GLModel = (function() {
 					obj.verticesRows.push(verticesRow);
 
 				}
-				
+
 				this.cache[radius] = obj;
 				return obj;
 			}
@@ -443,43 +452,46 @@ WebMol.GLModel = (function() {
 				color = style.color;
 			var C = new THREE.Color(color);
 
-
 			var x, y;
-			var radius = getRadiusFromStyle(atom,style);
+			var radius = getRadiusFromStyle(atom, style);
 			var vobj = sphereVertexCache.getVerticesForRadius(radius);
 			var start = geo.vertices.length;
-			
-			//now add vertices and create faces at appropriate location
+
+			// now add vertices and create faces at appropriate location
 			var vertices = vobj.vertices;
 			var normals = vobj.normals;
-			for(var i = 0, n = vertices.length; i < n; i++) {
+			for ( var i = 0, n = vertices.length; i < n; i++) {
 				var v = vertices[i];
-				var vertex = new THREE.Vector3(v.x+atom.x,v.y+atom.y,v.z+atom.z);
+				var vertex = new THREE.Vector3(v.x + atom.x, v.y + atom.y, v.z
+						+ atom.z);
 				geo.vertices.push(vertex);
 				geo.normals.push(normals[i]);
 			}
 			var verticesRows = vobj.verticesRows;
-			var h = verticesRows.length-1;
+			var h = verticesRows.length - 1;
 			for (y = 0; y < h; y++) {
-				var w = verticesRows[y].length-1;
+				var w = verticesRows[y].length - 1;
 				for (x = 0; x < w; x++) {
 
-					var v1 = verticesRows[y][x + 1]+start;
-					var v2 = verticesRows[y][x]+start;
-					var v3 = verticesRows[y + 1][x]+start;
-					var v4 = verticesRows[y + 1][x + 1]+start;
-					
-					var n1 = normals[ v1-start ];
-					var n2 = normals[ v2-start ];
-					var n3 = normals[ v3-start ];
-					var n4 = normals[ v4-start ];
+					var v1 = verticesRows[y][x + 1] + start;
+					var v2 = verticesRows[y][x] + start;
+					var v3 = verticesRows[y + 1][x] + start;
+					var v4 = verticesRows[y + 1][x + 1] + start;
 
-					if ( Math.abs( vertices[ v1-start ].y ) === radius)  {
-						geo.faces.push( new THREE.Face3( v1, v3, v4, [ n1, n3, n4 ], C ) );
-					} else if ( Math.abs( vertices[ v3-start].y) === radius)  {
-						geo.faces.push( new THREE.Face3( v1, v2, v3, [ n1, n2, n3 ], C ) );
+					var n1 = normals[v1 - start];
+					var n2 = normals[v2 - start];
+					var n3 = normals[v3 - start];
+					var n4 = normals[v4 - start];
+
+					if (Math.abs(vertices[v1 - start].y) === radius) {
+						geo.faces.push(new THREE.Face3(v1, v3, v4,
+								[ n1, n3, n4 ], C));
+					} else if (Math.abs(vertices[v3 - start].y) === radius) {
+						geo.faces.push(new THREE.Face3(v1, v2, v3,
+								[ n1, n2, n3 ], C));
 					} else {
-						geo.faces.push( new THREE.Face4( v1, v2, v3, v4, [ n1, n2, n3, n4 ] , C ) );
+						geo.faces.push(new THREE.Face4(v1, v2, v3, v4, [ n1,
+								n2, n3, n4 ], C));
 					}
 				}
 			}
@@ -559,19 +571,21 @@ WebMol.GLModel = (function() {
 
 		// bonds as cylinders
 		var defaultStickRadius = .25;
-		var cylinderQuality = 16;
+		var cylinderQuality = 12;
 		var cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1,
 				cylinderQuality, 1, true);
-		cylinderGeometry.faceUvs = [];
+		cylinderGeometry.faceUvs = []; // null these out to make merging faster
+		cylinderGeometry.faceVertexUvs = [ [] ];
 
-		// returns mesh of cylinder
-		var drawCylinder = function(obj, from, to, radius, color) {
+		// creates a cylinder
+		// TODO: create it ourselves in the hopes of getting a speed up
+		var drawCylinder = function(geo, from, to, radius, color) {
 			if (!from || !to)
 				return;
 
 			var midpoint = new TV3().addVectors(from, to).multiplyScalar(0.5);
 
-			cylinderGeometry.colorAll(new TCo(color));
+			cylinderGeometry.colorAll(color);
 			var cylinder = new THREE.Mesh(cylinderGeometry);
 			cylinder.position = midpoint;
 			cylinder.lookAt(from);
@@ -581,12 +595,55 @@ WebMol.GLModel = (function() {
 					.distanceTo(to));
 			m.rotateX(Math.PI / 2);
 			cylinder.matrix.multiply(m);
-			return cylinder;
+
+			// now merge, this takes a while so inline and reduce GeometryUtils.merge
+			var geometry2 = cylinder.geometry;
+			var geometry1 = geo;
+			var matrix, normalMatrix, faceCopy, vertexOffset = geometry1.vertices.length;
+			var vertices1 = geometry1.vertices, vertices2 = geometry2.vertices,
+					faces1 = geometry1.faces, faces2 = geometry2.faces;
+			matrix = cylinder.matrix;
+
+			normalMatrix = new THREE.Matrix3();
+			normalMatrix.getInverse(matrix);
+			normalMatrix.transpose();
+
+			// vertices
+
+			for ( var i = 0, il = vertices2.length; i < il; i++) {
+				var vertex = vertices2[i];
+				var vertexCopy = vertex.clone();
+				vertexCopy.applyMatrix4(matrix);
+
+				vertices1.push(vertexCopy);
+			}
+
+			// faces
+			for (i = 0, il = faces2.length; i < il; i++) {
+
+				var face = faces2[i], faceCopy, normal, color,
+				 faceVertexNormals = face.vertexNormals,
+				 faceVertexColors = face.vertexColors;
+
+				faceCopy = new THREE.Face4(face.a + vertexOffset, face.b
+							+ vertexOffset, face.c + vertexOffset, face.d
+							+ vertexOffset);		
+
+
+				for ( var j = 0, jl = faceVertexNormals.length; j < jl; j++) {
+
+					normal = faceVertexNormals[j].clone();
+					normal.applyMatrix3(normalMatrix).normalize();
+					faceCopy.vertexNormals.push(normal);
+				}
+
+				faceCopy.color = color;
+				faces1.push(faceCopy);
+			}
 		};
 
 		// draws cylinders and small spheres (at bond radius)
-		// cylinder geometries are merged for better interactive performance
-		var drawBondSticks = function(atom, atoms) {
+		var drawBondSticks = function(atom, atoms, geo) {
 			if (!atom.style.stick)
 				return;
 			var style = atom.style.stick;
@@ -599,9 +656,7 @@ WebMol.GLModel = (function() {
 			if (typeof (style.color) != "undefined") {
 				c1 = style.color;
 			}
-
-			atom.globj = atom.globj || new THREE.Object3D();
-			var geo = new THREE.Geometry();
+			var C1 = new THREE.Color(c1);
 
 			for ( var i = 0; i < atom.bonds.length; i++) {
 				var j = atom.bonds[i]; // our neighbor
@@ -619,20 +674,18 @@ WebMol.GLModel = (function() {
 					if (typeof (style.color) != "undefined") {
 						c2 = style.color;
 					}
+					var C2 = new THREE.Color(c2);
 
-					var mesh1 = drawCylinder(atom.globj, p1, mp, bondR, c1);
-					THREE.GeometryUtils.merge(geo, mesh1);
-					var mesh2 = drawCylinder(atom.globj, p2, mp, bondR, c2);
-					THREE.GeometryUtils.merge(geo, mesh2);
+					// draw cylinders
+					if(c1 != c2) {
+						drawCylinder(geo, p1, mp, bondR, C1);
+						drawCylinder(geo, mp, p2, bondR, C2);
+					}
+					else {
+						drawCylinder(geo, p1,p2, bondR, C1);
+					}
 				}
 			}
-
-			var cylinderMaterial = new THREE.MeshLambertMaterial({
-				vertexColors : true,
-				ambient : 0x000000,
-				reflectivity : 0
-			});
-			atom.globj.add(new THREE.Mesh(geo, cylinderMaterial));
 
 			// for junctions draw sphere; merge the sphere geometries was really
 			// really slow
@@ -643,7 +696,7 @@ WebMol.GLModel = (function() {
 					color : c1
 				}
 			};
-			drawAtomSphere(atom);
+			drawAtomSphere(atom, geo);
 			atom.style = savedstyle;
 
 		};
@@ -659,6 +712,7 @@ WebMol.GLModel = (function() {
 			var lineGeometries = {};
 			var crossGeometries = {};
 			var sphereGeometry = new THREE.Geometry();
+			var stickGeometry = new THREE.Geometry();
 			for ( var i = 0; i < atoms.length; i++) {
 				var atom = atoms[i];
 				// recreate gl info for each atom as necessary
@@ -666,7 +720,7 @@ WebMol.GLModel = (function() {
 					drawAtomSphere(atom, sphereGeometry);
 					drawAtomCross(atom, crossGeometries);
 					drawBondLines(atom, atoms, lineGeometries);
-					drawBondSticks(atom, atoms);
+					drawBondSticks(atom, atoms, stickGeometry);
 					if (typeof (atom.style.cartoon) != "undefined"
 							&& !atom.style.cartoon.hidden) {
 						cartoonAtoms.push(atom);
@@ -684,12 +738,27 @@ WebMol.GLModel = (function() {
 			if (sphereGeometry.vertices && sphereGeometry.vertices.length > 0) {
 				var sphereMaterial = new THREE.MeshLambertMaterial({
 					ambient : 0x000000,
-					vertexColors : true
+					vertexColors : true,
+					reflectivity : 0
 				});
 				var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+				console.log("sphere geometry "+sphereGeometry.vertices.length);
 
 				ret.add(sphere);
 			}
+
+			// add stick geometry
+			if (stickGeometry.vertices && stickGeometry.vertices.length > 0) {
+				var cylinderMaterial = new THREE.MeshLambertMaterial({
+					vertexColors : true,
+					ambient : 0x000000,
+					reflectivity : 0
+				});
+				console.log("stick geometry "+stickGeometry.vertices.length);
+				var sticks = new THREE.Mesh(stickGeometry, cylinderMaterial);
+				ret.add(sticks);
+			}
+
 			// add any line geometries, distinguished by line width
 			for ( var i in lineGeometries) {
 				if (lineGeometries.hasOwnProperty(i)) {
@@ -721,6 +790,7 @@ WebMol.GLModel = (function() {
 					ret.add(line);
 				}
 			}
+			
 			return ret;
 		};
 

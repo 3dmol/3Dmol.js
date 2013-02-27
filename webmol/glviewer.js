@@ -349,6 +349,7 @@ WebMol.glmolViewer = (function() {
 		// apply styles, models, etc in viewer
 		this.render = function() {
 
+			var time1 = new Date();
 			var view = this.getView();
 			initializeScene();
 
@@ -358,13 +359,15 @@ WebMol.glmolViewer = (function() {
 				}
 			}
 
-			for ( var i = 0; i < surfaces.length; i++) {
-				if (surfaces[i]) {
+			for ( var i in surfaces) { //this is an array with possible holes
+				if (surfaces.hasOwnProperty(i)) {
 					var smesh = new THREE.Mesh(surfaces[i].geo, surfaces[i].mat);
 					modelGroup.add(smesh);
 				}
 			}
 			this.setView(view);
+			var time2 = new Date();
+			console.log("render time: "+(time2-time1));
 		};
 
 		function getAtomsFromSel(sel) {
@@ -731,7 +734,7 @@ WebMol.glmolViewer = (function() {
 				mat : mat
 			};
 			var surfid = surfaces.length;
-			surfaces.push(surfobj);
+			surfaces[surfid] = surfobj;
 			var reducedAtoms = [];
 			// to reduce amount data transfered, just pass x,y,z,serial and elem
 			for ( var i = 0, n = atomlist.length; i < n; i++) {
@@ -745,7 +748,7 @@ WebMol.glmolViewer = (function() {
 				};
 			}
 
-			var sync = true;
+			var sync = false;
 			if (sync) { // don't use worker, still break up for memory purposes
 
 				for ( var i = 0; i < extents.length; i++) {
