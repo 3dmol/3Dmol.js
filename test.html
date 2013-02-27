@@ -29,14 +29,17 @@
         	var moldata = $("#moldata").val();
         	
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
-                viewer.setBackgroundColor(0xffffff);
-                var m = viewer.addModel(moldata,"pdb");
-                viewer.mapAtomProperties(WebMol.partialCharges);
-
-                      viewer.zoomTo();
-                     viewer.render();
+               // viewer.setBackgroundColor(0xffffff);
+                //var m = viewer.addModel(moldata,"pdb");
+                //viewer.mapAtomProperties(WebMol.partialCharges);
+                //viewer.zoomTo();
+                //viewer.render();
             }});	
-
+            glviewer.setBackgroundColor(0xffffff);
+            var m = glviewer.addModel(moldata,"pdb");
+            glviewer.mapAtomProperties(WebMol.partialCharges);
+            glviewer.zoomTo();
+            glviewer.render();
             jviewer = WebMol.createViewer("jmoldiv",{order: ["jmol"], defaultcolors: WebMol.rasmolElementColors, callback:
                 function(viewer) {
             	  viewer.setBackgroundColor(0);

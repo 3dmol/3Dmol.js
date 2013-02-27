@@ -223,7 +223,7 @@ WebMol.GLModel = (function() {
 				resn = line.substr(17, 3);
 				chain = line.substr(21, 1);
 				resi = parseInt(line.substr(22, 4));
-				icode = line.substr(26,1);
+				icode = line.substr(26, 1);
 				x = parseFloat(line.substr(30, 8));
 				y = parseFloat(line.substr(38, 8));
 				z = parseFloat(line.substr(46, 8));
@@ -345,27 +345,24 @@ WebMol.GLModel = (function() {
 		return true;
 	};
 
-
 	function GLModel(mid, defaultcolors) {
 		// private variables
 		var atoms = [];
 		var id = mid;
 		var molObj = null;
 		var defaultColor = WebMol.defaultElementColor;
-		
-		if(defaultcolors)
+
+		if (defaultcolors)
 			ElementColors = defaultcolors;
 		else
 			ElementColors = WebMol.defaultElementColors;
 
-		//drawing functions must be associated with model object since
-		//geometries can't span multiple canvases
-		
+		// drawing functions must be associated with model object since
+		// geometries can't span multiple canvases
+
 		// sphere drawing
 		var defaultSphereRadius = 1.5;
 		var sphereQuality = 16; // 16;
-		var sphereGeometry = new THREE.SphereGeometry(1, sphereQuality,
-				sphereQuality);
 
 		// return proper radius for atom given style
 		var getRadiusFromStyle = function(atom, style) {
@@ -379,7 +376,63 @@ WebMol.GLModel = (function() {
 				r *= style.scale;
 			return r;
 		}
-		var drawAtomSphere = function(atom) {
+
+		// construct vertices around orgin for given radius, memoize results
+		var sphereVertexCache = {
+			cache : {},
+			getVerticesForRadius : function(radius) {
+				
+				if(typeof(this.cache[radius]) != "undefined")
+					return this.cache[radius];
+				
+				var obj = {vertices:[], verticesRows: [], normals: []};
+				var widthSegments = sphereQuality;
+				var heightSegments = sphereQuality;
+
+				var phiStart = 0;
+				var phiLength = Math.PI * 2;
+
+				var thetaStart = 0;
+				var thetaLength = Math.PI;
+
+				var x, y, vertices = [], uvs = [];
+
+				for (y = 0; y <= heightSegments; y++) {
+
+					var verticesRow = [];
+					for (x = 0; x <= widthSegments; x++) {
+
+						var u = x / widthSegments;
+						var v = y / heightSegments;
+
+						var vertex = {};
+						vertex.x = -radius * Math.cos(phiStart + u * phiLength)
+								* Math.sin(thetaStart + v * thetaLength);
+						vertex.y = radius
+								* Math.cos(thetaStart + v * thetaLength);
+						vertex.z = radius * Math.sin(phiStart + u * phiLength)
+								* Math.sin(thetaStart + v * thetaLength);
+
+						var n = new THREE.Vector3(vertex.x,vertex.y,vertex.z);
+						n.normalize();
+						
+						obj.vertices.push(vertex);
+						obj.normals.push(n);
+
+						verticesRow.push(obj.vertices.length - 1);
+
+					}
+
+					obj.verticesRows.push(verticesRow);
+
+				}
+				
+				this.cache[radius] = obj;
+				return obj;
+			}
+		};
+
+		var drawAtomSphere = function(atom, geo) {
 			if (!atom.style.sphere)
 				return;
 			var style = atom.style.sphere;
@@ -389,31 +442,63 @@ WebMol.GLModel = (function() {
 			var color = atom.color;
 			if (typeof (style.color) != "undefined")
 				color = style.color;
-			var sphereMaterial = new THREE.MeshLambertMaterial({
-				color : color,
-				ambient: 0x000000,
-				 
-			});
-			var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-			var r = getRadiusFromStyle(atom, style);
+			var C = new THREE.Color(color);
 
-			sphere.scale.x = sphere.scale.y = sphere.scale.z = r;
-			sphere.position.x = atom.x;
-			sphere.position.y = atom.y;
-			sphere.position.z = atom.z;
 
-			atom.globj = atom.globj || new THREE.Object3D();
-			atom.globj.add(sphere);
-		}
+			var x, y;
+			var radius = getRadiusFromStyle(atom,style);
+			var vobj = sphereVertexCache.getVerticesForRadius(radius);
+			var start = geo.vertices.length;
+			
+			//now add vertices and create faces at appropriate location
+			var vertices = vobj.vertices;
+			var normals = vobj.normals;
+			for(var i = 0, n = vertices.length; i < n; i++) {
+				var v = vertices[i];
+				var vertex = new THREE.Vector3(v.x+atom.x,v.y+atom.y,v.z+atom.z);
+				geo.vertices.push(vertex);
+				geo.normals.push(normals[i]);
+			}
+			var verticesRows = vobj.verticesRows;
+			var h = verticesRows.length-1;
+			for (y = 0; y < h; y++) {
+				var w = verticesRows[y].length-1;
+				for (x = 0; x < w; x++) {
+
+					var v1 = verticesRows[y][x + 1]+start;
+					var v2 = verticesRows[y][x]+start;
+					var v3 = verticesRows[y + 1][x]+start;
+					var v4 = verticesRows[y + 1][x + 1]+start;
+					
+					var n1 = normals[ v1-start ];
+					var n2 = normals[ v2-start ];
+					var n3 = normals[ v3-start ];
+					var n4 = normals[ v4-start ];
+
+					if ( Math.abs( vertices[ v1-start ].y ) === radius)  {
+						geo.faces.push( new THREE.Face3( v1, v3, v4, [ n1, n3, n4 ], C ) );
+					} else if ( Math.abs( vertices[ v3-start].y) === radius)  {
+						geo.faces.push( new THREE.Face3( v1, v2, v3, [ n1, n2, n3 ], C ) );
+					} else {
+						geo.faces.push( new THREE.Face4( v1, v2, v3, v4, [ n1, n2, n3, n4 ] , C ) );
+					}
+				}
+			}
+
+		};
 
 		// cross drawing
-		var drawAtomCross = function(atom) {
+		var drawAtomCross = function(atom, geos) {
 			if (!atom.style.cross)
 				return;
 			var style = atom.style.cross;
 			if (style.hidden)
 				return;
-			var geo = new THREE.Geometry();
+			var linewidth = (atom.style.lineWidth || defaultlineWidth)
+			if (!geos[linewidth])
+				geos[linewidth] = new THREE.Geometry();
+			var geo = geos[linewidth];
+
 			var delta = getRadiusFromStyle(atom, style);
 
 			var points = [ [ delta, 0, 0 ], [ -delta, 0, 0 ], [ 0, delta, 0 ],
@@ -425,27 +510,23 @@ WebMol.GLModel = (function() {
 						+ points[j][1], atom.z + points[j][2]));
 				geo.colors.push(c);
 			}
-
-			var lineMaterial = new THREE.LineBasicMaterial({
-				linewidth : (style.linewidth || defaultlineWidth)
-			});
-			lineMaterial.vertexColors = true;
-			var line = new THREE.Line(geo, lineMaterial, THREE.LinePieces);
-			atom.globj = atom.globj || new THREE.Object3D();
-			atom.globj.add(line);
 		};
 
 		// bonds - both atoms must match bond style
 		// standardize on only drawing for lowest to highest
 
-		var drawBondLines = function(atom, atoms) {
+		var drawBondLines = function(atom, atoms, geos) {
 			if (!atom.style.line)
 				return;
 			var style = atom.style.line;
 			if (style.hidden)
 				return;
 
-			var geo = new THREE.Geometry();
+			// have a separate geometry for each linewidth
+			var linewidth = (atom.style.lineWidth || defaultlineWidth)
+			if (!geos[linewidth])
+				geos[linewidth] = new THREE.Geometry();
+			var geo = geos[linewidth];
 
 			for ( var i = 0; i < atom.bonds.length; i++) {
 				var j = atom.bonds[i]; // our neighbor
@@ -468,21 +549,13 @@ WebMol.GLModel = (function() {
 					cs.push(c1);
 					vs.push(mp);
 					cs.push(c1);
+					vs.push(mp);
+					cs.push(c2);
 					vs.push(p2);
 					cs.push(c2);
 				}
 			}
 
-			var lineMaterial = new THREE.LineBasicMaterial({
-				linewidth : (style.lineWidth || defaultlineWidth)
-			});
-
-			lineMaterial.vertexColors = true;
-
-			var line = new THREE.Line(geo, lineMaterial);
-			line.type = THREE.LineStrip;
-			atom.globj = atom.globj || new THREE.Object3D();
-			atom.globj.add(line);
 		};
 
 		// bonds as cylinders
@@ -491,7 +564,6 @@ WebMol.GLModel = (function() {
 		var cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1,
 				cylinderQuality, 1, true);
 		cylinderGeometry.faceUvs = [];
-		var faceVertexUvs = [];
 
 		// returns mesh of cylinder
 		var drawCylinder = function(obj, from, to, radius, color) {
@@ -558,8 +630,8 @@ WebMol.GLModel = (function() {
 
 			var cylinderMaterial = new THREE.MeshLambertMaterial({
 				vertexColors : true,
-				ambient: 0x000000,
-				reflectivity: 0
+				ambient : 0x000000,
+				reflectivity : 0
 			});
 			atom.globj.add(new THREE.Mesh(geo, cylinderMaterial));
 
@@ -578,18 +650,23 @@ WebMol.GLModel = (function() {
 		};
 
 		// go through all the atoms and regenerate their geometries
+		// we try to have one geometry for each style since this is much much
+		// faster
 		// at some point we should optimize this to avoid unnecessary
 		// recalculation
 		var createMolObj = function(atoms) {
 			var ret = new THREE.Object3D();
 			var cartoonAtoms = [];
+			var lineGeometries = {};
+			var crossGeometries = {};
+			var sphereGeometry = new THREE.Geometry();
 			for ( var i = 0; i < atoms.length; i++) {
 				var atom = atoms[i];
 				// recreate gl info for each atom as necessary
 				if (atom && atom.style && atom.globj == null) {
-					drawAtomSphere(atom);
-					drawAtomCross(atom);
-					drawBondLines(atom, atoms);
+					drawAtomSphere(atom, sphereGeometry);
+					drawAtomCross(atom, crossGeometries);
+					drawBondLines(atom, atoms, lineGeometries);
 					drawBondSticks(atom, atoms);
 					if (typeof (atom.style.cartoon) != "undefined"
 							&& !atom.style.cartoon.hidden) {
@@ -603,15 +680,55 @@ WebMol.GLModel = (function() {
 			if (cartoonAtoms.length > 0) {
 				WebMol.drawCartoon(ret, cartoonAtoms, false);
 			}
+
+			// add sphere geometry
+			if (sphereGeometry.vertices && sphereGeometry.vertices.length > 0) {
+				var sphereMaterial = new THREE.MeshLambertMaterial({
+					ambient : 0x000000,
+					vertexColors : true
+				});
+				var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+				ret.add(sphere);
+			}
+			// add any line geometries, distinguished by line width
+			for ( var i in lineGeometries) {
+				if (lineGeometries.hasOwnProperty(i)) {
+					var linewidth = i;
+					var lineMaterial = new THREE.LineBasicMaterial({
+						linewidth : linewidth,
+						vertexColors : true,
+					});
+
+					var line = new THREE.Line(lineGeometries[i], lineMaterial,
+							THREE.LinePieces);
+
+					ret.add(line);
+				}
+			}
+
+			// add any cross geometries
+			for ( var i in crossGeometries) {
+				if (crossGeometries.hasOwnProperty(i)) {
+					var linewidth = i;
+					var lineMaterial = new THREE.LineBasicMaterial({
+						linewidth : linewidth,
+						vertexColors : true,
+					});
+
+					var line = new THREE.Line(crossGeometries[i], lineMaterial,
+							THREE.LinePieces);
+
+					ret.add(line);
+				}
+			}
 			return ret;
 		};
-
 
 		this.getID = function() {
 			return id;
 		};
-		
-		
+
 		// set default style and colors for atoms
 		var setAtomDefaults = function(atoms, id) {
 			for ( var i = 0; i < atoms.length; i++) {
@@ -687,7 +804,7 @@ WebMol.GLModel = (function() {
 			var time = new Date();
 			molObj = createMolObj(atoms);
 			var time2 = new Date();
-			console.log("object creation time: "+(time2-time));
+			console.log("object creation time: " + (time2 - time));
 			return molObj;
 		};
 
