@@ -362,7 +362,6 @@ WebMol.GLModel = (function() {
 
 		// sphere drawing
 		var defaultSphereRadius = 1.5;
-		var sphereQuality = 16; // 16;
 
 		// return proper radius for atom given style
 		var getRadiusFromStyle = function(atom, style) {
@@ -386,8 +385,8 @@ WebMol.GLModel = (function() {
 					return this.cache[radius];
 				
 				var obj = {vertices:[], verticesRows: [], normals: []};
-				var widthSegments = sphereQuality;
-				var heightSegments = sphereQuality;
+				var widthSegments = 16;
+				var heightSegments = 12;
 
 				var phiStart = 0;
 				var phiLength = Math.PI * 2;
