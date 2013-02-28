@@ -58,4 +58,20 @@ WebMol.SurfaceType = {
 		SAS : 3,
 		SES : 2
 	};
+
+// in an attempt to reduce memory overhead, cache all THREE.Colors
+//this makes things a little faster
+WebMol.CC = {
+	cache : {},
+	color : function(hex) {
+		if(typeof(this.cache[hex]) != "undefined") {
+			return this.cache[hex];
+		}
+		else {
+			var c = new THREE.Color(hex);
+			this.cache[hex] = c;
+			return c;
+		}
+	}
+};
 	

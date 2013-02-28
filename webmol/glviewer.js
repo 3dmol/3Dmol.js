@@ -16,7 +16,7 @@ THREE.Matrix4.prototype.isIdentity = function() {
 	return true;
 };
 
-var TV3 = THREE.Vector3, TF3 = THREE.Face3, TCo = THREE.Color;
+var TV3 = THREE.Vector3, TF3 = THREE.Face3;
 
 // a webmol unified interace to gmol
 WebMol.glmolViewer = (function() {
@@ -302,7 +302,7 @@ WebMol.glmolViewer = (function() {
 			a = a | 1.0;
 			bgColor = hex;
 			renderer.setClearColorHex(hex, a);
-			scene.fog.color = new TCo(hex);
+			scene.fog.color = WebMol.CC.color(hex);
 			show();
 		};
 
@@ -547,10 +547,10 @@ WebMol.glmolViewer = (function() {
 				var atom = atoms[i];
 				if (atom) {
 					if (typeof(atom.surfaceColor) != "undefined") {
-						colors[i] = new THREE.Color(atom.surfaceColor);
+						colors[i] = WebMol.CC.color(atom.surfaceColor);
 					}
 					else if (atom.color) // map from atom
-						colors[i] = new THREE.Color(atom.color)
+						colors[i] = WebMol.CC.color(atom.color)
 				}
 			}
 			for ( var i = 0; i < faces.length; i++) {
@@ -616,7 +616,7 @@ WebMol.glmolViewer = (function() {
 			
 			for ( var prop in style) {
 				if (prop === "color") {
-					mat[prop] = new TCo(style.color);
+					mat[prop] = WebMol.CC.color(style.color);
 					delete mat.vertexColors; // ignore
 				}
 				else if(prop == "map") {

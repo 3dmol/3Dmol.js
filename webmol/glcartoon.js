@@ -66,7 +66,7 @@ WebMol.drawCartoon = (function() {
 		}
 		for ( var i = 1, lim = p1.length; i < lim; i++) {
 			var f = new THREE.Face4(2 * i, 2 * i + 1, 2 * i - 1, 2 * i - 2);
-			f.color = new TCo(colors[Math.round((i - 1) / div)]);
+			f.color = WebMol.color(colors[Math.round((i - 1) / div)]);
 			geo.faces.push(f);
 		}
 		geo.computeFaceNormals();
@@ -109,7 +109,7 @@ WebMol.drawCartoon = (function() {
 		var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, 3, -5, -1 ],
 				[ -3, -7, 1, 5 ] ];
 		for ( var i = 1, lim = p1.length; i < lim; i++) {
-			var offset = 8 * i, color = new TCo(colors[Math
+			var offset = 8 * i, color = WebMol.CC.color(colors[Math
 					.round((i - 1) / div)]);
 			for ( var j = 0; j < 4; j++) {
 				var f = new THREE.Face4(offset + faces[j][0], offset
@@ -149,7 +149,7 @@ WebMol.drawCartoon = (function() {
 
 		for ( var i = 0; i < points.length; i++) {
 			geo.vertices.push(points[i]);
-			geo.colors.push(new TCo(colors[(i == 0) ? 0 : Math.round((i - 1)
+			geo.colors.push(WebMol.color(colors[(i == 0) ? 0 : Math.round((i - 1)
 					/ div)]));
 		}
 		var lineMaterial = new THREE.LineBasicMaterial({
