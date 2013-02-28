@@ -613,7 +613,7 @@ WebMol.glmolViewer = (function() {
 		function getMatWithStyle(style) {
 			var mat = new THREE.MeshLambertMaterial();
 			mat.vertexColors = THREE.VertexColors;
-
+			
 			for ( var prop in style) {
 				if (prop === "color") {
 					mat[prop] = new TCo(style.color);
@@ -680,6 +680,7 @@ WebMol.glmolViewer = (function() {
 			var time = new Date();
 
 			var mat = getMatWithStyle(style);
+
 			var extent = getExtent(atomsToShow);
 
 			if (style.map && style.map.prop) {
