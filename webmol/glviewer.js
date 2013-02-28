@@ -118,8 +118,8 @@ WebMol.glmolViewer = (function() {
 		var slabFar = +50;
 
 		// UI variables
-		var cq = new THREE.Quaternion(1, 0, 0, 0);
-		var dq = new THREE.Quaternion(1, 0, 0, 0);
+		var cq = new THREE.Quaternion(0, 0, 0, 1);
+		var dq = new THREE.Quaternion(0, 0, 0, 1);
 		var isDragging = false;
 		var mouseStartX = 0;
 		var mouseStartY = 0;
@@ -172,7 +172,7 @@ WebMol.glmolViewer = (function() {
 			modelGroup = new THREE.Object3D();
 			rotationGroup = new THREE.Object3D();
 			rotationGroup.useQuaternion = true;
-			rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
+			rotationGroup.quaternion = new THREE.Quaternion(0,0, 0, 1);
 			rotationGroup.add(modelGroup);
 
 			scene.add(rotationGroup);
@@ -398,7 +398,7 @@ WebMol.glmolViewer = (function() {
 
 			rotationGroup.position.z = maxD * 0.35
 					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150;
-			rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
+			//rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
 			show();
 		};
 
@@ -816,7 +816,13 @@ WebMol.glmolViewer = (function() {
 		this.removeSurface = function(surf) {
 			delete surfaces[surf];
 			this.render();
-		}
+		};
+		
+		//return jmol moveto command to position this scene
+		this.jmolMoveTo = function() {
+			//move to timeSeconds {x y z} degrees zoomPercent transX transY {x y z} rotationRadius navigationCenter navTransX navTransY navDepth
+			//glmol    1.0        {up?    }  ?      ?            ?      ?     {modelGroup.position} 
+		};
 
 		// props is a list of objects that select certain atoms and enumerate
 		// properties for those atoms

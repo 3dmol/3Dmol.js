@@ -246,7 +246,8 @@ WebMol.GLModel = (function() {
 					'bonds' : [],
 					'bondOrder' : [],
 					'properties' : {},
-					'b' : b
+					'b' : b,
+					'pdbline' : line
 				});
 			} else if (recordName == 'SHEET ') {
 				var startChain = line.substr(21, 1);
@@ -866,6 +867,17 @@ WebMol.GLModel = (function() {
 			}
 
 		};
+		
+		//return pdb output of selected atoms
+		//currently only works if input was pdb
+		this.pdbData = function(style, sel) {
+			var atoms = this.selectedAtoms(sel);
+			var ret = "";
+			for( var i = 0, n = atoms.length; i < n; ++i) {
+				ret += atoms[i].pdbline;
+			}
+			return ret;
+		}
 
 		// return 3d data for this model, this is specific to glmodel
 		this.globj = function() {
