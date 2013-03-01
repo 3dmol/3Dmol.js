@@ -78,7 +78,7 @@ WebMol.glmolViewer = (function() {
 
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
-		var CAMERA_Z = -150;
+		var CAMERA_Z = 150;
 		var renderer = new THREE.WebGLRenderer({
 			antialias : true,
 		});
@@ -115,7 +115,7 @@ WebMol.glmolViewer = (function() {
 		var fov = 20;
 		var fogStart = 0.4;
 		var slabNear = -50; // relative to the center of rotationGroup
-		var slabFar = +50;
+		var slabFar = 50;
 
 		// UI variables
 		var cq = new THREE.Quaternion(0, 0, 0, 1);
@@ -129,7 +129,7 @@ WebMol.glmolViewer = (function() {
 		var cslabFar = 0;
 
 		var setSlabAndFog = function() {
-			var center = rotationGroup.position.z - camera.position.z;
+			var center = camera.position.z-rotationGroup.position.z;
 			if (center < 1)
 				center = 1;
 			camera.near = center + slabNear;
@@ -179,7 +179,7 @@ WebMol.glmolViewer = (function() {
 
 			// setup lights
 			var directionalLight = new THREE.DirectionalLight(0xFFFFFF);
-			directionalLight.position = new TV3(0.2, 0.2, -1).normalize();
+			directionalLight.position = new TV3(0.2, 0.2, 1).normalize();
 			directionalLight.intensity = 1.1;
 			scene.add(directionalLight);
 			var ambientLight = new THREE.AmbientLight(0x202020);
@@ -222,7 +222,7 @@ WebMol.glmolViewer = (function() {
 			ev.preventDefault();
 			if (!scene)
 				return;
-			var scaleFactor = (rotationGroup.position.z - CAMERA_Z) * 0.85;
+			var scaleFactor = (CAMERA_Z- rotationGroup.position.z ) * 0.85;
 			if (ev.originalEvent.detail) { // Webkit
 				rotationGroup.position.z += scaleFactor
 						* ev.originalEvent.detail / 10;
@@ -267,15 +267,15 @@ WebMol.glmolViewer = (function() {
 				slabNear = cslabNear + dx * 100;
 				slabFar = cslabFar + dy * 100;
 			} else if (mode == 2 || mouseButton == 3 || ev.shiftKey) { // Zoom
-				var scaleFactor = (rotationGroup.position.z - CAMERA_Z) * 0.85;
+				var scaleFactor = (CAMERA_Z - rotationGroup.position.z  ) * 0.85;
 				if (scaleFactor < 80)
 					scaleFactor = 80;
 				rotationGroup.position.z = cz - dy * scaleFactor;
 			} else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
-				var scaleFactor = (rotationGroup.position.z - CAMERA_Z) * 0.85;
+				var scaleFactor = (CAMERA_Z - rotationGroup.position.z ) * 0.85;
 				if (scaleFactor < 20)
 					scaleFactor = 20;
-				var translationByScreen = new TV3(-dx * scaleFactor, -dy
+				var translationByScreen = new TV3(dx * scaleFactor, -dy
 						* scaleFactor, 0);
 				var q = rotationGroup.quaternion;
 				var qinv = new THREE.Quaternion(q.x, q.y, q.z, q.w).inverse()
@@ -289,7 +289,7 @@ WebMol.glmolViewer = (function() {
 				dq.x = Math.cos(r * Math.PI);
 				dq.y = 0;
 				dq.z = rs * dx;
-				dq.w = rs * dy;
+				dq.w = -rs * dy;
 				rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
 				rotationGroup.quaternion.multiply(dq);
 				rotationGroup.quaternion.multiply(cq);
@@ -396,8 +396,8 @@ WebMol.glmolViewer = (function() {
 			slabNear = -maxD / 1.9;
 			slabFar = maxD / 3;
 
-			rotationGroup.position.z = maxD * 0.35
-					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150;
+			rotationGroup.position.z = -(maxD * 0.35
+					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
 			//rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
 			show();
 		};
