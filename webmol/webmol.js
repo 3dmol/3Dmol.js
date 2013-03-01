@@ -50,6 +50,33 @@ var WebMol = (function() {
 		return null;
 	}
 	
+	//loads a pdb/pubchem structure into the provided viewer
+	my.download = function(query, viewer) {
+		   var baseURL = '';
+		   var type = "";
+		   if (query.substr(0, 4) == 'pdb:') {
+			   type = "pdb";
+		      query = query.substr(4).toUpperCase();
+		      if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+		         alert("Wrong PDB ID"); return;
+		      }
+		      uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+		   } else if (query.substr(0, 4) == 'cid:') {
+			   type = "sdf";
+		      query = query.substr(4);
+		      if (!query.match(/^[1-9]+$/)) {
+		         alert("Wrong Compound ID"); return;
+		      }
+		      uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+		        "/SDF?record_type=3d";
+		   }
+
+		   $.get(uri, function(ret) {
+		      viewer.addModel(ret, type);
+		      viewer.zoomTo();
+		      viewer.render();
+		   });
+		}
 	return my;
 })();
 

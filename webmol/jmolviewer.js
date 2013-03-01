@@ -113,6 +113,11 @@ WebMol.jmolViewer = (function() {
 			delete models[model.getID()];
 			Jmol.script(japp, script);
 		}
+		
+		this.removeAllModels = function() {
+			models = [];
+			Jmol.script(japp, "delete");
+		};
 
 		// apply sel to all models and apply style
 		this.setStyle = function(style, sel) {

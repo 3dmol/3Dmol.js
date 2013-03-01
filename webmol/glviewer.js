@@ -419,6 +419,9 @@ WebMol.glmolViewer = (function() {
 				models.pop();
 		}
 
+		this.removeAllModels = function() {
+			models = [];
+		};
 		// apply sel to all models and apply style
 		this.setStyle = function(style, sel) {
 			for ( var i = 0; i < models.length; i++) {
@@ -820,8 +823,17 @@ WebMol.glmolViewer = (function() {
 		
 		//return jmol moveto command to position this scene
 		this.jmolMoveTo = function() {
-			//move to timeSeconds {x y z} degrees zoomPercent transX transY {x y z} rotationRadius navigationCenter navTransX navTransY navDepth
-			//glmol    1.0        {up?    }  ?      ?            ?      ?     {modelGroup.position} 
+			var pos = modelGroup.position;
+			//center on same position
+			var ret = "center { "+(-pos.x)+" "+(-pos.y)+" "+(-pos.z)+" }; ";
+			//apply rotation
+			var q = rotationGroup.quaternion;
+			ret += "moveto .5 quaternion { "+q.x+" "+q.y+" "+q.z+" "+q.w+" };";
+			//zoom is tricky.. maybe i would be best to let callee zoom on selection?
+			//can either do a bunch of math, or maybe zoom to the center with a fixed
+			//but reasonable percentage
+			
+			return ret;
 		};
 
 		// props is a list of objects that select certain atoms and enumerate

@@ -29,33 +29,18 @@
         	var moldata = $("#moldata").val();
         	
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
-               // viewer.setBackgroundColor(0xffffff);
-                //var m = viewer.addModel(moldata,"pdb");
-                //viewer.mapAtomProperties(WebMol.partialCharges);
-                //viewer.zoomTo();
-                //viewer.render();
+                viewer.setBackgroundColor(0xffffff);
+                var m = viewer.addModel(moldata,"pdb");
+                viewer.mapAtomProperties(WebMol.partialCharges);
+                viewer.zoomTo();
+                viewer.render();
             }});	
-            glviewer.setBackgroundColor(0xffffff);
-            var m = glviewer.addModel(moldata,"pdb");
-            glviewer.mapAtomProperties(WebMol.partialCharges);
-            glviewer.zoomTo();
-            glviewer.render();
-            jviewer = WebMol.createViewer("jmoldiv",{order: ["jmol"], defaultcolors: WebMol.rasmolElementColors, callback:
-                function(viewer) {
-            	  viewer.setBackgroundColor(0);
-            	   var m = viewer.addModel(moldata,"pdb");
-            	   viewer.mapAtomProperties(WebMol.partialCharges);
-            	         jviewer.zoomTo();
-            	         jviewer.render();            	
-            }});	         
+ 
         });
         </script>
     </head>
     <body >
-        <h1>WebMol</h1>
-        <table >
-        <tr ><td valign="top">
-         <div id="gldiv" style="width: 450px; height: 450px; border: 2px solid black; "></div>       
+         <div id="gldiv" style="width: 100%; height: 800px; border: 2px solid black; "></div>       
         <br>
         <input type="button" value="Stick" onclick="glviewer.setStyle({stick:{}}); glviewer.render();"></input>
         <input type="button" value="Line" onclick="glviewer.setStyle({line:{}}); glviewer.render();"></input>
@@ -70,27 +55,9 @@
         <input type="button" value="T" onclick="glviewer.setSurfaceMaterialStyle(surf1,{ opacity: .5});"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
-        </td>
-        <td valign="top">
-        <div id="jmoldiv" style="width: 450px; height: 450px; border: 2px solid black; padding: 0"></div>
-        <br>
-        <input type="button" value="Stick" onclick="jviewer.setStyle({stick:{}}); jviewer.render();"></input>
-        <input type="button" value="Line" onclick="jviewer.setStyle({line:{}}); jviewer.render();"></input>
-        <input type="button" value="Cross" onclick="jviewer.setStyle({cross:{}}); jviewer.render();"></input>
-        <input type="button" value="Sphere" onclick="jviewer.setStyle({sphere:{}}); jviewer.render();"></input>
-        <input type="button" value="Cartoon" onclick="jviewer.setStyle({cartoon:{}}); jviewer.render();"></input>
-               <br>
-        <input type="button" value="Surface1" onclick="surf1 = jviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A'}, {chain:'A'},{chain:'B'});"></input>
-        <input type="button" value="Surface2" onclick="surf2 = jviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
-       <input type="button" value="RM Surface1" onclick="jviewer.removeSurface(surf1);"></input>
-        <input type="button" value="RM Surface2" onclick="jviewer.removeSurface(surf2);"></input>
-        <input type="button" value="T" onclick="jviewer.setSurfaceMaterialStyle(surf1,{ color: 0xffff, opacity: .4});"></input>
+                <br>
+        <input id="pdbid" value="2POR" size=4><button onClick="glviewer.removeAllModels(); WebMol.download('pdb:' + $('#pdbid').val(), glviewer)">Download</button><br>
         
-        <br>
-        <input type="button" value="Recenter" onclick="jviewer.zoomTo();"></input>
-        </td>
-        </tr>
-        </table>
 <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata">           
 HEADER    COMPLEX (ONCOGENE PROTEIN/PEPTIDE)      30-SEP-96   1YCR              
 TITLE     MDM2 BOUND TO THE TRANSACTIVATION DOMAIN OF P53                       
