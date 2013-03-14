@@ -71,7 +71,7 @@ WebMol.GLModel = (function() {
 	// return true if atom1 and atom2 are probably bonded to each other
 	// based on distance alone
 	var areConnected = function(atom1, atom2) {
-		var max = 3.42;
+		var max = 1.9;
 
 		var xdiff = atom1.x - atom2.x;
 		if (xdiff > max)
@@ -85,21 +85,49 @@ WebMol.GLModel = (function() {
 
 		var distSquared = xdiff * xdiff + ydiff * ydiff + zdiff * zdiff;
 
-		// if (atom1.altLoc != atom2.altLoc) return false;
 		if (isNaN(distSquared))
-			return 0;
+			return false;
 		if (distSquared < 0.5)
-			return 0; // maybe duplicate position.
+			return false; // maybe duplicate position.
 
 		if (distSquared > 1.3
 				&& (atom1.elem == 'H' || atom2.elem == 'H' || atom1.elem == 'D' || atom2.elem == 'D'))
-			return 0;
+			return false;
 		if (distSquared < 3.6 && (atom1.elem == 'S' || atom2.elem == 'S'))
-			return 1;
+			return true;
 		if (distSquared > 2.78)
-			return 0;
-		return 1;
+			return false;
+		return true;
 	};
+
+	var assignBonds = function(atomsarray) {
+		// assign bonds - yuck, can't count on connect records
+		var atoms = atomsarray.slice(0);
+		for(var i = 0; i < atomsarray.length; i++)
+			atomsarray[i].index = i;
+		
+		atoms.sort(function(a, b) {
+			return a.z - b.z;
+		});
+		for ( var i = 0; i < atoms.length; i++) {
+			var ai = atoms[i];
+			
+			for ( var j = i + 1; j < atoms.length; j++) {
+				var aj = atoms[j];
+				if(aj.z - ai.z > 1.9) //can't be connected
+					break;
+				if (areConnected(ai, aj)) {
+					if (ai.bonds.indexOf(aj.index) == -1) {
+						// only add if not already there
+						ai.bonds.push(aj.index);
+						ai.bondOrder.push(1);
+						aj.bonds.push(ai.index);
+						aj.bondOrder.push(1);
+					}
+				}
+			}
+		}
+	}
 
 	// read an XYZ file from str and put the result in atoms
 	var parseXYZ = function(atoms, str) {
@@ -131,15 +159,7 @@ WebMol.GLModel = (function() {
 			atom.properties = {};
 			atoms[i] = atom;
 		}
-		for ( var i = start; i < end; i++)
-			// n^2 behavior.. should at least sort by z
-			for ( var j = i + 1; j < end; j++)
-				if (areConnected(atoms[i], atoms[j])) {
-					atoms[i].bonds.push(j);
-					atoms[i].bondOrder.push(1);
-					atoms[j].bonds.push(i);
-					atoms[j].bondOrder.push(1);
-				}
+		assignBonds(atoms);
 
 		return true;
 	};
@@ -285,20 +305,7 @@ WebMol.GLModel = (function() {
 
 		var starttime = (new Date()).getTime();
 		// assign bonds - yuck, can't count on connect records
-		for ( var i = start; i < atoms.length; i++) {
-			// n^2 behavior.. should at least sort by z
-			for ( var j = i + 1; j < atoms.length; j++) {
-				if (areConnected(atoms[i], atoms[j])) {
-					if (atoms[i].bonds.indexOf(j) == -1) {
-						// only add if not already there
-						atoms[i].bonds.push(j);
-						atoms[i].bondOrder.push(1);
-						atoms[j].bonds.push(i);
-						atoms[j].bondOrder.push(1);
-					}
-				}
-			}
-		}
+		assignBonds(atoms);
 		console.log("bond connecting " + ((new Date()).getTime() - starttime));
 		// Assign secondary structures
 		for (i = start; i < atoms.length; i++) {
@@ -544,7 +551,8 @@ WebMol.GLModel = (function() {
 					var p2 = new TV3(atom2.x, atom2.y, atom2.z);
 					var mp = p1.clone().add(p2).multiplyScalar(0.5);
 
-					var c1 = WebMol.CC.color(atom.color), c2 = WebMol.CC.color(atom2.color);
+					var c1 = WebMol.CC.color(atom.color), c2 = WebMol.CC
+							.color(atom2.color);
 
 					if (typeof (style.color) != "undefined") {
 						c1 = c2 = WebMol.CC.color(style.color);
@@ -576,35 +584,37 @@ WebMol.GLModel = (function() {
 		var drawCylinder = function(geo, from, to, radius, color) {
 			if (!from || !to)
 				return;
-			drawnC ++;
+			drawnC++;
 			// vertices
-			
+
 			var dir = to.clone();
 			dir.sub(from);
-			
-			//get orthonormal vector
+
+			// get orthonormal vector
 			var nvecs = [];
 			nvecs[0] = dir.clone();
-			if(Math.abs(nvecs[0].x) > .0001) nvecs[0].y += 1;
-			else nvecs[0].x += 1;
+			if (Math.abs(nvecs[0].x) > .0001)
+				nvecs[0].y += 1;
+			else
+				nvecs[0].x += 1;
 			nvecs[0].cross(dir);
 			nvecs[0].normalize();
-			
+
 			nvecs[0] = nvecs[0];
-			//another orth vector
+			// another orth vector
 			nvecs[4] = nvecs[0].clone();
-			nvecs[4].crossVectors(nvecs[0],dir);
+			nvecs[4].crossVectors(nvecs[0], dir);
 			nvecs[4].normalize();
 			nvecs[8] = nvecs[0].clone().negate();
 			nvecs[12] = nvecs[4].clone().negate();
-			
-			//now quarter positions
+
+			// now quarter positions
 			nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
 			nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
 			nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
 			nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
-			
-			//eights
+
+			// eights
 			nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
 			nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
 			nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
@@ -613,33 +623,34 @@ WebMol.GLModel = (function() {
 			nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
 			nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
 			nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
-			
+
 			var start = geo.vertices.length;
-			//add vertices, opposing vertices paired together
-			for(var i = 0, n = nvecs.length; i < n; ++i) {
+			// add vertices, opposing vertices paired together
+			for ( var i = 0, n = nvecs.length; i < n; ++i) {
 				var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
 				var top = nvecs[i].clone().multiplyScalar(radius).add(to);
-				
+
 				geo.vertices.push(bottom);
-				geo.vertices.push(top);				
+				geo.vertices.push(top);
 			}
-			
-			//now faces
+
+			// now faces
 			var face;
-			for(var i = 0, n = nvecs.length-1; i < n; ++i) {
-				var ti = start+2*i;
-				face = new THREE.Face4(ti,ti+1,ti+3,ti+2);
+			for ( var i = 0, n = nvecs.length - 1; i < n; ++i) {
+				var ti = start + 2 * i;
+				face = new THREE.Face4(ti, ti + 1, ti + 3, ti + 2);
 				face.color = color;
-				face.vertexNormals = [ nvecs[i], nvecs[i], nvecs[i+1], nvecs[i+1]];
+				face.vertexNormals = [ nvecs[i], nvecs[i], nvecs[i + 1],
+						nvecs[i + 1] ];
 				geo.faces.push(face);
 			}
-			//final face
+			// final face
 
-			face = new THREE.Face4(start+30,start+31,start+1,start);
+			face = new THREE.Face4(start + 30, start + 31, start + 1, start);
 			face.color = color;
-			face.vertexNormals = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0]];
-			geo.faces.push(face);				
-			
+			face.vertexNormals = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
+			geo.faces.push(face);
+
 		};
 
 		// draws cylinders and small spheres (at bond radius)
@@ -661,7 +672,10 @@ WebMol.GLModel = (function() {
 			for ( var i = 0; i < atom.bonds.length; i++) {
 				var j = atom.bonds[i]; // our neighbor
 				var atom2 = atoms[j];
-				if (atom.serial < atom2.serial) {// only draw if less, this lets use combine cylinders of the same color
+				if (atom.serial < atom2.serial) {// only draw if less, this
+													// lets use combine
+													// cylinders of the same
+													// color
 					// TODO: handle bond orders
 					if (!atom2.style.stick)
 						continue; // don't sweat the details
@@ -677,7 +691,8 @@ WebMol.GLModel = (function() {
 
 					// draw cylinders
 					if (c1 != c2) {
-						var mp = new TV3().addVectors(p1, p2).multiplyScalar(0.5);
+						var mp = new TV3().addVectors(p1, p2).multiplyScalar(
+								0.5);
 						drawCylinder(geo, p1, mp, bondR, C1);
 						drawCylinder(geo, mp, p2, bondR, C2);
 					} else {
@@ -867,13 +882,13 @@ WebMol.GLModel = (function() {
 			}
 
 		};
-		
-		//return pdb output of selected atoms
-		//currently only works if input was pdb
+
+		// return pdb output of selected atoms
+		// currently only works if input was pdb
 		this.pdbData = function(style, sel) {
 			var atoms = this.selectedAtoms(sel);
 			var ret = "";
-			for( var i = 0, n = atoms.length; i < n; ++i) {
+			for ( var i = 0, n = atoms.length; i < n; ++i) {
 				ret += atoms[i].pdbline;
 			}
 			return ret;
