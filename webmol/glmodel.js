@@ -103,18 +103,18 @@ WebMol.GLModel = (function() {
 	var assignBonds = function(atomsarray) {
 		// assign bonds - yuck, can't count on connect records
 		var atoms = atomsarray.slice(0);
-		for(var i = 0; i < atomsarray.length; i++)
+		for ( var i = 0; i < atomsarray.length; i++)
 			atomsarray[i].index = i;
-		
+
 		atoms.sort(function(a, b) {
 			return a.z - b.z;
 		});
 		for ( var i = 0; i < atoms.length; i++) {
 			var ai = atoms[i];
-			
+
 			for ( var j = i + 1; j < atoms.length; j++) {
 				var aj = atoms[j];
-				if(aj.z - ai.z > 1.9) //can't be connected
+				if (aj.z - ai.z > 1.9) // can't be connected
 					break;
 				if (areConnected(ai, aj)) {
 					if (ai.bonds.indexOf(aj.index) == -1) {
@@ -129,6 +129,127 @@ WebMol.GLModel = (function() {
 		}
 	}
 
+	// return distance between donor-acceptor, if not valid pair, return inf
+	var hbondDistance = function(a1, a2) {
+		var maxlength = 4.0; //ver generous hbond distance
+		if(a1.chain == a2.chain) { //ignore if residues too close
+			if(Math.abs(a1.resi-a2.resi) < 4)
+				return Number.POSITIVE_INFINITY;
+		}
+		if ((a1.atom == "O" && a2.atom == "N")
+				|| (a1.atom == "N" && a2.atom == "O")) {
+			var xdiff = a1.x - a2.x;
+			if (xdiff > maxlength)
+				return Number.POSITIVE_INFINITY;
+			var ydiff = a1.y - a2.y;
+			if (ydiff > maxlength)
+				return Number.POSITIVE_INFINITY;
+			var zdiff = a1.z - a2.z;
+			if (zdiff > maxlength)
+				return Number.POSITIVE_INFINITY;
+			
+			var dist = Math.sqrt(xdiff*xdiff+ydiff*ydiff+zdiff*zdiff);
+			if(dist < maxlength)
+				return dist;
+		}
+		return Number.POSITIVE_INFINITY;
+	};
+
+	// this will identify all hydrogen bonds between backbone
+	// atoms; assume atom names are correct, only identifies
+	// single closest hbond
+	var assignBackboneHBonds = function(atomsarray) {
+		var atoms = []
+		for ( var i = 0; i < atomsarray.length; i++) {
+			atomsarray[i].index = i;
+			// only consider 'N' and 'O'
+			var atom = atomsarray[i];
+			if (!atom.hetflag && (atom.atom == "N" || atom.atom == "O")) {
+				atoms.push(atom);
+				atom.hbondOther = null;
+				atom.hbondDistance = Number.POSITIVE_INFINITY;				
+			}
+		}
+
+		atoms.sort(function(a, b) {
+			return a.z - b.z;
+		});
+		for ( var i = 0; i < atoms.length; i++) {
+			var ai = atoms[i];
+
+			for ( var j = i + 1; j < atoms.length; j++) {
+				var aj = atoms[j];
+				var dist = hbondDistance(ai,aj);
+				if (dist < ai.hbondDistance) {
+					ai.hbondOther = aj;
+					ai.hbondDistance = dist;
+				}
+				if(dist < aj.hbondDistance) {
+					aj.hbondOther = ai;
+					aj.hbondDistance = dist;
+				}
+			}
+		}
+	}
+
+	var computeSecondaryStructure = function(atomsarray) {
+		assignBackboneHBonds(atomsarray);
+		
+		//compute, per residue, what the secondary structure is
+		var chres = {}; //lookup by chain and resid
+		for ( var i = 0; i < atomsarray.length; i++) {
+			var atom = atomsarray[i];
+			
+			if(typeof(chres[atom.chain]) === "undefined")
+				chres[atom.chain] = [];
+			
+			if(isFinite(atom.hbondDistance)) {
+				var other = atom.hbondOther;
+				if(Math.abs(other.resi - atom.resi) == 4) { 
+					//helix
+					chres[atom.chain][atom.resi] = 'h';
+				}
+				else { //otherwise assume sheet
+					chres[atom.chain][atom.resi] = 's';
+				}
+			}
+		}
+		
+		//plug gaps and remove singletons
+		for(c in chres) {
+			for(var r = 1; r < chres[c].length-1; r++) {
+				var valbefore = chres[c][r-1];
+				var valafter = chres[c][r+1];
+				var val = chres[c][r];
+				if(valbefore == valafter && val != valbefore) {
+					chres[c][r] = valbefore;
+				}
+			}
+			for(var r = 0; r < chres[c].length; r++) {
+				var val = chres[c][r];
+				if(val == 'h' || val == 's') {
+					if(chres[c][r-1] != val && chres[c][r+1] != val)
+						delete chres[c][r];
+				}
+			}
+		}
+		
+		console.log(chres);
+		//assign to all atoms in residue, keep track of start
+		var curres = null;
+		for ( var i = 0; i < atomsarray.length; i++) {
+			var atom = atomsarray[i];
+			var val = chres[atom.chain][atom.resi];
+			if(typeof(val) == "undefined")
+				continue;
+			atom.ss = val;
+			if(chres[atom.chain][atom.resi-1] != val)
+				atom.ssbegin = true;
+			if(chres[atom.chain][atom.resi+1] != val)
+				atom.ssend = true;
+		}
+	};
+	
 	// read an XYZ file from str and put the result in atoms
 	var parseXYZ = function(atoms, str) {
 
@@ -307,7 +428,9 @@ WebMol.GLModel = (function() {
 		// assign bonds - yuck, can't count on connect records
 		assignBonds(atoms);
 		console.log("bond connecting " + ((new Date()).getTime() - starttime));
-		// Assign secondary structures
+		
+		computeSecondaryStructure(atoms);
+		// Assign secondary structures from pdb file
 		for (i = start; i < atoms.length; i++) {
 			atom = atoms[i];
 			if (atom == undefined)
@@ -673,9 +796,9 @@ WebMol.GLModel = (function() {
 				var j = atom.bonds[i]; // our neighbor
 				var atom2 = atoms[j];
 				if (atom.serial < atom2.serial) {// only draw if less, this
-													// lets use combine
-													// cylinders of the same
-													// color
+					// lets use combine
+					// cylinders of the same
+					// color
 					// TODO: handle bond orders
 					if (!atom2.style.stick)
 						continue; // don't sweat the details
