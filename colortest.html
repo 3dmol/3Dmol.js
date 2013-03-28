@@ -1,0 +1,59 @@
+<html>
+<head><title>Color Gradient Tester</title>
+<script src="webmol/colorschemes.js"></script>
+<script src="js/jquery-1.9.1.js"></script>
+<style>
+.c { 
+	margin:0;
+	padding:0;
+	width: 4px;
+	height: 20px;
+	display: inline-block;
+}
+</style>
+</head>
+<body>
+<h1>RWB</h1>
+<div id="rwb"></div>
+<div id="rwb2"></div>
+<h1>ROYGB</h1>
+<div id="roygb"></div>
+<div id="roygb2"></div>
+<h1>Sinebow</h1>
+<div id="sinebow"></div>
+<div id="sinebow2"></div>
+<script>
+
+//this function takes a number and returns a string that
+//can be used as a html color
+function toHex(d) {
+	var hex = d.toString(16);
+  hex = "#"+ "000000".substr(0, 6 - hex.length) + hex; 
+  return hex;
+}
+
+var scheme = new WebMol.RWB(-50,60);
+var scheme2 = new WebMol.ROYGB(-50,60);
+var scheme3 = new WebMol.Sinebow(-50,60);
+for(var i = -50; i <= 60; i++) {
+ var c = scheme.valueToHex(i);
+ var c2 = scheme2.valueToHex(i);
+ var c3 = scheme3.valueToHex(i);
+ $("#rwb").append("<div class='c' style='background-color: "+toHex(c)+"'></div>");
+ $("#roygb").append("<div class='c' style='background-color: "+toHex(c2)+"'></div>");
+ $("#sinebow").append("<div class='c' style='background-color: "+toHex(c3)+"'></div>");
+}
+var scheme = new WebMol.RWB();
+var scheme2 = new WebMol.ROYGB();
+var scheme3 = new WebMol.Sinebow();
+for(var i = -3; i <= 3; i+=.1) {
+ var c = scheme.valueToHex(i, [-2,2]);
+ var c2 = scheme2.valueToHex(i, [-2,2]);
+ var c3 = scheme3.valueToHex(i, [-2,2]);
+ $("#rwb2").append("<div class='c' style='background-color: "+toHex(c)+"'></div>");
+ $("#roygb2").append("<div class='c' style='background-color: "+toHex(c2)+"'></div>");
+ $("#sinebow2").append("<div class='c' style='background-color: "+toHex(c3)+"'></div>");
+}
+</script>	
+</body>
+</html>

@@ -234,7 +234,6 @@ WebMol.GLModel = (function() {
 			}
 		}
 		
-		console.log(chres);
 		//assign to all atoms in residue, keep track of start
 		var curres = null;
 		for ( var i = 0; i < atomsarray.length; i++) {
