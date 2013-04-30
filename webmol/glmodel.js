@@ -14,7 +14,7 @@ WebMol.GLModel = (function() {
 	var Nucleotides = [ '  G', '  A', '  T', '  C', '  U', ' DG', ' DA', ' DT',
 			' DC', ' DU' ];
 
-	var defaultlineWidth = 1.5;
+	var defaultlineWidth = 1.0;
 
 	// Reference: A. Bondi, J. Phys. Chem., 1964, 68, 441.
 	var vdwRadii = {
@@ -40,14 +40,17 @@ WebMol.GLModel = (function() {
 
 	// given a selection specification, return true if atom is selected
 	var atomIsSelected = function(atom, sel) {
-		var invert = !!sel.invert;
 		if (typeof (sel) === "undefined")
-			return !invert; // undef gets all
+			return true; // undef gets all
+		var invert = !!sel.invert;
+		var ret = true;
 		for ( var key in sel) {
-			if (sel.hasOwnProperty(key) && key != "props") {
+			if (sel.hasOwnProperty(key) && key != "props" && key != "invert") {
 				// if something is in sel, atom must have it
-				if (typeof (atom[key]) === "undefined")
-					return invert;
+				if (typeof (atom[key]) === "undefined") {
+					ret = false;
+					break;
+				}
 				var isokay = false;
 				if ($.isArray(sel[key])) {
 					// can be any of the listed values
@@ -58,16 +61,21 @@ WebMol.GLModel = (function() {
 							break;
 						}
 					}
-					if (!isokay)
-						return invert;
+					if (!isokay) {
+						ret = false;
+						break;
+					}
 				} else { // single match
 					var val = sel[key];
-					if (atom[key] != val)
-						return invert;
+					if (atom[key] != val) {
+						ret = false;
+						break;
+					}
 				}
 			}
 		}
-		return !invert;
+		
+		return invert ? !ret : ret;
 	}
 	// return true if atom1 and atom2 are probably bonded to each other
 	// based on distance alone
@@ -629,7 +637,7 @@ WebMol.GLModel = (function() {
 			var style = atom.style.cross;
 			if (style.hidden)
 				return;
-			var linewidth = (atom.style.lineWidth || defaultlineWidth)
+			var linewidth = (atom.style.cross.lineWidth || defaultlineWidth)
 			if (!geos[linewidth])
 				geos[linewidth] = new THREE.Geometry();
 			var geo = geos[linewidth];
@@ -658,7 +666,8 @@ WebMol.GLModel = (function() {
 				return;
 
 			// have a separate geometry for each linewidth
-			var linewidth = (atom.style.lineWidth || defaultlineWidth)
+			var linewidth = (atom.style.line.lineWidth || defaultlineWidth)
+
 			if (!geos[linewidth])
 				geos[linewidth] = new THREE.Geometry();
 			var geo = geos[linewidth];
@@ -1005,6 +1014,20 @@ WebMol.GLModel = (function() {
 				}
 			}
 		};
+		
+		//given a mapping from element to color, set atom colors
+		this.setColorByElement = function(sel, colors) {
+			var atoms = this.selectedAtoms(sel);
+			for ( var i = 0; i < atoms.length; i++) {
+				var a = atoms[i];
+				if(typeof(colors[a.elem]) != "undefined") {
+					a.color = colors[a.elem];
+				}
+			}
+		}
+		
+		this.setColorByProperty = function(sel, prop, scheme) {
+		}
 
 		// return 3d data for this model, this is specific to glmodel
 		this.globj = function() {

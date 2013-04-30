@@ -72,9 +72,10 @@ WebMol.glmolViewer = (function() {
 
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
+	
 		// set dimensions
-		$(container).width(WIDTH);
-		$(container).height(HEIGHT);
+	//	$(container).width(WIDTH);
+	//	$(container).height(HEIGHT);
 
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
@@ -97,15 +98,6 @@ WebMol.glmolViewer = (function() {
 		orthoscopicCamera.position.z = CAMERA_Z;
 		orthoscopicCamera.lookAt(new TV3(0, 0, 0));
 
-		$(window).resize(function() { // only window can capture resize event
-			WIDTH = container.width();
-			HEIGHT = container.height();
-			ASPECT = WIDTH / HEIGHT;
-			renderer.setSize(WIDTH, HEIGHT);
-			camera.aspect = ASPECT;
-			camera.updateProjectionMatrix();
-			show();
-		});
 
 		var scene = null;
 		var rotationGroup = null; // which contains modelGroup
@@ -308,15 +300,25 @@ WebMol.glmolViewer = (function() {
 
 		this.setWidth = function(w) {
 			WIDTH = w;
-			$(htmlElement).width(WIDTH);
 			renderer.setSize(WIDTH, HEIGHT);
 		};
 
 		this.setHeight = function(h) {
 			HEIGHT = h;
-			$(htmlElement).height(h);
 			renderer.setSize(WIDTH, HEIGHT);
 		};
+
+		this.resize = function() {
+			WIDTH = container.width();
+			HEIGHT = container.height();
+			ASPECT = WIDTH / HEIGHT;
+			renderer.setSize(WIDTH, HEIGHT);
+			camera.aspect = ASPECT;
+			camera.updateProjectionMatrix();
+			show();
+		} 
+		
+		$(window).resize(this.resize);
 
 		// return specified model
 		this.getModel = function(id) {
@@ -363,6 +365,7 @@ WebMol.glmolViewer = (function() {
 				if (surfaces.hasOwnProperty(i)) {
 					var smesh = new THREE.Mesh(surfaces[i].geo, surfaces[i].mat);
 					modelGroup.add(smesh);
+					console.log("surface "+i);
 				}
 			}
 			this.setView(view);
@@ -394,11 +397,16 @@ WebMol.glmolViewer = (function() {
 		// zoom to atom selection
 		this.zoomTo = function(sel) {
 			var atoms = getAtomsFromSel(sel);
+			var allatoms = getAtomsFromSel({});
 			var tmp = getExtent(atoms);
+			var alltmp = getExtent(allatoms);
+			//use selection for center
 			var center = new TV3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.multiplyScalar(-1);
-			var x = tmp[1][0] - tmp[0][0], y = tmp[1][1] - tmp[0][1], z = tmp[1][2]
-					- tmp[0][2];
+			//but all for bounding box
+			var x = alltmp[1][0] - alltmp[0][0], 
+			y = alltmp[1][1] - alltmp[0][1], 
+			z = alltmp[1][2]- alltmp[0][2];
 
 			var maxD = Math.sqrt(x * x + y * y + z * z);
 			if (maxD < 25)
@@ -433,14 +441,28 @@ WebMol.glmolViewer = (function() {
 		this.removeAllModels = function() {
 			models = [];
 		};
-		// apply sel to all models and apply style
-		this.setStyle = function(sel, style) {
+		
+		function applyToModels(func, sel, value1, value2) {
 			for ( var i = 0; i < models.length; i++) {
 				if (models[i]) {
-					models[i].setStyle(style, sel);
+					models[i][func](sel, value1, value2);
 				}
 			}
+		}
+		
+		// apply sel to all models and apply style
+		this.setStyle = function(sel, style) {
+			applyToModels("setStyle",sel,style);
 		};
+		
+		
+		this.setColorByProperty = function(sel, prop, scheme) {
+			applyToModels("setColorByProperty", sel, prop, scheme);
+		}
+		
+		this.setColorByElement = function(sel, colors) {
+			applyToModels("setColorByElement", sel, colors);
+		}
 
 		var getAtomsWithin = function(atomlist, extent) {
 			var ret = [];

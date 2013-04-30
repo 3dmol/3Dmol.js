@@ -33,7 +33,7 @@ WebMol.jmolViewer = (function() {
 
 		// public methods
 		this.setBackgroundColor = function(hex, a) {
-			Jmol.script(japp, "set backgroundColor \"" + jmolColor(hex))+"\"";
+			Jmol.script(japp, "set backgroundColor \"" + jmolColor(hex)+"\"");
 		};
 
 		this.setWidth = function(w) {
@@ -96,7 +96,7 @@ WebMol.jmolViewer = (function() {
 
 		// zoom to atom selection
 		this.zoomTo = function(sel) {
-			var script = "zoomto 0 " + getJMolSel(sel);
+			var script = "zoomto 1 " + getJMolSel(sel) + " 0*.75;";
 			Jmol.script(japp, script);
 		};
 
@@ -201,7 +201,6 @@ WebMol.jmolViewer = (function() {
 				script += "color translucent "
 						+ (1 - style.opacity);
 
-			console.log(script);
 			Jmol.script(japp, script);
 			return surfid;
 		};
@@ -224,7 +223,6 @@ WebMol.jmolViewer = (function() {
 						+ (1 - style.opacity) + ";";
 				}
 			}
-			console.log(script);
 			Jmol.script(japp, script);
 		};
 
@@ -272,6 +270,15 @@ WebMol.jmolViewer = (function() {
 			}
 			return newlines.join("\n");
 		};
+		
+		this.resize = function() {
+				var w = container.width();
+				var h = container.height();
+				Jmol.resizeApplet(japp, [ w, h ]);			
+		}
+		
+		$(window).resize(this.resize);
+
 
 		var Info = {
 			addSelectionOptions : false,
@@ -309,11 +316,7 @@ WebMol.jmolViewer = (function() {
 
 		container.html(Jmol.getAppletHtml(japp));
 
-		$(window).resize(function() { // only window can capture resize event
-			var w = container.width();
-			var h = container.height();
-			Jmol.resizeApplet(japp, [ w, h ]);
-		});
+
 
 	}
 
