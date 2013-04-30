@@ -380,6 +380,17 @@ WebMol.glmolViewer = (function() {
 			return atoms;
 		}
 
+		// return pdb output of selected atoms
+		// currently only works if input was pdb
+		this.pdbData = function(sel) {
+			var atoms = getAtomsFromSel(sel);
+			var ret = "";
+			for ( var i = 0, n = atoms.length; i < n; ++i) {
+				ret += atoms[i].pdbline;
+			}
+			return ret;
+		}
+
 		// zoom to atom selection
 		this.zoomTo = function(sel) {
 			var atoms = getAtomsFromSel(sel);

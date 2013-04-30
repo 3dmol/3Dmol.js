@@ -52,7 +52,8 @@ WebMol.jmolViewer = (function() {
 		};
 
 		this.getView = function() {
-
+			var orient = Jmol.getPropertyAsArray("orientationInfo");
+			return orient;
 		}
 
 		this.setView = function(arg) {
@@ -140,8 +141,13 @@ WebMol.jmolViewer = (function() {
 				}
 			}
 		}
-		this.setElementColors = function(colors, sel) {
-			applyToModels("setElementColors", colors, sel);
+		
+		this.setColorByProperty = function(prop, scheme, sel) {
+			applyToModels("setColorByProperty", prop, scheme, sel);
+		}
+		
+		this.setColorByElement = function(colors, sel) {
+			applyToModels("setColorByElement", colors, sel);
 		}
 
 		// apply sel to all models and apply style
@@ -243,6 +249,31 @@ WebMol.jmolViewer = (function() {
 			}
 			Jmol.script(japp, script);
 		};
+		
+		this.pdbData = function(sel) {
+			Jmol.scriptWait(japp, "select "+getJMolSel(sel) + "; ");
+			var data = Jmol.scriptWaitOutput("write pdb").replace(
+					/Script completed[\s\S]*$/, "");
+			data = data.replace(/script.*started/, "");
+			// jmol doesn't output the atom names correctly, the element symbol
+			// is
+			// suppose to
+			// be right justified to column 14 (to be fair, this is far from
+			// clear
+			// in the documentation)
+			var lines = data.split("\n");
+			var newlines = [];
+			for ( var i = 0, n = lines.length; i < n; i++) {
+				var l = lines[i];
+				if (l.charAt(12) != " " && !l.charAt(13).match(/[a-z]/)) {
+					// need to shift
+					l = l.substr(0, 12) + " " + l.substr(12, 3) + l.substr(16);
+				}
+				if (l.substr(0, 4) == "ATOM")
+					newlines.push(l);
+			}
+			return newlines.join("\n");
+		};
 
 		var Info = {
 			addSelectionOptions : false,
@@ -255,7 +286,7 @@ WebMol.jmolViewer = (function() {
 			jarPath : "Jmol/appletweb",
 			memoryLimit : 512,
 			readyFunction : null,
-			script : "frank off; ",
+			script : "frank off; set showHydrogens false;",
 			src : null,
 			use : "Java noWebGL noHTML5 noImage",
 			width : "100%"

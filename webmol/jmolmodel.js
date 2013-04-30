@@ -99,7 +99,7 @@ WebMol.jmolModel = (function() {
 			for ( var i in sel) {
 				if (sel.hasOwnProperty(i)) {
 					switch (i) {
-					case "atom": //atom name
+					case "atom": // atom name
 						if (typeof (sel[i]) != "undefined") {
 							ret.push(constructOrStatement(sel[i], function(x) {
 								return "atomName=\"" + x + "\"";
@@ -148,7 +148,7 @@ WebMol.jmolModel = (function() {
 								return "^" + x;
 							}));
 						}
-					case "rescode": //combination of resid and icode
+					case "rescode": // combination of resid and icode
 						if (typeof (sel[i]) != "undefined") {
 							ret.push(constructOrStatement(sel[i], function(x) {
 								return x;
@@ -164,8 +164,15 @@ WebMol.jmolModel = (function() {
 			return res;
 		}
 
-		//what colors to set each atom, for now limit to jmol and rasmol
-		this.setElementColors = function(colors, sel)
+		// color atoms by property according to scheme
+		this.setColorByProperty = function(prop, scheme, sel) {
+			scriptToApply += "select " + this.jmolSelect(sel) + ";";
+			scriptToApply += 'color "' + scheme.jmolID()+'";'
+			scriptToApply += "color " + prop + ";";
+		}
+		
+		// what colors to set each atom, for now limit to jmol and rasmol
+		this.setColorByElement = function(colors, sel)
 		{
 			scriptToApply += "select " + this.jmolSelect(sel) + "; ";
 			if(colors == WebMol.JmolElementColors)
@@ -256,9 +263,7 @@ WebMol.jmolModel = (function() {
 				scriptToApply = "";
 			}
 		};
-
-	}
-	;
-
+		
+	};
 	return jmolModel;
 })();
