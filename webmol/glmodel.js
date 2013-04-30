@@ -982,7 +982,7 @@ WebMol.GLModel = (function() {
 		}
 
 		// style the select atoms with style
-		this.setStyle = function(style, sel) {
+		this.setStyle = function(sel, style) {
 			var atoms = this.selectedAtoms(sel);
 			// do a copy to enforce style changes through this function
 			var mystyle = $.extend(true, {}, style);

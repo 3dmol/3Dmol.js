@@ -434,7 +434,7 @@ WebMol.glmolViewer = (function() {
 			models = [];
 		};
 		// apply sel to all models and apply style
-		this.setStyle = function(style, sel) {
+		this.setStyle = function(sel, style) {
 			for ( var i = 0; i < models.length; i++) {
 				if (models[i]) {
 					models[i].setStyle(style, sel);

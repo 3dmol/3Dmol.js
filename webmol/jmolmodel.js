@@ -74,7 +74,7 @@ WebMol.jmolModel = (function() {
 			Jmol.loadInline(japp, data);
 			// figure out what model was just created
 			jmolid = getCurJMolID(japp);
-			this.setStyle(defaultAtomStyle);
+			this.setStyle({}, defaultAtomStyle);
 		};
 
 		// create an or statement if necessary from select= sel[i]
@@ -165,14 +165,14 @@ WebMol.jmolModel = (function() {
 		}
 
 		// color atoms by property according to scheme
-		this.setColorByProperty = function(prop, scheme, sel) {
+		this.setColorByProperty = function(sel, prop, scheme) {
 			scriptToApply += "select " + this.jmolSelect(sel) + ";";
 			scriptToApply += 'color "' + scheme.jmolID()+'";'
 			scriptToApply += "color " + prop + ";";
 		}
 		
 		// what colors to set each atom, for now limit to jmol and rasmol
-		this.setColorByElement = function(colors, sel)
+		this.setColorByElement = function(sel, colors)
 		{
 			scriptToApply += "select " + this.jmolSelect(sel) + "; ";
 			if(colors == WebMol.JmolElementColors)
@@ -186,7 +186,7 @@ WebMol.jmolModel = (function() {
 		}
 		
 		// style the select atoms with style
-		this.setStyle = function(style, sel) {
+		this.setStyle = function(sel, style) {
 			var select = "select " + this.jmolSelect(sel) + "; ";
 			scriptToApply += select;
 			var stylestr = "";

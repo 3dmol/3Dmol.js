@@ -120,7 +120,7 @@ WebMol.jmolViewer = (function() {
 			Jmol.script(japp, "delete");
 		};
 		
-		var applyToModels = function(func, value, sel) {
+		var applyToModels = function(func, sel, value, value2) {
 			var sel = sel || {};
 			var ms = [];
 			if (typeof sel.model == "undefined") {
@@ -137,22 +137,22 @@ WebMol.jmolViewer = (function() {
 			for ( var i = 0; i < ms.length; i++) {
 				if (typeof models[ms[i]] != "undefined") {
 					var m = models[ms[i]];
-					m[func](value, sel);
+					m[func](sel, value, value2);
 				}
 			}
 		}
 		
-		this.setColorByProperty = function(prop, scheme, sel) {
-			applyToModels("setColorByProperty", prop, scheme, sel);
+		this.setColorByProperty = function(sel, prop, scheme) {
+			applyToModels("setColorByProperty", sel, prop, scheme);
 		}
 		
-		this.setColorByElement = function(colors, sel) {
-			applyToModels("setColorByElement", colors, sel);
+		this.setColorByElement = function(sel, colors) {
+			applyToModels("setColorByElement", sel, colors);
 		}
 
 		// apply sel to all models and apply style
-		this.setStyle = function(style, sel) {
-			applyToModels("setStyle", style, sel);
+		this.setStyle = function(sel, style) {
+			applyToModels("setStyle", sel, style);
 		};
 
 		// add a surface
