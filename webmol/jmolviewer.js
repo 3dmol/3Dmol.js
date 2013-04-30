@@ -52,7 +52,7 @@ WebMol.jmolViewer = (function() {
 		};
 
 		this.getView = function() {
-			var orient = Jmol.getPropertyAsArray("orientationInfo");
+			var orient = Jmol.getPropertyAsArray(japp,"orientationInfo");
 			return orient;
 		}
 
@@ -252,9 +252,7 @@ WebMol.jmolViewer = (function() {
 		
 		this.pdbData = function(sel) {
 			Jmol.scriptWait(japp, "select "+getJMolSel(sel) + "; ");
-			var data = Jmol.scriptWaitOutput("write pdb").replace(
-					/Script completed[\s\S]*$/, "");
-			data = data.replace(/script.*started/, "");
+			var data = Jmol.scriptEcho(japp,"write pdb");
 			// jmol doesn't output the atom names correctly, the element symbol
 			// is
 			// suppose to

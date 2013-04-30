@@ -215,7 +215,14 @@ WebMol.jmolModel = (function() {
 					if (typeof style.stick.color != "undefined")
 						c = style.stick.color;
 				} else {
-					stylestr += "wireframe;";
+					if(style.line.lineWidth > 0) {
+						//very small sticks
+						var r = (style.line.lineWidth-1)*.05;
+						stylestr += "wireframe " + r +";";
+					}
+					else {
+						stylestr += "wireframe;";
+					}
 					if (typeof style.line.color != "undefined")
 						c = style.line.color;
 				}
@@ -259,7 +266,6 @@ WebMol.jmolModel = (function() {
 		this.render = function() {
 			if (scriptToApply.length > 0) {
 				Jmol.script(japp, scriptToApply);
-				console.log(scriptToApply);
 				scriptToApply = "";
 			}
 		};
