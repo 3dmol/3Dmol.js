@@ -22,10 +22,6 @@ var WebMol = (function() {
 		if(!element) return;
 		
 		config = config || {};
-		if(!config.width)
-			config.width = $(element).width();
-		if(!config.height)
-			config.height = $(element).height();
 		if(!config.order)
 			config.order = ["glmol","jmol"];
 		if(!config.defaultcolors)
@@ -39,7 +35,7 @@ var WebMol = (function() {
 			if(typeof(my[fname]) === "function")
 			{
 				try {
-					return new my[fname](element, config.width, config.height, config.callback, config.defaultcolors);
+					return new my[fname](element, config.callback, config.defaultcolors);
 				}
 				catch(e) {
 					console.log("error with "+kind+":"+e);

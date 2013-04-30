@@ -148,16 +148,40 @@ WebMol.jmolModel = (function() {
 								return "^" + x;
 							}));
 						}
+					case "rescode": //combination of resid and icode
+						if (typeof (sel[i]) != "undefined") {
+							ret.push(constructOrStatement(sel[i], function(x) {
+								return x;
+							}));
+						}
 						break;
 					}
 				}
 			}
-			return ret.join(" and ");
+			var res = ret.join(" and ");
+			if(sel && sel.invert)
+				res = "not ("+res+")";
+			return res;
 		}
 
+		//what colors to set each atom, for now limit to jmol and rasmol
+		this.setElementColors = function(colors, sel)
+		{
+			scriptToApply += "select " + this.jmolSelect(sel) + "; ";
+			if(colors == WebMol.JmolElementColors)
+			{
+				scriptToApply += "color jmol;";
+			}
+			else
+			{
+				scriptToApply += "color rasmol; ";
+			}
+		}
+		
 		// style the select atoms with style
 		this.setStyle = function(style, sel) {
-			var select = "select " + this.jmolSelect(sel);
+			var select = "select " + this.jmolSelect(sel) + "; ";
+			scriptToApply += select;
 			var stylestr = "";
 
 			if (style.sphere) {
@@ -218,7 +242,7 @@ WebMol.jmolModel = (function() {
 							+ ";";
 				}
 			} else {
-				stylestr += "cartoon off";
+				stylestr += "cartoon off;";
 			}
 			
 			scriptToApply += stylestr;

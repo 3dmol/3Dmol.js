@@ -16,7 +16,7 @@ WebMol.jmolViewer = (function() {
 	}
 
 	// The constructor
-	function jmolViewer(element, width, height, callback, defaultcolors) {
+	function jmolViewer(element, callback, defaultcolors) {
 		var japp = null;
 		var container = element;
 		var models = []; // atomistic molecular models
@@ -118,9 +118,8 @@ WebMol.jmolViewer = (function() {
 			models = [];
 			Jmol.script(japp, "delete");
 		};
-
-		// apply sel to all models and apply style
-		this.setStyle = function(style, sel) {
+		
+		var applyToModels = function(func, value, sel) {
 			var sel = sel || {};
 			var ms = [];
 			if (typeof sel.model == "undefined") {
@@ -137,9 +136,17 @@ WebMol.jmolViewer = (function() {
 			for ( var i = 0; i < ms.length; i++) {
 				if (typeof models[ms[i]] != "undefined") {
 					var m = models[ms[i]];
-					m.setStyle(style, sel);
+					m[func](value, sel);
 				}
 			}
+		}
+		this.setElementColors = function(colors, sel) {
+			applyToModels("setElementColors", colors, sel);
+		}
+
+		// apply sel to all models and apply style
+		this.setStyle = function(style, sel) {
+			applyToModels("setStyle", style, sel);
 		};
 
 		// add a surface
@@ -198,9 +205,19 @@ WebMol.jmolViewer = (function() {
 			if (style.color)
 				script += "color $" + surfid + " " + jmolColor(style.color)
 						+ ";";
-			if (style.opacity)
-				script += "color $" + surfid + " translucent "
+			if (!isNaN(style.opacity))
+			{
+				if(style.opacity == 0) 
+				{ //jmol won't do a fully translucent surface
+					script += "isosurface "+surfid+" hide;";
+				}
+				else
+				{
+					script += "isosurface "+surfid+" display;";
+					script += "color $" + surfid + " translucent "
 						+ (1 - style.opacity) + ";";
+				}
+			}
 			console.log(script);
 			Jmol.script(japp, script);
 		};
@@ -232,7 +249,7 @@ WebMol.jmolViewer = (function() {
 			color : "#FFFFFF",
 			debug : false,
 			defaultModel : "",
-			height : height,
+			height : "100%",
 			isSigned : false,
 			jarFile : "JmolApplet.jar",
 			jarPath : "Jmol/appletweb",
@@ -241,7 +258,7 @@ WebMol.jmolViewer = (function() {
 			script : "frank off; ",
 			src : null,
 			use : "Java noWebGL noHTML5 noImage",
-			width : width
+			width : "100%"
 		};
 
 		// have to let the java applet initialize before doing anything with

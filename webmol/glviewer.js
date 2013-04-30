@@ -56,7 +56,7 @@ WebMol.glmolViewer = (function() {
 	};
 
 	// The constructor
-	function GLViewer(element, width, height, callback, defaultcolors) {
+	function GLViewer(element, callback, defaultcolors) {
 		// check dependencies
 		if (typeof (THREE) === "undefined") {
 			// three.js not loaded, take matters into our own hands

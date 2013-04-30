@@ -40,14 +40,14 @@ WebMol.GLModel = (function() {
 
 	// given a selection specification, return true if atom is selected
 	var atomIsSelected = function(atom, sel) {
-
+		var invert = !!sel.invert;
 		if (typeof (sel) === "undefined")
-			return true; // undef gets all
+			return !invert; // undef gets all
 		for ( var key in sel) {
 			if (sel.hasOwnProperty(key) && key != "props") {
 				// if something is in sel, atom must have it
 				if (typeof (atom[key]) === "undefined")
-					return false;
+					return invert;
 				var isokay = false;
 				if ($.isArray(sel[key])) {
 					// can be any of the listed values
@@ -59,14 +59,15 @@ WebMol.GLModel = (function() {
 						}
 					}
 					if (!isokay)
-						return false;
+						return invert;
 				} else { // single match
-					if (atom[key] != sel[key])
-						return false;
+					var val = sel[key];
+					if (atom[key] != val)
+						return invert;
 				}
 			}
 		}
-		return true;
+		return !invert;
 	}
 	// return true if atom1 and atom2 are probably bonded to each other
 	// based on distance alone
@@ -379,6 +380,7 @@ WebMol.GLModel = (function() {
 					'chain' : chain,
 					'resi' : resi,
 					'icode' : icode,
+					'rescode': resi + (icode != ' ' ? "^"+icode: ""), //combo resi and icode
 					'serial' : serial,
 					'atom' : atom,
 					'bonds' : [],
