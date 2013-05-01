@@ -874,6 +874,12 @@ WebMol.glmolViewer = (function() {
 			
 			return ret;
 		};
+		
+		this.clear = function() {
+			surfaces = [];
+			models = [];
+			show();
+		}
 
 		// props is a list of objects that select certain atoms and enumerate
 		// properties for those atoms

@@ -288,6 +288,10 @@ WebMol.jmolViewer = (function() {
 		$(window).resize(this.resize);
 
 
+		this.clear = function() {
+			Jmol.script(japp,"delete all; isosurface delete;")
+		};
+		
 		var Info = {
 			addSelectionOptions : false,
 			color : "#FFFFFF",
