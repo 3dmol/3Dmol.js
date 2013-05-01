@@ -332,7 +332,7 @@ WebMol.glmolViewer = (function() {
 			var q = rotationGroup.quaternion;
 			return [ pos.x, pos.y, pos.z, rotationGroup.position.z, q.x, q.y,
 					q.z, q.w ];
-		}
+		};
 
 		this.setView = function(arg) {
 			if (!modelGroup || !rotationGroup)
@@ -346,7 +346,7 @@ WebMol.glmolViewer = (function() {
 			rotationGroup.quaternion.z = arg[6];
 			rotationGroup.quaternion.w = arg[7];
 			show();
-		}
+		};
 
 		// apply styles, models, etc in viewer
 		this.render = function() {
@@ -363,9 +363,12 @@ WebMol.glmolViewer = (function() {
 
 			for ( var i in surfaces) { //this is an array with possible holes
 				if (surfaces.hasOwnProperty(i)) {
-					var smesh = new THREE.Mesh(surfaces[i].geo, surfaces[i].mat);
+					var geo = surfaces[i].geo;
+					//we clone because async surface generation can cause
+					//the geometry to be webgl initialized before it is fully formed;
+					//there is probably a more efficient way to do this
+					var smesh = new THREE.Mesh(geo.clone(), surfaces[i].mat);
 					modelGroup.add(smesh);
-					console.log("surface "+i);
 				}
 			}
 			this.setView(view);
@@ -381,7 +384,7 @@ WebMol.glmolViewer = (function() {
 				}
 			}
 			return atoms;
-		}
+		};
 
 		// return pdb output of selected atoms
 		// currently only works if input was pdb
@@ -389,10 +392,10 @@ WebMol.glmolViewer = (function() {
 			var atoms = getAtomsFromSel(sel);
 			var ret = "";
 			for ( var i = 0, n = atoms.length; i < n; ++i) {
-				ret += atoms[i].pdbline;
+				ret += atoms[i].pdbline+"\n";
 			}
 			return ret;
-		}
+		};
 
 		// zoom to atom selection
 		this.zoomTo = function(sel) {
@@ -452,7 +455,11 @@ WebMol.glmolViewer = (function() {
 		
 		// apply sel to all models and apply style
 		this.setStyle = function(sel, style) {
-			applyToModels("setStyle",sel,style);
+			applyToModels("setStyle",sel,style, false);
+		};
+		
+		this.addStyle = function(sel, style) {
+			applyToModels("setStyle",sel,style, true);
 		};
 		
 		
@@ -840,11 +847,10 @@ WebMol.glmolViewer = (function() {
 			return surfid;
 		};
 
-		// set the material to something else
+		// set the material to something else, must render change
 		this.setSurfaceMaterialStyle = function(surf, style) {
 			if (surfaces[surf]) {
 				surfaces[surf].mat = getMatWithStyle(style);
-				this.render();
 			}
 		}
 

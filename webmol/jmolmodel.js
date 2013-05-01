@@ -185,12 +185,15 @@ WebMol.jmolModel = (function() {
 			}
 		}
 		
-		// style the select atoms with style
-		this.setStyle = function(sel, style) {
+		// style the select atoms with style, if add is true, merge with currentstyle
+		this.setStyle = function(sel, style, add) {
 			var select = "select " + this.jmolSelect(sel) + "; ";
 			scriptToApply += select;
 			var stylestr = "";
 
+			if(!add) {
+				stylestr += "spacefill off; wireframe off; stars off; cartoon off;"
+			}
 			if (style.sphere) {
 				stylestr += "spacefill ";
 				if (typeof (style.sphere.scale) != "undefined") {
@@ -202,9 +205,7 @@ WebMol.jmolModel = (function() {
 				if (typeof (style.sphere.color) != "undefined") {
 					stylestr += "color " + jmolColor(style.sphere.color) + ";";
 				}
-			} else {
-				stylestr += "spacefill off;";
-			}
+			} 
 
 			if (style.line || style.stick) {
 				// ignore line styling of stick is set
@@ -229,9 +230,7 @@ WebMol.jmolModel = (function() {
 				if (c != null) {
 					stylestr += "color wireframe " + jmolColor(c) + ";";
 				}
-			} else {
-				stylestr += "wireframe off;";
-			}
+			} 
 
 			if (style.cross) {
 				stylestr += "stars ";
@@ -245,9 +244,7 @@ WebMol.jmolModel = (function() {
 					stylestr += "color stars " + jmolColor(style.cross.color)
 							+ ";";
 				}
-			} else {
-				stylestr += "stars off;";
-			}
+			} 
 
 			if (style.cartoon) {
 				stylestr += "cartoon on;";
@@ -255,9 +252,7 @@ WebMol.jmolModel = (function() {
 					stylestr += "color cartoon " + jmolColor(style.cartoon.color)
 							+ ";";
 				}
-			} else {
-				stylestr += "cartoon off;";
-			}
+			} 
 			
 			scriptToApply += stylestr;
 		};

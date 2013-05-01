@@ -52,13 +52,16 @@ WebMol.jmolViewer = (function() {
 		};
 
 		this.getView = function() {
-			var orient = Jmol.getPropertyAsArray(japp,"orientationInfo");
-			return orient;
 		}
 
 		this.setView = function(arg) {
 
 		}
+		
+		this.jmolMoveTo = function() {
+			var orient = Jmol.getPropertyAsArray(japp,"orientationInfo");
+			return orient.moveTo;
+		};
 
 		// apply styles, models, etc in viewer
 		this.render = function() {
@@ -155,6 +158,11 @@ WebMol.jmolViewer = (function() {
 			applyToModels("setStyle", sel, style);
 		};
 
+		//add a style to the current style of selection
+		this.addStyle = function(sel, style) {
+			applyToModels("setStyle", sel, style, true);
+		};
+		
 		// add a surface
 		this.addSurface = function(type, style, atomsel, allsel) {
 			var surfid = "id" + surfaceCounter++;

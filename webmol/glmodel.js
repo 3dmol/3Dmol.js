@@ -340,9 +340,10 @@ WebMol.GLModel = (function() {
 	};
 
 	// parse pdb file from str and create atoms
-	var parsePDB = function(atoms, str) {
+	var parsePDB = function(atoms, str, keepH) {
 
 		var atoms_cnt = 0;
+		var noH = !keepH; //suppres hydrogens by default
 		var start = atoms.length;
 		var protein = {
 			sheet : [],
@@ -373,6 +374,8 @@ WebMol.GLModel = (function() {
 				if (elem == '') { // for some incorrect PDB files
 					elem = line.substr(12, 2).replace(/ /g, "");
 				}
+				if(elem == 'H' && noH)
+					continue;
 				if (line[0] == 'H')
 					hetflag = true;
 				else
@@ -901,8 +904,7 @@ WebMol.GLModel = (function() {
 					ambient : 0x000000,
 					reflectivity : 0
 				});
-				console.log("stick geometry " + stickGeometry.vertices.length);
-				console.log("drawC " + drawnC);
+
 				var sticks = new THREE.Mesh(stickGeometry, cylinderMaterial);
 				ret.add(sticks);
 			}
@@ -955,7 +957,6 @@ WebMol.GLModel = (function() {
 					atom.color = atom.color || ElementColors[atom.elem]
 							|| defaultColor;
 					atom.model = id;
-					atom.globj = null;
 				}
 			}
 		}
@@ -991,7 +992,7 @@ WebMol.GLModel = (function() {
 		}
 
 		// style the select atoms with style
-		this.setStyle = function(sel, style) {
+		this.setStyle = function(sel, style, add) {
 			var atoms = this.selectedAtoms(sel);
 			// do a copy to enforce style changes through this function
 			var mystyle = $.extend(true, {}, style);
@@ -1001,15 +1002,10 @@ WebMol.GLModel = (function() {
 			// are either null or undefined
 			for ( var i = 0; i < atoms.length; i++) {
 
-				atoms[i].style = mystyle;
-				atoms[i].globj = null; // need to recalculate
-
-				if (atoms[i].style.line != mystyle.line
-						|| atoms[i].style.stick != mystyle.stick) {
-					var bonds = atoms[i].bonds;
-					for ( var i = 0; i < bonds.length; i++) {
-						var atomj = atoms[bonds[i]];
-						atomj.globj = null;
+				if(!add) atoms[i].style = {};
+				for(var s in mystyle) {
+					if(mystyle.hasOwnProperty(s)) {
+						atoms[i].style[s] = mystyle[s];
 					}
 				}
 			}
@@ -1024,10 +1020,31 @@ WebMol.GLModel = (function() {
 					a.color = colors[a.elem];
 				}
 			}
-		}
+		};
 		
 		this.setColorByProperty = function(sel, prop, scheme) {
-		}
+			var atoms = this.selectedAtoms(sel);
+			var min =  Number.POSITIVE_INFINITY;
+			var max =  Number.NEGATIVE_INFINITY;
+			
+			//compute the range
+			for ( var i = 0; i < atoms.length; i++) {
+				var a = atoms[i];
+				if(a.properties && typeof(a.properties[prop]) != undefined) {
+					var p = parseFloat(a.properties[prop]);
+					if(p < min) min = p;
+					if(p > max) max = p;
+				}					
+			}
+			//now apply colors using scheme
+			for ( var i = 0; i < atoms.length; i++) {
+				var a = atoms[i];
+				if(a.properties && typeof(a.properties[prop]) != undefined) {
+					var c = scheme.valueToHex(parseFloat(a.properties[prop]), [min,max]);
+					a.color = c;
+				}					
+			}
+		};
 
 		// return 3d data for this model, this is specific to glmodel
 		this.globj = function() {
