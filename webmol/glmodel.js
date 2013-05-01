@@ -857,6 +857,7 @@ WebMol.GLModel = (function() {
 		// at some point we should optimize this to avoid unnecessary
 		// recalculation
 		var createMolObj = function(atoms) {
+			console.log("creating for "+id);
 			var ret = new THREE.Object3D();
 			var cartoonAtoms = [];
 			var lineGeometries = {};
@@ -990,10 +991,67 @@ WebMol.GLModel = (function() {
 			}
 			return ret;
 		}
+		
+		//copy new atoms into this model, adjust bonds appropriately
+		this.addAtoms = function(newatoms) {
+			molObj = null;
+			var start = atoms.length;
+			var indexmap = [];
+			//mapping from old index to new index
+			for(var i = 0; i < newatoms.length; i++) {
+				indexmap[newatoms[i].index] = start+i;
+			}
+			
+			//copy and push newatoms onto atoms
+			for(var i = 0; i < newatoms.length; i++) {
+				var olda = newatoms[i];
+				var nindex = indexmap[olda.index];
+				var a = $.extend(false, {}, olda);
+				a.index = nindex;
+				a.bonds = [];
+				a.bondOrder = [];
+				//copy over all bonds contained in selection,
+				//updating indices appropriately
+				for(var j = 0; j < olda.bonds.length; j++) {
+					var neigh = indexmap[olda.bonds[j]];
+					if(typeof(neigh) != "undefined") {
+						a.bonds.push(neigh);
+						a.bondOrder.push(olda.bondOrder[j]);
+					}				
+				}
+				atoms.push(a);
+			}
+		};
 
+		//remove badatoms from model
+		this.removeAtoms = function(badatoms) {
+			molObj = null;
+			//make map of all baddies
+			var baddies = [];
+			for(var i = 0; i < badatoms.length; i++) {
+				baddies[badatoms[i].index] = true;
+			}
+			
+			//create list of good atoms
+			var newatoms = [];
+			for(var i = 0; i < atoms.length; i++) {
+				var a = atoms[i];
+				if(!baddies[a.index])
+					newatoms.push(a);
+			}
+			
+			//clear it all out
+			atoms = [];
+			//and add back in to get updated bonds
+			this.addAtoms(newatoms);
+		};
+		
 		// style the select atoms with style
 		this.setStyle = function(sel, style, add) {
+			
 			var atoms = this.selectedAtoms(sel);
+			if(atoms.length > 0)
+				molObj = null; //force rebuild
 			// do a copy to enforce style changes through this function
 			var mystyle = $.extend(true, {}, style);
 
@@ -1014,6 +1072,8 @@ WebMol.GLModel = (function() {
 		//given a mapping from element to color, set atom colors
 		this.setColorByElement = function(sel, colors) {
 			var atoms = this.selectedAtoms(sel);
+			if(atoms.length > 0)
+				molObj = null; //force rebuild
 			for ( var i = 0; i < atoms.length; i++) {
 				var a = atoms[i];
 				if(typeof(colors[a.elem]) != "undefined") {
@@ -1024,6 +1084,9 @@ WebMol.GLModel = (function() {
 		
 		this.setColorByProperty = function(sel, prop, scheme) {
 			var atoms = this.selectedAtoms(sel);
+			
+			if(atoms.length > 0)
+				molObj = null; //force rebuild
 			var min =  Number.POSITIVE_INFINITY;
 			var max =  Number.NEGATIVE_INFINITY;
 			
@@ -1049,14 +1112,15 @@ WebMol.GLModel = (function() {
 		// return 3d data for this model, this is specific to glmodel
 		this.globj = function() {
 			var time = new Date();
-			molObj = createMolObj(atoms);
+			if(molObj == null)
+				molObj = createMolObj(atoms);
 			var time2 = new Date();
 			console.log("object creation time: " + (time2 - time));
 			return molObj;
 		};
+		
 
-	}
-	;
+	};
 
 	return GLModel;
 })();

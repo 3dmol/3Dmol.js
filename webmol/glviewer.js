@@ -74,8 +74,8 @@ WebMol.glmolViewer = (function() {
 		var HEIGHT = container.height();
 	
 		// set dimensions
-	//	$(container).width(WIDTH);
-	//	$(container).height(HEIGHT);
+	// $(container).width(WIDTH);
+	// $(container).height(HEIGHT);
 
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
@@ -361,14 +361,31 @@ WebMol.glmolViewer = (function() {
 				}
 			}
 
-			for ( var i in surfaces) { //this is an array with possible holes
+			for ( var i in surfaces) { // this is an array with possible holes
 				if (surfaces.hasOwnProperty(i)) {
 					var geo = surfaces[i].geo;
-					//we clone because async surface generation can cause
-					//the geometry to be webgl initialized before it is fully formed;
-					//there is probably a more efficient way to do this
-					var smesh = new THREE.Mesh(geo.clone(), surfaces[i].mat);
-					modelGroup.add(smesh);
+					// async surface generation can cause
+					// the geometry to be webgl initialized before it is fully
+					// formed; force various recalculations unti full surface is available
+					if(!surfaces[i].finished ) {
+						geo.verticesNeedUpdate = true;
+						geo.elementsNeedUpdate = true;
+						geo.uvsNeedUpdate = true;
+						geo.normalsNeedUpdate = true;
+						geo.tangentsNeedUpdate = true;
+						geo.colorsNeedUpdate = true;
+						geo.lineDistancesNeedUpdate = true;
+						geo.buffersNeedUpdate = true;	
+						geo.boundingSphere = null;
+						delete geo.geometryGroups;
+						delete geo.geometryGroupsList;
+						
+						if(surfaces[i].done)
+							surfaces[i].finished = true;
+					}
+				
+					var smesh = new THREE.Mesh(geo, surfaces[i].mat);
+					modelGroup.add(smesh);					
 				}
 			}
 			this.setView(view);
@@ -403,10 +420,10 @@ WebMol.glmolViewer = (function() {
 			var allatoms = getAtomsFromSel({});
 			var tmp = getExtent(atoms);
 			var alltmp = getExtent(allatoms);
-			//use selection for center
+			// use selection for center
 			var center = new TV3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.multiplyScalar(-1);
-			//but all for bounding box
+			// but all for bounding box
 			var x = alltmp[1][0] - alltmp[0][0], 
 			y = alltmp[1][1] - alltmp[0][1], 
 			z = alltmp[1][2]- alltmp[0][2];
@@ -420,7 +437,7 @@ WebMol.glmolViewer = (function() {
 
 			rotationGroup.position.z = -(maxD * 0.35
 					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
-			//rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
+			// rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
 			show();
 		};
 
@@ -434,15 +451,33 @@ WebMol.glmolViewer = (function() {
 		};
 
 		this.removeModel = function(model) {
-			delete models[m.getID()];
+			if(!model) return;
+			delete models[model.getID()];
 			// clear off back of model array
-			while (model.length > 0
+			while (models.length > 0
 					&& typeof (models[models.length - 1]) === "undefined")
 				models.pop();
 		}
 
 		this.removeAllModels = function() {
 			models = [];
+		};
+		
+		//create a new model out of sel, 
+		//if extract is true, removes sel form this model
+		//updates bond indices appropriately
+		this.createModelFrom = function(sel, extract) {
+			var m = new WebMol.GLModel(models.length, defaultcolors);
+			for ( var i = 0; i < models.length; i++) {
+				if (models[i]) {
+					var atoms = models[i].selectedAtoms(sel);
+					m.addAtoms(atoms);
+					if(extract)
+						models[i].removeAtoms(atoms);
+				}
+			}
+			models.push(m);
+			return m;
 		};
 		
 		function applyToModels(func, sel, value1, value2) {
@@ -663,7 +698,7 @@ WebMol.glmolViewer = (function() {
 					delete mat.vertexColors; // ignore
 				}
 				else if(prop == "map") {
-					//ignore				
+					// ignore
 				} else if (style.hasOwnProperty(prop))
 					mat[prop] = style[prop];
 			}
@@ -677,7 +712,8 @@ WebMol.glmolViewer = (function() {
 			return mat;
 		}
 		
-		//get the min and max values of the specified property in the provided atoms
+		// get the min and max values of the specified property in the provided
+		// atoms
 		function getPropertyRange(atomlist, prop) {
 			var min = Number.POSITIVE_INFINITY;
 			var max = Number.NEGATIVE_INFINITY;
@@ -775,7 +811,9 @@ WebMol.glmolViewer = (function() {
 
 			var surfobj = {
 				geo : new THREE.Geometry(),
-				mat : mat
+				mat : mat,
+				done : false,
+				finished: false // also webgl initialized
 			};
 			var surfid = surfaces.length;
 			surfaces[surfid] = surfobj;
@@ -816,6 +854,7 @@ WebMol.glmolViewer = (function() {
 						atoms : reducedAtoms
 					});
 				}
+				var cnt = 0;
 				for ( var i = 0; i < extents.length; i++) {
 					var worker = workers[i % workers.length];
 					worker.onmessage = function(event) {
@@ -826,6 +865,9 @@ WebMol.glmolViewer = (function() {
 						show();
 						console.log("async mesh generation "
 								+ (+new Date() - time) + "ms");
+						cnt++;
+						if(cnt == extents.length)
+							surfobj.done = true;
 					};
 
 					worker.onerror = function(event) {
@@ -860,17 +902,19 @@ WebMol.glmolViewer = (function() {
 			this.render();
 		};
 		
-		//return jmol moveto command to position this scene
+		// return jmol moveto command to position this scene
 		this.jmolMoveTo = function() {
 			var pos = modelGroup.position;
-			//center on same position
+			// center on same position
 			var ret = "center { "+(-pos.x)+" "+(-pos.y)+" "+(-pos.z)+" }; ";
-			//apply rotation
+			// apply rotation
 			var q = rotationGroup.quaternion;
 			ret += "moveto .5 quaternion { "+q.x+" "+q.y+" "+q.z+" "+q.w+" };";
-			//zoom is tricky.. maybe i would be best to let callee zoom on selection?
-			//can either do a bunch of math, or maybe zoom to the center with a fixed
-			//but reasonable percentage
+			// zoom is tricky.. maybe i would be best to let callee zoom on
+			// selection?
+			// can either do a bunch of math, or maybe zoom to the center with a
+			// fixed
+			// but reasonable percentage
 			
 			return ret;
 		};
@@ -890,7 +934,7 @@ WebMol.glmolViewer = (function() {
 					var atoms = getAtomsFromSel(prop);
 					for ( var p in prop.props) {
 						if (prop.props.hasOwnProperty(p)) {
-							//set each atom
+							// set each atom
 							for(var a = 0, na = atoms.length; a < na; a++) {
 								if(!atoms[a].properties) atoms[a].properties = {};
 								atoms[a].properties[p] = prop.props[p];
