@@ -285,6 +285,9 @@ var ProteinSurface = (function() {
 	};
 
 	this.initparm = function(extent, btype, volume) {
+		if(volume > 1000000) //heuristical decrease resolution to avoid large memory consumption
+			scaleFactor /= 2;
+		
 		var margin = (1 / scaleFactor) * 5.5; // need margine to avoid
 												// boundary/round off effects
 		origextent = extent;
