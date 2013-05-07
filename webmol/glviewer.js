@@ -538,6 +538,14 @@ WebMol.glmolViewer = (function() {
 			}
 			return ret;
 		};
+		
+		//return volume of extent
+		var volume = function(extent) {
+			var w = extent[1][0] - extent[0][0];
+			var h = extent[1][1] - extent[0][1];
+			var d = extent[1][2] - extent[0][2];
+			return w * h * d;
+		}; // volume 
 		/*
 		 * Break up bounding box/atoms into smaller pieces so we can parallelize
 		 * with webworkers and also limit the size of the working memory Returns
@@ -546,12 +554,7 @@ WebMol.glmolViewer = (function() {
 		 */
 		var carveUpExtent = function(extent, atomlist, atomstoshow) {
 			var ret = [];
-			var volume = function(extent) {
-				var w = extent[1][0] - extent[0][0];
-				var h = extent[1][1] - extent[0][1];
-				var d = extent[1][2] - extent[0][2];
-				return w * h * d;
-			}; // volume
+
 			var copyExtent = function(extent) {
 				// copy just the dimensions
 				var ret = [];
@@ -666,10 +669,10 @@ WebMol.glmolViewer = (function() {
 
 		// do same thing as worker in main thread
 		var generateMeshSyncHelper = function(type, expandedExtent,
-				extendedAtoms, atomsToShow, atoms) {
+				extendedAtoms, atomsToShow, atoms, vol) {
 			var time = new Date();
 			var ps = new ProteinSurface();
-			ps.initparm(expandedExtent, (type == 1) ? false : true);
+			ps.initparm(expandedExtent, (type == 1) ? false : true, vol);
 
 			var time2 = new Date();
 			console.log("initialize " + (time2 - time) + "ms");
@@ -791,6 +794,8 @@ WebMol.glmolViewer = (function() {
 				}
 			}
 
+			var totalVol = volume(extent); //used to scale resolution
+			console.log(totalVol);
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
@@ -849,7 +854,7 @@ WebMol.glmolViewer = (function() {
 
 				for ( var i = 0; i < extents.length; i++) {
 					var VandF = generateMeshSyncHelper(type, extents[i].extent,
-							extents[i].atoms, extents[i].toshow, reducedAtoms);
+							extents[i].atoms, extents[i].toshow, reducedAtoms, totalVol);
 					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
 					THREE.GeometryUtils.merge(surfobj.geo, mesh);
 					modelGroup.add(mesh);
@@ -865,7 +870,8 @@ WebMol.glmolViewer = (function() {
 					workers.push(w);
 					w.postMessage({
 						type : -1,
-						atoms : reducedAtoms
+						atoms : reducedAtoms,
+						volume : totalVol
 					});
 				}
 				var cnt = 0;

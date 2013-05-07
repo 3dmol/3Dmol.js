@@ -9,10 +9,11 @@ self.onmessage = function(oEvent) {
 	if (type < 0) // sending atom data, initialize
 	{
 		self.atomData = obj.atoms;
+		self.volume = obj.volume;
 		self.ps = new ProteinSurface();
 	} else {
 		var ps = self.ps;
-		ps.initparm(obj.expandedExtent, (type == 1) ? false : true);
+		ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
 		ps.fillvoxels(self.atomData, obj.extendedAtoms);
 		ps.buildboundary();
 

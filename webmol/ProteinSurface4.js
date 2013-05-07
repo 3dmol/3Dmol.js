@@ -284,7 +284,7 @@ var ProteinSurface = (function() {
 		}
 	};
 
-	this.initparm = function(extent, btype) {
+	this.initparm = function(extent, btype, volume) {
 		var margin = (1 / scaleFactor) * 5.5; // need margine to avoid
 												// boundary/round off effects
 		origextent = extent;
