@@ -395,10 +395,24 @@ WebMol.glmolViewer = (function() {
 
 		function getAtomsFromSel(sel) {
 			var atoms = [];
-			for ( var i = 0; i < models.length; i++) {
-				if (models[i]) {
-					atoms = atoms.concat(models[i].selectedAtoms(sel));
+			if(typeof(sel) == "undefined")
+				sel = {};
+			
+			var ms = [];
+			if (typeof sel.model == "undefined") {
+				for ( var i = 0; i < models.length; i++) {
+					if (models[i])
+						ms.push(models[i]);
 				}
+			} else { // specific to some models
+				var ms = sel.model;
+				if (!$.isArray(ms))
+					ms = [ ms ];
+			}
+
+			
+			for ( var i = 0; i < ms.length; i++) {
+				atoms = atoms.concat(ms[i].selectedAtoms(sel));				
 			}
 			return atoms;
 		};

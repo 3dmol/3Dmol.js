@@ -66,7 +66,8 @@ WebMol.jmolViewer = (function() {
 		// apply styles, models, etc in viewer
 		this.render = function() {
 			for ( var i = 0; i < models.length; i++) {
-				models[i].render();
+				if(typeof(models[i]) != "undefined")
+					models[i].render();
 			}
 
 		};
@@ -79,7 +80,7 @@ WebMol.jmolViewer = (function() {
 			if (typeof sel.model == "undefined") {
 				for ( var i = 0; i < models.length; i++) {
 					if (models[i])
-						ms.push(i);
+						ms.push(models[i]);
 				}
 			} else { // specific to some models
 				var ms = sel.model;
@@ -89,10 +90,8 @@ WebMol.jmolViewer = (function() {
 
 			var ors = []; // combine all with or
 			for ( var i = 0; i < ms.length; i++) {
-				if (typeof models[ms[i]] != "undefined") {
-					var m = models[ms[i]];
-					ors.push("(" + m.jmolSelect(sel) + ")");
-				}
+					var m = ms[i];
+					ors.push("(" + m.jmolSelect(sel) + ")");				
 			}
 			return ors.join(" or ");
 		}
@@ -112,10 +111,17 @@ WebMol.jmolViewer = (function() {
 			return m;
 		};
 
+		//since we don't actually create separate objects, this does not
+		//actually remove the model or style of the corresponding atoms -
+		//it is necessary to restyle them
 		this.removeModel = function(model) {
-			var script = "delete " + model.jmolSelect({});
-			delete models[model.getID()];
-			Jmol.script(japp, script);
+			if(model) {
+				delete models[model.getID()];
+				// clear off back of model array
+				while (models.length > 0
+						&& typeof (models[models.length - 1]) === "undefined")
+					models.pop();
+			}
 		}
 		
 		this.removeAllModels = function() {
@@ -187,7 +193,6 @@ WebMol.jmolViewer = (function() {
 			
 			var script = "isosurface " + surfid + " select \"" + s
 					+ "\" ignore \"not (" + a + ")\" " + t + " ";
-
 			if(style.map && style.map.prop) {
 				//map color space using already set atom properties
 				var prop = style.map.prop;
@@ -238,6 +243,22 @@ WebMol.jmolViewer = (function() {
 			Jmol.script(japp, "isosurface " + surf + " delete");
 		};
 
+		this.createModelFrom = function(sel, extract) {
+			var m = new WebMol.jmolModel(japp, models.length);
+			m.setAsSelection(sel);
+			if(extract) {
+				//invert sel
+				sel.invert = !sel.invert;
+				for ( var i = 0; i < models.length; i++) {
+					if (typeof models[i] != "undefined") {
+						models[i].setAsSelection(sel);
+					}
+				}			
+			}
+			models.push(m);
+			return m;
+		};
+		
 		// take a list of property objects that define selections of atoms
 		// and store the named properties in the atom
 		this.mapAtomProperties = function(props) {
@@ -245,12 +266,13 @@ WebMol.jmolViewer = (function() {
 			for ( var i = 0; i < props.length; i++) {
 				var p = props[i];
 				if (p.props) {
-					var sel = "{" + getJMolSel(p) + "}.";
+					//jmol has errors if we select across the models 
+					var sel = "{" + WebMol.jmolSelection(p) + "}.";
 					for( var prop in p.props) {
 						if(p.props.hasOwnProperty(prop)) {
 							script += sel + prop + " = " + p.props[prop] + ";";
 						}
-					}
+					}										
 				}
 			}
 			Jmol.script(japp, script);

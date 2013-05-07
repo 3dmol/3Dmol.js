@@ -45,7 +45,7 @@ WebMol.GLModel = (function() {
 		var invert = !!sel.invert;
 		var ret = true;
 		for ( var key in sel) {
-			if (sel.hasOwnProperty(key) && key != "props" && key != "invert") {
+			if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model") {
 				// if something is in sel, atom must have it
 				if (typeof (atom[key]) === "undefined") {
 					ret = false;

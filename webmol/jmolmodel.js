@@ -21,6 +21,103 @@ Jmol.loadInline = function(jsapp, model) {
 		return applet.loadInlineArray(model, "", false);
 };
 
+// returns a jmol selection string (with the select keyword) for
+// the passed selection objection; if no model is given it will
+// apply to all models
+WebMol.jmolSelection = function(sel, model) {
+	
+	// create an or statement if necessary from select= sel[i]
+	// fn knows how to do the select
+	var constructOrStatement = function(select, fn) {
+		if ($.isArray(select)) {
+			var or = [];
+			for ( var j = 0; j < select.length; j++) {
+				or.push(fn(select[j]));
+			}
+			return "(" + or.join(" or ") + ")";
+		} else {
+			return fn(select);
+		}
+	};
+	
+	var ret = [];
+
+	if(model) {
+		if(model.getJMolID())
+			ret.push("model=" + model.getJMolID());
+		if(model.getJMolSelected())
+			ret.push(model.getJMolSelected());
+	}
+	
+	for ( var i in sel) {
+		if (sel.hasOwnProperty(i)) {
+			switch (i) {
+			case "atom": // atom name
+				if (typeof (sel[i]) != "undefined") {
+					ret.push(constructOrStatement(sel[i], function(x) {
+						return "atomName=\"" + x + "\"";
+					}));
+				}
+				break;
+			case "resn": // residue name
+				if (typeof (sel[i]) != "undefined") {
+					ret.push(constructOrStatement(sel[i], function(x) {
+						return x;
+					}));
+				}
+				break;
+			case "elem":
+				if (typeof (sel[i]) != "undefined") {
+					ret.push(constructOrStatement(sel[i], function(x) {
+						return "element=\"" + x + "\"";
+					}));
+				}
+				break;
+			case "hetflag":
+				if (typeof (sel[i]) != "undefined") {
+					if (sel[i])
+						ret.push("(hetero)");
+					else
+						ret.push("(not hetero)");
+				}
+				break;
+			case "chain":
+				if (typeof (sel[i]) != "undefined") {
+					ret.push(constructOrStatement(sel[i], function(x) {
+						return ":" + x;
+					}));
+				}
+				break;
+			case "resi": // resid
+				if (typeof (sel[i]) != "undefined") {
+					ret.push(constructOrStatement(sel[i], function(x) {
+						return "resno=" + x;
+					}));
+				}
+				break;
+			case "icode":
+				if (typeof (sel[i]) != "undefined") {
+					ret.push(constructOrStatement(sel[i], function(x) {
+						return "^" + x;
+					}));
+				}
+			case "rescode": // combination of resid and icode
+				if (typeof (sel[i]) != "undefined") {
+					ret.push(constructOrStatement(sel[i], function(x) {
+						return x;
+					}));
+				}
+				break;
+			}
+		}
+	}
+	var res = ret.join(" and ");
+	if(sel && sel.invert)
+		res = "not ("+res+")";
+	return res;
+};
+
+
 WebMol.jmolModel = (function() {
 	// class variables go here
 	var defaultAtomStyle = {
@@ -54,13 +151,23 @@ WebMol.jmolModel = (function() {
 		return "\"[x" + hex + "]\"";
 	}
 
-	function jmolModel(japp, mid) {
+	function jmolModel(japp, mid, parentModel) {
 		// private variables
 		var atoms = [];
 		var id = mid;
 		var jmolid = null;
 		var scriptToApply = ""; // for consistency with glmol, delay application
 								// until render
+		
+		//used to modify the model to be a "sub" model
+		var selected = null;
+		
+		
+		if(parentModel) {
+			jmolid = parentModel.getJMolID();
+			selected = parentModel.getJMolSelected();
+		}
+		
 		this.getID = function() {
 			return id;
 		};
@@ -68,8 +175,26 @@ WebMol.jmolModel = (function() {
 		this.getJMolID = function() {
 			return jmolid;
 		};
+		
+		this.getJMolSelected = function() {
+			return selected;
+		};
+		
+		//limit the current model to just the selected atoms
+		this.setAsSelection = function(sel)
+		{
+			var select = this.jmolSelect(sel);
+			if(!selected) {
+				selected = select;
+			}
+			else {
+				selected = "(" + selected + ")"+ " and (" +select+")";
+			}					
+		};
 
 		// add atoms to this model from molecular data string
+		//the semantics for jmol are that the model because the new
+		//data, rather than adding to the current model - todo fix
 		this.addMolData = function(data, format) {
 			Jmol.loadInline(japp, data);
 			// figure out what model was just created
@@ -77,92 +202,12 @@ WebMol.jmolModel = (function() {
 			this.setStyle({}, defaultAtomStyle);
 		};
 
-		// create an or statement if necessary from select= sel[i]
-		// fn knows how to do the select
-		function constructOrStatement(select, fn) {
-			if ($.isArray(select)) {
-				var or = [];
-				for ( var j = 0; j < select.length; j++) {
-					or.push(fn(select[j]));
-				}
-				return "(" + or.join(" or ") + ")";
-			} else {
-				return fn(select);
-			}
-		}
-		;
 
 		// returns a jmol selection string (with the select keyword) for
 		// the passed selection objection
 		this.jmolSelect = function(sel) {
-			var ret = [ "model=" + jmolid ];
-			for ( var i in sel) {
-				if (sel.hasOwnProperty(i)) {
-					switch (i) {
-					case "atom": // atom name
-						if (typeof (sel[i]) != "undefined") {
-							ret.push(constructOrStatement(sel[i], function(x) {
-								return "atomName=\"" + x + "\"";
-							}));
-						}
-						break;
-					case "resn": // residue name
-						if (typeof (sel[i]) != "undefined") {
-							ret.push(constructOrStatement(sel[i], function(x) {
-								return x;
-							}));
-						}
-						break;
-					case "elem":
-						if (typeof (sel[i]) != "undefined") {
-							ret.push(constructOrStatement(sel[i], function(x) {
-								return "element=\"" + x + "\"";
-							}));
-						}
-						break;
-					case "hetflag":
-						if (typeof (sel[i]) != "undefined") {
-							if (sel[i])
-								ret.push("(hetero)");
-							else
-								ret.push("(not hetero)");
-						}
-						break;
-					case "chain":
-						if (typeof (sel[i]) != "undefined") {
-							ret.push(constructOrStatement(sel[i], function(x) {
-								return ":" + x;
-							}));
-						}
-						break;
-					case "resi": // resid
-						if (typeof (sel[i]) != "undefined") {
-							ret.push(constructOrStatement(sel[i], function(x) {
-								return "resno=" + x;
-							}));
-						}
-						break;
-					case "icode":
-						if (typeof (sel[i]) != "undefined") {
-							ret.push(constructOrStatement(sel[i], function(x) {
-								return "^" + x;
-							}));
-						}
-					case "rescode": // combination of resid and icode
-						if (typeof (sel[i]) != "undefined") {
-							ret.push(constructOrStatement(sel[i], function(x) {
-								return x;
-							}));
-						}
-						break;
-					}
-				}
-			}
-			var res = ret.join(" and ");
-			if(sel && sel.invert)
-				res = "not ("+res+")";
-			return res;
-		}
+			return WebMol.jmolSelection(sel, this);			
+		};
 
 		// color atoms by property according to scheme
 		this.setColorByProperty = function(sel, prop, scheme) {
