@@ -172,10 +172,8 @@ WebMol.glmolViewer = (function() {
 			// setup lights
 			var directionalLight = new THREE.DirectionalLight(0xFFFFFF);
 			directionalLight.position = new TV3(0.2, 0.2, 1).normalize();
-			directionalLight.intensity = 1.1;
+			directionalLight.intensity = 1.0;
 			scene.add(directionalLight);
-			var ambientLight = new THREE.AmbientLight(0x202020);
-			scene.add(ambientLight);
 		};
 
 		initializeScene();
