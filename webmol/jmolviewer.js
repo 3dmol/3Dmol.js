@@ -322,7 +322,7 @@ WebMol.jmolViewer = (function() {
 			height : "100%",
 			isSigned : false,
 			jarFile : "JmolApplet.jar",
-			jarPath : "Jmol/appletweb",
+			jarPath : "jmol",
 			memoryLimit : 512,
 			readyFunction : null,
 			script : "frank off; set showHydrogens false;",
