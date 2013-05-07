@@ -39,7 +39,8 @@ var ProteinSurface = (function() {
 
 	var ptranx = 0, ptrany = 0, ptranz = 0;
 	var probeRadius = 1.4;
-	var scaleFactor = 2; // 2 is .5A grid; if this is made user configurable,
+	var defaultScaleFactor = 2;
+	var scaleFactor = defaultScaleFactor; // 2 is .5A grid; if this is made user configurable,
 							// also have to adjust offset used to find non-shown
 							// atoms
 	var pHeight = 0, pWidth = 0, pLength = 0;
@@ -286,7 +287,7 @@ var ProteinSurface = (function() {
 
 	this.initparm = function(extent, btype, volume) {
 		if(volume > 1000000) //heuristical decrease resolution to avoid large memory consumption
-			scaleFactor /= 2;
+			scaleFactor = defaultScaleFactor/2;
 		
 		var margin = (1 / scaleFactor) * 5.5; // need margine to avoid
 												// boundary/round off effects
