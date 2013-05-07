@@ -279,7 +279,7 @@ WebMol.jmolViewer = (function() {
 		};
 		
 		this.pdbData = function(sel) {
-			Jmol.scriptWait(japp, "select "+getJMolSel(sel) + "; ");
+			Jmol.scriptWait(japp, "select "+WebMol.jmolSelection(sel) + "; ");
 			var data = Jmol.scriptEcho(japp,"write pdb");
 			// jmol doesn't output the atom names correctly, the element symbol
 			// is

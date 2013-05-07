@@ -446,8 +446,17 @@ WebMol.glmolViewer = (function() {
 			if (maxD < 25)
 				maxD = 25;
 
+			//use full bounding box for slab/fog
 			slabNear = -maxD / 1.9;
 			slabFar = maxD / 3;
+			
+			//for zoom, use selection box
+			x = tmp[1][0] - tmp[0][0];
+			y = tmp[1][1] - tmp[0][1];
+			z = tmp[1][2] - tmp[0][2];
+			maxD = Math.sqrt(x * x + y * y + z * z);
+			if (maxD < 25)
+				maxD = 25;
 
 			rotationGroup.position.z = -(maxD * 0.35
 					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
