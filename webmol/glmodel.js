@@ -38,6 +38,14 @@ WebMol.GLModel = (function() {
 
 	// class functions
 
+	//return true if a and b represent the same style
+	var sameObj = function(a,b) {
+		if(a && b)
+			return JSON.stringify(a) == JSON.stringify(b);
+		else
+			return a == b;
+	};
+	
 	// given a selection specification, return true if atom is selected
 	var atomIsSelected = function(atom, sel) {
 		if (typeof (sel) === "undefined")
@@ -485,6 +493,10 @@ WebMol.GLModel = (function() {
 		var atoms = [];
 		var id = mid;
 		var molObj = null;
+		var renderedMolObj = null;
+		var lastStyle = null; //cache previous styles to avoid recomputation
+		var lastColors = null;
+		
 		var defaultColor = WebMol.defaultElementColor;
 
 		if (defaultcolors)
@@ -1046,8 +1058,15 @@ WebMol.GLModel = (function() {
 			this.addAtoms(newatoms);
 		};
 		
+		
 		// style the select atoms with style
 		this.setStyle = function(sel, style, add) {
+			
+			if(!add && molObj != null && sameObj(style, lastStyle))
+				return; //no need to recompute
+			
+			if(add) lastStyle = null; //todo: compute merged style
+			else lastStyle = style;
 			
 			var atoms = this.selectedAtoms(sel);
 			if(atoms.length > 0)
@@ -1071,6 +1090,10 @@ WebMol.GLModel = (function() {
 		
 		//given a mapping from element to color, set atom colors
 		this.setColorByElement = function(sel, colors) {
+			
+			if(molObj != null && sameObj(colors,lastColors))
+				return; //don't recompute
+			lastColors = colors;
 			var atoms = this.selectedAtoms(sel);
 			if(atoms.length > 0)
 				molObj = null; //force rebuild
@@ -1084,7 +1107,7 @@ WebMol.GLModel = (function() {
 		
 		this.setColorByProperty = function(sel, prop, scheme) {
 			var atoms = this.selectedAtoms(sel);
-			
+			lastColors = null; //don't bother memoizing
 			if(atoms.length > 0)
 				molObj = null; //force rebuild
 			var min =  Number.POSITIVE_INFINITY;
@@ -1109,16 +1132,31 @@ WebMol.GLModel = (function() {
 			}
 		};
 
-		// return 3d data for this model, this is specific to glmodel
-		this.globj = function() {
+		// manage the globj for this model in the possed modelGroup -
+		//if it has to be regenerated, remove and add
+		this.globj = function(group) {
 			var time = new Date();
-			if(molObj == null)
+			if(molObj == null) { //have to regenerate
 				molObj = createMolObj(atoms);
-			var time2 = new Date();
-			console.log("object creation time: " + (time2 - time));
-			return molObj;
+				var time2 = new Date();
+				console.log("object creation time: " + (time2 - time));
+				if(renderedMolObj) { //previously rendered, remove
+					group.remove(renderedMolObj);
+					renderedMolObj = null;
+				}
+				renderedMolObj = molObj.clone();
+				group.add(renderedMolObj);
+			}
 		};
 		
+		//remove any rendered object from the scene
+		this.removegl = function(group) {
+			if(renderedMolObj) {
+				group.remove(renderedMolObj);
+				renderedMolObj = null;
+			}
+			molObj = null;
+		}
 
 	};
 

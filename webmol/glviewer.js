@@ -72,10 +72,10 @@ WebMol.glmolViewer = (function() {
 
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
-	
+
 		// set dimensions
-	// $(container).width(WIDTH);
-	// $(container).height(HEIGHT);
+		// $(container).width(WIDTH);
+		// $(container).height(HEIGHT);
 
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
@@ -97,7 +97,6 @@ WebMol.glmolViewer = (function() {
 		var orthoscopicCamera = new THREE.OrthographicCamera();
 		orthoscopicCamera.position.z = CAMERA_Z;
 		orthoscopicCamera.lookAt(new TV3(0, 0, 0));
-
 
 		var scene = null;
 		var rotationGroup = null; // which contains modelGroup
@@ -121,7 +120,7 @@ WebMol.glmolViewer = (function() {
 		var cslabFar = 0;
 
 		var setSlabAndFog = function() {
-			var center = camera.position.z-rotationGroup.position.z;
+			var center = camera.position.z - rotationGroup.position.z;
 			if (center < 1)
 				center = 1;
 			camera.near = center + slabNear;
@@ -164,7 +163,7 @@ WebMol.glmolViewer = (function() {
 			modelGroup = new THREE.Object3D();
 			rotationGroup = new THREE.Object3D();
 			rotationGroup.useQuaternion = true;
-			rotationGroup.quaternion = new THREE.Quaternion(0,0, 0, 1);
+			rotationGroup.quaternion = new THREE.Quaternion(0, 0, 0, 1);
 			rotationGroup.add(modelGroup);
 
 			scene.add(rotationGroup);
@@ -212,7 +211,7 @@ WebMol.glmolViewer = (function() {
 			ev.preventDefault();
 			if (!scene)
 				return;
-			var scaleFactor = (CAMERA_Z- rotationGroup.position.z ) * 0.85;
+			var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
 			if (ev.originalEvent.detail) { // Webkit
 				rotationGroup.position.z += scaleFactor
 						* ev.originalEvent.detail / 10;
@@ -257,12 +256,12 @@ WebMol.glmolViewer = (function() {
 				slabNear = cslabNear + dx * 100;
 				slabFar = cslabFar + dy * 100;
 			} else if (mode == 2 || mouseButton == 3 || ev.shiftKey) { // Zoom
-				var scaleFactor = (CAMERA_Z - rotationGroup.position.z  ) * 0.85;
+				var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
 				if (scaleFactor < 80)
 					scaleFactor = 80;
 				rotationGroup.position.z = cz - dy * scaleFactor;
 			} else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
-				var scaleFactor = (CAMERA_Z - rotationGroup.position.z ) * 0.85;
+				var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
 				if (scaleFactor < 20)
 					scaleFactor = 20;
 				var translationByScreen = new TV3(dx * scaleFactor, -dy
@@ -314,8 +313,8 @@ WebMol.glmolViewer = (function() {
 			camera.aspect = ASPECT;
 			camera.updateProjectionMatrix();
 			show();
-		} 
-		
+		}
+
 		$(window).resize(this.resize);
 
 		// return specified model
@@ -351,11 +350,10 @@ WebMol.glmolViewer = (function() {
 
 			var time1 = new Date();
 			var view = this.getView();
-			initializeScene();
 
 			for ( var i = 0; i < models.length; i++) {
 				if (models[i]) {
-					modelGroup.add(models[i].globj().clone());
+					models[i].globj(modelGroup);
 				}
 			}
 
@@ -364,8 +362,9 @@ WebMol.glmolViewer = (function() {
 					var geo = surfaces[i].geo;
 					// async surface generation can cause
 					// the geometry to be webgl initialized before it is fully
-					// formed; force various recalculations unti full surface is available
-					if(!surfaces[i].finished ) {
+					// formed; force various recalculations unti full surface is
+					// available
+					if (!surfaces[i].finished) {
 						geo.verticesNeedUpdate = true;
 						geo.elementsNeedUpdate = true;
 						geo.uvsNeedUpdate = true;
@@ -373,29 +372,35 @@ WebMol.glmolViewer = (function() {
 						geo.tangentsNeedUpdate = true;
 						geo.colorsNeedUpdate = true;
 						geo.lineDistancesNeedUpdate = true;
-						geo.buffersNeedUpdate = true;	
+						geo.buffersNeedUpdate = true;
 						geo.boundingSphere = null;
 						delete geo.geometryGroups;
 						delete geo.geometryGroupsList;
-						
-						if(surfaces[i].done)
+
+						if (surfaces[i].done)
 							surfaces[i].finished = true;
-					}
-				
-					var smesh = new THREE.Mesh(geo, surfaces[i].mat);
-					modelGroup.add(smesh);					
+
+						// remove partially rendered surface
+						if (surfaces[i].lastGL) {
+							modelGroup.remove(surfaces[i].lastGL);
+						}
+						// create new surface
+						var smesh = new THREE.Mesh(geo, surfaces[i].mat);
+						surfaces[i].lastGL = smesh;
+						modelGroup.add(smesh);
+					} // else final surface already there
 				}
 			}
 			this.setView(view);
 			var time2 = new Date();
-			console.log("render time: "+(time2-time1));
+			console.log("render time: " + (time2 - time1));
 		};
 
 		function getAtomsFromSel(sel) {
 			var atoms = [];
-			if(typeof(sel) == "undefined")
+			if (typeof (sel) == "undefined")
 				sel = {};
-			
+
 			var ms = [];
 			if (typeof sel.model == "undefined") {
 				for ( var i = 0; i < models.length; i++) {
@@ -408,12 +413,12 @@ WebMol.glmolViewer = (function() {
 					ms = [ ms ];
 			}
 
-			
 			for ( var i = 0; i < ms.length; i++) {
-				atoms = atoms.concat(ms[i].selectedAtoms(sel));				
+				atoms = atoms.concat(ms[i].selectedAtoms(sel));
 			}
 			return atoms;
-		};
+		}
+		;
 
 		// return pdb output of selected atoms
 		// currently only works if input was pdb
@@ -421,7 +426,7 @@ WebMol.glmolViewer = (function() {
 			var atoms = getAtomsFromSel(sel);
 			var ret = "";
 			for ( var i = 0, n = atoms.length; i < n; ++i) {
-				ret += atoms[i].pdbline+"\n";
+				ret += atoms[i].pdbline + "\n";
 			}
 			return ret;
 		};
@@ -436,19 +441,18 @@ WebMol.glmolViewer = (function() {
 			var center = new TV3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.multiplyScalar(-1);
 			// but all for bounding box
-			var x = alltmp[1][0] - alltmp[0][0], 
-			y = alltmp[1][1] - alltmp[0][1], 
-			z = alltmp[1][2]- alltmp[0][2];
+			var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
+					- alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
 
 			var maxD = Math.sqrt(x * x + y * y + z * z);
 			if (maxD < 25)
 				maxD = 25;
 
-			//use full bounding box for slab/fog
+			// use full bounding box for slab/fog
 			slabNear = -maxD / 1.9;
 			slabFar = maxD / 3;
-			
-			//for zoom, use selection box
+
+			// for zoom, use selection box
 			x = tmp[1][0] - tmp[0][0];
 			y = tmp[1][1] - tmp[0][1];
 			z = tmp[1][2] - tmp[0][2];
@@ -472,7 +476,9 @@ WebMol.glmolViewer = (function() {
 		};
 
 		this.removeModel = function(model) {
-			if(!model) return;
+			if (!model)
+				return;
+			model.removegl(modelGroup);
 			delete models[model.getID()];
 			// clear off back of model array
 			while (models.length > 0
@@ -483,24 +489,24 @@ WebMol.glmolViewer = (function() {
 		this.removeAllModels = function() {
 			models = [];
 		};
-		
-		//create a new model out of sel, 
-		//if extract is true, removes sel form this model
-		//updates bond indices appropriately
+
+		// create a new model out of sel,
+		// if extract is true, removes sel form this model
+		// updates bond indices appropriately
 		this.createModelFrom = function(sel, extract) {
 			var m = new WebMol.GLModel(models.length, defaultcolors);
 			for ( var i = 0; i < models.length; i++) {
 				if (models[i]) {
 					var atoms = models[i].selectedAtoms(sel);
 					m.addAtoms(atoms);
-					if(extract)
+					if (extract)
 						models[i].removeAtoms(atoms);
 				}
 			}
 			models.push(m);
 			return m;
 		};
-		
+
 		function applyToModels(func, sel, value1, value2) {
 			for ( var i = 0; i < models.length; i++) {
 				if (models[i]) {
@@ -508,21 +514,20 @@ WebMol.glmolViewer = (function() {
 				}
 			}
 		}
-		
+
 		// apply sel to all models and apply style
 		this.setStyle = function(sel, style) {
-			applyToModels("setStyle",sel,style, false);
+			applyToModels("setStyle", sel, style, false);
 		};
-		
+
 		this.addStyle = function(sel, style) {
-			applyToModels("setStyle",sel,style, true);
+			applyToModels("setStyle", sel, style, true);
 		};
-		
-		
+
 		this.setColorByProperty = function(sel, prop, scheme) {
 			applyToModels("setColorByProperty", sel, prop, scheme);
 		}
-		
+
 		this.setColorByElement = function(sel, colors) {
 			applyToModels("setColorByElement", sel, colors);
 		}
@@ -545,14 +550,14 @@ WebMol.glmolViewer = (function() {
 			}
 			return ret;
 		};
-		
-		//return volume of extent
+
+		// return volume of extent
 		var volume = function(extent) {
 			var w = extent[1][0] - extent[0][0];
 			var h = extent[1][1] - extent[0][1];
 			var d = extent[1][2] - extent[0][2];
 			return w * h * d;
-		}; // volume 
+		}; // volume
 		/*
 		 * Break up bounding box/atoms into smaller pieces so we can parallelize
 		 * with webworkers and also limit the size of the working memory Returns
@@ -648,10 +653,9 @@ WebMol.glmolViewer = (function() {
 			for ( var i = 0; i < atoms.length; i++) {
 				var atom = atoms[i];
 				if (atom) {
-					if (typeof(atom.surfaceColor) != "undefined") {
+					if (typeof (atom.surfaceColor) != "undefined") {
 						colors[i] = WebMol.CC.color(atom.surfaceColor);
-					}
-					else if (atom.color) // map from atom
+					} else if (atom.color) // map from atom
 						colors[i] = WebMol.CC.color(atom.color)
 				}
 			}
@@ -715,13 +719,12 @@ WebMol.glmolViewer = (function() {
 		function getMatWithStyle(style) {
 			var mat = new THREE.MeshLambertMaterial();
 			mat.vertexColors = THREE.VertexColors;
-			
+
 			for ( var prop in style) {
 				if (prop === "color") {
 					mat[prop] = WebMol.CC.color(style.color);
 					delete mat.vertexColors; // ignore
-				}
-				else if(prop == "map") {
+				} else if (prop == "map") {
 					// ignore
 				} else if (style.hasOwnProperty(prop))
 					mat[prop] = style[prop];
@@ -735,34 +738,35 @@ WebMol.glmolViewer = (function() {
 
 			return mat;
 		}
-		
+
 		// get the min and max values of the specified property in the provided
 		// atoms
 		function getPropertyRange(atomlist, prop) {
 			var min = Number.POSITIVE_INFINITY;
 			var max = Number.NEGATIVE_INFINITY;
-			
-			for(var i = 0, n = atomlist.length; i < n; i++) {
+
+			for ( var i = 0, n = atomlist.length; i < n; i++) {
 				var atom = atomlist[i];
-				if(atom.properties && typeof(atom.properties[prop]) != "undefined") {
+				if (atom.properties
+						&& typeof (atom.properties[prop]) != "undefined") {
 					var val = atom.properties[prop];
-					if(val < min)
+					if (val < min)
 						min = val;
-					if(val > max)
+					if (val > max)
 						max = val;
 				}
 			}
-			
-			if(!isFinite(min) && !isFinite(max))
+
+			if (!isFinite(min) && !isFinite(max))
 				min = max = 0;
-			else if(!isFinite(min))
+			else if (!isFinite(min))
 				min = max;
-			else if(!isFinite(max))
+			else if (!isFinite(max))
 				max = min;
-			
-			return [min,max];
+
+			return [ min, max ];
 		}
-		
+
 		// add a surface
 		this.addSurface = function(type, style, atomsel, allsel, focus) {
 			// type 1: VDW 3: SAS 4: MS 2: SES
@@ -791,18 +795,18 @@ WebMol.glmolViewer = (function() {
 				var prop = style.map.prop;
 				var scheme = style.map.scheme || new WebMol.RWB();
 				var range = scheme.range();
-				if(!range) {
-					range = getPropertyRange(atomsToShow, prop);					
+				if (!range) {
+					range = getPropertyRange(atomsToShow, prop);
 				}
-				
-				for(var i = 0, n = atomsToShow.length; i < n; i++) {
+
+				for ( var i = 0, n = atomsToShow.length; i < n; i++) {
 					var atom = atomsToShow[i];
-					atom.surfaceColor = scheme.valueToHex(atom.properties[prop], range);
+					atom.surfaceColor = scheme.valueToHex(
+							atom.properties[prop], range);
 				}
 			}
 
-			var totalVol = volume(extent); //used to scale resolution
-			console.log(totalVol);
+			var totalVol = volume(extent); // used to scale resolution
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
@@ -839,7 +843,8 @@ WebMol.glmolViewer = (function() {
 				geo : new THREE.Geometry(),
 				mat : mat,
 				done : false,
-				finished: false // also webgl initialized
+				finished : false
+			// also webgl initialized
 			};
 			var surfid = surfaces.length;
 			surfaces[surfid] = surfobj;
@@ -857,15 +862,16 @@ WebMol.glmolViewer = (function() {
 			}
 
 			var sync = false;
+			var view = this; //export render function to worker
 			if (sync) { // don't use worker, still break up for memory purposes
 
 				for ( var i = 0; i < extents.length; i++) {
 					var VandF = generateMeshSyncHelper(type, extents[i].extent,
-							extents[i].atoms, extents[i].toshow, reducedAtoms, totalVol);
+							extents[i].atoms, extents[i].toshow, reducedAtoms,
+							totalVol);
 					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
 					THREE.GeometryUtils.merge(surfobj.geo, mesh);
-					modelGroup.add(mesh);
-					show();
+					view.render();
 				}
 			} else { // use worker
 				// use worker
@@ -888,12 +894,11 @@ WebMol.glmolViewer = (function() {
 						var VandF = event.data;
 						var mesh = generateSurfaceMesh(atomlist, VandF, mat);
 						THREE.GeometryUtils.merge(surfobj.geo, mesh);
-						modelGroup.add(mesh);
-						show();
+						view.render();
 						console.log("async mesh generation "
 								+ (+new Date() - time) + "ms");
 						cnt++;
-						if(cnt == extents.length)
+						if (cnt == extents.length)
 							surfobj.done = true;
 					};
 
@@ -920,32 +925,38 @@ WebMol.glmolViewer = (function() {
 		this.setSurfaceMaterialStyle = function(surf, style) {
 			if (surfaces[surf]) {
 				surfaces[surf].mat = getMatWithStyle(style);
+				surfaces[surf].finished = false; //trigger redraw
 			}
 		}
 
 		// given the id returned by surfid, remove surface
 		this.removeSurface = function(surf) {
+			if (surfaces[surf].lastGL) {
+				modelGroup.remove(surfaces[surf].lastGL); // remove from scene
+			}
 			delete surfaces[surf];
-			this.render();
+			show();
 		};
-		
+
 		// return jmol moveto command to position this scene
 		this.jmolMoveTo = function() {
 			var pos = modelGroup.position;
 			// center on same position
-			var ret = "center { "+(-pos.x)+" "+(-pos.y)+" "+(-pos.z)+" }; ";
+			var ret = "center { " + (-pos.x) + " " + (-pos.y) + " " + (-pos.z)
+					+ " }; ";
 			// apply rotation
 			var q = rotationGroup.quaternion;
-			ret += "moveto .5 quaternion { "+q.x+" "+q.y+" "+q.z+" "+q.w+" };";
+			ret += "moveto .5 quaternion { " + q.x + " " + q.y + " " + q.z
+					+ " " + q.w + " };";
 			// zoom is tricky.. maybe i would be best to let callee zoom on
 			// selection?
 			// can either do a bunch of math, or maybe zoom to the center with a
 			// fixed
 			// but reasonable percentage
-			
+
 			return ret;
 		};
-		
+
 		this.clear = function() {
 			surfaces = [];
 			models = [];
@@ -962,8 +973,9 @@ WebMol.glmolViewer = (function() {
 					for ( var p in prop.props) {
 						if (prop.props.hasOwnProperty(p)) {
 							// set each atom
-							for(var a = 0, na = atoms.length; a < na; a++) {
-								if(!atoms[a].properties) atoms[a].properties = {};
+							for ( var a = 0, na = atoms.length; a < na; a++) {
+								if (!atoms[a].properties)
+									atoms[a].properties = {};
 								atoms[a].properties[p] = prop.props[p];
 							}
 						}
