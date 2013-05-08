@@ -42,11 +42,11 @@
     <body >
          <div id="gldiv" style="width: 100%; height: 800px; border: 2px solid black; "></div>       
         <br>
-        <input type="button" value="Stick" onclick="glviewer.setStyle({stick:{}}); glviewer.render();"></input>
-        <input type="button" value="Line" onclick="glviewer.setStyle({line:{}}); glviewer.render();"></input>
-        <input type="button" value="Cross" onclick="glviewer.setStyle({cross:{}}); glviewer.render();"></input>
-        <input type="button" value="Sphere" onclick="glviewer.setStyle({sphere:{}}); glviewer.render();"></input>
-        <input type="button" value="Cartoon" onclick="glviewer.setStyle({cartoon:{color:0x0000ff}}); glviewer.render();"></input>
+        <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
+        <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
+        <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{}}); glviewer.render();"></input>
+        <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
+        <input type="button" value="Cartoon" onclick="glviewer.setStyle({},{cartoon:{color:0x0000ff}}); glviewer.render();"></input>
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A'}, {chain:'A'},{chain:'B'});"></input>
         <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>

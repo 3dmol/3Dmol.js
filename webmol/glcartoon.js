@@ -133,8 +133,8 @@ WebMol.drawCartoon = (function() {
 		geo.computeVertexNormals(false);
 		var material = new THREE.MeshLambertMaterial();
 		material.vertexColors = THREE.FaceColors;
+		material.side = THREE.DoubleSide;
 		var mesh = new THREE.Mesh(geo, material);
-		mesh.doubleSided = true;
 		group.add(mesh);
 	};
 
@@ -199,7 +199,7 @@ WebMol.drawCartoon = (function() {
 					currentChain = atom.chain;
 					currentResi = atom.resi;
 					ss = atom.ss;
-					ssborder = atom.ssstart || atom.ssend;
+					ssborder = atom.ssbegin || atom.ssend;
 					var atomcolor = atom.color;
 					if(typeof(atom.style.cartoon.color) != "undefined") {
 						atomcolor = atom.style.cartoon.color;
