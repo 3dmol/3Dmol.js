@@ -202,9 +202,9 @@ WebMol.jmolViewer = (function() {
 				if(range) {
 					script += " color range "+range[0]+" "+range[1] + " ";
 				}
-				script += "map property " + prop+" ";
+				script += "map property " + prop+" within 5 ";
 			}
-			
+
 			if (style.color) {
 				script += "color " + jmolColor(style.color);
 				if(style.opacity)
