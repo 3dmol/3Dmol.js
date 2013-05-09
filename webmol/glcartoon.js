@@ -179,22 +179,22 @@ WebMol.drawCartoon = (function() {
 				continue;
 
 			if ((atom.atom == 'O' || atom.atom == 'CA') && !atom.hetflag) {
-				if (currentChain != atom.chain
-						|| currentResi + 1 != atom.resi) {
-					for ( var j = 0; !thickness && j < num; j++)
-						drawSmoothCurve(group, points[j], 1, colors, div);
-					if (fill)
-						drawStrip(group, points[0], points[num - 1],
-								colors, div, thickness);
-					var points = [];
-					for ( var k = 0; k < num; k++)
-						points[k] = [];
-					colors = [];
-					prevCO = null;
-					ss = null;
-					ssborder = false;
-				}
 				if (atom.atom == 'CA') {
+					if (currentChain != atom.chain
+							|| currentResi + 1 != atom.resi) {
+						for ( var j = 0; !thickness && j < num; j++)
+							drawSmoothCurve(group, points[j], 1, colors, div);
+						if (fill)
+							drawStrip(group, points[0], points[num - 1],
+									colors, div, thickness);
+						var points = [];
+						for ( var k = 0; k < num; k++)
+							points[k] = [];
+						colors = [];
+						prevCO = null;
+						ss = null;
+						ssborder = false;
+					}
 					currentCA = new TV3(atom.x, atom.y, atom.z);
 					currentChain = atom.chain;
 					currentResi = atom.resi;
