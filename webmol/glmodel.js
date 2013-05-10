@@ -413,7 +413,11 @@ WebMol.GLModel = (function() {
 		assignBonds(atoms);
 		console.log("bond connecting " + ((new Date()).getTime() - starttime));
 		
+		var starttime = (new Date()).getTime();
 		computeSecondaryStructure(atoms);
+		console.log("secondary structure " + ((new Date()).getTime() - starttime));
+
+		
 		// Assign secondary structures from pdb file
 		for (i = start; i < atoms.length; i++) {
 			atom = atoms[i];
