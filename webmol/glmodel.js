@@ -46,45 +46,7 @@ WebMol.GLModel = (function() {
 			return a == b;
 	};
 	
-	// given a selection specification, return true if atom is selected
-	var atomIsSelected = function(atom, sel) {
-		if (typeof (sel) === "undefined")
-			return true; // undef gets all
-		var invert = !!sel.invert;
-		var ret = true;
-		for ( var key in sel) {
-			if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model") {
-				// if something is in sel, atom must have it
-				if (typeof (atom[key]) === "undefined") {
-					ret = false;
-					break;
-				}
-				var isokay = false;
-				if ($.isArray(sel[key])) {
-					// can be any of the listed values
-					var valarr = sel[key];
-					for ( var i = 0; i < valarr.length; i++) {
-						if (atom[key] == valarr[i]) {
-							isokay = true;
-							break;
-						}
-					}
-					if (!isokay) {
-						ret = false;
-						break;
-					}
-				} else { // single match
-					var val = sel[key];
-					if (atom[key] != val) {
-						ret = false;
-						break;
-					}
-				}
-			}
-		}
-		
-		return invert ? !ret : ret;
-	}
+
 	// return true if atom1 and atom2 are probably bonded to each other
 	// based on distance alone
 	var areConnected = function(atom1, atom2) {
@@ -992,6 +954,46 @@ WebMol.GLModel = (function() {
 			}
 			setAtomDefaults(atoms, id);
 		};
+		
+		// given a selection specification, return true if atom is selected
+		this.atomIsSelected = function(atom, sel) {
+			if (typeof (sel) === "undefined")
+				return true; // undef gets all
+			var invert = !!sel.invert;
+			var ret = true;
+			for ( var key in sel) {
+				if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model") {
+					// if something is in sel, atom must have it
+					if (typeof (atom[key]) === "undefined") {
+						ret = false;
+						break;
+					}
+					var isokay = false;
+					if ($.isArray(sel[key])) {
+						// can be any of the listed values
+						var valarr = sel[key];
+						for ( var i = 0; i < valarr.length; i++) {
+							if (atom[key] == valarr[i]) {
+								isokay = true;
+								break;
+							}
+						}
+						if (!isokay) {
+							ret = false;
+							break;
+						}
+					} else { // single match
+						var val = sel[key];
+						if (atom[key] != val) {
+							ret = false;
+							break;
+						}
+					}
+				}
+			}
+			
+			return invert ? !ret : ret;
+		};
 
 		// return list of atoms selected by sel, this is specific to glmodel
 		this.selectedAtoms = function(sel) {
@@ -999,7 +1001,7 @@ WebMol.GLModel = (function() {
 			for ( var i = 0; i < atoms.length; i++) {
 				var atom = atoms[i];
 				if (atom) {
-					if (atomIsSelected(atom, sel))
+					if (this.atomIsSelected(atom, sel))
 						ret.push(atom);
 				}
 			}

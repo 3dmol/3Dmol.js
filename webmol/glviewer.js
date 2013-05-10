@@ -425,8 +425,30 @@ WebMol.glmolViewer = (function() {
 				atoms = atoms.concat(ms[i].selectedAtoms(sel));
 			}
 			return atoms;
-		}
-		;
+		};
+		
+		function atomIsSelected(atom,sel) {
+			if (typeof (sel) == "undefined")
+				sel = {};
+
+			var ms = [];
+			if (typeof sel.model == "undefined") {
+				for ( var i = 0; i < models.length; i++) {
+					if (models[i])
+						ms.push(models[i]);
+				}
+			} else { // specific to some models
+				var ms = sel.model;
+				if (!$.isArray(ms))
+					ms = [ ms ];
+			}
+
+			for ( var i = 0; i < ms.length; i++) {
+				if(ms[i].atomIsSelected(atom, sel))
+					return true;
+			}
+			return false;
+		};
 
 		// return pdb output of selected atoms
 		// currently only works if input was pdb
@@ -974,23 +996,27 @@ WebMol.glmolViewer = (function() {
 		// props is a list of objects that select certain atoms and enumerate
 		// properties for those atoms
 		this.mapAtomProperties = function(props) {
-			for ( var i = 0, n = props.length; i < n; i++) {
-				var prop = props[i];
-				if (prop.props) {
-					var atoms = getAtomsFromSel(prop);
-					for ( var p in prop.props) {
-						if (prop.props.hasOwnProperty(p)) {
-							// set each atom
-							for ( var a = 0, na = atoms.length; a < na; a++) {
-								if (!atoms[a].properties)
-									atoms[a].properties = {};
-								atoms[a].properties[p] = prop.props[p];
+			var atoms = getAtomsFromSel({});
+			for(var a = 0, numa = atoms.length; a < numa; a++) {
+				var atom = atoms[a];
+				for ( var i = 0, n = props.length; i < n; i++) {
+					var prop = props[i];
+					if (prop.props) {
+						for ( var p in prop.props) {
+							if (prop.props.hasOwnProperty(p)) {
+								// check the atom
+								if(atomIsSelected(atom, prop)) {
+									if (!atom.properties)
+										atom.properties = {};
+									atom.properties[p] = prop.props[p];									
+								}
 							}
 						}
 					}
 				}
 			}
 		};
+		
 		try {
 			if (typeof (callback) === "function")
 				callback(this);
