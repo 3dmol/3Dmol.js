@@ -50,19 +50,22 @@ WebMol.GLModel = (function() {
 	// return true if atom1 and atom2 are probably bonded to each other
 	// based on distance alone
 	var areConnected = function(atom1, atom2) {
-		var max = 1.9;
+		var maxsq = 3.6;
 
 		var xdiff = atom1.x - atom2.x;
-		if (xdiff > max)
+		xdiff *= xdiff;
+		if (xdiff > maxsq)
 			return false;
 		var ydiff = atom1.y - atom2.y;
-		if (ydiff > max)
+		ydiff *= ydiff;
+		if (ydiff > maxsq)
 			return false;
 		var zdiff = atom1.z - atom2.z;
-		if (zdiff > max)
+		zdiff *= zdiff;
+		if (zdiff > maxsq)
 			return false;
 
-		var distSquared = xdiff * xdiff + ydiff * ydiff + zdiff * zdiff;
+		var distSquared = xdiff + ydiff + zdiff;
 
 		if (isNaN(distSquared))
 			return false;
