@@ -939,7 +939,7 @@ WebMol.glmolViewer = (function() {
 
 		// given the id returned by surfid, remove surface
 		this.removeSurface = function(surf) {
-			if (surfaces[surf].lastGL) {
+			if (surfaces[surf] && surfaces[surf].lastGL) {
 				modelGroup.remove(surfaces[surf].lastGL); // remove from scene
 			}
 			delete surfaces[surf];
