@@ -72,7 +72,10 @@ WebMol.glmolViewer = (function() {
 
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
-
+		
+		var spinner = $('<div class="glviewerSpinnerWrap" style = "position: absolute; width: 100%; height: 100%; display: table; z-index: 1;"><div class="glviewerSpinner" style="display: table-cell; text-align: center; vertical-align: middle; z-index:1"><img src="webmol/spinner.gif"></div></div>');
+		$(element).append(spinner);
+		spinner.hide();
 		// set dimensions
 		// $(container).width(WIDTH);
 		// $(container).height(HEIGHT);
@@ -87,6 +90,9 @@ WebMol.glmolViewer = (function() {
 
 		renderer.domElement.style.width = "100%";
 		renderer.domElement.style.height = "100%";
+		renderer.domElement.style.position = "absolute";
+		renderer.domElement.style.top = "0px";
+		renderer.domElement.style["zIndex"] = "0";
 		container.append(renderer.domElement);
 		renderer.setSize(WIDTH, HEIGHT);
 
@@ -348,6 +354,7 @@ WebMol.glmolViewer = (function() {
 		// apply styles, models, etc in viewer
 		this.render = function() {
 
+			spinner.show();
 			var time1 = new Date();
 			var view = this.getView();
 
@@ -393,6 +400,7 @@ WebMol.glmolViewer = (function() {
 			}
 			this.setView(view);
 			var time2 = new Date();
+			spinner.hide();
 			console.log("render time: " + (time2 - time1));
 		};
 
