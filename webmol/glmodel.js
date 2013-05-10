@@ -109,7 +109,51 @@ WebMol.GLModel = (function() {
 				}
 			}
 		}
-	}
+	};
+	
+	//this is optimized for proteins where it is assumed connected
+	//atoms are on the same or next residue
+	var assignPDBBonds = function(atomsarray) {
+		// assign bonds - yuck, can't count on connect records
+		var protatoms = [];
+		var hetatoms = [];
+		
+		for ( var i = 0; i < atomsarray.length; i++) {
+			var atom = atomsarray[i];
+			atom.index = i;
+			if(atom.hetflag)
+				hetatoms.push(atom);
+			else
+				protatoms.push(atom);
+		}
+
+		assignBonds(hetatoms);
+		
+		//sort by resid
+		protatoms.sort(function(a, b) {
+			return a.resi - b.resi;
+		});
+		for ( var i = 0; i < protatoms.length; i++) {
+			var ai = protatoms[i];
+
+			for ( var j = i + 1; j < protatoms.length; j++) {
+				var aj = protatoms[j];
+				if(aj.chain != ai.chain)
+					break;
+				if (aj.resi - ai.resi > 1) // can't be connected
+					break;
+				if (areConnected(ai, aj)) {
+					if (ai.bonds.indexOf(aj.index) == -1) {
+						// only add if not already there
+						ai.bonds.push(aj.index);
+						ai.bondOrder.push(1);
+						aj.bonds.push(ai.index);
+						aj.bondOrder.push(1);
+					}
+				}
+			}
+		}
+	};
 
 	// return distance between donor-acceptor, if not valid pair, return inf
 	var hbondDistance = function(a1, a2, maxlength) {
@@ -413,7 +457,7 @@ WebMol.GLModel = (function() {
 
 		var starttime = (new Date()).getTime();
 		// assign bonds - yuck, can't count on connect records
-		assignBonds(atoms);
+		assignPDBBonds(atoms);
 		console.log("bond connecting " + ((new Date()).getTime() - starttime));
 		
 		var starttime = (new Date()).getTime();
