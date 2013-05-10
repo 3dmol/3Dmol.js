@@ -354,7 +354,7 @@ WebMol.glmolViewer = (function() {
 		// apply styles, models, etc in viewer
 		this.render = function() {
 
-			spinner.show();
+			//spinner.show();
 			var time1 = new Date();
 			var view = this.getView();
 

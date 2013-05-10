@@ -147,8 +147,7 @@ WebMol.GLModel = (function() {
 	}
 
 	// return distance between donor-acceptor, if not valid pair, return inf
-	var hbondDistance = function(a1, a2) {
-		var maxlength = 4.0; //ver generous hbond distance
+	var hbondDistance = function(a1, a2, maxlength) {
 		if(a1.chain == a2.chain) { //ignore if residues too close
 			if(Math.abs(a1.resi-a2.resi) < 4)
 				return Number.POSITIVE_INFINITY;
@@ -176,6 +175,7 @@ WebMol.GLModel = (function() {
 	// atoms; assume atom names are correct, only identifies
 	// single closest hbond
 	var assignBackboneHBonds = function(atomsarray) {
+		var maxlength = 4.0; //ver generous hbond distance
 		var atoms = []
 		for ( var i = 0; i < atomsarray.length; i++) {
 			atomsarray[i].index = i;
@@ -196,7 +196,9 @@ WebMol.GLModel = (function() {
 
 			for ( var j = i + 1; j < atoms.length; j++) {
 				var aj = atoms[j];
-				var dist = hbondDistance(ai,aj);
+				if (aj.z - ai.z > maxlength) // can't be connected
+					break;
+				var dist = hbondDistance(ai,aj,maxlength);
 				if (dist < ai.hbondDistance) {
 					ai.hbondOther = aj;
 					ai.hbondDistance = dist;
