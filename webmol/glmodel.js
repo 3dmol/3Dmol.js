@@ -131,7 +131,7 @@ WebMol.GLModel = (function() {
 		
 		//sort by resid
 		protatoms.sort(function(a, b) {
-			return a.resi - b.resi;
+			return b.resi - a.resi;
 		});
 		for ( var i = 0; i < protatoms.length; i++) {
 			var ai = protatoms[i];
