@@ -73,8 +73,8 @@ WebMol.drawCartoon = (function() {
 		geo.computeVertexNormals(false);
 		var material = new THREE.MeshLambertMaterial();
 		material.vertexColors = THREE.FaceColors;
+        material.side = THREE.DoubleSide;
 		var mesh = new THREE.Mesh(geo, material);
-		mesh.doubleSided = true;
 		group.add(mesh);
 	};
 

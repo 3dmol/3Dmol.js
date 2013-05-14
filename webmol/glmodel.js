@@ -186,7 +186,7 @@ WebMol.GLModel = (function() {
 	// atoms; assume atom names are correct, only identifies
 	// single closest hbond
 	var assignBackboneHBonds = function(atomsarray) {
-		var maxlength = 4.0; //ver generous hbond distance
+		var maxlength = 3.5; //ver generous hbond distance
 		var atoms = []
 		for ( var i = 0; i < atomsarray.length; i++) {
 			atomsarray[i].index = i;
