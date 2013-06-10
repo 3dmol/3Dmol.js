@@ -327,7 +327,7 @@ WebMol.jmolViewer = (function() {
 			readyFunction : null,
 			script : "frank off; set showHydrogens false;",
 			src : null,
-			use : "Java noWebGL noHTML5 noImage",
+			use : "Java HTML5 noWebGL noImage",
 			width : "100%"
 		};
 
