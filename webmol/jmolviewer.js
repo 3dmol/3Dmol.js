@@ -314,21 +314,28 @@ WebMol.jmolViewer = (function() {
 			Jmol.script(japp,"delete all; isosurface delete;")
 		};
 		
+		var use = "Java HTML5 noWebGL noImage";
+		var s = document.location.search;
+		if (s.indexOf("USE=") >= 0)
+			  use = s.split("USE=")[1].split("&")[0];
 		var Info = {
 			addSelectionOptions : false,
 			color : "#FFFFFF",
 			debug : false,
 			defaultModel : "",
-			height : "100%",
+			height : "1", //100% doesn't work mysteriously
 			isSigned : false,
-			jarFile : "JmolApplet.jar",
-			jarPath : "jmol",
-			memoryLimit : 512,
+			jarPath : "jsmol/java",
+			j2sPath: "jsmol/j2s",
+			  allowjavascript: true,
 			readyFunction : null,
+			coverTitle : "Please wait...",
 			script : "frank off; set showHydrogens false;",
 			src : null,
-			use : "Java HTML5 noWebGL noImage",
-			width : "100%"
+			use : use,
+			width : "100%",
+			disableJ2SLoadMonitor : true,
+			disableInitialConsole: true
 		};
 
 		// have to let the java applet initialize before doing anything with
@@ -347,8 +354,8 @@ WebMol.jmolViewer = (function() {
 		Jmol.setDocument(false);
 		japp = Jmol.getApplet("japp" + instance, Info)
 		instance++;
-
-		container.html(Jmol.getAppletHtml(japp));
+		var appstr = Jmol.getAppletHtml(japp);
+		$(container).html(appstr);
 
 
 
