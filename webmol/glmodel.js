@@ -838,7 +838,7 @@ WebMol.GLModel = (function() {
 				var j = atom.bonds[i]; // our neighbor
 				var atom2 = atoms[j];
 				if (atom.serial < atom2.serial) {// only draw if less, this
-					// lets use combine
+					// lets us combine
 					// cylinders of the same
 					// color
 					// TODO: handle bond orders
