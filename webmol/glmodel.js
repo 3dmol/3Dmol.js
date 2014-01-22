@@ -360,6 +360,127 @@ WebMol.GLModel = (function() {
 		return true;
 	};
 
+	// parse SYBYL mol2 file from string - assumed to only contain one molecule tag
+	// TODO: Figure out how to handle multi molecule files (for SDF, too)
+	var parseMOL2 = function(atoms, str, keepH) {
+		
+		var noH = !keepH; //again, suppress H's by default
+		
+		//Note: these regex's work, though they don't match '<TRIPOS>' correctly - something to do with angle brackets
+		var mol_pos = str.search(/@<TRIPOS>MOLECULE/);
+		var atom_pos = str.search(/@<TRIPOS>ATOM/);
+		
+		// Assuming both Molecule and Atom sections exist
+		if (mol_pos == -1 || atom_pos == -1)
+			return;
+		
+		//serial is atom's index in file; index is atoms index in 'atoms'	
+		var serialToIndex = [];
+		
+		//assert (mol_pos < atom_pos), "Unexpected formatting of mol2 file (expected 'molecule' section before 'atom' section)";
+		
+		var lines = str.substr(mol_pos, str.length).split("\n");
+		var tokens = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+		var natoms = parseInt(tokens[0]);
+		if (tokens.length > 1)
+			var nbonds = parseInt(tokens[1]); //NOTE: this may or may not be set
+		else
+			var nbonds = 0;
+		
+		var offset = 4;
+		// Continue until 'Atom' section
+		for (var i = 3; ;i++)
+		{
+			if (lines[i] == "@<TRIPOS>ATOM")
+			{
+				offset = i+1;
+				break;
+			}
+		}
+		
+		var start = atoms.length;
+		var end = start + natoms;
+		
+		//Process ATOMS
+		for (var i = start; i < end; i++)
+		{
+			var line = lines[offset++];
+			var tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
+					" ");
+			var atom = {};
+			
+			//'index' is this atom's index in 'atoms'; 'serial' is this atom's serial id in mol2 file
+			var index = i;
+			var serial = parseInt(tokens[0]);
+			atom.serial = serial;
+			//atom.serial = i;
+			
+			atom.x = parseFloat(tokens[2]);
+			atom.y = parseFloat(tokens[3]);
+			atom.z = parseFloat(tokens[4]);
+			atom.atom = atom.elem = tokens[5].split('.')[0];
+			
+			//TODO: Add capability to ignore H's			
+			if (atom.elem == 'H' && noH)
+				continue;
+				
+			atom.bonds = [];
+			atom.bondOrder = [];
+			atom.properties = {};
+			
+			serialToIndex[serial] = index;
+			atoms.push(atom);
+		}
+		
+		//Process BONDS
+		var bonds_found = false;
+		while (offset < lines.length)
+		{
+			if (lines[offset++] == "@<TRIPOS>BOND")
+			{
+				bonds_found = true;
+				break;			
+			}		
+		}
+		
+		if (bonds_found && nbonds)
+		{
+			for (var i = 0; i < nbonds; i++)
+			{
+				var line = lines[offset++];
+
+				var tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
+							" ");
+				var from = parseInt(tokens[1]);
+				fromAtom = atoms[serialToIndex[from]];
+				var to = parseInt(tokens[2]);
+				toAtom = atoms[serialToIndex[to]];
+					
+				//Won't be able to read aromatic bonds correctly...
+				var order = parseInt(tokens[3]);
+				if (isNaN(order))
+					order = 1;
+				
+				if (fromAtom != undefined && toAtom != undefined){
+					fromAtom.bonds.push(serialToIndex[to]);
+					fromAtom.bondOrder.push(order);
+					toAtom.bonds.push(serialToIndex[from]);
+					toAtom.bondOrder.push(order);
+				}	
+				
+				/*
+				atoms[from].bonds.push(to);
+				atoms[from].bondOrder.push(order);
+				atoms[to].bonds.push(from);
+				atoms[to].bondOrder.push(order);
+				*/
+			}
+		}
+		
+		return true;
+		
+	};
+	
 	// parse pdb file from str and create atoms
 	var parsePDB = function(atoms, str, keepH) {
 
@@ -1003,6 +1124,9 @@ WebMol.GLModel = (function() {
 				break;
 			case "sdf":
 				parseSDF(atoms, data);
+				break;
+			case "mol2":
+				parseMOL2(atoms, data);
 				break;
 			}
 			setAtomDefaults(atoms, id);
