@@ -319,7 +319,7 @@ WebMol.glmolViewer = (function() {
 			camera.aspect = ASPECT;
 			camera.updateProjectionMatrix();
 			show();
-		}
+		};
 
 		$(window).resize(this.resize);
 
@@ -496,7 +496,7 @@ WebMol.glmolViewer = (function() {
 			show();
 		};
 
-		// given molecular data and its format (pdb, sdf or xyz)
+		// given molecular data and its format (pdb, sdf, xyz or mol2)
 		// create a model and add it, returning the model identifier
 		this.addModel = function(data, format) {
 			var m = new WebMol.GLModel(models.length, defaultcolors);
@@ -514,7 +514,7 @@ WebMol.glmolViewer = (function() {
 			while (models.length > 0
 					&& typeof (models[models.length - 1]) === "undefined")
 				models.pop();
-		}
+		};
 
 		this.removeAllModels = function() {
 			models = [];
@@ -556,11 +556,11 @@ WebMol.glmolViewer = (function() {
 
 		this.setColorByProperty = function(sel, prop, scheme) {
 			applyToModels("setColorByProperty", sel, prop, scheme);
-		}
+		};
 
 		this.setColorByElement = function(sel, colors) {
 			applyToModels("setColorByElement", sel, colors);
-		}
+		};
 
 		var getAtomsWithin = function(atomlist, extent) {
 			var ret = [];
@@ -686,7 +686,7 @@ WebMol.glmolViewer = (function() {
 					if (typeof (atom.surfaceColor) != "undefined") {
 						colors[i] = WebMol.CC.color(atom.surfaceColor);
 					} else if (atom.color) // map from atom
-						colors[i] = WebMol.CC.color(atom.color)
+						colors[i] = WebMol.CC.color(atom.color);
 				}
 			}
 			for ( var i = 0; i < faces.length; i++) {
@@ -957,7 +957,7 @@ WebMol.glmolViewer = (function() {
 				surfaces[surf].mat = getMatWithStyle(style);
 				surfaces[surf].finished = false; //trigger redraw
 			}
-		}
+		};
 
 		// given the id returned by surfid, remove surface
 		this.removeSurface = function(surf) {
@@ -991,7 +991,7 @@ WebMol.glmolViewer = (function() {
 			surfaces = [];
 			models = [];
 			show();
-		}
+		};
 
 		// props is a list of objects that select certain atoms and enumerate
 		// properties for those atoms

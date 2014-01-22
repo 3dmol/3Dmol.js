@@ -44,7 +44,7 @@ var WebMol = (function() {
 		}
 		alert("Unable to instantiate webmol viewer: "+config.order);
 		return null;
-	}
+	};
 	
 	//loads a pdb/pubchem structure into the provided viewer
 	my.download = function(query, viewer) {
@@ -72,7 +72,7 @@ var WebMol = (function() {
 		      viewer.zoomTo();
 		      viewer.render();
 		   });
-		}
+		};
 	return my;
 })();
 
