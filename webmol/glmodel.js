@@ -86,8 +86,12 @@ WebMol.GLModel = (function() {
 		// assign bonds - yuck, can't count on connect records
 		var atoms = atomsarray.slice(0);
 		for ( var i = 0; i < atomsarray.length; i++)
-			atomsarray[i].index = i;
-
+		{
+			//Don't reindex if atoms are already indexed 
+			if (!atomsarray[i].index)
+				atomsarray[i].index = i;
+		}
+		
 		atoms.sort(function(a, b) {
 			return a.z - b.z;
 		});
@@ -135,6 +139,7 @@ WebMol.GLModel = (function() {
 				return a.chain < b.chain ? -1 : 1;
 			return a.resi - b.resi;
 		});
+		
 		for ( var i = 0; i < protatoms.length; i++) {
 			var ai = protatoms[i];
 
@@ -155,6 +160,7 @@ WebMol.GLModel = (function() {
 				}
 			}
 		}
+		
 	};
 
 	// return distance between donor-acceptor, if not valid pair, return inf
@@ -220,7 +226,7 @@ WebMol.GLModel = (function() {
 				}
 			}
 		}
-	}
+	};
 
 	var computeSecondaryStructure = function(atomsarray) {
 		assignBackboneHBonds(atomsarray);
@@ -377,8 +383,6 @@ WebMol.GLModel = (function() {
 		//serial is atom's index in file; index is atoms index in 'atoms'	
 		var serialToIndex = [];
 		
-		//assert (mol_pos < atom_pos), "Unexpected formatting of mol2 file (expected 'molecule' section before 'atom' section)";
-		
 		var lines = str.substr(mol_pos, str.length).split("\n");
 		var tokens = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
 		var natoms = parseInt(tokens[0]);
@@ -419,8 +423,7 @@ WebMol.GLModel = (function() {
 			atom.y = parseFloat(tokens[3]);
 			atom.z = parseFloat(tokens[4]);
 			atom.atom = atom.elem = tokens[5].split('.')[0];
-			
-			//TODO: Add capability to ignore H's			
+						
 			if (atom.elem == 'H' && noH)
 				continue;
 				
@@ -467,13 +470,7 @@ WebMol.GLModel = (function() {
 					toAtom.bonds.push(serialToIndex[from]);
 					toAtom.bondOrder.push(order);
 				}	
-				
-				/*
-				atoms[from].bonds.push(to);
-				atoms[from].bondOrder.push(order);
-				atoms[to].bonds.push(from);
-				atoms[to].bondOrder.push(order);
-				*/
+
 			}
 		}
 		
@@ -659,7 +656,7 @@ WebMol.GLModel = (function() {
 			if (typeof (style.scale) != "undefined")
 				r *= style.scale;
 			return r;
-		}
+		};
 
 		// construct vertices around orgin for given radius, memoize results
 		var sphereVertexCache = {
@@ -1110,7 +1107,7 @@ WebMol.GLModel = (function() {
 					atom.model = id;
 				}
 			}
-		}
+		};
 
 		// add atoms to this model from molecular data string
 		this.addMolData = function(data, format) {
@@ -1183,7 +1180,7 @@ WebMol.GLModel = (function() {
 				}
 			}
 			return ret;
-		}
+		};
 		
 		//copy new atoms into this model, adjust bonds appropriately
 		this.addAtoms = function(newatoms) {
@@ -1337,7 +1334,7 @@ WebMol.GLModel = (function() {
 				renderedMolObj = null;
 			}
 			molObj = null;
-		}
+		};
 
 	};
 
