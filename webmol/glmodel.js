@@ -556,10 +556,8 @@ WebMol.GLModel = (function() {
 				var fromAtom = atoms[serialToIndex[from]];
 				for ( var j = 0; j < 4; j++) {
 					var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
-					if (isNaN(to))
-						continue;
 					var toAtom = atoms[serialToIndex[to]];
-					if (fromAtom != undefined) {
+					if (fromAtom != undefined && toAtom != undefined) {
 						fromAtom.bonds.push(serialToIndex[to]);
 						fromAtom.bondOrder.push(1);
 					}
@@ -954,7 +952,8 @@ WebMol.GLModel = (function() {
 
 			for ( var i = 0; i < atom.bonds.length; i++) {
 				var j = atom.bonds[i]; // our neighbor
-				var atom2 = atoms[j];
+				var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
+
 				if (atom.serial < atom2.serial) {// only draw if less, this
 					// lets us combine
 					// cylinders of the same
