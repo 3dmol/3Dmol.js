@@ -27,10 +27,12 @@
         var jviewer = null;
         $(document).ready(function() {
         	var moldata = $("#moldata_sdf").val();
+        	var moldata2 = $("#moldata_pdb").val();
         	
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
                 var m = viewer.addModel(moldata,"sdf");
+                var m2 = viewer.addModel(moldata2,"pdb");
                 viewer.mapAtomProperties(WebMol.partialCharges);
                 viewer.zoomTo();
                 viewer.render();
@@ -56,7 +58,7 @@
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
                 <br>
-        <input id="pdbid" value="2POR" size=4><button onClick="glviewer.removeAllModels(); WebMol.download('pdb:' + $('#pdbid').val(), glviewer)">Download</button><br>
+        <input id="pdbid" value="2POR" size=4><button onlick="glviewer.clear(); WebMol.download('pdb:' + $('#pdbid').val(), glviewer); glviewer.render();">Download</button><br>
         
 <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf">v:U4C5Cr:4
   -OEChem-12201211493D

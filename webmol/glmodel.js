@@ -579,7 +579,7 @@ WebMol.GLModel = (function() {
 		console.log("bond connecting " + ((new Date()).getTime() - starttime));
 		
 		var starttime = (new Date()).getTime();
-		computeSecondaryStructure(atoms);
+		//computeSecondaryStructure(atoms);
 		console.log("secondary structure " + ((new Date()).getTime() - starttime));
 
 		

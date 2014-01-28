@@ -154,7 +154,7 @@ WebMol.glmolViewer = (function() {
 		var show = function() {
 			if (!scene)
 				return;
-
+			
 			// var time = new Date();
 			setSlabAndFog();
 			renderer.render(scene, camera);
@@ -398,7 +398,7 @@ WebMol.glmolViewer = (function() {
 					} // else final surface already there
 				}
 			}
-			this.setView(view);
+			this.setView(view);  //Calls show() => three.js render
 			var time2 = new Date();
 			spinner.hide();
 			console.log("render time: " + (time2 - time1));
@@ -904,7 +904,7 @@ WebMol.glmolViewer = (function() {
 					view.render();
 				}
 			} else { // use worker
-				// use worker
+				
 				var workers = [];
 				if (type < 0)
 					type = 0; // negative reserved for atom data
@@ -988,6 +988,10 @@ WebMol.glmolViewer = (function() {
 		};
 
 		this.clear = function() {
+			
+			//Re-initialize scene to remove any existing rendered models 
+			//CHECK: Is this what we want? If not, what's a better way to remove existing models?
+			initializeScene();
 			surfaces = [];
 			models = [];
 			show();

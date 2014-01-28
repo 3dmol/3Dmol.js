@@ -236,7 +236,7 @@ WebMol.drawCartoon = (function() {
 		
 		drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
 				false, thickness);
-	}
+	};
 
 	return drawCartoon;
 })();
