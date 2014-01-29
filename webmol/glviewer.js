@@ -517,6 +517,11 @@ WebMol.glmolViewer = (function() {
 		};
 
 		this.removeAllModels = function() {
+			for (var i = 0; i < models.length; i++){
+				var model = models[i];
+				model.removegl(modelGroup);
+				
+			}
 			models = [];
 		};
 
@@ -946,6 +951,7 @@ WebMol.glmolViewer = (function() {
 				}
 			}
 
+			//NOTE: This is misleading if 'async' mesh generation - returns immediately
 			console.log("full mesh generation " + (+new Date() - time) + "ms");
 
 			return surfid;
@@ -988,12 +994,10 @@ WebMol.glmolViewer = (function() {
 		};
 
 		this.clear = function() {
-			
-			//Re-initialize scene to remove any existing rendered models 
-			//CHECK: Is this what we want? If not, what's a better way to remove existing models?
-			initializeScene();
+
 			surfaces = [];
-			models = [];
+			//models = [];
+			this.removeAllModels();
 			show();
 		};
 
