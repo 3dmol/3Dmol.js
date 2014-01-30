@@ -3,22 +3,13 @@
 QUnit.config.autostart = false;
 
 var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:0x0000ff}}};
-var glviewer = null;
 
-
+//test cases
 var runtests = function() {
+
+//setup new model
+
 	
-test("Initial render", function(){ 
- 	ok(glviewer);
-});	
-
-
-
-test("Model set correctly", function() {
-	var m = glviewer.getModel(0);
-	ok(m);
-});
-
 
 //Render stick - use some console logging
 test("Stick Render", function() {
@@ -101,61 +92,93 @@ test("Cartoon Render", function() {
 });
 
 };
-
 //TESTS
-module( "First", {
-	setup: function() {
+
+
+
+//moldata 1
+
+QUnit.module( "Bovine Calbindin, 76 res (1YCR)", {
+	
+	setupOnce: function() {
+		console.group("MOL 1");
+		console.log("Testing first molecule");
 		glviewer.removeAllModels();
 		var moldata = $("#moldata_1").val();
-        var m = glviewer.addModel(moldata,"pdb");
-        glviewer.mapAtomProperties(WebMol.partialCharges);
-        glviewer.zoomTo();
-        glviewer.render();
-	}
-});
-
-runtests();
-
-module( "First", {
-	setup: function() {
-		glviewer.removeAllModels();
-		var moldata = $("#moldata_12").val();
-        var m = glviewer.addModel(moldata,"pdb");
-        glviewer.mapAtomProperties(WebMol.partialCharges);
-        glviewer.zoomTo();
-        glviewer.render();
-	}
-});
-
-runtests();
-
-
-//Look over getting the closure variables set correctly...
-/*
-for (var style in styleSpec) (function(style)
-{
-	
-	var testName = style + " render";
-	var consoleMsg = style + " render time: ";
-	test(testName, function(){
-		var styleExpected = styleSpec[style];
-		
-		var m = glviewer.getModel(0);
-		//var consoleMsg = style + " render time: ";
-		
-		console.group(testName);
-		console.time(consoleMsg);
-		
-		glviewer.setStyle(styleExpected);
+		console.log("moldata length: " + moldata.length);
+		var m = glviewer.addModel(moldata, "pdb");
+		glviewer.mapAtomProperties(WebMol.partialCharges);
+		glviewer.zoomTo();
 		glviewer.render();
-		
-		console.timeEnd(consoleMsg);
+	},
+	
+	teardownOnce: function() {
 		console.groupEnd();
-
-		//Should return first atom's style from our model
-		var styleActual = m.selectedAtoms()[0].style;	
-		//alert(JSON.stringify(styleActual));
-		equal(JSON.stringify(styleActual), JSON.stringify(styleExpected));			
-	});
+		glviewer.removeAllModels();
+	}
+	
 });
-*/
+
+runtests();
+
+//moldata 2
+
+QUnit.module( "Cathodic Hemoglobin, 143 res (2AA1)", {
+	
+	setupOnce: function() {
+		console.group("MOL 2");
+		console.log("Testing second molecule");
+		glviewer.removeAllModels();
+	},
+	
+	teardownOnce: function() {
+		console.groupEnd();
+		glviewer.removeAllModels();
+	}
+});
+
+//I'm loading in a molecule from PDB because it's too large to add to html file directly
+// Have to wait to make sure it's ajax request is finished before resuming tests
+//TODO: See if there's a way to include these files and not have to load them
+asyncTest("Load molecule", function() {
+	WebMol.download("pdb:2AA1", glviewer);
+	setTimeout(function() {
+		ok(true, "resuming");
+		start();
+	}, 1000);
+		
+});
+
+runtests();
+
+//moldata 3
+
+QUnit.module( "Calicivirus Capsid, 534 res (3M8L)", {
+	
+	setupOnce: function() {
+		console.group("MOL 3");
+		console.log("Testing second molecule");
+		glviewer.removeAllModels();
+	},
+	
+	teardownOnce: function() {
+		console.groupEnd();
+		glviewer.removeAllModels();
+	}
+});
+
+asyncTest("Load molecule", function() {
+	WebMol.download("pdb:3M8L", glviewer);
+	setTimeout(function() {
+		ok(true, "resuming");
+		start();
+	}, 1000);
+		
+});
+
+runtests();
+
+
+
+
+
