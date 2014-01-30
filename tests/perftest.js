@@ -1,16 +1,13 @@
 //Test rendering performance for different sized pdb's
 
 QUnit.config.autostart = false;
+	
 
 var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:0x0000ff}}};
 
 //test cases
-var runtests = function() {
-
-//setup new model
-
+var runtests = (function() {
 	
-
 //Render stick - use some console logging
 test("Stick Render", function() {
 	var m = glviewer.getModel(0);
@@ -21,7 +18,6 @@ test("Stick Render", function() {
 	
 	glviewer.setStyle({},styleExpected);
 	glviewer.render();
-	
 	console.timeEnd("Stick render time: ");
 	console.groupEnd();
 	
@@ -58,7 +54,7 @@ test("Sphere Render", function() {
 	
 	console.group("Sphere Render");
 	console.time("Sphere render time: ");
-	
+
 	glviewer.setStyle({},styleExpected);
 	glviewer.render();
 	
@@ -91,17 +87,18 @@ test("Cartoon Render", function() {
 	equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), "Cartoon style set correctly");	
 });
 
-};
+
+});
+
+
 //TESTS
-
-
 
 //moldata 1
 
-QUnit.module( "Bovine Calbindin, 76 res (1YCR)", {
+QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
 	
 	setupOnce: function() {
-		console.group("MOL 1");
+		console.group("Calbindin (76 res)");
 		console.log("Testing first molecule");
 		glviewer.removeAllModels();
 		var moldata = $("#moldata_1").val();
@@ -112,9 +109,8 @@ QUnit.module( "Bovine Calbindin, 76 res (1YCR)", {
 		glviewer.render();
 	},
 	
-	teardownOnce: function() {
+	teardownOnce: function() {		
 		console.groupEnd();
-		glviewer.removeAllModels();
 	}
 	
 });
@@ -123,57 +119,50 @@ runtests();
 
 //moldata 2
 
-QUnit.module( "Cathodic Hemoglobin, 143 res (2AA1)", {
+QUnit.module( "B. Cathodic Hemoglobin, 143 res (2AA1)", {
 	
 	setupOnce: function() {
-		console.group("MOL 2");
-		console.log("Testing second molecule");
 		glviewer.removeAllModels();
+		stop();
+   		$.get("http://www.rcsb.org/pdb/files/2AA1.pdb", function(ret) {
+      		glviewer.addModel(ret, "pdb");
+      		glviewer.zoomTo();
+      		glviewer.render();
+      		start();
+   		});
+   		console.groupEnd();
+   		console.group("Hemoglobin (143 res)");
 	},
 	
 	teardownOnce: function() {
 		console.groupEnd();
-		glviewer.removeAllModels();
 	}
-});
-
-//I'm loading in a molecule from PDB because it's too large to add to html file directly
-// Have to wait to make sure it's ajax request is finished before resuming tests
-//TODO: See if there's a way to include these files and not have to load them
-asyncTest("Load molecule", function() {
-	WebMol.download("pdb:2AA1", glviewer);
-	setTimeout(function() {
-		ok(true, "resuming");
-		start();
-	}, 1000);
-		
 });
 
 runtests();
 
 //moldata 3
 
-QUnit.module( "Calicivirus Capsid, 534 res (3M8L)", {
+QUnit.module( "C. Calicivirus Capsid, 534 res (3M8L)", {
 	
 	setupOnce: function() {
-		console.group("MOL 3");
-		console.log("Testing second molecule");
+		console.log("Testing third molecule");
 		glviewer.removeAllModels();
+		stop();
+   		$.get("http://www.rcsb.org/pdb/files/3M8L.pdb", function(ret) {
+      		glviewer.addModel(ret, "pdb");
+      		glviewer.zoomTo();
+      		glviewer.render();
+      		start();
+   		});
+   		console.groupEnd();
+   		console.group("Capsid (534 res)");
 	},
 	
 	teardownOnce: function() {
 		console.groupEnd();
-		glviewer.removeAllModels();
+		//glviewer.removeAllModels();
 	}
-});
-
-asyncTest("Load molecule", function() {
-	WebMol.download("pdb:3M8L", glviewer);
-	setTimeout(function() {
-		ok(true, "resuming");
-		start();
-	}, 1000);
-		
 });
 
 runtests();

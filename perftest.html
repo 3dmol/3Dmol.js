@@ -27,16 +27,13 @@
         <script src="tests/perftest.js"></script>        
         
         <script>
-        
-        var glviewer = null;
-	
+     	
         $(document).ready(function() {
-
         	
-            glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
-                viewer.setBackgroundColor(0xffffff);
-            }});	
- 			
+			glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
+			    viewer.setBackgroundColor(0xffffff);
+			}});
+        	
  			//starts QUnit tests
  			start();
         });
