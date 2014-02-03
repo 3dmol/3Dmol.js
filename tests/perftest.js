@@ -1,7 +1,53 @@
 //Test rendering performance for different sized pdb's
 
 QUnit.config.autostart = false;
+/*
+QUnit.config.urlConfig.push({
+	id: "testresults",
+	label: "download",
+	tooltip: "Download test results"
+});
+*/
+var resultXML = null;
+var resultStr = "";
 
+//QUnit-reporter hook to output test results in XML format
+QUnit.jUnitReport = function(data) {
+
+	resultXML = $.parseXML(data.xml);
+	
+	//Wrap XML result in JQuery object
+	$result = $(resultXML);
+	
+	resultStr += "GLMol Performance Tests\n";
+	var runTime = $result.find("testsuites").attr("time");
+	var runDate = $result.find("testsuites").attr("timestamp");
+	resultStr += "Total Test Time: " + runTime + " s\n";
+	resultStr += "Date: " + runDate + "\n\n";
+	
+	$result.find("testsuite").each(function(){
+		var moduleName = $(this).attr("name");
+		var moduleTime = $(this).attr("time");
+		resultStr += "\n" + moduleName;
+		//alert(moduleName);
+		$(this).find("testcase").each(function() {
+			var testName = $(this).attr("name");
+			var testTime = $(this).attr("time");
+			resultStr += "\n\t" + testName + ": " + testTime + " s";
+			//alert(testName);
+		});
+		resultStr += "\n\tTotal:         " + moduleTime + " s\n";
+	});
+	
+	//Set up a link to download test results
+	$("#qunit-testresult").append("<br><a id='download'>Download</a>");
+	var url = "data:text/plain;charset=utf-8," + encodeURIComponent(resultStr);
+	
+	$("#download").attr("download", "webgltest.log");
+	$("#download").attr("href", url);
+	//alert(resultStr);
+
+};
 
 var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:0x0000ff}}};
 
