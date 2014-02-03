@@ -124,12 +124,12 @@ QUnit.module( "B. Cathodic Hemoglobin, 143 res (2AA1)", {
 	setupOnce: function() {
 		glviewer.removeAllModels();
 		stop();
-   		$.get("test_structs/2AA1.pdb").error(function(data) {				
-	      		glviewer.addModel(data.responseText, "pdb");
+   		$.get("test_structs/2AA1.pdb", function(data) {				
+	      		glviewer.addModel(data, "pdb");
 	      		glviewer.zoomTo();
 	      		glviewer.render();
 	      		start();
-   		});
+   		}, "text");
    		console.groupEnd();
    		console.group("Hemoglobin (143 res)");
 	},
@@ -149,12 +149,12 @@ QUnit.module( "C. Calicivirus Capsid, 534 res (3M8L)", {
 		console.log("Testing third molecule");
 		glviewer.removeAllModels();
 		stop();
-   		$.get("test_structs/3M8L.pdb").error(function(data) {
-	      		glviewer.addModel(data.responseText, "pdb");
+   		$.get("test_structs/3M8L.pdb", function(data) {
+	      		glviewer.addModel(data, "pdb");
 	      		glviewer.zoomTo();
 	      		glviewer.render();
 	      		start();
-   		});
+   		}, "text");
    		console.groupEnd();
    		console.group("Capsid (534 res)");
 	},
