@@ -22,12 +22,10 @@
         <script src="webmol/jmolmodel.js"></script>
         <script src="webmol/colorschemes.js"></script>
 
-        <script src="tests/qunit.js"></script>        
-        <script src="tests/qunit-once.js"></script> 
-        <script src="tests/perftest.js"></script>        
+       
         
         <script>
-     	
+     	var glviewer = null;
         $(document).ready(function() {
         	
 			glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
@@ -38,7 +36,13 @@
  			start();
         });
         
+        
         </script>
+
+        <script src="tests/qunit.js"></script>        
+        <script src="tests/qunit-once.js"></script> 
+        <script src="tests/perftest.js"></script> 
+        
     </head>
     <body >
 

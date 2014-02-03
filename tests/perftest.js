@@ -1,7 +1,7 @@
 //Test rendering performance for different sized pdb's
 
 QUnit.config.autostart = false;
-	
+
 
 var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:0x0000ff}}};
 
@@ -108,7 +108,7 @@ QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
 		glviewer.zoomTo();
 		glviewer.render();
 	},
-	
+		
 	teardownOnce: function() {		
 		console.groupEnd();
 	}
@@ -124,11 +124,11 @@ QUnit.module( "B. Cathodic Hemoglobin, 143 res (2AA1)", {
 	setupOnce: function() {
 		glviewer.removeAllModels();
 		stop();
-   		$.get("http://www.rcsb.org/pdb/files/2AA1.pdb", function(ret) {
-      		glviewer.addModel(ret, "pdb");
-      		glviewer.zoomTo();
-      		glviewer.render();
-      		start();
+   		$.get("test_structs/2AA1.pdb").error(function(data) {				
+	      		glviewer.addModel(data.responseText, "pdb");
+	      		glviewer.zoomTo();
+	      		glviewer.render();
+	      		start();
    		});
    		console.groupEnd();
    		console.group("Hemoglobin (143 res)");
@@ -149,16 +149,16 @@ QUnit.module( "C. Calicivirus Capsid, 534 res (3M8L)", {
 		console.log("Testing third molecule");
 		glviewer.removeAllModels();
 		stop();
-   		$.get("http://www.rcsb.org/pdb/files/3M8L.pdb", function(ret) {
-      		glviewer.addModel(ret, "pdb");
-      		glviewer.zoomTo();
-      		glviewer.render();
-      		start();
+   		$.get("test_structs/3M8L.pdb").error(function(data) {
+	      		glviewer.addModel(data.responseText, "pdb");
+	      		glviewer.zoomTo();
+	      		glviewer.render();
+	      		start();
    		});
    		console.groupEnd();
    		console.group("Capsid (534 res)");
 	},
-	
+		
 	teardownOnce: function() {
 		console.groupEnd();
 		//glviewer.removeAllModels();
