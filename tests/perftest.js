@@ -1,13 +1,18 @@
 //Test rendering performance for different sized pdb's
 
+var glviewer = null;
+
 QUnit.config.autostart = false;
-/*
+
+//Add profile option to QUnit header
 QUnit.config.urlConfig.push({
-	id: "testresults",
-	label: "download",
-	tooltip: "Download test results"
+	id: "profilecheck",
+	label: "profile",
+	value: "",
+	tooltip: "Profile rendering"
 });
-*/
+
+var profile = QUnit.urlParams.profilecheck;
 var resultXML = null;
 var resultStr = "";
 
@@ -16,7 +21,7 @@ QUnit.jUnitReport = function(data) {
 
 	resultXML = $.parseXML(data.xml);
 	
-	//Wrap XML result in JQuery object
+	//Wrap XML result in JQuery object; parse and setup output string
 	$result = $(resultXML);
 	
 	resultStr += "GLMol Performance Tests\n";
@@ -33,7 +38,7 @@ QUnit.jUnitReport = function(data) {
 		$(this).find("testcase").each(function() {
 			var testName = $(this).attr("name");
 			var testTime = $(this).attr("time");
-			resultStr += "\n\t" + testName + ": " + testTime + " s";
+			resultStr += "\n\t" + testName + ":   " + testTime + " s";
 			//alert(testName);
 		});
 		resultStr += "\n\tTotal:         " + moduleTime + " s\n";
@@ -52,8 +57,8 @@ QUnit.jUnitReport = function(data) {
 var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:0x0000ff}}};
 
 //test cases
-var runtests = (function() {
-	
+var runtests = (function(profile) {
+
 //Render stick - use some console logging
 test("Stick Render", function() {
 	var m = glviewer.getModel(0);
@@ -62,8 +67,15 @@ test("Stick Render", function() {
 	console.group("Stick Render");
 	console.time("Stick render time: ");
 	
+	if (profile)
+		console.profile();
+	
 	glviewer.setStyle({},styleExpected);
 	glviewer.render();
+	
+	if (profile)
+		console.profileEnd();
+	
 	console.timeEnd("Stick render time: ");
 	console.groupEnd();
 	
@@ -81,9 +93,15 @@ test("Cross Render", function() {
 	console.group("Cross Render");
 	console.time("Cross render time: ");
 	
+	if (profile)
+		console.profile();	
+		
 	glviewer.setStyle({},styleExpected);
 	glviewer.render();
-	
+
+	if (profile)
+		console.profileEnd();
+			
 	console.timeEnd("Cross render time: ");
 	console.groupEnd();
 	
@@ -101,9 +119,15 @@ test("Sphere Render", function() {
 	console.group("Sphere Render");
 	console.time("Sphere render time: ");
 
+	if (profile)
+		console.profile();
+		
 	glviewer.setStyle({},styleExpected);
 	glviewer.render();
-	
+
+	if (profile)
+		console.profileEnd();
+			
 	console.timeEnd("Sphere render time: ");
 	console.groupEnd();
 	
@@ -120,10 +144,16 @@ test("Cartoon Render", function() {
 	
 	console.group("Cartoon Render");
 	console.time("Cartoon render time: ");
-	
+
+	if (profile)
+		console.profile();
+			
 	glviewer.setStyle({},styleExpected);
 	glviewer.render();
-	
+
+	if (profile)
+		console.profileEnd();
+			
 	console.timeEnd("Cartoon render time: ");
 	console.groupEnd();
 	
@@ -140,6 +170,8 @@ test("Cartoon Render", function() {
 //TESTS
 
 //moldata 1
+
+
 
 QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
 	
@@ -161,7 +193,7 @@ QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
 	
 });
 
-runtests();
+runtests(profile);
 
 //moldata 2
 
@@ -185,7 +217,7 @@ QUnit.module( "B. Cathodic Hemoglobin, 143 res (2AA1)", {
 	}
 });
 
-runtests();
+runtests(profile);
 
 //moldata 3
 
@@ -211,7 +243,7 @@ QUnit.module( "C. Calicivirus Capsid, 534 res (3M8L)", {
 	}
 });
 
-runtests();
+runtests(profile);
 
 
 

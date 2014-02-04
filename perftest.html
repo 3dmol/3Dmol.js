@@ -21,17 +21,15 @@
         <script src="webmol/jmolviewer.js"></script>
         <script src="webmol/jmolmodel.js"></script>
         <script src="webmol/colorschemes.js"></script>
-
-       
-        
+                
         <script>
-     	var glviewer = null;
+		
         $(document).ready(function() {
         	
 			glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
 			    viewer.setBackgroundColor(0xffffff);
 			}});
-        	
+			        	
  			//starts QUnit tests
  			start();
         });
