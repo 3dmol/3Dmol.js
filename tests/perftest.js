@@ -1,6 +1,6 @@
 //Test rendering performance for different sized pdb's
 
-var glviewer = null;
+//var glviewer = null;
 
 QUnit.config.autostart = false;
 
@@ -56,122 +56,55 @@ QUnit.jUnitReport = function(data) {
 
 var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:0x0000ff}}};
 
-//test cases
+
+//Generic style render testcase
+var testcase = (function() {
+	
+	var TestRunner = function(styleType, profile) {
+		
+		var testName = styleType + " render";
+		var timeName = styleType + " render time: ";
+		var testMsg = styleType + " style set correctly";
+		var styleExpected = styleSpec[styleType];
+		
+		test(testName, function() {
+			var m = glviewer.getModel(0);
+			console.group(testName);
+			console.time(timeName);
+			
+			if (profile)
+				console.profile();
+				
+			glviewer.setStyle({}, styleExpected);
+			glviewer.render();
+			
+			if (profile)
+				console.profileEnd();
+			
+			console.timeEnd(timeName);
+			console.groupEnd();
+			
+			var styleActual = m.selectedAtoms()[0].style;
+			equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), testMsg);	
+			
+		});
+	};
+	
+	return TestRunner;
+
+})();
+
 var runtests = (function(profile) {
-
-//Render stick - use some console logging
-test("Stick Render", function() {
-	var m = glviewer.getModel(0);
-	var styleExpected = styleSpec["stick"];
-	
-	console.group("Stick Render");
-	console.time("Stick render time: ");
-	
-	if (profile)
-		console.profile();
-	
-	glviewer.setStyle({},styleExpected);
-	glviewer.render();
-	
-	if (profile)
-		console.profileEnd();
-	
-	console.timeEnd("Stick render time: ");
-	console.groupEnd();
-	
-	//Should return first atom's style from our model
-	var styleActual = m.selectedAtoms()[0].style;
-	
-	equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), "Stick style set correctly");	
+	for (var style in styleSpec)
+		new testcase(style, profile);
 });
+//test cases
 
-//Render cross - use some console logging
-test("Cross Render", function() {
-	var m = glviewer.getModel(0);
-	var styleExpected = styleSpec["cross"];
-	
-	console.group("Cross Render");
-	console.time("Cross render time: ");
-	
-	if (profile)
-		console.profile();	
-		
-	glviewer.setStyle({},styleExpected);
-	glviewer.render();
-
-	if (profile)
-		console.profileEnd();
-			
-	console.timeEnd("Cross render time: ");
-	console.groupEnd();
-	
-	//Should return first atom's style from our model
-	var styleActual = m.selectedAtoms()[0].style;
-	
-	equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), "Cross style set correctly");	
-});
-
-//Render sphere - use some console logging
-test("Sphere Render", function() {
-	var m = glviewer.getModel(0);
-	var styleExpected = styleSpec["sphere"];
-	
-	console.group("Sphere Render");
-	console.time("Sphere render time: ");
-
-	if (profile)
-		console.profile();
-		
-	glviewer.setStyle({},styleExpected);
-	glviewer.render();
-
-	if (profile)
-		console.profileEnd();
-			
-	console.timeEnd("Sphere render time: ");
-	console.groupEnd();
-	
-	//Should return first atom's style from our model
-	var styleActual = m.selectedAtoms()[0].style;
-	
-	equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), "Sphere style set correctly");	
-});
-
-//Render cartoon - use some console logging
-test("Cartoon Render", function() {
-	var m = glviewer.getModel(0);
-	var styleExpected = styleSpec["cartoon"];
-	
-	console.group("Cartoon Render");
-	console.time("Cartoon render time: ");
-
-	if (profile)
-		console.profile();
-			
-	glviewer.setStyle({},styleExpected);
-	glviewer.render();
-
-	if (profile)
-		console.profileEnd();
-			
-	console.timeEnd("Cartoon render time: ");
-	console.groupEnd();
-	
-	//Should return first atom's style from our model
-	var styleActual = m.selectedAtoms()[0].style;
-	
-	equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), "Cartoon style set correctly");	
-});
-
-
-});
 
 
 //TESTS
 
 //moldata 1
-
-
 
 QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
 	
@@ -193,6 +126,7 @@ QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
 	
 });
 
+//new tester("sphere", profile);
 runtests(profile);
 
 //moldata 2

@@ -84,7 +84,7 @@ WebMol.glmolViewer = (function() {
 		var NEAR = 1, FAR = 800;
 		var CAMERA_Z = 150;
 		var renderer = new THREE.WebGLRenderer({
-			antialias : true,
+			antialias : true
 		});
 		// renderer.sortObjects = false; // hopefully improve performance
 

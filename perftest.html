@@ -23,7 +23,7 @@
         <script src="webmol/colorschemes.js"></script>
                 
         <script>
-		
+		var glviewer;
         $(document).ready(function() {
         	
 			glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
@@ -42,8 +42,8 @@
         <script src="tests/qunit-reporter-junit.js"></script>
         <script src="tests/perftest.js"></script> 
         
-    </head>
-    <body >
+</head>
+<body >
 
     	<table>
 	    	<tr><td valign="top">
@@ -53,7 +53,6 @@
 	    		<td valign="top">
 	    			<div id="qunit"></div>
 	    			<div id="qunit-fixture"></div>
-	    			<div id="result_download"></div>
 	    		</td>
 	    	</tr>
     	</table>
@@ -1047,5 +1046,5 @@ END
 	
 </textarea>
 
-    </body>
+</body>
 </html>
