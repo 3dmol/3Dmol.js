@@ -6,9 +6,7 @@
              scripts/main.js after require.js loads. -->
         <script  src="js/jquery-1.9.1.js"></script>
         <script src="three.js/build/three.js"></script>
-		<script type="text/javascript" src="Jmol/appletweb/JmolCore.js"></script>
-		<script type="text/javascript" src="Jmol/appletweb/JmolApplet.js"></script>
-		<script type="text/javascript" src="Jmol/appletweb/JmolApi.js"></script>       
+     
 		<script src="webmol/webmol.js"></script>
         <script src="webmol/properties.js"></script>
 		<script src="webmol/colors.js"></script>
@@ -27,12 +25,13 @@
         var jviewer = null;
         $(document).ready(function() {
         	var moldata = $("#moldata_sdf").val();
-        	var moldata2 = $("#moldata_pdb").val();
+        	//var moldata2 = $("#moldata_pdb").val();
         	
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
                 var m = viewer.addModel(moldata,"sdf");
-                var m2 = viewer.addModel(moldata2,"pdb");
+                //var m2 = viewer.addModel(moldata2,"pdb");
+                viewer.setStyle({}, {sphere:{}});
                 viewer.mapAtomProperties(WebMol.partialCharges);
                 viewer.zoomTo();
                 viewer.render();

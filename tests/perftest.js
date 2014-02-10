@@ -109,15 +109,17 @@ var runtests = (function(profile) {
 QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
 	
 	setupOnce: function() {
-		console.group("Calbindin (76 res)");
-		console.log("Testing first molecule");
+		
 		glviewer.removeAllModels();
-		var moldata = $("#moldata_1").val();
-		console.log("moldata length: " + moldata.length);
-		var m = glviewer.addModel(moldata, "pdb");
+		stop();
+   		$.get("test_structs/1YCR.pdb", function(data) {				
+	      		glviewer.addModel(data, "pdb");
+	      		glviewer.zoomTo();
+	      		glviewer.render();
+	      		start();
+   		}, "text");
 		glviewer.mapAtomProperties(WebMol.partialCharges);
-		glviewer.zoomTo();
-		glviewer.render();
+		console.group("Calbindin (76 res)");
 	},
 		
 	teardownOnce: function() {		
