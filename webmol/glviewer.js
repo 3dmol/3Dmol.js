@@ -83,7 +83,8 @@ WebMol.glmolViewer = (function() {
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
 		var CAMERA_Z = 150;
-		var renderer = new THREE.WebGLRenderer({
+		//Changed to WebMol's renderer
+		var renderer = new WebMol.WebGLRenderer({
 			antialias : true
 		});
 		// renderer.sortObjects = false; // hopefully improve performance
