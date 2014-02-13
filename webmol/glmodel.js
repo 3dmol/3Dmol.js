@@ -785,7 +785,7 @@ WebMol.GLModel = (function() {
 			var style = atom.style.cross;
 			if (style.hidden)
 				return;
-			var linewidth = (atom.style.cross.lineWidth || defaultlineWidth)
+			var linewidth = (atom.style.cross.lineWidth || defaultlineWidth);
 			if (!geos[linewidth])
 				geos[linewidth] = new THREE.Geometry();
 			var geo = geos[linewidth];
@@ -814,7 +814,7 @@ WebMol.GLModel = (function() {
 				return;
 
 			// have a separate geometry for each linewidth
-			var linewidth = (atom.style.line.lineWidth || defaultlineWidth)
+			var linewidth = (atom.style.line.lineWidth || defaultlineWidth);
 
 			if (!geos[linewidth])
 				geos[linewidth] = new THREE.Geometry();
@@ -1309,7 +1309,7 @@ WebMol.GLModel = (function() {
 			}
 		};
 
-		// manage the globj for this model in the possed modelGroup -
+		// manage the globj for this model in the passed modelGroup -
 		//if it has to be regenerated, remove and add
 		this.globj = function(group) {
 			var time = new Date();

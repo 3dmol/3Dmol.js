@@ -1025,6 +1025,10 @@ WebMol.glmolViewer = (function() {
 			}
 		};
 		
+		this.getModelGroup = function() {
+			return modelGroup;
+		};
+		
 		try {
 			if (typeof (callback) === "function")
 				callback(this);
