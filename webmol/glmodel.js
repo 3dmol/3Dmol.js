@@ -38,7 +38,7 @@ WebMol.GLModel = (function() {
 
 	// class functions
 
-	//return true if a and b represent the same style
+	// return true if a and b represent the same style
 	var sameObj = function(a,b) {
 		if(a && b)
 			return JSON.stringify(a) == JSON.stringify(b);
@@ -111,8 +111,8 @@ WebMol.GLModel = (function() {
 		}
 	};
 	
-	//this is optimized for proteins where it is assumed connected
-	//atoms are on the same or next residue
+	// this is optimized for proteins where it is assumed connected
+	// atoms are on the same or next residue
 	var assignPDBBonds = function(atomsarray) {
 		// assign bonds - yuck, can't count on connect records
 		var protatoms = [];
@@ -129,7 +129,7 @@ WebMol.GLModel = (function() {
 
 		assignBonds(hetatoms);
 		
-		//sort by resid
+		// sort by resid
 		protatoms.sort(function(a, b) {
 			if(a.chain != b.chain)
 				return a.chain < b.chain ? -1 : 1;
@@ -159,7 +159,7 @@ WebMol.GLModel = (function() {
 
 	// return distance between donor-acceptor, if not valid pair, return inf
 	var hbondDistance = function(a1, a2, maxlength) {
-		if(a1.chain == a2.chain) { //ignore if residues too close
+		if(a1.chain == a2.chain) { // ignore if residues too close
 			if(Math.abs(a1.resi-a2.resi) < 4)
 				return Number.POSITIVE_INFINITY;
 		}
@@ -186,7 +186,7 @@ WebMol.GLModel = (function() {
 	// atoms; assume atom names are correct, only identifies
 	// single closest hbond
 	var assignBackboneHBonds = function(atomsarray) {
-		var maxlength = 3.5; //ver generous hbond distance
+		var maxlength = 3.5; // ver generous hbond distance
 		var atoms = []
 		for ( var i = 0; i < atomsarray.length; i++) {
 			atomsarray[i].index = i;
@@ -225,8 +225,8 @@ WebMol.GLModel = (function() {
 	var computeSecondaryStructure = function(atomsarray) {
 		assignBackboneHBonds(atomsarray);
 		
-		//compute, per residue, what the secondary structure is
-		var chres = {}; //lookup by chain and resid
+		// compute, per residue, what the secondary structure is
+		var chres = {}; // lookup by chain and resid
 		for ( var i = 0; i < atomsarray.length; i++) {
 			var atom = atomsarray[i];
 			
@@ -236,16 +236,16 @@ WebMol.GLModel = (function() {
 			if(isFinite(atom.hbondDistance)) {
 				var other = atom.hbondOther;
 				if(Math.abs(other.resi - atom.resi) == 4) { 
-					//helix
+					// helix
 					chres[atom.chain][atom.resi] = 'h';
 				}
-				else { //otherwise assume sheet
+				else { // otherwise assume sheet
 					chres[atom.chain][atom.resi] = 's';
 				}
 			}
 		}
 		
-		//plug gaps and remove singletons
+		// plug gaps and remove singletons
 		for(c in chres) {
 			for(var r = 1; r < chres[c].length-1; r++) {
 				var valbefore = chres[c][r-1];
@@ -264,7 +264,7 @@ WebMol.GLModel = (function() {
 			}
 		}
 		
-		//assign to all atoms in residue, keep track of start
+		// assign to all atoms in residue, keep track of start
 		var curres = null;
 		for ( var i = 0; i < atomsarray.length; i++) {
 			var atom = atomsarray[i];
@@ -360,13 +360,15 @@ WebMol.GLModel = (function() {
 		return true;
 	};
 
-	// parse SYBYL mol2 file from string - assumed to only contain one molecule tag
+	// parse SYBYL mol2 file from string - assumed to only contain one molecule
+	// tag
 	// TODO: Figure out how to handle multi molecule files (for SDF, too)
 	var parseMOL2 = function(atoms, str, keepH) {
 		
-		var noH = !keepH; //again, suppress H's by default
+		var noH = !keepH; // again, suppress H's by default
 		
-		//Note: these regex's work, though they don't match '<TRIPOS>' correctly - something to do with angle brackets
+		// Note: these regex's work, though they don't match '<TRIPOS>'
+		// correctly - something to do with angle brackets
 		var mol_pos = str.search(/@<TRIPOS>MOLECULE/);
 		var atom_pos = str.search(/@<TRIPOS>ATOM/);
 		
@@ -374,16 +376,18 @@ WebMol.GLModel = (function() {
 		if (mol_pos == -1 || atom_pos == -1)
 			return;
 		
-		//serial is atom's index in file; index is atoms index in 'atoms'	
+		// serial is atom's index in file; index is atoms index in 'atoms'
 		var serialToIndex = [];
 		
-		//assert (mol_pos < atom_pos), "Unexpected formatting of mol2 file (expected 'molecule' section before 'atom' section)";
+		// assert (mol_pos < atom_pos), "Unexpected formatting of mol2 file
+		// (expected 'molecule' section before 'atom' section)";
 		
 		var lines = str.substr(mol_pos, str.length).split("\n");
 		var tokens = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
 		var natoms = parseInt(tokens[0]);
 		if (tokens.length > 1)
-			var nbonds = parseInt(tokens[1]); //NOTE: this may or may not be set
+			var nbonds = parseInt(tokens[1]); // NOTE: this may or may not be
+												// set
 		else
 			var nbonds = 0;
 		
@@ -401,7 +405,7 @@ WebMol.GLModel = (function() {
 		var start = atoms.length;
 		var end = start + natoms;
 		
-		//Process ATOMS
+		// Process ATOMS
 		for (var i = start; i < end; i++)
 		{
 			var line = lines[offset++];
@@ -409,18 +413,19 @@ WebMol.GLModel = (function() {
 					" ");
 			var atom = {};
 			
-			//'index' is this atom's index in 'atoms'; 'serial' is this atom's serial id in mol2 file
+			// 'index' is this atom's index in 'atoms'; 'serial' is this atom's
+			// serial id in mol2 file
 			var index = i;
 			var serial = parseInt(tokens[0]);
 			atom.serial = serial;
-			//atom.serial = i;
+			// atom.serial = i;
 			
 			atom.x = parseFloat(tokens[2]);
 			atom.y = parseFloat(tokens[3]);
 			atom.z = parseFloat(tokens[4]);
 			atom.atom = atom.elem = tokens[5].split('.')[0];
 			
-			//TODO: Add capability to ignore H's			
+			// TODO: Add capability to ignore H's
 			if (atom.elem == 'H' && noH)
 				continue;
 				
@@ -432,7 +437,7 @@ WebMol.GLModel = (function() {
 			atoms.push(atom);
 		}
 		
-		//Process BONDS
+		// Process BONDS
 		var bonds_found = false;
 		while (offset < lines.length)
 		{
@@ -456,7 +461,7 @@ WebMol.GLModel = (function() {
 				var to = parseInt(tokens[2]);
 				toAtom = atoms[serialToIndex[to]];
 					
-				//Won't be able to read aromatic bonds correctly...
+				// Won't be able to read aromatic bonds correctly...
 				var order = parseInt(tokens[3]);
 				if (isNaN(order))
 					order = 1;
@@ -469,11 +474,10 @@ WebMol.GLModel = (function() {
 				}	
 				
 				/*
-				atoms[from].bonds.push(to);
-				atoms[from].bondOrder.push(order);
-				atoms[to].bonds.push(from);
-				atoms[to].bondOrder.push(order);
-				*/
+				 * atoms[from].bonds.push(to);
+				 * atoms[from].bondOrder.push(order);
+				 * atoms[to].bonds.push(from); atoms[to].bondOrder.push(order);
+				 */
 			}
 		}
 		
@@ -485,7 +489,7 @@ WebMol.GLModel = (function() {
 	var parsePDB = function(atoms, str, keepH) {
 
 		var atoms_cnt = 0;
-		var noH = !keepH; //suppres hydrogens by default
+		var noH = !keepH; // suppres hydrogens by default
 		var start = atoms.length;
 		var protein = {
 			sheet : [],
@@ -533,7 +537,10 @@ WebMol.GLModel = (function() {
 					'chain' : chain,
 					'resi' : resi,
 					'icode' : icode,
-					'rescode': resi + (icode != ' ' ? "^"+icode: ""), //combo resi and icode
+					'rescode': resi + (icode != ' ' ? "^"+icode: ""), // combo
+																		// resi
+																		// and
+																		// icode
 					'serial' : serial,
 					'atom' : atom,
 					'bonds' : [],
@@ -632,7 +639,7 @@ WebMol.GLModel = (function() {
 		var id = mid;
 		var molObj = null;
 		var renderedMolObj = null;
-		var lastStyle = null; //cache previous styles to avoid recomputation
+		var lastStyle = null; // cache previous styles to avoid recomputation
 		var lastColors = null;
 		
 		var defaultColor = WebMol.defaultElementColor;
@@ -955,7 +962,7 @@ WebMol.GLModel = (function() {
 			}
 			var C1 = WebMol.CC.color(c1);
 
-			for ( var i = 0; i < atom.bonds.length; i++) {
+			for (var i = 0; i < atom.bonds.length; i++) {
 				var j = atom.bonds[i]; // our neighbor
 				var atom2 = atoms[j];
 				if (atom.serial < atom2.serial) {// only draw if less, this
@@ -976,13 +983,118 @@ WebMol.GLModel = (function() {
 					var C2 = WebMol.CC.color(c2);
 
 					// draw cylinders
-					if (c1 != c2) {
-						var mp = new TV3().addVectors(p1, p2).multiplyScalar(
-								0.5);
-						drawCylinder(geo, p1, mp, bondR, C1);
-						drawCylinder(geo, mp, p2, bondR, C2);
-					} else {
-						drawCylinder(geo, p1, p2, bondR, C1);
+					if (atom.bondOrder[i] == 1) {
+						if (c1 != c2) {
+							var mp = new TV3().addVectors(p1, p2)
+									.multiplyScalar(0.5);
+							drawCylinder(geo, p1, mp, bondR, C1);
+							drawCylinder(geo, mp, p2, bondR, C2);
+						} else {
+							drawCylinder(geo, p1, p2, bondR, C1);
+						}
+					} else if (atom.bondOrder[i] > 1) {
+						var dir = p2.clone();
+						var v = null;
+						dir.sub(p1);
+
+						if (atom.bonds.length == 1) {
+							if (atom2.bonds.length == 1) {
+								v = dir.clone();
+								if (Math.abs(v.x) > .0001)
+									v.y += 1;
+								else
+									v.x += 1;
+							} else {
+								var i2 = (i + 1) % atom2.bonds.length;
+								var j2 = atom2.bonds[i2];
+								var atom3 = atoms[j2];
+								var p3 = new TV3(atom3.x, atom3.y, atom3.z);
+
+								var dir2 = p3.clone();
+								dir2.sub(p1);
+
+								v = dir2.clone();
+								v.cross(dir);
+							}
+						} else {
+							// get vector 2 different neighboring atom
+							var i2 = (i + 1) % atom.bonds.length;
+							var j2 = atom.bonds[i2];
+							var atom3 = atoms[j2];
+							var p3 = new TV3(atom3.x, atom3.y, atom3.z);
+
+							var dir2 = p3.clone();
+							dir2.sub(p1);
+
+							v = dir2.clone();
+							v.cross(dir);
+						}
+
+						if (atom.bondOrder[i] == 2) {
+							var r = bondR / 2.5;
+							v.cross(dir);
+							v.normalize();
+							v.multiplyScalar(r * 1.5);
+
+							var p1a = p1.clone();
+							p1a.add(v);
+							var p1b = p1.clone()
+							p1b.sub(v);
+
+							var p2a = p1a.clone();
+							p2a.add(dir);
+							var p2b = p1b.clone();
+							p2b.add(dir);
+
+							if (c1 != c2) {
+								var mp = new TV3().addVectors(p1a, p2a)
+										.multiplyScalar(0.5);
+								var mp2 = new TV3().addVectors(p1b, p2b)
+										.multiplyScalar(0.5);
+								drawCylinder(geo, p1a, mp, r, C1);
+								drawCylinder(geo, mp, p2a, r, C2);
+								drawCylinder(geo, p1b, mp2, r, C1);
+								drawCylinder(geo, mp2, p2b, r, C2);
+							} else {
+								drawCylinder(geo, p1a, p2a, r, C1);
+								drawCylinder(geo, p1b, p2b, r, C1);
+							}
+						} else if (atom.bondOrder[i] == 3) {
+							var r = bondR / 4;
+							v.cross(dir);
+							v.normalize();
+							v.multiplyScalar(r * 3);
+
+							var p1a = p1.clone();
+							p1a.add(v);
+							var p1b = p1.clone()
+							p1b.sub(v);
+
+							var p2a = p1a.clone();
+							p2a.add(dir);
+							var p2b = p1b.clone();
+							p2b.add(dir);
+
+							if (c1 != c2) {
+								var mp = new TV3().addVectors(p1a, p2a)
+										.multiplyScalar(0.5);
+								var mp2 = new TV3().addVectors(p1b, p2b)
+										.multiplyScalar(0.5);
+								var mp3 = new TV3().addVectors(p1, p2)
+										.multiplyScalar(0.5);
+								drawCylinder(geo, p1a, mp, r, C1);
+								drawCylinder(geo, mp, p2a, r, C2);
+								drawCylinder(geo, p1, mp3, r, C1);
+								drawCylinder(geo, mp3, p2, r, C2);
+								drawCylinder(geo, p1b, mp2, r, C1);
+								drawCylinder(geo, mp2, p2b, r, C2);
+							} else {
+								drawCylinder(geo, p1a, p2a, r, C1);
+								drawCylinder(geo, p1, p2, r, C1);
+								drawCylinder(geo, p1b, p2b, r, C1);
+
+							}
+						}
 					}
 				}
 			}
@@ -1185,17 +1297,17 @@ WebMol.GLModel = (function() {
 			return ret;
 		}
 		
-		//copy new atoms into this model, adjust bonds appropriately
+		// copy new atoms into this model, adjust bonds appropriately
 		this.addAtoms = function(newatoms) {
 			molObj = null;
 			var start = atoms.length;
 			var indexmap = [];
-			//mapping from old index to new index
+			// mapping from old index to new index
 			for(var i = 0; i < newatoms.length; i++) {
 				indexmap[newatoms[i].index] = start+i;
 			}
 			
-			//copy and push newatoms onto atoms
+			// copy and push newatoms onto atoms
 			for(var i = 0; i < newatoms.length; i++) {
 				var olda = newatoms[i];
 				var nindex = indexmap[olda.index];
@@ -1203,8 +1315,8 @@ WebMol.GLModel = (function() {
 				a.index = nindex;
 				a.bonds = [];
 				a.bondOrder = [];
-				//copy over all bonds contained in selection,
-				//updating indices appropriately
+				// copy over all bonds contained in selection,
+				// updating indices appropriately
 				for(var j = 0; j < olda.bonds.length; j++) {
 					var neigh = indexmap[olda.bonds[j]];
 					if(typeof(neigh) != "undefined") {
@@ -1216,16 +1328,16 @@ WebMol.GLModel = (function() {
 			}
 		};
 
-		//remove badatoms from model
+		// remove badatoms from model
 		this.removeAtoms = function(badatoms) {
 			molObj = null;
-			//make map of all baddies
+			// make map of all baddies
 			var baddies = [];
 			for(var i = 0; i < badatoms.length; i++) {
 				baddies[badatoms[i].index] = true;
 			}
 			
-			//create list of good atoms
+			// create list of good atoms
 			var newatoms = [];
 			for(var i = 0; i < atoms.length; i++) {
 				var a = atoms[i];
@@ -1233,9 +1345,9 @@ WebMol.GLModel = (function() {
 					newatoms.push(a);
 			}
 			
-			//clear it all out
+			// clear it all out
 			atoms = [];
-			//and add back in to get updated bonds
+			// and add back in to get updated bonds
 			this.addAtoms(newatoms);
 		};
 		
@@ -1244,14 +1356,14 @@ WebMol.GLModel = (function() {
 		this.setStyle = function(sel, style, add) {
 			
 			if(!add && molObj != null && sameObj(style, lastStyle))
-				return; //no need to recompute
+				return; // no need to recompute
 			
-			if(add) lastStyle = null; //todo: compute merged style
+			if(add) lastStyle = null; // todo: compute merged style
 			else lastStyle = style;
 			
 			var atoms = this.selectedAtoms(sel);
 			if(atoms.length > 0)
-				molObj = null; //force rebuild
+				molObj = null; // force rebuild
 			// do a copy to enforce style changes through this function
 			var mystyle = $.extend(true, {}, style);
 
@@ -1269,15 +1381,15 @@ WebMol.GLModel = (function() {
 			}
 		};
 		
-		//given a mapping from element to color, set atom colors
+		// given a mapping from element to color, set atom colors
 		this.setColorByElement = function(sel, colors) {
 			
 			if(molObj != null && sameObj(colors,lastColors))
-				return; //don't recompute
+				return; // don't recompute
 			lastColors = colors;
 			var atoms = this.selectedAtoms(sel);
 			if(atoms.length > 0)
-				molObj = null; //force rebuild
+				molObj = null; // force rebuild
 			for ( var i = 0; i < atoms.length; i++) {
 				var a = atoms[i];
 				if(typeof(colors[a.elem]) != "undefined") {
@@ -1288,13 +1400,13 @@ WebMol.GLModel = (function() {
 		
 		this.setColorByProperty = function(sel, prop, scheme) {
 			var atoms = this.selectedAtoms(sel);
-			lastColors = null; //don't bother memoizing
+			lastColors = null; // don't bother memoizing
 			if(atoms.length > 0)
-				molObj = null; //force rebuild
+				molObj = null; // force rebuild
 			var min =  Number.POSITIVE_INFINITY;
 			var max =  Number.NEGATIVE_INFINITY;
 			
-			//compute the range
+			// compute the range
 			for ( var i = 0; i < atoms.length; i++) {
 				var a = atoms[i];
 				if(a.properties && typeof(a.properties[prop]) != undefined) {
@@ -1303,7 +1415,7 @@ WebMol.GLModel = (function() {
 					if(p > max) max = p;
 				}					
 			}
-			//now apply colors using scheme
+			// now apply colors using scheme
 			for ( var i = 0; i < atoms.length; i++) {
 				var a = atoms[i];
 				if(a.properties && typeof(a.properties[prop]) != undefined) {
@@ -1314,14 +1426,14 @@ WebMol.GLModel = (function() {
 		};
 
 		// manage the globj for this model in the possed modelGroup -
-		//if it has to be regenerated, remove and add
+		// if it has to be regenerated, remove and add
 		this.globj = function(group) {
 			var time = new Date();
-			if(molObj == null) { //have to regenerate
+			if(molObj == null) { // have to regenerate
 				molObj = createMolObj(atoms);
 				var time2 = new Date();
 				console.log("object creation time: " + (time2 - time));
-				if(renderedMolObj) { //previously rendered, remove
+				if(renderedMolObj) { // previously rendered, remove
 					group.remove(renderedMolObj);
 					renderedMolObj = null;
 				}
@@ -1330,7 +1442,7 @@ WebMol.GLModel = (function() {
 			}
 		};
 		
-		//remove any rendered object from the scene
+		// remove any rendered object from the scene
 		this.removegl = function(group) {
 			if(renderedMolObj) {
 				group.remove(renderedMolObj);
