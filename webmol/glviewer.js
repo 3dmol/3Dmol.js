@@ -2,6 +2,7 @@
 
 var WebMol = WebMol || {};
 
+/*
 THREE.Geometry.prototype.colorAll = function(color) {
 	for ( var i = 0; i < this.faces.length; i++) {
 		this.faces[i].color = color;
@@ -15,7 +16,7 @@ THREE.Matrix4.prototype.isIdentity = function() {
 				return false;
 	return true;
 };
-
+*/
 var TV3 = THREE.Vector3, TF3 = THREE.Face3;
 
 // a webmol unified interace to gmol
