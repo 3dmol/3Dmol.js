@@ -489,6 +489,19 @@ WebMol.WebGLRenderer = function ( parameters ) {
 
 	};
 
+	//TODO: createBuffers function
+	//make this default GL buffer initialization function
+	function createBuffers ( geometryGroup ) {
+
+		geometryGroup.__webglVertexBuffer = _gl.createBuffer();
+		geometryGroup.__webglNormalBuffer = _gl.createBuffer();
+		geometryGroup.__webglColorBuffer = _gl.createBuffer();
+
+		geometryGroup.__webglFaceBuffer = _gl.createBuffer();
+		geometryGroup.__webglLineBuffer = _gl.createBuffer();
+
+
+	};
 	// Events
 
 	var onGeometryDispose = function ( event ) {
@@ -1808,6 +1821,38 @@ WebMol.WebGLRenderer = function ( parameters ) {
 		}
 
 	};
+
+	//TODO: setBuffers function
+	//sets the intialized gl buffers with typed array data in geometryChunk
+	function setBuffers( geometryChunk, hint ) {
+		
+		var vertexArray = geometryChunk.__vertexArray;
+		var colorArray = geometryChunk.__colorArray;
+		var normalArray = geometryChunk.__normalArray;
+		var faceArray = geometryChunk.__faceArray;
+		var lineArray = geometryChunk.__lineArray;
+		
+		//vertex buffers
+		_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglVertexBuffer );
+		_gl.bufferData( _gl.ARRAY_BUFFER, vertexArray, hint );		
+
+		//color buffers
+		_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglColorBuffer );
+		_gl.bufferData( _gl.ARRAY_BUFFER, colorArray, hint );		
+		
+		//normal buffers
+		_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
+		_gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );		
+		
+		//face (index) buffers
+		_gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
+		_gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );	
+		
+		//line (index) buffers
+		_gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglLineBuffer);
+		_gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint);			
+		
+	}
 
 	function setMeshBuffers( geometryGroup, object, hint, dispose, material ) {
 
@@ -3231,6 +3276,9 @@ WebMol.WebGLRenderer = function ( parameters ) {
 
 	};
 
+	
+	//This initializes GL buffers and populates them with typed array data from geometryChunk
+
 	function setDirectBuffers ( geometry, hint, dispose ) {
 
 		var attributes = geometry.attributes;
@@ -4088,7 +4136,8 @@ WebMol.WebGLRenderer = function ( parameters ) {
 
 
 	// Rendering
-
+	//TODO: render function
+	// strip this down to bare functionality
 	this.render = function ( scene, camera, renderTarget, forceClear ) {
 
 		if ( camera instanceof THREE.Camera === false ) {
@@ -4511,8 +4560,8 @@ WebMol.WebGLRenderer = function ( parameters ) {
 		var numMorphNormals = geometry.morphNormals.length;
 
 		var usesFaceMaterial = material instanceof THREE.MeshFaceMaterial;
-
-		geometry.geometryGroups = {};
+		if (geometry.geometryGroups === undefined)
+			geometry.geometryGroups = {};
 
 		for ( f = 0, fl = geometry.faces.length; f < fl; f ++ ) {
 
@@ -4587,6 +4636,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 
 		}
 
+		//Add objects; this sets up buffers for each geometryChunk
 		while ( scene.__objectsAdded.length ) {
 
 			addObject( scene.__objectsAdded[ 0 ], scene );
@@ -4602,7 +4652,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 		}
 
 		// update must be called after objects adding / removal
-
+		//This sends typed arrays to GL buffers for each geometryChunk
 		for ( var o = 0, ol = scene.__webglObjects.length; o < ol; o ++ ) {
 
 			updateObject( scene.__webglObjects[ o ].object );
@@ -4627,7 +4677,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 			if ( object.geometry !== undefined && object.geometry.__webglInit === undefined ) {
 
 				object.geometry.__webglInit = true;
-				object.geometry.addEventListener( 'dispose', onGeometryDispose );
+				//object.geometry.addEventListener( 'dispose', onGeometryDispose );
 
 			}
 
@@ -4638,14 +4688,14 @@ WebMol.WebGLRenderer = function ( parameters ) {
 
 				if ( geometry instanceof THREE.Geometry ) {
 
-					if ( geometry.geometryGroups === undefined ) {
+					//if ( geometry.geometryGroups === undefined ) {
 
 						sortFacesByMaterial( geometry, material );
 
-					}
+					//}
 
 					// create separate VBOs per geometry chunk
-
+					/*
 					for ( g in geometry.geometryGroups ) {
 
 						geometryGroup = geometry.geometryGroups[ g ];
@@ -4668,7 +4718,29 @@ WebMol.WebGLRenderer = function ( parameters ) {
 						}
 
 					}
+				*/
+					//TODO: createBuffers for all chunks
+					//use this loop to replace previous
+					//initialize gl buffers for all chunks
+					for ( g in geometry.geometryChunks ) {
 
+						geometryChunk = geometry.geometryChunks[ g ];
+
+						// initialise VBO on the first access
+
+						if ( ! geometryChunk.__webglVertexBuffer ) {
+
+							createBuffers( geometryChunk );
+							//initMeshBuffers( geometryGroup, object );
+
+							geometry.verticesNeedUpdate = true;
+							geometry.elementsNeedUpdate = true;
+							geometry.normalsNeedUpdate = true;
+							geometry.colorsNeedUpdate = true;
+
+						}
+
+					}
 				} else if ( geometry instanceof THREE.BufferGeometry ) {
 
 					initDirectBuffers( geometry );
@@ -4751,7 +4823,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 					addBuffer( scene.__webglObjects, geometry, object );
 
 				} else if ( geometry instanceof THREE.Geometry ) {
-
+					/*
 					for ( g in geometry.geometryGroups ) {
 
 						geometryGroup = geometry.geometryGroups[ g ];
@@ -4759,7 +4831,15 @@ WebMol.WebGLRenderer = function ( parameters ) {
 						addBuffer( scene.__webglObjects, geometryGroup, object );
 
 					}
-
+					*/
+					//TODO: addBuffer for all chunks
+					//Not entirely sure what this function does; just seems to set up an object
+					//with references to the geometryChunk (group), initialized webGL objects, and mesh
+					for ( g in geometry.geometryChunks ) {
+						geometryChunk = geometry.geometryChunks[ g ];
+						
+						addBuffer (scene.__webglObjects, geometryChunk, object);
+					}
 				}
 
 			} else if ( object instanceof THREE.Ribbon ||
@@ -4819,7 +4899,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 	function updateObject ( object ) {
 
 		var geometry = object.geometry,
-			geometryGroup, customAttributesDirty, material;
+			geometryGroup, geometryChunk, customAttributesDirty, material;
 
 		if ( object instanceof THREE.Mesh ) {
 
@@ -4843,7 +4923,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 			} else {
 
 				// check all geometry groups
-
+				/*
 				for( var i = 0, il = geometry.geometryGroupsList.length; i < il; i ++ ) {
 
 					geometryGroup = geometry.geometryGroupsList[ i ];
@@ -4867,7 +4947,19 @@ WebMol.WebGLRenderer = function ( parameters ) {
 					}
 
 				}
+				*/
+				//TODO: setBuffers loop for all chunks
+				for (g in geometry.geometryChunks ) {
+					geometryChunk = geometry.geometryChunks[ g ];
+					
+					if ( geometry.verticesNeedUpdate || geometry.morphTargetsNeedUpdate || geometry.elementsNeedUpdate ||
+						 geometry.uvsNeedUpdate || geometry.normalsNeedUpdate ||
+						 geometry.colorsNeedUpdate || geometry.tangentsNeedUpdate || customAttributesDirty ) {
 
+						setBuffers( geometryChunk, _gl.DYNAMIC_DRAW );
+
+					}
+				}
 				geometry.verticesNeedUpdate = false;
 				geometry.morphTargetsNeedUpdate = false;
 				geometry.elementsNeedUpdate = false;
@@ -4878,7 +4970,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 
 				geometry.buffersNeedUpdate = false;
 
-				material.attributes && clearCustomAttributes( material );
+				//material.attributes && clearCustomAttributes( material );
 
 			}
 
@@ -5529,7 +5621,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 		uniforms.psColor.value = material.color;
 		uniforms.opacity.value = material.opacity;
 		uniforms.size.value = material.size;
-		uniforms.scale.value = _canvas.height / 2.0; // TODO: Cache this.
+		uniforms.scale.value = _canvas.height / 2.0; // 
 
 		uniforms.map.value = material.map;
 
@@ -6314,14 +6406,14 @@ WebMol.WebGLRenderer = function ( parameters ) {
 
 			} else if ( blending === THREE.SubtractiveBlending ) {
 
-				// TODO: Find blendFuncSeparate() combination
+				// 
 				_gl.enable( _gl.BLEND );
 				_gl.blendEquation( _gl.FUNC_ADD );
 				_gl.blendFunc( _gl.ZERO, _gl.ONE_MINUS_SRC_COLOR );
 
 			} else if ( blending === THREE.MultiplyBlending ) {
 
-				// TODO: Find blendFuncSeparate() combination
+				// 
 				_gl.enable( _gl.BLEND );
 				_gl.blendEquation( _gl.FUNC_ADD );
 				_gl.blendFunc( _gl.ZERO, _gl.SRC_COLOR );

@@ -748,7 +748,10 @@ WebMol.GLModel = (function() {
 			var style = atom.style.sphere;
 			if (style.hidden)
 				return;
-
+				
+			
+			var geoGroup = geo.geometryChunks[geo.geometryChunks.length - 1];
+													 			
 			var color = atom.color;
 			if (typeof (style.color) != "undefined")
 				color = style.color;
@@ -762,15 +765,13 @@ WebMol.GLModel = (function() {
 			// now add vertices and create faces at appropriate location
 			var vertices = vobj.vertices;
 			var normals = vobj.normals;
-			for ( var i = 0, n = vertices.length; i < n; i++) {
-				var v = vertices[i];
-				var vertex = new THREE.Vector3(v.x + atom.x, v.y + atom.y, v.z
-						+ atom.z);
-				geo.vertices.push(vertex);
-				geo.normals.push(normals[i]);
-			}
+
 			var verticesRows = vobj.verticesRows;
 			var h = verticesRows.length - 1;
+			
+			var face, normal;
+			var n_vertices = 0;
+			var color = [C.r, C.g, C.b];
 			for (y = 0; y < h; y++) {
 				var w = verticesRows[y].length - 1;
 				for (x = 0; x < w; x++) {
@@ -784,22 +785,220 @@ WebMol.GLModel = (function() {
 					var n2 = normals[v2 - start];
 					var n3 = normals[v3 - start];
 					var n4 = normals[v4 - start];
-
+					var face, norm;
 					if (Math.abs(vertices[v1 - start].y) === radius) {
-						geo.faces.push(new THREE.Face3(v1, v3, v4,
-								[ n1, n3, n4 ], C));
+						//geo.faces.push(new THREE.Face3(v1, v3, v4, [ n1, n3, n4 ], C));
+						n_vertices = 3;
+						var vertex1 = new vertex(vertices[v1].x + atom.x, vertices[v1].y + atom.y, vertices[v1].z + atom.z);
+						var vertex3 = new vertex(vertices[v3].x + atom.x, vertices[v3].y + atom.y, vertices[v3].z + atom.z);
+						var vertex4 = new vertex(vertices[v4].x + atom.x, vertices[v4].y + atom.y, vertices[v4].z + atom.z);
+						face = [vertex1, vertex3, vertex4];
+						norm = [n1, n3, n4];
 					} else if (Math.abs(vertices[v3 - start].y) === radius) {
-						geo.faces.push(new THREE.Face3(v1, v2, v3,
-								[ n1, n2, n3 ], C));
+						//geo.faces.push(new THREE.Face3(v1, v2, v3, [ n1, n2, n3 ], C));
+						n_vertices = 3;
+						var vertex1 = new vertex(vertices[v1].x + atom.x, vertices[v1].y + atom.y, vertices[v1].z + atom.z);
+						var vertex2 = new vertex(vertices[v2].x + atom.x, vertices[v2].y + atom.y, vertices[v2].z + atom.z);
+						var vertex3 = new vertex(vertices[v3].x + atom.x, vertices[v3].y + atom.y, vertices[v3].z + atom.z);
+						face = [vertex1, vertex2, vertex3];
+						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3]];
+						norm = [n1, n2, n3];
 					} else {
-						geo.faces.push(new THREE.Face4(v1, v2, v3, v4, [ n1,
-								n2, n3, n4 ], C));
+						//geo.faces.push(new THREE.Face4(v1, v2, v3, v4, [ n1, n2, n3, n4 ], C));
+						n_vertices = 4;
+						var vertex1 = new vertex(vertices[v1].x + atom.x, vertices[v1].y + atom.y, vertices[v1].z + atom.z);
+						var vertex2 = new vertex(vertices[v2].x + atom.x, vertices[v2].y + atom.y, vertices[v2].z + atom.z);
+						var vertex3 = new vertex(vertices[v3].x + atom.x, vertices[v3].y + atom.y, vertices[v3].z + atom.z);
+						var vertex4 = new vertex(vertices[v4].x + atom.x, vertices[v4].y + atom.y, vertices[v4].z + atom.z);
+						face = [vertex1, vertex2, vertex3, vertex4];
+						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3], geo.vertices[v4]];
+						norm = [n1, n2, n3, n4];
 					}
+					
+					//make new group if necessary
+					if ( geoGroup.vertices + n_vertices > 65535 ) {
+						geo.geometryChunks.push( new geometryChunk() );
+					}
+					
+					geoGroup.vertices += n_vertices;
+					var offset = geoGroup.vertexArr.length;
+					
+					//populate non-typed vertexArr and face arrays with vertex coordinates
+					populateGroup(geoGroup, face, norm, color, offset);
 				}
 			}
 
 		};
+		var vertex = function(x, y, z) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		};
+		//Fill up geometry chunk's non typed arrays for a single face
+		var populateGroup = function(group, face, norm, color, index) {
+			
+			//one triangle
+			if (face.length === 3) {
+				var v1 = face[ 0 ];
+				var v2 = face[ 1 ];
+				var v3 = face[ 2 ];
+				var verts = [v1.x, v1.y, v1.z,
+							 v2.x, v2.y, v2.z,
+							 v3.x, v3.y, v3.z];
+							 
+				var n1 = norm[0];
+				var n2 = norm[1];
+				var n3 = norm[2];
+				var norms = [n1.x, n1.y, n1.z,
+							 n2.x, n2.y, n2.z,
+							 n3.x, n3.y, n3.z];
+				var r = color[0];
+				var g = color[1];
+				var b = color[2];
+							 
+				//group.vertexArr = group.vertexArr.concat(verts);
+				for (var i in verts) {
+					group.vertexArr.push(verts[i]);
+				}
 
+				for (var i in norms) {
+					group.normalArr.push(norms[i]);
+				}
+				
+				group.normalArr = group.normalArr.concat(norms);
+				
+				group.faceArr.push(index); 
+				group.faceArr.push(index + 1);
+				group.faceArr.push(index + 2);
+				
+				//TODO: do I really need these arrays?
+				group.lineArr.push(index);
+				group.lineArr.push(index + 1);
+				group.lineArr.push(index);
+				group.lineArr.push(index + 2);
+				group.lineArr.push(index + 1);
+				group.lineArr.push(index + 2);
+				
+				//add rgb color values for each vertex - faces are always same color
+				//group.colorArr = group.colorArr.concat(color);
+				//group.colorArr = group.colorArr.concat(color);
+				//group.colorArr = group.colorArr.concat(color);
+				group.colorArr.push(r);
+				group.colorArr.push(g);
+				group.colorArr.push(b);
+				
+				group.colorArr.push(r);
+				group.colorArr.push(g);
+				group.colorArr.push(b);
+				
+				group.colorArr.push(r);
+				group.colorArr.push(g);
+				group.colorArr.push(b);
+
+			}
+			
+			else if (face.length === 4) {
+				v1 = face[ 0 ];
+				v2 = face[ 1 ];
+				v3 = face[ 2 ];
+				v4 = face[ 3 ];
+				
+				var verts = [v1.x, v1.y, v1.z,
+							 v2.x, v2.y, v2.z,
+							 v3.x, v3.y, v3.z,
+							 v4.x, v4.y, v4.z];
+							 
+				var n1 = norm[0];
+				var n2 = norm[1];
+				var n3 = norm[2];
+				var n4 = norm[3];
+				var norms = [n1.x, n1.y, n1.z,
+							 n2.x, n2.y, n2.z,
+							 n3.x, n3.y, n3.z,
+							 n4.x, n4.y, n4.z];
+				
+				var r = color[0];
+				var g = color[1];
+				var b = color[2];
+
+				//group.vertexArr = group.vertexArr.concat(verts);
+				for (var i in verts) {
+					group.vertexArr.push(verts[i]);
+				}
+				
+				//group.normalArr = group.normalArr.concat(norms);
+				for (var i in norms) {
+					group.normalArr.push(norms[i]);
+				}
+				
+				group.faceArr.push(index);
+				group.faceArr.push(index + 1);
+				group.faceArr.push(index + 3);
+				
+				group.faceArr.push(index + 1);
+				group.faceArr.push(index + 2);
+				group.faceArr.push(index + 3);
+				
+				group.lineArr.push(index);
+				group.lineArr.push(index + 1);
+				group.lineArr.push(index);
+				group.lineArr.push(index + 3);
+				group.lineArr.push(index + 1);
+				group.lineArr.push(index + 2);
+				group.lineArr.push(index + 2);
+				group.lineArr.push(index + 3);
+				
+				//group.colorArr = group.colorArr.concat(color);
+				//group.colorArr = group.colorArr.concat(color);
+				//group.colorArr = group.colorArr.concat(color);
+				//group.colorArr = group.colorArr.concat(color);
+				group.colorArr.push(r);
+				group.colorArr.push(g);
+				group.colorArr.push(b);
+				
+				group.colorArr.push(r);
+				group.colorArr.push(g);
+				group.colorArr.push(b);
+				
+				group.colorArr.push(r);
+				group.colorArr.push(g);
+				group.colorArr.push(b);		
+
+				group.colorArr.push(r);
+				group.colorArr.push(g);
+				group.colorArr.push(b);			
+			};
+		};
+		
+		//Initialize typed array buffers for completed geometry
+		var initBuffers = function(geometry) {
+			
+			for (var i = 0; i < geometry.geometryChunks.length; ++i){
+				group = geometry.geometryChunks[i];
+				group.__vertexArray = new Float32Array(group.vertexArr);
+				group.__colorArray = new Float32Array(group.colorArr);
+				group.__normalArray = new Float32Array(group.normalArr);
+				group.__faceArray = new Uint16Array(group.faceArr);
+				group.__lineArray = new Uint16Array(group.lineArr);
+				
+				//Doesn't free memory directly, but should break references for gc 
+				delete group.vertexArr;
+				delete group.colorArr;
+				delete group.normalArr;
+				delete group.faceArr;
+				delete group.lineArr;
+			}
+		};
+		
+		//represents individual renderable geometry group
+		var geometryChunk = function() {
+			this.vertexArr = [];
+			this.colorArr = [];
+			this.normalArr = [];
+			this.faceArr = [];
+			this.lineArr = [];
+			this.vertices = 0;
+		};
 		// cross drawing
 		var drawAtomCross = function(atom, geos) {
 			if (!atom.style.cross)
@@ -1049,7 +1248,7 @@ WebMol.GLModel = (function() {
 
 							var p1a = p1.clone();
 							p1a.add(v);
-							var p1b = p1.clone()
+							var p1b = p1.clone();
 							p1b.sub(v);
 
 							var p2a = p1a.clone();
@@ -1130,12 +1329,18 @@ WebMol.GLModel = (function() {
 		// at some point we should optimize this to avoid unnecessary
 		// recalculation
 		var createMolObj = function(atoms) {
+
+
 			console.log("creating for "+id);
 			var ret = new THREE.Object3D();
 			var cartoonAtoms = [];
 			var lineGeometries = {};
 			var crossGeometries = {};
 			var sphereGeometry = new THREE.Geometry();
+			
+			sphereGeometry.geometryChunks = [];
+			sphereGeometry.geometryChunks.push( new geometryChunk() );	
+									   			  	
 			var stickGeometry = new THREE.Geometry();
 			for ( var i = 0; i < atoms.length; i++) {
 				var atom = atoms[i];
@@ -1157,12 +1362,16 @@ WebMol.GLModel = (function() {
 			}
 
 			// add sphere geometry
-			if (sphereGeometry.vertices && sphereGeometry.vertices.length > 0) {
+			if (sphereGeometry.geometryChunks[0].vertices) {
 				var sphereMaterial = new THREE.MeshLambertMaterial({
 					ambient : 0x000000,
 					vertexColors : true,
 					reflectivity : 0
 				});
+				
+				//Initialize buffers in geometry
+				initBuffers(sphereGeometry);
+				
 				var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 				console
 						.log("sphere geometry "
