@@ -27,12 +27,12 @@
         var jviewer = null;
         $(document).ready(function() {
         	var moldata = $("#moldata_sdf").val();
-        	var moldata2 = $("#moldata_pdb").val();
+        	//var moldata2 = $("#moldata_pdb").val();
         	
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
                 var m = viewer.addModel(moldata,"sdf");
-                var m2 = viewer.addModel(moldata2,"pdb");
+                viewer.setStyle({}, {sphere:{}});
                 viewer.mapAtomProperties(WebMol.partialCharges);
                 viewer.zoomTo();
                 viewer.render();
