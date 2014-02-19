@@ -2,6 +2,633 @@
 Simplified webGL renderer - modified from THREE.js
  */
 
+WebMol.SimpleRenderer = function ( parameters ) {
+    
+    parameters = parameters || {};
+    
+    var _canvas = parameters.canvas !== undefined ? parameters.canvas : document.createElement( 'canvas' ),
+
+    _precision = parameters.precision !== undefined ? parameters.precision : 'mediump',
+
+    _alpha = parameters.alpha !== undefined ? parameters.alpha : true,
+    _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha : true,
+    _antialias = parameters.antialias !== undefined ? parameters.antialias : false,
+    _stencil = parameters.stencil !== undefined ? parameters.stencil : true,
+    _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false,
+
+    _clearColor = parameters.clearColor !== undefined ? new THREE.Color( parameters.clearColor ) : new THREE.Color( 0x000000 ),
+    _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0;
+    
+    this.domElement = _canvas;
+    this.context = null;
+    this.devicePixelRatio = parameters.devicePixelRatio !== undefined
+    ? parameters.devicePixelRatio
+    : self.devicePixelRatio !== undefined
+    ? self.devicePixelRatio
+    : 1;
+
+    // clearing
+
+    this.autoClear = true;
+    this.autoClearColor = true;
+    this.autoClearDepth = true;
+    this.autoClearStencil = true;
+
+    // scene graph
+
+    this.sortObjects = true;
+
+    this.autoUpdateObjects = true;
+    this.autoUpdateScene = true;
+    
+    // info
+
+    this.info = {
+
+    memory: {
+
+    programs: 0,
+    geometries: 0,
+    textures: 0
+
+    },
+
+    render: {
+
+    calls: 0,
+    vertices: 0,
+    faces: 0,
+    points: 0
+
+    }
+
+    };
+
+    // internal properties
+
+    var _this = this,
+
+    _programs = [],
+    _programs_counter = 0,
+
+    // internal state cache
+
+    _currentProgram = null,
+    _currentFramebuffer = null,
+    _currentMaterialId = -1,
+    _currentGeometryGroupHash = null,
+    _currentCamera = null,
+    _geometryGroupCounter = 0,
+
+    _usedTextureUnits = 0,
+
+    // GL state cache
+
+    _oldDoubleSided = -1,
+    _oldFlipSided = -1,
+
+    _oldBlending = -1,
+
+    _oldBlendEquation = -1,
+    _oldBlendSrc = -1,
+    _oldBlendDst = -1,
+
+    _oldDepthTest = -1,
+    _oldDepthWrite = -1,
+
+    _oldPolygonOffset = null,
+    _oldPolygonOffsetFactor = null,
+    _oldPolygonOffsetUnits = null,
+
+    _oldLineWidth = null,
+
+    _viewportX = 0,
+    _viewportY = 0,
+    _viewportWidth = 0,
+    _viewportHeight = 0,
+    _currentWidth = 0,
+    _currentHeight = 0,
+
+    _enabledAttributes = {},
+
+    // frustum
+
+    _frustum = new THREE.Frustum(),
+
+     // camera matrices cache
+
+    _projScreenMatrix = new THREE.Matrix4(),
+    _projScreenMatrixPS = new THREE.Matrix4(),
+
+    _vector3 = new THREE.Vector3(),
+
+    // light arrays cache
+
+    _direction = new THREE.Vector3(),
+
+    _lightsNeedUpdate = true,
+
+    _lights = {
+
+            ambient: [ 0, 0, 0 ],
+            directional: { length: 0, colors: new Array(), positions: new Array() },
+            point: { length: 0, colors: new Array(), positions: new Array(), distances: new Array() },
+            spot: { length: 0, colors: new Array(), positions: new Array(), distances: new Array(), directions: new Array(), anglesCos: new Array(), exponents: new Array() },
+            hemi: { length: 0, skyColors: new Array(), groundColors: new Array(), positions: new Array() }
+
+    };
+
+    // initialize
+
+    var _gl;
+
+    initGL();
+
+    setDefaultGLState();
+
+    this.context = _gl;    
+
+    // API
+
+    this.getContext = function () {
+
+            return _gl;
+
+    };
+
+    this.getPrecision = function () {
+
+            return _precision;
+
+    };
+    
+    this.setClearColorHex = function ( hex, alpha ) {
+
+            _clearColor.setHex( hex );
+            _clearAlpha = alpha;
+
+            _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
+
+    };
+
+    this.setSize = function ( width, height ) {
+
+            _canvas.width = width * this.devicePixelRatio;
+            _canvas.height = height * this.devicePixelRatio;
+
+            _canvas.style.width = width + 'px';
+            _canvas.style.height = height + 'px';
+
+            this.setViewport( 0, 0, _canvas.width, _canvas.height );
+
+    };
+
+    this.setViewport = function ( x, y, width, height ) {
+
+            _viewportX = x !== undefined ? x : 0;
+            _viewportY = y !== undefined ? y : 0;
+
+            _viewportWidth = width !== undefined ? width : _canvas.width;
+            _viewportHeight = height !== undefined ? height : _canvas.height;
+
+            _gl.viewport( _viewportX, _viewportY, _viewportWidth, _viewportHeight );
+
+    };
+
+    this.clear = function ( color, depth, stencil ) {
+
+            var bits = 0;
+
+            if ( color === undefined || color ) bits |= _gl.COLOR_BUFFER_BIT;
+            if ( depth === undefined || depth ) bits |= _gl.DEPTH_BUFFER_BIT;
+            if ( stencil === undefined || stencil ) bits |= _gl.STENCIL_BUFFER_BIT;
+
+            _gl.clear( bits );
+
+    };
+
+    this.clearTarget = function ( renderTarget, color, depth, stencil ) {
+
+            this.setRenderTarget( renderTarget );
+            this.clear( color, depth, stencil );
+
+    };
+
+    this.render = function ( scene, camera, renderTarget, forceClear ) {
+
+            if ( camera instanceof THREE.Camera === false ) {
+
+                    console.error( 'THREE.WebGLRenderer.render: camera is not an instance of THREE.Camera.' );
+                    return;
+
+            }
+
+            var i, il,
+
+            webglObject, object,
+            renderList,
+
+            lights = scene.__lights,
+            fog = scene.fog;
+
+            // reset caching for this frame
+
+            _currentMaterialId = -1;
+            _lightsNeedUpdate = true;
+
+            // update scene graph
+
+            if ( this.autoUpdateScene ) scene.updateMatrixWorld();
+
+            // update camera matrices and frustum
+
+            if ( camera.parent === undefined ) camera.updateMatrixWorld();
+
+            camera.matrixWorldInverse.getInverse( camera.matrixWorld );
+
+            _projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+            _frustum.setFromMatrix( _projScreenMatrix );
+
+            // update WebGL objects
+
+            if ( this.autoUpdateObjects ) this.initWebGLObjects( scene );
+
+            // custom render plugins (pre pass)
+
+            renderPlugins( this.renderPluginsPre, scene, camera );
+
+            //
+
+            _this.info.render.calls = 0;
+            _this.info.render.vertices = 0;
+            _this.info.render.faces = 0;
+            _this.info.render.points = 0;
+
+            this.setRenderTarget( renderTarget );
+
+            if ( this.autoClear || forceClear ) {
+
+                    this.clear( this.autoClearColor, this.autoClearDepth, this.autoClearStencil );
+
+            }
+
+            // set matrices for regular objects (frustum culled)
+
+            renderList = scene.__webglObjects;
+
+            for ( i = 0, il = renderList.length; i < il; i ++ ) {
+
+                    webglObject = renderList[ i ];
+                    object = webglObject.object;
+
+                    webglObject.render = false;
+
+                    if ( object.visible ) {
+
+                            if ( ! ( object instanceof THREE.Mesh || object instanceof THREE.ParticleSystem ) || ! ( object.frustumCulled ) || _frustum.intersectsObject( object ) ) {
+
+                                    setupMatrices( object, camera );
+
+                                    unrollBufferMaterial( webglObject );
+
+                                    webglObject.render = true;
+
+                                    if ( this.sortObjects === true ) {
+
+                                            if ( object.renderDepth !== null ) {
+
+                                                    webglObject.z = object.renderDepth;
+
+                                            } else {
+
+                                                    _vector3.getPositionFromMatrix( object.matrixWorld );
+                                                    _vector3.applyProjection( _projScreenMatrix );
+
+                                                    webglObject.z = _vector3.z;
+
+                                            }
+
+                                            webglObject.id = object.id;
+
+                                    }
+
+                            }
+
+                    }
+
+            }
+
+            if ( this.sortObjects ) {
+
+                    renderList.sort( painterSortStable );
+
+            }
+
+            // set matrices for immediate objects
+
+            renderList = scene.__webglObjectsImmediate;
+
+            for ( i = 0, il = renderList.length; i < il; i ++ ) {
+
+                    webglObject = renderList[ i ];
+                    object = webglObject.object;
+
+                    if ( object.visible ) {
+
+                            setupMatrices( object, camera );
+
+                            unrollImmediateBufferMaterial( webglObject );
+
+                    }
+
+            }
+
+            if ( scene.overrideMaterial ) {
+
+                    var material = scene.overrideMaterial;
+
+                    this.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
+                    this.setDepthTest( material.depthTest );
+                    this.setDepthWrite( material.depthWrite );
+                    setPolygonOffset( material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits );
+
+                    renderObjects( scene.__webglObjects, false, "", camera, lights, fog, true, material );
+                    renderObjectsImmediate( scene.__webglObjectsImmediate, "", camera, lights, fog, false, material );
+
+            } else {
+
+                    var material = null;
+
+                    // opaque pass (front-to-back order)
+
+                    this.setBlending( THREE.NoBlending );
+
+                    renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
+                    renderObjectsImmediate( scene.__webglObjectsImmediate, "opaque", camera, lights, fog, false, material );
+
+                    // transparent pass (back-to-front order)
+
+                    renderObjects( scene.__webglObjects, false, "transparent", camera, lights, fog, true, material );
+                    renderObjectsImmediate( scene.__webglObjectsImmediate, "transparent", camera, lights, fog, true, material );
+
+            }
+
+            // custom render plugins (post pass)
+
+            renderPlugins( this.renderPluginsPost, scene, camera );
+
+
+            // Generate mipmap if we're using any kind of mipmap filtering
+
+            if ( renderTarget && renderTarget.generateMipmaps && renderTarget.minFilter !== THREE.NearestFilter && renderTarget.minFilter !== THREE.LinearFilter ) {
+
+                    updateRenderTargetMipmap( renderTarget );
+
+            }
+
+            // Ensure depth buffer writing is enabled so it can be cleared on next render
+
+            this.setDepthTest( true );
+            this.setDepthWrite( true );
+
+            // _gl.finish();
+
+    };
+
+    this.initWebGLObjects = function ( scene ) {
+
+            if ( !scene.__webglObjects ) {
+
+                    scene.__webglObjects = [];
+                    scene.__webglObjectsImmediate = [];
+                    scene.__webglSprites = [];
+                    scene.__webglFlares = [];
+
+            }
+
+            //Add objects; this sets up buffers for each geometryChunk
+            while ( scene.__objectsAdded.length ) {
+
+                    addObject( scene.__objectsAdded[ 0 ], scene );
+                    scene.__objectsAdded.splice( 0, 1 );
+
+            }
+
+            while ( scene.__objectsRemoved.length ) {
+
+                    removeObject( scene.__objectsRemoved[ 0 ], scene );
+                    scene.__objectsRemoved.splice( 0, 1 );
+
+            }
+
+            // update must be called after objects adding / removal
+            //This sends typed arrays to GL buffers for each geometryChunk
+            for ( var o = 0, ol = scene.__webglObjects.length; o < ol; o ++ ) {
+
+                    updateObject( scene.__webglObjects[ o ].object );
+
+            }
+
+    };
+
+    // Objects adding
+
+    function addObject ( object, scene ) {
+
+        var g, geometry, material, geometryGroup;
+
+        if ( ! object.__webglInit ) {
+
+            object.__webglInit = true;
+
+            object._modelViewMatrix = new THREE.Matrix4();
+            object._normalMatrix = new THREE.Matrix3();
+
+            if ( object.geometry !== undefined && object.geometry.__webglInit === undefined ) {
+
+                    object.geometry.__webglInit = true;
+                    //object.geometry.addEventListener( 'dispose', onGeometryDispose );
+
+            }
+
+            if (object instanceof THREE.Mesh){
+                geometry = object.geometry;
+                material = object.material;
+
+                for ( g in geometry.geometryChunks ) {
+
+                        var geometryChunk = geometry.geometryChunks[ g ];
+
+                        // initialise VBO on the first access
+
+                        if ( ! geometryChunk.__webglVertexBuffer ) {
+
+                                createBuffers( geometryChunk );
+                                //initMeshBuffers( geometryGroup, object );
+
+                                geometry.verticesNeedUpdate = true;
+                                geometry.elementsNeedUpdate = true;
+                                geometry.normalsNeedUpdate = true;
+                                geometry.colorsNeedUpdate = true;
+
+                        }
+                }
+            }
+            
+        }
+        
+        if ( ! object.__webglActive ) {
+            
+            if ( object instanceof THREE.Mesh) {
+                geometry = object.geometry;
+
+                //TODO: addBuffer for all chunks
+                //Not entirely sure what this function does; just seems to set up an object
+                //with references to the geometryChunk (group), initialized webGL objects, and mesh
+                for ( g in geometry.geometryChunks ) {
+                        geometryChunk = geometry.geometryChunks[ g ];
+
+                        addBuffer (scene.__webglObjects, geometryChunk, object);
+                }
+            }
+            
+            object.__webglActive = true;
+        }
+
+    };
+
+    function updateObject ( object ) {
+
+            var geometry = object.geometry,
+                    geometryGroup, geometryChunk, customAttributesDirty, material;
+
+            if ( object instanceof THREE.Mesh ) {
+                
+                for (g in geometry.geometryChunks ) {
+                        geometryChunk = geometry.geometryChunks[ g ];
+
+                        if ( geometry.verticesNeedUpdate || geometry.morphTargetsNeedUpdate || geometry.elementsNeedUpdate ||
+                                 geometry.uvsNeedUpdate || geometry.normalsNeedUpdate ||
+                                 geometry.colorsNeedUpdate || geometry.tangentsNeedUpdate || customAttributesDirty ) {
+
+                                setBuffers( geometryChunk, _gl.DYNAMIC_DRAW );
+
+                        }
+                }
+                geometry.verticesNeedUpdate = false;
+                geometry.morphTargetsNeedUpdate = false;
+                geometry.elementsNeedUpdate = false;
+                geometry.uvsNeedUpdate = false;
+                geometry.normalsNeedUpdate = false;
+                geometry.colorsNeedUpdate = false;
+                geometry.tangentsNeedUpdate = false;
+
+                geometry.buffersNeedUpdate = false;
+
+                //material.attributes && clearCustomAttributes( material );
+
+        }
+
+    };
+
+    function setBuffers( geometryChunk, hint ) {
+
+        var vertexArray = geometryChunk.__vertexArray;
+        var colorArray = geometryChunk.__colorArray;
+        var normalArray = geometryChunk.__normalArray;
+        var faceArray = geometryChunk.__faceArray;
+        var lineArray = geometryChunk.__lineArray;
+
+        //vertex buffers
+        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglVertexBuffer );
+        _gl.bufferData( _gl.ARRAY_BUFFER, vertexArray, hint );		
+
+        //color buffers
+        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglColorBuffer );
+        _gl.bufferData( _gl.ARRAY_BUFFER, colorArray, hint );		
+
+        //normal buffers
+        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
+        _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );		
+
+        //face (index) buffers
+        _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
+        _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );	
+
+        //line (index) buffers
+        _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglLineBuffer);
+        _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint);			
+
+    };
+
+
+    //Creates appropriate gl buffers for geometry chunk
+    function createBuffers ( geometryChunk ) {
+
+            geometryChunk.__webglVertexBuffer = _gl.createBuffer();
+            geometryChunk.__webglNormalBuffer = _gl.createBuffer();
+            geometryChunk.__webglColorBuffer = _gl.createBuffer();
+
+            geometryChunk.__webglFaceBuffer = _gl.createBuffer();
+            geometryChunk.__webglLineBuffer = _gl.createBuffer();
+
+            _this.info.memory.geometries++;
+    };
+
+    function addBuffer ( objlist, buffer, object ) {
+
+            objlist.push(
+                    {
+                            buffer: buffer,
+                            object: object,
+                            opaque: null,
+                            transparent: null
+                    }
+            );
+
+    };
+
+    function initGL () {
+
+            try {
+
+                    if ( ! ( _gl = _canvas.getContext( 'experimental-webgl', { alpha: _alpha, premultipliedAlpha: _premultipliedAlpha, antialias: _antialias, stencil: _stencil, preserveDrawingBuffer: _preserveDrawingBuffer } ) ) ) {
+
+                            throw 'Error creating WebGL context.';
+
+                    }
+
+            } catch ( error ) {
+
+                    console.error( error );
+
+            }
+
+    };
+
+    function setDefaultGLState () {
+
+            _gl.clearColor( 0, 0, 0, 1 );
+            _gl.clearDepth( 1 );
+            _gl.clearStencil( 0 );
+
+            _gl.enable( _gl.DEPTH_TEST );
+            _gl.depthFunc( _gl.LEQUAL );
+
+            _gl.frontFace( _gl.CCW );
+            _gl.cullFace( _gl.BACK );
+            _gl.enable( _gl.CULL_FACE );
+
+            _gl.enable( _gl.BLEND );
+            _gl.blendEquation( _gl.FUNC_ADD );
+            _gl.blendFunc( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA );
+
+            _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
+
+    };
+        
+};
+
 WebMol.WebGLRenderer = function ( parameters ) {
 
 	console.log( 'WebMol.WebGLRenderer');
@@ -500,7 +1127,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 		geometryGroup.__webglFaceBuffer = _gl.createBuffer();
 		geometryGroup.__webglLineBuffer = _gl.createBuffer();
 
-
+                _this.info.memory.geometries++;
 	};
 	// Events
 
@@ -7574,7 +8201,7 @@ WebMol.WebGLRenderer = function ( parameters ) {
 					"precision" : 1
 				};
 				
-			}
+			};
 		}
 
 	};
