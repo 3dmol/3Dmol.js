@@ -2,7 +2,7 @@
 
 var WebMol = WebMol || {};
 
-/*
+
 THREE.Geometry.prototype.colorAll = function(color) {
 	for ( var i = 0; i < this.faces.length; i++) {
 		this.faces[i].color = color;
@@ -16,7 +16,7 @@ THREE.Matrix4.prototype.isIdentity = function() {
 				return false;
 	return true;
 };
-*/
+
 var TV3 = THREE.Vector3, TF3 = THREE.Face3;
 
 // a webmol unified interace to gmol
@@ -33,11 +33,11 @@ WebMol.glmolViewer = (function() {
 		var xmax = ymax = zmax = -9999;
 		var xsum = ysum = zsum = cnt = 0;
 
-		if (atomlist.length == 0)
+		if (atomlist.length === 0)
 			return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
 		for ( var i = 0; i < atomlist.length; i++) {
 			var atom = atomlist[i];
-			if (atom == undefined)
+			if (atom === undefined)
 				continue;
 			cnt++;
 			xsum += atom.x;
@@ -202,7 +202,7 @@ WebMol.glmolViewer = (function() {
 				x = ev.originalEvent.targetTouches[0].pageX;
 				y = ev.originalEvent.targetTouches[0].pageY;
 			}
-			if (x == undefined)
+			if (x === undefined)
 				return;
 			isDragging = true;
 			mouseButton = ev.which;
@@ -408,11 +408,11 @@ WebMol.glmolViewer = (function() {
 
 		function getAtomsFromSel(sel) {
 			var atoms = [];
-			if (typeof (sel) == "undefined")
+			if (typeof (sel) === "undefined")
 				sel = {};
 
 			var ms = [];
-			if (typeof sel.model == "undefined") {
+			if (typeof sel.model === "undefined") {
 				for ( var i = 0; i < models.length; i++) {
 					if (models[i])
 						ms.push(models[i]);
@@ -430,11 +430,11 @@ WebMol.glmolViewer = (function() {
 		};
 		
 		function atomIsSelected(atom,sel) {
-			if (typeof (sel) == "undefined")
+			if (typeof (sel) === "undefined")
 				sel = {};
 
 			var ms = [];
-			if (typeof sel.model == "undefined") {
+			if (typeof sel.model === "undefined") {
 				for ( var i = 0; i < models.length; i++) {
 					if (models[i])
 						ms.push(models[i]);
