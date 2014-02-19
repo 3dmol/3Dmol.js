@@ -24,20 +24,21 @@
         
         <script>
         var glviewer = null;
-        var jviewer = null;
+        //var jviewer = null;
+        var moldata = null;
         $(document).ready(function() {
-        	var moldata = $("#moldata_sdf").val();
+        	moldata = $("#moldata_sdf").val();
         	//var moldata2 = $("#moldata_pdb").val();
-        	
+            
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
                 var m = viewer.addModel(moldata,"sdf");
-                viewer.setStyle({}, {sphere:{}});
+                viewer.setStyle({}, {line:{}});
                 viewer.mapAtomProperties(WebMol.partialCharges);
                 viewer.zoomTo();
                 viewer.render();
             }});	
- 
+            
         });
         </script>
     </head>
