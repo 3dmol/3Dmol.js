@@ -169,8 +169,8 @@ WebMol.GLModel = (function() {
 			if(Math.abs(a1.resi-a2.resi) < 4)
 				return Number.POSITIVE_INFINITY;
 		}
-		if ((a1.atom == "O" && a2.atom == "N")
-				|| (a1.atom == "N" && a2.atom == "O")) {
+		if ((a1.atom === "O" && a2.atom === "N")
+				|| (a1.atom === "N" && a2.atom === "O")) {
 			var xdiff = a1.x - a2.x;
 			if (xdiff > maxlength)
 				return Number.POSITIVE_INFINITY;
@@ -198,7 +198,7 @@ WebMol.GLModel = (function() {
 			atomsarray[i].index = i;
 			// only consider 'N' and 'O'
 			var atom = atomsarray[i];
-			if (!atom.hetflag && (atom.atom == "N" || atom.atom == "O")) {
+			if (!atom.hetflag && (atom.atom === "N" || atom.atom === "O")) {
 				atoms.push(atom);
 				atom.hbondOther = null;
 				atom.hbondDistance = Number.POSITIVE_INFINITY;				
@@ -241,7 +241,7 @@ WebMol.GLModel = (function() {
 			
 			if(isFinite(atom.hbondDistance)) {
 				var other = atom.hbondOther;
-				if(Math.abs(other.resi - atom.resi) == 4) { 
+				if(Math.abs(other.resi - atom.resi) === 4) { 
 					// helix
 					chres[atom.chain][atom.resi] = 'h';
 				}
@@ -1350,7 +1350,7 @@ WebMol.GLModel = (function() {
 					drawAtomCross(atom, crossGeometries);
 					drawBondLines(atom, atoms, lineGeometries);
 					drawBondSticks(atom, atoms, stickGeometry);
-					if (typeof (atom.style.cartoon) != "undefined"
+					if (typeof (atom.style.cartoon) !== "undefined"
 							&& !atom.style.cartoon.hidden) {
 						cartoonAtoms.push(atom);
 					}
