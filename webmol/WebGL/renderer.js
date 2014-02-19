@@ -41,6 +41,9 @@ WebMol.SimpleRenderer = function ( parameters ) {
     this.autoUpdateObjects = true;
     this.autoUpdateScene = true;
     
+	this.renderPluginsPre = [];
+	this.renderPluginsPost = [];
+    
     // info
 
     this.info = {
@@ -214,6 +217,36 @@ WebMol.SimpleRenderer = function ( parameters ) {
 
     };
 
+	this.setBlending = function( blend ) {
+		_gl.disable( _gl.BLEND );
+	};
+
+	// Sorting
+
+	function painterSortStable ( a, b ) {
+
+		if ( a.z !== b.z ) {
+
+			return b.z - a.z;
+
+		} else {
+
+			return b.id - a.id;
+
+		}
+
+	};
+
+	function numericalSort ( a, b ) {
+
+		return b[ 0 ] - a[ 0 ];
+
+	};
+	
+	function setProgram( camera, ligts, fog, material, object ) {
+		
+	};
+	
     this.render = function ( scene, camera, renderTarget, forceClear ) {
 
             if ( camera instanceof THREE.Camera === false ) {
@@ -431,6 +464,12 @@ WebMol.SimpleRenderer = function ( parameters ) {
 
     };
 
+	function renderPlugins( plugins, scene, camera ) {
+
+		if ( ! plugins.length ) return;
+	
+	};
+	
     // Objects adding
 
     function addObject ( object, scene ) {
@@ -561,7 +600,173 @@ WebMol.SimpleRenderer = function ( parameters ) {
 
     };
 
+	this.setRenderTarget = function ( renderTarget ) {
 
+		var isCube = ( renderTarget instanceof THREE.WebGLRenderTargetCube );
+
+		if ( renderTarget && ! renderTarget.__webglFramebuffer ) {
+
+			if ( renderTarget.depthBuffer === undefined ) renderTarget.depthBuffer = true;
+			if ( renderTarget.stencilBuffer === undefined ) renderTarget.stencilBuffer = true;
+
+			renderTarget.addEventListener( 'dispose', onRenderTargetDispose );
+
+			renderTarget.__webglTexture = _gl.createTexture();
+
+			_this.info.memory.textures ++;
+
+			// Setup texture, create render and frame buffers
+
+			var isTargetPowerOfTwo = isPowerOfTwo( renderTarget.width ) && isPowerOfTwo( renderTarget.height ),
+				glFormat = paramThreeToGL( renderTarget.format ),
+				glType = paramThreeToGL( renderTarget.type );
+
+			if ( isCube ) {
+
+				renderTarget.__webglFramebuffer = [];
+				renderTarget.__webglRenderbuffer = [];
+
+				_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, renderTarget.__webglTexture );
+				setTextureParameters( _gl.TEXTURE_CUBE_MAP, renderTarget, isTargetPowerOfTwo );
+
+				for ( var i = 0; i < 6; i ++ ) {
+
+					renderTarget.__webglFramebuffer[ i ] = _gl.createFramebuffer();
+					renderTarget.__webglRenderbuffer[ i ] = _gl.createRenderbuffer();
+
+					_gl.texImage2D( _gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glFormat, renderTarget.width, renderTarget.height, 0, glFormat, glType, null );
+
+					setupFrameBuffer( renderTarget.__webglFramebuffer[ i ], renderTarget, _gl.TEXTURE_CUBE_MAP_POSITIVE_X + i );
+					setupRenderBuffer( renderTarget.__webglRenderbuffer[ i ], renderTarget );
+
+				}
+
+				if ( isTargetPowerOfTwo ) _gl.generateMipmap( _gl.TEXTURE_CUBE_MAP );
+
+			} else {
+
+				renderTarget.__webglFramebuffer = _gl.createFramebuffer();
+
+				if ( renderTarget.shareDepthFrom ) {
+
+					renderTarget.__webglRenderbuffer = renderTarget.shareDepthFrom.__webglRenderbuffer;
+
+				} else {
+
+					renderTarget.__webglRenderbuffer = _gl.createRenderbuffer();
+
+				}
+
+				_gl.bindTexture( _gl.TEXTURE_2D, renderTarget.__webglTexture );
+				setTextureParameters( _gl.TEXTURE_2D, renderTarget, isTargetPowerOfTwo );
+
+				_gl.texImage2D( _gl.TEXTURE_2D, 0, glFormat, renderTarget.width, renderTarget.height, 0, glFormat, glType, null );
+
+				setupFrameBuffer( renderTarget.__webglFramebuffer, renderTarget, _gl.TEXTURE_2D );
+
+				if ( renderTarget.shareDepthFrom ) {
+
+					if ( renderTarget.depthBuffer && ! renderTarget.stencilBuffer ) {
+
+						_gl.framebufferRenderbuffer( _gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT, _gl.RENDERBUFFER, renderTarget.__webglRenderbuffer );
+
+					} else if ( renderTarget.depthBuffer && renderTarget.stencilBuffer ) {
+
+						_gl.framebufferRenderbuffer( _gl.FRAMEBUFFER, _gl.DEPTH_STENCIL_ATTACHMENT, _gl.RENDERBUFFER, renderTarget.__webglRenderbuffer );
+
+					}
+
+				} else {
+
+					setupRenderBuffer( renderTarget.__webglRenderbuffer, renderTarget );
+
+				}
+
+				if ( isTargetPowerOfTwo ) _gl.generateMipmap( _gl.TEXTURE_2D );
+
+			}
+
+			// Release everything
+
+			if ( isCube ) {
+
+				_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, null );
+
+			} else {
+
+				_gl.bindTexture( _gl.TEXTURE_2D, null );
+
+			}
+
+			_gl.bindRenderbuffer( _gl.RENDERBUFFER, null );
+			_gl.bindFramebuffer( _gl.FRAMEBUFFER, null );
+
+		}
+
+		var framebuffer, width, height, vx, vy;
+
+		if ( renderTarget ) {
+
+			if ( isCube ) {
+
+				framebuffer = renderTarget.__webglFramebuffer[ renderTarget.activeCubeFace ];
+
+			} else {
+
+				framebuffer = renderTarget.__webglFramebuffer;
+
+			}
+
+			width = renderTarget.width;
+			height = renderTarget.height;
+
+			vx = 0;
+			vy = 0;
+
+		} else {
+
+			framebuffer = null;
+
+			width = _viewportWidth;
+			height = _viewportHeight;
+
+			vx = _viewportX;
+			vy = _viewportY;
+
+		}
+
+		if ( framebuffer !== _currentFramebuffer ) {
+
+			_gl.bindFramebuffer( _gl.FRAMEBUFFER, framebuffer );
+			_gl.viewport( vx, vy, width, height );
+
+			_currentFramebuffer = framebuffer;
+
+		}
+
+		_currentWidth = width;
+		_currentHeight = height;
+
+	};
+
+	function updateRenderTargetMipmap ( renderTarget ) {
+
+		if ( renderTarget instanceof THREE.WebGLRenderTargetCube ) {
+
+			_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, renderTarget.__webglTexture );
+			_gl.generateMipmap( _gl.TEXTURE_CUBE_MAP );
+			_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, null );
+
+		} else {
+
+			_gl.bindTexture( _gl.TEXTURE_2D, renderTarget.__webglTexture );
+			_gl.generateMipmap( _gl.TEXTURE_2D );
+			_gl.bindTexture( _gl.TEXTURE_2D, null );
+
+		}
+
+	};
+	
     //Creates appropriate gl buffers for geometry chunk
     function createBuffers ( geometryChunk ) {
 
