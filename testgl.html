@@ -31,11 +31,7 @@
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
                 var m = viewer.addModel(moldata,"sdf");
-                //var m2 = viewer.addModel(moldata2,"pdb");
-                viewer.setStyle({}, {sphere:{}});
-                viewer.mapAtomProperties(WebMol.partialCharges);
-                viewer.zoomTo();
-                viewer.render();
+
             }});	
  
         });
