@@ -8,7 +8,7 @@
 <script type="text/javascript" src="webgl-utils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-    precision mediump float;
+    precision highp float;
 
 	varying vec4 vColor;
 
@@ -18,6 +18,8 @@
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
+	precision highp float;
+	
     attribute vec3 aVertexPosition;
     attribute vec4 aVertexColor;
 

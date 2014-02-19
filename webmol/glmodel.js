@@ -818,6 +818,7 @@ WebMol.GLModel = (function() {
 					//make new group if necessary
 					if ( geoGroup.vertices + n_vertices > 65535 ) {
 						geo.geometryChunks.push( new geometryChunk() );
+						geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
 					}
 					
 					geoGroup.vertices += n_vertices;
