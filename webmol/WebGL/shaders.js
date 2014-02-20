@@ -12,6 +12,33 @@ function multiLineString(f) {
             
 }
 
+WebMol.ShaderUtils = {
+	
+	clone: function ( uniforms_src ) {
+		
+		var u, p, parameter, parameter_src, uniforms_clone = {};
+		
+		for (u in uniforms_src) {
+			uniforms_clone[u] = {};
+			uniforms_clone[u].type = uniforms_src[u].type;
+			
+			var srcValue = uniforms_src[u].value;
+			
+			if (srcValue instanceof WebMol.Color)
+				uniforms_clone[u].value = srcValue.clone();
+			else if (typeof srcValue === "number")
+				uniforms_clone[u].value = srcValue;
+			else if (srcValue instanceof Array) 
+				uniforms_clone[u].value = [];
+			else
+				console.error("Error copying shader uniforms from ShaderLib: unknown type for uniform");
+			
+		}
+		
+		return uniforms_clone;
+	}
+};
+
 WebMol.ShaderLib = { 
 	basic : {
 		fragmentShader : multiLineString(function() {/*
@@ -55,9 +82,6 @@ uniform mat3 normalMatrix;
 uniform vec3 cameraPosition;
 
 attribute vec3 position;
-attribute vec3 normal;
-attribute vec2 uv;
-attribute vec2 uv2;
 attribute vec3 color;
 
 varying vec3 vColor;
@@ -70,7 +94,15 @@ void main() {
 
 }
 		
-*/})
+*/}),
+	
+		uniforms : {
+			opacity: { type: 'f', value: 1.0 },
+			diffuse: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+			fogColor: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+			fogNear: { type: 'f', value: 1.0 },
+			fogFar: { type: 'f', value: 2000}
+		}
 
 	},
 	
@@ -128,8 +160,6 @@ uniform vec3 directionalLightDirection[ 1 ];
 
 attribute vec3 position;
 attribute vec3 normal;
-attribute vec2 uv;
-attribute vec2 uv2;
 attribute vec3 color;
 
 varying vec3 vColor;
@@ -160,7 +190,22 @@ void main() {
 	vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;
 }
            
-*/})
+*/}),
+
+		uniforms : {
+			opacity: { type: 'f', value: 1.0 },
+			diffuse: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+			fogColor: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+			fogNear: { type: 'f', value: 1.0 },
+			fogFar: { type: 'f', value: 2000},
+			
+			ambient: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+			diffuse: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+			emissive: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+			ambientLightColor: { type: 'fv', value: [] },
+			directionalLightColor: { type: 'fv', value: [] },
+			directionalLightDirection: { type: 'fv', value: [] }
+		}
 
     }
 };

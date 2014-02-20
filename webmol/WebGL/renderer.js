@@ -299,6 +299,32 @@ WebMol.SimpleRenderer = function ( parameters ) {
 
 	};
 	
+	function enableAttribute( attribute ) {
+
+		if ( ! _enabledAttributes[ attribute ] ) {
+
+			_gl.enableVertexAttribArray( attribute );
+			_enabledAttributes[ attribute ] = true;
+
+		}
+
+	};
+
+	function disableAttributes() {
+
+		for ( var attribute in _enabledAttributes ) {
+
+			if ( _enabledAttributes[ attribute ] ) {
+
+				_gl.disableVertexAttribArray( attribute );
+				_enabledAttributes[ attribute ] = false;
+
+			}
+
+		}
+
+	};	
+	
 	function setPolygonOffset ( polygonOffset, factor, units) {
 		
 		if ( _oldPolygonOffset !== polygonOffset ) {
@@ -309,6 +335,15 @@ WebMol.SimpleRenderer = function ( parameters ) {
 				_gl.disable( _gl.POLYGON_OFFSET_FILL );
 		}
 	};
+	
+	function setLineWidth ( width ) {
+		
+		if ( width !== _oldLineWidth ) {
+			_gl.lineWidth(width);
+			_oldLineWidth = width;
+		}
+		
+	}
 	
 	var deallocateMaterial = function ( material ) {
 
@@ -373,32 +408,34 @@ WebMol.SimpleRenderer = function ( parameters ) {
 
 	};
 
-//Compile and return shader
-function getShader (type, str) {
-	
-	var shader;
-	
-	if (type === "fragment")
-		shader = _gl.createShader( _gl.FRAGMENT_SHADER );
-	else if (type === "vertex")
-		shader = _gl.createShader( _gl.VERTEX_SHADER );
-	
-	_gl.shaderSource(shader, str);
-	_gl.compileShader(shader);
-	
-	if ( ! _gl.getShaderParameter(shader, _gl.COMPILE_STATUS) ) {
+	//Compile and return shader
+	function getShader (type, str) {
 		
-		console.error(_gl.getShaderInfoLog(shader));
-		console.error("could not initialize shader");
-		return null;
+		var shader;
 		
-	}
+		if (type === "fragment")
+			shader = _gl.createShader( _gl.FRAGMENT_SHADER );
+		else if (type === "vertex")
+			shader = _gl.createShader( _gl.VERTEX_SHADER );
+		
+		_gl.shaderSource(shader, str);
+		_gl.compileShader(shader);
+		
+		if ( ! _gl.getShaderParameter(shader, _gl.COMPILE_STATUS) ) {
+			
+			console.error(_gl.getShaderInfoLog(shader));
+			console.error("could not initialize shader");
+			return null;
+			
+		}
+		
+		return shader;
+		
+	};	
 	
-	return shader;
 	
-}	
-	
-	function buildProgram(fragmentShader, vertexShader) {
+	//Compile appropriate shaders (if necessary) from source code and attach to gl program.
+	function buildProgram(fragmentShader, vertexShader, uniforms) {
 		
 		var p, pl, d, program, code;
 		var chunks = [];
@@ -422,6 +459,8 @@ function getShader (type, str) {
 			}
 		}
 		
+		//Set up new program and compile shaders
+		
 		program = _gl.createProgram();
 		
 		var glFragmentShader = getShader("fragment", fragmentShader);
@@ -435,10 +474,52 @@ function getShader (type, str) {
 		if (! _gl.getProgramParameter(program, _gl.LINK_STATUS) )
 			console.error("Could not initialize shader");
 			
+		//gather and cache uniform variables and attributes
+		
+		program.uniforms = {};
+		program.attributes = {};
+		
+		var identifiers, u, a, i;
+		
+		//uniform vars
+		identifiers = 
+			[ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix', 'normalMatrix', 'modelMatrix', 'cameraPosition' ];
+		
+		//custom uniform vars
+		for (u in uniforms) 
+			identifiers.push(u);
+		
+		for (i = 0; i < identifiers.length; i++) {
+			
+			var uniformVar = identifiers[i];
+			program.uniforms[uniformVar] = _gl.getUniformLocation(program, uniformVar);
+			
+		}
+		
+		//attributes
+		identifiers = 
+			[ 'position', 'normal', 'color', 'lineDistance' ];
+		
+		/*
+		for (a in attributes)
+			identifiers.push(a);
+		*/
+			
+		for(i = 0; i < identifiers.length; i++) {
+			
+			var attributeVar = identifiers[i];
+			program.attributes[attributeVar] = _gl.getAttribLocation(program, attributeVar);
+		}
+		
+		program.id = _programs_counter++;
+		_programs.push( {program: program, code: code, usedTimes: 1} );
+		_this.info.memory.programs = _programs.length;
+		
 		return program;
 	};
 	
 	//TODO: need to set up shader attributes and uniforms as attributes on material object after attaching prgm
+	//We need to attach appropriate uniform variables to material after shaders have been chosen
 	this.initMaterial = function ( material, lights, fog, object ) {
 		
 		//material.addEventListener('dispose', onMaterialDispose);
@@ -450,22 +531,21 @@ function getShader (type, str) {
 		else if (material instanceof THREE.MeshLambertMaterial)
 			shaderID = "lambert";
 			
-		if (shaderID)
-			setMaterialShaders( material, WebMol.ShaderLib[shaderID] );
+		if (shaderID) {
 			
-		material.program = buildProgram(material.vertexShader, material.fragmentShader);
+			var shader = WebMol.ShaderLib[shaderID];
+			material.shaderType = shaderID;
+			material.vertexShader = shader.vertexShader;
+			material.fragmentShader = shader.fragmentShader;
+			material.uniforms = WebMol.ShaderUtils.clone(shader.uniforms);
+			//TODO: set material uniforms to shader uniform variables
+		
+		}
+			
+		material.program = buildProgram(material.fragmentShader, material.vertexShader, material.uniforms);
+		
 	};
 	
-	//TODO: add uniform variables as attribute
-	function setMaterialShaders(material, shaders) {
-		
-		material.vertexShader = shaders.vertexShader;
-		material.fragmentShader = shaders.fragmentShader;
-		
-		
-	};
-	
-	//TODO: initialize shaders
 	function setProgram( camera, lights, fog, material, object ) {
 		
 		if ( material.needsUpdate ) {
@@ -475,7 +555,185 @@ function getShader (type, str) {
 				
 				_this.initMaterial( material, lights, fog, object );
 				material.needsUpdate = false;
-		} 
+		}
+		
+		var refreshMaterial = false;
+		
+		//p_uniforms: uniformVarName => uniformLocation
+		//m_uniforms: uniformVarName => uniformJsVal
+		var program = material.program,
+			p_uniforms = program.uniforms,
+			m_uniforms = material.uniforms;
+			
+		if (program != _currentProgram) {		
+			_gl.useProgram(program);
+			_currentProgram = program;
+			
+			refreshMaterial = true;
+		}
+		
+		if (material.id != _currentMaterialId) {
+			_currentMaterialId = material.id;
+			refreshMaterial = true;
+		}
+		
+		if (camera != _currentCamera) {	
+			_currentCamera = camera;
+			refreshMaterial = true;
+		}
+		
+		//Send projection matrix to uniform variable in shader
+		if (refreshMaterial) {
+			
+			//Load projection, model-view matrices for perspective
+			_gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
+			_gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+		
+			//Set up correct fog uniform vals
+			m_uniforms.fogColor.value = fog.color;
+			m_uniforms.fogNear.value = fog.near;
+			m_uniforms.fogFar.value = fog.far;
+			
+			//Set up lights for lambert shader
+			if (material.shaderType === "lambert") {
+				
+				//load view, model, and normal matrices for directional and object lighting
+				_gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
+				_gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+				_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
+				
+				if (_lightsNeedUpdate) {
+					//setupLights(program, lights);
+					_lightsNeedUpdate = false;
+				}
+				
+				//Set up correct light uniform var vals
+				m_uniforms.ambientLightColor.value = lights.ambient;
+				m_uniforms.directionalLightColor.value = lights.directional.colors;
+				m_uniforms.directionalLightDirection.value = lights.directional.position;
+				m_uniforms.ambient.value = material.ambient;
+				m_uniforms.emissive.value = material.emissive;
+				
+			}
+			
+			//opacity, diffuse, emissive, etc
+			m_uniforms.opacity.value = material.opacity;
+			m_uniforms.diffuse.value = material.color;
+			
+			//Load any other material specific uniform variables to gl shaders
+			loadMaterialUniforms(p_uniforms, m_uniforms);
+			
+			return program;
+		
+		}
+		
+	};
+	
+	//TODO: eventually move away from THREE.js types (e.g. vector3, matix4, etc)
+	function loadMaterialUniforms(p_uniforms, m_uniforms) {
+		var uniformVar, type, uniformVal, uniformLoc;
+		
+		for (uniformVar in m_uniforms) {
+			if (! p_uniforms[uniformVar])
+				continue;
+			
+			type = m_uniforms[uniformVar].type;
+			uniformVal = m_uniforms[uniformVar].value;
+			uniformLoc = p_uniforms[uniformVar];
+			
+			switch (type) {
+				
+				//single float
+				case 'f':
+					_gl.uniform1f(uniformLoc, uniformVal);
+					break;
+				//array of floats
+				case 'fv':
+					_gl.uniform3fv(uniformLoc, uniformVal);
+					break;
+				//color - r,g,b floats
+				case 'c':
+					_gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g, uniformVal.b);
+					break;
+			}	
+
+		}
+		
+	};
+	
+	this.renderBuffer = function ( camera, lights, fog, material, geometryGroup, object ) {
+		
+		if ( ! material.visible )
+			return;
+		
+		var program, attributes, linewidth, primitives, a, attribute, i, il;
+		
+		//Sets up proper vertex and fragment shaders and attaches them to webGL program
+		//Also sets appropriate uniform variables 
+		program = setProgram(camera, lights, fog, material, object);
+		
+		attributes = program.attributes;
+		
+		var updateBuffers = false,
+			geometryGroupHash = (geometryGroup.id * 0xffffff) + (program.id * 2);
+		
+		if (geometryGroupHash !== _currentGeometryGroupHash) {
+			_currentGeometryGroupHash = geometryGroupHash;
+			updateBuffers = true;
+		}
+		
+		//rebind shader attributes to appropriate (and already initialized) gl buffers
+		if (updateBuffers) {
+			
+			disableAttributes();
+			
+			// Vertices
+			if (attributes.position >= 0) {			
+				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
+				enableAttribute( attributes.position );
+				_gl.vertexAttribPointer( attributes.position, 3, _gl.FLOAT, false, 0, 0 );	
+			}
+			
+			// Colors
+			if (attributes.colors >= 0) {
+				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
+				enableAttribute( attributes.color );
+				_gl.vertexAttribPointer( attributes.color, 3, _gl.FLOAT, false, 0, 0 );
+			}
+			
+			// Normals (lambert shader only)
+			if (attributes.position >=0) {
+				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
+				enableAttribute( attributes.normal );
+				_gl.vertexAttribPointer( attributes.normal, 3, _gl.FLOAT, false, 0, 0 );
+			}
+			
+		}
+
+		//Render
+		
+		//lambert shaders - draw triangles
+		//TODO: make sure geometryGroup's face count is setup correctly
+		if (object instanceof THREE.Mesh) {
+			
+			if (updateBuffers)
+				_gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
+			_gl.drawElements( _gl.TRIANGLES, geometryGroup.__webglFaceCount, _gl.UNSIGNED_SHORT, 0 );
+			
+			_this.info.render.calls++;
+			_this.info.render.vertices += geometryGroup.__webglFaceCount;
+			_this.info.render.faces += geometryGroup.__webglFaceCount / 3;
+		}
+		
+		//basic shaders - draw lines
+		else if (object instanceof THREE.Line) {
+			
+			setLineWidth(material.lineWidth);
+			_gl.drawArrays( _gl.LINES, 0, geometryGroup.__webglLineCount );
+			
+			_this.info.render.calls++;
+		}
+		
 	};
 
 	//rendering
@@ -627,16 +885,6 @@ function getShader (type, str) {
 
     };
 
-	this.renderBuffer = function ( camera, lights, fog, material, geometryGroup, object ) {
-		
-		if ( ! material.visible )
-			return;
-		
-		var program, attributes, linewidth, primitives, a, attribute, i, il;
-		
-		program = setProgram(camera, lights, fog, material, object;)
-	};
-
     this.initWebGLObjects = function ( scene ) {
 
             if ( !scene.__webglObjects ) {
@@ -743,8 +991,13 @@ function getShader (type, str) {
                 for ( g in geometry.geometryChunks ) {
                         geometryChunk = geometry.geometryChunks[ g ];
 
-                        addBuffer (scene.__webglObjects, geometryChunk, object);
+                        addBuffer( scene.__webglObjects, geometryChunk, object );
                 }
+            }
+            
+            else if ( object instanceof THREE.Line ) {
+            	geometry = object.geometry;
+            	addBuffer( scene.__webglObjects, geometry, object );
             }
             
             object.__webglActive = true;
@@ -813,6 +1066,8 @@ function getShader (type, str) {
 			? object.material.materials[ geometryGroup.materialIndex ]
 			: object.material;
 	};
+	
+	//
 
     function setBuffers( geometryChunk, hint ) {
 
@@ -844,6 +1099,9 @@ function getShader (type, str) {
 
     };
 
+	//TODO: Fill up typed arrays in glmodel.js (like we do for mesh objects)
+	//TODO: incorporate the actual buffering (call to gl.bufferdata) into setBuffers function
+	//Also - do we need the lineDistanceBuffer ?
 	function setLineBuffers ( geometry, hint ) {
 
 		var v, c, d, vertex, offset, color,
@@ -921,120 +1179,24 @@ function getShader (type, str) {
 
 		}
 
-		if ( customAttributes ) {
-
-			for ( i = 0, il = customAttributes.length; i < il; i ++ ) {
-
-				customAttribute = customAttributes[ i ];
-
-				if ( customAttribute.needsUpdate &&
-					 ( customAttribute.boundTo === undefined ||
-					   customAttribute.boundTo === "vertices" ) ) {
-
-					offset = 0;
-
-					cal = customAttribute.value.length;
-
-					if ( customAttribute.size === 1 ) {
-
-						for ( ca = 0; ca < cal; ca ++ ) {
-
-							customAttribute.array[ ca ] = customAttribute.value[ ca ];
-
-						}
-
-					} else if ( customAttribute.size === 2 ) {
-
-						for ( ca = 0; ca < cal; ca ++ ) {
-
-							value = customAttribute.value[ ca ];
-
-							customAttribute.array[ offset ] 	= value.x;
-							customAttribute.array[ offset + 1 ] = value.y;
-
-							offset += 2;
-
-						}
-
-					} else if ( customAttribute.size === 3 ) {
-
-						if ( customAttribute.type === "c" ) {
-
-							for ( ca = 0; ca < cal; ca ++ ) {
-
-								value = customAttribute.value[ ca ];
-
-								customAttribute.array[ offset ] 	= value.r;
-								customAttribute.array[ offset + 1 ] = value.g;
-								customAttribute.array[ offset + 2 ] = value.b;
-
-								offset += 3;
-
-							}
-
-						} else {
-
-							for ( ca = 0; ca < cal; ca ++ ) {
-
-								value = customAttribute.value[ ca ];
-
-								customAttribute.array[ offset ] 	= value.x;
-								customAttribute.array[ offset + 1 ] = value.y;
-								customAttribute.array[ offset + 2 ] = value.z;
-
-								offset += 3;
-
-							}
-
-						}
-
-					} else if ( customAttribute.size === 4 ) {
-
-						for ( ca = 0; ca < cal; ca ++ ) {
-
-							value = customAttribute.value[ ca ];
-
-							customAttribute.array[ offset ] 	 = value.x;
-							customAttribute.array[ offset + 1  ] = value.y;
-							customAttribute.array[ offset + 2  ] = value.z;
-							customAttribute.array[ offset + 3  ] = value.w;
-
-							offset += 4;
-
-						}
-
-					}
-
-					_gl.bindBuffer( _gl.ARRAY_BUFFER, customAttribute.buffer );
-					_gl.bufferData( _gl.ARRAY_BUFFER, customAttribute.array, hint );
-
-				}
-
-			}
-
-		}
-
 	};
 	
-	function updateRenderTargetMipmap ( renderTarget ) {
+	//TODO: Move this functionality, along with filling up typed buffers (above), to glmodel.js
+	function initLineBuffers ( geometry, object ) {
 
-		if ( renderTarget instanceof THREE.WebGLRenderTargetCube ) {
+		var nvertices = geometry.vertices.length;
 
-			_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, renderTarget.__webglTexture );
-			_gl.generateMipmap( _gl.TEXTURE_CUBE_MAP );
-			_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, null );
+		geometry.__vertexArray = new Float32Array( nvertices * 3 );
+		geometry.__colorArray = new Float32Array( nvertices * 3 );
+		geometry.__lineDistanceArray = new Float32Array( nvertices * 1 );
 
-		} else {
-
-			_gl.bindTexture( _gl.TEXTURE_2D, renderTarget.__webglTexture );
-			_gl.generateMipmap( _gl.TEXTURE_2D );
-			_gl.bindTexture( _gl.TEXTURE_2D, null );
-
-		}
+		geometry.__webglLineCount = nvertices;
 
 	};
 	
     //Creates appropriate gl buffers for geometry chunk
+    //TODO: do we need line buffer for mesh objects?
+    //Also, can we integrate this with createLineBuffers?
     function createBuffers ( geometryChunk ) {
 
         geometryChunk.__webglVertexBuffer = _gl.createBuffer();
