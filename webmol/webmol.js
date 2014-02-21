@@ -101,9 +101,9 @@ WebMol.CC = {
 //TODO: eventually make all new WebMol types to replace THREE types (color, vector, matrix, etc)
 WebMol.Color = function( r, g, b ){
 	
-	this.r = r === undefined ? 1.0 : r;
-	this.g = g === undefined ? 1.0 : g;
-	this.b = b === undefined ? 1.0 : b;
+	this.r = r === undefined ? 0.0 : r;
+	this.g = g === undefined ? 0.0 : g;
+	this.b = b === undefined ? 0.0 : b;
 				
 };
 

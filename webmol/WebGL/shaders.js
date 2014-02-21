@@ -74,7 +74,7 @@ void main() {
 
 precision highp float;
 
-uniform mat4 modelMatrix;
+
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
@@ -145,7 +145,6 @@ void main() {
 
 precision highp float;
 
-uniform mat4 modelMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
@@ -173,10 +172,6 @@ void main() {
 	vec3 transformedNormal = normalMatrix * objectNormal;	
 	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );;
 	
-	gl_Position = projectionMatrix * mvPosition;
-	
-	vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
-	
 	vLightFront = vec3( 0.0 );
 	
 	transformedNormal = normalize( transformedNormal );
@@ -188,6 +183,8 @@ void main() {
 	
 	vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;
 	vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;
+	
+	gl_Position = projectionMatrix * mvPosition;
 }
            
 */}),

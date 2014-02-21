@@ -8,7 +8,7 @@ WebMol.SimpleRenderer = function ( parameters ) {
     
     var _canvas = parameters.canvas !== undefined ? parameters.canvas : document.createElement( 'canvas' ),
 
-    _precision = parameters.precision !== undefined ? parameters.precision : 'mediump',
+    _precision = parameters.precision !== undefined ? parameters.precision : 'highp',
 
     _alpha = parameters.alpha !== undefined ? parameters.alpha : true,
     _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha : true,
@@ -133,7 +133,7 @@ WebMol.SimpleRenderer = function ( parameters ) {
 
     _lights = {
 
-            ambient: [ 0, 0, 0 ],
+            ambient: [0,0,0],
             directional: { length: 0, colors: new Array(), positions: new Array() },
             point: { length: 0, colors: new Array(), positions: new Array(), distances: new Array() },
             spot: { length: 0, colors: new Array(), positions: new Array(), distances: new Array(), directions: new Array(), anglesCos: new Array(), exponents: new Array() },
@@ -597,20 +597,20 @@ WebMol.SimpleRenderer = function ( parameters ) {
 			//Set up lights for lambert shader
 			if (material.shaderType === "lambert") {
 				
-				//load view, model, and normal matrices for directional and object lighting
+				//load view and normal matrices for directional and object lighting
 				_gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
 				_gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
-				_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
+				//_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
 				
 				if (_lightsNeedUpdate) {
-					//setupLights(program, lights);
+					setupLights(program, lights);
 					_lightsNeedUpdate = false;
 				}
 				
 				//Set up correct light uniform var vals
-				m_uniforms.ambientLightColor.value = lights.ambient;
-				m_uniforms.directionalLightColor.value = lights.directional.colors;
-				m_uniforms.directionalLightDirection.value = lights.directional.position;
+				m_uniforms.ambientLightColor.value = _lights.ambient;
+				m_uniforms.directionalLightColor.value = _lights.directional.colors;
+				m_uniforms.directionalLightDirection.value = _lights.directional.positions;
 				m_uniforms.ambient.value = material.ambient;
 				m_uniforms.emissive.value = material.emissive;
 				
@@ -641,21 +641,15 @@ WebMol.SimpleRenderer = function ( parameters ) {
 			uniformVal = m_uniforms[uniformVar].value;
 			uniformLoc = p_uniforms[uniformVar];
 			
-			switch (type) {
-				
-				//single float
-				case 'f':
-					_gl.uniform1f(uniformLoc, uniformVal);
-					break;
-				//array of floats
-				case 'fv':
-					_gl.uniform3fv(uniformLoc, uniformVal);
-					break;
-				//color - r,g,b floats
-				case 'c':
-					_gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g, uniformVal.b);
-					break;
-			}	
+			//single float
+			if (type === 'f')
+				_gl.uniform1f(uniformLoc, uniformVal);
+			//array of floats
+			else if (type === 'fv')
+				_gl.uniform3fv(uniformLoc, uniformVal);
+			//color - r,g,b floats
+			else if (type === 'c')
+				_gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g, uniformVal.b);
 
 		}
 		
@@ -695,14 +689,14 @@ WebMol.SimpleRenderer = function ( parameters ) {
 			}
 			
 			// Colors
-			if (attributes.colors >= 0) {
+			if (attributes.color >= 0) {
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
 				enableAttribute( attributes.color );
 				_gl.vertexAttribPointer( attributes.color, 3, _gl.FLOAT, false, 0, 0 );
 			}
 			
 			// Normals (lambert shader only)
-			if (attributes.position >=0) {
+			if (attributes.normal >=0) {
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
 				enableAttribute( attributes.normal );
 				_gl.vertexAttribPointer( attributes.normal, 3, _gl.FLOAT, false, 0, 0 );
@@ -948,6 +942,8 @@ WebMol.SimpleRenderer = function ( parameters ) {
                 for ( g in geometry.geometryChunks ) {
 
                         var geometryChunk = geometry.geometryChunks[ g ];
+                        
+                        geometryChunk.id = _geometryGroupCounter++;
 
                         // initialise VBO on the first access
 
@@ -1015,6 +1011,8 @@ WebMol.SimpleRenderer = function ( parameters ) {
             for (g in geometry.geometryChunks ) {
             	
                 geometryChunk = geometry.geometryChunks[ g ];
+                
+                material = getBufferMaterial(object, geometryChunk);
 
                 if ( geometry.verticesNeedUpdate || geometry.morphTargetsNeedUpdate || geometry.elementsNeedUpdate ||
                          geometry.uvsNeedUpdate || geometry.normalsNeedUpdate ||
@@ -1039,6 +1037,7 @@ WebMol.SimpleRenderer = function ( parameters ) {
         }
         
         else if ( object instanceof THREE.Line ) {
+        
         	material = getBufferMaterial( object, geometry );
         	
         	if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate || geometry.lineDistancesNeedUpdate) {
@@ -1049,6 +1048,26 @@ WebMol.SimpleRenderer = function ( parameters ) {
         }
 
     };
+    
+	function removeObject( object, scene ) {
+		
+		if (object instanceof THREE.Mesh || object instanceof THREE.Line )
+			removeInstances(scene.__webglObjects, object);
+		
+		else
+			object.__webglActive = false;
+			
+	};
+	
+	function removeInstances( objList, object ) {
+		
+		for (var o = objList.length - 1; o >= 0; --o) {
+		
+			if (objList[o].object === object) 
+				objList.splice(o, 1);
+				
+		}
+	};
 
 	function unrollBufferMaterial( globject ) {
 		
@@ -1238,6 +1257,64 @@ WebMol.SimpleRenderer = function ( parameters ) {
 		object._normalMatrix.getInverse( object._modelViewMatrix );
 		object._normalMatrix.transpose();
 
+	};
+	
+	function setupLights ( program, lights ) {
+		var l, ll, light, n,
+		r = 0, g = 0, b = 0,
+		color,
+		position,
+		intensity,
+		distance,
+		
+		zlights = _lights,
+		
+		dirColors = zlights.directional.colors,
+		dirPositions = zlights.directional.positions,
+		
+		dirCount = 0,
+		dirLength = 0,
+		dirOffset = 0;
+		
+		for ( l = 0, ll = lights.length; l < ll; l++) {
+			
+			light = lights[l];
+			
+			color = light.color;
+			intensity = light.intensity;
+			distance = light.distance;
+			
+			if (light instanceof THREE.DirectionalLight) {
+				
+				dirCount++;
+				
+				_direction.getPositionFromMatrix(light.matrixWorld);
+				_vector3.getPositionFromMatrix(light.target.matrixWorld);
+				_direction.sub(_vector3);
+				_direction.normalize();
+				
+				if (_direction.x === 0 && _direction.y === 0 && _direction.z === 0)
+					continue;
+				
+				dirPositions[dirOffset] = _direction.x;
+				dirPositions[dirOffset + 1] = _direction.y;
+				dirPositions[dirOffset + 2] = _direction.z;
+
+				dirColors[dirOffset] = color.r * intensity;
+				dirColors[dirOffset + 1] = color.g * intensity;
+				dirColors[dirOffset + 2] = color.b * intensity;
+				
+				dirOffset += 3;
+				
+				dirLength++;	
+			}
+		
+		}
+
+		zlights.ambient[0] = r;
+		zlights.ambient[1] = g;
+		zlights.ambient[2] = b;
+		zlights.directional.length = dirLength;
 	};
 
     function initGL () {
