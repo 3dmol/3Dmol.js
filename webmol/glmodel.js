@@ -766,6 +766,13 @@ WebMol.GLModel = (function() {
 			var vertices = vobj.vertices;
 			var normals = vobj.normals;
 
+			for (i in vertices) {
+				var v = vertices[i];
+				var vert = new vertex(v.x + atom.x, v.y + atom.y, v.z + atom.z);
+				geo.vertices.push(vert);
+				geo.normals.push(normals[i]);
+			}
+
 			var verticesRows = vobj.verticesRows;
 			var h = verticesRows.length - 1;
 			
@@ -789,28 +796,18 @@ WebMol.GLModel = (function() {
 					if (Math.abs(vertices[v1 - start].y) === radius) {
 						//geo.faces.push(new THREE.Face3(v1, v3, v4, [ n1, n3, n4 ], C));
 						n_vertices = 3;
-						var vertex1 = new vertex(vertices[v1].x + atom.x, vertices[v1].y + atom.y, vertices[v1].z + atom.z);
-						var vertex3 = new vertex(vertices[v3].x + atom.x, vertices[v3].y + atom.y, vertices[v3].z + atom.z);
-						var vertex4 = new vertex(vertices[v4].x + atom.x, vertices[v4].y + atom.y, vertices[v4].z + atom.z);
-						face = [vertex1, vertex3, vertex4];
+						face = [v1, v3, v4];
 						norm = [n1, n3, n4];
 					} else if (Math.abs(vertices[v3 - start].y) === radius) {
 						//geo.faces.push(new THREE.Face3(v1, v2, v3, [ n1, n2, n3 ], C));
 						n_vertices = 3;
-						var vertex1 = new vertex(vertices[v1].x + atom.x, vertices[v1].y + atom.y, vertices[v1].z + atom.z);
-						var vertex2 = new vertex(vertices[v2].x + atom.x, vertices[v2].y + atom.y, vertices[v2].z + atom.z);
-						var vertex3 = new vertex(vertices[v3].x + atom.x, vertices[v3].y + atom.y, vertices[v3].z + atom.z);
-						face = [vertex1, vertex2, vertex3];
+						face = [v1, v2, v3];
 						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3]];
 						norm = [n1, n2, n3];
 					} else {
 						//geo.faces.push(new THREE.Face4(v1, v2, v3, v4, [ n1, n2, n3, n4 ], C));
 						n_vertices = 4;
-						var vertex1 = new vertex(vertices[v1].x + atom.x, vertices[v1].y + atom.y, vertices[v1].z + atom.z);
-						var vertex2 = new vertex(vertices[v2].x + atom.x, vertices[v2].y + atom.y, vertices[v2].z + atom.z);
-						var vertex3 = new vertex(vertices[v3].x + atom.x, vertices[v3].y + atom.y, vertices[v3].z + atom.z);
-						var vertex4 = new vertex(vertices[v4].x + atom.x, vertices[v4].y + atom.y, vertices[v4].z + atom.z);
-						face = [vertex1, vertex2, vertex3, vertex4];
+						face = [v1, v2, v3, v4];
 						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3], geo.vertices[v4]];
 						norm = [n1, n2, n3, n4];
 					}
@@ -821,11 +818,13 @@ WebMol.GLModel = (function() {
 						geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
 					}
 					
+					var offset = geoGroup.vertices;
+					
 					geoGroup.vertices += n_vertices;
-					var offset = geoGroup.vertexArr.length;
+					
 					
 					//populate non-typed vertexArr and face arrays with vertex coordinates
-					populateGroup(geoGroup, face, norm, color, offset);
+					populateGroup(geo, geoGroup, face, norm, color, offset);
 				}
 			}
 
@@ -836,13 +835,14 @@ WebMol.GLModel = (function() {
 			this.z = z;
 		};
 		//Fill up geometry chunk's non typed arrays for a single face
-		var populateGroup = function(group, face, norm, color, index) {
+		var populateGroup = function(geo, group, face, norm, color, index) {
 			
 			//one triangle
 			if (face.length === 3) {
-				var v1 = face[ 0 ];
-				var v2 = face[ 1 ];
-				var v3 = face[ 2 ];
+				
+				var v1 = geo.vertices[ face[ 0 ] ];
+				var v2 = geo.vertices[ face[ 1 ] ];
+				var v3 = geo.vertices[ face[ 2 ] ];
 				var verts = [v1.x, v1.y, v1.z,
 							 v2.x, v2.y, v2.z,
 							 v3.x, v3.y, v3.z];
@@ -857,16 +857,15 @@ WebMol.GLModel = (function() {
 				var g = color[1];
 				var b = color[2];
 							 
-				//group.vertexArr = group.vertexArr.concat(verts);
 				for (var i in verts) {
-					group.vertexArr.push(verts[i]);
+					group.vertexArr.push(verts[i]);	
 				}
-
+				
 				for (var i in norms) {
 					group.normalArr.push(norms[i]);
 				}
 				
-				group.normalArr = group.normalArr.concat(norms);
+				//group.normalArr = group.normalArr.concat(norms);
 				
 				group.faceArr.push(index); 
 				group.faceArr.push(index + 1);
@@ -899,10 +898,11 @@ WebMol.GLModel = (function() {
 			}
 			
 			else if (face.length === 4) {
-				v1 = face[ 0 ];
-				v2 = face[ 1 ];
-				v3 = face[ 2 ];
-				v4 = face[ 3 ];
+				
+				v1 = geo.vertices[ face[ 0 ] ];
+				v2 = geo.vertices[ face[ 1 ] ];
+				v3 = geo.vertices[ face[ 2 ] ];
+				v4 = geo.vertices[ face[ 3 ] ];
 				
 				var verts = [v1.x, v1.y, v1.z,
 							 v2.x, v2.y, v2.z,
@@ -922,11 +922,10 @@ WebMol.GLModel = (function() {
 				var g = color[1];
 				var b = color[2];
 
-				//group.vertexArr = group.vertexArr.concat(verts);
 				for (var i in verts) {
 					group.vertexArr.push(verts[i]);
 				}
-				
+								
 				//group.normalArr = group.normalArr.concat(norms);
 				for (var i in norms) {
 					group.normalArr.push(norms[i]);
@@ -974,6 +973,8 @@ WebMol.GLModel = (function() {
 		//Initialize typed array buffers for completed geometry
 		var initBuffers = function(geometry) {
 			
+			var group;
+			
 			for (var i = 0; i < geometry.geometryChunks.length; ++i){
 				group = geometry.geometryChunks[i];
 				group.__vertexArray = new Float32Array(group.vertexArr);
@@ -988,6 +989,7 @@ WebMol.GLModel = (function() {
 				delete group.normalArr;
 				delete group.faceArr;
 				delete group.lineArr;
+				
 			}
 		};
 		

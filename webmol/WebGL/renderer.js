@@ -710,13 +710,15 @@ WebMol.SimpleRenderer = function ( parameters ) {
 		//TODO: make sure geometryGroup's face count is setup correctly
 		if (object instanceof THREE.Mesh) {
 			
+			var faceCount = geometryGroup.__faceArray.length;
+			
 			if (updateBuffers)
 				_gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
-			_gl.drawElements( _gl.TRIANGLES, geometryGroup.__webglFaceCount, _gl.UNSIGNED_SHORT, 0 );
+			_gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );
 			
 			_this.info.render.calls++;
-			_this.info.render.vertices += geometryGroup.__webglFaceCount;
-			_this.info.render.faces += geometryGroup.__webglFaceCount / 3;
+			_this.info.render.vertices += faceCount;
+			_this.info.render.faces += faceCount / 3;
 		}
 		
 		//basic shaders - draw lines

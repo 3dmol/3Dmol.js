@@ -26,12 +26,12 @@
         var glviewer = null;
         var jviewer = null;
         $(document).ready(function() {
-        	var moldata = $("#moldata_sdf_single").val();
+        	var moldata = $("#moldata_pdb").val();
         	//var moldata2 = $("#moldata_pdb").val();
         	
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
-                var m = viewer.addModel(moldata,"sdf");
+                var m = viewer.addModel(moldata,"pdb");
 
             }});	
  
