@@ -25,12 +25,12 @@
         var glviewer = null;
         var jviewer = null;
         $(document).ready(function() {
-        	var moldata = $("#moldata_pdb").val();
+        	var moldata = $("#moldata_sdf_small").val();
         	//var moldata2 = $("#moldata_pdb").val();
         	
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
-                var m = viewer.addModel(moldata,"pdb");
+                var m = viewer.addModel(moldata,"sdf");
 
             }});	
  
@@ -56,11 +56,13 @@
                 <br>
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); WebMol.download('pdb:' + $('#pdbid').val(), glviewer); glviewer.render();">Download</button><br>
 
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_single">v:U4C5Cr:4
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small">v:U4C5Cr:4
   -OEChem-12201211493D
 
- 1 0  0     1  0  0  0  0  0999 V2000
+ 2 1  0     1  0  0  0  0  0999 V2000
    -8.1967    0.5191    0.7989 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -7.6843   -0.2222   -0.2656 C   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
 M  END
 </textarea> 
 <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf">v:U4C5Cr:4

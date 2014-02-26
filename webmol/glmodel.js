@@ -829,6 +829,7 @@ WebMol.GLModel = (function() {
 			}
 
 		};
+		
 		var vertex = function(x, y, z) {
 			this.x = x;
 			this.y = y;
@@ -995,6 +996,7 @@ WebMol.GLModel = (function() {
 			this.lineArr = [];
 			this.vertices = 0;
 		};
+		
 		// cross drawing
 		var drawAtomCross = function(atom, geos) {
 			if (!atom.style.cross)
@@ -1022,7 +1024,6 @@ WebMol.GLModel = (function() {
 
 		// bonds - both atoms must match bond style
 		// standardize on only drawing for lowest to highest
-
 		var drawBondLines = function(atom, atoms, geos) {
 			if (!atom.style.line)
 				return;
@@ -1325,7 +1326,6 @@ WebMol.GLModel = (function() {
 		// at some point we should optimize this to avoid unnecessary
 		// recalculation
 		var createMolObj = function(atoms) {
-
 
 			console.log("creating for "+id);
 			var ret = new THREE.Object3D();
