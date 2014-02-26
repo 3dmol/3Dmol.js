@@ -622,10 +622,10 @@ WebMol.SimpleRenderer = function ( parameters ) {
 			
 			//Load any other material specific uniform variables to gl shaders
 			loadMaterialUniforms(p_uniforms, m_uniforms);
-			
-			return program;
 		
 		}
+		
+		return program;
 		
 	};
 	

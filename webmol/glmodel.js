@@ -834,6 +834,7 @@ WebMol.GLModel = (function() {
 			this.y = y;
 			this.z = z;
 		};
+		
 		//Fill up geometry chunk's non typed arrays for a single face
 		var populateGroup = function(geo, group, face, norm, color, index) {
 			
@@ -879,10 +880,6 @@ WebMol.GLModel = (function() {
 				group.lineArr.push(index + 1);
 				group.lineArr.push(index + 2);
 				
-				//add rgb color values for each vertex - faces are always same color
-				//group.colorArr = group.colorArr.concat(color);
-				//group.colorArr = group.colorArr.concat(color);
-				//group.colorArr = group.colorArr.concat(color);
 				group.colorArr.push(r);
 				group.colorArr.push(g);
 				group.colorArr.push(b);
@@ -948,10 +945,6 @@ WebMol.GLModel = (function() {
 				group.lineArr.push(index + 2);
 				group.lineArr.push(index + 3);
 				
-				//group.colorArr = group.colorArr.concat(color);
-				//group.colorArr = group.colorArr.concat(color);
-				//group.colorArr = group.colorArr.concat(color);
-				//group.colorArr = group.colorArr.concat(color);
 				group.colorArr.push(r);
 				group.colorArr.push(g);
 				group.colorArr.push(b);
