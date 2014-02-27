@@ -741,94 +741,6 @@ WebMol.GLModel = (function() {
 				return obj;
 			}
 		};
-
-		var drawAtomSphere = function(atom, geo) {
-			if (!atom.style.sphere)
-				return;
-			var style = atom.style.sphere;
-			if (style.hidden)
-				return;
-				
-			
-			var geoGroup = geo.geometryChunks[geo.geometryChunks.length - 1];
-													 			
-			var color = atom.color;
-			if (typeof (style.color) != "undefined")
-				color = style.color;
-			var C = WebMol.CC.color(color);
-
-			var x, y;
-			var radius = getRadiusFromStyle(atom, style);
-			var vobj = sphereVertexCache.getVerticesForRadius(radius);
-			var start = geo.vertices.length;
-
-			// now add vertices and create faces at appropriate location
-			var vertices = vobj.vertices;
-			var normals = vobj.normals;
-
-			for (i in vertices) {
-				var v = vertices[i];
-				var vert = new vertex(v.x + atom.x, v.y + atom.y, v.z + atom.z);
-				geo.vertices.push(vert);
-				geo.normals.push(normals[i]);
-			}
-
-			var verticesRows = vobj.verticesRows;
-			var h = verticesRows.length - 1;
-			
-			var face, normal;
-			var n_vertices = 0;
-			var color = [C.r, C.g, C.b];
-			for (y = 0; y < h; y++) {
-				var w = verticesRows[y].length - 1;
-				for (x = 0; x < w; x++) {
-
-					var v1 = verticesRows[y][x + 1] + start;
-					var v2 = verticesRows[y][x] + start;
-					var v3 = verticesRows[y + 1][x] + start;
-					var v4 = verticesRows[y + 1][x + 1] + start;
-
-					var n1 = normals[v1 - start];
-					var n2 = normals[v2 - start];
-					var n3 = normals[v3 - start];
-					var n4 = normals[v4 - start];
-					var face, norm;
-					if (Math.abs(vertices[v1 - start].y) === radius) {
-						//geo.faces.push(new THREE.Face3(v1, v3, v4, [ n1, n3, n4 ], C));
-						n_vertices = 3;
-						face = [v1, v3, v4];
-						norm = [n1, n3, n4];
-					} else if (Math.abs(vertices[v3 - start].y) === radius) {
-						//geo.faces.push(new THREE.Face3(v1, v2, v3, [ n1, n2, n3 ], C));
-						n_vertices = 3;
-						face = [v1, v2, v3];
-						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3]];
-						norm = [n1, n2, n3];
-					} else {
-						//geo.faces.push(new THREE.Face4(v1, v2, v3, v4, [ n1, n2, n3, n4 ], C));
-						n_vertices = 4;
-						face = [v1, v2, v3, v4];
-						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3], geo.vertices[v4]];
-						norm = [n1, n2, n3, n4];
-					}
-					
-					//make new group if necessary
-					if ( geoGroup.vertices + n_vertices > 65535 ) {
-						geo.geometryChunks.push( new geometryChunk() );
-						geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
-					}
-					
-					var offset = geoGroup.vertices;
-					
-					geoGroup.vertices += n_vertices;
-					
-					
-					//populate non-typed vertexArr and face arrays with vertex coordinates
-					populateGroup(geo, geoGroup, face, norm, color, offset);
-				}
-			}
-
-		};
 		
 		var vertex = function(x, y, z) {
 			this.x = x;
@@ -838,6 +750,10 @@ WebMol.GLModel = (function() {
 		
 		//Fill up geometry chunk's non typed arrays for a single face
 		var populateGroup = function(geo, group, face, norm, color, index) {
+			
+			var r = color.r;
+			var g = color.g;
+			var b = color.b;
 			
 			//one triangle
 			if (face.length === 3) {
@@ -855,9 +771,6 @@ WebMol.GLModel = (function() {
 				var norms = [n1.x, n1.y, n1.z,
 							 n2.x, n2.y, n2.z,
 							 n3.x, n3.y, n3.z];
-				var r = color[0];
-				var g = color[1];
-				var b = color[2];
 							 
 				for (var i in verts) {
 					group.vertexArr.push(verts[i]);	
@@ -915,10 +828,6 @@ WebMol.GLModel = (function() {
 							 n2.x, n2.y, n2.z,
 							 n3.x, n3.y, n3.z,
 							 n4.x, n4.y, n4.z];
-				
-				var r = color[0];
-				var g = color[1];
-				var b = color[2];
 
 				for (var i in verts) {
 					group.vertexArr.push(verts[i]);
@@ -967,24 +876,43 @@ WebMol.GLModel = (function() {
 		//Initialize typed array buffers for completed geometry
 		var initBuffers = function(geometry) {
 			
-			var group;
-			
-			for (var i = 0; i < geometry.geometryChunks.length; ++i){
-				group = geometry.geometryChunks[i];
-				group.__vertexArray = new Float32Array(group.vertexArr);
-				group.__colorArray = new Float32Array(group.colorArr);
-				group.__normalArray = new Float32Array(group.normalArr);
-				group.__faceArray = new Uint16Array(group.faceArr);
-				group.__lineArray = new Uint16Array(group.lineArr);
+			//mesh arrays
+			if ( geometry.geometryChunks !== undefined ) {
 				
-				//Doesn't free memory directly, but should break references for gc 
-				delete group.vertexArr;
-				delete group.colorArr;
-				delete group.normalArr;
-				delete group.faceArr;
-				delete group.lineArr;
+				var group;
+				
+				for (var i = 0; i < geometry.geometryChunks.length; ++i){
+					group = geometry.geometryChunks[i];
+					group.__vertexArray = new Float32Array(group.vertexArr);
+					group.__colorArray = new Float32Array(group.colorArr);
+					group.__normalArray = new Float32Array(group.normalArr);
+					group.__faceArray = new Uint16Array(group.faceArr);
+					group.__lineArray = new Uint16Array(group.lineArr);
+					
+					//Doesn't free memory directly, but should break references for gc 
+					delete group.vertexArr;
+					delete group.colorArr;
+					delete group.normalArr;
+					delete group.faceArr;
+					delete group.lineArr;
+					
+				}
 				
 			}
+			
+			//line arrays
+			else {
+				
+				geometry.__vertexArray = new Float32Array(geometry.vertexArr);
+				geometry.__colorArray = new Float32Array(geometry.colorArr);
+				geometry.__lineDistanceArray = new Float32Array(geometry.vertices.length);
+				
+				delete geometry.vertexArr;
+				delete geometry.colorArr;
+				delete geometry.lineArr;
+				
+			}		
+			
 		};
 		
 		//represents individual renderable geometry group
@@ -1007,8 +935,16 @@ WebMol.GLModel = (function() {
 			var linewidth = (atom.style.cross.lineWidth || defaultlineWidth);
 			if (!geos[linewidth])
 				geos[linewidth] = new THREE.Geometry();
+				
 			var geo = geos[linewidth];
-
+			
+			//TODO: initialize geometry in createMolObj
+			if (!geo.vertexArr || !geo.colorArr || !geo.lineArr) {
+				geo.vertexArr = [];
+				geo.colorArr = [];
+				geo.lineArr = [];
+			}
+			
 			var delta = getRadiusFromStyle(atom, style);
 
 			var points = [ [ delta, 0, 0 ], [ -delta, 0, 0 ], [ 0, delta, 0 ],
@@ -1019,6 +955,13 @@ WebMol.GLModel = (function() {
 				geo.vertices.push(new TV3(atom.x + points[j][0], atom.y
 						+ points[j][1], atom.z + points[j][2]));
 				geo.colors.push(c);
+				geo.vertexArr.push(atom.x + points[j][0]);
+				geo.vertexArr.push(atom.y + points[j][1]);
+				geo.vertexArr.push(atom.z + points[j][2]);
+				geo.colorArr.push(c.r);
+				geo.colorArr.push(c.g);
+				geo.colorArr.push(c.b);
+
 			}
 		};
 
@@ -1037,6 +980,13 @@ WebMol.GLModel = (function() {
 			if (!geos[linewidth])
 				geos[linewidth] = new THREE.Geometry();
 			var geo = geos[linewidth];
+
+			//TODO: initialize geometry in createMolObj
+			if (!geo.vertexArr || !geo.colorArr || !geo.lineArr) {
+				geo.vertexArr = [];
+				geo.colorArr = [];
+				geo.lineArr = [];
+			}
 
 			for ( var i = 0; i < atom.bonds.length; i++) {
 				var j = atom.bonds[i]; // our neighbor
@@ -1064,6 +1014,16 @@ WebMol.GLModel = (function() {
 					cs.push(c2);
 					vs.push(p2);
 					cs.push(c2);
+					
+					geo.vertexArr.push(p1.x), geo.vertexArr.push(p1.y), geo.vertexArr.push(p1.z);
+					geo.colorArr.push(c1.r), geo.colorArr.push(c1.g), geo.colorArr.push(c1.b);
+					geo.vertexArr.push(mp.x), geo.vertexArr.push(mp.y), geo.vertexArr.push(mp.z);
+					geo.colorArr.push(c1.r), geo.colorArr.push(c1.g), geo.colorArr.push(c1.b);
+					geo.vertexArr.push(mp.x), geo.vertexArr.push(mp.y), geo.vertexArr.push(mp.z);
+					geo.colorArr.push(c2.r), geo.colorArr.push(c2.g), geo.colorArr.push(c2.b);
+					geo.vertexArr.push(p2.x), geo.vertexArr.push(p2.y), geo.vertexArr.push(p2.z);
+					geo.colorArr.push(c2.r), geo.colorArr.push(c2.g), geo.colorArr.push(c2.b);
+					
 				}
 			}
 
@@ -1077,6 +1037,94 @@ WebMol.GLModel = (function() {
 		cylinderGeometry.faceUvs = []; // null these out to make merging faster
 		cylinderGeometry.faceVertexUvs = [ [] ];
 
+		//sphere drawing
+		var drawAtomSphere = function(atom, geo) {
+			
+			if (!atom.style.sphere)
+				return;
+			var style = atom.style.sphere;
+			if (style.hidden)
+				return;
+			
+			var geoGroup = geo.geometryChunks[geo.geometryChunks.length - 1];
+													 			
+			var color = atom.color;
+			if (typeof (style.color) != "undefined")
+				color = style.color;
+			var C = WebMol.CC.color(color);
+
+			var x, y;
+			var radius = getRadiusFromStyle(atom, style);
+			var vobj = sphereVertexCache.getVerticesForRadius(radius);
+			var start = geo.vertices.length;
+
+			// now add vertices and create faces at appropriate location
+			var vertices = vobj.vertices;
+			var normals = vobj.normals;
+
+			for (i in vertices) {
+				var v = vertices[i];
+				var vert = new vertex(v.x + atom.x, v.y + atom.y, v.z + atom.z);
+				geo.vertices.push(vert);
+				//geo.normals.push(normals[i]);
+			}
+
+			var verticesRows = vobj.verticesRows;
+			var h = verticesRows.length - 1;
+			
+			//var face, normal;
+			var n_vertices = 0;
+			//var color = [C.r, C.g, C.b];
+			for (y = 0; y < h; y++) {
+				var w = verticesRows[y].length - 1;
+				for (x = 0; x < w; x++) {
+
+					var v1 = verticesRows[y][x + 1] + start;
+					var v2 = verticesRows[y][x] + start;
+					var v3 = verticesRows[y + 1][x] + start;
+					var v4 = verticesRows[y + 1][x + 1] + start;
+
+					var n1 = normals[v1 - start];
+					var n2 = normals[v2 - start];
+					var n3 = normals[v3 - start];
+					var n4 = normals[v4 - start];
+					var face, norm;
+					if (Math.abs(vertices[v1 - start].y) === radius) {
+						//geo.faces.push(new THREE.Face3(v1, v3, v4, [ n1, n3, n4 ], C));
+						n_vertices = 3;
+						face = [v1, v3, v4];
+						norm = [n1, n3, n4];
+					} else if (Math.abs(vertices[v3 - start].y) === radius) {
+						//geo.faces.push(new THREE.Face3(v1, v2, v3, [ n1, n2, n3 ], C));
+						n_vertices = 3;
+						face = [v1, v2, v3];
+						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3]];
+						norm = [n1, n2, n3];
+					} else {
+						//geo.faces.push(new THREE.Face4(v1, v2, v3, v4, [ n1, n2, n3, n4 ], C));
+						n_vertices = 4;
+						face = [v1, v2, v3, v4];
+						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3], geo.vertices[v4]];
+						norm = [n1, n2, n3, n4];
+					}
+					
+					//make new group if necessary
+					if ( geoGroup.vertices + n_vertices > 65535 ) {
+						geo.geometryChunks.push( new geometryChunk() );
+						geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
+					}
+					
+					var offset = geoGroup.vertices;
+					
+					geoGroup.vertices += n_vertices;
+					
+					//populate non-typed vertexArr and face arrays with vertex coordinates
+					populateGroup(geo, geoGroup, face, norm, C, offset);
+				}
+			}
+
+		};
+		
 		// creates a cylinder
 		// TODO: create it ourselves in the hopes of getting a speed up
 		var drawnC = 0;
@@ -1086,6 +1134,8 @@ WebMol.GLModel = (function() {
 			drawnC++;
 			// vertices
 
+			var geoGroup = geo.geometryChunks[geo.geometryChunks.length - 1];
+			
 			var dir = to.clone();
 			dir.sub(from);
 
@@ -1134,22 +1184,54 @@ WebMol.GLModel = (function() {
 			}
 
 			// now faces
-			var face;
+			var face, norm, offset;
+			var n_vertices = 0;
 			for ( var i = 0, n = nvecs.length - 1; i < n; ++i) {
 				var ti = start + 2 * i;
-				face = new THREE.Face4(ti, ti + 1, ti + 3, ti + 2);
-				face.color = color;
-				face.vertexNormals = [ nvecs[i], nvecs[i], nvecs[i + 1],
-						nvecs[i + 1] ];
-				geo.faces.push(face);
+				
+				//face = new THREE.Face4(ti, ti + 1, ti + 3, ti + 2);
+				//face.color = color;
+				
+				face = [ti, ti + 1, ti + 3, ti + 2];
+				norm = [ nvecs[i], nvecs[i], nvecs[i + 1], nvecs[i + 1]];
+				
+				//face.vertexNormals = [ nvecs[i], nvecs[i], nvecs[i + 1],
+				//		nvecs[i + 1] ];
+				//geo.faces.push(face);
+				
+				if ( geoGroup.vertices + 4 > 65535 ) {
+					geo.geometryChunks.push( new geometryChunk() );
+					geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1 ];
+				}
+				
+				offset = geoGroup.vertices;				
+				geoGroup.vertices += 4;
+				
+				populateGroup(geo, geoGroup, face, norm, color, offset);
+				
 			}
 			// final face
 
-			face = new THREE.Face4(start + 30, start + 31, start + 1, start);
-			face.color = color;
-			face.vertexNormals = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
-			geo.faces.push(face);
+			face = [start + 30, start + 31, start + 1, start];
+			norm = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
+			//face = new THREE.Face4(start + 30, start + 31, start + 1, start);
+			//face.color = color;
+			//face.vertexNormals = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
+			//geo.faces.push(face);
+			
+			//make new group if necessary
+			if ( geoGroup.vertices + n_vertices > 65535 ) {
+				geo.geometryChunks.push( new geometryChunk() );
+				geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
+			}
+			
+			offset = geoGroup.vertices;
+			
+			geoGroup.vertices += 4;
 
+			//populate non-typed vertexArr and face arrays with vertex coordinates
+			populateGroup(geo, geoGroup, face, norm, color, offset);
+			
 		};
 
 		// draws cylinders and small spheres (at bond radius)
@@ -1338,6 +1420,10 @@ WebMol.GLModel = (function() {
 			sphereGeometry.geometryChunks.push( new geometryChunk() );	
 									   			  	
 			var stickGeometry = new THREE.Geometry();
+			
+			stickGeometry.geometryChunks = [];
+			stickGeometry.geometryChunks.push( new geometryChunk() );
+			
 			for ( var i = 0; i < atoms.length; i++) {
 				var atom = atoms[i];
 				// recreate gl info for each atom as necessary
@@ -1384,6 +1470,9 @@ WebMol.GLModel = (function() {
 					reflectivity : 0
 				});
 
+				//Initialize buffers in geometry
+				initBuffers(stickGeometry);
+				
 				var sticks = new THREE.Mesh(stickGeometry, cylinderMaterial);
 				ret.add(sticks);
 			}
@@ -1396,7 +1485,9 @@ WebMol.GLModel = (function() {
 						linewidth : linewidth,
 						vertexColors : true,
 					});
-
+					
+					initBuffers(lineGeometries[i]);
+					
 					var line = new THREE.Line(lineGeometries[i], lineMaterial,
 							THREE.LinePieces);
 
@@ -1413,6 +1504,8 @@ WebMol.GLModel = (function() {
 						vertexColors : true,
 					});
 
+					initBuffers(crossGeometries[i]);
+					
 					var line = new THREE.Line(crossGeometries[i], lineMaterial,
 							THREE.LinePieces);
 
