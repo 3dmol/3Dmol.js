@@ -60,17 +60,33 @@ WebMol.drawCartoon = (function() {
 
 	var drawThinStrip = function(group, p1, p2, colors, div) {
 		var geo = new THREE.Geometry();
+		geo.geometryChunks = [];
+		geo.geometryChunks.push( new geometryChunk() );
+		var geoGroup = geo.geometryChunks[0];
+		
+		var offset;
+		
 		for ( var i = 0, lim = p1.length; i < lim; i++) {
+			
+			geoGroup = updateGeoGroup(geo, geoGroup, 2);
 			geo.vertices.push(p1[i]); // 2i
 			geo.vertices.push(p2[i]); // 2i + 1
+			
+			geo.vertexArr.push(p1[i].x), geo.vertexArr.push(p1[i].y), geo.vertexArr.push(p1[i].z);
+			geo.vertexArr.push(p2[i].x), geo.vertexArr.push(p2[i].y), geo.vertexArr.push(p2[i].z);
+			
+			offset = geoGroup.vertices;
+			
+			if (i > 0) {
+				var faces = [offset, offset + 1, offset - 1, offset - 2];
+				geoGroup.faceArr.push(faces[0]), geoGroup.faceArr.push(faces[1]), geoGroup.faceArr.push(faces[3]);
+				geoGroup.faceArr.push(faces[1]), geoGroup.faceArr.push(faces[2]), geoGroup.faceArr.push(faces[3]);
+			}
+			
+			geoGroup.vertices += 2;
 		}
-		for ( var i = 1, lim = p1.length; i < lim; i++) {
-			var f = new THREE.Face4(2 * i, 2 * i + 1, 2 * i - 1, 2 * i - 2);
-			f.color = WebMol.color(colors[Math.round((i - 1) / div)]);
-			geo.faces.push(f);
-		}
-		geo.computeFaceNormals();
-		geo.computeVertexNormals(false);
+		
+		setUpNormals(geo);
 		var material = new THREE.MeshLambertMaterial();
 		material.vertexColors = THREE.FaceColors;
         material.side = THREE.DoubleSide;
@@ -161,18 +177,7 @@ WebMol.drawCartoon = (function() {
 			geoGroup.vertices += 8;
 		}
 		
-		//TODO: Remove this
-		for ( var i = 1, lim = p1.length; i < lim; i++) {
-			offset = 8 * i, color = WebMol.CC.color(colors[Math
-					.round((i - 1) / div)]);
-			for ( var j = 0; j < 4; j++) {
-				var f = new THREE.Face4(offset + faces[j][0], offset
-						+ faces[j][1], offset + faces[j][2], offset
-						+ faces[j][3], undefined, color);
-				fs.push(f);
-			}
-		}
-		
+
 		var vsize = vs.length - 8; // Cap
 		
 		geoGroup = updateGeoGroup(geo, geoGroup, 8);
@@ -195,12 +200,6 @@ WebMol.drawCartoon = (function() {
 		}
 		
 		vsize += 8;
-		
-		//TODO: Remove faces
-		fs.push(new THREE.Face4(vsize, vsize + 2, vsize + 6, vsize + 4,
-				undefined, fs[0].color));
-		fs.push(new THREE.Face4(vsize + 1, vsize + 5, vsize + 7, vsize + 3,
-				undefined, fs[fs.length - 3].color));
 				
 		var face1 = [offset, offset + 2, offset + 6, offset + 4];
 		var face2 = [offset + 1, offset + 5, offset + 7, offset + 3];
@@ -265,6 +264,7 @@ WebMol.drawCartoon = (function() {
 		
 	};
 
+	//TODO: Need to update this (will we ever use this?)
 	var drawSmoothCurve = function(group, _points, width, colors, div) {
 		if (_points.length == 0)
 			return;
