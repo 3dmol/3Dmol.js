@@ -111,7 +111,7 @@ var ProteinSurface = (function() {
 			vertices[i].z = vertices[i].z / scaleFactor - ptranz;
 		}
 
-		var finalfaces = []
+		var finalfaces = [];
 		for ( var i = 0; i < faces.length; i++) {
 			var f = faces[i];
 			var a = vertices[f.a].atomid, b = vertices[f.b].atomid, c = vertices[f.c].atomid;

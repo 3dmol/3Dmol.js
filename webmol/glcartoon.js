@@ -88,9 +88,24 @@ WebMol.drawCartoon = (function() {
 			return drawThinStrip(group, p1, p2, colors, div);
 
 		var geo = new THREE.Geometry();
+		geo.geometryChunks = [];
+		geo.geometryChunks.push( new geometryChunk() );
+		
+		var geoGroup = geo.geometryChunks[0];
+		
 		var vs = geo.vertices, fs = geo.faces;
 		var axis, p1v, p2v, a1v, a2v;
+		
+		var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, 3, -5, -1 ],
+				[ -3, -7, 1, 5 ] ];
+				
+		var offset;
+		var color;
+		
 		for ( var i = 0, lim = p1.length; i < lim; i++) {
+		
+			color = WebMol.CC.color(colors[Math.round((i - 1) / div)]);
+			
 			vs.push(p1v = p1[i]); // 0
 			vs.push(p1v); // 1
 			vs.push(p2v = p2[i]); // 2
@@ -105,11 +120,50 @@ WebMol.drawCartoon = (function() {
 			vs.push(a1v); // 5
 			vs.push(a2v = p2[i].clone().add(axis)); // 6
 			vs.push(a2v); // 7
+			
+			geoGroup = updateGeoGroup(geo, geoGroup, 8);
+			
+			geoGroup.vertexArr.push(p1v.x), geoGroup.vertexArr.push(p1v.y), geoGroup.vertexArr.push(p1v.z);
+			geoGroup.vertexArr.push(p1v.x), geoGroup.vertexArr.push(p1v.y), geoGroup.vertexArr.push(p1v.z);
+			geoGroup.vertexArr.push(p2v.x), geoGroup.vertexArr.push(p2v.y), geoGroup.vertexArr.push(p2v.z);
+			geoGroup.vertexArr.push(p2v.x), geoGroup.vertexArr.push(p2v.y), geoGroup.vertexArr.push(p2v.z);
+			geoGroup.vertexArr.push(a1v.x), geoGroup.vertexArr.push(a1v.y), geoGroup.vertexArr.push(a1v.z);
+			geoGroup.vertexArr.push(a1v.x), geoGroup.vertexArr.push(a1v.y), geoGroup.vertexArr.push(a1v.z);
+			geoGroup.vertexArr.push(a2v.x), geoGroup.vertexArr.push(a2v.y), geoGroup.vertexArr.push(a2v.z);
+			geoGroup.vertexArr.push(a2v.x), geoGroup.vertexArr.push(a2v.y), geoGroup.vertexArr.push(a2v.z);
+			
+			for (var j = 0; j < 8; ++j) {
+				geoGroup.colorArr.push(color.r), geoGroup.colorArr.push(color.g), geoGroup.colorArr.push(color.b);
+				geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
+			}
+			
+			if (i > 0) {
+					    
+				offset = geoGroup.vertices;
+				
+				for ( var j = 0; j < 4; j++ ) {
+				
+					var face = [offset + faces[j][0], offset
+						+ faces[j][1], offset + faces[j][2], offset
+						+ faces[j][3]];
+						
+					geoGroup.faceArr.push(face[0]);
+					geoGroup.faceArr.push(face[1]);
+					geoGroup.faceArr.push(face[3]);
+					
+					geoGroup.faceArr.push(face[1]);
+					geoGroup.faceArr.push(face[2]);
+					geoGroup.faceArr.push(face[3]);
+					
+				}
+			}
+			
+			geoGroup.vertices += 8;
 		}
-		var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, 3, -5, -1 ],
-				[ -3, -7, 1, 5 ] ];
+		
+		//TODO: Remove this
 		for ( var i = 1, lim = p1.length; i < lim; i++) {
-			var offset = 8 * i, color = WebMol.CC.color(colors[Math
+			offset = 8 * i, color = WebMol.CC.color(colors[Math
 					.round((i - 1) / div)]);
 			for ( var j = 0; j < 4; j++) {
 				var f = new THREE.Face4(offset + faces[j][0], offset
@@ -118,24 +172,97 @@ WebMol.drawCartoon = (function() {
 				fs.push(f);
 			}
 		}
+		
 		var vsize = vs.length - 8; // Cap
+		
+		geoGroup = updateGeoGroup(geo, geoGroup, 8);
+		offset = geoGroup.vertices;
+		
 		for ( var i = 0; i < 4; i++) {
 			vs.push(vs[i * 2]);
-			vs.push(vs[vsize + i * 2])
+			vs.push(vs[vsize + i * 2]);
+			
+			var v1 = vs[i * 2], v2 = vs[vsize + i * 2];
+			
+			geoGroup.vertexArr.push(v1.x), geoGroup.vertexArr.push(v1.y), geoGroup.vertexArr.push(v1.z);
+			geoGroup.vertexArr.push(v2.x), geoGroup.vertexArr.push(v2.y), geoGroup.vertexArr.push(v2.z);
+			
+			geoGroup.colorArr.push(color.r), geoGroup.colorArr.push(color.g), geoGroup.colorArr.push(color.b);
+			geoGroup.colorArr.push(color.r), geoGroup.colorArr.push(color.g), geoGroup.colorArr.push(color.b);
+			
+			geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
+			geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
 		}
-		;
+		
 		vsize += 8;
+		
+		//TODO: Remove faces
 		fs.push(new THREE.Face4(vsize, vsize + 2, vsize + 6, vsize + 4,
 				undefined, fs[0].color));
 		fs.push(new THREE.Face4(vsize + 1, vsize + 5, vsize + 7, vsize + 3,
 				undefined, fs[fs.length - 3].color));
-		geo.computeFaceNormals();
-		geo.computeVertexNormals(false);
+				
+		var face1 = [offset, offset + 2, offset + 6, offset + 4];
+		var face2 = [offset + 1, offset + 5, offset + 7, offset + 3];
+		
+		geoGroup.faceArr.push(face1[0]), geoGroup.faceArr.push(face1[1]), geoGroup.faceArr.push(face1[3]);
+		geoGroup.faceArr.push(face1[1]), geoGroup.faceArr.push(face1[2]), geoGroup.faceArr.push(face1[3]);
+		geoGroup.faceArr.push(face2[0]), geoGroup.faceArr.push(face2[1]), geoGroup.faceArr.push(face2[3]);
+		geoGroup.faceArr.push(face2[1]), geoGroup.faceArr.push(face2[2]), geoGroup.faceArr.push(face2[3]);
+		
+		//geo.computeFaceNormals();
+		//geo.computeVertexNormals(false);
+		setUpNormals(geo);
 		var material = new THREE.MeshLambertMaterial();
 		material.vertexColors = THREE.FaceColors;
 		material.side = THREE.DoubleSide;
 		var mesh = new THREE.Mesh(geo, material);
 		group.add(mesh);
+		
+	};
+	
+	
+	//TODO: Optimize this !!
+	var setUpNormals = function(geo) {
+		
+		for ( var g in geo.geometryChunks ) {
+		
+			var geoGroup = geo.geometryChunks[g];
+		
+			var faces = geoGroup.faceArr;
+			var verts = geoGroup.vertexArr;
+			var norms = geoGroup.normalArr;
+			
+			//vertex indices
+			var a, b, c, d,
+			//and actual vertices
+			vA, vB, vC, vD, norm;
+			
+			for ( var i = 0; i < faces.length / 6; i++ ) {
+				a = faces[ i * 6 ] * 3;
+				b = faces[ i * 6 + 1 ] * 3;
+				c = faces[ i * 6 + 4 ] * 3;
+				d = faces[ i * 6 + 2 ] * 3;
+				
+				vA = new vertex(verts[a], verts[a+1], verts[a+2]);
+				vB = new vertex(verts[b], verts[b+1], verts[b+2]);
+				vC = new vertex(verts[c], verts[c+1], verts[c+2]);
+				vD = new vertex(verts[d], verts[d+1], verts[d+2]);
+				
+				vC.sub(vB.x, vB.y, vB.z);
+				vA.sub(vB.x, vB.y, vB.z);
+				
+				//face normal
+				norm = crossMult(vC, vA);
+				norm.normalize();
+				
+				norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
+				norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y, norms[d + 1] += norm.y;
+				norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z, norms[d + 2] += norm.z;
+				
+			}
+		}
+		
 	};
 
 	var drawSmoothCurve = function(group, _points, width, colors, div) {

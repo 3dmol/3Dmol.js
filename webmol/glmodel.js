@@ -742,12 +742,6 @@ WebMol.GLModel = (function() {
 			}
 		};
 		
-		var vertex = function(x, y, z) {
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		};
-		
 		//Fill up geometry chunk's non typed arrays for a single face
 		var populateGroup = function(geo, group, face, norm, color, index) {
 			
@@ -785,14 +779,6 @@ WebMol.GLModel = (function() {
 				group.faceArr.push(index); 
 				group.faceArr.push(index + 1);
 				group.faceArr.push(index + 2);
-				
-				//TODO: do I really need these arrays?
-				group.lineArr.push(index);
-				group.lineArr.push(index + 1);
-				group.lineArr.push(index);
-				group.lineArr.push(index + 2);
-				group.lineArr.push(index + 1);
-				group.lineArr.push(index + 2);
 				
 				group.colorArr.push(r);
 				group.colorArr.push(g);
@@ -846,15 +832,6 @@ WebMol.GLModel = (function() {
 				group.faceArr.push(index + 2);
 				group.faceArr.push(index + 3);
 				
-				group.lineArr.push(index);
-				group.lineArr.push(index + 1);
-				group.lineArr.push(index);
-				group.lineArr.push(index + 3);
-				group.lineArr.push(index + 1);
-				group.lineArr.push(index + 2);
-				group.lineArr.push(index + 2);
-				group.lineArr.push(index + 3);
-				
 				group.colorArr.push(r);
 				group.colorArr.push(g);
 				group.colorArr.push(b);
@@ -887,7 +864,6 @@ WebMol.GLModel = (function() {
 					group.__colorArray = new Float32Array(group.colorArr);
 					group.__normalArray = new Float32Array(group.normalArr);
 					group.__faceArray = new Uint16Array(group.faceArr);
-					group.__lineArray = new Uint16Array(group.lineArr);
 					
 					//Doesn't free memory directly, but should break references for gc 
 					delete group.vertexArr;
@@ -913,16 +889,6 @@ WebMol.GLModel = (function() {
 				
 			}		
 			
-		};
-		
-		//represents individual renderable geometry group
-		var geometryChunk = function() {
-			this.vertexArr = [];
-			this.colorArr = [];
-			this.normalArr = [];
-			this.faceArr = [];
-			this.lineArr = [];
-			this.vertices = 0;
 		};
 		
 		// cross drawing
@@ -1108,11 +1074,7 @@ WebMol.GLModel = (function() {
 						norm = [n1, n2, n3, n4];
 					}
 					
-					//make new group if necessary
-					if ( geoGroup.vertices + n_vertices > 65535 ) {
-						geo.geometryChunks.push( new geometryChunk() );
-						geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
-					}
+					geoGroup = updateGeoGroup(geo, geoGroup, n_vertices);
 					
 					var offset = geoGroup.vertices;
 					
@@ -1198,11 +1160,8 @@ WebMol.GLModel = (function() {
 				//face.vertexNormals = [ nvecs[i], nvecs[i], nvecs[i + 1],
 				//		nvecs[i + 1] ];
 				//geo.faces.push(face);
-				
-				if ( geoGroup.vertices + 4 > 65535 ) {
-					geo.geometryChunks.push( new geometryChunk() );
-					geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1 ];
-				}
+
+				geoGroup = updateGeoGroup(geo, geoGroup, 4);
 				
 				offset = geoGroup.vertices;				
 				geoGroup.vertices += 4;
@@ -1220,11 +1179,9 @@ WebMol.GLModel = (function() {
 			//geo.faces.push(face);
 			
 			//make new group if necessary
-			if ( geoGroup.vertices + n_vertices > 65535 ) {
-				geo.geometryChunks.push( new geometryChunk() );
-				geoGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
-			}
 			
+			geoGroup = updateGeoGroup(geo, geoGroup, 4);
+
 			offset = geoGroup.vertices;
 			
 			geoGroup.vertices += 4;
@@ -1233,7 +1190,7 @@ WebMol.GLModel = (function() {
 			populateGroup(geo, geoGroup, face, norm, color, offset);
 			
 		};
-
+		
 		// draws cylinders and small spheres (at bond radius)
 		var drawBondSticks = function(atom, atoms, geo) {
 			if (!atom.style.stick)
@@ -1441,6 +1398,11 @@ WebMol.GLModel = (function() {
 			// create cartoon if needed - this is a whole model analysis
 			if (cartoonAtoms.length > 0) {
 				WebMol.drawCartoon(ret, cartoonAtoms, false);
+				
+				for (var i = 0; i < ret.children.length; i++){
+					var geo = ret.children[i].geometry;
+					initBuffers(geo);
+				}
 			}
 
 			// add sphere geometry

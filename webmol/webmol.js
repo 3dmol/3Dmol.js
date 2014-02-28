@@ -101,9 +101,9 @@ WebMol.CC = {
 //TODO: eventually make all new WebMol types to replace THREE types (color, vector, matrix, etc)
 WebMol.Color = function( r, g, b ){
 	
-	this.r = r === undefined ? 0.0 : r;
-	this.g = g === undefined ? 0.0 : g;
-	this.b = b === undefined ? 0.0 : b;
+	this.r = r || 0.0;
+	this.g = g || 0.0;
+	this.b = b || 0.0;
 				
 };
 
@@ -111,6 +111,85 @@ WebMol.Color.prototype.clone = function() {
 	
 	return new WebMol.Color(this.r, this.g, this.b);
 	
+};
+
+//Miscellaneous functions and classes - to be incorporated into WebMol proper
+
+		
+var vertex = function(x, y, z) {
+	this.x = x || 0.0;
+	this.y = y || 0.0;
+	this.z = z || 0.0;
+	
+	this.add = function( x, y, z ) {
+		this.x += x;
+		this.y += y;
+		this.z += z;
+	};
+	
+	this.sub = function( x, y, z ) {
+		this.x -= x;
+		this.y -= y;
+		this.z -= z;
+	};
+	
+	this.normalize = function() {
+		var normFactor = 1 / Math.sqrt( (this.x * this.x) + (this.y * this.y) + (this.z * this.z) );
+		
+		this.scale(normFactor);
+	};
+	
+	this.scale = function(s) {
+		this.x *= s;
+		this.y *= s;
+		this.z *= s;
+	};
+	
+};
+
+vertex.prototype.clone = function() {
+
+	return new vertex(this.x, this.y, this.z);
+	
+};
+
+//cross multiply two vectors
+var crossMult = function(u, v) {
+	
+	if ( ! (u instanceof vertex && v instanceof vertex) )
+		return null;
+		
+	var x, y, z;
+	
+	x = (u.y * v.z) - (u.z * v.y);
+	y = (u.z * v.x) - (u.x * v.z);
+	z = (u.x * v.y) - (u.y * v.x);
+	
+	return new vertex(x, y, z);
+	
+};
+
+//represents individual renderable geometry group
+var geometryChunk = function() {
+	this.vertexArr = [];
+	this.colorArr = [];
+	this.normalArr = [];
+	this.faceArr = [];
+	this.vertices = 0;
+};
+
+//checks to make sure geo group isn't too big - if so, create a new group 
+// and add to existing geometry.
+//return either new group or current group
+var updateGeoGroup = function(geo, geoGroup, n_vertices) {
+	
+	var retGroup = geoGroup;
+	if (geoGroup.vertices + n_vertices > 65535){
+		geo.geometryChunks.push( new geometryChunk() );
+		retGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
+	}
+	
+	return retGroup;
 };
 
 	

@@ -971,7 +971,6 @@ WebMol.SimpleRenderer = function ( parameters ) {
 				if ( ! geometry.__webglVertexBuffer ) {
 
 					createLineBuffers( geometry );
-					//initLineBuffers( geometry, object );
 					geometry.verticesNeedUpdate = true;
 					geometry.colorsNeedUpdate = true;
 					geometry.lineDistancesNeedUpdate = true;
@@ -1122,7 +1121,6 @@ WebMol.SimpleRenderer = function ( parameters ) {
 			
 	        var normalArray = geometryChunk.__normalArray;
 	        var faceArray = geometryChunk.__faceArray;
-	        var lineArray = geometryChunk.__lineArray;
 	
 	        //normal buffers
 	        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
@@ -1132,108 +1130,10 @@ WebMol.SimpleRenderer = function ( parameters ) {
 	        _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
 	        _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );	
 	
-	        //line (index) buffers
-	        _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglLineBuffer);
-	        _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint);		
 	        			
 		}
 
     };
-
-	//TODO: Fill up typed arrays in glmodel.js (like we do for mesh objects)
-	//TODO: incorporate the actual buffering (call to gl.bufferdata) into setBuffers function
-	//Also - do we need the lineDistanceBuffer ?
-	function setLineBuffers ( geometry, hint ) {
-
-		var v, c, d, vertex, offset, color,
-
-		vertices = geometry.vertices,
-		colors = geometry.colors,
-		lineDistances = geometry.lineDistances,
-
-		vl = vertices.length,
-		cl = colors.length,
-		dl = lineDistances.length,
-
-		vertexArray = geometry.__vertexArray,
-		colorArray = geometry.__colorArray,
-		lineDistanceArray = geometry.__lineDistanceArray,
-
-		dirtyVertices = geometry.verticesNeedUpdate,
-		dirtyColors = geometry.colorsNeedUpdate,
-		dirtyLineDistances = geometry.lineDistancesNeedUpdate,
-
-		customAttributes = geometry.__webglCustomAttributesList,
-
-		i, il,
-		a, ca, cal, value,
-		customAttribute;
-
-		if ( dirtyVertices ) {
-
-			for ( v = 0; v < vl; v ++ ) {
-
-				vertex = vertices[ v ];
-
-				offset = v * 3;
-
-				vertexArray[ offset ]     = vertex.x;
-				vertexArray[ offset + 1 ] = vertex.y;
-				vertexArray[ offset + 2 ] = vertex.z;
-
-			}
-
-			_gl.bindBuffer( _gl.ARRAY_BUFFER, geometry.__webglVertexBuffer );
-			_gl.bufferData( _gl.ARRAY_BUFFER, vertexArray, hint );
-
-		}
-
-		if ( dirtyColors ) {
-
-			for ( c = 0; c < cl; c ++ ) {
-
-				color = colors[ c ];
-
-				offset = c * 3;
-
-				colorArray[ offset ]     = color.r;
-				colorArray[ offset + 1 ] = color.g;
-				colorArray[ offset + 2 ] = color.b;
-
-			}
-
-			_gl.bindBuffer( _gl.ARRAY_BUFFER, geometry.__webglColorBuffer );
-			_gl.bufferData( _gl.ARRAY_BUFFER, colorArray, hint );
-
-		}
-
-		if ( dirtyLineDistances ) {
-
-			for ( d = 0; d < dl; d ++ ) {
-
-				lineDistanceArray[ d ] = lineDistances[ d ];
-
-			}
-
-			_gl.bindBuffer( _gl.ARRAY_BUFFER, geometry.__webglLineDistanceBuffer );
-			_gl.bufferData( _gl.ARRAY_BUFFER, lineDistanceArray, hint );
-
-		}
-
-	};
-	
-	//TODO: Move this functionality, along with filling up typed buffers (above), to glmodel.js
-	function initLineBuffers ( geometry, object ) {
-
-		var nvertices = geometry.vertices.length;
-
-		geometry.__vertexArray = new Float32Array( nvertices * 3 );
-		geometry.__colorArray = new Float32Array( nvertices * 3 );
-		geometry.__lineDistanceArray = new Float32Array( nvertices * 1 );
-
-		geometry.__webglLineCount = nvertices;
-
-	};
 	
     //Creates appropriate gl buffers for geometry chunk
     //TODO: do we need line buffer for mesh objects?
@@ -1245,7 +1145,6 @@ WebMol.SimpleRenderer = function ( parameters ) {
         geometryChunk.__webglColorBuffer = _gl.createBuffer();
 
         geometryChunk.__webglFaceBuffer = _gl.createBuffer();
-        geometryChunk.__webglLineBuffer = _gl.createBuffer();
 
         _this.info.memory.geometries++;
     };
