@@ -963,6 +963,8 @@ WebMol.GLModel = (function() {
 		cylinderGeometry.faceVertexUvs = [ [] ];
 
 		//sphere drawing
+		//TODO: call to populateGroup is *really* slow - try to build them up as we go
+		//See also: drawCylinder
 		var drawAtomSphere = function(atom, geo) {
 			
 			if (!atom.style.sphere)
@@ -981,33 +983,45 @@ WebMol.GLModel = (function() {
 			var x, y;
 			var radius = getRadiusFromStyle(atom, style);
 			var vobj = sphereVertexCache.getVerticesForRadius(radius);
-			var start = geo.vertices.length;
+			//var start = geo.vertices.length;
 
 			// now add vertices and create faces at appropriate location
 			var vertices = vobj.vertices;
 			var normals = vobj.normals;
-
+			
+			geoGroup = updateGeoGroup(geo, geoGroup, vertices.length);
+			var start = geoGroup.vertices;
+			
 			for (i in vertices) {
 				var v = vertices[i];
-				var vert = new vertex(v.x + atom.x, v.y + atom.y, v.z + atom.z);
-				geo.vertices.push(vert);
+				//var vert = new vertex(v.x + atom.x, v.y + atom.y, v.z + atom.z);
+				//geo.vertices.push(vert);
 				//geo.normals.push(normals[i]);
+				geoGroup.vertexArr.push(v.x + atom.x);
+				geoGroup.vertexArr.push(v.y + atom.y);
+				geoGroup.vertexArr.push(v.z + atom.z);
+				
+				geoGroup.colorArr.push(C.r), geoGroup.colorArr.push(C.g), geoGroup.colorArr.push(C.b);
+				
+				//Fill up dummy normalArr
+				geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
 			}
-
+			
+			geoGroup.vertices += vertices.length;
+			
 			var verticesRows = vobj.verticesRows;
 			var h = verticesRows.length - 1;
 			
-			//var face, normal;
-			var n_vertices = 0;
+
 			//var color = [C.r, C.g, C.b];
 			for (y = 0; y < h; y++) {
 				var w = verticesRows[y].length - 1;
 				for (x = 0; x < w; x++) {
 
-					var v1 = verticesRows[y][x + 1] + start;
-					var v2 = verticesRows[y][x] + start;
-					var v3 = verticesRows[y + 1][x] + start;
-					var v4 = verticesRows[y + 1][x + 1] + start;
+					var v1 = verticesRows[y][x + 1] + start, v1offset = v1 * 3;
+					var v2 = verticesRows[y][x] + start, v2offset = v2 * 3;
+					var v3 = verticesRows[y + 1][x] + start, v3offset = v3 * 3;
+					var v4 = verticesRows[y + 1][x + 1] + start, v4offset = v4 * 3;
 
 					var n1 = normals[v1 - start];
 					var n2 = normals[v2 - start];
@@ -1015,32 +1029,41 @@ WebMol.GLModel = (function() {
 					var n4 = normals[v4 - start];
 					var face, norm;
 					if (Math.abs(vertices[v1 - start].y) === radius) {
-						//geo.faces.push(new THREE.Face3(v1, v3, v4, [ n1, n3, n4 ], C));
-						n_vertices = 3;
-						face = [v1, v3, v4];
-						norm = [n1, n3, n4];
+						//face = [v1, v3, v4];
+						//norm = [n1, n3, n4];
+						
+						geoGroup.normalArr[v1offset] = n1.x, geoGroup.normalArr[v3offset] = n3.x, geoGroup.normalArr[v4offset] = n4.x;
+						geoGroup.normalArr[v1offset+1] = n1.y, geoGroup.normalArr[v3offset+1] = n3.y, geoGroup.normalArr[v4offset+1] = n4.y;
+						geoGroup.normalArr[v1offset+2] = n1.z, geoGroup.normalArr[v3offset+2] = n3.z, geoGroup.normalArr[v4offset+2] = n4.z;
+						
+						geoGroup.faceArr.push(v1), geoGroup.faceArr.push(v3), geoGroup.faceArr.push(v4);
+						
 					} else if (Math.abs(vertices[v3 - start].y) === radius) {
-						//geo.faces.push(new THREE.Face3(v1, v2, v3, [ n1, n2, n3 ], C));
-						n_vertices = 3;
-						face = [v1, v2, v3];
-						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3]];
-						norm = [n1, n2, n3];
+						//face = [v1, v2, v3];			
+						//norm = [n1, n2, n3];
+						
+						geoGroup.normalArr[v1offset] = n1.x, geoGroup.normalArr[v2offset] = n2.x, geoGroup.normalArr[v3offset] = n3.x;
+						geoGroup.normalArr[v1offset+1] = n1.y, geoGroup.normalArr[v2offset+1] = n2.y, geoGroup.normalArr[v3offset+1] = n3.y;
+						geoGroup.normalArr[v1offset+2] = n1.z, geoGroup.normalArr[v2offset+2] = n2.z, geoGroup.normalArr[v3offset+2] = n3.z;
+						
+						geoGroup.faceArr.push(v1), geoGroup.faceArr.push(v2), geoGroup.faceArr.push(v3);
+						
 					} else {
-						//geo.faces.push(new THREE.Face4(v1, v2, v3, v4, [ n1, n2, n3, n4 ], C));
-						n_vertices = 4;
-						face = [v1, v2, v3, v4];
-						//face = [geo.vertices[v1], geo.vertices[v2], geo.vertices[v3], geo.vertices[v4]];
-						norm = [n1, n2, n3, n4];
+						//face = [v1, v2, v3, v4];
+						//norm = [n1, n2, n3, n4];
+						
+						geoGroup.normalArr[v1offset] = n1.x, geoGroup.normalArr[v2offset] = n2.x, geoGroup.normalArr[v4offset] = n4.x;
+						geoGroup.normalArr[v1offset+1] = n1.y, geoGroup.normalArr[v2offset+1] = n2.y, geoGroup.normalArr[v4offset+1] = n4.y;
+						geoGroup.normalArr[v1offset+2] = n1.z, geoGroup.normalArr[v2offset+2] = n2.z, geoGroup.normalArr[v4offset+2] = n4.z;
+						
+						geoGroup.normalArr[v2offset] = n2.x, geoGroup.normalArr[v3offset] = n3.x, geoGroup.normalArr[v4offset] = n4.x;
+						geoGroup.normalArr[v2offset+1] = n2.y, geoGroup.normalArr[v3offset+1] = n3.y, geoGroup.normalArr[v4offset+1] = n4.y;
+						geoGroup.normalArr[v2offset+2] = n2.z, geoGroup.normalArr[v3offset+2] = n3.z, geoGroup.normalArr[v4offset+2] = n4.z;
+						
+						geoGroup.faceArr.push(v1), geoGroup.faceArr.push(v2), geoGroup.faceArr.push(v4);
+						geoGroup.faceArr.push(v2), geoGroup.faceArr.push(v3), geoGroup.faceArr.push(v4);
 					}
-					
-					geoGroup = updateGeoGroup(geo, geoGroup, n_vertices);
-					
-					var offset = geoGroup.vertices;
-					
-					geoGroup.vertices += n_vertices;
-					
-					//populate non-typed vertexArr and face arrays with vertex coordinates
-					populateGroup(geo, geoGroup, face, norm, C, offset);
+
 				}
 			}
 
