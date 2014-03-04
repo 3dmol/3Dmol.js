@@ -192,4 +192,150 @@ var updateGeoGroup = function(geo, geoGroup, n_vertices) {
 	return retGroup;
 };
 
+var mergeGeos = function(geometry, mesh) {
+	
+	var meshGeo = mesh.geometry;
+	
+	if (meshGeo === undefined || meshGeo.geometryChunks === undefined) 
+		return;
+		
+	if (geometry.geometryChunks === undefined)
+		geometry.geometryChunks = [];
+	
+	geometry.geometryChunks.push( meshGeo.geometryChunks[0] );
+	initBuffers(geometry);
+	
+};
+
+//Initialize typed array buffers for completed geometry
+//TODO: get rid of the saveArrs argument (always delete arrays)
+//For surf render, generate the typed arrays directly (rather than calling this function)
+var initBuffers = function(geometry, saveArrs) {
+	
+	//mesh arrays
+	if ( geometry.geometryChunks !== undefined ) {
+		
+		var group;
+		
+		for (var i = 0; i < geometry.geometryChunks.length; ++i){
+		
+			group = geometry.geometryChunks[i];
+			
+			if (group.__inittedArrays)
+				continue;
+			
+			group.__vertexArray = new Float32Array(group.vertexArr);
+			group.__colorArray = new Float32Array(group.colorArr);
+			group.__normalArray = new Float32Array(group.normalArr);
+			group.__faceArray = new Uint16Array(group.faceArr);
+			
+			//Doesn't free memory directly, but should break references for gc 
+			delete group.vertexArr;
+			delete group.colorArr;
+			delete group.normalArr;
+			delete group.faceArr;
+			delete group.lineArr;
+			
+			group.__inittedArrays = true;
+			
+		}
+		
+	}
+	
+	//line arrays
+	else {
+		
+		if (geometry.__inittedArrays)
+			return
+		
+		geometry.__vertexArray = new Float32Array(geometry.vertexArr);
+		geometry.__colorArray = new Float32Array(geometry.colorArr);
+		geometry.__lineDistanceArray = new Float32Array(geometry.vertices.length);
+		
+		delete geometry.vertexArr;
+		delete geometry.colorArr;
+		delete geometry.lineArr;
+		
+		geometry.__inittedArrays = true;
+	}		
+	
+};
+
+//Set up normalArr from faces and vertices
+//for face3 or face4
+//DOES NOT work for mixed faceArr 
+//TODO: Optimize this !!
+var setUpNormals = function(geo, three) {
+	
+	for ( var g in geo.geometryChunks ) {
+	
+		var geoGroup = geo.geometryChunks[g];
+	
+		var faces = geoGroup.faceArr;
+		var verts = geoGroup.vertexArr;
+		var norms = geoGroup.normalArr;
+		
+		//vertex indices
+		var a, b, c, d,
+		//and actual vertices
+		vA, vB, vC, vD, norm;
+		
+		//Face3
+		if (three && three !== undefined) {
+		
+			for ( var i = 0; i < faces.length / 3; i++ ) {
+				a = faces[ i * 3 ] * 3;
+				b = faces[ i * 3 + 1 ] * 3;
+				c = faces[ i * 3 + 2 ] * 3;
+				
+				vA = new vertex(verts[a], verts[a+1], verts[a+2]);
+				vB = new vertex(verts[b], verts[b+1], verts[b+2]);
+				vC = new vertex(verts[c], verts[c+1], verts[c+2]);
+				
+				vC.sub(vB.x, vB.y, vB.z);
+				vA.sub(vB.x, vB.y, vB.z);
+				
+				//face normal
+				norm = crossMult(vC, vA);
+				norm.normalize();
+				
+				norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
+				norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y;
+				norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z;
+				
+			}		
+		
+		}
+		
+		//face4
+		else {
+		
+			for ( var i = 0; i < faces.length / 6; i++ ) {
+				a = faces[ i * 6 ] * 3;
+				b = faces[ i * 6 + 1 ] * 3;
+				c = faces[ i * 6 + 4 ] * 3;
+				d = faces[ i * 6 + 2 ] * 3;
+				
+				vA = new vertex(verts[a], verts[a+1], verts[a+2]);
+				vB = new vertex(verts[b], verts[b+1], verts[b+2]);
+				vC = new vertex(verts[c], verts[c+1], verts[c+2]);
+				vD = new vertex(verts[d], verts[d+1], verts[d+2]);
+				
+				vC.sub(vB.x, vB.y, vB.z);
+				vA.sub(vB.x, vB.y, vB.z);
+				
+				//face normal
+				norm = crossMult(vC, vA);
+				norm.normalize();
+				
+				norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
+				norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y, norms[d + 1] += norm.y;
+				norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z, norms[d + 2] += norm.z;
+				
+			}
+		}
+	}
+	
+};
+
 	

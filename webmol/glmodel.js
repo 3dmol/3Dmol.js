@@ -850,47 +850,6 @@ WebMol.GLModel = (function() {
 			};
 		};
 		
-		//Initialize typed array buffers for completed geometry
-		var initBuffers = function(geometry) {
-			
-			//mesh arrays
-			if ( geometry.geometryChunks !== undefined ) {
-				
-				var group;
-				
-				for (var i = 0; i < geometry.geometryChunks.length; ++i){
-					group = geometry.geometryChunks[i];
-					group.__vertexArray = new Float32Array(group.vertexArr);
-					group.__colorArray = new Float32Array(group.colorArr);
-					group.__normalArray = new Float32Array(group.normalArr);
-					group.__faceArray = new Uint16Array(group.faceArr);
-					
-					//Doesn't free memory directly, but should break references for gc 
-					delete group.vertexArr;
-					delete group.colorArr;
-					delete group.normalArr;
-					delete group.faceArr;
-					delete group.lineArr;
-					
-				}
-				
-			}
-			
-			//line arrays
-			else {
-				
-				geometry.__vertexArray = new Float32Array(geometry.vertexArr);
-				geometry.__colorArray = new Float32Array(geometry.colorArr);
-				geometry.__lineDistanceArray = new Float32Array(geometry.vertices.length);
-				
-				delete geometry.vertexArr;
-				delete geometry.colorArr;
-				delete geometry.lineArr;
-				
-			}		
-			
-		};
-		
 		// cross drawing
 		var drawAtomCross = function(atom, geos) {
 			if (!atom.style.cross)

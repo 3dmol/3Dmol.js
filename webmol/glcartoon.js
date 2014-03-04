@@ -219,50 +219,6 @@ WebMol.drawCartoon = (function() {
 		group.add(mesh);
 		
 	};
-	
-	
-	//TODO: Optimize this !!
-	var setUpNormals = function(geo) {
-		
-		for ( var g in geo.geometryChunks ) {
-		
-			var geoGroup = geo.geometryChunks[g];
-		
-			var faces = geoGroup.faceArr;
-			var verts = geoGroup.vertexArr;
-			var norms = geoGroup.normalArr;
-			
-			//vertex indices
-			var a, b, c, d,
-			//and actual vertices
-			vA, vB, vC, vD, norm;
-			
-			for ( var i = 0; i < faces.length / 6; i++ ) {
-				a = faces[ i * 6 ] * 3;
-				b = faces[ i * 6 + 1 ] * 3;
-				c = faces[ i * 6 + 4 ] * 3;
-				d = faces[ i * 6 + 2 ] * 3;
-				
-				vA = new vertex(verts[a], verts[a+1], verts[a+2]);
-				vB = new vertex(verts[b], verts[b+1], verts[b+2]);
-				vC = new vertex(verts[c], verts[c+1], verts[c+2]);
-				vD = new vertex(verts[d], verts[d+1], verts[d+2]);
-				
-				vC.sub(vB.x, vB.y, vB.z);
-				vA.sub(vB.x, vB.y, vB.z);
-				
-				//face normal
-				norm = crossMult(vC, vA);
-				norm.normalize();
-				
-				norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
-				norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y, norms[d + 1] += norm.y;
-				norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z, norms[d + 2] += norm.z;
-				
-			}
-		}
-		
-	};
 
 	//TODO: Need to update this (will we ever use this?)
 	var drawSmoothCurve = function(group, _points, width, colors, div) {

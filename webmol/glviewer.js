@@ -371,7 +371,7 @@ WebMol.glmolViewer = (function() {
 					var geo = surfaces[i].geo;
 					// async surface generation can cause
 					// the geometry to be webgl initialized before it is fully
-					// formed; force various recalculations unti full surface is
+					// formed; force various recalculations until full surface is
 					// available
 					if (!surfaces[i].finished) {
 						geo.verticesNeedUpdate = true;
@@ -393,8 +393,11 @@ WebMol.glmolViewer = (function() {
 						if (surfaces[i].lastGL) {
 							modelGroup.remove(surfaces[i].lastGL);
 						}
+						
+						initBuffers(geo, true);
 						// create new surface
 						var smesh = new THREE.Mesh(geo, surfaces[i].mat);
+						//initBuffers(geo);
 						surfaces[i].lastGL = smesh;
 						modelGroup.add(smesh);
 					} // else final surface already there
@@ -673,13 +676,30 @@ WebMol.glmolViewer = (function() {
 		};
 
 		// create a mesh defined from the passed vertices and faces and material
+		// Just create a single geometry chunk - broken up whether sync or not
 		var generateSurfaceMesh = function(atoms, VandF, mat) {
 			var geo = new THREE.Geometry();
+			geo.geometryChunks = [];
+			geo.geometryChunks.push( new geometryChunk() );
+			
+			var geoGroup = geo.geometryChunks[0];
+			
 			// reconstruct vertices and faces
 			geo.vertices = [];
 			var v = VandF.vertices;
+			
 			for ( var i = 0; i < v.length; i++) {
+				//geoGroup = updateGeoGroup(geo, geoGroup, 1);
+				geoGroup.vertexArr.push(v[i].x), geoGroup.vertexArr.push(v[i].y), geoGroup.vertexArr.push(v[i].z);
+				
+				//Set colors in next loop
+				geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0);
+				
+				geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
+				
 				geo.vertices.push(new THREE.Vector3(v[i].x, v[i].y, v[i].z));
+				
+				geoGroup.vertices++;
 			}
 
 			geo.faces = [];
@@ -700,14 +720,26 @@ WebMol.glmolViewer = (function() {
 				var A = v[faces[i].a].atomid;
 				var B = v[faces[i].b].atomid;
 				var C = v[faces[i].c].atomid;
+				
+				var offsetA = faces[i].a * 3, offsetB = faces[i].b * 3, offsetC = faces[i].c * 3;
 
 				var f = new THREE.Face3(faces[i].a, faces[i].b, faces[i].c);
+				geoGroup.faceArr.push(faces[i].a), geoGroup.faceArr.push(faces[i].b), geoGroup.faceArr.push(faces[i].c);
+				
+				geoGroup.colorArr[offsetA] = colors[A].r, geoGroup.colorArr[offsetA+1] = colors[A].g,
+						 geoGroup.colorArr[offsetA+2] = colors[A].b;
+				geoGroup.colorArr[offsetB] = colors[B].r, geoGroup.colorArr[offsetB+1] = colors[B].g,
+						 geoGroup.colorArr[offsetB+2] = colors[B].b;
+				geoGroup.colorArr[offsetC] = colors[C].r, geoGroup.colorArr[offsetC+1] = colors[C].g,
+						 geoGroup.colorArr[offsetC+2] = colors[C].b;
+				
 				f.vertexColors = [ colors[A], colors[B], colors[C] ];
 				geo.faces.push(f);
 			}
 
-			geo.computeFaceNormals();
-			geo.computeVertexNormals(false);
+			//geo.computeFaceNormals();
+			//geo.computeVertexNormals(false);
+			setUpNormals(geo, true);
 
 			var mesh = new THREE.Mesh(geo, mat);
 			mesh.doubleSided = true;
@@ -907,7 +939,7 @@ WebMol.glmolViewer = (function() {
 							extents[i].atoms, extents[i].toshow, reducedAtoms,
 							totalVol);
 					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-					THREE.GeometryUtils.merge(surfobj.geo, mesh);
+					mergeGeos(surfobj.geo, mesh);
 					view.render();
 				}
 			} else { // use worker
@@ -930,7 +962,9 @@ WebMol.glmolViewer = (function() {
 					worker.onmessage = function(event) {
 						var VandF = event.data;
 						var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-						THREE.GeometryUtils.merge(surfobj.geo, mesh);
+						//THREE.GeometryUtils.merge(surfobj.geo, mesh);
+						//surfobj.geo = mesh.geometry;
+						mergeGeos(surfobj.geo, mesh);
 						view.render();
 						console.log("async mesh generation "
 								+ (+new Date() - time) + "ms");
