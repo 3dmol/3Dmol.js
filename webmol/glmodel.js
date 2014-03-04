@@ -1117,59 +1117,91 @@ WebMol.GLModel = (function() {
 			nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
 			nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
 
-			var start = geo.vertices.length;
+			geoGroup = updateGeoGroup(geo, geoGroup, 32);
+			//var start = geo.vertices.length;
+			var start = geoGroup.vertices;
 			// add vertices, opposing vertices paired together
 			for ( var i = 0, n = nvecs.length; i < n; ++i) {
 				var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
 				var top = nvecs[i].clone().multiplyScalar(radius).add(to);
 
-				geo.vertices.push(bottom);
-				geo.vertices.push(top);
+				//geo.vertices.push(bottom);
+				//geo.vertices.push(top);
+				geoGroup.vertexArr.push(bottom.x), geoGroup.vertexArr.push(bottom.y), geoGroup.vertexArr.push(bottom.z);
+				geoGroup.vertexArr.push(top.x), geoGroup.vertexArr.push(top.y), geoGroup.vertexArr.push(top.z);
+				
+				geoGroup.colorArr.push(color.r), geoGroup.colorArr.push(color.g), geoGroup.colorArr.push(color.b);
+				geoGroup.colorArr.push(color.r), geoGroup.colorArr.push(color.g), geoGroup.colorArr.push(color.b);
+				
+				//populate dummy normalArr
+				geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
+				geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
+				
 			}
-
+			
+			geoGroup.vertices += 32;
+			
 			// now faces
 			var face, norm, offset;
 			var n_vertices = 0;
 			for ( var i = 0, n = nvecs.length - 1; i < n; ++i) {
-				var ti = start + 2 * i;
+			
+				var ti = start + 2 * i, offset = ti * 3;
 				
-				//face = new THREE.Face4(ti, ti + 1, ti + 3, ti + 2);
-				//face.color = color;
+				var t1 = ti, t1offset = t1 * 3;
+				var t2 = ti + 1, t2offset = t2 * 3;
+				var t3 = ti + 3, t3offset = t3 * 3;
+				var t4 = ti + 2, t4offset = t4 * 3;
 				
-				face = [ti, ti + 1, ti + 3, ti + 2];
+				//face = [t1, t2, t4], [t2, t3, t4];	
+				//face = [t1, t2, t3, t4];
+					
 				norm = [ nvecs[i], nvecs[i], nvecs[i + 1], nvecs[i + 1]];
+				var n1, n2, n3, n4;
+				n1 = n2 = nvecs[i];
+				n3 = n4 = nvecs[i + 1];
 				
-				//face.vertexNormals = [ nvecs[i], nvecs[i], nvecs[i + 1],
-				//		nvecs[i + 1] ];
-				//geo.faces.push(face);
+				geoGroup.normalArr[t1offset] = n1.x, geoGroup.normalArr[t2offset] = n2.x, geoGroup.normalArr[t4offset] = n4.x;
+				geoGroup.normalArr[t1offset+1] = n1.y, geoGroup.normalArr[t2offset+1] = n2.y, geoGroup.normalArr[t4offset+1] = n4.y;
+				geoGroup.normalArr[t1offset+2] = n1.z, geoGroup.normalArr[t2offset+2] = n2.z, geoGroup.normalArr[t4offset+2] = n4.z;
+				
+				geoGroup.normalArr[t2offset] = n2.x, geoGroup.normalArr[t3offset] = n3.x, geoGroup.normalArr[t4offset] = n4.x;
+				geoGroup.normalArr[t2offset+1] = n2.y, geoGroup.normalArr[t3offset+1] = n3.y, geoGroup.normalArr[t4offset+1] = n4.y;
+				geoGroup.normalArr[t2offset+2] = n2.z, geoGroup.normalArr[t3offset+2] = n3.z, geoGroup.normalArr[t4offset+2] = n4.z;
+		
+				geoGroup.faceArr.push(t1), geoGroup.faceArr.push(t2), geoGroup.faceArr.push(t4);
+				geoGroup.faceArr.push(t2), geoGroup.faceArr.push(t3), geoGroup.faceArr.push(t4);
 
-				geoGroup = updateGeoGroup(geo, geoGroup, 4);
-				
-				offset = geoGroup.vertices;				
-				geoGroup.vertices += 4;
-				
-				populateGroup(geo, geoGroup, face, norm, color, offset);
 				
 			}
 			// final face
 
 			face = [start + 30, start + 31, start + 1, start];
 			norm = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
-			//face = new THREE.Face4(start + 30, start + 31, start + 1, start);
-			//face.color = color;
-			//face.vertexNormals = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
-			//geo.faces.push(face);
 			
-			//make new group if necessary
+			var t1 = face[0], t1offset = t1 * 3;
+			var t2 = face[1], t2offset = t2 * 3;
+			var t3 = face[2], t3offset = t3 * 3;
+			var t4 = face[3], t4offset = t4 * 3;
+			var n1, n2, n3, n4;
 			
-			geoGroup = updateGeoGroup(geo, geoGroup, 4);
+			n1 = n2 = nvecs[15];
+			n3 = n4 = nvecs[0];
 
-			offset = geoGroup.vertices;
+			geoGroup.normalArr[t1offset] = n1.x, geoGroup.normalArr[t2offset] = n2.x, geoGroup.normalArr[t4offset] = n4.x;
+			geoGroup.normalArr[t1offset+1] = n1.y, geoGroup.normalArr[t2offset+1] = n2.y, geoGroup.normalArr[t4offset+1] = n4.y;
+			geoGroup.normalArr[t1offset+2] = n1.z, geoGroup.normalArr[t2offset+2] = n2.z, geoGroup.normalArr[t4offset+2] = n4.z;
 			
-			geoGroup.vertices += 4;
+			geoGroup.normalArr[t2offset] = n2.x, geoGroup.normalArr[t3offset] = n3.x, geoGroup.normalArr[t4offset] = n4.x;
+			geoGroup.normalArr[t2offset+1] = n2.y, geoGroup.normalArr[t3offset+1] = n3.y, geoGroup.normalArr[t4offset+1] = n4.y;
+			geoGroup.normalArr[t2offset+2] = n2.z, geoGroup.normalArr[t3offset+2] = n3.z, geoGroup.normalArr[t4offset+2] = n4.z;
+	
+			geoGroup.faceArr.push(t1), geoGroup.faceArr.push(t2), geoGroup.faceArr.push(t4);
+			geoGroup.faceArr.push(t2), geoGroup.faceArr.push(t3), geoGroup.faceArr.push(t4);
+
 
 			//populate non-typed vertexArr and face arrays with vertex coordinates
-			populateGroup(geo, geoGroup, face, norm, color, offset);
+			//populateGroup(geo, geoGroup, face, norm, color, offset);
 			
 		};
 		
@@ -1407,7 +1439,7 @@ WebMol.GLModel = (function() {
 			}
 
 			// add stick geometry
-			if (stickGeometry.vertices && stickGeometry.vertices.length > 0) {
+			if (stickGeometry.geometryChunks[0].vertices) {
 				var cylinderMaterial = new THREE.MeshLambertMaterial({
 					vertexColors : true,
 					ambient : 0x000000,
