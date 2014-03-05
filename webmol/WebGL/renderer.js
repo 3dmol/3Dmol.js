@@ -2,7 +2,7 @@
 Simplified webGL renderer - modified from THREE.js
  */
 
-WebMol.SimpleRenderer = function ( parameters ) {
+WebMol.Renderer = function ( parameters ) {
     
     parameters = parameters || {};
     
@@ -16,7 +16,7 @@ WebMol.SimpleRenderer = function ( parameters ) {
     _stencil = parameters.stencil !== undefined ? parameters.stencil : true,
     _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false,
 
-    _clearColor = parameters.clearColor !== undefined ? new THREE.Color( parameters.clearColor ) : new THREE.Color( 0x000000 ),
+    _clearColor = parameters.clearColor !== undefined ? new WebMol.Color( parameters.clearColor ) : new WebMol.Color( 0x000000 ),
     _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0;
     
     this.domElement = _canvas;
@@ -113,10 +113,6 @@ WebMol.SimpleRenderer = function ( parameters ) {
     _currentHeight = 0,
 
     _enabledAttributes = {},
-
-    // frustum
-
-    _frustum = new THREE.Frustum(),
 
      // camera matrices cache
 
@@ -515,7 +511,7 @@ WebMol.SimpleRenderer = function ( parameters ) {
 			identifiers.push(a);
 		*/
 			
-		for(i = 0; i < identifiers.length; i++) {
+		for (i = 0; i < identifiers.length; i++) {
 			
 			var attributeVar = identifiers[i];
 			program.attributes[attributeVar] = _gl.getAttribLocation(program, attributeVar);
@@ -793,7 +789,7 @@ WebMol.SimpleRenderer = function ( parameters ) {
 	
     this.render = function ( scene, camera, renderTarget, forceClear ) {
 
-            if ( camera instanceof THREE.Camera === false ) {
+            if ( (camera instanceof THREE.Camera === false) && (camera instanceof WebMol.Camera === false) ) {
 
                     console.error( 'THREE.WebGLRenderer.render: camera is not an instance of THREE.Camera.' );
                     return;
@@ -817,14 +813,13 @@ WebMol.SimpleRenderer = function ( parameters ) {
 
             if ( this.autoUpdateScene ) scene.updateMatrixWorld();
 
-            // update camera matrices and frustum
+            // update camera matrices
 
             if ( camera.parent === undefined ) camera.updateMatrixWorld();
 
             camera.matrixWorldInverse.getInverse( camera.matrixWorld );
 
             _projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
-            _frustum.setFromMatrix( _projScreenMatrix );
 
             // update WebGL objects
 
@@ -854,19 +849,12 @@ WebMol.SimpleRenderer = function ( parameters ) {
 
                     webglObject.render = false;
 
-                    if ( object.visible ) {
-
-                            //if ( ! ( object instanceof THREE.Mesh || object instanceof THREE.ParticleSystem ) || ! ( object.frustumCulled ) || _frustum.intersectsObject( object ) ) {
-							//NOTE: below used to be protected by above if - seems to work ok without it
-							
+                    if ( object.visible ) {		
                             setupMatrices( object, camera );
                             unrollBufferMaterial( webglObject );
                             webglObject.render = true;
-
                     }
-
             }
-
 
             // set matrices for immediate objects
 
@@ -888,7 +876,7 @@ WebMol.SimpleRenderer = function ( parameters ) {
             this.setDepthTest( true );
             this.setDepthWrite( true );
 
-            // _gl.finish();
+            _gl.finish();
 
     };
 

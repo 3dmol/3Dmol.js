@@ -4,10 +4,9 @@
 
 //the presence of jquery is assumed
 var WebMol = (function() {
+	
 	var my = {};
 	var $ = jQuery; //avoid any conflicts with the dollar
-	
-	
 	
 	//create the best viewer according to parameters in config within element
 	//config.width - width of viewer, if unset use html elment width
@@ -91,7 +90,7 @@ WebMol.CC = {
 			return this.cache[hex];
 		}
 		else {
-			var c = new THREE.Color(hex);
+			var c = new WebMol.Color(hex);
 			this.cache[hex] = c;
 			return c;
 		}
@@ -99,57 +98,92 @@ WebMol.CC = {
 };
 
 //TODO: eventually make all new WebMol types to replace THREE types (color, vector, matrix, etc)
-WebMol.Color = function( r, g, b ){
+WebMol.Color = function( color ){
 	
-	this.r = r || 0.0;
-	this.g = g || 0.0;
-	this.b = b || 0.0;
+	if ( arguments.length > 1) {
+		this.r = arguments[0] || 0.0;
+		this.g = arguments[1] || 0.0;
+		this.b = arguments[2] || 0.0;
+		
+		return this;
+	}
+	
+	return this.set(color);
 				
 };
 
-WebMol.Color.prototype.clone = function() {
+WebMol.Color.prototype = {
 	
-	return new WebMol.Color(this.r, this.g, this.b);
+	constructor: WebMol.Color,
+	
+	r: 0.0, g: 0.0, b: 0.0,
+	
+	set : function(val) {
+		
+		if (val instanceof WebMol.Color) 
+			return val.clone();
+			
+		else if (typeof val === 'number')
+			this.setHex(val);
+	},
+	
+	setHex: function(hex) {
+		
+		hex = Math.floor(hex);
+		
+		this.r = (hex >> 16 & 255) / 255;
+		this.g = (hex >> 8 & 255) / 255;
+		this.b = (hex & 255) / 255;
+		
+		return this;
+	},
+	
+	clone : function() {
+		return new WebMol.Color(this.r, this.g, this.b);
+	}
 	
 };
 
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
 
-		
-var vertex = function(x, y, z) {
+
+WebMol.Vertex = function(x, y, z) {
 	this.x = x || 0.0;
 	this.y = y || 0.0;
 	this.z = z || 0.0;
+};
+
+WebMol.Vertex.prototype = {
 	
-	this.add = function( x, y, z ) {
+	constructor : WebMol.Vertex,
+	
+	add : function( x, y, z ) {
 		this.x += x;
 		this.y += y;
 		this.z += z;
-	};
+	},
 	
-	this.sub = function( x, y, z ) {
+	sub : function( x, y, z ) {
 		this.x -= x;
 		this.y -= y;
 		this.z -= z;
-	};
+	},
 	
-	this.normalize = function() {
+	normalize : function() {
 		var normFactor = 1 / Math.sqrt( (this.x * this.x) + (this.y * this.y) + (this.z * this.z) );
 		
-		this.scale(normFactor);
-	};
+		this.multiplyByScalar(normFactor);
+	},
 	
-	this.scale = function(s) {
+	multiplyByScalar : function(s) {
 		this.x *= s;
 		this.y *= s;
 		this.z *= s;
-	};
+	},
 	
-};
-
-vertex.prototype.clone = function() {
-
-	return new vertex(this.x, this.y, this.z);
+	clone : function() {
+		return new WebMol.Vertex(this.x, this.y, this.z);
+	}
 	
 };
 
@@ -278,7 +312,7 @@ var setUpNormals = function(geo, three) {
 		//vertex indices
 		var a, b, c, d,
 		//and actual vertices
-		vA, vB, vC, vD, norm;
+		vA, vB, vC, norm;
 		
 		//Face3
 		if (three && three !== undefined) {
@@ -319,7 +353,6 @@ var setUpNormals = function(geo, three) {
 				vA = new vertex(verts[a], verts[a+1], verts[a+2]);
 				vB = new vertex(verts[b], verts[b+1], verts[b+2]);
 				vC = new vertex(verts[c], verts[c+1], verts[c+2]);
-				vD = new vertex(verts[d], verts[d+1], verts[d+2]);
 				
 				vC.sub(vB.x, vB.y, vB.z);
 				vA.sub(vB.x, vB.y, vB.z);

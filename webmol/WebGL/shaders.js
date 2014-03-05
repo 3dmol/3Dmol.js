@@ -74,7 +74,6 @@ void main() {
 
 precision highp float;
 
-
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
@@ -125,8 +124,6 @@ varying vec3 vColor;
 void main() {
 	
 	gl_FragColor = vec4( vec3 ( 1.0 ), opacity );
-	
-	float specularStrength = 1.0;
 	
 	gl_FragColor.xyz *= vLightFront;
 	gl_FragColor = gl_FragColor * vec4( vColor, opacity );

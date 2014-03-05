@@ -2,22 +2,8 @@
 
 var WebMol = WebMol || {};
 
-
-THREE.Geometry.prototype.colorAll = function(color) {
-	for ( var i = 0; i < this.faces.length; i++) {
-		this.faces[i].color = color;
-	}
-};
-
-THREE.Matrix4.prototype.isIdentity = function() {
-	for ( var i = 0; i < 4; i++)
-		for ( var j = 0; j < 4; j++)
-			if (this.elements[i * 4 + j] != (i == j) ? 1 : 0)
-				return false;
-	return true;
-};
-
-var TV3 = THREE.Vector3, TF3 = THREE.Face3;
+var TV3 = THREE.Vector3;
+var vertex = WebMol.Vertex;
 
 // a webmol unified interace to gmol
 WebMol.glmolViewer = (function() {
@@ -84,8 +70,8 @@ WebMol.glmolViewer = (function() {
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
 		var CAMERA_Z = 150;
-		//Changed to WebMol's renderer
-		var renderer = new WebMol.SimpleRenderer({
+		
+		var renderer = new WebMol.Renderer({
 			antialias : true
 		});
 		// renderer.sortObjects = false; // hopefully improve performance
@@ -101,10 +87,6 @@ WebMol.glmolViewer = (function() {
 		var camera = new THREE.PerspectiveCamera(20, ASPECT, 1, 800);
 		camera.position = new TV3(0, 0, CAMERA_Z);
 		camera.lookAt(new TV3(0, 0, 0));
-		var perspectiveCamera = camera;
-		var orthoscopicCamera = new THREE.OrthographicCamera();
-		orthoscopicCamera.position.z = CAMERA_Z;
-		orthoscopicCamera.lookAt(new TV3(0, 0, 0));
 
 		var scene = null;
 		var rotationGroup = null; // which contains modelGroup
@@ -689,20 +671,15 @@ WebMol.glmolViewer = (function() {
 			var v = VandF.vertices;
 			
 			for ( var i = 0; i < v.length; i++) {
-				//geoGroup = updateGeoGroup(geo, geoGroup, 1);
+				
 				geoGroup.vertexArr.push(v[i].x), geoGroup.vertexArr.push(v[i].y), geoGroup.vertexArr.push(v[i].z);
-				
-				//Set colors in next loop
-				geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0);
-				
+
+				geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0);			
 				geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
-				
-				geo.vertices.push(new THREE.Vector3(v[i].x, v[i].y, v[i].z));
 				
 				geoGroup.vertices++;
 			}
 
-			geo.faces = [];
 			var faces = VandF.faces;
 
 			// set colors for vertices
