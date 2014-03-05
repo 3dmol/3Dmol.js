@@ -84,7 +84,8 @@ WebMol.glmolViewer = (function() {
 		container.append(renderer.domElement);
 		renderer.setSize(WIDTH, HEIGHT);
 
-		var camera = new THREE.PerspectiveCamera(20, ASPECT, 1, 800);
+		//var camera = new THREE.PerspectiveCamera(20, ASPECT, 1, 800);
+		var camera = new WebMol.Camera(20, ASPECT, 1, 800);
 		camera.position = new TV3(0, 0, CAMERA_Z);
 		camera.lookAt(new TV3(0, 0, 0));
 

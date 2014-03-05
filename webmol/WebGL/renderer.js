@@ -41,9 +41,6 @@ WebMol.Renderer = function ( parameters ) {
     this.autoUpdateObjects = true;
     this.autoUpdateScene = true;
     
-	this.renderPluginsPre = [];
-	this.renderPluginsPost = [];
-    
     // info
 
     this.info = {
@@ -814,7 +811,7 @@ WebMol.Renderer = function ( parameters ) {
             if ( this.autoUpdateScene ) scene.updateMatrixWorld();
 
             // update camera matrices
-
+			//Pretty sure camera's parent is always going to be undefined for our purposes...
             if ( camera.parent === undefined ) camera.updateMatrixWorld();
 
             camera.matrixWorldInverse.getInverse( camera.matrixWorld );

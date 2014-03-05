@@ -128,7 +128,7 @@ WebMol.Object3D.prototype = {
 		this.matrixWorldNeedsUpdate = false;
 		
 		//Update matrices of all children
-		for (var i in children) {
+		for (var i in this.children) {
 			this.children[i].updateMatrixWorld(true);
 		}
 	},
