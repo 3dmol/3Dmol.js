@@ -190,7 +190,7 @@ WebMol.Vertex.prototype = {
 //cross multiply two vectors
 var crossMult = function(u, v) {
 	
-	if ( ! (u instanceof vertex && v instanceof vertex) )
+	if ( ! (u instanceof WebMol.Vertex && v instanceof WebMol.Vertex) )
 		return null;
 		
 	var x, y, z;
@@ -199,7 +199,7 @@ var crossMult = function(u, v) {
 	y = (u.z * v.x) - (u.x * v.z);
 	z = (u.x * v.y) - (u.y * v.x);
 	
-	return new vertex(x, y, z);
+	return new WebMol.Vertex(x, y, z);
 	
 };
 
