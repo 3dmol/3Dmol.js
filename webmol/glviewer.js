@@ -149,6 +149,7 @@ WebMol.glmolViewer = (function() {
 		var initializeScene = function() {
 			// CHECK: Should I explicitly call scene.deallocateObject?
 			scene = new THREE.Scene();
+			//scene = new WebMol.Scene();
 			scene.fog = new THREE.Fog(bgColor, 100, 200);
 
 			modelGroup = new THREE.Object3D();
