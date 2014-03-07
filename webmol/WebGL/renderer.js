@@ -1206,7 +1206,7 @@ WebMol.Renderer = function ( parameters ) {
 			intensity = light.intensity;
 			distance = light.distance;
 			
-			if (light instanceof THREE.DirectionalLight) {
+			if (light instanceof WebMol.Light) {
 				
 				dirCount++;
 				
