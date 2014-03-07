@@ -150,7 +150,7 @@ WebMol.glmolViewer = (function() {
 			// CHECK: Should I explicitly call scene.deallocateObject?
 			scene = new WebMol.Scene();
 			//scene = new WebMol.Scene();
-			scene.fog = new THREE.Fog(bgColor, 100, 200);
+			scene.fog = new WebMol.Fog(bgColor, 100, 200);
 
 			modelGroup = new WebMol.Object3D();
 			rotationGroup = new WebMol.Object3D();

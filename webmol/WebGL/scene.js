@@ -99,3 +99,26 @@ WebMol.Scene.prototype.__removeObject = function(object) {
 		this.__removeObject(object.children[i]);
 	
 };
+
+
+/*
+ * Fog Class
+ */
+
+
+WebMol.Fog = function ( hex, near, far ) {
+
+	this.name = '';
+
+	this.color = new WebMol.Color( hex );
+
+	this.near = ( near !== undefined ) ? near : 1;
+	this.far = ( far !== undefined ) ? far : 1000;
+
+};
+
+WebMol.Fog.prototype.clone = function () {
+
+	return new WebMol.Fog( this.color.getHex(), this.near, this.far );
+
+};
