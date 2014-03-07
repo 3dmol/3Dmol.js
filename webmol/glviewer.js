@@ -120,7 +120,7 @@ WebMol.glmolViewer = (function() {
 			camera.far = center + slabFar;
 			if (camera.near + 1 > camera.far)
 				camera.far = camera.near + 1;
-			if (camera instanceof THREE.PerspectiveCamera) {
+			if (camera instanceof WebMol.Camera) {
 				camera.fov = fov;
 			} else {
 				camera.right = center * Math.tan(Math.PI / 180 * fov);
@@ -148,12 +148,12 @@ WebMol.glmolViewer = (function() {
 
 		var initializeScene = function() {
 			// CHECK: Should I explicitly call scene.deallocateObject?
-			scene = new THREE.Scene();
+			scene = new WebMol.Scene();
 			//scene = new WebMol.Scene();
 			scene.fog = new THREE.Fog(bgColor, 100, 200);
 
-			modelGroup = new THREE.Object3D();
-			rotationGroup = new THREE.Object3D();
+			modelGroup = new WebMol.Object3D();
+			rotationGroup = new WebMol.Object3D();
 			rotationGroup.useQuaternion = true;
 			rotationGroup.quaternion = new THREE.Quaternion(0, 0, 0, 1);
 			rotationGroup.add(modelGroup);

@@ -1381,7 +1381,7 @@ WebMol.GLModel = (function() {
 		var createMolObj = function(atoms) {
 
 			console.log("creating for "+id);
-			var ret = new THREE.Object3D();
+			var ret = new WebMol.Object3D();
 			var cartoonAtoms = [];
 			var lineGeometries = {};
 			var crossGeometries = {};
