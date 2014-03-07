@@ -702,7 +702,6 @@ WebMol.glmolViewer = (function() {
 				
 				var offsetA = faces[i].a * 3, offsetB = faces[i].b * 3, offsetC = faces[i].c * 3;
 
-				var f = new THREE.Face3(faces[i].a, faces[i].b, faces[i].c);
 				geoGroup.faceArr.push(faces[i].a), geoGroup.faceArr.push(faces[i].b), geoGroup.faceArr.push(faces[i].c);
 				
 				geoGroup.colorArr[offsetA] = colors[A].r, geoGroup.colorArr[offsetA+1] = colors[A].g,
@@ -712,8 +711,6 @@ WebMol.glmolViewer = (function() {
 				geoGroup.colorArr[offsetC] = colors[C].r, geoGroup.colorArr[offsetC+1] = colors[C].g,
 						 geoGroup.colorArr[offsetC+2] = colors[C].b;
 				
-				f.vertexColors = [ colors[A], colors[B], colors[C] ];
-				geo.faces.push(f);
 			}
 
 			//geo.computeFaceNormals();
