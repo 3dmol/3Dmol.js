@@ -786,7 +786,7 @@ WebMol.Renderer = function ( parameters ) {
 	
     this.render = function ( scene, camera, renderTarget, forceClear ) {
 
-            if ( (camera instanceof THREE.Camera === false) && (camera instanceof WebMol.Camera === false) ) {
+            if ( camera instanceof WebMol.Camera === false )  {
 
                     console.error( 'THREE.WebGLRenderer.render: camera is not an instance of THREE.Camera.' );
                     return;
