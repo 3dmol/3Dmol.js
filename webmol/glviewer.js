@@ -161,7 +161,6 @@ WebMol.glmolViewer = (function() {
 			scene.add(rotationGroup);
 
 			// setup lights
-			//var directionalLight = new THREE.DirectionalLight(0xFFFFFF);
                         var directionalLight = new WebMol.Light(0xFFFFFF);
 			directionalLight.position = new TV3(0.2, 0.2, 1).normalize();
 			directionalLight.intensity = 1.0;
@@ -482,7 +481,7 @@ WebMol.glmolViewer = (function() {
 
 			rotationGroup.position.z = -(maxD * 0.35
 					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
-			// rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
+			
 			show();
 		};
 
@@ -764,7 +763,7 @@ WebMol.glmolViewer = (function() {
 
 		function getMatWithStyle(style) {
 			var mat = new WebMol.MeshLambertMaterial();
-			mat.vertexColors = THREE.VertexColors;
+			mat.vertexColors = WebMol.VertexColors;
 
 			for ( var prop in style) {
 				if (prop === "color") {
@@ -939,8 +938,6 @@ WebMol.glmolViewer = (function() {
 					worker.onmessage = function(event) {
 						var VandF = event.data;
 						var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-						//THREE.GeometryUtils.merge(surfobj.geo, mesh);
-						//surfobj.geo = mesh.geometry;
 						mergeGeos(surfobj.geo, mesh);
 						view.render();
 						console.log("async mesh generation "

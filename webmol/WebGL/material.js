@@ -14,16 +14,16 @@ WebMol.Material = function () {
     this.name = '';
     
     //TODO: Which of these instance variables can I remove??
-    this.side = THREE.FrontSide;
+    this.side = WebMol.FrontSide;
 
     this.opacity = 1;
     this.transparent = false;
 
-    this.blending = THREE.NormalBlending;
+    this.blending = WebMol.NormalBlending;
 
-    this.blendSrc = THREE.SrcAlphaFactor;
-    this.blendDst = THREE.OneMinusSrcAlphaFactor;
-    this.blendEquation = THREE.AddEquation;
+    //this.blendSrc = THREE.SrcAlphaFactor;
+    //this.blendDst = THREE.OneMinusSrcAlphaFactor;
+    //this.blendEquation = THREE.AddEquation;
 
     this.depthTest = true;
     this.depthWrite = true;
@@ -84,7 +84,7 @@ WebMol.Material.prototype.setValues = function ( values ) {
 	}
 
 };
-
+//TODO: might want to look into blending equations
 WebMol.Material.prototype.clone = function ( material ) {
 
 	if ( material === undefined ) material = new WebMol.Material();
@@ -98,9 +98,9 @@ WebMol.Material.prototype.clone = function ( material ) {
 
 	material.blending = this.blending;
 
-	material.blendSrc = this.blendSrc;
-	material.blendDst = this.blendDst;
-	material.blendEquation = this.blendEquation;
+	//material.blendSrc = this.blendSrc;
+	//material.blendDst = this.blendDst;
+	//material.blendEquation = this.blendEquation;
 
 	material.depthTest = this.depthTest;
 	material.depthWrite = this.depthWrite;
@@ -180,15 +180,14 @@ WebMol.MeshLambertMaterial = function(parameters) {
     this.specularMap = null;
     
     this.envMap = null;
-    this.combine = THREE.MultiplyOperation;
     this.reflectivity = 1;
     this.refractionRatio = 0.98;
     
     this.fog = true;
     
-    this.shading = THREE.SmoothShading;
+    this.shading = WebMol.SmoothShading;
     
-    this.vertexColors = THREE.NoColors;
+    this.vertexColors = WebMol.NoColors;
     
     this.skinning = false;
     

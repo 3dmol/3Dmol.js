@@ -109,7 +109,7 @@ WebMol.SurfaceType = {
             SES : 2
 	};
 
-// in an attempt to reduce memory overhead, cache all THREE.Colors
+// in an attempt to reduce memory overhead, cache all WebMol.Colors
 //this makes things a little faster
 WebMol.CC = {
 	cache : {},
@@ -405,4 +405,30 @@ var setUpNormals = function(geo, three) {
 	
 };
 
-	
+//WebMol constants (replaces needed THREE constants)
+
+//material constants
+
+// sides
+WebMol.FrontSide = 0;
+WebMol.BackSide = 1;
+WebMol.DoubleSide = 2;
+
+// blending modes
+WebMol.NoBlending = 0;
+WebMol.NormalBlending = 1;
+WebMol.AdditiveBlending = 2;
+WebMol.SubtractiveBlending = 3;
+WebMol.MultiplyBlending = 4;
+WebMol.CustomBlending = 5;
+
+// shading
+WebMol.NoShading = 0;
+WebMol.FlatShading = 1;
+WebMol.SmoothShading = 2;
+
+// colors
+WebMol.NoColors = 0;
+WebMol.FaceColors = 1;
+WebMol.VertexColors = 2;
+

@@ -1,5 +1,5 @@
 /**
-Simplified webGL renderer - modified from THREE.js
+Simplified webGL renderer 
  */
 
 WebMol.Renderer = function ( parameters ) {
@@ -210,585 +210,584 @@ WebMol.Renderer = function ( parameters ) {
 
     };
 
-	this.setMaterialFaces = function ( material ) {
-		
-		var doubleSided = material.side === THREE.DoubleSide;
-		var flipSided = material.side === THREE.BackSide;
+    this.setMaterialFaces = function ( material ) {
 
-		if ( _oldDoubleSided !== doubleSided ) {
+            var doubleSided = material.side === WebMol.DoubleSide;
+            var flipSided = material.side === WebMol.BackSide;
 
-			if ( doubleSided ) {
+            if ( _oldDoubleSided !== doubleSided ) {
 
-				_gl.disable( _gl.CULL_FACE );
+                    if ( doubleSided ) {
 
-			} else {
+                            _gl.disable( _gl.CULL_FACE );
 
-				_gl.enable( _gl.CULL_FACE );
+                    } else {
 
-			}
+                            _gl.enable( _gl.CULL_FACE );
 
-			_oldDoubleSided = doubleSided;
+                    }
 
-		}
+                    _oldDoubleSided = doubleSided;
 
-		if ( _oldFlipSided !== flipSided ) {
+            }
 
-			if ( flipSided ) {
+            if ( _oldFlipSided !== flipSided ) {
 
-				_gl.frontFace( _gl.CW );
+                    if ( flipSided ) {
 
-			} else {
+                            _gl.frontFace( _gl.CW );
 
-				_gl.frontFace( _gl.CCW );
+                    } else {
 
-			}
+                            _gl.frontFace( _gl.CCW );
 
-			_oldFlipSided = flipSided;
+                    }
 
-		}	
-			
-	};
+                    _oldFlipSided = flipSided;
+
+            }	
+
+    };
 	
-	this.setDepthTest = function ( depthTest ) {
+    this.setDepthTest = function ( depthTest ) {
 
-		if ( _oldDepthTest !== depthTest ) {
+            if ( _oldDepthTest !== depthTest ) {
 
-			if ( depthTest ) {
+                    if ( depthTest ) {
 
-				_gl.enable( _gl.DEPTH_TEST );
+                            _gl.enable( _gl.DEPTH_TEST );
 
-			} else {
+                    } else {
 
-				_gl.disable( _gl.DEPTH_TEST );
+                            _gl.disable( _gl.DEPTH_TEST );
 
-			}
+                    }
 
-			_oldDepthTest = depthTest;
+                    _oldDepthTest = depthTest;
 
-		}
+            }
 
-	};
+    };
 
-	this.setDepthWrite = function ( depthWrite ) {
+    this.setDepthWrite = function ( depthWrite ) {
 
-		if ( _oldDepthWrite !== depthWrite ) {
+            if ( _oldDepthWrite !== depthWrite ) {
 
-			_gl.depthMask( depthWrite );
-			_oldDepthWrite = depthWrite;
+                    _gl.depthMask( depthWrite );
+                    _oldDepthWrite = depthWrite;
 
-		}
+            }
 
-	};
+    };
 
-	this.setBlending = function( blending ) {
-		
-		if (blending === 0) 
-			_gl.disable( _gl.BLEND );
-		
-		else {
-			_gl.enable( _gl.BLEND );
-			_gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
-			_gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
-		}
-		
-		_oldBlending = blending;
-	};
+    this.setBlending = function( blending ) {
 
-	// Sorting
+            if (blending === WebMol.NoBlending) 
+                    _gl.disable( _gl.BLEND );
 
-	function numericalSort ( a, b ) {
+            else {
+                    _gl.enable( _gl.BLEND );
+                    _gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
+                    _gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
+            }
 
-		return b[ 0 ] - a[ 0 ];
+            _oldBlending = blending;
+    };
 
-	};
-	
-	function enableAttribute( attribute ) {
+    // Sorting
 
-		if ( ! _enabledAttributes[ attribute ] ) {
+    function numericalSort ( a, b ) {
 
-			_gl.enableVertexAttribArray( attribute );
-			_enabledAttributes[ attribute ] = true;
+            return b[ 0 ] - a[ 0 ];
 
-		}
+    };
 
-	};
+    function enableAttribute( attribute ) {
 
-	function disableAttributes() {
+            if ( ! _enabledAttributes[ attribute ] ) {
 
-		for ( var attribute in _enabledAttributes ) {
+                    _gl.enableVertexAttribArray( attribute );
+                    _enabledAttributes[ attribute ] = true;
 
-			if ( _enabledAttributes[ attribute ] ) {
+            }
 
-				_gl.disableVertexAttribArray( attribute );
-				_enabledAttributes[ attribute ] = false;
+    };
 
-			}
+    function disableAttributes() {
 
-		}
+            for ( var attribute in _enabledAttributes ) {
 
-	};	
-	
-	function setPolygonOffset ( polygonOffset, factor, units) {
-		
-		if ( _oldPolygonOffset !== polygonOffset ) {
-			
-			if (polygonOffset)
-				_gl.enable( _gl.POLYGON_OFFSET_FILL );
-			else
-				_gl.disable( _gl.POLYGON_OFFSET_FILL );
-		}
-	};
-	
-	function setLineWidth ( width ) {
-		
-		if ( width !== _oldLineWidth ) {
-			_gl.lineWidth(width);
-			_oldLineWidth = width;
-		}
-		
-	}
-	
-	var deallocateMaterial = function ( material ) {
+                    if ( _enabledAttributes[ attribute ] ) {
 
-		var program = material.program;
+                            _gl.disableVertexAttribArray( attribute );
+                            _enabledAttributes[ attribute ] = false;
 
-		if ( program === undefined ) return;
+                    }
 
-		material.program = undefined;
+            }
 
-		// only deallocate GL program if this was the last use of shared program
-		// assumed there is only single copy of any program in the _programs list
-		// (that's how it's constructed)
+    };	
 
-		var i, il, programInfo;
-		var deleteProgram = false;
+    function setPolygonOffset ( polygonOffset, factor, units) {
 
-		for ( i = 0, il = _programs.length; i < il; i ++ ) {
+            if ( _oldPolygonOffset !== polygonOffset ) {
 
-			programInfo = _programs[ i ];
+                    if (polygonOffset)
+                            _gl.enable( _gl.POLYGON_OFFSET_FILL );
+                    else
+                            _gl.disable( _gl.POLYGON_OFFSET_FILL );
+            }
+    };
 
-			if ( programInfo.program === program ) {
+    function setLineWidth ( width ) {
 
-				programInfo.usedTimes --;
+            if ( width !== _oldLineWidth ) {
+                    _gl.lineWidth(width);
+                    _oldLineWidth = width;
+            }
 
-				if ( programInfo.usedTimes === 0 ) {
+    }
 
-					deleteProgram = true;
+    var deallocateMaterial = function ( material ) {
 
-				}
+            var program = material.program;
 
-				break;
+            if ( program === undefined ) return;
 
-			}
+            material.program = undefined;
 
-		}
+            // only deallocate GL program if this was the last use of shared program
+            // assumed there is only single copy of any program in the _programs list
+            // (that's how it's constructed)
 
-		if ( deleteProgram === true ) {
+            var i, il, programInfo;
+            var deleteProgram = false;
 
-			// avoid using array.splice, this is costlier than creating new array from scratch
+            for ( i = 0, il = _programs.length; i < il; i ++ ) {
 
-			var newPrograms = [];
+                    programInfo = _programs[ i ];
 
-			for ( i = 0, il = _programs.length; i < il; i ++ ) {
+                    if ( programInfo.program === program ) {
 
-				programInfo = _programs[ i ];
+                            programInfo.usedTimes --;
 
-				if ( programInfo.program !== program ) {
+                            if ( programInfo.usedTimes === 0 ) {
 
-					newPrograms.push( programInfo );
+                                    deleteProgram = true;
 
-				}
+                            }
 
-			}
+                            break;
 
-			_programs = newPrograms;
+                    }
 
-			_gl.deleteProgram( program );
+            }
 
-			_this.info.memory.programs --;
+            if ( deleteProgram === true ) {
 
-		}
+                    // avoid using array.splice, this is costlier than creating new array from scratch
 
-	};
+                    var newPrograms = [];
 
-	//Compile and return shader
-	function getShader (type, str) {
-		
-		var shader;
-		
-		if (type === "fragment")
-			shader = _gl.createShader( _gl.FRAGMENT_SHADER );
-		else if (type === "vertex")
-			shader = _gl.createShader( _gl.VERTEX_SHADER );
-		
-		_gl.shaderSource(shader, str);
-		_gl.compileShader(shader);
-		
-		if ( ! _gl.getShaderParameter(shader, _gl.COMPILE_STATUS) ) {
-			
-			console.error(_gl.getShaderInfoLog(shader));
-			console.error("could not initialize shader");
-			return null;
-			
-		}
-		
-		return shader;
-		
-	};	
-	
-	
-	//Compile appropriate shaders (if necessary) from source code and attach to gl program.
-	function buildProgram(fragmentShader, vertexShader, uniforms) {
-		
-		var p, pl, d, program, code;
-		var chunks = [];
-		
-		chunks.push(fragmentShader);
-		chunks.push(vertexShader);
-		
-		code = chunks.join();
-		
-		//check if program has already been compiled
-		
-		for (p = 0, pl = _programs.length; p < pl; p++) {
-			
-			var programInfo = _programs[p];
-			
-			if (programInfo.code === code) {
-				
-				programInfo.usedTimes++;
-				
-				return programInfo.program;
-			}
-		}
-		
-		//Set up new program and compile shaders
-		
-		program = _gl.createProgram();
-		
-		var glFragmentShader = getShader("fragment", fragmentShader);
-		var glVertexShader = getShader("vertex", vertexShader);
-		
-		_gl.attachShader(program, glVertexShader);
-		_gl.attachShader(program, glFragmentShader);
-		
-		_gl.linkProgram(program);
-		
-		if (! _gl.getProgramParameter(program, _gl.LINK_STATUS) )
-			console.error("Could not initialize shader");
-			
-		//gather and cache uniform variables and attributes
-		
-		program.uniforms = {};
-		program.attributes = {};
-		
-		var identifiers, u, a, i;
-		
-		//uniform vars
-		identifiers = 
-			[ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix', 'normalMatrix', 'modelMatrix', 'cameraPosition' ];
-		
-		//custom uniform vars
-		for (u in uniforms) 
-			identifiers.push(u);
-		
-		for (i = 0; i < identifiers.length; i++) {
-			
-			var uniformVar = identifiers[i];
-			program.uniforms[uniformVar] = _gl.getUniformLocation(program, uniformVar);
-			
-		}
-		
-		//attributes
-		identifiers = 
-			[ 'position', 'normal', 'color', 'lineDistance' ];
-		
-		/*
-		for (a in attributes)
-			identifiers.push(a);
-		*/
-			
-		for (i = 0; i < identifiers.length; i++) {
-			
-			var attributeVar = identifiers[i];
-			program.attributes[attributeVar] = _gl.getAttribLocation(program, attributeVar);
-		}
-		
-		program.id = _programs_counter++;
-		_programs.push( {program: program, code: code, usedTimes: 1} );
-		_this.info.memory.programs = _programs.length;
-		
-		return program;
-	};
-	
-	//TODO: need to set up shader attributes and uniforms as attributes on material object after attaching prgm
-	//We need to attach appropriate uniform variables to material after shaders have been chosen
-	this.initMaterial = function ( material, lights, fog, object ) {
-		
-		//material.addEventListener('dispose', onMaterialDispose);
-		
-		var u, a, identifiers, i, parameters, maxLightCount, maxBones, maxShadows, shaderID;
-		
-		if (material instanceof WebMol.LineBasicMaterial)
-			shaderID = "basic";
-		else if (material instanceof WebMol.MeshLambertMaterial)
-			shaderID = "lambert";
-			
-		if (shaderID) {
-			
-			var shader = WebMol.ShaderLib[shaderID];
-			material.shaderType = shaderID;
-			material.vertexShader = shader.vertexShader;
-			material.fragmentShader = shader.fragmentShader;
-			material.uniforms = WebMol.ShaderUtils.clone(shader.uniforms);
-			//TODO: set material uniforms to shader uniform variables
-		
-		}
-			
-		material.program = buildProgram(material.fragmentShader, material.vertexShader, material.uniforms);
-		
-	};
-	
-	function setProgram( camera, lights, fog, material, object ) {
-		
-		if ( material.needsUpdate ) {
-			
-			if (material.program)
-				deallocateMaterial(material);
-				
-				_this.initMaterial( material, lights, fog, object );
-				material.needsUpdate = false;
-		}
-		
-		var refreshMaterial = false;
-		
-		//p_uniforms: uniformVarName => uniformLocation
-		//m_uniforms: uniformVarName => uniformJsVal
-		var program = material.program,
-			p_uniforms = program.uniforms,
-			m_uniforms = material.uniforms;
-			
-		if (program != _currentProgram) {		
-			_gl.useProgram(program);
-			_currentProgram = program;
-			
-			refreshMaterial = true;
-		}
-		
-		if (material.id != _currentMaterialId) {
-			_currentMaterialId = material.id;
-			refreshMaterial = true;
-		}
-		
-		if (camera != _currentCamera) {	
-			_currentCamera = camera;
-			refreshMaterial = true;
-		}
-		
-		//Send projection matrix to uniform variable in shader
-		if (refreshMaterial) {
-			
-			//Load projection, model-view matrices for perspective
-			_gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
-			_gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
-		
-			//Set up correct fog uniform vals
-			m_uniforms.fogColor.value = fog.color;
-			m_uniforms.fogNear.value = fog.near;
-			m_uniforms.fogFar.value = fog.far;
-			
-			//Set up lights for lambert shader
-			if (material.shaderType === "lambert") {
-				
-				//load view and normal matrices for directional and object lighting
-				_gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
-				_gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
-				//_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
-				
-				if (_lightsNeedUpdate) {
-					setupLights(program, lights);
-					_lightsNeedUpdate = false;
-				}
-				
-				//Set up correct light uniform var vals
-				m_uniforms.ambientLightColor.value = _lights.ambient;
-				m_uniforms.directionalLightColor.value = _lights.directional.colors;
-				m_uniforms.directionalLightDirection.value = _lights.directional.positions;
-				m_uniforms.ambient.value = material.ambient;
-				m_uniforms.emissive.value = material.emissive;
-				
-			}
-			
-			//opacity, diffuse, emissive, etc
-			m_uniforms.opacity.value = material.opacity;
-			m_uniforms.diffuse.value = material.color;
-			
-			//Load any other material specific uniform variables to gl shaders
-			loadMaterialUniforms(p_uniforms, m_uniforms);
-		
-		}
-		
-		return program;
-		
-	};
-	
-	//TODO: eventually move away from THREE.js types (e.g. vector3, matix4, etc)
-	function loadMaterialUniforms(p_uniforms, m_uniforms) {
-		var uniformVar, type, uniformVal, uniformLoc;
-		
-		for (uniformVar in m_uniforms) {
-			if (! p_uniforms[uniformVar])
-				continue;
-			
-			type = m_uniforms[uniformVar].type;
-			uniformVal = m_uniforms[uniformVar].value;
-			uniformLoc = p_uniforms[uniformVar];
-			
-			//single float
-			if (type === 'f')
-				_gl.uniform1f(uniformLoc, uniformVal);
-			//array of floats
-			else if (type === 'fv')
-				_gl.uniform3fv(uniformLoc, uniformVal);
-			//color - r,g,b floats
-			else if (type === 'c')
-				_gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g, uniformVal.b);
+                    for ( i = 0, il = _programs.length; i < il; i ++ ) {
 
-		}
-		
-	};
-	
-	this.renderBuffer = function ( camera, lights, fog, material, geometryGroup, object ) {
-		
-		if ( ! material.visible )
-			return;
-		
-		var program, attributes, linewidth, primitives, a, attribute, i, il;
-		
-		//Sets up proper vertex and fragment shaders and attaches them to webGL program
-		//Also sets appropriate uniform variables 
-		program = setProgram(camera, lights, fog, material, object);
-		
-		attributes = program.attributes;
-		
-		var updateBuffers = false,
-			geometryGroupHash = (geometryGroup.id * 0xffffff) + (program.id * 2);
-		
-		if (geometryGroupHash !== _currentGeometryGroupHash) {
-			_currentGeometryGroupHash = geometryGroupHash;
-			updateBuffers = true;
-		}
-		
-		//rebind shader attributes to appropriate (and already initialized) gl buffers
-		if (updateBuffers) {
-			
-			disableAttributes();
-			
-			// Vertices
-			if (attributes.position >= 0) {			
-				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
-				enableAttribute( attributes.position );
-				_gl.vertexAttribPointer( attributes.position, 3, _gl.FLOAT, false, 0, 0 );	
-			}
-			
-			// Colors
-			if (attributes.color >= 0) {
-				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
-				enableAttribute( attributes.color );
-				_gl.vertexAttribPointer( attributes.color, 3, _gl.FLOAT, false, 0, 0 );
-			}
-			
-			// Normals (lambert shader only)
-			if (attributes.normal >=0) {
-				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
-				enableAttribute( attributes.normal );
-				_gl.vertexAttribPointer( attributes.normal, 3, _gl.FLOAT, false, 0, 0 );
-			}
-			
-		}
+                            programInfo = _programs[ i ];
 
-		//Render
-		
-		//lambert shaders - draw triangles
-		//TODO: make sure geometryGroup's face count is setup correctly
-		if (object instanceof WebMol.Mesh) {
-			
-			var faceCount = geometryGroup.__faceArray.length;
-			
-			if (updateBuffers)
-				_gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
-			_gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );
-			
-			_this.info.render.calls++;
-			_this.info.render.vertices += faceCount;
-			_this.info.render.faces += faceCount / 3;
-		}
-		
-		//basic shaders - draw lines
-		else if (object instanceof WebMol.Line) {
-			
-                        var lineCount = geometryGroup.vertices;
-			
-			setLineWidth(material.lineWidth);
-			_gl.drawArrays( _gl.LINES, 0, lineCount );
-			
-			_this.info.render.calls++;
-		}
-		
-	};
+                            if ( programInfo.program !== program ) {
 
-	//rendering
-	function renderObjects ( renderList, reverse, materialType, camera, lights, fog, useBlending, overrideMaterial)  {
-		
-		var webglObject, object, buffer, material, start, end, delta;
-		
-		//Forward or backward render
-		
-		if (reverse) {
-			start = renderList.length - 1;
-			end = -1;
-			delta = -1;
-		}
-		
-		else {
-			start = 0;
-			end = renderList.length;
-			delta = 1;
-		}
-		
-		for (var i = start; i !== end; i += delta) {
-			
-			webglObject = renderList[i];
-			
-			if (webglObject.render) {
-				
-				object = webglObject.object;
-				buffer = webglObject.buffer;
-				material = webglObject[materialType];
-				
-				if ( ! material )
-					continue;
-				
-				if (useBlending)
-					_this.setBlending(material.blending);
-				
-				_this.setDepthTest(material.depthTest);
-				_this.setDepthWrite(material.depthWrite);
-				setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
-				
-				_this.setMaterialFaces(material);
-				
-				_this.renderBuffer(camera, lights, fog, material, buffer, object);
-			}
-		}
-		
-	};
+                                    newPrograms.push( programInfo );
+
+                            }
+
+                    }
+
+                    _programs = newPrograms;
+
+                    _gl.deleteProgram( program );
+
+                    _this.info.memory.programs --;
+
+            }
+
+    };
+
+    //Compile and return shader
+    function getShader (type, str) {
+
+            var shader;
+
+            if (type === "fragment")
+                    shader = _gl.createShader( _gl.FRAGMENT_SHADER );
+            else if (type === "vertex")
+                    shader = _gl.createShader( _gl.VERTEX_SHADER );
+
+            _gl.shaderSource(shader, str);
+            _gl.compileShader(shader);
+
+            if ( ! _gl.getShaderParameter(shader, _gl.COMPILE_STATUS) ) {
+
+                    console.error(_gl.getShaderInfoLog(shader));
+                    console.error("could not initialize shader");
+                    return null;
+
+            }
+
+            return shader;
+
+    };	
+
+
+    //Compile appropriate shaders (if necessary) from source code and attach to gl program.
+    function buildProgram(fragmentShader, vertexShader, uniforms) {
+
+            var p, pl, d, program, code;
+            var chunks = [];
+
+            chunks.push(fragmentShader);
+            chunks.push(vertexShader);
+
+            code = chunks.join();
+
+            //check if program has already been compiled
+
+            for (p = 0, pl = _programs.length; p < pl; p++) {
+
+                    var programInfo = _programs[p];
+
+                    if (programInfo.code === code) {
+
+                            programInfo.usedTimes++;
+
+                            return programInfo.program;
+                    }
+            }
+
+            //Set up new program and compile shaders
+
+            program = _gl.createProgram();
+
+            var glFragmentShader = getShader("fragment", fragmentShader);
+            var glVertexShader = getShader("vertex", vertexShader);
+
+            _gl.attachShader(program, glVertexShader);
+            _gl.attachShader(program, glFragmentShader);
+
+            _gl.linkProgram(program);
+
+            if (! _gl.getProgramParameter(program, _gl.LINK_STATUS) )
+                    console.error("Could not initialize shader");
+
+            //gather and cache uniform variables and attributes
+
+            program.uniforms = {};
+            program.attributes = {};
+
+            var identifiers, u, a, i;
+
+            //uniform vars
+            identifiers = 
+                    [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix', 'normalMatrix', 'modelMatrix', 'cameraPosition' ];
+
+            //custom uniform vars
+            for (u in uniforms) 
+                    identifiers.push(u);
+
+            for (i = 0; i < identifiers.length; i++) {
+
+                    var uniformVar = identifiers[i];
+                    program.uniforms[uniformVar] = _gl.getUniformLocation(program, uniformVar);
+
+            }
+
+            //attributes
+            identifiers = 
+                    [ 'position', 'normal', 'color', 'lineDistance' ];
+
+            /*
+            for (a in attributes)
+                    identifiers.push(a);
+            */
+
+            for (i = 0; i < identifiers.length; i++) {
+
+                    var attributeVar = identifiers[i];
+                    program.attributes[attributeVar] = _gl.getAttribLocation(program, attributeVar);
+            }
+
+            program.id = _programs_counter++;
+            _programs.push( {program: program, code: code, usedTimes: 1} );
+            _this.info.memory.programs = _programs.length;
+
+            return program;
+    };
+
+    //TODO: need to set up shader attributes and uniforms as attributes on material object after attaching prgm
+    //We need to attach appropriate uniform variables to material after shaders have been chosen
+    this.initMaterial = function ( material, lights, fog, object ) {
+
+            //material.addEventListener('dispose', onMaterialDispose);
+
+            var u, a, identifiers, i, parameters, maxLightCount, maxBones, maxShadows, shaderID;
+
+            if (material instanceof WebMol.LineBasicMaterial)
+                    shaderID = "basic";
+            else if (material instanceof WebMol.MeshLambertMaterial)
+                    shaderID = "lambert";
+
+            if (shaderID) {
+
+                    var shader = WebMol.ShaderLib[shaderID];
+                    material.shaderType = shaderID;
+                    material.vertexShader = shader.vertexShader;
+                    material.fragmentShader = shader.fragmentShader;
+                    material.uniforms = WebMol.ShaderUtils.clone(shader.uniforms);
+                    //TODO: set material uniforms to shader uniform variables
+
+            }
+
+            material.program = buildProgram(material.fragmentShader, material.vertexShader, material.uniforms);
+
+    };
+
+    function setProgram( camera, lights, fog, material, object ) {
+
+            if ( material.needsUpdate ) {
+
+                    if (material.program)
+                            deallocateMaterial(material);
+
+                            _this.initMaterial( material, lights, fog, object );
+                            material.needsUpdate = false;
+            }
+
+            var refreshMaterial = false;
+
+            //p_uniforms: uniformVarName => uniformLocation
+            //m_uniforms: uniformVarName => uniformJsVal
+            var program = material.program,
+                    p_uniforms = program.uniforms,
+                    m_uniforms = material.uniforms;
+
+            if (program != _currentProgram) {		
+                    _gl.useProgram(program);
+                    _currentProgram = program;
+
+                    refreshMaterial = true;
+            }
+
+            if (material.id != _currentMaterialId) {
+                    _currentMaterialId = material.id;
+                    refreshMaterial = true;
+            }
+
+            if (camera != _currentCamera) {	
+                    _currentCamera = camera;
+                    refreshMaterial = true;
+            }
+
+            //Send projection matrix to uniform variable in shader
+            if (refreshMaterial) {
+
+                    //Load projection, model-view matrices for perspective
+                    _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
+                    _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+
+                    //Set up correct fog uniform vals
+                    m_uniforms.fogColor.value = fog.color;
+                    m_uniforms.fogNear.value = fog.near;
+                    m_uniforms.fogFar.value = fog.far;
+
+                    //Set up lights for lambert shader
+                    if (material.shaderType === "lambert") {
+
+                            //load view and normal matrices for directional and object lighting
+                            _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
+                            _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+                            //_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
+
+                            if (_lightsNeedUpdate) {
+                                    setupLights(program, lights);
+                                    _lightsNeedUpdate = false;
+                            }
+
+                            //Set up correct light uniform var vals
+                            m_uniforms.ambientLightColor.value = _lights.ambient;
+                            m_uniforms.directionalLightColor.value = _lights.directional.colors;
+                            m_uniforms.directionalLightDirection.value = _lights.directional.positions;
+                            m_uniforms.ambient.value = material.ambient;
+                            m_uniforms.emissive.value = material.emissive;
+
+                    }
+
+                    //opacity, diffuse, emissive, etc
+                    m_uniforms.opacity.value = material.opacity;
+                    m_uniforms.diffuse.value = material.color;
+
+                    //Load any other material specific uniform variables to gl shaders
+                    loadMaterialUniforms(p_uniforms, m_uniforms);
+
+            }
+
+            return program;
+
+    };
+
+    function loadMaterialUniforms(p_uniforms, m_uniforms) {
+            var uniformVar, type, uniformVal, uniformLoc;
+
+            for (uniformVar in m_uniforms) {
+                    if (! p_uniforms[uniformVar])
+                            continue;
+
+                    type = m_uniforms[uniformVar].type;
+                    uniformVal = m_uniforms[uniformVar].value;
+                    uniformLoc = p_uniforms[uniformVar];
+
+                    //single float
+                    if (type === 'f')
+                            _gl.uniform1f(uniformLoc, uniformVal);
+                    //array of floats
+                    else if (type === 'fv')
+                            _gl.uniform3fv(uniformLoc, uniformVal);
+                    //color - r,g,b floats
+                    else if (type === 'c')
+                            _gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g, uniformVal.b);
+
+            }
+
+    };
+
+    this.renderBuffer = function ( camera, lights, fog, material, geometryGroup, object ) {
+
+            if ( ! material.visible )
+                    return;
+
+            var program, attributes, linewidth, primitives, a, attribute, i, il;
+
+            //Sets up proper vertex and fragment shaders and attaches them to webGL program
+            //Also sets appropriate uniform variables 
+            program = setProgram(camera, lights, fog, material, object);
+
+            attributes = program.attributes;
+
+            var updateBuffers = false,
+                    geometryGroupHash = (geometryGroup.id * 0xffffff) + (program.id * 2);
+
+            if (geometryGroupHash !== _currentGeometryGroupHash) {
+                    _currentGeometryGroupHash = geometryGroupHash;
+                    updateBuffers = true;
+            }
+
+            //rebind shader attributes to appropriate (and already initialized) gl buffers
+            if (updateBuffers) {
+
+                    disableAttributes();
+
+                    // Vertices
+                    if (attributes.position >= 0) {			
+                            _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
+                            enableAttribute( attributes.position );
+                            _gl.vertexAttribPointer( attributes.position, 3, _gl.FLOAT, false, 0, 0 );	
+                    }
+
+                    // Colors
+                    if (attributes.color >= 0) {
+                            _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
+                            enableAttribute( attributes.color );
+                            _gl.vertexAttribPointer( attributes.color, 3, _gl.FLOAT, false, 0, 0 );
+                    }
+
+                    // Normals (lambert shader only)
+                    if (attributes.normal >=0) {
+                            _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
+                            enableAttribute( attributes.normal );
+                            _gl.vertexAttribPointer( attributes.normal, 3, _gl.FLOAT, false, 0, 0 );
+                    }
+
+            }
+
+            //Render
+
+            //lambert shaders - draw triangles
+            //TODO: make sure geometryGroup's face count is setup correctly
+            if (object instanceof WebMol.Mesh) {
+
+                    var faceCount = geometryGroup.__faceArray.length;
+
+                    if (updateBuffers)
+                            _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
+                    _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );
+
+                    _this.info.render.calls++;
+                    _this.info.render.vertices += faceCount;
+                    _this.info.render.faces += faceCount / 3;
+            }
+
+            //basic shaders - draw lines
+            else if (object instanceof WebMol.Line) {
+
+                    var lineCount = geometryGroup.vertices;
+
+                    setLineWidth(material.lineWidth);
+                    _gl.drawArrays( _gl.LINES, 0, lineCount );
+
+                    _this.info.render.calls++;
+            }
+
+    };
+
+    //rendering
+    function renderObjects ( renderList, reverse, materialType, camera, lights, fog, useBlending, overrideMaterial)  {
+
+            var webglObject, object, buffer, material, start, end, delta;
+
+            //Forward or backward render
+
+            if (reverse) {
+                    start = renderList.length - 1;
+                    end = -1;
+                    delta = -1;
+            }
+
+            else {
+                    start = 0;
+                    end = renderList.length;
+                    delta = 1;
+            }
+
+            for (var i = start; i !== end; i += delta) {
+
+                    webglObject = renderList[i];
+
+                    if (webglObject.render) {
+
+                            object = webglObject.object;
+                            buffer = webglObject.buffer;
+                            material = webglObject[materialType];
+
+                            if ( ! material )
+                                    continue;
+
+                            if (useBlending)
+                                    _this.setBlending(material.blending);
+
+                            _this.setDepthTest(material.depthTest);
+                            _this.setDepthWrite(material.depthWrite);
+                            setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
+
+                            _this.setMaterialFaces(material);
+
+                            _this.renderBuffer(camera, lights, fog, material, buffer, object);
+                    }
+            }
+
+    };
 	
     this.render = function ( scene, camera, renderTarget, forceClear ) {
 
             if ( camera instanceof WebMol.Camera === false )  {
 
-                    console.error( 'THREE.WebGLRenderer.render: camera is not an instance of THREE.Camera.' );
+                    console.error( 'WebMol.Renderer.render: camera is not an instance of WebMol.Camera.' );
                     return;
 
             }
@@ -859,7 +858,7 @@ WebMol.Renderer = function ( parameters ) {
 
             // opaque pass (front-to-back order)
 
-            this.setBlending( THREE.NoBlending );
+            this.setBlending( WebMol.NoBlending );
 
             renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
 
@@ -948,7 +947,6 @@ WebMol.Renderer = function ( parameters ) {
                         if ( ! geometryChunk.__webglVertexBuffer ) {
 
                                 createBuffers( geometryChunk );
-                                //initMeshBuffers( geometryGroup, object );
 
                                 geometry.verticesNeedUpdate = true;
                                 geometry.elementsNeedUpdate = true;
@@ -967,7 +965,7 @@ WebMol.Renderer = function ( parameters ) {
 					createLineBuffers( geometry );
 					geometry.verticesNeedUpdate = true;
 					geometry.colorsNeedUpdate = true;
-					//geometry.lineDistancesNeedUpdate = true;
+
 				}
             }
         
@@ -976,16 +974,15 @@ WebMol.Renderer = function ( parameters ) {
         if ( ! object.__webglActive ) {
             
             if ( object instanceof WebMol.Mesh) {
+                
                 geometry = object.geometry;
 
-                //TODO: addBuffer for all chunks
-                //Not entirely sure what this function does; just seems to set up an object
-                //with references to the geometryChunk (group), initialized webGL objects, and mesh
                 for ( g in geometry.geometryChunks ) {
                         geometryChunk = geometry.geometryChunks[ g ];
 
                         addBuffer( scene.__webglObjects, geometryChunk, object );
                 }
+                
             }
             
             else if ( object instanceof WebMol.Line ) {
@@ -1000,16 +997,14 @@ WebMol.Renderer = function ( parameters ) {
 
     function updateObject ( object ) {
 
-        var geometry = object.geometry,
-                geometryGroup, geometryChunk, customAttributesDirty, material;
+        var geometry = object.geometry, material = object.material,
+                geometryGroup, geometryChunk, customAttributesDirty;
 
         if ( object instanceof WebMol.Mesh ) {
             
             for (g in geometry.geometryChunks ) {
             	
                 geometryChunk = geometry.geometryChunks[ g ];
-                
-                material = getBufferMaterial(object, geometryChunk);
 
                 if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate ||
                          geometry.colorsNeedUpdate || geometry.normalsNeedUpdate) {
@@ -1024,20 +1019,13 @@ WebMol.Renderer = function ( parameters ) {
 
             geometry.buffersNeedUpdate = false;
 
-            //material.attributes && clearCustomAttributes( material );
-
         }
         
         else if ( object instanceof WebMol.Line ) {
-        
-        	material = getBufferMaterial( object, geometry );
         	
-        	if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate) {
-        		
+        	if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate) 
         		setBuffers( geometry, _gl.DYNAMIC_DRAW, true);
         		
-        	}
-                
                 geometry.veticesNeedUpdate = false;
                 geometry.colorsNeedUpdate = false;
                 
@@ -1045,51 +1033,42 @@ WebMol.Renderer = function ( parameters ) {
 
     };
     
-	function removeObject( object, scene ) {
-		
-		if (object instanceof WebMol.Mesh || object instanceof WebMol.Line )
-			removeInstances(scene.__webglObjects, object);
-		
-		else
-			object.__webglActive = false;
-			
-	};
-	
-	function removeInstances( objList, object ) {
-		
-		for (var o = objList.length - 1; o >= 0; --o) {
-		
-			if (objList[o].object === object) 
-				objList.splice(o, 1);
-				
-		}
-	};
+    function removeObject( object, scene ) {
 
-	function unrollBufferMaterial( globject ) {
-		
-		var object = globject.object;
-		var material = object.material;
-		
-		if ( material.transparent) {
-			globject.opaque = null;
-			globject.transparent = material;
-		}
-		
-		else {
-			globject.opaque = material;
-			globject.transparent = null;
-		}
-		
-	};
+            if (object instanceof WebMol.Mesh || object instanceof WebMol.Line )
+                    removeInstances(scene.__webglObjects, object);
 
-	function getBufferMaterial( object, geometryGroup ) {
-		
-		return object.material instanceof THREE.MeshFaceMaterial
-			? object.material.materials[ geometryGroup.materialIndex ]
-			: object.material;
-	};
-	
-	//
+            else
+                    object.__webglActive = false;
+
+    };
+
+    function removeInstances( objList, object ) {
+
+            for (var o = objList.length - 1; o >= 0; --o) {
+
+                    if (objList[o].object === object) 
+                            objList.splice(o, 1);
+
+            }
+    };
+
+    function unrollBufferMaterial( globject ) {
+
+            var object = globject.object;
+            var material = object.material;
+
+            if ( material.transparent) {
+                    globject.opaque = null;
+                    globject.transparent = material;
+            }
+
+            else {
+                    globject.opaque = material;
+                    globject.transparent = null;
+            }
+
+    };
 
     function setBuffers( geometryChunk, hint, line ) {
 
@@ -1119,7 +1098,6 @@ WebMol.Renderer = function ( parameters ) {
                 //face (index) buffers
                 _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
                 _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );	
-
 
             }
 

@@ -86,8 +86,8 @@ WebMol.drawCartoon = (function() {
 		
 		setUpNormals(geo);
 		var material = new WebMol.MeshLambertMaterial();
-		material.vertexColors = THREE.FaceColors;
-        material.side = THREE.DoubleSide;
+		material.vertexColors = WebMol.FaceColors;
+                material.side = WebMol.DoubleSide;
 		var mesh = new WebMol.Mesh(geo, material);
 		group.add(mesh);
 	};
@@ -212,8 +212,8 @@ WebMol.drawCartoon = (function() {
 		//geo.computeVertexNormals(false);
 		setUpNormals(geo);
 		var material = new WebMol.MeshLambertMaterial();
-		material.vertexColors = THREE.FaceColors;
-		material.side = THREE.DoubleSide;
+		material.vertexColors = WebMol.FaceColors;
+		material.side = WebMol.DoubleSide;
 		var mesh = new WebMol.Mesh(geo, material);
 		group.add(mesh);
 		
@@ -226,7 +226,7 @@ WebMol.drawCartoon = (function() {
 
 		div = (div == undefined) ? 5 : div;
 
-		var geo = new THREE.Geometry();
+		var geo = new WebMol.Geometry();
 		var points = subdivide(_points, div);
                 /*
 		for ( var i = 0; i < points.length; i++) {
@@ -235,12 +235,12 @@ WebMol.drawCartoon = (function() {
 					/ div)]));
 		}
                 */
-		var lineMaterial = new THREE.LineBasicMaterial({
+		var lineMaterial = new WebMol.LineBasicMaterial({
 			linewidth : width
 		});
 		lineMaterial.vertexColors = true;
-		var line = new THREE.Line(geo, lineMaterial);
-		line.type = THREE.LineStrip;
+		var line = new WebMol.Line(geo, lineMaterial);
+		line.type = WebMol.LineStrip;
 		group.add(line);
 	};
 

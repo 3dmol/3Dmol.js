@@ -9,8 +9,8 @@ WebMol.Line = function ( geometry, material, type ) {
 
 	this.geometry = geometry;
         //TODO: update material and type to webgl
-	this.material = ( material !== undefined ) ? material : new THREE.LineBasicMaterial( { color: Math.random() * 0xffffff } );
-	this.type = ( type !== undefined ) ? type : THREE.LineStrip;
+	this.material = ( material !== undefined ) ? material : new WebMol.LineBasicMaterial( { color: Math.random() * 0xffffff } );
+	this.type = ( type !== undefined ) ? type : WebMol.LineStrip;
 
 };
 
@@ -35,7 +35,7 @@ WebMol.Mesh = function ( geometry, material ) {
 	WebMol.Object3D.call( this );
 
 	this.geometry = geometry;
-	this.material = ( material !== undefined ) ? material : new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff, wireframe: true } );
+	this.material = ( material !== undefined ) ? material : new WebMol.MeshBasicMaterial( { color: Math.random() * 0xffffff, wireframe: true } );
 
 };
 

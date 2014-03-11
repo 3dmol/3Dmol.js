@@ -844,11 +844,6 @@ WebMol.GLModel = (function() {
 
 		// bonds as cylinders
 		var defaultStickRadius = .25;
-		var cylinderQuality = 12;
-		var cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1,
-				cylinderQuality, 1, true);
-		cylinderGeometry.faceUvs = []; // null these out to make merging faster
-		cylinderGeometry.faceVertexUvs = [ [] ];
 
 		//sphere drawing
 		//TODO: call to populateGroup is *really* slow - try to build them up as we go
@@ -1342,7 +1337,7 @@ WebMol.GLModel = (function() {
 					initBuffers(lineGeometries[i]);
 					
 					var line = new WebMol.Line(lineGeometries[i], lineMaterial,
-							THREE.LinePieces);
+							WebMol.LinePieces);
 
 					ret.add(line);
 				}
@@ -1360,7 +1355,7 @@ WebMol.GLModel = (function() {
 					initBuffers(crossGeometries[i]);
 					
 					var line = new WebMol.Line(crossGeometries[i], lineMaterial,
-							THREE.LinePieces);
+							WebMol.LinePieces);
 
 					ret.add(line);
 				}
