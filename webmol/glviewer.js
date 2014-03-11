@@ -100,8 +100,8 @@ WebMol.glmolViewer = (function() {
 		var slabFar = 50;
 
 		// UI variables
-		var cq = new THREE.Quaternion(0, 0, 0, 1);
-		var dq = new THREE.Quaternion(0, 0, 0, 1);
+		var cq = new WebMol.Quaternion(0, 0, 0, 1);
+		var dq = new WebMol.Quaternion(0, 0, 0, 1);
 		var isDragging = false;
 		var mouseStartX = 0;
 		var mouseStartY = 0;
@@ -155,7 +155,7 @@ WebMol.glmolViewer = (function() {
 			modelGroup = new WebMol.Object3D();
 			rotationGroup = new WebMol.Object3D();
 			rotationGroup.useQuaternion = true;
-			rotationGroup.quaternion = new THREE.Quaternion(0, 0, 0, 1);
+			rotationGroup.quaternion = new WebMol.Quaternion(0, 0, 0, 1);
 			rotationGroup.add(modelGroup);
 
 			scene.add(rotationGroup);
@@ -259,7 +259,7 @@ WebMol.glmolViewer = (function() {
 				var translationByScreen = new TV3(dx * scaleFactor, -dy
 						* scaleFactor, 0);
 				var q = rotationGroup.quaternion;
-				var qinv = new THREE.Quaternion(q.x, q.y, q.z, q.w).inverse()
+				var qinv = new WebMol.Quaternion(q.x, q.y, q.z, q.w).inverse()
 						.normalize();
 				var translation = translationByScreen.applyQuaternion(qinv);
 				modelGroup.position.x = currentModelPos.x + translation.x;
@@ -271,7 +271,7 @@ WebMol.glmolViewer = (function() {
 				dq.y = 0;
 				dq.z = rs * dx;
 				dq.w = -rs * dy;
-				rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0);
+				rotationGroup.quaternion = new WebMol.Quaternion(1, 0, 0, 0);
 				rotationGroup.quaternion.multiply(dq);
 				rotationGroup.quaternion.multiply(cq);
 			}

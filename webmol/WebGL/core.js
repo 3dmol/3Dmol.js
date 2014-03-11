@@ -18,7 +18,7 @@ WebMol.Object3D = function() {
 	this.rotation = new THREE.Vector3();
 	this.matrix = new THREE.Matrix4();
 	this.matrixWorld = new THREE.Matrix4();
-	this.quaternion = new THREE.Quaternion();
+	this.quaternion = new WebMol.Quaternion();
 	//TODO: Do I need this??
 	this.eulerOrder = 'XYZ';
 	
