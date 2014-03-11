@@ -727,7 +727,7 @@ WebMol.Renderer = function ( parameters ) {
 		//basic shaders - draw lines
 		else if (object instanceof WebMol.Line) {
 			
-			var lineCount = geometryGroup.vertices.length;
+                        var lineCount = geometryGroup.vertices;
 			
 			setLineWidth(material.lineWidth);
 			_gl.drawArrays( _gl.LINES, 0, lineCount );
@@ -1107,32 +1107,23 @@ WebMol.Renderer = function ( parameters ) {
         _gl.bufferData( _gl.ARRAY_BUFFER, colorArray, hint );	
           	
     	//set buffers for line render
-		if (line !== undefined) {
-
-			var lineDistanceArray = geometryChunk.__lineDistanceArray;
-			
-			//line distance buffer
-			_gl.bindBuffer(_gl.ARRAY_BUFFER, geometryChunk.__webglLineDistanceBuffer );
-			_gl.bufferData( _gl.ARRAY_BUFFER, lineDistanceArray, hint );
-			
-		}
 		
-		//set buffers for mesh render
-		else {
-			
-	        var normalArray = geometryChunk.__normalArray;
-	        var faceArray = geometryChunk.__faceArray;
-	
-	        //normal buffers
-	        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
-	        _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );		
-	
-	        //face (index) buffers
-	        _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
-	        _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );	
-	
-	        			
-		}
+            //set buffers for mesh render
+            if (line === undefined) {
+
+                var normalArray = geometryChunk.__normalArray;
+                var faceArray = geometryChunk.__faceArray;
+
+                //normal buffers
+                _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
+                _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );		
+
+                //face (index) buffers
+                _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
+                _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );	
+
+
+            }
 
     };
 	

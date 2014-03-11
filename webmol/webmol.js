@@ -75,6 +75,34 @@ var WebMol = (function() {
     return my;
 })();
 
+//From THREE.js src/Three.js
+
+WebMol.extend = function(obj, source) {
+  
+    //ECMAScript5 compatability
+    if (Object.keys) {
+        
+        var keys = Object.keys(source);
+        
+        for (var i = 0, il = keys.length; i < il; i++) {
+            var prop = keys[i];
+            Object.defineProperty( obj, prop, Object.getOwnPropertyDescriptor(source, prop) );
+        }
+    }
+    
+    else {
+        
+        var safeHasOwnProperty = {}.hasOwnProperty;
+        
+        for (var prop in source) {
+            
+            if (safeHasOwnProperty.call(source, prop))
+                obj[prop] = source[prop];
+            
+        }
+    }
+};
+
 WebMol.SurfaceType = {
             VDW : 1,
             SAS : 3,
@@ -292,11 +320,9 @@ var initBuffers = function(geometry, saveArrs) {
 		
 		geometry.__vertexArray = new Float32Array(geometry.vertexArr);
 		geometry.__colorArray = new Float32Array(geometry.colorArr);
-		geometry.__lineDistanceArray = new Float32Array(geometry.vertices.length);
 		
 		delete geometry.vertexArr;
 		delete geometry.colorArr;
-		delete geometry.lineArr;
 		
 		geometry.__inittedArrays = true;
 	}		

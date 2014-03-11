@@ -1,5 +1,6 @@
 /* core Object3D
  * Base class for Scene, Camera, Geometry
+ * Geometry class
  */
 
 //Object3D base constructor function
@@ -169,9 +170,17 @@ WebMol.Object3D.prototype = {
 
 WebMol.Object3DIDCount = 0;
 
+//Geometry class
+//TODO: What can I remove - how can I optimize ?
+
 WebMol.Geometry = function() {
     
+    //TODO: What do I do with this??
+    THREE.EventDispatcher.call(this);
+    
     this.id = WebMol.GeometryIDCount++;
+
+    this.name = '';
 
     this.boundingBox = null;
     this.boundingSphere = null;
@@ -192,9 +201,14 @@ WebMol.Geometry = function() {
     
 };
 
+
 WebMol.Geometry.prototype = {
   
-  constructor : WebMol.Geometry
+  constructor : WebMol.Geometry,
+  
+  dispose : function() {
+      this.dispatchEvent( {type: 'dispose'} );
+  }
     
 };
 

@@ -868,6 +868,7 @@ WebMol.GLModel = (function() {
 				geo.vertexArr = [];
 				geo.colorArr = [];
 				geo.lineArr = [];
+                                geo.vertices = 0;
 			}
 			
 			var delta = getRadiusFromStyle(atom, style);
@@ -877,9 +878,8 @@ WebMol.GLModel = (function() {
 
 			var c = WebMol.CC.color(atom.color);
 			for ( var j = 0; j < 6; j++) {
-				geo.vertices.push(new TV3(atom.x + points[j][0], atom.y
-						+ points[j][1], atom.z + points[j][2]));
-				geo.colors.push(c);
+
+                                geo.vertices++;
 				geo.vertexArr.push(atom.x + points[j][0]);
 				geo.vertexArr.push(atom.y + points[j][1]);
 				geo.vertexArr.push(atom.z + points[j][2]);
@@ -888,6 +888,7 @@ WebMol.GLModel = (function() {
 				geo.colorArr.push(c.b);
 
 			}
+                        
 		};
 
 		// bonds - both atoms must match bond style
@@ -911,6 +912,7 @@ WebMol.GLModel = (function() {
 				geo.vertexArr = [];
 				geo.colorArr = [];
 				geo.lineArr = [];
+                                geo.vertices = 0;
 			}
 
 			for ( var i = 0; i < atom.bonds.length; i++) {
@@ -920,7 +922,7 @@ WebMol.GLModel = (function() {
 					var atom2 = atoms[j];
 					if (!atom2.style.line)
 						continue; // don't sweat the details
-					var vs = geo.vertices, cs = geo.colors;
+					//var vs = geo.vertices, cs = geo.colors;
 					var p1 = new TV3(atom.x, atom.y, atom.z);
 					var p2 = new TV3(atom2.x, atom2.y, atom2.z);
 					var mp = p1.clone().add(p2).multiplyScalar(0.5);
@@ -931,15 +933,9 @@ WebMol.GLModel = (function() {
 					if (typeof (style.color) != "undefined") {
 						c1 = c2 = WebMol.CC.color(style.color);
 					}
-					vs.push(p1);
-					cs.push(c1);
-					vs.push(mp);
-					cs.push(c1);
-					vs.push(mp);
-					cs.push(c2);
-					vs.push(p2);
-					cs.push(c2);
-					
+                                        
+                                        geo.vertices += 4;
+                                        
 					geo.vertexArr.push(p1.x), geo.vertexArr.push(p1.y), geo.vertexArr.push(p1.z);
 					geo.colorArr.push(c1.r), geo.colorArr.push(c1.g), geo.colorArr.push(c1.b);
 					geo.vertexArr.push(mp.x), geo.vertexArr.push(mp.y), geo.vertexArr.push(mp.z);
@@ -983,9 +979,7 @@ WebMol.GLModel = (function() {
 			var x, y;
 			var radius = getRadiusFromStyle(atom, style);
 			var vobj = sphereVertexCache.getVerticesForRadius(radius);
-			//var start = geo.vertices.length;
-
-			// now add vertices and create faces at appropriate location
+                        
 			var vertices = vobj.vertices;
 			var normals = vobj.normals;
 			
@@ -994,9 +988,6 @@ WebMol.GLModel = (function() {
 			
 			for (i in vertices) {
 				var v = vertices[i];
-				//var vert = new vertex(v.x + atom.x, v.y + atom.y, v.z + atom.z);
-				//geo.vertices.push(vert);
-				//geo.normals.push(normals[i]);
 				geoGroup.vertexArr.push(v.x + atom.x);
 				geoGroup.vertexArr.push(v.y + atom.y);
 				geoGroup.vertexArr.push(v.z + atom.z);
@@ -1125,8 +1116,6 @@ WebMol.GLModel = (function() {
 				var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
 				var top = nvecs[i].clone().multiplyScalar(radius).add(to);
 
-				//geo.vertices.push(bottom);
-				//geo.vertices.push(top);
 				geoGroup.vertexArr.push(bottom.x), geoGroup.vertexArr.push(bottom.y), geoGroup.vertexArr.push(bottom.z);
 				geoGroup.vertexArr.push(top.x), geoGroup.vertexArr.push(top.y), geoGroup.vertexArr.push(top.z);
 				
@@ -1198,10 +1187,6 @@ WebMol.GLModel = (function() {
 	
 			geoGroup.faceArr.push(t1), geoGroup.faceArr.push(t2), geoGroup.faceArr.push(t4);
 			geoGroup.faceArr.push(t2), geoGroup.faceArr.push(t3), geoGroup.faceArr.push(t4);
-
-
-			//populate non-typed vertexArr and face arrays with vertex coordinates
-			//populateGroup(geo, geoGroup, face, norm, color, offset);
 			
 		};
 		
