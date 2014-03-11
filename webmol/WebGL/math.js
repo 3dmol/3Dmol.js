@@ -90,3 +90,43 @@ WebMol.extend(WebMol.Quaternion.prototype, {
     }
     
 });
+
+WebMol.Vertex = function(x, y, z) {
+	this.x = x || 0.0;
+	this.y = y || 0.0;
+	this.z = z || 0.0;
+};
+
+WebMol.Vertex.prototype = {
+	
+	constructor : WebMol.Vertex,
+	
+	add : function( x, y, z ) {
+		this.x += x;
+		this.y += y;
+		this.z += z;
+	},
+	
+	sub : function( x, y, z ) {
+		this.x -= x;
+		this.y -= y;
+		this.z -= z;
+	},
+	
+	normalize : function() {
+		var normFactor = 1 / Math.sqrt( (this.x * this.x) + (this.y * this.y) + (this.z * this.z) );
+		
+		this.multiplyByScalar(normFactor);
+	},
+	
+	multiplyByScalar : function(s) {
+		this.x *= s;
+		this.y *= s;
+		this.z *= s;
+	},
+	
+	clone : function() {
+		return new WebMol.Vertex(this.x, this.y, this.z);
+	}
+	
+};

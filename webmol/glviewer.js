@@ -2,8 +2,8 @@
 
 var WebMol = WebMol || {};
 
-var TV3 = THREE.Vector3;
-var vertex = WebMol.Vertex;
+var TV3 = vertex = THREE.Vector3;
+//var vertex = WebMol.Vertex;
 
 // a webmol unified interace to gmol
 WebMol.glmolViewer = (function() {

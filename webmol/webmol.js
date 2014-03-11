@@ -182,47 +182,6 @@ WebMol.Color.prototype = {
 
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
 
-
-WebMol.Vertex = function(x, y, z) {
-	this.x = x || 0.0;
-	this.y = y || 0.0;
-	this.z = z || 0.0;
-};
-
-WebMol.Vertex.prototype = {
-	
-	constructor : WebMol.Vertex,
-	
-	add : function( x, y, z ) {
-		this.x += x;
-		this.y += y;
-		this.z += z;
-	},
-	
-	sub : function( x, y, z ) {
-		this.x -= x;
-		this.y -= y;
-		this.z -= z;
-	},
-	
-	normalize : function() {
-		var normFactor = 1 / Math.sqrt( (this.x * this.x) + (this.y * this.y) + (this.z * this.z) );
-		
-		this.multiplyByScalar(normFactor);
-	},
-	
-	multiplyByScalar : function(s) {
-		this.x *= s;
-		this.y *= s;
-		this.z *= s;
-	},
-	
-	clone : function() {
-		return new WebMol.Vertex(this.x, this.y, this.z);
-	}
-	
-};
-
 //cross multiply two vectors
 var crossMult = function(u, v) {
 	
@@ -360,11 +319,15 @@ var setUpNormals = function(geo, three) {
 				vB = new vertex(verts[b], verts[b+1], verts[b+2]);
 				vC = new vertex(verts[c], verts[c+1], verts[c+2]);
 				
-				vC.sub(vB.x, vB.y, vB.z);
-				vA.sub(vB.x, vB.y, vB.z);
+				//vC.sub(vB.x, vB.y, vB.z);
+				//vA.sub(vB.x, vB.y, vB.z);
+                                vC.subVectors(vC, vB);
+                                vA.subVectors(vA, vB);
+                                vC.cross(vA);
 				
 				//face normal
-				norm = crossMult(vC, vA);
+				//norm = crossMult(vC, vA);
+                                norm = vC;
 				norm.normalize();
 				
 				norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
@@ -388,11 +351,15 @@ var setUpNormals = function(geo, three) {
 				vB = new vertex(verts[b], verts[b+1], verts[b+2]);
 				vC = new vertex(verts[c], verts[c+1], verts[c+2]);
 				
-				vC.sub(vB.x, vB.y, vB.z);
-				vA.sub(vB.x, vB.y, vB.z);
-				
+				//vC.sub(vB.x, vB.y, vB.z);
+				//vA.sub(vB.x, vB.y, vB.z);
+                                vC.subVectors(vC, vB);
+                                vA.subVectors(vA, vB);
+				vC.cross(vA);
+                                
 				//face normal
-				norm = crossMult(vC, vA);
+                                norm = vC;
+				//norm = crossMult(vC, vA);
 				norm.normalize();
 				
 				norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
