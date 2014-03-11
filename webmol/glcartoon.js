@@ -59,7 +59,7 @@ WebMol.drawCartoon = (function() {
 	};
 
 	var drawThinStrip = function(group, p1, p2, colors, div) {
-		var geo = new THREE.Geometry();
+		var geo = new WebMol.Geometry();
 		geo.geometryChunks = [];
 		geo.geometryChunks.push( new geometryChunk() );
 		var geoGroup = geo.geometryChunks[0];
@@ -69,8 +69,6 @@ WebMol.drawCartoon = (function() {
 		for ( var i = 0, lim = p1.length; i < lim; i++) {
 			
 			geoGroup = updateGeoGroup(geo, geoGroup, 2);
-			geo.vertices.push(p1[i]); // 2i
-			geo.vertices.push(p2[i]); // 2i + 1
 			
 			geo.vertexArr.push(p1[i].x), geo.vertexArr.push(p1[i].y), geo.vertexArr.push(p1[i].z);
 			geo.vertexArr.push(p2[i].x), geo.vertexArr.push(p2[i].y), geo.vertexArr.push(p2[i].z);
@@ -103,13 +101,14 @@ WebMol.drawCartoon = (function() {
 		if (!thickness)
 			return drawThinStrip(group, p1, p2, colors, div);
 
-		var geo = new THREE.Geometry();
+		var geo = new WebMol.Geometry();
 		geo.geometryChunks = [];
 		geo.geometryChunks.push( new geometryChunk() );
 		
 		var geoGroup = geo.geometryChunks[0];
 		
-		var vs = geo.vertices, fs = geo.faces;
+		//var vs = geo.vertices, fs = geo.faces;
+                var vs = [], fs = [];
 		var axis, p1v, p2v, a1v, a2v;
 		
 		var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, 3, -5, -1 ],
@@ -229,12 +228,13 @@ WebMol.drawCartoon = (function() {
 
 		var geo = new THREE.Geometry();
 		var points = subdivide(_points, div);
-
+                /*
 		for ( var i = 0; i < points.length; i++) {
 			geo.vertices.push(points[i]);
 			geo.colors.push(WebMol.color(colors[(i == 0) ? 0 : Math.round((i - 1)
 					/ div)]));
 		}
+                */
 		var lineMaterial = new THREE.LineBasicMaterial({
 			linewidth : width
 		});

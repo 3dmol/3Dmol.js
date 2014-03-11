@@ -663,7 +663,7 @@ WebMol.glmolViewer = (function() {
 		// create a mesh defined from the passed vertices and faces and material
 		// Just create a single geometry chunk - broken up whether sync or not
 		var generateSurfaceMesh = function(atoms, VandF, mat) {
-			var geo = new THREE.Geometry();
+			var geo = new WebMol.Geometry();
 			geo.geometryChunks = [];
 			geo.geometryChunks.push( new geometryChunk() );
 			
@@ -886,7 +886,7 @@ WebMol.glmolViewer = (function() {
 					+ (+new Date() - time) + "ms");
 
 			var surfobj = {
-				geo : new THREE.Geometry(),
+				geo : new WebMol.Geometry(),
 				mat : mat,
 				done : false,
 				finished : false

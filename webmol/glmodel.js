@@ -742,114 +742,6 @@ WebMol.GLModel = (function() {
 			}
 		};
 		
-		//Fill up geometry chunk's non typed arrays for a single face
-		var populateGroup = function(geo, group, face, norm, color, index) {
-			
-			var r = color.r;
-			var g = color.g;
-			var b = color.b;
-			
-			//one triangle
-			if (face.length === 3) {
-				
-				var v1 = geo.vertices[ face[ 0 ] ];
-				var v2 = geo.vertices[ face[ 1 ] ];
-				var v3 = geo.vertices[ face[ 2 ] ];
-				var verts = [v1.x, v1.y, v1.z,
-							 v2.x, v2.y, v2.z,
-							 v3.x, v3.y, v3.z];
-							 
-				var n1 = norm[0];
-				var n2 = norm[1];
-				var n3 = norm[2];
-				var norms = [n1.x, n1.y, n1.z,
-							 n2.x, n2.y, n2.z,
-							 n3.x, n3.y, n3.z];
-							 
-				for (var i in verts) {
-					group.vertexArr.push(verts[i]);	
-				}
-				
-				for (var i in norms) {
-					group.normalArr.push(norms[i]);
-				}
-				
-				//group.normalArr = group.normalArr.concat(norms);
-				
-				group.faceArr.push(index); 
-				group.faceArr.push(index + 1);
-				group.faceArr.push(index + 2);
-				
-				group.colorArr.push(r);
-				group.colorArr.push(g);
-				group.colorArr.push(b);
-				
-				group.colorArr.push(r);
-				group.colorArr.push(g);
-				group.colorArr.push(b);
-				
-				group.colorArr.push(r);
-				group.colorArr.push(g);
-				group.colorArr.push(b);
-
-			}
-			
-			else if (face.length === 4) {
-				
-				v1 = geo.vertices[ face[ 0 ] ];
-				v2 = geo.vertices[ face[ 1 ] ];
-				v3 = geo.vertices[ face[ 2 ] ];
-				v4 = geo.vertices[ face[ 3 ] ];
-				
-				var verts = [v1.x, v1.y, v1.z,
-							 v2.x, v2.y, v2.z,
-							 v3.x, v3.y, v3.z,
-							 v4.x, v4.y, v4.z];
-							 
-				var n1 = norm[0];
-				var n2 = norm[1];
-				var n3 = norm[2];
-				var n4 = norm[3];
-				var norms = [n1.x, n1.y, n1.z,
-							 n2.x, n2.y, n2.z,
-							 n3.x, n3.y, n3.z,
-							 n4.x, n4.y, n4.z];
-
-				for (var i in verts) {
-					group.vertexArr.push(verts[i]);
-				}
-								
-				//group.normalArr = group.normalArr.concat(norms);
-				for (var i in norms) {
-					group.normalArr.push(norms[i]);
-				}
-				
-				group.faceArr.push(index);
-				group.faceArr.push(index + 1);
-				group.faceArr.push(index + 3);
-				
-				group.faceArr.push(index + 1);
-				group.faceArr.push(index + 2);
-				group.faceArr.push(index + 3);
-				
-				group.colorArr.push(r);
-				group.colorArr.push(g);
-				group.colorArr.push(b);
-				
-				group.colorArr.push(r);
-				group.colorArr.push(g);
-				group.colorArr.push(b);
-				
-				group.colorArr.push(r);
-				group.colorArr.push(g);
-				group.colorArr.push(b);		
-
-				group.colorArr.push(r);
-				group.colorArr.push(g);
-				group.colorArr.push(b);			
-			};
-		};
-		
 		// cross drawing
 		var drawAtomCross = function(atom, geos) {
 			if (!atom.style.cross)
@@ -859,7 +751,7 @@ WebMol.GLModel = (function() {
 				return;
 			var linewidth = (atom.style.cross.lineWidth || defaultlineWidth);
 			if (!geos[linewidth])
-				geos[linewidth] = new THREE.Geometry();
+				geos[linewidth] = new WebMol.Geometry();
 				
 			var geo = geos[linewidth];
 			
@@ -904,7 +796,7 @@ WebMol.GLModel = (function() {
 			var linewidth = (atom.style.line.lineWidth || defaultlineWidth);
 
 			if (!geos[linewidth])
-				geos[linewidth] = new THREE.Geometry();
+				geos[linewidth] = new WebMol.Geometry();
 			var geo = geos[linewidth];
 
 			//TODO: initialize geometry in createMolObj
@@ -922,7 +814,7 @@ WebMol.GLModel = (function() {
 					var atom2 = atoms[j];
 					if (!atom2.style.line)
 						continue; // don't sweat the details
-					//var vs = geo.vertices, cs = geo.colors;
+					
 					var p1 = new TV3(atom.x, atom.y, atom.z);
 					var p2 = new TV3(atom2.x, atom2.y, atom2.z);
 					var mp = p1.clone().add(p2).multiplyScalar(0.5);
@@ -1370,12 +1262,12 @@ WebMol.GLModel = (function() {
 			var cartoonAtoms = [];
 			var lineGeometries = {};
 			var crossGeometries = {};
-			var sphereGeometry = new THREE.Geometry();
+			var sphereGeometry = new WebMol.Geometry();
 			
 			sphereGeometry.geometryChunks = [];
 			sphereGeometry.geometryChunks.push( new geometryChunk() );	
 									   			  	
-			var stickGeometry = new THREE.Geometry();
+			var stickGeometry = new WebMol.Geometry();
 			
 			stickGeometry.geometryChunks = [];
 			stickGeometry.geometryChunks.push( new geometryChunk() );

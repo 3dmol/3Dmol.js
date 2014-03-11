@@ -181,9 +181,8 @@ WebMol.Geometry = function() {
     this.id = WebMol.GeometryIDCount++;
 
     this.name = '';
-
-    this.boundingBox = null;
-    this.boundingSphere = null;
+    
+    this.vertices = 0;
 
     this.hasTangents = false;
 
@@ -195,7 +194,6 @@ WebMol.Geometry = function() {
     this.elementsNeedUpdate = false;
     this.normalsNeedUpdate = false;
     this.colorsNeedUpdate = false;
-    this.lineDistancesNeedUpdate = false;
 
     this.buffersNeedUpdate = false;
     

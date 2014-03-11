@@ -967,7 +967,7 @@ WebMol.Renderer = function ( parameters ) {
 					createLineBuffers( geometry );
 					geometry.verticesNeedUpdate = true;
 					geometry.colorsNeedUpdate = true;
-					geometry.lineDistancesNeedUpdate = true;
+					//geometry.lineDistancesNeedUpdate = true;
 				}
             }
         
@@ -1011,21 +1011,16 @@ WebMol.Renderer = function ( parameters ) {
                 
                 material = getBufferMaterial(object, geometryChunk);
 
-                if ( geometry.verticesNeedUpdate || geometry.morphTargetsNeedUpdate || geometry.elementsNeedUpdate ||
-                         geometry.uvsNeedUpdate || geometry.normalsNeedUpdate ||
-                         geometry.colorsNeedUpdate || geometry.tangentsNeedUpdate || customAttributesDirty ) {
-
+                if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate ||
+                         geometry.colorsNeedUpdate || geometry.normalsNeedUpdate) {
                         setBuffers( geometryChunk, _gl.DYNAMIC_DRAW );
-
                 }
             }
+            
             geometry.verticesNeedUpdate = false;
-            geometry.morphTargetsNeedUpdate = false;
             geometry.elementsNeedUpdate = false;
-            geometry.uvsNeedUpdate = false;
             geometry.normalsNeedUpdate = false;
             geometry.colorsNeedUpdate = false;
-            geometry.tangentsNeedUpdate = false;
 
             geometry.buffersNeedUpdate = false;
 
@@ -1037,12 +1032,15 @@ WebMol.Renderer = function ( parameters ) {
         
         	material = getBufferMaterial( object, geometry );
         	
-        	if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate || geometry.lineDistancesNeedUpdate) {
+        	if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate) {
         		
-        		//setLineBuffers( geometry, _gl.DYNAMIC_DRAW);
         		setBuffers( geometry, _gl.DYNAMIC_DRAW, true);
         		
         	}
+                
+                geometry.veticesNeedUpdate = false;
+                geometry.colorsNeedUpdate = false;
+                
         }
 
     };
