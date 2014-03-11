@@ -381,7 +381,7 @@ WebMol.glmolViewer = (function() {
 						
 						initBuffers(geo, true);
 						// create new surface
-						var smesh = new THREE.Mesh(geo, surfaces[i].mat);
+						var smesh = new WebMol.Mesh(geo, surfaces[i].mat);
 						//initBuffers(geo);
 						surfaces[i].lastGL = smesh;
 						modelGroup.add(smesh);
@@ -718,7 +718,7 @@ WebMol.glmolViewer = (function() {
 			//geo.computeVertexNormals(false);
 			setUpNormals(geo, true);
 
-			var mesh = new THREE.Mesh(geo, mat);
+			var mesh = new WebMol.Mesh(geo, mat);
 			mesh.doubleSided = true;
 
 			return mesh;

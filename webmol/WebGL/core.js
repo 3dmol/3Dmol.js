@@ -168,3 +168,34 @@ WebMol.Object3D.prototype = {
 
 
 WebMol.Object3DIDCount = 0;
+
+WebMol.Geometry = function() {
+    
+    this.id = WebMol.GeometryIDCount++;
+
+    this.boundingBox = null;
+    this.boundingSphere = null;
+
+    this.hasTangents = false;
+
+    this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
+
+    // update flags
+
+    this.verticesNeedUpdate = false;
+    this.elementsNeedUpdate = false;
+    this.normalsNeedUpdate = false;
+    this.colorsNeedUpdate = false;
+    this.lineDistancesNeedUpdate = false;
+
+    this.buffersNeedUpdate = false;
+    
+};
+
+WebMol.Geometry.prototype = {
+  
+  constructor : WebMol.Geometry
+    
+};
+
+WebMol.GeometryIDCount = 0;

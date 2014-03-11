@@ -90,7 +90,7 @@ WebMol.drawCartoon = (function() {
 		var material = new THREE.MeshLambertMaterial();
 		material.vertexColors = THREE.FaceColors;
         material.side = THREE.DoubleSide;
-		var mesh = new THREE.Mesh(geo, material);
+		var mesh = new WebMol.Mesh(geo, material);
 		group.add(mesh);
 	};
 
@@ -215,7 +215,7 @@ WebMol.drawCartoon = (function() {
 		var material = new THREE.MeshLambertMaterial();
 		material.vertexColors = THREE.FaceColors;
 		material.side = THREE.DoubleSide;
-		var mesh = new THREE.Mesh(geo, material);
+		var mesh = new WebMol.Mesh(geo, material);
 		group.add(mesh);
 		
 	};

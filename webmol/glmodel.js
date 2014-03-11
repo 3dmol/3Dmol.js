@@ -1430,7 +1430,7 @@ WebMol.GLModel = (function() {
 				//Initialize buffers in geometry
 				initBuffers(sphereGeometry);
 				
-				var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+				var sphere = new WebMol.Mesh(sphereGeometry, sphereMaterial);
 				console
 						.log("sphere geometry "
 								+ sphereGeometry.vertices.length);
@@ -1449,7 +1449,7 @@ WebMol.GLModel = (function() {
 				//Initialize buffers in geometry
 				initBuffers(stickGeometry);
 				
-				var sticks = new THREE.Mesh(stickGeometry, cylinderMaterial);
+				var sticks = new WebMol.Mesh(stickGeometry, cylinderMaterial);
 				ret.add(sticks);
 			}
 
@@ -1464,7 +1464,7 @@ WebMol.GLModel = (function() {
 					
 					initBuffers(lineGeometries[i]);
 					
-					var line = new THREE.Line(lineGeometries[i], lineMaterial,
+					var line = new WebMol.Line(lineGeometries[i], lineMaterial,
 							THREE.LinePieces);
 
 					ret.add(line);
@@ -1482,7 +1482,7 @@ WebMol.GLModel = (function() {
 
 					initBuffers(crossGeometries[i]);
 					
-					var line = new THREE.Line(crossGeometries[i], lineMaterial,
+					var line = new WebMol.Line(crossGeometries[i], lineMaterial,
 							THREE.LinePieces);
 
 					ret.add(line);

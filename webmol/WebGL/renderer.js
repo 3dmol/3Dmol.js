@@ -711,7 +711,7 @@ WebMol.Renderer = function ( parameters ) {
 		
 		//lambert shaders - draw triangles
 		//TODO: make sure geometryGroup's face count is setup correctly
-		if (object instanceof THREE.Mesh) {
+		if (object instanceof WebMol.Mesh) {
 			
 			var faceCount = geometryGroup.__faceArray.length;
 			
@@ -725,7 +725,7 @@ WebMol.Renderer = function ( parameters ) {
 		}
 		
 		//basic shaders - draw lines
-		else if (object instanceof THREE.Line) {
+		else if (object instanceof WebMol.Line) {
 			
 			var lineCount = geometryGroup.vertices.length;
 			
@@ -933,7 +933,7 @@ WebMol.Renderer = function ( parameters ) {
 
             }
 
-            if (object instanceof THREE.Mesh){
+            if (object instanceof WebMol.Mesh){
                 geometry = object.geometry;
                 material = object.material;
 
@@ -959,7 +959,7 @@ WebMol.Renderer = function ( parameters ) {
                 }
             } 
             
-            else if ( object instanceof THREE.Line ) {
+            else if ( object instanceof WebMol.Line ) {
             	
 				geometry = object.geometry;
 				if ( ! geometry.__webglVertexBuffer ) {
@@ -975,7 +975,7 @@ WebMol.Renderer = function ( parameters ) {
         
         if ( ! object.__webglActive ) {
             
-            if ( object instanceof THREE.Mesh) {
+            if ( object instanceof WebMol.Mesh) {
                 geometry = object.geometry;
 
                 //TODO: addBuffer for all chunks
@@ -988,7 +988,7 @@ WebMol.Renderer = function ( parameters ) {
                 }
             }
             
-            else if ( object instanceof THREE.Line ) {
+            else if ( object instanceof WebMol.Line ) {
             	geometry = object.geometry;
             	addBuffer( scene.__webglObjects, geometry, object );
             }
@@ -1003,7 +1003,7 @@ WebMol.Renderer = function ( parameters ) {
         var geometry = object.geometry,
                 geometryGroup, geometryChunk, customAttributesDirty, material;
 
-        if ( object instanceof THREE.Mesh ) {
+        if ( object instanceof WebMol.Mesh ) {
             
             for (g in geometry.geometryChunks ) {
             	
@@ -1033,7 +1033,7 @@ WebMol.Renderer = function ( parameters ) {
 
         }
         
-        else if ( object instanceof THREE.Line ) {
+        else if ( object instanceof WebMol.Line ) {
         
         	material = getBufferMaterial( object, geometry );
         	
@@ -1049,7 +1049,7 @@ WebMol.Renderer = function ( parameters ) {
     
 	function removeObject( object, scene ) {
 		
-		if (object instanceof THREE.Mesh || object instanceof THREE.Line )
+		if (object instanceof WebMol.Mesh || object instanceof WebMol.Line )
 			removeInstances(scene.__webglObjects, object);
 		
 		else
