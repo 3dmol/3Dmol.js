@@ -87,7 +87,7 @@ WebMol.drawCartoon = (function() {
 		}
 		
 		setUpNormals(geo);
-		var material = new THREE.MeshLambertMaterial();
+		var material = new WebMol.MeshLambertMaterial();
 		material.vertexColors = THREE.FaceColors;
         material.side = THREE.DoubleSide;
 		var mesh = new WebMol.Mesh(geo, material);
@@ -212,7 +212,7 @@ WebMol.drawCartoon = (function() {
 		//geo.computeFaceNormals();
 		//geo.computeVertexNormals(false);
 		setUpNormals(geo);
-		var material = new THREE.MeshLambertMaterial();
+		var material = new WebMol.MeshLambertMaterial();
 		material.vertexColors = THREE.FaceColors;
 		material.side = THREE.DoubleSide;
 		var mesh = new WebMol.Mesh(geo, material);

@@ -763,7 +763,7 @@ WebMol.glmolViewer = (function() {
 		};
 
 		function getMatWithStyle(style) {
-			var mat = new THREE.MeshLambertMaterial();
+			var mat = new WebMol.MeshLambertMaterial();
 			mat.vertexColors = THREE.VertexColors;
 
 			for ( var prop in style) {

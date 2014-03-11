@@ -1421,7 +1421,7 @@ WebMol.GLModel = (function() {
 
 			// add sphere geometry
 			if (sphereGeometry.geometryChunks[0].vertices) {
-				var sphereMaterial = new THREE.MeshLambertMaterial({
+				var sphereMaterial = new WebMol.MeshLambertMaterial({
 					ambient : 0x000000,
 					vertexColors : true,
 					reflectivity : 0
@@ -1440,7 +1440,7 @@ WebMol.GLModel = (function() {
 
 			// add stick geometry
 			if (stickGeometry.geometryChunks[0].vertices) {
-				var cylinderMaterial = new THREE.MeshLambertMaterial({
+				var cylinderMaterial = new WebMol.MeshLambertMaterial({
 					vertexColors : true,
 					ambient : 0x000000,
 					reflectivity : 0
@@ -1457,7 +1457,7 @@ WebMol.GLModel = (function() {
 			for ( var i in lineGeometries) {
 				if (lineGeometries.hasOwnProperty(i)) {
 					var linewidth = i;
-					var lineMaterial = new THREE.LineBasicMaterial({
+					var lineMaterial = new WebMol.LineBasicMaterial({
 						linewidth : linewidth,
 						vertexColors : true,
 					});
@@ -1475,7 +1475,7 @@ WebMol.GLModel = (function() {
 			for ( var i in crossGeometries) {
 				if (crossGeometries.hasOwnProperty(i)) {
 					var linewidth = i;
-					var lineMaterial = new THREE.LineBasicMaterial({
+					var lineMaterial = new WebMol.LineBasicMaterial({
 						linewidth : linewidth,
 						vertexColors : true,
 					});

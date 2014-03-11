@@ -529,9 +529,9 @@ WebMol.Renderer = function ( parameters ) {
 		
 		var u, a, identifiers, i, parameters, maxLightCount, maxBones, maxShadows, shaderID;
 		
-		if (material instanceof THREE.LineBasicMaterial)
+		if (material instanceof WebMol.LineBasicMaterial)
 			shaderID = "basic";
-		else if (material instanceof THREE.MeshLambertMaterial)
+		else if (material instanceof WebMol.MeshLambertMaterial)
 			shaderID = "lambert";
 			
 		if (shaderID) {
