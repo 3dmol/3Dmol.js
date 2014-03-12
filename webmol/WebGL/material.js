@@ -44,84 +44,84 @@ WebMol.Material = function () {
 
 WebMol.Material.prototype.setValues = function ( values ) {
 
-	if ( values === undefined ) return;
+    if ( values === undefined ) return;
 
-	for ( var key in values ) {
+    for ( var key in values ) {
 
-		var newValue = values[ key ];
+        var newValue = values[ key ];
 
-		if ( newValue === undefined ) {
+        if ( newValue === undefined ) {
 
-			console.warn( 'WebMol.Material: \'' + key + '\' parameter is undefined.' );
-			continue;
+            console.warn( 'WebMol.Material: \'' + key + '\' parameter is undefined.' );
+            continue;
 
-		}
+        }
 
-		if ( key in this ) {
+        if ( key in this ) {
 
-			var currentValue = this[ key ];
+            var currentValue = this[ key ];
 
-			if ( currentValue instanceof WebMol.Color && newValue instanceof WebMol.Color ) {
+            if ( currentValue instanceof WebMol.Color && newValue instanceof WebMol.Color ) {
 
-				currentValue.copy( newValue );
+                currentValue.copy( newValue );
 
-			} else if ( currentValue instanceof WebMol.Color ) {
+            } else if ( currentValue instanceof WebMol.Color ) {
 
-				currentValue.set( newValue );
+                currentValue.set( newValue );
 
-			} else if ( currentValue instanceof THREE.Vector3 && newValue instanceof THREE.Vector3 ) {
+            } else if ( currentValue instanceof THREE.Vector3 && newValue instanceof THREE.Vector3 ) {
 
-				currentValue.copy( newValue );
+                currentValue.copy( newValue );
 
-			} else {
+            } else {
 
-				this[ key ] = newValue;
+                this[ key ] = newValue;
 
-			}
+            }
 
-		}
+        }
 
-	}
+    }
 
 };
 //TODO: might want to look into blending equations
 WebMol.Material.prototype.clone = function ( material ) {
 
-	if ( material === undefined ) material = new WebMol.Material();
+    if ( material === undefined ) material = new WebMol.Material();
 
-	material.name = this.name;
+    material.name = this.name;
 
-	material.side = this.side;
+    material.side = this.side;
 
-	material.opacity = this.opacity;
-	material.transparent = this.transparent;
+    material.opacity = this.opacity;
+    material.transparent = this.transparent;
 
-	material.blending = this.blending;
+    material.blending = this.blending;
 
-	//material.blendSrc = this.blendSrc;
-	//material.blendDst = this.blendDst;
-	//material.blendEquation = this.blendEquation;
+    //material.blendSrc = this.blendSrc;
+    //material.blendDst = this.blendDst;
+    //material.blendEquation = this.blendEquation;
 
-	material.depthTest = this.depthTest;
-	material.depthWrite = this.depthWrite;
+    material.depthTest = this.depthTest;
+    material.depthWrite = this.depthWrite;
 
-	material.polygonOffset = this.polygonOffset;
-	material.polygonOffsetFactor = this.polygonOffsetFactor;
-	material.polygonOffsetUnits = this.polygonOffsetUnits;
+    material.polygonOffset = this.polygonOffset;
+    material.polygonOffsetFactor = this.polygonOffsetFactor;
+    material.polygonOffsetUnits = this.polygonOffsetUnits;
 
-	material.alphaTest = this.alphaTest;
+    material.alphaTest = this.alphaTest;
 
-	material.overdraw = this.overdraw;
+    material.overdraw = this.overdraw;
 
-	material.visible = this.visible;
+    material.visible = this.visible;
 
-	return material;
+    return material;
 
 };
 
 WebMol.Material.prototype.dispose = function () {
 
-	this.dispatchEvent( { type: 'dispose' } );
+    this.dispatchEvent( { type: 'dispose' } );
 
 };
 

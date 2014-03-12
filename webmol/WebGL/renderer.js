@@ -245,10 +245,10 @@ WebMol.Renderer = function ( parameters ) {
 
                     _oldFlipSided = flipSided;
 
-            }	
+            }    
 
     };
-	
+    
     this.setDepthTest = function ( depthTest ) {
 
             if ( _oldDepthTest !== depthTest ) {
@@ -326,7 +326,7 @@ WebMol.Renderer = function ( parameters ) {
 
             }
 
-    };	
+    };    
 
     function setPolygonOffset ( polygonOffset, factor, units) {
 
@@ -434,7 +434,7 @@ WebMol.Renderer = function ( parameters ) {
 
             return shader;
 
-    };	
+    };    
 
 
     //Compile appropriate shaders (if necessary) from source code and attach to gl program.
@@ -568,7 +568,7 @@ WebMol.Renderer = function ( parameters ) {
                     p_uniforms = program.uniforms,
                     m_uniforms = material.uniforms;
 
-            if (program != _currentProgram) {		
+            if (program != _currentProgram) {        
                     _gl.useProgram(program);
                     _currentProgram = program;
 
@@ -580,7 +580,7 @@ WebMol.Renderer = function ( parameters ) {
                     refreshMaterial = true;
             }
 
-            if (camera != _currentCamera) {	
+            if (camera != _currentCamera) {    
                     _currentCamera = camera;
                     refreshMaterial = true;
             }
@@ -684,10 +684,10 @@ WebMol.Renderer = function ( parameters ) {
                     disableAttributes();
 
                     // Vertices
-                    if (attributes.position >= 0) {			
+                    if (attributes.position >= 0) {            
                             _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
                             enableAttribute( attributes.position );
-                            _gl.vertexAttribPointer( attributes.position, 3, _gl.FLOAT, false, 0, 0 );	
+                            _gl.vertexAttribPointer( attributes.position, 3, _gl.FLOAT, false, 0, 0 );    
                     }
 
                     // Colors
@@ -782,7 +782,7 @@ WebMol.Renderer = function ( parameters ) {
             }
 
     };
-	
+    
     this.render = function ( scene, camera, renderTarget, forceClear ) {
 
             if ( camera instanceof WebMol.Camera === false )  {
@@ -810,7 +810,7 @@ WebMol.Renderer = function ( parameters ) {
             if ( this.autoUpdateScene ) scene.updateMatrixWorld();
 
             // update camera matrices
-			//Pretty sure camera's parent is always going to be undefined for our purposes...
+            //Pretty sure camera's parent is always going to be undefined for our purposes...
             if ( camera.parent === undefined ) camera.updateMatrixWorld();
 
             camera.matrixWorldInverse.getInverse( camera.matrixWorld );
@@ -845,7 +845,7 @@ WebMol.Renderer = function ( parameters ) {
 
                     webglObject.render = false;
 
-                    if ( object.visible ) {		
+                    if ( object.visible ) {        
                             setupMatrices( object, camera );
                             unrollBufferMaterial( webglObject );
                             webglObject.render = true;
@@ -911,7 +911,7 @@ WebMol.Renderer = function ( parameters ) {
             }
 
     };
-	
+    
     // Objects adding
 
     function addObject ( object, scene ) {
@@ -958,15 +958,15 @@ WebMol.Renderer = function ( parameters ) {
             } 
             
             else if ( object instanceof WebMol.Line ) {
-            	
-				geometry = object.geometry;
-				if ( ! geometry.__webglVertexBuffer ) {
+                
+                geometry = object.geometry;
+                if ( ! geometry.__webglVertexBuffer ) {
 
-					createLineBuffers( geometry );
-					geometry.verticesNeedUpdate = true;
-					geometry.colorsNeedUpdate = true;
+                    createLineBuffers( geometry );
+                    geometry.verticesNeedUpdate = true;
+                    geometry.colorsNeedUpdate = true;
 
-				}
+                }
             }
         
         }
@@ -986,8 +986,8 @@ WebMol.Renderer = function ( parameters ) {
             }
             
             else if ( object instanceof WebMol.Line ) {
-            	geometry = object.geometry;
-            	addBuffer( scene.__webglObjects, geometry, object );
+                geometry = object.geometry;
+                addBuffer( scene.__webglObjects, geometry, object );
             }
             
             object.__webglActive = true;
@@ -1003,7 +1003,7 @@ WebMol.Renderer = function ( parameters ) {
         if ( object instanceof WebMol.Mesh ) {
             
             for (g in geometry.geometryChunks ) {
-            	
+                
                 geometryChunk = geometry.geometryChunks[ g ];
 
                 if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate ||
@@ -1022,10 +1022,10 @@ WebMol.Renderer = function ( parameters ) {
         }
         
         else if ( object instanceof WebMol.Line ) {
-        	
-        	if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate) 
-        		setBuffers( geometry, _gl.DYNAMIC_DRAW, true);
-        		
+            
+            if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate) 
+                setBuffers( geometry, _gl.DYNAMIC_DRAW, true);
+                
                 geometry.veticesNeedUpdate = false;
                 geometry.colorsNeedUpdate = false;
                 
@@ -1077,14 +1077,14 @@ WebMol.Renderer = function ( parameters ) {
          
         //vertex buffers
         _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglVertexBuffer );
-        _gl.bufferData( _gl.ARRAY_BUFFER, vertexArray, hint );		
+        _gl.bufferData( _gl.ARRAY_BUFFER, vertexArray, hint );        
 
         //color buffers
         _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglColorBuffer );
-        _gl.bufferData( _gl.ARRAY_BUFFER, colorArray, hint );	
-          	
-    	//set buffers for line render
-		
+        _gl.bufferData( _gl.ARRAY_BUFFER, colorArray, hint );    
+              
+        //set buffers for line render
+        
             //set buffers for mesh render
             if (line === undefined) {
 
@@ -1093,16 +1093,16 @@ WebMol.Renderer = function ( parameters ) {
 
                 //normal buffers
                 _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
-                _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );		
+                _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );        
 
                 //face (index) buffers
                 _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
-                _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );	
+                _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );    
 
             }
 
     };
-	
+    
     //Creates appropriate gl buffers for geometry chunk
     //TODO: do we need line buffer for mesh objects?
     //Also, can we integrate this with createLineBuffers?
@@ -1118,12 +1118,12 @@ WebMol.Renderer = function ( parameters ) {
     };
     
     function createLineBuffers ( geometry ) {
-    	
-    	geometry.__webglVertexBuffer = _gl.createBuffer();
-    	geometry.__webglColorBuffer = _gl.createBuffer();
-    	geometry.__webglLineDistanceBuffer = _gl.createBuffer();
-    	
-    	_this.info.memory.geometries++;
+        
+        geometry.__webglVertexBuffer = _gl.createBuffer();
+        geometry.__webglColorBuffer = _gl.createBuffer();
+        geometry.__webglLineDistanceBuffer = _gl.createBuffer();
+        
+        _this.info.memory.geometries++;
     };
 
     function addBuffer ( objlist, buffer, object ) {
@@ -1139,72 +1139,72 @@ WebMol.Renderer = function ( parameters ) {
 
     };
 
-	function setupMatrices ( object, camera ) {
+    function setupMatrices ( object, camera ) {
 
-		object._modelViewMatrix.multiplyMatrices( camera.matrixWorldInverse, object.matrixWorld );
+        object._modelViewMatrix.multiplyMatrices( camera.matrixWorldInverse, object.matrixWorld );
 
-		object._normalMatrix.getInverse( object._modelViewMatrix );
-		object._normalMatrix.transpose();
+        object._normalMatrix.getInverse( object._modelViewMatrix );
+        object._normalMatrix.transpose();
 
-	};
-	
-	function setupLights ( program, lights ) {
-		var l, ll, light, n,
-		r = 0, g = 0, b = 0,
-		color,
-		position,
-		intensity,
-		distance,
-		
-		zlights = _lights,
-		
-		dirColors = zlights.directional.colors,
-		dirPositions = zlights.directional.positions,
-		
-		dirCount = 0,
-		dirLength = 0,
-		dirOffset = 0;
-		
-		for ( l = 0, ll = lights.length; l < ll; l++) {
-			
-			light = lights[l];
-			
-			color = light.color;
-			intensity = light.intensity;
-			distance = light.distance;
-			
-			if (light instanceof WebMol.Light) {
-				
-				dirCount++;
-				
-				_direction.getPositionFromMatrix(light.matrixWorld);
-				_vector3.getPositionFromMatrix(light.target.matrixWorld);
-				_direction.sub(_vector3);
-				_direction.normalize();
-				
-				if (_direction.x === 0 && _direction.y === 0 && _direction.z === 0)
-					continue;
-				
-				dirPositions[dirOffset] = _direction.x;
-				dirPositions[dirOffset + 1] = _direction.y;
-				dirPositions[dirOffset + 2] = _direction.z;
+    };
+    
+    function setupLights ( program, lights ) {
+        var l, ll, light, n,
+        r = 0, g = 0, b = 0,
+        color,
+        position,
+        intensity,
+        distance,
+        
+        zlights = _lights,
+        
+        dirColors = zlights.directional.colors,
+        dirPositions = zlights.directional.positions,
+        
+        dirCount = 0,
+        dirLength = 0,
+        dirOffset = 0;
+        
+        for ( l = 0, ll = lights.length; l < ll; l++) {
+            
+            light = lights[l];
+            
+            color = light.color;
+            intensity = light.intensity;
+            distance = light.distance;
+            
+            if (light instanceof WebMol.Light) {
+                
+                dirCount++;
+                
+                _direction.getPositionFromMatrix(light.matrixWorld);
+                _vector3.getPositionFromMatrix(light.target.matrixWorld);
+                _direction.sub(_vector3);
+                _direction.normalize();
+                
+                if (_direction.x === 0 && _direction.y === 0 && _direction.z === 0)
+                    continue;
+                
+                dirPositions[dirOffset] = _direction.x;
+                dirPositions[dirOffset + 1] = _direction.y;
+                dirPositions[dirOffset + 2] = _direction.z;
 
-				dirColors[dirOffset] = color.r * intensity;
-				dirColors[dirOffset + 1] = color.g * intensity;
-				dirColors[dirOffset + 2] = color.b * intensity;
-				
-				dirOffset += 3;
-				
-				dirLength++;	
-			}
-		
-		}
+                dirColors[dirOffset] = color.r * intensity;
+                dirColors[dirOffset + 1] = color.g * intensity;
+                dirColors[dirOffset + 2] = color.b * intensity;
+                
+                dirOffset += 3;
+                
+                dirLength++;    
+            }
+        
+        }
 
-		zlights.ambient[0] = r;
-		zlights.ambient[1] = g;
-		zlights.ambient[2] = b;
-		zlights.directional.length = dirLength;
-	};
+        zlights.ambient[0] = r;
+        zlights.ambient[1] = g;
+        zlights.ambient[2] = b;
+        zlights.directional.length = dirLength;
+    };
 
     function initGL () {
 
