@@ -888,11 +888,17 @@ WebMol.Renderer = function ( parameters ) {
             }
 
             //Add objects; this sets up buffers for each geometryChunk
-            while ( scene.__objectsAdded.length ) {
-
+            if ( scene.__objectsAdded.length ) {
+                
+                while(scene.__objectsAdded.length){
                     addObject( scene.__objectsAdded[ 0 ], scene );
                     scene.__objectsAdded.splice( 0, 1 );
-
+                }
+                
+                //Force buffer update during render
+                //Hackish fix for initial cartoon-render-then-transparent-surface bug
+                _currentGeometryGroupHash = -1;
+                
             }
 
             while ( scene.__objectsRemoved.length ) {
@@ -1058,7 +1064,7 @@ WebMol.Renderer = function ( parameters ) {
             var object = globject.object;
             var material = object.material;
 
-            if ( material.transparent) {
+            if ( material.transparent) {                    
                     globject.opaque = null;
                     globject.transparent = material;
             }
