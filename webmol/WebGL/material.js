@@ -7,7 +7,7 @@
 WebMol.Material = function () {
 
     //TODO: Do I need this/should I implement?
-    THREE.EventDispatcher.call( this );
+    WebMol.EventDispatcher.call( this );
 
     this.id = WebMol.MaterialIdCount ++;
 
