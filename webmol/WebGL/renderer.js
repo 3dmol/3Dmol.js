@@ -113,14 +113,14 @@ WebMol.Renderer = function ( parameters ) {
 
      // camera matrices cache
 
-    _projScreenMatrix = new THREE.Matrix4(),
-    _projScreenMatrixPS = new THREE.Matrix4(),
+    _projScreenMatrix = new WebMol.Matrix4(),
+    _projScreenMatrixPS = new WebMol.Matrix4(),
 
-    _vector3 = new THREE.Vector3(),
+    _vector3 = new WebMol.Vector(),
 
     // light arrays cache
 
-    _direction = new THREE.Vector3(),
+    _direction = new WebMol.Vector(),
 
     _lightsNeedUpdate = true,
 
@@ -922,8 +922,8 @@ WebMol.Renderer = function ( parameters ) {
 
             object.__webglInit = true;
 
-            object._modelViewMatrix = new THREE.Matrix4();
-            object._normalMatrix = new THREE.Matrix3();
+            object._modelViewMatrix = new WebMol.Matrix4();
+            object._normalMatrix = new WebMol.Matrix3();
 
             if ( object.geometry !== undefined && object.geometry.__webglInit === undefined ) {
 

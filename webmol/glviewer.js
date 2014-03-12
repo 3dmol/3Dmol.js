@@ -2,9 +2,6 @@
 
 var WebMol = WebMol || {};
 
-var TV3 = vertex = WebMol.Vector;
-//var vertex = WebMol.Vertex;
-
 // a webmol unified interace to gmol
 WebMol.glmolViewer = (function() {
     // private class variables
@@ -44,11 +41,6 @@ WebMol.glmolViewer = (function() {
 
     // The constructor
     function GLViewer(element, callback, defaultcolors) {
-        // check dependencies
-        if (typeof (THREE) === "undefined") {
-            // three.js not loaded, take matters into our own hands
-            throw "Missing Three.js";
-        }
 
         // set variables
         var container = element;

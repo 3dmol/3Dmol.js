@@ -182,22 +182,6 @@ WebMol.Color.prototype = {
 
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
 
-//cross multiply two vectors
-var crossMult = function(u, v) {
-    
-    if ( ! (u instanceof WebMol.Vertex && v instanceof WebMol.Vertex) )
-        return null;
-        
-    var x, y, z;
-    
-    x = (u.y * v.z) - (u.z * v.y);
-    y = (u.z * v.x) - (u.x * v.z);
-    z = (u.x * v.y) - (u.y * v.x);
-    
-    return new WebMol.Vertex(x, y, z);
-    
-};
-
 //represents individual renderable geometry group
 var geometryChunk = function() {
     this.vertexArr = [];

@@ -8,7 +8,7 @@ WebMol.Light = function(hex, intensity) {
     WebMol.Object3D.call(this);
     
     this.color = new WebMol.Color(hex);
-    this.position = new THREE.Vector3( 0, 1, 0 );
+    this.position = new WebMol.Vector( 0, 1, 0 );
     this.target = new WebMol.Object3D();
 
     this.intensity = ( intensity !== undefined ) ? intensity : 1;
@@ -38,7 +38,7 @@ WebMol.Light = function(hex, intensity) {
 
     this.shadowCascade = false;
 
-    this.shadowCascadeOffset = new THREE.Vector3( 0, 0, -1000 );
+    this.shadowCascadeOffset = new WebMol.Vector( 0, 0, -1000 );
     this.shadowCascadeCount = 2;
 
     this.shadowCascadeBias = [ 0, 0, 0 ];

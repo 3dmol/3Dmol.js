@@ -14,16 +14,16 @@ WebMol.Object3D = function() {
     this.children = [];
     
     //TODO: Replace this with own class
-    this.position = new THREE.Vector3();
-    this.rotation = new THREE.Vector3();
-    this.matrix = new THREE.Matrix4();
-    this.matrixWorld = new THREE.Matrix4();
+    this.position = new WebMol.Vector();
+    this.rotation = new WebMol.Vector();
+    this.matrix = new WebMol.Matrix4();
+    this.matrixWorld = new WebMol.Matrix4();
     this.quaternion = new WebMol.Quaternion();
     //TODO: Do I need this??
     this.eulerOrder = 'XYZ';
     
-    this.up = new THREE.Vector3(0, 1, 0);
-    this.scale = new THREE.Vector3(1, 1, 1);
+    this.up = new WebMol.Vector(0, 1, 0);
+    this.scale = new WebMol.Vector(1, 1, 1);
     
     this.matrixAutoUpdate = true;
     this.matrixWorldNeedsUpdate = true;

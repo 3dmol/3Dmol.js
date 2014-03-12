@@ -21,10 +21,6 @@ WebMol.Material = function () {
 
     this.blending = WebMol.NormalBlending;
 
-    //this.blendSrc = THREE.SrcAlphaFactor;
-    //this.blendDst = THREE.OneMinusSrcAlphaFactor;
-    //this.blendEquation = THREE.AddEquation;
-
     this.depthTest = true;
     this.depthWrite = true;
 
@@ -69,7 +65,7 @@ WebMol.Material.prototype.setValues = function ( values ) {
 
                 currentValue.set( newValue );
 
-            } else if ( currentValue instanceof THREE.Vector3 && newValue instanceof THREE.Vector3 ) {
+            } else if ( currentValue instanceof WebMol.Vector && newValue instanceof WebMol.Vector ) {
 
                 currentValue.copy( newValue );
 
@@ -171,7 +167,7 @@ WebMol.MeshLambertMaterial = function(parameters) {
     
     //TODO: Which of these instance variables do I really need?
     this.wrapAround = false;
-    this.wrapRGB = new THREE.Vector3(1,1,1);
+    this.wrapRGB = new WebMol.Vector(1,1,1);
     
     this.map = null;
     

@@ -26,7 +26,7 @@ WebMol.Scene.prototype = Object.create(WebMol.Object3D.prototype);
 WebMol.Scene.prototype.__addObject = function(object) {
     
     //Directional Lighting
-    if (object instanceof THREE.Light || object instanceof WebMol.Light) {
+    if (object instanceof WebMol.Light) {
         
         if (this.__lights.indexOf(object) === -1)
             this.__lights.push(object);
@@ -64,7 +64,7 @@ WebMol.Scene.prototype.__addObject = function(object) {
 
 WebMol.Scene.prototype.__removeObject = function(object) {
     
-    if (object instanceof THREE.Light || object instanceof WebMol.Light) {
+    if (object instanceof WebMol.Light) {
         
         var i = this.__lights.indexOf(object);
         
