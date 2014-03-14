@@ -273,8 +273,8 @@ var initBuffers = function(geometry, saveArrs) {
 
 //Set up normalArr from faces and vertices
 //for face3 or face4
-//DOES NOT work for mixed faceArr 
-//TODO: Optimize this !!
+// Used in surface and cartoon renders, when normals must be computed
+//after all faces and vertices are set up
 var setUpNormals = function(geo, three) {
     
     for ( var g in geo.geometryChunks ) {

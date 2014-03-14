@@ -846,7 +846,6 @@ WebMol.GLModel = (function() {
         var defaultStickRadius = .25;
 
         //sphere drawing
-        //TODO: call to populateGroup is *really* slow - try to build them up as we go
         //See also: drawCylinder
         var drawAtomSphere = function(atom, geo) {
             

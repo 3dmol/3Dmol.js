@@ -679,12 +679,17 @@ WebMol.glmolViewer = (function() {
                         colors[i] = WebMol.CC.color(atom.color);
                 }
             }
+            var verts = geoGroup.vertexArr;
+            var vA, vB, vC, norm;
+            //Setup colors, faces, and normals
             for ( var i = 0; i < faces.length; i++) {
-                var A = v[faces[i].a].atomid;
-                var B = v[faces[i].b].atomid;
-                var C = v[faces[i].c].atomid;
                 
-                var offsetA = faces[i].a * 3, offsetB = faces[i].b * 3, offsetC = faces[i].c * 3;
+                var a = faces[i].a, b = faces[i].b, c = faces[i].c;
+                var A = v[a].atomid;
+                var B = v[b].atomid;
+                var C = v[c].atomid;
+                
+                var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
                 geoGroup.faceArr.push(faces[i].a), geoGroup.faceArr.push(faces[i].b), geoGroup.faceArr.push(faces[i].c);
                 
@@ -694,12 +699,26 @@ WebMol.glmolViewer = (function() {
                          geoGroup.colorArr[offsetB+2] = colors[B].b;
                 geoGroup.colorArr[offsetC] = colors[C].r, geoGroup.colorArr[offsetC+1] = colors[C].g,
                          geoGroup.colorArr[offsetC+2] = colors[C].b;
+                 
+                //setup Normals
+                
+                vA = new TV3(verts[offsetA], verts[offsetA+1], verts[offsetA+2]);
+                vB = new TV3(verts[offsetB], verts[offsetB+1], verts[offsetB+2]);
+                vC = new TV3(verts[offsetC], verts[offsetC+1], verts[offsetC+2]);
+                
+                vC.subVectors(vC, vB);
+                vA.subVectors(vA, vB);
+                vC.cross(vA);
+
+                //face normal
+                norm = vC;
+                norm.normalize();
+                
+                geoGroup.normalArr[offsetA] += norm.x, geoGroup.normalArr[offsetB] += norm.x, geoGroup.normalArr[offsetC] += norm.x;
+                geoGroup.normalArr[offsetA+1] += norm.y, geoGroup.normalArr[offsetB+1] += norm.y, geoGroup.normalArr[offsetC+1] += norm.y;
+                geoGroup.normalArr[offsetA+2] += norm.z, geoGroup.normalArr[offsetB+2] += norm.z, geoGroup.normalArr[offsetC+2] += norm.z;
                 
             }
-
-            //geo.computeFaceNormals();
-            //geo.computeVertexNormals(false);
-            setUpNormals(geo, true);
 
             var mesh = new WebMol.Mesh(geo, mat);
             mesh.doubleSided = true;
@@ -753,13 +772,13 @@ WebMol.glmolViewer = (function() {
                 if (prop === "color") {
                     mat[prop] = WebMol.CC.color(style.color);
                     delete mat.vertexColors; // ignore
-                } else if (prop == "map") {
+                } else if (prop === "map") {
                     // ignore
                 } else if (style.hasOwnProperty(prop))
                     mat[prop] = style[prop];
             }
-            if (typeof (style.opacity) != "undefined") {
-                if (style.opacity == 1)
+            if ( style.opacity !== undefined) {
+                if (style.opacity === 1)
                     mat.transparent = false;
                 else
                     mat.transparent = true;
@@ -804,7 +823,7 @@ WebMol.glmolViewer = (function() {
             // with workers, must ensure group is the actual modelgroup since
             // surface
             // will get added asynchronously
-            // all atoms in atomlist are used to compute surfacees, but only the
+            // all atoms in atomlist are used to compute surfaces, but only the
             // surfaces
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
@@ -890,7 +909,7 @@ WebMol.glmolViewer = (function() {
                 };
             }
 
-            var sync = false;
+            var sync = true;
             var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 
