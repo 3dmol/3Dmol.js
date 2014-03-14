@@ -351,28 +351,21 @@ WebMol.glmolViewer = (function() {
                     if (!surfaces[i].finished) {
                         geo.verticesNeedUpdate = true;
                         geo.elementsNeedUpdate = true;
-                        geo.uvsNeedUpdate = true;
                         geo.normalsNeedUpdate = true;
-                        geo.tangentsNeedUpdate = true;
                         geo.colorsNeedUpdate = true;
-                        geo.lineDistancesNeedUpdate = true;
                         geo.buffersNeedUpdate = true;
                         geo.boundingSphere = null;
-                        delete geo.geometryGroups;
-                        delete geo.geometryGroupsList;
 
                         if (surfaces[i].done)
                             surfaces[i].finished = true;
 
                         // remove partially rendered surface
-                        if (surfaces[i].lastGL) {
+                        if (surfaces[i].lastGL) 
                             modelGroup.remove(surfaces[i].lastGL);
-                        }
                         
                         initBuffers(geo, true);
                         // create new surface
                         var smesh = new WebMol.Mesh(geo, surfaces[i].mat);
-                        //initBuffers(geo);
                         surfaces[i].lastGL = smesh;
                         modelGroup.add(smesh);
                     } // else final surface already there
@@ -969,6 +962,8 @@ WebMol.glmolViewer = (function() {
         // given the id returned by surfid, remove surface
         this.removeSurface = function(surf) {
             if (surfaces[surf] && surfaces[surf].lastGL) {
+                if (surfaces[surf].geo !== undefined) surfaces[surf].geo.dispose();             
+                if (surfaces[surf].mat !== undefined) surfaces[surf].mat.dispose();
                 modelGroup.remove(surfaces[surf].lastGL); // remove from scene
             }
             delete surfaces[surf];

@@ -243,11 +243,10 @@ var initBuffers = function(geometry, saveArrs) {
             group.__faceArray = new Uint16Array(group.faceArr);
             
             //Doesn't free memory directly, but should break references for gc 
-            delete group.vertexArr;
-            delete group.colorArr;
-            delete group.normalArr;
-            delete group.faceArr;
-            delete group.lineArr;
+            group.vertexArr = null;
+            group.colorArr = null;
+            group.normalArr = null;
+            group.faceArr = null;
             
             group.__inittedArrays = true;
             
@@ -264,8 +263,8 @@ var initBuffers = function(geometry, saveArrs) {
         geometry.__vertexArray = new Float32Array(geometry.vertexArr);
         geometry.__colorArray = new Float32Array(geometry.colorArr);
         
-        delete geometry.vertexArr;
-        delete geometry.colorArr;
+        geometry.vertexArr = null;
+        geometry.colorArr = null;
         
         geometry.__inittedArrays = true;
     }        

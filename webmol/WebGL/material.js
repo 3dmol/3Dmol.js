@@ -6,7 +6,6 @@
 
 WebMol.Material = function () {
 
-    //TODO: Do I need this/should I implement?
     WebMol.EventDispatcher.call( this );
 
     this.id = WebMol.MaterialIdCount ++;
@@ -37,6 +36,7 @@ WebMol.Material = function () {
     this.needsUpdate = true;
 
 };
+
 
 WebMol.Material.prototype.setValues = function ( values ) {
 

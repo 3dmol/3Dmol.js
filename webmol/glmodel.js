@@ -1604,6 +1604,9 @@ WebMol.GLModel = (function() {
         // remove any rendered object from the scene
         this.removegl = function(group) {
             if(renderedMolObj) {
+                //dispose of geos and materials
+                if (renderedMolObj.geometry !== undefined) renderedMolObj.geometry.dispose();             
+                if (renderedMolObj.material !== undefined) renderedMolObj.material.dispose();
                 group.remove(renderedMolObj);
                 renderedMolObj = null;
             }
