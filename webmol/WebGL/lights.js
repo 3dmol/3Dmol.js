@@ -8,7 +8,7 @@ WebMol.Light = function(hex, intensity) {
     WebMol.Object3D.call(this);
     
     this.color = new WebMol.Color(hex);
-    this.position = new WebMol.Vector( 0, 1, 0 );
+    this.position = new WebMol.Vector3( 0, 1, 0 );
     this.target = new WebMol.Object3D();
 
     this.intensity = ( intensity !== undefined ) ? intensity : 1;

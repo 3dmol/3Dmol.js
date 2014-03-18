@@ -115,11 +115,11 @@ WebMol.Renderer = function ( parameters ) {
 
     _projScreenMatrix = new WebMol.Matrix4(),
 
-    _vector3 = new WebMol.Vector(),
+    _vector3 = new WebMol.Vector3(),
 
     // light arrays cache
 
-    _direction = new WebMol.Vector(),
+    _direction = new WebMol.Vector3(),
 
     _lightsNeedUpdate = true,
 

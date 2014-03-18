@@ -50,3 +50,44 @@ WebMol.Mesh.prototype.clone = function ( object ) {
     return object;
 
 };
+
+
+//Sprite object
+
+WebMol.Sprite = function(material) {
+    
+    WebMol.Object3D.call(this);
+    
+    this.material = (material !== undefined) ? material : new WebMol.SpriteMaterial();
+
+    this.rotation3d = this.rotation;
+    this.rotation = 0;
+    
+};
+
+WebMol.Sprite.prototype = Object.create(WebMol.Object3D.prototype);
+
+WebMol.Sprite.prototype.updateMatrix = function() {
+    
+    this.matrix.setPosition(this.position);
+    
+    this.rotation3d.set(0, 0, this.rotation);
+    this.matrix.setRotationFromEuler(this.rotation3d);
+    
+    if (this.scale.x !== 1 || this.scale.y !== 1)
+        this.matrix.scale(this.scale);
+    
+    this.matrixWorldNeedsUpdate = true;
+    
+};
+
+WebMol.Sprite.prototype.clone = function(object) {
+    
+    if (object === undefined)
+        object = new WebMol.Sprite(this.material);
+    
+    WebMol.Object3D.prototype.clone.call(this, object);
+    
+    return object;
+    
+};

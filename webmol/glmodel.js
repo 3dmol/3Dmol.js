@@ -724,7 +724,7 @@ WebMol.GLModel = (function() {
                         vertex.z = radius * Math.sin(phiStart + u * phiLength)
                                 * Math.sin(thetaStart + v * thetaLength);
 
-                        var n = new WebMol.Vector(vertex.x, vertex.y, vertex.z);
+                        var n = new WebMol.Vector3(vertex.x, vertex.y, vertex.z);
                         n.normalize();
 
                         obj.vertices.push(vertex);
