@@ -2,7 +2,7 @@
  * Base class for Scene, Camera, Geometry
  * Geometry class
  */
-
+WebMol = WebMol || {};
 //Event Handling
 WebMol.EventDispatcher = function() {
   
