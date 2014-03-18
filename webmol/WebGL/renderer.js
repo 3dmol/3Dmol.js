@@ -513,9 +513,13 @@ WebMol.Renderer = function ( parameters ) {
         //Set up new program and compile shaders
 
         program = _gl.createProgram();
-
-        var glFragmentShader = getShader("fragment", fragmentShader);
-        var glVertexShader = getShader("vertex", vertexShader);
+        
+        //set up precision
+        var precision = _precision;
+        var prefix = "precision " + precision + " float;\n";
+        
+        var glFragmentShader = getShader("fragment", prefix + fragmentShader);
+        var glVertexShader = getShader("vertex", prefix + vertexShader);
 
         _gl.attachShader(program, glVertexShader);
         _gl.attachShader(program, glFragmentShader);
