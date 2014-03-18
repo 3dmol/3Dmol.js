@@ -1,71 +1,3 @@
-<!DOCTYPE html>
-<html style="height:100%; padding: 0; margin: 0">
-    <head>
-        <title>WebMol Test</title>
-        <link rel="stylesheet" href="tests/qunit.css">
-        <!-- data-main attribute tells require.js to load
-             scripts/main.js after require.js loads. -->
-        <script  src="js/jquery-1.9.1.js"></script>
-		
-		<script type="text/javascript" src="webmol/webmol.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/math.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/core.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/material.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/objects.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/shaders.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/renderer.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/lights.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/scene.js"></script>
-        <script type="text/javascript" src="webmol/WebGL/camera.js"></script>
-		<script src="webmol/WebGL/renderer.js"></script>
-        <script src="webmol/properties.js"></script>
-		<script src="webmol/colors.js"></script>
-        <script src="webmol/glmodel.js"></script>
-        <script src="webmol/glcartoon.js"></script>
-        <script src="webmol/ProteinSurface4.js"></script>
-        <script src="webmol/MarchingCubeData.js"></script>
-        <script src="webmol/glviewer.js"></script>
-        <script src="webmol/jmolviewer.js"></script>
-        <script src="webmol/jmolmodel.js"></script>
-        <script src="webmol/colorschemes.js"></script>
-                
-        <script>
-		var glviewer;
-        $(document).ready(function() {
-        	
-			glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
-			    viewer.setBackgroundColor(0xffffff);
-			}});
-			        	
- 			//starts QUnit tests
- 			start();
-        });
-        
-        
-        </script>
-
-        <script src="tests/qunit.js"></script>        
-        <script src="tests/qunit-once.js"></script> 
-        <script src="tests/qunit-reporter-junit.js"></script>
-        <script src="tests/perftest.js"></script> 
-        
-</head>
-<body >
-
-    	<table>
-	    	<tr><td valign="top">
-	    			<div id="gldiv" style="width: 675px; height: 600px; border: 2px solid black; "></div>
-	    		</td>
-	    		<br>
-	    		<td valign="top">
-	    			<div id="qunit"></div>
-	    			<div id="qunit-fixture"></div>
-	    		</td>
-	    	</tr>
-    	</table>
-                
-
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_1">  
 HEADER    METAL BINDING PROTEIN                   18-APR-01   1IGV              
 TITLE     BOVINE CALBINDIN D9K BINDING MN2+                                     
 COMPND    MOL_ID: 1;                                                            
@@ -1045,13 +977,4 @@ CONECT  598  604  606
 CONECT  604  598                                                                
 CONECT  606  598                                                                
 MASTER      266    0    1    5    2    0    3    6  636    1    8    6          
-END                                                                             
-         
-</textarea>
-
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_2">
-	
-</textarea>
-
-</body>
-</html>
+END

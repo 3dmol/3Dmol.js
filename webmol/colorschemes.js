@@ -16,7 +16,7 @@ WebMol.RWB = function(min, max) {
 			hi = max;
 		}
 	
-		if(typeof(val) == "undefined")
+		if(val === undefined)
 			return 0xffffff;
 		
 		if(val < lo) val = lo;
@@ -35,7 +35,7 @@ WebMol.RWB = function(min, max) {
 			var color =  0x10000*scale+0x100*scale+0xff;
 			return color;
 		}
-	}
+	};
 	
 	this.jmolID = function() {
 		return "rwb";
@@ -96,7 +96,7 @@ WebMol.ROYGB = function(min, max) {
 			var color =  0x000000+0x0100*scale+0xff;
 			return color;
 		}		
-	}
+	};
 	
 	this.jmolID = function() {
 		return "roygb";
@@ -143,7 +143,7 @@ WebMol.Sinebow = function(min, max) {
 		b *= b*255;
 		
 		return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
-	}
+	};
 	
 	this.jmolID = function() {
 		return "sinebow";
