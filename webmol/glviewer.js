@@ -909,7 +909,7 @@ WebMol.glmolViewer = (function() {
                 };
             }
 
-            var sync = true;
+            var sync = false;
             var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 
