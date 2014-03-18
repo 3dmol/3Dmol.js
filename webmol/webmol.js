@@ -347,3 +347,26 @@ WebMol.NoColors = 0;
 WebMol.FaceColors = 1;
 WebMol.VertexColors = 2;
 
+//Texture constants
+//TODO: Which of these do I need (since I only use textures to display label sprites) ?
+WebMol.MultiplyOperation = 0;
+WebMol.MixOperation = 1;
+WebMol.AddOperation = 2;
+
+// mapping modes
+
+WebMol.UVMapping = function() {};
+
+// wrapping modes
+WebMol.ClampToEdgeWrapping = 1001;
+
+//Filters
+WebMol.LinearFilter = 1006;
+WebMol.LinearMipMapLinearFilter = 1008;
+
+//Data types
+WebMol.UnsignedByteType = 1009;
+
+//Pixel formats
+WebMol.RGBAFormat = 1021;
+

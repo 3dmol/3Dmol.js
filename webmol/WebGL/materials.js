@@ -248,69 +248,143 @@ WebMol.SpriteMaterial = function(parameters) {
     
     this.fog = false; // use scene fog
     
-    this.lights = false; // use scene lights
-    
-    this.vertexColors = WebMol.NoColors; 
+    this.uvOffset = new WebMol.Vector2(0, 0);
+    this.uvScale = new WebMol.Vector2(1, 1);
     
     this.setValues(parameters);
     
+    parameters = parameters || {};
+    
+    if (parameters.depthTest === undefined)
+        this.depthTest = !this.useScreenCoordinates;
+    if (parameters.sizeAttenuation === undefined)
+        this.sizeAttenuation = !this.useScreenCoordinates;
+    if (parameters.scaleByViewPort === undefined)
+        this.scaleByViewPort = !this.sizeAttenuation;
+    
 };
 
-WebMol.ShaderMaterial.prototype = Object.create(WebMol.Material.prototype);
+WebMol.SpriteMaterial.prototype = Object.create(WebMol.Material.prototype);
 
-WebMol.ShaderMaterial.prototype.clone = function() {
+WebMol.SpriteMaterial.prototype.clone = function() {
     
-    var material = new WebMol.ShaderMaterial();
+    var material = new WebMol.SpriteMaterial();
     
     WebMol.Material.prototype.clone.call(this, material);
     
-    material.fragmentShader = this.fragmentShader;
-    material.vertexShader = this.vertexShader;
+    material.color.copy(this.color);
+    material.map = this.map;
     
-    material.attributes = this.attributes;
-    material.defines = this.defines;
+    material.useScreenCoordinates = useScreenCoordinates;
+    material.sizeAttenuation = this.sizeAttenuation;
+    material.scaleByViewport = this.scaleByViewPort;
+    material.alignment.copy(this.alignment);
     
-    material.shading = this.shading;
-    
-    material.fog = this.fog;
-    
-    material.lights = this.lights;
-    
-    material.vertexColors = this.vertexColors;
-    
-    //copy uniforms
-    material.uniforms = {};
-    
-    for (var u in this.uniforms) {
-        
-        var parameter_src;
-        
-        material.uniforms[u] = {};
-        
-        for (var p in this.uniforms[u]) {
-            
-            parameter_src = this.uniforms[u][p];
-            
-            if (parameter_src instanceof WebMol.Color ||
-                parameter_src instanceof WebMol.Vector2 ||
-                parameter_src instanceof WebMol.Vector3 ||
-                parameter_src instanceof WebMol.Matrix4 ||
-                parameter_src instanceof WebMol.Texture) {
-            
-                material.uniforms[u][p] = parameter_src.clone();        
-            }
-            
-            else if(parameter_src instanceof Array) {
-                material.uniforms[u][p] = parameter_src.slice();
-            }
-            
-            else {
-                material.uniforms[u][p] = parameter_src;
-            }
-            
-        }
-    }
+    material.uv
     
     return material;
     
 };
+
+//Alignment for Sprites
+
+WebMol.SpriteAlignment = {};
+WebMol.SpriteAlignment.topLeft = new WebMol.Vector2(1, -1);
+WebMol.SpriteAlignment.topCenter = new WebMol.Vector2(0, -1);
+WebMol.SpriteAlignment.topRight = new WebMol.Vector2(-1, -1);
+WebMol.SpriteAlignment.centerLeft = new WebMol.Vector2(1, 0);
+WebMol.SpriteAlignment.center = new WebMol.Vector2(0, 0);
+WebMol.SpriteAlignment.centerRight = new WebMol.Vector2(-1, 0);
+WebMol.SpriteAlignment.bottomLeft = new WebMol.Vector2(1, 1);
+WebMol.SpriteAlignment.bottomCenter = new WebMol.Vector2(0, 1);
+WebMol.SpriteAlignment.bottomRight = new WebMol.Vector2(-1, 1);
+
+
+//Texture
+//We really only create textures from a 2d canvas passed as image
+
+WebMol.Texture = function(image) {
+
+    WebMol.EventDispatcher.call(this);
+    
+    this.id = WebMol.TextureIdCount++;
+    
+    this.name = "";
+    
+    this.image = image;
+    this.mipmaps = [];
+    
+    this.mapping = new WebMol.UVMapping();
+    
+    this.wrapS = WebMol.ClampToEdgeWrapping;
+    this.wrapT = WebMol.ClampToEdgeWrapping;
+    
+    this.magFilter = WebMol.LinearFilter;
+    this.minFilter = WebMol.LinearMipMapLinearFilter;
+    
+    this.anisotropy = 1;
+    
+    this.format = WebMol.RGBAFormat;
+    this.type = WebMol.UnsignedByteType;
+    
+    this.offset = new WebMol.Vector2(0, 0);
+    this.repeat = new WebMol.Vector2(1, 1);
+    
+    this.generateMipmaps = true;
+    this.premultiplyAlpha = false;
+    this.flipY = true;
+    this.unpackAlignment = 4;
+    
+    this.needsUpdate = false;
+    this.onUpdate = null;
+    
+};
+
+WebMol.Texture.prototype = {
+
+    constructor : WebMol.Texture,
+    
+    clone : function(texture) {
+        
+        if (texture === undefined)
+            texture = new WebMol.Texture();
+        
+        texture.image = this.image;
+        texture.mipmaps = this.mipmaps.slice(0);
+        
+        texture.mapping = this.mapping;
+        
+        texture.wrapS = this.wrapS;
+        texture.wrapT = this.wrapT;
+        
+        texture.magFilter = this.magFilter;
+        texture.minFilter = this.minFilter;
+        
+        texture.anisotropy = this.anisotropy;
+        
+        texture.format = this.format;
+        texture.type = this.type;
+        
+        texture.offset.copy(this.offset);
+        texture.repeat.copy(this.repeat);
+        
+        texture.generateMipmaps = this.generateMipmaps;
+        texture.premultiplyAlpha = this.premultiplyAlpha;
+        texture.flipY = this.flipY;
+        texture.unpackAlignment = this.unpackAlignment;
+        
+        return texture;
+        
+    },
+    
+    dispose : function() {
+        
+        this.dispatchEvent( {type: 'dispose'});
+        
+    }    
+    
+};
+
+WebMol.TextureIdCount = 0;
+
+

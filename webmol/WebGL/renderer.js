@@ -354,7 +354,7 @@ WebMol.Renderer = function ( parameters ) {
         
         deallocateGeometry(geometry);
         
-        _this.info.memory.geometries--
+        _this.info.memory.geometries--;
     };
     
     var onMaterialDispose = function(event) {
@@ -391,7 +391,7 @@ WebMol.Renderer = function ( parameters ) {
                     _gl.deleteBuffer(geometryChunk.__webglNormalBuffer);  
                 
                 if (geometryChunk.__webglFaceBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglFaceBuffer)
+                    _gl.deleteBuffer(geometryChunk.__webglFaceBuffer);
             }
         }
     };
