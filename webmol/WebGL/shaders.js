@@ -206,7 +206,7 @@ uniform sampler2D map;
 uniform float opacity;
 
 uniform int fogType;
-uniform int fogColor;
+uniform vec3 fogColor;
 uniform float fogDensity;
 uniform float fogNear;
 uniform float fogFar;
@@ -218,8 +218,7 @@ void main() {
     
     vec4 texture = texture2D(map, vUV);
     
-    if (texture.a < alphaTest)
-        discard;
+    if (texture.a < alphaTest) discard;
     
     gl_FragColor = vec4(color * texture.xyz, texture.a * opacity);
     
@@ -234,7 +233,7 @@ void main() {
         
         else {
             const float LOG2 = 1.442695;
-            float fogFactor = exp2(-fogDensity * fogDensity * depth * depth * LOG2);
+            float fogFactor = exp2(- fogDensity * fogDensity * depth * depth * LOG2);
             fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);
         }
         
@@ -251,7 +250,7 @@ uniform int useScreenCoordinates;
 uniform int sizeAttenuation;     
 uniform vec3 screenPosition;
 uniform mat4 modelViewMatrix;
-uniform mat4 projection Matrix;
+uniform mat4 projectionMatrix;
 uniform float rotation;
 uniform vec2 scale;
 uniform vec2 alignment;
@@ -271,7 +270,7 @@ void main() {
     
     vec2 rotatedPosition;
     rotatedPosition.x = ( cos(rotation) * alignedPosition.x - sin(rotation) * alignedPosition.y ) * scale.x;
-    rotatesPosition.y = ( sin(rotation) * alignedPOsition.x + cos(rotation) * alignedPosition.y ) * scale.y;
+    rotatedPosition.y = ( sin(rotation) * alignedPosition.x + cos(rotation) * alignedPosition.y ) * scale.y;
     
     vec4 finalPosition;
     

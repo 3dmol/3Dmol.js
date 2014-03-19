@@ -239,7 +239,7 @@ WebMol.SpritePlugin = function () {
                 _gl.uniform1f( uniforms.rotation, sprite.rotation );
                 _gl.uniform2fv( uniforms.scale, scale );
 
-                _renderer.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
+                //_renderer.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
                 _renderer.setDepthTest( material.depthTest );
                 _renderer.setDepthWrite( material.depthWrite );
                 _renderer.setTexture( material.map, 0 );
@@ -273,6 +273,7 @@ WebMol.SpritePlugin = function () {
         
         if ( ! _gl.getShaderParameter(fragmentShader, _gl.COMPILE_STATUS) || ! _gl.getShaderParameter(vertexShader,_gl.COMPILE_STATUS) ) {
 
+                console.error(_gl.getShaderInfoLog(fragmentShader));
                 console.error("could not initialize shader");
                 return null;
         }

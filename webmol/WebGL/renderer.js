@@ -41,26 +41,28 @@ WebMol.Renderer = function ( parameters ) {
     this.autoUpdateObjects = true;
     this.autoUpdateScene = true;
     
+    this.renderPluginsPost = [];
+    
     // info
 
     this.info = {
 
-    memory: {
-
-    programs: 0,
-    geometries: 0,
-    textures: 0
-
-    },
-
-    render: {
-
-    calls: 0,
-    vertices: 0,
-    faces: 0,
-    points: 0
-
-    }
+        memory: {
+    
+        programs: 0,
+        geometries: 0,
+        textures: 0
+    
+        },
+    
+        render: {
+    
+        calls: 0,
+        vertices: 0,
+        faces: 0,
+        points: 0
+    
+        }
 
     };
 
@@ -292,6 +294,15 @@ WebMol.Renderer = function ( parameters ) {
 
             _oldBlending = blending;
     };
+    
+    // Plugins
+    
+    this.addPostPlugin = function(plugin) {
+
+        plugin.init(this);
+        this.renderPluginsPost.push(plugin);
+
+    };
 
     // Sorting
 
@@ -355,6 +366,20 @@ WebMol.Renderer = function ( parameters ) {
         deallocateGeometry(geometry);
         
         _this.info.memory.geometries--;
+        
+    };
+    
+    var onTextureDispose = function(event) {
+
+        var texture = event.target;
+
+        texture.removeEventListener('dispose', onTextureDispose);
+
+        deallocateTexture(texture);
+
+        _this.info.memory.textures--;
+
+
     };
     
     var onMaterialDispose = function(event) {
@@ -363,6 +388,7 @@ WebMol.Renderer = function ( parameters ) {
         material.removeEventListener('dispose', onMaterialDispose);
         
         deallocateMaterial(material);
+        
     };
     
     var deallocateGeometry = function(geometry) {
@@ -454,6 +480,29 @@ WebMol.Renderer = function ( parameters ) {
                 _gl.deleteProgram( program );
 
                 _this.info.memory.programs --;
+
+        }
+
+    };
+    
+    var deallocateTexture = function(texture) {
+
+        if (texture.image && texture.image.__webglTextureCube) {
+
+            // cube texture
+
+            _gl.deleteTexture(texture.image.__webglTextureCube);
+
+        } 
+        
+        else {
+
+            // 2D texture
+
+            if ( ! texture.__webglInit ) return;
+
+            texture.__webglInit = false;
+            _gl.deleteTexture( texture.__webglTexture );
 
         }
 
@@ -879,6 +928,8 @@ WebMol.Renderer = function ( parameters ) {
             _this.info.render.faces = 0;
             _this.info.render.points = 0;
 
+            _currentWidth = _viewportWidth;
+            _currentHeight = _viewportHeight;
 
             if ( this.autoClear || forceClear ) {
 
@@ -918,14 +969,57 @@ WebMol.Renderer = function ( parameters ) {
 
             renderObjects( scene.__webglObjects, false, "transparent", camera, lights, fog, true, material );
 
+            // Render plugins (e.g. sprites), and reset state
+            
+            renderPlugins(this.renderPluginsPost, scene, camera);
 
             // Ensure depth buffer writing is enabled so it can be cleared on next render
 
             this.setDepthTest( true );
             this.setDepthWrite( true );
 
-            _gl.finish();
+            //_gl.finish();
 
+    };
+    
+    function renderPlugins(plugins, scene, camera) {
+        
+        //Reset state once regardless
+        //This should also fix cartoon render bug (after transparent surface render)
+        
+        _currentGeometryGroupHash = -1;
+        _currentProgram = null;
+        _currentCamera = null;
+        _oldBlending = -1;
+        _oldDepthWrite = -1;
+        _oldDepthTest = -1;
+        _oldDoubleSided = -1;
+        _currentMaterialId = -1;
+        _oldFlipSided = -1;
+        
+        
+        if (!plugins.length)
+            return;
+        
+        for (var i = 0, il = plugins.length; i < il; i++) {
+            
+            _lightsNeedUpdate = true;
+            
+            plugins[i].render(scene, camera, _currentWidth, _currentHeight);
+            
+            //Reset state after plugin render
+            _currentGeometryGroupHash = -1;
+            _currentProgram = null;
+            _currentCamera = null;
+            _oldBlending = -1;
+            _oldDepthWrite = -1;
+            _oldDepthTest = -1;
+            _oldDoubleSided = -1;
+            _currentMaterialId = -1;
+            _oldFlipSided = -1;       
+                
+        }  
+        
     };
 
     this.initWebGLObjects = function ( scene ) {
@@ -1031,24 +1125,31 @@ WebMol.Renderer = function ( parameters ) {
         
         if ( ! object.__webglActive ) {
             
-            if ( object instanceof WebMol.Mesh) {
+            if (object instanceof WebMol.Mesh) {
                 
                 geometry = object.geometry;
 
                 for ( g in geometry.geometryChunks ) {
-                        geometryChunk = geometry.geometryChunks[ g ];
+                        geometryChunk = geometry.geometryChunks[g];
 
-                        addBuffer( scene.__webglObjects, geometryChunk, object );
+                        addBuffer(scene.__webglObjects, geometryChunk, object);
                 }
                 
             }
             
-            else if ( object instanceof WebMol.Line ) {
+            else if (object instanceof WebMol.Line) {
                 geometry = object.geometry;
-                addBuffer( scene.__webglObjects, geometry, object );
+                addBuffer(scene.__webglObjects, geometry, object);
             }
             
+            
+            //Sprite
+            else if (object instanceof WebMol.Sprite) 
+                scene.__webglSprites.push(object);
+         
+            
             object.__webglActive = true;
+            
         }
 
     };
@@ -1183,7 +1284,7 @@ WebMol.Renderer = function ( parameters ) {
         _this.info.memory.geometries++;
     };
 
-    function addBuffer ( objlist, buffer, object ) {
+    function addBuffer (objlist, buffer, object) {
 
         objlist.push(
                 {
@@ -1196,12 +1297,219 @@ WebMol.Renderer = function ( parameters ) {
 
     };
 
-    function setupMatrices ( object, camera ) {
+    function setupMatrices (object, camera) {
 
         object._modelViewMatrix.multiplyMatrices( camera.matrixWorldInverse, object.matrixWorld );
 
         object._normalMatrix.getInverse( object._modelViewMatrix );
         object._normalMatrix.transpose();
+
+    };
+
+    function isPowerOfTwo ( value ) {
+
+        return ( value & ( value - 1 ) ) === 0;
+
+    };
+    
+    // Fallback filters for non-power-of-2 textures
+
+    function filterFallback ( f ) {
+
+        return _gl.LINEAR;
+
+    };
+
+    function setTextureParameters ( textureType, texture, isImagePowerOfTwo ) {
+
+        if ( isImagePowerOfTwo ) {
+
+            _gl.texParameteri( textureType, _gl.TEXTURE_WRAP_S, paramThreeToGL( texture.wrapS ) );
+            _gl.texParameteri( textureType, _gl.TEXTURE_WRAP_T, paramThreeToGL( texture.wrapT ) );
+
+            _gl.texParameteri( textureType, _gl.TEXTURE_MAG_FILTER, paramThreeToGL( texture.magFilter ) );
+            _gl.texParameteri( textureType, _gl.TEXTURE_MIN_FILTER, paramThreeToGL( texture.minFilter ) );
+
+        } else {
+
+            _gl.texParameteri( textureType, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE );
+            _gl.texParameteri( textureType, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE );
+
+            _gl.texParameteri( textureType, _gl.TEXTURE_MAG_FILTER, filterFallback( texture.magFilter ) );
+            _gl.texParameteri( textureType, _gl.TEXTURE_MIN_FILTER, filterFallback( texture.minFilter ) );
+
+        }
+
+    };
+    
+    this.setTexture = function (texture, slot) {
+
+        if (texture.needsUpdate) {
+
+            if ( !texture.__webglInit ) {
+
+                texture.__webglInit = true;
+
+                texture.addEventListener('dispose', onTextureDispose);
+
+                texture.__webglTexture = _gl.createTexture();
+
+                _this.info.memory.textures++;
+
+            }
+
+            _gl.activeTexture(_gl.TEXTURE0 + slot);
+            _gl.bindTexture(_gl.TEXTURE_2D, texture.__webglTexture);
+
+            _gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
+            _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
+            _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
+
+            var image = texture.image,
+            isImagePowerOfTwo = isPowerOfTwo(image.width) && isPowerOfTwo(image.height),
+            glFormat = paramToGL(texture.format),
+            glType = paramToGL(texture.type);
+
+            setTextureParameters(_gl.TEXTURE_2D, texture, isImagePowerOfTwo);
+
+            var mipmap, mipmaps = texture.mipmaps;
+
+            if ( texture instanceof THREE.DataTexture ) {
+
+                // use manually created mipmaps if available
+                // if there are no manual mipmaps
+                // set 0 level mipmap and then use GL to generate other mipmap levels
+
+                if ( mipmaps.length > 0 && isImagePowerOfTwo ) {
+
+                    for ( var i = 0, il = mipmaps.length; i < il; i ++ ) {
+
+                        mipmap = mipmaps[ i ];
+                        _gl.texImage2D( _gl.TEXTURE_2D, i, glFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data );
+
+                    }
+
+                    texture.generateMipmaps = false;
+
+                } else {
+
+                    _gl.texImage2D( _gl.TEXTURE_2D, 0, glFormat, image.width, image.height, 0, glFormat, glType, image.data );
+
+                }
+
+            } else if ( texture instanceof THREE.CompressedTexture ) {
+
+                // compressed textures can only use manually created mipmaps
+                // WebGL can't generate mipmaps for DDS textures
+
+                for( var i = 0, il = mipmaps.length; i < il; i ++ ) {
+
+                    mipmap = mipmaps[ i ];
+                    _gl.compressedTexImage2D( _gl.TEXTURE_2D, i, glFormat, mipmap.width, mipmap.height, 0, mipmap.data );
+
+                }
+
+            } else { // regular Texture (image, video, canvas)
+
+                // use manually created mipmaps if available
+                // if there are no manual mipmaps
+                // set 0 level mipmap and then use GL to generate other mipmap levels
+
+                if ( mipmaps.length > 0 && isImagePowerOfTwo ) {
+
+                    for ( var i = 0, il = mipmaps.length; i < il; i ++ ) {
+
+                        mipmap = mipmaps[ i ];
+                        _gl.texImage2D( _gl.TEXTURE_2D, i, glFormat, glFormat, glType, mipmap );
+
+                    }
+
+                    texture.generateMipmaps = false;
+
+                } else {
+
+                    _gl.texImage2D( _gl.TEXTURE_2D, 0, glFormat, glFormat, glType, texture.image );
+
+                }
+
+            }
+
+            if ( texture.generateMipmaps && isImagePowerOfTwo ) _gl.generateMipmap( _gl.TEXTURE_2D );
+
+            texture.needsUpdate = false;
+
+            if ( texture.onUpdate ) texture.onUpdate();
+
+        } else {
+
+            _gl.activeTexture( _gl.TEXTURE0 + slot );
+            _gl.bindTexture( _gl.TEXTURE_2D, texture.__webglTexture );
+
+        }
+
+    };
+    
+    // Map constants to WebGL constants
+
+    function paramToGL ( p ) {
+
+        if ( p === THREE.RepeatWrapping ) return _gl.REPEAT;
+        if ( p === THREE.ClampToEdgeWrapping ) return _gl.CLAMP_TO_EDGE;
+        if ( p === THREE.MirroredRepeatWrapping ) return _gl.MIRRORED_REPEAT;
+
+        if ( p === THREE.NearestFilter ) return _gl.NEAREST;
+        if ( p === THREE.NearestMipMapNearestFilter ) return _gl.NEAREST_MIPMAP_NEAREST;
+        if ( p === THREE.NearestMipMapLinearFilter ) return _gl.NEAREST_MIPMAP_LINEAR;
+
+        if ( p === THREE.LinearFilter ) return _gl.LINEAR;
+        if ( p === THREE.LinearMipMapNearestFilter ) return _gl.LINEAR_MIPMAP_NEAREST;
+        if ( p === THREE.LinearMipMapLinearFilter ) return _gl.LINEAR_MIPMAP_LINEAR;
+
+        if ( p === WebMol.UnsignedByteType ) return _gl.UNSIGNED_BYTE;
+        if ( p === THREE.UnsignedShort4444Type ) return _gl.UNSIGNED_SHORT_4_4_4_4;
+        if ( p === THREE.UnsignedShort5551Type ) return _gl.UNSIGNED_SHORT_5_5_5_1;
+        if ( p === THREE.UnsignedShort565Type ) return _gl.UNSIGNED_SHORT_5_6_5;
+
+        if ( p === THREE.ByteType ) return _gl.BYTE;
+        if ( p === THREE.ShortType ) return _gl.SHORT;
+        if ( p === THREE.UnsignedShortType ) return _gl.UNSIGNED_SHORT;
+        if ( p === THREE.IntType ) return _gl.INT;
+        if ( p === THREE.UnsignedIntType ) return _gl.UNSIGNED_INT;
+        if ( p === THREE.FloatType ) return _gl.FLOAT;
+
+        if ( p === THREE.AlphaFormat ) return _gl.ALPHA;
+        if ( p === THREE.RGBFormat ) return _gl.RGB;
+        if ( p === WebMol.RGBAFormat ) return _gl.RGBA;
+        if ( p === THREE.LuminanceFormat ) return _gl.LUMINANCE;
+        if ( p === THREE.LuminanceAlphaFormat ) return _gl.LUMINANCE_ALPHA;
+
+        if ( p === THREE.AddEquation ) return _gl.FUNC_ADD;
+        if ( p === THREE.SubtractEquation ) return _gl.FUNC_SUBTRACT;
+        if ( p === THREE.ReverseSubtractEquation ) return _gl.FUNC_REVERSE_SUBTRACT;
+
+        if ( p === THREE.ZeroFactor ) return _gl.ZERO;
+        if ( p === THREE.OneFactor ) return _gl.ONE;
+        if ( p === THREE.SrcColorFactor ) return _gl.SRC_COLOR;
+        if ( p === THREE.OneMinusSrcColorFactor ) return _gl.ONE_MINUS_SRC_COLOR;
+        if ( p === THREE.SrcAlphaFactor ) return _gl.SRC_ALPHA;
+        if ( p === THREE.OneMinusSrcAlphaFactor ) return _gl.ONE_MINUS_SRC_ALPHA;
+        if ( p === THREE.DstAlphaFactor ) return _gl.DST_ALPHA;
+        if ( p === THREE.OneMinusDstAlphaFactor ) return _gl.ONE_MINUS_DST_ALPHA;
+
+        if ( p === THREE.DstColorFactor ) return _gl.DST_COLOR;
+        if ( p === THREE.OneMinusDstColorFactor ) return _gl.ONE_MINUS_DST_COLOR;
+        if ( p === THREE.SrcAlphaSaturateFactor ) return _gl.SRC_ALPHA_SATURATE;
+
+        if ( _glExtensionCompressedTextureS3TC !== undefined ) {
+
+            if ( p === THREE.RGB_S3TC_DXT1_Format ) return _glExtensionCompressedTextureS3TC.COMPRESSED_RGB_S3TC_DXT1_EXT;
+            if ( p === THREE.RGBA_S3TC_DXT1_Format ) return _glExtensionCompressedTextureS3TC.COMPRESSED_RGBA_S3TC_DXT1_EXT;
+            if ( p === THREE.RGBA_S3TC_DXT3_Format ) return _glExtensionCompressedTextureS3TC.COMPRESSED_RGBA_S3TC_DXT3_EXT;
+            if ( p === THREE.RGBA_S3TC_DXT5_Format ) return _glExtensionCompressedTextureS3TC.COMPRESSED_RGBA_S3TC_DXT5_EXT;
+
+        }
+
+        return 0;
 
     };
     
@@ -1301,6 +1609,8 @@ WebMol.Renderer = function ( parameters ) {
             _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
 
     };
+    
+    this.addPostPlugin(new WebMol.SpritePlugin());
         
 };
 
