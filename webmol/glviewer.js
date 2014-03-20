@@ -2,6 +2,88 @@
 
 var WebMol = WebMol || {};
 
+//Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
+
+// function for drawing rounded rectangles
+var roundRect = function(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();   
+};
+
+WebMol.Label = function(group, message, parameters) {
+        
+    parameters = parameters || {};
+
+    var canvas = document.createElement('canvas');
+    
+    this.context = canvas.getContext('2d');
+    this.sprite = null;
+
+    var font = parameters.font ? 
+        parameters.font : "Arial";
+
+    var fontsize = parameters.fontsize ? 
+        parameters.fontsize : 18;
+
+    var borderThickness = parameters.borderThickness ? 
+        parameters.borderThickness : 4;
+
+    var borderColor = parameters.borderColor ?
+        parameters.borderColor : { r:0, g:0, b:0, a:1.0 };
+
+    var backgroundColor = parameters.backgroundColor ?
+        parameters.backgroundColor : { r:255, g:255, b:255, a:1.0 };
+
+    var spriteAlignment = WebMol.SpriteAlignment.topLeft;
+
+    this.context.font = "Bold " + fontsize + "px " + font;
+
+    // get size data (height depends only on font size)
+    var metrics = this.context.measureText(message);
+    var textWidth = metrics.width;
+
+    // background color
+    this.context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+                                                              + backgroundColor.b + "," + backgroundColor.a + ")";
+    // border color
+    this.context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
+                                                              + borderColor.b + "," + borderColor.a + ")";
+
+    this.context.lineWidth = borderThickness;
+    roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+    // 1.4 is extra height factor for text below baseline: g,j,p,q.
+
+    // text color
+    this.context.fillStyle = "rgba(0, 0, 0, 1.0)";
+
+    this.context.fillText(message, borderThickness, fontsize + borderThickness);
+
+    // canvas contents will be used for a texture
+    var texture = new WebMol.Texture(canvas);
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new WebMol.SpriteMaterial( 
+            { map: texture, useScreenCoordinates: false, alignment: spriteAlignment } );
+    this.sprite = new WebMol.Sprite( spriteMaterial );
+    this.sprite.scale.set(100,50,1.0);
+
+    this.sprite.position.set(-10, 1, 1);
+    
+    group.add(this.sprite);
+    
+};
+
 // a webmol unified interace to gmol
 WebMol.glmolViewer = (function() {
     // private class variables
@@ -467,6 +549,21 @@ WebMol.glmolViewer = (function() {
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
             
             show();
+        };
+        
+        // add a label to viewer
+        this.addLabel = function(text, data) {
+            return new WebMol.Label(rotationGroup, text, data); 
+        };
+        
+        this.removeLabel = function(label) {
+            
+            label.sprite.material.map.dispose();
+            //label.sprite.material.dispose();
+            rotationGroup.remove(label.sprite);
+            
+            show();
+            
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)

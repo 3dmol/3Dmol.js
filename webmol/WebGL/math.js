@@ -127,6 +127,14 @@ WebMol.extend(WebMol.Vector2.prototype, {
        
         return this;
     },
+    
+    subVectors : function(a, b) {
+        
+      this.x = a.x - b.x;
+      this.y = a.y - b.y;
+      
+      return this;
+    },
    
     copy : function(v) {
        
@@ -231,6 +239,19 @@ WebMol.extend(WebMol.Vector3.prototype, {
         }
         
         return this;
+    },
+    
+
+    distanceTo: function(v) {
+        return Math.sqrt(this.distanceToSquared(v));
+    },
+
+    distanceToSquared: function(v) {
+        var dx = this.x - v.x;
+        var dy = this.y - v.y;
+        var dz = this.z - v.z;
+
+        return dx * dx + dy * dy + dz * dz;
     },
     
     applyQuaternion : function(q) { 

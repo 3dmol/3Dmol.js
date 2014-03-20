@@ -1588,7 +1588,7 @@ WebMol.GLModel = (function() {
 
         this.globj = function(group) {
             var time = new Date();
-            if(molObj == null) { // have to regenerate
+            if(molObj === null) { // have to regenerate
                 molObj = createMolObj(atoms);
                 var time2 = new Date();
                 console.log("object creation time: " + (time2 - time));

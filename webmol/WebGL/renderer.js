@@ -1324,11 +1324,11 @@ WebMol.Renderer = function ( parameters ) {
 
         if ( isImagePowerOfTwo ) {
 
-            _gl.texParameteri( textureType, _gl.TEXTURE_WRAP_S, paramThreeToGL( texture.wrapS ) );
-            _gl.texParameteri( textureType, _gl.TEXTURE_WRAP_T, paramThreeToGL( texture.wrapT ) );
+            _gl.texParameteri( textureType, _gl.TEXTURE_WRAP_S, paramToGL( texture.wrapS ) );
+            _gl.texParameteri( textureType, _gl.TEXTURE_WRAP_T, paramToGL( texture.wrapT ) );
 
-            _gl.texParameteri( textureType, _gl.TEXTURE_MAG_FILTER, paramThreeToGL( texture.magFilter ) );
-            _gl.texParameteri( textureType, _gl.TEXTURE_MIN_FILTER, paramThreeToGL( texture.minFilter ) );
+            _gl.texParameteri( textureType, _gl.TEXTURE_MAG_FILTER, paramToGL( texture.magFilter ) );
+            _gl.texParameteri( textureType, _gl.TEXTURE_MIN_FILTER, paramToGL( texture.minFilter ) );
 
         } else {
 
@@ -1374,66 +1374,26 @@ WebMol.Renderer = function ( parameters ) {
 
             var mipmap, mipmaps = texture.mipmaps;
 
-            if ( texture instanceof THREE.DataTexture ) {
+            // regular Texture (image, video, canvas)
 
-                // use manually created mipmaps if available
-                // if there are no manual mipmaps
-                // set 0 level mipmap and then use GL to generate other mipmap levels
+            // use manually created mipmaps if available
+            // if there are no manual mipmaps
+            // set 0 level mipmap and then use GL to generate other mipmap levels
 
-                if ( mipmaps.length > 0 && isImagePowerOfTwo ) {
+            if ( mipmaps.length > 0 && isImagePowerOfTwo ) {
 
-                    for ( var i = 0, il = mipmaps.length; i < il; i ++ ) {
-
-                        mipmap = mipmaps[ i ];
-                        _gl.texImage2D( _gl.TEXTURE_2D, i, glFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data );
-
-                    }
-
-                    texture.generateMipmaps = false;
-
-                } else {
-
-                    _gl.texImage2D( _gl.TEXTURE_2D, 0, glFormat, image.width, image.height, 0, glFormat, glType, image.data );
-
-                }
-
-            } else if ( texture instanceof THREE.CompressedTexture ) {
-
-                // compressed textures can only use manually created mipmaps
-                // WebGL can't generate mipmaps for DDS textures
-
-                for( var i = 0, il = mipmaps.length; i < il; i ++ ) {
-
+                for ( var i = 0, il = mipmaps.length; i < il; i ++ ) {
                     mipmap = mipmaps[ i ];
-                    _gl.compressedTexImage2D( _gl.TEXTURE_2D, i, glFormat, mipmap.width, mipmap.height, 0, mipmap.data );
-
+                    _gl.texImage2D( _gl.TEXTURE_2D, i, glFormat, glFormat, glType, mipmap );
                 }
+                
+                texture.generateMipmaps = false;
+            } 
+            
+            else 
+                _gl.texImage2D( _gl.TEXTURE_2D, 0, glFormat, glFormat, glType, texture.image );
 
-            } else { // regular Texture (image, video, canvas)
-
-                // use manually created mipmaps if available
-                // if there are no manual mipmaps
-                // set 0 level mipmap and then use GL to generate other mipmap levels
-
-                if ( mipmaps.length > 0 && isImagePowerOfTwo ) {
-
-                    for ( var i = 0, il = mipmaps.length; i < il; i ++ ) {
-
-                        mipmap = mipmaps[ i ];
-                        _gl.texImage2D( _gl.TEXTURE_2D, i, glFormat, glFormat, glType, mipmap );
-
-                    }
-
-                    texture.generateMipmaps = false;
-
-                } else {
-
-                    _gl.texImage2D( _gl.TEXTURE_2D, 0, glFormat, glFormat, glType, texture.image );
-
-                }
-
-            }
-
+            
             if ( texture.generateMipmaps && isImagePowerOfTwo ) _gl.generateMipmap( _gl.TEXTURE_2D );
 
             texture.needsUpdate = false;
@@ -1453,61 +1413,8 @@ WebMol.Renderer = function ( parameters ) {
 
     function paramToGL ( p ) {
 
-        if ( p === THREE.RepeatWrapping ) return _gl.REPEAT;
-        if ( p === THREE.ClampToEdgeWrapping ) return _gl.CLAMP_TO_EDGE;
-        if ( p === THREE.MirroredRepeatWrapping ) return _gl.MIRRORED_REPEAT;
-
-        if ( p === THREE.NearestFilter ) return _gl.NEAREST;
-        if ( p === THREE.NearestMipMapNearestFilter ) return _gl.NEAREST_MIPMAP_NEAREST;
-        if ( p === THREE.NearestMipMapLinearFilter ) return _gl.NEAREST_MIPMAP_LINEAR;
-
-        if ( p === THREE.LinearFilter ) return _gl.LINEAR;
-        if ( p === THREE.LinearMipMapNearestFilter ) return _gl.LINEAR_MIPMAP_NEAREST;
-        if ( p === THREE.LinearMipMapLinearFilter ) return _gl.LINEAR_MIPMAP_LINEAR;
-
         if ( p === WebMol.UnsignedByteType ) return _gl.UNSIGNED_BYTE;
-        if ( p === THREE.UnsignedShort4444Type ) return _gl.UNSIGNED_SHORT_4_4_4_4;
-        if ( p === THREE.UnsignedShort5551Type ) return _gl.UNSIGNED_SHORT_5_5_5_1;
-        if ( p === THREE.UnsignedShort565Type ) return _gl.UNSIGNED_SHORT_5_6_5;
-
-        if ( p === THREE.ByteType ) return _gl.BYTE;
-        if ( p === THREE.ShortType ) return _gl.SHORT;
-        if ( p === THREE.UnsignedShortType ) return _gl.UNSIGNED_SHORT;
-        if ( p === THREE.IntType ) return _gl.INT;
-        if ( p === THREE.UnsignedIntType ) return _gl.UNSIGNED_INT;
-        if ( p === THREE.FloatType ) return _gl.FLOAT;
-
-        if ( p === THREE.AlphaFormat ) return _gl.ALPHA;
-        if ( p === THREE.RGBFormat ) return _gl.RGB;
         if ( p === WebMol.RGBAFormat ) return _gl.RGBA;
-        if ( p === THREE.LuminanceFormat ) return _gl.LUMINANCE;
-        if ( p === THREE.LuminanceAlphaFormat ) return _gl.LUMINANCE_ALPHA;
-
-        if ( p === THREE.AddEquation ) return _gl.FUNC_ADD;
-        if ( p === THREE.SubtractEquation ) return _gl.FUNC_SUBTRACT;
-        if ( p === THREE.ReverseSubtractEquation ) return _gl.FUNC_REVERSE_SUBTRACT;
-
-        if ( p === THREE.ZeroFactor ) return _gl.ZERO;
-        if ( p === THREE.OneFactor ) return _gl.ONE;
-        if ( p === THREE.SrcColorFactor ) return _gl.SRC_COLOR;
-        if ( p === THREE.OneMinusSrcColorFactor ) return _gl.ONE_MINUS_SRC_COLOR;
-        if ( p === THREE.SrcAlphaFactor ) return _gl.SRC_ALPHA;
-        if ( p === THREE.OneMinusSrcAlphaFactor ) return _gl.ONE_MINUS_SRC_ALPHA;
-        if ( p === THREE.DstAlphaFactor ) return _gl.DST_ALPHA;
-        if ( p === THREE.OneMinusDstAlphaFactor ) return _gl.ONE_MINUS_DST_ALPHA;
-
-        if ( p === THREE.DstColorFactor ) return _gl.DST_COLOR;
-        if ( p === THREE.OneMinusDstColorFactor ) return _gl.ONE_MINUS_DST_COLOR;
-        if ( p === THREE.SrcAlphaSaturateFactor ) return _gl.SRC_ALPHA_SATURATE;
-
-        if ( _glExtensionCompressedTextureS3TC !== undefined ) {
-
-            if ( p === THREE.RGB_S3TC_DXT1_Format ) return _glExtensionCompressedTextureS3TC.COMPRESSED_RGB_S3TC_DXT1_EXT;
-            if ( p === THREE.RGBA_S3TC_DXT1_Format ) return _glExtensionCompressedTextureS3TC.COMPRESSED_RGBA_S3TC_DXT1_EXT;
-            if ( p === THREE.RGBA_S3TC_DXT3_Format ) return _glExtensionCompressedTextureS3TC.COMPRESSED_RGBA_S3TC_DXT3_EXT;
-            if ( p === THREE.RGBA_S3TC_DXT5_Format ) return _glExtensionCompressedTextureS3TC.COMPRESSED_RGBA_S3TC_DXT5_EXT;
-
-        }
 
         return 0;
 

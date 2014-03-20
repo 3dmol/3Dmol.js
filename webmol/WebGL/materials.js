@@ -238,13 +238,13 @@ WebMol.SpriteMaterial = function(parameters) {
     WebMol.Material.call(this);
     
     this.color = new WebMol.Color(0xffffff);
-    this.map = new THREE.Texture();
+    this.map = new WebMol.Texture();
     
     this.useScreenCoordinates = true;
     this.depthTest = !this.useScreenCoordinates;
     this.sizeAttenuation = !this.useScreenCoordinates;
     this.scaleByViewPort = !this.sizeAttenuation;
-    this.alignment = THREE.SpriteAlignment.center.clone();
+    this.alignment = WebMol.SpriteAlignment.center.clone();
     
     this.fog = false; // use scene fog
     
@@ -280,7 +280,7 @@ WebMol.SpriteMaterial.prototype.clone = function() {
     material.scaleByViewport = this.scaleByViewPort;
     material.alignment.copy(this.alignment);
     
-    material.uv
+    material.uvOffset.copy(this.uvOffset);
     
     return material;
     
