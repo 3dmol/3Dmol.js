@@ -6,6 +6,7 @@ var WebMol = WebMol || {};
 
 // function for drawing rounded rectangles
 var roundRect = function(ctx, x, y, w, h, r) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     ctx.moveTo(x+r, y);
     ctx.lineTo(x+w-r, y);
@@ -18,76 +19,20 @@ var roundRect = function(ctx, x, y, w, h, r) {
     ctx.quadraticCurveTo(x, y, x+r, y);
     ctx.closePath();
     ctx.fill();
-    ctx.stroke();   
+    //ctx.stroke();   
 };
-
-WebMol.Label = function(group, message, parameters) {
+WebMol.LabelCount = 0;
+WebMol.Label = function(message, parameters) {
         
-    parameters = parameters || {};
+    this.id = WebMol.LabelCount++;    
+    this.stylespec = parameters || {};
 
     var canvas = document.createElement('canvas');
     
     this.context = canvas.getContext('2d');
+
     this.sprite = null;
-
-    var font = parameters.font ? 
-        parameters.font : "Arial";
-
-    var fontsize = parameters.fontsize ? 
-        parameters.fontsize : 18;
-
-    var borderThickness = parameters.borderThickness ? 
-        parameters.borderThickness : 4;
-
-    var borderColor = parameters.borderColor ?
-        parameters.borderColor : { r:0, g:0, b:0, a:1.0 };
-
-    var backgroundColor = parameters.backgroundColor ?
-        parameters.backgroundColor : { r:255, g:255, b:255, a:1.0 };
-        
-    var position = parameters.position ?
-        parameters.position : new WebMol.Vector3(-10, 1, 1);
-    
-    //Should labels always be in front of model? 
-    var inFront = (parameters.inFront !== undefined) ?
-        parameters.inFront : true;
-
-    var spriteAlignment = WebMol.SpriteAlignment.topLeft;
-
-    this.context.font = "Bold " + fontsize + "px " + font;
-
-    // get size data (height depends only on font size)
-    var metrics = this.context.measureText(message);
-    var textWidth = metrics.width;
-
-    // background color
-    this.context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
-                                                              + backgroundColor.b + "," + backgroundColor.a + ")";
-    // border color
-    this.context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
-                                                              + borderColor.b + "," + borderColor.a + ")";
-
-    this.context.lineWidth = borderThickness;
-    roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
-    // 1.4 is extra height factor for text below baseline: g,j,p,q.
-
-    // text color
-    this.context.fillStyle = "rgba(0, 0, 0, 1.0)";
-
-    this.context.fillText(message, borderThickness, fontsize + borderThickness);
-
-    // canvas contents will be used for a texture
-    var texture = new WebMol.Texture(canvas);
-    texture.needsUpdate = true;
-
-    var spriteMaterial = new WebMol.SpriteMaterial( 
-            { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !inFront } );
-    this.sprite = new WebMol.Sprite( spriteMaterial );
-    this.sprite.scale.set(100,50,1.0);
-
-    //this.sprite.position.set(-10, 1, 1);
-    this.sprite.position = position;
-    group.add(this.sprite);
+    this.text = message;
     
 };
 
@@ -96,10 +41,66 @@ WebMol.Label.prototype = {
     
     constructor : WebMol.Label,
     
-    setText : function(text) {
-        //this.sprite.material.map.dispose();
-        this.context.fillText(text);
+    setContext : function() {
+
+        var font = this.stylespec.font ? 
+            this.stylespec.font : "Helvetica";
+    
+        var fontsize = this.stylespec.fontsize ? 
+            this.stylespec.fontsize : 18;
+    
+        var borderThickness = this.stylespec.borderThickness ? 
+            this.stylespec.borderThickness : 4;
+    
+        var borderColor = this.stylespec.borderColor ?
+            this.stylespec.borderColor : { r:0, g:0, b:0, a:1.0 };
+    
+        var backgroundColor = this.stylespec.backgroundColor ?
+            this.stylespec.backgroundColor : { r:0, g:0, b:0, a:1.0 };
+            
+        var position = this.stylespec.position ?
+            this.stylespec.position : { x:-10, y:1, z:1 };
+        
+        //Should labels always be in front of model? 
+        var inFront = (this.stylespec.inFront !== undefined) ?
+            this.stylespec.inFront : true;
+            
+        var spriteAlignment = WebMol.SpriteAlignment.topLeft;
+    
+        this.context.font = fontsize + "pt " + font;
+    
+        // get size data (height depends only on font size)
+        var metrics = this.context.measureText(this.text);
+        var textWidth = metrics.width;
+    
+        // background color
+        this.context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+                                                                  + backgroundColor.b + "," + backgroundColor.a + ")";
+        // border color
+        this.context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
+                                                                  + borderColor.b + "," + borderColor.a + ")";
+    
+        this.context.lineWidth = borderThickness;
+        roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+        // 1.4 is extra height factor for text below baseline: g,j,p,q.
+    
+        // text color
+        this.context.fillStyle = "rgba(255, 255, 255, 1.0)";
+    
+        this.context.fillText(this.text, borderThickness, fontsize + borderThickness);
+        
+        // canvas contents will be used for a texture
+        var texture = new WebMol.Texture(this.context.canvas);
+        texture.needsUpdate = true;
+    
+        var spriteMaterial = new WebMol.SpriteMaterial( 
+                { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !inFront } );
+        this.sprite = new WebMol.Sprite( spriteMaterial );
+        this.sprite.scale.set(100,50,1.0);
+
+        this.sprite.position.set(position.x, position.y, position.z);
     }
+    
 };
 
 // a webmol unified interace to gmol
@@ -571,17 +572,41 @@ WebMol.glmolViewer = (function() {
         
         // add a label to viewer
         this.addLabel = function(text, data) {
-            return new WebMol.Label(rotationGroup, text, data); 
+            var label = new WebMol.Label(text, data); 
+            label.setContext();
+            modelGroup.add(label.sprite);
+            
+            return label;
         };
         
         this.removeLabel = function(label) {
+            label.sprite.material.map.dispose(); // Texture clean up
+            label.sprite.material.dispose(); // SpriteMaterial clean up
+            modelGroup.remove(label.sprite);                       
+        };
+        
+        //Modify label style
+        this.setLabelStyle = function(label, stylespec) {    
+            this.removeLabel(label);
+
+            label.stylespec = stylespec;
+            label.setContext();
+            modelGroup.add(label.sprite);
             
-            label.sprite.material.map.dispose();
-            label.sprite.material.dispose();
-            rotationGroup.remove(label.sprite);
+            return label;
             
-            show();
+        };
+        
+        //Change label text
+        this.setLabelText = function(label, text) {
+            this.removeLabel(label);
             
+            label.text = text;
+            label.setContext();
+            modelGroup.add(label.sprite);
+            
+            return label;
+
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)

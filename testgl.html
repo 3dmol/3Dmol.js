@@ -31,28 +31,57 @@
         
         <script>
         var glviewer = null;
-        var l = null;
+        var labels = [];
         var m = null;
-        //var jviewer = null;
+        var atoms = null;
         var moldata = null;
+        var l = null;
+        var modelgroup = null;
+        
         $(document).ready(function() {
 
-            moldata = $("#moldata_sdf").val();
-
-            //var moldata2 = $("#moldata_pdb").val();
+            $.get("test_structs/2AA1.pdb", function(data) {             
+                $("#moldata_download").val(data);                    
+            }, "text");
+                        
+            moldata = $("#moldata_download").val();
+            while(moldata === "")
+                moldata = $("#moldata_download").val();
             
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
+                
                 viewer.setBackgroundColor(0xffffff);
-                m = viewer.addModel(moldata,"sdf");
-                l = viewer.addLabel(" Hello ", { inFront: false, fontsize: 24, borderColor: {r:255, g:0, b:0, a:1.0}, backgroundColor: {r:255, g:100, b:100, a:0.8} });
+                m = viewer.addModel(moldata,"pdb");           
+                atoms = m.selectedAtoms({ });
+             
+                
+                for (var a in atoms) {
+                    
+                    var atom = atoms[a];
+                    
+                    if (atom.elem === 'FE') {
+                        var l = viewer.addLabel(atom.resn + " " + atom.rescode, {inFront: true, 
+                                                fontsize: 8, backgroundColor:{r:40, g:40, b:40, a:1.0},
+                                                position: new WebMol.Vector3(atom.x, atom.y, atom.z)} ); 
+                        atom.label = l;
+                        labels.push(atom);
+                        
+                    }
+                }
+                
+                modelgroup = viewer.getModelGroup();
+                viewer.zoomTo();
+                viewer.render();
             }});
             
+           
+
             
             
         });
         </script>
     </head>
-    <body >
+    <body>
          <div id="gldiv" style="width: 100%; height: 800px; border: 2px solid black; "></div>       
         <br>
         <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
@@ -71,6 +100,8 @@
                 <br>
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); WebMol.download('pdb:' + $('#pdbid').val(), glviewer); glviewer.render();">Download</button><br>
  
+ 
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_download"></textarea>
 <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small">v:U4C5Cr:4
   -OEChem-12201211493D
 

@@ -827,7 +827,7 @@ WebMol.GLModel = (function() {
                         c1 = c2 = WebMol.CC.color(style.color);
                     }
                                         
-                                        geo.vertices += 4;
+                    geo.vertices += 4;
                                         
                     geo.vertexArr.push(p1.x), geo.vertexArr.push(p1.y), geo.vertexArr.push(p1.z);
                     geo.colorArr.push(c1.r), geo.colorArr.push(c1.g), geo.colorArr.push(c1.b);

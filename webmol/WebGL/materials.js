@@ -301,7 +301,7 @@ WebMol.SpriteAlignment.bottomRight = new WebMol.Vector2(-1, 1);
 
 
 //Texture
-//We really only create textures from a 2d canvas passed as image
+//We really only create textures from 2d rendering contexts (to display text labels)
 
 WebMol.Texture = function(image) {
 
