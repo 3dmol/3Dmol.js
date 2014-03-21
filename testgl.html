@@ -32,6 +32,7 @@
         <script>
         var glviewer = null;
         var l = null;
+        var m = null;
         //var jviewer = null;
         var moldata = null;
         $(document).ready(function() {
@@ -42,11 +43,11 @@
             
             glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
                 viewer.setBackgroundColor(0xffffff);
-                var m = viewer.addModel(moldata,"sdf");
-                
+                m = viewer.addModel(moldata,"sdf");
+                l = viewer.addLabel(" Hello ", { inFront: false, fontsize: 24, borderColor: {r:255, g:0, b:0, a:1.0}, backgroundColor: {r:255, g:100, b:100, a:0.8} });
             }});
             
-            l = glviewer.addLabel(" Hello ", { fontsize: 24, borderColor: {r:255, g:0, b:0, a:1.0}, backgroundColor: {r:255, g:100, b:100, a:0.8} });
+            
             
         });
         </script>
