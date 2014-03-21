@@ -49,7 +49,7 @@ var WebMol = (function() {
     my.download = function(query, viewer) {
            var baseURL = '';
            var type = "";
-           if (query.substr(0, 4) == 'pdb:') {
+           if (query.substr(0, 4) === 'pdb:') {
                    type = "pdb";
               query = query.substr(4).toUpperCase();
               if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {

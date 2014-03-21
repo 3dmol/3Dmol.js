@@ -1194,11 +1194,13 @@ WebMol.Renderer = function ( parameters ) {
     
     function removeObject( object, scene ) {
 
-            if (object instanceof WebMol.Mesh || object instanceof WebMol.Line )
-                    removeInstances(scene.__webglObjects, object);
+        if (object instanceof WebMol.Mesh || object instanceof WebMol.Line )
+            removeInstances(scene.__webglObjects, object);
 
-            else
-                    object.__webglActive = false;
+        else if (object instanceof WebMol.Sprite)
+            removeInstancesDirect(scene.__webglSprites, object);
+            
+        object.__webglActive = false;
 
     };
 
@@ -1207,6 +1209,16 @@ WebMol.Renderer = function ( parameters ) {
             for (var o = objList.length - 1; o >= 0; --o) {
 
                     if (objList[o].object === object) 
+                            objList.splice(o, 1);
+
+            }
+    };
+
+    function removeInstancesDirect( objList, object ) {
+
+            for (var o = objList.length - 1; o >= 0; --o) {
+
+                    if (objList[o] === object) 
                             objList.splice(o, 1);
 
             }

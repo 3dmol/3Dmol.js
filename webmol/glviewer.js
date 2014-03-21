@@ -44,6 +44,13 @@ WebMol.Label = function(group, message, parameters) {
 
     var backgroundColor = parameters.backgroundColor ?
         parameters.backgroundColor : { r:255, g:255, b:255, a:1.0 };
+        
+    var position = parameters.position ?
+        parameters.position : new WebMol.Vector3(-10, 1, 1);
+    
+    //Should labels always be in front of model? 
+    var inFront = (parameters.inFront !== undefined) ?
+        parameters.inFront : true;
 
     var spriteAlignment = WebMol.SpriteAlignment.topLeft;
 
@@ -74,14 +81,25 @@ WebMol.Label = function(group, message, parameters) {
     texture.needsUpdate = true;
 
     var spriteMaterial = new WebMol.SpriteMaterial( 
-            { map: texture, useScreenCoordinates: false, alignment: spriteAlignment } );
+            { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !inFront } );
     this.sprite = new WebMol.Sprite( spriteMaterial );
     this.sprite.scale.set(100,50,1.0);
 
-    this.sprite.position.set(-10, 1, 1);
-    
+    //this.sprite.position.set(-10, 1, 1);
+    this.sprite.position = position;
     group.add(this.sprite);
     
+};
+
+//TODO: How should this class be structured?
+WebMol.Label.prototype = {
+    
+    constructor : WebMol.Label,
+    
+    setText : function(text) {
+        //this.sprite.material.map.dispose();
+        this.context.fillText(text);
+    }
 };
 
 // a webmol unified interace to gmol
@@ -559,7 +577,7 @@ WebMol.glmolViewer = (function() {
         this.removeLabel = function(label) {
             
             label.sprite.material.map.dispose();
-            //label.sprite.material.dispose();
+            label.sprite.material.dispose();
             rotationGroup.remove(label.sprite);
             
             show();
@@ -1151,4 +1169,5 @@ WebMol.glmolViewer = (function() {
     }
 
     return GLViewer;
+    
 })();

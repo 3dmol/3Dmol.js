@@ -1541,7 +1541,7 @@ WebMol.GLModel = (function() {
         // given a mapping from element to color, set atom colors
         this.setColorByElement = function(sel, colors) {
             
-            if(molObj != null && sameObj(colors,lastColors))
+            if(molObj !== null && sameObj(colors,lastColors))
                 return; // don't recompute
             lastColors = colors;
             var atoms = this.selectedAtoms(sel);
@@ -1549,7 +1549,7 @@ WebMol.GLModel = (function() {
                 molObj = null; // force rebuild
             for ( var i = 0; i < atoms.length; i++) {
                 var a = atoms[i];
-                if(typeof(colors[a.elem]) != "undefined") {
+                if(typeof(colors[a.elem]) !== "undefined") {
                     a.color = colors[a.elem];
                 }
             }
@@ -1616,4 +1616,5 @@ WebMol.GLModel = (function() {
     };
 
     return GLModel;
+    
 })();
