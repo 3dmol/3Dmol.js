@@ -6,7 +6,7 @@ var WebMol = WebMol || {};
 
 // function for drawing rounded rectangles
 var roundRect = function(ctx, x, y, w, h, r) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     ctx.moveTo(x+r, y);
     ctx.lineTo(x+w-r, y);
@@ -46,10 +46,13 @@ WebMol.Label.prototype = {
     setContext : function() {
 
         var font = this.stylespec.font ? 
-            this.stylespec.font : "Helvetica";
+            this.stylespec.font : "Arial";
     
         var fontsize = this.stylespec.fontsize ? 
-            this.stylespec.fontsize : 18;
+            this.stylespec.fontsize : 20;
+            
+        var fontcolor = this.stylespec.fontcolor ?
+            this.stylespec.fontcolor : { r:255, g:255, b:255, a:1.0};
     
         var borderThickness = this.stylespec.borderThickness ? 
             this.stylespec.borderThickness : 4;
@@ -69,12 +72,18 @@ WebMol.Label.prototype = {
             
         var spriteAlignment = WebMol.SpriteAlignment.topLeft;
     
-        this.context.font = fontsize + "pt " + font;
-    
         // get size data (height depends only on font size)
+        
         var metrics = this.context.measureText(this.text);
         var textWidth = metrics.width;
-    
+        var textHeight = textWidth * 100/260;
+        
+        textWidth = textWidth / textHeight * fontsize;
+        textHeight = fontsize;
+        
+        
+        this.context.font = textHeight + "px " + font;
+        
         // background color
         this.context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
                                                                   + backgroundColor.b + "," + backgroundColor.a + ")";
@@ -83,13 +92,14 @@ WebMol.Label.prototype = {
                                                                   + borderColor.b + "," + borderColor.a + ")";
     
         this.context.lineWidth = borderThickness;
-        roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+        roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, textHeight * 1.4 + borderThickness, 6);
         // 1.4 is extra height factor for text below baseline: g,j,p,q.
     
         // text color
-        this.context.fillStyle = "rgba(255, 255, 255, 1.0)";
+        this.context.fillStyle = "rgba(" + fontcolor.r + "," + fontcolor.g + ","
+                                                                + fontcolor.b + "," + fontcolor.a + ")";
     
-        this.context.fillText(this.text, borderThickness, fontsize + borderThickness);
+        this.context.fillText(this.text, borderThickness, textHeight + borderThickness, textWidth);
         
         // canvas contents will be used for a texture
         var texture = new WebMol.Texture(this.context.canvas);
@@ -97,9 +107,11 @@ WebMol.Label.prototype = {
     
         var spriteMaterial = new WebMol.SpriteMaterial( 
                 { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !inFront } );
+                
         this.sprite = new WebMol.Sprite( spriteMaterial );
-        this.sprite.scale.set(100,50,1.0);
 
+        //this.sprite.scale.set(textWidth / textHeight * fontsize, fontsize, 1);
+        this.sprite.scale.set(textWidth, textHeight, 1);
         this.sprite.position.set(position.x, position.y, position.z);
     }
     

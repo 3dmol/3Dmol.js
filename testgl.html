@@ -44,9 +44,8 @@
                 var atom = atoms[a];
                 
                 if (atom.atom === "CA") {
-                    var l = glviewer.addLabel(atom.resn + " " + atom.rescode, {inFront: true, 
-                                            fontsize: 8, backgroundColor:{r:40, g:40, b:40, a:1.0},
-                                            position: {x: atom.x, y: atom.y, z: atom.z} } ); 
+                    var l = glviewer.addLabel(atom.resn + " " + atom.resi, {inFront: true, 
+                                              fontsize: 23, position: {x: atom.x, y: atom.y, z: atom.z} } ); 
                     atom.label = l;
                     labels.push(atom);                
                 }
@@ -57,11 +56,11 @@
             
             
             //$.get("test_structs/3M8L.pdb", function(data){
-                data = moldata = $("#moldata_sdf").val();
+                data = moldata = $("#moldata_pdb").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
-                    m = viewer.addModel(data,"sdf");           
+                    m = viewer.addModel(data,"pdb");           
                     atoms = m.selectedAtoms({ });
                     
                     modelgroup = viewer.getModelGroup();
