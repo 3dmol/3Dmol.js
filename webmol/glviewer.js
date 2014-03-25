@@ -21,7 +21,9 @@ var roundRect = function(ctx, x, y, w, h, r) {
     ctx.fill();
     //ctx.stroke();   
 };
+
 WebMol.LabelCount = 0;
+
 WebMol.Label = function(message, parameters) {
         
     this.id = WebMol.LabelCount++;    

@@ -78,7 +78,7 @@ WebMol.Object3D.prototype = {
     
     lookAt : function(vector) {
         
-        this.matrix.lookAt(vector, this.postion, this.up);
+        this.matrix.lookAt(vector, this.position, this.up);
         
         if (this.rotationAutoUpdate) {
             

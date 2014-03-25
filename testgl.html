@@ -11,14 +11,14 @@
         <script src="webmol/WebGL/materials.js"></script>
         <script src="webmol/WebGL/objects.js"></script>
         <script src="webmol/WebGL/shaders.js"></script>
-        <script src ="webmol/WebGL/extras.js"></script>
+        <script src="webmol/WebGL/extras.js"></script>
         <script src="webmol/WebGL/renderer.js"></script>
         <script src="webmol/WebGL/lights.js"></script>
         <script src="webmol/WebGL/scene.js"></script>
         <script src="webmol/WebGL/camera.js"></script>
         <script src="webmol/WebGL/renderer.js"></script>
         <script src="webmol/properties.js"></script>
-	<script src="webmol/colors.js"></script>
+	    <script src="webmol/colors.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/ProteinSurface4.js"></script>
@@ -34,46 +34,42 @@
         var labels = [];
         var m = null;
         var atoms = null;
-        var moldata = null;
+        var moldata = "";
         var l = null;
         var modelgroup = null;
         
-        $(document).ready(function() {
-
-            $.get("test_structs/2AA1.pdb", function(data) {             
-                $("#moldata_download").val(data);                    
-            }, "text");
-                        
-            moldata = $("#moldata_download").val();
-            while(moldata === "")
-                moldata = $("#moldata_download").val();
-            
-            glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
+        var addLabels = function() {
+            var atoms = glviewer.getModel(0).selectedAtoms({});
+            for (var a in atoms) {
+                var atom = atoms[a];
                 
-                viewer.setBackgroundColor(0xffffff);
-                m = viewer.addModel(moldata,"pdb");           
-                atoms = m.selectedAtoms({ });
-             
-                
-                for (var a in atoms) {
-                    
-                    var atom = atoms[a];
-                    
-                    if (atom.elem === 'FE') {
-                        var l = viewer.addLabel(atom.resn + " " + atom.rescode, {inFront: true, 
-                                                fontsize: 8, backgroundColor:{r:40, g:40, b:40, a:1.0},
-                                                position: new WebMol.Vector3(atom.x, atom.y, atom.z)} ); 
-                        atom.label = l;
-                        labels.push(atom);
-                        
-                    }
+                if (atom.atom === "CA") {
+                    var l = glviewer.addLabel(atom.resn + " " + atom.rescode, {inFront: true, 
+                                            fontsize: 8, backgroundColor:{r:40, g:40, b:40, a:1.0},
+                                            position: {x: atom.x, y: atom.y, z: atom.z} } ); 
+                    atom.label = l;
+                    labels.push(atom);                
                 }
-                
-                modelgroup = viewer.getModelGroup();
-                viewer.zoomTo();
-                viewer.render();
-            }});
+            }
+        };
+        
+        $(document).ready(function() {
             
+            
+            //$.get("test_structs/3M8L.pdb", function(data){
+                data = moldata = $("#moldata_sdf").val();
+                glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
+                    
+                    viewer.setBackgroundColor(0xffffff);
+                    m = viewer.addModel(data,"sdf");           
+                    atoms = m.selectedAtoms({ });
+                    
+                    modelgroup = viewer.getModelGroup();
+                    viewer.zoomTo();
+                    viewer.render();
+                }});
+                
+            //}, "text");   
            
 
             
@@ -89,6 +85,7 @@
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{}}); glviewer.render();"></input>
         <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({},{cartoon:{color:0x0000ff}}); glviewer.render();"></input>
+        <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A'}, {chain:'A'},{chain:'B'});"></input>
         <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
