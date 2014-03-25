@@ -19,7 +19,7 @@ var roundRect = function(ctx, x, y, w, h, r) {
     ctx.quadraticCurveTo(x, y, x+r, y);
     ctx.closePath();
     ctx.fill();
-    //ctx.stroke();   
+ 
 };
 
 WebMol.LabelCount = 0;
@@ -71,18 +71,10 @@ WebMol.Label.prototype = {
             this.stylespec.inFront : true;
             
         var spriteAlignment = WebMol.SpriteAlignment.topLeft;
-    
-        // get size data (height depends only on font size)
         
-        var metrics = this.context.measureText(this.text);
-        var textWidth = metrics.width;
-        var textHeight = textWidth * 100/260;
-        
-        textWidth = textWidth / textHeight * fontsize;
-        textHeight = fontsize;
-        
-        
-        this.context.font = textHeight + "px " + font;
+        var textWidth = fontsize * 260/100;
+                
+        this.context.font = fontsize + "px " + font;
         
         // background color
         this.context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
@@ -92,14 +84,14 @@ WebMol.Label.prototype = {
                                                                   + borderColor.b + "," + borderColor.a + ")";
     
         this.context.lineWidth = borderThickness;
-        roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, textHeight * 1.4 + borderThickness, 6);
+        roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
         // 1.4 is extra height factor for text below baseline: g,j,p,q.
     
         // text color
         this.context.fillStyle = "rgba(" + fontcolor.r + "," + fontcolor.g + ","
                                                                 + fontcolor.b + "," + fontcolor.a + ")";
     
-        this.context.fillText(this.text, borderThickness, textHeight + borderThickness, textWidth);
+        this.context.fillText(this.text, borderThickness, fontsize + borderThickness, textWidth);
         
         // canvas contents will be used for a texture
         var texture = new WebMol.Texture(this.context.canvas);
@@ -110,9 +102,9 @@ WebMol.Label.prototype = {
                 
         this.sprite = new WebMol.Sprite( spriteMaterial );
 
-        //this.sprite.scale.set(textWidth / textHeight * fontsize, fontsize, 1);
-        this.sprite.scale.set(textWidth, textHeight, 1);
+        this.sprite.scale.set(textWidth, fontsize, 1);
         this.sprite.position.set(position.x, position.y, position.z);
+        
     }
     
 };
