@@ -6,7 +6,7 @@ var WebMol = WebMol || {};
 
 // function for drawing rounded rectangles
 var roundRect = function(ctx, x, y, w, h, r) {
-    //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     ctx.moveTo(x+r, y);
     ctx.lineTo(x+w-r, y);
@@ -45,36 +45,37 @@ WebMol.Label.prototype = {
     
     setContext : function() {
 
-        var font = this.stylespec.font ? 
-            this.stylespec.font : "Arial";
+        var font = this.stylespec.font = 
+            this.stylespec.font ? this.stylespec.font : "Arial";
     
-        var fontsize = this.stylespec.fontsize ? 
-            this.stylespec.fontsize : 20;
+        var fontSize = this.stylespec.fontSize =
+            this.stylespec.fontSize ? this.stylespec.fontSize : 20;
             
-        var fontcolor = this.stylespec.fontcolor ?
-            this.stylespec.fontcolor : { r:255, g:255, b:255, a:1.0};
+        var fontColor = this.stylespec.fontColor =
+            this.stylespec.fontColor ? this.stylespec.fontColor : { r:255, g:255, b:255, a:1.0};
     
-        var borderThickness = this.stylespec.borderThickness ? 
-            this.stylespec.borderThickness : 4;
+        var borderThickness = this.stylespec.borderThickness =
+            this.stylespec.borderThickness ? this.stylespec.borderThickness : 4;
     
-        var borderColor = this.stylespec.borderColor ?
-            this.stylespec.borderColor : { r:0, g:0, b:0, a:1.0 };
+        var borderColor = this.stylespec.borderColor =
+            this.stylespec.borderColor ? this.stylespec.borderColor : { r:0, g:0, b:0, a:1.0 };
     
-        var backgroundColor = this.stylespec.backgroundColor ?
-            this.stylespec.backgroundColor : { r:0, g:0, b:0, a:1.0 };
+        var backgroundColor = this.stylespec.backgroundColor =
+            this.stylespec.backgroundColor ? this.stylespec.backgroundColor : { r:0, g:0, b:0, a:1.0 };
             
-        var position = this.stylespec.position ?
-            this.stylespec.position : { x:-10, y:1, z:1 };
+        var position = this.stylespec.position =
+            this.stylespec.position ? this.stylespec.position : { x:-10, y:1, z:1 };
         
         //Should labels always be in front of model? 
-        var inFront = (this.stylespec.inFront !== undefined) ?
-            this.stylespec.inFront : true;
+        var inFront = this.stylespec.inFront = 
+            (this.stylespec.inFront !== undefined) ? this.stylespec.inFront : true;
             
         var spriteAlignment = WebMol.SpriteAlignment.topLeft;
         
-        var textWidth = fontsize * 260/100;
-                
-        this.context.font = fontsize + "px " + font;
+        this.context.font = fontSize + "pt " + font;
+        
+        var metrics = this.context.measureText(this.text);           
+        var textWidth = metrics.width;
         
         // background color
         this.context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
@@ -84,14 +85,14 @@ WebMol.Label.prototype = {
                                                                   + borderColor.b + "," + borderColor.a + ")";
     
         this.context.lineWidth = borderThickness;
-        roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+        roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontSize * 1.4 + borderThickness, 6);
         // 1.4 is extra height factor for text below baseline: g,j,p,q.
     
         // text color
-        this.context.fillStyle = "rgba(" + fontcolor.r + "," + fontcolor.g + ","
-                                                                + fontcolor.b + "," + fontcolor.a + ")";
+        this.context.fillStyle = "rgba(" + fontColor.r + "," + fontColor.g + ","
+                                                                + fontColor.b + "," + fontColor.a + ")";
     
-        this.context.fillText(this.text, borderThickness, fontsize + borderThickness, textWidth);
+        this.context.fillText(this.text, borderThickness, fontSize + borderThickness, textWidth);
         
         // canvas contents will be used for a texture
         var texture = new WebMol.Texture(this.context.canvas);
@@ -101,8 +102,8 @@ WebMol.Label.prototype = {
                 { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !inFront } );
                 
         this.sprite = new WebMol.Sprite( spriteMaterial );
-
-        this.sprite.scale.set(textWidth, fontsize, 1);
+             
+        this.sprite.scale.set(2 * fontSize, fontSize, 1);
         this.sprite.position.set(position.x, position.y, position.z);
         
     }
