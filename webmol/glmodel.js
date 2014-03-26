@@ -194,7 +194,7 @@ WebMol.GLModel = (function() {
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
         var maxlength = 3.5; // ver generous hbond distance
-        var atoms = []
+        var atoms = [];
         for ( var i = 0; i < atomsarray.length; i++) {
             atomsarray[i].index = i;
             // only consider 'N' and 'O'

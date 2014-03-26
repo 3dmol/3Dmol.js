@@ -6,7 +6,7 @@ var WebMol = WebMol || {};
 
 // function for drawing rounded rectangles
 var roundRect = function(ctx, x, y, w, h, r) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
     ctx.beginPath();
     ctx.moveTo(x+r, y);
     ctx.lineTo(x+w-r, y);
@@ -29,11 +29,11 @@ WebMol.Label = function(message, parameters) {
     this.id = WebMol.LabelCount++;    
     this.stylespec = parameters || {};
 
-    var canvas = document.createElement('canvas');
+    this.canvas = document.createElement('canvas');
     
-    this.context = canvas.getContext('2d');
+    this.context = this.canvas.getContext('2d');
 
-    this.sprite = null;
+    this.sprite = new WebMol.Sprite();
     this.text = message;
     
 };
@@ -44,68 +44,79 @@ WebMol.Label.prototype = {
     constructor : WebMol.Label,
     
     setContext : function() {
-
-        var font = this.stylespec.font = 
+        
+        //Update stylespec
+        this.font = this.stylespec.font = 
             this.stylespec.font ? this.stylespec.font : "Arial";
     
-        var fontSize = this.stylespec.fontSize =
+        this.fontSize = this.stylespec.fontSize =
             this.stylespec.fontSize ? this.stylespec.fontSize : 20;
             
-        var fontColor = this.stylespec.fontColor =
+        this.fontColor = this.stylespec.fontColor =
             this.stylespec.fontColor ? this.stylespec.fontColor : { r:255, g:255, b:255, a:1.0};
     
-        var borderThickness = this.stylespec.borderThickness =
+        this.borderThickness = this.stylespec.borderThickness =
             this.stylespec.borderThickness ? this.stylespec.borderThickness : 4;
     
-        var borderColor = this.stylespec.borderColor =
+        this.borderColor = this.stylespec.borderColor =
             this.stylespec.borderColor ? this.stylespec.borderColor : { r:0, g:0, b:0, a:1.0 };
     
-        var backgroundColor = this.stylespec.backgroundColor =
+        this.backgroundColor = this.stylespec.backgroundColor =
             this.stylespec.backgroundColor ? this.stylespec.backgroundColor : { r:0, g:0, b:0, a:1.0 };
             
-        var position = this.stylespec.position =
+        this.position = this.stylespec.position =
             this.stylespec.position ? this.stylespec.position : { x:-10, y:1, z:1 };
         
         //Should labels always be in front of model? 
-        var inFront = this.stylespec.inFront = 
+        this.inFront = this.stylespec.inFront = 
             (this.stylespec.inFront !== undefined) ? this.stylespec.inFront : true;
+            
+        //clear canvas
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
             
         var spriteAlignment = WebMol.SpriteAlignment.topLeft;
         
-        this.context.font = fontSize + "pt " + font;
+        this.context.font = this.fontSize + "pt " + this.font;
         
         var metrics = this.context.measureText(this.text);           
         var textWidth = metrics.width;
         
         // background color
-        this.context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
-                                                                  + backgroundColor.b + "," + backgroundColor.a + ")";
+        this.context.fillStyle   = "rgba(" + this.backgroundColor.r + "," + this.backgroundColor.g + ","
+                                                                  + this.backgroundColor.b + "," + this.backgroundColor.a + ")";
         // border color
-        this.context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
-                                                                  + borderColor.b + "," + borderColor.a + ")";
+        this.context.strokeStyle = "rgba(" + this.borderColor.r + "," + this.borderColor.g + ","
+                                                                  + this.borderColor.b + "," + this.borderColor.a + ")";
     
-        this.context.lineWidth = borderThickness;
-        roundRect(this.context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontSize * 1.4 + borderThickness, 6);
+        this.context.lineWidth = this.borderThickness;
+        roundRect(this.context, this.borderThickness/2, this.borderThickness/2, textWidth + this.borderThickness, this.fontSize * 1.4 + this.borderThickness, 6);
         // 1.4 is extra height factor for text below baseline: g,j,p,q.
     
         // text color
-        this.context.fillStyle = "rgba(" + fontColor.r + "," + fontColor.g + ","
-                                                                + fontColor.b + "," + fontColor.a + ")";
+        this.context.fillStyle = "rgba(" + this.fontColor.r + "," + this.fontColor.g + ","
+                                                                + this.fontColor.b + "," + this.fontColor.a + ")";
     
-        this.context.fillText(this.text, borderThickness, fontSize + borderThickness, textWidth);
+        this.context.fillText(this.text, this.borderThickness, this.fontSize + this.borderThickness, textWidth);
         
         // canvas contents will be used for a texture
-        var texture = new WebMol.Texture(this.context.canvas);
+        var texture = new WebMol.Texture(this.canvas);
         texture.needsUpdate = true;
-    
-        var spriteMaterial = new WebMol.SpriteMaterial( 
-                { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !inFront } );
-                
-        this.sprite = new WebMol.Sprite( spriteMaterial );
-             
-        this.sprite.scale.set(2 * fontSize, fontSize, 1);
-        this.sprite.position.set(position.x, position.y, position.z);
         
+        this.sprite.material = new WebMol.SpriteMaterial( 
+                { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !this.inFront } );
+                    
+        this.sprite.scale.set(2 * this.fontSize, this.fontSize, 1);
+        this.sprite.position.set(this.position.x, this.position.y, this.position.z);
+        
+    },
+    
+    //clean up material and texture
+    dispose : function() {
+        
+        if (this.sprite.material.map !== undefined)
+            this.sprite.material.map.dispose();
+        if (this.sprite.material !== undefined)
+            this.sprite.material.dispose();        
     }
     
 };
@@ -587,15 +598,15 @@ WebMol.glmolViewer = (function() {
         };
         
         this.removeLabel = function(label) {
-            label.sprite.material.map.dispose(); // Texture clean up
-            label.sprite.material.dispose(); // SpriteMaterial clean up
+
+            label.dispose();
             modelGroup.remove(label.sprite);                       
         };
         
         //Modify label style
-        this.setLabelStyle = function(label, stylespec) {    
-            this.removeLabel(label);
-
+        this.setLabelStyle = function(label, stylespec) {   
+             
+            label.dispose();
             label.stylespec = stylespec;
             label.setContext();
             modelGroup.add(label.sprite);
@@ -606,8 +617,8 @@ WebMol.glmolViewer = (function() {
         
         //Change label text
         this.setLabelText = function(label, text) {
-            this.removeLabel(label);
-            
+         
+            label.dispose();
             label.text = text;
             label.setContext();
             modelGroup.add(label.sprite);
