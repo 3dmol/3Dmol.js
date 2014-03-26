@@ -922,6 +922,99 @@ WebMol.extend(WebMol.Matrix4.prototype, {
     
 });
 
+WebMol.Ray = function(origin, direction) {
+    
+    this.origin = (origin !== undefined) ? origin : new WebMol.Vector3();
+    this.direction = (direction !== undefined) ? direction : new WebMol.Vector3();
+      
+};
+
+WebMol.extend(WebMol.Ray.prototype, {
+     
+     set : function(origin, direction){
+         
+         this.origin.copy(origin);
+         this.direction.copy(direction);
+         
+         return this;
+     
+     },
+     
+     copy : function(ray) {
+         
+         this.origin.copy(ray.origin);
+         this.direction.copy(ray.direction);
+         
+         return this;
+         
+     },
+     
+     at : function(t, optionalTarget) {
+         
+         var result = optionalTarget || new WebMol.Vector3();
+         
+         return result.copy(this.direction).multiplyScalar(t).add(this.origin);
+         
+     },
+     
+     recast : function() {
+         
+         var v1 = new WebMol.Vector3();
+         
+         return function(t) {
+             this.origin.copy(this.at(t, v1));
+             
+             return this;
+         };
+         
+     }(),
+     
+     closestPointToPoint : function(point, optionalTarget) {
+         
+         var result = optionalTarget || new WebMol.Vector3();
+         result.subVectors(point, this.origin);
+         var directionDistance = result.dot(this.direction);
+         
+         return result.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
+         
+     },
+     
+     distanceToPoint : function() {
+         
+         var v1 = new WebMol.Vector3();
+         
+         return function(point) {
+             var directionDistance = v1.subVectors(point, this.origin).dot(this.direction);
+             v1.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
+             
+             return v1.distanceTo(point);
+         };
+         
+     }(),
+     
+     isIntersectionSphere : function(plane) {
+        
+        return (this.distanceToPoint(sphere.center) <= sphere.radius);
+           
+     },
+     
+     isIntersectionPlane : function(plane) {
+         
+         var denominator = plane.normal.dot(this.direction);
+         
+         //plane and ray are not perpendicular
+         if (denominator != 0) 
+             return true;
+         
+         if (plane.distanceToPoint(this.origin) == 0) 
+             return true;
+         
+         return false;
+         
+     }
+     
+});
+
 //alias
 var TV3 = Vector = WebMol.Vector3;
 
