@@ -5,15 +5,13 @@
 
 WebMol.Camera = function(fov, aspect, near, far) {
     
-    //Invoke Object3D constructor function (i.e. initialize the same instance variables)
     WebMol.Object3D.call(this);
     
     this.fov = fov !== undefined ? fov : 50;
     this.aspect = aspect !== undefined ? aspect : 1;
     this.near = near !== undefined ? near : 0.1;
     this.far = far !== undefined ? far : 2000;
-    
-    //TODO: Replace these with own matrix class
+
     this.projectionMatrix = new WebMol.Matrix4();
     this.matrixWorldInverse = new WebMol.Matrix4();
     

@@ -53,16 +53,15 @@ WebMol.Object3D = function() {
     this.children = [];
     
     //TODO: Replace this with own class
-    this.position = new WebMol.Vector();
-    this.rotation = new WebMol.Vector();
+    this.position = new WebMol.Vector3();
+    this.rotation = new WebMol.Vector3();
     this.matrix = new WebMol.Matrix4();
     this.matrixWorld = new WebMol.Matrix4();
     this.quaternion = new WebMol.Quaternion();
-    //TODO: Do I need this??
     this.eulerOrder = 'XYZ';
     
-    this.up = new WebMol.Vector(0, 1, 0);
-    this.scale = new WebMol.Vector(1, 1, 1);
+    this.up = new WebMol.Vector3(0, 1, 0);
+    this.scale = new WebMol.Vector3(1, 1, 1);
     
     this.matrixAutoUpdate = true;
     this.matrixWorldNeedsUpdate = true;
@@ -79,7 +78,7 @@ WebMol.Object3D.prototype = {
     
     lookAt : function(vector) {
         
-        this.matrix.lookAt(vector, this.postion, this.up);
+        this.matrix.lookAt(vector, this.position, this.up);
         
         if (this.rotationAutoUpdate) {
             
@@ -214,7 +213,6 @@ WebMol.Object3DIDCount = 0;
 
 WebMol.Geometry = function() {
     
-    //TODO: What do I do with this??
     WebMol.EventDispatcher.call(this);
     
     this.id = WebMol.GeometryIDCount++;

@@ -2,6 +2,125 @@
 
 var WebMol = WebMol || {};
 
+//Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
+
+// function for drawing rounded rectangles
+var roundRect = function(ctx, x, y, w, h, r) {
+
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+    ctx.fill();
+ 
+};
+
+WebMol.LabelCount = 0;
+
+WebMol.Label = function(message, parameters) {
+        
+    this.id = WebMol.LabelCount++;    
+    this.stylespec = parameters || {};
+
+    this.canvas = document.createElement('canvas');
+    
+    this.context = this.canvas.getContext('2d');
+
+    this.sprite = new WebMol.Sprite();
+    this.text = message;
+    
+};
+
+//TODO: How should this class be structured?
+WebMol.Label.prototype = {
+    
+    constructor : WebMol.Label,
+    
+    setContext : function() {
+        
+        //Update stylespec
+        this.font = this.stylespec.font = 
+            this.stylespec.font ? this.stylespec.font : "Arial";
+    
+        this.fontSize = this.stylespec.fontSize =
+            this.stylespec.fontSize ? this.stylespec.fontSize : 20;
+            
+        this.fontColor = this.stylespec.fontColor =
+            this.stylespec.fontColor ? this.stylespec.fontColor : { r:255, g:255, b:255, a:1.0};
+    
+        this.borderThickness = this.stylespec.borderThickness =
+            this.stylespec.borderThickness ? this.stylespec.borderThickness : 4;
+    
+        this.borderColor = this.stylespec.borderColor =
+            this.stylespec.borderColor ? this.stylespec.borderColor : { r:0, g:0, b:0, a:1.0 };
+    
+        this.backgroundColor = this.stylespec.backgroundColor =
+            this.stylespec.backgroundColor ? this.stylespec.backgroundColor : { r:0, g:0, b:0, a:1.0 };
+            
+        this.position = this.stylespec.position =
+            this.stylespec.position ? this.stylespec.position : { x:-10, y:1, z:1 };
+        
+        //Should labels always be in front of model? 
+        this.inFront = this.stylespec.inFront = 
+            (this.stylespec.inFront !== undefined) ? this.stylespec.inFront : true;
+            
+        //clear canvas
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            
+        var spriteAlignment = WebMol.SpriteAlignment.topLeft;
+        
+        this.context.font = this.fontSize + "pt " + this.font;
+        
+        var metrics = this.context.measureText(this.text);           
+        var textWidth = metrics.width;
+        
+        // background color
+        this.context.fillStyle   = "rgba(" + this.backgroundColor.r + "," + this.backgroundColor.g + ","
+                                                                  + this.backgroundColor.b + "," + this.backgroundColor.a + ")";
+        // border color
+        this.context.strokeStyle = "rgba(" + this.borderColor.r + "," + this.borderColor.g + ","
+                                                                  + this.borderColor.b + "," + this.borderColor.a + ")";
+    
+        this.context.lineWidth = this.borderThickness;
+        roundRect(this.context, this.borderThickness/2, this.borderThickness/2, textWidth + this.borderThickness, this.fontSize * 1.4 + this.borderThickness, 6);
+        // 1.4 is extra height factor for text below baseline: g,j,p,q.
+    
+        // text color
+        this.context.fillStyle = "rgba(" + this.fontColor.r + "," + this.fontColor.g + ","
+                                                                + this.fontColor.b + "," + this.fontColor.a + ")";
+    
+        this.context.fillText(this.text, this.borderThickness, this.fontSize + this.borderThickness, textWidth);
+        
+        // canvas contents will be used for a texture
+        var texture = new WebMol.Texture(this.canvas);
+        texture.needsUpdate = true;
+        
+        this.sprite.material = new WebMol.SpriteMaterial( 
+                { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !this.inFront } );
+                    
+        this.sprite.scale.set(2 * this.fontSize, this.fontSize, 1);
+        this.sprite.position.set(this.position.x, this.position.y, this.position.z);
+        
+    },
+    
+    //clean up material and texture
+    dispose : function() {
+        
+        if (this.sprite.material.map !== undefined)
+            this.sprite.material.map.dispose();
+        if (this.sprite.material !== undefined)
+            this.sprite.material.dispose();        
+    }
+    
+};
+
 // a webmol unified interace to gmol
 WebMol.glmolViewer = (function() {
     // private class variables
@@ -351,28 +470,21 @@ WebMol.glmolViewer = (function() {
                     if (!surfaces[i].finished) {
                         geo.verticesNeedUpdate = true;
                         geo.elementsNeedUpdate = true;
-                        geo.uvsNeedUpdate = true;
                         geo.normalsNeedUpdate = true;
-                        geo.tangentsNeedUpdate = true;
                         geo.colorsNeedUpdate = true;
-                        geo.lineDistancesNeedUpdate = true;
                         geo.buffersNeedUpdate = true;
                         geo.boundingSphere = null;
-                        delete geo.geometryGroups;
-                        delete geo.geometryGroupsList;
 
                         if (surfaces[i].done)
                             surfaces[i].finished = true;
 
                         // remove partially rendered surface
-                        if (surfaces[i].lastGL) {
+                        if (surfaces[i].lastGL) 
                             modelGroup.remove(surfaces[i].lastGL);
-                        }
                         
                         initBuffers(geo, true);
                         // create new surface
                         var smesh = new WebMol.Mesh(geo, surfaces[i].mat);
-                        //initBuffers(geo);
                         surfaces[i].lastGL = smesh;
                         modelGroup.add(smesh);
                     } // else final surface already there
@@ -474,6 +586,45 @@ WebMol.glmolViewer = (function() {
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
             
             show();
+        };
+        
+        // add a label to viewer
+        this.addLabel = function(text, data) {
+            var label = new WebMol.Label(text, data); 
+            label.setContext();
+            modelGroup.add(label.sprite);
+            
+            return label;
+        };
+        
+        this.removeLabel = function(label) {
+
+            label.dispose();
+            modelGroup.remove(label.sprite);                       
+        };
+        
+        //Modify label style
+        this.setLabelStyle = function(label, stylespec) {   
+             
+            label.dispose();
+            label.stylespec = stylespec;
+            label.setContext();
+            modelGroup.add(label.sprite);
+            
+            return label;
+            
+        };
+        
+        //Change label text
+        this.setLabelText = function(label, text) {
+         
+            label.dispose();
+            label.text = text;
+            label.setContext();
+            modelGroup.add(label.sprite);
+            
+            return label;
+
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)
@@ -686,12 +837,17 @@ WebMol.glmolViewer = (function() {
                         colors[i] = WebMol.CC.color(atom.color);
                 }
             }
+            var verts = geoGroup.vertexArr;
+            var vA, vB, vC, norm;
+            //Setup colors, faces, and normals
             for ( var i = 0; i < faces.length; i++) {
-                var A = v[faces[i].a].atomid;
-                var B = v[faces[i].b].atomid;
-                var C = v[faces[i].c].atomid;
                 
-                var offsetA = faces[i].a * 3, offsetB = faces[i].b * 3, offsetC = faces[i].c * 3;
+                var a = faces[i].a, b = faces[i].b, c = faces[i].c;
+                var A = v[a].atomid;
+                var B = v[b].atomid;
+                var C = v[c].atomid;
+                
+                var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
                 geoGroup.faceArr.push(faces[i].a), geoGroup.faceArr.push(faces[i].b), geoGroup.faceArr.push(faces[i].c);
                 
@@ -701,12 +857,26 @@ WebMol.glmolViewer = (function() {
                          geoGroup.colorArr[offsetB+2] = colors[B].b;
                 geoGroup.colorArr[offsetC] = colors[C].r, geoGroup.colorArr[offsetC+1] = colors[C].g,
                          geoGroup.colorArr[offsetC+2] = colors[C].b;
+                 
+                //setup Normals
+                
+                vA = new TV3(verts[offsetA], verts[offsetA+1], verts[offsetA+2]);
+                vB = new TV3(verts[offsetB], verts[offsetB+1], verts[offsetB+2]);
+                vC = new TV3(verts[offsetC], verts[offsetC+1], verts[offsetC+2]);
+                
+                vC.subVectors(vC, vB);
+                vA.subVectors(vA, vB);
+                vC.cross(vA);
+
+                //face normal
+                norm = vC;
+                norm.normalize();
+                
+                geoGroup.normalArr[offsetA] += norm.x, geoGroup.normalArr[offsetB] += norm.x, geoGroup.normalArr[offsetC] += norm.x;
+                geoGroup.normalArr[offsetA+1] += norm.y, geoGroup.normalArr[offsetB+1] += norm.y, geoGroup.normalArr[offsetC+1] += norm.y;
+                geoGroup.normalArr[offsetA+2] += norm.z, geoGroup.normalArr[offsetB+2] += norm.z, geoGroup.normalArr[offsetC+2] += norm.z;
                 
             }
-
-            //geo.computeFaceNormals();
-            //geo.computeVertexNormals(false);
-            setUpNormals(geo, true);
 
             var mesh = new WebMol.Mesh(geo, mat);
             mesh.doubleSided = true;
@@ -760,13 +930,13 @@ WebMol.glmolViewer = (function() {
                 if (prop === "color") {
                     mat[prop] = WebMol.CC.color(style.color);
                     delete mat.vertexColors; // ignore
-                } else if (prop == "map") {
+                } else if (prop === "map") {
                     // ignore
                 } else if (style.hasOwnProperty(prop))
                     mat[prop] = style[prop];
             }
-            if (typeof (style.opacity) != "undefined") {
-                if (style.opacity == 1)
+            if ( style.opacity !== undefined) {
+                if (style.opacity === 1)
                     mat.transparent = false;
                 else
                     mat.transparent = true;
@@ -811,7 +981,7 @@ WebMol.glmolViewer = (function() {
             // with workers, must ensure group is the actual modelgroup since
             // surface
             // will get added asynchronously
-            // all atoms in atomlist are used to compute surfacees, but only the
+            // all atoms in atomlist are used to compute surfaces, but only the
             // surfaces
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
@@ -969,6 +1139,8 @@ WebMol.glmolViewer = (function() {
         // given the id returned by surfid, remove surface
         this.removeSurface = function(surf) {
             if (surfaces[surf] && surfaces[surf].lastGL) {
+                if (surfaces[surf].geo !== undefined) surfaces[surf].geo.dispose();             
+                if (surfaces[surf].mat !== undefined) surfaces[surf].mat.dispose();
                 modelGroup.remove(surfaces[surf].lastGL); // remove from scene
             }
             delete surfaces[surf];
@@ -1040,4 +1212,5 @@ WebMol.glmolViewer = (function() {
     }
 
     return GLViewer;
+    
 })();

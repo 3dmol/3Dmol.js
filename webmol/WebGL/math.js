@@ -33,6 +33,7 @@ WebMol.Quaternion = function(x, y, z, w) {
 WebMol.extend(WebMol.Quaternion.prototype, {
 
     set : function(x, y, z, w) {
+        
         this.x = x;
         this.y = y;
         this.z = z;
@@ -42,15 +43,17 @@ WebMol.extend(WebMol.Quaternion.prototype, {
     },
 
     copy : function(q) {
+        
         this.x = q.x;
         this.y = q.y;
-        this.z = q.z
+        this.z = q.z;
         this.w = q.w;
 
         return this;
     },
 
     conjugate : function() {
+        
         this.x *= -1;
         this.y *= -1;
         this.z *= -1;
@@ -59,14 +62,17 @@ WebMol.extend(WebMol.Quaternion.prototype, {
     },
 
     inverse : function() {
+        
         return this.conjugate.normalize();
     },
 
     length : function() {
+        
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w);
     },
 
     normalize : function() {
+        
         var l = this.length();
 
         if (l === 0) {
@@ -88,6 +94,7 @@ WebMol.extend(WebMol.Quaternion.prototype, {
     },
 
     multiply : function(q) {
+        
         return this.multiplyQuaternions(this, q);
     },
 
@@ -104,18 +111,58 @@ WebMol.extend(WebMol.Quaternion.prototype, {
     }
 });
 
+//A 2 Vector
+WebMol.Vector2 = function(x, y) {
+    
+    this.x = x || 0.0;
+    this.y = y || 0.0;
+};
+
+WebMol.extend(WebMol.Vector2.prototype, {
+   
+    set : function(x, y) {
+       
+        this.x = x;
+        this.y = y;
+       
+        return this;
+    },
+    
+    subVectors : function(a, b) {
+        
+      this.x = a.x - b.x;
+      this.y = a.y - b.y;
+      
+      return this;
+    },
+   
+    copy : function(v) {
+       
+        this.x = v.x;
+        this.y = v.y;
+       
+        return this;
+    },
+   
+    clone : function() {
+        
+        return new WebMol.Vector2(this.x, this.y);
+    }    
+   
+});
 
 //A 3 Vector
 
-WebMol.Vector = function(x, y, z) {
+WebMol.Vector3 = function(x, y, z) {
     this.x = x || 0.0;
     this.y = y || 0.0;
     this.z = z || 0.0;
 };
 
-WebMol.extend(WebMol.Vector.prototype, {
+WebMol.extend(WebMol.Vector3.prototype, {
     
     set : function(x, y, z) {
+        
         this.x = x;
         this.y = y;
         this.z = z;
@@ -124,6 +171,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     copy : function(v) {
+        
         this.x = v.x;
         this.y = v.y;
         this.z = v.z;
@@ -132,6 +180,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     add : function(v) {
+        
         this.x += v.x;
         this.y += v.y;
         this.z += v.z;  
@@ -140,6 +189,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     addVectors : function(a, b) {
+        
         this.x = a.x + b.x;
         this.y = a.y + b.y;
         this.z = a.z + b.z;
@@ -148,6 +198,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     sub : function(v) {
+        
         this.x -= v.x;
         this.y -= v.y;
         this.z -= v.z;
@@ -156,6 +207,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     subVectors : function(a, b) {
+        
         this.x = a.x - b.x;
         this.y = a.y - b.y;
         this.z = a.z - b.z;
@@ -164,6 +216,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     multiplyScalar : function(s) {
+        
         this.x *= s;
         this.y *= s;
         this.z *= s;
@@ -172,6 +225,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     divideScalar : function(s) {
+        
         if (s !== 0) {
             this.x /= s;
             this.y /= s;
@@ -187,7 +241,21 @@ WebMol.extend(WebMol.Vector.prototype, {
         return this;
     },
     
+
+    distanceTo: function(v) {
+        return Math.sqrt(this.distanceToSquared(v));
+    },
+
+    distanceToSquared: function(v) {
+        var dx = this.x - v.x;
+        var dy = this.y - v.y;
+        var dz = this.z - v.z;
+
+        return dx * dx + dy * dy + dz * dz;
+    },
+    
     applyQuaternion : function(q) { 
+        
         var x = this.x;
         var y = this.y;
         var z = this.z;
@@ -214,22 +282,27 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     negate : function() {
+        
         return this.multiplyScalar(-1);
     },
     
     dot : function(v) {
+        
         return this.x * v.x + this.y * v.y + this.z * v.z;
     },
     
     length : function() {
+        
         return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
     },
     
     normalize : function() {
+        
         return this.divideScalar( this.length() );
     },
     
     cross : function (v) {
+        
         var x = this.x, y = this.y, z = this.z;
         
         this.x = y * v.z - z * v.y;
@@ -240,6 +313,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     crossVectors : function(a, b) {
+        
         this.x = a.y * b.z - a.z * b.y;
         this.y = a.z * b.x - a.x * b.z;
         this.z = a.x * b.y - a.y * b.x;
@@ -248,6 +322,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     getPositionFromMatrix : function(m) {
+        
         this.x = m.elements[12];
         this.y = m.elements[13];
         this.z = m.elements[14];
@@ -296,7 +371,7 @@ WebMol.extend(WebMol.Vector.prototype, {
     },
     
     clone : function() {
-        return new WebMol.Vector(this.x, this.y, this.z);
+        return new WebMol.Vector3(this.x, this.y, this.z);
     }
     
 });
@@ -541,9 +616,9 @@ WebMol.extend(WebMol.Matrix4.prototype, {
     },
 
     lookAt: function() {
-        var x = new WebMol.Vector();
-        var y = new WebMol.Vector();
-        var z = new WebMol.Vector();
+        var x = new WebMol.Vector3();
+        var y = new WebMol.Vector3();
+        var z = new WebMol.Vector3();
 
         return function ( eye, target, up ) {
 
@@ -643,7 +718,7 @@ WebMol.extend(WebMol.Matrix4.prototype, {
     },
 
     getPosition: function() {
-        var v1 = new WebMol.Vector();
+        var v1 = new WebMol.Vector3();
 
         return function () {
 
@@ -743,9 +818,9 @@ WebMol.extend(WebMol.Matrix4.prototype, {
     }(),
 
     decompose: function() {
-        var x = new WebMol.Vector(),
-            y = new WebMol.Vector(),
-            z = new WebMol.Vector(),
+        var x = new WebMol.Vector3(),
+            y = new WebMol.Vector3(),
+            z = new WebMol.Vector3(),
             matrix = new WebMol.Matrix4();
 
         return function ( translation, rotation, scale ) {
@@ -757,9 +832,9 @@ WebMol.extend(WebMol.Matrix4.prototype, {
             y.set( te[4], te[5], te[6] );
             z.set( te[8], te[9], te[10] );
 
-            translation = ( translation instanceof WebMol.Vector ) ? translation : new WebMol.Vector();
+            translation = ( translation instanceof WebMol.Vector3 ) ? translation : new WebMol.Vector3();
             rotation = ( rotation instanceof WebMol.Quaternion ) ? rotation : new WebMol.Quaternion();
-            scale = ( scale instanceof Webmol.Vector ) ? scale : new WebMol.Vector();
+            scale = ( scale instanceof Webmol.Vector3 ) ? scale : new WebMol.Vector3();
 
             scale.x = x.length();
             scale.y = y.length();
@@ -847,6 +922,99 @@ WebMol.extend(WebMol.Matrix4.prototype, {
     
 });
 
+WebMol.Ray = function(origin, direction) {
+    
+    this.origin = (origin !== undefined) ? origin : new WebMol.Vector3();
+    this.direction = (direction !== undefined) ? direction : new WebMol.Vector3();
+      
+};
+
+WebMol.extend(WebMol.Ray.prototype, {
+     
+     set : function(origin, direction){
+         
+         this.origin.copy(origin);
+         this.direction.copy(direction);
+         
+         return this;
+     
+     },
+     
+     copy : function(ray) {
+         
+         this.origin.copy(ray.origin);
+         this.direction.copy(ray.direction);
+         
+         return this;
+         
+     },
+     
+     at : function(t, optionalTarget) {
+         
+         var result = optionalTarget || new WebMol.Vector3();
+         
+         return result.copy(this.direction).multiplyScalar(t).add(this.origin);
+         
+     },
+     
+     recast : function() {
+         
+         var v1 = new WebMol.Vector3();
+         
+         return function(t) {
+             this.origin.copy(this.at(t, v1));
+             
+             return this;
+         };
+         
+     }(),
+     
+     closestPointToPoint : function(point, optionalTarget) {
+         
+         var result = optionalTarget || new WebMol.Vector3();
+         result.subVectors(point, this.origin);
+         var directionDistance = result.dot(this.direction);
+         
+         return result.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
+         
+     },
+     
+     distanceToPoint : function() {
+         
+         var v1 = new WebMol.Vector3();
+         
+         return function(point) {
+             var directionDistance = v1.subVectors(point, this.origin).dot(this.direction);
+             v1.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
+             
+             return v1.distanceTo(point);
+         };
+         
+     }(),
+     
+     isIntersectionSphere : function(plane) {
+        
+        return (this.distanceToPoint(sphere.center) <= sphere.radius);
+           
+     },
+     
+     isIntersectionPlane : function(plane) {
+         
+         var denominator = plane.normal.dot(this.direction);
+         
+         //plane and ray are not perpendicular
+         if (denominator != 0) 
+             return true;
+         
+         if (plane.distanceToPoint(this.origin) == 0) 
+             return true;
+         
+         return false;
+         
+     }
+     
+});
+
 //alias
-var TV3 = Vector = WebMol.Vector;
+var TV3 = Vector = WebMol.Vector3;
 

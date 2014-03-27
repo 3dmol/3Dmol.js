@@ -6,6 +6,7 @@
 var WebMol = WebMol || {};
 
 WebMol.GLModel = (function() {
+
     // class variables go here
     var defaultAtomStyle = {
         line : {},
@@ -193,7 +194,7 @@ WebMol.GLModel = (function() {
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
         var maxlength = 3.5; // ver generous hbond distance
-        var atoms = []
+        var atoms = [];
         for ( var i = 0; i < atomsarray.length; i++) {
             atomsarray[i].index = i;
             // only consider 'N' and 'O'
@@ -723,7 +724,7 @@ WebMol.GLModel = (function() {
                         vertex.z = radius * Math.sin(phiStart + u * phiLength)
                                 * Math.sin(thetaStart + v * thetaLength);
 
-                        var n = new WebMol.Vector(vertex.x, vertex.y, vertex.z);
+                        var n = new WebMol.Vector3(vertex.x, vertex.y, vertex.z);
                         n.normalize();
 
                         obj.vertices.push(vertex);
@@ -826,7 +827,7 @@ WebMol.GLModel = (function() {
                         c1 = c2 = WebMol.CC.color(style.color);
                     }
                                         
-                                        geo.vertices += 4;
+                    geo.vertices += 4;
                                         
                     geo.vertexArr.push(p1.x), geo.vertexArr.push(p1.y), geo.vertexArr.push(p1.z);
                     geo.colorArr.push(c1.r), geo.colorArr.push(c1.g), geo.colorArr.push(c1.b);
@@ -846,7 +847,6 @@ WebMol.GLModel = (function() {
         var defaultStickRadius = .25;
 
         //sphere drawing
-        //TODO: call to populateGroup is *really* slow - try to build them up as we go
         //See also: drawCylinder
         var drawAtomSphere = function(atom, geo) {
             
@@ -1541,7 +1541,7 @@ WebMol.GLModel = (function() {
         // given a mapping from element to color, set atom colors
         this.setColorByElement = function(sel, colors) {
             
-            if(molObj != null && sameObj(colors,lastColors))
+            if(molObj !== null && sameObj(colors,lastColors))
                 return; // don't recompute
             lastColors = colors;
             var atoms = this.selectedAtoms(sel);
@@ -1549,7 +1549,7 @@ WebMol.GLModel = (function() {
                 molObj = null; // force rebuild
             for ( var i = 0; i < atoms.length; i++) {
                 var a = atoms[i];
-                if(typeof(colors[a.elem]) != "undefined") {
+                if(typeof(colors[a.elem]) !== "undefined") {
                     a.color = colors[a.elem];
                 }
             }
@@ -1588,7 +1588,7 @@ WebMol.GLModel = (function() {
 
         this.globj = function(group) {
             var time = new Date();
-            if(molObj == null) { // have to regenerate
+            if(molObj === null) { // have to regenerate
                 molObj = createMolObj(atoms);
                 var time2 = new Date();
                 console.log("object creation time: " + (time2 - time));
@@ -1604,6 +1604,9 @@ WebMol.GLModel = (function() {
         // remove any rendered object from the scene
         this.removegl = function(group) {
             if(renderedMolObj) {
+                //dispose of geos and materials
+                if (renderedMolObj.geometry !== undefined) renderedMolObj.geometry.dispose();             
+                if (renderedMolObj.material !== undefined) renderedMolObj.material.dispose();
                 group.remove(renderedMolObj);
                 renderedMolObj = null;
             }
@@ -1613,4 +1616,5 @@ WebMol.GLModel = (function() {
     };
 
     return GLModel;
+    
 })();

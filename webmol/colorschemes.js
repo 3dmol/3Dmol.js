@@ -16,7 +16,7 @@ WebMol.RWB = function(min, max) {
 			hi = max;
 		}
 	
-		if(typeof(val) == "undefined")
+		if(val === undefined)
 			return 0xffffff;
 		
 		if(val < lo) val = lo;

@@ -49,7 +49,7 @@ var WebMol = (function() {
     my.download = function(query, viewer) {
            var baseURL = '';
            var type = "";
-           if (query.substr(0, 4) == 'pdb:') {
+           if (query.substr(0, 4) === 'pdb:') {
                    type = "pdb";
               query = query.substr(4).toUpperCase();
               if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
@@ -243,11 +243,10 @@ var initBuffers = function(geometry, saveArrs) {
             group.__faceArray = new Uint16Array(group.faceArr);
             
             //Doesn't free memory directly, but should break references for gc 
-            delete group.vertexArr;
-            delete group.colorArr;
-            delete group.normalArr;
-            delete group.faceArr;
-            delete group.lineArr;
+            group.vertexArr = null;
+            group.colorArr = null;
+            group.normalArr = null;
+            group.faceArr = null;
             
             group.__inittedArrays = true;
             
@@ -264,8 +263,8 @@ var initBuffers = function(geometry, saveArrs) {
         geometry.__vertexArray = new Float32Array(geometry.vertexArr);
         geometry.__colorArray = new Float32Array(geometry.colorArr);
         
-        delete geometry.vertexArr;
-        delete geometry.colorArr;
+        geometry.vertexArr = null;
+        geometry.colorArr = null;
         
         geometry.__inittedArrays = true;
     }        
@@ -273,9 +272,9 @@ var initBuffers = function(geometry, saveArrs) {
 };
 
 //Set up normalArr from faces and vertices
-//for face3 or face4
-//DOES NOT work for mixed faceArr 
-//TODO: Optimize this !!
+//for faceArr of face4
+// Used in cartoon render, when normals must be computed
+// after all (4-)faces and vertices are set up
 var setUpNormals = function(geo, three) {
     
     for ( var g in geo.geometryChunks ) {
@@ -290,64 +289,33 @@ var setUpNormals = function(geo, three) {
         var a, b, c, d,
         //and actual vertices
         vA, vB, vC, norm;
-        
-        //Face3
-        if (three && three !== undefined) {
-        
-            for ( var i = 0; i < faces.length / 3; i++ ) {
-                
-                a = faces[ i * 3 ] * 3;
-                b = faces[ i * 3 + 1 ] * 3;
-                c = faces[ i * 3 + 2 ] * 3;
-                
-                vA = new TV3(verts[a], verts[a+1], verts[a+2]);
-                vB = new TV3(verts[b], verts[b+1], verts[b+2]);
-                vC = new TV3(verts[c], verts[c+1], verts[c+2]);
-                
-                vC.subVectors(vC, vB);
-                vA.subVectors(vA, vB);
-                vC.cross(vA);
+              
+        //face4   
+        for ( var i = 0; i < faces.length / 6; i++ ) {
 
-                //face normal
-                norm = vC;
-                norm.normalize();
-                
-                norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
-                norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y;
-                norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z;
-                
-            }        
-        
+            a = faces[ i * 6 ] * 3;
+            b = faces[ i * 6 + 1 ] * 3;
+            c = faces[ i * 6 + 4 ] * 3;
+            d = faces[ i * 6 + 2 ] * 3;
+
+            vA = new TV3(verts[a], verts[a+1], verts[a+2]);
+            vB = new TV3(verts[b], verts[b+1], verts[b+2]);
+            vC = new TV3(verts[c], verts[c+1], verts[c+2]);
+
+            vC.subVectors(vC, vB);
+            vA.subVectors(vA, vB);
+            vC.cross(vA);
+
+            //face normal
+            norm = vC;
+            norm.normalize();
+
+            norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
+            norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y, norms[d + 1] += norm.y;
+            norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z, norms[d + 2] += norm.z;
+
         }
         
-        //face4
-        else {
-        
-            for ( var i = 0; i < faces.length / 6; i++ ) {
-                
-                a = faces[ i * 6 ] * 3;
-                b = faces[ i * 6 + 1 ] * 3;
-                c = faces[ i * 6 + 4 ] * 3;
-                d = faces[ i * 6 + 2 ] * 3;
-                
-                vA = new TV3(verts[a], verts[a+1], verts[a+2]);
-                vB = new TV3(verts[b], verts[b+1], verts[b+2]);
-                vC = new TV3(verts[c], verts[c+1], verts[c+2]);
-                
-                vC.subVectors(vC, vB);
-                vA.subVectors(vA, vB);
-                vC.cross(vA);
-                                
-                //face normal
-                norm = vC;
-                norm.normalize();
-                
-                norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
-                norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y, norms[d + 1] += norm.y;
-                norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z, norms[d + 2] += norm.z;
-                
-            }
-        }
     }
     
 };
@@ -378,4 +346,27 @@ WebMol.SmoothShading = 2;
 WebMol.NoColors = 0;
 WebMol.FaceColors = 1;
 WebMol.VertexColors = 2;
+
+//Texture constants
+//TODO: Which of these do I need (since I only use textures to display label sprites) ?
+WebMol.MultiplyOperation = 0;
+WebMol.MixOperation = 1;
+WebMol.AddOperation = 2;
+
+// mapping modes
+
+WebMol.UVMapping = function() {};
+
+// wrapping modes
+WebMol.ClampToEdgeWrapping = 1001;
+
+//Filters
+WebMol.LinearFilter = 1006;
+WebMol.LinearMipMapLinearFilter = 1008;
+
+//Data types
+WebMol.UnsignedByteType = 1009;
+
+//Pixel formats
+WebMol.RGBAFormat = 1021;
 

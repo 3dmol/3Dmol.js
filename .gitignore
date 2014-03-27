@@ -1,2 +1,9 @@
 /nbproject/private/
 /Jmol
+/js/Detector.js
+/js/Stats.js
+/js/OrbitControls.js
+/js/THREEx.FullScreen.js
+/js/THREEx.KeyboardState.js
+/js/THREEx.WindowResize.js
+/testlabel.html
