@@ -296,6 +296,11 @@ WebMol.extend(WebMol.Vector3.prototype, {
         return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
     },
     
+    lengthSq : function() {
+    
+        return (this.x*this.x + this.y*this.y + this.z*this.z);
+    },
+    
     normalize : function() {
         
         return this.divideScalar( this.length() );
@@ -878,6 +883,18 @@ WebMol.extend(WebMol.Matrix4.prototype, {
 
         return this;
     },
+    
+    getMaxScaleOnAxis : function() {
+        
+        var te = this.elements;
+        
+        var scaleXSq = te[0] * te[0] + te[1] * te[1] + te[2] * te[2];
+        var scaleYSq = te[4] * te[4] + te[5] * te[5] + te[6] * te[6];
+        var scaleZSq = te[8] * te[8] + te[9] * te[9] + te[10] * te[10];
+        
+        return Math.sqrt(Math.max(scaleXSq, Math.max(scaleYSq, scaleZSq)));
+        
+    },
 
     makeFrustum: function ( left, right, bottom, top, near, far ) {
         var te = this.elements;
@@ -924,96 +941,157 @@ WebMol.extend(WebMol.Matrix4.prototype, {
 
 WebMol.Ray = function(origin, direction) {
     
-    this.origin = (origin !== undefined) ? origin : new WebMol.Vector3();
-    this.direction = (direction !== undefined) ? direction : new WebMol.Vector3();
+    this.origin = (origin !== undefined) ? 
+        origin : new WebMol.Vector3();
+        
+    this.direction = (direction !== undefined) ?
+        direction : new WebMol.Vector3();
       
 };
 
-WebMol.extend(WebMol.Ray.prototype, {
+//TODO: Remove methods we don't need (intersectPlane ??)
+WebMol.Ray.prototype = {
+    
+    constructor : WebMol.Ray,
      
-     set : function(origin, direction){
-         
-         this.origin.copy(origin);
-         this.direction.copy(direction);
-         
-         return this;
-     
-     },
-     
-     copy : function(ray) {
-         
-         this.origin.copy(ray.origin);
-         this.direction.copy(ray.direction);
-         
-         return this;
-         
-     },
-     
-     at : function(t, optionalTarget) {
-         
-         var result = optionalTarget || new WebMol.Vector3();
-         
-         return result.copy(this.direction).multiplyScalar(t).add(this.origin);
-         
-     },
-     
-     recast : function() {
-         
-         var v1 = new WebMol.Vector3();
-         
-         return function(t) {
-             this.origin.copy(this.at(t, v1));
-             
-             return this;
-         };
-         
-     }(),
-     
-     closestPointToPoint : function(point, optionalTarget) {
-         
-         var result = optionalTarget || new WebMol.Vector3();
-         result.subVectors(point, this.origin);
-         var directionDistance = result.dot(this.direction);
-         
-         return result.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
-         
-     },
-     
-     distanceToPoint : function() {
-         
-         var v1 = new WebMol.Vector3();
-         
-         return function(point) {
-             var directionDistance = v1.subVectors(point, this.origin).dot(this.direction);
-             v1.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
-             
-             return v1.distanceTo(point);
-         };
-         
-     }(),
-     
-     isIntersectionSphere : function(plane) {
+    set : function(origin, direction){
         
-        return (this.distanceToPoint(sphere.center) <= sphere.radius);
+        this.origin.copy(origin);
+        this.direction.copy(direction);
+        
+        return this;
+    
+    },
+    
+    copy : function(ray) {
+        
+        this.origin.copy(ray.origin);
+        this.direction.copy(ray.direction);
+        
+        return this;
+        
+    },
+    
+    at : function(t, optionalTarget) {
+        
+        var result = optionalTarget || new WebMol.Vector3();
+        
+        return result.copy(this.direction).multiplyScalar(t).add(this.origin);
+        
+    },
+    
+    recast : function() {
+        
+        var v1 = new WebMol.Vector3();
+        
+        return function(t) {
+            this.origin.copy(this.at(t, v1));
+            
+            return this;
+        };
+        
+    }(),
+    
+    closestPointToPoint : function(point, optionalTarget) {
+        
+        var result = optionalTarget || new WebMol.Vector3();
+        result.subVectors(point, this.origin);
+        var directionDistance = result.dot(this.direction);
+        
+        return result.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
+        
+    },
+    
+    distanceToPoint : function() {
+        
+        var v1 = new WebMol.Vector3();
+        
+        return function(point) {
+            var directionDistance = v1.subVectors(point, this.origin).dot(this.direction);
+            v1.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
+            
+            return v1.distanceTo(point);
+        };
+        
+    }(),
+    
+    isIntersectionSphere : function(sphere) {
+       
+       return (this.distanceToPoint(sphere.center) <= sphere.radius);
+          
+    },
+    
+    isIntersectionPlane : function(plane) {
+        
+        var denominator = plane.normal.dot(this.direction);
+        
+        //plane and ray are not perpendicular
+        if (denominator != 0) 
+            return true;
+        
+        if (plane.distanceToPoint(this.origin) == 0) 
+            return true;
+        
+        return false;
+        
+    },
+    
+    distanceToPlane : function(plane) {
+       
+       var denominator = plane.normal.dot(this.direction);
+       if (denominator == 0) {
            
-     },
+           //line is coplanar
+       if (plane.distanceToPoint(this.origin) == 0)
+           return 0;
+       
+       //ray is parallel
+           return undefined;
+       }
+       
+       var t = - (this.origin.dot(plane.normal) + plane.constant) / denominator;
+       
+       return t;
+       
+    },
+    
+    intersectPlane : function(plane, optionalTarget) {
+       
+       var t = this.distanceToPlane(plane);
+       
+       if (t === undefined)
+           return undefined;
+       
+       return this.at(t, optionalTarget);
+       
+    },
+    
+    
+    
+    applyMatrix4 : function(matrix4) {
+       
+       this.direction.add(this.origin).applyMatrix4(matrix4);
+       this.origin.applyMatrix4(matrix4);
+       this.direction.sub(this.origin);
+       
+       return this;
+       
+    },
+    
+    equals : function(ray) {
+       
+       return ray.origin.equals(this.origin) && ray.direction.equals(this.direction);
+       
+    },
+    
+    clone : function() {
+    
+       return new WebMol.Ray().copy(this);
+    
+    }
+ 
      
-     isIntersectionPlane : function(plane) {
-         
-         var denominator = plane.normal.dot(this.direction);
-         
-         //plane and ray are not perpendicular
-         if (denominator != 0) 
-             return true;
-         
-         if (plane.distanceToPoint(this.origin) == 0) 
-             return true;
-         
-         return false;
-         
-     }
-     
-});
+};
 
 //alias
 var TV3 = Vector = WebMol.Vector3;

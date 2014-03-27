@@ -3,6 +3,8 @@
  * Geometry class
  */
 
+var WebMol = WebMol || {};
+
 //Event Handling
 WebMol.EventDispatcher = function() {
   
@@ -205,7 +207,6 @@ WebMol.Object3D.prototype = {
     
 };
 
-
 WebMol.Object3DIDCount = 0;
 
 //Geometry class
@@ -220,6 +221,7 @@ WebMol.Geometry = function() {
     this.name = '';
     
     this.vertices = 0;
+    this.interesetShapes = []; // list of spheres and/or boxes of clickable atoms in this geometry
 
     this.hasTangents = false;
 
@@ -239,12 +241,77 @@ WebMol.Geometry = function() {
 
 WebMol.Geometry.prototype = {
   
-  constructor : WebMol.Geometry,
+    constructor : WebMol.Geometry,
   
-  dispose : function() {
-      this.dispatchEvent( {type: 'dispose'} );
-  }
+    dispose : function() {
+    
+        this.dispatchEvent( {type: 'dispose'} );
+        
+    }
     
 };
 
 WebMol.GeometryIDCount = 0;
+
+
+//Raycaster
+
+WebMol.Raycaster = (function() {
+    
+    Raycaster = function(origin, direction, far, near) {
+        
+        this.ray = new WebMol.Ray(origin, direction);
+        
+        if (this.ray.direction.lengthSq() > 0) 
+            this.ray.direction.normalize();
+        
+        this.near = near || 0;
+        this.far = far || Infinity;
+    
+    };
+    
+    //var sphere = new WebMol.Sphere();
+    //var facePlane = new WebMol.Plane();
+    var localRay = new WebMol.Ray();
+    var intersectPoint = new WebMol.Vector3();
+    var matrixPosition = new WebMol.Vector3();
+    
+    var inverseMatrix = new WebMol.Matrix4();
+    
+    var descSort = function(a, b) {
+        return a.distance - b.distance;
+    };
+    
+    //object is a Sphere or (Bounding) Box
+    var intersectObject = function(object, raycaster, intersects) {
+        
+        
+    };   
+    
+    
+    WebMol.Raycaster.prototype.precision = 0.0001;
+    WebMol.Raycaster.prototype.linePrecision = 1;
+    
+    WebMol.Raycaster.prototype.set = function(origin, destination) {
+        
+        this.ray.set(origin, direction);
+          
+    };
+    
+    WebMol.Raycaster.prototype.intersectObjects = function(objects) {
+        
+        var intersects = [];
+        
+        for (var i = 0, l = objects.length; i < l; i++)            
+            intersectObject(objects[i], this, intersects);
+            
+        intersects.sort(descSort);
+        
+        return intersects;
+        
+    };
+    
+    return Raycaster;
+    
+})();
+
