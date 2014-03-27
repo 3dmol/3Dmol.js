@@ -258,7 +258,7 @@ WebMol.GeometryIDCount = 0;
 
 WebMol.Raycaster = (function() {
     
-    Raycaster = function(origin, direction, far, near) {
+    function Raycaster(origin, direction, far, near) {
         
         this.ray = new WebMol.Ray(origin, direction);
         
@@ -289,16 +289,16 @@ WebMol.Raycaster = (function() {
     };   
     
     
-    WebMol.Raycaster.prototype.precision = 0.0001;
-    WebMol.Raycaster.prototype.linePrecision = 1;
+    Raycaster.prototype.precision = 0.0001;
+    Raycaster.prototype.linePrecision = 1;
     
-    WebMol.Raycaster.prototype.set = function(origin, destination) {
+    Raycaster.prototype.set = function(origin, destination) {
         
         this.ray.set(origin, direction);
           
     };
     
-    WebMol.Raycaster.prototype.intersectObjects = function(objects) {
+    Raycaster.prototype.intersectObjects = function(objects) {
         
         var intersects = [];
         
