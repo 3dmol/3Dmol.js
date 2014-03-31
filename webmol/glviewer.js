@@ -198,6 +198,8 @@ WebMol.glmolViewer = (function() {
         var camera = new WebMol.Camera(20, ASPECT, 1, 800);
         camera.position = new TV3(0, 0, CAMERA_Z);
         camera.lookAt(new TV3(0, 0, 0));
+        
+        var projector = new WebMol.Projector();
 
         var scene = null;
         var rotationGroup = null; // which contains modelGroup
@@ -250,10 +252,10 @@ WebMol.glmolViewer = (function() {
             if (!scene)
                 return;
             
-            // var time = new Date();
+            //var time = new Date();
             setSlabAndFog();
             renderer.render(scene, camera);
-            // console.log("rendered in " + (+new Date() - time) + "ms");
+            //console.log("rendered in " + (+new Date() - time) + "ms");
         };
 
         var initializeScene = function() {
@@ -278,7 +280,8 @@ WebMol.glmolViewer = (function() {
         };
 
         initializeScene();
-
+        
+        var clickedAtom = null;
         // enable mouse support
         var glDOM = $(renderer.domElement);
 
@@ -307,7 +310,68 @@ WebMol.glmolViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
+            
+            //handle selection
+            var mouseX = (mouseStartX / window.innerWidth)*2 - 1;
+            var mouseY = -(mouseStartY / window.innerHeight)*2 + 1;
+            handleClickSelection(mouseX, mouseY);
+            
         });
+        
+        var handleClickSelection = function(mouseX, mouseY) {
+            
+            var vector = new WebMol.Vector3(mouseX, mouseY, 1);
+            projector.unprojectVector(vector, camera);
+            vector.sub(camera.position).normalize();
+            /*
+            var label = new WebMol.Label('click',
+                                         {position:{x:mouseX, y:mouseY, z:1}}); 
+            label.setContext();
+            rotationGroup.add(label.sprite);
+            
+            var rayGeo = new WebMol.Geometry();
+            
+            rayGeo.vertexArr = [];
+            rayGeo.colorArr = [];
+            rayGeo.vertices = 2;
+            
+            var material = new WebMol.LineBasicMaterial({
+                linewidth : 1.0,
+                vertexColors : true
+            });
+            
+            rayGeo.vertexArr.push(rotationGroup.position.x);
+            rayGeo.vertexArr.push(rotationGroup.position.y);
+            rayGeo.vertexArr.push(rotationGroup.position.z);
+            rayGeo.vertexArr.push(vector.x);
+            rayGeo.vertexArr.push(vector.y);
+            rayGeo.vertexArr.push(vector.z);
+            
+            for (var i = 0; i < 6; i++)
+                rayGeo.colorArr.push(0.0, 0.0, 0.0);
+            
+            initBuffers(rayGeo);
+            var line = new WebMol.Line(rayGeo, material, WebMol.LinePieces);
+            rotationGroup.add(line);
+            show();
+            */
+            var raycaster = new WebMol.Raycaster(camera.position, vector); 
+            var intersects = [];
+            
+            for (var i in models) {
+                var model = models[i];
+                var atoms = model.selectedAtoms({clickable: true});
+                var atom = null;
+                intersects = raycaster.intersectObjects(modelGroup, atoms);
+                
+                if (intersects.length) {
+                    var atom = intersects[0].atom;
+                    
+                }
+                clickedAtom = atom;
+            }
+           
+        };
 
         glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
             ev.preventDefault();
@@ -330,6 +394,9 @@ WebMol.glmolViewer = (function() {
         });
         $('body').bind('mouseup touchend', function(ev) {
             isDragging = false;
+            if (clickedAtom !== null) 
+                alert(clickedAtom.atom);
+            clickedAtom = null;
         });
 
         glDOM.bind('mousemove touchmove', function(ev) { // touchmove

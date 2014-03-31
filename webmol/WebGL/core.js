@@ -270,7 +270,7 @@ WebMol.Raycaster = (function() {
     
     };
     
-    //var sphere = new WebMol.Sphere();
+    var sphere = new WebMol.Sphere();
     //var facePlane = new WebMol.Plane();
     var localRay = new WebMol.Ray();
     var intersectPoint = new WebMol.Vector3();
@@ -283,12 +283,33 @@ WebMol.Raycaster = (function() {
     };
     
     //object is a Sphere or (Bounding) Box
-    var intersectObject = function(object, raycaster, intersects) {
+    var intersectObject = function(group, atom, raycaster, intersects) {
         
+        matrixPosition.getPositionFromMatrix(group.matrixWorld);
+        
+        if ((atom.clickable !== true) || (atom.intersectionShape === undefined))
+            return intersects;
+        
+        var intersectionShape = atom.intersectionShape;
+        
+        if (intersectionShape.sphere instanceof WebMol.Sphere) {
+            sphere.copy(intersectionShape.sphere);
+            sphere.applyMatrix4(group.matrixWorld);
+            
+            //TODO: for descSort to work, must push intersection object in 
+            // intersects that includes distance 
+            if (raycaster.ray.isIntersectionSphere(sphere)) {
+                var distance = raycaster.ray.distanceToPoint(sphere.center);
+                intersects.push({atom : atom, 
+                                 distance : - sphere.center.z});
+                return intersects;
+            }
+        }
+        
+       
         
     };   
-    
-    
+       
     Raycaster.prototype.precision = 0.0001;
     Raycaster.prototype.linePrecision = 1;
     
@@ -298,12 +319,12 @@ WebMol.Raycaster = (function() {
           
     };
     
-    Raycaster.prototype.intersectObjects = function(objects) {
+    Raycaster.prototype.intersectObjects = function(group, objects) {
         
         var intersects = [];
         
         for (var i = 0, l = objects.length; i < l; i++)            
-            intersectObject(objects[i], this, intersects);
+            intersectObject(group, objects[i], this, intersects);
             
         intersects.sort(descSort);
         
@@ -315,3 +336,32 @@ WebMol.Raycaster = (function() {
     
 })();
 
+
+//WebMol Projecion 
+//TODO: can probably strip this down a lot (only used for selection handling)
+WebMol.Projector = function () {
+
+    var _viewMatrix = new WebMol.Matrix4(),
+    _viewProjectionMatrix = new WebMol.Matrix4();
+
+    this.projectVector = function ( vector, camera ) {
+
+            camera.matrixWorldInverse.getInverse( camera.matrixWorld );
+
+            _viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+
+            return vector.applyProjection( _viewProjectionMatrix );
+
+    };
+
+    this.unprojectVector = function ( vector, camera ) {
+
+            camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+
+            _viewProjectionMatrix.multiplyMatrices(camera.matrixWorld, camera.projectionMatrixInverse);
+
+            return vector.applyProjection( _viewProjectionMatrix );
+
+    };
+
+};

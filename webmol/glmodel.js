@@ -866,6 +866,12 @@ WebMol.GLModel = (function() {
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
             var vobj = sphereVertexCache.getVerticesForRadius(radius);
+            
+            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)){
+                var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
+                atom.intersectionShape.sphere = new WebMol.Sphere(center, radius);
+            }
+                
                         
             var vertices = vobj.vertices;
             var normals = vobj.normals;
@@ -1270,7 +1276,10 @@ WebMol.GLModel = (function() {
             for ( var i = 0; i < atoms.length; i++) {
                 var atom = atoms[i];
                 // recreate gl info for each atom as necessary
+                // set up appropriate intersection spheres for clickable atoms
                 if (atom && atom.style) {
+                    if (atom.clickable === true)
+                        atom.intersectionShape = {sphere: null, box: null, line: null};                    
                     drawAtomSphere(atom, sphereGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
@@ -1279,6 +1288,7 @@ WebMol.GLModel = (function() {
                             && !atom.style.cartoon.hidden) {
                         cartoonAtoms.push(atom);
                     }
+
                 }
             }
             // create cartoon if needed - this is a whole model analysis

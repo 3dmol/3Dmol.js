@@ -66,6 +66,8 @@ WebMol.Sphere.prototype = {
 
 };
 
+//Intersection bounding box for line, stick (cylinder), ribbon render
+
 WebMol.Box3 = function(min, max) {
     
     this.min = (min !== undefined) ?
@@ -89,12 +91,5 @@ WebMol.Box3.prototype = {
         return this;
         
     }
-
-
-
-
     
 };
-
-
-//Intersection bounding box for line, stick (cylinder), ribbon render
