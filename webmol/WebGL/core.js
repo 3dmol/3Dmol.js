@@ -271,6 +271,7 @@ WebMol.Raycaster = (function() {
     };
     
     var sphere = new WebMol.Sphere();
+    var _vector = new WebMol.Vector3();
     //var facePlane = new WebMol.Plane();
     var localRay = new WebMol.Ray();
     var intersectPoint = new WebMol.Vector3();
@@ -293,15 +294,36 @@ WebMol.Raycaster = (function() {
         var intersectionShape = atom.intersectionShape;
         
         if (intersectionShape.sphere instanceof WebMol.Sphere) {
+            
             sphere.copy(intersectionShape.sphere);
             sphere.applyMatrix4(group.matrixWorld);
             
             //TODO: for descSort to work, must push intersection object in 
             // intersects that includes distance 
             if (raycaster.ray.isIntersectionSphere(sphere)) {
-                var distance = raycaster.ray.distanceToPoint(sphere.center);
+                
+                var distance;
+                
+                _vector.subVectors(sphere.center, raycaster.ray.origin);
+                
+                //distance from ray origin to point on the ray normal to sphere's center
+                //must be less than sphere's radius (since ray intersects sphere)
+                var distanceToCenter = _vector.dot(raycaster.ray.direction);
+                
+                var det = distanceToCenter*distanceToCenter - (_vector.lengthSq() - sphere.radius*sphere.radius);
+                
+                //ray tangent to sphere?
+                if (det <= 0)
+                    distance = distanceToCenter;
+                
+                //This is reversed if sphere is closer than ray origin.  Do we have 
+                //to worry about handling that case?
+                else 
+                    distance = distanceToCenter - Math.sqrt(det);
+                
+                //distance = - sphere.center.z;
                 intersects.push({atom : atom, 
-                                 distance : - sphere.center.z});
+                                 distance : distance});
                 return intersects;
             }
         }

@@ -1027,6 +1027,7 @@ WebMol.Ray.prototype = {
         result.subVectors(point, this.origin);
         var directionDistance = result.dot(this.direction);
         
+        //returns a point on this ray
         return result.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
         
     },

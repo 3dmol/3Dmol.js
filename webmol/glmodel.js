@@ -869,7 +869,7 @@ WebMol.GLModel = (function() {
             
             if ((atom.clickable === true) && (atom.intersectionShape !== undefined)){
                 var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
-                atom.intersectionShape.sphere = new WebMol.Sphere(center, radius);
+                atom.intersectionShape.sphere = new WebMol.Sphere(center, 0.98*radius);
             }
                 
                         
