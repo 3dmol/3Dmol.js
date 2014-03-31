@@ -162,6 +162,7 @@ WebMol.glmolViewer = (function() {
     function GLViewer(element, callback, defaultcolors) {
 
         // set variables
+        var _viewer = this;
         var container = element;
         var id = container.id;
 
@@ -285,6 +286,35 @@ WebMol.glmolViewer = (function() {
         // enable mouse support
         var glDOM = $(renderer.domElement);
 
+        //Checks for selection intersects on mousedown
+        var handleClickSelection = function(mouseX, mouseY) {
+            
+            var vector = new WebMol.Vector3(mouseX, mouseY, 0.0);
+            projector.unprojectVector(vector, camera);
+            vector.sub(camera.position).normalize();
+            var raycaster = new WebMol.Raycaster(camera.position, vector); 
+            var intersects = [];
+            
+            for (var i in models) {
+                var model = models[i];
+                
+                var atoms = model.selectedAtoms({clickable: true});
+                var atom = null;
+
+                intersects = raycaster.intersectObjects(modelGroup, atoms);
+                
+                if (intersects.length) {
+                    var atom = intersects[0].atom;
+                    clickedAtom = atom;
+                    
+                    if (atom.callback !== undefined && typeof(atom.callback) === "function"){
+                        atom.callback(atom, model, _viewer);
+                        show();
+                    }
+                }
+            }        
+        }; 
+        
         // TODO: Better touch panel support.
         // Contribution is needed as I don't own any iOS or Android device
         // with
@@ -302,6 +332,7 @@ WebMol.glmolViewer = (function() {
             if (x === undefined)
                 return;
             isDragging = true;
+            clickedAtom = null;
             mouseButton = ev.which;
             mouseStartX = x;
             mouseStartY = y;
@@ -317,61 +348,6 @@ WebMol.glmolViewer = (function() {
             handleClickSelection(mouseX, mouseY);
             
         });
-        
-        var handleClickSelection = function(mouseX, mouseY) {
-            
-            var vector = new WebMol.Vector3(mouseX, mouseY, 1);
-            projector.unprojectVector(vector, camera);
-            vector.sub(camera.position).normalize();
-            /*
-            var label = new WebMol.Label('click',
-                                         {position:{x:mouseX, y:mouseY, z:1}}); 
-            label.setContext();
-            rotationGroup.add(label.sprite);
-            
-            var rayGeo = new WebMol.Geometry();
-            
-            rayGeo.vertexArr = [];
-            rayGeo.colorArr = [];
-            rayGeo.vertices = 2;
-            
-            var material = new WebMol.LineBasicMaterial({
-                linewidth : 1.0,
-                vertexColors : true
-            });
-            
-            rayGeo.vertexArr.push(rotationGroup.position.x);
-            rayGeo.vertexArr.push(rotationGroup.position.y);
-            rayGeo.vertexArr.push(rotationGroup.position.z);
-            rayGeo.vertexArr.push(vector.x);
-            rayGeo.vertexArr.push(vector.y);
-            rayGeo.vertexArr.push(vector.z);
-            
-            for (var i = 0; i < 6; i++)
-                rayGeo.colorArr.push(0.0, 0.0, 0.0);
-            
-            initBuffers(rayGeo);
-            var line = new WebMol.Line(rayGeo, material, WebMol.LinePieces);
-            rotationGroup.add(line);
-            show();
-            */
-            var raycaster = new WebMol.Raycaster(camera.position, vector); 
-            var intersects = [];
-            
-            for (var i in models) {
-                var model = models[i];
-                var atoms = model.selectedAtoms({clickable: true});
-                var atom = null;
-                intersects = raycaster.intersectObjects(modelGroup, atoms);
-                
-                if (intersects.length) {
-                    var atom = intersects[0].atom;
-                    
-                }
-                clickedAtom = atom;
-            }
-           
-        };
 
         glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
             ev.preventDefault();
@@ -394,9 +370,6 @@ WebMol.glmolViewer = (function() {
         });
         $('body').bind('mouseup touchend', function(ev) {
             isDragging = false;
-            if (clickedAtom !== null) 
-                alert(clickedAtom.atom);
-            clickedAtom = null;
         });
 
         glDOM.bind('mousemove touchmove', function(ev) { // touchmove
@@ -1267,7 +1240,7 @@ WebMol.glmolViewer = (function() {
         
         this.getModelGroup = function() {
             return modelGroup;
-        };
+        };       
         
         try {
             if (typeof (callback) === "function")

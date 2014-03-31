@@ -55,6 +55,34 @@
             }
         };
         
+        var clickCallback = function(atom, model, viewer){
+            if (atom.clickLabel === undefined || !atom.clickLabel instanceof WebMol.Label) {
+                atom.clickLabel = viewer.addLabel(atom.elem + " " + atom.serial,
+                                                  {fontSize : 18, 
+                                                   position : {x:atom.x, y:atom.y, z:atom.z}});
+                atom.clicked = true;
+            }
+            
+            //toggle label style
+            else{
+
+                if (atom.clicked) {
+                    var newstyle = {fontSize: atom.clickLabel.fontSize, position: atom.clickLabel.position,
+                                    backgroundColor: {r: 100, g: 0, b: 255, a: 0.8}};
+                                
+                    viewer.setLabelStyle(atom.clickLabel, newstyle);
+                    atom.clicked = !atom.clicked;
+                }
+               
+                else {
+                    viewer.removeLabel(atom.clickLabel);  
+                    atom.clickLabel = undefined;
+                    atom.clicked = false;
+                }
+                
+            }
+        };
+        
         $(document).ready(function() {
             
             
@@ -64,11 +92,12 @@
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
-                    m = viewer.addModel(data,"sdf");
+                    m = viewer.addModel(data, "sdf");
                     //m2 = viewer.addModel(data2,"pdb");
                     atoms = m.selectedAtoms({ });
                     for (a in atoms) {
                         atoms[a].clickable = true;
+                        atoms[a].callback = clickCallback;
                     }
                     
                     modelgroup = viewer.getModelGroup();
