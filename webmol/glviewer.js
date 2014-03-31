@@ -200,7 +200,9 @@ WebMol.glmolViewer = (function() {
         camera.position = new TV3(0, 0, CAMERA_Z);
         camera.lookAt(new TV3(0, 0, 0));
         
+        var raycaster = new WebMol.Raycaster(new TV3(0,0,0), new TV3(0,0,0));
         var projector = new WebMol.Projector();
+        var mouseVector = new WebMol.Vector3(0, 0, 0);
 
         var scene = null;
         var rotationGroup = null; // which contains modelGroup
@@ -289,10 +291,13 @@ WebMol.glmolViewer = (function() {
         //Checks for selection intersects on mousedown
         var handleClickSelection = function(mouseX, mouseY) {
             
-            var vector = new WebMol.Vector3(mouseX, mouseY, 0.0);
-            projector.unprojectVector(vector, camera);
-            vector.sub(camera.position).normalize();
-            var raycaster = new WebMol.Raycaster(camera.position, vector); 
+            var mouse = {x : mouseX, y : mouseY, z : 1};
+            mouseVector.set(mouse.x, mouse.y, mouse.z);
+            projector.unprojectVector(mouseVector, camera);
+            mouseVector.sub(camera.position).normalize();
+             
+            raycaster.set(camera.position, mouseVector);
+
             var intersects = [];
             
             for (var i in models) {
@@ -343,8 +348,8 @@ WebMol.glmolViewer = (function() {
             cslabFar = slabFar;
             
             //handle selection
-            var mouseX = (mouseStartX / window.innerWidth)*2 - 1;
-            var mouseY = -(mouseStartY / window.innerHeight)*2 + 1;
+            var mouseX = (x / WIDTH)*2 - 1;
+            var mouseY = -(y / HEIGHT)*2 + 1;
             handleClickSelection(mouseX, mouseY);
             
         });

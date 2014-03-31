@@ -313,7 +313,7 @@ WebMol.Raycaster = (function() {
     Raycaster.prototype.precision = 0.0001;
     Raycaster.prototype.linePrecision = 1;
     
-    Raycaster.prototype.set = function(origin, destination) {
+    Raycaster.prototype.set = function(origin, direction) {
         
         this.ray.set(origin, direction);
           

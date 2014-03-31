@@ -95,6 +95,7 @@
                     m = viewer.addModel(data, "sdf");
                     //m2 = viewer.addModel(data2,"pdb");
                     atoms = m.selectedAtoms({ });
+
                     for (a in atoms) {
                         atoms[a].clickable = true;
                         atoms[a].callback = clickCallback;
@@ -106,6 +107,7 @@
                     viewer.render();
                     
                     molObj = modelgroup.children[0];
+                    
                 }});
                 
             //}, "text");   
