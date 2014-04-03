@@ -271,7 +271,11 @@ WebMol.Raycaster = (function() {
     };
     
     var sphere = new WebMol.Sphere();
-    var _vector = new WebMol.Vector3();
+    var cylinder = new WebMol.Cylinder();
+    var w_0 = new WebMol.Vector3(); // for cylinders, cylinder.c1 - ray.origin
+    var v1 = new WebMol.Vector3(); // all purpose local vector
+    var v2 = new WebMol.Vector3();
+    var v3 = new WebMol.Vector3();
     //var facePlane = new WebMol.Plane();
     var localRay = new WebMol.Ray();
     var intersectPoint = new WebMol.Vector3();
@@ -281,6 +285,11 @@ WebMol.Raycaster = (function() {
     
     var descSort = function(a, b) {
         return a.distance - b.distance;
+    };
+
+    // [-1, 1]
+    var clamp = function(x) {
+        return Math.min(Math.max(x, -1), 1);
     };
     
     //object is a Sphere or (Bounding) Box
@@ -293,6 +302,66 @@ WebMol.Raycaster = (function() {
         
         var intersectionShape = atom.intersectionShape;
         
+        for (var i in intersectionShape.cylinder) {
+            
+            if (intersectionShape.cylinder[i] instanceof WebMol.Cylinder){
+                
+                cylinder.copy(intersectionShape.cylinder[i]);
+                cylinder.applyMatrix4(group.matrixWorld);
+                
+                w_0.subVectors(cylinder.c1, raycaster.ray.origin); 
+                
+                var cylProj = w_0.dot(cylinder.direction); // Dela
+                var rayProj = w_0.dot(raycaster.ray.direction); // Epsilon
+                
+                var normProj = clamp(raycaster.ray.direction.dot(cylinder.direction)); // Beta
+                
+                var denom = 1 - normProj*normProj;
+                
+                if (denom === 0.0)
+                    continue;
+                
+                var s_c = (normProj*rayProj - cylProj) / denom;
+                var t_c = (rayProj - normProj*cylProj) / denom;
+                
+                v1.copy(cylinder.direction).multiplyScalar(s_c).add(cylinder.c1);  // Q_c
+                v2.copy(raycaster.ray.direction).multiplyScalar(t_c).add(raycaster.ray.origin); // P_c
+                
+                var closestSqDist = v3.subVectors(v1, v2).lengthSq();
+                // closest distance between ray and cylinder axis not greater than cylinder radius;
+                // might intersect this cylinder between atom and bond midpoint
+                if (closestSqDist <= cylinder.radius*cylinder.radius){
+                    var distance;
+                    
+                    //Find points where ray intersects sides of cylinder
+                    var discriminant = (normProj*cylProj - rayProj)*(normProj*cylProj - rayProj) - 
+                            denom*(w_0.lengthSq() - cylProj*cylProj - cylinder.radius*cylinder.radius);
+                    
+                    // ray tangent to cylinder?
+                    if (discriminant <= 0)
+                        distance = Math.sqrt(closestSqDist);
+                    
+                    //find closest intersection point; make sure it's between atom's position and cylinder midpoint
+                    else {
+                        var t = distance = ( (rayProj - normProj*cylProj) - Math.sqrt(discriminant) ) / denom;                   
+                        var s = normProj*t - cylProj;
+                        
+                        //does not intersect cylinder between atom and midpoint,
+                        // or intersects cylinder behind camera
+                        if (s < 0 || s*s > cylinder.lengthSq() || t < 0)
+                            continue
+                        
+                        else
+                            intersects.push({atom : atom,
+                                             distance : distance});
+                    }
+                }
+                    
+                
+            }
+            
+        }
+        
         if (intersectionShape.sphere instanceof WebMol.Sphere) {
             
             sphere.copy(intersectionShape.sphere);
@@ -304,22 +373,26 @@ WebMol.Raycaster = (function() {
                 
                 var distance;
                 
-                _vector.subVectors(sphere.center, raycaster.ray.origin);
+                v1.subVectors(sphere.center, raycaster.ray.origin);
                 
                 //distance from ray origin to point on the ray normal to sphere's center
                 //must be less than sphere's radius (since ray intersects sphere)
-                var distanceToCenter = _vector.dot(raycaster.ray.direction);
+                var distanceToCenter = v1.dot(raycaster.ray.direction);
                 
-                var det = distanceToCenter*distanceToCenter - (_vector.lengthSq() - sphere.radius*sphere.radius);
+                var discriminant = distanceToCenter*distanceToCenter - (v1.lengthSq() - sphere.radius*sphere.radius);
+                
+                //Don't select if sphere center behind camera
+                if (distanceToCenter < 0) 
+                    return intersects;
                 
                 //ray tangent to sphere?
-                if (det <= 0)
+                if (discriminant <= 0)
                     distance = distanceToCenter;
                 
                 //This is reversed if sphere is closer than ray origin.  Do we have 
                 //to worry about handling that case?
                 else 
-                    distance = distanceToCenter - Math.sqrt(det);
+                    distance = distanceToCenter - Math.sqrt(discriminant);
                 
                 //distance = - sphere.center.z;
                 intersects.push({atom : atom, 

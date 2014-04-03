@@ -66,30 +66,61 @@ WebMol.Sphere.prototype = {
 
 };
 
-//Intersection bounding box for line, stick (cylinder), ribbon render
+//Bounding cylinder for stick render 
 
-WebMol.Box3 = function(min, max) {
+
+   
+WebMol.Cylinder = function(c1, c2, radius) {
+
+    this.c1 = (c1 !== undefined) ?
+        c1 : new WebMol.Vector3();
+
+    this.c2 = (c2 !== undefined) ?
+        c2 : new WebMol.Vector3();
+        
+    this.direction = new WebMol.Vector3().subVectors(this.c2, this.c1).normalize();
+
+    this.radius = (radius !== undefined) ?
+        radius : 0;
     
-    this.min = (min !== undefined) ?
-        min : new WebMol.Vector3(Infinity, Infinity, Infinity);
-        
-    this.max = (max !== undefined) ?
-        max : new WebMol.Vector3(-Infinity, -Infinity, -Infinity);
-        
 };
 
 //Axis aligned bounding box
-WebMol.Box3.prototype = {
+WebMol.Cylinder.prototype = {
 
-    constructor : WebMol.Box3,
+    constructor : WebMol.Cylinder,
 
-    set : function(min, max) {
-        
-        this.min.copy(min);
-        this.max.copy(max);
-        
+    copy : function(cylinder) {
+
+        this.c1.copy(cylinder.c1);
+        this.c2.copy(cylinder.c2);
+        this.direction.copy(cylinder.direction);
+        this.radius = cylinder.radius;
+
         return this;
-        
-    }
+
+    },
     
+    lengthSq : function() {
+        var vector = new WebMol.Vector3();
+        
+        return function(){
+            return vector.subVectors(this.c2, this.c1).lengthSq();
+        }
+    }(),
+
+    applyMatrix4 : function(matrix) {
+        
+        this.direction.add(this.c1).applyMatrix4(matrix);
+        this.c1.applyMatrix4(matrix);
+        this.c2.applyMatrix4(matrix);
+        this.direction.sub(this.c1).normalize();
+        this.radius = this.radius * matrix.getMaxScaleOnAxis();
+
+        return this;
+
+    }
+
 };
+    
+

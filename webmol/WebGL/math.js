@@ -1045,6 +1045,10 @@ WebMol.Ray.prototype = {
         
     }(),
     
+    isIntersectionCylinder : function() {
+        
+    },
+    
     isIntersectionSphere : function(sphere) {
        
        return (this.distanceToPoint(sphere.center) <= sphere.radius);

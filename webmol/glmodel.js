@@ -869,7 +869,7 @@ WebMol.GLModel = (function() {
             
             if ((atom.clickable === true) && (atom.intersectionShape !== undefined)){
                 var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
-                atom.intersectionShape.sphere = new WebMol.Sphere(center, 0.98*radius);
+                atom.intersectionShape.sphere = new WebMol.Sphere(center, 0.99*radius);
             }
                 
                         
@@ -1121,7 +1121,7 @@ WebMol.GLModel = (function() {
                     var C2 = WebMol.CC.color(c2);
 
                     // draw cylinders
-                    if (atom.bondOrder[i] == 1) {
+                    if (atom.bondOrder[i] === 1) {
                         if (c1 != c2) {
                             var mp = new TV3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
@@ -1130,13 +1130,27 @@ WebMol.GLModel = (function() {
                         } else {
                             drawCylinder(geo, p1, p2, bondR, C1);
                         }
+                        
+                        if (atom.clickable || atom2.clickable) {
+                            var mp = new TV3().addVectors(p1, p2).multiplyScalar(0.5);
+                            if (atom.clickable){
+                                var cylinder1 = new WebMol.Cylinder(p1.clone(), mp.clone(), bondR);
+                                atom.intersectionShape.cylinder.push(cylinder1);
+                            }
+                            if (atom2.clickable){
+                                var cylinder2 = new WebMol.Cylinder(p2.clone(), mp.clone(), bondR);
+                                atom2.intersectionShape.cylinder.push(cylinder2);
+                            }
+
+                        }
+                        
                     } else if (atom.bondOrder[i] > 1) {
                         var dir = p2.clone();
                         var v = null;
                         dir.sub(p1);
 
-                        if (atom.bonds.length == 1) {
-                            if (atom2.bonds.length == 1) {
+                        if (atom.bonds.length === 1) {
+                            if (atom2.bonds.length === 1) {
                                 v = dir.clone();
                                 if (Math.abs(v.x) > .0001)
                                     v.y += 1;
@@ -1278,8 +1292,8 @@ WebMol.GLModel = (function() {
                 // recreate gl info for each atom as necessary
                 // set up appropriate intersection spheres for clickable atoms
                 if (atom && atom.style) {
-                    if (atom.clickable === true)
-                        atom.intersectionShape = {sphere: null, box: null, line: null};                    
+                    if (atom.clickable && atom.intersectionShape === undefined)
+                        atom.intersectionShape = {sphere: null, cylinder: [], line: null};                    
                     drawAtomSphere(atom, sphereGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
@@ -1538,7 +1552,8 @@ WebMol.GLModel = (function() {
             // style, although these checks will only catch cases where both
             // are either null or undefined
             for ( var i = 0; i < atoms.length; i++) {
-
+                if (atoms[i].clickable)
+                    atoms[i].intersectionShape = {sphere : null, cylinder : [], line : null};
                 if(!add) atoms[i].style = {};
                 for(var s in mystyle) {
                     if(mystyle.hasOwnProperty(s)) {
