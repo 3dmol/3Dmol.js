@@ -282,7 +282,7 @@ WebMol.Raycaster = (function() {
     var matrixPosition = new WebMol.Vector3();
     
     var inverseMatrix = new WebMol.Matrix4();
-    
+        
     var descSort = function(a, b) {
         return a.distance - b.distance;
     };
@@ -299,9 +299,16 @@ WebMol.Raycaster = (function() {
         
         if ((atom.clickable !== true) || (atom.intersectionShape === undefined))
             return intersects;
+        var sulfur;
+        if (atom.elem === "S")
+            sulfur = true;
         
         var intersectionShape = atom.intersectionShape;
+        var precision = raycaster.linePrecision;
+        precision *= group.matrixWorld.getMaxScaleOnAxis();
+        var precisionSq = precision*precision;
         
+        //cylinders
         for (var i in intersectionShape.cylinder) {
             
             if (intersectionShape.cylinder[i] instanceof WebMol.Cylinder){
@@ -327,10 +334,10 @@ WebMol.Raycaster = (function() {
                 v1.copy(cylinder.direction).multiplyScalar(s_c).add(cylinder.c1);  // Q_c
                 v2.copy(raycaster.ray.direction).multiplyScalar(t_c).add(raycaster.ray.origin); // P_c
                 
-                var closestSqDist = v3.subVectors(v1, v2).lengthSq();
+                var closestDistSq = v3.subVectors(v1, v2).lengthSq();
                 // closest distance between ray and cylinder axis not greater than cylinder radius;
                 // might intersect this cylinder between atom and bond midpoint
-                if (closestSqDist <= cylinder.radius*cylinder.radius){
+                if (closestDistSq <= cylinder.radius*cylinder.radius){
                     var distance;
                     
                     //Find points where ray intersects sides of cylinder
@@ -361,7 +368,47 @@ WebMol.Raycaster = (function() {
             }
             
         }
+         
+        //lines
+        for (var i = 0, il = intersectionShape.line.length; i < il; i += 2) {
+            
+            v1.copy(intersectionShape.line[i]);
+            v1.applyMatrix4(group.matrixWorld);
+            v2.copy(intersectionShape.line[i+1]);
+            v2.applyMatrix4(group.matrixWorld);
+            
+            v3.subVectors(v2, v1);
+            var bondLengthSq = v3.lengthSq();
+            v3.normalize();
+            
+            w_0.subVectors(v1, raycaster.ray.origin);
+            
+            var lineProj = w_0.dot(v3);
+            var rayProj = w_0.dot(raycaster.ray.direction);
+            
+            var normProj = clamp(raycaster.ray.direction.dot(v3));
+            
+            var denom = 1 - normProj*normProj;
+            
+            if (denom === 0.0)
+                continue;
+            
+            var s_c = (normProj*rayProj - lineProj) / denom;
+            var t_c = (rayProj - normProj*lineProj) / denom;
+            
+            v1.add(v3.multiplyScalar(s_c)); // Q_c
+            v2.copy(raycaster.ray.direction).multiplyScalar(t_c).add(raycaster.ray.origin); // P_c
+            
+            var closestDistSq = v3.subVectors(v2, v1).lengthSq();
+            
+            if (closestDistSq < precisionSq && s_c*s_c < bondLengthSq)
+                intersects.push({atom : atom,
+                                 distance : t_c
+                                });
+            
+        }
         
+        //sphere
         if (intersectionShape.sphere instanceof WebMol.Sphere) {
             
             sphere.copy(intersectionShape.sphere);
@@ -399,14 +446,13 @@ WebMol.Raycaster = (function() {
                                  distance : distance});
                 return intersects;
             }
-        }
-        
+        }        
        
         
     };   
        
     Raycaster.prototype.precision = 0.0001;
-    Raycaster.prototype.linePrecision = 1;
+    Raycaster.prototype.linePrecision = 0.2;
     
     Raycaster.prototype.set = function(origin, direction) {
         
