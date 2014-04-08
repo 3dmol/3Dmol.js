@@ -1108,7 +1108,7 @@ WebMol.GLModel = (function() {
                 c1 = style.color;
             }
             var C1 = WebMol.CC.color(c1);
-            var mp;
+            var mp, mp1, mp2;
 
             for (var i = 0; i < atom.bonds.length; i++) {
                 var j = atom.bonds[i]; // our neighbor
@@ -1208,8 +1208,7 @@ WebMol.GLModel = (function() {
                             p2a.add(dir);
                             var p2b = p1b.clone();
                             p2b.add(dir);
-                                
-                            var mp2;                                  
+                                                                 
                             if (c1 != c2) {
                                 mp = new TV3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
@@ -1258,11 +1257,11 @@ WebMol.GLModel = (function() {
                             p2b.add(dir);
 
                             if (c1 != c2) {
-                                var mp = new TV3().addVectors(p1a, p2a)
+                                mp = new TV3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
-                                var mp2 = new TV3().addVectors(p1b, p2b)
+                                mp2 = new TV3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                var mp3 = new TV3().addVectors(p1, p2)
+                                mp3 = new TV3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
                                 drawCylinder(geo, p1a, mp, r, C1);
                                 drawCylinder(geo, mp, p2a, r, C2);
@@ -1275,6 +1274,31 @@ WebMol.GLModel = (function() {
                                 drawCylinder(geo, p1, p2, r, C1);
                                 drawCylinder(geo, p1b, p2b, r, C1);
 
+                            }
+                            if (atom.clickable || atom2.clickable) {
+                                mp = new TV3().addVectors(p1a, p2a)
+                                        .multiplyScalar(0.5);
+                                mp2 = new TV3().addVectors(p1b, p2b)
+                                        .multiplyScalar(0.5);
+                                mp3 = new TV3().addVectors(p1, p2)
+                                        .multiplyScalar(0.5);
+                                
+                                if (atom.clickable) {
+                                    var cylinder1a = new WebMol.Cylinder(p1a.clone(), mp.clone(), r);
+                                    var cylinder1b = new WebMol.Cylinder(p1b.clone(), mp2.clone(), r);
+                                    var cylinder1c = new WebMol.Cylinder(p1.clone(), mp3.clone(), r);
+                                    atom.intersectionShape.cylinder.push(cylinder1a);
+                                    atom.intersectionShape.cylinder.push(cylinder1b);
+                                    atom.intersectionShape.cylinder.push(cylinder1c);
+                                } 
+                                if (atom2.clickable) {                               
+                                    var cylinder2a = new WebMol.Cylinder(p2a.clone(), mp.clone(), r);
+                                    var cylinder2b = new WebMol.Cylinder(p2b.clone(), mp2.clone(), r);
+                                    var cylinder2c = new WebMol.Cylinder(p2.clone(), mp3.clone(), r);
+                                    atom2.intersectionShape.cylinder.push(cylinder2a);
+                                    atom2.intersectionShape.cylinder.push(cylinder2b);
+                                    atom2.intersectionShape.cylinder.push(cylinder2c);                                
+                                }
                             }
                         }
                     }
