@@ -42,7 +42,7 @@
         var molObj = null; //Object3D for each rendered model
         
         var addLabels = function() {
-            var atoms = glviewer.getModel(1).selectedAtoms({});
+            var atoms = glviewer.getModel(0).selectedAtoms({});
             for (var a in atoms) {
                 var atom = atoms[a];
                 
