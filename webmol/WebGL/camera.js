@@ -13,6 +13,7 @@ WebMol.Camera = function(fov, aspect, near, far) {
     this.far = far !== undefined ? far : 2000;
 
     this.projectionMatrix = new WebMol.Matrix4();
+    this.projectionMatrixInverse = new WebMol.Matrix4();
     this.matrixWorldInverse = new WebMol.Matrix4();
     
     this.updateProjectionMatrix();

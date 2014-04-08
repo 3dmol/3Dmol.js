@@ -162,6 +162,7 @@ WebMol.glmolViewer = (function() {
     function GLViewer(element, callback, defaultcolors) {
 
         // set variables
+        var _viewer = this;
         var container = element;
         var id = container.id;
 
@@ -198,6 +199,10 @@ WebMol.glmolViewer = (function() {
         var camera = new WebMol.Camera(20, ASPECT, 1, 800);
         camera.position = new TV3(0, 0, CAMERA_Z);
         camera.lookAt(new TV3(0, 0, 0));
+        
+        var raycaster = new WebMol.Raycaster(new TV3(0,0,0), new TV3(0,0,0));
+        var projector = new WebMol.Projector();
+        var mouseVector = new WebMol.Vector3(0, 0, 0);
 
         var scene = null;
         var rotationGroup = null; // which contains modelGroup
@@ -250,10 +255,10 @@ WebMol.glmolViewer = (function() {
             if (!scene)
                 return;
             
-            // var time = new Date();
+            //var time = new Date();
             setSlabAndFog();
             renderer.render(scene, camera);
-            // console.log("rendered in " + (+new Date() - time) + "ms");
+            //console.log("rendered in " + (+new Date() - time) + "ms");
         };
 
         var initializeScene = function() {
@@ -278,10 +283,43 @@ WebMol.glmolViewer = (function() {
         };
 
         initializeScene();
-
+        
+        var clickedAtom = null;
         // enable mouse support
         var glDOM = $(renderer.domElement);
 
+        //Checks for selection intersects on mousedown
+        var handleClickSelection = function(mouseX, mouseY) {
+            
+            var mouse = {x : mouseX, y : mouseY, z : 1};
+            mouseVector.set(mouse.x, mouse.y, mouse.z);
+            projector.unprojectVector(mouseVector, camera);
+            mouseVector.sub(camera.position).normalize();
+             
+            raycaster.set(camera.position, mouseVector);
+
+            var intersects = [];
+            
+            for (var i in models) {
+                var model = models[i];
+                
+                var atoms = model.selectedAtoms({clickable: true});
+                var atom = null;
+
+                intersects = raycaster.intersectObjects(modelGroup, atoms);
+                
+                if (intersects.length) {
+                    var atom = intersects[0].atom;
+                    clickedAtom = atom;
+                    
+                    if (atom.callback !== undefined && typeof(atom.callback) === "function"){
+                        atom.callback(atom, model, _viewer);
+                        show();
+                    }
+                }
+            }        
+        }; 
+        
         // TODO: Better touch panel support.
         // Contribution is needed as I don't own any iOS or Android device
         // with
@@ -299,6 +337,7 @@ WebMol.glmolViewer = (function() {
             if (x === undefined)
                 return;
             isDragging = true;
+            clickedAtom = null;
             mouseButton = ev.which;
             mouseStartX = x;
             mouseStartY = y;
@@ -307,6 +346,12 @@ WebMol.glmolViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
+            
+            //handle selection
+            var mouseX = (x / WIDTH)*2 - 1;
+            var mouseY = -(y / HEIGHT)*2 + 1;
+            handleClickSelection(mouseX, mouseY);
+            
         });
 
         glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
@@ -1200,7 +1245,7 @@ WebMol.glmolViewer = (function() {
         
         this.getModelGroup = function() {
             return modelGroup;
-        };
+        };       
         
         try {
             if (typeof (callback) === "function")

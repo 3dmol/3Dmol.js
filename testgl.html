@@ -7,6 +7,7 @@
         <script  src="js/jquery-1.9.1.js"></script>
         <script src="webmol/webmol.js"></script>
         <script src="webmol/WebGL/math.js"></script>
+        <script src="webmol/WebGL/shapes.js"></script>
         <script src="webmol/WebGL/core.js"></script>
         <script src="webmol/WebGL/materials.js"></script>
         <script src="webmol/WebGL/objects.js"></script>
@@ -18,7 +19,7 @@
         <script src="webmol/WebGL/camera.js"></script>
         <script src="webmol/WebGL/renderer.js"></script>
         <script src="webmol/properties.js"></script>
-	    <script src="webmol/colors.js"></script>
+	<script src="webmol/colors.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/ProteinSurface4.js"></script>
@@ -33,10 +34,12 @@
         var glviewer = null;
         var labels = [];
         var m = null;
+        var m2 = null;
         var atoms = null;
         var moldata = "";
         var l = null;
         var modelgroup = null;
+        var molObj = null; //Object3D for each rendered model
         
         var addLabels = function() {
             var atoms = glviewer.getModel(0).selectedAtoms({});
@@ -52,20 +55,59 @@
             }
         };
         
+        var clickCallback = function(atom, model, viewer){
+            if (atom.clickLabel === undefined || !atom.clickLabel instanceof WebMol.Label) {
+                atom.clickLabel = viewer.addLabel(atom.elem + " " + atom.serial,
+                                                  {fontSize : 18, 
+                                                   position : {x:atom.x, y:atom.y, z:atom.z}});
+                atom.clicked = true;
+            }
+            
+            //toggle label style
+            else{
+
+                if (atom.clicked) {
+                    var newstyle = {fontSize: atom.clickLabel.fontSize, position: atom.clickLabel.position,
+                                    backgroundColor: {r: 100, g: 0, b: 255, a: 0.8}};
+                                
+                    viewer.setLabelStyle(atom.clickLabel, newstyle);
+                    atom.clicked = !atom.clicked;
+                }
+               
+                else {
+                    viewer.removeLabel(atom.clickLabel);  
+                    atom.clickLabel = undefined;
+                    atom.clicked = false;
+                }
+                
+            }
+        };
+        
         $(document).ready(function() {
             
             
-            //$.get("test_structs/3M8L.pdb", function(data){
-                data = moldata = $("#moldata_sdf_small").val();
+            //$.get("test_structs/2AA1.pdb", function(data){
+                //data = moldata = $("#moldata_pdb").val();
+                data = moldata = $("#moldata_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
-                    m = viewer.addModel(data,"sdf");           
+                    m = viewer.addModel(data, "sdf");
+                    //m2 = viewer.addModel(data2,"pdb");
                     atoms = m.selectedAtoms({ });
+
+                    for (a in atoms) {
+                        atoms[a].clickable = true;
+                        atoms[a].callback = clickCallback;
+                    }
                     
                     modelgroup = viewer.getModelGroup();
+                    
                     viewer.zoomTo();
                     viewer.render();
+                    
+                    molObj = modelgroup.children[0];
+                    
                 }});
                 
             //}, "text");   
@@ -102,7 +144,7 @@
 
  2 1  0     1  0  0  0  0  0999 V2000
    -8.1967    0.5191    0.7989 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -7.6843   -0.2222   -0.2656 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -7.6843   -0.2222   -0.2656 S   0  0  0  0  0  0  0  0  0  0  0  0
   1  2  1  0  0  0  0
 M  END
 </textarea> 
