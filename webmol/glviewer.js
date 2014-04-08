@@ -291,7 +291,7 @@ WebMol.glmolViewer = (function() {
         //Checks for selection intersects on mousedown
         var handleClickSelection = function(mouseX, mouseY) {
             
-            var mouse = {x : mouseX, y : mouseY, z : 1};
+            var mouse = {x : mouseX, y : mouseY, z : -1.0};
             mouseVector.set(mouse.x, mouse.y, mouse.z);
             projector.unprojectVector(mouseVector, camera);
             mouseVector.sub(camera.position).normalize();
@@ -348,7 +348,7 @@ WebMol.glmolViewer = (function() {
             cslabFar = slabFar;
             
             //handle selection
-            var mouseX = (x / WIDTH)*2 - 1;
+            var mouseX = (x / window.innerWidth)*2 - 1;
             var mouseY = -(y / HEIGHT)*2 + 1;
             handleClickSelection(mouseX, mouseY);
             

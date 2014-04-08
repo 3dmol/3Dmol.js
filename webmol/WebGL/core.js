@@ -335,33 +335,41 @@ WebMol.Raycaster = (function() {
                 v2.copy(raycaster.ray.direction).multiplyScalar(t_c).add(raycaster.ray.origin); // P_c
                 
                 var closestDistSq = v3.subVectors(v1, v2).lengthSq();
+                var radiusSq = cylinder.radius*cylinder.radius;
+                
+                //Smoothing?
+                //if (closestDistSq > radiusSq) radiusSq += precisionSq;
+                
                 // closest distance between ray and cylinder axis not greater than cylinder radius;
                 // might intersect this cylinder between atom and bond midpoint
-                if (closestDistSq <= cylinder.radius*cylinder.radius){
+                if (closestDistSq <= radiusSq){
                     var distance;
                     
                     //Find points where ray intersects sides of cylinder
                     var discriminant = (normProj*cylProj - rayProj)*(normProj*cylProj - rayProj) - 
-                            denom*(w_0.lengthSq() - cylProj*cylProj - cylinder.radius*cylinder.radius);
+                            denom*(w_0.lengthSq() - cylProj*cylProj - radiusSq);
                     
+                    var t;
                     // ray tangent to cylinder?
                     if (discriminant <= 0)
-                        distance = Math.sqrt(closestSqDist);
+                        t = distance = Math.sqrt(closestDistSq);
+                    else
+                        t = distance = ( (rayProj - normProj*cylProj) - Math.sqrt(discriminant) ) / denom; 
                     
                     //find closest intersection point; make sure it's between atom's position and cylinder midpoint
-                    else {
-                        var t = distance = ( (rayProj - normProj*cylProj) - Math.sqrt(discriminant) ) / denom;                   
-                        var s = normProj*t - cylProj;
-                        
-                        //does not intersect cylinder between atom and midpoint,
-                        // or intersects cylinder behind camera
-                        if (s < 0 || s*s > cylinder.lengthSq() || t < 0)
-                            continue
-                        
-                        else
-                            intersects.push({atom : atom,
-                                             distance : distance});
-                    }
+                    
+                                          
+                    var s = normProj*t - cylProj;
+                    
+                    //does not intersect cylinder between atom and midpoint,
+                    // or intersects cylinder behind camera
+                    if (s < 0 || s*s > cylinder.lengthSq() || t < 0)
+                        continue;
+                    
+                    else
+                        intersects.push({atom : atom,
+                                         distance : distance});
+                    
                 }
                     
                 
