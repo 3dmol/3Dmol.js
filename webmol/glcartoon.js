@@ -33,13 +33,22 @@ WebMol.drawCartoon = (function() {
                 points.push(p1);
         }
         points.push(_points[_points.length - 1]);
-
+        
+        var atom1, atom2;
+        
         for ( var i = -1, size = points.length; i <= size - 3; i++) {
             var p0 = points[(i == -1) ? 0 : i];
             var p1 = points[i + 1], p2 = points[i + 2];
             var p3 = points[(i == size - 3) ? size - 1 : i + 3];
             var v0 = new TV3().subVectors(p2, p0).multiplyScalar(0.5);
             var v1 = new TV3().subVectors(p3, p1).multiplyScalar(0.5);
+            
+            if (p0.atom !== undefined) atom1 = p0.atom;
+            if (p2.atom !== undefined) atom2 = p2.atom;
+            
+            //index between atom1 and atom2
+            var mp = DIV / 2;
+            
             for ( var j = 0; j < DIV; j++) {
                 var t = 1.0 / DIV * j;
                 var x = p1.x + t * v0.x + t * t
@@ -51,7 +60,16 @@ WebMol.drawCartoon = (function() {
                 var z = p1.z + t * v0.z + t * t
                         * (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t
                         * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
-                ret.push(new TV3(x, y, z));
+                        
+                var pt = new TV3(x, y, z);
+                
+                if (j < mp) {
+                    if (atom1 !== undefined) pt.atom = atom1;
+                }
+
+                else if (atom2 !== undefined) pt.atom = atom2;
+                    
+                ret.push(pt);
             }
         }
         ret.push(points[points.length - 1]);
@@ -116,6 +134,7 @@ WebMol.drawCartoon = (function() {
                 
         var offset;
         var color;
+        var currentAtom, lastAtom;
         
         for ( var i = 0, lim = p1.length; i < lim; i++) {
         
@@ -135,6 +154,9 @@ WebMol.drawCartoon = (function() {
             vs.push(a1v); // 5
             vs.push(a2v = p2[i].clone().add(axis)); // 6
             vs.push(a2v); // 7
+            
+            if (p1v.atom !== undefined)
+                currentAtom = p1v.atom;
             
             geoGroup = updateGeoGroup(geo, geoGroup, 8);
             
@@ -156,6 +178,9 @@ WebMol.drawCartoon = (function() {
                         
                 offset = geoGroup.vertices;
                 
+                //both points have distinct atoms
+                var diffAtoms = ((lastAtom !== undefined && currentAtom !== undefined) && lastAtom.serial !== currentAtom.serial);
+                
                 for ( var j = 0; j < 4; j++ ) {
                 
                     var face = [offset + faces[j][0], offset
@@ -170,10 +195,48 @@ WebMol.drawCartoon = (function() {
                     geoGroup.faceArr.push(face[2]);
                     geoGroup.faceArr.push(face[3]);
                     
+                    if (currentAtom.clickable || lastAtom.clickable) {
+                        
+                        var p1a = vs[face[3]].clone(), p1b = vs[face[0]].clone(),
+                            p2a = vs[face[2]].clone(), p2b = vs[face[1]].clone();
+                            
+                        var face1, face2;
+                        
+                        if (diffAtoms) {
+                            var m1 = p1a.clone().add(p1b).multiplyScalar(0.5);
+                            var m2 = p2a.clone().add(p2b).multiplyScalar(0.5);
+                            
+                            if (lastAtom.clickable) {
+                                face1 = new WebMol.Triangle(m1, m2, p1a);
+                                face2 = new WebMol.Triangle(m2, p2a, p1a);
+                                lastAtom.intersectionShape.triangle.push(face1);
+                                lastAtom.intersectionShape.triangle.push(face2);
+                            }
+                            
+                            if (currentAtom.clickable) {
+                                face1 = new WebMol.Triangle(p1b, p2b, m1);
+                                face2 = new WebMol.Triangle(p2b, m2, m1);
+                                currentAtom.intersectionShape.triangle.push(face1);
+                                currentAtom.intersectionShape.triangle.push(face2);
+                            }
+                            
+                        }
+                        
+                        //face for single atom
+                        else if (currentAtom.clickable) {
+                            face1 = new WebMol.Triangle(p1b, p2b, p1a);
+                            face2 = new WebMol.Triangle(p2b, p2a, p1a);
+                            currentAtom.intersectionShape.triangle.push(face1);
+                            currentAtom.intersectionShape.triangle.push(face2);
+                        }
+                        
+                    }
+                    
                 }
             }
             
             geoGroup.vertices += 8;
+            lastAtom = currentAtom;
         }
         
 
@@ -207,6 +270,8 @@ WebMol.drawCartoon = (function() {
         geoGroup.faceArr.push(face1[1]), geoGroup.faceArr.push(face1[2]), geoGroup.faceArr.push(face1[3]);
         geoGroup.faceArr.push(face2[0]), geoGroup.faceArr.push(face2[1]), geoGroup.faceArr.push(face2[3]);
         geoGroup.faceArr.push(face2[1]), geoGroup.faceArr.push(face2[2]), geoGroup.faceArr.push(face2[3]);
+        
+        //TODO: Add intersection planes for caps
         
         //geo.computeFaceNormals();
         //geo.computeVertexNormals(false);
@@ -279,6 +344,7 @@ WebMol.drawCartoon = (function() {
                         ssborder = false;
                     }
                     currentCA = new TV3(atom.x, atom.y, atom.z);
+                    currentAtom = atom;
                     currentChain = atom.chain;
                     currentResi = atom.resi;
                     ss = atom.ss;
@@ -288,6 +354,10 @@ WebMol.drawCartoon = (function() {
                         atomcolor = atom.style.cartoon.color;
                     }
                     colors.push(atomcolor);
+                    
+                    if (atom.clickable === true && (atom.intersectionShape === undefined || atom.intersectionShape.triangle === undefined)) 
+                        atom.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
+                    
                 } else { // O
                     var O = new TV3(atom.x, atom.y, atom.z);
                     O.sub(currentCA);
@@ -301,6 +371,7 @@ WebMol.drawCartoon = (function() {
                         var v = new TV3(currentCA.x + prevCO.x * delta,
                                 currentCA.y + prevCO.y * delta, currentCA.z
                                         + prevCO.z * delta);
+                        v.atom = currentAtom;
                         if (!doNotSmoothen && ss == 's')
                             v.smoothen = true;
                         points[j].push(v);

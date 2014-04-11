@@ -272,6 +272,7 @@ WebMol.Raycaster = (function() {
     
     var sphere = new WebMol.Sphere();
     var cylinder = new WebMol.Cylinder();
+    var triangle = new WebMol.Triangle();
     var w_0 = new WebMol.Vector3(); // for cylinders, cylinder.c1 - ray.origin
     var v1 = new WebMol.Vector3(); // all purpose local vector
     var v2 = new WebMol.Vector3();
@@ -307,6 +308,58 @@ WebMol.Raycaster = (function() {
         var precision = raycaster.linePrecision;
         precision *= group.matrixWorld.getMaxScaleOnAxis();
         var precisionSq = precision*precision;
+        
+        //triangle faces
+        for (var i in intersectionShape.triangle) {
+            
+            if (intersectionShape.triangle[i] instanceof WebMol.Triangle) {
+                
+                triangle.copy(intersectionShape.triangle[i]);
+                triangle.applyMatrix4(group.matrixWorld);
+                
+                var norm = triangle.getNormal();
+                
+                var normProj = raycaster.ray.direction.dot(norm);
+                
+                //face culling
+                if (normProj >= 0)
+                    continue;
+                
+                w_0.subVectors(triangle.a, raycaster.ray.origin);
+                
+                var distance = (norm.dot(w_0)) / normProj;
+                
+                if (distance < 0)
+                    continue;
+                    
+                //intersects with plane, check if P inside triangle
+                v1.copy(raycaster.ray.direction).multiplyScalar(distance).add(raycaster.ray.origin);
+                v1.sub(triangle.a); // from pt a to intersection point P
+                
+                v2.copy(triangle.b).sub(triangle.a); // from pt a to b
+                v3.copy(triangle.c).sub(triangle.a); // from pt a to c
+                var b_dot_c = v2.dot(v3);
+                var b_sq = v2.lengthSq();
+                var c_sq = v3.lengthSq();
+                
+                // P = A + s(v2) + t(v3), inside trianle if 0 <= s, t <=1  and (s + t) <=0
+                var s, t;
+                
+                t = ( b_sq*v1.dot(v3) - b_dot_c*v1.dot(v2) ) / ( b_sq*c_sq - b_dot_c*b_dot_c );
+                
+                if (t < 0 || t > 1)
+                    continue;
+                
+                s = ( v1.dot(v2) - t*b_dot_c ) / b_sq;
+                
+                if ( (s < 0 || s > 1) || s + t > 1)
+                    continue;
+                    
+                else
+                    intersects.push({atom : atom,
+                                     distance : distance});  
+            }
+        }
         
         //cylinders
         for (var i in intersectionShape.cylinder) {

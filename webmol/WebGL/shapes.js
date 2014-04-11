@@ -66,10 +66,8 @@ WebMol.Sphere.prototype = {
 
 };
 
-//Bounding cylinder for stick render 
 
-
-   
+//Bounding cylinder for stick render  
 WebMol.Cylinder = function(c1, c2, radius) {
 
     this.c1 = (c1 !== undefined) ?
@@ -85,7 +83,6 @@ WebMol.Cylinder = function(c1, c2, radius) {
     
 };
 
-//Axis aligned bounding box
 WebMol.Cylinder.prototype = {
 
     constructor : WebMol.Cylinder,
@@ -102,11 +99,13 @@ WebMol.Cylinder.prototype = {
     },
     
     lengthSq : function() {
+    
         var vector = new WebMol.Vector3();
         
         return function(){
             return vector.subVectors(this.c2, this.c1).lengthSq();
-        }
+        };
+        
     }(),
 
     applyMatrix4 : function(matrix) {
@@ -120,6 +119,66 @@ WebMol.Cylinder.prototype = {
         return this;
 
     }
+
+};
+
+
+//plane specified by three points
+WebMol.Triangle = function(a, b, c){
+   
+    this.a = (a !== undefined) ?
+        a : new WebMol.Vector3();
+
+    this.b = (b !== undefined) ?
+        b : new WebMol.Vector3();
+    
+    this.c = (c !== undefined) ?
+        c : new WebMol.Vector3();   
+  
+};
+
+WebMol.Triangle.prototype = {
+
+    constructor : WebMol.Triangle,
+    
+    copy : function(triangle) {
+        
+        this.a.copy(triangle.a);
+        this.b.copy(triangle.b);
+        this.c.copy(triangle.c);
+        
+        return this;
+        
+    },
+    
+    applyMatrix4 : function(matrix) {
+        
+        this.a.applyMatrix4(matrix);
+        this.b.applyMatrix4(matrix);
+        this.c.applyMatrix4(matrix);
+        
+        return this;
+        
+    },
+    
+    getNormal : function() {
+        
+        var v1 = new WebMol.Vector3();
+        
+        return function() {
+            
+            var norm = this.a.clone();
+            norm.sub(this.b);
+            v1.subVectors(this.c, this.b);
+            
+            norm.cross(v1);
+            norm.normalize();
+            
+            return norm;
+            
+        };
+        
+    }()
 
 };
 
