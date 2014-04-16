@@ -114,8 +114,8 @@ WebMol.drawCartoon = (function() {
         if ((p1.length) < 2)
             return;
         div = div || axisDIV;
-        p1 = subdivide(p1, div);
-        p2 = subdivide(p2, div);
+        //p1 = subdivide(p1, div);
+        //p2 = subdivide(p2, div);
         if (!thickness)
             return drawThinStrip(group, p1, p2, colors, div);
 
@@ -199,6 +199,13 @@ WebMol.drawCartoon = (function() {
                         
                         var p1a = vs[face[3]].clone(), p1b = vs[face[0]].clone(),
                             p2a = vs[face[2]].clone(), p2b = vs[face[1]].clone();
+                        
+                        p1a.atom = vs[face[3]].atom || null; //should be same
+                        p2a.atom = vs[face[2]].atom || null; 
+                        
+                        
+                        p1b.atom = vs[face[0]].atom || null; //should be same                      
+                        p2b.atom = vs[face[1]].atom || null; 
                             
                         var face1, face2;
                         
@@ -206,18 +213,36 @@ WebMol.drawCartoon = (function() {
                             var m1 = p1a.clone().add(p1b).multiplyScalar(0.5);
                             var m2 = p2a.clone().add(p2b).multiplyScalar(0.5);
                             
-                            if (lastAtom.clickable) {
-                                face1 = new WebMol.Triangle(m1, m2, p1a);
-                                face2 = new WebMol.Triangle(m2, p2a, p1a);
-                                lastAtom.intersectionShape.triangle.push(face1);
-                                lastAtom.intersectionShape.triangle.push(face2);
+                            if (j % 2 === 0)
+                            {
+                                if (lastAtom.clickable) {
+                                    face1 = new WebMol.Triangle(m1, m2, p1a);
+                                    face2 = new WebMol.Triangle(m2, p2a, p1a);
+                                    lastAtom.intersectionShape.triangle.push(face1);
+                                    lastAtom.intersectionShape.triangle.push(face2);
+                                }
+                                
+                                if (currentAtom.clickable) {
+                                    face1 = new WebMol.Triangle(p1b, p2b, m1);
+                                    face2 = new WebMol.Triangle(p2b, m2, m1);
+                                    currentAtom.intersectionShape.triangle.push(face1);
+                                    currentAtom.intersectionShape.triangle.push(face2);
+                                }
                             }
-                            
-                            if (currentAtom.clickable) {
-                                face1 = new WebMol.Triangle(p1b, p2b, m1);
-                                face2 = new WebMol.Triangle(p2b, m2, m1);
-                                currentAtom.intersectionShape.triangle.push(face1);
-                                currentAtom.intersectionShape.triangle.push(face2);
+                            else {
+                                if (currentAtom.clickable) {
+                                    face1 = new WebMol.Triangle(m1, m2, p1a);
+                                    face2 = new WebMol.Triangle(m2, p2a, p1a);
+                                    currentAtom.intersectionShape.triangle.push(face1);
+                                    currentAtom.intersectionShape.triangle.push(face2);
+                                }
+                                
+                                if (lastAtom.clickable) {
+                                    face1 = new WebMol.Triangle(p1b, p2b, m1);
+                                    face2 = new WebMol.Triangle(p2b, m2, m1);
+                                    lastAtom.intersectionShape.triangle.push(face1);
+                                    lastAtom.intersectionShape.triangle.push(face2);
+                                }                                
                             }
                             
                         }
