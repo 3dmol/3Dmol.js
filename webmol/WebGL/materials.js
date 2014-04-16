@@ -29,8 +29,6 @@ WebMol.Material = function () {
 
     this.alphaTest = 0;
 
-    this.overdraw = false; // Boolean for fixing antialiasing gaps in CanvasRenderer
-
     this.visible = true;
 
     this.needsUpdate = true;
@@ -93,10 +91,6 @@ WebMol.Material.prototype.clone = function ( material ) {
     material.transparent = this.transparent;
 
     material.blending = this.blending;
-
-    //material.blendSrc = this.blendSrc;
-    //material.blendDst = this.blendDst;
-    //material.blendEquation = this.blendEquation;
 
     material.depthTest = this.depthTest;
     material.depthWrite = this.depthWrite;

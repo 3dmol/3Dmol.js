@@ -679,7 +679,7 @@ WebMol.GLModel = (function() {
             return r;
         };
 
-        // construct vertices around orgin for given radius, memoize results
+        // construct vertices around origin for given radius, memoize results
         var sphereVertexCache = {
             cache : {},
             getVerticesForRadius : function(radius) {

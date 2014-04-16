@@ -54,7 +54,6 @@ WebMol.Object3D = function() {
     this.parent = undefined;
     this.children = [];
     
-    //TODO: Replace this with own class
     this.position = new WebMol.Vector3();
     this.rotation = new WebMol.Vector3();
     this.matrix = new WebMol.Matrix4();
@@ -221,7 +220,6 @@ WebMol.Geometry = function() {
     this.name = '';
     
     this.vertices = 0;
-    this.interesetShapes = []; // list of spheres and/or boxes of clickable atoms in this geometry
 
     this.hasTangents = false;
 
@@ -475,8 +473,6 @@ WebMol.Raycaster = (function() {
             sphere.copy(intersectionShape.sphere);
             sphere.applyMatrix4(group.matrixWorld);
             
-            //TODO: for descSort to work, must push intersection object in 
-            // intersects that includes distance 
             if (raycaster.ray.isIntersectionSphere(sphere)) {
                 
                 var distance;
@@ -501,8 +497,7 @@ WebMol.Raycaster = (function() {
                 //to worry about handling that case?
                 else 
                     distance = distanceToCenter - Math.sqrt(discriminant);
-                
-                //distance = - sphere.center.z;
+
                 intersects.push({atom : atom, 
                                  distance : distance});
                 return intersects;
