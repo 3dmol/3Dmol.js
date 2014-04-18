@@ -33,9 +33,7 @@ WebMol.drawCartoon = (function() {
                 points.push(p1);
         }
         points.push(_points[_points.length - 1]);
-        
-        //Total number of new points after subdivision
-        var npts = DIV*(_points.length-l) + 1;
+
         
         for ( var i = -1, size = points.length; i <= size - 3; i++) {
             var p0 = points[(i == -1) ? 0 : i];

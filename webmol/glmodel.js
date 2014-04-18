@@ -877,7 +877,7 @@ WebMol.GLModel = (function() {
             var radius = getRadiusFromStyle(atom, style);
             var vobj = sphereVertexCache.getVerticesForRadius(radius);
             
-            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)){
+            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)) {
                 var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
                 atom.intersectionShape.sphere = new WebMol.Sphere(center, radius);
             }

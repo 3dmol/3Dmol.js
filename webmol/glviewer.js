@@ -348,9 +348,9 @@ WebMol.glmolViewer = (function() {
             cslabFar = slabFar;
             
             //handle selection
-            var mouseX = (x / window.innerWidth)*2 - 1;
+            var mouseX = (x / $(window).width())*2 - 1;
             var mouseY = -(y / HEIGHT)*2 + 1;
-            handleClickSelection(mouseX, mouseY);
+            handleClickSelection(mouseX, mouseY, ev, container);
             
         });
 
