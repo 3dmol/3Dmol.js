@@ -188,6 +188,7 @@ var geometryChunk = function() {
     this.colorArr = [];
     this.normalArr = [];
     this.faceArr = [];
+    this.lineArr = [];
     this.vertices = 0;
 };
 
@@ -216,7 +217,6 @@ var mergeGeos = function(geometry, mesh) {
         geometry.geometryChunks = [];
     
     geometry.geometryChunks.push( meshGeo.geometryChunks[0] );
-    initBuffers(geometry);
     
 };
 
@@ -241,12 +241,14 @@ var initBuffers = function(geometry, saveArrs) {
             group.__colorArray = new Float32Array(group.colorArr);
             group.__normalArray = new Float32Array(group.normalArr);
             group.__faceArray = new Uint16Array(group.faceArr);
+            group.__lineArray = new Uint16Array(group.lineArr);
             
             //Doesn't free memory directly, but should break references for gc 
             group.vertexArr = null;
             group.colorArr = null;
             group.normalArr = null;
             group.faceArr = null;
+            group.lineArr = null;
             
             group.__inittedArrays = true;
             

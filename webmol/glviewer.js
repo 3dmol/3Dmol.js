@@ -348,9 +348,9 @@ WebMol.glmolViewer = (function() {
             cslabFar = slabFar;
             
             //handle selection
-            var mouseX = (x / window.innerWidth)*2 - 1;
+            var mouseX = (x / $(window).width())*2 - 1;
             var mouseY = -(y / HEIGHT)*2 + 1;
-            handleClickSelection(mouseX, mouseY);
+            handleClickSelection(mouseX, mouseY, ev, container);
             
         });
 
@@ -1122,6 +1122,7 @@ WebMol.glmolViewer = (function() {
                             totalVol);
                     var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                     mergeGeos(surfobj.geo, mesh);
+                    initBuffers(surfobj.geo);
                     view.render();
                 }
             } else { // use worker
@@ -1145,6 +1146,7 @@ WebMol.glmolViewer = (function() {
                         var VandF = event.data;
                         var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                         mergeGeos(surfobj.geo, mesh);
+                        initBuffers(surfobj.geo);
                         view.render();
                         console.log("async mesh generation "
                                 + (+new Date() - time) + "ms");
@@ -1243,6 +1245,8 @@ WebMol.glmolViewer = (function() {
             }
         };
         
+        //TODO: Probably want to keep modelgroup hidden in deployment
+        //  used for debugging
         this.getModelGroup = function() {
             return modelGroup;
         };       

@@ -33,8 +33,7 @@ WebMol.drawCartoon = (function() {
                 points.push(p1);
         }
         points.push(_points[_points.length - 1]);
-        
-        var atom1, atom2;
+
         
         for ( var i = -1, size = points.length; i <= size - 3; i++) {
             var p0 = points[(i == -1) ? 0 : i];
@@ -42,13 +41,7 @@ WebMol.drawCartoon = (function() {
             var p3 = points[(i == size - 3) ? size - 1 : i + 3];
             var v0 = new TV3().subVectors(p2, p0).multiplyScalar(0.5);
             var v1 = new TV3().subVectors(p3, p1).multiplyScalar(0.5);
-            
-            if (p0.atom !== undefined) atom1 = p0.atom;
-            if (p2.atom !== undefined) atom2 = p2.atom;
-            
-            //index between atom1 and atom2
-            var mp = DIV / 2;
-            
+
             for ( var j = 0; j < DIV; j++) {
                 var t = 1.0 / DIV * j;
                 var x = p1.x + t * v0.x + t * t
@@ -63,11 +56,10 @@ WebMol.drawCartoon = (function() {
                         
                 var pt = new TV3(x, y, z);
                 
-                if (j < mp) {
-                    if (atom1 !== undefined) pt.atom = atom1;
-                }
-
-                else if (atom2 !== undefined) pt.atom = atom2;
+                var atomIndex = Math.floor( (ret.length+2) / DIV);
+                
+                if (_points[atomIndex].atom !== undefined)
+                    pt.atom = _points[atomIndex].atom;
                     
                 ret.push(pt);
             }
@@ -199,25 +191,59 @@ WebMol.drawCartoon = (function() {
                         
                         var p1a = vs[face[3]].clone(), p1b = vs[face[0]].clone(),
                             p2a = vs[face[2]].clone(), p2b = vs[face[1]].clone();
+                        
+                        p1a.atom = vs[face[3]].atom || null; //should be same
+                        p2a.atom = vs[face[2]].atom || null; 
+                        
+                        
+                        p1b.atom = vs[face[0]].atom || null; //should be same                      
+                        p2b.atom = vs[face[1]].atom || null; 
                             
-                        var face1, face2;
+                        var face1, face2, face3;
                         
                         if (diffAtoms) {
                             var m1 = p1a.clone().add(p1b).multiplyScalar(0.5);
                             var m2 = p2a.clone().add(p2b).multiplyScalar(0.5);
+                            var m = p1a.clone().add(p2b).multiplyScalar(0.5);
                             
-                            if (lastAtom.clickable) {
-                                face1 = new WebMol.Triangle(m1, m2, p1a);
-                                face2 = new WebMol.Triangle(m2, p2a, p1a);
-                                lastAtom.intersectionShape.triangle.push(face1);
-                                lastAtom.intersectionShape.triangle.push(face2);
+                            if (j % 2 === 0)
+                            {
+                                if (lastAtom.clickable) {
+                                    face1 = new WebMol.Triangle(m1, m, p1a);
+                                    face2 = new WebMol.Triangle(m2, p2a, m);
+                                    face3 = new WebMol.Triangle(m, p2a, p1a);
+                                    lastAtom.intersectionShape.triangle.push(face1);
+                                    lastAtom.intersectionShape.triangle.push(face2);
+                                    lastAtom.intersectionShape.triangle.push(face3);
+                                }
+                                
+                                if (currentAtom.clickable) {
+                                    face1 = new WebMol.Triangle(p1b, p2b, m);
+                                    face2 = new WebMol.Triangle(p2b, m2, m);
+                                    face3 = new WebMol.Triangle(p1b, m, m1);
+                                    currentAtom.intersectionShape.triangle.push(face1);
+                                    currentAtom.intersectionShape.triangle.push(face2);
+                                    currentAtom.intersectionShape.triangle.push(face3);
+                                }
                             }
-                            
-                            if (currentAtom.clickable) {
-                                face1 = new WebMol.Triangle(p1b, p2b, m1);
-                                face2 = new WebMol.Triangle(p2b, m2, m1);
-                                currentAtom.intersectionShape.triangle.push(face1);
-                                currentAtom.intersectionShape.triangle.push(face2);
+                            else {
+                                if (currentAtom.clickable) {
+                                    face1 = new WebMol.Triangle(m1, m, p1a);
+                                    face2 = new WebMol.Triangle(m2, p2a, m);
+                                    face3 = new WebMol.Triangle(m, p2a, p1a);
+                                    currentAtom.intersectionShape.triangle.push(face1);
+                                    currentAtom.intersectionShape.triangle.push(face2);
+                                    currentAtom.intersectionShape.triangle.push(face3);
+                                }
+                                
+                                if (lastAtom.clickable) {
+                                    face1 = new WebMol.Triangle(p1b, p2b, m);
+                                    face2 = new WebMol.Triangle(p2b, m2, m);
+                                    face3 = new WebMol.Triangle(p1b, m, m1);
+                                    lastAtom.intersectionShape.triangle.push(face1);
+                                    lastAtom.intersectionShape.triangle.push(face2);
+                                    lastAtom.intersectionShape.triangle.push(face3);
+                                }                          
                             }
                             
                         }

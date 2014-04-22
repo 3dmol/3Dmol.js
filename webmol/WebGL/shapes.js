@@ -1,5 +1,4 @@
 //Intersection sphere and box shapes.  
-//May want to extend this to other uses (e.g. drawing pharmacophores?
 
 
 //Intersection sphere for sphere, stick render
