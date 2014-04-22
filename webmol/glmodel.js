@@ -761,7 +761,7 @@ WebMol.GLModel = (function() {
                 geo.vertexArr = [];
                 geo.colorArr = [];
                 geo.lineArr = [];
-                                geo.vertices = 0;
+                geo.vertices = 0;
             }
             
             var delta = getRadiusFromStyle(atom, style);
@@ -866,6 +866,11 @@ WebMol.GLModel = (function() {
             if (style.hidden)
                 return;
             
+            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)) {
+                var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
+                atom.intersectionShape.sphere = new WebMol.Sphere(center, radius);
+            }
+                        
             var geoGroup = geo.geometryChunks[geo.geometryChunks.length - 1];
                                                                  
             var color = atom.color;
@@ -875,13 +880,7 @@ WebMol.GLModel = (function() {
 
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
-            var vobj = sphereVertexCache.getVerticesForRadius(radius);
-            
-            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)) {
-                var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
-                atom.intersectionShape.sphere = new WebMol.Sphere(center, radius);
-            }
-                
+            var vobj = sphereVertexCache.getVerticesForRadius(radius);                
                         
             var vertices = vobj.vertices;
             var normals = vobj.normals;
@@ -889,7 +888,7 @@ WebMol.GLModel = (function() {
             geoGroup = updateGeoGroup(geo, geoGroup, vertices.length);
             var start = geoGroup.vertices;
             
-            for (i in vertices) {
+            for (var i in vertices) {
                 var v = vertices[i];
                 geoGroup.vertexArr.push(v.x + atom.x);
                 geoGroup.vertexArr.push(v.y + atom.y);
@@ -1696,6 +1695,10 @@ WebMol.GLModel = (function() {
             molObj = null;
         };
 
+    };
+    
+    GLModel.prototype.testMethod = function() {
+          
     };
 
     return GLModel;

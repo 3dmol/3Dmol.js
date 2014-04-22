@@ -418,6 +418,10 @@ WebMol.Renderer = function ( parameters ) {
                 
                 if (geometryChunk.__webglFaceBuffer !== undefined)
                     _gl.deleteBuffer(geometryChunk.__webglFaceBuffer);
+                    
+                if (geometryChunk.__webglLineBuffer !== undefined)
+                    _gl.deleteBuffer(geometryChunk.__webglLineBuffer);
+                    
             }
         }
     };
@@ -772,7 +776,8 @@ WebMol.Renderer = function ( parameters ) {
             attributes = program.attributes;
 
             var updateBuffers = false,
-                    geometryGroupHash = (geometryGroup.id * 0xffffff) + (program.id * 2);
+                wireframeBit = material.wireframe ? 1 : 0,
+                geometryGroupHash = (geometryGroup.id * 0xffffff) + (program.id * 2) + wireframeBit;
 
             if (geometryGroupHash !== _currentGeometryGroupHash) {
                     _currentGeometryGroupHash = geometryGroupHash;
@@ -813,11 +818,23 @@ WebMol.Renderer = function ( parameters ) {
             //TODO: make sure geometryGroup's face count is setup correctly
             if (object instanceof WebMol.Mesh) {
 
-                    var faceCount = geometryGroup.__faceArray.length;
-
-                    if (updateBuffers)
+                    if (material.wireframe) {
+                        var lineCount = geometryGroup.__lineArray.length;
+                        setLineWidth(material.wireframeLineWidth);
+                        if (updateBuffers)
+                            _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
+                        
+                        _gl.drawElements( _gl.LINES, lineCount, _gl.UNSIGNED_SHORT, 0 );
+                    }
+                    
+                    else {
+                        var faceCount = geometryGroup.__faceArray.length;
+    
+                        if (updateBuffers)
                             _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
-                    _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );
+                        _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );                       
+                    }
+
 
                     _this.info.render.calls++;
                     _this.info.render.vertices += faceCount;
@@ -1185,7 +1202,7 @@ WebMol.Renderer = function ( parameters ) {
             if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate) 
                 setBuffers( geometry, _gl.DYNAMIC_DRAW, true);
                 
-                geometry.veticesNeedUpdate = false;
+                geometry.verticesNeedUpdate = false;
                 geometry.colorsNeedUpdate = false;
                 
         }
@@ -1261,6 +1278,7 @@ WebMol.Renderer = function ( parameters ) {
 
                 var normalArray = geometryChunk.__normalArray;
                 var faceArray = geometryChunk.__faceArray;
+                var lineArray = geometryChunk.__lineArray;
 
                 //normal buffers
                 _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
@@ -1269,6 +1287,10 @@ WebMol.Renderer = function ( parameters ) {
                 //face (index) buffers
                 _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
                 _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );    
+                
+                //line (index) buffers (for wireframe)
+                _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglLineBuffer );
+                _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );
 
             }
 
@@ -1284,6 +1306,7 @@ WebMol.Renderer = function ( parameters ) {
         geometryChunk.__webglColorBuffer = _gl.createBuffer();
 
         geometryChunk.__webglFaceBuffer = _gl.createBuffer();
+        geometryChunk.__webglLineBuffer = _gl.createBuffer();
 
         _this.info.memory.geometries++;
     };

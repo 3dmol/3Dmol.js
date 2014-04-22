@@ -175,6 +175,11 @@ WebMol.MeshLambertMaterial = function(parameters) {
     
     this.fog = true;
     
+    this.wireframe = false;
+    this.wireframeLinewidth = 1;
+    this.wireframeLinecap = 'round';
+    this.wireframeLinejoin = 'round';
+    
     this.shading = WebMol.SmoothShading;
     
     this.vertexColors = WebMol.NoColors;
