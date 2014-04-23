@@ -115,6 +115,7 @@ WebMol.GLShapeCollection = (function() {
             this.cache[radius] = obj;
             return obj;
         }
+        
     }; 
     
     var drawSphere = function(shape) {

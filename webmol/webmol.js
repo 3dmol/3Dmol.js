@@ -218,7 +218,7 @@ var initBuffers = function(geometry, saveArrs) {
                 group.__normalArray = new Float32Array(group.normalArr);
             if (group.faceArr.length)
                 group.__faceArray = new Uint16Array(group.faceArr);
-            if (group.lineArr.length)
+            if (group.lineArr)
                 group.__lineArray = new Uint16Array(group.lineArr);
             
             //Doesn't free memory directly, but should break references for gc 

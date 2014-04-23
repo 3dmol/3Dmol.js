@@ -207,27 +207,24 @@ WebMol.Object3D.prototype = {
 };
 
 WebMol.Object3DIDCount = 0;
-var updateGeoGroup = function(geo, geoGroup, n_vertices) {
-    
-    var retGroup = geoGroup;
-    if (geoGroup.vertices + n_vertices > 65535){
-        geo.geometryChunks.push( new geometryChunk() );
-        retGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
-    }
-    
-    return retGroup;
-};
+
 //Geometry class
 //TODO: What can I remove - how can I optimize ?
 WebMol.Geometry = (function() {
     
     var geometryGroup = function() {
+        this.__vertexArray = null;
+        this.__colorArray = null;
+        this.__normalArray = null;
+        this.__faceArray = null;
+        this.__lineArray = null;
         this.vertexArr = [];
         this.colorArr = [];
         this.normalArr = [];
         this.faceArr = [];
-        this.lineArr = [];
         this.vertices = 0;
+        this.faceidx = 0;
+        this.lineidx = 0;
     };
     
     var addGroup = function(geo) {
@@ -235,10 +232,24 @@ WebMol.Geometry = (function() {
         geo.geometryGroups.push(ret);
         geo.groups = geo.geometryGroups.length;
         
+        ret.__vertexArray = new Float32Array(65535*3);
+        ret.__colorArray = new Float32Array(65535*3);
+        
+        //TODO: instantiating uint arrays according to max number of vertices
+        // is dangerous, since there exists the possibility that there will be 
+        // more face or line indices than vertex points - but so far that doesn't
+        // seem to be the case for any of the renders 
+        if (geo.mesh) {
+            ret.__normalArray = new Float32Array(65535*3);
+            ret.__faceArray = new Uint16Array(65535*6);
+            ret.__lineArray = new Uint16Array(65535*6);
+        }
+        
+        
         return ret;
     };
         
-    Geometry = function() {
+    Geometry = function(mesh) {
         
         WebMol.EventDispatcher.call(this);
         
@@ -249,7 +260,7 @@ WebMol.Geometry = (function() {
         this.hasTangents = false;
     
         this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
-    
+        this.mesh = mesh; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
         // update flags
     
         this.verticesNeedUpdate = false;
@@ -269,9 +280,11 @@ WebMol.Geometry = (function() {
         
         constructor : Geometry,
 
-        //Get geometry chunk to accomodate addVertices new vertices - create 
+        //Get geometry group to accomodate addVertices new vertices - create 
         // new group if necessary       
         updateGeoGroup : function(addVertices) {
+        
+            addVertices = addVertices || 0;
             
             var retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
             
@@ -280,6 +293,35 @@ WebMol.Geometry = (function() {
                 
             return retGroup;
             
+        },
+        
+        //After vertices, colors, etc are collected in regular or typed arrays,
+        // either create typed arrays from regular arrays if they don't already exist,
+        // or shorten last typed array
+        initTypedArrays : function() {
+        
+            if (this.__inittedArrays === true)
+                return;
+            
+            //last geometryGroup
+            var group = this.updateGeoGroup();
+            
+            var vertexArr = group.__vertexArray,
+                colorArr = group.__colorArray,
+                normalArr = group.__normalArray,
+                faceArr = group.__faceArray,
+                lineArr = group.__lineArray;
+                
+            group.__vertexArray = new Float32Array(vertexArr.buffer.slice(vertexArr.byteOffset, group.vertices*12));
+            group.__colorArray = new Float32Array(colorArr.buffer.slice(colorArr.byteOffset, group.vertices*12));
+            
+            if (this.mesh) {
+                group.__normalArray = new Float32Array(normalArr.buffer.slice(normalArr.byteOffset, group.vertices*12));
+                group.__faceArray = new Uint16Array(faceArr.buffer.slice(faceArr.byteOffset, group.faceidx*2));
+                group.__lineArray = new Uint16Array(lineArr.buffer.slice(lineArr.byteOffset, group.lineidx*2));
+            }
+            this.__inittedArrays = true;
+        
         },
         
         dispose : function() {
