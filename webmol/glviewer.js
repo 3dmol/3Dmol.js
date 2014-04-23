@@ -849,14 +849,12 @@ WebMol.glmolViewer = (function() {
         // create a mesh defined from the passed vertices and faces and material
         // Just create a single geometry chunk - broken up whether sync or not
         var generateSurfaceMesh = function(atoms, VandF, mat) {
-            var geo = new WebMol.Geometry();
-            geo.geometryChunks = [];
-            geo.geometryChunks.push( new geometryChunk() );
-            
-            var geoGroup = geo.geometryChunks[0];
+        
+            var geo = new WebMol.Geometry();           
+            var geoGroup = geo.updateGeoGroup(0);
             
             // reconstruct vertices and faces
-            geo.vertices = [];
+            geo.vs = [];
             var v = VandF.vertices;
             
             for ( var i = 0; i < v.length; i++) {

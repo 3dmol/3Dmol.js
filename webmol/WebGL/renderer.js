@@ -401,26 +401,26 @@ WebMol.Renderer = function ( parameters ) {
         if (geometry.__webglColorBuffer !== undefined)
             _gl.deleteBuffer(geometry.__webglColorBuffer);
         
-        if (geometry.geometryChunks !== undefined) {
+        if (geometry.geometryGroups !== undefined) {
             
-            for (var g in geometry.geometryChunks) {  
+            for (var g in geometry.geometryGroups) {  
                 
-                var geometryChunk = geometry.geometryChunks[g];
+                var geometryGroup = geometry.geometryGroups[g];
 
-                if (geometryChunk.__webglVertexBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglVertexBuffer);
+                if (geometryGroup.__webglVertexBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglVertexBuffer);
 
-                if (geometryChunk.__webglColorBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglColorBuffer);
+                if (geometryGroup.__webglColorBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglColorBuffer);
                 
-                if (geometryChunk.__webglNormalBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglNormalBuffer);  
+                if (geometryGroup.__webglNormalBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglNormalBuffer);  
                 
-                if (geometryChunk.__webglFaceBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglFaceBuffer);
+                if (geometryGroup.__webglFaceBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglFaceBuffer);
                     
-                if (geometryChunk.__webglLineBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglLineBuffer);
+                if (geometryGroup.__webglLineBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglLineBuffer);
                     
             }
         }
@@ -1050,7 +1050,7 @@ WebMol.Renderer = function ( parameters ) {
 
             }
 
-            //Add objects; this sets up buffers for each geometryChunk
+            //Add objects; this sets up buffers for each geometryGroup
             if (scene.__objectsAdded.length) {
                 
                 while(scene.__objectsAdded.length){
@@ -1072,7 +1072,7 @@ WebMol.Renderer = function ( parameters ) {
             }
 
             // update must be called after objects adding / removal
-            //This sends typed arrays to GL buffers for each geometryChunk
+            //This sends typed arrays to GL buffers for each geometryGroup
             for ( var o = 0, ol = scene.__webglObjects.length; o < ol; o ++ ) {
 
                     updateObject(scene.__webglObjects[ o ].object);
@@ -1100,71 +1100,60 @@ WebMol.Renderer = function ( parameters ) {
                     object.geometry.addEventListener('dispose', onGeometryDispose);
 
             }
-
-            if (object instanceof WebMol.Mesh){
+            
+            if (object instanceof WebMol.Mesh || object instanceof WebMol.Line) {
                 geometry = object.geometry;
-                material = object.material;
+                material = object.material;           
+    
+                for (g in geometry.geometryGroups) {
+    
+                    var geometryGroup = geometry.geometryGroups[ g ];
+                    
+                    geometryGroup.id = _geometryGroupCounter++;
 
-                for (g in geometry.geometryChunks) {
+                    // initialise VBO on the first access
 
-                        var geometryChunk = geometry.geometryChunks[ g ];
-                        
-                        geometryChunk.id = _geometryGroupCounter++;
-
-                        // initialise VBO on the first access
-
-                        if ( !geometryChunk.__webglVertexBuffer ) {
-
-                                createMeshBuffers(geometryChunk);
-
-                                geometry.verticesNeedUpdate = true;
+                    if ( !geometryGroup.__webglVertexBuffer ) {
+                            
+                            if (object instanceof WebMol.Mesh) {
+                                createMeshBuffers(geometryGroup);
                                 geometry.elementsNeedUpdate = true;
                                 geometry.normalsNeedUpdate = true;
-                                geometry.colorsNeedUpdate = true;
+                            }
+                                
+                            else if (object instanceof WebMol.Line)
+                                createLineBuffers(geometryGroup);
 
-                        }
+                            geometry.verticesNeedUpdate = true;
+                            geometry.colorsNeedUpdate = true;
+
+                    }
+                        
                 }
-            } 
-            
-            else if (object instanceof WebMol.Line) {
                 
-                geometry = object.geometry;
-                if ( !geometry.__webglVertexBuffer ) {
-
-                    createLineBuffers( geometry );
-                    geometry.verticesNeedUpdate = true;
-                    geometry.colorsNeedUpdate = true;
-
-                }
             }
         
         }
         
         if ( ! object.__webglActive ) {
             
-            if (object instanceof WebMol.Mesh) {
+            if (object instanceof WebMol.Mesh || object instanceof WebMol.Line) {
                 
                 geometry = object.geometry;
 
-                for ( g in geometry.geometryChunks ) {
-                        geometryChunk = geometry.geometryChunks[g];
+                for ( g in geometry.geometryGroups ) {
+                        geometryGroup = geometry.geometryGroups[g];
 
-                        addBuffer(scene.__webglObjects, geometryChunk, object);
+                        addBuffer(scene.__webglObjects, geometryGroup, object);
                 }
                 
             }
-            
-            else if (object instanceof WebMol.Line) {
-                geometry = object.geometry;
-                addBuffer(scene.__webglObjects, geometry, object);
-            }
-            
             
             //Sprite
             else if (object instanceof WebMol.Sprite) 
                 scene.__webglSprites.push(object);
          
-            
+                     
             object.__webglActive = true;
             
         }
@@ -1174,17 +1163,17 @@ WebMol.Renderer = function ( parameters ) {
     function updateObject ( object ) {
 
         var geometry = object.geometry, material = object.material,
-                geometryGroup, geometryChunk, customAttributesDirty;
-
-        if ( object instanceof WebMol.Mesh ) {
+                geometryGroup, customAttributesDirty;
+        
+        if ( object instanceof WebMol.Mesh || object instanceof WebMol.Line ) {
             
-            for (g in geometry.geometryChunks ) {
+            for (g in geometry.geometryGroups ) {
                 
-                geometryChunk = geometry.geometryChunks[ g ];
+                geometryGroup = geometry.geometryGroups[ g ];
 
                 if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate ||
                          geometry.colorsNeedUpdate || geometry.normalsNeedUpdate) {
-                        setBuffers( geometryChunk, _gl.DYNAMIC_DRAW );
+                        setBuffers( geometryGroup, _gl.DYNAMIC_DRAW );
                 }
             }
             
@@ -1195,16 +1184,6 @@ WebMol.Renderer = function ( parameters ) {
 
             geometry.buffersNeedUpdate = false;
 
-        }
-        
-        else if ( object instanceof WebMol.Line ) {
-            
-            if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate) 
-                setBuffers( geometry, _gl.DYNAMIC_DRAW, true);
-                
-                geometry.verticesNeedUpdate = false;
-                geometry.colorsNeedUpdate = false;
-                
         }
 
     };
@@ -1258,55 +1237,56 @@ WebMol.Renderer = function ( parameters ) {
 
     };
 
-    function setBuffers( geometryChunk, hint, line ) {
+    function setBuffers( geometryGroup, hint, line ) {
 
-        var vertexArray = geometryChunk.__vertexArray;
-        var colorArray = geometryChunk.__colorArray;
+        var vertexArray = geometryGroup.__vertexArray;
+        var colorArray = geometryGroup.__colorArray;
          
         //vertex buffers
-        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglVertexBuffer );
+        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
         _gl.bufferData( _gl.ARRAY_BUFFER, vertexArray, hint );        
 
         //color buffers
-        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglColorBuffer );
+        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer );
         _gl.bufferData( _gl.ARRAY_BUFFER, colorArray, hint );    
               
-        //set buffers for line render
         
-            //set buffers for mesh render
-            if (line === undefined) {
-
-                var normalArray = geometryChunk.__normalArray;
-                var faceArray = geometryChunk.__faceArray;
-                var lineArray = geometryChunk.__lineArray;
-
-                //normal buffers
-                _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
-                _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );        
-
-                //face (index) buffers
-                _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
-                _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );    
-                
-                //line (index) buffers (for wireframe)
-                _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglLineBuffer );
-                _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );
-
-            }
+        //normal buffers
+        if (geometryGroup.__normalArray !== undefined) {
+            var normalArray = geometryGroup.__normalArray;
+            _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
+            _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );       
+             
+        }
+        
+        //face (index) buffers
+        if (geometryGroup.__faceArray !== undefined) {
+            var faceArray = geometryGroup.__faceArray;
+            _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
+            _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );  
+                      
+        }
+        
+        //line (index) buffers (for wireframe)
+        if (geometryGroup.__lineArray !== undefined) {
+            var lineArray = geometryGroup.__lineArray;            
+            _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
+            _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );
+        }
 
     };
     
     //Creates appropriate gl buffers for geometry chunk
     //TODO: do we need line buffer for mesh objects?
     //Also, can we integrate this with createLineBuffers?
-    function createMeshBuffers ( geometryChunk ) {
+    function createMeshBuffers ( geometryGroup ) {
 
-        geometryChunk.__webglVertexBuffer = _gl.createBuffer();
-        geometryChunk.__webglNormalBuffer = _gl.createBuffer();
-        geometryChunk.__webglColorBuffer = _gl.createBuffer();
+        geometryGroup.__webglVertexBuffer = _gl.createBuffer();
+        geometryGroup.__webglNormalBuffer = _gl.createBuffer();
+        geometryGroup.__webglColorBuffer = _gl.createBuffer();
 
-        geometryChunk.__webglFaceBuffer = _gl.createBuffer();
-        geometryChunk.__webglLineBuffer = _gl.createBuffer();
+        geometryGroup.__webglFaceBuffer = _gl.createBuffer();
+        geometryGroup.__webglLineBuffer = _gl.createBuffer();
 
         _this.info.memory.geometries++;
     };

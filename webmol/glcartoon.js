@@ -69,16 +69,13 @@ WebMol.drawCartoon = (function() {
     };
 
     var drawThinStrip = function(group, p1, p2, colors, div) {
-        var geo = new WebMol.Geometry();
-        geo.geometryChunks = [];
-        geo.geometryChunks.push( new geometryChunk() );
-        var geoGroup = geo.geometryChunks[0];
-        
+    
+        var geo = new WebMol.Geometry();       
         var offset;
         
         for ( var i = 0, lim = p1.length; i < lim; i++) {
             
-            geoGroup = updateGeoGroup(geo, geoGroup, 2);
+            geoGroup = geo.updateGeoGroup(2);
             
             geo.vertexArr.push(p1[i].x), geo.vertexArr.push(p1[i].y), geo.vertexArr.push(p1[i].z);
             geo.vertexArr.push(p2[i].x), geo.vertexArr.push(p2[i].y), geo.vertexArr.push(p2[i].z);
@@ -112,10 +109,6 @@ WebMol.drawCartoon = (function() {
             return drawThinStrip(group, p1, p2, colors, div);
 
         var geo = new WebMol.Geometry();
-        geo.geometryChunks = [];
-        geo.geometryChunks.push( new geometryChunk() );
-        
-        var geoGroup = geo.geometryChunks[0];
         
         //var vs = geo.vertices, fs = geo.faces;
                 var vs = [], fs = [];
@@ -150,7 +143,7 @@ WebMol.drawCartoon = (function() {
             if (p1v.atom !== undefined)
                 currentAtom = p1v.atom;
             
-            geoGroup = updateGeoGroup(geo, geoGroup, 8);
+            geoGroup = geo.updateGeoGroup(8);
             
             geoGroup.vertexArr.push(p1v.x), geoGroup.vertexArr.push(p1v.y), geoGroup.vertexArr.push(p1v.z);
             geoGroup.vertexArr.push(p1v.x), geoGroup.vertexArr.push(p1v.y), geoGroup.vertexArr.push(p1v.z);
@@ -268,7 +261,7 @@ WebMol.drawCartoon = (function() {
 
         var vsize = vs.length - 8; // Cap
         
-        geoGroup = updateGeoGroup(geo, geoGroup, 8);
+        geoGroup = geo.updateGeoGroup(8);
         offset = geoGroup.vertices;
         
         for ( var i = 0; i < 4; i++) {

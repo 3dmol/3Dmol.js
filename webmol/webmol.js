@@ -182,41 +182,14 @@ WebMol.Color.prototype = {
 
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
 
-//represents individual renderable geometry group
-var geometryChunk = function() {
-    this.vertexArr = [];
-    this.colorArr = [];
-    this.normalArr = [];
-    this.faceArr = [];
-    this.lineArr = [];
-    this.vertices = 0;
-};
-
-//checks to make sure geo group isn't too big - if so, create a new group 
-// and add to existing geometry.
-//return either new group or current group
-var updateGeoGroup = function(geo, geoGroup, n_vertices) {
-    
-    var retGroup = geoGroup;
-    if (geoGroup.vertices + n_vertices > 65535){
-        geo.geometryChunks.push( new geometryChunk() );
-        retGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
-    }
-    
-    return retGroup;
-};
-
 var mergeGeos = function(geometry, mesh) {
     
     var meshGeo = mesh.geometry;
     
-    if (meshGeo === undefined || meshGeo.geometryChunks === undefined) 
+    if (meshGeo === undefined) 
         return;
-        
-    if (geometry.geometryChunks === undefined)
-        geometry.geometryChunks = [];
     
-    geometry.geometryChunks.push( meshGeo.geometryChunks[0] );
+    geometry.geometryGroups.push( meshGeo.geometryGroups[0] );
     
 };
 
@@ -226,22 +199,27 @@ var mergeGeos = function(geometry, mesh) {
 var initBuffers = function(geometry, saveArrs) {
     
     //mesh arrays
-    if ( geometry.geometryChunks !== undefined ) {
+    if ( geometry.geometryGroups !== undefined ) {
         
         var group;
         
-        for (var i = 0; i < geometry.geometryChunks.length; ++i){
+        for (var i = 0; i < geometry.geometryGroups.length; ++i){
         
-            group = geometry.geometryChunks[i];
+            group = geometry.geometryGroups[i];
             
             if (group.__inittedArrays)
                 continue;
             
-            group.__vertexArray = new Float32Array(group.vertexArr);
-            group.__colorArray = new Float32Array(group.colorArr);
-            group.__normalArray = new Float32Array(group.normalArr);
-            group.__faceArray = new Uint16Array(group.faceArr);
-            group.__lineArray = new Uint16Array(group.lineArr);
+            if (group.vertexArr.length)
+                group.__vertexArray = new Float32Array(group.vertexArr);
+            if (group.colorArr.length)
+                group.__colorArray = new Float32Array(group.colorArr);
+            if (group.normalArr.length)
+                group.__normalArray = new Float32Array(group.normalArr);
+            if (group.faceArr.length)
+                group.__faceArray = new Uint16Array(group.faceArr);
+            if (group.lineArr.length)
+                group.__lineArray = new Uint16Array(group.lineArr);
             
             //Doesn't free memory directly, but should break references for gc 
             group.vertexArr = null;
@@ -279,9 +257,9 @@ var initBuffers = function(geometry, saveArrs) {
 // after all (4-)faces and vertices are set up
 var setUpNormals = function(geo, three) {
     
-    for ( var g in geo.geometryChunks ) {
+    for ( var g in geo.geometryGroups ) {
     
-        var geoGroup = geo.geometryChunks[g];
+        var geoGroup = geo.geometryGroups[g];
     
         var faces = geoGroup.faceArr;
         var verts = geoGroup.vertexArr;

@@ -207,47 +207,102 @@ WebMol.Object3D.prototype = {
 };
 
 WebMol.Object3DIDCount = 0;
-
-//Geometry class
-//TODO: What can I remove - how can I optimize ?
-
-WebMol.Geometry = function() {
+var updateGeoGroup = function(geo, geoGroup, n_vertices) {
     
-    WebMol.EventDispatcher.call(this);
-    
-    this.id = WebMol.GeometryIDCount++;
-
-    this.name = '';
-    
-    this.vertices = 0;
-
-    this.hasTangents = false;
-
-    this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
-
-    // update flags
-
-    this.verticesNeedUpdate = false;
-    this.elementsNeedUpdate = false;
-    this.normalsNeedUpdate = false;
-    this.colorsNeedUpdate = false;
-
-    this.buffersNeedUpdate = false;
-    
-};
-
-
-WebMol.Geometry.prototype = {
-  
-    constructor : WebMol.Geometry,
-  
-    dispose : function() {
-    
-        this.dispatchEvent( {type: 'dispose'} );
-        
+    var retGroup = geoGroup;
+    if (geoGroup.vertices + n_vertices > 65535){
+        geo.geometryChunks.push( new geometryChunk() );
+        retGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
     }
     
+    return retGroup;
 };
+//Geometry class
+//TODO: What can I remove - how can I optimize ?
+WebMol.Geometry = (function() {
+    
+    var geometryGroup = function() {
+        this.vertexArr = [];
+        this.colorArr = [];
+        this.normalArr = [];
+        this.faceArr = [];
+        this.lineArr = [];
+        this.vertices = 0;
+    };
+    
+    var addGroup = function(geo) {
+        var ret = new geometryGroup();
+        geo.geometryGroups.push(ret);
+        geo.groups = geo.geometryGroups.length;
+        
+        return ret;
+    };
+        
+    Geometry = function() {
+        
+        WebMol.EventDispatcher.call(this);
+        
+        this.id = WebMol.GeometryIDCount++;
+    
+        this.name = '';
+    
+        this.hasTangents = false;
+    
+        this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
+    
+        // update flags
+    
+        this.verticesNeedUpdate = false;
+        this.elementsNeedUpdate = false;
+        this.normalsNeedUpdate = false;
+        this.colorsNeedUpdate = false;
+    
+        this.buffersNeedUpdate = false;
+        
+        this.geometryGroups = [];
+        this.groups = 0;
+
+        
+    };
+    
+    Geometry.prototype = {
+        
+        constructor : Geometry,
+
+        //Get geometry chunk to accomodate addVertices new vertices - create 
+        // new group if necessary       
+        updateGeoGroup : function(addVertices) {
+            
+            var retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
+            
+            if (!retGroup || retGroup.vertices + addVertices > 65535) 
+                retGroup = addGroup(this);
+                
+            return retGroup;
+            
+        },
+        
+        dispose : function() {
+            this.dispatchEvent( {type : 'dispose'} );
+        }
+    };
+
+    
+    return Geometry;
+    
+})();
+
+Object.defineProperty(WebMol.Geometry.prototype, "vertices", {
+    
+    get : function() {
+        var vertices = 0;
+        for (g in this.geometryGroups)
+            vertices += this.geometryGroups[g].vertices;
+            
+        return vertices;
+    } 
+        
+});
 
 WebMol.GeometryIDCount = 0;
 

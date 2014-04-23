@@ -754,15 +754,7 @@ WebMol.GLModel = (function() {
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
                 
-            var geo = geos[linewidth];
-            
-            //TODO: initialize geometry in createMolObj
-            if (!geo.vertexArr || !geo.colorArr || !geo.lineArr) {
-                geo.vertexArr = [];
-                geo.colorArr = [];
-                geo.lineArr = [];
-                geo.vertices = 0;
-            }
+            var geo = geos[linewidth].updateGeoGroup();
             
             var delta = getRadiusFromStyle(atom, style);
 
@@ -811,15 +803,7 @@ WebMol.GLModel = (function() {
 
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
-            var geo = geos[linewidth];
-
-            //TODO: initialize geometry in createMolObj
-            if (!geo.vertexArr || !geo.colorArr || !geo.lineArr) {
-                geo.vertexArr = [];
-                geo.colorArr = [];
-                geo.lineArr = [];
-                                geo.vertices = 0;
-            }
+            var geo = geos[linewidth].updateGeoGroup();
 
             for ( var i = 0; i < atom.bonds.length; i++) {
                 
@@ -870,8 +854,6 @@ WebMol.GLModel = (function() {
                 var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
                 atom.intersectionShape.sphere = new WebMol.Sphere(center, radius);
             }
-                        
-            var geoGroup = geo.geometryChunks[geo.geometryChunks.length - 1];
                                                                  
             var color = atom.color;
             if (typeof (style.color) != "undefined")
@@ -885,7 +867,7 @@ WebMol.GLModel = (function() {
             var vertices = vobj.vertices;
             var normals = vobj.normals;
             
-            geoGroup = updateGeoGroup(geo, geoGroup, vertices.length);
+            geoGroup = geo.updateGeoGroup(vertices.length);
             var start = geoGroup.vertices;
             
             for (var i in vertices) {
@@ -905,7 +887,6 @@ WebMol.GLModel = (function() {
             var verticesRows = vobj.verticesRows;
             var h = verticesRows.length - 1;
             
-
             //var color = [C.r, C.g, C.b];
             for (y = 0; y < h; y++) {
                 var w = verticesRows[y].length - 1;
@@ -970,8 +951,6 @@ WebMol.GLModel = (function() {
                 return;
             drawnC++;
             // vertices
-
-            var geoGroup = geo.geometryChunks[geo.geometryChunks.length - 1];
             
             var dir = to.clone();
             dir.sub(from);
@@ -1010,7 +989,7 @@ WebMol.GLModel = (function() {
             nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
             nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
 
-            geoGroup = updateGeoGroup(geo, geoGroup, 32);
+            var geoGroup = geo.updateGeoGroup(32);
             //var start = geo.vertices.length;
             var start = geoGroup.vertices;
             // add vertices, opposing vertices paired together
@@ -1330,15 +1309,8 @@ WebMol.GLModel = (function() {
             var cartoonAtoms = [];
             var lineGeometries = {};
             var crossGeometries = {};
-            var sphereGeometry = new WebMol.Geometry();
-            
-            sphereGeometry.geometryChunks = [];
-            sphereGeometry.geometryChunks.push( new geometryChunk() );    
-                                                         
+            var sphereGeometry = new WebMol.Geometry();                                                         
             var stickGeometry = new WebMol.Geometry();
-            
-            stickGeometry.geometryChunks = [];
-            stickGeometry.geometryChunks.push( new geometryChunk() );
             
             for ( var i = 0; i < atoms.length; i++) {
                 var atom = atoms[i];
@@ -1369,7 +1341,7 @@ WebMol.GLModel = (function() {
             }
 
             // add sphere geometry
-            if (sphereGeometry.geometryChunks[0].vertices) {
+            if (sphereGeometry.vertices > 0) {
                 var sphereMaterial = new WebMol.MeshLambertMaterial({
                     ambient : 0x000000,
                     vertexColors : true,
@@ -1388,7 +1360,7 @@ WebMol.GLModel = (function() {
             }
 
             // add stick geometry
-            if (stickGeometry.geometryChunks[0].vertices) {
+            if (stickGeometry.vertices > 0) {
                 var cylinderMaterial = new WebMol.MeshLambertMaterial({
                     vertexColors : true,
                     ambient : 0x000000,

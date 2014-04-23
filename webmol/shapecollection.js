@@ -5,24 +5,24 @@
 
 //Wrapper around Geometry allowing for quick toggle between mesh and wireframe 
 //after initial vertex typed array contsruction
+
 WebMol.Shape = function(type, color) {
         
-    this.type = type || 'wireframe';
+    this.type = type === 'mesh' ? type : 'wireframe';
+    //TODO: Color handling inconsistent
     this.color = color || {r: 0, g: 0, b: 0, a: 1.0};
-    this.vertices = 0; 
-    this.__vertexArray = null;
-    this.__colorArray = null;
-    this.__normalArray = null;
-    this.__faceArray = null;
-    this.__lineArray = null;
+
     this.initialized = false;
-    //TODO: Can/should vertices be updated (e.g. scaling a sphere) ?
+    this.clickable = false;
+    
+    this.intersectionShape = null;
+    this.clickCallback = null;
     
     this.geo = new WebMol.Geometry();
-    this.geo.geometryChunks = [];
-    this.geo.geometryChunks.push( new geometryChunk() );
+
     
 };
+
 
 WebMol.Shape.prototype = {
     
