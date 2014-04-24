@@ -570,43 +570,44 @@ WebMol.Raycaster = (function() {
             
         }
         
-        //sphere
-        if (intersectionShape.sphere instanceof WebMol.Sphere) {
-            
-            sphere.copy(intersectionShape.sphere);
-            sphere.applyMatrix4(group.matrixWorld);
-            
-            if (raycaster.ray.isIntersectionSphere(sphere)) {
+        for (var i = 0; i < intersectionShape.sphere.length; i++) {
+            //sphere
+            if (intersectionShape.sphere[i] instanceof WebMol.Sphere) {
                 
-                var distance;
+                sphere.copy(intersectionShape.sphere[i]);
+                sphere.applyMatrix4(group.matrixWorld);
                 
-                v1.subVectors(sphere.center, raycaster.ray.origin);
-                
-                //distance from ray origin to point on the ray normal to sphere's center
-                //must be less than sphere's radius (since ray intersects sphere)
-                var distanceToCenter = v1.dot(raycaster.ray.direction);
-                
-                var discriminant = distanceToCenter*distanceToCenter - (v1.lengthSq() - sphere.radius*sphere.radius);
-                
-                //Don't select if sphere center behind camera
-                if (distanceToCenter < 0) 
+                if (raycaster.ray.isIntersectionSphere(sphere)) {
+                    
+                    var distance;
+                    
+                    v1.subVectors(sphere.center, raycaster.ray.origin);
+                    
+                    //distance from ray origin to point on the ray normal to sphere's center
+                    //must be less than sphere's radius (since ray intersects sphere)
+                    var distanceToCenter = v1.dot(raycaster.ray.direction);
+                    
+                    var discriminant = distanceToCenter*distanceToCenter - (v1.lengthSq() - sphere.radius*sphere.radius);
+                    
+                    //Don't select if sphere center behind camera
+                    if (distanceToCenter < 0) 
+                        return intersects;
+                    
+                    //ray tangent to sphere?
+                    if (discriminant <= 0)
+                        distance = distanceToCenter;
+                    
+                    //This is reversed if sphere is closer than ray origin.  Do we have 
+                    //to worry about handling that case?
+                    else 
+                        distance = distanceToCenter - Math.sqrt(discriminant);
+    
+                    intersects.push({atom : atom, 
+                                     distance : distance});
                     return intersects;
-                
-                //ray tangent to sphere?
-                if (discriminant <= 0)
-                    distance = distanceToCenter;
-                
-                //This is reversed if sphere is closer than ray origin.  Do we have 
-                //to worry about handling that case?
-                else 
-                    distance = distanceToCenter - Math.sqrt(discriminant);
-
-                intersects.push({atom : atom, 
-                                 distance : distance});
-                return intersects;
-            }
-        }        
-       
+                }
+            }        
+       }
         
     };   
        

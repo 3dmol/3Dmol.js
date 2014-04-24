@@ -20,7 +20,7 @@
         <script src="webmol/WebGL/renderer.js"></script>
         <script src="webmol/properties.js"></script>
 	    <script src="webmol/colors.js"></script>
-	    <script src="webmol/shapecollection.js"></script>
+	    <script src="webmol/glshape.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/ProteinSurface4.js"></script>
@@ -89,11 +89,11 @@
             
             //$.get("test_structs/2AA1.pdb", function(data){
                 //data = moldata = $("#moldata_pdb").val();
-                data = moldata = $("#moldata_pdb").val();
+                data = moldata = $("#moldata_sdf_small").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
-                    m = viewer.addModel(data, "pdb");
+                    m = viewer.addModel(data, "sdf");
                     //m2 = viewer.addModel(data2,"pdb");
                     atoms = m.selectedAtoms({ });
 

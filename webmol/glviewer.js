@@ -168,6 +168,7 @@ WebMol.glmolViewer = (function() {
 
         var models = []; // atomistic molecular models
         var surfaces = [];
+        var shapes = []; //Generic shapes
 
         var WIDTH = container.width();
         var HEIGHT = container.height();
@@ -504,6 +505,12 @@ WebMol.glmolViewer = (function() {
                     models[i].globj(modelGroup);
                 }
             }
+            
+            for ( var i = 0; i < shapes.length; i++ ) {
+                if (shapes[i]) {
+                    shapes[i].globj(modelGroup);
+                }
+            }
 
             for ( var i in surfaces) { // this is an array with possible holes
                 if (surfaces.hasOwnProperty(i)) {
@@ -669,6 +676,20 @@ WebMol.glmolViewer = (function() {
             
             return label;
 
+        };
+        
+        //Add generic GLShape to viewer
+        this.addShape = function(shapeSpec) {
+            shapeSpec = shapeSpec || {};
+            var shape = new WebMol.GLShape(shapeSpec);
+            shapes.push(shape);
+            
+            return shape;
+              
+        };
+        
+        this.addSphere = function(shape, spec) {
+            shape.addSphere(spec);      
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)
@@ -1124,6 +1145,7 @@ WebMol.glmolViewer = (function() {
                     mergeGeos(surfobj.geo, mesh);
                     view.render();
                 }
+            //TODO: Asynchronously generate geometryGroups (not separate meshes) and merge them into a single geometry
             } else { // use worker
                 
                 var workers = [];

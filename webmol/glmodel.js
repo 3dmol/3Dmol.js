@@ -763,7 +763,7 @@ WebMol.GLModel = (function() {
 
             var clickable = atom.clickable;
             if (clickable && atom.intersectionShape === undefined)
-                atom.intersectionShape = {sphere : null, cylinder : [], line : []};
+                atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
             var c = WebMol.CC.color(atom.color);
             
@@ -823,7 +823,7 @@ WebMol.GLModel = (function() {
 
                 if (atom.clickable){
                     if (atom.intersectionShape === undefined)
-                        atom.intersectionShape = {sphere : null, cylinder : [], line : []};
+                        atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                     atom.intersectionShape.line.push(p1);
                     atom.intersectionShape.line.push(mp);
                 }
@@ -853,11 +853,6 @@ WebMol.GLModel = (function() {
             var style = atom.style.sphere;
             if (style.hidden)
                 return;
-            
-            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)) {
-                var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
-                atom.intersectionShape.sphere = new WebMol.Sphere(center, radius);
-            }
                                                                  
             var color = atom.color;
             if (typeof (style.color) != "undefined")
@@ -866,6 +861,12 @@ WebMol.GLModel = (function() {
 
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
+            
+            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)) {
+                var center = new WebMol.Vector3(atom.x, atom.y, atom.z);
+                atom.intersectionShape.sphere.push(new WebMol.Sphere(center, radius));
+            }
+            
             var vobj = sphereVertexCache.getVerticesForRadius(radius);                
                         
             var vertices = vobj.vertices;
@@ -1350,7 +1351,7 @@ WebMol.GLModel = (function() {
                 // set up appropriate intersection spheres for clickable atoms
                 if (atom && atom.style) {
                     if (atom.clickable && atom.intersectionShape === undefined)
-                        atom.intersectionShape = {sphere: null, cylinder: [], line: [], triangle : []};                    
+                        atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};                    
                     drawAtomSphere(atom, sphereGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
@@ -1459,7 +1460,7 @@ WebMol.GLModel = (function() {
                             || defaultColor;
                     atom.model = id;
                     if (atom.clickable)
-                        atom.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
+                        atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                 }
             }
         };
@@ -1613,7 +1614,7 @@ WebMol.GLModel = (function() {
             for ( var i = 0; i < atoms.length; i++) {
                 
                 if (atoms[i].clickable) 
-                    atoms[i].intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};                    
+                    atoms[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
           
                 if(!add) atoms[i].style = {};
                 for(var s in mystyle) {
