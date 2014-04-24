@@ -261,9 +261,9 @@ var setUpNormals = function(geo, three) {
     
         var geoGroup = geo.geometryGroups[g];
     
-        var faces = geoGroup.faceArr;
-        var verts = geoGroup.vertexArr;
-        var norms = geoGroup.normalArr;
+        var faces = geoGroup.__faceArray;
+        var verts = geoGroup.__vertexArray;
+        var norms = geoGroup.__normalArray;
         
         //vertex indices
         var a, b, c, d,
