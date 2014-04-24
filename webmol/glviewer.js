@@ -527,7 +527,6 @@ WebMol.glmolViewer = (function() {
                         if (surfaces[i].lastGL) 
                             modelGroup.remove(surfaces[i].lastGL);
                         
-                        initBuffers(geo, true);
                         // create new surface
                         var smesh = new WebMol.Mesh(geo, surfaces[i].mat);
                         surfaces[i].lastGL = smesh;
@@ -857,21 +856,15 @@ WebMol.glmolViewer = (function() {
             // reconstruct vertices and faces
             var v = VandF.vertices;
             var offset;
-            for ( var i = 0; i < v.length; i++) {
+            for ( var i = 0; i < v.length; i++) {            
                 offset = geoGroup.vertices*3;
-                
-                geoGroup.vertexArr.push(v[i].x), geoGroup.vertexArr.push(v[i].y), geoGroup.vertexArr.push(v[i].z);
-                geoGroup.__vertexArray[offset] = v[i].x; geoGroup.__vertexArray[offset+1] = v[i].y, geoGroup.__vertexArray[offset+2] =v[i].z;
-                
-                //geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0);       
-                //geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
-                
+                geoGroup.__vertexArray[offset] = v[i].x; geoGroup.__vertexArray[offset+1] = v[i].y, geoGroup.__vertexArray[offset+2] =v[i].z;                
                 geoGroup.vertices++;
             }
-            
-            geo.initTypedArrays();
-
+                       
             var faces = VandF.faces;
+            geoGroup.faceidx = faces.length*3;
+            geo.initTypedArrays();
 
             // set colors for vertices
             var colors = [];
@@ -892,7 +885,7 @@ WebMol.glmolViewer = (function() {
             //Setup colors, faces, and normals
             for ( var i = 0; i < faces.length; i++) {
                 
-                faceoffset = geoGroup.faceidx;
+                faceoffset = i*3;
                 var a = faces[i].a, b = faces[i].b, c = faces[i].c;
                 var A = v[a].atomid;
                 var B = v[b].atomid;
@@ -902,7 +895,6 @@ WebMol.glmolViewer = (function() {
 
                 geoGroup.__faceArray[faceoffset] = faces[i].a, geoGroup.__faceArray[faceoffset+1] = faces[i].b, 
                     geoGroup.__faceArray[faceoffset+2] = faces[i].c;
-                geoGroup.faceArr.push(faces[i].a), geoGroup.faceArr.push(faces[i].b), geoGroup.faceArr.push(faces[i].c);
                 
                 geoGroup.__colorArray[offsetA] = colors[A].r, geoGroup.__colorArray[offsetA+1] = colors[A].g,
                          geoGroup.__colorArray[offsetA+2] = colors[A].b;
@@ -1099,7 +1091,7 @@ WebMol.glmolViewer = (function() {
                     + (+new Date() - time) + "ms");
 
             var surfobj = {
-                geo : new WebMol.Geometry(),
+                geo : new WebMol.Geometry(true),
                 mat : mat,
                 done : false,
                 finished : false

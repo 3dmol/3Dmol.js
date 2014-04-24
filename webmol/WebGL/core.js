@@ -218,10 +218,6 @@ WebMol.Geometry = (function() {
         this.__normalArray = null;
         this.__faceArray = null;
         this.__lineArray = null;
-        this.vertexArr = [];
-        this.colorArr = [];
-        this.normalArr = [];
-        this.faceArr = [];
         this.vertices = 0;
         this.faceidx = 0;
         this.lineidx = 0;
@@ -276,6 +272,16 @@ WebMol.Geometry = (function() {
         
     };
     
+    //return truncated typed array, including its buffer
+    // type == 0 => Uint16Array; type == 1 => Float32Array
+    var truncateArrayBuffer = function(arr, type, start, end) {
+        
+        if (type === 0)
+            return new Uint16Array(arr.buffer.slice(start, end*2));
+        else if (type === 1) 
+            return new Float32Array(arr.buffer.slice(start, end*4));
+    };
+    
     Geometry.prototype = {
         
         constructor : Geometry,
@@ -311,14 +317,14 @@ WebMol.Geometry = (function() {
                 normalArr = group.__normalArray,
                 faceArr = group.__faceArray,
                 lineArr = group.__lineArray;
-                
-            group.__vertexArray = new Float32Array(vertexArr.buffer.slice(vertexArr.byteOffset, group.vertices*12));
-            group.__colorArray = new Float32Array(colorArr.buffer.slice(colorArr.byteOffset, group.vertices*12));
+                           
+            group.__vertexArray = truncateArrayBuffer(vertexArr, 1, vertexArr.byteOffset, group.vertices*3);
+            group.__colorArray = truncateArrayBuffer(colorArr, 1, colorArr.byteOffset, group.vertices*3);
             
             if (this.mesh) {
-                group.__normalArray = new Float32Array(normalArr.buffer.slice(normalArr.byteOffset, group.vertices*12));
-                group.__faceArray = new Uint16Array(faceArr.buffer.slice(faceArr.byteOffset, group.faceidx*2));
-                group.__lineArray = new Uint16Array(lineArr.buffer.slice(lineArr.byteOffset, group.lineidx*2));
+                group.__normalArray = truncateArrayBuffer(normalArr, 1, normalArr.byteOffset, group.vertices*3);
+                group.__faceArray = truncateArrayBuffer(faceArr, 0, faceArr.byteOffset, group.faceidx);
+                group.__lineArray = truncateArrayBuffer(lineArr, 0, lineArr.byteOffset, group.lineidx);
             }
             this.__inittedArrays = true;
         
