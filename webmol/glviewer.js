@@ -850,22 +850,26 @@ WebMol.glmolViewer = (function() {
         // Just create a single geometry chunk - broken up whether sync or not
         var generateSurfaceMesh = function(atoms, VandF, mat) {
         
-            var geo = new WebMol.Geometry();           
+            var geo = new WebMol.Geometry(true);  
+            //Only one group per call to generate surface mesh (addSurface should split up mesh render)     
             var geoGroup = geo.updateGeoGroup(0);
             
             // reconstruct vertices and faces
-            geo.vs = [];
             var v = VandF.vertices;
-            
+            var offset;
             for ( var i = 0; i < v.length; i++) {
+                offset = geoGroup.vertices*3;
                 
                 geoGroup.vertexArr.push(v[i].x), geoGroup.vertexArr.push(v[i].y), geoGroup.vertexArr.push(v[i].z);
-
-                geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0);            
-                geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
+                geoGroup.__vertexArray[offset] = v[i].x; geoGroup.__vertexArray[offset+1] = v[i].y, geoGroup.__vertexArray[offset+2] =v[i].z;
+                
+                //geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0);       
+                //geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
                 
                 geoGroup.vertices++;
             }
+            
+            geo.initTypedArrays();
 
             var faces = VandF.faces;
 
@@ -880,11 +884,15 @@ WebMol.glmolViewer = (function() {
                         colors[i] = WebMol.CC.color(atom.color);
                 }
             }
-            var verts = geoGroup.vertexArr;
+            
+            var verts = geoGroup.__vertexArray;
             var vA, vB, vC, norm;
+            var faceoffset;
+            
             //Setup colors, faces, and normals
             for ( var i = 0; i < faces.length; i++) {
                 
+                faceoffset = geoGroup.faceidx;
                 var a = faces[i].a, b = faces[i].b, c = faces[i].c;
                 var A = v[a].atomid;
                 var B = v[b].atomid;
@@ -892,14 +900,16 @@ WebMol.glmolViewer = (function() {
                 
                 var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
+                geoGroup.__faceArray[faceoffset] = faces[i].a, geoGroup.__faceArray[faceoffset+1] = faces[i].b, 
+                    geoGroup.__faceArray[faceoffset+2] = faces[i].c;
                 geoGroup.faceArr.push(faces[i].a), geoGroup.faceArr.push(faces[i].b), geoGroup.faceArr.push(faces[i].c);
                 
-                geoGroup.colorArr[offsetA] = colors[A].r, geoGroup.colorArr[offsetA+1] = colors[A].g,
-                         geoGroup.colorArr[offsetA+2] = colors[A].b;
-                geoGroup.colorArr[offsetB] = colors[B].r, geoGroup.colorArr[offsetB+1] = colors[B].g,
-                         geoGroup.colorArr[offsetB+2] = colors[B].b;
-                geoGroup.colorArr[offsetC] = colors[C].r, geoGroup.colorArr[offsetC+1] = colors[C].g,
-                         geoGroup.colorArr[offsetC+2] = colors[C].b;
+                geoGroup.__colorArray[offsetA] = colors[A].r, geoGroup.__colorArray[offsetA+1] = colors[A].g,
+                         geoGroup.__colorArray[offsetA+2] = colors[A].b;
+                geoGroup.__colorArray[offsetB] = colors[B].r, geoGroup.__colorArray[offsetB+1] = colors[B].g,
+                         geoGroup.__colorArray[offsetB+2] = colors[B].b;
+                geoGroup.__colorArray[offsetC] = colors[C].r, geoGroup.__colorArray[offsetC+1] = colors[C].g,
+                         geoGroup.__colorArray[offsetC+2] = colors[C].b;
                  
                 //setup Normals
                 
@@ -915,9 +925,9 @@ WebMol.glmolViewer = (function() {
                 norm = vC;
                 norm.normalize();
                 
-                geoGroup.normalArr[offsetA] += norm.x, geoGroup.normalArr[offsetB] += norm.x, geoGroup.normalArr[offsetC] += norm.x;
-                geoGroup.normalArr[offsetA+1] += norm.y, geoGroup.normalArr[offsetB+1] += norm.y, geoGroup.normalArr[offsetC+1] += norm.y;
-                geoGroup.normalArr[offsetA+2] += norm.z, geoGroup.normalArr[offsetB+2] += norm.z, geoGroup.normalArr[offsetC+2] += norm.z;
+                geoGroup.__normalArray[offsetA] += norm.x, geoGroup.__normalArray[offsetB] += norm.x, geoGroup.__normalArray[offsetC] += norm.x;
+                geoGroup.__normalArray[offsetA+1] += norm.y, geoGroup.__normalArray[offsetB+1] += norm.y, geoGroup.__normalArray[offsetC+1] += norm.y;
+                geoGroup.__normalArray[offsetA+2] += norm.z, geoGroup.__normalArray[offsetB+2] += norm.z, geoGroup.__normalArray[offsetC+2] += norm.z;
                 
             }
 
@@ -1120,7 +1130,6 @@ WebMol.glmolViewer = (function() {
                             totalVol);
                     var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                     mergeGeos(surfobj.geo, mesh);
-                    initBuffers(surfobj.geo);
                     view.render();
                 }
             } else { // use worker
@@ -1144,7 +1153,6 @@ WebMol.glmolViewer = (function() {
                         var VandF = event.data;
                         var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                         mergeGeos(surfobj.geo, mesh);
-                        initBuffers(surfobj.geo);
                         view.render();
                         console.log("async mesh generation "
                                 + (+new Date() - time) + "ms");
@@ -1212,7 +1220,6 @@ WebMol.glmolViewer = (function() {
         };
 
         this.clear = function() {
-
             surfaces = [];
             //models = [];
             this.removeAllModels();

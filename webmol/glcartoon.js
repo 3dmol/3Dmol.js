@@ -14,7 +14,7 @@ WebMol.drawCartoon = (function() {
     var coilWidth = 0.3;
     var helixSheetWidth = 1.3;
     var nucleicAcidWidth = 0.8;
-    var thickness = 0; 
+    var thickness = 0.4; 
 
     // helper functions
 
@@ -99,6 +99,7 @@ WebMol.drawCartoon = (function() {
             geoGroup.vertices += 2;
         }
         
+        geo.initTypedArrays();
         setUpNormals(geo);
         var material = new WebMol.MeshLambertMaterial();
         material.vertexColors = WebMol.FaceColors;
