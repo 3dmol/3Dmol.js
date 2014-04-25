@@ -212,7 +212,8 @@ WebMol.Object3DIDCount = 0;
 //TODO: What can I remove - how can I optimize ?
 WebMol.Geometry = (function() {
     
-    var geometryGroup = function() {
+    var geometryGroup = function(id) {
+        this.id = id || 0;
         this.__vertexArray = null;
         this.__colorArray = null;
         this.__normalArray = null;
@@ -224,7 +225,7 @@ WebMol.Geometry = (function() {
     };
     
     var addGroup = function(geo) {
-        var ret = new geometryGroup();
+        var ret = new geometryGroup(geo.geometryGroups.length);
         geo.geometryGroups.push(ret);
         geo.groups = geo.geometryGroups.length;
         
@@ -268,7 +269,6 @@ WebMol.Geometry = (function() {
         
         this.geometryGroups = [];
         this.groups = 0;
-
         
     };
     
@@ -301,32 +301,40 @@ WebMol.Geometry = (function() {
             
         },
         
+        addGeoGroup : function() {
+            return addGroup(this);  
+        },
+        
         //After vertices, colors, etc are collected in regular or typed arrays,
         // either create typed arrays from regular arrays if they don't already exist,
         // or shorten last typed array
         initTypedArrays : function() {
-        
-            if (this.__inittedArrays === true)
-                return;
-            
-            //last geometryGroup
-            var group = this.updateGeoGroup();
-            
-            var vertexArr = group.__vertexArray,
-                colorArr = group.__colorArray,
-                normalArr = group.__normalArray,
-                faceArr = group.__faceArray,
-                lineArr = group.__lineArray;
-                           
-            group.__vertexArray = truncateArrayBuffer(vertexArr, 1, vertexArr.byteOffset, group.vertices*3);
-            group.__colorArray = truncateArrayBuffer(colorArr, 1, colorArr.byteOffset, group.vertices*3);
-            
-            if (this.mesh) {
-                group.__normalArray = truncateArrayBuffer(normalArr, 1, normalArr.byteOffset, group.vertices*3);
-                group.__faceArray = truncateArrayBuffer(faceArr, 0, faceArr.byteOffset, group.faceidx);
-                group.__lineArray = truncateArrayBuffer(lineArr, 0, lineArr.byteOffset, group.lineidx);
+                
+            for (var g in this.geometryGroups) {
+                
+                var group = this.geometryGroups[g];
+                
+                if (group.__inittedArrays === true)
+                    continue;
+                
+                var vertexArr = group.__vertexArray,
+                    colorArr = group.__colorArray,
+                    normalArr = group.__normalArray,
+                    faceArr = group.__faceArray,
+                    lineArr = group.__lineArray;
+                               
+                group.__vertexArray = truncateArrayBuffer(vertexArr, 1, vertexArr.byteOffset, group.vertices*3);
+                group.__colorArray = truncateArrayBuffer(colorArr, 1, colorArr.byteOffset, group.vertices*3);
+                
+                if (this.mesh) {
+                    group.__normalArray = truncateArrayBuffer(normalArr, 1, normalArr.byteOffset, group.vertices*3);
+                    group.__faceArray = truncateArrayBuffer(faceArr, 0, faceArr.byteOffset, group.faceidx);
+                    group.__lineArray = truncateArrayBuffer(lineArr, 0, lineArr.byteOffset, group.lineidx);
+                }
+                
+                group.__inittedArrays = true;
             }
-            this.__inittedArrays = true;
+            
         
         },
         
@@ -395,20 +403,27 @@ WebMol.Raycaster = (function() {
     };
     
     //object is a Sphere or (Bounding) Box
-    var intersectObject = function(group, atom, raycaster, intersects) {
+    var intersectObject = function(group, clickable, raycaster, intersects) {
         
         matrixPosition.getPositionFromMatrix(group.matrixWorld);
         
-        if ((atom.clickable !== true) || (atom.intersectionShape === undefined))
+        if ((clickable.clickable !== true) || (clickable.intersectionShape === undefined))
             return intersects;
-        var sulfur;
-        if (atom.elem === "S")
-            sulfur = true;
         
-        var intersectionShape = atom.intersectionShape;
+        var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
         precision *= group.matrixWorld.getMaxScaleOnAxis();
         var precisionSq = precision*precision;
+
+        //Check for intersection with clickable's bounding sphere, if it exists
+        if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof WebMol.Sphere) {
+            sphere.copy(clickable.boundingSphere);
+            sphere.applyMatrix4(group.matrixWorld);
+            
+            if (!raycaster.ray.isIntersectionSphere(sphere)) {
+                return intersects;
+            }
+        }
         
         //triangle faces
         for (var i in intersectionShape.triangle) {
@@ -457,7 +472,7 @@ WebMol.Raycaster = (function() {
                     continue;
                     
                 else
-                    intersects.push({atom : atom,
+                    intersects.push({clickable : clickable,
                                      distance : distance});  
             }
         }
@@ -521,7 +536,7 @@ WebMol.Raycaster = (function() {
                         continue;
                     
                     else
-                        intersects.push({atom : atom,
+                        intersects.push({clickable : clickable,
                                          distance : distance});
                     
                 }
@@ -564,12 +579,12 @@ WebMol.Raycaster = (function() {
             var closestDistSq = v3.subVectors(v2, v1).lengthSq();
             
             if (closestDistSq < precisionSq && s_c*s_c < bondLengthSq)
-                intersects.push({atom : atom,
+                intersects.push({clickable : clickable,
                                  distance : t_c
                                 });
             
         }
-        
+
         for (var i = 0; i < intersectionShape.sphere.length; i++) {
             //sphere
             if (intersectionShape.sphere[i] instanceof WebMol.Sphere) {
@@ -602,7 +617,7 @@ WebMol.Raycaster = (function() {
                     else 
                         distance = distanceToCenter - Math.sqrt(discriminant);
     
-                    intersects.push({atom : atom, 
+                    intersects.push({clickable : clickable, 
                                      distance : distance});
                     return intersects;
                 }
@@ -647,21 +662,21 @@ WebMol.Projector = function () {
 
     this.projectVector = function ( vector, camera ) {
 
-            camera.matrixWorldInverse.getInverse( camera.matrixWorld );
+        camera.matrixWorldInverse.getInverse( camera.matrixWorld );
 
-            _viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+        _viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
 
-            return vector.applyProjection( _viewProjectionMatrix );
+        return vector.applyProjection( _viewProjectionMatrix );
 
     };
 
     this.unprojectVector = function ( vector, camera ) {
 
-            camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+        camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
 
-            _viewProjectionMatrix.multiplyMatrices(camera.matrixWorld, camera.projectionMatrixInverse);
+        _viewProjectionMatrix.multiplyMatrices(camera.matrixWorld, camera.projectionMatrixInverse);
 
-            return vector.applyProjection( _viewProjectionMatrix );
+        return vector.applyProjection( _viewProjectionMatrix );
 
     };
 

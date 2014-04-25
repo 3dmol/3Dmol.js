@@ -299,26 +299,35 @@ WebMol.glmolViewer = (function() {
              
             raycaster.set(camera.position, mouseVector);
 
-            var intersects = [];
+            var clickables = [], intersects = [];
             
             for (var i in models) {
                 var model = models[i];
                 
                 var atoms = model.selectedAtoms({clickable: true});
-                var atom = null;
+                clickables = clickables.concat(atoms);
 
-                intersects = raycaster.intersectObjects(modelGroup, atoms);
+            }
+            
+            for (var i in shapes) {
                 
-                if (intersects.length) {
-                    var atom = intersects[0].atom;
-                    clickedAtom = atom;
-                    
-                    if (atom.callback !== undefined && typeof(atom.callback) === "function"){
-                        atom.callback(atom, model, _viewer);
-                        show();
-                    }
+                var shape = shapes[i];
+                if (shape.clickable) {
+                    clickables.push(shape);
                 }
-            }        
+
+            }
+            
+            intersects = raycaster.intersectObjects(modelGroup, clickables);
+            
+            if (intersects.length) {
+                var selected = intersects[0].clickable;
+                if (selected.callback !== undefined && typeof(selected.callback) === "function") {
+                    selected.callback(selected, _viewer);
+                }
+            }
+            
+            show();        
         }; 
         
         // TODO: Better touch panel support.
@@ -689,7 +698,13 @@ WebMol.glmolViewer = (function() {
         };
         
         this.addSphere = function(shape, spec) {
+            spec = spec || {};
             shape.addSphere(spec);      
+        };
+        
+        this.addCylinder = function(shape, spec) {
+            spec = spec || {};
+            shape.addCylinder(spec);
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)
