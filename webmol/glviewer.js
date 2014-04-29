@@ -702,9 +702,9 @@ WebMol.glmolViewer = (function() {
             shape.addSphere(spec);      
         };
         
-        this.addCylinder = function(shape, spec) {
+        this.addArrow = function(shape, spec) {
             spec = spec || {};
-            shape.addCylinder(spec);
+            shape.addArrow(spec);
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)

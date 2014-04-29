@@ -207,18 +207,23 @@ WebMol.GLShape = (function() {
 
     };
     
-    var drawCylinder = function(shape, geoGroup, spec) {
+    var drawArrow = function(shape, geoGroup, spec) {
         
-        var from = spec.from, to = spec.to, radius = spec.radius;
+        var from = spec.start, end = spec.end, radius = spec.radius, radiusRatio = spec.radiusRatio, mid = spec.mid;
 
-        if (!from || !from)
+        if (!from || !end)
             return;
-
+        
         // vertices
         
-        var dir = to.clone();
-        dir.sub(from);
+        var dir = end.clone();
+        dir.sub(from).multiplyScalar(mid);
+        var to = from.clone().add(dir);
         var negDir = dir.clone().negate();
+        
+        shape.intersectionShape.cylinder.push( new WebMol.Cylinder(from.clone(), to.clone(), radius) );
+        shape.intersectionShape.sphere.push( new WebMol.Sphere(from.clone(), radius) );
+        
         // get orthonormal vector
         var nvecs = [];
         nvecs[0] = dir.clone();
@@ -257,9 +262,10 @@ WebMol.GLShape = (function() {
         var start = geoGroup.vertices;
         // add vertices, opposing vertices paired together
         for ( var i = 0, n = nvecs.length; i < n; ++i) {
-            var offset = 3*(start + 2*i);
+            var offset = 3*(start + 3*i);
             var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
             var top = nvecs[i].clone().multiplyScalar(radius).add(to);
+            var conebase = nvecs[i].clone().multiplyScalar(radius*radiusRatio).add(to);
 
             geoGroup.__vertexArray[offset] = bottom.x;
             geoGroup.__vertexArray[offset+1] = bottom.y;
@@ -267,11 +273,27 @@ WebMol.GLShape = (function() {
             
             geoGroup.__vertexArray[offset+3] = top.x;
             geoGroup.__vertexArray[offset+4] = top.y;
-            geoGroup.__vertexArray[offset+5] = top.z;                    
+            geoGroup.__vertexArray[offset+5] = top.z; 
             
+            geoGroup.__vertexArray[offset+6] = conebase.x;
+            geoGroup.__vertexArray[offset+7] = conebase.y;
+            geoGroup.__vertexArray[offset+8] = conebase.z;
+            
+            if (i > 0) {
+                var prev_x = geoGroup.__vertexArray[offset-3];
+                var prev_y = geoGroup.__vertexArray[offset-2];
+                var prev_z = geoGroup.__vertexArray[offset-1];
+                
+                var c = new WebMol.Vector3(prev_x, prev_y, prev_z);
+                var b = end.clone(), b2 = to.clone();
+                var a = new WebMol.Vector3(conebase.x, conebase.y, conebase.z);
+                
+                shape.intersectionShape.triangle.push( new WebMol.Triangle(a, b, c) );
+                shape.intersectionShape.triangle.push( new WebMol.Triangle(c.clone(), b2, a.clone()) );
+            }
         }
         
-        geoGroup.vertices += 32;
+        geoGroup.vertices += 48;
         offset = geoGroup.vertices*3;
         
         //caps
@@ -283,22 +305,28 @@ WebMol.GLShape = (function() {
         geoGroup.__vertexArray[offset+4] = to.y;
         geoGroup.__vertexArray[offset+5] = to.z;
         
-        geoGroup.vertices += 2;
+        geoGroup.__vertexArray[offset+6] = end.x;
+        geoGroup.__vertexArray[offset+7] = end.y;
+        geoGroup.__vertexArray[offset+8] = end.z;
+        
+        geoGroup.vertices += 3;
         
         // now faces
         var face, norm, offset, faceoffset, lineoffset;
         var n_vertices = 0;
-        var fromi = geoGroup.vertices - 2, toi = geoGroup.vertices - 1;
-        var fromoffset = fromi*3, tooffset = toi*3;
-        for ( var i = 0, n = nvecs.length - 1; i < n; ++i) {
+        var fromi = geoGroup.vertices - 3, toi = geoGroup.vertices - 2, endi = geoGroup.vertices - 1;
+        var fromoffset = fromi*3, tooffset = toi*3, endoffset = endi*3;
+        for (var i = 0, n = nvecs.length - 1; i < n; ++i) {
         
-            var ti = start + 2 * i, offset = ti * 3;
+            var ti = start + 3 * i, offset = ti * 3;
             faceoffset = geoGroup.faceidx, lineoffset = geoGroup.lineidx;
             
             var t1 = ti, t1offset = t1 * 3;
             var t2 = ti + 1, t2offset = t2 * 3;
-            var t3 = ti + 3, t3offset = t3 * 3;
-            var t4 = ti + 2, t4offset = t4 * 3;
+            var t2b = ti + 2, t2boffset = t2b * 3;
+            var t3 = ti + 4, t3offset = t3 * 3;
+            var t3b = ti + 5, t3boffset = t3b * 3;
+            var t4 = ti + 3, t4offset = t4 * 3;
             
             //face = [t1, t2, t4], [t2, t3, t4];    
             //face = [t1, t2, t3, t4];
@@ -316,39 +344,53 @@ WebMol.GLShape = (function() {
             geoGroup.__normalArray[t2offset+1] = n2.y, geoGroup.__normalArray[t3offset+1] = n3.y, geoGroup.__normalArray[t4offset+1] = n4.y;
             geoGroup.__normalArray[t2offset+2] = n2.z, geoGroup.__normalArray[t3offset+2] = n3.z, geoGroup.__normalArray[t4offset+2] = n4.z;
             
+            geoGroup.__normalArray[t2boffset] = n2.x, geoGroup.__normalArray[t3boffset] = n3.x;
+            geoGroup.__normalArray[t2boffset+1] = n2.y, geoGroup.__normalArray[t3boffset+1] = n3.y;
+            geoGroup.__normalArray[t2boffset+2] = n2.z, geoGroup.__normalArray[t3boffset+2] = n3.z;
+            
             //sides
             geoGroup.__faceArray[faceoffset] = t1, geoGroup.__faceArray[faceoffset+1] = t2, geoGroup.__faceArray[faceoffset+2] = t4;
             geoGroup.__faceArray[faceoffset+3] = t2, geoGroup.__faceArray[faceoffset+4] = t3, geoGroup.__faceArray[faceoffset+5] = t4;
             //caps
-            geoGroup.__faceArray[faceoffset+6] = t4, geoGroup.__faceArray[faceoffset+7] = fromi, geoGroup.__faceArray[faceoffset+8] = t1;
-            geoGroup.__faceArray[faceoffset+9] = t2, geoGroup.__faceArray[faceoffset+10] = toi, geoGroup.__faceArray[faceoffset+11] = t3;
+            geoGroup.__faceArray[faceoffset+6] = t1, geoGroup.__faceArray[faceoffset+7] = t4, geoGroup.__faceArray[faceoffset+8] = fromi;
+            geoGroup.__faceArray[faceoffset+9] = t2b, geoGroup.__faceArray[faceoffset+10] = toi, geoGroup.__faceArray[faceoffset+11] = t3b;
+            //arrowhead
+            geoGroup.__faceArray[faceoffset+12] = t2b, geoGroup.__faceArray[faceoffset+13] = endi, geoGroup.__faceArray[faceoffset+14] = t3b;
             
+            //sides
             geoGroup.__lineArray[lineoffset] = t1, geoGroup.__lineArray[lineoffset+1] = t2;
-            geoGroup.__lineArray[lineoffset+2] = t1, geoGroup.__lineArray[lineoffset+3] = t4;
+            geoGroup.__lineArray[lineoffset+2] = t1, geoGroup.__lineArray[lineoffset+3] = t4;           
+            //geoGroup.__lineArray[lineoffset+4] = t2, geoGroup.__lineArray[lineoffset+5] = t3;
+            geoGroup.__lineArray[lineoffset+4] = t3, geoGroup.__lineArray[lineoffset+5] = t4;
+            //caps
+            geoGroup.__lineArray[lineoffset+6] = t1, geoGroup.__lineArray[lineoffset+7] = t4;
+            //geoGroup.__lineArray[lineoffset+10] = t1, geoGroup.__lineArray[lineoffset+11] = fromi;           
+            //geoGroup.__lineArray[lineoffset+12] = t4, geoGroup.__lineArray[lineoffset+13] = fromi;
             
-            geoGroup.__lineArray[lineoffset+4] = t2, geoGroup.__lineArray[lineoffset+5] = t3;
-            geoGroup.__lineArray[lineoffset+6] = t3, geoGroup.__lineArray[lineoffset+7] = t4;
-            
-            geoGroup.__lineArray[lineoffset+8] = t1, geoGroup.__lineArray[lineoffset+9] = t2;
-            geoGroup.__lineArray[lineoffset+10] = t1, geoGroup.__lineArray[lineoffset+11] = fromi;
-            
-            geoGroup.__lineArray[lineoffset+12] = t3, geoGroup.__lineArray[lineoffset+13] = t4;
-            geoGroup.__lineArray[lineoffset+14] = t3, geoGroup.__lineArray[lineoffset+15] = toi;
+            geoGroup.__lineArray[lineoffset+8] = t2b, geoGroup.__lineArray[lineoffset+9] = t2; //toi   
+            geoGroup.__lineArray[lineoffset+10] = t2b, geoGroup.__lineArray[lineoffset+11] = t3b;
+            geoGroup.__lineArray[lineoffset+12] = t3, geoGroup.__lineArray[lineoffset+13] = t3b; //toi
+            //arrowhead
+            geoGroup.__lineArray[lineoffset+14] = t2b, geoGroup.__lineArray[lineoffset+15] = endi;
+            geoGroup.__lineArray[lineoffset+16] = t2b, geoGroup.__lineArray[lineoffset+17] = t3b;
+            geoGroup.__lineArray[lineoffset+18] = endi, geoGroup.__lineArray[lineoffset+19] = t3b;
                              
-            geoGroup.faceidx += 12;
-            geoGroup.lineidx += 16;
+            geoGroup.faceidx += 15;
+            geoGroup.lineidx += 20;
             
         }
         // final face
 
-        face = [start + 30, start + 31, start + 1, start];
+        face = [start + 45, start + 46, start + 1, start, start + 47, start + 2];
         norm = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
         
         faceoffset = geoGroup.faceidx, lineoffset = geoGroup.lineidx;
         
         var t1 = face[0], t1offset = t1 * 3;
         var t2 = face[1], t2offset = t2 * 3;
+        var t2b = face[4], t2boffset = t2b * 3;
         var t3 = face[2], t3offset = t3 * 3;
+        var t3b = face[5], t3boffset = t3b * 3;
         var t4 = face[3], t4offset = t4 * 3;        
         var n1, n2, n3, n4;
         
@@ -363,38 +405,46 @@ WebMol.GLShape = (function() {
         geoGroup.__normalArray[t2offset+1] = n2.y, geoGroup.__normalArray[t3offset+1] = n3.y, geoGroup.__normalArray[t4offset+1] = n4.y;
         geoGroup.__normalArray[t2offset+2] = n2.z, geoGroup.__normalArray[t3offset+2] = n3.z, geoGroup.__normalArray[t4offset+2] = n4.z;
         
+        geoGroup.__normalArray[t2boffset] = n2.x, geoGroup.__normalArray[t3boffset] = n3.x;
+        geoGroup.__normalArray[t2boffset+1] = n2.y, geoGroup.__normalArray[t3boffset+1] = n3.y;
+        geoGroup.__normalArray[t2boffset+2] = n2.z, geoGroup.__normalArray[t3boffset+2] = n3.z;
+        
         //Cap normals
         dir.normalize(), negDir.normalize();
-        geoGroup.__normalArray[fromoffset] = negDir.x, geoGroup.__normalArray[tooffset] = dir.x;
-        geoGroup.__normalArray[fromoffset+1] = negDir.y, geoGroup.__normalArray[tooffset+1] = dir.y;
-        geoGroup.__normalArray[fromoffset+2] = negDir.z, geoGroup.__normalArray[tooffset+2] = dir.z;
+        geoGroup.__normalArray[fromoffset] = negDir.x, geoGroup.__normalArray[tooffset] = geoGroup.__normalArray[endoffset] = dir.x;
+        geoGroup.__normalArray[fromoffset+1] = negDir.y, geoGroup.__normalArray[tooffset+1] = geoGroup.__normalArray[endoffset+1] = dir.y;
+        geoGroup.__normalArray[fromoffset+2] = negDir.z, geoGroup.__normalArray[tooffset+2] = geoGroup.__normalArray[endoffset+2] = dir.z;
         
         //Final side
         geoGroup.__faceArray[faceoffset] = t1, geoGroup.__faceArray[faceoffset+1] = t2, geoGroup.__faceArray[faceoffset+2] = t4;
         geoGroup.__faceArray[faceoffset+3] = t2, geoGroup.__faceArray[faceoffset+4] = t3, geoGroup.__faceArray[faceoffset+5] = t4;
         //final caps
-        geoGroup.__faceArray[faceoffset+6] = t4, geoGroup.__faceArray[faceoffset+7] = fromi, geoGroup.__faceArray[faceoffset+8] = t1;
-        geoGroup.__faceArray[faceoffset+9] = t2, geoGroup.__faceArray[faceoffset+10] = toi, geoGroup.__faceArray[faceoffset+11] = t3;       
+        geoGroup.__faceArray[faceoffset+6] = t1, geoGroup.__faceArray[faceoffset+7] = t4, geoGroup.__faceArray[faceoffset+8] = fromi;
+        geoGroup.__faceArray[faceoffset+9] = t2b, geoGroup.__faceArray[faceoffset+10] = toi, geoGroup.__faceArray[faceoffset+11] = t3b;
+        //final arrowhead
+        geoGroup.__faceArray[faceoffset+12] = t2b, geoGroup.__faceArray[faceoffset+13] = endi, geoGroup.__faceArray[faceoffset+14] = t3b;
         
+        //sides
         geoGroup.__lineArray[lineoffset] = t1, geoGroup.__lineArray[lineoffset+1] = t2;
-        geoGroup.__lineArray[lineoffset+2] = t1, geoGroup.__lineArray[lineoffset+3] = t4;
-        
-        geoGroup.__lineArray[lineoffset+4] = t2, geoGroup.__lineArray[lineoffset+5] = t3;
-        geoGroup.__lineArray[lineoffset+6] = t3, geoGroup.__lineArray[lineoffset+7] = t4;
- 
-        geoGroup.__lineArray[lineoffset+8] = t1, geoGroup.__lineArray[lineoffset+9] = t2;
-        geoGroup.__lineArray[lineoffset+10] = t1, geoGroup.__lineArray[lineoffset+11] = fromi;
+        geoGroup.__lineArray[lineoffset+2] = t1, geoGroup.__lineArray[lineoffset+3] = t4;           
+        //geoGroup.__lineArray[lineoffset+4] = t2, geoGroup.__lineArray[lineoffset+5] = t3;
+        geoGroup.__lineArray[lineoffset+4] = t3, geoGroup.__lineArray[lineoffset+5] = t4;
+        //caps
+        geoGroup.__lineArray[lineoffset+6] = t1, geoGroup.__lineArray[lineoffset+7] = t4;
+        //geoGroup.__lineArray[lineoffset+10] = t1, geoGroup.__lineArray[lineoffset+11] = fromi;           
+        //geoGroup.__lineArray[lineoffset+12] = t4, geoGroup.__lineArray[lineoffset+13] = fromi;
 
-        geoGroup.__lineArray[lineoffset+12] = t3, geoGroup.__lineArray[lineoffset+13] = t4;
-        geoGroup.__lineArray[lineoffset+14] = t3, geoGroup.__lineArray[lineoffset+15] = toi;        
+        geoGroup.__lineArray[lineoffset+8] = t2b, geoGroup.__lineArray[lineoffset+9] = t2; //toi        
+        geoGroup.__lineArray[lineoffset+10] = t2b, geoGroup.__lineArray[lineoffset+11] = t3b;
+        geoGroup.__lineArray[lineoffset+12] = t3, geoGroup.__lineArray[lineoffset+13] = t3b; //toi
+        //arrowhead
+        geoGroup.__lineArray[lineoffset+14] = t2b, geoGroup.__lineArray[lineoffset+15] = endi;
+        geoGroup.__lineArray[lineoffset+16] = t2b, geoGroup.__lineArray[lineoffset+17] = t3b;
+        geoGroup.__lineArray[lineoffset+18] = endi, geoGroup.__lineArray[lineoffset+19] = t3b; 
         
-        geoGroup.faceidx += 12;        
-        geoGroup.lineidx += 16;    
+        geoGroup.faceidx += 15;        
+        geoGroup.lineidx += 20;    
 
-        
-    };
-    
-    var drawArrow = function(shape) {
         
     };
     
@@ -487,21 +537,34 @@ WebMol.GLShape = (function() {
                 centroid : new WebMol.Vector3(sphereSpec.position.x, sphereSpec.position.y, sphereSpec.position.z)
             });
             
-            updateBoundingFromPoints( this.boundingSphere, components, geo.updateGeoGroup().__vertexArray );
+            updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
         };        
         
-        this.addCylinder = function(cylSpec) {
+        this.addArrow = function(arrowSpec) {
             
-            cylSpec.from = cylSpec.from || {};
-            cylSpec.to = cylSpec.to || {};
+            arrowSpec.start = arrowSpec.start || {};
+            arrowSpec.end = arrowSpec.end || {};
             
-            cylSpec.from = new WebMol.Vector3(cylSpec.from.x || 0, cylSpec.from.y || 0, cylSpec.from.z || 0);
-            cylSpec.to = new WebMol.Vector3(cylSpec.to.x || 1, cylSpec.to.y || 0, cylSpec.to.z || 0);
-            cylSpec.radius = cylSpec.radius || 0.5;
+            arrowSpec.start = new WebMol.Vector3(arrowSpec.start.x || 0, arrowSpec.start.y || 0, arrowSpec.start.z || 0);
+            arrowSpec.end = new WebMol.Vector3(arrowSpec.end.x || 3, arrowSpec.end.y || 0, arrowSpec.end.z || 0);
+            arrowSpec.radius = arrowSpec.radius || 0.25;
+            
+            arrowSpec.radiusRatio = arrowSpec.radiusRatio || 1.618034;
+            arrowSpec.mid = ( 0 < arrowSpec.mid && arrowSpec.mid < 1) ? arrowSpec.mid : 0.618034;
             
             var geoGroup = geo.addGeoGroup();
             
-            drawCylinder(shape, geoGroup, cylSpec);
+            drawArrow(shape, geoGroup, arrowSpec);
+            geo.initTypedArrays();
+            
+            var centroid = new WebMol.Vector3();
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : centroid.addVectors(arrowSpec.start, arrowSpec.end).multiplyScalar(0.5)
+            });
+            
+            updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
             
             //setUpNormals(geo, true);
                 
@@ -519,7 +582,8 @@ WebMol.GLShape = (function() {
                 wireframe : this.wireframe,
                 vertexColors : true,
                 ambient : 0x000000,
-                reflectivity : 0    
+                reflectivity : 0,
+                side : WebMol.DoubleSide
             });
             
             var mesh = new WebMol.Mesh(geo, material);

@@ -126,13 +126,14 @@
                     }
                     
                     shape = viewer.addShape({
-                        wireframe: false,
+                        wireframe: true,
                         color: new WebMol.Color(0xAB5CF2),
                         clickable: true,
                         callback: shapecallback 
                     });
                     
-                    viewer.addCylinder(shape);
+                    viewer.addArrow(shape);
+                    //viewer.addSphere(shape);
                     
                     modelgroup = viewer.getModelGroup();
                     
