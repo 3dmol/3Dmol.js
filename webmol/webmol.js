@@ -227,12 +227,12 @@ var setUpNormals = function(geo, three) {
                 vB = new TV3(verts[b], verts[b+1], verts[b+2]);
                 vC = new TV3(verts[c], verts[c+1], verts[c+2]);
                 
-                vC.subVectors(vC, vB);
                 vA.subVectors(vA, vB);
-                vC.cross(vA);
+                vC.subVectors(vC, vB);
+                vA.cross(vC);
                 
                 //face normal
-                norm = vC;
+                norm = vA;
                 norm.normalize();
                 
                 norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;

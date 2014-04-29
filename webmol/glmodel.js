@@ -151,7 +151,7 @@ WebMol.GLModel = (function() {
                 if (aj.resi - ai.resi > 1) // can't be connected
                     break;
                 if (areConnected(ai, aj)) {
-                    if (ai.bonds.indexOf(aj.index) == -1) {
+                    if (ai.bonds.indexOf(aj.index) === -1) {
                         // only add if not already there
                         ai.bonds.push(aj.index);
                         ai.bondOrder.push(1);
@@ -1325,7 +1325,7 @@ WebMol.GLModel = (function() {
                     color : c1
                 }
             };
-            drawAtomSphere(atom, geo);
+            //drawAtomSphere(atom, geo);
             atom.style = savedstyle;
 
         };

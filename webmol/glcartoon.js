@@ -36,9 +36,9 @@ WebMol.drawCartoon = (function() {
 
         
         for ( var i = -1, size = points.length; i <= size - 3; i++) {
-            var p0 = points[(i == -1) ? 0 : i];
+            var p0 = points[(i === -1) ? 0 : i];
             var p1 = points[i + 1], p2 = points[i + 2];
-            var p3 = points[(i == size - 3) ? size - 1 : i + 3];
+            var p3 = points[(i === size - 3) ? size - 1 : i + 3];
             var v0 = new TV3().subVectors(p2, p0).multiplyScalar(0.5);
             var v1 = new TV3().subVectors(p3, p1).multiplyScalar(0.5);
 

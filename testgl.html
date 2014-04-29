@@ -117,21 +117,22 @@
                     
                     viewer.setBackgroundColor(0xffffff);
                     
-                    m = viewer.addModel(data, "sdf");
-                    atoms = m.selectedAtoms({ });
-
+                    //m = viewer.addModel(data, "sdf");
+                    //atoms = m.selectedAtoms({ });
+                    atoms = [];
                     for (a in atoms) {
                         atoms[a].clickable = true;
                         atoms[a].callback = atomcallback;
                     }
                     
                     shape = viewer.addShape({
-                        wireframe: true,
+                        wireframe: false,
                         color: new WebMol.Color(0xAB5CF2),
                         clickable: true,
                         callback: shapecallback 
                     });
-                    viewer.addSphere(shape);
+                    
+                    viewer.addCylinder(shape);
                     
                     modelgroup = viewer.getModelGroup();
                     
