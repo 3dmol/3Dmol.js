@@ -211,6 +211,22 @@ WebMol.Object3DIDCount = 0;
 //Geometry class
 //TODO: What can I remove - how can I optimize ?
 WebMol.Geometry = (function() {
+
+    //return truncated typed array, including its buffer
+    // type == 0 => Uint16Array; type == 1 => Float32Array
+    //TODO: Should integrate this directly into geometryGroup's truncateArrayBuffers method
+    var truncateArrayBuffer = function(arr, type, end) {
+        
+        if (arr === null || arr === undefined) {
+            return (type === 0) ? new Uint16Array() : new Float32Array();
+        }
+        
+        if (type === 0)
+            return new Uint16Array(arr.buffer.slice(arr.byteOffset, end*2));
+        else if (type === 1) 
+            return new Float32Array(arr.buffer.slice(arr.byteOffset, end*4));
+    };
+    
     
     var geometryGroup = function(id) {
         this.id = id || 0;
@@ -222,6 +238,120 @@ WebMol.Geometry = (function() {
         this.vertices = 0;
         this.faceidx = 0;
         this.lineidx = 0;
+    };
+    
+    geometryGroup.prototype.getCentroid = function() {
+        
+        var centroid = new WebMol.Vector3();
+        var offset, x, y, z;
+        
+        for (var i = 0; i < this.vertices; ++i) {
+            offset = i*3;
+            
+            x = this.__vertexArray[offset], y = this.__vertexArray[offset+1], z = this.__vertexArray[offset+2];
+            
+            centroid.x += x, centroid.y += y, centroid.z += z;
+        }
+        
+        //divideScalar checks for 0 denom
+        centroid.divideScalar(this.vertices);
+        
+        return centroid;
+    };
+    
+    //setup normals - vertex and face array must exist
+    geometryGroup.prototype.setNormals = function() {        
+        
+        var faces = this.__faceArray;
+        var verts = this.__vertexArray;
+        var norms = this.__normalArray;
+        
+        if (! this.vertices || ! this.faceidx) 
+            return;
+        
+        //vertex indices
+        var a, b, c, d,
+        //and actual vertices
+        vA, vB, vC, norm;
+            
+        for (var i = 0; i < faces.length / 3; ++i) {
+            
+            a = faces[i * 3] * 3;
+            b = faces[i * 3 + 1] * 3;
+            c = faces[i * 3 + 2] * 3;
+            
+            vA = new WebMol.Vector3(verts[a], verts[a+1], verts[a+2]);
+            vB = new WebMol.Vector3(verts[b], verts[b+1], verts[b+2]);
+            vC = new WebMol.Vector3(verts[c], verts[c+1], verts[c+2]);
+            
+            vA.subVectors(vA, vB);
+            vC.subVectors(vC, vB);
+            vA.cross(vC);
+            
+            //face normal
+            norm = vA;
+            norm.normalize();
+            
+            norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
+            norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y;
+            norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z;
+            
+        }             
+                
+    };
+    
+    //sets line index array from face arr
+    //Note - assumes all faces are triangles (i.e. there will
+    //be an extra diagonal for four-sided faces - user should 
+    //specify linearr for custom shape generation to show wireframe squares
+    //as rectangles rather than two triangles)
+    geometryGroup.prototype.setLineIndices = function() {
+        
+        if (! this.faceidx)
+            return;
+                    
+        var faceArr = this.__faceArray, lineArr = this.__lineArray = new Uint16Array(this.faceidx*2);      
+        this.lineidx = this.faceidx*2;         
+        var faceoffset;
+            
+        for (var i = 0; i < this.faceidx; ++i) {
+            
+            faceoffset = i*3, lineoffset = faceoffset*2;          
+            var a = faceArr[faceoffset], b = faceArr[faceoffset+1], c = faceArr[faceoffset+2];
+            
+            lineArr[lineoffset] = a, lineArr[lineoffset+1] = b;
+            lineArr[lineoffset+2] = a, lineArr[lineoffset+3] = c;
+            lineArr[lineoffset+4] = b, lineArr[lineoffset+5] = c;
+            
+        }
+    };
+    
+    geometryGroup.prototype.truncateArrayBuffers = function(mesh) {
+        
+        var mesh = (mesh === true) ? true : false;
+        
+        var vertexArr = this.__vertexArray,
+            colorArr = this.__colorArray,
+            normalArr = this.__normalArray,
+            faceArr = this.__faceArray,
+            lineArr = this.__lineArray;
+                       
+        this.__vertexArray = truncateArrayBuffer(vertexArr, 1, this.vertices*3);
+        this.__colorArray = truncateArrayBuffer(colorArr, 1, this.vertices*3);
+        
+        if (mesh) {
+            this.__normalArray = truncateArrayBuffer(normalArr, 1, this.vertices*3);
+            this.__faceArray = truncateArrayBuffer(faceArr, 0, this.faceidx);
+            this.__lineArray = truncateArrayBuffer(lineArr, 0, this.lineidx);
+        }
+        else {
+            this.__normalArray = truncateArrayBuffer(normalArr, 1, 0);
+            this.__faceArray = truncateArrayBuffer(faceArr, 0, 0);
+            this.__lineArray = truncateArrayBuffer(lineArr, 0, 0);            
+        }
+        
+        this.__inittedArrays = true;        
+        
     };
     
     var addGroup = function(geo) {
@@ -257,7 +387,7 @@ WebMol.Geometry = (function() {
         this.hasTangents = false;
     
         this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
-        this.mesh = mesh; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
+        this.mesh = (mesh === true) ? true : false; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
         // update flags
     
         this.verticesNeedUpdate = false;
@@ -272,15 +402,6 @@ WebMol.Geometry = (function() {
         
     };
     
-    //return truncated typed array, including its buffer
-    // type == 0 => Uint16Array; type == 1 => Float32Array
-    var truncateArrayBuffer = function(arr, type, start, end) {
-        
-        if (type === 0)
-            return new Uint16Array(arr.buffer.slice(start, end*2));
-        else if (type === 1) 
-            return new Float32Array(arr.buffer.slice(start, end*4));
-    };
     
     Geometry.prototype = {
         
@@ -305,6 +426,20 @@ WebMol.Geometry = (function() {
             return addGroup(this);  
         },
         
+        setUpNormals : function(three) {
+            
+            var three = three || false;
+            
+            for ( var g in this.geometryGroups ) {
+            
+                var geoGroup = this.geometryGroups[g];            
+                
+                geoGroup.setNormals(three);
+                
+            }  
+                      
+        },
+        
         //After vertices, colors, etc are collected in regular or typed arrays,
         // either create typed arrays from regular arrays if they don't already exist,
         // or shorten last typed array
@@ -317,22 +452,7 @@ WebMol.Geometry = (function() {
                 if (group.__inittedArrays === true)
                     continue;
                 
-                var vertexArr = group.__vertexArray,
-                    colorArr = group.__colorArray,
-                    normalArr = group.__normalArray,
-                    faceArr = group.__faceArray,
-                    lineArr = group.__lineArray;
-                               
-                group.__vertexArray = truncateArrayBuffer(vertexArr, 1, vertexArr.byteOffset, group.vertices*3);
-                group.__colorArray = truncateArrayBuffer(colorArr, 1, colorArr.byteOffset, group.vertices*3);
-                
-                if (this.mesh) {
-                    group.__normalArray = truncateArrayBuffer(normalArr, 1, normalArr.byteOffset, group.vertices*3);
-                    group.__faceArray = truncateArrayBuffer(faceArr, 0, faceArr.byteOffset, group.faceidx);
-                    group.__lineArray = truncateArrayBuffer(lineArr, 0, lineArr.byteOffset, group.lineidx);
-                }
-                
-                group.__inittedArrays = true;
+                group.truncateArrayBuffers(this.mesh);
             }
             
         

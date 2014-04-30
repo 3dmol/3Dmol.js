@@ -261,7 +261,7 @@ var setUpNormals = function(geo, three) {
                 vC.cross(vA);
     
                 //face normal
-                norm = vC;
+                norm = vC.negate();
                 norm.normalize();
     
                 norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;

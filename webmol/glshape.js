@@ -90,7 +90,7 @@ WebMol.GLShape = (function() {
     
     var drawSphere = function(shape, geoGroup, spec) {
         
-        var pos = spec.position, radius = spec.radius;        
+        var pos = spec.center, radius = spec.radius;        
         
         var center = new WebMol.Vector3(pos.x, pos.y, pos.z);
         shape.intersectionShape.sphere.push( new WebMol.Sphere(center, radius) );                                                                  
@@ -448,6 +448,51 @@ WebMol.GLShape = (function() {
         
     };
     
+    //handles custom shape generation from user supplied arrays
+    //May need to generate normal and/or line indices
+    var drawCustom = function(shape, geoGroup, customSpec) {
+        
+        var vertexArr = customSpec.vertexArr, normalArr = customSpec.normalArr, faceArr = customSpec.faceArr, lineArr = customSpec.lineArr;        
+        
+        if (vertexArr.length === 0 || faceArr.length === 0) {
+            console.error("Error adding custom shape component: No vertices and/or face indices supplied!");
+        }
+        
+        geoGroup.vertices = vertexArr.length, geoGroup.faceidx = faceArr.length;
+        
+        var offset, v, a, b, c;
+        
+        for (var i = 0; i < geoGroup.vertices; ++i) {            
+            offset = i*3;
+            v = vertexArr[i];    
+            geoGroup.__vertexArray[offset] = v.x, geoGroup.__vertexArray[offset+1] = v.y, geoGroup.__vertexArray[offset+2] = v.z;           
+        }
+        
+        for (var i = 0; i < geoGroup.faceidx / 3; ++i) {
+            offset = i*3;
+            a = faceArr[offset], b = faceArr[offset+1], c = faceArr[offset+2];
+            
+            shape.intersectionShape.triangle.push( new WebMol.Triangle(vertexArr[a].clone(), vertexArr[b].clone(), vertexArr[c].clone()) );
+        }
+                  
+        geoGroup.__faceArray = new Uint16Array(faceArr);
+     
+        geoGroup.truncateArrayBuffers(true);
+        
+        if (normalArr.length < geoGroup.vertices)
+            geoGroup.setNormals();
+        else
+            geoGroup.__normalArray = new Float32Array(normalArr);
+        
+        if (! lineArr.length)
+            geoGroup.setLineIndices(); 
+        else
+            geoGroup.__lineArray = new Uint16Array(lineArr);
+        
+        geoGroup.lineidx = geoGroup.__lineArray.length;
+             
+    };
+    
     //Update a bounding sphere's position and radius
     //from list of centroids and new points
     var updateBoundingFromPoints = function(sphere, components, points) {       
@@ -498,43 +543,47 @@ WebMol.GLShape = (function() {
         
         var geo = new WebMol.Geometry(true);
         
-        var createShapeComponent = function(fn) {
+        this.addCustom = function(customSpec) {
+            
+            customSpec.vertexArr = customSpec.vertexArr || [];
+            customSpec.faceArr = customSpec.faceArr || [];
+            customSpec.normalArr = customSpec.normalArr || [];
+            customSpec.lineArr = customSpec.lineArr || [];
             
             //Force creation of new geometryGroup for each added component
-            var geoGroup = geo.updateGeoGroup(65536);
-            var vertexArr = [], normalArr = [], faceArr = [], lineArr = [];
-            
-            fn(vertexArr, normalArr, faceArr, lineArr);
-            
-            geoGroup.__vertexArray = new Float32Array(vertexArr);
-            geoGroup.__normalArray = new Float32Array(normalArr);
-            geoGroup.__colorArray = new Float32Array(vertexArr.length);
-
+            var geoGroup = geo.addGeoGroup();
+            drawCustom(shape, geoGroup, customSpec);            
+            geoGroup.truncateArrayBuffers(true);
+    
             for (var i = 0; i < geoGroup.__colorArray.length / 3; ++i) {
                 geoGroup.__colorArray[i*3] = this.color.r;
                 geoGroup.__colorArray[i*3 + 1] = this.color.g;
                 geoGroup.__colorArray[i*3 + 2] = this.color.b;      
-            }
+            }            
             
-            geoGroup.__faceArray = new Uint16Array(faceArr);
-            geoGroup.__lineArray = new Uint16Array(lineArr);
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : geoGroup.getCentroid() 
+            });
             
+            updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );            
         };
         
         //TODO: Refactor so 'drawSphere' method automatically updates bounding sphere as vertices are added
         this.addSphere = function(sphereSpec) {
           
-            sphereSpec.position = sphereSpec.position || {x: 0, y: 0, z: 0};
+            sphereSpec.center = sphereSpec.center || {x: 0, y: 0, z: 0};
             sphereSpec.radius = sphereSpec.radius ? WebMol.Math.clamp(sphereSpec.radius, 0, Infinity) : 1.5;
             
             var geoGroup = geo.addGeoGroup();
             drawSphere(shape, geoGroup, sphereSpec);
-            geo.initTypedArrays();
+            geoGroup.truncateArrayBuffers(true);            
             
             components.push({
                 id : geoGroup.id,
                 geoGroup : geoGroup, //has to be last group added
-                centroid : new WebMol.Vector3(sphereSpec.position.x, sphereSpec.position.y, sphereSpec.position.z)
+                centroid : new WebMol.Vector3(sphereSpec.center.x, sphereSpec.center.y, sphereSpec.center.z)
             });
             
             updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
@@ -555,7 +604,7 @@ WebMol.GLShape = (function() {
             var geoGroup = geo.addGeoGroup();
             
             drawArrow(shape, geoGroup, arrowSpec);
-            geo.initTypedArrays();
+            geoGroup.truncateArrayBuffers(true);
             
             var centroid = new WebMol.Vector3();
             components.push({
@@ -566,7 +615,6 @@ WebMol.GLShape = (function() {
             
             updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
             
-            //setUpNormals(geo, true);
                 
         };
     

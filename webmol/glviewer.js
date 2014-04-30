@@ -615,8 +615,8 @@ WebMol.glmolViewer = (function() {
 
         // zoom to atom selection
         this.zoomTo = function(sel) {
-            var atoms = getAtomsFromSel(sel);
-            var allatoms = getAtomsFromSel({});
+            var atoms = getAtomsFromSel(sel).concat(shapes);
+            var allatoms = getAtomsFromSel({}).concat(shapes);
             var tmp = getExtent(atoms);
             var alltmp = getExtent(allatoms);
             // use selection for center
@@ -705,6 +705,12 @@ WebMol.glmolViewer = (function() {
         this.addArrow = function(shape, spec) {
             spec = spec || {};
             shape.addArrow(spec);
+        };
+        
+        //Add custom shape component from user supplied function
+        this.addCustom = function(shape, spec) {                            
+            spec = spec || {};
+            shape.addCustom(spec);                            
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)
