@@ -182,94 +182,14 @@ WebMol.Color.prototype = {
 
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
 
-//represents individual renderable geometry group
-var geometryChunk = function() {
-    this.vertexArr = [];
-    this.colorArr = [];
-    this.normalArr = [];
-    this.faceArr = [];
-    this.lineArr = [];
-    this.vertices = 0;
-};
-
-//checks to make sure geo group isn't too big - if so, create a new group 
-// and add to existing geometry.
-//return either new group or current group
-var updateGeoGroup = function(geo, geoGroup, n_vertices) {
-    
-    var retGroup = geoGroup;
-    if (geoGroup.vertices + n_vertices > 65535){
-        geo.geometryChunks.push( new geometryChunk() );
-        retGroup = geo.geometryChunks[ geo.geometryChunks.length - 1];
-    }
-    
-    return retGroup;
-};
-
 var mergeGeos = function(geometry, mesh) {
     
     var meshGeo = mesh.geometry;
     
-    if (meshGeo === undefined || meshGeo.geometryChunks === undefined) 
+    if (meshGeo === undefined) 
         return;
-        
-    if (geometry.geometryChunks === undefined)
-        geometry.geometryChunks = [];
     
-    geometry.geometryChunks.push( meshGeo.geometryChunks[0] );
-    
-};
-
-//Initialize typed array buffers for completed geometry
-//TODO: get rid of the saveArrs argument (always delete arrays)
-//For surf render, generate the typed arrays directly (rather than calling this function)
-var initBuffers = function(geometry, saveArrs) {
-    
-    //mesh arrays
-    if ( geometry.geometryChunks !== undefined ) {
-        
-        var group;
-        
-        for (var i = 0; i < geometry.geometryChunks.length; ++i){
-        
-            group = geometry.geometryChunks[i];
-            
-            if (group.__inittedArrays)
-                continue;
-            
-            group.__vertexArray = new Float32Array(group.vertexArr);
-            group.__colorArray = new Float32Array(group.colorArr);
-            group.__normalArray = new Float32Array(group.normalArr);
-            group.__faceArray = new Uint16Array(group.faceArr);
-            group.__lineArray = new Uint16Array(group.lineArr);
-            
-            //Doesn't free memory directly, but should break references for gc 
-            group.vertexArr = null;
-            group.colorArr = null;
-            group.normalArr = null;
-            group.faceArr = null;
-            group.lineArr = null;
-            
-            group.__inittedArrays = true;
-            
-        }
-        
-    }
-    
-    //line arrays
-    else {
-        
-        if (geometry.__inittedArrays)
-            return
-        
-        geometry.__vertexArray = new Float32Array(geometry.vertexArr);
-        geometry.__colorArray = new Float32Array(geometry.colorArr);
-        
-        geometry.vertexArr = null;
-        geometry.colorArr = null;
-        
-        geometry.__inittedArrays = true;
-    }        
+    geometry.geometryGroups.push( meshGeo.geometryGroups[0] );
     
 };
 
@@ -279,43 +199,77 @@ var initBuffers = function(geometry, saveArrs) {
 // after all (4-)faces and vertices are set up
 var setUpNormals = function(geo, three) {
     
-    for ( var g in geo.geometryChunks ) {
+    three = three || false;
     
-        var geoGroup = geo.geometryChunks[g];
+    for ( var g in geo.geometryGroups ) {
     
-        var faces = geoGroup.faceArr;
-        var verts = geoGroup.vertexArr;
-        var norms = geoGroup.normalArr;
+        var geoGroup = geo.geometryGroups[g];            
+    
+        var faces = geoGroup.__faceArray;
+        var verts = geoGroup.__vertexArray;
+        var norms = geoGroup.__normalArray;
         
         //vertex indices
         var a, b, c, d,
         //and actual vertices
         vA, vB, vC, norm;
+        
+        //face3
+        if (three) {
+            
+            for (var i = 0; i < faces.length / 3; ++i) {
+                
+                a = faces[i * 3] * 3;
+                b = faces[i * 3 + 1] * 3;
+                c = faces[i * 3 + 2] * 3;
+                
+                vA = new TV3(verts[a], verts[a+1], verts[a+2]);
+                vB = new TV3(verts[b], verts[b+1], verts[b+2]);
+                vC = new TV3(verts[c], verts[c+1], verts[c+2]);
+                
+                vA.subVectors(vA, vB);
+                vC.subVectors(vC, vB);
+                vA.cross(vC);
+                
+                //face normal
+                norm = vA;
+                norm.normalize();
+                
+                norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
+                norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y;
+                norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z;
+                
+            }
+        }      
+        
+        //face4
+        else {
               
-        //face4   
-        for ( var i = 0; i < faces.length / 6; i++ ) {
-
-            a = faces[ i * 6 ] * 3;
-            b = faces[ i * 6 + 1 ] * 3;
-            c = faces[ i * 6 + 4 ] * 3;
-            d = faces[ i * 6 + 2 ] * 3;
-
-            vA = new TV3(verts[a], verts[a+1], verts[a+2]);
-            vB = new TV3(verts[b], verts[b+1], verts[b+2]);
-            vC = new TV3(verts[c], verts[c+1], verts[c+2]);
-
-            vC.subVectors(vC, vB);
-            vA.subVectors(vA, vB);
-            vC.cross(vA);
-
-            //face normal
-            norm = vC;
-            norm.normalize();
-
-            norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
-            norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y, norms[d + 1] += norm.y;
-            norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z, norms[d + 2] += norm.z;
-
+            for ( var i = 0; i < faces.length / 6; i++ ) {
+    
+                a = faces[ i * 6 ] * 3;
+                b = faces[ i * 6 + 1 ] * 3;
+                c = faces[ i * 6 + 4 ] * 3;
+                d = faces[ i * 6 + 2 ] * 3;
+    
+                vA = new TV3(verts[a], verts[a+1], verts[a+2]);
+                vB = new TV3(verts[b], verts[b+1], verts[b+2]);
+                vC = new TV3(verts[c], verts[c+1], verts[c+2]);
+    
+                vC.subVectors(vC, vB);
+                vA.subVectors(vA, vB);
+                vC.cross(vA);
+    
+                //face normal
+                norm = vC;
+                norm.normalize();
+    
+                norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
+                norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y, norms[d + 1] += norm.y;
+                norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z, norms[d + 2] += norm.z;
+    
+            }
+        
         }
         
     }

@@ -168,6 +168,7 @@ WebMol.glmolViewer = (function() {
 
         var models = []; // atomistic molecular models
         var surfaces = [];
+        var shapes = []; //Generic shapes
 
         var WIDTH = container.width();
         var HEIGHT = container.height();
@@ -298,26 +299,35 @@ WebMol.glmolViewer = (function() {
              
             raycaster.set(camera.position, mouseVector);
 
-            var intersects = [];
+            var clickables = [], intersects = [];
             
             for (var i in models) {
                 var model = models[i];
                 
                 var atoms = model.selectedAtoms({clickable: true});
-                var atom = null;
+                clickables = clickables.concat(atoms);
 
-                intersects = raycaster.intersectObjects(modelGroup, atoms);
+            }
+            
+            for (var i in shapes) {
                 
-                if (intersects.length) {
-                    var atom = intersects[0].atom;
-                    clickedAtom = atom;
-                    
-                    if (atom.callback !== undefined && typeof(atom.callback) === "function"){
-                        atom.callback(atom, model, _viewer);
-                        show();
-                    }
+                var shape = shapes[i];
+                if (shape.clickable) {
+                    clickables.push(shape);
                 }
-            }        
+
+            }
+            
+            intersects = raycaster.intersectObjects(modelGroup, clickables);
+            
+            if (intersects.length) {
+                var selected = intersects[0].clickable;
+                if (selected.callback !== undefined && typeof(selected.callback) === "function") {
+                    selected.callback(selected, _viewer);
+                }
+            }
+            
+            show();        
         }; 
         
         // TODO: Better touch panel support.
@@ -504,6 +514,12 @@ WebMol.glmolViewer = (function() {
                     models[i].globj(modelGroup);
                 }
             }
+            
+            for ( var i = 0; i < shapes.length; i++ ) {
+                if (shapes[i]) {
+                    shapes[i].globj(modelGroup);
+                }
+            }
 
             for ( var i in surfaces) { // this is an array with possible holes
                 if (surfaces.hasOwnProperty(i)) {
@@ -527,7 +543,6 @@ WebMol.glmolViewer = (function() {
                         if (surfaces[i].lastGL) 
                             modelGroup.remove(surfaces[i].lastGL);
                         
-                        initBuffers(geo, true);
                         // create new surface
                         var smesh = new WebMol.Mesh(geo, surfaces[i].mat);
                         surfaces[i].lastGL = smesh;
@@ -670,6 +685,26 @@ WebMol.glmolViewer = (function() {
             
             return label;
 
+        };
+        
+        //Add generic GLShape to viewer
+        this.addShape = function(shapeSpec) {
+            shapeSpec = shapeSpec || {};
+            var shape = new WebMol.GLShape(shapeSpec);
+            shapes.push(shape);
+            
+            return shape;
+              
+        };
+        
+        this.addSphere = function(shape, spec) {
+            spec = spec || {};
+            shape.addSphere(spec);      
+        };
+        
+        this.addArrow = function(shape, spec) {
+            spec = spec || {};
+            shape.addArrow(spec);
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)
@@ -849,27 +884,23 @@ WebMol.glmolViewer = (function() {
         // create a mesh defined from the passed vertices and faces and material
         // Just create a single geometry chunk - broken up whether sync or not
         var generateSurfaceMesh = function(atoms, VandF, mat) {
-            var geo = new WebMol.Geometry();
-            geo.geometryChunks = [];
-            geo.geometryChunks.push( new geometryChunk() );
-            
-            var geoGroup = geo.geometryChunks[0];
+        
+            var geo = new WebMol.Geometry(true);  
+            //Only one group per call to generate surface mesh (addSurface should split up mesh render)     
+            var geoGroup = geo.updateGeoGroup(0);
             
             // reconstruct vertices and faces
-            geo.vertices = [];
             var v = VandF.vertices;
-            
-            for ( var i = 0; i < v.length; i++) {
-                
-                geoGroup.vertexArr.push(v[i].x), geoGroup.vertexArr.push(v[i].y), geoGroup.vertexArr.push(v[i].z);
-
-                geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0), geoGroup.colorArr.push(0.0);            
-                geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0), geoGroup.normalArr.push(0.0);
-                
+            var offset;
+            for ( var i = 0; i < v.length; i++) {            
+                offset = geoGroup.vertices*3;
+                geoGroup.__vertexArray[offset] = v[i].x; geoGroup.__vertexArray[offset+1] = v[i].y, geoGroup.__vertexArray[offset+2] =v[i].z;                
                 geoGroup.vertices++;
             }
-
+                       
             var faces = VandF.faces;
+            geoGroup.faceidx = faces.length*3;
+            geo.initTypedArrays();
 
             // set colors for vertices
             var colors = [];
@@ -882,11 +913,15 @@ WebMol.glmolViewer = (function() {
                         colors[i] = WebMol.CC.color(atom.color);
                 }
             }
-            var verts = geoGroup.vertexArr;
+            
+            var verts = geoGroup.__vertexArray;
             var vA, vB, vC, norm;
+            var faceoffset;
+            
             //Setup colors, faces, and normals
             for ( var i = 0; i < faces.length; i++) {
                 
+                faceoffset = i*3;
                 var a = faces[i].a, b = faces[i].b, c = faces[i].c;
                 var A = v[a].atomid;
                 var B = v[b].atomid;
@@ -894,14 +929,15 @@ WebMol.glmolViewer = (function() {
                 
                 var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
-                geoGroup.faceArr.push(faces[i].a), geoGroup.faceArr.push(faces[i].b), geoGroup.faceArr.push(faces[i].c);
+                geoGroup.__faceArray[faceoffset] = faces[i].a, geoGroup.__faceArray[faceoffset+1] = faces[i].b, 
+                    geoGroup.__faceArray[faceoffset+2] = faces[i].c;
                 
-                geoGroup.colorArr[offsetA] = colors[A].r, geoGroup.colorArr[offsetA+1] = colors[A].g,
-                         geoGroup.colorArr[offsetA+2] = colors[A].b;
-                geoGroup.colorArr[offsetB] = colors[B].r, geoGroup.colorArr[offsetB+1] = colors[B].g,
-                         geoGroup.colorArr[offsetB+2] = colors[B].b;
-                geoGroup.colorArr[offsetC] = colors[C].r, geoGroup.colorArr[offsetC+1] = colors[C].g,
-                         geoGroup.colorArr[offsetC+2] = colors[C].b;
+                geoGroup.__colorArray[offsetA] = colors[A].r, geoGroup.__colorArray[offsetA+1] = colors[A].g,
+                         geoGroup.__colorArray[offsetA+2] = colors[A].b;
+                geoGroup.__colorArray[offsetB] = colors[B].r, geoGroup.__colorArray[offsetB+1] = colors[B].g,
+                         geoGroup.__colorArray[offsetB+2] = colors[B].b;
+                geoGroup.__colorArray[offsetC] = colors[C].r, geoGroup.__colorArray[offsetC+1] = colors[C].g,
+                         geoGroup.__colorArray[offsetC+2] = colors[C].b;
                  
                 //setup Normals
                 
@@ -917,9 +953,9 @@ WebMol.glmolViewer = (function() {
                 norm = vC;
                 norm.normalize();
                 
-                geoGroup.normalArr[offsetA] += norm.x, geoGroup.normalArr[offsetB] += norm.x, geoGroup.normalArr[offsetC] += norm.x;
-                geoGroup.normalArr[offsetA+1] += norm.y, geoGroup.normalArr[offsetB+1] += norm.y, geoGroup.normalArr[offsetC+1] += norm.y;
-                geoGroup.normalArr[offsetA+2] += norm.z, geoGroup.normalArr[offsetB+2] += norm.z, geoGroup.normalArr[offsetC+2] += norm.z;
+                geoGroup.__normalArray[offsetA] += norm.x, geoGroup.__normalArray[offsetB] += norm.x, geoGroup.__normalArray[offsetC] += norm.x;
+                geoGroup.__normalArray[offsetA+1] += norm.y, geoGroup.__normalArray[offsetB+1] += norm.y, geoGroup.__normalArray[offsetC+1] += norm.y;
+                geoGroup.__normalArray[offsetA+2] += norm.z, geoGroup.__normalArray[offsetB+2] += norm.z, geoGroup.__normalArray[offsetC+2] += norm.z;
                 
             }
 
@@ -1091,7 +1127,7 @@ WebMol.glmolViewer = (function() {
                     + (+new Date() - time) + "ms");
 
             var surfobj = {
-                geo : new WebMol.Geometry(),
+                geo : new WebMol.Geometry(true),
                 mat : mat,
                 done : false,
                 finished : false
@@ -1122,9 +1158,9 @@ WebMol.glmolViewer = (function() {
                             totalVol);
                     var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                     mergeGeos(surfobj.geo, mesh);
-                    initBuffers(surfobj.geo);
                     view.render();
                 }
+            //TODO: Asynchronously generate geometryGroups (not separate meshes) and merge them into a single geometry
             } else { // use worker
                 
                 var workers = [];
@@ -1146,7 +1182,6 @@ WebMol.glmolViewer = (function() {
                         var VandF = event.data;
                         var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                         mergeGeos(surfobj.geo, mesh);
-                        initBuffers(surfobj.geo);
                         view.render();
                         console.log("async mesh generation "
                                 + (+new Date() - time) + "ms");
@@ -1214,7 +1249,6 @@ WebMol.glmolViewer = (function() {
         };
 
         this.clear = function() {
-
             surfaces = [];
             //models = [];
             this.removeAllModels();

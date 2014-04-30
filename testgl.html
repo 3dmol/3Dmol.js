@@ -20,7 +20,7 @@
         <script src="webmol/WebGL/renderer.js"></script>
         <script src="webmol/properties.js"></script>
 	    <script src="webmol/colors.js"></script>
-	    <script src="webmol/shapecollection.js"></script>
+	    <script src="webmol/glshape.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/ProteinSurface4.js"></script>
@@ -35,6 +35,7 @@
         var glviewer = null;
         var labels = [];
         var m = null;
+        var shape = null;
         var m2 = null;
         var atoms = null;
         var moldata = "";
@@ -56,7 +57,7 @@
             }
         };
         
-        var clickCallback = function(atom, model, viewer){
+        var atomcallback = function(atom, viewer){
             if (atom.clickLabel === undefined || !atom.clickLabel instanceof WebMol.Label) {
                 atom.clickLabel = viewer.addLabel(atom.elem,
                                                   {fontSize : 14, 
@@ -83,6 +84,28 @@
                 
             }
         };
+
+        var shapecallback = function(shape, viewer) {
+            if(shape.clickLabel === undefined || !shape.clickLabel instanceof WebMol.Label) { 
+                shape.clickLabel = viewer.addLabel("Shape " + shape.id, {fontSize:14, position:
+                    {x:shape.position.x, y:shape.position.y, z:shape.position.z}});
+                shape.clicked=true;
+            } 
+            
+            else { 
+                if (shape.clicked) { 
+                    var newstyle = shape.clickLabel.stylespec; 
+                    newstyle.backgroundColor = {r:100, g:0, b:255, a:0.8}; 
+                    viewer.setLabelStyle(shape.clickLabel, newstyle); 
+                    shape.clicked = !shape.clicked; 
+                } 
+                else { 
+                    viewer.removeLabel(shape.clickLabel); 
+                    shape.clickLabel = undefined; 
+                    shape.clicked = false; 
+                } 
+            } 
+        };
         
         $(document).ready(function() {
             
@@ -93,14 +116,24 @@
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
-                    m = viewer.addModel(data, "sdf");
-                    //m2 = viewer.addModel(data2,"pdb");
-                    atoms = m.selectedAtoms({ });
-
+                    
+                    //m = viewer.addModel(data, "sdf");
+                    //atoms = m.selectedAtoms({ });
+                    atoms = [];
                     for (a in atoms) {
                         atoms[a].clickable = true;
-                        atoms[a].callback = clickCallback;
+                        atoms[a].callback = atomcallback;
                     }
+                    
+                    shape = viewer.addShape({
+                        wireframe: true,
+                        color: new WebMol.Color(0xAB5CF2),
+                        clickable: true,
+                        callback: shapecallback 
+                    });
+                    
+                    viewer.addArrow(shape);
+                    //viewer.addSphere(shape);
                     
                     modelgroup = viewer.getModelGroup();
                     

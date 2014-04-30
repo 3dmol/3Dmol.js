@@ -7,6 +7,10 @@
 
 WebMol.Math = {
 
+    clamp : function(x, min, max) {
+        return Math.min( Math.max( x, min ), max );
+    },
+
     degToRad : function() {
        var degreeToRadiansFactor = Math.PI / 180;
        
@@ -368,12 +372,6 @@ WebMol.extend(WebMol.Vector3.prototype, {
 
         // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
 
-        // clamp, to handle numerical problems
-
-        function clamp(x) {
-            return Math.min( Math.max( x, -1 ), 1 );
-        }
-
         var te = m.elements;
         var m11 = te[0], m12 = te[4], m13 = te[8];
         var m21 = te[1], m22 = te[5], m23 = te[9];
@@ -381,7 +379,7 @@ WebMol.extend(WebMol.Vector3.prototype, {
 
         if ( order === undefined || order === 'XYZ' ) {
 
-            this.y = Math.asin( clamp( m13 ) );
+            this.y = Math.asin( WebMol.Math.clamp( m13, -1, 1 ) );
 
             if ( Math.abs( m13 ) < 0.99999 ) {
 

@@ -401,26 +401,26 @@ WebMol.Renderer = function ( parameters ) {
         if (geometry.__webglColorBuffer !== undefined)
             _gl.deleteBuffer(geometry.__webglColorBuffer);
         
-        if (geometry.geometryChunks !== undefined) {
+        if (geometry.geometryGroups !== undefined) {
             
-            for (var g in geometry.geometryChunks) {  
+            for (var g in geometry.geometryGroups) {  
                 
-                var geometryChunk = geometry.geometryChunks[g];
+                var geometryGroup = geometry.geometryGroups[g];
 
-                if (geometryChunk.__webglVertexBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglVertexBuffer);
+                if (geometryGroup.__webglVertexBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglVertexBuffer);
 
-                if (geometryChunk.__webglColorBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglColorBuffer);
+                if (geometryGroup.__webglColorBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglColorBuffer);
                 
-                if (geometryChunk.__webglNormalBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglNormalBuffer);  
+                if (geometryGroup.__webglNormalBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglNormalBuffer);  
                 
-                if (geometryChunk.__webglFaceBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglFaceBuffer);
+                if (geometryGroup.__webglFaceBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglFaceBuffer);
                     
-                if (geometryChunk.__webglLineBuffer !== undefined)
-                    _gl.deleteBuffer(geometryChunk.__webglLineBuffer);
+                if (geometryGroup.__webglLineBuffer !== undefined)
+                    _gl.deleteBuffer(geometryGroup.__webglLineBuffer);
                     
             }
         }
@@ -539,28 +539,33 @@ WebMol.Renderer = function ( parameters ) {
 
 
     //Compile appropriate shaders (if necessary) from source code and attach to gl program.
-    function buildProgram(fragmentShader, vertexShader, uniforms) {
+    function buildProgram(fragmentShader, vertexShader, uniforms, parameters) {
 
         var p, pl, d, program, code;
         var chunks = [];
 
         chunks.push(fragmentShader);
         chunks.push(vertexShader);
-
+        
+        for (var p in parameters) {
+            chunks.push(p);
+            chunks.push(parameters[p]);
+        }
+        
         code = chunks.join();
 
         //check if program has already been compiled
 
         for (p = 0, pl = _programs.length; p < pl; p++) {
 
-                var programInfo = _programs[p];
+            var programInfo = _programs[p];
 
-                if (programInfo.code === code) {
+            if (programInfo.code === code) {
 
-                        programInfo.usedTimes++;
+                programInfo.usedTimes++;
 
-                        return programInfo.program;
-                }
+                return programInfo.program;
+            }
         }
 
         //Set up new program and compile shaders
@@ -569,10 +574,19 @@ WebMol.Renderer = function ( parameters ) {
         
         //set up precision
         var precision = _precision;
-        var prefix = "precision " + precision + " float;\n";
+        var prefix = "precision " + precision + " float;";
         
-        var glFragmentShader = getShader("fragment", prefix + fragmentShader);
-        var glVertexShader = getShader("vertex", prefix + vertexShader);
+        var prefix_vertex = [
+                             prefix
+                            ].join("\n");
+                            
+        var prefix_fragment = [                               
+                               parameters.wireframe ? "#define WIREFRAME 1" : "",
+                               prefix
+                              ].join("\n");
+        
+        var glFragmentShader = getShader("fragment", prefix_fragment + fragmentShader);
+        var glVertexShader = getShader("vertex", prefix_vertex + vertexShader);
 
         _gl.attachShader(program, glVertexShader);
         _gl.attachShader(program, glFragmentShader);
@@ -580,7 +594,7 @@ WebMol.Renderer = function ( parameters ) {
         _gl.linkProgram(program);
 
         if (! _gl.getProgramParameter(program, _gl.LINK_STATUS) )
-                console.error("Could not initialize shader");
+            console.error("Could not initialize shader");
 
         //gather and cache uniform variables and attributes
 
@@ -591,22 +605,22 @@ WebMol.Renderer = function ( parameters ) {
 
         //uniform vars
         identifiers = 
-                [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix', 'normalMatrix', 'modelMatrix', 'cameraPosition' ];
+            [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix', 'normalMatrix', 'modelMatrix', 'cameraPosition' ];
 
         //custom uniform vars
         for (u in uniforms) 
-                identifiers.push(u);
+            identifiers.push(u);
 
         for (i = 0; i < identifiers.length; i++) {
 
-                var uniformVar = identifiers[i];
-                program.uniforms[uniformVar] = _gl.getUniformLocation(program, uniformVar);
+            var uniformVar = identifiers[i];
+            program.uniforms[uniformVar] = _gl.getUniformLocation(program, uniformVar);
 
         }
 
         //attributes
         identifiers = 
-                [ 'position', 'normal', 'color', 'lineDistance' ];
+            [ 'position', 'normal', 'color', 'lineDistance' ];
 
         /*
         for (a in attributes)
@@ -615,8 +629,8 @@ WebMol.Renderer = function ( parameters ) {
 
         for (i = 0; i < identifiers.length; i++) {
 
-                var attributeVar = identifiers[i];
-                program.attributes[attributeVar] = _gl.getAttribLocation(program, attributeVar);
+            var attributeVar = identifiers[i];
+            program.attributes[attributeVar] = _gl.getAttribLocation(program, attributeVar);
         }
 
         program.id = _programs_counter++;
@@ -635,22 +649,26 @@ WebMol.Renderer = function ( parameters ) {
         var u, a, identifiers, i, parameters, maxLightCount, maxBones, maxShadows, shaderID;
 
         if (material instanceof WebMol.LineBasicMaterial)
-                shaderID = "basic";
+            shaderID = "basic";
         else if (material instanceof WebMol.MeshLambertMaterial)
-                shaderID = "lambert";
+            shaderID = "lambert";
 
         if (shaderID) {
 
-                var shader = WebMol.ShaderLib[shaderID];
-                material.shaderType = shaderID;
-                material.vertexShader = shader.vertexShader;
-                material.fragmentShader = shader.fragmentShader;
-                material.uniforms = WebMol.ShaderUtils.clone(shader.uniforms);
-                //TODO: set material uniforms to shader uniform variables
+            var shader = WebMol.ShaderLib[shaderID];
+            material.shaderType = shaderID;
+            material.vertexShader = shader.vertexShader;
+            material.fragmentShader = shader.fragmentShader;
+            material.uniforms = WebMol.ShaderUtils.clone(shader.uniforms);
+            //TODO: set material uniforms to shader uniform variables
 
         }
+        
+        parameters = {
+            wireframe: material.wireframe
+        };
 
-        material.program = buildProgram(material.fragmentShader, material.vertexShader, material.uniforms);
+        material.program = buildProgram(material.fragmentShader, material.vertexShader, material.uniforms, parameters);
 
     };
 
@@ -658,11 +676,11 @@ WebMol.Renderer = function ( parameters ) {
 
         if ( material.needsUpdate ) {
 
-                if (material.program)
-                        deallocateMaterial(material);
+            if (material.program)
+                deallocateMaterial(material);
 
-                        _this.initMaterial( material, lights, fog, object );
-                        material.needsUpdate = false;
+                _this.initMaterial( material, lights, fog, object );
+                material.needsUpdate = false;
         }
 
         var refreshMaterial = false;
@@ -670,66 +688,66 @@ WebMol.Renderer = function ( parameters ) {
         //p_uniforms: uniformVarName => uniformLocation
         //m_uniforms: uniformVarName => uniformJsVal
         var program = material.program,
-                p_uniforms = program.uniforms,
-                m_uniforms = material.uniforms;
+            p_uniforms = program.uniforms,
+            m_uniforms = material.uniforms;
 
         if (program != _currentProgram) {        
-                _gl.useProgram(program);
-                _currentProgram = program;
+            _gl.useProgram(program);
+            _currentProgram = program;
 
-                refreshMaterial = true;
+            refreshMaterial = true;
         }
 
         if (material.id != _currentMaterialId) {
-                _currentMaterialId = material.id;
-                refreshMaterial = true;
+            _currentMaterialId = material.id;
+            refreshMaterial = true;
         }
 
         if (camera != _currentCamera) {    
-                _currentCamera = camera;
-                refreshMaterial = true;
+            _currentCamera = camera;
+            refreshMaterial = true;
         }
 
         //Send projection matrix to uniform variable in shader
         if (refreshMaterial) {
 
-                //Load projection, model-view matrices for perspective
-                _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
-                _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+            //Load projection, model-view matrices for perspective
+            _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
+            _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
 
-                //Set up correct fog uniform vals
-                m_uniforms.fogColor.value = fog.color;
-                m_uniforms.fogNear.value = fog.near;
-                m_uniforms.fogFar.value = fog.far;
+            //Set up correct fog uniform vals
+            m_uniforms.fogColor.value = fog.color;
+            m_uniforms.fogNear.value = fog.near;
+            m_uniforms.fogFar.value = fog.far;
 
-                //Set up lights for lambert shader
-                if (material.shaderType === "lambert") {
+            //Set up lights for lambert shader
+            if (material.shaderType === "lambert") {
 
-                        //load view and normal matrices for directional and object lighting
-                        _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
-                        _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
-                        //_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
+                //load view and normal matrices for directional and object lighting
+                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
+                _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+                //_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
 
-                        if (_lightsNeedUpdate) {
-                                setupLights(program, lights);
-                                _lightsNeedUpdate = false;
-                        }
-
-                        //Set up correct light uniform var vals
-                        m_uniforms.ambientLightColor.value = _lights.ambient;
-                        m_uniforms.directionalLightColor.value = _lights.directional.colors;
-                        m_uniforms.directionalLightDirection.value = _lights.directional.positions;
-                        m_uniforms.ambient.value = material.ambient;
-                        m_uniforms.emissive.value = material.emissive;
-
+                if (_lightsNeedUpdate) {
+                    setupLights(program, lights);
+                    _lightsNeedUpdate = false;
                 }
 
-                //opacity, diffuse, emissive, etc
-                m_uniforms.opacity.value = material.opacity;
-                m_uniforms.diffuse.value = material.color;
+                //Set up correct light uniform var vals
+                m_uniforms.ambientLightColor.value = _lights.ambient;
+                m_uniforms.directionalLightColor.value = _lights.directional.colors;
+                m_uniforms.directionalLightDirection.value = _lights.directional.positions;
+                m_uniforms.ambient.value = material.ambient;
+                m_uniforms.emissive.value = material.emissive;
 
-                //Load any other material specific uniform variables to gl shaders
-                loadMaterialUniforms(p_uniforms, m_uniforms);
+            }
+
+            //opacity, diffuse, emissive, etc
+            m_uniforms.opacity.value = material.opacity;
+            m_uniforms.diffuse.value = material.color;
+
+            //Load any other material specific uniform variables to gl shaders
+            loadMaterialUniforms(p_uniforms, m_uniforms);
 
         }
 
@@ -738,264 +756,266 @@ WebMol.Renderer = function ( parameters ) {
     };
 
     function loadMaterialUniforms(p_uniforms, m_uniforms) {
-            var uniformVar, type, uniformVal, uniformLoc;
+        var uniformVar, type, uniformVal, uniformLoc;
 
-            for (uniformVar in m_uniforms) {
-                    if (! p_uniforms[uniformVar])
-                            continue;
+        for (uniformVar in m_uniforms) {
+            if (! p_uniforms[uniformVar])
+                continue;
 
-                    type = m_uniforms[uniformVar].type;
-                    uniformVal = m_uniforms[uniformVar].value;
-                    uniformLoc = p_uniforms[uniformVar];
+            type = m_uniforms[uniformVar].type;
+            uniformVal = m_uniforms[uniformVar].value;
+            uniformLoc = p_uniforms[uniformVar];
 
-                    //single float
-                    if (type === 'f')
-                            _gl.uniform1f(uniformLoc, uniformVal);
-                    //array of floats
-                    else if (type === 'fv')
-                            _gl.uniform3fv(uniformLoc, uniformVal);
-                    //color - r,g,b floats
-                    else if (type === 'c')
-                            _gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g, uniformVal.b);
+            //single float
+            if (type === 'f')
+                _gl.uniform1f(uniformLoc, uniformVal);
+            //array of floats
+            else if (type === 'fv')
+                _gl.uniform3fv(uniformLoc, uniformVal);
+            //color - r,g,b floats
+            else if (type === 'c')
+                _gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g, uniformVal.b);
 
-            }
+        }
 
     };
 
     this.renderBuffer = function ( camera, lights, fog, material, geometryGroup, object ) {
 
-            if ( ! material.visible )
-                    return;
+        if ( ! material.visible )
+            return;
 
-            var program, attributes, linewidth, primitives, a, attribute, i, il;
+        var program, attributes, linewidth, primitives, a, attribute, i, il;
 
-            //Sets up proper vertex and fragment shaders and attaches them to webGL program
-            //Also sets appropriate uniform variables 
-            program = setProgram(camera, lights, fog, material, object);
+        //Sets up proper vertex and fragment shaders and attaches them to webGL program
+        //Also sets appropriate uniform variables 
+        program = setProgram(camera, lights, fog, material, object);
 
-            attributes = program.attributes;
+        attributes = program.attributes;
 
-            var updateBuffers = false,
-                wireframeBit = material.wireframe ? 1 : 0,
-                geometryGroupHash = (geometryGroup.id * 0xffffff) + (program.id * 2) + wireframeBit;
+        var updateBuffers = false,
+            wireframeBit = material.wireframe ? 1 : 0,
+            geometryGroupHash = (geometryGroup.id * 0xffffff) + (program.id * 2) + wireframeBit;
 
-            if (geometryGroupHash !== _currentGeometryGroupHash) {
-                    _currentGeometryGroupHash = geometryGroupHash;
-                    updateBuffers = true;
+        if (geometryGroupHash !== _currentGeometryGroupHash) {
+            _currentGeometryGroupHash = geometryGroupHash;
+            updateBuffers = true;
+        }
+
+        //rebind shader attributes to appropriate (and already initialized) gl buffers
+        if (updateBuffers) {
+
+            disableAttributes();
+
+            // Vertices
+            if (attributes.position >= 0) {            
+                _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
+                enableAttribute( attributes.position );
+                _gl.vertexAttribPointer( attributes.position, 3, _gl.FLOAT, false, 0, 0 );    
             }
 
-            //rebind shader attributes to appropriate (and already initialized) gl buffers
-            if (updateBuffers) {
-
-                    disableAttributes();
-
-                    // Vertices
-                    if (attributes.position >= 0) {            
-                            _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
-                            enableAttribute( attributes.position );
-                            _gl.vertexAttribPointer( attributes.position, 3, _gl.FLOAT, false, 0, 0 );    
-                    }
-
-                    // Colors
-                    if (attributes.color >= 0) {
-                            _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
-                            enableAttribute( attributes.color );
-                            _gl.vertexAttribPointer( attributes.color, 3, _gl.FLOAT, false, 0, 0 );
-                    }
-
-                    // Normals (lambert shader only)
-                    if (attributes.normal >=0) {
-                            _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
-                            enableAttribute( attributes.normal );
-                            _gl.vertexAttribPointer( attributes.normal, 3, _gl.FLOAT, false, 0, 0 );
-                    }
-
+            // Colors
+            if (attributes.color >= 0) {
+                _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
+                enableAttribute( attributes.color );
+                _gl.vertexAttribPointer( attributes.color, 3, _gl.FLOAT, false, 0, 0 );
             }
 
-            //Render
+            // Normals (lambert shader only)
+            if (attributes.normal >=0) {
+                _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
+                enableAttribute( attributes.normal );
+                _gl.vertexAttribPointer( attributes.normal, 3, _gl.FLOAT, false, 0, 0 );
+            }
 
-            //lambert shaders - draw triangles
-            //TODO: make sure geometryGroup's face count is setup correctly
-            if (object instanceof WebMol.Mesh) {
+        }
 
-                    if (material.wireframe) {
-                        var lineCount = geometryGroup.__lineArray.length;
-                        setLineWidth(material.wireframeLineWidth);
-                        if (updateBuffers)
-                            _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
-                        
-                        _gl.drawElements( _gl.LINES, lineCount, _gl.UNSIGNED_SHORT, 0 );
-                    }
+        //Render
+
+        //lambert shaders - draw triangles
+        //TODO: make sure geometryGroup's face count is setup correctly
+        if (object instanceof WebMol.Mesh) {
+
+            if (material.wireframe) {
+                var lineCount = geometryGroup.lineidx;
+                setLineWidth(material.wireframeLineWidth);
+                
+                if (updateBuffers)
+                    _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
+                
+                _gl.drawElements( _gl.LINES, lineCount, _gl.UNSIGNED_SHORT, 0 );
+            }
+            
+            else {
+                var faceCount = geometryGroup.faceidx;
+
+                if (updateBuffers)
+                    _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
                     
-                    else {
-                        var faceCount = geometryGroup.__faceArray.length;
-    
-                        if (updateBuffers)
-                            _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
-                        _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );                       
-                    }
-
-
-                    _this.info.render.calls++;
-                    _this.info.render.vertices += faceCount;
-                    _this.info.render.faces += faceCount / 3;
+                _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );                       
             }
 
-            //basic shaders - draw lines
-            else if (object instanceof WebMol.Line) {
 
-                    var lineCount = geometryGroup.vertices;
+            _this.info.render.calls++;
+            _this.info.render.vertices += faceCount;
+            _this.info.render.faces += faceCount / 3;
+        }
 
-                    setLineWidth(material.lineWidth);
-                    _gl.drawArrays( _gl.LINES, 0, lineCount );
+        //basic shaders - draw lines
+        else if (object instanceof WebMol.Line) {
 
-                    _this.info.render.calls++;
-            }
+            var lineCount = geometryGroup.vertices;
+
+            setLineWidth(material.lineWidth);
+            _gl.drawArrays( _gl.LINES, 0, lineCount );
+
+            _this.info.render.calls++;
+        }
 
     };
 
     //rendering
     function renderObjects ( renderList, reverse, materialType, camera, lights, fog, useBlending, overrideMaterial)  {
 
-            var webglObject, object, buffer, material, start, end, delta;
+        var webglObject, object, buffer, material, start, end, delta;
 
-            //Forward or backward render
+        //Forward or backward render
 
-            if (reverse) {
-                    start = renderList.length - 1;
-                    end = -1;
-                    delta = -1;
+        if (reverse) {
+            start = renderList.length - 1;
+            end = -1;
+            delta = -1;
+        }
+
+        else {
+            start = 0;
+            end = renderList.length;
+            delta = 1;
+        }
+
+        for (var i = start; i !== end; i += delta) {
+
+            webglObject = renderList[i];
+
+            if (webglObject.render) {
+
+                object = webglObject.object;
+                buffer = webglObject.buffer;
+                material = webglObject[materialType];
+
+                if ( ! material )
+                    continue;
+
+                if (useBlending)
+                    _this.setBlending(material.blending);
+
+                _this.setDepthTest(material.depthTest);
+                _this.setDepthWrite(material.depthWrite);
+                setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
+
+                _this.setMaterialFaces(material);
+
+                _this.renderBuffer(camera, lights, fog, material, buffer, object);
             }
-
-            else {
-                    start = 0;
-                    end = renderList.length;
-                    delta = 1;
-            }
-
-            for (var i = start; i !== end; i += delta) {
-
-                    webglObject = renderList[i];
-
-                    if (webglObject.render) {
-
-                            object = webglObject.object;
-                            buffer = webglObject.buffer;
-                            material = webglObject[materialType];
-
-                            if ( ! material )
-                                    continue;
-
-                            if (useBlending)
-                                    _this.setBlending(material.blending);
-
-                            _this.setDepthTest(material.depthTest);
-                            _this.setDepthWrite(material.depthWrite);
-                            setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
-
-                            _this.setMaterialFaces(material);
-
-                            _this.renderBuffer(camera, lights, fog, material, buffer, object);
-                    }
-            }
+        }
 
     };
     
     this.render = function ( scene, camera, renderTarget, forceClear ) {
 
-            if ( camera instanceof WebMol.Camera === false )  {
+        if ( camera instanceof WebMol.Camera === false )  {
 
-                    console.error( 'WebMol.Renderer.render: camera is not an instance of WebMol.Camera.' );
-                    return;
+            console.error( 'WebMol.Renderer.render: camera is not an instance of WebMol.Camera.' );
+            return;
 
+        }
+
+        var i, il,
+
+        webglObject, object,
+        renderList,
+
+        lights = scene.__lights,
+        fog = scene.fog;
+
+        // reset caching for this frame
+
+        _currentMaterialId = -1;
+        _lightsNeedUpdate = true;
+
+        // update scene graph
+
+        if ( this.autoUpdateScene ) scene.updateMatrixWorld();
+
+        // update camera matrices
+        //Pretty sure camera's parent is always going to be undefined for our purposes...
+        if ( camera.parent === undefined ) camera.updateMatrixWorld();
+
+        camera.matrixWorldInverse.getInverse( camera.matrixWorld );
+
+        _projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+
+        // update WebGL objects
+
+        if ( this.autoUpdateObjects ) this.initWebGLObjects( scene );
+
+
+        _this.info.render.calls = 0;
+        _this.info.render.vertices = 0;
+        _this.info.render.faces = 0;
+        _this.info.render.points = 0;
+
+        _currentWidth = _viewportWidth;
+        _currentHeight = _viewportHeight;
+
+        if ( this.autoClear || forceClear ) {
+
+            this.clear( this.autoClearColor, this.autoClearDepth, this.autoClearStencil );
+
+        }
+
+        // set matrices for regular objects (frustum culled)
+
+        renderList = scene.__webglObjects;
+
+        for ( i = 0, il = renderList.length; i < il; i ++ ) {
+
+            webglObject = renderList[ i ];
+            object = webglObject.object;
+
+            webglObject.render = false;
+
+            if ( object.visible ) {        
+                setupMatrices( object, camera );
+                unrollBufferMaterial( webglObject );
+                webglObject.render = true;
             }
+        }
 
-            var i, il,
+        // set matrices for immediate objects
 
-            webglObject, object,
-            renderList,
+        var material = null;
 
-            lights = scene.__lights,
-            fog = scene.fog;
+        // opaque pass (front-to-back order)
 
-            // reset caching for this frame
+        this.setBlending( WebMol.NoBlending );
 
-            _currentMaterialId = -1;
-            _lightsNeedUpdate = true;
+        renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
 
-            // update scene graph
+        // transparent pass (back-to-front order)
 
-            if ( this.autoUpdateScene ) scene.updateMatrixWorld();
+        renderObjects( scene.__webglObjects, false, "transparent", camera, lights, fog, true, material );
 
-            // update camera matrices
-            //Pretty sure camera's parent is always going to be undefined for our purposes...
-            if ( camera.parent === undefined ) camera.updateMatrixWorld();
+        // Render plugins (e.g. sprites), and reset state
+        
+        renderPlugins(this.renderPluginsPost, scene, camera);
 
-            camera.matrixWorldInverse.getInverse( camera.matrixWorld );
+        // Ensure depth buffer writing is enabled so it can be cleared on next render
 
-            _projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+        this.setDepthTest( true );
+        this.setDepthWrite( true );
 
-            // update WebGL objects
-
-            if ( this.autoUpdateObjects ) this.initWebGLObjects( scene );
-
-
-            _this.info.render.calls = 0;
-            _this.info.render.vertices = 0;
-            _this.info.render.faces = 0;
-            _this.info.render.points = 0;
-
-            _currentWidth = _viewportWidth;
-            _currentHeight = _viewportHeight;
-
-            if ( this.autoClear || forceClear ) {
-
-                    this.clear( this.autoClearColor, this.autoClearDepth, this.autoClearStencil );
-
-            }
-
-            // set matrices for regular objects (frustum culled)
-
-            renderList = scene.__webglObjects;
-
-            for ( i = 0, il = renderList.length; i < il; i ++ ) {
-
-                    webglObject = renderList[ i ];
-                    object = webglObject.object;
-
-                    webglObject.render = false;
-
-                    if ( object.visible ) {        
-                            setupMatrices( object, camera );
-                            unrollBufferMaterial( webglObject );
-                            webglObject.render = true;
-                    }
-            }
-
-            // set matrices for immediate objects
-
-            var material = null;
-
-            // opaque pass (front-to-back order)
-
-            this.setBlending( WebMol.NoBlending );
-
-            renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
-
-            // transparent pass (back-to-front order)
-
-            renderObjects( scene.__webglObjects, false, "transparent", camera, lights, fog, true, material );
-
-            // Render plugins (e.g. sprites), and reset state
-            
-            renderPlugins(this.renderPluginsPost, scene, camera);
-
-            // Ensure depth buffer writing is enabled so it can be cleared on next render
-
-            this.setDepthTest( true );
-            this.setDepthWrite( true );
-
-            //_gl.finish();
+        //_gl.finish();
 
     };
     
@@ -1041,43 +1061,43 @@ WebMol.Renderer = function ( parameters ) {
 
     this.initWebGLObjects = function ( scene ) {
 
-            if ( !scene.__webglObjects ) {
+        if ( !scene.__webglObjects ) {
 
-                    scene.__webglObjects = [];
-                    scene.__webglObjectsImmediate = [];
-                    scene.__webglSprites = [];
-                    scene.__webglFlares = [];
+            scene.__webglObjects = [];
+            scene.__webglObjectsImmediate = [];
+            scene.__webglSprites = [];
+            scene.__webglFlares = [];
 
+        }
+
+        //Add objects; this sets up buffers for each geometryGroup
+        if (scene.__objectsAdded.length) {
+            
+            while(scene.__objectsAdded.length){
+                addObject(scene.__objectsAdded[0], scene);
+                scene.__objectsAdded.splice(0, 1);
             }
+            
+            //Force buffer update during render
+            //Hackish fix for initial cartoon-render-then-transparent-surface bug
+            _currentGeometryGroupHash = -1;
+            
+        }
 
-            //Add objects; this sets up buffers for each geometryChunk
-            if (scene.__objectsAdded.length) {
-                
-                while(scene.__objectsAdded.length){
-                    addObject(scene.__objectsAdded[0], scene);
-                    scene.__objectsAdded.splice(0, 1);
-                }
-                
-                //Force buffer update during render
-                //Hackish fix for initial cartoon-render-then-transparent-surface bug
-                _currentGeometryGroupHash = -1;
-                
-            }
+        while (scene.__objectsRemoved.length) {
 
-            while (scene.__objectsRemoved.length) {
+            removeObject(scene.__objectsRemoved[ 0 ], scene);
+            scene.__objectsRemoved.splice(0, 1);
 
-                    removeObject(scene.__objectsRemoved[ 0 ], scene);
-                    scene.__objectsRemoved.splice(0, 1);
+        }
 
-            }
+        // update must be called after objects adding / removal
+        //This sends typed arrays to GL buffers for each geometryGroup
+        for ( var o = 0, ol = scene.__webglObjects.length; o < ol; o ++ ) {
 
-            // update must be called after objects adding / removal
-            //This sends typed arrays to GL buffers for each geometryChunk
-            for ( var o = 0, ol = scene.__webglObjects.length; o < ol; o ++ ) {
+            updateObject(scene.__webglObjects[ o ].object);
 
-                    updateObject(scene.__webglObjects[ o ].object);
-
-            }
+        }
 
     };
     
@@ -1100,71 +1120,60 @@ WebMol.Renderer = function ( parameters ) {
                     object.geometry.addEventListener('dispose', onGeometryDispose);
 
             }
-
-            if (object instanceof WebMol.Mesh){
+            
+            if (object instanceof WebMol.Mesh || object instanceof WebMol.Line) {
                 geometry = object.geometry;
-                material = object.material;
+                material = object.material;           
+    
+                for (g in geometry.geometryGroups) {
+    
+                    var geometryGroup = geometry.geometryGroups[ g ];
+                    
+                    geometryGroup.id = _geometryGroupCounter++;
 
-                for (g in geometry.geometryChunks) {
+                    // initialise VBO on the first access
 
-                        var geometryChunk = geometry.geometryChunks[ g ];
-                        
-                        geometryChunk.id = _geometryGroupCounter++;
-
-                        // initialise VBO on the first access
-
-                        if ( !geometryChunk.__webglVertexBuffer ) {
-
-                                createMeshBuffers(geometryChunk);
-
-                                geometry.verticesNeedUpdate = true;
+                    if ( !geometryGroup.__webglVertexBuffer ) {
+                            
+                            if (object instanceof WebMol.Mesh) {
+                                createMeshBuffers(geometryGroup);
                                 geometry.elementsNeedUpdate = true;
                                 geometry.normalsNeedUpdate = true;
-                                geometry.colorsNeedUpdate = true;
+                            }
+                                
+                            else if (object instanceof WebMol.Line)
+                                createLineBuffers(geometryGroup);
 
-                        }
+                            geometry.verticesNeedUpdate = true;
+                            geometry.colorsNeedUpdate = true;
+
+                    }
+                        
                 }
-            } 
-            
-            else if (object instanceof WebMol.Line) {
                 
-                geometry = object.geometry;
-                if ( !geometry.__webglVertexBuffer ) {
-
-                    createLineBuffers( geometry );
-                    geometry.verticesNeedUpdate = true;
-                    geometry.colorsNeedUpdate = true;
-
-                }
             }
         
         }
         
         if ( ! object.__webglActive ) {
             
-            if (object instanceof WebMol.Mesh) {
+            if (object instanceof WebMol.Mesh || object instanceof WebMol.Line) {
                 
                 geometry = object.geometry;
 
-                for ( g in geometry.geometryChunks ) {
-                        geometryChunk = geometry.geometryChunks[g];
+                for ( g in geometry.geometryGroups ) {
+                        geometryGroup = geometry.geometryGroups[g];
 
-                        addBuffer(scene.__webglObjects, geometryChunk, object);
+                        addBuffer(scene.__webglObjects, geometryGroup, object);
                 }
                 
             }
-            
-            else if (object instanceof WebMol.Line) {
-                geometry = object.geometry;
-                addBuffer(scene.__webglObjects, geometry, object);
-            }
-            
             
             //Sprite
             else if (object instanceof WebMol.Sprite) 
                 scene.__webglSprites.push(object);
          
-            
+                     
             object.__webglActive = true;
             
         }
@@ -1174,17 +1183,16 @@ WebMol.Renderer = function ( parameters ) {
     function updateObject ( object ) {
 
         var geometry = object.geometry, material = object.material,
-                geometryGroup, geometryChunk, customAttributesDirty;
-
-        if ( object instanceof WebMol.Mesh ) {
+                geometryGroup, customAttributesDirty;
+        
+        if ( object instanceof WebMol.Mesh || object instanceof WebMol.Line ) {
             
-            for (g in geometry.geometryChunks ) {
+            for (g in geometry.geometryGroups ) {
                 
-                geometryChunk = geometry.geometryChunks[ g ];
+                geometryGroup = geometry.geometryGroups[ g ];
 
-                if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate ||
-                         geometry.colorsNeedUpdate || geometry.normalsNeedUpdate) {
-                        setBuffers( geometryChunk, _gl.DYNAMIC_DRAW );
+                if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate || geometry.colorsNeedUpdate || geometry.normalsNeedUpdate) {
+                    setBuffers( geometryGroup, _gl.DYNAMIC_DRAW );
                 }
             }
             
@@ -1195,16 +1203,6 @@ WebMol.Renderer = function ( parameters ) {
 
             geometry.buffersNeedUpdate = false;
 
-        }
-        
-        else if ( object instanceof WebMol.Line ) {
-            
-            if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate) 
-                setBuffers( geometry, _gl.DYNAMIC_DRAW, true);
-                
-                geometry.verticesNeedUpdate = false;
-                geometry.colorsNeedUpdate = false;
-                
         }
 
     };
@@ -1223,90 +1221,91 @@ WebMol.Renderer = function ( parameters ) {
 
     function removeInstances( objList, object ) {
 
-            for (var o = objList.length - 1; o >= 0; --o) {
+        for (var o = objList.length - 1; o >= 0; --o) {
 
-                    if (objList[o].object === object) 
-                            objList.splice(o, 1);
+            if (objList[o].object === object) 
+                objList.splice(o, 1);
 
-            }
+        }
     };
 
     function removeInstancesDirect( objList, object ) {
 
-            for (var o = objList.length - 1; o >= 0; --o) {
+        for (var o = objList.length - 1; o >= 0; --o) {
 
-                    if (objList[o] === object) 
-                            objList.splice(o, 1);
+            if (objList[o] === object) 
+                objList.splice(o, 1);
 
-            }
+        }
     };
 
     function unrollBufferMaterial( globject ) {
 
-            var object = globject.object;
-            var material = object.material;
+        var object = globject.object;
+        var material = object.material;
 
-            if ( material.transparent) {                    
-                    globject.opaque = null;
-                    globject.transparent = material;
-            }
+        if ( material.transparent) {                    
+            globject.opaque = null;
+            globject.transparent = material;
+        }
 
-            else {
-                    globject.opaque = material;
-                    globject.transparent = null;
-            }
+        else {
+            globject.opaque = material;
+            globject.transparent = null;
+        }
 
     };
 
-    function setBuffers( geometryChunk, hint, line ) {
+    function setBuffers( geometryGroup, hint, line ) {
 
-        var vertexArray = geometryChunk.__vertexArray;
-        var colorArray = geometryChunk.__colorArray;
+        var vertexArray = geometryGroup.__vertexArray;
+        var colorArray = geometryGroup.__colorArray;
          
         //vertex buffers
-        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglVertexBuffer );
+        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
         _gl.bufferData( _gl.ARRAY_BUFFER, vertexArray, hint );        
 
         //color buffers
-        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglColorBuffer );
+        _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer );
         _gl.bufferData( _gl.ARRAY_BUFFER, colorArray, hint );    
               
-        //set buffers for line render
         
-            //set buffers for mesh render
-            if (line === undefined) {
-
-                var normalArray = geometryChunk.__normalArray;
-                var faceArray = geometryChunk.__faceArray;
-                var lineArray = geometryChunk.__lineArray;
-
-                //normal buffers
-                _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryChunk.__webglNormalBuffer );
-                _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );        
-
-                //face (index) buffers
-                _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglFaceBuffer );
-                _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );    
-                
-                //line (index) buffers (for wireframe)
-                _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryChunk.__webglLineBuffer );
-                _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );
-
-            }
+        //normal buffers
+        if (geometryGroup.__normalArray !== undefined) {
+            var normalArray = geometryGroup.__normalArray;
+            _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
+            _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );       
+             
+        }
+        
+        //face (index) buffers
+        if (geometryGroup.__faceArray !== undefined) {
+            var faceArray = geometryGroup.__faceArray;
+            _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
+            _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );  
+                      
+        }
+        
+        //line (index) buffers (for wireframe)
+        if (geometryGroup.__lineArray !== undefined) {
+            var lineArray = geometryGroup.__lineArray;            
+            _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
+            _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );
+        }
 
     };
     
     //Creates appropriate gl buffers for geometry chunk
     //TODO: do we need line buffer for mesh objects?
     //Also, can we integrate this with createLineBuffers?
-    function createMeshBuffers ( geometryChunk ) {
+    function createMeshBuffers ( geometryGroup ) {
 
-        geometryChunk.__webglVertexBuffer = _gl.createBuffer();
-        geometryChunk.__webglNormalBuffer = _gl.createBuffer();
-        geometryChunk.__webglColorBuffer = _gl.createBuffer();
+        geometryGroup.__webglVertexBuffer = _gl.createBuffer();
+        geometryGroup.__webglNormalBuffer = _gl.createBuffer();
+        geometryGroup.__webglColorBuffer = _gl.createBuffer();
 
-        geometryChunk.__webglFaceBuffer = _gl.createBuffer();
-        geometryChunk.__webglLineBuffer = _gl.createBuffer();
+        geometryGroup.__webglFaceBuffer = _gl.createBuffer();
+        geometryGroup.__webglLineBuffer = _gl.createBuffer();
 
         _this.info.memory.geometries++;
     };
@@ -1322,12 +1321,12 @@ WebMol.Renderer = function ( parameters ) {
     function addBuffer (objlist, buffer, object) {
 
         objlist.push(
-                {
-                        buffer: buffer,
-                        object: object,
-                        opaque: null,
-                        transparent: null
-                }
+            {
+                buffer: buffer,
+                object: object,
+                opaque: null,
+                transparent: null
+            }
         );
 
     };
@@ -1515,40 +1514,40 @@ WebMol.Renderer = function ( parameters ) {
 
     function initGL () {
 
-            try {
+        try {
 
-                    if ( ! ( _gl = _canvas.getContext( 'experimental-webgl', { alpha: _alpha, premultipliedAlpha: _premultipliedAlpha, antialias: _antialias, stencil: _stencil, preserveDrawingBuffer: _preserveDrawingBuffer } ) ) ) {
+            if ( ! ( _gl = _canvas.getContext( 'experimental-webgl', { alpha: _alpha, premultipliedAlpha: _premultipliedAlpha, antialias: _antialias, stencil: _stencil, preserveDrawingBuffer: _preserveDrawingBuffer } ) ) ) {
 
-                            throw 'Error creating WebGL context.';
-
-                    }
-
-            } catch ( error ) {
-
-                    console.error( error );
+                throw 'Error creating WebGL context.';
 
             }
+
+        } catch ( error ) {
+
+            console.error( error );
+
+        }
 
     };
 
     function setDefaultGLState () {
 
-            _gl.clearColor( 0, 0, 0, 1 );
-            _gl.clearDepth( 1 );
-            _gl.clearStencil( 0 );
+        _gl.clearColor( 0, 0, 0, 1 );
+        _gl.clearDepth( 1 );
+        _gl.clearStencil( 0 );
 
-            _gl.enable( _gl.DEPTH_TEST );
-            _gl.depthFunc( _gl.LEQUAL );
+        _gl.enable( _gl.DEPTH_TEST );
+        _gl.depthFunc( _gl.LEQUAL );
 
-            _gl.frontFace( _gl.CCW );
-            _gl.cullFace( _gl.BACK );
-            _gl.enable( _gl.CULL_FACE );
+        _gl.frontFace( _gl.CCW );
+        _gl.cullFace( _gl.BACK );
+        _gl.enable( _gl.CULL_FACE );
 
-            _gl.enable( _gl.BLEND );
-            _gl.blendEquation( _gl.FUNC_ADD );
-            _gl.blendFunc( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA );
+        _gl.enable( _gl.BLEND );
+        _gl.blendEquation( _gl.FUNC_ADD );
+        _gl.blendFunc( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA );
 
-            _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
+        _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
 
     };
     

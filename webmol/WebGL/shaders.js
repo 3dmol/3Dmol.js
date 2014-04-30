@@ -120,7 +120,10 @@ void main() {
     
     gl_FragColor = vec4( vec3 ( 1.0 ), opacity );
     
+    #ifndef WIREFRAME
     gl_FragColor.xyz *= vLightFront;
+    #endif
+    
     gl_FragColor = gl_FragColor * vec4( vColor, opacity );
     float depth = gl_FragCoord.z / gl_FragCoord.w;
     

@@ -210,44 +210,155 @@ WebMol.Object3DIDCount = 0;
 
 //Geometry class
 //TODO: What can I remove - how can I optimize ?
-
-WebMol.Geometry = function() {
+WebMol.Geometry = (function() {
     
-    WebMol.EventDispatcher.call(this);
+    var geometryGroup = function(id) {
+        this.id = id || 0;
+        this.__vertexArray = null;
+        this.__colorArray = null;
+        this.__normalArray = null;
+        this.__faceArray = null;
+        this.__lineArray = null;
+        this.vertices = 0;
+        this.faceidx = 0;
+        this.lineidx = 0;
+    };
     
-    this.id = WebMol.GeometryIDCount++;
-
-    this.name = '';
-    
-    this.vertices = 0;
-
-    this.hasTangents = false;
-
-    this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
-
-    // update flags
-
-    this.verticesNeedUpdate = false;
-    this.elementsNeedUpdate = false;
-    this.normalsNeedUpdate = false;
-    this.colorsNeedUpdate = false;
-
-    this.buffersNeedUpdate = false;
-    
-};
-
-
-WebMol.Geometry.prototype = {
-  
-    constructor : WebMol.Geometry,
-  
-    dispose : function() {
-    
-        this.dispatchEvent( {type: 'dispose'} );
+    var addGroup = function(geo) {
+        var ret = new geometryGroup(geo.geometryGroups.length);
+        geo.geometryGroups.push(ret);
+        geo.groups = geo.geometryGroups.length;
         
-    }
+        ret.__vertexArray = new Float32Array(65535*3);
+        ret.__colorArray = new Float32Array(65535*3);
+        
+        //TODO: instantiating uint arrays according to max number of vertices
+        // is dangerous, since there exists the possibility that there will be 
+        // more face or line indices than vertex points - but so far that doesn't
+        // seem to be the case for any of the renders 
+        if (geo.mesh) {
+            ret.__normalArray = new Float32Array(65535*3);
+            ret.__faceArray = new Uint16Array(65535*6);
+            ret.__lineArray = new Uint16Array(65535*6);
+        }
+        
+        
+        return ret;
+    };
+        
+    Geometry = function(mesh) {
+        
+        WebMol.EventDispatcher.call(this);
+        
+        this.id = WebMol.GeometryIDCount++;
     
-};
+        this.name = '';
+    
+        this.hasTangents = false;
+    
+        this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
+        this.mesh = mesh; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
+        // update flags
+    
+        this.verticesNeedUpdate = false;
+        this.elementsNeedUpdate = false;
+        this.normalsNeedUpdate = false;
+        this.colorsNeedUpdate = false;
+    
+        this.buffersNeedUpdate = false;
+        
+        this.geometryGroups = [];
+        this.groups = 0;
+        
+    };
+    
+    //return truncated typed array, including its buffer
+    // type == 0 => Uint16Array; type == 1 => Float32Array
+    var truncateArrayBuffer = function(arr, type, start, end) {
+        
+        if (type === 0)
+            return new Uint16Array(arr.buffer.slice(start, end*2));
+        else if (type === 1) 
+            return new Float32Array(arr.buffer.slice(start, end*4));
+    };
+    
+    Geometry.prototype = {
+        
+        constructor : Geometry,
+
+        //Get geometry group to accomodate addVertices new vertices - create 
+        // new group if necessary       
+        updateGeoGroup : function(addVertices) {
+        
+            addVertices = addVertices || 0;
+            
+            var retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
+            
+            if (!retGroup || retGroup.vertices + addVertices > 65535) 
+                retGroup = addGroup(this);
+                
+            return retGroup;
+            
+        },
+        
+        addGeoGroup : function() {
+            return addGroup(this);  
+        },
+        
+        //After vertices, colors, etc are collected in regular or typed arrays,
+        // either create typed arrays from regular arrays if they don't already exist,
+        // or shorten last typed array
+        initTypedArrays : function() {
+                
+            for (var g in this.geometryGroups) {
+                
+                var group = this.geometryGroups[g];
+                
+                if (group.__inittedArrays === true)
+                    continue;
+                
+                var vertexArr = group.__vertexArray,
+                    colorArr = group.__colorArray,
+                    normalArr = group.__normalArray,
+                    faceArr = group.__faceArray,
+                    lineArr = group.__lineArray;
+                               
+                group.__vertexArray = truncateArrayBuffer(vertexArr, 1, vertexArr.byteOffset, group.vertices*3);
+                group.__colorArray = truncateArrayBuffer(colorArr, 1, colorArr.byteOffset, group.vertices*3);
+                
+                if (this.mesh) {
+                    group.__normalArray = truncateArrayBuffer(normalArr, 1, normalArr.byteOffset, group.vertices*3);
+                    group.__faceArray = truncateArrayBuffer(faceArr, 0, faceArr.byteOffset, group.faceidx);
+                    group.__lineArray = truncateArrayBuffer(lineArr, 0, lineArr.byteOffset, group.lineidx);
+                }
+                
+                group.__inittedArrays = true;
+            }
+            
+        
+        },
+        
+        dispose : function() {
+            this.dispatchEvent( {type : 'dispose'} );
+        }
+    };
+
+    
+    return Geometry;
+    
+})();
+
+Object.defineProperty(WebMol.Geometry.prototype, "vertices", {
+    
+    get : function() {
+        var vertices = 0;
+        for (g in this.geometryGroups)
+            vertices += this.geometryGroups[g].vertices;
+            
+        return vertices;
+    } 
+        
+});
 
 WebMol.GeometryIDCount = 0;
 
@@ -292,20 +403,27 @@ WebMol.Raycaster = (function() {
     };
     
     //object is a Sphere or (Bounding) Box
-    var intersectObject = function(group, atom, raycaster, intersects) {
+    var intersectObject = function(group, clickable, raycaster, intersects) {
         
         matrixPosition.getPositionFromMatrix(group.matrixWorld);
         
-        if ((atom.clickable !== true) || (atom.intersectionShape === undefined))
+        if ((clickable.clickable !== true) || (clickable.intersectionShape === undefined))
             return intersects;
-        var sulfur;
-        if (atom.elem === "S")
-            sulfur = true;
         
-        var intersectionShape = atom.intersectionShape;
+        var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
         precision *= group.matrixWorld.getMaxScaleOnAxis();
         var precisionSq = precision*precision;
+
+        //Check for intersection with clickable's bounding sphere, if it exists
+        if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof WebMol.Sphere) {
+            sphere.copy(clickable.boundingSphere);
+            sphere.applyMatrix4(group.matrixWorld);
+            
+            if (!raycaster.ray.isIntersectionSphere(sphere)) {
+                return intersects;
+            }
+        }
         
         //triangle faces
         for (var i in intersectionShape.triangle) {
@@ -354,7 +472,7 @@ WebMol.Raycaster = (function() {
                     continue;
                     
                 else
-                    intersects.push({atom : atom,
+                    intersects.push({clickable : clickable,
                                      distance : distance});  
             }
         }
@@ -418,7 +536,7 @@ WebMol.Raycaster = (function() {
                         continue;
                     
                     else
-                        intersects.push({atom : atom,
+                        intersects.push({clickable : clickable,
                                          distance : distance});
                     
                 }
@@ -461,49 +579,50 @@ WebMol.Raycaster = (function() {
             var closestDistSq = v3.subVectors(v2, v1).lengthSq();
             
             if (closestDistSq < precisionSq && s_c*s_c < bondLengthSq)
-                intersects.push({atom : atom,
+                intersects.push({clickable : clickable,
                                  distance : t_c
                                 });
             
         }
-        
-        //sphere
-        if (intersectionShape.sphere instanceof WebMol.Sphere) {
-            
-            sphere.copy(intersectionShape.sphere);
-            sphere.applyMatrix4(group.matrixWorld);
-            
-            if (raycaster.ray.isIntersectionSphere(sphere)) {
-                
-                var distance;
-                
-                v1.subVectors(sphere.center, raycaster.ray.origin);
-                
-                //distance from ray origin to point on the ray normal to sphere's center
-                //must be less than sphere's radius (since ray intersects sphere)
-                var distanceToCenter = v1.dot(raycaster.ray.direction);
-                
-                var discriminant = distanceToCenter*distanceToCenter - (v1.lengthSq() - sphere.radius*sphere.radius);
-                
-                //Don't select if sphere center behind camera
-                if (distanceToCenter < 0) 
-                    return intersects;
-                
-                //ray tangent to sphere?
-                if (discriminant <= 0)
-                    distance = distanceToCenter;
-                
-                //This is reversed if sphere is closer than ray origin.  Do we have 
-                //to worry about handling that case?
-                else 
-                    distance = distanceToCenter - Math.sqrt(discriminant);
 
-                intersects.push({atom : atom, 
-                                 distance : distance});
-                return intersects;
-            }
-        }        
-       
+        for (var i = 0; i < intersectionShape.sphere.length; i++) {
+            //sphere
+            if (intersectionShape.sphere[i] instanceof WebMol.Sphere) {
+                
+                sphere.copy(intersectionShape.sphere[i]);
+                sphere.applyMatrix4(group.matrixWorld);
+                
+                if (raycaster.ray.isIntersectionSphere(sphere)) {
+                    
+                    var distance;
+                    
+                    v1.subVectors(sphere.center, raycaster.ray.origin);
+                    
+                    //distance from ray origin to point on the ray normal to sphere's center
+                    //must be less than sphere's radius (since ray intersects sphere)
+                    var distanceToCenter = v1.dot(raycaster.ray.direction);
+                    
+                    var discriminant = distanceToCenter*distanceToCenter - (v1.lengthSq() - sphere.radius*sphere.radius);
+                    
+                    //Don't select if sphere center behind camera
+                    if (distanceToCenter < 0) 
+                        return intersects;
+                    
+                    //ray tangent to sphere?
+                    if (discriminant <= 0)
+                        distance = distanceToCenter;
+                    
+                    //This is reversed if sphere is closer than ray origin.  Do we have 
+                    //to worry about handling that case?
+                    else 
+                        distance = distanceToCenter - Math.sqrt(discriminant);
+    
+                    intersects.push({clickable : clickable, 
+                                     distance : distance});
+                    return intersects;
+                }
+            }        
+       }
         
     };   
        
@@ -543,21 +662,21 @@ WebMol.Projector = function () {
 
     this.projectVector = function ( vector, camera ) {
 
-            camera.matrixWorldInverse.getInverse( camera.matrixWorld );
+        camera.matrixWorldInverse.getInverse( camera.matrixWorld );
 
-            _viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+        _viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
 
-            return vector.applyProjection( _viewProjectionMatrix );
+        return vector.applyProjection( _viewProjectionMatrix );
 
     };
 
     this.unprojectVector = function ( vector, camera ) {
 
-            camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+        camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
 
-            _viewProjectionMatrix.multiplyMatrices(camera.matrixWorld, camera.projectionMatrixInverse);
+        _viewProjectionMatrix.multiplyMatrices(camera.matrixWorld, camera.projectionMatrixInverse);
 
-            return vector.applyProjection( _viewProjectionMatrix );
+        return vector.applyProjection( _viewProjectionMatrix );
 
     };
 
