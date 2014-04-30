@@ -706,6 +706,20 @@ WebMol.glmolViewer = (function() {
             spec = spec || {};
             shape.addArrow(spec);
         };
+        
+        //Add custom shape component from user supplied function
+        this.addCustom = function(shape, fn) {
+            
+            if (typeof(fn) !== "function") {
+                console.error("Error adding custom shape component: function not supplied");
+                return;
+            }
+                
+            else {
+                shape.addCustom(fn);    
+            }
+            
+        };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)
         // create a model and add it, returning the model identifier

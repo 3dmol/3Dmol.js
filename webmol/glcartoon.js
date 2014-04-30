@@ -58,7 +58,7 @@ WebMol.drawCartoon = (function() {
                 
                 var atomIndex = Math.floor( (ret.length+2) / DIV);
                 
-                if (_points[atomIndex].atom !== undefined)
+                if (_points[atomIndex] !== undefined && _points[atomIndex].atom !== undefined)
                     pt.atom = _points[atomIndex].atom;
                     
                 ret.push(pt);
@@ -72,8 +72,11 @@ WebMol.drawCartoon = (function() {
     
         var geo = new WebMol.Geometry(true);       
         var offset, vertoffset;
+        var color;
         
         for ( var i = 0, lim = p1.length; i < lim; i++) {
+            
+            color = WebMol.CC.color(colors[Math.round((i - 1) / div)]);
            
             geoGroup = geo.updateGeoGroup(2);
             offset = geoGroup.vertices, vertoffset = offset*3;
@@ -85,9 +88,13 @@ WebMol.drawCartoon = (function() {
             geoGroup.__vertexArray[vertoffset+3] = p2[i].x;
             geoGroup.__vertexArray[vertoffset+4] = p2[i].y;
             geoGroup.__vertexArray[vertoffset+5] = p2[i].z;
+            
+            for (var j = 0; j < 6; ++j) {                
+                geoGroup.__colorArray[vertoffset+3*j] = color.r; geoGroup.__colorArray[vertoffset+1+3*j] = color.g; geoGroup.__colorArray[vertoffset+2+3*j] = color.b;                
+            }            
            
             if (i > 0) {
-                var faces = [offset, offset + 1, offset - 1, offset - 2];
+                var faces = [offset, offset - 2, offset - 1, offset + 1];
                 var faceoffset = geoGroup.faceidx;
                 
                 geoGroup.__faceArray[faceoffset] = faces[0]; geoGroup.__faceArray[faceoffset+1] = faces[1]; geoGroup.__faceArray[faceoffset+2] = faces[3];
@@ -123,8 +130,8 @@ WebMol.drawCartoon = (function() {
                 var vs = [], fs = [];
         var axis, p1v, p2v, a1v, a2v;
         
-        var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, 3, -5, -1 ],
-                [ -3, -7, 1, 5 ] ];
+        var faces = [ [ 0, -8, -6, 2 ], [ -4, 4, 6, -2 ], [ 7, -1, -5, 3 ],
+                [ -3, 5, 1, -7 ] ];
                 
         var offset, vertoffset, faceoffset;
         var color;

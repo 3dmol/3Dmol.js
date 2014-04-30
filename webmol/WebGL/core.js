@@ -224,6 +224,82 @@ WebMol.Geometry = (function() {
         this.lineidx = 0;
     };
     
+    //setup normals - vertex and face array must exist
+    geometryGroup.prototype.setNormals = function(three) {
+        
+        three = (three === true) ? true : false;
+        
+        var faces = this.__faceArray;
+        var verts = this.__vertexArray;
+        var norms = this.__normalArray;
+        
+        if (! this.vertices || ! this.faceidx) 
+            return;
+        
+        //vertex indices
+        var a, b, c, d,
+        //and actual vertices
+        vA, vB, vC, norm;
+        
+        //face3
+        if (three) {
+            
+            for (var i = 0; i < faces.length / 3; ++i) {
+                
+                a = faces[i * 3] * 3;
+                b = faces[i * 3 + 1] * 3;
+                c = faces[i * 3 + 2] * 3;
+                
+                vA = new WebMol.Vector3(verts[a], verts[a+1], verts[a+2]);
+                vB = new WebMol.Vector3(verts[b], verts[b+1], verts[b+2]);
+                vC = new WebMol.Vector3(verts[c], verts[c+1], verts[c+2]);
+                
+                vA.subVectors(vA, vB);
+                vC.subVectors(vC, vB);
+                vA.cross(vC);
+                
+                //face normal
+                norm = vA;
+                norm.normalize();
+                
+                norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
+                norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y;
+                norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z;
+                
+            }
+        }      
+        
+        //face4
+        else {
+              
+            for ( var i = 0; i < faces.length / 6; i++ ) {
+    
+                a = faces[ i * 6 ] * 3;
+                b = faces[ i * 6 + 1 ] * 3;
+                c = faces[ i * 6 + 4 ] * 3;
+                d = faces[ i * 6 + 2 ] * 3;
+    
+                vA = new WebMol.Vector3(verts[a], verts[a+1], verts[a+2]);
+                vB = new WebMol.Vector3(verts[b], verts[b+1], verts[b+2]);
+                vC = new WebMol.Vector3(verts[c], verts[c+1], verts[c+2]);
+    
+                vC.subVectors(vC, vB);
+                vA.subVectors(vA, vB);
+                vC.cross(vA);
+    
+                //face normal
+                norm = vC;
+                norm.normalize();
+    
+                norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x, norms[d] += norm.x;
+                norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y, norms[d + 1] += norm.y;
+                norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z, norms[d + 2] += norm.z;
+    
+            }
+        
+        }          
+    };
+    
     var addGroup = function(geo) {
         var ret = new geometryGroup(geo.geometryGroups.length);
         geo.geometryGroups.push(ret);

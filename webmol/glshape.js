@@ -448,6 +448,41 @@ WebMol.GLShape = (function() {
         
     };
     
+    //handles custom shape generation using user specified function
+    var drawCustom = function(shape, geoGroup, fn) {
+        
+        var vertexArr = [], normalArr = [], faceArr = [], lineArr = [];
+        
+        //user function must at least create vertex and face arrays
+        fn(vertexArr, faceArr, normalArr, lineArr);
+        
+        if (vertexArr.length === 0 || faceArr.length === 0) {
+            console.error("Error adding custom shape component: User supplied function does not\
+                           generate vertices and/or vertex face indices");
+        }
+
+                    
+        geoGroup.__vertexArray = new Float32Array(vertexArr);
+        geoGroup.__faceArray = new Uint16Array(faceArr);
+        
+        geoGroup.vertices += vertexArr.length, geoGroup.faceidx += geoGroup.__faceArray.length;
+        
+        //these may or may not be initialized
+        geoGroup.__normalArray = new Float32Array(normalArr);
+        geoGroup.__lineArray = new Uint16Array(lineArr);  
+        
+        geoGroup.lineidx += geoGroup.__lineArray.length;
+        
+        geoGroup.__colorArray = new Float32Array(geoGroup.vertices*3);
+
+        for (var i = 0; i < geoGroup.__colorArray.length / 3; ++i) {
+            geoGroup.__colorArray[i*3] = this.color.r;
+            geoGroup.__colorArray[i*3 + 1] = this.color.g;
+            geoGroup.__colorArray[i*3 + 2] = this.color.b;      
+        }
+             
+    };
+    
     //Update a bounding sphere's position and radius
     //from list of centroids and new points
     var updateBoundingFromPoints = function(sphere, components, points) {       
@@ -498,26 +533,16 @@ WebMol.GLShape = (function() {
         
         var geo = new WebMol.Geometry(true);
         
-        var createShapeComponent = function(fn) {
+        this.addCustom = function(fn) {
             
             //Force creation of new geometryGroup for each added component
-            var geoGroup = geo.updateGeoGroup(65536);
-            var vertexArr = [], normalArr = [], faceArr = [], lineArr = [];
+            var geoGroup = geo.addGeoGroup();
+            drawCustom(shape, geoGroup, fn);
             
-            fn(vertexArr, normalArr, faceArr, lineArr);
-            
-            geoGroup.__vertexArray = new Float32Array(vertexArr);
-            geoGroup.__normalArray = new Float32Array(normalArr);
-            geoGroup.__colorArray = new Float32Array(vertexArr.length);
-
-            for (var i = 0; i < geoGroup.__colorArray.length / 3; ++i) {
-                geoGroup.__colorArray[i*3] = this.color.r;
-                geoGroup.__colorArray[i*3 + 1] = this.color.g;
-                geoGroup.__colorArray[i*3 + 2] = this.color.b;      
+            //check that normals and line index arrays initialized
+            if (geoGroup.__normalArray.length < geoGroup.vertices*3) {
+                geo.initialize
             }
-            
-            geoGroup.__faceArray = new Uint16Array(faceArr);
-            geoGroup.__lineArray = new Uint16Array(lineArr);
             
         };
         
