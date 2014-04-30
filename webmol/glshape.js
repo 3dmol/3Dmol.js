@@ -631,7 +631,9 @@ WebMol.GLShape = (function() {
                 vertexColors : true,
                 ambient : 0x000000,
                 reflectivity : 0,
-                side : WebMol.DoubleSide
+                side : WebMol.DoubleSide,
+                transparent : (this.alpha < 1) ? true : false,
+                opacity : this.alpha
             });
             
             var mesh = new WebMol.Mesh(geo, material);

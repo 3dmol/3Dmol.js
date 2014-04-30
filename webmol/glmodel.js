@@ -1378,8 +1378,7 @@ WebMol.GLModel = (function() {
                 var sphereMaterial = new WebMol.MeshLambertMaterial({
                     ambient : 0x000000,
                     vertexColors : true,
-                    reflectivity : 0,
-                    wireframe : true
+                    reflectivity : 0
                 });
                 
                 //Initialize buffers in geometry                
