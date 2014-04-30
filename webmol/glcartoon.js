@@ -107,7 +107,8 @@ WebMol.drawCartoon = (function() {
         }
         
         geo.initTypedArrays();
-        setUpNormals(geo);
+        geo.setUpNormals();
+        
         var material = new WebMol.MeshLambertMaterial();
         material.vertexColors = WebMol.FaceColors;
                 material.side = WebMol.DoubleSide;
@@ -306,10 +307,9 @@ WebMol.drawCartoon = (function() {
         
         //TODO: Add intersection planes for caps
         
-        //geo.computeFaceNormals();
-        //geo.computeVertexNormals(false);
         geo.initTypedArrays();
-        setUpNormals(geo);
+        geo.setUpNormals();
+        
         var material = new WebMol.MeshLambertMaterial();
         material.vertexColors = WebMol.FaceColors;
         material.side = WebMol.DoubleSide;

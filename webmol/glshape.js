@@ -460,12 +460,16 @@ WebMol.GLShape = (function() {
             console.error("Error adding custom shape component: User supplied function does not\
                            generate vertices and/or vertex face indices");
         }
-
-                    
+                  
         geoGroup.__vertexArray = new Float32Array(vertexArr);
         geoGroup.__faceArray = new Uint16Array(faceArr);
         
         geoGroup.vertices += vertexArr.length, geoGroup.faceidx += geoGroup.__faceArray.length;
+        
+        geoGroup.truncateArrayBuffers(true);
+        
+        if (normalArr.length < geoGroup.vertices)
+            geoGroup.setNormals();
         
         //these may or may not be initialized
         geoGroup.__normalArray = new Float32Array(normalArr);
@@ -539,10 +543,6 @@ WebMol.GLShape = (function() {
             var geoGroup = geo.addGeoGroup();
             drawCustom(shape, geoGroup, fn);
             
-            //check that normals and line index arrays initialized
-            if (geoGroup.__normalArray.length < geoGroup.vertices*3) {
-                geo.initialize
-            }
             
         };
         
@@ -591,7 +591,6 @@ WebMol.GLShape = (function() {
             
             updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
             
-            //setUpNormals(geo, true);
                 
         };
     

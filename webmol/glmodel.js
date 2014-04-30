@@ -1325,7 +1325,8 @@ WebMol.GLModel = (function() {
                     color : c1
                 }
             };
-            //drawAtomSphere(atom, geo);
+            
+            drawAtomSphere(atom, geo);
             atom.style = savedstyle;
 
         };
