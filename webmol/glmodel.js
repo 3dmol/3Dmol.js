@@ -1370,7 +1370,6 @@ WebMol.GLModel = (function() {
                 
                 for (var i = 0; i < ret.children.length; i++){
                     var geo = ret.children[i].geometry;
-                    //initBuffers(geo);
                 }
             }
 
@@ -1379,7 +1378,8 @@ WebMol.GLModel = (function() {
                 var sphereMaterial = new WebMol.MeshLambertMaterial({
                     ambient : 0x000000,
                     vertexColors : true,
-                    reflectivity : 0
+                    reflectivity : 0,
+                    wireframe : true
                 });
                 
                 //Initialize buffers in geometry                

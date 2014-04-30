@@ -3,6 +3,8 @@
 //of atoms with assigned secondary structure
 //TODO: secondary structure calculation
 
+//TODO: generate normals directly in drawStrip and drawThinStrip
+
 var WebMol = WebMol || {};
 
 WebMol.drawCartoon = (function() {

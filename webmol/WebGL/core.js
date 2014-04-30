@@ -240,6 +240,25 @@ WebMol.Geometry = (function() {
         this.lineidx = 0;
     };
     
+    geometryGroup.prototype.getCentroid = function() {
+        
+        var centroid = new WebMol.Vector3();
+        var offset, x, y, z;
+        
+        for (var i = 0; i < this.vertices; ++i) {
+            offset = i*3;
+            
+            x = this.__vertexArray[offset], y = this.__vertexArray[offset+1], z = this.__vertexArray[offset+2];
+            
+            centroid.x += x, centroid.y += y, centroid.z += z;
+        }
+        
+        //divideScalar checks for 0 denom
+        centroid.divideScalar(this.vertices);
+        
+        return centroid;
+    };
+    
     //setup normals - vertex and face array must exist
     geometryGroup.prototype.setNormals = function() {        
         
@@ -279,6 +298,32 @@ WebMol.Geometry = (function() {
             
         }             
                 
+    };
+    
+    //sets line index array from face arr
+    //Note - assumes all faces are triangles (i.e. there will
+    //be an extra diagonal for four-sided faces - user should 
+    //specify linearr for custom shape generation to show wireframe squares
+    //as rectangles rather than two triangles)
+    geometryGroup.prototype.setLineIndices = function() {
+        
+        if (! this.faceidx)
+            return;
+                    
+        var faceArr = this.__faceArray, lineArr = this.__lineArray = new Uint16Array(this.faceidx*2);      
+        this.lineidx = this.faceidx*2;         
+        var faceoffset;
+            
+        for (var i = 0; i < this.faceidx; ++i) {
+            
+            faceoffset = i*3, lineoffset = faceoffset*2;          
+            var a = faceArr[faceoffset], b = faceArr[faceoffset+1], c = faceArr[faceoffset+2];
+            
+            lineArr[lineoffset] = a, lineArr[lineoffset+1] = b;
+            lineArr[lineoffset+2] = a, lineArr[lineoffset+3] = c;
+            lineArr[lineoffset+4] = b, lineArr[lineoffset+5] = c;
+            
+        }
     };
     
     geometryGroup.prototype.truncateArrayBuffers = function(mesh) {
