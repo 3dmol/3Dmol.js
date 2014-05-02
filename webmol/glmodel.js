@@ -286,6 +286,45 @@ WebMol.GLModel = (function() {
         }
     };
     
+    var parseCube = function(atoms, str) {
+        
+        var lines = str.split("\n");
+        var convFactor = parseFloat(lines[0].replace(/^\s+/, "").replace(/\s+/g, " ").split(
+                                                 " ")[0]); 
+       
+        var start = atoms.length;
+        var end = start + lines.length - 1;
+        
+        for (var i = start; i < end; ++i) {
+            var atom = {};
+            atom.serial = i;
+            var line = lines[i - start + 1];
+            var tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
+                    " ");
+            
+            if (tokens[0] == 6) 
+                atom.elem = "C";
+                        
+            else if (tokens[0] == 1) 
+                atom.elem = "H";
+                
+            atom.x = parseFloat(tokens[2]) * convFactor;
+            atom.y = parseFloat(tokens[3]) * convFactor;
+            atom.z = parseFloat(tokens[4]) * convFactor;
+            
+            atom.hetflag = true;
+            atom.bonds = [];
+            atom.bondOrder = [];
+            atom.properties = {};
+            atoms.push(atom);
+            
+        }   
+        
+        assignBonds(atoms);
+        
+        return true; 
+    };
+        
     // read an XYZ file from str and put the result in atoms
     var parseXYZ = function(atoms, str) {
 
@@ -1480,6 +1519,9 @@ WebMol.GLModel = (function() {
                 break;
             case "mol2":
                 parseMOL2(atoms, data);
+                break;
+            case "cube":
+                parseCube(atoms, data);
                 break;
             }
             setAtomDefaults(atoms, id);

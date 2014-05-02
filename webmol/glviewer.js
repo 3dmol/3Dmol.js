@@ -157,7 +157,122 @@ WebMol.glmolViewer = (function() {
         return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
                 [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
     };
-
+    
+    //Read a cube file - generate model and possibly shape(s)
+    var parseCube = function(str, shapes) {
+        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
+        
+        if (lines.length < 6)
+            return;
+            
+        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");       
+          
+        var natoms = Math.abs(parseFloat(lineArr[0]));        
+        var origin = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3]));
+        
+        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        //might have to convert from bohr units to angstroms
+        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
+        
+        origin.multiplyScalar(convFactor);
+        
+        var nX = Math.abs(lineArr[0]);
+        var xVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        var nY = Math.abs(lineArr[0]);
+        var yVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        var nZ = Math.abs(lineArr[0]);
+        var zVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        //Extract atom portion; send to new GLModel...
+        var atomStr = lines.splice(6, natoms).join("\n");
+        atomStr = convFactor + "\n" + atomStr;
+        
+        lines = lines.splice(7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/);
+        
+        //Extract voxels
+        var xArr, yArr, zArr;
+        var offset = 0;
+        
+        xArr = [];
+        var isoval = 0.01;
+        
+        for (var i = 0; i < nX; ++i) {
+            yArr = [];
+            for (var j = 0; j < nY; ++j) {
+                zArr = [];
+                for (var k = 0; k < nZ; ++k, ++offset) {
+                    var val = parseFloat(lines[offset]) * convFactor;
+                    zArr.push(val);
+                }
+                yArr.push(zArr);
+            }
+            xArr.push(yArr);
+        }
+        
+        var cube = [
+            new WebMol.Vector3(), new WebMol.Vector3().add(xVec),
+            new WebMol.Vector3().add(xVec).add(zVec), new WebMol.Vector3().add(zVec),
+            
+            new WebMol.Vector3().add(yVec), new WebMol.Vector3().add(xVec).add(yVec),
+            new WebMol.Vector3().add(xVec).add(yVec).add(zVec), new WebMol.Vector3().add(yVec).add(zVec)
+        ];
+        
+        //TODO: Obviously refactor this into previous loop - just need to work out indexing
+        for (var i = 1; i < nX; ++i) {
+            for (var j = 1; j < nY; ++j) {
+                for (var k = 1; k < nZ; ++k) {
+                    
+                    var bit = 0;
+                    
+                    if (xArr[i-1][j-1][k-1] < isoval)
+                        bit |= 1;
+                    
+                    if (xArr[i][j-1][k-1] < isoval)
+                        bit |= 2;
+                        
+                    if (xArr[i][j-1][k] < isoval)
+                        bit |= 4;
+                    
+                    if (xArr[i-1][j-1][k] < isoval)
+                        bit |= 8;
+                    
+                    if (xArr[i-1][j][k-1] < isoval)
+                        bit |= 16;
+                    
+                    if (xArr[i][j][k-1] < isoval)
+                        bit |= 32;
+                    
+                    if (xArr[i][j][k] < isoval)
+                        bit |= 64;
+                        
+                    if (xArr[i-1][j][k] < isoval)
+                        bit |= 128;
+                        
+                    var edgeIdx = MarchingCube.edgeTable[bit];
+                    
+                    //Not on isosurface
+                    if (edgeIdx == 0)
+                        continue;
+                        
+                    //check edges
+                    
+                    //if (edgeIdx & 1)
+                        
+                }
+            }
+        }
+     
+        return atomStr;
+                
+    };
+    
     // The constructor
     function GLViewer(element, callback, defaultcolors) {
 
@@ -717,6 +832,9 @@ WebMol.glmolViewer = (function() {
         // create a model and add it, returning the model identifier
         this.addModel = function(data, format) {
             var m = new WebMol.GLModel(models.length, defaultcolors);
+            if (format === "cube") {
+                data = parseCube(data, shapes);
+            }
             m.addMolData(data, format);
             models.push(m);
             return m;
