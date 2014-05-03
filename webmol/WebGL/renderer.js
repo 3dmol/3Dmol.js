@@ -1271,7 +1271,7 @@ WebMol.Renderer = function ( parameters ) {
               
         
         //normal buffers
-        if (geometryGroup.__normalArray !== undefined) {
+        if (geometryGroup.__normalArray !== undefined && geometryGroup.__webglNormalBuffer !== undefined) {
             var normalArray = geometryGroup.__normalArray;
             _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
             _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );       
@@ -1279,7 +1279,7 @@ WebMol.Renderer = function ( parameters ) {
         }
         
         //face (index) buffers
-        if (geometryGroup.__faceArray !== undefined) {
+        if (geometryGroup.__faceArray !== undefined && geometryGroup.__webglFaceBuffer !== undefined) {
             var faceArray = geometryGroup.__faceArray;
             _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
             _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );  
@@ -1287,7 +1287,7 @@ WebMol.Renderer = function ( parameters ) {
         }
         
         //line (index) buffers (for wireframe)
-        if (geometryGroup.__lineArray !== undefined) {
+        if (geometryGroup.__lineArray !== undefined && geometryGroup.__webglLineBuffer !== undefined) {
             var lineArray = geometryGroup.__lineArray;            
             _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
             _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );

@@ -159,7 +159,7 @@ WebMol.glmolViewer = (function() {
     };
     
     //Read a cube file - generate model and possibly shape(s)
-    var parseCube = function(str, shapes) {
+    var parseCube = function(str, viewer) {
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
         if (lines.length < 6)
@@ -201,15 +201,18 @@ WebMol.glmolViewer = (function() {
         var offset = 0;
         
         xArr = [];
-        var isoval = 0.01;
+        var isoval = 0.005;
         
         for (var i = 0; i < nX; ++i) {
             yArr = [];
             for (var j = 0; j < nY; ++j) {
-                zArr = [];
+                zArr = new Float32Array(nZ);
                 for (var k = 0; k < nZ; ++k, ++offset) {
                     var val = parseFloat(lines[offset]) * convFactor;
-                    zArr.push(val);
+                    
+                    if (val < isoval)                      
+                            zArr[k] = val;
+                                   
                 }
                 yArr.push(zArr);
             }
@@ -224,6 +227,8 @@ WebMol.glmolViewer = (function() {
             new WebMol.Vector3().add(xVec).add(yVec).add(zVec), new WebMol.Vector3().add(yVec).add(zVec)
         ];
         
+        var p1 = new WebMol.Vector3(), p2 = new WebMol.Vector3();
+        var verts = [], faces = [];
         //TODO: Obviously refactor this into previous loop - just need to work out indexing
         for (var i = 1; i < nX; ++i) {
             for (var j = 1; j < nY; ++j) {
@@ -231,31 +236,35 @@ WebMol.glmolViewer = (function() {
                     
                     var bit = 0;
                     
-                    if (xArr[i-1][j-1][k-1] < isoval)
+                    if (xArr[i-1][j-1][k-1])
                         bit |= 1;
                     
-                    if (xArr[i][j-1][k-1] < isoval)
+                    if (xArr[i][j-1][k-1])
                         bit |= 2;
                         
-                    if (xArr[i][j-1][k] < isoval)
+                    if (xArr[i][j-1][k])
                         bit |= 4;
                     
-                    if (xArr[i-1][j-1][k] < isoval)
+                    if (xArr[i-1][j-1][k])
                         bit |= 8;
                     
-                    if (xArr[i-1][j][k-1] < isoval)
+                    if (xArr[i-1][j][k-1])
                         bit |= 16;
                     
-                    if (xArr[i][j][k-1] < isoval)
+                    if (xArr[i][j][k-1])
                         bit |= 32;
                     
-                    if (xArr[i][j][k] < isoval)
+                    if (xArr[i][j][k])
                         bit |= 64;
                         
-                    if (xArr[i-1][j][k] < isoval)
+                    if (xArr[i-1][j][k])
                         bit |= 128;
+                    
+                    if (bit < 7 || bit == 255) 
+                        continue;
                         
-                    var edgeIdx = MarchingCube.edgeTable[bit];
+                    var edgeIdx = MarchingCube.edgeTable2[bit];
+                    var triangles = MarchingCube.triTable2[bit];
                     
                     //Not on isosurface
                     if (edgeIdx == 0)
@@ -263,14 +272,319 @@ WebMol.glmolViewer = (function() {
                         
                     //check edges
                     
-                    //if (edgeIdx & 1)
+                    var xV = xVec.clone().multiplyScalar(i-1);
+                    var yV = yVec.clone().multiplyScalar(j-1);
+                    var zV = zVec.clone().multiplyScalar(k-1);
+                    
+                    var intersects = [null, null, null, null,
+                                      null, null, null, null,
+                                      null, null, null, null];
+                                
+                    var v1, v2;              
+                    //0 to 1
+                    if (edgeIdx & 1) {
+                        p1.addVectors(cube[0], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[1], xV).add(yV).add(zV);
+                        v1 = xArr[i-1][j-1][k-1];
+                        v2 = xArr[i][j-1][k-1];
+                        
+                        intersects[0] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    //1 to 2
+                    if (edgeIdx & 2) {
+                        p1.addVectors(cube[1], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[2], xV).add(yV).add(zV);
+                        v1 = xArr[i][j-1][k-1];
+                        v2 = xArr[i][j-1][k];
+                        
+                        intersects[1] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    //2 to 3
+                    if (edgeIdx & 4) {
+                        p1.addVectors(cube[2], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[3], xV).add(yV).add(zV);
+                        v1 = xArr[i][j-1][k];
+                        v2 = xArr[i-1][j-1][k];
+                        
+                        intersects[2] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    //3 to 0
+                    if (edgeIdx & 8) {
+                        p1.addVectors(cube[3], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[0], xV).add(yV).add(zV);
+                        v1 = xArr[i-1][j-1][k];
+                        v2 = xArr[i-1][j-1][k-1];
+                        
+                        intersects[3] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }     
+                    //4 to 5
+                    if (edgeIdx & 16) {
+                        p1.addVectors(cube[4], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[5], xV).add(yV).add(zV);
+                        v1 = xArr[i-1][j][k-1];
+                        v2 = xArr[i][j][k-1];
+                        
+                        intersects[4] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }    
+                    //5 to 6
+                    if (edgeIdx & 32) {
+                        p1.addVectors(cube[5], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[6], xV).add(yV).add(zV);
+                        v1 = xArr[i][j][k-1];
+                        v2 = xArr[i][j][k];
+                        
+                        intersects[5] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    //6 to 7
+                    if (edgeIdx & 64) {
+                        p1.addVectors(cube[6], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[7], xV).add(yV).add(zV);
+                        v1 = xArr[i][j][k];
+                        v2 = xArr[i-1][j][k];
+                        
+                        intersects[6] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    //7 to 4
+                    if (edgeIdx & 128) {
+                        p1.addVectors(cube[7], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[4], xV).add(yV).add(zV);
+                        v1 = xArr[i-1][j][k];
+                        v2 = xArr[i-1][j][k-1];
+                        
+                        intersects[7] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    //0 to 4
+                    if (edgeIdx & 256) {
+                        p1.addVectors(cube[0], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[4], xV).add(yV).add(zV);
+                        v1 = xArr[i-1][j-1][k-1];
+                        v2 = xArr[i-1][j][k-1];
+                        
+                        intersects[8] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    //1 to 5
+                    if (edgeIdx & 512) {
+                        p1.addVectors(cube[1], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[5], xV).add(yV).add(zV);
+                        v1 = xArr[i][j-1][k-1];
+                        v2 = xArr[i][j][k-1];
+                        
+                        intersects[9] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }  
+                    //2 to 6
+                    if (edgeIdx & 1024) {
+                        p1.addVectors(cube[2], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[6], xV).add(yV).add(zV);
+                        v1 = xArr[i][j-1][k];
+                        v2 = xArr[i][j][k];
+                        
+                        intersects[10] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    //3 to 7
+                    if (edgeIdx & 2048) {
+                        p1.addVectors(cube[3], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[7], xV).add(yV).add(zV);
+                        v1 = xArr[i-1][j-1][k];
+                        v2 = xArr[i-1][j][k];
+                        
+                        intersects[11] = linearInterpolate(p1,p2,v1,v2,isoval);
+                    }
+                    
+                    //add Vectors
+                    for (var itri = 0; itri < triangles.length / 3; ++itri) {
+                        var trioffset = itri*3;
+                        var a = triangles[trioffset];
+                        
+                        if (isoval > 0)
+                            var b = triangles[trioffset + 1], c = triangles[trioffset + 2];
+                        else
+                            var b = triangles[trioffset + 2], c = triangles[trioffset + 1];
+                        
+                        faces.push(verts.length);
+                        verts.push(intersects[a]);
+                        faces.push(verts.length);
+                        verts.push(intersects[b]);
+                        faces.push(verts.length);
+                        verts.push(intersects[c]);
+                        
+                    }
                         
                 }
+
             }
+
         }
-     
+        laplacianSmooth(1, verts, faces);
+        var shape = viewer.addShape({
+            wireframe : false,
+            color : new WebMol.Color(0,0,1)
+        });
+        
+        viewer.addCustom(shape, {vertexArr:verts, 
+                                 faceArr:faces});
         return atomStr;
                 
+    };
+    
+    var linearInterpolate = function(p1,p2,v1,v2,isoval) {
+        var pt = new WebMol.Vector3();
+        pt.addVectors(p1, p2).multiplyScalar(0.5);
+        return pt;
+        if (Math.abs(isoval - v1) < 0.00001)
+            return p1.clone();
+        if (Math.abs(isoval - v2) < 0.00001) 
+            return p2.clone();
+        if (Math.abs(v1 - v2) < 0.00001)
+            return pt.addVectors(p1, p2).multiplyScalar(0.5);
+        
+        pt.subVectors(p2, p1);
+        pt.multiplyScalar((-v1)/(v2 - v1)).add(p1);
+        
+        return pt;
+       
+    };
+    
+    laplacianSmooth = function(numiter, verts, faces) {
+            var tps = new Array(verts.length);
+            for ( var i = 0; i < verts.length; i++)
+                    tps[i] = {
+                            x : 0,
+                            y : 0,
+                            z : 0
+                    };
+            var vertdeg = new Array(20);
+            var flagvert;
+            for ( var i = 0; i < 20; i++)
+                    vertdeg[i] = new Array(verts.length);
+            for ( var i = 0; i < verts.length; i++)
+                    vertdeg[0][i] = 0;
+            for ( var i = 0; i < faces.length / 3; i++) {
+                    var aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
+                    flagvert = true;
+                    for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
+                            if (faces[boffset] == vertdeg[j + 1][faces[aoffset]]) {
+                                    flagvert = false;
+                                    break;
+                            }
+                    }
+                    if (flagvert) {
+                            vertdeg[0][faces[aoffset]]++;
+                            vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[boffset];
+                    }
+                    flagvert = true;
+                    for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
+                            if (faces[coffset] == vertdeg[j + 1][faces[aoffset]]) {
+                                    flagvert = false;
+                                    break;
+                            }
+                    }
+                    if (flagvert) {
+                            vertdeg[0][faces[aoffset]]++;
+                            vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[coffset];
+                    }
+                    // b
+                    flagvert = true;
+                    for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
+                            if (faces[aoffset] == vertdeg[j + 1][faces[boffset]]) {
+                                    flagvert = false;
+                                    break;
+                            }
+                    }
+                    if (flagvert) {
+                            vertdeg[0][faces[boffset]]++;
+                            vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[aoffset];
+                    }
+                    flagvert = true;
+                    for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
+                            if (faces[coffset] == vertdeg[j + 1][faces[boffset]]) {
+                                    flagvert = false;
+                                    break;
+                            }
+                    }
+                    if (flagvert) {
+                            vertdeg[0][faces[boffset]]++;
+                            vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[coffset];
+                    }
+                    // c
+                    flagvert = true;
+                    for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
+                            if (faces[aoffset] == vertdeg[j + 1][faces[coffset]]) {
+                                    flagvert = false;
+                                    break;
+                            }
+                    }
+                    if (flagvert) {
+                            vertdeg[0][faces[coffset]]++;
+                            vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[aoffset];
+                    }
+                    flagvert = true;
+                    for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
+                            if (faces[boffset] == vertdeg[j + 1][faces[coffset]]) {
+                                    flagvert = false;
+                                    break;
+                            }
+                    }
+                    if (flagvert) {
+                            vertdeg[0][faces[coffset]]++;
+                            vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[boffset];
+                    }
+            }
+
+            var wt = 1.00;
+            var wt2 = 0.50;
+            var ssign;
+            var scaleFactor = 1;
+            var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
+            for ( var k = 0; k < numiter; k++) {
+                    for ( var i = 0; i < verts.length; i++) {
+                            if (vertdeg[0][i] < 3) {
+                                    tps[i].x = verts[i].x;
+                                    tps[i].y = verts[i].y;
+                                    tps[i].z = verts[i].z;
+                            } else if (vertdeg[0][i] == 3 || vertdeg[0][i] == 4) {
+                                    tps[i].x = 0;
+                                    tps[i].y = 0;
+                                    tps[i].z = 0;
+                                    for (j = 0; j < vertdeg[0][i]; j++) {
+                                            tps[i].x += verts[vertdeg[j + 1][i]].x;
+                                            tps[i].y += verts[vertdeg[j + 1][i]].y;
+                                            tps[i].z += verts[vertdeg[j + 1][i]].z;
+                                    }
+                                    tps[i].x += wt2 * verts[i].x;
+                                    tps[i].y += wt2 * verts[i].y;
+                                    tps[i].z += wt2 * verts[i].z;
+                                    tps[i].x /= wt2 + vertdeg[0][i];
+                                    tps[i].y /= wt2 + vertdeg[0][i];
+                                    tps[i].z /= wt2 + vertdeg[0][i];
+                            } else {
+                                    tps[i].x = 0;
+                                    tps[i].y = 0;
+                                    tps[i].z = 0;
+                                    for ( var j = 0; j < vertdeg[0][i]; j++) {
+                                            tps[i].x += verts[vertdeg[j + 1][i]].x;
+                                            tps[i].y += verts[vertdeg[j + 1][i]].y;
+                                            tps[i].z += verts[vertdeg[j + 1][i]].z;
+                                    }
+                                    tps[i].x += wt * verts[i].x;
+                                    tps[i].y += wt * verts[i].y;
+                                    tps[i].z += wt * verts[i].z;
+                                    tps[i].x /= wt + vertdeg[0][i];
+                                    tps[i].y /= wt + vertdeg[0][i];
+                                    tps[i].z /= wt + vertdeg[0][i];
+                            }
+                    }
+                    for ( var i = 0; i < verts.length; i++) {
+                            verts[i].x = tps[i].x;
+                            verts[i].y = tps[i].y;
+                            verts[i].z = tps[i].z;
+                    }
+                    /*
+                     * computenorm(); for (var i = 0; i < vertnumber; i++) { if
+                     * (verts[i].inout) ssign = 1; else ssign = -1; verts[i].x += ssign *
+                     * outwt * verts[i].pn.x; verts[i].y += ssign * outwt *
+                     * verts[i].pn.y; verts[i].z += ssign * outwt * verts[i].pn.z; }
+                     */
+            }
     };
     
     // The constructor
@@ -833,7 +1147,7 @@ WebMol.glmolViewer = (function() {
         this.addModel = function(data, format) {
             var m = new WebMol.GLModel(models.length, defaultcolors);
             if (format === "cube") {
-                data = parseCube(data, shapes);
+                data = parseCube(data, this);
             }
             m.addMolData(data, format);
             models.push(m);
@@ -1272,7 +1586,7 @@ WebMol.glmolViewer = (function() {
                 };
             }
 
-            var sync = false;
+            var sync = true;
             var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 

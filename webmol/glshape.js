@@ -552,7 +552,7 @@ WebMol.GLShape = (function() {
             
             //Force creation of new geometryGroup for each added component
             var geoGroup = geo.addGeoGroup();
-            drawCustom(shape, geoGroup, customSpec);            
+            drawCustom(this, geoGroup, customSpec);            
             geoGroup.truncateArrayBuffers(true);
     
             for (var i = 0; i < geoGroup.__colorArray.length / 3; ++i) {
@@ -577,7 +577,7 @@ WebMol.GLShape = (function() {
             sphereSpec.radius = sphereSpec.radius ? WebMol.Math.clamp(sphereSpec.radius, 0, Infinity) : 1.5;
             
             var geoGroup = geo.addGeoGroup();
-            drawSphere(shape, geoGroup, sphereSpec);
+            drawSphere(this, geoGroup, sphereSpec);
             geoGroup.truncateArrayBuffers(true);            
             
             components.push({
@@ -603,7 +603,7 @@ WebMol.GLShape = (function() {
             
             var geoGroup = geo.addGeoGroup();
             
-            drawArrow(shape, geoGroup, arrowSpec);
+            drawArrow(this, geoGroup, arrowSpec);
             geoGroup.truncateArrayBuffers(true);
             
             var centroid = new WebMol.Vector3();
