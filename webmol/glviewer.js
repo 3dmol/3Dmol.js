@@ -201,7 +201,7 @@ WebMol.glmolViewer = (function() {
         var offset = 0;
         
         xArr = [];
-        var isoval = 0.005;
+        var isoval = -0.0005;
         
         for (var i = 0; i < nX; ++i) {
             yArr = [];
@@ -210,8 +210,10 @@ WebMol.glmolViewer = (function() {
                 for (var k = 0; k < nZ; ++k, ++offset) {
                     var val = parseFloat(lines[offset]) * convFactor;
                     
-                    if (val < isoval)                      
-                            zArr[k] = val;
+                    if (val > isoval && isoval > 0)                      
+                        zArr[k] = val;
+                    else if (val < isoval && isoval < 0)
+                        zArr[k] = val;
                                    
                 }
                 yArr.push(zArr);
@@ -220,12 +222,13 @@ WebMol.glmolViewer = (function() {
         }
         
         var cube = [
-            new WebMol.Vector3(), new WebMol.Vector3().add(xVec),
-            new WebMol.Vector3().add(xVec).add(zVec), new WebMol.Vector3().add(zVec),
+            origin.clone(), origin.clone().add(xVec),
+            origin.clone().add(xVec).add(zVec), origin.clone().add(zVec),
             
-            new WebMol.Vector3().add(yVec), new WebMol.Vector3().add(xVec).add(yVec),
-            new WebMol.Vector3().add(xVec).add(yVec).add(zVec), new WebMol.Vector3().add(yVec).add(zVec)
+            origin.clone().add(yVec), origin.clone().add(xVec).add(yVec),
+            origin.clone().add(xVec).add(yVec).add(zVec), origin.clone().add(yVec).add(zVec)
         ];
+                
         
         var p1 = new WebMol.Vector3(), p2 = new WebMol.Vector3();
         var verts = [], faces = [];
@@ -260,7 +263,7 @@ WebMol.glmolViewer = (function() {
                     if (xArr[i-1][j][k])
                         bit |= 128;
                     
-                    if (bit < 7 || bit == 255) 
+                    if (bit == 0 || bit == 255) 
                         continue;
                         
                     var edgeIdx = MarchingCube.edgeTable2[bit];
@@ -395,16 +398,13 @@ WebMol.glmolViewer = (function() {
                         var trioffset = itri*3;
                         var a = triangles[trioffset];
                         
-                        if (isoval > 0)
-                            var b = triangles[trioffset + 1], c = triangles[trioffset + 2];
-                        else
-                            var b = triangles[trioffset + 2], c = triangles[trioffset + 1];
+                        var b = triangles[trioffset + 2], c = triangles[trioffset + 1];
                         
-                        faces.push(verts.length);
+                        //faces.push(verts.length);
                         verts.push(intersects[a]);
-                        faces.push(verts.length);
+                        //faces.push(verts.length);
                         verts.push(intersects[b]);
-                        faces.push(verts.length);
+                        //faces.push(verts.length);
                         verts.push(intersects[c]);
                         
                     }
@@ -414,11 +414,18 @@ WebMol.glmolViewer = (function() {
             }
 
         }
-        laplacianSmooth(1, verts, faces);
+        
+        for (var vertidx in verts) {
+            faces.push(vertidx);
+        }
+        
+        //laplacianSmooth(1, verts, faces);
+        
         var shape = viewer.addShape({
             wireframe : false,
             color : new WebMol.Color(0,0,1)
         });
+        
         
         viewer.addCustom(shape, {vertexArr:verts, 
                                  faceArr:faces});
@@ -428,18 +435,21 @@ WebMol.glmolViewer = (function() {
     
     var linearInterpolate = function(p1,p2,v1,v2,isoval) {
         var pt = new WebMol.Vector3();
-        pt.addVectors(p1, p2).multiplyScalar(0.5);
-        return pt;
-        if (Math.abs(isoval - v1) < 0.00001)
+        //pt.addVectors(p1, p2).multiplyScalar(0.5);
+        //return pt;
+        if (Math.abs(isoval-v1) < 0.000001)
             return p1.clone();
-        if (Math.abs(isoval - v2) < 0.00001) 
+        if (Math.abs(isoval-v2) < 0.000001) 
             return p2.clone();
-        if (Math.abs(v1 - v2) < 0.00001)
+        if (Math.abs(v1 - v2) < 0.000001)
             return pt.addVectors(p1, p2).multiplyScalar(0.5);
         
         pt.subVectors(p2, p1);
-        pt.multiplyScalar((-v1)/(v2 - v1)).add(p1);
         
+        var scale = (isoval-v1)/(v2-v1);       
+        
+        //pt.multiplyScalar(scale).add(p1);
+        pt.addVectors(p1, p2).multiplyScalar(0.5);
         return pt;
        
     };
