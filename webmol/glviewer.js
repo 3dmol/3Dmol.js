@@ -195,32 +195,11 @@ WebMol.glmolViewer = (function() {
         atomStr = convFactor + "\n" + atomStr;
         
         lines = lines.splice(7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/);
+        lines = new Float32Array(lines);
         
-        //Extract voxels
-        var xArr, yArr, zArr;
-        var offset = 0;
+        var isoval = 0.005;
         
-        xArr = [];
-        var isoval = -0.0005;
-        
-        for (var i = 0; i < nX; ++i) {
-            yArr = [];
-            for (var j = 0; j < nY; ++j) {
-                zArr = new Float32Array(nZ);
-                for (var k = 0; k < nZ; ++k, ++offset) {
-                    var val = parseFloat(lines[offset]) * convFactor;
-                    
-                    if (val > isoval && isoval > 0)                      
-                        zArr[k] = val;
-                    else if (val < isoval && isoval < 0)
-                        zArr[k] = val;
-                                   
-                }
-                yArr.push(zArr);
-            }
-            xArr.push(yArr);
-        }
-        
+        //Cube points - for finding vertices
         var cube = [
             origin.clone(), origin.clone().add(xVec),
             origin.clone().add(xVec).add(zVec), origin.clone().add(zVec),
@@ -228,39 +207,76 @@ WebMol.glmolViewer = (function() {
             origin.clone().add(yVec), origin.clone().add(xVec).add(yVec),
             origin.clone().add(xVec).add(yVec).add(zVec), origin.clone().add(yVec).add(zVec)
         ];
+        
+        //voxel values for current position
+        var grid = new Float32Array(8);
                 
         
         var p1 = new WebMol.Vector3(), p2 = new WebMol.Vector3();
-        var verts = [], faces = [];
+        var verts = [], faces = [], verts2 = [], faces2 = [];
+        var vertnums = new Int16Array(nX*nY*nZ*12);
+        
+        for (var i = 0; i < vertnums.length; ++i)
+            vertnums[i] = -1;
+        
+        //mapping of front facing edges (according to cube numbering scheme) to index in vertnums
+        var frontMap = {
+            2 : 0,
+            3 : 1,
+            4 : 2,
+            5 : 3,
+            6 : 4,
+            7 : 5,
+            8 : 6,
+            10 : 7,
+            11 : 8
+        };
+        
         //TODO: Obviously refactor this into previous loop - just need to work out indexing
-        for (var i = 1; i < nX; ++i) {
-            for (var j = 1; j < nY; ++j) {
-                for (var k = 1; k < nZ; ++k) {
+        
+        //Also TODO:  vertnums must be signed (to initialize at -1) -> but this means we can't have more than
+        // 32,768 vertices per geoGroup (rather than 65,536) - should probably enforce (or else use Int32Array for vertnums...)
+        for (var i = 0; i < nX - 1; ++i) {
+            for (var j = 0; j < nY - 1; ++j) {
+                for (var k = 0; k < nZ - 1; ++k) {
+                    
+                    
+                    //unpack voxels for this cube
+                    offset = (i*nY*nZ) + (j*nZ) + k;
+                    grid[0] = parseFloat(lines[offset]) * convFactor;
+                    grid[1] = parseFloat(lines[offset+nY*nZ]) * convFactor;
+                    grid[2] = parseFloat(lines[offset+nY*nZ+1]) * convFactor;
+                    grid[3] = parseFloat(lines[offset+1]) * convFactor;
+                    
+                    grid[4] = parseFloat(lines[offset+nZ]) * convFactor; 
+                    grid[5] = parseFloat(lines[offset+nY*nZ+nZ]) * convFactor;
+                    grid[6] = parseFloat(lines[offset+nY*nZ+nZ+1]) * convFactor;
+                    grid[7] = parseFloat(lines[offset+nZ+1]) * convFactor;
                     
                     var bit = 0;
                     
-                    if (xArr[i-1][j-1][k-1])
+                    if ((grid[0] > isoval && isoval >= 0) || (grid[0] < isoval && isoval < 0))
                         bit |= 1;
                     
-                    if (xArr[i][j-1][k-1])
+                    if ((grid[1] > isoval && isoval >= 0) || (grid[1] < isoval && isoval < 0))
                         bit |= 2;
                         
-                    if (xArr[i][j-1][k])
+                    if ((grid[2] > isoval && isoval >= 0) || (grid[2] < isoval && isoval < 0))
                         bit |= 4;
                     
-                    if (xArr[i-1][j-1][k])
+                    if ((grid[3] > isoval && isoval >= 0) || (grid[3] < isoval && isoval < 0))
                         bit |= 8;
                     
-                    if (xArr[i-1][j][k-1])
+                    if ((grid[4] > isoval && isoval >= 0) || (grid[4] < isoval && isoval < 0))
                         bit |= 16;
                     
-                    if (xArr[i][j][k-1])
+                    if ((grid[5] > isoval && isoval >= 0) || (grid[5] < isoval && isoval < 0))
                         bit |= 32;
                     
-                    if (xArr[i][j][k])
+                    if ((grid[6] > isoval && isoval >= 0) || (grid[6] < isoval && isoval < 0))
                         bit |= 64;
                         
-                    if (xArr[i-1][j][k])
+                    if ((grid[7] > isoval && isoval >= 0) || (grid[7] < isoval && isoval < 0))
                         bit |= 128;
                     
                     if (bit == 0 || bit == 255) 
@@ -283,114 +299,116 @@ WebMol.glmolViewer = (function() {
                                       null, null, null, null,
                                       null, null, null, null];
                                 
-                    var v1, v2;              
+                    var v1, v2, idx;
+                    var index = (i*nY*nZ) + (j*nZ) + k;      
+                    index *= 12;       
                     //0 to 1
                     if (edgeIdx & 1) {
                         p1.addVectors(cube[0], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[1], xV).add(yV).add(zV);
-                        v1 = xArr[i-1][j-1][k-1];
-                        v2 = xArr[i][j-1][k-1];
-                        
-                        intersects[0] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[0];
+                        v2 = grid[1];
+                        idx = index+0;
+                        intersects[0] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     //1 to 2
                     if (edgeIdx & 2) {
                         p1.addVectors(cube[1], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[2], xV).add(yV).add(zV);
-                        v1 = xArr[i][j-1][k-1];
-                        v2 = xArr[i][j-1][k];
-                        
-                        intersects[1] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[1];
+                        v2 = grid[2];
+                        idx = index+1;
+                        intersects[1] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     //2 to 3
                     if (edgeIdx & 4) {
                         p1.addVectors(cube[2], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[3], xV).add(yV).add(zV);
-                        v1 = xArr[i][j-1][k];
-                        v2 = xArr[i-1][j-1][k];
-                        
-                        intersects[2] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[2];
+                        v2 = grid[3];
+                        idx = index+2;
+                        intersects[2] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     //3 to 0
                     if (edgeIdx & 8) {
                         p1.addVectors(cube[3], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[0], xV).add(yV).add(zV);
-                        v1 = xArr[i-1][j-1][k];
-                        v2 = xArr[i-1][j-1][k-1];
-                        
-                        intersects[3] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[3];
+                        v2 = grid[0];
+                        idx = index+3;
+                        intersects[3] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }     
                     //4 to 5
                     if (edgeIdx & 16) {
                         p1.addVectors(cube[4], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[5], xV).add(yV).add(zV);
-                        v1 = xArr[i-1][j][k-1];
-                        v2 = xArr[i][j][k-1];
-                        
-                        intersects[4] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[4];
+                        v2 = grid[5];
+                        idx = index+4;
+                        intersects[4] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }    
                     //5 to 6
                     if (edgeIdx & 32) {
                         p1.addVectors(cube[5], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[6], xV).add(yV).add(zV);
-                        v1 = xArr[i][j][k-1];
-                        v2 = xArr[i][j][k];
-                        
-                        intersects[5] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[5];
+                        v2 = grid[6];
+                        idx = index+5;
+                        intersects[5] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     //6 to 7
                     if (edgeIdx & 64) {
                         p1.addVectors(cube[6], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[7], xV).add(yV).add(zV);
-                        v1 = xArr[i][j][k];
-                        v2 = xArr[i-1][j][k];
-                        
-                        intersects[6] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[6];
+                        v2 = grid[7];
+                        idx = index+6;
+                        intersects[6] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     //7 to 4
                     if (edgeIdx & 128) {
                         p1.addVectors(cube[7], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[4], xV).add(yV).add(zV);
-                        v1 = xArr[i-1][j][k];
-                        v2 = xArr[i-1][j][k-1];
-                        
-                        intersects[7] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[7];
+                        v2 = grid[4];
+                        idx = index+7;
+                        intersects[7] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     //0 to 4
                     if (edgeIdx & 256) {
                         p1.addVectors(cube[0], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[4], xV).add(yV).add(zV);
-                        v1 = xArr[i-1][j-1][k-1];
-                        v2 = xArr[i-1][j][k-1];
-                        
-                        intersects[8] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[0];
+                        v2 = grid[4];
+                        idx = index+8;
+                        intersects[8] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     //1 to 5
                     if (edgeIdx & 512) {
                         p1.addVectors(cube[1], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[5], xV).add(yV).add(zV);
-                        v1 = xArr[i][j-1][k-1];
-                        v2 = xArr[i][j][k-1];
-                        
-                        intersects[9] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[1];
+                        v2 = grid[5];
+                        idx = index+9;
+                        intersects[9] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }  
                     //2 to 6
                     if (edgeIdx & 1024) {
                         p1.addVectors(cube[2], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[6], xV).add(yV).add(zV);
-                        v1 = xArr[i][j-1][k];
-                        v2 = xArr[i][j][k];
-                        
-                        intersects[10] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[2];
+                        v2 = grid[6];
+                        idx = index+10;
+                        intersects[10] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     //3 to 7
                     if (edgeIdx & 2048) {
                         p1.addVectors(cube[3], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[7], xV).add(yV).add(zV);
-                        v1 = xArr[i-1][j-1][k];
-                        v2 = xArr[i-1][j][k];
-                        
-                        intersects[11] = linearInterpolate(p1,p2,v1,v2,isoval);
+                        v1 = grid[3];
+                        v2 = grid[7];
+                        idx = index+11;
+                        intersects[11] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
                     }
                     
                     //add Vectors
@@ -401,11 +419,11 @@ WebMol.glmolViewer = (function() {
                         var b = triangles[trioffset + 2], c = triangles[trioffset + 1];
                         
                         //faces.push(verts.length);
-                        verts.push(intersects[a]);
+                        faces.push(intersects[a]);
                         //faces.push(verts.length);
-                        verts.push(intersects[b]);
+                        faces.push(intersects[b]);
                         //faces.push(verts.length);
-                        verts.push(intersects[c]);
+                        faces.push(intersects[c]);
                         
                     }
                         
@@ -415,9 +433,7 @@ WebMol.glmolViewer = (function() {
 
         }
         
-        for (var vertidx in verts) {
-            faces.push(vertidx);
-        }
+
         
         //laplacianSmooth(1, verts, faces);
         
@@ -433,24 +449,41 @@ WebMol.glmolViewer = (function() {
                 
     };
     
-    var linearInterpolate = function(p1,p2,v1,v2,isoval) {
+    var linearInterpolate = function(p1,p2,v1,v2,isoval,index,vertnums,verts) {
         
         var pt = new WebMol.Vector3();
         
         if (Math.abs(isoval-v1) < 0.000001)
-            return p1.clone();
-        if (Math.abs(isoval-v2) < 0.000001) 
-            return p2.clone();
-        if (Math.abs(v1 - v2) < 0.000001)
-            return pt.addVectors(p1, p2).multiplyScalar(0.5);
+            pt = p1.clone();
+        else if (Math.abs(isoval-v2) < 0.000001) 
+            pt = p2.clone();
+        else if (Math.abs(v1 - v2) < 0.000001)
+            pt = p1.clone().add(p2).multiplyScalar(0.5);
+            
+        else {            
+            pt = p2.clone().sub(p1); 
+            var scale = (isoval-v1)/(v2-v1);                   
+            pt.multiplyScalar(scale).add(p1);            
+        }
         
-        pt.subVectors(p2, p1);
+        pt.addVectors(p1, p2).multiplyScalar(0.5);
+        if (verts.length === 9 || verts.length === 18) {
+            var blah = '';
+        }
+        if (vertnums[index] < 1) {
+            vertnums[index] = verts.length;
+            verts.push(pt);
+            
+        }
+
+
         
-        var scale = (isoval-v1)/(v2-v1);       
+        //verts.push(pt);
         
-        pt.multiplyScalar(scale).add(p1);
+
         //pt.addVectors(p1, p2).multiplyScalar(0.5);
-        return pt;
+        return vertnums[index];
+        //return pt;
        
     };
     
