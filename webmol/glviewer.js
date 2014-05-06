@@ -434,9 +434,9 @@ WebMol.glmolViewer = (function() {
     };
     
     var linearInterpolate = function(p1,p2,v1,v2,isoval) {
+        
         var pt = new WebMol.Vector3();
-        //pt.addVectors(p1, p2).multiplyScalar(0.5);
-        //return pt;
+        
         if (Math.abs(isoval-v1) < 0.000001)
             return p1.clone();
         if (Math.abs(isoval-v2) < 0.000001) 
@@ -448,8 +448,8 @@ WebMol.glmolViewer = (function() {
         
         var scale = (isoval-v1)/(v2-v1);       
         
-        //pt.multiplyScalar(scale).add(p1);
-        pt.addVectors(p1, p2).multiplyScalar(0.5);
+        pt.multiplyScalar(scale).add(p1);
+        //pt.addVectors(p1, p2).multiplyScalar(0.5);
         return pt;
        
     };
