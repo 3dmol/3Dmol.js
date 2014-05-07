@@ -218,21 +218,7 @@ WebMol.glmolViewer = (function() {
         
         for (var i = 0; i < vertnums.length; ++i)
             vertnums[i] = -1;
-        
-        //mapping of front facing edges (according to cube numbering scheme) to index in vertnums
-        var frontMap = {
-            2 : 0,
-            3 : 1,
-            4 : 2,
-            5 : 3,
-            6 : 4,
-            7 : 5,
-            8 : 6,
-            10 : 7,
-            11 : 8
-        };
-        
-        //TODO: Obviously refactor this into previous loop - just need to work out indexing
+
         
         //Also TODO:  vertnums must be signed (to initialize at -1) -> but this means we can't have more than
         // 32,768 vertices per geoGroup (rather than 65,536) - should probably enforce (or else use Int32Array for vertnums...)
@@ -300,8 +286,7 @@ WebMol.glmolViewer = (function() {
                                       null, null, null, null];
                                 
                     var v1, v2, idx;
-                    var index = (i*nY*nZ) + (j*nZ) + k;      
-                    index *= 12;       
+                    var index = offset*12;      
                     //0 to 1
                     if (edgeIdx & 1) {
                         p1.addVectors(cube[0], xV).add(yV).add(zV);                        
@@ -439,6 +424,7 @@ WebMol.glmolViewer = (function() {
         
         var shape = viewer.addShape({
             wireframe : false,
+            alpha : 0.8,
             color : new WebMol.Color(0,0,1)
         });
         
@@ -464,28 +450,19 @@ WebMol.glmolViewer = (function() {
             pt = p2.clone().sub(p1); 
             var scale = (isoval-v1)/(v2-v1);                   
             pt.multiplyScalar(scale).add(p1);            
-        }
-        
-        pt.addVectors(p1, p2).multiplyScalar(0.5);
-        if (verts.length === 9 || verts.length === 18) {
-            var blah = '';
-        }
+        }        
+
         if (vertnums[index] < 1) {
             vertnums[index] = verts.length;
-            verts.push(pt);
-            
+            verts.push(pt);            
         }
 
-
-        
-        //verts.push(pt);
-        
-
-        //pt.addVectors(p1, p2).multiplyScalar(0.5);
         return vertnums[index];
-        //return pt;
+
        
     };
+    
+
     
     laplacianSmooth = function(numiter, verts, faces) {
             var tps = new Array(verts.length);
