@@ -213,12 +213,14 @@ WebMol.glmolViewer = (function() {
                 
         
         var p1 = new WebMol.Vector3(), p2 = new WebMol.Vector3();
-        var verts = [], faces = [], verts2 = [], faces2 = [];
+        var verts = [], faces = [], norms = [];
         var vertnums = new Int16Array(nX*nY*nZ*12);
         
         for (var i = 0; i < vertnums.length; ++i)
             vertnums[i] = -1;
 
+        //TODO: Need a good way to compute hard vertex normals for non-smoothed voxel (to get facetted look)
+        smooth = true;
         
         //Also TODO:  vertnums must be signed (to initialize at -1) -> but this means we can't have more than
         // 32,768 vertices per geoGroup (rather than 65,536) - should probably enforce (or else use Int32Array for vertnums...)
@@ -277,9 +279,9 @@ WebMol.glmolViewer = (function() {
                         
                     //check edges
                     
-                    var xV = xVec.clone().multiplyScalar(i-1);
-                    var yV = yVec.clone().multiplyScalar(j-1);
-                    var zV = zVec.clone().multiplyScalar(k-1);
+                    var xV = xVec.clone().multiplyScalar(i);
+                    var yV = yVec.clone().multiplyScalar(j);
+                    var zV = zVec.clone().multiplyScalar(k);
                     
                     var intersects = [null, null, null, null,
                                       null, null, null, null,
@@ -294,7 +296,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[0];
                         v2 = grid[1];
                         idx = index+0;
-                        intersects[0] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[0] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //1 to 2
                     if (edgeIdx & 2) {
@@ -303,7 +305,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[1];
                         v2 = grid[2];
                         idx = index+1;
-                        intersects[1] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[1] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //2 to 3
                     if (edgeIdx & 4) {
@@ -312,7 +314,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[2];
                         v2 = grid[3];
                         idx = index+2;
-                        intersects[2] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[2] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //3 to 0
                     if (edgeIdx & 8) {
@@ -321,7 +323,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[3];
                         v2 = grid[0];
                         idx = index+3;
-                        intersects[3] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[3] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }     
                     //4 to 5
                     if (edgeIdx & 16) {
@@ -330,7 +332,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[4];
                         v2 = grid[5];
                         idx = index+4;
-                        intersects[4] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[4] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }    
                     //5 to 6
                     if (edgeIdx & 32) {
@@ -339,7 +341,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[5];
                         v2 = grid[6];
                         idx = index+5;
-                        intersects[5] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[5] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //6 to 7
                     if (edgeIdx & 64) {
@@ -348,7 +350,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[6];
                         v2 = grid[7];
                         idx = index+6;
-                        intersects[6] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[6] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //7 to 4
                     if (edgeIdx & 128) {
@@ -357,7 +359,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[7];
                         v2 = grid[4];
                         idx = index+7;
-                        intersects[7] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[7] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //0 to 4
                     if (edgeIdx & 256) {
@@ -366,7 +368,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[0];
                         v2 = grid[4];
                         idx = index+8;
-                        intersects[8] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[8] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //1 to 5
                     if (edgeIdx & 512) {
@@ -375,7 +377,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[1];
                         v2 = grid[5];
                         idx = index+9;
-                        intersects[9] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[9] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }  
                     //2 to 6
                     if (edgeIdx & 1024) {
@@ -384,7 +386,7 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[2];
                         v2 = grid[6];
                         idx = index+10;
-                        intersects[10] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[10] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //3 to 7
                     if (edgeIdx & 2048) {
@@ -393,22 +395,46 @@ WebMol.glmolViewer = (function() {
                         v1 = grid[3];
                         v2 = grid[7];
                         idx = index+11;
-                        intersects[11] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts);
+                        intersects[11] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     
                     //add Vectors
+                    var norm = new WebMol.Vector3();
                     for (var itri = 0; itri < triangles.length / 3; ++itri) {
                         var trioffset = itri*3;
-                        var a = triangles[trioffset];
                         
-                        var b = triangles[trioffset + 2], c = triangles[trioffset + 1];
+                        var a = intersects[triangles[trioffset]];                        
+                        if (a == 25)
+                            var blah = '';
+                        var b = intersects[triangles[trioffset + 2]], c = intersects[triangles[trioffset + 1]];
                         
-                        //faces.push(verts.length);
-                        faces.push(intersects[a]);
-                        //faces.push(verts.length);
-                        faces.push(intersects[b]);
-                        //faces.push(verts.length);
-                        faces.push(intersects[c]);
+                        var vA = verts[a], vB = verts[b], vC = verts[c];
+                        var normA = norms[a], normB = norms[b], normC = norms[c];
+                        normA.subVectors(vA, vB);
+                        normC.subVectors(vC, vB);
+                        
+                        normA.cross(normC).normalize();
+                        norms[b].copy(normA);
+                        norms[c].copy(normA);
+                        
+                        if (! smooth && itri > 0) {
+                            faces.push(verts.length);
+                            verts.push(vA), norms.push(normA);
+                            faces.push(verts.length);
+                            verts.push(vB), norms.push(normA);
+                            faces.push(verts.length);
+                            verts.push(vC), norms.push(normB);
+                            
+                        }
+                        else {
+                            //faces.push(verts.length);
+                            faces.push(a);
+                            //faces.push(verts.length);
+                            faces.push(b);
+                            //faces.push(verts.length);
+                            faces.push(c);                           
+                        }
+
                         
                     }
                         
@@ -424,18 +450,18 @@ WebMol.glmolViewer = (function() {
         
         var shape = viewer.addShape({
             wireframe : false,
-            alpha : 0.8,
             color : new WebMol.Color(0,0,1)
         });
         
         
         viewer.addCustom(shape, {vertexArr:verts, 
-                                 faceArr:faces});
+                                 faceArr:faces,
+                                 normalArr:[]});
         return atomStr;
                 
     };
     
-    var linearInterpolate = function(p1,p2,v1,v2,isoval,index,vertnums,verts) {
+    var linearInterpolate = function(p1,p2,v1,v2,isoval,index,vertnums,verts,norms) {
         
         var pt = new WebMol.Vector3();
         
@@ -447,14 +473,17 @@ WebMol.glmolViewer = (function() {
             pt = p1.clone().add(p2).multiplyScalar(0.5);
             
         else {            
-            pt = p2.clone().sub(p1); 
+            pt.subVectors(p2,p1);
             var scale = (isoval-v1)/(v2-v1);                   
             pt.multiplyScalar(scale).add(p1);            
         }        
+        
+        //pt.addVectors(p1, p2).multiplyScalar(0.5);
 
         if (vertnums[index] < 1) {
             vertnums[index] = verts.length;
-            verts.push(pt);            
+            verts.push(pt);          
+            norms.push(new WebMol.Vector3());  
         }
 
         return vertnums[index];

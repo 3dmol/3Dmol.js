@@ -481,8 +481,17 @@ WebMol.GLShape = (function() {
         
         if (normalArr.length < geoGroup.vertices)
             geoGroup.setNormals();
-        else
-            geoGroup.__normalArray = new Float32Array(normalArr);
+        else {
+            
+            geoGroup.__normalArray = new Float32Array(geoGroup.vertices*3);
+            var n;
+            for (var i = 0; i < geoGroup.vertices; ++i) {
+                offset = i*3;
+                n = normalArr[i];
+                geoGroup.__normalArray[offset] = n.x, geoGroup.__normalArray[offset+1] = n.y, geoGroup.__normalArray[offset+2] = n.z;
+            }
+        }
+            
         
         if (! lineArr.length)
             geoGroup.setLineIndices(); 
