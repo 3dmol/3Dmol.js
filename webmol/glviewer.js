@@ -201,11 +201,11 @@ WebMol.glmolViewer = (function() {
         
         //Cube points - for finding vertices
         var cube = [
-            origin.clone(), origin.clone().add(xVec),
-            origin.clone().add(xVec).add(zVec), origin.clone().add(zVec),
+            origin.clone(), origin.clone().add(zVec),
+            origin.clone().add(yVec), origin.clone().add(yVec).add(zVec),
             
-            origin.clone().add(yVec), origin.clone().add(xVec).add(yVec),
-            origin.clone().add(xVec).add(yVec).add(zVec), origin.clone().add(yVec).add(zVec)
+            origin.clone().add(xVec), origin.clone().add(xVec).add(zVec),
+            origin.clone().add(xVec).add(yVec), origin.clone().add(xVec).add(yVec).add(zVec)
         ];
         
         //voxel values for current position
@@ -230,7 +230,9 @@ WebMol.glmolViewer = (function() {
                     
                     
                     //unpack voxels for this cube
+                    
                     offset = (i*nY*nZ) + (j*nZ) + k;
+                    /*
                     grid[0] = parseFloat(lines[offset]) * convFactor;
                     grid[1] = parseFloat(lines[offset+nY*nZ]) * convFactor;
                     grid[2] = parseFloat(lines[offset+nY*nZ+1]) * convFactor;
@@ -240,6 +242,13 @@ WebMol.glmolViewer = (function() {
                     grid[5] = parseFloat(lines[offset+nY*nZ+nZ]) * convFactor;
                     grid[6] = parseFloat(lines[offset+nY*nZ+nZ+1]) * convFactor;
                     grid[7] = parseFloat(lines[offset+nZ+1]) * convFactor;
+                    */
+                   
+                    for (var p = 0; p < 8; p++) {
+                        var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
+                                        * nZ + k + (p & 1);
+                        grid[p] = parseFloat(lines[index]) * convFactor;
+                    }
                     
                     var bit = 0;
                     
@@ -301,26 +310,26 @@ WebMol.glmolViewer = (function() {
                     //1 to 2
                     if (edgeIdx & 2) {
                         p1.addVectors(cube[1], xV).add(yV).add(zV);                        
-                        p2.addVectors(cube[2], xV).add(yV).add(zV);
+                        p2.addVectors(cube[3], xV).add(yV).add(zV);
                         v1 = grid[1];
-                        v2 = grid[2];
+                        v2 = grid[3];
                         idx = index+1;
                         intersects[1] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //2 to 3
                     if (edgeIdx & 4) {
-                        p1.addVectors(cube[2], xV).add(yV).add(zV);                        
-                        p2.addVectors(cube[3], xV).add(yV).add(zV);
-                        v1 = grid[2];
-                        v2 = grid[3];
+                        p1.addVectors(cube[3], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[2], xV).add(yV).add(zV);
+                        v1 = grid[3];
+                        v2 = grid[2];
                         idx = index+2;
                         intersects[2] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //3 to 0
                     if (edgeIdx & 8) {
-                        p1.addVectors(cube[3], xV).add(yV).add(zV);                        
+                        p1.addVectors(cube[2], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[0], xV).add(yV).add(zV);
-                        v1 = grid[3];
+                        v1 = grid[2];
                         v2 = grid[0];
                         idx = index+3;
                         intersects[3] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
@@ -337,26 +346,26 @@ WebMol.glmolViewer = (function() {
                     //5 to 6
                     if (edgeIdx & 32) {
                         p1.addVectors(cube[5], xV).add(yV).add(zV);                        
-                        p2.addVectors(cube[6], xV).add(yV).add(zV);
+                        p2.addVectors(cube[7], xV).add(yV).add(zV);
                         v1 = grid[5];
-                        v2 = grid[6];
+                        v2 = grid[7];
                         idx = index+5;
                         intersects[5] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //6 to 7
                     if (edgeIdx & 64) {
-                        p1.addVectors(cube[6], xV).add(yV).add(zV);                        
-                        p2.addVectors(cube[7], xV).add(yV).add(zV);
-                        v1 = grid[6];
-                        v2 = grid[7];
+                        p1.addVectors(cube[7], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[6], xV).add(yV).add(zV);
+                        v1 = grid[7];
+                        v2 = grid[6];
                         idx = index+6;
                         intersects[6] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //7 to 4
                     if (edgeIdx & 128) {
-                        p1.addVectors(cube[7], xV).add(yV).add(zV);                        
+                        p1.addVectors(cube[6], xV).add(yV).add(zV);                        
                         p2.addVectors(cube[4], xV).add(yV).add(zV);
-                        v1 = grid[7];
+                        v1 = grid[6];
                         v2 = grid[4];
                         idx = index+7;
                         intersects[7] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
@@ -381,19 +390,19 @@ WebMol.glmolViewer = (function() {
                     }  
                     //2 to 6
                     if (edgeIdx & 1024) {
-                        p1.addVectors(cube[2], xV).add(yV).add(zV);                        
-                        p2.addVectors(cube[6], xV).add(yV).add(zV);
-                        v1 = grid[2];
-                        v2 = grid[6];
+                        p1.addVectors(cube[3], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[7], xV).add(yV).add(zV);
+                        v1 = grid[3];
+                        v2 = grid[7];
                         idx = index+10;
                         intersects[10] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
                     //3 to 7
                     if (edgeIdx & 2048) {
-                        p1.addVectors(cube[3], xV).add(yV).add(zV);                        
-                        p2.addVectors(cube[7], xV).add(yV).add(zV);
-                        v1 = grid[3];
-                        v2 = grid[7];
+                        p1.addVectors(cube[2], xV).add(yV).add(zV);                        
+                        p2.addVectors(cube[6], xV).add(yV).add(zV);
+                        v1 = grid[2];
+                        v2 = grid[6];
                         idx = index+11;
                         intersects[11] = linearInterpolate(p1,p2,v1,v2,isoval,idx,vertnums,verts,norms);
                     }
