@@ -158,6 +158,10 @@ WebMol.glmolViewer = (function() {
                 [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
     };
     
+    var zSort = function(a, b) {
+        return a.z < b.z;
+    };
+    
     //Read a cube file - generate model and possibly shape(s)
     var parseCube = function(str, viewer) {
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
@@ -463,7 +467,8 @@ WebMol.glmolViewer = (function() {
             var shape = viewer.addShape({
                 wireframe : false,
                 color : color,
-                alpha : 0.75
+                alpha : 0.8,
+                side : WebMol.FrontSide
             });
             
             
@@ -1686,7 +1691,7 @@ WebMol.glmolViewer = (function() {
                 };
             }
 
-            var sync = true;
+            var sync = false;
             var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 

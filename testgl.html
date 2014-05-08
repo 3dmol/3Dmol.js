@@ -110,14 +110,14 @@
         $(document).ready(function() {
             
             
-            $.get("test_structs/benzene-homo.cube", function(data){
+            $.get("test_structs/2AA1.pdb", function(data){
                 
-                //data = moldata = $("#moldata_sdf_small").val();
+                data = moldata = $("#moldata_pdb").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
                     
-                    m = viewer.addModel(data, "cube");
+                    m = viewer.addModel(data, "pdb");
                     atoms = m.selectedAtoms({ });
                     //atoms = [];
                     for (a in atoms) {

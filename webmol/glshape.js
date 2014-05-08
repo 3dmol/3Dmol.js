@@ -537,6 +537,7 @@ WebMol.GLShape = (function() {
         this.color = stylespec.color || new WebMol.Color();
         this.wireframe = stylespec.wireframe ? true : false;
         this.alpha = stylespec.alpha ? WebMol.Math.clamp(stylespec.alpha, 0.0, 1.0) : 1.0;
+        this.side = WebMol.DoubleSide;
         
         this.boundingSphere = new WebMol.Sphere();
         
@@ -640,7 +641,7 @@ WebMol.GLShape = (function() {
                 vertexColors : true,
                 ambient : 0x000000,
                 reflectivity : 0,
-                side : WebMol.DoubleSide,
+                side : this.side,
                 transparent : (this.alpha < 1) ? true : false,
                 opacity : this.alpha
             });
