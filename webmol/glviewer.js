@@ -420,7 +420,7 @@ WebMol.glmolViewer = (function() {
                             var trioffset = itri*3;
                             
                             var a = intersects[triangles[trioffset]];                        
-                            var b = intersects[triangles[trioffset + 2]], c = intersects[triangles[trioffset + 1]];
+                            var b = intersects[triangles[trioffset + 1]], c = intersects[triangles[trioffset + 2]];
                             
                             var vA = verts[a], vB = verts[b], vC = verts[c];
                             //var normA = norms[a], normB = norms[b], normC = norms[c];
@@ -467,7 +467,7 @@ WebMol.glmolViewer = (function() {
             var shape = viewer.addShape({
                 wireframe : false,
                 color : color,
-                alpha : 0.8,
+                alpha : 0.85,
                 side : WebMol.FrontSide
             });
             
@@ -1253,6 +1253,7 @@ WebMol.glmolViewer = (function() {
             var m = new WebMol.GLModel(models.length, defaultcolors);
             if (format === "cube") {
                 data = parseCube(data, this);
+                //return;
             }
             m.addMolData(data, format);
             models.push(m);
@@ -1757,6 +1758,7 @@ WebMol.glmolViewer = (function() {
         this.setSurfaceMaterialStyle = function(surf, style) {
             if (surfaces[surf]) {
                 surfaces[surf].mat = getMatWithStyle(style);
+                surfaces[surf].mat.side = WebMol.FrontSide;
                 surfaces[surf].finished = false; //trigger redraw
             }
         };

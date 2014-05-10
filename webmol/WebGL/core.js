@@ -286,10 +286,10 @@ WebMol.Geometry = (function() {
             
             vA.subVectors(vA, vB);
             vC.subVectors(vC, vB);
-            vA.cross(vC);
+            vC.cross(vA);
             
             //face normal
-            norm = vA;
+            norm = vC;
             norm.normalize();
             
             norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;

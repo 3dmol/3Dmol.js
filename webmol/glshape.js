@@ -537,7 +537,7 @@ WebMol.GLShape = (function() {
         this.color = stylespec.color || new WebMol.Color();
         this.wireframe = stylespec.wireframe ? true : false;
         this.alpha = stylespec.alpha ? WebMol.Math.clamp(stylespec.alpha, 0.0, 1.0) : 1.0;
-        this.side = WebMol.DoubleSide;
+        this.side = (stylespec.side !== undefined) ? stylespec.side : WebMol.DoubleSide;
         
         this.boundingSphere = new WebMol.Sphere();
         

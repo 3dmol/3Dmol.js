@@ -110,7 +110,7 @@
         $(document).ready(function() {
             
             
-            $.get("test_structs/2AA1.pdb", function(data){
+            //$.get("test_structs/benzene-homo.cube", function(data){
                 
                 data = moldata = $("#moldata_pdb").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
@@ -118,8 +118,8 @@
                     viewer.setBackgroundColor(0xffffff);
                     
                     m = viewer.addModel(data, "pdb");
-                    atoms = m.selectedAtoms({ });
-                    //atoms = [];
+                    //atoms = m.selectedAtoms({ });
+                    atoms = [];
                     for (a in atoms) {
                         atoms[a].clickable = true;
                         atoms[a].callback = atomcallback;
@@ -147,7 +147,7 @@
             }, "text");   
            
 
-        });
+        //});
         
         </script>
     </head>
@@ -165,7 +165,7 @@
         <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1);"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2);"></input>
-        <input type="button" value="T" onclick="glviewer.setSurfaceMaterialStyle(surf1,{ opacity: .5}); glviewer.render();"></input>
+        <input type="button" value="T" onclick="glviewer.setSurfaceMaterialStyle(surf1,{ opacity: .65}); glviewer.render();"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
                 <br>

@@ -851,8 +851,9 @@ WebMol.Renderer = function ( parameters ) {
 
                 if (updateBuffers)
                     _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
-                    
-                _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );                       
+                
+                _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );
+                
             }
 
 
@@ -1001,6 +1002,9 @@ WebMol.Renderer = function ( parameters ) {
         this.setBlending( WebMol.NoBlending );
 
         renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
+        
+        //prime depth buffer
+        renderObjects( scene.__webglObjects, true, "blank", camera, lights, fog, true, material );
 
         // transparent pass (back-to-front order)
 
@@ -1247,6 +1251,9 @@ WebMol.Renderer = function ( parameters ) {
         if ( material.transparent) {                    
             globject.opaque = null;
             globject.transparent = material;
+            var blankMaterial = material.clone();
+            blankMaterial.opacity = 0;
+            globject.blank = blankMaterial;
         }
 
         else {
