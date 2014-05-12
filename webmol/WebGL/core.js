@@ -286,10 +286,10 @@ WebMol.Geometry = (function() {
             
             vA.subVectors(vA, vB);
             vC.subVectors(vC, vB);
-            vA.cross(vC);
+            vC.cross(vA);
             
             //face normal
-            norm = vA;
+            norm = vC;
             norm.normalize();
             
             norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
@@ -314,7 +314,7 @@ WebMol.Geometry = (function() {
         this.lineidx = this.faceidx*2;         
         var faceoffset;
             
-        for (var i = 0; i < this.faceidx; ++i) {
+        for (var i = 0; i < this.faceidx / 3; ++i) {
             
             faceoffset = i*3, lineoffset = faceoffset*2;          
             var a = faceArr[faceoffset], b = faceArr[faceoffset+1], c = faceArr[faceoffset+2];

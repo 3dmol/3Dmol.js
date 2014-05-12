@@ -218,33 +218,33 @@ WebMol.Renderer = function ( parameters ) {
 
             if ( _oldDoubleSided !== doubleSided ) {
 
-                    if ( doubleSided ) {
+                if ( doubleSided ) {
 
-                            _gl.disable( _gl.CULL_FACE );
+                    _gl.disable( _gl.CULL_FACE );
 
-                    } else {
+                } else {
 
-                            _gl.enable( _gl.CULL_FACE );
+                    _gl.enable( _gl.CULL_FACE );
 
-                    }
+                }
 
-                    _oldDoubleSided = doubleSided;
+                _oldDoubleSided = doubleSided;
 
             }
 
             if ( _oldFlipSided !== flipSided ) {
 
-                    if ( flipSided ) {
+                if ( flipSided ) {
 
-                            _gl.frontFace( _gl.CW );
+                    _gl.frontFace( _gl.CW );
 
-                    } else {
+                } else {
 
-                            _gl.frontFace( _gl.CCW );
+                    _gl.frontFace( _gl.CCW );
 
-                    }
+                }
 
-                    _oldFlipSided = flipSided;
+                _oldFlipSided = flipSided;
 
             }    
 
@@ -254,17 +254,17 @@ WebMol.Renderer = function ( parameters ) {
 
             if ( _oldDepthTest !== depthTest ) {
 
-                    if ( depthTest ) {
+                if ( depthTest ) {
 
-                            _gl.enable( _gl.DEPTH_TEST );
+                    _gl.enable( _gl.DEPTH_TEST );
 
-                    } else {
+                } else {
 
-                            _gl.disable( _gl.DEPTH_TEST );
+                    _gl.disable( _gl.DEPTH_TEST );
 
-                    }
+                }
 
-                    _oldDepthTest = depthTest;
+                _oldDepthTest = depthTest;
 
             }
 
@@ -851,8 +851,9 @@ WebMol.Renderer = function ( parameters ) {
 
                 if (updateBuffers)
                     _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
-                    
-                _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );                       
+                
+                _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );
+                
             }
 
 
@@ -1001,6 +1002,9 @@ WebMol.Renderer = function ( parameters ) {
         this.setBlending( WebMol.NoBlending );
 
         renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
+        
+        //prime depth buffer
+        renderObjects( scene.__webglObjects, true, "blank", camera, lights, fog, true, material );
 
         // transparent pass (back-to-front order)
 
@@ -1116,8 +1120,8 @@ WebMol.Renderer = function ( parameters ) {
 
             if (object.geometry !== undefined && object.geometry.__webglInit === undefined) {
 
-                    object.geometry.__webglInit = true;
-                    object.geometry.addEventListener('dispose', onGeometryDispose);
+                object.geometry.__webglInit = true;
+                object.geometry.addEventListener('dispose', onGeometryDispose);
 
             }
             
@@ -1135,17 +1139,17 @@ WebMol.Renderer = function ( parameters ) {
 
                     if ( !geometryGroup.__webglVertexBuffer ) {
                             
-                            if (object instanceof WebMol.Mesh) {
-                                createMeshBuffers(geometryGroup);
-                                geometry.elementsNeedUpdate = true;
-                                geometry.normalsNeedUpdate = true;
-                            }
-                                
-                            else if (object instanceof WebMol.Line)
-                                createLineBuffers(geometryGroup);
+                        if (object instanceof WebMol.Mesh) {
+                            createMeshBuffers(geometryGroup);
+                            geometry.elementsNeedUpdate = true;
+                            geometry.normalsNeedUpdate = true;
+                        }
+                            
+                        else if (object instanceof WebMol.Line)
+                            createLineBuffers(geometryGroup);
 
-                            geometry.verticesNeedUpdate = true;
-                            geometry.colorsNeedUpdate = true;
+                        geometry.verticesNeedUpdate = true;
+                        geometry.colorsNeedUpdate = true;
 
                     }
                         
@@ -1162,9 +1166,9 @@ WebMol.Renderer = function ( parameters ) {
                 geometry = object.geometry;
 
                 for ( g in geometry.geometryGroups ) {
-                        geometryGroup = geometry.geometryGroups[g];
+                    geometryGroup = geometry.geometryGroups[g];
 
-                        addBuffer(scene.__webglObjects, geometryGroup, object);
+                    addBuffer(scene.__webglObjects, geometryGroup, object);
                 }
                 
             }
@@ -1247,6 +1251,9 @@ WebMol.Renderer = function ( parameters ) {
         if ( material.transparent) {                    
             globject.opaque = null;
             globject.transparent = material;
+            var blankMaterial = material.clone();
+            blankMaterial.opacity = 0;
+            globject.blank = blankMaterial;
         }
 
         else {
@@ -1271,7 +1278,7 @@ WebMol.Renderer = function ( parameters ) {
               
         
         //normal buffers
-        if (geometryGroup.__normalArray !== undefined) {
+        if (geometryGroup.__normalArray !== undefined && geometryGroup.__webglNormalBuffer !== undefined) {
             var normalArray = geometryGroup.__normalArray;
             _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
             _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );       
@@ -1279,7 +1286,7 @@ WebMol.Renderer = function ( parameters ) {
         }
         
         //face (index) buffers
-        if (geometryGroup.__faceArray !== undefined) {
+        if (geometryGroup.__faceArray !== undefined && geometryGroup.__webglFaceBuffer !== undefined) {
             var faceArray = geometryGroup.__faceArray;
             _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
             _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );  
@@ -1287,7 +1294,7 @@ WebMol.Renderer = function ( parameters ) {
         }
         
         //line (index) buffers (for wireframe)
-        if (geometryGroup.__lineArray !== undefined) {
+        if (geometryGroup.__lineArray !== undefined && geometryGroup.__webglLineBuffer !== undefined) {
             var lineArray = geometryGroup.__lineArray;            
             _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
             _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );

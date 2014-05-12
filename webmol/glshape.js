@@ -481,8 +481,17 @@ WebMol.GLShape = (function() {
         
         if (normalArr.length < geoGroup.vertices)
             geoGroup.setNormals();
-        else
-            geoGroup.__normalArray = new Float32Array(normalArr);
+        else {
+            
+            geoGroup.__normalArray = new Float32Array(geoGroup.vertices*3);
+            var n;
+            for (var i = 0; i < geoGroup.vertices; ++i) {
+                offset = i*3;
+                n = normalArr[i];
+                geoGroup.__normalArray[offset] = n.x, geoGroup.__normalArray[offset+1] = n.y, geoGroup.__normalArray[offset+2] = n.z;
+            }
+        }
+            
         
         if (! lineArr.length)
             geoGroup.setLineIndices(); 
@@ -528,6 +537,7 @@ WebMol.GLShape = (function() {
         this.color = stylespec.color || new WebMol.Color();
         this.wireframe = stylespec.wireframe ? true : false;
         this.alpha = stylespec.alpha ? WebMol.Math.clamp(stylespec.alpha, 0.0, 1.0) : 1.0;
+        this.side = (stylespec.side !== undefined) ? stylespec.side : WebMol.DoubleSide;
         
         this.boundingSphere = new WebMol.Sphere();
         
@@ -552,7 +562,7 @@ WebMol.GLShape = (function() {
             
             //Force creation of new geometryGroup for each added component
             var geoGroup = geo.addGeoGroup();
-            drawCustom(shape, geoGroup, customSpec);            
+            drawCustom(this, geoGroup, customSpec);            
             geoGroup.truncateArrayBuffers(true);
     
             for (var i = 0; i < geoGroup.__colorArray.length / 3; ++i) {
@@ -577,7 +587,7 @@ WebMol.GLShape = (function() {
             sphereSpec.radius = sphereSpec.radius ? WebMol.Math.clamp(sphereSpec.radius, 0, Infinity) : 1.5;
             
             var geoGroup = geo.addGeoGroup();
-            drawSphere(shape, geoGroup, sphereSpec);
+            drawSphere(this, geoGroup, sphereSpec);
             geoGroup.truncateArrayBuffers(true);            
             
             components.push({
@@ -603,7 +613,7 @@ WebMol.GLShape = (function() {
             
             var geoGroup = geo.addGeoGroup();
             
-            drawArrow(shape, geoGroup, arrowSpec);
+            drawArrow(this, geoGroup, arrowSpec);
             geoGroup.truncateArrayBuffers(true);
             
             var centroid = new WebMol.Vector3();
@@ -631,7 +641,9 @@ WebMol.GLShape = (function() {
                 vertexColors : true,
                 ambient : 0x000000,
                 reflectivity : 0,
-                side : WebMol.DoubleSide
+                side : this.side,
+                transparent : (this.alpha < 1) ? true : false,
+                opacity : this.alpha
             });
             
             var mesh = new WebMol.Mesh(geo, material);

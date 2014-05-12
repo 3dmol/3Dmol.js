@@ -96,7 +96,7 @@ WebMol.drawCartoon = (function() {
             }            
            
             if (i > 0) {
-                var faces = [offset, offset - 2, offset - 1, offset + 1];
+                var faces = [offset, offset + 1, offset - 1, offset - 2];
                 var faceoffset = geoGroup.faceidx;
                 
                 geoGroup.__faceArray[faceoffset] = faces[0]; geoGroup.__faceArray[faceoffset+1] = faces[1]; geoGroup.__faceArray[faceoffset+2] = faces[3];
@@ -133,7 +133,7 @@ WebMol.drawCartoon = (function() {
                 var vs = [], fs = [];
         var axis, p1v, p2v, a1v, a2v;
         
-        var faces = [ [ 0, -8, -6, 2 ], [ -4, 4, 6, -2 ], [ 7, -1, -5, 3 ],
+        var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, -1, -5, 3 ],
                 [ -3, 5, 1, -7 ] ];
                 
         var offset, vertoffset, faceoffset;
