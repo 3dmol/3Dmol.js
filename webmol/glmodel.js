@@ -287,18 +287,30 @@ WebMol.GLModel = (function() {
     };
     
     var parseCube = function(atoms, str) {
+        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
-        var lines = str.split("\n");
-        var convFactor = parseFloat(lines[0].replace(/^\s+/, "").replace(/\s+/g, " ").split(
-                                                 " ")[0]); 
+        if (lines.length < 6)
+            return;
+            
+        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");       
+          
+        var natoms = Math.abs(parseFloat(lineArr[0]));        
+        
+        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        //might have to convert from bohr units to angstroms
+        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
+        
+        //Extract atom portion; send to new GLModel...
+        lines = lines.splice(6, natoms);
        
         var start = atoms.length;
-        var end = start + lines.length - 1;
+        var end = start + lines.length;
         
         for (var i = start; i < end; ++i) {
             var atom = {};
             atom.serial = i;
-            var line = lines[i - start + 1];
+            var line = lines[i - start];
             var tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
                     " ");
             
@@ -643,7 +655,6 @@ WebMol.GLModel = (function() {
         var starttime = (new Date()).getTime();
         //computeSecondaryStructure(atoms);
         console.log("secondary structure " + ((new Date()).getTime() - starttime));
-
         
         // Assign secondary structures from pdb file
         for (i = start; i < atoms.length; i++) {

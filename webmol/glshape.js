@@ -531,9 +531,11 @@ WebMol.GLShape = (function() {
     };
     
 
-    var GLShape = function(stylespec) {
-    
-        this.id = WebMol.ShapeIDCount++;
+    var GLShape = function(sid, stylespec) {
+        
+        stylespec = stylespec || {};
+        WebMol.ShapeIDCount++;
+        this.id = sid || WebMol.ShapeIDCount;
         this.color = stylespec.color || new WebMol.Color();
         this.wireframe = stylespec.wireframe ? true : false;
         this.alpha = stylespec.alpha ? WebMol.Math.clamp(stylespec.alpha, 0.0, 1.0) : 1.0;
@@ -624,11 +626,23 @@ WebMol.GLShape = (function() {
             });
             
             updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
+                            
+        };
+        
+        this.addVolumetricData = function(str, fmt, isoval, vxl) {
+            isoval = (typeof(isoval) === "number") ? isoval : 0.0;
+            vxl = (vxl) ? true : false;
             
-                
+            switch(fmt) {
+                case "cube":
+                    parseCube(data);
+                    break;
+            }              
+            
         };
     
-        //TODO: Adding multiple overlapping shapes in wireframe mode should obscure overlapped meshes
+        //TODO: Adding multiple overlapping shapes in wireframe mode should obscure overlapped meshes ...
+        //         (i.e. generate a new isosurface ... ?)
         this.globj = function(group) {
             
             geo.initTypedArrays();

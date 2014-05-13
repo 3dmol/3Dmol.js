@@ -467,7 +467,7 @@ WebMol.glmolViewer = (function() {
             var shape = viewer.addShape({
                 wireframe : false,
                 color : color,
-                alpha : 0.85,
+                alpha : 0.95,
                 side : WebMol.FrontSide
             });
             
@@ -1224,39 +1224,59 @@ WebMol.glmolViewer = (function() {
         //Add generic GLShape to viewer
         this.addShape = function(shapeSpec) {
             shapeSpec = shapeSpec || {};
-            var shape = new WebMol.GLShape(shapeSpec);
+            var shape = new WebMol.GLShape(shapes.length, shapeSpec);
             shapes.push(shape);
             
             return shape;
               
         };
         
-        this.addSphere = function(shape, spec) {
+        this.addSphere = function(spec) {
+            var s = new WebMol.GLShape(shapes.length);
             spec = spec || {};
-            shape.addSphere(spec);      
+            s.addSphere(spec);      
+            shapes.push(s);
+            
+            return s;
         };
         
-        this.addArrow = function(shape, spec) {
+        this.addArrow = function(spec) {            
+            var s = new WebMol.GLShape(shapes.length);            
             spec = spec || {};
-            shape.addArrow(spec);
+            s.addArrow(spec);
+            shapes.push(s);
+            
+            return s;
         };
         
         //Add custom shape component from user supplied function
-        this.addCustom = function(shape, spec) {                            
+        this.addCustom = function(spec) {   
+            var s = new WebMol.GLShape(shapes.length);                         
             spec = spec || {};
-            shape.addCustom(spec);                            
+            s.addCustom(spec);     
+            shapes.push(s);
+            
+            return s;                       
+        };
+        
+        // Construct isosurface from volumetric data
+        // - so far only supports gaussian cube format
+        // Can optionally render as blocky voxel image
+        this.addVolumetric = function(data, format, isoval, voxel) {
+            var s = new WebMol.GLShape(shapes.length);
+            s.addVolumetricData(data, format, isoval, voxel);     
+            shapes.push(s);
+            
+            return s;       
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)
         // create a model and add it, returning the model identifier
         this.addModel = function(data, format) {
             var m = new WebMol.GLModel(models.length, defaultcolors);
-            if (format === "cube") {
-                data = parseCube(data, this);
-                //return;
-            }
             m.addMolData(data, format);
             models.push(m);
+            
             return m;
         };
 
