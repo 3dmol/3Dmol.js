@@ -41,7 +41,16 @@
         var moldata = "";
         var l = null;
         var modelgroup = null;
-        var molObj = null; //Object3D for each rendered model        
+        var molObj = null; //Object3D for each rendered model      
+        var lastsurfstyle = 1;
+        
+        var toggleSurfTrans = function(surf) {
+            
+            var opacity = (lastsurfstyle) ? 0.75 : 1;
+            glviewer.setSurfaceMaterialStyle(surf,{ opacity: opacity}); 
+            glviewer.render();
+            lastsurfstyle = !(lastsurfstyle);
+        };  
         
         var addLabels = function() {
             var atoms = glviewer.getModel(0).selectedAtoms({});
@@ -112,12 +121,12 @@
             
             $.get("test_structs/benzene.sdf", function(data){
                 
-                //data = moldata = $("#moldata_pdb").val();
+                data = moldata = $("#moldata_pdb").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
                     
-                    m = viewer.addModel(data, "sdf");
+                    m = viewer.addModel(data, "pdb");
                     atoms = m.selectedAtoms({ });
                     //atoms = [];
                     for (a in atoms) {
@@ -126,7 +135,7 @@
                     }                    
                     
                     //viewer.addArrow(shape);
-                    
+                    /*
                     shape = viewer.addSphere();
                     shape.color.set(0xAB5CF2);
                     shape.wireframe = true;
@@ -134,7 +143,8 @@
                     shape.callback = shapecallback;
                     
                     viewer.addArrow();
-                    
+                    */
+                   
                     modelgroup = viewer.getModelGroup();
                     
                     viewer.zoomTo();
@@ -161,15 +171,15 @@
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({},{cartoon:{color:0x0000ff}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
-        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A'}, {chain:'A'},{chain:'B'});"></input>
+        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A',hetflag:false},{chain:'A',hetflag:false},{chain:'B'});"></input>
         <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1);"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2);"></input>
-        <input type="button" value="T" onclick="glviewer.setSurfaceMaterialStyle(surf1,{ opacity: .65}); glviewer.render();"></input>
+        <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
                 <br>
-        <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); WebMol.download('pdb:' + $('#pdbid').val(), glviewer); glviewer.render();">Download</button><br>
+        <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = WebMol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
  
  
 <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_download"></textarea>

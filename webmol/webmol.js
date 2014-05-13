@@ -49,6 +49,7 @@ var WebMol = (function() {
     my.download = function(query, viewer) {
            var baseURL = '';
            var type = "";
+           var m = null;
            if (query.substr(0, 4) === 'pdb:') {
                    type = "pdb";
               query = query.substr(4).toUpperCase();
@@ -69,8 +70,10 @@ var WebMol = (function() {
            $.get(uri, function(ret) {
               viewer.addModel(ret, type);
               viewer.zoomTo();
-              viewer.render();
+              viewer.render();                            
            });
+           
+           return m;
     };
     return my;
 })();

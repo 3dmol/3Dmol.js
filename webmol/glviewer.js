@@ -1619,7 +1619,7 @@ WebMol.glmolViewer = (function() {
         }
 
         // add a surface
-        this.addSurface = function(type, style, atomsel, allsel, focus) {
+        this.addSurface = function(type, style, atomsel, allsel, focus, sync) {
             // type 1: VDW 3: SAS 4: MS 2: SES
             // if sync is true, does all work in main thread, otherwise uses
             // workers
@@ -1712,7 +1712,7 @@ WebMol.glmolViewer = (function() {
                 };
             }
 
-            var sync = false;
+            var sync = !!(sync);
             var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 
