@@ -471,8 +471,8 @@ WebMol.GLShape = (function() {
         for (var i = 0; i < geoGroup.faceidx / 3; ++i) {
             offset = i*3;
             a = faceArr[offset], b = faceArr[offset+1], c = faceArr[offset+2];
-            
-            shape.intersectionShape.triangle.push( new WebMol.Triangle(vertexArr[a].clone(), vertexArr[b].clone(), vertexArr[c].clone()) );
+            var vA = new WebMol.Vector3(), vB = new WebMol.Vector3(), vC = new WebMol.Vector3();
+            shape.intersectionShape.triangle.push( new WebMol.Triangle( vA.copy(vertexArr[a]), vB.copy(vertexArr[b]), vC.copy(vertexArr[c]) ) );
         }
                   
         geoGroup.__faceArray = new Uint16Array(faceArr);

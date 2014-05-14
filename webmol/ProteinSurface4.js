@@ -31,7 +31,7 @@ if (typeof console === 'undefined') {
 	};
 }
 
-var ProteinSurface = (function() {
+var ProteinSurface = function() {
 	// constants for vpbits bitmasks
 	var INOUT = 1;
 	var ISDONE = 2;
@@ -289,7 +289,7 @@ var ProteinSurface = (function() {
 		if(volume > 1000000) //heuristical decrease resolution to avoid large memory consumption
 			scaleFactor = defaultScaleFactor/2;
 		
-		var margin = (1 / scaleFactor) * 5.5; // need margine to avoid
+		var margin = (1 / scaleFactor) * 5.5; // need margin to avoid
 												// boundary/round off effects
 		origextent = extent;
 		pminx = extent[0][0], pmaxx = extent[1][0];
@@ -968,7 +968,7 @@ var ProteinSurface = (function() {
 			}
 			str += "]";
 			console.log(str);
-		}
+		};
 
 		this.print = function() {
 
@@ -1092,4 +1092,4 @@ var ProteinSurface = (function() {
 		}
 	};
 
-});
+};

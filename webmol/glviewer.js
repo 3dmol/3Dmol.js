@@ -194,14 +194,11 @@ WebMol.glmolViewer = (function() {
         var nZ = Math.abs(lineArr[0]);
         var zVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
         
-        //Extract atom portion; send to new GLModel...
-        var atomStr = lines.splice(6, natoms).join("\n");
-        atomStr = convFactor + "\n" + atomStr;
+        //lines.splice(6, natoms).join("\n");
         
-        lines = lines.splice(7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/);
-        lines = new Float32Array(lines);
+        lines = new Float32Array(lines.splice(natoms+7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/));
         
-        var isoval = 0.005;
+        var isoval = 0.01;
         
         var cubepts = [
             origin.clone(), origin.clone().add(zVec),
@@ -213,7 +210,69 @@ WebMol.glmolViewer = (function() {
         
         //voxel values for current position
         var grid = new Float32Array(8);
+        //TODO: Need a good way to compute hard vertex normals for non-smoothed voxel (to get faceted look)
+        smooth = false;
+        // create (or retrieve) a vertex at the appropriate point for
+        // the edge (p1,p2)
+        var getVertex = function(i, j, k, code, p1, p2, vertnums, verts) {
+        
+            var pt = origin.clone();
+            var val1 = !!(code & (1 << p1));
+            var val2 = !!(code & (1 << p2));
+             
+            // p1 if they are the same or if !val1
+            var p = p1;
+            if (!val1 && val2)
+                p = p2;
+            
+            // adjust i,j,k by p
+            if (p & 1)
+                k++;
+            if (p & 2)
+                j++;
+            if (p & 4)
+                i++;
+
+            var xV = xVec.clone().multiplyScalar(i);
+            var yV = yVec.clone().multiplyScalar(j);
+            var zV = zVec.clone().multiplyScalar(k);   
+            pt.add(xV).add(yV).add(zV);
+    
+            var index = ((nY * i) + j) * nZ + k;
+            
+            if (smooth) {
+            
+                if (vertnums[index] < 0) // not created yet
+                {
+                    vertnums[index] = verts.length;
+                    verts.push( pt );
+                }
+                return vertnums[index];
+            
+            }
+            
+            else {
+                verts.push(pt);
+                return verts.length - 1;
+            }
+        };                
+        
+        var setUpData = function(data, isoval) {
+            
+            var retdata = new Float32Array(data);
+            
+            for (var i = 0; i < data.length; ++i) {
+            
+                retdata[i] -= isoval;
                 
+                if (isoval < 0)
+                    retdata[i] *= -1;
+                    
+            }  
+            
+            return retdata;
+            
+        };
         
         var p1 = new WebMol.Vector3(), p2 = new WebMol.Vector3();
 
@@ -222,8 +281,6 @@ WebMol.glmolViewer = (function() {
         for (var i = 0; i < vertnums.length; ++i)
             vertnums[i] = -1;
 
-        //TODO: Need a good way to compute hard vertex normals for non-smoothed voxel (to get facetted look)
-        smooth = true;
         
         //Also TODO:  vertnums must be signed (to initialize at -1) -> but this means we can't have more than
         // 32,768 vertices per geoGroup (rather than 65,536) - should probably enforce (or else use Int32Array for vertnums...)
@@ -231,6 +288,8 @@ WebMol.glmolViewer = (function() {
             
             if (neg)
                 isoval = -isoval;
+            
+            var bitdata = setUpData(lines, isoval);
             
             var verts = [], faces = [], norms = [];
             
@@ -242,38 +301,20 @@ WebMol.glmolViewer = (function() {
                         //unpack voxels for this cube
                         
                         offset = (i*nY*nZ) + (j*nZ) + k;
-                       
-                        for (var p = 0; p < 8; p++) {
-                            var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
-                                            * nZ + k + (p & 1);
-                            grid[p] = parseFloat(lines[index]) * convFactor;
-                        }
                         
                         var bit = 0;
                         
-                        if ((grid[0] > isoval && isoval >= 0) || (grid[0] < isoval && isoval < 0))
-                            bit |= 1;
-                        
-                        if ((grid[1] > isoval && isoval >= 0) || (grid[1] < isoval && isoval < 0))
-                            bit |= 2;
+                        for (var p = 0; p < 8; p++) {
+                            var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
+                                            * nZ + k + (p & 1);
+                                            
+                            //grid[p] = lines[index];
+                            //var val = (grid[p] > isoval && isoval >= 0) || (grid[p] < isoval && isoval < 0);
+
+                            var val = bitdata[index] > 0;
                             
-                        if ((grid[2] > isoval && isoval >= 0) || (grid[2] < isoval && isoval < 0))
-                            bit |= 4;
-                        
-                        if ((grid[3] > isoval && isoval >= 0) || (grid[3] < isoval && isoval < 0))
-                            bit |= 8;
-                        
-                        if ((grid[4] > isoval && isoval >= 0) || (grid[4] < isoval && isoval < 0))
-                            bit |= 16;
-                        
-                        if ((grid[5] > isoval && isoval >= 0) || (grid[5] < isoval && isoval < 0))
-                            bit |= 32;
-                        
-                        if ((grid[6] > isoval && isoval >= 0) || (grid[6] < isoval && isoval < 0))
-                            bit |= 64;
-                            
-                        if ((grid[7] > isoval && isoval >= 0) || (grid[7] < isoval && isoval < 0))
-                            bit |= 128;
+                            bit |= val << p;
+                        }
                         
                         if (bit == 0 || bit == 255) 
                             continue;
@@ -304,7 +345,8 @@ WebMol.glmolViewer = (function() {
                                           null, null, null, null];
                                     
                         var v1, v2, idx;
-                        var index = offset*12;      
+                        var index = offset*12;   
+                        /*   
                         //0 to 1
                         if (edgeIdx & 1) {
                             p1.addVectors(cubepts[0], xV).add(yV).add(zV);                        
@@ -413,7 +455,31 @@ WebMol.glmolViewer = (function() {
                             idx = index+11;
                             intersects[11] = linearInterpolate(i,j,k,cube,grid,2,6,verts,vertnums,bit,isoval,smooth);
                         }
-                        
+                        */
+                        if (edgeIdx & 1)
+                            intersects[0] = getVertex(i, j, k, bit, 0, 1, vertnums, verts);
+                        if (edgeIdx & 2)
+                            intersects[1] = getVertex(i, j, k, bit, 1, 3, vertnums, verts);
+                        if (edgeIdx & 4)
+                            intersects[2] = getVertex(i, j, k, bit, 3, 2, vertnums, verts);
+                        if (edgeIdx & 8)
+                            intersects[3] = getVertex(i, j, k, bit, 2, 0, vertnums, verts);
+                        if (edgeIdx & 16)
+                            intersects[4] = getVertex(i, j, k, bit, 4, 5, vertnums, verts);
+                        if (edgeIdx & 32)
+                            intersects[5] = getVertex(i, j, k, bit, 5, 7, vertnums, verts);
+                        if (edgeIdx & 64)
+                            intersects[6] = getVertex(i, j, k, bit, 7, 6, vertnums, verts);
+                        if (edgeIdx & 128)
+                            intersects[7] = getVertex(i, j, k, bit, 6, 4, vertnums, verts);
+                        if (edgeIdx & 256)
+                            intersects[8] = getVertex(i, j, k, bit, 0, 4, vertnums, verts);
+                        if (edgeIdx & 512)
+                            intersects[9] = getVertex(i, j, k, bit, 1, 5, vertnums, verts);
+                        if (edgeIdx & 1024)
+                            intersects[10] = getVertex(i, j, k, bit, 3, 7, vertnums, verts);
+                        if (edgeIdx & 2048)
+                            intersects[11] = getVertex(i, j, k, bit, 2, 6, vertnums, verts);                        
                         //add Vectors
                         
                         for (var itri = 0; itri < triangles.length / 3; ++itri) {
@@ -460,25 +526,22 @@ WebMol.glmolViewer = (function() {
             
     
             if (smooth) 
-                laplacianSmooth(1, verts, faces);
+                laplacianSmooth(10, verts, faces);
                 
             var color = neg ? new WebMol.Color(1,0,0) : new WebMol.Color(0,0,1);
             
-            var shape = viewer.addShape({
-                wireframe : false,
-                color : color,
-                alpha : 0.95,
-                side : WebMol.FrontSide
-            });
             
-            
-            viewer.addCustom(shape, {vertexArr:verts, 
-                                     faceArr:faces,
-                                     normalArr:[]});
+            var shape = viewer.addCustom({vertexArr:verts, 
+                                          faceArr:faces,
+                                          normalArr:[]});
+                                          
+            shape.color.copy(color);
+            //shape.alpha = 0.95;
+            //shape.wireframe = true;
                       
         }
 
-        return atomStr;  
+        return shape;  
                 
     };
     
@@ -1262,9 +1325,10 @@ WebMol.glmolViewer = (function() {
         // Construct isosurface from volumetric data
         // - so far only supports gaussian cube format
         // Can optionally render as blocky voxel image
-        this.addVolumetric = function(data, format, isoval, voxel) {
-            var s = new WebMol.GLShape(shapes.length);
-            s.addVolumetricData(data, format, isoval, voxel);     
+        this.addVolumetricData = function(data, format, isoval, voxel) {
+            //var s = new WebMol.GLShape(shapes.length);
+            //s.addVolumetricData(data, format, isoval, voxel);   
+            var s = parseCube(data, this);  
             shapes.push(s);
             
             return s;       
