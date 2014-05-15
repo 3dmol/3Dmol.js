@@ -100,6 +100,51 @@ var ProteinSurface = function() {
 		return true;
 	};
 
+    this.getFacesAndVertices2 = function(atomlist) {
+        var atomsToShow = new Object();
+        for ( var i = 0, lim = atomlist.length; i < lim; i++)
+            atomsToShow[atomlist[i]] = true;
+        var vertices = verts;
+        for (i = 0; i < vertices.length; i++) {
+            vertices[i].x = vertices[i].x / scaleFactor - ptranx;
+            vertices[i].y = vertices[i].y / scaleFactor - ptrany;
+            vertices[i].z = vertices[i].z / scaleFactor - ptranz;
+        }
+
+        var finalfaces = [];
+        for ( var i = 0; i < faces.length; i += 3) {
+            //var f = faces[i];
+            var fa = faces[i], fb = faces[i+1], fc = faces[i+2];
+            var a = vertices[fa].atomid, b = vertices[fb].atomid, c = vertices[fc].atomid;
+
+            // must be a unique face for each atom
+            var which = a;
+            if (b < which)
+                which = b;
+            if (c < which)
+                which = c;
+            if (!atomsToShow[which]) {
+                continue;
+            }
+            var av = vertices[faces[i]];
+            var bv = vertices[faces[i+1]];
+            var cv = vertices[faces[i+2]];
+
+            if (fa !== fb && fb !== fc && fa !== fc)
+                finalfaces.push(fa), finalfaces.push(fb), finalfaces.push(fc);
+        }
+
+        //try to help the garbage collector
+        vpBits = null; // uint8 array of bitmasks
+        vpDistance = null; // floatarray
+        vpAtomID = null; // intarray
+        
+        return {
+            vertices : vertices,
+            faces : finalfaces
+        };
+    };
+
 	this.getFacesAndVertices = function(atomlist) {
 		var atomsToShow = new Object();
 		for ( var i = 0, lim = atomlist.length; i < lim; i++)
@@ -992,6 +1037,25 @@ var ProteinSurface = function() {
 			console.log(JSON.stringify(newtable));
 			redoTable(newtable);
 		};
+	};
+	
+	this.marchingcube2 = function(stype) {
+        this.marchingcubeinit(stype);
+        verts = [], faces = [];   
+        WebMol.MarchingCube.march(vpBits, verts, faces, {
+            smooth : 1,
+            nX : pLength,
+            nY : pWidth,
+            nZ : pHeight        
+        });	     
+
+        for (i = 0, vlen = verts.length; i < vlen; i++) {
+            verts[i].atomid = vpAtomID[verts[i].x * pWidth * pHeight + pHeight
+                    * verts[i].y + verts[i].z];
+        }  
+
+        WebMol.MarchingCube.laplacianSmooth(1, verts, faces);
+        
 	};
 	// this is based off the code here:
 	// http://paulbourke.net/geometry/polygonise/

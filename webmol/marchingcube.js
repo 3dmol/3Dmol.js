@@ -11,15 +11,16 @@ WebMol.MarchingCube = (function() {
     // scale - cube diagonal unit vector scale (webmol vector) (specifying distance between data points); diagonal of cube
     // - default is 1 - assumes unit cube (1,1,1) diag)
     // fulltable - if true, use full marching cubes and tritables - else use trimmed table (e.g. surf render)
-    // smooth - apply n rounds of smoothing - blocky voxel type render if set to 0.  (default 1)
+    // voxel - if true, draws with a blocky voxel style (default false)
     // verts, faces - vertex and face arrays to fill up
     
-    var marchingcube = function(data, verts, faces, spec) {
-        
-                
-        var smooth = (spec.hasOwnProperty('smooth') && typeof(spec.smooth) === "number") ? parseInt(spec.smooth) : 1;
+    var my = {};
+    
+    my.march = function(data, verts, faces, spec) {
+
         var fulltable = !!(spec.fulltable);
         var origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
+        var voxel = !!(spec.voxel);
         
         var nX = spec.nX || 0;
         var nY = spec.nY || 0;
@@ -62,7 +63,8 @@ WebMol.MarchingCube = (function() {
     
             var index = ((nY * i) + j) * nZ + k;
             
-            if (smooth) {
+            //Have to add option to do voxels
+            if (!voxel) {
             
                 if (vertnums[index] < 0) // not created yet
                 {
@@ -98,8 +100,9 @@ WebMol.MarchingCube = (function() {
                         var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
                                         * nZ + k + (p & 1);
 
-                        var val = !!(data[index] & 2);
-                       
+                        //TODO: Need to fix vpBits in protein surface for this to work
+                        //var val = !!(data[index] & 2);
+                        var val = !!(data[index] > 0);   
                         
                         code |= val << p;                        
                     }
@@ -108,10 +111,11 @@ WebMol.MarchingCube = (function() {
                         continue;
                     
                     var ecode = etable[code];
-                    var ttable = tritable[code];
                     
                     if (ecode === 0)
                         continue;
+                        
+                    var ttable = tritable[code];                        
                     
                     if (ecode & 1)
                         intersects[0] = getVertex(i, j, k, code, 0, 1);
@@ -151,15 +155,13 @@ WebMol.MarchingCube = (function() {
             }
             
         }
-        
-        if (smooth > 0)
-            laplacianSmooth(smooth,verts,faces);                   
+             
         
     };
 
 
 
-    var laplacianSmooth = function(numiter, verts, faces) {
+    my.laplacianSmooth = function(numiter, verts, faces) {
             var tps = new Array(verts.length);
             for ( var i = 0; i < verts.length; i++)
                     tps[i] = {
@@ -596,7 +598,7 @@ WebMol.MarchingCube = (function() {
             [ 11, 3, 2, 0, 9, 1 ], [ 11, 0, 2, 11, 8, 0 ], [ 11, 3, 2 ],
             [ 8, 1, 3, 8, 9, 1 ], [ 9, 1, 0 ], [ 8, 0, 3 ], [] ];
             
-            return marchingcube;
+            return my;
 })();
 
 

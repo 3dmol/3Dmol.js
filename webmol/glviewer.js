@@ -199,20 +199,15 @@ WebMol.glmolViewer = (function() {
         lines = new Float32Array(lines.splice(natoms+7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/));
         
         var isoval = 0.01;
-        
-
-        
+                
         var setUpData = function(data, isoval) {
             
             var retdata = new Float32Array(data);
             
-            for (var i = 0; i < data.length; ++i) {
-            
-                retdata[i] -= isoval;
-                
+            for (var i = 0; i < data.length; ++i) {            
+                retdata[i] -= isoval;                
                 if (isoval < 0)
-                    retdata[i] *= -1;
-                    
+                    retdata[i] *= -1;                   
             }  
             
             return retdata;
@@ -220,9 +215,8 @@ WebMol.glmolViewer = (function() {
         };
         
         var p1 = new WebMol.Vector3(), p2 = new WebMol.Vector3();
-
-        var vertnums = new Int16Array(nX*nY*nZ);
         
+        var vertnums = new Int16Array(nX*nY*nZ);        
         for (var i = 0; i < vertnums.length; ++i)
             vertnums[i] = -1;
 
@@ -238,8 +232,7 @@ WebMol.glmolViewer = (function() {
             
             var verts = [], faces = [];
             
-            WebMol.MarchingCube(bitdata, verts, faces, {
-                smooth : 10,
+            WebMol.MarchingCube.march(bitdata, verts, faces, {
                 fulltable : true,
                 scale : xVec.length(),
                 origin : origin,
@@ -248,7 +241,8 @@ WebMol.glmolViewer = (function() {
                 nZ : nZ        
             });
             
- 
+            WebMol.MarchingCube.laplacianSmooth(10, verts, faces);
+            
             var color = neg ? new WebMol.Color(1,0,0) : new WebMol.Color(0,0,1);
             
             
@@ -904,9 +898,9 @@ WebMol.glmolViewer = (function() {
         this.addVolumetricData = function(data, format, isoval, voxel) {
             //var s = new WebMol.GLShape(shapes.length);
             //s.addVolumetricData(data, format, isoval, voxel);   
-            console.profile();
+            //console.profile();
             var s = parseCube(data, this); 
-            console.profileEnd();
+            //console.profileEnd();
             shapes.push(s);
             
             return s;       
@@ -1105,7 +1099,7 @@ WebMol.glmolViewer = (function() {
             }
                        
             var faces = VandF.faces;
-            geoGroup.faceidx = faces.length*3;
+            geoGroup.faceidx = faces.length;//*3;
             geo.initTypedArrays();
 
             // set colors for vertices
@@ -1125,10 +1119,11 @@ WebMol.glmolViewer = (function() {
             var faceoffset;
             
             //Setup colors, faces, and normals
-            for ( var i = 0; i < faces.length; i++) {
+            for ( var i = 0; i < faces.length; i+=3) {
                 
-                faceoffset = i*3;
-                var a = faces[i].a, b = faces[i].b, c = faces[i].c;
+                faceoffset = i;
+                //var a = faces[i].a, b = faces[i].b, c = faces[i].c;
+                var a = faces[i], b = faces[i+1], c = faces[i+2];
                 var A = v[a].atomid;
                 var B = v[b].atomid;
                 var C = v[c].atomid;
@@ -1164,7 +1159,7 @@ WebMol.glmolViewer = (function() {
                 geoGroup.__normalArray[offsetA+2] += norm.z, geoGroup.__normalArray[offsetB+2] += norm.z, geoGroup.__normalArray[offsetC+2] += norm.z;
                 
             }
-
+            geoGroup.__faceArray = new Uint16Array(faces);
             var mesh = new WebMol.Mesh(geo, mat);
             mesh.doubleSided = true;
 
@@ -1200,13 +1195,13 @@ WebMol.glmolViewer = (function() {
             console.log("buildboundaryetc " + (time4 - time3) + "  "
                     + (time4 - time) + "ms");
 
-            ps.marchingcube(type);
+            ps.marchingcube2(type);
 
             var time5 = new Date();
             console.log("marching cube " + (time5 - time4) + "  "
                     + (time5 - time) + "ms");
-            ps.laplaciansmooth(1);
-            return ps.getFacesAndVertices(atomsToShow);
+            //ps.laplaciansmooth(1);
+            return ps.getFacesAndVertices2(atomsToShow);
         };
 
         function getMatWithStyle(style) {
@@ -1359,14 +1354,14 @@ WebMol.glmolViewer = (function() {
             if (sync) { // don't use worker, still break up for memory purposes
 
                 for ( var i = 0; i < extents.length; i++) {
-                    console.profile();
+                    //console.profile();
                     var VandF = generateMeshSyncHelper(type, extents[i].extent,
                             extents[i].atoms, extents[i].toshow, reducedAtoms,
                             totalVol);
                     var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                     mergeGeos(surfobj.geo, mesh);
                     view.render();
-                    console.profileEnd();
+                    //console.profileEnd();
                 }
             //TODO: Asynchronously generate geometryGroups (not separate meshes) and merge them into a single geometry
             } else { // use worker
