@@ -4,67 +4,166 @@
 // (currently used by protein surface rendering and generic volumetric data reading)
 WebMol.MarchingCube = (function() {
     
+    //Marching cube algorithm - assume data has been pre-treated so isovalue is 0 
+    // (i.e. select points greater than 0)
+    //origin -  vector of origin of volumetric data (default is (0,0,0))
+    // nX, nY, nZ - specifies number of voxels in each dimension
+    // scale - cube diagonal unit vector scale (webmol vector) (specifying distance between data points); diagonal of cube
+    // - default is 1 - assumes unit cube (1,1,1) diag)
+    // fulltable - if true, use full marching cubes and tritables - else use trimmed table (e.g. surf render)
+    // smooth - apply n rounds of smoothing - blocky voxel type render if set to 0.  (default 1)
+    // verts, faces - vertex and face arrays to fill up
+    
+    var marchingcube = function(data, verts, faces, spec) {
+        
+                
+        var smooth = (spec.hasOwnProperty('smooth') && typeof(spec.smooth) === "number") ? parseInt(spec.smooth) : 1;
+        var fulltable = !!(spec.fulltable);
+        var origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
+        
+        var nX = spec.nX || 0;
+        var nY = spec.nY || 0;
+        var nZ = spec.nZ || 0;
+        
+        var scale = spec.scale || 1.0;
+        
+        var unitCube = new WebMol.Vector3(1,1,1).multiplyScalar(scale);
+        
+        //keep track of calculated vertices to avoid repeats
+        var vertnums = new Int16Array(nX*nY*nZ);
+        for (var i = 0; i < vertnums.length; ++i)
+            vertnums[i] = -1;
 
-    var MarchingCube = function(origin,nX,nY,nZ,vX,vY,vZ,smooth) {
+        // create (or retrieve) a vertex at the appropriate point for
+        // the edge (p1,p2)
+        var getVertex = function(i, j, k, code, p1, p2) {
         
-        smooth = !!(smooth);
-        isoval = (typeof(isoval) === "number") ? isoval : 0.0;
+            var pt = origin.clone();
+            var val1 = !!(code & (1 << p1));
+            var val2 = !!(code & (1 << p2));
+             
+            // p1 if they are the same or if !val1
+            var p = p1;
+            if (!val1 && val2)
+                p = p2;
+            
+            // adjust i,j,k by p
+            if (p & 1)
+                k++;
+            if (p & 2)
+                j++;
+            if (p & 4)
+                i++;
+    
+            pt.x += unitCube.x*i;
+            pt.y += unitCube.y*j;
+            pt.z += unitCube.z*k;
+    
+            var index = ((nY * i) + j) * nZ + k;
+            
+            if (smooth) {
+            
+                if (vertnums[index] < 0) // not created yet
+                {
+                    vertnums[index] = verts.length;
+                    verts.push( pt );
+                }
+                return vertnums[index];
+            
+            }
+            
+            else {
+                verts.push(pt);
+                return verts.length - 1;
+            }
+            
+        };
+            
+        var intersects = new Int16Array(12);
         
+        var etable = (fulltable) ? edgeTable2 : edgeTable;
+        var tritable = (fulltable) ? triTable2 : triTable;
+                
+        //Run marching cubes algorithm
+        for (var i = 0; i < nX-1; ++i) {
+            
+            for (var j = 0; j < nY-1; ++j){
+                
+                for (var k = 0; k < nZ-1; ++k){
+                    
+                    var code = 0;
+                    
+                    for (var p = 0; p < 8; ++p) {
+                        var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
+                                        * nZ + k + (p & 1);
+
+                        var val = data[index] > 0;
+                        
+                        code |= val << p;                        
+                    }
+                    
+                    if (code === 0 || code === 255)
+                        continue;
+                    
+                    var ecode = etable[code];
+                    var ttable = tritable[code];
+                    
+                    if (ecode === 0)
+                        continue;
+                    
+                    if (ecode & 1)
+                        intersects[0] = getVertex(i, j, k, code, 0, 1);
+                    if (ecode & 2)
+                        intersects[1] = getVertex(i, j, k, code, 1, 3);
+                    if (ecode & 4)
+                        intersects[2] = getVertex(i, j, k, code, 3, 2);
+                    if (ecode & 8)
+                        intersects[3] = getVertex(i, j, k, code, 2, 0);
+                    if (ecode & 16)
+                        intersects[4] = getVertex(i, j, k, code, 4, 5);
+                    if (ecode & 32)
+                        intersects[5] = getVertex(i, j, k, code, 5, 7);
+                    if (ecode & 64)
+                        intersects[6] = getVertex(i, j, k, code, 7, 6);
+                    if (ecode & 128)
+                        intersects[7] = getVertex(i, j, k, code, 6, 4);
+                    if (ecode & 256)
+                        intersects[8] = getVertex(i, j, k, code, 0, 4);
+                    if (ecode & 512)
+                        intersects[9] = getVertex(i, j, k, code, 1, 5);
+                    if (ecode & 1024)
+                        intersects[10] = getVertex(i, j, k, code, 3, 7);
+                    if (ecode & 2048)
+                        intersects[11] = getVertex(i, j, k, code, 2, 6);       
+                        
+                    for (var t = 0; t < ttable.length; t += 3) {
+                        var a = intersects[ttable[t]],
+                            b = intersects[ttable[t+1]],
+                            c = intersects[ttable[t+2]];
+                        
+                        faces.push(a), faces.push(b), faces.push(c);                               
+                    }              
+                    
+                }
+                
+            }
+            
+        }
+        
+        if (smooth > 0)
+            laplacianSmooth(smooth,verts,faces);                   
         
     };
 
-    // create (or retrieve) a vertex at the appropriate point for
-    // the edge (p1,p2)
-    var getVertex = function(i, j, k, code, p1, p2, vertnums, verts) {
-    
-        var pt = origin.clone();
-        var val1 = !!(code & (1 << p1));
-        var val2 = !!(code & (1 << p2));
-         
-        // p1 if they are the same or if !val1
-        var p = p1;
-        if (!val1 && val2)
-            p = p2;
-        
-        // adjust i,j,k by p
-        if (p & 1)
-            k++;
-        if (p & 2)
-            j++;
-        if (p & 4)
-            i++;
 
-        var xV = xVec.clone().multiplyScalar(i);
-        var yV = yVec.clone().multiplyScalar(j);
-        var zV = zVec.clone().multiplyScalar(k);   
-        pt.add(xV).add(yV).add(zV);
-
-        var index = ((nY * i) + j) * nZ + k;
-        
-        if (smooth) {
-        
-            if (vertnums[index] < 0) // not created yet
-            {
-                vertnums[index] = verts.length;
-                verts.push( pt );
-            }
-            return vertnums[index];
-        
-        }
-        
-        else {
-            verts.push(pt);
-            return verts.length - 1;
-        }
-    };   
 
     var laplacianSmooth = function(numiter, verts, faces) {
             var tps = new Array(verts.length);
             for ( var i = 0; i < verts.length; i++)
                     tps[i] = {
-                            x : 0,
-                            y : 0,
-                            z : 0
+                        x : 0,
+                        y : 0,
+                        z : 0
                     };
             var vertdeg = new Array(20);
             var flagvert;
@@ -73,75 +172,75 @@ WebMol.MarchingCube = (function() {
             for ( var i = 0; i < verts.length; i++)
                     vertdeg[0][i] = 0;
             for ( var i = 0; i < faces.length / 3; i++) {
-                    var aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
-                    flagvert = true;
-                    for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
-                            if (faces[boffset] == vertdeg[j + 1][faces[aoffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
+                var aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
+                flagvert = true;
+                for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
+                    if (faces[boffset] == vertdeg[j + 1][faces[aoffset]]) {
+                        flagvert = false;
+                        break;
                     }
-                    if (flagvert) {
-                            vertdeg[0][faces[aoffset]]++;
-                            vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[boffset];
+                }
+                if (flagvert) {
+                    vertdeg[0][faces[aoffset]]++;
+                    vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[boffset];
+                }
+                flagvert = true;
+                for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
+                    if (faces[coffset] == vertdeg[j + 1][faces[aoffset]]) {
+                        flagvert = false;
+                        break;
                     }
-                    flagvert = true;
-                    for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
-                            if (faces[coffset] == vertdeg[j + 1][faces[aoffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
+                }
+                if (flagvert) {
+                    vertdeg[0][faces[aoffset]]++;
+                    vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[coffset];
+                }
+                // b
+                flagvert = true;
+                for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
+                    if (faces[aoffset] == vertdeg[j + 1][faces[boffset]]) {
+                        flagvert = false;
+                        break;
                     }
-                    if (flagvert) {
-                            vertdeg[0][faces[aoffset]]++;
-                            vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[coffset];
+                }
+                if (flagvert) {
+                    vertdeg[0][faces[boffset]]++;
+                    vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[aoffset];
+                }
+                flagvert = true;
+                for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
+                    if (faces[coffset] == vertdeg[j + 1][faces[boffset]]) {
+                        flagvert = false;
+                        break;
                     }
-                    // b
-                    flagvert = true;
-                    for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
-                            if (faces[aoffset] == vertdeg[j + 1][faces[boffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
+                }
+                if (flagvert) {
+                    vertdeg[0][faces[boffset]]++;
+                    vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[coffset];
+                }
+                // c
+                flagvert = true;
+                for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
+                    if (faces[aoffset] == vertdeg[j + 1][faces[coffset]]) {
+                        flagvert = false;
+                        break;
                     }
-                    if (flagvert) {
-                            vertdeg[0][faces[boffset]]++;
-                            vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[aoffset];
+                }
+                if (flagvert) {
+                    vertdeg[0][faces[coffset]]++;
+                    vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[aoffset];
+                }
+                flagvert = true;
+                for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
+                    if (faces[boffset] == vertdeg[j + 1][faces[coffset]]) {
+                        flagvert = false;
+                        break;
                     }
-                    flagvert = true;
-                    for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
-                            if (faces[coffset] == vertdeg[j + 1][faces[boffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[boffset]]++;
-                            vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[coffset];
-                    }
-                    // c
-                    flagvert = true;
-                    for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
-                            if (faces[aoffset] == vertdeg[j + 1][faces[coffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[coffset]]++;
-                            vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[aoffset];
-                    }
-                    flagvert = true;
-                    for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
-                            if (faces[boffset] == vertdeg[j + 1][faces[coffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[coffset]]++;
-                            vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[boffset];
-                    }
+                }
+                if (flagvert) {
+                    vertdeg[0][faces[coffset]]++;
+                    vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[boffset];
+                }
             }
 
             var wt = 1.00;
@@ -495,7 +594,7 @@ WebMol.MarchingCube = (function() {
             [ 11, 3, 2, 0, 9, 1 ], [ 11, 0, 2, 11, 8, 0 ], [ 11, 3, 2 ],
             [ 8, 1, 3, 8, 9, 1 ], [ 9, 1, 0 ], [ 8, 0, 3 ], [] ];
             
-            return MarchingCube;
+            return marchingcube;
 })();
 
 

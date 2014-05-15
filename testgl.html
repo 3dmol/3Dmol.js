@@ -25,6 +25,7 @@
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/ProteinSurface4.js"></script>
         <script src="webmol/MarchingCubeData.js"></script>
+        <script src="webmol/marchingcube.js"></script>
         <script src="webmol/glviewer.js"></script>
         <script src="webmol/jmolviewer.js"></script>
         <script src="webmol/jmolmodel.js"></script>
@@ -160,7 +161,7 @@
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({},{cartoon:{color:0x0000ff}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
-        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A',hetflag:false},{chain:'A',hetflag:false},{chain:'B'},true);"></input>
+        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {hetflag:false},{hetflag:false},{chain:'B'},true);"></input>
         <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1);"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2);"></input>
