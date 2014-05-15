@@ -36,9 +36,10 @@ WebMol.MarchingCube = (function() {
 
         // create (or retrieve) a vertex at the appropriate point for
         // the edge (p1,p2)
-        var getVertex = function(i, j, k, code, p1, p2) {
         
-            var pt = origin.clone();
+        var getVertex = function(i, j, k, code, p1, p2) {
+            var pt = new WebMol.Vector3();
+            pt.copy(origin);
             var val1 = !!(code & (1 << p1));
             var val2 = !!(code & (1 << p2));
              
@@ -79,7 +80,7 @@ WebMol.MarchingCube = (function() {
             
         };
             
-        var intersects = new Int16Array(12);
+        var intersects = new Int32Array(12);
         
         var etable = (fulltable) ? edgeTable2 : edgeTable;
         var tritable = (fulltable) ? triTable2 : triTable;
@@ -97,7 +98,8 @@ WebMol.MarchingCube = (function() {
                         var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
                                         * nZ + k + (p & 1);
 
-                        var val = data[index] > 0;
+                        var val = !!(data[index] & 2);
+                       
                         
                         code |= val << p;                        
                     }

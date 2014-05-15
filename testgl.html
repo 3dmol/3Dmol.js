@@ -23,9 +23,9 @@
 	    <script src="webmol/glshape.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
-        <script src="webmol/ProteinSurface4.js"></script>
         <script src="webmol/MarchingCubeData.js"></script>
-        <script src="webmol/marchingcube.js"></script>
+        <script src="webmol/marchingcube.js"></script>        
+        <script src="webmol/ProteinSurface4.js"></script>
         <script src="webmol/glviewer.js"></script>
         <script src="webmol/jmolviewer.js"></script>
         <script src="webmol/jmolmodel.js"></script>
@@ -119,14 +119,14 @@
         
         $(document).ready(function() {
                         
-            $.get("test_structs/benzene-homo.cube", function(data){
+            $.get("test_structs/1YCR.pdb", function(data){
                 
                 var benzenedata = moldata = $("#moldata_benzene_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
                     
-                    m = viewer.addModel(benzenedata, "sdf");
+                    m = viewer.addModel(data, "pdb");
                     atoms = m.selectedAtoms({ });
                     //atoms = [];
                     for (a in atoms) {
@@ -136,7 +136,7 @@
                     
                     modelgroup = viewer.getModelGroup();
                     
-                    shape = viewer.addVolumetricData(data);
+                    //shape = viewer.addVolumetricData(data);
                     
                     viewer.zoomTo();
                     viewer.render();
