@@ -3,6 +3,9 @@
 
 
 WebMol.GLShape = (function() {
+    
+    //Marching cube, to match with protein surface generation
+    var ISDONE = 2;
 
     var updateColor = function(geo, color) {
         

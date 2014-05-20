@@ -14,6 +14,8 @@ WebMol.MarchingCube = (function() {
     // voxel - if true, draws with a blocky voxel style (default false)
     // verts, faces - vertex and face arrays to fill up
     
+    //to match with protein surface...
+    var ISDONE = 2;
     var my = {};
     
     my.march = function(data, verts, faces, spec) {
@@ -101,8 +103,8 @@ WebMol.MarchingCube = (function() {
                                         * nZ + k + (p & 1);
 
                         //TODO: Need to fix vpBits in protein surface for this to work
-                        //var val = !!(data[index] & 2);
-                        var val = !!(data[index] > 0);   
+                        var val = !!(data[index] & ISDONE);
+                        //var val = !!(data[index] > 0);   
                         
                         code |= val << p;                        
                     }

@@ -1195,13 +1195,12 @@ WebMol.glmolViewer = (function() {
             console.log("buildboundaryetc " + (time4 - time3) + "  "
                     + (time4 - time) + "ms");
 
-            ps.marchingcube2(type);
+            ps.marchingcube(type);
 
             var time5 = new Date();
             console.log("marching cube " + (time5 - time4) + "  "
                     + (time5 - time) + "ms");
-            //ps.laplaciansmooth(1);
-            return ps.getFacesAndVertices2(atomsToShow);
+            return ps.getFacesAndVertices(atomsToShow);
         };
 
         function getMatWithStyle(style) {

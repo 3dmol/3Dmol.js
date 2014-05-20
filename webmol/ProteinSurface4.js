@@ -100,7 +100,7 @@ var ProteinSurface = function() {
 		return true;
 	};
 
-    this.getFacesAndVertices2 = function(atomlist) {
+    this.getFacesAndVertices = function(atomlist) {
         var atomsToShow = new Object();
         for ( var i = 0, lim = atomlist.length; i < lim; i++)
             atomsToShow[atomlist[i]] = true;
@@ -144,191 +144,6 @@ var ProteinSurface = function() {
             faces : finalfaces
         };
     };
-
-	this.getFacesAndVertices = function(atomlist) {
-		var atomsToShow = new Object();
-		for ( var i = 0, lim = atomlist.length; i < lim; i++)
-			atomsToShow[atomlist[i]] = true;
-		var vertices = verts;
-		for (i = 0; i < vertices.length; i++) {
-			vertices[i].x = vertices[i].x / scaleFactor - ptranx;
-			vertices[i].y = vertices[i].y / scaleFactor - ptrany;
-			vertices[i].z = vertices[i].z / scaleFactor - ptranz;
-		}
-
-		var finalfaces = [];
-		for ( var i = 0; i < faces.length; i++) {
-			var f = faces[i];
-			var a = vertices[f.a].atomid, b = vertices[f.b].atomid, c = vertices[f.c].atomid;
-
-			// must be a unique face for each atom
-			var which = a;
-			if (b < which)
-				which = b;
-			if (c < which)
-				which = c;
-			if (!atomsToShow[which]) {
-				continue;
-			}
-			var av = vertices[f.a];
-			var bv = vertices[f.b];
-			var cv = vertices[f.c];
-
-			if (f.a != f.bb && f.b != f.c && f.a != f.c)
-				finalfaces.push(f);
-		}
-
-		//try to help the garbage collector
-		vpBits = null; // uint8 array of bitmasks
-		vpDistance = null; // floatarray
-		vpAtomID = null; // intarray
-		
-		return {
-			vertices : vertices,
-			faces : finalfaces
-		};
-	};
-
-	this.laplaciansmooth = function(numiter) {
-		var tps = new Array(verts.length);
-		for ( var i = 0; i < verts.length; i++)
-			tps[i] = {
-				x : 0,
-				y : 0,
-				z : 0
-			};
-		var vertdeg = new Array(20);
-		var flagvert;
-		for ( var i = 0; i < 20; i++)
-			vertdeg[i] = new Array(verts.length);
-		for ( var i = 0; i < verts.length; i++)
-			vertdeg[0][i] = 0;
-		for ( var i = 0; i < faces.length; i++) {
-			flagvert = true;
-			for ( var j = 0; j < vertdeg[0][faces[i].a]; j++) {
-				if (faces[i].b == vertdeg[j + 1][faces[i].a]) {
-					flagvert = false;
-					break;
-				}
-			}
-			if (flagvert) {
-				vertdeg[0][faces[i].a]++;
-				vertdeg[vertdeg[0][faces[i].a]][faces[i].a] = faces[i].b;
-			}
-			flagvert = true;
-			for ( var j = 0; j < vertdeg[0][faces[i].a]; j++) {
-				if (faces[i].c == vertdeg[j + 1][faces[i].a]) {
-					flagvert = false;
-					break;
-				}
-			}
-			if (flagvert) {
-				vertdeg[0][faces[i].a]++;
-				vertdeg[vertdeg[0][faces[i].a]][faces[i].a] = faces[i].c;
-			}
-			// b
-			flagvert = true;
-			for (j = 0; j < vertdeg[0][faces[i].b]; j++) {
-				if (faces[i].a == vertdeg[j + 1][faces[i].b]) {
-					flagvert = false;
-					break;
-				}
-			}
-			if (flagvert) {
-				vertdeg[0][faces[i].b]++;
-				vertdeg[vertdeg[0][faces[i].b]][faces[i].b] = faces[i].a;
-			}
-			flagvert = true;
-			for (j = 0; j < vertdeg[0][faces[i].b]; j++) {
-				if (faces[i].c == vertdeg[j + 1][faces[i].b]) {
-					flagvert = false;
-					break;
-				}
-			}
-			if (flagvert) {
-				vertdeg[0][faces[i].b]++;
-				vertdeg[vertdeg[0][faces[i].b]][faces[i].b] = faces[i].c;
-			}
-			// c
-			flagvert = true;
-			for (j = 0; j < vertdeg[0][faces[i].c]; j++) {
-				if (faces[i].a == vertdeg[j + 1][faces[i].c]) {
-					flagvert = false;
-					break;
-				}
-			}
-			if (flagvert) {
-				vertdeg[0][faces[i].c]++;
-				vertdeg[vertdeg[0][faces[i].c]][faces[i].c] = faces[i].a;
-			}
-			flagvert = true;
-			for (j = 0; j < vertdeg[0][faces[i].c]; j++) {
-				if (faces[i].b == vertdeg[j + 1][faces[i].c]) {
-					flagvert = false;
-					break;
-				}
-			}
-			if (flagvert) {
-				vertdeg[0][faces[i].c]++;
-				vertdeg[vertdeg[0][faces[i].c]][faces[i].c] = faces[i].b;
-			}
-		}
-
-		var wt = 1.00;
-		var wt2 = 0.50;
-		var ssign;
-		var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
-		for ( var k = 0; k < numiter; k++) {
-			for ( var i = 0; i < verts.length; i++) {
-				if (vertdeg[0][i] < 3) {
-					tps[i].x = verts[i].x;
-					tps[i].y = verts[i].y;
-					tps[i].z = verts[i].z;
-				} else if (vertdeg[0][i] == 3 || vertdeg[0][i] == 4) {
-					tps[i].x = 0;
-					tps[i].y = 0;
-					tps[i].z = 0;
-					for (j = 0; j < vertdeg[0][i]; j++) {
-						tps[i].x += verts[vertdeg[j + 1][i]].x;
-						tps[i].y += verts[vertdeg[j + 1][i]].y;
-						tps[i].z += verts[vertdeg[j + 1][i]].z;
-					}
-					tps[i].x += wt2 * verts[i].x;
-					tps[i].y += wt2 * verts[i].y;
-					tps[i].z += wt2 * verts[i].z;
-					tps[i].x /= wt2 + vertdeg[0][i];
-					tps[i].y /= wt2 + vertdeg[0][i];
-					tps[i].z /= wt2 + vertdeg[0][i];
-				} else {
-					tps[i].x = 0;
-					tps[i].y = 0;
-					tps[i].z = 0;
-					for ( var j = 0; j < vertdeg[0][i]; j++) {
-						tps[i].x += verts[vertdeg[j + 1][i]].x;
-						tps[i].y += verts[vertdeg[j + 1][i]].y;
-						tps[i].z += verts[vertdeg[j + 1][i]].z;
-					}
-					tps[i].x += wt * verts[i].x;
-					tps[i].y += wt * verts[i].y;
-					tps[i].z += wt * verts[i].z;
-					tps[i].x /= wt + vertdeg[0][i];
-					tps[i].y /= wt + vertdeg[0][i];
-					tps[i].z /= wt + vertdeg[0][i];
-				}
-			}
-			for ( var i = 0; i < verts.length; i++) {
-				verts[i].x = tps[i].x;
-				verts[i].y = tps[i].y;
-				verts[i].z = tps[i].z;
-			}
-			/*
-			 * computenorm(); for (var i = 0; i < vertnumber; i++) { if
-			 * (verts[i].inout) ssign = 1; else ssign = -1; verts[i].x += ssign *
-			 * outwt * verts[i].pn.x; verts[i].y += ssign * outwt *
-			 * verts[i].pn.y; verts[i].z += ssign * outwt * verts[i].pn.z; }
-			 */
-		}
-	};
 
 	this.initparm = function(extent, btype, volume) {
 		if(volume > 1000000) //heuristical decrease resolution to avoid large memory consumption
@@ -925,7 +740,7 @@ var ProteinSurface = function() {
 
 	this.marchingcubeinit = function(stype) {
 		for ( var i = 0, lim = vpBits.length; i < lim; i++) {
-			if (stype == 3) {// vdw
+			if (stype == 1) {// vdw
 				vpBits[i] &= ~ISBOUND;
 			} else if (stype == 4) { // ses
 				vpBits[i] &= ~ISDONE;
@@ -941,38 +756,6 @@ var ProteinSurface = function() {
 				vpBits[i] &= ~ISBOUND;
 			}
 		}
-	};
-
-	// create (or retrieve) a vertex at the appropriate point for
-	// the edge (p1,p2)
-	var getVertex = function(i, j, k, code, p1, p2, vertnums) {
-		var val1 = !!(code & (1 << p1));
-		var val2 = !!(code & (1 << p2));
-
-		// p1 if they are the same or if !val1
-		var p = p1;
-		if (!val1 && val2)
-			p = p2;
-
-		// adjust i,j,k by p
-		if (p & 1)
-			k++;
-		if (p & 2)
-			j++;
-		if (p & 4)
-			i++;
-
-		var index = ((pWidth * i) + j) * pHeight + k;
-		if (vertnums[index] < 0) // not created yet
-		{
-			vertnums[index] = verts.length;
-			verts.push({
-				x : i,
-				y : j,
-				z : k
-			});
-		}
-		return vertnums[index];
 	};
 
 	// this code allows me to empirically prune the marching cubes code tables
@@ -1039,7 +822,7 @@ var ProteinSurface = function() {
 		};
 	};
 	
-	this.marchingcube2 = function(stype) {
+	this.marchingcube = function(stype) {
         this.marchingcubeinit(stype);
         verts = [], faces = [];   
         WebMol.MarchingCube.march(vpBits, verts, faces, {
@@ -1057,103 +840,6 @@ var ProteinSurface = function() {
         WebMol.MarchingCube.laplacianSmooth(1, verts, faces);
         
 	};
-	// this is based off the code here:
-	// http://paulbourke.net/geometry/polygonise/
-	// which is in turn based off of assorted public domain codes
-	this.marchingcube = function(stype) {
-		this.marchingcubeinit(stype);
 
-		// this array keeps track of unique numbers for vertices
-		// created in verts
-		var vertnums = new Int32Array(pLength * pWidth * pHeight);
-		for ( var i = 0; i < vertnums.length; i++) {
-			vertnums[i] = -1;
-		}
-
-		verts = new Array();
-		faces = new Array();
-
-		// consider every grid cube
-		var etable = MarchingCube.edgeTable;
-		var tritable = MarchingCube.triTable;
-		var i, j, k, p, t;
-		var l, w, h, trilen, vlen;
-		var vertList = new Int32Array(12);
-		for (i = 0, l = pLength - 1; i < l; i++) {
-			for (j = 0, w = pWidth - 1; j < w; j++) {
-				for (k = 0, h = pHeight - 1; k < h; k++) {
-					var code = 0;
-					for (p = 0; p < 8; p++) {
-						var index = ((pWidth * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
-								* pHeight + k + (p & 1);
-
-						var val = !!(vpBits[index] & ISDONE);
-						code |= val << p;
-					}
-
-					// set the vertList
-					var ecode = etable[code];
-					if (ecode == 0)
-						continue;
-					var ttable = tritable[code];
-
-					// based on code, determine what vertices are needed for
-					// cube i,j,k
-					// if necessary create them (adding to verts and setting
-					// vertnums)
-					// and set the appropriate vertex indices in vertList
-					if (ecode & 1)
-						vertList[0] = getVertex(i, j, k, code, 0, 1, vertnums);
-					if (ecode & 2)
-						vertList[1] = getVertex(i, j, k, code, 1, 3, vertnums);
-					if (ecode & 4)
-						vertList[2] = getVertex(i, j, k, code, 3, 2, vertnums);
-					if (ecode & 8)
-						vertList[3] = getVertex(i, j, k, code, 2, 0, vertnums);
-					if (ecode & 16)
-						vertList[4] = getVertex(i, j, k, code, 4, 5, vertnums);
-					if (ecode & 32)
-						vertList[5] = getVertex(i, j, k, code, 5, 7, vertnums);
-					if (ecode & 64)
-						vertList[6] = getVertex(i, j, k, code, 7, 6, vertnums);
-					if (ecode & 128)
-						vertList[7] = getVertex(i, j, k, code, 6, 4, vertnums);
-					if (ecode & 256)
-						vertList[8] = getVertex(i, j, k, code, 0, 4, vertnums);
-					if (ecode & 512)
-						vertList[9] = getVertex(i, j, k, code, 1, 5, vertnums);
-					if (ecode & 1024)
-						vertList[10] = getVertex(i, j, k, code, 3, 7, vertnums);
-					if (ecode & 2048)
-						vertList[11] = getVertex(i, j, k, code, 2, 6, vertnums);
-
-					// add all faces
-					for (t = 0, trilen = ttable.length; t < trilen; t += 3) {
-						var a = vertList[ttable[t]];
-						var b = vertList[ttable[t + 1]];
-						var c = vertList[ttable[t + 2]];
-
-						if (a != b && b != c && a != c)
-							faces.push({
-								a : a,
-								b : b,
-								c : c
-							});
-						/*
-						 * if (a != b && b != c && a != c) {
-						 * counts.incrementUsed(code, t / 3); } else
-						 * counts.incrementUnused(code, t / 3);
-						 */
-					}
-
-				}
-			}
-		}
-		// set atom ids
-		for (i = 0, vlen = verts.length; i < vlen; i++) {
-			verts[i].atomid = vpAtomID[verts[i].x * pWidth * pHeight + pHeight
-					* verts[i].y + verts[i].z];
-		}
-	};
 
 };
