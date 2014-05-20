@@ -145,9 +145,17 @@ WebMol.MarchingCube = (function() {
                         intersects[11] = getVertex(i, j, k, code, 2, 6);       
                         
                     for (var t = 0; t < ttable.length; t += 3) {
+                        
                         var a = intersects[ttable[t]],
                             b = intersects[ttable[t+1]],
-                            c = intersects[ttable[t+2]];
+                            c = intersects[ttable[t+2]];         
+                                           
+                        if (voxel && t >= 3) {
+                            verts.push(verts[a]), a = verts.length - 1;
+                            verts.push(verts[b]), b = verts.length - 1;
+                            verts.push(verts[c]), c = verts.length - 1;
+                        }
+
                         
                         faces.push(a), faces.push(b), faces.push(c);                               
                     }              

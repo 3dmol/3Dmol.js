@@ -319,6 +319,12 @@ WebMol.GLModel = (function() {
                         
             else if (tokens[0] == 1) 
                 atom.elem = "H";
+            
+            else if (tokens[0] == 8)
+                atom.elem = "O";
+                
+            else if (tokens[0] == 17)
+                atom.elem = "CL";
                 
             atom.x = parseFloat(tokens[2]) * convFactor;
             atom.y = parseFloat(tokens[3]) * convFactor;

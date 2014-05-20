@@ -458,7 +458,7 @@ WebMol.GLShape = (function() {
         var vertexArr = customSpec.vertexArr, normalArr = customSpec.normalArr, faceArr = customSpec.faceArr, lineArr = customSpec.lineArr;        
         
         if (vertexArr.length === 0 || faceArr.length === 0) {
-            console.error("Error adding custom shape component: No vertices and/or face indices supplied!");
+            console.warn("Error adding custom shape component: No vertices and/or face indices supplied!");
         }
         
         geoGroup.vertices = vertexArr.length, geoGroup.faceidx = faceArr.length;
@@ -507,8 +507,6 @@ WebMol.GLShape = (function() {
     
     //Read a cube file - generate model and possibly shape(s)
     var parseCube = function(shape, geoGroup, str, isoval, voxel) {
-        
-        var smooth = !(voxel);
         
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
@@ -562,6 +560,7 @@ WebMol.GLShape = (function() {
         
         WebMol.MarchingCube.march(bitdata, verts, faces, {
             fulltable : true,
+            voxel : voxel,
             scale : xVec.length(),
             origin : origin,
             nX : nX,
@@ -569,7 +568,7 @@ WebMol.GLShape = (function() {
             nZ : nZ        
         });
         
-        if (smooth)
+        if (!voxel)
             WebMol.MarchingCube.laplacianSmooth(10, verts, faces);        
         
         drawCustom(shape, geoGroup, {vertexArr:verts, 
