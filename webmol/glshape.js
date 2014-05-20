@@ -506,7 +506,7 @@ WebMol.GLShape = (function() {
     };
     
     //Read a cube file - generate model and possibly shape(s)
-    var parseCube = function(shape, str, isoval, voxel) {
+    var parseCube = function(shape, geoGroup, str, isoval, voxel) {
         
         var smooth = !(voxel);
         
@@ -572,9 +572,11 @@ WebMol.GLShape = (function() {
         if (smooth)
             WebMol.MarchingCube.laplacianSmooth(10, verts, faces);        
         
-        shape.addCustom({vertexArr:verts, 
-                         faceArr:faces});
-                
+        drawCustom(shape, geoGroup, {vertexArr:verts, 
+                                     faceArr:faces,
+                                     normalArr:[],
+                                     lineArr:[]});
+        
     };
     
     //Update a bounding sphere's position and radius
@@ -605,23 +607,27 @@ WebMol.GLShape = (function() {
 
     };
     
+    var updateFromStyle = function(shape, stylespec) {
+        shape.color = stylespec.color || new WebMol.Color();
+        shape.wireframe = stylespec.wireframe ? true : false;
+        shape.alpha = stylespec.alpha ? WebMol.Math.clamp(stylespec.alpha, 0.0, 1.0) : 1.0;
+        shape.side = (stylespec.side !== undefined) ? stylespec.side : WebMol.DoubleSide;            
 
+        //Click handling
+        shape.clickable = stylespec.clickable ? true : false;
+        shape.callback = typeof(stylespec.callback) === "function" ? stylespec.callback : null;
+    };
+    
     var GLShape = function(sid, stylespec) {
         
         stylespec = stylespec || {};
         WebMol.ShapeIDCount++;
-        this.id = sid || WebMol.ShapeIDCount;
-        this.color = stylespec.color || new WebMol.Color();
-        this.wireframe = stylespec.wireframe ? true : false;
-        this.alpha = stylespec.alpha ? WebMol.Math.clamp(stylespec.alpha, 0.0, 1.0) : 1.0;
-        this.side = (stylespec.side !== undefined) ? stylespec.side : WebMol.DoubleSide;
-        
+        this.id = sid;
+               
         this.boundingSphere = new WebMol.Sphere();
-        
-        //Click handling
-        this.clickable = stylespec.clickable ? true : false;
-        this.callback = typeof(stylespec.callback) === "function" ? stylespec.callback : null;
         this.intersectionShape = {sphere: [], cylinder: [], line: [], triangle: []};
+        
+        updateFromStyle(this, stylespec);
         
         //Keep track of shape components and their centroids
         var components = [];
@@ -629,6 +635,15 @@ WebMol.GLShape = (function() {
         var renderedShapeObj = null;
         
         var geo = new WebMol.Geometry(true);
+                
+        this.updateStyle = function(newspec) {
+            
+            for (var prop in newspec) {
+                stylespec[prop] = newspec[prop];
+            }    
+            
+            updateFromStyle(this, stylespec);
+        };
         
         this.addCustom = function(customSpec) {
             
@@ -704,20 +719,33 @@ WebMol.GLShape = (function() {
                             
         };
         
-        this.addVolumetricData = function(str, fmt, isoval, vxl) {
-            isoval = (typeof(isoval) === "number") ? isoval : 0.0;
-            vxl = (vxl) ? true : false;
+        this.addVolumetricData = function(data, fmt, volSpec) {
+                            
+            //str, fmt, isoval, vxl
+            var isoval = (volSpec.isoval !== undefined && typeof(volSpec.isoval) === "number") ? volSpec.isoval : 0.0;
+            var vxl = (volSpec.voxel) ? true : false;
             
+            var geoGroup = geo.addGeoGroup();
+            
+            //TODO: Initialize geometry group here (parseCube currently calls addCustom...)
             switch(fmt) {
                 case "cube":
-                    parseCube(this, str, isoval, vxl);
+                    parseCube(this, geoGroup, data, isoval, vxl);
                     break;
             }              
             
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : geoGroup.getCentroid()    
+            });
+            
+            this.updateStyle(volSpec);
+            
+            updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
+            
         };
     
-        //TODO: Adding multiple overlapping shapes in wireframe mode should obscure overlapped meshes ...
-        //         (i.e. generate a new isosurface ... ?)
         this.globj = function(group) {
             
             geo.initTypedArrays();

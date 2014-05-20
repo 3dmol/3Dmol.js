@@ -728,12 +728,10 @@ WebMol.glmolViewer = (function() {
         // Construct isosurface from volumetric data
         // - so far only supports gaussian cube format
         // Can optionally render as blocky voxel image
-        this.addVolumetricData = function(data, format, isoval, voxel) {
+        this.addVolumetricData = function(data, format, spec) {
             var s = new WebMol.GLShape(shapes.length);
-            s.addVolumetricData(data, format, isoval, voxel);   
-            //console.profile();
-            //var s = parseCube(data, this); 
-            //console.profileEnd();
+            spec = spec || {};            
+            s.addVolumetricData(data, format, spec);   
             shapes.push(s);
             
             return s;       

@@ -36,7 +36,8 @@
         var glviewer = null;
         var labels = [];
         var m = null;
-        var shape = null;
+        var posLobe = null;
+        var negLobe = null;
         var m2 = null;
         var atoms = null;
         var moldata = "";
@@ -138,10 +139,18 @@
                     
                     modelgroup = viewer.getModelGroup();
                     
-                    shape = viewer.addVolumetricData(data, "cube", 0.01);
-                    shape.color.b = 1;
-                    shape.alpha = 0.95;
-                    
+                    posLobe = viewer.addVolumetricData(data, "cube", {isoval: 0.01,
+                                                                      color: new WebMol.Color(0,0,1),
+                                                                      alpha: 0.95,
+                                                                      clickable: true,
+                                                                      callback: shapecallback});
+
+                    negLobe = viewer.addVolumetricData(data, "cube", {isoval: -0.01,
+                                                                      color: new WebMol.Color(1,0,0),
+                                                                      alpha: 0.95,
+                                                                      clickable: true,
+                                                                      callback : shapecallback});
+                                        
                     viewer.zoomTo();
                     viewer.render();
                     
