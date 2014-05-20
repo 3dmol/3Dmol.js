@@ -818,7 +818,7 @@ WebMol.GLModel = (function() {
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
                 
-            var geoGroup = geos[linewidth].updateGeoGroup();
+            var geoGroup = geos[linewidth].updateGeoGroup(6);
             
             var delta = getRadiusFromStyle(atom, style);
 
@@ -870,7 +870,7 @@ WebMol.GLModel = (function() {
 
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
-            var geoGroup = geos[linewidth].updateGeoGroup();
+            var geoGroup = geos[linewidth].updateGeoGroup(2*atom.bonds.length);
             
 
             for ( var i = 0; i < atom.bonds.length; i++) {
