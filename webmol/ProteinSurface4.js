@@ -21,6 +21,7 @@ TODO: Improved performance on Firefox
       Refactor!
  */
 
+
 // dkoes
 // Surface calculations.  This must be safe to use within a web worker.
 if (typeof console === 'undefined') {

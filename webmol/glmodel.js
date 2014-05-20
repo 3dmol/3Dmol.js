@@ -556,7 +556,9 @@ WebMol.GLModel = (function() {
     };
     
     // parse pdb file from str and create atoms
-    var parsePDB = function(atoms, str, keepH) {
+    //if computeStruct is true will always perform secondary structure analysis,
+    //otherwise only do analysis of SHEET/HELIX comments are missing
+    var parsePDB = function(atoms, str, keepH, computeStruct) {
 
         var atoms_cnt = 0;
         var noH = !keepH; // suppres hydrogens by default
@@ -566,6 +568,7 @@ WebMol.GLModel = (function() {
             helix : []
         }; // get secondary structure straight from pdb
 
+        var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
         lines = str.split("\n");
         for ( var i = 0; i < lines.length; i++) {
@@ -622,6 +625,7 @@ WebMol.GLModel = (function() {
                     'pdbline' : line
                 });
             } else if (recordName == 'SHEET ') {
+            	hasStruct = true;
                 var startChain = line.substr(21, 1);
                 var startResi = parseInt(line.substr(22, 4));
                 var endChain = line.substr(32, 1);
@@ -643,6 +647,7 @@ WebMol.GLModel = (function() {
                     }
                 }
             } else if (recordName == 'HELIX ') {
+            	hasStruct = true;
                 var startChain = line.substr(19, 1);
                 var startResi = parseInt(line.substr(21, 4));
                 var endChain = line.substr(31, 1);
@@ -658,9 +663,12 @@ WebMol.GLModel = (function() {
         assignPDBBonds(atoms);
         console.log("bond connecting " + ((new Date()).getTime() - starttime));
         
-        var starttime = (new Date()).getTime();
-        //computeSecondaryStructure(atoms);
-        console.log("secondary structure " + ((new Date()).getTime() - starttime));
+        
+        if(computeStruct || !hasStruct) {
+            var starttime = (new Date()).getTime();
+        	computeSecondaryStructure(atoms);
+        	console.log("secondary structure " + ((new Date()).getTime() - starttime));
+        }
         
         // Assign secondary structures from pdb file
         for (i = start; i < atoms.length; i++) {
