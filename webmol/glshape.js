@@ -505,6 +505,78 @@ WebMol.GLShape = (function() {
              
     };
     
+    //Read a cube file - generate model and possibly shape(s)
+    var parseCube = function(shape, str, isoval, voxel) {
+        
+        var smooth = !(voxel);
+        
+        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
+        
+        if (lines.length < 6)
+            return;
+            
+        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");       
+          
+        var natoms = Math.abs(parseFloat(lineArr[0]));        
+        var origin = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3]));
+        
+        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        //might have to convert from bohr units to angstroms
+        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
+        
+        origin.multiplyScalar(convFactor);
+        
+        var nX = Math.abs(lineArr[0]);
+        var xVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        var nY = Math.abs(lineArr[0]);
+        var yVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        var nZ = Math.abs(lineArr[0]);
+        var zVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        //lines.splice(6, natoms).join("\n");
+        
+        lines = new Float32Array(lines.splice(natoms+7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/));        
+        
+        var vertnums = new Int16Array(nX*nY*nZ);        
+        for (var i = 0; i < vertnums.length; ++i)
+            vertnums[i] = -1;
+
+        var bitdata = new Uint8Array(nX*nY*nZ);
+        
+        for (var i = 0; i < lines.length; ++i) {
+            var val = (isoval >= 0) ? lines[i] - isoval : isoval - lines[i];
+            
+            if (val > 0)
+                bitdata[i] |= ISDONE;
+            
+        }
+        
+        var verts = [], faces = [];
+        
+        WebMol.MarchingCube.march(bitdata, verts, faces, {
+            fulltable : true,
+            scale : xVec.length(),
+            origin : origin,
+            nX : nX,
+            nY : nY,
+            nZ : nZ        
+        });
+        
+        if (smooth)
+            WebMol.MarchingCube.laplacianSmooth(10, verts, faces);        
+        
+        shape.addCustom({vertexArr:verts, 
+                         faceArr:faces});
+                
+    };
+    
     //Update a bounding sphere's position and radius
     //from list of centroids and new points
     var updateBoundingFromPoints = function(sphere, components, points) {       
@@ -638,7 +710,7 @@ WebMol.GLShape = (function() {
             
             switch(fmt) {
                 case "cube":
-                    parseCube(data);
+                    parseCube(this, str, isoval, vxl);
                     break;
             }              
             

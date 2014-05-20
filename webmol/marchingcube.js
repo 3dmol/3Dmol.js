@@ -161,8 +161,6 @@ WebMol.MarchingCube = (function() {
         
     };
 
-
-
     my.laplacianSmooth = function(numiter, verts, faces) {
             var tps = new Array(verts.length);
             for ( var i = 0; i < verts.length; i++)

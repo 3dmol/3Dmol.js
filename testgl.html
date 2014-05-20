@@ -44,6 +44,7 @@
         var modelgroup = null;
         var molObj = null; //Object3D for each rendered model      
         var lastsurfstyle = 1;
+        var voldata = null;
         
         var toggleSurfTrans = function(surf) {
             
@@ -117,16 +118,17 @@
             } 
         };
         
-        //$(document).ready(function() {
+        $(document).ready(function() {
                         
             $.get("test_structs/benzene-homo.cube", function(data){
                 
-                var data = moldata = $("#moldata_pdb").val();
+                var benzenedata = moldata = $("#moldata_benzene_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
+                    voldata = data;
                     
-                    m = viewer.addModel(moldata, "pdb");
+                    m = viewer.addModel(moldata, "sdf");
                     atoms = m.selectedAtoms({ });
                     //atoms = [];
                     for (a in atoms) {
@@ -136,7 +138,9 @@
                     
                     modelgroup = viewer.getModelGroup();
                     
-                    //shape = viewer.addVolumetricData(data);
+                    shape = viewer.addVolumetricData(data, "cube", 0.01);
+                    shape.color.b = 1;
+                    shape.alpha = 0.95;
                     
                     viewer.zoomTo();
                     viewer.render();
@@ -147,7 +151,7 @@
                 
             }, "text");   
            
-        //});
+        });
         
         </script>
     </head>

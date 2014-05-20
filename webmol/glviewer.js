@@ -157,174 +157,7 @@ WebMol.glmolViewer = (function() {
         return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
                 [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
     };
-    
-    var zSort = function(a, b) {
-        return a.z < b.z;
-    };
-    
-    //Read a cube file - generate model and possibly shape(s)
-    var parseCube = function(str, viewer) {
-        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
-        if (lines.length < 6)
-            return;
-            
-        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");       
-          
-        var natoms = Math.abs(parseFloat(lineArr[0]));        
-        var origin = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3]));
-        
-        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        
-        //might have to convert from bohr units to angstroms
-        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
-        
-        origin.multiplyScalar(convFactor);
-        
-        var nX = Math.abs(lineArr[0]);
-        var xVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
-        
-        lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        
-        var nY = Math.abs(lineArr[0]);
-        var yVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
-        
-        lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        
-        var nZ = Math.abs(lineArr[0]);
-        var zVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
-        
-        //lines.splice(6, natoms).join("\n");
-        
-        lines = new Float32Array(lines.splice(natoms+7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/));
-        
-        var isoval = 0.01;
-                
-        var setUpData = function(data, isoval) {
-            
-            var retdata = new Float32Array(data);
-            
-            for (var i = 0; i < data.length; ++i) {            
-                retdata[i] -= isoval;                
-                if (isoval < 0)
-                    retdata[i] *= -1;                   
-            }  
-            
-            return retdata;
-            
-        };
-        
-        var p1 = new WebMol.Vector3(), p2 = new WebMol.Vector3();
-        
-        var vertnums = new Int16Array(nX*nY*nZ);        
-        for (var i = 0; i < vertnums.length; ++i)
-            vertnums[i] = -1;
-
-        
-        //Also TODO:  vertnums must be signed (to initialize at -1) -> but this means we can't have more than
-        // 32,768 vertices per geoGroup (rather than 65,536) - should probably enforce (or else use Int32Array for vertnums...)
-        for (var neg = 0; neg < 2; ++neg) {
-            
-            if (neg)
-                isoval = -isoval;
-            
-            var bitdata = setUpData(lines, isoval);
-            
-            var verts = [], faces = [];
-            
-            WebMol.MarchingCube.march(bitdata, verts, faces, {
-                fulltable : true,
-                scale : xVec.length(),
-                origin : origin,
-                nX : nX,
-                nY : nY,
-                nZ : nZ        
-            });
-            
-            WebMol.MarchingCube.laplacianSmooth(10, verts, faces);
-            
-            var color = neg ? new WebMol.Color(1,0,0) : new WebMol.Color(0,0,1);
-            
-            
-            var shape = viewer.addCustom({vertexArr:verts, 
-                                          faceArr:faces});
-                                          
-            shape.color.copy(color);
-            shape.alpha = 0.95;
-            //shape.wireframe = true;
-                      
-        }
-
-        return shape;  
-                
-    };
-    
-    var linearInterpolate = function() {       
-        
-        var nY = 55, nZ = 40;
-        
-        return function(i, j, k, cube, grid, p1, p2, verts, vertnums, code, isoval, smooth) {
-            
-            var pt = new WebMol.Vector3();
-            
-            var v1 = grid[p1], v2 = grid[p2];
-            var pt1 = cube[p1], pt2 = cube[p2];
-            
-            if (smooth) {
-                
-                var val1 = !!(code & (1 << p1));
-                var val2 = !!(code & (1 << p2));
-                
-                var p = p1;
-                if (!val1 && val2)
-                    p = p2;
-                    
-                if (p & 1)
-                    k++;
-                if (p & 2)
-                    j++;
-                if (p & 4)
-                    i++;
-                    
-                var index = (i*nY*nZ) + (j*nZ) + k;
-                
-                if (Math.abs(isoval-v1) < 0.000001)
-                    pt = pt1.clone();
-                else if (Math.abs(isoval-v2) < 0.000001) 
-                    pt = pt2.clone();
-                else if (Math.abs(v1 - v2) < 0.000001)
-                    pt = pt1.clone().add(pt2).multiplyScalar(0.5);
-                    
-                else {            
-                    pt.subVectors(pt2,pt1);
-                    var scale = (isoval-v1)/(v2-v1);                   
-                    pt.multiplyScalar(scale).add(pt1);            
-                }     
-                   
-                if (vertnums[index] < 1) {
-                    vertnums[index] = verts.length;
-                    verts.push(pt);          
-                    //norms.push(new WebMol.Vector3());  
-                }          
-                
-                return vertnums[index];                      
-            }
-
-            else {
-                
-                pt.addVectors(pt1, pt2).multiplyScalar(0.5); 
-                
-                verts.push(pt);      
-                
-                return verts.length - 1;              
-            }
-
-        };
-
-       
-    }();
-    
-    
     // The constructor
     function GLViewer(element, callback, defaultcolors) {
 
@@ -896,10 +729,10 @@ WebMol.glmolViewer = (function() {
         // - so far only supports gaussian cube format
         // Can optionally render as blocky voxel image
         this.addVolumetricData = function(data, format, isoval, voxel) {
-            //var s = new WebMol.GLShape(shapes.length);
-            //s.addVolumetricData(data, format, isoval, voxel);   
+            var s = new WebMol.GLShape(shapes.length);
+            s.addVolumetricData(data, format, isoval, voxel);   
             //console.profile();
-            var s = parseCube(data, this); 
+            //var s = parseCube(data, this); 
             //console.profileEnd();
             shapes.push(s);
             
