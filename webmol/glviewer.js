@@ -759,7 +759,7 @@ WebMol.glmolViewer = (function() {
         };
 
         this.removeAllModels = function() {
-            for (var i = 0; i < models.length; i++){
+            for (var i = 0; i < models.length; i++) {
                 var model = models[i];
                 model.removegl(modelGroup);
                 
