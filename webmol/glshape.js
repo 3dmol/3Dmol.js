@@ -3,6 +3,9 @@
 
 
 WebMol.GLShape = (function() {
+    
+    //Marching cube, to match with protein surface generation
+    var ISDONE = 2;
 
     var updateColor = function(geo, color) {
         
@@ -455,7 +458,7 @@ WebMol.GLShape = (function() {
         var vertexArr = customSpec.vertexArr, normalArr = customSpec.normalArr, faceArr = customSpec.faceArr, lineArr = customSpec.lineArr;        
         
         if (vertexArr.length === 0 || faceArr.length === 0) {
-            console.error("Error adding custom shape component: No vertices and/or face indices supplied!");
+            console.warn("Error adding custom shape component: No vertices and/or face indices supplied!");
         }
         
         geoGroup.vertices = vertexArr.length, geoGroup.faceidx = faceArr.length;
@@ -471,8 +474,8 @@ WebMol.GLShape = (function() {
         for (var i = 0; i < geoGroup.faceidx / 3; ++i) {
             offset = i*3;
             a = faceArr[offset], b = faceArr[offset+1], c = faceArr[offset+2];
-            
-            shape.intersectionShape.triangle.push( new WebMol.Triangle(vertexArr[a].clone(), vertexArr[b].clone(), vertexArr[c].clone()) );
+            var vA = new WebMol.Vector3(), vB = new WebMol.Vector3(), vC = new WebMol.Vector3();
+            shape.intersectionShape.triangle.push( new WebMol.Triangle( vA.copy(vertexArr[a]), vB.copy(vertexArr[b]), vC.copy(vertexArr[c]) ) );
         }
                   
         geoGroup.__faceArray = new Uint16Array(faceArr);
@@ -500,6 +503,79 @@ WebMol.GLShape = (function() {
         
         geoGroup.lineidx = geoGroup.__lineArray.length;
              
+    };
+    
+    //Read a cube file - generate model and possibly shape(s)
+    var parseCube = function(shape, geoGroup, str, isoval, voxel) {
+        
+        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
+        
+        if (lines.length < 6)
+            return;
+            
+        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");       
+          
+        var natoms = Math.abs(parseFloat(lineArr[0]));        
+        var origin = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3]));
+        
+        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        //might have to convert from bohr units to angstroms
+        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
+        
+        origin.multiplyScalar(convFactor);
+        
+        var nX = Math.abs(lineArr[0]);
+        var xVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        var nY = Math.abs(lineArr[0]);
+        var yVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        
+        var nZ = Math.abs(lineArr[0]);
+        var zVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
+        
+        //lines.splice(6, natoms).join("\n");
+        
+        lines = new Float32Array(lines.splice(natoms+7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/));        
+        
+        var vertnums = new Int16Array(nX*nY*nZ);        
+        for (var i = 0; i < vertnums.length; ++i)
+            vertnums[i] = -1;
+
+        var bitdata = new Uint8Array(nX*nY*nZ);
+        
+        for (var i = 0; i < lines.length; ++i) {
+            var val = (isoval >= 0) ? lines[i] - isoval : isoval - lines[i];
+            
+            if (val > 0)
+                bitdata[i] |= ISDONE;
+            
+        }
+        
+        var verts = [], faces = [];
+        
+        WebMol.MarchingCube.march(bitdata, verts, faces, {
+            fulltable : true,
+            voxel : voxel,
+            scale : xVec.length(),
+            origin : origin,
+            nX : nX,
+            nY : nY,
+            nZ : nZ        
+        });
+        
+        if (!voxel)
+            WebMol.MarchingCube.laplacianSmooth(10, verts, faces);        
+        
+        drawCustom(shape, geoGroup, {vertexArr:verts, 
+                                     faceArr:faces,
+                                     normalArr:[],
+                                     lineArr:[]});
+        
     };
     
     //Update a bounding sphere's position and radius
@@ -530,21 +606,27 @@ WebMol.GLShape = (function() {
 
     };
     
+    var updateFromStyle = function(shape, stylespec) {
+        shape.color = stylespec.color || new WebMol.Color();
+        shape.wireframe = stylespec.wireframe ? true : false;
+        shape.alpha = stylespec.alpha ? WebMol.Math.clamp(stylespec.alpha, 0.0, 1.0) : 1.0;
+        shape.side = (stylespec.side !== undefined) ? stylespec.side : WebMol.DoubleSide;            
 
-    var GLShape = function(stylespec) {
-    
-        this.id = WebMol.ShapeIDCount++;
-        this.color = stylespec.color || new WebMol.Color();
-        this.wireframe = stylespec.wireframe ? true : false;
-        this.alpha = stylespec.alpha ? WebMol.Math.clamp(stylespec.alpha, 0.0, 1.0) : 1.0;
-        this.side = (stylespec.side !== undefined) ? stylespec.side : WebMol.DoubleSide;
-        
-        this.boundingSphere = new WebMol.Sphere();
-        
         //Click handling
-        this.clickable = stylespec.clickable ? true : false;
-        this.callback = typeof(stylespec.callback) === "function" ? stylespec.callback : null;
+        shape.clickable = stylespec.clickable ? true : false;
+        shape.callback = typeof(stylespec.callback) === "function" ? stylespec.callback : null;
+    };
+    
+    var GLShape = function(sid, stylespec) {
+        
+        stylespec = stylespec || {};
+        WebMol.ShapeIDCount++;
+        this.id = sid;
+               
+        this.boundingSphere = new WebMol.Sphere();
         this.intersectionShape = {sphere: [], cylinder: [], line: [], triangle: []};
+        
+        updateFromStyle(this, stylespec);
         
         //Keep track of shape components and their centroids
         var components = [];
@@ -552,6 +634,15 @@ WebMol.GLShape = (function() {
         var renderedShapeObj = null;
         
         var geo = new WebMol.Geometry(true);
+                
+        this.updateStyle = function(newspec) {
+            
+            for (var prop in newspec) {
+                stylespec[prop] = newspec[prop];
+            }    
+            
+            updateFromStyle(this, stylespec);
+        };
         
         this.addCustom = function(customSpec) {
             
@@ -624,11 +715,36 @@ WebMol.GLShape = (function() {
             });
             
             updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
+                            
+        };
+        
+        this.addVolumetricData = function(data, fmt, volSpec) {
+                            
+            //str, fmt, isoval, vxl
+            var isoval = (volSpec.isoval !== undefined && typeof(volSpec.isoval) === "number") ? volSpec.isoval : 0.0;
+            var vxl = (volSpec.voxel) ? true : false;
             
-                
+            var geoGroup = geo.addGeoGroup();
+            
+            //TODO: Initialize geometry group here (parseCube currently calls addCustom...)
+            switch(fmt) {
+                case "cube":
+                    parseCube(this, geoGroup, data, isoval, vxl);
+                    break;
+            }              
+            
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : geoGroup.getCentroid()    
+            });
+            
+            this.updateStyle(volSpec);
+            
+            updateBoundingFromPoints( this.boundingSphere, components, geoGroup.__vertexArray );
+            
         };
     
-        //TODO: Adding multiple overlapping shapes in wireframe mode should obscure overlapped meshes
         this.globj = function(group) {
             
             geo.initTypedArrays();

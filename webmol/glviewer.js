@@ -157,541 +157,7 @@ WebMol.glmolViewer = (function() {
         return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
                 [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
     };
-    
-    var zSort = function(a, b) {
-        return a.z < b.z;
-    };
-    
-    //Read a cube file - generate model and possibly shape(s)
-    var parseCube = function(str, viewer) {
-        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
-        if (lines.length < 6)
-            return;
-            
-        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");       
-          
-        var natoms = Math.abs(parseFloat(lineArr[0]));        
-        var origin = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3]));
-        
-        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        
-        //might have to convert from bohr units to angstroms
-        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
-        
-        origin.multiplyScalar(convFactor);
-        
-        var nX = Math.abs(lineArr[0]);
-        var xVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
-        
-        lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        
-        var nY = Math.abs(lineArr[0]);
-        var yVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
-        
-        lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        
-        var nZ = Math.abs(lineArr[0]);
-        var zVec = new WebMol.Vector3(parseFloat(lineArr[1]), parseFloat(lineArr[2]), parseFloat(lineArr[3])).multiplyScalar(convFactor);
-        
-        //Extract atom portion; send to new GLModel...
-        var atomStr = lines.splice(6, natoms).join("\n");
-        atomStr = convFactor + "\n" + atomStr;
-        
-        lines = lines.splice(7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/);
-        lines = new Float32Array(lines);
-        
-        var isoval = 0.005;
-        
-        var cubepts = [
-            origin.clone(), origin.clone().add(zVec),
-            origin.clone().add(yVec), origin.clone().add(yVec).add(zVec),
-            
-            origin.clone().add(xVec), origin.clone().add(xVec).add(zVec),
-            origin.clone().add(xVec).add(yVec), origin.clone().add(xVec).add(yVec).add(zVec)
-        ];        
-        
-        //voxel values for current position
-        var grid = new Float32Array(8);
-                
-        
-        var p1 = new WebMol.Vector3(), p2 = new WebMol.Vector3();
-
-        var vertnums = new Int16Array(nX*nY*nZ*12);
-        
-        for (var i = 0; i < vertnums.length; ++i)
-            vertnums[i] = -1;
-
-        //TODO: Need a good way to compute hard vertex normals for non-smoothed voxel (to get facetted look)
-        smooth = true;
-        
-        //Also TODO:  vertnums must be signed (to initialize at -1) -> but this means we can't have more than
-        // 32,768 vertices per geoGroup (rather than 65,536) - should probably enforce (or else use Int32Array for vertnums...)
-        for (var neg = 0; neg < 2; ++neg) {
-            
-            if (neg)
-                isoval = -isoval;
-            
-            var verts = [], faces = [], norms = [];
-            
-            for (var i = 0; i < nX - 1; ++i) {
-                for (var j = 0; j < nY - 1; ++j) {
-                    for (var k = 0; k < nZ - 1; ++k) {
-                        
-                        
-                        //unpack voxels for this cube
-                        
-                        offset = (i*nY*nZ) + (j*nZ) + k;
-                       
-                        for (var p = 0; p < 8; p++) {
-                            var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
-                                            * nZ + k + (p & 1);
-                            grid[p] = parseFloat(lines[index]) * convFactor;
-                        }
-                        
-                        var bit = 0;
-                        
-                        if ((grid[0] > isoval && isoval >= 0) || (grid[0] < isoval && isoval < 0))
-                            bit |= 1;
-                        
-                        if ((grid[1] > isoval && isoval >= 0) || (grid[1] < isoval && isoval < 0))
-                            bit |= 2;
-                            
-                        if ((grid[2] > isoval && isoval >= 0) || (grid[2] < isoval && isoval < 0))
-                            bit |= 4;
-                        
-                        if ((grid[3] > isoval && isoval >= 0) || (grid[3] < isoval && isoval < 0))
-                            bit |= 8;
-                        
-                        if ((grid[4] > isoval && isoval >= 0) || (grid[4] < isoval && isoval < 0))
-                            bit |= 16;
-                        
-                        if ((grid[5] > isoval && isoval >= 0) || (grid[5] < isoval && isoval < 0))
-                            bit |= 32;
-                        
-                        if ((grid[6] > isoval && isoval >= 0) || (grid[6] < isoval && isoval < 0))
-                            bit |= 64;
-                            
-                        if ((grid[7] > isoval && isoval >= 0) || (grid[7] < isoval && isoval < 0))
-                            bit |= 128;
-                        
-                        if (bit == 0 || bit == 255) 
-                            continue;
-                            
-                        var edgeIdx = MarchingCube.edgeTable2[bit];
-                        var triangles = MarchingCube.triTable2[bit];
-                        
-                        //Not on isosurface
-                        if (edgeIdx == 0)
-                            continue;
-                            
-                        //check edges
-                        
-                        var xV = xVec.clone().multiplyScalar(i);
-                        var yV = yVec.clone().multiplyScalar(j);
-                        var zV = zVec.clone().multiplyScalar(k);
-                        
-                        //Cube points
-                        var cube = [null, null, null, null,
-                                    null, null, null, null,];
-                        
-                        for (var c = 0; c < 8; c++) {
-                            cube[c] = cubepts[c].clone().add(xV).add(yV).add(zV);
-                        }
-                        
-                        var intersects = [null, null, null, null,
-                                          null, null, null, null,
-                                          null, null, null, null];
-                                    
-                        var v1, v2, idx;
-                        var index = offset*12;      
-                        //0 to 1
-                        if (edgeIdx & 1) {
-                            p1.addVectors(cubepts[0], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[1], xV).add(yV).add(zV);
-                            v1 = grid[0];
-                            v2 = grid[1];
-                            idx = index+0;
-                            intersects[0] = linearInterpolate(i,j,k,cube,grid,0,1,verts,vertnums,bit,isoval,smooth);
-                        }
-                        //1 to 3
-                        if (edgeIdx & 2) {
-                            p1.addVectors(cubepts[1], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[3], xV).add(yV).add(zV);
-                            v1 = grid[1];
-                            v2 = grid[3];
-                            idx = index+1;
-                            intersects[1] = linearInterpolate(i,j,k,cube,grid,1,3,verts,vertnums,bit,isoval,smooth);
-                        }
-                        //3 to 2
-                        if (edgeIdx & 4) {
-                            p1.addVectors(cubepts[3], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[2], xV).add(yV).add(zV);
-                            v1 = grid[3];
-                            v2 = grid[2];
-                            idx = index+2;
-                            intersects[2] = linearInterpolate(i,j,k,cube,grid,3,2,verts,vertnums,bit,isoval,smooth);
-                        }
-                        //2 to 0
-                        if (edgeIdx & 8) {
-                            p1.addVectors(cubepts[2], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[0], xV).add(yV).add(zV);
-                            v1 = grid[2];
-                            v2 = grid[0];
-                            idx = index+3;
-                            intersects[3] = linearInterpolate(i,j,k,cube,grid,2,0,verts,vertnums,bit,isoval,smooth);
-                        }     
-                        //4 to 5
-                        if (edgeIdx & 16) {
-                            p1.addVectors(cubepts[4], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[5], xV).add(yV).add(zV);
-                            v1 = grid[4];
-                            v2 = grid[5];
-                            idx = index+4;
-                            intersects[4] = linearInterpolate(i,j,k,cube,grid,4,5,verts,vertnums,bit,isoval,smooth);
-                        }    
-                        //5 to 7
-                        if (edgeIdx & 32) {
-                            p1.addVectors(cubepts[5], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[7], xV).add(yV).add(zV);
-                            v1 = grid[5];
-                            v2 = grid[7];
-                            idx = index+5;
-                            intersects[5] = linearInterpolate(i,j,k,cube,grid,5,7,verts,vertnums,bit,isoval,smooth);
-                        }
-                        //7 to 6
-                        if (edgeIdx & 64) {
-                            p1.addVectors(cubepts[7], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[6], xV).add(yV).add(zV);
-                            v1 = grid[7];
-                            v2 = grid[6];
-                            idx = index+6;
-                            intersects[6] = linearInterpolate(i,j,k,cube,grid,7,6,verts,vertnums,bit,isoval,smooth);
-                        }
-                        //6 to 4
-                        if (edgeIdx & 128) {
-                            p1.addVectors(cubepts[6], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[4], xV).add(yV).add(zV);
-                            v1 = grid[6];
-                            v2 = grid[4];
-                            idx = index+7;
-                            intersects[7] = linearInterpolate(i,j,k,cube,grid,6,4,verts,vertnums,bit,isoval,smooth);
-                        }
-                        //0 to 4
-                        if (edgeIdx & 256) {
-                            p1.addVectors(cubepts[0], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[4], xV).add(yV).add(zV);
-                            v1 = grid[0];
-                            v2 = grid[4];
-                            idx = index+8;
-                            intersects[8] = linearInterpolate(i,j,k,cube,grid,0,4,verts,vertnums,bit,isoval,smooth);
-                        }
-                        //1 to 5
-                        if (edgeIdx & 512) {
-                            p1.addVectors(cubepts[1], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[5], xV).add(yV).add(zV);
-                            v1 = grid[1];
-                            v2 = grid[5];
-                            idx = index+9;
-                            intersects[9] = linearInterpolate(i,j,k,cube,grid,1,5,verts,vertnums,bit,isoval,smooth);
-                        }  
-                        //3 to 7
-                        if (edgeIdx & 1024) {
-                            p1.addVectors(cubepts[3], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[7], xV).add(yV).add(zV);
-                            v1 = grid[3];
-                            v2 = grid[7];
-                            idx = index+10;
-                            intersects[10] = linearInterpolate(i,j,k,cube,grid,3,7,verts,vertnums,bit,isoval,smooth);
-                        }
-                        //2 to 6
-                        if (edgeIdx & 2048) {
-                            p1.addVectors(cubepts[2], xV).add(yV).add(zV);                        
-                            p2.addVectors(cubepts[6], xV).add(yV).add(zV);
-                            v1 = grid[2];
-                            v2 = grid[6];
-                            idx = index+11;
-                            intersects[11] = linearInterpolate(i,j,k,cube,grid,2,6,verts,vertnums,bit,isoval,smooth);
-                        }
-                        
-                        //add Vectors
-                        
-                        for (var itri = 0; itri < triangles.length / 3; ++itri) {
-                            var trioffset = itri*3;
-                            
-                            var a = intersects[triangles[trioffset]];                        
-                            var b = intersects[triangles[trioffset + 1]], c = intersects[triangles[trioffset + 2]];
-                            
-                            var vA = verts[a], vB = verts[b], vC = verts[c];
-                            //var normA = norms[a], normB = norms[b], normC = norms[c];
-                            //normA.subVectors(vA, vB);
-                            //normC.subVectors(vC, vB);
-                            
-                            //normA.cross(normC).normalize();
-                            //norms[b].copy(normA);
-                            //norms[c].copy(normA);
-                            
-                            if (! smooth && itri > 0) {
-                                faces.push(verts.length);
-                                verts.push(vA);
-                                faces.push(verts.length);
-                                verts.push(vB);
-                                faces.push(verts.length);
-                                verts.push(vC);
-                                
-                            }
-                            else {
-                                //faces.push(verts.length);
-                                faces.push(a);
-                                //faces.push(verts.length);
-                                faces.push(b);
-                                //faces.push(verts.length);
-                                faces.push(c);                           
-                            }
-    
-                            
-                        }
-                            
-                    }
-    
-                }
-    
-            }
-            
-    
-            if (smooth) 
-                laplacianSmooth(1, verts, faces);
-                
-            var color = neg ? new WebMol.Color(1,0,0) : new WebMol.Color(0,0,1);
-            
-            var shape = viewer.addShape({
-                wireframe : false,
-                color : color,
-                alpha : 0.85,
-                side : WebMol.FrontSide
-            });
-            
-            
-            viewer.addCustom(shape, {vertexArr:verts, 
-                                     faceArr:faces,
-                                     normalArr:[]});
-                      
-        }
-
-        return atomStr;  
-                
-    };
-    
-    var linearInterpolate = function() {       
-        
-        var nY = 55, nZ = 40;
-        
-        return function(i, j, k, cube, grid, p1, p2, verts, vertnums, code, isoval, smooth) {
-            
-            var pt = new WebMol.Vector3();
-            
-            var v1 = grid[p1], v2 = grid[p2];
-            var pt1 = cube[p1], pt2 = cube[p2];
-            
-            if (smooth) {
-                
-                var val1 = !!(code & (1 << p1));
-                var val2 = !!(code & (1 << p2));
-                
-                var p = p1;
-                if (!val1 && val2)
-                    p = p2;
-                    
-                if (p & 1)
-                    k++;
-                if (p & 2)
-                    j++;
-                if (p & 4)
-                    i++;
-                    
-                var index = (i*nY*nZ) + (j*nZ) + k;
-                
-                if (Math.abs(isoval-v1) < 0.000001)
-                    pt = pt1.clone();
-                else if (Math.abs(isoval-v2) < 0.000001) 
-                    pt = pt2.clone();
-                else if (Math.abs(v1 - v2) < 0.000001)
-                    pt = pt1.clone().add(pt2).multiplyScalar(0.5);
-                    
-                else {            
-                    pt.subVectors(pt2,pt1);
-                    var scale = (isoval-v1)/(v2-v1);                   
-                    pt.multiplyScalar(scale).add(pt1);            
-                }     
-                   
-                if (vertnums[index] < 1) {
-                    vertnums[index] = verts.length;
-                    verts.push(pt);          
-                    //norms.push(new WebMol.Vector3());  
-                }          
-                
-                return vertnums[index];                      
-            }
-
-            else {
-                
-                pt.addVectors(pt1, pt2).multiplyScalar(0.5); 
-                
-                verts.push(pt);      
-                
-                return verts.length - 1;              
-            }
-
-        };
-
-       
-    }();
-    
-
-    
-    laplacianSmooth = function(numiter, verts, faces) {
-            var tps = new Array(verts.length);
-            for ( var i = 0; i < verts.length; i++)
-                    tps[i] = {
-                            x : 0,
-                            y : 0,
-                            z : 0
-                    };
-            var vertdeg = new Array(20);
-            var flagvert;
-            for ( var i = 0; i < 20; i++)
-                    vertdeg[i] = new Array(verts.length);
-            for ( var i = 0; i < verts.length; i++)
-                    vertdeg[0][i] = 0;
-            for ( var i = 0; i < faces.length / 3; i++) {
-                    var aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
-                    flagvert = true;
-                    for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
-                            if (faces[boffset] == vertdeg[j + 1][faces[aoffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[aoffset]]++;
-                            vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[boffset];
-                    }
-                    flagvert = true;
-                    for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
-                            if (faces[coffset] == vertdeg[j + 1][faces[aoffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[aoffset]]++;
-                            vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[coffset];
-                    }
-                    // b
-                    flagvert = true;
-                    for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
-                            if (faces[aoffset] == vertdeg[j + 1][faces[boffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[boffset]]++;
-                            vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[aoffset];
-                    }
-                    flagvert = true;
-                    for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
-                            if (faces[coffset] == vertdeg[j + 1][faces[boffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[boffset]]++;
-                            vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[coffset];
-                    }
-                    // c
-                    flagvert = true;
-                    for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
-                            if (faces[aoffset] == vertdeg[j + 1][faces[coffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[coffset]]++;
-                            vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[aoffset];
-                    }
-                    flagvert = true;
-                    for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
-                            if (faces[boffset] == vertdeg[j + 1][faces[coffset]]) {
-                                    flagvert = false;
-                                    break;
-                            }
-                    }
-                    if (flagvert) {
-                            vertdeg[0][faces[coffset]]++;
-                            vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[boffset];
-                    }
-            }
-
-            var wt = 1.00;
-            var wt2 = 0.50;
-            var ssign;
-            var scaleFactor = 1;
-            var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
-            for ( var k = 0; k < numiter; k++) {
-                    for ( var i = 0; i < verts.length; i++) {
-                            if (vertdeg[0][i] < 3) {
-                                    tps[i].x = verts[i].x;
-                                    tps[i].y = verts[i].y;
-                                    tps[i].z = verts[i].z;
-                            } else if (vertdeg[0][i] == 3 || vertdeg[0][i] == 4) {
-                                    tps[i].x = 0;
-                                    tps[i].y = 0;
-                                    tps[i].z = 0;
-                                    for (j = 0; j < vertdeg[0][i]; j++) {
-                                            tps[i].x += verts[vertdeg[j + 1][i]].x;
-                                            tps[i].y += verts[vertdeg[j + 1][i]].y;
-                                            tps[i].z += verts[vertdeg[j + 1][i]].z;
-                                    }
-                                    tps[i].x += wt2 * verts[i].x;
-                                    tps[i].y += wt2 * verts[i].y;
-                                    tps[i].z += wt2 * verts[i].z;
-                                    tps[i].x /= wt2 + vertdeg[0][i];
-                                    tps[i].y /= wt2 + vertdeg[0][i];
-                                    tps[i].z /= wt2 + vertdeg[0][i];
-                            } else {
-                                    tps[i].x = 0;
-                                    tps[i].y = 0;
-                                    tps[i].z = 0;
-                                    for ( var j = 0; j < vertdeg[0][i]; j++) {
-                                            tps[i].x += verts[vertdeg[j + 1][i]].x;
-                                            tps[i].y += verts[vertdeg[j + 1][i]].y;
-                                            tps[i].z += verts[vertdeg[j + 1][i]].z;
-                                    }
-                                    tps[i].x += wt * verts[i].x;
-                                    tps[i].y += wt * verts[i].y;
-                                    tps[i].z += wt * verts[i].z;
-                                    tps[i].x /= wt + vertdeg[0][i];
-                                    tps[i].y /= wt + vertdeg[0][i];
-                                    tps[i].z /= wt + vertdeg[0][i];
-                            }
-                    }
-                    for ( var i = 0; i < verts.length; i++) {
-                            verts[i].x = tps[i].x;
-                            verts[i].y = tps[i].y;
-                            verts[i].z = tps[i].z;
-                    }
-                    /*
-                     * computenorm(); for (var i = 0; i < vertnumber; i++) { if
-                     * (verts[i].inout) ssign = 1; else ssign = -1; verts[i].x += ssign *
-                     * outwt * verts[i].pn.x; verts[i].y += ssign * outwt *
-                     * verts[i].pn.y; verts[i].z += ssign * outwt * verts[i].pn.z; }
-                     */
-            }
-    };
-    
     // The constructor
     function GLViewer(element, callback, defaultcolors) {
 
@@ -1224,39 +690,60 @@ WebMol.glmolViewer = (function() {
         //Add generic GLShape to viewer
         this.addShape = function(shapeSpec) {
             shapeSpec = shapeSpec || {};
-            var shape = new WebMol.GLShape(shapeSpec);
+            var shape = new WebMol.GLShape(shapes.length, shapeSpec);
             shapes.push(shape);
             
             return shape;
               
         };
         
-        this.addSphere = function(shape, spec) {
+        this.addSphere = function(spec) {
+            var s = new WebMol.GLShape(shapes.length);
             spec = spec || {};
-            shape.addSphere(spec);      
+            s.addSphere(spec);      
+            shapes.push(s);
+            
+            return s;
         };
         
-        this.addArrow = function(shape, spec) {
+        this.addArrow = function(spec) {            
+            var s = new WebMol.GLShape(shapes.length);            
             spec = spec || {};
-            shape.addArrow(spec);
+            s.addArrow(spec);
+            shapes.push(s);
+            
+            return s;
         };
         
         //Add custom shape component from user supplied function
-        this.addCustom = function(shape, spec) {                            
+        this.addCustom = function(spec) {   
+            var s = new WebMol.GLShape(shapes.length);                         
             spec = spec || {};
-            shape.addCustom(spec);                            
+            s.addCustom(spec);     
+            shapes.push(s);
+            
+            return s;                       
+        };
+        
+        // Construct isosurface from volumetric data
+        // - so far only supports gaussian cube format
+        // Can optionally render as blocky voxel image
+        this.addVolumetricData = function(data, format, spec) {
+            var s = new WebMol.GLShape(shapes.length);
+            spec = spec || {};            
+            s.addVolumetricData(data, format, spec);   
+            shapes.push(s);
+            
+            return s;       
         };
 
         // given molecular data and its format (pdb, sdf, xyz or mol2)
         // create a model and add it, returning the model identifier
         this.addModel = function(data, format) {
             var m = new WebMol.GLModel(models.length, defaultcolors);
-            if (format === "cube") {
-                data = parseCube(data, this);
-                //return;
-            }
             m.addMolData(data, format);
             models.push(m);
+            
             return m;
         };
 
@@ -1443,7 +930,7 @@ WebMol.glmolViewer = (function() {
             }
                        
             var faces = VandF.faces;
-            geoGroup.faceidx = faces.length*3;
+            geoGroup.faceidx = faces.length;//*3;
             geo.initTypedArrays();
 
             // set colors for vertices
@@ -1463,10 +950,11 @@ WebMol.glmolViewer = (function() {
             var faceoffset;
             
             //Setup colors, faces, and normals
-            for ( var i = 0; i < faces.length; i++) {
+            for ( var i = 0; i < faces.length; i+=3) {
                 
-                faceoffset = i*3;
-                var a = faces[i].a, b = faces[i].b, c = faces[i].c;
+                faceoffset = i;
+                //var a = faces[i].a, b = faces[i].b, c = faces[i].c;
+                var a = faces[i], b = faces[i+1], c = faces[i+2];
                 var A = v[a].atomid;
                 var B = v[b].atomid;
                 var C = v[c].atomid;
@@ -1502,7 +990,7 @@ WebMol.glmolViewer = (function() {
                 geoGroup.__normalArray[offsetA+2] += norm.z, geoGroup.__normalArray[offsetB+2] += norm.z, geoGroup.__normalArray[offsetC+2] += norm.z;
                 
             }
-
+            geoGroup.__faceArray = new Uint16Array(faces);
             var mesh = new WebMol.Mesh(geo, mat);
             mesh.doubleSided = true;
 
@@ -1543,7 +1031,6 @@ WebMol.glmolViewer = (function() {
             var time5 = new Date();
             console.log("marching cube " + (time5 - time4) + "  "
                     + (time5 - time) + "ms");
-            ps.laplaciansmooth(1);
             return ps.getFacesAndVertices(atomsToShow);
         };
 
@@ -1599,7 +1086,7 @@ WebMol.glmolViewer = (function() {
         }
 
         // add a surface
-        this.addSurface = function(type, style, atomsel, allsel, focus) {
+        this.addSurface = function(type, style, atomsel, allsel, focus, sync) {
             // type 1: VDW 3: SAS 4: MS 2: SES
             // if sync is true, does all work in main thread, otherwise uses
             // workers
@@ -1616,7 +1103,7 @@ WebMol.glmolViewer = (function() {
             var focusSele = getAtomsFromSel(focus);
 
             var time = new Date();
-
+        
             var mat = getMatWithStyle(style);
 
             var extent = getExtent(atomsToShow);
@@ -1692,17 +1179,19 @@ WebMol.glmolViewer = (function() {
                 };
             }
 
-            var sync = false;
+            var sync = !!(sync);
             var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 
                 for ( var i = 0; i < extents.length; i++) {
+                    //console.profile();
                     var VandF = generateMeshSyncHelper(type, extents[i].extent,
                             extents[i].atoms, extents[i].toshow, reducedAtoms,
                             totalVol);
                     var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                     mergeGeos(surfobj.geo, mesh);
                     view.render();
+                    //console.profileEnd();
                 }
             //TODO: Asynchronously generate geometryGroups (not separate meshes) and merge them into a single geometry
             } else { // use worker

@@ -4,6 +4,7 @@
 */
 
 //Math functions
+var WebMol = WebMol || {};
 
 WebMol.Math = {
 
@@ -34,7 +35,9 @@ WebMol.Quaternion = function(x, y, z, w) {
 
 };
 
-WebMol.extend(WebMol.Quaternion.prototype, {
+WebMol.Quaternion.prototype = {
+
+    constructor : WebMol.Quaternion,
 
     set : function(x, y, z, w) {
         
@@ -113,7 +116,7 @@ WebMol.extend(WebMol.Quaternion.prototype, {
         this.w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
 
     }
-});
+};
 
 //A 2 Vector
 WebMol.Vector2 = function(x, y) {
@@ -122,7 +125,9 @@ WebMol.Vector2 = function(x, y) {
     this.y = y || 0.0;
 };
 
-WebMol.extend(WebMol.Vector2.prototype, {
+WebMol.Vector2.prototype = {
+    
+    constructor : WebMol.Vector2,
    
     set : function(x, y) {
        
@@ -153,7 +158,7 @@ WebMol.extend(WebMol.Vector2.prototype, {
         return new WebMol.Vector2(this.x, this.y);
     }    
    
-});
+};
 
 //A 3 Vector
 
@@ -163,7 +168,9 @@ WebMol.Vector3 = function(x, y, z) {
     this.z = z || 0.0;
 };
 
-WebMol.extend(WebMol.Vector3.prototype, {
+WebMol.Vector3.prototype =  {
+    
+    constructor : WebMol.Vector3,
     
     set : function(x, y, z) {
         
@@ -406,7 +413,7 @@ WebMol.extend(WebMol.Vector3.prototype, {
         return new WebMol.Vector3(this.x, this.y, this.z);
     }
     
-});
+};
 
 //Matrices
 
@@ -424,27 +431,29 @@ WebMol.Matrix3 = function(n11, n12, n13, n21, n22, n23, n31, n32, n33) {
     
 };
 
-WebMol.extend(WebMol.Matrix3.prototype, {
+WebMol.Matrix3.prototype = {
+    
+    constructor : WebMol.Matrix3,    
    
-   set : function(n11, n12, n13, n21, n22, n23, n31, n32, n33) {
-       var te = this.elements;
-       
-       te[0] = n11; te[3] = n12; te[6] = n13;
-       te[1] = n21; te[4] = n22; te[7] = n23;
-       te[2] = n31; te[5] = n32; te[8] = n33;
-       
-       return this;
-   },
-   
-   identity : function() {   
-       this.set(
-           1,0,0,
-           0,1,0,
-           0,0,1
-       );
-       
-       return this;
-   },
+    set : function(n11, n12, n13, n21, n22, n23, n31, n32, n33) {
+        var te = this.elements;
+        
+        te[0] = n11; te[3] = n12; te[6] = n13;
+        te[1] = n21; te[4] = n22; te[7] = n23;
+        te[2] = n31; te[5] = n32; te[8] = n33;
+        
+        return this;
+    },
+    
+    identity : function() {   
+        this.set(
+            1,0,0,
+            0,1,0,
+            0,0,1
+        );
+        
+        return this;
+    },
    
     copy : function(m) {
         var me = m.elements;
@@ -533,7 +542,7 @@ WebMol.extend(WebMol.Matrix3.prototype, {
         );
     }
    
-});
+};
 
 //Matrix 4
 
@@ -548,7 +557,9 @@ WebMol.Matrix4 = function(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33,
 
 };
 
-WebMol.extend(WebMol.Matrix4.prototype, {
+WebMol.Matrix4.prototype = {
+
+    constructor : WebMol.Matrix4,
 
     set: function ( n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 ) {
         var te = this.elements;
@@ -964,7 +975,7 @@ WebMol.extend(WebMol.Matrix4.prototype, {
         );
     }
     
-});
+};
 
 WebMol.Ray = function(origin, direction) {
     

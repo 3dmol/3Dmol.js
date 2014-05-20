@@ -23,8 +23,9 @@
 	    <script src="webmol/glshape.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
-        <script src="webmol/ProteinSurface4.js"></script>
         <script src="webmol/MarchingCubeData.js"></script>
+        <script src="webmol/marchingcube.js"></script>        
+        <script src="webmol/ProteinSurface4.js"></script>
         <script src="webmol/glviewer.js"></script>
         <script src="webmol/jmolviewer.js"></script>
         <script src="webmol/jmolmodel.js"></script>
@@ -35,13 +36,24 @@
         var glviewer = null;
         var labels = [];
         var m = null;
-        var shape = null;
+        var posLobe = null;
+        var negLobe = null;
         var m2 = null;
         var atoms = null;
         var moldata = "";
         var l = null;
         var modelgroup = null;
-        var molObj = null; //Object3D for each rendered model
+        var molObj = null; //Object3D for each rendered model      
+        var lastsurfstyle = 1;
+        var voldata = null;
+        
+        var toggleSurfTrans = function(surf) {
+            
+            var opacity = (lastsurfstyle) ? 0.75 : 1;
+            glviewer.setSurfaceMaterialStyle(surf,{ opacity: opacity}); 
+            glviewer.render();
+            lastsurfstyle = !(lastsurfstyle);
+        };  
         
         var addLabels = function() {
             var atoms = glviewer.getModel(0).selectedAtoms({});
@@ -108,35 +120,37 @@
         };
         
         $(document).ready(function() {
-            
-            
-            //$.get("test_structs/benzene-homo.cube", function(data){
+                        
+            $.get("test_structs/benzene-homo.cube", function(data){
                 
-                data = moldata = $("#moldata_pdb").val();
+                moldata = $("#moldata_benzene_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
+                    voldata = data;
                     
-                    m = viewer.addModel(data, "pdb");
-                    //atoms = m.selectedAtoms({ });
-                    atoms = [];
+                    m = viewer.addModel(moldata, "sdf");
+                    atoms = m.selectedAtoms({ });
+                    //atoms = [];
                     for (a in atoms) {
                         atoms[a].clickable = true;
                         atoms[a].callback = atomcallback;
-                    }
-                    
-                    shape = viewer.addShape({
-                        wireframe: true,
-                        color: new WebMol.Color(0xAB5CF2),
-                        clickable: true,
-                        callback: shapecallback 
-                    });
-                    
-                    //viewer.addArrow(shape);
-                    //viewer.addSphere(shape);
+                    }                    
                     
                     modelgroup = viewer.getModelGroup();
                     
+                    posLobe = viewer.addVolumetricData(data, "cube", {isoval: 0.01, 
+                                                                      color: new WebMol.Color(0,0,1),
+                                                                      alpha: 0.95,
+                                                                      clickable: true,
+                                                                      callback: shapecallback});
+                    
+                    negLobe = viewer.addVolumetricData(data, "cube", {isoval: -0.01,
+                                                                      color: new WebMol.Color(1,0,0),
+                                                                      alpha: 0.95,
+                                                                      clickable: true,
+                                                                      callback : shapecallback});
+                                      
                     viewer.zoomTo();
                     viewer.render();
                     
@@ -146,8 +160,7 @@
                 
             }, "text");   
            
-
-        //});
+        });
         
         </script>
     </head>
@@ -161,18 +174,65 @@
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({},{cartoon:{color:0x0000ff}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
-        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {chain:'A'}, {chain:'A'},{chain:'B'});"></input>
-        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'});"></input>
+        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
+        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'},true);"></input>
        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1);"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2);"></input>
-        <input type="button" value="T" onclick="glviewer.setSurfaceMaterialStyle(surf1,{ opacity: .65}); glviewer.render();"></input>
+        <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
                 <br>
-        <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); WebMol.download('pdb:' + $('#pdbid').val(), glviewer); glviewer.render();">Download</button><br>
+        <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = WebMol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
  
  
 <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_download"></textarea>
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_ch3cl_sdf">
+    
+ OpenBabel05201415003D
+
+  5  4  0  0  0  0  0  0  0  0999 V2000
+    0.0000    0.0000   -1.1275 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.0225   -1.4687 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.8855   -0.5113   -1.4687 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.8855   -0.5113   -1.4687 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000    0.6571 Cl  0  0  0  0  0  0  0  0  0  0  0  0
+  1  5  1  0  0  0  0
+  2  1  1  0  0  0  0
+  3  1  1  0  0  0  0
+  4  1  1  0  0  0  0
+M  END
+</textarea>
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_benzene_sdf">
+
+ OpenBabel05131411233D
+
+ 12 12  0  0  0  0  0  0  0  0999 V2000
+    0.3122    1.3530   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.3278    0.4060   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0156   -0.9469   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.3123   -1.3529   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.3278   -0.4061    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0155    0.9469    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.5536    2.3986   -0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    2.3541    0.7199    0.0001 H   0  0  0  0  0  0  0  0  0  0  0  0
+    1.8004   -1.6788    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.5536   -2.3986    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.3541   -0.7198   -0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.8005    1.6787    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  7  1  0  0  0  0
+  1  6  2  0  0  0  0
+  2  3  2  0  0  0  0
+  2  1  1  0  0  0  0
+  2  8  1  0  0  0  0
+  3  4  1  0  0  0  0
+  3  9  1  0  0  0  0
+  4  5  2  0  0  0  0
+  4 10  1  0  0  0  0
+  5  6  1  0  0  0  0
+  6 12  1  0  0  0  0
+ 11  5  1  0  0  0  0
+M  END
+</textarea>
 <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small">v:U4C5Cr:4
   -OEChem-12201211493D
 
