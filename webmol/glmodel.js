@@ -814,7 +814,7 @@ WebMol.GLModel = (function() {
             var style = atom.style.cross;
             if (style.hidden)
                 return;
-            var linewidth = (atom.style.cross.lineWidth || defaultlineWidth);
+            var linewidth = (style.linewidth || defaultlineWidth);
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
                 
@@ -866,7 +866,7 @@ WebMol.GLModel = (function() {
                 return;
 
             // have a separate geometry for each linewidth
-            var linewidth = (atom.style.line.lineWidth || defaultlineWidth);
+            var linewidth = (style.linewidth || defaultlineWidth);
 
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
