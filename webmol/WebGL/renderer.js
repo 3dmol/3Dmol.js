@@ -314,46 +314,46 @@ WebMol.Renderer = function ( parameters ) {
 
     function enableAttribute( attribute ) {
 
-            if ( ! _enabledAttributes[ attribute ] ) {
+        if ( ! _enabledAttributes[ attribute ] ) {
 
-                    _gl.enableVertexAttribArray( attribute );
-                    _enabledAttributes[ attribute ] = true;
+            _gl.enableVertexAttribArray( attribute );
+            _enabledAttributes[ attribute ] = true;
 
-            }
+        }
 
     };
 
     function disableAttributes() {
 
-            for ( var attribute in _enabledAttributes ) {
+        for ( var attribute in _enabledAttributes ) {
 
-                    if ( _enabledAttributes[ attribute ] ) {
+            if ( _enabledAttributes[ attribute ] ) {
 
-                            _gl.disableVertexAttribArray( attribute );
-                            _enabledAttributes[ attribute ] = false;
-
-                    }
+                _gl.disableVertexAttribArray( attribute );
+                _enabledAttributes[ attribute ] = false;
 
             }
+
+        }
 
     };    
 
     function setPolygonOffset ( polygonOffset, factor, units) {
 
-            if ( _oldPolygonOffset !== polygonOffset ) {
+        if ( _oldPolygonOffset !== polygonOffset ) {
 
-                    if (polygonOffset)
-                            _gl.enable( _gl.POLYGON_OFFSET_FILL );
-                    else
-                            _gl.disable( _gl.POLYGON_OFFSET_FILL );
-            }
+            if (polygonOffset)
+                _gl.enable( _gl.POLYGON_OFFSET_FILL );
+            else
+                _gl.disable( _gl.POLYGON_OFFSET_FILL );
+        }
     };
 
     function setLineWidth ( width ) {
 
         if ( width !== _oldLineWidth ) {
-                _gl.lineWidth(width);
-                _oldLineWidth = width;
+            _gl.lineWidth(width);
+            _oldLineWidth = width;
         }
 
     };
@@ -443,47 +443,47 @@ WebMol.Renderer = function ( parameters ) {
 
         for ( i = 0, il = _programs.length; i < il; i ++ ) {
 
-                programInfo = _programs[ i ];
+            programInfo = _programs[ i ];
 
-                if ( programInfo.program === program ) {
+            if ( programInfo.program === program ) {
 
-                        programInfo.usedTimes --;
+                programInfo.usedTimes --;
 
-                        if ( programInfo.usedTimes === 0 ) {
+                if ( programInfo.usedTimes === 0 ) {
 
-                                deleteProgram = true;
-
-                        }
-
-                        break;
+                    deleteProgram = true;
 
                 }
+
+                break;
+
+            }
 
         }
 
         if ( deleteProgram === true ) {
 
-                // avoid using array.splice, this is costlier than creating new array from scratch
+            // avoid using array.splice, this is costlier than creating new array from scratch
 
-                var newPrograms = [];
+            var newPrograms = [];
 
-                for ( i = 0, il = _programs.length; i < il; i ++ ) {
+            for ( i = 0, il = _programs.length; i < il; i ++ ) {
 
-                        programInfo = _programs[ i ];
+                programInfo = _programs[ i ];
 
-                        if ( programInfo.program !== program ) {
+                if ( programInfo.program !== program ) {
 
-                                newPrograms.push( programInfo );
-
-                        }
+                    newPrograms.push( programInfo );
 
                 }
 
-                _programs = newPrograms;
+            }
 
-                _gl.deleteProgram( program );
+            _programs = newPrograms;
 
-                _this.info.memory.programs --;
+            _gl.deleteProgram( program );
+
+            _this.info.memory.programs --;
 
         }
 
@@ -518,18 +518,18 @@ WebMol.Renderer = function ( parameters ) {
         var shader;
 
         if (type === "fragment")
-                shader = _gl.createShader( _gl.FRAGMENT_SHADER );
+            shader = _gl.createShader( _gl.FRAGMENT_SHADER );
         else if (type === "vertex")
-                shader = _gl.createShader( _gl.VERTEX_SHADER );
+            shader = _gl.createShader( _gl.VERTEX_SHADER );
 
         _gl.shaderSource(shader, str);
         _gl.compileShader(shader);
 
         if ( ! _gl.getShaderParameter(shader, _gl.COMPILE_STATUS) ) {
 
-                console.error(_gl.getShaderInfoLog(shader));
-                console.error("could not initialize shader");
-                return null;
+            console.error(_gl.getShaderInfoLog(shader));
+            console.error("could not initialize shader");
+            return null;
 
         }
 
@@ -838,7 +838,7 @@ WebMol.Renderer = function ( parameters ) {
 
             if (material.wireframe) {
                 var lineCount = geometryGroup.lineidx;
-                setLineWidth(material.wireframeLineWidth);
+                setLineWidth(material.wireframeLinewidth);
                 
                 if (updateBuffers)
                     _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
@@ -867,7 +867,7 @@ WebMol.Renderer = function ( parameters ) {
 
             var lineCount = geometryGroup.vertices;
 
-            setLineWidth(material.lineWidth);
+            setLineWidth(material.linewidth);
             _gl.drawArrays( _gl.LINES, 0, lineCount );
 
             _this.info.render.calls++;
