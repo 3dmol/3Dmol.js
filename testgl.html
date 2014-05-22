@@ -4,7 +4,8 @@
         <title>WebMol Test</title>
         <!-- data-main attribute tells require.js to load
              scripts/main.js after require.js loads. -->
-        <script  src="js/jquery-1.9.1.js"></script>
+        <script src="js/jquery-1.9.1.js"></script>
+
         <script src="webmol/webmol.js"></script>
         <script src="webmol/WebGL/math.js"></script>
         <script src="webmol/WebGL/shapes.js"></script>
@@ -17,20 +18,15 @@
         <script src="webmol/WebGL/lights.js"></script>
         <script src="webmol/WebGL/scene.js"></script>
         <script src="webmol/WebGL/camera.js"></script>
-        <script src="webmol/WebGL/renderer.js"></script>
         <script src="webmol/properties.js"></script>
 	    <script src="webmol/colors.js"></script>
 	    <script src="webmol/glshape.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
-        <script src="webmol/MarchingCubeData.js"></script>
         <script src="webmol/marchingcube.js"></script>        
         <script src="webmol/ProteinSurface4.js"></script>
         <script src="webmol/glviewer.js"></script>
-        <script src="webmol/jmolviewer.js"></script>
-        <script src="webmol/jmolmodel.js"></script>
         <script src="webmol/colorschemes.js"></script>
-        
         
         <script>
         var glviewer = null;
@@ -43,6 +39,8 @@
         var moldata = "";
         var l = null;
         var modelgroup = null;
+        var receptorModel = null;
+        var ligandModel = null;
         var molObj = null; //Object3D for each rendered model      
         var lastsurfstyle = 1;
         var voldata = null;
@@ -60,8 +58,8 @@
             for (var a in atoms) {
                 var atom = atoms[a];
                 
-                if (atom.atom === "CA") {
-                    var l = glviewer.addLabel(atom.resn.trim() + " " + atom.resi, {inFront: true, 
+                if (atom.atom === "CA" && atom.resn.trim() == "ASN") {
+                    var l = glviewer.addLabel(atom.resn + " " + atom.resi, {inFront: true, 
                                               fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z} } ); 
                     atom.label = l;
                     labels.push(atom);                
@@ -121,41 +119,28 @@
         
         $(document).ready(function() {
                         
-            $.get("test_structs/1YCR.pdb", function(data){
+            $.get("test_structs/4GQB.pdb", function(data){
                 
-                moldata = $("#moldata_benzene_sdf").val();
+                //moldata = $("#moldata_benzene_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
                     voldata = data;
                     
-                    m = viewer.addModel(data, "pdb");
-                    atoms = m.selectedAtoms({ });
-                    //atoms = [];
-                    for (a in atoms) {
-                        atoms[a].clickable = true;
-                        atoms[a].callback = atomcallback;
-                    }                    
+                    receptorModel = m = viewer.addModel(data, "pdb");
+                    ligandModel = viewer.createModelFrom({chain: "C"}, true);                    
                     
-                    modelgroup = viewer.getModelGroup();
-                    /*
-                    posLobe = viewer.addVolumetricData(data, "cube", {isoval: 0.01, 
-                                                                      color: new WebMol.Color(0,0,1),
-                                                                      alpha: 0.95,
-                                                                      clickable: true,
-                                                                      callback: shapecallback});
+                    atoms = m.selectedAtoms({ }); 
                     
-                    negLobe = viewer.addVolumetricData(data, "cube", {isoval: -0.01,
-                                                                      color: new WebMol.Color(1,0,0),
-                                                                      alpha: 0.95,
-                                                                      clickable: true,
-                                                                      callback : shapecallback});
-                    */                 
+                    for (var i in atoms) {
+                        var atom = atoms[i];
+                        atom.clickable = true;
+                        atom.callback = atomcallback;
+                    }
+       
                     viewer.zoomTo();
                     viewer.render();
-                    
-                    molObj = modelgroup.children[0];
-                    
+
                 }});
                 
             }, "text");   
