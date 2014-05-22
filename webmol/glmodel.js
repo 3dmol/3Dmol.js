@@ -121,7 +121,7 @@ WebMol.GLModel = (function() {
     var assignPDBBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var protatoms = [];
-        var hetatoms = [];
+        var hetatoms = [];        
         
         for ( var i = 0; i < atomsarray.length; i++) {
             var atom = atomsarray[i];
@@ -141,8 +141,23 @@ WebMol.GLModel = (function() {
             return a.resi - b.resi;
         });
         
+        //for identifying connected residues
+        var currentResi = -1;
+        var reschain = -1;
+        var lastResConnected;
+        
         for ( var i = 0; i < protatoms.length; i++) {
             var ai = protatoms[i];
+            
+            if (ai.resi !== currentResi) {
+                currentResi = ai.resi;
+                if (!lastResConnected)
+                    reschain++;
+                    
+                lastResConnected = false;
+            }
+            
+            ai.reschain = reschain;
 
             for ( var j = i + 1; j < protatoms.length; j++) {
                 var aj = protatoms[j];
@@ -158,6 +173,10 @@ WebMol.GLModel = (function() {
                         aj.bonds.push(ai.index);
                         aj.bondOrder.push(1);
                     }
+                    
+                    if (ai.resi !== aj.resi) 
+                        lastResConnected = true;                   
+                        
                 }
             }
         }
@@ -561,7 +580,7 @@ WebMol.GLModel = (function() {
     var parsePDB = function(atoms, str, keepH, computeStruct) {
 
         var atoms_cnt = 0;
-        var noH = !keepH; // suppres hydrogens by default
+        var noH = !keepH; // suppress hydrogens by default
         var start = atoms.length;
         var protein = {
             sheet : [],
@@ -1537,7 +1556,7 @@ WebMol.GLModel = (function() {
                 parseXYZ(atoms, data);
                 break;
             case "pdb":
-                parsePDB(atoms, data);
+                parsePDB(atoms, data, false, true);
                 break;
             case "sdf":
                 parseSDF(atoms, data);

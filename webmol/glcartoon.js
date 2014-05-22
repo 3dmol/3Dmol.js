@@ -354,7 +354,7 @@ WebMol.drawCartoon = (function() {
         for ( var k = 0; k < num; k++)
             points[k] = [];
         var colors = [];
-        var currentChain, currentResi, currentCA;
+        var currentChain, currentReschain, currentResi, currentCA;
         var prevCO = null, ss = null, ssborder = false;
 
         for ( var i in atomlist) {
@@ -364,8 +364,8 @@ WebMol.drawCartoon = (function() {
 
             if ((atom.atom == 'O' || atom.atom == 'CA') && !atom.hetflag) {
                 if (atom.atom == 'CA') {
-                    if (currentChain != atom.chain
-                            || currentResi + 1 != atom.resi) {
+                    if (currentChain != atom.chain 
+                            || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
                         for ( var j = 0; !thickness && j < num; j++)
                             drawSmoothCurve(group, points[j], 1, colors, div);
                         if (fill)
@@ -382,6 +382,7 @@ WebMol.drawCartoon = (function() {
                     currentCA = new TV3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
                     currentChain = atom.chain;
+                    currentReschain = atom.reschain;
                     currentResi = atom.resi;
                     ss = atom.ss;
                     ssborder = atom.ssbegin || atom.ssend;
