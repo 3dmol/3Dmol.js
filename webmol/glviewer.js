@@ -1002,7 +1002,7 @@ WebMol.glmolViewer = (function() {
                 extendedAtoms, atomsToShow, atoms, vol) {
             var time = new Date();
             var ps = new ProteinSurface();
-            ps.initparm(expandedExtent, (type == 1) ? false : true, vol);
+            ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
 
             var time2 = new Date();
             console.log("initialize " + (time2 - time) + "ms");
@@ -1015,9 +1015,9 @@ WebMol.glmolViewer = (function() {
 
             ps.buildboundary();
 
-            if (type == 4 || type == 2)
+            if (type === 4 || type === 2)
                 ps.fastdistancemap();
-            if (type == 2) {
+            if (type === 2) {
                 ps.boundingatom(false);
                 ps.fillvoxelswaals(atoms, extendedAtoms);
             }

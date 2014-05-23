@@ -107,24 +107,25 @@ WebMol.extend = function(obj, source) {
 };
 
 WebMol.SurfaceType = {
-            VDW : 1,
-            SAS : 3,
-            SES : 2
-    };
+    VDW : 1,
+    SES : 2,
+    SAS : 3,
+    MS  : 4
+};
 
 // in an attempt to reduce memory overhead, cache all WebMol.Colors
 //this makes things a little faster
 WebMol.CC = {
     cache : {},
     color : function(hex) {
-            if(typeof(this.cache[hex]) != "undefined") {
-                return this.cache[hex];
-            }
-            else {
-                var c = new WebMol.Color(hex);
-                this.cache[hex] = c;
-                return c;
-            }
+        if(typeof(this.cache[hex]) !== "undefined") {
+            return this.cache[hex];
+        }
+        else {
+            var c = new WebMol.Color(hex);
+            this.cache[hex] = c;
+            return c;
+        }
     }
 };
 
