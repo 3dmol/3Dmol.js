@@ -19,8 +19,8 @@
         <script src="webmol/WebGL/scene.js"></script>
         <script src="webmol/WebGL/camera.js"></script>
         <script src="webmol/properties.js"></script>
-	    <script src="webmol/colors.js"></script>
-	    <script src="webmol/glshape.js"></script>
+        <script src="webmol/colors.js"></script>
+        <script src="webmol/glshape.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/marchingcube.js"></script>        
@@ -159,9 +159,9 @@
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({},{cartoon:{color:0x0000ff}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
-        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
+        <input type="button" value="SES" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.SES, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
         <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{});"></input>
-       <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1);"></input>
+        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1);"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2);"></input>
         <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>
         <br>
