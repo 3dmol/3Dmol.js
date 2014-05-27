@@ -33,7 +33,7 @@ WebMol.MarchingCube = (function() {
         var unitCube = new WebMol.Vector3(1,1,1).multiplyScalar(scale);
         
         //keep track of calculated vertices to avoid repeats
-        var vertnums = new Int16Array(nX*nY*nZ);
+        var vertnums = new Int32Array(nX*nY*nZ);
         for (var i = 0; i < vertnums.length; ++i)
             vertnums[i] = -1;
 

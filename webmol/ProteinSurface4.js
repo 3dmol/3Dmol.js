@@ -153,7 +153,7 @@ var ProteinSurface = function() {
             scaleFactor = defaultScaleFactor/2;
 
         var margin = (1 / scaleFactor) * 5.5; // need margin to avoid
-                                                                                        // boundary/round off effects
+                                              // boundary/round off effects
         origextent = extent;
         pminx = extent[0][0], pmaxx = extent[1][0];
         pminy = extent[0][1], pmaxy = extent[1][1];
@@ -763,7 +763,7 @@ var ProteinSurface = function() {
         for ( var i = 0, lim = vpBits.length; i < lim; i++) {
             if (stype === 1) {// vdw
                 vpBits[i] &= ~ISBOUND;
-            } else if (stype === 2) { // ses
+            } else if (stype === 4) { // ses
                 vpBits[i] &= ~ISDONE;
                 if (vpBits[i] & ISBOUND)
                     vpBits[i] |= ISDONE;
