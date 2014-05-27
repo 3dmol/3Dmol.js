@@ -109,7 +109,8 @@ WebMol.extend = function(obj, source) {
 WebMol.SurfaceType = {
             VDW : 1,
             SAS : 3,
-            SES : 2
+            SES : 2,
+            MS : 4
     };
 
 // in an attempt to reduce memory overhead, cache all WebMol.Colors

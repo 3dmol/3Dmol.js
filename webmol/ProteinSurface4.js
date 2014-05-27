@@ -47,7 +47,7 @@ var ProteinSurface = function() {
 	var pHeight = 0, pWidth = 0, pLength = 0;
 	var cutRadius = 0;
 	var vpBits = null; // uint8 array of bitmasks
-	var vpDistance = null; // floatarray
+	var vpDistance = null; // floatarray of _squared_ distances
 	var vpAtomID = null; // intarray
 	var vertnumber = 0, facenumber = 0;
 	var pminx = 0, pminy = 0, pminz = 0, pmaxx = 0, pmaxy = 0, pmaxz = 0;
@@ -81,13 +81,30 @@ var ProteinSurface = function() {
 	
 	var depty = {}, widxz = {};
 	var faces, verts;
-	var nb = [ [ 1, 0, 0 ], [ -1, 0, 0 ], [ 0, 1, 0 ], [ 0, -1, 0 ],
-			[ 0, 0, 1 ], [ 0, 0, -1 ], [ 1, 1, 0 ], [ 1, -1, 0 ], [ -1, 1, 0 ],
-			[ -1, -1, 0 ], [ 1, 0, 1 ], [ 1, 0, -1 ], [ -1, 0, 1 ],
-			[ -1, 0, -1 ], [ 0, 1, 1 ], [ 0, 1, -1 ], [ 0, -1, 1 ],
-			[ 0, -1, -1 ], [ 1, 1, 1 ], [ 1, 1, -1 ], [ 1, -1, 1 ],
-			[ -1, 1, 1 ], [ 1, -1, -1 ], [ -1, -1, 1 ], [ -1, 1, -1 ],
-			[ -1, -1, -1 ] ];
+	var nb = [ new Int32Array([ 1, 0, 0 ]), new Int32Array([ -1, 0, 0 ]), 
+	           new Int32Array([ 0, 1, 0 ]), new Int32Array([ 0, -1, 0 ]),
+	           new Int32Array([ 0, 0, 1 ]), 
+	           new Int32Array([ 0, 0, -1 ]), 
+	           new Int32Array([ 1, 1, 0 ]), 
+	           new Int32Array([ 1, -1, 0 ]), 
+	           new Int32Array([ -1, 1, 0 ]),
+	           new Int32Array([ -1, -1, 0 ]), 
+	           new Int32Array([ 1, 0, 1 ]), 
+	           new Int32Array([ 1, 0, -1 ]), 
+	           new Int32Array([ -1, 0, 1 ]),
+	           new Int32Array([ -1, 0, -1 ]), 
+	           new Int32Array([ 0, 1, 1 ]), 
+	           new Int32Array([ 0, 1, -1 ]), 
+	           new Int32Array([ 0, -1, 1 ]),
+	           new Int32Array([ 0, -1, -1 ]), 
+	           new Int32Array([ 1, 1, 1 ]), 
+	           new Int32Array([ 1, 1, -1 ]), 
+	           new Int32Array([ 1, -1, 1 ]),
+	           new Int32Array([ -1, 1, 1 ]), 
+	           new Int32Array([ 1, -1, -1 ]), 
+	           new Int32Array([ -1, -1, 1 ]), 
+	           new Int32Array([ -1, 1, -1 ]),
+	           new Int32Array([ -1, -1, -1 ]) ];
 
 	var origextent;
 
@@ -189,7 +206,7 @@ var ProteinSurface = function() {
 		pHeight = Math.ceil(scaleFactor * (pmaxz - pminz)) + 1;
 
 		this.boundingatom(btype);
-		cutRadis = probeRadius * scaleFactor;
+		cutRadius = probeRadius * scaleFactor;
 
 		vpBits = new Uint8Array(pLength * pWidth * pHeight);
 		vpDistance = new Float64Array(pLength * pWidth * pHeight); // float 32
@@ -219,7 +236,7 @@ var ProteinSurface = function() {
 
 			sradius = tradius[i] * tradius[i];
 			widxz[i] = Math.floor(tradius[i]) + 1;
-			depty[i] = new Array(widxz[i] * widxz[i]);
+			depty[i] = new Int32Array(widxz[i] * widxz[i]);
 			indx = 0;
 			for (j = 0; j < widxz[i]; j++) {
 				for (k = 0; k < widxz[i]; k++) {
@@ -341,6 +358,7 @@ var ProteinSurface = function() {
 
 		var at = getVDWIndex(atom);
 		var i, j,n;
+		var pWH = pWidth*pHeight;
 		for (i = 0, n = widxz[at]; i < n; i++) {
 			for (j = 0; j < n; j++) {
 				if (depty[at][nind] != -1) {
@@ -360,7 +378,7 @@ var ProteinSurface = function() {
 												|| sj >= pWidth
 												|| sk >= pHeight)
 											continue;
-										var index = si * pWidth * pHeight + sj
+										var index = si * pWH + sj
 												* pHeight + sk;
 										if (!(vpBits[index] & ISDONE)) {
 											vpBits[index] |= ISDONE;
@@ -390,14 +408,15 @@ var ProteinSurface = function() {
 	};
 
 	this.buildboundary = function() {
+		var pWH = pWidth*pHeight;
 		for (i = 0; i < pLength; i++) {
 			for (j = 0; j < pHeight; j++) {
 				for (k = 0; k < pWidth; k++) {
-					var index = i * pWidth * pHeight + k * pHeight + j;
+					var index = i * pWH + k * pHeight + j;
 					if (vpBits[index] & INOUT) {
 						var flagbound = false;
 						var ii = 0;
-						while (!flagbound && ii < 26) {
+						while (ii < 26) {
 							var ti = i + nb[ii][0], tj = j + nb[ii][2], tk = k
 									+ nb[ii][1];
 							if (ti > -1
@@ -406,10 +425,10 @@ var ProteinSurface = function() {
 									&& tk < pWidth
 									&& tj > -1
 									&& tj < pHeight
-									&& !(vpBits[ti * pWidth * pHeight + tk
+									&& !(vpBits[ti * pWH + tk
 											* pHeight + tj] & INOUT)) {
 								vpBits[index] |= ISBOUND;
-								flagbound = true;
+								break;
 							} else
 								ii++;
 						}
@@ -452,11 +471,13 @@ var ProteinSurface = function() {
 		totalinnervox = 0;
 
 		var boundPoint = new PointGrid(pLength, pWidth, pHeight);
-
+		var pWH = pWidth*pHeight;
+		var cutRSq = cutRadius*cutRadius;
+		
 		for (i = 0; i < pLength; i++) {
 			for (j = 0; j < pWidth; j++) {
 				for (k = 0; k < pHeight; k++) {
-					var index = i * pWidth * pHeight + j * pHeight + k;
+					var index = i * pWH + j * pHeight + k;
 					vpBits[index] &= ~ISDONE; // isdone = false
 					if (vpBits[index] & INOUT) {
 						if (vpBits[index] & ISBOUND) {
@@ -483,7 +504,7 @@ var ProteinSurface = function() {
 		for (i = 0; i < pLength; i++) {
 			for (j = 0; j < pWidth; j++) {
 				for (k = 0; k < pHeight; k++) {
-					var index = i * pWidth * pHeight + j * pHeight + k;
+					var index = i * pWH + j * pHeight + k;
 					if (vpBits[index] & ISBOUND) {
 						inarray.push({
 							ix : i,
@@ -502,18 +523,15 @@ var ProteinSurface = function() {
 			positin = 0;
 			inarray = [];
 			for (i = 0; i < positout; i++) {
-				var index = pWidth * pHeight * outarray[i].ix + pHeight
+				var index = pWH * outarray[i].ix + pHeight
 						* outarray[i].iy + outarray[i].iz;
 				vpBits[index] &= ~ISBOUND;
-				if (vpDistance[index] <= 1.02 * cutRadis) {
+				if (vpDistance[index] <= 1.0404 * cutRSq) {
 					inarray.push({
 						ix : outarray[i].ix,
 						iy : outarray[i].iy,
 						iz : outarray[i].iz
 					});
-					// inarray[positin].ix=outarray[i].ix;
-					// inarray[positin].iy=outarray[i].iy;
-					// inarray[positin].iz=outarray[i].iz;
 					positin++;
 				}
 			}
@@ -525,12 +543,12 @@ var ProteinSurface = function() {
 		for (i = 0; i < pLength; i++) {
 			for (j = 0; j < pWidth; j++) {
 				for (k = 0; k < pHeight; k++) {
-					var index = i * pWidth * pHeight + j * pHeight + k;
+					var index = i * pWH + j * pHeight + k;
 					vpBits[index] &= ~ISBOUND;
 					// ses solid
 					if (vpBits[index] & INOUT) {
 						if (!(vpBits[index] & ISDONE)
-								|| ((vpBits[index] & ISDONE) && vpDistance[index] >= cutRadis
+								|| ((vpBits[index] & ISDONE) && vpDistance[index] >= cutRSq
 										- 0.50 / (0.1 + cutsf))) {
 							vpBits[index] |= ISBOUND;
 						}
@@ -560,6 +578,7 @@ var ProteinSurface = function() {
 			iy : -1,
 			iz : -1
 		};
+		var pWH = pWidth*pHeight;
 		for ( var i = 0; i < number; i++) {
 			tx = inarray[i].ix;
 			ty = inarray[i].iy;
@@ -570,48 +589,47 @@ var ProteinSurface = function() {
 				tnv.ix = tx + nb[j][0];
 				tnv.iy = ty + nb[j][1];
 				tnv.iz = tz + nb[j][2];
-				var index = tnv.ix * pWidth * pHeight + pHeight * tnv.iy
-						+ tnv.iz;
+				
 				if (tnv.ix < pLength && tnv.ix > -1 && tnv.iy < pWidth
-						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1
-						&& (vpBits[index] & INOUT) && !(vpBits[index] & ISDONE)) {
-
-					boundPoint.set(tnv.ix, tnv.iy, tz + nb[j][2], bp);
-					dx = tnv.ix - bp.ix;
-					dy = tnv.iy - bp.iy;
-					dz = tnv.iz - bp.iz;
-					var square = dx * dx + dy * dy + dz * dz;
-					vpDistance[index] = Math.sqrt(square);
-					vpBits[index] |= ISDONE;
-					vpBits[index] |= ISBOUND;
-
-					outarray.push({
-						ix : tnv.ix,
-						iy : tnv.iy,
-						iz : tnv.iz
-					});
-					positout++;
-				} else if (tnv.ix < pLength && tnv.ix > -1 && tnv.iy < pWidth
-						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1
-						&& (vpBits[index] & INOUT) && (vpBits[index] & ISDONE)) {
-
-					dx = tnv.ix - bp.ix;
-					dy = tnv.iy - bp.iy;
-					dz = tnv.iz - bp.iz;
-					square = dx * dx + dy * dy + dz * dz;
-					square = Math.sqrt(square);
-					if (square < vpDistance[index]) {
-						boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
-
+						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1) {
+					var index = tnv.ix * pWH + pHeight * tnv.iy + tnv.iz;
+					
+					if ((vpBits[index] & INOUT) && !(vpBits[index] & ISDONE)) {
+	
+						boundPoint.set(tnv.ix, tnv.iy, tz + nb[j][2], bp);
+						dx = tnv.ix - bp.ix;
+						dy = tnv.iy - bp.iy;
+						dz = tnv.iz - bp.iz;
+						var square = dx * dx + dy * dy + dz * dz;
 						vpDistance[index] = square;
-						if (!(vpBits[index] & ISBOUND)) {
-							vpBits[index] |= ISBOUND;
-							outarray.push({
-								ix : tnv.ix,
-								iy : tnv.iy,
-								iz : tnv.iz
-							});
-							positout++;
+						vpBits[index] |= ISDONE;
+						vpBits[index] |= ISBOUND;
+	
+						outarray.push({
+							ix : tnv.ix,
+							iy : tnv.iy,
+							iz : tnv.iz
+						});
+						positout++;
+					} else if ((vpBits[index] & INOUT) && (vpBits[index] & ISDONE)) {
+	
+						dx = tnv.ix - bp.ix;
+						dy = tnv.iy - bp.iy;
+						dz = tnv.iz - bp.iz;
+						square = dx * dx + dy * dy + dz * dz;
+						if (square < vpDistance[index]) {
+							boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
+	
+							vpDistance[index] = square;
+							if (!(vpBits[index] & ISBOUND)) {
+								vpBits[index] |= ISBOUND;
+								outarray.push({
+									ix : tnv.ix,
+									iy : tnv.iy,
+									iz : tnv.iz
+								});
+								positout++;
+							}
 						}
 					}
 				}
@@ -630,46 +648,45 @@ var ProteinSurface = function() {
 				tnv.ix = tx + nb[j][0];
 				tnv.iy = ty + nb[j][1];
 				tnv.iz = tz + nb[j][2];
-				var index = tnv.ix * pWidth * pHeight + pHeight * tnv.iy
-						+ tnv.iz;
 
-				if (tnv.ix < pLength && tnv.ix > -1 && tnv.iy < pWidth
-						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1
-						&& (vpBits[index] & INOUT) && !(vpBits[index] & ISDONE)) {
-					boundPoint.set(tnv.ix, tnv.iy, tz + nb[j][2], bp);
-
-					dx = tnv.ix - bp.ix;
-					dy = tnv.iy - bp.iy;
-					dz = tnv.iz - bp.iz;
-					square = dx * dx + dy * dy + dz * dz;
-					vpDistance[index] = Math.sqrt(square);
-					vpBits[index] |= ISDONE;
-					vpBits[index] |= ISBOUND;
-
-					outarray.push({
-						ix : tnv.ix,
-						iy : tnv.iy,
-						iz : tnv.iz
-					});
-					positout++;
-				} else if (tnv.ix < pLength && tnv.ix > -1 && tnv.iy < pWidth
-						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1
-						&& (vpBits[index] & INOUT) && (vpBits[index] & ISDONE)) {
-					dx = tnv.ix - bp.ix;
-					dy = tnv.iy - bp.iy;
-					dz = tnv.iz - bp.iz;
-					square = Math.sqrt(dx * dx + dy * dy + dz * dz);
-					if (square < vpDistance[index]) {
-						boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
+				if(tnv.ix < pLength && tnv.ix > -1 && tnv.iy < pWidth
+						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1) {
+					var index = tnv.ix * pWH + pHeight * tnv.iy + tnv.iz;
+					
+					if ((vpBits[index] & INOUT) && !(vpBits[index] & ISDONE)) {
+						boundPoint.set(tnv.ix, tnv.iy, tz + nb[j][2], bp);
+	
+						dx = tnv.ix - bp.ix;
+						dy = tnv.iy - bp.iy;
+						dz = tnv.iz - bp.iz;
+						square = dx * dx + dy * dy + dz * dz;
 						vpDistance[index] = square;
-						if (!(vpBits[index] & ISBOUND)) {
-							vpBits[index] |= ISBOUND;
-							outarray.push({
-								ix : tnv.ix,
-								iy : tnv.iy,
-								iz : tnv.iz
-							});
-							positout++;
+						vpBits[index] |= ISDONE;
+						vpBits[index] |= ISBOUND;
+	
+						outarray.push({
+							ix : tnv.ix,
+							iy : tnv.iy,
+							iz : tnv.iz
+						});
+						positout++;
+					} else if ((vpBits[index] & INOUT) && (vpBits[index] & ISDONE)) {
+						dx = tnv.ix - bp.ix;
+						dy = tnv.iy - bp.iy;
+						dz = tnv.iz - bp.iz;
+						square = dx * dx + dy * dy + dz * dz;
+						if (square < vpDistance[index]) {
+							boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
+							vpDistance[index] = square;
+							if (!(vpBits[index] & ISBOUND)) {
+								vpBits[index] |= ISBOUND;
+								outarray.push({
+									ix : tnv.ix,
+									iy : tnv.iy,
+									iz : tnv.iz
+								});
+								positout++;
+							}
 						}
 					}
 				}
@@ -688,47 +705,47 @@ var ProteinSurface = function() {
 				tnv.ix = tx + nb[j][0];
 				tnv.iy = ty + nb[j][1];
 				tnv.iz = tz + nb[j][2];
-				var index = tnv.ix * pWidth * pHeight + pHeight * tnv.iy
-						+ tnv.iz;
 
 				if (tnv.ix < pLength && tnv.ix > -1 && tnv.iy < pWidth
-						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1
-						&& (vpBits[index] & INOUT) && !(vpBits[index] & ISDONE)) {
-					boundPoint.set(tnv.ix, tnv.iy, tz + nb[j][2], bp);
+						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1) {
+					var index = tnv.ix * pWH + pHeight * tnv.iy + tnv.iz;
+				
 
-					dx = tnv.ix - bp.ix;
-					dy = tnv.iy - bp.iy;
-					dz = tnv.iz - bp.iz;
-					square = dx * dx + dy * dy + dz * dz;
-					vpDistance[index] = Math.sqrt(square);
-					vpBits[index] |= ISDONE;
-					vpBits[index] |= ISBOUND;
+					if ((vpBits[index] & INOUT) && !(vpBits[index] & ISDONE)) {
+						boundPoint.set(tnv.ix, tnv.iy, tz + nb[j][2], bp);
 
-					outarray.push({
-						ix : tnv.ix,
-						iy : tnv.iy,
-						iz : tnv.iz
-					});
-					positout++;
-				} else if (tnv.ix < pLength && tnv.ix > -1 && tnv.iy < pWidth
-						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1
-						&& (vpBits[index] & INOUT) && (vpBits[index] & ISDONE)) {
-					dx = tnv.ix - bp.ix;
-					dy = tnv.iy - bp.iy;
-					dz = tnv.iz - bp.iz;
-					square = Math.sqrt(dx * dx + dy * dy + dz * dz);
-					if (square < vpDistance[index]) {
-						boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
-
+						dx = tnv.ix - bp.ix;
+						dy = tnv.iy - bp.iy;
+						dz = tnv.iz - bp.iz;
+						square = dx * dx + dy * dy + dz * dz;
 						vpDistance[index] = square;
-						if (!(vpBits[index] & ISBOUND)) {
-							vpBits[index] |= ISBOUND;
-							outarray.push({
-								ix : tnv.ix,
-								iy : tnv.iy,
-								iz : tnv.iz
-							});
-							positout++;
+						vpBits[index] |= ISDONE;
+						vpBits[index] |= ISBOUND;
+
+						outarray.push({
+							ix : tnv.ix,
+							iy : tnv.iy,
+							iz : tnv.iz
+						});
+						positout++;
+					} else if ((vpBits[index] & INOUT)	&& (vpBits[index] & ISDONE)) {
+						dx = tnv.ix - bp.ix;
+						dy = tnv.iy - bp.iy;
+						dz = tnv.iz - bp.iz;
+						square = dx * dx + dy * dy + dz * dz;
+						if (square < vpDistance[index]) {
+							boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
+
+							vpDistance[index] = square;
+							if (!(vpBits[index] & ISBOUND)) {
+								vpBits[index] |= ISBOUND;
+								outarray.push({
+									ix : tnv.ix,
+									iy : tnv.iy,
+									iz : tnv.iz
+								});
+								positout++;
+							}
 						}
 					}
 				}
@@ -833,8 +850,9 @@ var ProteinSurface = function() {
             nZ : pHeight        
         });	     
 
+        var pWH = pWidth*pHeight;
         for (i = 0, vlen = verts.length; i < vlen; i++) {
-            verts[i].atomid = vpAtomID[verts[i].x * pWidth * pHeight + pHeight
+            verts[i].atomid = vpAtomID[verts[i].x * pWH + pHeight
                     * verts[i].y + verts[i].z];
         }  
 
