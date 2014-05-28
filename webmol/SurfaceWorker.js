@@ -51,12 +51,11 @@ self.onmessage = function(oEvent) {
 		ps.fillvoxels(self.atomData, obj.extendedAtoms);
 		ps.buildboundary();
 
-		if (type == 4 || type == 2)
+		if (type == 4 || type == 2) {
 			ps.fastdistancemap();
-		if (type == 2) {
-			ps.boundingatom(false);
-			ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);
-		}
+            ps.boundingatom(false);
+            ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);	
+        }		
 
 		ps.marchingcube(type);
 		var VandF = ps.getFacesAndVertices(obj.atomsToShow);

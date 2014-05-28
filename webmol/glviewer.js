@@ -24,6 +24,10 @@ var roundRect = function(ctx, x, y, w, h, r) {
 
 WebMol.LabelCount = 0;
 
+/**
+ * Create a new label
+ * @constructor
+ */
 WebMol.Label = function(message, parameters) {
         
     this.id = WebMol.LabelCount++;    
@@ -38,7 +42,7 @@ WebMol.Label = function(message, parameters) {
     
 };
 
-//TODO: How should this class be structured?
+
 WebMol.Label.prototype = {
     
     constructor : WebMol.Label,
@@ -122,7 +126,10 @@ WebMol.Label.prototype = {
 };
 
 // a webmol unified interace to gmol
-WebMol.glmolViewer = (function() {
+/**
+ * 
+ */
+WebMol.GLViewer = WebMol.glmolViewer = (function() {
     // private class variables
     var numWorkers = 4; // number of threads for surface generation
     var maxVolume = 64000; // how much to break up surface calculations
@@ -159,6 +166,7 @@ WebMol.glmolViewer = (function() {
     };
         
     // The constructor
+
     function GLViewer(element, callback, defaultcolors) {
 
         // set variables
@@ -1015,11 +1023,10 @@ WebMol.glmolViewer = (function() {
 
             ps.buildboundary();
 
-            if (type === 4 || type === 2)
+            if (type === 4 || type === 2) {
                 ps.fastdistancemap();
-            if (type === 2) {
                 ps.boundingatom(false);
-                ps.fillvoxelswaals(atoms, extendedAtoms);
+                ps.fillvoxelswaals(atoms, extendedAtoms);                
             }
 
             var time4 = new Date();
