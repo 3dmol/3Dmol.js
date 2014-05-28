@@ -1015,9 +1015,8 @@ WebMol.glmolViewer = (function() {
 
             ps.buildboundary();
 
-            if (type == 4 || type == 2)
+            if (type == WebMol.SurfaceType.SES) {
                 ps.fastdistancemap();
-            if (type == 2) {
                 ps.boundingatom(false);
                 ps.fillvoxelswaals(atoms, extendedAtoms);
             }

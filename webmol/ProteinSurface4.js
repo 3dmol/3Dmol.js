@@ -257,7 +257,7 @@ var ProteinSurface = function() {
 		// seqterm,bool
 		// atomtype,atom*
 		// proseq,bool bcolor)
-		var i;
+		var i, lim;
 		for ( var i = 0, lim = vpBits.length; i < lim; i++) {
 			vpBits[i] = 0;
 			vpDistance[i] = -1.0;
@@ -265,7 +265,7 @@ var ProteinSurface = function() {
 		}
 
 		for (i in atomlist) {
-			atom = atoms[atomlist[i]];
+			var atom = atoms[atomlist[i]];
 			if (atom == undefined)
 				continue;
 			this.fillAtom(atom, atoms);
@@ -279,7 +279,8 @@ var ProteinSurface = function() {
 
 
 	this.fillAtom = function(atom, atoms) {
-		var cx, cy, cz, ox, oy, oz;
+		var cx, cy, cz, ox, oy, oz, mi, mj, mk, i, j, k, si, sj, sk;
+		var ii, jj, kk, n;
 		cx = Math.floor(0.5 + scaleFactor * (atom.x + ptranx));
 		cy = Math.floor(0.5 + scaleFactor * (atom.y + ptrany));
 		cz = Math.floor(0.5 + scaleFactor * (atom.z + ptranz));
@@ -287,7 +288,8 @@ var ProteinSurface = function() {
 		var at = getVDWIndex(atom);
 		var nind = 0;
 		var cnt = 0;
-
+		var pWH = pWidth*pHeight;
+		
 		for (i = 0, n = widxz[at]; i < n; i++) {
 			for (j = 0; j < n; j++) {
 				if (depty[at][nind] != -1) {
@@ -307,8 +309,7 @@ var ProteinSurface = function() {
 												|| sj >= pWidth
 												|| sk >= pHeight)
 											continue;
-										var index = si * pWidth * pHeight + sj
-												* pHeight + sk;
+										var index = si * pWH + sj * pHeight + sk;
 
 										if (!(vpBits[index] & INOUT)) {
 											vpBits[index] |= INOUT;
@@ -342,7 +343,7 @@ var ProteinSurface = function() {
 			vpBits[i] &= ~ISDONE; // not isdone
 
 		for (i in atomlist) {
-			atom = atoms[atomlist[i]];
+			var atom = atoms[atomlist[i]];
 			if (atom == undefined)
 				continue;
 
@@ -352,6 +353,7 @@ var ProteinSurface = function() {
 
 	this.fillAtomWaals = function(atom, atoms) {
 		var cx, cy, cz, ox, oy, oz, nind = 0;
+		var mi, mj, mk, si, sj, sk, i, j, k, ii, jj, kk;
 		cx = Math.floor(0.5 + scaleFactor * (atom.x + ptranx));
 		cy = Math.floor(0.5 + scaleFactor * (atom.y + ptrany));
 		cz = Math.floor(0.5 + scaleFactor * (atom.z + ptranz));
@@ -464,15 +466,16 @@ var ProteinSurface = function() {
 	};
 
 	this.fastdistancemap = function() {
-		var positin = 0, positout = 0, eliminate = 0;
+		var eliminate = 0;
 		var certificate;
-		var i, j, k;
-		totalsurfacevox = 0;
-		totalinnervox = 0;
+		var i, j, k, n;
 
 		var boundPoint = new PointGrid(pLength, pWidth, pHeight);
 		var pWH = pWidth*pHeight;
 		var cutRSq = cutRadius*cutRadius;
+		
+		var inarray = new Array();
+		var outarray = new Array();
 		
 		for (i = 0; i < pLength; i++) {
 			for (j = 0; j < pWidth; j++) {
@@ -481,48 +484,26 @@ var ProteinSurface = function() {
 					vpBits[index] &= ~ISDONE; // isdone = false
 					if (vpBits[index] & INOUT) {
 						if (vpBits[index] & ISBOUND) {
-							totalsurfacevox++;
-							boundPoint.set(i, j, k, {
+							var triple = {
 								ix : i,
 								iy : j,
 								iz : k
-							});
+							};
+							boundPoint.set(i, j, k, triple);
+							inarray.push(triple);
 							vpDistance[index] = 0;
 							vpBits[index] |= ISDONE;
-						} else {
-							totalinnervox++;
-						}
-					}
-				}
-			}
-		}
-
-		inarray = new Array();
-		outarray = new Array();
-		var positin = 0, positout = 0;
-
-		for (i = 0; i < pLength; i++) {
-			for (j = 0; j < pWidth; j++) {
-				for (k = 0; k < pHeight; k++) {
-					var index = i * pWH + j * pHeight + k;
-					if (vpBits[index] & ISBOUND) {
-						inarray.push({
-							ix : i,
-							iy : j,
-							iz : k
-						});
-						positin++;
-						vpBits[index] &= ~ISBOUND;
+							vpBits[index] &= ~ISBOUND;
+						} 
 					}
 				}
 			}
 		}
 
 		do {
-			positout = this.fastoneshell(positin, boundPoint);
-			positin = 0;
+			outarray = this.fastoneshell(inarray, boundPoint);
 			inarray = [];
-			for (i = 0; i < positout; i++) {
+			for (i = 0, n = outarray.length; i < n; i++) {
 				var index = pWH * outarray[i].ix + pHeight
 						* outarray[i].iy + outarray[i].iz;
 				vpBits[index] &= ~ISBOUND;
@@ -532,14 +513,18 @@ var ProteinSurface = function() {
 						iy : outarray[i].iy,
 						iz : outarray[i].iz
 					});
-					positin++;
 				}
 			}
-		} while (positin != 0);
+		} while (inarray.length != 0);
 
+		inarray = [];
+		outarray = [];
+		boundPoint = null;
+		
 		var cutsf = scaleFactor - 0.5;
 		if (cutsf < 0)
 			cutsf = 0;
+		var cutoff = cutRSq	- 0.50 / (0.1 + cutsf);
 		for (i = 0; i < pLength; i++) {
 			for (j = 0; j < pWidth; j++) {
 				for (k = 0; k < pHeight; k++) {
@@ -548,30 +533,27 @@ var ProteinSurface = function() {
 					// ses solid
 					if (vpBits[index] & INOUT) {
 						if (!(vpBits[index] & ISDONE)
-								|| ((vpBits[index] & ISDONE) && vpDistance[index] >= cutRSq
-										- 0.50 / (0.1 + cutsf))) {
+								|| ((vpBits[index] & ISDONE) && vpDistance[index] >= cutoff)) {
 							vpBits[index] |= ISBOUND;
 						}
 					}
 				}
 			}
 		}
-		inarray = [];
-		outarray = [];
-		boundPoint = null;
+
 	};
 
-	this.fastoneshell = function(number, boundPoint) { // (int* innum,int
+	this.fastoneshell = function(inarray, boundPoint) { // (int* innum,int
 		// *allocout,voxel2
 		// ***boundPoint, int*
 		// outnum, int *elimi)
-		var positout = 0;
 		var tx, ty, tz;
 		var dx, dy, dz;
+		var i, j, n;
 		var square;
-		if (number == 0)
-			return 0;
-		outarray = [];
+		var outarray = [];
+		if (inarray.length == 0)
+			return outarray;
 
 		tnv = {
 			ix : -1,
@@ -579,7 +561,7 @@ var ProteinSurface = function() {
 			iz : -1
 		};
 		var pWH = pWidth*pHeight;
-		for ( var i = 0; i < number; i++) {
+		for ( i = 0, n = inarray.length; i < n; i++) {
 			tx = inarray[i].ix;
 			ty = inarray[i].iy;
 			tz = inarray[i].iz;
@@ -610,7 +592,6 @@ var ProteinSurface = function() {
 							iy : tnv.iy,
 							iz : tnv.iz
 						});
-						positout++;
 					} else if ((vpBits[index] & INOUT) && (vpBits[index] & ISDONE)) {
 	
 						dx = tnv.ix - bp.ix;
@@ -628,7 +609,6 @@ var ProteinSurface = function() {
 									iy : tnv.iy,
 									iz : tnv.iz
 								});
-								positout++;
 							}
 						}
 					}
@@ -638,7 +618,7 @@ var ProteinSurface = function() {
 
 		// console.log("part1", positout);
 
-		for (i = 0; i < number; i++) {
+		for (i = 0, n = inarray.length; i < n; i++) {
 			tx = inarray[i].ix;
 			ty = inarray[i].iy;
 			tz = inarray[i].iz;
@@ -669,7 +649,6 @@ var ProteinSurface = function() {
 							iy : tnv.iy,
 							iz : tnv.iz
 						});
-						positout++;
 					} else if ((vpBits[index] & INOUT) && (vpBits[index] & ISDONE)) {
 						dx = tnv.ix - bp.ix;
 						dy = tnv.iy - bp.iy;
@@ -685,7 +664,6 @@ var ProteinSurface = function() {
 									iy : tnv.iy,
 									iz : tnv.iz
 								});
-								positout++;
 							}
 						}
 					}
@@ -695,7 +673,7 @@ var ProteinSurface = function() {
 
 		// console.log("part2", positout);
 
-		for (i = 0; i < number; i++) {
+		for (i = 0, n = inarray.length; i < n; i++) {
 			tx = inarray[i].ix;
 			ty = inarray[i].iy;
 			tz = inarray[i].iz;
@@ -709,7 +687,6 @@ var ProteinSurface = function() {
 				if (tnv.ix < pLength && tnv.ix > -1 && tnv.iy < pWidth
 						&& tnv.iy > -1 && tnv.iz < pHeight && tnv.iz > -1) {
 					var index = tnv.ix * pWH + pHeight * tnv.iy + tnv.iz;
-				
 
 					if ((vpBits[index] & INOUT) && !(vpBits[index] & ISDONE)) {
 						boundPoint.set(tnv.ix, tnv.iy, tz + nb[j][2], bp);
@@ -727,7 +704,6 @@ var ProteinSurface = function() {
 							iy : tnv.iy,
 							iz : tnv.iz
 						});
-						positout++;
 					} else if ((vpBits[index] & INOUT)	&& (vpBits[index] & ISDONE)) {
 						dx = tnv.ix - bp.ix;
 						dy = tnv.iy - bp.iy;
@@ -744,7 +720,6 @@ var ProteinSurface = function() {
 									iy : tnv.iy,
 									iz : tnv.iz
 								});
-								positout++;
 							}
 						}
 					}
@@ -753,7 +728,7 @@ var ProteinSurface = function() {
 		}
 
 		// console.log("part3", positout);
-		return positout;
+		return outarray;
 	};
 
 	this.marchingcubeinit = function(stype) {
@@ -851,7 +826,7 @@ var ProteinSurface = function() {
         });	     
 
         var pWH = pWidth*pHeight;
-        for (i = 0, vlen = verts.length; i < vlen; i++) {
+        for (var i = 0, vlen = verts.length; i < vlen; i++) {
             verts[i].atomid = vpAtomID[verts[i].x * pWH + pHeight
                     * verts[i].y + verts[i].z];
         }  
