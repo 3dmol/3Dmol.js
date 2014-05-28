@@ -5,20 +5,19 @@
 //the presence of jquery is assumed
 /** 
  * WebMol global namespace
- * @namespace
+ * @namespace WebMol
+ * 
  */
-var WebMol = (function() {
+var WebMol = {
     
-    var my = {};
-    var $ = jQuery; //avoid any conflicts with the dollar
-
-
     /**
      * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+     * @function WebMol.createViewer
      * @param {Object | string} element Either HTML element or string identifier
      * @param {Object} config Viewer specification
+     * @return {WebMol.GLViewer} GLViewer
      */
-    my.createViewer = function(element, config)
+    createViewer : function(element, config)
     {
         if($.type(element) === "string")
             element = $("#"+element);
@@ -35,10 +34,10 @@ var WebMol = (function() {
             var kind = config.order[i];
             var fname =kind+"Viewer";
 
-            if(typeof(my[fname]) === "function")
+            if(typeof(this[fname]) === "function")
             {
                 try {
-                    return new my[fname](element, config.callback, config.defaultcolors);
+                    return new this[fname](element, config.callback, config.defaultcolors);
                 }
                 catch(e) {
                     console.log("error with "+kind+":"+e);
@@ -47,9 +46,18 @@ var WebMol = (function() {
         }
         alert("Unable to instantiate webmol viewer: "+config.order);
         return null;
-    };
-    
-    my.download = function(query, viewer) {
+    },
+
+    /**
+     * Load a pdb/pubchem structure into existing viewer
+     * 
+     * @function download
+     * @memberof WebMol
+     * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+     * @param {Object} viewer Add new model to existing viewer
+     * @return {WebMol.GLModel} GLModel
+     */    
+    download : function(query, viewer) {
         var baseURL = '';
         var type = "";
         var m = null;
@@ -77,21 +85,10 @@ var WebMol = (function() {
        });
        
        return m;
-    };
+    }
     
-    return my;
 
-})();
-
-/**
- * Load a pdb/pubchem structure into existing viewer
- * 
- * @memberOf WebMol
- * @type {Function}
- * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
- * @param {Object} viewer Add new model to existing viewer
- */
-WebMol.download;
+};
 
 WebMol.SurfaceType = {
     VDW : 1,
@@ -116,7 +113,6 @@ WebMol.CC = {
     }
 };
 
-//TODO: eventually make all new WebMol types to replace THREE types (color, vector, matrix, etc)
 WebMol.Color = function( color ){
     
     if ( arguments.length > 1) {
@@ -173,7 +169,7 @@ WebMol.Color.prototype = {
 
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
 
-var mergeGeos = function(geometry, mesh) {
+WebMol.mergeGeos = function(geometry, mesh) {
     
     var meshGeo = mesh.geometry;
     

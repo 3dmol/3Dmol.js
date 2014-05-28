@@ -727,6 +727,13 @@ WebMol.GLModel = (function() {
         return true;
     };
 
+    /**
+     * GLModel represents a group of related atoms
+     * @constructor WebMol.GLModel
+     * @param {number} mid 
+     * @param {Object} defaultcolors Object defining default atom colors as atom => color property value pairs
+     * @see WebMol.download
+     */
     function GLModel(mid, defaultcolors) {
         // private variables
         var atoms = [];
