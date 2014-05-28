@@ -822,9 +822,9 @@ var ProteinSurface = function() {
         verts = [], faces = [];   
         WebMol.MarchingCube.march(vpBits, verts, faces, {
             smooth : 1,
-            nX : nX,
-            nY : nY,
-            nZ : nZ        
+            nX : pLength,
+            nY : pWidth,
+            nZ : pHeight        
         });	     
 
 
