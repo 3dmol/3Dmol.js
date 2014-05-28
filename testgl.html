@@ -19,8 +19,8 @@
         <script src="webmol/WebGL/scene.js"></script>
         <script src="webmol/WebGL/camera.js"></script>
         <script src="webmol/properties.js"></script>
-	    <script src="webmol/colors.js"></script>
-	    <script src="webmol/glshape.js"></script>
+        <script src="webmol/colors.js"></script>
+        <script src="webmol/glshape.js"></script>
         <script src="webmol/glmodel.js"></script>
         <script src="webmol/glcartoon.js"></script>
         <script src="webmol/marchingcube.js"></script>        
@@ -58,7 +58,7 @@
             for (var a in atoms) {
                 var atom = atoms[a];
                 
-                if (atom.atom === "CA" && atom.resn.trim() == "ASN") {
+                if (atom.atom === "CA" && atom.resn.trim() === "ASN") {
                     var l = glviewer.addLabel(atom.resn + " " + atom.resi, {inFront: true, 
                                               fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z} } ); 
                     atom.label = l;
@@ -119,7 +119,7 @@
         
         $(document).ready(function() {
                         
-            $.get("test_structs/4GQB.pdb", function(data){
+            $.get("test_structs/1YCR.pdb", function(data){
                 
                 //moldata = $("#moldata_benzene_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             

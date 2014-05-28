@@ -25,14 +25,15 @@ TODO: Improved performance on Firefox
 // dkoes
 // Surface calculations.  This must be safe to use within a web worker.
 if (typeof console === 'undefined') {
-	// this should only be true inside of a webworker
-	console = {
-		log : function() {
-		}
-	};
+    // this should only be true inside of a webworker
+    console = {
+        log : function() {
+        }
+    };
 }
 
 var ProteinSurface = function() {
+
 	// constants for vpbits bitmasks
 	var INOUT = 1;
 	var ISDONE = 2;
@@ -162,6 +163,7 @@ var ProteinSurface = function() {
             faces : finalfaces
         };
     };
+
 
 	this.initparm = function(extent, btype, volume) {
 		if(volume > 1000000) //heuristical decrease resolution to avoid large memory consumption
@@ -832,8 +834,8 @@ var ProteinSurface = function() {
         }  
 
         WebMol.MarchingCube.laplacianSmooth(1, verts, faces);
-        
-	};
+
+    };
 
 
 };

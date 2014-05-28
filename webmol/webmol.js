@@ -3,17 +3,21 @@
 //and configure system-wide settings
 
 //the presence of jquery is assumed
+/** 
+ * WebMol global namespace
+ * @namespace
+ */
 var WebMol = (function() {
     
     var my = {};
     var $ = jQuery; //avoid any conflicts with the dollar
 
-    //create the best viewer according to parameters in config within element
-    //config.width - width of viewer, if unset use html elment width
-    //config.height - height, if unset use html elment width
-    //config.order - preference for types of viewer, glmol or jmol
-    //config.callback - for intialization commands to immediately apply to viewer
-    //element can either be the html element object or its identifier
+
+    /**
+     * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+     * @param {Object | string} element Either HTML element or string identifier
+     * @param {Object} config Viewer specification
+     */
     my.createViewer = function(element, config)
     {
         if($.type(element) === "string")
@@ -45,87 +49,70 @@ var WebMol = (function() {
         return null;
     };
     
-    //loads a pdb/pubchem structure into the provided viewer
     my.download = function(query, viewer) {
-           var baseURL = '';
-           var type = "";
-           var m = null;
-           if (query.substr(0, 4) === 'pdb:') {
-                   type = "pdb";
-              query = query.substr(4).toUpperCase();
-              if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
-                 alert("Wrong PDB ID"); return;
-              }
-              uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
-           } else if (query.substr(0, 4) == 'cid:') {
-                   type = "sdf";
-              query = query.substr(4);
-              if (!query.match(/^[1-9]+$/)) {
-                 alert("Wrong Compound ID"); return;
-              }
-              uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
-                "/SDF?record_type=3d";
-           }
+        var baseURL = '';
+        var type = "";
+        var m = null;
+        if (query.substr(0, 4) === 'pdb:') {
+            type = "pdb";
+            query = query.substr(4).toUpperCase();
+            if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+               alert("Wrong PDB ID"); return;
+            }
+            uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+        } else if (query.substr(0, 4) == 'cid:') {
+            type = "sdf";
+            query = query.substr(4);
+            if (!query.match(/^[1-9]+$/)) {
+               alert("Wrong Compound ID"); return;
+            }
+            uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+              "/SDF?record_type=3d";
+        }
 
-           $.get(uri, function(ret) {
-              viewer.addModel(ret, type);
-              viewer.zoomTo();
-              viewer.render();                            
-           });
-           
-           return m;
+       $.get(uri, function(ret) {
+          viewer.addModel(ret, type);
+          viewer.zoomTo();
+          viewer.render();                            
+       });
+       
+       return m;
     };
+    
     return my;
+
 })();
 
-//From THREE.js src/Three.js
-
-WebMol.extend = function(obj, source) {
-  
-    //ECMAScript5 compatability
-    if (Object.keys) {
-        
-        var keys = Object.keys(source);
-        
-        for (var i = 0, il = keys.length; i < il; i++) {
-            var prop = keys[i];
-            Object.defineProperty( obj, prop, Object.getOwnPropertyDescriptor(source, prop) );
-        }
-    }
-    
-    else {
-        
-        var safeHasOwnProperty = {}.hasOwnProperty;
-        
-        for (var prop in source) {
-            
-            if (safeHasOwnProperty.call(source, prop))
-                obj[prop] = source[prop];
-            
-        }
-    }
-};
+/**
+ * Load a pdb/pubchem structure into existing viewer
+ * 
+ * @memberOf WebMol
+ * @type {Function}
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {Object} viewer Add new model to existing viewer
+ */
+WebMol.download;
 
 WebMol.SurfaceType = {
-            VDW : 1,
-            SAS : 3,
-            SES : 2,
-            MS : 4
-    };
+    VDW : 1,
+    MS : 2,
+    SAS : 3,
+    SES  : 4
+};
 
 // in an attempt to reduce memory overhead, cache all WebMol.Colors
 //this makes things a little faster
 WebMol.CC = {
     cache : {},
     color : function(hex) {
-            if(typeof(this.cache[hex]) != "undefined") {
-                return this.cache[hex];
-            }
-            else {
-                var c = new WebMol.Color(hex);
-                this.cache[hex] = c;
-                return c;
-            }
+        if(typeof(this.cache[hex]) !== "undefined") {
+            return this.cache[hex];
+        }
+        else {
+            var c = new WebMol.Color(hex);
+            this.cache[hex] = c;
+            return c;
+        }
     }
 };
 
@@ -248,4 +235,3 @@ WebMol.UnsignedByteType = 1009;
 
 //Pixel formats
 WebMol.RGBAFormat = 1021;
-
