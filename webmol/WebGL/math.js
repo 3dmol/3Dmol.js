@@ -70,7 +70,7 @@ WebMol.Quaternion.prototype = {
 
     inverse : function() {
         
-        return this.conjugate.normalize();
+        return this.conjugate().normalize();
     },
 
     length : function() {
