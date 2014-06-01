@@ -285,9 +285,8 @@ WebMol.GLViewer = (function() {
         };
 
         var initializeScene = function() {
-            // CHECK: Should I explicitly call scene.deallocateObject?
+            
             scene = new WebMol.Scene();
-            //scene = new WebMol.Scene();
             scene.fog = new WebMol.Fog(bgColor, 100, 200);
 
             modelGroup = new WebMol.Object3D();
@@ -306,6 +305,9 @@ WebMol.GLViewer = (function() {
         };
 
         initializeScene();
+        
+        renderer.setClearColorHex(bgColor, 1.0);
+        scene.fog.color = WebMol.CC.color(bgColor);
         
         var clickedAtom = null;
         // enable mouse support
@@ -466,6 +468,12 @@ WebMol.GLViewer = (function() {
         });
 
         // public methods
+        /**
+         * Set the background color (default white)
+         * @param {type} hex
+         * @param {type} a
+         * 
+         */
         this.setBackgroundColor = function(hex, a) {
             a = a | 1.0;
             bgColor = hex;

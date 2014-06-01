@@ -119,12 +119,12 @@
         
         $(document).ready(function() {
                         
-            $.get("test_structs/1B5S.pdb", function(data){
+            $.get("test_structs/1YCR.pdb", function(data){
                 
                 //moldata = $("#moldata_benzene_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
-                    viewer.setBackgroundColor(0xffffff);
+                    viewer.setBackgroundColor(0xffffff, 0.5);
                     voldata = data;
                     
                     receptorModel = m = viewer.addModel(data, "pdb");
