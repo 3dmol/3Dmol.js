@@ -25,10 +25,12 @@ var roundRect = function(ctx, x, y, w, h, r) {
 WebMol.LabelCount = 0;
 
 /**
- * Create a new label
- * @constructor
+ * Renderable labels
+ * @constructor WebMol.Label
+ * @param {string} tag Label text
+ * @param {Object} parameters Label style and font specifications
  */
-WebMol.Label = function(message, parameters) {
+WebMol.Label = function(text, parameters) {
         
     this.id = WebMol.LabelCount++;    
     this.stylespec = parameters || {};
@@ -38,7 +40,7 @@ WebMol.Label = function(message, parameters) {
     this.context = this.canvas.getContext('2d');
 
     this.sprite = new WebMol.Sprite();
-    this.text = message;
+    this.text = text;
     
 };
 
@@ -50,12 +52,20 @@ WebMol.Label.prototype = {
     setContext : function() {
         
         //Update stylespec
+        /** Label text font style
+         * @public
+         * @type {string} */
         this.font = this.stylespec.font = 
             this.stylespec.font ? this.stylespec.font : "Arial";
     
+         
+        /** Label text font pt size
+         * @type {number} */
         this.fontSize = this.stylespec.fontSize =
             this.stylespec.fontSize ? this.stylespec.fontSize : 20;
             
+        /** Label font color - specify with an object with r, g, b, and a (alpha) values
+         * @type {Object | WebMol.Color} */
         this.fontColor = this.stylespec.fontColor =
             this.stylespec.fontColor ? this.stylespec.fontColor : { r:255, g:255, b:255, a:1.0};
     
@@ -126,10 +136,8 @@ WebMol.Label.prototype = {
 };
 
 // a webmol unified interace to gmol
-/**
- * 
- */
-WebMol.GLViewer = WebMol.glmolViewer = (function() {
+
+WebMol.GLViewer = (function() {
     // private class variables
     var numWorkers = 4; // number of threads for surface generation
     var maxVolume = 64000; // how much to break up surface calculations
@@ -166,7 +174,13 @@ WebMol.GLViewer = WebMol.glmolViewer = (function() {
     };
         
     // The constructor
-
+    /**
+     * WebGL WebMol viewer
+     * @constructor WebMol.GLViewer
+     * @param {Object | string} element HTML element or string identifier
+     * @param {Function} callback Callback function to be immediately executed on this viewer
+     * @param {Object} defaultcolors Object defining default atom colors as atom => color property value pairs for all models within this viewer
+     */
     function GLViewer(element, callback, defaultcolors) {
 
         // set variables
@@ -1196,7 +1210,7 @@ WebMol.GLViewer = WebMol.glmolViewer = (function() {
                             extents[i].atoms, extents[i].toshow, reducedAtoms,
                             totalVol);
                     var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                    mergeGeos(surfobj.geo, mesh);
+                    WebMol.mergeGeos(surfobj.geo, mesh);
                     view.render();
                     //console.profileEnd();
                 }
@@ -1221,7 +1235,7 @@ WebMol.GLViewer = WebMol.glmolViewer = (function() {
                     worker.onmessage = function(event) {
                         var VandF = event.data;
                         var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                        mergeGeos(surfobj.geo, mesh);
+                        WebMol.mergeGeos(surfobj.geo, mesh);
                         view.render();
                         console.log("async mesh generation "
                                 + (+new Date() - time) + "ms");
@@ -1338,3 +1352,5 @@ WebMol.GLViewer = WebMol.glmolViewer = (function() {
     return GLViewer;
     
 })();
+
+WebMol.glmolViewer = WebMol.GLViewer;
