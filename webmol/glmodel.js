@@ -769,6 +769,70 @@ WebMol.GLModel = (function() {
             return r;
         };
 
+        // memoize capped cylinder for given radius
+        var cylVertexCache = {
+            
+            //Ortho normal vectors for cylinder radius/ sphere cap radius
+            // Direction is j basis (0,1,0)
+            basisVectors : function() {
+                
+                var ret = {vertices : [], norms : []};
+                
+                var nvecs = [];
+                nvecs[0] = new WebMol.Vector3(0,0,1);
+                nvecs[4] = new WebMol.Vector3(-1,0,0);
+                nvecs[8] = new WebMol.Vector3(0,0,-1);
+                nvecs[12] = new WebMol.Vector3(1,0,0);
+    
+                // now quarter positions
+                nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
+                nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
+                nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
+                nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
+    
+                // eights
+                nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
+                nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
+                nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
+                nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
+                nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
+                nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
+                nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
+                nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize(); 
+                
+                
+                return nvecs;
+                                        
+            }(),
+            
+            cache : {},
+            
+            getVerticesForRadius : function(radius) {
+                
+                if (this.cache[radius] !== undefined)
+                    return this.cache[radius];
+                
+                var dir = new WebMol.Vector3(0,1,0);                
+                var nvecs = new Array(16), norms = new Array(16);
+                
+                for (var i = 0; i < 16; i++) {
+                    nvecs[i] = this.basisVectors[i].clone().multiplyScalar(radius);
+                }
+                
+                
+                //norms[0]   
+                
+                var obj = {
+                    vertices : nvecs    
+                };  
+                
+                this.cache[radius] = obj;
+                
+                return obj;
+                
+            }
+        };
+
         // construct vertices around origin for given radius, memoize results
         var sphereVertexCache = {
             cache : {},
@@ -1069,6 +1133,10 @@ WebMol.GLModel = (function() {
             var dir = to.clone();
             dir.sub(from);
 
+            //get orthonormal vectors from cache
+            //TODO: Will have orient with model view matrix according to direction
+            var vobj = cylVertexCache.getVerticesForRadius(radius);            
+
             // get orthonormal vector
             var nvecs = [];
             nvecs[0] = dir.clone();
@@ -1102,6 +1170,8 @@ WebMol.GLModel = (function() {
             nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
             nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
             nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
+            
+            nvecs = vobj.vertices;
 
             var geoGroup = geo.updateGeoGroup(32);
             //var start = geo.vertices.length;
@@ -1416,7 +1486,7 @@ WebMol.GLModel = (function() {
                 }
             };
             
-            drawAtomSphere(atom, geo);
+            //drawAtomSphere(atom, geo);
             atom.style = savedstyle;
 
         };
