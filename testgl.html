@@ -119,16 +119,16 @@
         
         $(document).ready(function() {
                         
-            $.get("test_structs/1YCR.pdb", function(data){
+            //$.get("test_structs/1YCR.pdb", function(data){
                 
-                //moldata = $("#moldata_benzene_sdf").val();
+                moldata = data = $("#moldata_sdf_small").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff, 0.5);
                     voldata = data;
                     
-                    receptorModel = m = viewer.addModel(data, "pdb");
-                    ligandModel = viewer.createModelFrom({chain: "C"}, true);                    
+                    receptorModel = m = viewer.addModel(data, "sdf");
+                    //ligandModel = viewer.createModelFrom({chain: "C"}, true);                    
                     
                     atoms = m.selectedAtoms({ }); 
                     
@@ -143,7 +143,7 @@
 
                 }});
                 
-            }, "text");   
+            //}, "text");   
            
         });
         
