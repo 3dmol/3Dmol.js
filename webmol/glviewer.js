@@ -470,8 +470,8 @@ WebMol.GLViewer = (function() {
         // public methods
         /**
          * Set the background color (default white)
-         * @param {type} hex
-         * @param {type} a
+         * @param {number} hex Hexcode specified background color
+         * @param {type} a Alpha level (default 1.0)
          * 
          */
         this.setBackgroundColor = function(hex, a) {
