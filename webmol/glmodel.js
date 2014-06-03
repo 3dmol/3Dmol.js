@@ -1124,43 +1124,69 @@ WebMol.GLModel = (function() {
         
         // Rotation matrix around z and x axis - 
         // according to y basis vector
+        // TODO: Try to optimize this (square roots?)
         var getRotationMatrix = function() {
            
-           var rot = new WebMol.Matrix4();
-           var d = new WebMol.Vector3();
+            var rot = new WebMol.Matrix4();
+            var Rx = new WebMol.Matrix4();
+            var Ry = new WebMol.Matrix4();
+            var Rz = new WebMol.Matrix4();
            
-           return function(dir) {
+            var d = new WebMol.Vector3();
+           
+            return function(dir) {
                
-               d.copy(dir).normalize();
-               
-               var dx = d.x, dy = d.y, dz = d.z;
-               
-               var dxy = Math.sqrt(dx*dx + dy*dy);
-               var dyz = Math.sqrt(dy*dy + dz*dz);
-               
-               var sinPhi, cosPhi, sinTheta, cosTheta;
-               
-               // Phi == 0
-               if (Math.abs(dxy - 0) < 0.0001)
-                   sinPhi = 0, cosPhi = 1;
-               else 
-                   sinPhi = dx / dxy, cosPhi = dy / dxy;
-               
-               // Theta == 0
-               if (Math.abs(dyz - 0) < 0.0001)
-                   sinTheta = 0, cosTheta = 1;
-               else
-                   sinTheta = dz / dyz, cosTheta = dy / dyz;
-               
-               rot.set( cosPhi, -(sinPhi*cosTheta),  (sinPhi*sinTheta), 0,
-                        sinPhi,  (cosPhi*cosTheta), -(cosPhi*sinTheta), 0,
-                        0,       sinTheta,           cosTheta,          0,
-                        0,        0,                  0,                1 );
-               //rot.transpose();
-               
-               return rot;
-               
-           };
+                d.copy(dir).normalize();
+                
+                var dx = d.x, dy = d.y, dz = d.z;
+                
+                var dxy = Math.sqrt(dx*dx + dy*dy);
+                var dxz = Math.sqrt(dx*dx + dz*dz);
+                var dyz = Math.sqrt(dy*dy + dz*dz);
+                
+                var sinA, cosA, sinB, cosB, sinC, cosC;
+                
+                // A == 0
+                if (Math.abs(dxy - 0) < 0.0001)
+                    sinA = 0, cosA = 1;
+                else 
+                    sinA = dx / dxy, cosA = dy / dxy;
+                
+                // B == 0
+                if (Math.abs(dxz - 0) < 0.0001)
+                    sinB = 0, cosB = 1;
+                else 
+                    sinB = dz / dxz, cosB = dx / dxz;                                     
+                
+                // Theta == 0
+                if (Math.abs(dyz - 0) < 0.0001)
+                    sinC = 0, cosC = 1;
+                else
+                    sinC = dz / dyz, cosC = dy / dyz;
+                    
+                Rz.set( cosA,  sinA,  0, 0,
+                       -sinA,  cosA,  0, 0,
+                        0,     0,     1, 0,
+                        0,     0,     0, 1 );
+                        
+                Rx.set( 1,  0,     0,    0,
+                        0,  cosC, -sinC, 0,
+                        0,  sinC,  cosC, 0,
+                        0,  0,     0,    1 );
+                        
+                Ry.set( cosB, 0,  sinB, 0,
+                        0,    1,  0,    0,
+                       -sinB, 0,  cosB, 0,
+                        0,    0,  0,    1 );
+                
+                rot.multiplyMatrices(Rx, Rz);
+                rot.multiplyMatrices(rot, Ry);
+                                 
+                //rot.transpose();
+                
+                return rot;
+            
+            };
             
         }();
         
@@ -1216,7 +1242,9 @@ WebMol.GLModel = (function() {
             nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
             nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
             
-            nvecs = vobj.vertices;
+            for (var i = 0; i < nvecs.length; ++i) 
+                nvecs[i] = vobj.vertices[i].clone();
+            
 
             var geoGroup = geo.updateGeoGroup(32);
             //var start = geo.vertices.length;
@@ -1224,12 +1252,11 @@ WebMol.GLModel = (function() {
             // add vertices, opposing vertices paired together
             for ( var i = 0, n = nvecs.length; i < n; ++i) {
                 
-                var v = nvecs[i].clone();
-                v.applyMatrix4(rotMat);
+                nvecs[i].applyMatrix4(rotMat);
                 
                 var offset = 3*(start + 2*i);
-                var bottom = v.clone().multiplyScalar(radius).add(from);
-                var top = v.clone().multiplyScalar(radius).add(to);
+                var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
+                var top = nvecs[i].clone().multiplyScalar(radius).add(to);
 
                 geoGroup.__vertexArray[offset] = bottom.x;
                 geoGroup.__vertexArray[offset+1] = bottom.y;
@@ -1535,7 +1562,7 @@ WebMol.GLModel = (function() {
                 }
             };
             
-            //drawAtomSphere(atom, geo);
+            drawAtomSphere(atom, geo);
             atom.style = savedstyle;
 
         };
