@@ -1130,15 +1130,12 @@ WebMol.GLModel = (function() {
             var rot = new WebMol.Matrix4();
             var Rphi = new WebMol.Matrix4();
             var Rtheta = new WebMol.Matrix4();
-            var Rpsi = new WebMol.Matrix4();
             
-            var up = new WebMol.Vector3(0,1,0);
-            var eye = new WebMol.Vector3();   
             var d = new WebMol.Vector3();
            
             return function(dir) {
                
-                d.copy(dir).normalize();
+                d.copy(dir);
                 
                 var dx = d.x, dy = d.y, dz = d.z;
                 
@@ -1152,20 +1149,17 @@ WebMol.GLModel = (function() {
                     sinA = 0, cosA = 1;
                 else 
                     sinA = -dx / dxy, cosA = dy / dxy;
-                    
+                
+                /* 
                 Rphi.set( cosA, -sinA,  0, 0,
                           sinA,  cosA,  0, 0,
                           0,     0,     1, 0,
                           0,     0,     0, 1 );   
-
-                rot.set(  cosA,  sinA,  0, 0,
-                         -sinA,  cosA,  0, 0,
-                          0,     0,     1, 0,
-                          0,     0,     0, 1 );   
+                */
+               
+                //recast dy in terms of new axes - z is the same
                 
-                //recast d in terms of new axes - z is the same
-                d.applyMatrix4(rot);     
-                dx = d.x, dy = d.y;
+                dy = -sinA*dx + cosA*dy;
                 dyz = Math.sqrt(dy*dy + dz*dz);    
                  
                 // about new x axis - Theta
@@ -1175,32 +1169,20 @@ WebMol.GLModel = (function() {
                 else 
                     sinB =  dz / dyz, cosB = dy / dyz;                                     
 
-                        
+                /*        
                 Rtheta.set( 1,  0,     0,    0,
                             0,  cosB, -sinB, 0,
                             0,  sinB,  cosB, 0,
                             0,  0,     0,    1 );
-                
-                // C == 0
-                // about x axis
-                if (Math.abs(dz) < 0.0001)
-                    sinC = 0, cosC = 1;
-                else
-                    sinC = -dz / dyz, cosC = dy / dyz;
-                   
-                        
-                Rpsi.set( cosB, 0, -sinB, 0,
-                        0,    1,  0,    0,
-                        sinB, 0,  cosB, 0,
-                        0,    0,  0,    1 );
 
-                //rot.copy(Rphi);
                 rot.multiplyMatrices(Rphi, Rtheta);
-                //rot.multiplyMatrices(rot, Ry);
-                
-                                 
-                //rot.transpose();
-                
+                */
+               
+                rot.set( cosA,  -sinA*cosB,  sinA*sinB, 0,
+                         sinA,   cosA*cosB, -cosA*sinB, 0,
+                         0,      sinB,       cosB,      0,
+                         0, 0, 0, 1 );               
+
                 return rot;
             
             };
@@ -1227,50 +1209,14 @@ WebMol.GLModel = (function() {
 
             // get orthonormal vector
             var nvecs = [];
-            nvecs[0] = dir.clone();
-            if (Math.abs(nvecs[0].x) > .0001)
-                nvecs[0].y += 1;
-            else
-                nvecs[0].x += 1;
-            nvecs[0].cross(dir);
-            nvecs[0].normalize();
-
-            nvecs[0] = nvecs[0];
-            // another orth vector
-            nvecs[4] = nvecs[0].clone();
-            nvecs[4].crossVectors(nvecs[0], dir);
-            nvecs[4].normalize();
-            nvecs[8] = nvecs[0].clone().negate();
-            nvecs[12] = nvecs[4].clone().negate();
-
-            // now quarter positions
-            nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
-            nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
-            nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
-            nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
-
-            // eights
-            nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
-            nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
-            nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
-            nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
-            nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
-            nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
-            nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
-            nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
             
-            for (var i = 0; i < nvecs.length; ++i) 
-                nvecs[i] = vobj.vertices[i].clone();
-            
-
             var geoGroup = geo.updateGeoGroup(32);
-            //var start = geo.vertices.length;
             var start = geoGroup.vertices;
             
-
             // add vertices, opposing vertices paired together
-            for ( var i = 0, n = nvecs.length; i < n; ++i) {
+            for ( var i = 0, n = vobj.vertices.length; i < n; ++i) {
                 
+                nvecs.push(vobj.vertices[i].clone());
                 nvecs[i].applyMatrix4(rotMat);
                 
                 var offset = 3*(start + 2*i);
