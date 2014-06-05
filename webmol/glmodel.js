@@ -1352,7 +1352,7 @@ WebMol.GLModel = (function() {
             start = geoGroup.vertices;
 
             for (var i = 16, il = vertices.length; i < il; ++i) {
-                offset = 3*(start + 2*i);   
+                offset = 3*(start + i);   
                 var v = vertices[i];
                 v.applyMatrix4(rotMat);
                 
@@ -1377,10 +1377,10 @@ WebMol.GLModel = (function() {
                     
                     var faceoffset = geoGroup.faceidx;
                     
-                    var v1 = verticesRows[y][x + 1] + start, v1offset = v1 * 3;
-                    var v2 = verticesRows[y][x] + start, v2offset = v2 * 3;
-                    var v3 = verticesRows[y + 1][x] + start, v3offset = v3 * 3;
-                    var v4 = verticesRows[y + 1][x + 1] + start, v4offset = v4 * 3;
+                    var v1 = verticesRows[y][x + 1] + start - 16, v1offset = v1 * 3;
+                    var v2 = verticesRows[y][x] + start - 16, v2offset = v2 * 3;
+                    var v3 = verticesRows[y + 1][x] + start -16, v3offset = v3 * 3;
+                    var v4 = verticesRows[y + 1][x + 1] + start - 16, v4offset = v4 * 3;
 
                     var n1 = normals[v1 - start];
                     var n2 = normals[v2 - start];
