@@ -1128,10 +1128,12 @@ WebMol.GLModel = (function() {
         var getRotationMatrix = function() {
            
             var rot = new WebMol.Matrix4();
-            var Rx = new WebMol.Matrix4();
-            var Ry = new WebMol.Matrix4();
-            var Rz = new WebMol.Matrix4();
-           
+            var Rphi = new WebMol.Matrix4();
+            var Rtheta = new WebMol.Matrix4();
+            var Rpsi = new WebMol.Matrix4();
+            
+            var up = new WebMol.Vector3(0,1,0);
+            var eye = new WebMol.Vector3();   
             var d = new WebMol.Vector3();
            
             return function(dir) {
@@ -1141,23 +1143,43 @@ WebMol.GLModel = (function() {
                 var dx = d.x, dy = d.y, dz = d.z;
                 
                 var dxy = Math.sqrt(dx*dx + dy*dy);
-                var dxz = Math.sqrt(dx*dx + dz*dz);
-                var dyz = Math.sqrt(dy*dy + dz*dz);
+                var dxz, dyz;
                 
                 var sinA, cosA, sinB, cosB, sinC, cosC;
                 
-                // A == 0
-                // about z axis
-                if (Math.abs(dx) < 0.0001)
+                // about z axis - Phi
+                if (Math.abs(dxy) < 0.0001)
                     sinA = 0, cosA = 1;
                 else 
-                    sinA = dx / dxy, cosA = dy / dxy;
+                    sinA = -dx / dxy, cosA = dy / dxy;
+                    
+                Rphi.set( cosA, -sinA,  0, 0,
+                          sinA,  cosA,  0, 0,
+                          0,     0,     1, 0,
+                          0,     0,     0, 1 );   
+
+                rot.set(  cosA,  sinA,  0, 0,
+                         -sinA,  cosA,  0, 0,
+                          0,     0,     1, 0,
+                          0,     0,     0, 1 );   
                 
-                // B == 0
-                if (Math.abs(dz) < 0.0001)
+                //recast d in terms of new axes - z is the same
+                d.applyMatrix4(rot);     
+                dx = d.x, dy = d.y;
+                dyz = Math.sqrt(dy*dy + dz*dz);    
+                 
+                // about new x axis - Theta
+                
+                if (Math.abs(dyz) < 0.0001)
                     sinB = 0, cosB = 1;
                 else 
-                    sinB = dz / dxz, cosB = dx / dxz;                                     
+                    sinB =  dz / dyz, cosB = dy / dyz;                                     
+
+                        
+                Rtheta.set( 1,  0,     0,    0,
+                            0,  cosB, -sinB, 0,
+                            0,  sinB,  cosB, 0,
+                            0,  0,     0,    1 );
                 
                 // C == 0
                 // about x axis
@@ -1165,25 +1187,17 @@ WebMol.GLModel = (function() {
                     sinC = 0, cosC = 1;
                 else
                     sinC = -dz / dyz, cosC = dy / dyz;
-                    
-                Rz.set( cosA,  sinA,  0, 0,
-                       -sinA,  cosA,  0, 0,
-                        0,     0,     1, 0,
-                        0,     0,     0, 1 );
+                   
                         
-                Rx.set( 1,  0,     0,    0,
-                        0,  cosC,  sinC, 0,
-                        0, -sinC,  cosC, 0,
-                        0,  0,     0,    1 );
-                        
-                Ry.set( cosB, 0, -sinB, 0,
+                Rpsi.set( cosB, 0, -sinB, 0,
                         0,    1,  0,    0,
                         sinB, 0,  cosB, 0,
                         0,    0,  0,    1 );
+
+                //rot.copy(Rphi);
+                rot.multiplyMatrices(Rphi, Rtheta);
+                //rot.multiplyMatrices(rot, Ry);
                 
-                //rot.copy(Ry);
-                rot.multiplyMatrices(Rx, Ry);
-                rot.multiplyMatrices(rot, Rz);
                                  
                 //rot.transpose();
                 
