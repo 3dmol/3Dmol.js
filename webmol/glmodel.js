@@ -1147,22 +1147,24 @@ WebMol.GLModel = (function() {
                 var sinA, cosA, sinB, cosB, sinC, cosC;
                 
                 // A == 0
-                if (Math.abs(dxy - 0) < 0.0001)
+                // about z axis
+                if (Math.abs(dx) < 0.0001)
                     sinA = 0, cosA = 1;
                 else 
                     sinA = dx / dxy, cosA = dy / dxy;
                 
                 // B == 0
-                if (Math.abs(dxz - 0) < 0.0001)
+                if (Math.abs(dz) < 0.0001)
                     sinB = 0, cosB = 1;
                 else 
                     sinB = dz / dxz, cosB = dx / dxz;                                     
                 
-                // Theta == 0
-                if (Math.abs(dyz - 0) < 0.0001)
+                // C == 0
+                // about x axis
+                if (Math.abs(dz) < 0.0001)
                     sinC = 0, cosC = 1;
                 else
-                    sinC = dz / dyz, cosC = dy / dyz;
+                    sinC = -dz / dyz, cosC = dy / dyz;
                     
                 Rz.set( cosA,  sinA,  0, 0,
                        -sinA,  cosA,  0, 0,
@@ -1170,17 +1172,18 @@ WebMol.GLModel = (function() {
                         0,     0,     0, 1 );
                         
                 Rx.set( 1,  0,     0,    0,
-                        0,  cosC, -sinC, 0,
-                        0,  sinC,  cosC, 0,
+                        0,  cosC,  sinC, 0,
+                        0, -sinC,  cosC, 0,
                         0,  0,     0,    1 );
                         
-                Ry.set( cosB, 0,  sinB, 0,
+                Ry.set( cosB, 0, -sinB, 0,
                         0,    1,  0,    0,
-                       -sinB, 0,  cosB, 0,
+                        sinB, 0,  cosB, 0,
                         0,    0,  0,    1 );
                 
-                rot.multiplyMatrices(Rx, Rz);
-                rot.multiplyMatrices(rot, Ry);
+                //rot.copy(Ry);
+                rot.multiplyMatrices(Rx, Ry);
+                rot.multiplyMatrices(rot, Rz);
                                  
                 //rot.transpose();
                 
@@ -1249,12 +1252,15 @@ WebMol.GLModel = (function() {
             var geoGroup = geo.updateGeoGroup(32);
             //var start = geo.vertices.length;
             var start = geoGroup.vertices;
+            
+
             // add vertices, opposing vertices paired together
             for ( var i = 0, n = nvecs.length; i < n; ++i) {
                 
                 nvecs[i].applyMatrix4(rotMat);
                 
                 var offset = 3*(start + 2*i);
+                
                 var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
                 var top = nvecs[i].clone().multiplyScalar(radius).add(to);
 
