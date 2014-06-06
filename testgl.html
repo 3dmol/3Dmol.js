@@ -69,7 +69,7 @@
         
         var atomcallback = function(atom, viewer){
             if (atom.clickLabel === undefined || !atom.clickLabel instanceof WebMol.Label) {
-                atom.clickLabel = viewer.addLabel(atom.elem,
+                atom.clickLabel = viewer.addLabel(atom.elem + atom.serial,
                                                   {fontSize : 14, 
                                                    position : {x:atom.x, y:atom.y, z:atom.z}});
                 atom.clicked = true;
@@ -131,7 +131,7 @@
                     //shape = viewer.addSphere({radius:1});
                     //shape.wireframe = true;
                     //ligandModel = viewer.createModelFrom({chain: "C"}, true);                    
-                    /*
+                    
                     atoms = m.selectedAtoms({ }); 
                     
                     for (var i in atoms) {
@@ -139,7 +139,7 @@
                         atom.clickable = true;
                         atom.callback = atomcallback;
                     }
-                    */
+                    
        
                     viewer.zoomTo();
                     viewer.render();
