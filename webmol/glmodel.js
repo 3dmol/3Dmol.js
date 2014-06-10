@@ -789,6 +789,7 @@ WebMol.GLModel = (function() {
                 var ret = {vertices : [], norms : []};
                 
                 var nvecs = [];
+                /*
                 nvecs[0] = new WebMol.Vector3(-1,0,0);
                 nvecs[4] = new WebMol.Vector3(0,0,1);
                 nvecs[8] = new WebMol.Vector3(1,0,0);
@@ -809,7 +810,12 @@ WebMol.GLModel = (function() {
                 nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
                 nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
                 nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize(); 
+                */
                 
+                nvecs[0] = new WebMol.Vector3(-1,0,0);
+                nvecs[1] = new WebMol.Vector3(0,0,1);
+                nvecs[2] = new WebMol.Vector3(1,0,0);
+                nvecs[3] = new WebMol.Vector3(0,0,-1);
                 
                 return nvecs;
                                         
@@ -822,15 +828,13 @@ WebMol.GLModel = (function() {
                 if (this.cache[radius] !== undefined)
                     return this.cache[radius];
                 
-                var dir = new WebMol.Vector3(0,1,0);                
-                var nvecs = new Array(16), norms = new Array(16);
+                var dir = new WebMol.Vector3(0,1,0);    
+                var w = this.basisVectors.length;            
+                var nvecs = new Array(w), norms = new Array(w);
                 
-                for (var i = 0; i < 16; i++) {
-                    //nvecs[i] = this.basisVectors[i].clone().multiplyScalar(radius);
+                for (var i = 0; i < w; i++) 
                     nvecs[i] = this.basisVectors[i].clone().multiplyScalar(radius);
-                }
-                
-                
+
                 //norms[0]   
                 
                 var obj = {
@@ -840,7 +844,7 @@ WebMol.GLModel = (function() {
                     verticesRows : []   
                 };  
                 
-                var heightSegments = 2, widthSegments = 16;
+                var heightSegments = 2, widthSegments = w; // 16 or however many basis vectors for cylinder
                 
                 var phiStart = 0;
                 var phiLength = Math.PI * 2;
@@ -850,8 +854,8 @@ WebMol.GLModel = (function() {
 
                 var x, y, vertices = [], uvs = [];
 
-                for (y = 0; y <= heightSegments; y++) {
-
+                for (y = 0; y <= heightSegments; y++) {                   
+                        
                     var verticesRow = [];
                     for (x = 0; x <= widthSegments; x++) {
                         
@@ -865,7 +869,11 @@ WebMol.GLModel = (function() {
                                 * Math.cos(thetaStart + v * thetaLength);
                         vertex.z = radius * Math.sin(phiStart + u * phiLength)
                                 * Math.sin(thetaStart + v * thetaLength);
-
+                        
+                        if (Math.abs(vertex.x) < 1e-5) vertex.x = 0;
+                        if (Math.abs(vertex.y) < 1e-5) vertex.y = 0;
+                        if (Math.abs(vertex.z) < 1e-5) vertex.z = 0;
+                        
                         var n = new WebMol.Vector3(vertex.x, vertex.y, vertex.z);
                         n.normalize();
 
@@ -1251,8 +1259,7 @@ WebMol.GLModel = (function() {
             var dir = to.clone();
             dir.sub(from);
             
-            var rotMat = getRotationMatrix(dir);
-            var e = rotMat;
+            var e = getRotationMatrix(dir);
             //get orthonormal vectors from cache
             //TODO: Will have orient with model view matrix according to direction
             var vobj = cylVertexCache.getVerticesForRadius(radius);            
@@ -1264,8 +1271,9 @@ WebMol.GLModel = (function() {
             var start = geoGroup.vertices;
             var bottom = new WebMol.Vector3(), top = new WebMol.Vector3();
             
+            var n = vobj.vertices.length;
             // add vertices, opposing vertices paired together
-            for ( var i = 0, n = 16; i < n; ++i) {
+            for ( var i = 0; i < n; ++i) {
             
                 var vert = {x: e[0]*vobj.vertices[i].x + e[3]*vobj.vertices[i].y + e[6]*vobj.vertices[i].z,
                             y: e[1]*vobj.vertices[i].x + e[4]*vobj.vertices[i].y + e[7]*vobj.vertices[i].z,
@@ -1292,12 +1300,12 @@ WebMol.GLModel = (function() {
                 
             }
             
-            geoGroup.vertices += 32;
+            geoGroup.vertices += n*2;
             
             // now faces
             var face, norm, offset, faceoffset;
             var n_vertices = 0;
-            for ( var i = 0, n = 15; i < n; ++i) {
+            for ( var i = 0; i < n-1; ++i) {
             
                 var ti = start + 2 * i, offset = ti * 3;
                 faceoffset = geoGroup.faceidx;
@@ -1310,7 +1318,7 @@ WebMol.GLModel = (function() {
                 //face = [t1, t2, t4], [t2, t3, t4];    
                 //face = [t1, t2, t3, t4];
                     
-                norm = [ nvecs[i], nvecs[i], nvecs[i + 1], nvecs[i + 1]];
+                norm = [ nvecs[i], nvecs[i], nvecs[i + 1], nvecs[i + 1] ];
                 var n1, n2, n3, n4;
                 n1 = n2 = nvecs[i];
                 n3 = n4 = nvecs[i + 1];
@@ -1329,10 +1337,9 @@ WebMol.GLModel = (function() {
                 geoGroup.faceidx += 6;
                 
             }
-            // final face
 
-            face = [start + 30, start + 31, start + 1, start];
-            norm = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
+            face = [start + n*2-2, start + n*2-1, start + 1, start];
+            norm = [ nvecs[n-1], nvecs[n-1], nvecs[0], nvecs[0] ];
             
             faceoffset = geoGroup.faceidx;
             
@@ -1342,7 +1349,7 @@ WebMol.GLModel = (function() {
             var t4 = face[3], t4offset = t4 * 3;
             var n1, n2, n3, n4;
             
-            n1 = n2 = nvecs[15];
+            n1 = n2 = nvecs[n-1];
             n3 = n4 = nvecs[0];
 
             geoGroup.__normalArray[t1offset] = n1.x, geoGroup.__normalArray[t2offset] = n2.x, geoGroup.__normalArray[t4offset] = n4.x;
@@ -1360,7 +1367,7 @@ WebMol.GLModel = (function() {
             
             
             //SPHERE CAPS         
-            
+            //drawcaps = false;
             if (drawcaps) {
             
                 var normals = vobj.normals, vertices = vobj.sphereVertices, verticesRows = vobj.verticesRows;
@@ -1373,8 +1380,7 @@ WebMol.GLModel = (function() {
                 
                 for (var y = ystart; y < yend; y++) {
                 
-                    //var w = verticesRows[y].length;
-                    var w = 3;
+                    var w = verticesRows[y].length;
                     var cap = (y < h/2) ? to : from;
                     
                     for (var x = 0; x < w - 1; x++) {
@@ -1438,7 +1444,23 @@ WebMol.GLModel = (function() {
                         
                         var face, norm;
                         
-                        if (Math.abs(vobj.sphereVertices[v1].y) === radius) {
+                        //last before equator - use 'To' part of cylinder (odd indexed vertices in nvecs...)
+                        if (y === h/2 - 1) {
+                            v3 = -n*4 + 1 + x*2;
+                            v4 = -n*4 + 3 + x*2;
+                            if (x === w - 2)
+                                v4 -= (w-1)*2;
+                        }
+                        //equator - use 'From' part of cylinder (even indexed vertices in nvecs)
+                        else if (y === h/2) {
+                            v1 = start - n*4 + 2 + x*2;
+                            v2 = start - n*4 + x*2;
+                            if (x === w - 2)
+                                v1 -= (w-1)*2;
+                        }
+                        
+                        //if (Math.abs(vobj.sphereVertices[v1].y) === radius) {
+                        if (y === 0) {
                             //face = [v1, v3, v4];
                             //norm = [n1, n3, n4];
                             
@@ -1452,7 +1474,10 @@ WebMol.GLModel = (function() {
                             
                             geoGroup.faceidx += 3;
                             
-                        } else if (Math.abs(vobj.sphereVertices[v3].y) === radius) {
+                        } 
+                        
+                        //else if (Math.abs(vobj.sphereVertices[v3].y) === radius) {
+                        else if (y === yend - 1) {
                             //face = [v1, v2, v3];            
                             //norm = [n1, n2, n3];
                             
@@ -1466,7 +1491,9 @@ WebMol.GLModel = (function() {
                             
                             geoGroup.faceidx += 3;
                             
-                        } else {
+                        } 
+                        
+                        else {
                             //face = [v1, v2, v3, v4];
                             //norm = [n1, n2, n3, n4];
                             
