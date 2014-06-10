@@ -1168,12 +1168,9 @@ WebMol.GLModel = (function() {
         // according to y basis vector
         // TODO: Try to optimize this (square roots?)
         var getRotationMatrix = function() {
-           
-            var rot = new WebMol.Matrix4();
-            var Rphi = new WebMol.Matrix4();
-            var Rtheta = new WebMol.Matrix4();
-            
+                      
             var d = new WebMol.Vector3();
+            //var rot = new Float32Array(9);
            
             return function(dir) {
                
@@ -1187,7 +1184,7 @@ WebMol.GLModel = (function() {
                 var sinA, cosA, sinB, cosB, sinC, cosC;
                 
                 // about z axis - Phi
-                if (Math.abs(dxy) < 0.0001)
+                if (dxy < 0.0001)
                     sinA = 0, cosA = 1;
                 else 
                     sinA = -dx / dxy, cosA = dy / dxy;
@@ -1206,7 +1203,7 @@ WebMol.GLModel = (function() {
                  
                 // about new x axis - Theta
                 
-                if (Math.abs(dyz) < 0.0001)
+                if (dyz < 0.0001)
                     sinB = 0, cosB = 1;
                 else 
                     sinB =  dz / dyz, cosB = dy / dyz;                                     
@@ -1220,11 +1217,12 @@ WebMol.GLModel = (function() {
                 rot.multiplyMatrices(Rphi, Rtheta);
                 */
                
-                rot.set( cosA,  -sinA*cosB,  sinA*sinB, 0,
-                         sinA,   cosA*cosB, -cosA*sinB, 0,
-                         0,      sinB,       cosB,      0,
-                         0, 0, 0, 1 );               
 
+                                   
+                rot = new Float32Array(9);
+                rot[0] = cosA, rot[1] = sinA, rot[2] = 0;
+                rot[3] = -sinA*cosB, rot[4] = cosA*cosB, rot[5] = sinB;
+                rot[6] = sinA*sinB, rot[7] = -cosA*sinB, rot[8] = cosB;
                 return rot;
             
             };
@@ -1234,17 +1232,17 @@ WebMol.GLModel = (function() {
         // creates a cylinder
         // TODO: create it ourselves in the hopes of getting a speed up
         var drawnC = 0;
-        var drawCylinder = function(geo, from, to, radius, color, drawcaps) {
+        var drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
             if (!from || !to)
                 return;
             drawnC++;
             // vertices
-            
+            var drawcaps = fromCap || toCap;
             var dir = to.clone();
             dir.sub(from);
             
             var rotMat = getRotationMatrix(dir);
-            var e = rotMat.elements;
+            var e = rotMat;
             //get orthonormal vectors from cache
             //TODO: Will have orient with model view matrix according to direction
             var vobj = cylVertexCache.getVerticesForRadius(radius);            
@@ -1259,9 +1257,9 @@ WebMol.GLModel = (function() {
             // add vertices, opposing vertices paired together
             for ( var i = 0, n = 16; i < n; ++i) {
             
-                var vert = {x: e[0]*vobj.vertices[i].x + e[4]*vobj.vertices[i].y + e[8]*vobj.vertices[i].z,
-                            y: e[1]*vobj.vertices[i].x + e[5]*vobj.vertices[i].y + e[9]*vobj.vertices[i].z,
-                            z:                      e[6]*vobj.vertices[i].y + e[10]*vobj.vertices[i].z};
+                var vert = {x: e[0]*vobj.vertices[i].x + e[3]*vobj.vertices[i].y + e[6]*vobj.vertices[i].z,
+                            y: e[1]*vobj.vertices[i].x + e[4]*vobj.vertices[i].y + e[7]*vobj.vertices[i].z,
+                            z:                           e[5]*vobj.vertices[i].y + e[8]*vobj.vertices[i].z};
                             
                 nvecs.push(vert);
                 
@@ -1358,37 +1356,40 @@ WebMol.GLModel = (function() {
                 var normals = vobj.normals, vertices = vobj.sphereVertices, verticesRows = vobj.verticesRows;
 
                 start = geoGroup.vertices;
+                var h = verticesRows.length - 1;
                 
-                for (var y = 0, h = verticesRows.length - 1; y < h; y++) {
+                var ystart = (toCap) ? 0 : h/2;
+                var yend = (fromCap) ? h : h/2;
+                
+                for (var y = ystart; y < yend; y++) {
                 
                     var w = verticesRows[y].length;
+                    var cap = (y < h/2) ? to : from;
                     
                     for (var x = 0; x < w - 1; x++) {
                                            
                         var faceoffset = geoGroup.faceidx;
-                        
-                        var cap = (y <= w) ? from : to;
                         
                         var v1 = verticesRows[y][x + 1], v1offset = (v1 + start) * 3;
                         var v2 = verticesRows[y][x], v2offset = (v2 + start) * 3;
                         var v3 = verticesRows[y + 1][x], v3offset = (v3 + start) * 3;
                         var v4 = verticesRows[y + 1][x + 1], v4offset = (v4 + start) * 3;
                         
+                        //rotate sphere vectors
+                        var x1 = e[0]*vertices[v1].x + e[3]*vertices[v1].y + e[6]*vertices[v1].z;
+                        var x2 = e[0]*vertices[v2].x + e[3]*vertices[v2].y + e[6]*vertices[v2].z;
+                        var x3 = e[0]*vertices[v3].x + e[3]*vertices[v3].y + e[6]*vertices[v3].z;
+                        var x4 = e[0]*vertices[v4].x + e[3]*vertices[v4].y + e[6]*vertices[v4].z;
                         
-                        var x1 = e[0]*vertices[v1].x + e[4]*vertices[v1].y + e[8]*vertices[v1].z;
-                        var x2 = e[0]*vertices[v2].x + e[4]*vertices[v2].y + e[8]*vertices[v2].z;
-                        var x3 = e[0]*vertices[v3].x + e[4]*vertices[v3].y + e[8]*vertices[v3].z;
-                        var x4 = e[0]*vertices[v4].x + e[4]*vertices[v4].y + e[8]*vertices[v4].z;
-                        
-                        var y1 = e[1]*vertices[v1].x + e[5]*vertices[v1].y + e[9]*vertices[v1].z;
-                        var y2 = e[1]*vertices[v2].x + e[5]*vertices[v2].y + e[9]*vertices[v2].z;
-                        var y3 = e[1]*vertices[v3].x + e[5]*vertices[v3].y + e[9]*vertices[v3].z;
-                        var y4 = e[1]*vertices[v4].x + e[5]*vertices[v4].y + e[9]*vertices[v4].z;
+                        var y1 = e[1]*vertices[v1].x + e[4]*vertices[v1].y + e[7]*vertices[v1].z;
+                        var y2 = e[1]*vertices[v2].x + e[4]*vertices[v2].y + e[7]*vertices[v2].z;
+                        var y3 = e[1]*vertices[v3].x + e[4]*vertices[v3].y + e[7]*vertices[v3].z;
+                        var y4 = e[1]*vertices[v4].x + e[4]*vertices[v4].y + e[7]*vertices[v4].z;
 
-                        var z1 = e[6]*vertices[v1].y + e[10]*vertices[v1].z;
-                        var z2 = e[6]*vertices[v2].y + e[10]*vertices[v2].z;
-                        var z3 = e[6]*vertices[v3].y + e[10]*vertices[v3].z;
-                        var z4 = e[6]*vertices[v4].y + e[10]*vertices[v4].z;
+                        var z1 =                       e[5]*vertices[v1].y + e[8]*vertices[v1].z;
+                        var z2 =                       e[5]*vertices[v2].y + e[8]*vertices[v2].z;
+                        var z3 =                       e[5]*vertices[v3].y + e[8]*vertices[v3].z;
+                        var z4 =                       e[5]*vertices[v4].y + e[8]*vertices[v4].z;
                         
                         geoGroup.__vertexArray[v1offset] = x1 + cap.x, geoGroup.__vertexArray[v2offset] = x2 + cap.x,
                         geoGroup.__vertexArray[v3offset] = x3 + cap.x, geoGroup.__vertexArray[v4offset] = x4 + cap.x;
@@ -1408,21 +1409,21 @@ WebMol.GLModel = (function() {
                         geoGroup.__colorArray[v1offset+2] = color.b, geoGroup.__colorArray[v2offset+2] = color.b,
                         geoGroup.__colorArray[v3offset+2] = color.b, geoGroup.__colorArray[v4offset+2] = color.b;                                      
                         
-                        var n1 = {x: e[0]*normals[v1].x + e[4]*normals[v1].y + e[8]*normals[v1].z,
-                                  y: e[1]*normals[v1].x + e[5]*normals[v1].y + e[9]*normals[v1].z,
-                                  z:                      e[6]*normals[v1].y + e[10]*normals[v1].z};
+                        var n1 = {x: e[0]*normals[v1].x + e[3]*normals[v1].y + e[6]*normals[v1].z,
+                                  y: e[1]*normals[v1].x + e[4]*normals[v1].y + e[7]*normals[v1].z,
+                                  z:                      e[5]*normals[v1].y + e[8]*normals[v1].z};
                                   
-                        var n2 = {x: e[0]*normals[v2].x + e[4]*normals[v2].y + e[8]*normals[v2].z,
-                                  y: e[1]*normals[v2].x + e[5]*normals[v2].y + e[9]*normals[v2].z,
-                                  z:                      e[6]*normals[v2].y + e[10]*normals[v2].z};
+                        var n2 = {x: e[0]*normals[v2].x + e[3]*normals[v2].y + e[6]*normals[v2].z,
+                                  y: e[1]*normals[v2].x + e[4]*normals[v2].y + e[7]*normals[v2].z,
+                                  z:                      e[5]*normals[v2].y + e[8]*normals[v2].z};
 
-                        var n3 = {x: e[0]*normals[v3].x + e[4]*normals[v3].y + e[8]*normals[v3].z,
-                                  y: e[1]*normals[v3].x + e[5]*normals[v3].y + e[9]*normals[v3].z,
-                                  z:                      e[6]*normals[v3].y + e[10]*normals[v3].z};
+                        var n3 = {x: e[0]*normals[v3].x + e[3]*normals[v3].y + e[6]*normals[v3].z,
+                                  y: e[1]*normals[v3].x + e[4]*normals[v3].y + e[7]*normals[v3].z,
+                                  z:                      e[5]*normals[v3].y + e[8]*normals[v3].z};
 
-                        var n4 = {x: e[0]*normals[v4].x + e[4]*normals[v4].y + e[8]*normals[v4].z,
-                                  y: e[1]*normals[v4].x + e[5]*normals[v4].y + e[9]*normals[v4].z,
-                                  z:                      e[6]*normals[v4].y + e[10]*normals[v4].z};
+                        var n4 = {x: e[0]*normals[v4].x + e[3]*normals[v4].y + e[6]*normals[v4].z,
+                                  y: e[1]*normals[v4].x + e[4]*normals[v4].y + e[7]*normals[v4].z,
+                                  z:                      e[5]*normals[v4].y + e[8]*normals[v4].z};
                         
                         var face, norm;
                         
@@ -1494,7 +1495,7 @@ WebMol.GLModel = (function() {
                 return;
 
             var bondR = style.radius || defaultStickRadius;
-            var capflag = false;
+            var fromCap = false, toCap = false;
 
             var c1 = atom.color;
             if (typeof (style.color) != "undefined") {
@@ -1503,6 +1504,9 @@ WebMol.GLModel = (function() {
             var C1 = WebMol.CC.color(c1);
             var mp, mp1, mp2;
             
+            if (!style.capDrawn && atom.bonds.length < 3)
+                fromCap = true;
+                
             for (var i = 0; i < atom.bonds.length; i++) {
                 var j = atom.bonds[i]; // our neighbor
                 var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
@@ -1514,6 +1518,9 @@ WebMol.GLModel = (function() {
                     // TODO: handle bond orders
                     if (!atom2.style.stick)
                         continue; // don't sweat the details
+                        
+                    if (!atom2.style.stick.capDrawn & atom2.bonds.length < 3)
+                        toCap = true;                        
 
                     var p1 = new TV3(atom.x, atom.y, atom.z);
                     var p2 = new TV3(atom2.x, atom2.y, atom2.z);
@@ -1526,25 +1533,28 @@ WebMol.GLModel = (function() {
 
                     // draw cylinders
                     if (atom.bondOrder[i] === 1) {
-                        capflag = true;
                         if (c1 != c2) {
                             mp = new TV3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
-                            drawCylinder(geo, p1, mp, bondR, C1, capflag);
-                            drawCylinder(geo, p2, mp, bondR, C2, capflag);
+                            drawCylinder(geo, p1, mp, bondR, C1, fromCap, false);
+                            drawCylinder(geo, mp, p2, bondR, C2, false, toCap);
                         } else {
-                            drawCylinder(geo, p1, p2, bondR, C1, capflag);
+                            drawCylinder(geo, p1, p2, bondR, C1, fromCap, toCap);
                         }
                         
                         if (atom.clickable || atom2.clickable) {
                             mp = new TV3().addVectors(p1, p2).multiplyScalar(0.5);
                             if (atom.clickable){
                                 var cylinder1 = new WebMol.Cylinder(p1.clone(), mp.clone(), bondR);
-                                atom.intersectionShape.cylinder.push(cylinder1);
+                                var sphere1 = new WebMol.Sphere(p1.clone(), bondR);
+                                atom.intersectionShape.cylinder.push(cylinder1);   
+                                atom.intersectionShape.sphere.push(sphere1);                             
                             }
                             if (atom2.clickable){
                                 var cylinder2 = new WebMol.Cylinder(p2.clone(), mp.clone(), bondR);
+                                var sphere2 = new WebMol.Sphere(p2.clone(), bondR);
                                 atom2.intersectionShape.cylinder.push(cylinder2);
+                                atom2.intersectionShape.sphere.push(sphere2);
                             }
 
                         }
@@ -1588,6 +1598,7 @@ WebMol.GLModel = (function() {
                         }
 
                         if (atom.bondOrder[i] == 2) {
+                            fromCap = false, toCap = false;
                             var r = bondR / 2.5;
                             v.cross(dir);
                             v.normalize();
@@ -1709,8 +1720,7 @@ WebMol.GLModel = (function() {
                 }
             };
             
-            if (!capflag)
-                drawAtomSphere(atom, geo);
+            //if (!fromCap) drawAtomSphere(atom, geo);
                 
             atom.style = savedstyle;
 
