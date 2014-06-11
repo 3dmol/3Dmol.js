@@ -852,7 +852,7 @@ WebMol.GLModel = (function() {
                 //Require that heightSegments is even and >= 2
                 //Equator points at h/2 (theta = pi/2)
                 //(repeated) polar points at 0 and h (theta = 0 and pi)
-                var heightSegments = 2, widthSegments = w; // 16 or however many basis vectors for cylinder
+                var heightSegments = 10, widthSegments = w; // 16 or however many basis vectors for cylinder
                 
                 if (heightSegments % 2 !== 0 || !heightSegments) {
                     console.error("heightSegments must be even");
@@ -892,26 +892,34 @@ WebMol.GLModel = (function() {
                         //Only push first polar point
                         
                         if (!polar || x === 0) {
-                           var vertex = new WebMol.Vector3();
-                           vertex.x = -radius * Math.cos(phiStart + u * phiLength)
-                                   * Math.sin(thetaStart + v * thetaLength);
-                           vertex.y = radius
-                                   * Math.cos(thetaStart + v * thetaLength);
-                           vertex.z = radius * Math.sin(phiStart + u * phiLength)
-                                   * Math.sin(thetaStart + v * thetaLength);
+                            
+                            if (x < widthSegments) {
+                                var vertex = new WebMol.Vector3();
+                                vertex.x = -radius * Math.cos(phiStart + u * phiLength)
+                                        * Math.sin(thetaStart + v * thetaLength);
+                                vertex.y = radius
+                                        * Math.cos(thetaStart + v * thetaLength);
+                                vertex.z = radius * Math.sin(phiStart + u * phiLength)
+                                        * Math.sin(thetaStart + v * thetaLength);
 
-                           if (Math.abs(vertex.x) < 1e-5) vertex.x = 0;
-                           if (Math.abs(vertex.y) < 1e-5) vertex.y = 0;
-                           if (Math.abs(vertex.z) < 1e-5) vertex.z = 0;
+                                if (Math.abs(vertex.x) < 1e-5) vertex.x = 0;
+                                if (Math.abs(vertex.y) < 1e-5) vertex.y = 0;
+                                if (Math.abs(vertex.z) < 1e-5) vertex.z = 0;
 
-                           var n = new WebMol.Vector3(vertex.x, vertex.y, vertex.z);
-                           n.normalize();
+                                var n = new WebMol.Vector3(vertex.x, vertex.y, vertex.z);
+                                n.normalize();
 
-                           nvecs.push(vertex);
-                           norms.push(n);                            
-                           
-
-                           verticesRow.push(nvecs.length - 1);                           
+                                nvecs.push(vertex);
+                                norms.push(n);   
+                                
+                                verticesRow.push(nvecs.length - 1);
+                            }
+                            
+                            //last point is just the first point for this row
+                            else {
+                                verticesRow.push(nvecs.length - widthSegments);
+                            }
+                                                       
                         }
                         
                         // x > 0; index to already added point
@@ -1305,7 +1313,7 @@ WebMol.GLModel = (function() {
             drawnC++;
             // vertices
             var drawcaps = fromCap || toCap;
-            drawcaps = false;
+            //drawcaps = false;
             
             var dir = to.clone();
             dir.sub(from);
@@ -1379,21 +1387,18 @@ WebMol.GLModel = (function() {
             //SPHERE CAPS         
 
             if (drawcaps) {
-            
-                var normals = vobj.normals, vertices = vobj.sphereVertices, verticesRows = vobj.verticesRows;
 
-                start = geoGroup.vertices;
-                var h = verticesRows.length - 1;
-
+                // h - sphere rows, verticesRows.length - 2
                 var ystart = (toCap) ? 0 : h/2;
-                var yend = (fromCap) ? h : h/2;
+                var yend = (fromCap) ? h + 1 : h/2+1;
                 
                 for (var y = ystart; y < yend; y++) {
-                
-                    var w = verticesRows[y].length;
-                    var cap = (y < h/2) ? to : from;
+                    if (y === h/2)
+                        continue;
+                    // n number of points for each level (verticesRows[i].length - 1)
+                    var cap = (y <= h/2) ? to : from;
                     
-                    for (var x = 0; x < w - 1; x++) {
+                    for (var x = 0; x < n; x++) {
                                            
                         faceoffset = geoGroup.faceidx;
                         
@@ -1450,24 +1455,7 @@ WebMol.GLModel = (function() {
 
                         var n4 = {x: e[0]*normals[v4].x + e[3]*normals[v4].y + e[6]*normals[v4].z,
                                   y: e[1]*normals[v4].x + e[4]*normals[v4].y + e[7]*normals[v4].z,
-                                  z:                      e[5]*normals[v4].y + e[8]*normals[v4].z};
-                        
-                        var face, norm;
-                        
-                        //last before equator - use 'To' part of cylinder (odd indexed vertices in nvecs...)
-                        if (y === h/2 - 1) {
-                            v3 = -n*4 + 1 + x*2;
-                            v4 = -n*4 + 3 + x*2;
-                            if (x === w - 2)
-                                v4 -= (w-1)*2;
-                        }
-                        //equator - use 'From' part of cylinder (even indexed vertices in nvecs)
-                        else if (y === h/2) {
-                            v1 = start - n*4 + 2 + x*2;
-                            v2 = start - n*4 + x*2;
-                            if (x === w - 2)
-                                v1 -= (w-1)*2;
-                        }
+                                  z:                      e[5]*normals[v4].y + e[8]*normals[v4].z};                        
                         
                         //if (Math.abs(vobj.sphereVertices[v1].y) === radius) {
                         if (y === 0) {
