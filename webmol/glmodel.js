@@ -1753,8 +1753,9 @@ WebMol.GLModel = (function() {
                                  
             }            
 
-            // draw non bonded heteroatoms as spheres            
-            if (!atom.bonds.length) {
+            // draw non bonded heteroatoms as spheres   
+            var drawSphere = (!atom.singleBonds && atom.bonds.length === 1) || (!atom.bonds.length);
+            if (drawSphere) {
                 var savedstyle = atom.style;
                 atom.style = {
                     sphere : {
@@ -1839,6 +1840,9 @@ WebMol.GLModel = (function() {
 
                 //Initialize buffers in geometry                
                 stickGeometry.initTypedArrays();
+                
+                if (cylinderMaterial.wireframe)
+                    stickGeometry.setUpWireframe();
                 
                 var sticks = new WebMol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
