@@ -69,7 +69,7 @@
         
         var atomcallback = function(atom, viewer){
             if (atom.clickLabel === undefined || !atom.clickLabel instanceof WebMol.Label) {
-                atom.clickLabel = viewer.addLabel(atom.elem,
+                atom.clickLabel = viewer.addLabel(atom.elem + atom.serial,
                                                   {fontSize : 14, 
                                                    position : {x:atom.x, y:atom.y, z:atom.z}});
                 atom.clicked = true;
@@ -119,16 +119,18 @@
         
         $(document).ready(function() {
                         
-            $.get("test_structs/1B5S.pdb", function(data){
+            //$.get("test_structs/1YCR.pdb", function(data){
                 
-                //moldata = $("#moldata_benzene_sdf").val();
+                moldata = data = $("#moldata_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
-                    viewer.setBackgroundColor(0xffffff);
-                    voldata = data;
+                    viewer.setBackgroundColor(0xffffff, 0.5);
                     
-                    receptorModel = m = viewer.addModel(data, "pdb");
-                    ligandModel = viewer.createModelFrom({chain: "C"}, true);                    
+                    
+                    receptorModel = m = viewer.addModel(data, "sdf");
+                    //shape = viewer.addSphere({radius:1});
+                    //shape.wireframe = true;
+                    //ligandModel = viewer.createModelFrom({chain: "C"}, true);                    
                     
                     atoms = m.selectedAtoms({ }); 
                     
@@ -137,13 +139,14 @@
                         atom.clickable = true;
                         atom.callback = atomcallback;
                     }
+                    
        
                     viewer.zoomTo();
                     viewer.render();
 
                 }});
                 
-            }, "text");   
+            //}, "text");   
            
         });
         
@@ -218,12 +221,58 @@ M  END
  11  5  1  0  0  0  0
 M  END
 </textarea>
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small_xy">v:U4C5Cr:4
+  -OEChem-12201211493D
+
+  9  8  0     1  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.4142    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0000    1.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    1.4142    0.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0000   -1.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0  
+    0.0000   -1.4142    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0000   -1.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.4142    0.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0000    1.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0    
+  1  2  1  0  0  0  0
+  1  3  1  0  0  0  0
+  1  4  1  0  0  0  0
+  1  5  1  0  0  0  0
+  1  6  1  0  0  0  0
+  1  7  1  0  0  0  0
+  1  8  1  0  0  0  0
+  1  9  1  0  0  0  0
+M  END
+</textarea> 
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small_yz">v:U4C5Cr:4
+  -OEChem-12201211493D
+
+ 9  8  0     1  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.4142    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.0000    1.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000    1.4142 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000   -1.0000    1.0000 S   0  0  0  0  0  0  0  0  0  0  0  0  
+    0.0000   -1.4142    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000   -1.0000   -1.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000   -1.4142 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.0000   -1.0000 S   0  0  0  0  0  0  0  0  0  0  0  0    
+  1  2  1  0  0  0  0
+  1  3  1  0  0  0  0
+  1  4  1  0  0  0  0
+  1  5  1  0  0  0  0
+  1  6  1  0  0  0  0
+  1  7  1  0  0  0  0
+  1  8  1  0  0  0  0
+  1  9  1  0  0  0  0
+M  END
+</textarea> 
 <textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small">v:U4C5Cr:4
   -OEChem-12201211493D
 
  2 1  0     1  0  0  0  0  0999 V2000
-   -8.1967    0.5191    0.7989 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -7.6843   -0.2222   -0.2656 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.0000    0.0000 S  0  0  0  0  0  0  0  0  0  0  0  0
   1  2  1  0  0  0  0
 M  END
 </textarea> 

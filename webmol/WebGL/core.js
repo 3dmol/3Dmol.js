@@ -440,6 +440,14 @@ WebMol.Geometry = (function() {
                       
         },
         
+        setUpWireframe : function() {
+            for (var g in this.geometryGroups ) {
+                var geoGroup = this.geometryGroups[g];
+                
+                geoGroup.setLineIndices();
+            }
+        },
+        
         //After vertices, colors, etc are collected in regular or typed arrays,
         // either create typed arrays from regular arrays if they don't already exist,
         // or shorten last typed array

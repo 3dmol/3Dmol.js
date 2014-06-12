@@ -58,41 +58,37 @@ var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphe
 
 
 //Generic style render testcase
-var testcase = (function() {
-	
-	var TestRunner = function(styleType, profile) {
-		
-		var testName = styleType + " render";
-		var timeName = styleType + " render time: ";
-		var testMsg = styleType + " style set correctly";
-		var styleExpected = styleSpec[styleType];
-		
-		test(testName, function() {
-			var m = glviewer.getModel(0);
-			console.group(testName);
-			console.time(timeName);
-			
-			if (profile)
-				console.profile();
-				
-			glviewer.setStyle({}, styleExpected);
-			glviewer.render();
-			
-			if (profile)
-				console.profileEnd();
-			
-			console.timeEnd(timeName);
-			console.groupEnd();
-			
-			var styleActual = m.selectedAtoms()[0].style;
-			equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), testMsg);	
-			
-		});
-	};
-	
-	return TestRunner;
 
-})();
+var testcase = function(styleType, profile) {
+    
+    var testName = styleType + " render";
+    var timeName = styleType + " render time: ";
+    var testMsg = styleType + " style set correctly";
+    var styleExpected = styleSpec[styleType];
+    
+    test(testName, function() {
+        var m = glviewer.getModel(0);
+        console.group(testName);
+        console.time(timeName);
+        
+        if (profile)
+            console.profile();
+            
+        glviewer.setStyle({}, styleExpected);
+        glviewer.render();
+        
+        if (profile)
+            console.profileEnd();
+        
+        console.timeEnd(timeName);
+        console.groupEnd();
+        
+        var styleActual = m.selectedAtoms()[0].style;
+        equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), testMsg); 
+        
+    });
+};
+
 
 var runtests = (function(profile) {
 	for (var style in styleSpec)
@@ -100,13 +96,11 @@ var runtests = (function(profile) {
 });
 //test cases
 
-
-
 //TESTS
 
 //moldata 1
 
-QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
+QUnit.module( "A. Bovine Calbindin, 637 atoms (1YCR)", {
 	
 	setupOnce: function() {
 		
@@ -119,7 +113,7 @@ QUnit.module( "A. Bovine Calbindin, 76 res (1YCR)", {
 	      		start();
    		}, "text");
 		glviewer.mapAtomProperties(WebMol.partialCharges);
-		console.group("Calbindin (76 res)");
+		console.group("Calbindin (637 atoms)");
 	},
 		
 	teardownOnce: function() {		
@@ -133,7 +127,7 @@ runtests(profile);
 
 //moldata 2
 
-QUnit.module( "B. Cathodic Hemoglobin, 143 res (2AA1)", {
+QUnit.module( "B. Cathodic Hemoglobin, 5,085 atoms (2AA1)", {
 	
 	setupOnce: function() {
 		glviewer.removeAllModels();
@@ -145,7 +139,7 @@ QUnit.module( "B. Cathodic Hemoglobin, 143 res (2AA1)", {
 	      		start();
    		}, "text");
    		console.groupEnd();
-   		console.group("Hemoglobin (143 res)");
+   		console.group("Hemoglobin (5,085 atoms)");
 	},
 	
 	teardownOnce: function() {
@@ -157,7 +151,7 @@ runtests(profile);
 
 //moldata 3
 
-QUnit.module( "C. Calicivirus Capsid, 534 res (3M8L)", {
+QUnit.module( "C. Calicivirus Capsid, 12,362 atoms (3M8L)", {
 	
 	setupOnce: function() {
 		console.log("Testing third molecule");
@@ -170,13 +164,38 @@ QUnit.module( "C. Calicivirus Capsid, 534 res (3M8L)", {
 	      		start();
    		}, "text");
    		console.groupEnd();
-   		console.group("Capsid (534 res)");
+   		console.group("Capsid (12,362 atoms)");
 	},
 		
 	teardownOnce: function() {
 		console.groupEnd();
 		//glviewer.removeAllModels();
 	}
+});
+
+runtests(profile);
+
+
+QUnit.module( "D. Dihydrolipoyl Transacetylase Biological Assembly,  71,820 atoms (1B5S)", {
+    
+    setupOnce: function() {
+        
+        glviewer.removeAllModels();
+        stop();
+        $.get("test_structs/1B5S.pdb", function(data) {             
+                glviewer.addModel(data, "pdb");
+                glviewer.zoomTo();
+                glviewer.render();
+                start();
+        }, "text");
+        glviewer.mapAtomProperties(WebMol.partialCharges);
+        console.group("Calbindin (71,820 atoms)");
+    },
+        
+    teardownOnce: function() {      
+        console.groupEnd();
+    }
+    
 });
 
 runtests(profile);

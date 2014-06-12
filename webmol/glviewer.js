@@ -177,7 +177,7 @@ WebMol.GLViewer = (function() {
     /**
      * WebGL WebMol viewer
      * @constructor WebMol.GLViewer
-     * @param {Object | string} element HTML element or string identifier
+     * @param {Object} element HTML element within which to create viewer
      * @param {Function} callback Callback function to be immediately executed on this viewer
      * @param {Object} defaultcolors Object defining default atom colors as atom => color property value pairs for all models within this viewer
      */
@@ -285,9 +285,8 @@ WebMol.GLViewer = (function() {
         };
 
         var initializeScene = function() {
-            // CHECK: Should I explicitly call scene.deallocateObject?
+            
             scene = new WebMol.Scene();
-            //scene = new WebMol.Scene();
             scene.fog = new WebMol.Fog(bgColor, 100, 200);
 
             modelGroup = new WebMol.Object3D();
@@ -306,6 +305,9 @@ WebMol.GLViewer = (function() {
         };
 
         initializeScene();
+        
+        renderer.setClearColorHex(bgColor, 1.0);
+        scene.fog.color = WebMol.CC.color(bgColor);
         
         var clickedAtom = null;
         // enable mouse support
@@ -466,6 +468,12 @@ WebMol.GLViewer = (function() {
         });
 
         // public methods
+        /**
+         * Set the background color (default white)
+         * @param {number} hex Hexcode specified background color
+         * @param {type} a Alpha level (default 1.0)
+         * 
+         */
         this.setBackgroundColor = function(hex, a) {
             a = a | 1.0;
             bgColor = hex;
@@ -473,17 +481,28 @@ WebMol.GLViewer = (function() {
             scene.fog.color = WebMol.CC.color(hex);
             show();
         };
-
+        
+        /**
+         * Set viewer width
+         * @param {number} w Width in pixels
+         */
         this.setWidth = function(w) {
-            WIDTH = w;
+            WIDTH = w || WIDTH;
             renderer.setSize(WIDTH, HEIGHT);
         };
-
+        
+        /**
+         * Set viewer height
+         * @param {number} h Height in pixels
+         */
         this.setHeight = function(h) {
-            HEIGHT = h;
+            HEIGHT = h || HEIGHT;
             renderer.setSize(WIDTH, HEIGHT);
         };
-
+        
+        /**
+         * Resize viewer according to containing HTML element's dimensions
+         */
         this.resize = function() {
             WIDTH = container.width();
             HEIGHT = container.height();
@@ -496,11 +515,20 @@ WebMol.GLViewer = (function() {
 
         $(window).resize(this.resize);
 
-        // return specified model
+        /**
+         * Return specified model
+         * @param {number} [id] - Retrieve model with specified id
+         * @default Last model added to viewer
+         * @returns {GLModel}
+         */
         this.getModel = function(id) {
+            id = id || models.length - 1;
             return models[id];
         };
 
+        /**
+         * Retrieve 
+         */
         this.getView = function() {
             if (!modelGroup)
                 return [ 0, 0, 0, 0, 0, 0, 0, 1 ];
@@ -511,6 +539,10 @@ WebMol.GLViewer = (function() {
         };
 
         this.setView = function(arg) {
+            
+            if (arg === undefined || !(arg instanceof Array || arg.length !== 8))
+                return;                       
+                
             if (!modelGroup || !rotationGroup)
                 return;
             modelGroup.position.x = arg[0];

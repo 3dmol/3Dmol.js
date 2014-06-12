@@ -40,7 +40,7 @@ WebMol.GLShape = (function() {
                 normals : []
             };
             // scale quality with radius heuristically
-            var widthSegments = 12;
+            var widthSegments = 16;
             var heightSegments = 10;
             if (radius < 1) {
                 widthSegments = 8;
