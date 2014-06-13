@@ -1,4 +1,31 @@
-//a molecular viewer based on GLMol
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: glviewer.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: glviewer.js</h1>
+
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//a molecular viewer based on GLMol
 
 var WebMol = WebMol || {};
 
@@ -151,7 +178,7 @@ WebMol.GLViewer = (function() {
 
         if (atomlist.length === 0)
             return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-        for ( var i = 0; i < atomlist.length; i++) {
+        for ( var i = 0; i &lt; atomlist.length; i++) {
             var atom = atomlist[i];
             if (atom === undefined)
                 continue;
@@ -160,9 +187,9 @@ WebMol.GLViewer = (function() {
             ysum += atom.y;
             zsum += atom.z;
 
-            xmin = (xmin < atom.x) ? xmin : atom.x;
-            ymin = (ymin < atom.y) ? ymin : atom.y;
-            zmin = (zmin < atom.z) ? zmin : atom.z;
+            xmin = (xmin &lt; atom.x) ? xmin : atom.x;
+            ymin = (ymin &lt; atom.y) ? ymin : atom.y;
+            zmin = (zmin &lt; atom.z) ? zmin : atom.z;
             xmax = (xmax > atom.x) ? xmax : atom.x;
             ymax = (ymax > atom.y) ? ymax : atom.y;
             zmax = (zmax > atom.z) ? zmax : atom.z;
@@ -196,7 +223,7 @@ WebMol.GLViewer = (function() {
         var WIDTH = container.width();
         var HEIGHT = container.height();
         
-        var spinner = $('<div class="glviewerSpinnerWrap" style = "position: absolute; width: 100%; height: 100%; display: table; z-index: 1;"><div class="glviewerSpinner" style="display: table-cell; text-align: center; vertical-align: middle; z-index:1"><img src="webmol/spinner.gif"></div></div>');
+        var spinner = $('&lt;div class="glviewerSpinnerWrap" style = "position: absolute; width: 100%; height: 100%; display: table; z-index: 1;">&lt;div class="glviewerSpinner" style="display: table-cell; text-align: center; vertical-align: middle; z-index:1">&lt;img src="webmol/spinner.gif">&lt;/div>&lt;/div>');
         $(element).append(spinner);
         spinner.hide();
         // set dimensions
@@ -251,10 +278,10 @@ WebMol.GLViewer = (function() {
 
         var setSlabAndFog = function() {
             var center = camera.position.z - rotationGroup.position.z;
-            if (center < 1)
+            if (center &lt; 1)
                 center = 1;
             camera.near = center + slabNear;
-            if (camera.near < 1)
+            if (camera.near &lt; 1)
                 camera.near = 1;
             camera.far = center + slabFar;
             if (camera.near + 1 > camera.far)
@@ -347,7 +374,7 @@ WebMol.GLViewer = (function() {
             
             if (intersects.length) {
                 var selected = intersects[0].clickable;
-                if (selected.callback !== undefined && typeof(selected.callback) === "function") {
+                if (selected.callback !== undefined &amp;&amp; typeof(selected.callback) === "function") {
                     selected.callback(selected, _viewer);
                 }
             }
@@ -365,7 +392,7 @@ WebMol.GLViewer = (function() {
                 return;
             var x = ev.pageX, y = ev.pageY;
             if (ev.originalEvent.targetTouches
-                    && ev.originalEvent.targetTouches[0]) {
+                    &amp;&amp; ev.originalEvent.targetTouches[0]) {
                 x = ev.originalEvent.targetTouches[0].pageX;
                 y = ev.originalEvent.targetTouches[0].pageY;
             }
@@ -425,7 +452,7 @@ WebMol.GLViewer = (function() {
 
             var x = ev.pageX, y = ev.pageY;
             if (ev.originalEvent.targetTouches
-                    && ev.originalEvent.targetTouches[0]) {
+                    &amp;&amp; ev.originalEvent.targetTouches[0]) {
                 x = ev.originalEvent.targetTouches[0].pageX;
                 y = ev.originalEvent.targetTouches[0].pageY;
             }
@@ -434,17 +461,17 @@ WebMol.GLViewer = (function() {
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
             var r = Math.sqrt(dx * dx + dy * dy);
-            if (mode == 3 || (mouseButton == 3 && ev.ctrlKey)) { // Slab
+            if (mode == 3 || (mouseButton == 3 &amp;&amp; ev.ctrlKey)) { // Slab
                 slabNear = cslabNear + dx * 100;
                 slabFar = cslabFar + dy * 100;
             } else if (mode == 2 || mouseButton == 3 || ev.shiftKey) { // Zoom
                 var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-                if (scaleFactor < 80)
+                if (scaleFactor &lt; 80)
                     scaleFactor = 80;
                 rotationGroup.position.z = cz - dy * scaleFactor;
             } else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
                 var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-                if (scaleFactor < 20)
+                if (scaleFactor &lt; 20)
                     scaleFactor = 20;
                 var translationByScreen = new TV3(dx * scaleFactor, -dy
                         * scaleFactor, 0);
@@ -455,7 +482,7 @@ WebMol.GLViewer = (function() {
                 modelGroup.position.x = currentModelPos.x + translation.x;
                 modelGroup.position.y = currentModelPos.y + translation.y;
                 modelGroup.position.z = currentModelPos.z + translation.z;
-            } else if ((mode == 0 || mouseButton == 1) && r != 0) { // Rotate
+            } else if ((mode == 0 || mouseButton == 1) &amp;&amp; r != 0) { // Rotate
                 var rs = Math.sin(r * Math.PI) / r;
                 dq.x = Math.cos(r * Math.PI);
                 dq.y = 0;
@@ -587,13 +614,13 @@ WebMol.GLViewer = (function() {
             var time1 = new Date();
             var view = this.getView();
 
-            for ( var i = 0; i < models.length; i++) {
+            for ( var i = 0; i &lt; models.length; i++) {
                 if (models[i]) {
                     models[i].globj(modelGroup);
                 }
             }
             
-            for ( var i = 0; i < shapes.length; i++ ) {
+            for ( var i = 0; i &lt; shapes.length; i++ ) {
                 if (shapes[i]) {
                     shapes[i].globj(modelGroup);
                 }
@@ -641,7 +668,7 @@ WebMol.GLViewer = (function() {
 
             var ms = [];
             if (typeof sel.model === "undefined") {
-                for ( var i = 0; i < models.length; i++) {
+                for ( var i = 0; i &lt; models.length; i++) {
                     if (models[i])
                         ms.push(models[i]);
                 }
@@ -651,7 +678,7 @@ WebMol.GLViewer = (function() {
                     ms = [ ms ];
             }
 
-            for ( var i = 0; i < ms.length; i++) {
+            for ( var i = 0; i &lt; ms.length; i++) {
                 atoms = atoms.concat(ms[i].selectedAtoms(sel));
             }
             return atoms;
@@ -663,7 +690,7 @@ WebMol.GLViewer = (function() {
 
             var ms = [];
             if (typeof sel.model === "undefined") {
-                for ( var i = 0; i < models.length; i++) {
+                for ( var i = 0; i &lt; models.length; i++) {
                     if (models[i])
                         ms.push(models[i]);
                 }
@@ -673,7 +700,7 @@ WebMol.GLViewer = (function() {
                     ms = [ ms ];
             }
 
-            for ( var i = 0; i < ms.length; i++) {
+            for ( var i = 0; i &lt; ms.length; i++) {
                 if(ms[i].atomIsSelected(atom, sel))
                     return true;
             }
@@ -690,7 +717,7 @@ WebMol.GLViewer = (function() {
         this.pdbData = function(sel) {
             var atoms = getAtomsFromSel(sel);
             var ret = "";
-            for ( var i = 0, n = atoms.length; i < n; ++i) {
+            for ( var i = 0, n = atoms.length; i &lt; n; ++i) {
                 ret += atoms[i].pdbline + "\n";
             }
             return ret;
@@ -722,7 +749,7 @@ WebMol.GLViewer = (function() {
                     - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
 
             var maxD = Math.sqrt(x * x + y * y + z * z);
-            if (maxD < 25)
+            if (maxD &lt; 25)
                 maxD = 25;
 
             // use full bounding box for slab/fog
@@ -734,7 +761,7 @@ WebMol.GLViewer = (function() {
             y = tmp[1][1] - tmp[0][1];
             z = tmp[1][2] - tmp[0][2];
             maxD = Math.sqrt(x * x + y * y + z * z);
-            if (maxD < 25)
+            if (maxD &lt; 25)
                 maxD = 25;
 
             rotationGroup.position.z = -(maxD * 0.35
@@ -790,7 +817,7 @@ WebMol.GLViewer = (function() {
          * @example
          * // Remove labels created in [addLabel example]{@link WebMol.GLViewer#addLabel}
          * 
-         * for (var i = 0; i < labels.length; i++) {
+         * for (var i = 0; i &lt; labels.length; i++) {
          *     glviewer.removeLabel(label);
          * }
          * 
@@ -945,7 +972,7 @@ WebMol.GLViewer = (function() {
             delete models[model.getID()];
             // clear off back of model array
             while (models.length > 0
-                    && typeof (models[models.length - 1]) === "undefined")
+                    &amp;&amp; typeof (models[models.length - 1]) === "undefined")
                 models.pop();
         };
 
@@ -953,7 +980,7 @@ WebMol.GLViewer = (function() {
          * Delete all existing models
          */
         this.removeAllModels = function() {
-            for (var i = 0; i < models.length; i++) {
+            for (var i = 0; i &lt; models.length; i++) {
                 var model = models[i];
                 model.removegl(modelGroup);
                 
@@ -970,7 +997,7 @@ WebMol.GLViewer = (function() {
          */
         this.createModelFrom = function(sel, extract) {
             var m = new WebMol.GLModel(models.length, defaultcolors);
-            for ( var i = 0; i < models.length; i++) {
+            for ( var i = 0; i &lt; models.length; i++) {
                 if (models[i]) {
                     var atoms = models[i].selectedAtoms(sel);
                     m.addAtoms(atoms);
@@ -983,7 +1010,7 @@ WebMol.GLViewer = (function() {
         };
 
         function applyToModels(func, sel, value1, value2) {
-            for ( var i = 0; i < models.length; i++) {
+            for ( var i = 0; i &lt; models.length; i++) {
                 if (models[i]) {
                     models[i][func](sel, value1, value2);
                 }
@@ -1028,16 +1055,16 @@ WebMol.GLViewer = (function() {
         var getAtomsWithin = function(atomlist, extent) {
             var ret = [];
 
-            for ( var i = 0; i < atomlist.length; i++) {
+            for ( var i = 0; i &lt; atomlist.length; i++) {
                 var atom = atomlist[i];
                 if (typeof (atom) == "undefined")
                     continue;
 
-                if (atom.x < extent[0][0] || atom.x > extent[1][0])
+                if (atom.x &lt; extent[0][0] || atom.x > extent[1][0])
                     continue;
-                if (atom.y < extent[0][1] || atom.y > extent[1][1])
+                if (atom.y &lt; extent[0][1] || atom.y > extent[1][1])
                     continue;
-                if (atom.z < extent[0][2] || atom.z > extent[1][2])
+                if (atom.z &lt; extent[0][2] || atom.z > extent[1][2])
                     continue;
                 ret.push(i);
             }
@@ -1069,7 +1096,7 @@ WebMol.GLViewer = (function() {
             }; // copyExtent
             var splitExtentR = function(extent) {
                 // recursively split until volume is below maxVol
-                if (volume(extent) < maxVolume) {
+                if (volume(extent) &lt; maxVolume) {
                     return [ extent ];
                 } else {
                     // find longest edge
@@ -1077,9 +1104,9 @@ WebMol.GLViewer = (function() {
                     var h = extent[1][1] - extent[0][1];
                     var d = extent[1][2] - extent[0][2];
                     var index = 0;
-                    if (w > h && w > d) {
+                    if (w > h &amp;&amp; w > d) {
                         index = 0;
-                    } else if (h > w && h > d) {
+                    } else if (h > w &amp;&amp; h > d) {
                         index = 1;
                     } else {
                         index = 2;
@@ -1105,7 +1132,7 @@ WebMol.GLViewer = (function() {
             // now compute atoms within expanded (this could be more efficient)
             var off = 6; // enough for water and 2*r, also depends on scale
             // factor
-            for ( var i = 0, n = splits.length; i < n; i++) {
+            for ( var i = 0, n = splits.length; i &lt; n; i++) {
                 var e = copyExtent(splits[i]);
                 e[0][0] -= off;
                 e[0][1] -= off;
@@ -1139,7 +1166,7 @@ WebMol.GLViewer = (function() {
             // reconstruct vertices and faces
             var v = VandF.vertices;
             var offset;
-            for ( var i = 0; i < v.length; i++) {            
+            for ( var i = 0; i &lt; v.length; i++) {            
                 offset = geoGroup.vertices*3;
                 geoGroup.__vertexArray[offset] = v[i].x; geoGroup.__vertexArray[offset+1] = v[i].y, geoGroup.__vertexArray[offset+2] =v[i].z;                
                 geoGroup.vertices++;
@@ -1151,7 +1178,7 @@ WebMol.GLViewer = (function() {
 
             // set colors for vertices
             var colors = [];
-            for ( var i = 0; i < atoms.length; i++) {
+            for ( var i = 0; i &lt; atoms.length; i++) {
                 var atom = atoms[i];
                 if (atom) {
                     if (typeof (atom.surfaceColor) != "undefined") {
@@ -1166,7 +1193,7 @@ WebMol.GLViewer = (function() {
             var faceoffset;
             
             //Setup colors, faces, and normals
-            for ( var i = 0; i < faces.length; i+=3) {
+            for ( var i = 0; i &lt; faces.length; i+=3) {
                 
                 faceoffset = i;
                 //var a = faces[i].a, b = faces[i].b, c = faces[i].c;
@@ -1231,6 +1258,7 @@ WebMol.GLViewer = (function() {
 
             ps.buildboundary();
 
+
             if (type == WebMol.SurfaceType.SES) {
                 ps.fastdistancemap();
                 ps.boundingatom(false);
@@ -1278,19 +1306,19 @@ WebMol.GLViewer = (function() {
             var min = Number.POSITIVE_INFINITY;
             var max = Number.NEGATIVE_INFINITY;
 
-            for ( var i = 0, n = atomlist.length; i < n; i++) {
+            for ( var i = 0, n = atomlist.length; i &lt; n; i++) {
                 var atom = atomlist[i];
                 if (atom.properties
-                        && typeof (atom.properties[prop]) != "undefined") {
+                        &amp;&amp; typeof (atom.properties[prop]) != "undefined") {
                     var val = atom.properties[prop];
-                    if (val < min)
+                    if (val &lt; min)
                         min = val;
                     if (val > max)
                         max = val;
                 }
             }
 
-            if (!isFinite(min) && !isFinite(max))
+            if (!isFinite(min) &amp;&amp; !isFinite(max))
                 min = max = 0;
             else if (!isFinite(min))
                 min = max;
@@ -1323,7 +1351,7 @@ WebMol.GLViewer = (function() {
 
             var extent = getExtent(atomsToShow);
 
-            if (style.map && style.map.prop) {
+            if (style.map &amp;&amp; style.map.prop) {
                 // map color space using already set atom properties
                 var prop = style.map.prop;
                 var scheme = style.map.scheme || new WebMol.RWB();
@@ -1332,7 +1360,7 @@ WebMol.GLViewer = (function() {
                     range = getPropertyRange(atomsToShow, prop);
                 }
 
-                for ( var i = 0, n = atomsToShow.length; i < n; i++) {
+                for ( var i = 0, n = atomsToShow.length; i &lt; n; i++) {
                     var atom = atomsToShow[i];
                     atom.surfaceColor = scheme.valueToHex(
                             atom.properties[prop], range);
@@ -1342,7 +1370,7 @@ WebMol.GLViewer = (function() {
             var totalVol = volume(extent); // used to scale resolution
             var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
-            if (focusSele && focusSele.length && focusSele.length > 0) {
+            if (focusSele &amp;&amp; focusSele.length &amp;&amp; focusSele.length > 0) {
                 var seleExtent = getExtent(focusSele);
                 // sort by how close to center of seleExtent
                 var sortFunc = function(a, b) {
@@ -1383,7 +1411,7 @@ WebMol.GLViewer = (function() {
             surfaces[surfid] = surfobj;
             var reducedAtoms = [];
             // to reduce amount data transfered, just pass x,y,z,serial and elem
-            for ( var i = 0, n = atomlist.length; i < n; i++) {
+            for ( var i = 0, n = atomlist.length; i &lt; n; i++) {
                 var atom = atomlist[i];
                 reducedAtoms[i] = {
                     x : atom.x,
@@ -1398,7 +1426,7 @@ WebMol.GLViewer = (function() {
             var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 
-                for ( var i = 0; i < extents.length; i++) {
+                for ( var i = 0; i &lt; extents.length; i++) {
                     //console.profile();
                     var VandF = generateMeshSyncHelper(type, extents[i].extent,
                             extents[i].atoms, extents[i].toshow, reducedAtoms,
@@ -1412,9 +1440,9 @@ WebMol.GLViewer = (function() {
             } else { // use worker
                 
                 var workers = [];
-                if (type < 0)
+                if (type &lt; 0)
                     type = 0; // negative reserved for atom data
-                for ( var i = 0; i < numWorkers; i++) {
+                for ( var i = 0; i &lt; numWorkers; i++) {
                     var w = new Worker('webmol/SurfaceWorker.js');
                     workers.push(w);
                     w.postMessage({
@@ -1424,7 +1452,7 @@ WebMol.GLViewer = (function() {
                     });
                 }
                 var cnt = 0;
-                for ( var i = 0; i < extents.length; i++) {
+                for ( var i = 0; i &lt; extents.length; i++) {
                     var worker = workers[i % workers.length];
                     worker.onmessage = function(event) {
                         var VandF = event.data;
@@ -1469,7 +1497,7 @@ WebMol.GLViewer = (function() {
 
         // given the id returned by surfid, remove surface
         this.removeSurface = function(surf) {
-            if (surfaces[surf] && surfaces[surf].lastGL) {
+            if (surfaces[surf] &amp;&amp; surfaces[surf].lastGL) {
                 if (surfaces[surf].geo !== undefined) surfaces[surf].geo.dispose();             
                 if (surfaces[surf].mat !== undefined) surfaces[surf].mat.dispose();
                 modelGroup.remove(surfaces[surf].lastGL); // remove from scene
@@ -1508,9 +1536,9 @@ WebMol.GLViewer = (function() {
         // properties for those atoms
         this.mapAtomProperties = function(props) {
             var atoms = getAtomsFromSel({});
-            for(var a = 0, numa = atoms.length; a < numa; a++) {
+            for(var a = 0, numa = atoms.length; a &lt; numa; a++) {
                 var atom = atoms[a];
-                for ( var i = 0, n = props.length; i < n; i++) {
+                for ( var i = 0, n = props.length; i &lt; n; i++) {
                     var prop = props[i];
                     if (prop.props) {
                         for ( var p in prop.props) {
@@ -1546,3 +1574,26 @@ WebMol.GLViewer = (function() {
 })();
 
 WebMol.glmolViewer = WebMol.GLViewer;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="WebMol.GLModel.html">GLModel</a></li><li><a href="WebMol.GLShape.html">GLShape</a></li><li><a href="WebMol.GLViewer.html">GLViewer</a></li><li><a href="WebMol.Label.html">Label</a></li></ul><h3>Namespaces</h3><ul><li><a href="WebMol.html">WebMol</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a> on Fri Jun 13 2014 16:26:25 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

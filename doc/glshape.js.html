@@ -1,4 +1,31 @@
-//A GLShape is a collection of user specified shapes. Includes
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: glshape.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: glshape.js</h1>
+
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//A GLShape is a collection of user specified shapes. Includes
 // build in sphere and arrow shapes, as well as custom user specified shapes
 
 WebMol.GLShape = (function() {
@@ -16,7 +43,7 @@ WebMol.GLShape = (function() {
             var geoGroup = geo.geometryGroups[g];
             var colorArr = geoGroup.__colorArray;
             
-            for (var i = 0, il = geoGroup.vertices; i < il; ++i) {
+            for (var i = 0, il = geoGroup.vertices; i &lt; il; ++i) {
                 colorArr[i*3] = C.r, colorArr[i*3+1] = C.g, colorArr[i*3+2] = C.b;                       
             }
         }
@@ -41,7 +68,7 @@ WebMol.GLShape = (function() {
             // scale quality with radius heuristically
             var widthSegments = 16;
             var heightSegments = 10;
-            if (radius < 1) {
+            if (radius &lt; 1) {
                 widthSegments = 8;
                 heightSegments = 6;
             }
@@ -54,10 +81,10 @@ WebMol.GLShape = (function() {
 
             var x, y, vertices = [], uvs = [];
 
-            for (y = 0; y <= heightSegments; y++) {
+            for (y = 0; y &lt;= heightSegments; y++) {
 
                 var verticesRow = [];
-                for (x = 0; x <= widthSegments; x++) {
+                for (x = 0; x &lt;= widthSegments; x++) {
 
                     var u = x / widthSegments;
                     var v = y / heightSegments;
@@ -105,7 +132,7 @@ WebMol.GLShape = (function() {
         
         var start = geoGroup.vertices;
         
-        for (var i = 0, il = vertices.length; i < il; ++i) {
+        for (var i = 0, il = vertices.length; i &lt; il; ++i) {
             var offset = 3*(start + i);   
             var v = vertices[i];
             
@@ -121,9 +148,9 @@ WebMol.GLShape = (function() {
         var h = verticesRows.length - 1;
         
         //var color = [C.r, C.g, C.b];
-        for (y = 0; y < h; y++) {
+        for (y = 0; y &lt; h; y++) {
             var w = verticesRows[y].length - 1;
-            for (x = 0; x < w; x++) {
+            for (x = 0; x &lt; w; x++) {
                 
                 var faceoffset = geoGroup.faceidx, lineoffset = geoGroup.lineidx;
                 
@@ -263,7 +290,7 @@ WebMol.GLShape = (function() {
         //var start = geo.vertices.length;
         var start = geoGroup.vertices;
         // add vertices, opposing vertices paired together
-        for ( var i = 0, n = nvecs.length; i < n; ++i) {
+        for ( var i = 0, n = nvecs.length; i &lt; n; ++i) {
             var offset = 3*(start + 3*i);
             var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
             var top = nvecs[i].clone().multiplyScalar(radius).add(to);
@@ -318,7 +345,7 @@ WebMol.GLShape = (function() {
         var n_vertices = 0;
         var fromi = geoGroup.vertices - 3, toi = geoGroup.vertices - 2, endi = geoGroup.vertices - 1;
         var fromoffset = fromi*3, tooffset = toi*3, endoffset = endi*3;
-        for (var i = 0, n = nvecs.length - 1; i < n; ++i) {
+        for (var i = 0, n = nvecs.length - 1; i &lt; n; ++i) {
         
             var ti = start + 3 * i, offset = ti * 3;
             faceoffset = geoGroup.faceidx, lineoffset = geoGroup.lineidx;
@@ -464,13 +491,13 @@ WebMol.GLShape = (function() {
         
         var offset, v, a, b, c;
         
-        for (var i = 0; i < geoGroup.vertices; ++i) {            
+        for (var i = 0; i &lt; geoGroup.vertices; ++i) {            
             offset = i*3;
             v = vertexArr[i];    
             geoGroup.__vertexArray[offset] = v.x, geoGroup.__vertexArray[offset+1] = v.y, geoGroup.__vertexArray[offset+2] = v.z;           
         }
         
-        for (var i = 0; i < geoGroup.faceidx / 3; ++i) {
+        for (var i = 0; i &lt; geoGroup.faceidx / 3; ++i) {
             offset = i*3;
             a = faceArr[offset], b = faceArr[offset+1], c = faceArr[offset+2];
             var vA = new WebMol.Vector3(), vB = new WebMol.Vector3(), vC = new WebMol.Vector3();
@@ -481,13 +508,13 @@ WebMol.GLShape = (function() {
      
         geoGroup.truncateArrayBuffers(true);
         
-        if (normalArr.length < geoGroup.vertices)
+        if (normalArr.length &lt; geoGroup.vertices)
             geoGroup.setNormals();
         else {
             
             geoGroup.__normalArray = new Float32Array(geoGroup.vertices*3);
             var n;
-            for (var i = 0; i < geoGroup.vertices; ++i) {
+            for (var i = 0; i &lt; geoGroup.vertices; ++i) {
                 offset = i*3;
                 n = normalArr[i];
                 geoGroup.__normalArray[offset] = n.x, geoGroup.__normalArray[offset+1] = n.y, geoGroup.__normalArray[offset+2] = n.z;
@@ -509,7 +536,7 @@ WebMol.GLShape = (function() {
         
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
-        if (lines.length < 6)
+        if (lines.length &lt; 6)
             return;
             
         var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");       
@@ -542,12 +569,12 @@ WebMol.GLShape = (function() {
         lines = new Float32Array(lines.splice(natoms+7).join(" ").replace(/^\s+/, "").split(/[\s\r]+/));        
         
         var vertnums = new Int16Array(nX*nY*nZ);        
-        for (var i = 0; i < vertnums.length; ++i)
+        for (var i = 0; i &lt; vertnums.length; ++i)
             vertnums[i] = -1;
 
         var bitdata = new Uint8Array(nX*nY*nZ);
         
-        for (var i = 0; i < lines.length; ++i) {
+        for (var i = 0; i &lt; lines.length; ++i) {
             var val = (isoval >= 0) ? lines[i] - isoval : isoval - lines[i];
             
             if (val > 0)
@@ -585,7 +612,7 @@ WebMol.GLShape = (function() {
             
         if (components.length > 0) {
                             
-            for (var i = 0, il = components.length; i < il; ++i) {
+            for (var i = 0, il = components.length; i &lt; il; ++i) {
                 var centroid = components[i].centroid;
                 sphere.center.add(centroid);            
             }                
@@ -595,7 +622,7 @@ WebMol.GLShape = (function() {
        
         var maxRadiusSq = sphere.radius*sphere.radius;
         
-        for (var i = 0, il = points.length / 3; i < il; i++) {              
+        for (var i = 0, il = points.length / 3; i &lt; il; i++) {              
             var x = points[i*3], y = points[i*3 + 1], z = points[i*3 + 2];
             var radiusSq = sphere.center.distanceToSquared({x:x, y:y, z:z});                
             maxRadiusSq = Math.max(maxRadiusSq, radiusSq);
@@ -664,7 +691,7 @@ WebMol.GLShape = (function() {
             drawCustom(this, geoGroup, customSpec);            
             geoGroup.truncateArrayBuffers(true);
     
-            for (var i = 0; i < geoGroup.__colorArray.length / 3; ++i) {
+            for (var i = 0; i &lt; geoGroup.__colorArray.length / 3; ++i) {
                 geoGroup.__colorArray[i*3] = this.color.r;
                 geoGroup.__colorArray[i*3 + 1] = this.color.g;
                 geoGroup.__colorArray[i*3 + 2] = this.color.b;      
@@ -708,7 +735,7 @@ WebMol.GLShape = (function() {
             arrowSpec.radius = arrowSpec.radius || 0.25;
             
             arrowSpec.radiusRatio = arrowSpec.radiusRatio || 1.618034;
-            arrowSpec.mid = ( 0 < arrowSpec.mid && arrowSpec.mid < 1) ? arrowSpec.mid : 0.618034;
+            arrowSpec.mid = ( 0 &lt; arrowSpec.mid &amp;&amp; arrowSpec.mid &lt; 1) ? arrowSpec.mid : 0.618034;
             
             var geoGroup = geo.addGeoGroup();
             
@@ -729,7 +756,7 @@ WebMol.GLShape = (function() {
         this.addVolumetricData = function(data, fmt, volSpec) {
                             
             //str, fmt, isoval, vxl
-            var isoval = (volSpec.isoval !== undefined && typeof(volSpec.isoval) === "number") ? volSpec.isoval : 0.0;
+            var isoval = (volSpec.isoval !== undefined &amp;&amp; typeof(volSpec.isoval) === "number") ? volSpec.isoval : 0.0;
             var vxl = (volSpec.voxel) ? true : false;
             
             var geoGroup = geo.addGeoGroup();
@@ -766,7 +793,7 @@ WebMol.GLShape = (function() {
                 ambient : 0x000000,
                 reflectivity : 0,
                 side : this.side,
-                transparent : (this.alpha < 1) ? true : false,
+                transparent : (this.alpha &lt; 1) ? true : false,
                 opacity : this.alpha
             });
             
@@ -820,4 +847,26 @@ WebMol.GLShape = (function() {
     
 }());
 
-WebMol.ShapeIDCount = 0;
+WebMol.ShapeIDCount = 0;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="WebMol.GLModel.html">GLModel</a></li><li><a href="WebMol.GLShape.html">GLShape</a></li><li><a href="WebMol.GLViewer.html">GLViewer</a></li><li><a href="WebMol.Label.html">Label</a></li></ul><h3>Namespaces</h3><ul><li><a href="WebMol.html">WebMol</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a> on Fri Jun 13 2014 16:26:25 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
