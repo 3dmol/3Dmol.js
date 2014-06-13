@@ -1,5 +1,7 @@
+
 var WebMol = WebMol || {};
 WebMol.defaultElementColor = 0xff1493;
+
 WebMol.JmolElementColors = {
 		H: 0xFFFFFF,
 		He: 0xD9FFFF,

@@ -136,7 +136,6 @@ WebMol.Label.prototype = {
 };
 
 // a webmol unified interace to gmol
-
 WebMol.GLViewer = (function() {
     // private class variables
     var numWorkers = 4; // number of threads for surface generation
@@ -176,11 +175,12 @@ WebMol.GLViewer = (function() {
     // The constructor
     /**
      * WebGL WebMol viewer
+     * Note: The preferred method of instantiating a GLViewer is through {@link WebMol.createViewer} 
      * 
      * @constructor WebMol.GLViewer
      * @param {Object} element HTML element within which to create viewer
-     * @param {Function} callback Callback function to be immediately executed on this viewer
-     * @param {Object} defaultcolors Object defining default atom colors as atom => color property value pairs for all models within this viewer
+     * @param {Function} callback - Callback function to be immediately executed on this viewer
+     * @param {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
      */
     function GLViewer(element, callback, defaultcolors) {
 
@@ -471,8 +471,15 @@ WebMol.GLViewer = (function() {
         // public methods
         /**
          * Set the background color (default white)
+         * 
+         * @function WebMol.GLViewer#setBackgroundColor
          * @param {number} hex Hexcode specified background color
          * @param {type} a Alpha level (default 1.0)
+         * 
+         * @example
+         * 
+         * //Set 'myviewer' background color to white
+         * myviewer.setBackgroundColor(0xffffff)
          * 
          */
         this.setBackgroundColor = function(hex, a) {
@@ -485,6 +492,8 @@ WebMol.GLViewer = (function() {
         
         /**
          * Set viewer width
+         * 
+         * @function WebMol.GLViewer#setWidth
          * @param {number} w Width in pixels
          */
         this.setWidth = function(w) {
@@ -494,6 +503,8 @@ WebMol.GLViewer = (function() {
         
         /**
          * Set viewer height
+         * 
+         * @function WebMol.GLViewer#setHeight
          * @param {number} h Height in pixels
          */
         this.setHeight = function(h) {
@@ -503,6 +514,8 @@ WebMol.GLViewer = (function() {
         
         /**
          * Resize viewer according to containing HTML element's dimensions
+         * 
+         * @function WebMol.GLViewer#resize
          */
         this.resize = function() {
             WIDTH = container.width();
@@ -518,9 +531,15 @@ WebMol.GLViewer = (function() {
 
         /**
          * Return specified model
-         * @param {number} [id] - Retrieve model with specified id
-         * @default Last model added to viewer
+         * 
+         * @function WebMol.GLViewer#getModel
+         * @param {number} [id=last model id] - Retrieve model with specified id
+         * @default Returns last model added to viewer
          * @returns {GLModel}
+         * 
+         * @example
+         * // Retrieve reference to first GLModel added
+         * var m = glviewer.getModel(0);
          */
         this.getModel = function(id) {
             id = id || models.length - 1;
@@ -557,9 +576,10 @@ WebMol.GLViewer = (function() {
 
         // apply styles, models, etc in viewer
         /**
-         * 
          * Render current state of viewer, after 
          * adding/removing models, applying styles, etc.
+         * 
+         * @function WebMol.GLViewer#render
          */
         this.render = function() {
 
@@ -663,6 +683,7 @@ WebMol.GLViewer = (function() {
         /**
          * Return pdb output of selected atoms (if atoms from pdb input)
          * 
+         * @function WebMol.GLViewer#pdbData  
          * @param {type} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
          * @returns {String} PDB string of selected atoms
          */
@@ -678,7 +699,15 @@ WebMol.GLViewer = (function() {
         /**
          * Zoom to center of atom selection
          * 
+         * @function WebMol.GLViewer#zoomTo
          * @param {Object} [sel] - Selection specification specifying model and atom properties to select. Default: all atoms in viewer
+         * 
+         * @example
+         * // Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
+         * glviewer.zoomTo({chain: 'B'});
+         * 
+         * // Focus on centroid of all atoms of all models in this viewer
+         * glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )
          */
         this.zoomTo = function(sel) {
             var atoms = getAtomsFromSel(sel).concat(shapes);
@@ -717,9 +746,32 @@ WebMol.GLViewer = (function() {
         /**
          * Add label to viewer
          * 
+         * @function WebMol.GLViewer#addLabel
          * @param {String} text - Label text
          * @param {Object} data - Label style specification
          * @returns {WebMol.Label}
+         * 
+         * @example
+         * 
+         * // Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
+         * 
+         * // Select all alpha carbons (have property atom : "CA") from last model added
+         * var atoms = glviewer.getModel().selectedAtoms({atom:"CA"});
+         * var labels = [];
+         * 
+         * for (var a in atoms) {
+         *     var atom = atoms[a];
+         * 
+         *     // Create label at alpha carbon's position displaying atom's residue and residue number
+         *     var labelText = atom.resname + " " + atom.resi;
+         *      
+         *     var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z});
+         * 
+         *     labels.push(l);
+         * }
+         * 
+         * // Render labels
+         * glviewer.render();
          */
         this.addLabel = function(text, data) {
             var label = new WebMol.Label(text, data); 
@@ -732,7 +784,17 @@ WebMol.GLViewer = (function() {
         /**
          * Remove label from viewer
          * 
+         * @function WebMol.GLViewer#removeLabel
          * @param {WebMol.Label} label - WebMol label
+         * 
+         * @example
+         * // Remove labels created in [addLabel example]{@link WebMol.GLViewer#addLabel}
+         * 
+         * for (var i = 0; i < labels.length; i++) {
+         *     glviewer.removeLabel(label);
+         * }
+         * 
+         * glviewer.render();
          */
         this.removeLabel = function(label) {
 
@@ -1467,9 +1529,7 @@ WebMol.GLViewer = (function() {
             }
         };
         
-        //TODO: Probably want to keep modelgroup hidden in deployment
-        //  used for debugging
-        this.getModelGroup = function() {
+        getModelGroup = function() {
             return modelGroup;
         };       
         

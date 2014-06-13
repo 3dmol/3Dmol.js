@@ -42,28 +42,28 @@
         var receptorModel = null;
         var ligandModel = null;
         var molObj = null; //Object3D for each rendered model      
-        var lastsurfstyle = 1;
+        var lastsurfstyle = true;
         var voldata = null;
         
         var toggleSurfTrans = function(surf) {
             
-            var opacity = (lastsurfstyle) ? 0.75 : 1;
+            var opacity = !!(lastsurfstyle) ? 0.75 : 1;
             glviewer.setSurfaceMaterialStyle(surf,{ opacity: opacity}); 
             glviewer.render();
             lastsurfstyle = !(lastsurfstyle);
         };  
         
         var addLabels = function() {
-            var atoms = glviewer.getModel(0).selectedAtoms({});
+            var atoms = glviewer.getModel().selectedAtoms({atom : "CA"});
             for (var a in atoms) {
                 var atom = atoms[a];
                 
-                if (atom.atom === "CA" && atom.resn.trim() === "ASN") {
+                //if (atom.resn.trim() === "ASN") {
                     var l = glviewer.addLabel(atom.resn + " " + atom.resi, {inFront: true, 
                                               fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z} } ); 
                     atom.label = l;
                     labels.push(atom);                
-                }
+                //}
             }
         };
         
@@ -124,7 +124,7 @@
                 moldata = data = $("#moldata_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
-                    viewer.setBackgroundColor(0xffffff, 0.5);
+                    viewer.setBackgroundColor(0xffffff);
                     
                     
                     receptorModel = m = viewer.addModel(data, "sdf");
@@ -164,8 +164,8 @@
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.VDW, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
         <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'},true);"></input>
-       <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1);"></input>
-        <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2);"></input>
+       <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
+        <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2), lastsurfstyle = 1;"></input>
         <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>

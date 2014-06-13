@@ -45,6 +45,70 @@
 <dl class="details">
     
 
+        <h5 class="subsection-title">Properties:</h5>
+
+        <dl>
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>JmolElementColors</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Jmol style atom colors (default color scheme)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rasmolElementColors</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Rasmol style atom colors</td>
+        </tr>
+
+    
+    </tbody>
+</table></dl>
+
+    
+
     
 
     
@@ -64,7 +128,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line6">line 6</a>
+        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line16">line 16</a>
     </li></ul></dd>
     
 
@@ -231,7 +295,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line13">line 13</a>
+        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line18">line 18</a>
     </li></ul></dd>
     
 
@@ -278,6 +342,26 @@
         
 
     
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>// Assume there exists an HTML div with id "gldiv"
+var element = $("#gldiv");
+
+// Viewer config - properties 'defaultcolors' and 'callback'
+var config = {defaultcolors: WebMol.rasmolElementColors,
+              callback : function(viewer) {
+                           //'data' is a string containing molecule data in pdb format  
+                           viewer.addModel(data, "pdb");
+                           viewer.zoomTo();
+                           viewer.render();
+                         }  
+                       
+              };
+
+// Create GLViewer within 'gldiv' and execute callback
+var myviewer = WebMol.createViewer(element, config);</code></pre>
+
+    
 </dd>
 
         
@@ -291,7 +375,7 @@
 
     
     <div class="description">
-        Load a pdb/pubchem structure into existing viewer
+        Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
     </div>
     
 
@@ -395,7 +479,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line51">line 51</a>
+        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -442,6 +526,156 @@
         
 
     
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var myviewer = WebMol.createViewer(gldiv);
+
+// GLModel 'm' created and loaded into glviewer for PDB id 2POR
+var m = WebMol.download('pdb: 2POR', myviewer);</code></pre>
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="Renderer"><span class="type-signature">(static) </span>Renderer<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Simplified webGL renderer
+    </div>
+    
+
+    
+
+    
+
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="renderer.js.html">WebGL/renderer.js</a>, <a href="renderer.js.html#line5">line 5</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="SpritePlugin"><span class="type-signature">(static) </span>SpritePlugin<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Sprite render plugin
+    </div>
+    
+
+    
+
+    
+
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="extras.js.html">WebGL/extras.js</a>, <a href="extras.js.html#line7">line 7</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 </dd>
 
         </dl>
@@ -466,7 +700,7 @@
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a> on Fri Jun 13 2014 10:46:16 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a> on Fri Jun 13 2014 16:26:25 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
