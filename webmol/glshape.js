@@ -1,7 +1,6 @@
 //A GLShape is a collection of user specified shapes. Includes
 // build in sphere and arrow shapes, as well as custom user specified shapes
 
-
 WebMol.GLShape = (function() {
     
     //Marching cube, to match with protein surface generation
@@ -617,6 +616,15 @@ WebMol.GLShape = (function() {
         shape.callback = typeof(stylespec.callback) === "function" ? stylespec.callback : null;
     };
     
+    /**
+     * Custom renderable shape
+     * 
+     * @constructor WebMol.GLShape
+     * 
+     * @param {Number} sid - Unique identifier
+     * @param {Object} stylespec
+     * @returns {WebMol.GLShape}
+     */
     var GLShape = function(sid, stylespec) {
         
         stylespec = stylespec || {};
