@@ -11,9 +11,8 @@
     "templates": {
         "cleverLinks": false,
         "monospaceLinks": false,
-        "default": {
-            "outputSourceFiles": true
-        }
+        "navType": "vertical",
+        "theme": "united"
     },
     "opts": {
         "destination": "./WebMol/doc/",

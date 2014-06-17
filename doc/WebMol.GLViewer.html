@@ -275,7 +275,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -403,6 +403,150 @@ for (var a in atoms) {
 
 // Render labels
 glviewer.render();</code></pre>
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addShape"><span class="type-signature"></span>addShape<span class="signature">(shapeSpec)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLShape.html">WebMol.GLShape</a>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Add shape object to viewer
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>shapeSpec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">style specification for label</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line845">line 845</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="WebMol.GLShape.html">WebMol.GLShape</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="WebMol.GLShape.html">WebMol.GLShape</a></span>
+
+
+    </dd>
+</dl>
+
+        
 
     
 </dd>
@@ -578,7 +722,7 @@ var m = glviewer.getModel(0);</code></pre>
         
             
 <dt>
-    <h4 class="name" id="pdbData"><span class="type-signature"></span>pdbData<span class="signature">(sel<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="pdbData"><span class="type-signature"></span>pdbData<span class="signature">(sel<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 </dt>
@@ -628,7 +772,7 @@ var m = glviewer.getModel(0);</code></pre>
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type">Object</span>
 
 
             
@@ -717,7 +861,7 @@ var m = glviewer.getModel(0);</code></pre>
     </dt>
     <dd>
         
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
     </dd>
@@ -1075,7 +1219,7 @@ adding/removing models, applying styles, etc.
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type">number</span>
 
 
             
@@ -1264,6 +1408,326 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
     
 
     
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setLabelStyle"><span class="type-signature"></span>setLabelStyle<span class="signature">(label, stylespec)</span><span class="type-signature"> &rarr; {<a href="WebMol.Label.html">WebMol.Label</a>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Modify existing label's style
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">WebMol label</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stylespec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Label style specification</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line806">line 806</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setLabelText"><span class="type-signature"></span>setLabelText<span class="signature">(label, text)</span><span class="type-signature"> &rarr; {<a href="WebMol.Label.html">WebMol.Label</a>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Modify existing label's text
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">WebMol label</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Label text</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line826">line 826</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+    </dd>
+</dl>
+
+        
 
     
 </dd>
@@ -1549,7 +2013,7 @@ glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )</code></pre>
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a> on Fri Jun 13 2014 16:26:26 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Tue Jun 17 2014 16:17:47 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
