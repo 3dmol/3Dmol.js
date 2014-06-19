@@ -474,7 +474,7 @@ WebMol.GLViewer = (function() {
          * 
          * @function WebMol.GLViewer#setBackgroundColor
          * @param {number} hex Hexcode specified background color
-         * @param {type} a Alpha level (default 1.0)
+         * @param {number} a Alpha level (default 1.0)
          * 
          * @example
          * 
@@ -684,8 +684,8 @@ WebMol.GLViewer = (function() {
          * Return pdb output of selected atoms (if atoms from pdb input)
          * 
          * @function WebMol.GLViewer#pdbData  
-         * @param {type} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
-         * @returns {String} PDB string of selected atoms
+         * @param {Object} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
+         * @returns {string} PDB string of selected atoms
          */
         this.pdbData = function(sel) {
             var atoms = getAtomsFromSel(sel);
@@ -747,7 +747,7 @@ WebMol.GLViewer = (function() {
          * Add label to viewer
          * 
          * @function WebMol.GLViewer#addLabel
-         * @param {String} text - Label text
+         * @param {string} text - Label text
          * @param {Object} data - Label style specification
          * @returns {WebMol.Label}
          * 
@@ -806,6 +806,7 @@ WebMol.GLViewer = (function() {
         /**
          * Modify existing label's style
          * 
+         * @function WebMol.GLViewer#setLabelStyle
          * @param {WebMol.Label} label - WebMol label
          * @param {Object} stylespec - Label style specification
          * @returns {WebMol.Label}
@@ -825,6 +826,7 @@ WebMol.GLViewer = (function() {
         /**
          * Modify existing label's text
          * 
+         * @function WebMol.GLViewer#setLabelText
          * @param {WebMol.Label} label - WebMol label
          * @param {String} text - Label text
          * @returns {WebMol.Label}
@@ -841,8 +843,10 @@ WebMol.GLViewer = (function() {
         };
         
         /**
-         * Add shape to viewer 
+         * Add shape object to viewer 
+         * @see {@link WebMol.GLShape}
          * 
+         * @function WebMol.GLViewer#addShape
          * @param {Object} shapeSpec - style specification for label
          * @returns {WebMol.GLShape}
          */
@@ -856,9 +860,10 @@ WebMol.GLViewer = (function() {
         };
         
         /**
-         * Create and add sphere shape
+         * Create and add sphere shape. This method provides a shorthand 
+         * way to create a spherical shape object
          * 
-         * @param {Object} spec - Style specification
+         * @param {Object} spec - Sphere shape style specification
          * @returns {WebMol.GLShape}
          */
         this.addSphere = function(spec) {

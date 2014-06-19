@@ -260,3 +260,4 @@ WebMol.UnsignedByteType = 1009;
 
 //Pixel formats
 WebMol.RGBAFormat = 1021;
+
