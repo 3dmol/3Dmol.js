@@ -1,28 +1,80 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>JSDoc: Class: GLViewer</title>
+	<meta charset="utf-8">
+	<title>WebMol Class: GLViewer</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
 </head>
 
 <body>
+<div class="container-fluid">
+	<div class="navbar navbar-fixed-top ">
+		<div class="navbar-inner">
+			<a class="brand" href="index.html">WebMol</a>
+			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b
+						class="caret"></b></a>
 
-<div id="main">
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="WebMol.html">WebMol</a>
+						</li>
+						
 
-    <h1 class="page-title">Class: GLViewer</h1>
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
+						class="caret"></b></a>
 
-    
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="WebMol.GLModel.html">GLModel</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.GLShape.html">GLShape</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.GLViewer.html">GLViewer</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.Label.html">Label</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+			</ul>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+
+		
+		<div class="span8">
+			
+				<div id="main">
+					
 
 
-
+	<h1 class="page-title">Class: GLViewer</h1>
 <section>
 
 <header>
@@ -42,11 +94,11 @@
         
 <dt>
     <h4 class="name" id="GLViewer"><span class="type-signature"></span>new GLViewer<span class="signature">(element, callback, defaultcolors)</span><span class="type-signature"></span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         WebGL WebMol viewer
@@ -55,32 +107,32 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -103,7 +155,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
             <td class="description last">HTML element within which to create viewer</td>
         </tr>
 
-    
+	
 
         <tr>
             
@@ -126,7 +178,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
             <td class="description last">Callback function to be immediately executed on this viewer</td>
         </tr>
 
-    
+	
 
         <tr>
             
@@ -149,58 +201,54 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
             <td class="description last">Object defining default atom colors as atom => color property value pairs for all models within this viewer</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line176">line 176</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
     
-
+    
+    
     
 </dd>
 
@@ -215,8 +263,6 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
     
 
-     
-
     
 
     
@@ -228,11 +274,11 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
             
 <dt>
     <h4 class="name" id="addLabel"><span class="type-signature"></span>addLabel<span class="signature">(text, data)</span><span class="type-signature"> &rarr; {<a href="WebMol.Label.html">WebMol.Label</a>}</span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Add label to viewer
@@ -240,32 +286,32 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -288,7 +334,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
             <td class="description last">Label text</td>
         </tr>
 
-    
+	
 
         <tr>
             
@@ -311,56 +357,52 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
             <td class="description last">Label style specification</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line746">line 746</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
+    
     
     <h5>Returns:</h5>
     
@@ -368,41 +410,43 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
 
 <dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
 <span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
 
 
-    </dd>
+	</dd>
 </dl>
 
-        
 
+        
+    
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
 
-// Select all alpha carbons (have property atom : "CA") from last model added
-var atoms = glviewer.getModel().selectedAtoms({atom:"CA"});
+&#x2F;&#x2F; Select all alpha carbons (have property atom : &quot;CA&quot;) from last model added
+var atoms = glviewer.getModel().selectedAtoms({atom:&quot;CA&quot;});
 var labels = [];
 
 for (var a in atoms) {
     var atom = atoms[a];
 
-    // Create label at alpha carbon's position displaying atom's residue and residue number
-    var labelText = atom.resname + " " + atom.resi;
+    &#x2F;&#x2F; Create label at alpha carbon&#x27;s position displaying atom&#x27;s residue and residue number
+    var labelText = atom.resname + &quot; &quot; + atom.resi;
      
     var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z});
 
     labels.push(l);
 }
 
-// Render labels
-glviewer.render();</code></pre>
+&#x2F;&#x2F; Render labels
+glviewer.render();</pre>
+
 
     
 </dd>
@@ -411,11 +455,11 @@ glviewer.render();</code></pre>
             
 <dt>
     <h4 class="name" id="addShape"><span class="type-signature"></span>addShape<span class="signature">(shapeSpec)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLShape.html">WebMol.GLShape</a>}</span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Add shape object to viewer
@@ -423,32 +467,32 @@ glviewer.render();</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -471,63 +515,59 @@ glviewer.render();</code></pre>
             <td class="description last">style specification for label</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line845">line 845</a>
-    </li></ul></dd>
-    
 
-    
 
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="WebMol.GLShape.html">WebMol.GLShape</a></li>
-        </ul>
-    </dd>
-    
+	
 
-    
+	
+
+	
+	<dt class="tag-see">See:</dt>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="WebMol.GLShape.html">WebMol.GLShape</a></li>
+			</ul>
+	</dd>
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
+    
     
     <h5>Returns:</h5>
     
@@ -535,31 +575,32 @@ glviewer.render();</code></pre>
 
 
 <dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
 <span class="param-type"><a href="WebMol.GLShape.html">WebMol.GLShape</a></span>
 
 
-    </dd>
+	</dd>
 </dl>
 
-        
 
+        
+    
     
 </dd>
 
         
             
 <dt>
-    <h4 class="name" id="getModel"><span class="type-signature"></span>getModel<span class="signature">(id<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {GLModel}</span></h4>
-
+    <h4 class="name" id="getModel"><span class="type-signature"></span>getModel<span class="signature">(<span class="optional">id</span>)</span><span class="type-signature"> &rarr; {GLModel}</span></h4>
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Return specified model
@@ -567,36 +608,36 @@ glviewer.render();</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
-        <th>Attributes</th>
-        
+		
+		<th>Argument</th>
+		
 
-        
-        <th>Default</th>
-        
+		
+		<th>Default</th>
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -635,61 +676,59 @@ glviewer.render();</code></pre>
             <td class="description last">Retrieve model with specified id</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy">
-            <li>Returns last model added to viewer</li>
-        </ul></dd>
-    
+	
+	<dt class="tag-default">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>Returns last model added to viewer</li>
+		</ul>
+	</dd>
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line532">line 532</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
+    
     
     <h5>Returns:</h5>
     
@@ -697,24 +736,26 @@ glviewer.render();</code></pre>
 
 
 <dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
 <span class="param-type">GLModel</span>
 
 
-    </dd>
+	</dd>
 </dl>
 
-        
 
+        
+    
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// Retrieve reference to first GLModel added
-var m = glviewer.getModel(0);</code></pre>
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Retrieve reference to first GLModel added
+var m = glviewer.getModel(0);</pre>
+
 
     
 </dd>
@@ -722,12 +763,12 @@ var m = glviewer.getModel(0);</code></pre>
         
             
 <dt>
-    <h4 class="name" id="pdbData"><span class="type-signature"></span>pdbData<span class="signature">(sel<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
-
+    <h4 class="name" id="pdbData"><span class="type-signature"></span>pdbData<span class="signature">(<span class="optional">sel</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Return pdb output of selected atoms (if atoms from pdb input)
@@ -735,34 +776,34 @@ var m = glviewer.getModel(0);</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
-        <th>Attributes</th>
-        
+		
+		<th>Argument</th>
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -795,56 +836,52 @@ var m = glviewer.getModel(0);</code></pre>
             <td class="description last">Selection specification specifying model and atom properties to select.  Default: all atoms in viewer</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line683">line 683</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
+    
     
     <h5>Returns:</h5>
     
@@ -856,19 +893,20 @@ var m = glviewer.getModel(0);</code></pre>
 
 
 <dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
 <span class="param-type">string</span>
 
 
-    </dd>
+	</dd>
 </dl>
 
-        
 
+        
+    
     
 </dd>
 
@@ -876,11 +914,11 @@ var m = glviewer.getModel(0);</code></pre>
             
 <dt>
     <h4 class="name" id="removeLabel"><span class="type-signature"></span>removeLabel<span class="signature">(label)</span><span class="type-signature"></span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Remove label from viewer
@@ -888,32 +926,32 @@ var m = glviewer.getModel(0);</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -936,68 +974,65 @@ var m = glviewer.getModel(0);</code></pre>
             <td class="description last">WebMol label</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line784">line 784</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
     
-
+    
+    
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// Remove labels created in <a href="WebMol.GLViewer.html#addLabel">addLabel example</a>
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Remove labels created in <a href="WebMol.GLViewer.html#addLabel">addLabel example</a>
 
 for (var i = 0; i &lt; labels.length; i++) {
     glviewer.removeLabel(label);
 }
 
-glviewer.render();</code></pre>
+glviewer.render();</pre>
+
 
     
 </dd>
@@ -1006,11 +1041,11 @@ glviewer.render();</code></pre>
             
 <dt>
     <h4 class="name" id="render"><span class="type-signature"></span>render<span class="signature">()</span><span class="type-signature"></span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Render current state of viewer, after 
@@ -1019,58 +1054,53 @@ adding/removing models, applying styles, etc.
     
 
     
-
     
-
     
-
+    
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line578">line 578</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
     
-
+    
+    
     
 </dd>
 
@@ -1078,11 +1108,11 @@ adding/removing models, applying styles, etc.
             
 <dt>
     <h4 class="name" id="resize"><span class="type-signature"></span>resize<span class="signature">()</span><span class="type-signature"></span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Resize viewer according to containing HTML element's dimensions
@@ -1090,58 +1120,53 @@ adding/removing models, applying styles, etc.
     
 
     
-
     
-
     
-
+    
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line515">line 515</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
     
-
+    
+    
     
 </dd>
 
@@ -1149,11 +1174,11 @@ adding/removing models, applying styles, etc.
             
 <dt>
     <h4 class="name" id="setBackgroundColor"><span class="type-signature"></span>setBackgroundColor<span class="signature">(hex, a)</span><span class="type-signature"></span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Set the background color (default white)
@@ -1161,32 +1186,32 @@ adding/removing models, applying styles, etc.
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -1209,7 +1234,7 @@ adding/removing models, applying styles, etc.
             <td class="description last">Hexcode specified background color</td>
         </tr>
 
-    
+	
 
         <tr>
             
@@ -1232,63 +1257,60 @@ adding/removing models, applying styles, etc.
             <td class="description last">Alpha level (default 1.0)</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line472">line 472</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
     
-
+    
+    
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>//Set 'myviewer' background color to white
-myviewer.setBackgroundColor(0xffffff)</code></pre>
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F;Set &#x27;myviewer&#x27; background color to white
+myviewer.setBackgroundColor(0xffffff)</pre>
+
 
     
 </dd>
@@ -1297,11 +1319,11 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             
 <dt>
     <h4 class="name" id="setHeight"><span class="type-signature"></span>setHeight<span class="signature">(h)</span><span class="type-signature"></span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Set viewer height
@@ -1309,32 +1331,32 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -1357,58 +1379,54 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             <td class="description last">Height in pixels</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line504">line 504</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
     
-
+    
+    
     
 </dd>
 
@@ -1416,11 +1434,11 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             
 <dt>
     <h4 class="name" id="setLabelStyle"><span class="type-signature"></span>setLabelStyle<span class="signature">(label, stylespec)</span><span class="type-signature"> &rarr; {<a href="WebMol.Label.html">WebMol.Label</a>}</span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Modify existing label's style
@@ -1428,32 +1446,32 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -1476,7 +1494,7 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             <td class="description last">WebMol label</td>
         </tr>
 
-    
+	
 
         <tr>
             
@@ -1499,56 +1517,52 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             <td class="description last">Label style specification</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line806">line 806</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
+    
     
     <h5>Returns:</h5>
     
@@ -1556,19 +1570,20 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
 
 <dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
 <span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
 
 
-    </dd>
+	</dd>
 </dl>
 
-        
 
+        
+    
     
 </dd>
 
@@ -1576,11 +1591,11 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             
 <dt>
     <h4 class="name" id="setLabelText"><span class="type-signature"></span>setLabelText<span class="signature">(label, text)</span><span class="type-signature"> &rarr; {<a href="WebMol.Label.html">WebMol.Label</a>}</span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Modify existing label's text
@@ -1588,32 +1603,32 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -1636,7 +1651,7 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             <td class="description last">WebMol label</td>
         </tr>
 
-    
+	
 
         <tr>
             
@@ -1659,56 +1674,52 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             <td class="description last">Label text</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line826">line 826</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
+    
     
     <h5>Returns:</h5>
     
@@ -1716,19 +1727,20 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
 
 <dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
 <span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
 
 
-    </dd>
+	</dd>
 </dl>
 
-        
 
+        
+    
     
 </dd>
 
@@ -1736,11 +1748,11 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             
 <dt>
     <h4 class="name" id="setWidth"><span class="type-signature"></span>setWidth<span class="signature">(w)</span><span class="type-signature"></span></h4>
-
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Set viewer width
@@ -1748,32 +1760,32 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -1796,70 +1808,66 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             <td class="description last">Width in pixels</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line493">line 493</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
     
-
+    
+    
     
 </dd>
 
         
             
 <dt>
-    <h4 class="name" id="zoomTo"><span class="type-signature"></span>zoomTo<span class="signature">(sel<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
-
+    <h4 class="name" id="zoomTo"><span class="type-signature"></span>zoomTo<span class="signature">(<span class="optional">sel</span>)</span><span class="type-signature"></span></h4>
+    
     
 </dt>
 <dd>
-
+    
     
     <div class="description">
         Zoom to center of atom selection
@@ -1867,34 +1875,34 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
     
 
     
-
     
-
+    
+    
     
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+	<tr>
+		
+		<th>Name</th>
+		
 
-        <th>Type</th>
+		<th>Type</th>
 
-        
-        <th>Attributes</th>
-        
+		
+		<th>Argument</th>
+		
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<th class="last">Description</th>
+	</tr>
+	</thead>
 
-    <tbody>
-    
+	<tbody>
+	
 
         <tr>
             
@@ -1927,66 +1935,63 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
             <td class="description last">Selection specification specifying model and atom properties to select. Default: all atoms in viewer</td>
         </tr>
 
-    
-    </tbody>
+	
+	</tbody>
 </table>
-    
 
+    
+    
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="glviewer.js.html">glviewer.js</a>, <a href="glviewer.js.html#line699">line 699</a>
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
-
+    
     
 
     
 
     
-
     
-
     
-
     
-
+    
+    
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
-glviewer.zoomTo({chain: 'B'});
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
+glviewer.zoomTo({chain: &#x27;B&#x27;});
 
-// Focus on centroid of all atoms of all models in this viewer
-glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )</code></pre>
+&#x2F;&#x2F; Focus on centroid of all atoms of all models in this viewer
+glviewer.zoomTo();  &#x2F;&#x2F; (equivalent to glviewer.zoomTo({}) )</pre>
+
 
     
 </dd>
@@ -2004,19 +2009,87 @@ glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )</code></pre>
 
 
 
-</div>
+				</div>
 
-<nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="WebMol.GLModel.html">GLModel</a></li><li><a href="WebMol.GLShape.html">GLShape</a></li><li><a href="WebMol.GLViewer.html">GLViewer</a></li><li><a href="WebMol.Label.html">Label</a></li></ul><h3>Namespaces</h3><ul><li><a href="WebMol.html">WebMol</a></li></ul>
-</nav>
+				<div class="clearfix"></div>
+				<footer>
+					
+					
+		<span class="jsdoc-message">
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
+		on 2014-06-20T14:06:17-04:00 using the <a
+			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		</span>
+				</footer>
+			</div>
 
-<br clear="both">
+			
+			<div class="span3">
+				<div id="toc"></div>
+			</div>
+			
+			<br clear="both">
+		</div>
 
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Tue Jun 17 2014 16:17:47 GMT-0400 (EDT)
-</footer>
+	</div>
+	<!--<script src="scripts/sunlight.js"></script>-->
+	<script src="scripts/docstrap.lib.js"></script>
+	<script src="scripts/bootstrap-dropdown.js"></script>
+	<script src="scripts/toc.js"></script>
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+	<script>
+		$( function () {
+			$( "#toc" ).toc( {
+				anchorName  : function ( i, heading, prefix ) {
+					return $( heading ).attr( "id" ) || ( prefix + i );
+				},
+				selectors   : "h1,h2,h3,h4",
+				showAndHide : false,
+				scrollTo    : 60
+			} );
+			$( "#toc>ul" ).addClass( "nav nav-pills nav-stacked" );
+			$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+			$('.dropdown-toggle').dropdown();
+//			$( ".tutorial-section pre, .readme-section pre" ).addClass( "sunlight-highlight-javascript" ).addClass( "linenums" );
+
+			$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+				var $this = $( this );
+
+				var example = $this.find("code" );
+				exampleText = example.html();
+				var lang = /{@lang (.*?)}/.exec( exampleText );
+				if ( lang && lang[1] ) {
+					exampleText = exampleText.replace( lang[0], "" );
+					example.html(exampleText);
+					lang = lang[1];
+				} else {
+					lang = "javascript";
+				}
+
+				if ( lang ) {
+
+					$this
+						.addClass( "sunlight-highlight-" + lang )
+						.addClass( "linenums" )
+						.html( example.html() );
+
+				}
+			} );
+
+			Sunlight.highlightAll( {
+				lineNumbers : false,
+				showMenu:true,
+				enableDoclinks:true
+		} );
+		} );
+
+	</script>
+
+	<!--Google Analytics-->
+	
+
+	<!--Navigation and Symbol Display-->
+	
+
 </body>
 </html>

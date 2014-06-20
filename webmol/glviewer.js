@@ -145,9 +145,13 @@ WebMol.GLViewer = (function() {
 
     // computes the bounding box around the provided atoms
     var getExtent = function(atomlist) {
-        var xmin = ymin = zmin = 9999;
-        var xmax = ymax = zmax = -9999;
-        var xsum = ysum = zsum = cnt = 0;
+        var xmin, ymin, zmin,
+            xmax, ymax, zmax,
+            xsum, ysum, zsum, cnt;
+        
+        xmin = ymin = zmin = 9999;
+        xmax = ymax = zmax = -9999;
+        xsum = ysum = zsum = cnt = 0;
 
         if (atomlist.length === 0)
             return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
@@ -1081,12 +1085,16 @@ WebMol.GLViewer = (function() {
                     var w = extent[1][0] - extent[0][0];
                     var h = extent[1][1] - extent[0][1];
                     var d = extent[1][2] - extent[0][2];
-                    var index = 0;
+                    
+                    var index;
+                    
                     if (w > h && w > d) {
                         index = 0;
-                    } else if (h > w && h > d) {
+                    } 
+                    else if (h > w && h > d) {
                         index = 1;
-                    } else {
+                    } 
+                    else {
                         index = 2;
                     }
 
