@@ -1429,7 +1429,8 @@ WebMol.GLViewer = (function() {
                 if (type < 0)
                     type = 0; // negative reserved for atom data
                 for ( var i = 0; i < numWorkers; i++) {
-                    var w = new Worker('webmol/SurfaceWorker.js');
+                    //var w = new Worker('webmol/SurfaceWorker.js');
+                    var w = new Worker(URL.createObjectURL( new Blob([WebMol.SurfaceWorker], {type: 'text/javascript'}) ));
                     workers.push(w);
                     w.postMessage({
                         type : -1,

@@ -1,5 +1,5 @@
 //dkoes - calls protein surface as a webworker, returns the faces and vertices
-
+/*
 var WebMol = WebMol || {};
 
 if (WebMol.Vector3 === undefined) {
@@ -36,10 +36,16 @@ if (WebMol.Vector3 === undefined) {
 
 importScripts("marchingcube.js");
 importScripts("ProteinSurface4.js");
+*/
+
+
+WebMol.SurfaceWorker = WebMol.multiLineString(function() {
+
+/*
+
 self.onmessage = function(oEvent) {
 	var obj = oEvent.data;
 	var type = obj.type;
-
 	if (type < 0) // sending atom data, initialize
 	{
 		self.atomData = obj.atoms;
@@ -50,15 +56,16 @@ self.onmessage = function(oEvent) {
 		ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
 		ps.fillvoxels(self.atomData, obj.extendedAtoms);
 		ps.buildboundary();
-
 		if (type == 4 || type == 2) {
 			ps.fastdistancemap();
             ps.boundingatom(false);
             ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);	
         }		
-
 		ps.marchingcube(type);
 		var VandF = ps.getFacesAndVertices(obj.atomsToShow);
 		self.postMessage(VandF);
 	}
 };
+*/
+
+});
