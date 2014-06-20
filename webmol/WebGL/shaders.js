@@ -4,14 +4,6 @@
  * and open the template in the editor.
  */
 
-
-function multiLineString(f) {
-    return f.toString()
-            .replace(/^[^\/]+\/\*!?/, '')
-            .replace(/\*\/[^\/]+$/, '');
-            
-}
-
 WebMol.ShaderUtils = {
     
     clone: function ( uniforms_src ) {
@@ -41,7 +33,7 @@ WebMol.ShaderUtils = {
 
 WebMol.ShaderLib = { 
     basic : {
-        fragmentShader : multiLineString(function() {/*
+        fragmentShader : WebMol.multiLineString(function() {/*
 
 uniform mat4 viewMatrix;
 uniform vec3 cameraPosition;
@@ -68,7 +60,7 @@ void main() {
             
 */}),
         
-        vertexShader : multiLineString(function() {/*
+        vertexShader : WebMol.multiLineString(function() {/*
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
@@ -103,7 +95,7 @@ void main() {
     
     
     lambert : { 
-        fragmentShader : multiLineString(function() {/*
+        fragmentShader : WebMol.multiLineString(function() {/*
 
 uniform mat4 viewMatrix;
 uniform vec3 cameraPosition;
@@ -136,7 +128,7 @@ void main() {
 
 */}),
        
-       vertexShader : multiLineString(function() {/*
+       vertexShader : WebMol.multiLineString(function() {/*
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
@@ -202,7 +194,7 @@ void main() {
     
     sprite: {
         
-        fragmentShader: multiLineString(function() {/*
+        fragmentShader: WebMol.multiLineString(function() {/*
                                                          
 uniform vec3 color;
 uniform sampler2D map;
@@ -247,7 +239,7 @@ void main() {
             
 */}),
         
-        vertexShader: multiLineString(function() {/*
+        vertexShader: WebMol.multiLineString(function() {/*
 
 uniform int useScreenCoordinates;
 uniform int sizeAttenuation;     

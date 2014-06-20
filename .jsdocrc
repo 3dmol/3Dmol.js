@@ -6,9 +6,10 @@
     "templates": {
         "cleverLinks": false,
         "monospaceLinks": false,
-        "systemName": "WebMol",
+        "systemName": "WebMol.js",
         "navType": "vertical",
-        "theme": "cerulean"
+        "inverseNav": true,
+        "theme": "amelia"
     },
     "opts":{
         "recurse": true
