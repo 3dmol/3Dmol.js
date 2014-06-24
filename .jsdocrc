@@ -1,0 +1,18 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "plugins": [],
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "systemName": "WebMol.js",
+        "navType": "vertical",
+        "inverseNav": true,
+        "theme": "amelia"
+    },
+    "opts":{
+        "recurse": true
+     }
+    
+}

@@ -198,7 +198,7 @@ QUnit.module( "D. Dihydrolipoyl Transacetylase Biological Assembly,  71,820 atom
     
 });
 
-runtests(profile);
+//runtests(profile);
 
 
 

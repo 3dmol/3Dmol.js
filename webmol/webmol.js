@@ -115,7 +115,7 @@ var WebMol = {
        
        return m;
     }
-    
+       
 
 };
 
@@ -209,6 +209,12 @@ WebMol.mergeGeos = function(geometry, mesh) {
     
 };
 
+WebMol.multiLineString = function(f) {
+    return f.toString()
+            .replace(/^[^\/]+\/\*!?/, '')
+            .replace(/\*\/[^\/]+$/, '');
+            
+};
 
 
 //WebMol constants (replaces needed THREE constants)
