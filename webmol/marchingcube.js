@@ -1,5 +1,5 @@
 
-
+WebMol = WebMol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
 WebMol.MarchingCube = (function() {
