@@ -27,15 +27,16 @@ module.exports = function(grunt) {
             },
             
             dist : {
-                src : ['webmol/webmol.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
-                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/**.js', '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
-                dest : 'build/webmol-all.js'
+                src : ['js/jquery-1.9.1.js', 'webmol/webmol.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
+                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/**.js', 
+                       '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
+                dest : 'build/webmol.js'
             }   
         },
         
         uglify : {
             build : {
-                src : ['build/webmol-all.js'],
+                src : ['build/webmol.js'],
                 dest : 'build/webmol-min.js',
                 options : {
                     mangle: false

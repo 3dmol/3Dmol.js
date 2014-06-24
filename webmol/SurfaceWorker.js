@@ -1,7 +1,6 @@
 
-WebMol.SurfaceWorker = window.URL.createObjectURL(new Blob([WebMol.multiLineString(function() {
+WebMol.SurfaceWorker = window.URL.createObjectURL(new Blob(["(" + function(){
 
-/*
 
 self.onmessage = function(oEvent) {
 	var obj = oEvent.data;
@@ -1263,8 +1262,8 @@ var triTable = [ [], [], [], [], [], [], [], [ 11, 9, 8 ], [], [], [],
         [ 11, 3, 2, 0, 9, 1 ], [ 11, 0, 2, 11, 8, 0 ], [ 11, 3, 2 ],
         [ 8, 1, 3, 8, 9, 1 ], [ 9, 1, 0 ], [ 8, 0, 3 ], [] ];
 
-*/
 
-})]));
+
+}.toString() + ")()"]));
 
  
