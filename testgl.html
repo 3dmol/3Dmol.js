@@ -123,12 +123,12 @@
                         
             //$.get("test_structs/1YCR.pdb", function(data){
                 
-                moldata = data = $("#moldata_sdf").val();
+                moldata = data = $("#moldata_pdb_large").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
                                         
-                    receptorModel = m = viewer.addModel(data, "sdf");
+                    receptorModel = m = viewer.addModel(data, "pdb");
                     //shape = viewer.addSphere({radius:1});
                     //shape.wireframe = true;
                     //ligandModel = viewer.createModelFrom({chain: "C"}, true);                    

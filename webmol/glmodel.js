@@ -1912,7 +1912,10 @@ WebMol.GLModel = (function() {
 
         // add atoms to this model from molecular data string
         this.addMolData = function(data, format) {
-
+            
+            if (!data)
+                console.error("Erorr with addMolData: No input data specified");
+            
             switch (format) {
             case "xyz":
                 parseXYZ(atoms, data);

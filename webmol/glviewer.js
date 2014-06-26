@@ -935,6 +935,7 @@ WebMol.GLViewer = (function() {
          * @returns {WebMol.GLModel}
          */
         this.addModel = function(data, format) {
+           
             var m = new WebMol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format);
             models.push(m);

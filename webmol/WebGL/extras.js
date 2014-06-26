@@ -46,7 +46,7 @@ WebMol.SpritePlugin = function () {
         _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, _sprite.elementBuffer );
         _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, _sprite.faces, _gl.STATIC_DRAW );
 
-        _sprite.program = createProgram( WebMol.ShaderLib[ "sprite" ], _precision );
+        _sprite.program = createProgram( WebMol.ShaderLib.sprite, _precision );
 
         _sprite.attributes = {};
         _sprite.uniforms = {};
@@ -288,7 +288,7 @@ WebMol.SpritePlugin = function () {
 
         return program;
 
-    };
+    }
 
     function painterSortStable ( a, b ) {
 
@@ -302,6 +302,6 @@ WebMol.SpritePlugin = function () {
 
         }
 
-    };
+    }
 
 };

@@ -26,8 +26,12 @@ module.exports = function(grunt) {
                 src : ['Gruntfile.js', 'webmol/*.js']    
             },
             webgl : {
-                src : ['webmol/WebGL/*.js']
+                src : ['webmol/WebGL/*.js', '!webmol/WebGL/renderer.js']
+            },
+            renderer : {
+                src : ['webmol/WebGL/renderer.js']
             }
+            
         },
         
         concat : {
