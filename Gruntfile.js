@@ -48,7 +48,7 @@ module.exports = function(grunt) {
         
         uglify : {
             build : {
-                src : ['build/webmol.js'],
+                src : ['js/jquery-1.9.1.js', 'build/webmol.js'],
                 dest : 'build/webmol-min.js',
                 options : {
                     mangle: false

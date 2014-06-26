@@ -20,6 +20,7 @@ var WebMol = {
      * @function WebMol.createViewer
      * @param {Object | string} element Either HTML element or string identifier
      * @param {Object} config Viewer specification
+     * @returns {WebMol.GLViewer} GLViewer
      * 
      * @example
      * // Assume there exists an HTML div with id "gldiv"
@@ -38,8 +39,7 @@ var WebMol = {
      * 
      * // Create GLViewer within 'gldiv' and execute callback
      * var myviewer = WebMol.createViewer(element, config);
-     * 
-     * @returns {WebMol.GLViewer} GLViewer
+     *      
      */
     createViewer : function(element, config)
     {
