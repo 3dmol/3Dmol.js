@@ -10678,7 +10678,7 @@ WebMol.Matrix4.prototype = {
 
         var det = me[ 0 ] * te[ 0 ] + me[ 1 ] * te[ 4 ] + me[ 2 ] * te[ 8 ] + me[ 3 ] * te[ 12 ];
 
-        if ( det == 0 ) {
+        if ( det === 0 ) {
 
             var msg = "Matrix4.getInverse(): can't invert matrix, determinant is 0";
 
@@ -10935,10 +10935,10 @@ WebMol.Ray.prototype = {
         var denominator = plane.normal.dot(this.direction);
         
         //plane and ray are not perpendicular
-        if (denominator != 0) 
+        if (denominator !== 0) 
             return true;
         
-        if (plane.distanceToPoint(this.origin) == 0) 
+        if (plane.distanceToPoint(this.origin) === 0) 
             return true;
         
         return false;
@@ -10948,10 +10948,10 @@ WebMol.Ray.prototype = {
     distanceToPlane : function(plane) {
        
        var denominator = plane.normal.dot(this.direction);
-       if (denominator == 0) {
+       if (denominator === 0) {
            
            //line is coplanar
-       if (plane.distanceToPoint(this.origin) == 0)
+       if (plane.distanceToPoint(this.origin) === 0)
            return 0;
        
        //ray is parallel
@@ -11001,9 +11001,6 @@ WebMol.Ray.prototype = {
  
      
 };
-
-//alias
-var TV3 = Vector = WebMol.Vector3;
 
 //Intersection sphere and box shapes.  
 
@@ -17286,7 +17283,7 @@ WebMol.drawCartoon = (function() {
         for ( var i = 1, lim = _points.length - 1; i < lim; i++) {
             var p1 = _points[i], p2 = _points[i + 1];
             if (p1.smoothen)
-                points.push(new TV3((p1.x + p2.x) / 2, (p1.y + p2.y) / 2,
+                points.push(new WebMol.Vector3((p1.x + p2.x) / 2, (p1.y + p2.y) / 2,
                         (p1.z + p2.z) / 2));
             else
                 points.push(p1);
@@ -17298,8 +17295,8 @@ WebMol.drawCartoon = (function() {
             var p0 = points[(i === -1) ? 0 : i];
             var p1 = points[i + 1], p2 = points[i + 2];
             var p3 = points[(i === size - 3) ? size - 1 : i + 3];
-            var v0 = new TV3().subVectors(p2, p0).multiplyScalar(0.5);
-            var v1 = new TV3().subVectors(p3, p1).multiplyScalar(0.5);
+            var v0 = new WebMol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
+            var v1 = new WebMol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
 
             for ( var j = 0; j < DIV; j++) {
                 var t = 1.0 / DIV * j;
@@ -17313,7 +17310,7 @@ WebMol.drawCartoon = (function() {
                         * (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t
                         * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
                         
-                var pt = new TV3(x, y, z);
+                var pt = new WebMol.Vector3(x, y, z);
                 
                 var atomIndex = Math.floor( (ret.length+2) / DIV);
                 
@@ -17636,7 +17633,7 @@ WebMol.drawCartoon = (function() {
                         ss = null;
                         ssborder = false;
                     }
-                    currentCA = new TV3(atom.x, atom.y, atom.z);
+                    currentCA = new WebMol.Vector3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
                     currentChain = atom.chain;
                     currentReschain = atom.reschain;
@@ -17653,7 +17650,7 @@ WebMol.drawCartoon = (function() {
                         atom.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
                     
                 } else { // O
-                    var O = new TV3(atom.x, atom.y, atom.z);
+                    var O = new WebMol.Vector3(atom.x, atom.y, atom.z);
                     O.sub(currentCA);
                     O.normalize(); // can be omitted for performance
                     O.multiplyScalar((ss == 'c') ? coilWidth : helixSheetWidth);
@@ -17662,7 +17659,7 @@ WebMol.drawCartoon = (function() {
                     prevCO = O;
                     for ( var j = 0; j < num; j++) {
                         var delta = -1 + 2 / (num - 1) * j;
-                        var v = new TV3(currentCA.x + prevCO.x * delta,
+                        var v = new WebMol.Vector3(currentCA.x + prevCO.x * delta,
                                 currentCA.y + prevCO.y * delta, currentCA.z
                                         + prevCO.z * delta);
                         v.atom = currentAtom;
@@ -18779,8 +18776,8 @@ WebMol.GLModel = (function() {
                 if (!atom2.style.line)
                     continue; // don't sweat the details
 
-                var p1 = new TV3(atom.x, atom.y, atom.z);
-                var p2 = new TV3(atom2.x, atom2.y, atom2.z);
+                var p1 = new WebMol.Vector3(atom.x, atom.y, atom.z);
+                var p2 = new WebMol.Vector3(atom2.x, atom2.y, atom2.z);
                 var mp = p1.clone().add(p2).multiplyScalar(0.5);
 
                 if (atom.clickable){
@@ -19250,8 +19247,8 @@ WebMol.GLModel = (function() {
                     if (!atom2.style.stick)
                         continue; // don't sweat the details                     
 
-                    var p1 = new TV3(atom.x, atom.y, atom.z);
-                    var p2 = new TV3(atom2.x, atom2.y, atom2.z);
+                    var p1 = new WebMol.Vector3(atom.x, atom.y, atom.z);
+                    var p2 = new WebMol.Vector3(atom2.x, atom2.y, atom2.z);
 
                     var c2 = atom2.color;
                     if (typeof (style.color) != "undefined") {
@@ -19266,7 +19263,7 @@ WebMol.GLModel = (function() {
                             toCap = true;       
                                                 
                         if (c1 != c2) {
-                            mp = new TV3().addVectors(p1, p2)
+                            mp = new WebMol.Vector3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
                             drawCylinder(geo, p1, mp, bondR, C1, fromCap, false);
                             drawCylinder(geo, mp, p2, bondR, C2, false, toCap);
@@ -19275,7 +19272,7 @@ WebMol.GLModel = (function() {
                         }
                         
                         if (atom.clickable || atom2.clickable) {
-                            mp = new TV3().addVectors(p1, p2).multiplyScalar(0.5);
+                            mp = new WebMol.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
                             if (atom.clickable){
                                 var cylinder1 = new WebMol.Cylinder(p1.clone(), mp.clone(), bondR);
                                 var sphere1 = new WebMol.Sphere(p1.clone(), bondR);
@@ -19308,7 +19305,7 @@ WebMol.GLModel = (function() {
                                 var i2 = (i + 1) % atom2.bonds.length;
                                 var j2 = atom2.bonds[i2];
                                 var atom3 = atoms[j2];
-                                var p3 = new TV3(atom3.x, atom3.y, atom3.z);
+                                var p3 = new WebMol.Vector3(atom3.x, atom3.y, atom3.z);
 
                                 var dir2 = p3.clone();
                                 dir2.sub(p1);
@@ -19321,7 +19318,7 @@ WebMol.GLModel = (function() {
                             var i2 = (i + 1) % atom.bonds.length;
                             var j2 = atom.bonds[i2];
                             var atom3 = atoms[j2];
-                            var p3 = new TV3(atom3.x, atom3.y, atom3.z);
+                            var p3 = new WebMol.Vector3(atom3.x, atom3.y, atom3.z);
 
                             var dir2 = p3.clone();
                             dir2.sub(p1);
@@ -19347,9 +19344,9 @@ WebMol.GLModel = (function() {
                             p2b.add(dir);
                                                                  
                             if (c1 != c2) {
-                                mp = new TV3().addVectors(p1a, p2a)
+                                mp = new WebMol.Vector3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
-                                mp2 = new TV3().addVectors(p1b, p2b)
+                                mp2 = new WebMol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
                                 drawCylinder(geo, p1a, mp, r, C1, fromCap, false);
                                 drawCylinder(geo, mp, p2a, r, C2, false, toCap);
@@ -19360,9 +19357,9 @@ WebMol.GLModel = (function() {
                                 drawCylinder(geo, p1b, p2b, r, C1, fromCap, toCap);
                             }
                             if (atom.clickable || atom2.clickable){
-                                mp = new TV3().addVectors(p1a, p2a)
+                                mp = new WebMol.Vector3().addVectors(p1a, p2a)
                                                .multiplyScalar(0.5);
-                                mp2 = new TV3().addVectors(p1b, p2b)
+                                mp2 = new WebMol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
                                 if (atom.clickable) {
                                     var cylinder1a = new WebMol.Cylinder(p1a.clone(), mp.clone(), r);
@@ -19394,11 +19391,11 @@ WebMol.GLModel = (function() {
                             p2b.add(dir);
 
                             if (c1 != c2) {
-                                mp = new TV3().addVectors(p1a, p2a)
+                                mp = new WebMol.Vector3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
-                                mp2 = new TV3().addVectors(p1b, p2b)
+                                mp2 = new WebMol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                mp3 = new TV3().addVectors(p1, p2)
+                                mp3 = new WebMol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
                                 drawCylinder(geo, p1a, mp, r, C1, fromCap, false);
                                 drawCylinder(geo, mp, p2a, r, C2, false, toCap);
@@ -19413,11 +19410,11 @@ WebMol.GLModel = (function() {
 
                             }
                             if (atom.clickable || atom2.clickable) {
-                                mp = new TV3().addVectors(p1a, p2a)
+                                mp = new WebMol.Vector3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
-                                mp2 = new TV3().addVectors(p1b, p2b)
+                                mp2 = new WebMol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                mp3 = new TV3().addVectors(p1, p2)
+                                mp3 = new WebMol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
                                 
                                 if (atom.clickable) {
@@ -20898,10 +20895,10 @@ WebMol.GLViewer = (function() {
         renderer.setSize(WIDTH, HEIGHT);
 
         var camera = new WebMol.Camera(20, ASPECT, 1, 800);
-        camera.position = new TV3(0, 0, CAMERA_Z);
-        camera.lookAt(new TV3(0, 0, 0));
+        camera.position = new WebMol.Vector3(0, 0, CAMERA_Z);
+        camera.lookAt(new WebMol.Vector3(0, 0, 0));
         
-        var raycaster = new WebMol.Raycaster(new TV3(0,0,0), new TV3(0,0,0));
+        var raycaster = new WebMol.Raycaster(new WebMol.Vector3(0,0,0), new WebMol.Vector3(0,0,0));
         var projector = new WebMol.Projector();
         var mouseVector = new WebMol.Vector3(0, 0, 0);
 
@@ -20977,7 +20974,7 @@ WebMol.GLViewer = (function() {
 
             // setup lights
             var directionalLight = new WebMol.Light(0xFFFFFF);
-            directionalLight.position = new TV3(0.2, 0.2, 1).normalize();
+            directionalLight.position = new WebMol.Vector3(0.2, 0.2, 1).normalize();
             directionalLight.intensity = 1.0;
             scene.add(directionalLight);
         };
@@ -21123,7 +21120,7 @@ WebMol.GLViewer = (function() {
                 var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
                 if (scaleFactor < 20)
                     scaleFactor = 20;
-                var translationByScreen = new TV3(dx * scaleFactor, -dy
+                var translationByScreen = new WebMol.Vector3(dx * scaleFactor, -dy
                         * scaleFactor, 0);
                 var q = rotationGroup.quaternion;
                 var qinv = new WebMol.Quaternion(q.x, q.y, q.z, q.w).inverse()
@@ -21392,7 +21389,7 @@ WebMol.GLViewer = (function() {
             var tmp = getExtent(atoms);
             var alltmp = getExtent(allatoms);
             // use selection for center
-            var center = new TV3(tmp[2][0], tmp[2][1], tmp[2][2]);
+            var center = new WebMol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
             modelGroup.position = center.multiplyScalar(-1);
             // but all for bounding box
             var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
@@ -21875,9 +21872,9 @@ WebMol.GLViewer = (function() {
                  
                 //setup Normals
                 
-                vA = new TV3(verts[offsetA], verts[offsetA+1], verts[offsetA+2]);
-                vB = new TV3(verts[offsetB], verts[offsetB+1], verts[offsetB+2]);
-                vC = new TV3(verts[offsetC], verts[offsetC+1], verts[offsetC+2]);
+                vA = new WebMol.Vector3(verts[offsetA], verts[offsetA+1], verts[offsetA+2]);
+                vB = new WebMol.Vector3(verts[offsetB], verts[offsetB+1], verts[offsetB+2]);
+                vC = new WebMol.Vector3(verts[offsetC], verts[offsetC+1], verts[offsetC+2]);
                 
                 vC.subVectors(vC, vB);
                 vA.subVectors(vA, vB);

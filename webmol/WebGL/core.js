@@ -248,9 +248,9 @@ WebMol.Geometry = (function() {
         for (var i = 0; i < this.vertices; ++i) {
             offset = i*3;
             
-            x = this.__vertexArray[offset], y = this.__vertexArray[offset+1], z = this.__vertexArray[offset+2];
+            x = this.__vertexArray[offset]; y = this.__vertexArray[offset+1]; z = this.__vertexArray[offset+2];
             
-            centroid.x += x, centroid.y += y, centroid.z += z;
+            centroid.x += x; centroid.y += y; centroid.z += z;
         }
         
         //divideScalar checks for 0 denom
@@ -292,9 +292,9 @@ WebMol.Geometry = (function() {
             norm = vC;
             norm.normalize();
             
-            norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
-            norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y;
-            norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z;
+            norms[a] += norm.x; norms[b] += norm.x; norms[c] += norm.x;
+            norms[a + 1] += norm.y; norms[b + 1] += norm.y; norms[c + 1] += norm.y;
+            norms[a + 2] += norm.z; norms[b + 2] += norm.z; norms[c + 2] += norm.z;
             
         }             
                 
@@ -316,12 +316,12 @@ WebMol.Geometry = (function() {
             
         for (var i = 0; i < this.faceidx / 3; ++i) {
             
-            faceoffset = i*3, lineoffset = faceoffset*2;          
+            faceoffset = i*3; lineoffset = faceoffset*2;          
             var a = faceArr[faceoffset], b = faceArr[faceoffset+1], c = faceArr[faceoffset+2];
             
-            lineArr[lineoffset] = a, lineArr[lineoffset+1] = b;
-            lineArr[lineoffset+2] = a, lineArr[lineoffset+3] = c;
-            lineArr[lineoffset+4] = b, lineArr[lineoffset+5] = c;
+            lineArr[lineoffset] = a; lineArr[lineoffset+1] = b;
+            lineArr[lineoffset+2] = a; lineArr[lineoffset+3] = c;
+            lineArr[lineoffset+4] = b; lineArr[lineoffset+5] = c;
             
         }
     };

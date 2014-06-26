@@ -24,7 +24,7 @@ QUnit.jUnitReport = function(data) {
 	//Wrap XML result in JQuery object; parse and setup output string
 	$result = $(resultXML);
 	
-	resultStr += "GLMol Performance Tests\n";
+	resultStr += "WebMol Performance Tests\n";
 	var runTime = $result.find("testsuites").attr("time");
 	var runDate = $result.find("testsuites").attr("timestamp");
 	resultStr += "Total Test Time: " + runTime + " s\n";

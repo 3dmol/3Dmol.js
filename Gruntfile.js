@@ -21,6 +21,15 @@ module.exports = function(grunt) {
             }                   
         },
         
+        jshint : {
+            main : {
+                src : ['Gruntfile.js', 'webmol/*.js']    
+            },
+            webgl : {
+                src : ['webmol/WebGL/*.js']
+            }
+        },
+        
         concat : {
             options : {
                 separator : ''
@@ -42,16 +51,31 @@ module.exports = function(grunt) {
                     mangle: false
                 }
             }
+        },
+        
+        'closure-compiler' : {
+            build : {
+                js : ['build/webmol.js'],
+                jsOutputFile : 'build/webmol-min-closure.js',
+                noreport : true,
+                options : {
+                    compilation_levl: 'SIMPLE_OPTIMIZATIONS',
+                    warning_level: 'DEFAULT'
+                }
+            }
         }   
         
     });
     
     grunt.registerTask('doc', ['clean:doc', 'jsdoc']);
     grunt.registerTask('build', ['clean:build', 'concat', 'uglify']);
+    grunt.registerTask('compile', ['clean:build', 'concat', 'closure-compiler']);
     
     grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-closure-compiler');
     
 };

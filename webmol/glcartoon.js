@@ -29,7 +29,7 @@ WebMol.drawCartoon = (function() {
         for ( var i = 1, lim = _points.length - 1; i < lim; i++) {
             var p1 = _points[i], p2 = _points[i + 1];
             if (p1.smoothen)
-                points.push(new TV3((p1.x + p2.x) / 2, (p1.y + p2.y) / 2,
+                points.push(new WebMol.Vector3((p1.x + p2.x) / 2, (p1.y + p2.y) / 2,
                         (p1.z + p2.z) / 2));
             else
                 points.push(p1);
@@ -41,8 +41,8 @@ WebMol.drawCartoon = (function() {
             var p0 = points[(i === -1) ? 0 : i];
             var p1 = points[i + 1], p2 = points[i + 2];
             var p3 = points[(i === size - 3) ? size - 1 : i + 3];
-            var v0 = new TV3().subVectors(p2, p0).multiplyScalar(0.5);
-            var v1 = new TV3().subVectors(p3, p1).multiplyScalar(0.5);
+            var v0 = new WebMol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
+            var v1 = new WebMol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
 
             for ( var j = 0; j < DIV; j++) {
                 var t = 1.0 / DIV * j;
@@ -56,7 +56,7 @@ WebMol.drawCartoon = (function() {
                         * (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t
                         * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
                         
-                var pt = new TV3(x, y, z);
+                var pt = new WebMol.Vector3(x, y, z);
                 
                 var atomIndex = Math.floor( (ret.length+2) / DIV);
                 
@@ -379,7 +379,7 @@ WebMol.drawCartoon = (function() {
                         ss = null;
                         ssborder = false;
                     }
-                    currentCA = new TV3(atom.x, atom.y, atom.z);
+                    currentCA = new WebMol.Vector3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
                     currentChain = atom.chain;
                     currentReschain = atom.reschain;
@@ -396,7 +396,7 @@ WebMol.drawCartoon = (function() {
                         atom.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
                     
                 } else { // O
-                    var O = new TV3(atom.x, atom.y, atom.z);
+                    var O = new WebMol.Vector3(atom.x, atom.y, atom.z);
                     O.sub(currentCA);
                     O.normalize(); // can be omitted for performance
                     O.multiplyScalar((ss == 'c') ? coilWidth : helixSheetWidth);
@@ -405,7 +405,7 @@ WebMol.drawCartoon = (function() {
                     prevCO = O;
                     for ( var j = 0; j < num; j++) {
                         var delta = -1 + 2 / (num - 1) * j;
-                        var v = new TV3(currentCA.x + prevCO.x * delta,
+                        var v = new WebMol.Vector3(currentCA.x + prevCO.x * delta,
                                 currentCA.y + prevCO.y * delta, currentCA.z
                                         + prevCO.z * delta);
                         v.atom = currentAtom;
