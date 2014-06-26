@@ -225,10 +225,10 @@ WebMol.GLViewer = (function() {
         renderer.setSize(WIDTH, HEIGHT);
 
         var camera = new WebMol.Camera(20, ASPECT, 1, 800);
-        camera.position = new TV3(0, 0, CAMERA_Z);
-        camera.lookAt(new TV3(0, 0, 0));
+        camera.position = new WebMol.Vector3(0, 0, CAMERA_Z);
+        camera.lookAt(new WebMol.Vector3(0, 0, 0));
         
-        var raycaster = new WebMol.Raycaster(new TV3(0,0,0), new TV3(0,0,0));
+        var raycaster = new WebMol.Raycaster(new WebMol.Vector3(0,0,0), new WebMol.Vector3(0,0,0));
         var projector = new WebMol.Projector();
         var mouseVector = new WebMol.Vector3(0, 0, 0);
 
@@ -304,7 +304,7 @@ WebMol.GLViewer = (function() {
 
             // setup lights
             var directionalLight = new WebMol.Light(0xFFFFFF);
-            directionalLight.position = new TV3(0.2, 0.2, 1).normalize();
+            directionalLight.position = new WebMol.Vector3(0.2, 0.2, 1).normalize();
             directionalLight.intensity = 1.0;
             scene.add(directionalLight);
         };
@@ -450,7 +450,7 @@ WebMol.GLViewer = (function() {
                 var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
                 if (scaleFactor < 20)
                     scaleFactor = 20;
-                var translationByScreen = new TV3(dx * scaleFactor, -dy
+                var translationByScreen = new WebMol.Vector3(dx * scaleFactor, -dy
                         * scaleFactor, 0);
                 var q = rotationGroup.quaternion;
                 var qinv = new WebMol.Quaternion(q.x, q.y, q.z, q.w).inverse()
@@ -719,7 +719,7 @@ WebMol.GLViewer = (function() {
             var tmp = getExtent(atoms);
             var alltmp = getExtent(allatoms);
             // use selection for center
-            var center = new TV3(tmp[2][0], tmp[2][1], tmp[2][2]);
+            var center = new WebMol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
             modelGroup.position = center.multiplyScalar(-1);
             // but all for bounding box
             var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
@@ -935,6 +935,7 @@ WebMol.GLViewer = (function() {
          * @returns {WebMol.GLModel}
          */
         this.addModel = function(data, format) {
+           
             var m = new WebMol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format);
             models.push(m);
@@ -1202,9 +1203,9 @@ WebMol.GLViewer = (function() {
                  
                 //setup Normals
                 
-                vA = new TV3(verts[offsetA], verts[offsetA+1], verts[offsetA+2]);
-                vB = new TV3(verts[offsetB], verts[offsetB+1], verts[offsetB+2]);
-                vC = new TV3(verts[offsetC], verts[offsetC+1], verts[offsetC+2]);
+                vA = new WebMol.Vector3(verts[offsetA], verts[offsetA+1], verts[offsetA+2]);
+                vB = new WebMol.Vector3(verts[offsetB], verts[offsetB+1], verts[offsetB+2]);
+                vC = new WebMol.Vector3(verts[offsetC], verts[offsetC+1], verts[offsetC+2]);
                 
                 vC.subVectors(vC, vB);
                 vA.subVectors(vA, vB);

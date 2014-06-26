@@ -812,7 +812,7 @@ WebMol.Matrix4.prototype = {
 
         var det = me[ 0 ] * te[ 0 ] + me[ 1 ] * te[ 4 ] + me[ 2 ] * te[ 8 ] + me[ 3 ] * te[ 12 ];
 
-        if ( det == 0 ) {
+        if ( det === 0 ) {
 
             var msg = "Matrix4.getInverse(): can't invert matrix, determinant is 0";
 
@@ -1069,10 +1069,10 @@ WebMol.Ray.prototype = {
         var denominator = plane.normal.dot(this.direction);
         
         //plane and ray are not perpendicular
-        if (denominator != 0) 
+        if (denominator !== 0) 
             return true;
         
-        if (plane.distanceToPoint(this.origin) == 0) 
+        if (plane.distanceToPoint(this.origin) === 0) 
             return true;
         
         return false;
@@ -1082,10 +1082,10 @@ WebMol.Ray.prototype = {
     distanceToPlane : function(plane) {
        
        var denominator = plane.normal.dot(this.direction);
-       if (denominator == 0) {
+       if (denominator === 0) {
            
            //line is coplanar
-       if (plane.distanceToPoint(this.origin) == 0)
+       if (plane.distanceToPoint(this.origin) === 0)
            return 0;
        
        //ray is parallel
@@ -1135,7 +1135,4 @@ WebMol.Ray.prototype = {
  
      
 };
-
-//alias
-var TV3 = Vector = WebMol.Vector3;
 

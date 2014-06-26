@@ -248,9 +248,9 @@ WebMol.Geometry = (function() {
         for (var i = 0; i < this.vertices; ++i) {
             offset = i*3;
             
-            x = this.__vertexArray[offset], y = this.__vertexArray[offset+1], z = this.__vertexArray[offset+2];
+            x = this.__vertexArray[offset]; y = this.__vertexArray[offset+1]; z = this.__vertexArray[offset+2];
             
-            centroid.x += x, centroid.y += y, centroid.z += z;
+            centroid.x += x; centroid.y += y; centroid.z += z;
         }
         
         //divideScalar checks for 0 denom
@@ -292,9 +292,9 @@ WebMol.Geometry = (function() {
             norm = vC;
             norm.normalize();
             
-            norms[a] += norm.x, norms[b] += norm.x, norms[c] += norm.x;
-            norms[a + 1] += norm.y, norms[b + 1] += norm.y, norms[c + 1] += norm.y;
-            norms[a + 2] += norm.z, norms[b + 2] += norm.z, norms[c + 2] += norm.z;
+            norms[a] += norm.x; norms[b] += norm.x; norms[c] += norm.x;
+            norms[a + 1] += norm.y; norms[b + 1] += norm.y; norms[c + 1] += norm.y;
+            norms[a + 2] += norm.z; norms[b + 2] += norm.z; norms[c + 2] += norm.z;
             
         }             
                 
@@ -316,19 +316,19 @@ WebMol.Geometry = (function() {
             
         for (var i = 0; i < this.faceidx / 3; ++i) {
             
-            faceoffset = i*3, lineoffset = faceoffset*2;          
+            faceoffset = i*3; lineoffset = faceoffset*2;          
             var a = faceArr[faceoffset], b = faceArr[faceoffset+1], c = faceArr[faceoffset+2];
             
-            lineArr[lineoffset] = a, lineArr[lineoffset+1] = b;
-            lineArr[lineoffset+2] = a, lineArr[lineoffset+3] = c;
-            lineArr[lineoffset+4] = b, lineArr[lineoffset+5] = c;
+            lineArr[lineoffset] = a; lineArr[lineoffset+1] = b;
+            lineArr[lineoffset+2] = a; lineArr[lineoffset+3] = c;
+            lineArr[lineoffset+4] = b; lineArr[lineoffset+5] = c;
             
         }
     };
     
     geometryGroup.prototype.truncateArrayBuffers = function(mesh) {
         
-        var mesh = (mesh === true) ? true : false;
+        mesh = (mesh === true) ? true : false;
         
         var vertexArr = this.__vertexArray,
             colorArr = this.__colorArray,
@@ -428,7 +428,7 @@ WebMol.Geometry = (function() {
         
         setUpNormals : function(three) {
             
-            var three = three || false;
+            three = three || false;
             
             for ( var g in this.geometryGroups ) {
             
@@ -480,7 +480,7 @@ Object.defineProperty(WebMol.Geometry.prototype, "vertices", {
     
     get : function() {
         var vertices = 0;
-        for (g in this.geometryGroups)
+        for (var g in this.geometryGroups)
             vertices += this.geometryGroups[g].vertices;
             
         return vertices;
@@ -495,7 +495,7 @@ WebMol.GeometryIDCount = 0;
 
 WebMol.Raycaster = (function() {
     
-    function Raycaster(origin, direction, far, near) {
+    var Raycaster = function(origin, direction, far, near) {
         
         this.ray = new WebMol.Ray(origin, direction);
         
@@ -553,17 +553,22 @@ WebMol.Raycaster = (function() {
             }
         }
         
+        //Iterate through intersection objects
+        var i, il,
+            norm, normProj, cylProj, rayProj,
+            distance, closestDistSq, denom, discriminant,
+            s, t, s_c, t_c;
         //triangle faces
-        for (var i in intersectionShape.triangle) {
+        for (i = 0, il = intersectionShape.triangle.length; i < il; i++) {
             
             if (intersectionShape.triangle[i] instanceof WebMol.Triangle) {
                 
                 triangle.copy(intersectionShape.triangle[i]);
                 triangle.applyMatrix4(group.matrixWorld);
                 
-                var norm = triangle.getNormal();
+                norm = triangle.getNormal();
                 
-                var normProj = raycaster.ray.direction.dot(norm);
+                normProj = raycaster.ray.direction.dot(norm);
                 
                 //face culling
                 if (normProj >= 0)
@@ -571,7 +576,7 @@ WebMol.Raycaster = (function() {
                 
                 w_0.subVectors(triangle.a, raycaster.ray.origin);
                 
-                var distance = (norm.dot(w_0)) / normProj;
+                distance = (norm.dot(w_0)) / normProj;
                 
                 if (distance < 0)
                     continue;
@@ -587,7 +592,6 @@ WebMol.Raycaster = (function() {
                 var c_sq = v3.lengthSq();
                 
                 // P = A + s(v2) + t(v3), inside trianle if 0 <= s, t <=1  and (s + t) <=0
-                var s, t;
                 
                 t = ( b_sq*v1.dot(v3) - b_dot_c*v1.dot(v2) ) / ( b_sq*c_sq - b_dot_c*b_dot_c );
                 
@@ -606,7 +610,7 @@ WebMol.Raycaster = (function() {
         }
         
         //cylinders
-        for (var i in intersectionShape.cylinder) {
+        for (i = 0, il = intersectionShape.cylinder.length; i < il; i++) {
             
             if (intersectionShape.cylinder[i] instanceof WebMol.Cylinder){
                 
@@ -615,23 +619,23 @@ WebMol.Raycaster = (function() {
                 
                 w_0.subVectors(cylinder.c1, raycaster.ray.origin); 
                 
-                var cylProj = w_0.dot(cylinder.direction); // Dela
-                var rayProj = w_0.dot(raycaster.ray.direction); // Epsilon
+                cylProj = w_0.dot(cylinder.direction); // Dela
+                rayProj = w_0.dot(raycaster.ray.direction); // Epsilon
                 
-                var normProj = clamp(raycaster.ray.direction.dot(cylinder.direction)); // Beta
+                normProj = clamp(raycaster.ray.direction.dot(cylinder.direction)); // Beta
                 
-                var denom = 1 - normProj*normProj;
+                denom = 1 - normProj*normProj;
                 
                 if (denom === 0.0)
                     continue;
                 
-                var s_c = (normProj*rayProj - cylProj) / denom;
-                var t_c = (rayProj - normProj*cylProj) / denom;
+                s_c = (normProj*rayProj - cylProj) / denom;
+                t_c = (rayProj - normProj*cylProj) / denom;
                 
                 v1.copy(cylinder.direction).multiplyScalar(s_c).add(cylinder.c1);  // Q_c
                 v2.copy(raycaster.ray.direction).multiplyScalar(t_c).add(raycaster.ray.origin); // P_c
                 
-                var closestDistSq = v3.subVectors(v1, v2).lengthSq();
+                closestDistSq = v3.subVectors(v1, v2).lengthSq();
                 var radiusSq = cylinder.radius*cylinder.radius;
                 
                 //Smoothing?
@@ -640,13 +644,11 @@ WebMol.Raycaster = (function() {
                 // closest distance between ray and cylinder axis not greater than cylinder radius;
                 // might intersect this cylinder between atom and bond midpoint
                 if (closestDistSq <= radiusSq){
-                    var distance;
-                    
+
                     //Find points where ray intersects sides of cylinder
-                    var discriminant = (normProj*cylProj - rayProj)*(normProj*cylProj - rayProj) - 
+                    discriminant = (normProj*cylProj - rayProj)*(normProj*cylProj - rayProj) - 
                             denom*(w_0.lengthSq() - cylProj*cylProj - radiusSq);
                     
-                    var t;
                     // ray tangent to cylinder?
                     if (discriminant <= 0)
                         t = distance = Math.sqrt(closestDistSq);
@@ -655,8 +657,7 @@ WebMol.Raycaster = (function() {
                     
                     //find closest intersection point; make sure it's between atom's position and cylinder midpoint
                     
-                                          
-                    var s = normProj*t - cylProj;
+                    s = normProj*t - cylProj;
                     
                     //does not intersect cylinder between atom and midpoint,
                     // or intersects cylinder behind camera
@@ -675,7 +676,7 @@ WebMol.Raycaster = (function() {
         }
          
         //lines
-        for (var i = 0, il = intersectionShape.line.length; i < il; i += 2) {
+        for (i = 0, il = intersectionShape.line.length; i < il; i += 2) {
             
             v1.copy(intersectionShape.line[i]);
             v1.applyMatrix4(group.matrixWorld);
@@ -688,23 +689,23 @@ WebMol.Raycaster = (function() {
             
             w_0.subVectors(v1, raycaster.ray.origin);
             
-            var lineProj = w_0.dot(v3);
-            var rayProj = w_0.dot(raycaster.ray.direction);
+            lineProj = w_0.dot(v3);
+            rayProj = w_0.dot(raycaster.ray.direction);
             
-            var normProj = clamp(raycaster.ray.direction.dot(v3));
+            normProj = clamp(raycaster.ray.direction.dot(v3));
             
-            var denom = 1 - normProj*normProj;
+            denom = 1 - normProj*normProj;
             
             if (denom === 0.0)
                 continue;
             
-            var s_c = (normProj*rayProj - lineProj) / denom;
-            var t_c = (rayProj - normProj*lineProj) / denom;
+            s_c = (normProj*rayProj - lineProj) / denom;
+            t_c = (rayProj - normProj*lineProj) / denom;
             
             v1.add(v3.multiplyScalar(s_c)); // Q_c
             v2.copy(raycaster.ray.direction).multiplyScalar(t_c).add(raycaster.ray.origin); // P_c
             
-            var closestDistSq = v3.subVectors(v2, v1).lengthSq();
+            closestDistSq = v3.subVectors(v2, v1).lengthSq();
             
             if (closestDistSq < precisionSq && s_c*s_c < bondLengthSq)
                 intersects.push({clickable : clickable,
@@ -713,7 +714,7 @@ WebMol.Raycaster = (function() {
             
         }
 
-        for (var i = 0; i < intersectionShape.sphere.length; i++) {
+        for (i = 0, il = intersectionShape.sphere.length; i < il; i++) {
             //sphere
             if (intersectionShape.sphere[i] instanceof WebMol.Sphere) {
                 
@@ -722,15 +723,13 @@ WebMol.Raycaster = (function() {
                 
                 if (raycaster.ray.isIntersectionSphere(sphere)) {
                     
-                    var distance;
-                    
                     v1.subVectors(sphere.center, raycaster.ray.origin);
                     
                     //distance from ray origin to point on the ray normal to sphere's center
                     //must be less than sphere's radius (since ray intersects sphere)
                     var distanceToCenter = v1.dot(raycaster.ray.direction);
                     
-                    var discriminant = distanceToCenter*distanceToCenter - (v1.lengthSq() - sphere.radius*sphere.radius);
+                    discriminant = distanceToCenter*distanceToCenter - (v1.lengthSq() - sphere.radius*sphere.radius);
                     
                     //Don't select if sphere center behind camera
                     if (distanceToCenter < 0) 

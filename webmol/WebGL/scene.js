@@ -25,6 +25,8 @@ WebMol.Scene.prototype = Object.create(WebMol.Object3D.prototype);
 
 WebMol.Scene.prototype.__addObject = function(object) {
     
+    var i;
+    
     //Directional Lighting
     if (object instanceof WebMol.Light) {
         
@@ -47,7 +49,7 @@ WebMol.Scene.prototype.__addObject = function(object) {
             
             //Check if previously removed
             
-            var i = this.__objectsRemoved.indexOf(object);
+            i = this.__objectsRemoved.indexOf(object);
             
             if (i !== -1)
                 this.__objectsRemoved.splice(i, 1);
@@ -57,16 +59,18 @@ WebMol.Scene.prototype.__addObject = function(object) {
     
     //Add object's children
     
-    for (var i in object.children) 
+    for (i= 0, il = object.children.length; i < il; i++) 
         this.__addObject(object.children[i]);
     
 };
 
 WebMol.Scene.prototype.__removeObject = function(object) {
     
+    var i, il;
+    
     if (object instanceof WebMol.Light) {
         
-        var i = this.__lights.indexOf(object);
+        i = this.__lights.indexOf(object);
         
         if (i !== -1)
             this.__lights.splice(i, 1);
@@ -76,7 +80,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     //Object3D
     else {
         
-        var i = this.__objects.indexOf(object);
+        i = this.__objects.indexOf(object);
         
         if (i !== -1) {
             
@@ -95,7 +99,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     }
     
     //Remove object's children
-    for (var i in object.children)
+    for (i = 0, il = object.children.length; i < il; i++)
         this.__removeObject(object.children[i]);
     
 };

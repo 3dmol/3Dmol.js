@@ -34,7 +34,10 @@ WebMol.MarchingCube = (function() {
         
         //keep track of calculated vertices to avoid repeats
         var vertnums = new Int32Array(nX*nY*nZ);
-        for (var i = 0; i < vertnums.length; ++i)
+        
+        var i, il;
+        
+        for (i = 0, il = vertnums.length; i < il; ++i)
             vertnums[i] = -1;
 
         // create (or retrieve) a vertex at the appropriate point for
@@ -90,7 +93,7 @@ WebMol.MarchingCube = (function() {
         var tritable = (fulltable) ? triTable2 : triTable;
                 
         //Run marching cubes algorithm
-        for (var i = 0; i < nX-1; ++i) {
+        for (i = 0; i < nX-1; ++i) {
             
             for (var j = 0; j < nY-1; ++j){
                 
@@ -171,7 +174,8 @@ WebMol.MarchingCube = (function() {
 
     my.laplacianSmooth = function(numiter, verts, faces) {
             var tps = new Array(verts.length);
-            for ( var i = 0; i < verts.length; i++)
+            var i, il, j, jl, k, kl;
+            for (i = 0, il = verts.length; i < il; i++)
                     tps[i] = {
                         x : 0,
                         y : 0,
@@ -179,14 +183,14 @@ WebMol.MarchingCube = (function() {
                     };
             var vertdeg = new Array(20);
             var flagvert;
-            for ( var i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
                     vertdeg[i] = new Array(verts.length);
-            for ( var i = 0; i < verts.length; i++)
+            for (i = 0, il = verts.length; i < il; i++)
                     vertdeg[0][i] = 0;
-            for ( var i = 0; i < faces.length / 3; i++) {
+            for (i = 0, il = faces.length / 3; i < il; i++) {
                 var aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
                 flagvert = true;
-                for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
+                for (j = 0, jl = vertdeg[0][faces[aoffset]]; j < jl; j++) {
                     if (faces[boffset] == vertdeg[j + 1][faces[aoffset]]) {
                         flagvert = false;
                         break;
@@ -197,7 +201,7 @@ WebMol.MarchingCube = (function() {
                     vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[boffset];
                 }
                 flagvert = true;
-                for ( var j = 0; j < vertdeg[0][faces[aoffset]]; j++) {
+                for (j = 0, jl = vertdeg[0][faces[aoffset]]; j < jl; j++) {
                     if (faces[coffset] == vertdeg[j + 1][faces[aoffset]]) {
                         flagvert = false;
                         break;
@@ -209,7 +213,7 @@ WebMol.MarchingCube = (function() {
                 }
                 // b
                 flagvert = true;
-                for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
+                for (j = 0, jl = vertdeg[0][faces[boffset]]; j < jl; j++) {
                     if (faces[aoffset] == vertdeg[j + 1][faces[boffset]]) {
                         flagvert = false;
                         break;
@@ -220,7 +224,7 @@ WebMol.MarchingCube = (function() {
                     vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[aoffset];
                 }
                 flagvert = true;
-                for (j = 0; j < vertdeg[0][faces[boffset]]; j++) {
+                for (j = 0, jl = vertdeg[0][faces[boffset]]; j < jl; j++) {
                     if (faces[coffset] == vertdeg[j + 1][faces[boffset]]) {
                         flagvert = false;
                         break;
@@ -243,7 +247,7 @@ WebMol.MarchingCube = (function() {
                     vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[aoffset];
                 }
                 flagvert = true;
-                for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
+                for (j = 0, jl = vertdeg[0][faces[coffset]]; j < jl; j++) {
                     if (faces[boffset] == vertdeg[j + 1][faces[coffset]]) {
                         flagvert = false;
                         break;
@@ -260,8 +264,8 @@ WebMol.MarchingCube = (function() {
             var ssign;
             var scaleFactor = 1;
             var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
-            for ( var k = 0; k < numiter; k++) {
-                    for ( var i = 0; i < verts.length; i++) {
+            for (k = 0; k < numiter; k++) {
+                    for (i = 0, il = verts.length; i < il; i++) {
                             if (vertdeg[0][i] < 3) {
                                     tps[i].x = verts[i].x;
                                     tps[i].y = verts[i].y;
@@ -270,7 +274,7 @@ WebMol.MarchingCube = (function() {
                                     tps[i].x = 0;
                                     tps[i].y = 0;
                                     tps[i].z = 0;
-                                    for (j = 0; j < vertdeg[0][i]; j++) {
+                                    for (j = 0, jl = vertdeg[0][i]; j < jl; j++) {
                                             tps[i].x += verts[vertdeg[j + 1][i]].x;
                                             tps[i].y += verts[vertdeg[j + 1][i]].y;
                                             tps[i].z += verts[vertdeg[j + 1][i]].z;
@@ -285,7 +289,7 @@ WebMol.MarchingCube = (function() {
                                     tps[i].x = 0;
                                     tps[i].y = 0;
                                     tps[i].z = 0;
-                                    for ( var j = 0; j < vertdeg[0][i]; j++) {
+                                    for (j = 0, jl = vertdeg[0][i]; j < jl; j++) {
                                             tps[i].x += verts[vertdeg[j + 1][i]].x;
                                             tps[i].y += verts[vertdeg[j + 1][i]].y;
                                             tps[i].z += verts[vertdeg[j + 1][i]].z;
@@ -298,7 +302,7 @@ WebMol.MarchingCube = (function() {
                                     tps[i].z /= wt + vertdeg[0][i];
                             }
                     }
-                    for ( var i = 0; i < verts.length; i++) {
+                    for (i = 0, il = verts.length; i < il; i++) {
                             verts[i].x = tps[i].x;
                             verts[i].y = tps[i].y;
                             verts[i].z = tps[i].z;
