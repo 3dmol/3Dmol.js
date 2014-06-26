@@ -23,13 +23,10 @@ module.exports = function(grunt) {
         
         jshint : {
             main : {
-                src : ['Gruntfile.js', 'webmol/*.js']    
+                src : ['Gruntfile.js', 'webmol/*.js', '!webmol/jmol*']    
             },
             webgl : {
-                src : ['webmol/WebGL/*.js', '!webmol/WebGL/renderer.js']
-            },
-            renderer : {
-                src : ['webmol/WebGL/renderer.js']
+                src : ['webmol/WebGL/*.js']
             }
             
         },

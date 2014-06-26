@@ -12880,11 +12880,9 @@ WebMol.Renderer = function ( parameters ) {
     
     this.domElement = _canvas;
     this.context = null;
-    this.devicePixelRatio = parameters.devicePixelRatio !== undefined
-    ? parameters.devicePixelRatio
-    : self.devicePixelRatio !== undefined
-    ? self.devicePixelRatio
-    : 1;
+    this.devicePixelRatio = parameters.devicePixelRatio !== undefined ? 
+    parameters.devicePixelRatio : (self.devicePixelRatio !== undefined) ? 
+                                   self.devicePixelRatio : 1;
 
     // clearing
 
@@ -12987,10 +12985,10 @@ WebMol.Renderer = function ( parameters ) {
     _lights = {
 
             ambient: [0,0,0],
-            directional: { length: 0, colors: new Array(), positions: new Array() },
-            point: { length: 0, colors: new Array(), positions: new Array(), distances: new Array() },
-            spot: { length: 0, colors: new Array(), positions: new Array(), distances: new Array(), directions: new Array(), anglesCos: new Array(), exponents: new Array() },
-            hemi: { length: 0, skyColors: new Array(), groundColors: new Array(), positions: new Array() }
+            directional: { length: 0, colors: [], positions: [] },
+            point: { length: 0, colors: [], positions: [], distances: [] },
+            spot: { length: 0, colors: [], positions: [], distances: [], directions: [], anglesCos: [], exponents: [] },
+            hemi: { length: 0, skyColors: [], groundColors: [], positions: [] }
 
     };
 
@@ -13169,7 +13167,7 @@ WebMol.Renderer = function ( parameters ) {
 
             return b[ 0 ] - a[ 0 ];
 
-    };
+    }
 
     function enableAttribute( attribute ) {
 
@@ -13180,7 +13178,7 @@ WebMol.Renderer = function ( parameters ) {
 
         }
 
-    };
+    }
 
     function disableAttributes() {
 
@@ -13195,7 +13193,7 @@ WebMol.Renderer = function ( parameters ) {
 
         }
 
-    };    
+    } 
 
     function setPolygonOffset ( polygonOffset, factor, units) {
 
@@ -13206,7 +13204,7 @@ WebMol.Renderer = function ( parameters ) {
             else
                 _gl.disable( _gl.POLYGON_OFFSET_FILL );
         }
-    };
+    }
 
     function setLineWidth ( width ) {
 
@@ -13215,7 +13213,7 @@ WebMol.Renderer = function ( parameters ) {
             _oldLineWidth = width;
         }
 
-    };
+    }
     
     var onGeometryDispose = function(event) {
         
@@ -13262,7 +13260,7 @@ WebMol.Renderer = function ( parameters ) {
         
         if (geometry.geometryGroups !== undefined) {
             
-            for (var g in geometry.geometryGroups) {  
+            for (var g = 0, gl = geometry.groups; g < gl; g++) {  
                 
                 var geometryGroup = geometry.geometryGroups[g];
 
@@ -13394,7 +13392,7 @@ WebMol.Renderer = function ( parameters ) {
 
         return shader;
 
-    };    
+    } 
 
 
     //Compile appropriate shaders (if necessary) from source code and attach to gl program.
@@ -13406,7 +13404,7 @@ WebMol.Renderer = function ( parameters ) {
         chunks.push(fragmentShader);
         chunks.push(vertexShader);
         
-        for (var p in parameters) {
+        for (p in parameters) {
             chunks.push(p);
             chunks.push(parameters[p]);
         }
@@ -13497,7 +13495,7 @@ WebMol.Renderer = function ( parameters ) {
         _this.info.memory.programs = _programs.length;
 
         return program;
-    };
+    }
 
     //TODO: need to set up shader attributes and uniforms as attributes on material object after attaching prgm
     //We need to attach appropriate uniform variables to material after shaders have been chosen
@@ -13612,7 +13610,7 @@ WebMol.Renderer = function ( parameters ) {
 
         return program;
 
-    };
+    }
 
     function loadMaterialUniforms(p_uniforms, m_uniforms) {
         var uniformVar, type, uniformVal, uniformLoc;
@@ -13637,7 +13635,7 @@ WebMol.Renderer = function ( parameters ) {
 
         }
 
-    };
+    }
 
     this.renderBuffer = function ( camera, lights, fog, material, geometryGroup, object ) {
 
@@ -13690,13 +13688,13 @@ WebMol.Renderer = function ( parameters ) {
         }
 
         //Render
-
+        var faceCount, lineCount;
         //lambert shaders - draw triangles
         //TODO: make sure geometryGroup's face count is setup correctly
         if (object instanceof WebMol.Mesh) {
-
+            
             if (material.wireframe) {
-                var lineCount = geometryGroup.lineidx;
+                lineCount = geometryGroup.lineidx;
                 setLineWidth(material.wireframeLinewidth);
                 
                 if (updateBuffers)
@@ -13706,7 +13704,7 @@ WebMol.Renderer = function ( parameters ) {
             }
             
             else {
-                var faceCount = geometryGroup.faceidx;
+                faceCount = geometryGroup.faceidx;
 
                 if (updateBuffers)
                     _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
@@ -13723,8 +13721,7 @@ WebMol.Renderer = function ( parameters ) {
 
         //basic shaders - draw lines
         else if (object instanceof WebMol.Line) {
-
-            var lineCount = geometryGroup.vertices;
+            lineCount = geometryGroup.vertices;
 
             setLineWidth(material.linewidth);
             _gl.drawArrays( _gl.LINES, 0, lineCount );
@@ -13779,7 +13776,7 @@ WebMol.Renderer = function ( parameters ) {
             }
         }
 
-    };
+    }
     
     this.render = function ( scene, camera, renderTarget, forceClear ) {
 
@@ -13920,7 +13917,7 @@ WebMol.Renderer = function ( parameters ) {
                 
         }  
         
-    };
+    }
 
     this.initWebGLObjects = function ( scene ) {
 
@@ -13968,7 +13965,7 @@ WebMol.Renderer = function ( parameters ) {
 
     function addObject (object, scene) {
 
-        var g, geometry, material, geometryGroup;
+        var g, gl, geometry, material, geometryGroup;
 
         if ( !object.__webglInit ) {
 
@@ -13988,9 +13985,9 @@ WebMol.Renderer = function ( parameters ) {
                 geometry = object.geometry;
                 material = object.material;           
     
-                for (g in geometry.geometryGroups) {
+                for (g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
     
-                    var geometryGroup = geometry.geometryGroups[ g ];
+                    geometryGroup = geometry.geometryGroups[ g ];
                     
                     geometryGroup.id = _geometryGroupCounter++;
 
@@ -14024,7 +14021,7 @@ WebMol.Renderer = function ( parameters ) {
                 
                 geometry = object.geometry;
 
-                for ( g in geometry.geometryGroups ) {
+                for ( g = 0, gl = geometry.geometryGroups.length; g < gl; g++ ) {
                     geometryGroup = geometry.geometryGroups[g];
 
                     addBuffer(scene.__webglObjects, geometryGroup, object);
@@ -14041,7 +14038,7 @@ WebMol.Renderer = function ( parameters ) {
             
         }
 
-    };
+    }
 
     function updateObject ( object ) {
 
@@ -14050,7 +14047,7 @@ WebMol.Renderer = function ( parameters ) {
         
         if ( object instanceof WebMol.Mesh || object instanceof WebMol.Line ) {
             
-            for (g in geometry.geometryGroups ) {
+            for (var g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
                 
                 geometryGroup = geometry.geometryGroups[ g ];
 
@@ -14068,7 +14065,7 @@ WebMol.Renderer = function ( parameters ) {
 
         }
 
-    };
+    }
     
     function removeObject( object, scene ) {
 
@@ -14080,7 +14077,7 @@ WebMol.Renderer = function ( parameters ) {
             
         object.__webglActive = false;
 
-    };
+    }
 
     function removeInstances( objList, object ) {
 
@@ -14090,7 +14087,7 @@ WebMol.Renderer = function ( parameters ) {
                 objList.splice(o, 1);
 
         }
-    };
+    }
 
     function removeInstancesDirect( objList, object ) {
 
@@ -14100,7 +14097,7 @@ WebMol.Renderer = function ( parameters ) {
                 objList.splice(o, 1);
 
         }
-    };
+    }
 
     function unrollBufferMaterial( globject ) {
 
@@ -14120,7 +14117,7 @@ WebMol.Renderer = function ( parameters ) {
             globject.transparent = null;
         }
 
-    };
+    }
 
     function setBuffers( geometryGroup, hint, line ) {
 
@@ -14159,7 +14156,7 @@ WebMol.Renderer = function ( parameters ) {
             _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );
         }
 
-    };
+    }
     
     //Creates appropriate gl buffers for geometry chunk
     //TODO: do we need line buffer for mesh objects?
@@ -14174,7 +14171,7 @@ WebMol.Renderer = function ( parameters ) {
         geometryGroup.__webglLineBuffer = _gl.createBuffer();
 
         _this.info.memory.geometries++;
-    };
+    }
     
     function createLineBuffers ( geometry ) {
         
@@ -14182,7 +14179,7 @@ WebMol.Renderer = function ( parameters ) {
         geometry.__webglColorBuffer = _gl.createBuffer();
         
         _this.info.memory.geometries++;
-    };
+    }
 
     function addBuffer (objlist, buffer, object) {
 
@@ -14195,7 +14192,7 @@ WebMol.Renderer = function ( parameters ) {
             }
         );
 
-    };
+    }
 
     function setupMatrices (object, camera) {
 
@@ -14204,13 +14201,13 @@ WebMol.Renderer = function ( parameters ) {
         object._normalMatrix.getInverse( object._modelViewMatrix );
         object._normalMatrix.transpose();
 
-    };
+    }
 
     function isPowerOfTwo ( value ) {
 
         return ( value & ( value - 1 ) ) === 0;
 
-    };
+    }
     
     // Fallback filters for non-power-of-2 textures
 
@@ -14218,7 +14215,7 @@ WebMol.Renderer = function ( parameters ) {
 
         return _gl.LINEAR;
 
-    };
+    }
 
     function setTextureParameters ( textureType, texture, isImagePowerOfTwo ) {
 
@@ -14240,7 +14237,7 @@ WebMol.Renderer = function ( parameters ) {
 
         }
 
-    };
+    }
     
     this.setTexture = function (texture, slot) {
 
@@ -14318,7 +14315,7 @@ WebMol.Renderer = function ( parameters ) {
 
         return 0;
 
-    };
+    }
     
     function setupLights ( program, lights ) {
         var l, ll, light, n,
@@ -14376,7 +14373,7 @@ WebMol.Renderer = function ( parameters ) {
         zlights.ambient[1] = g;
         zlights.ambient[2] = b;
         zlights.directional.length = dirLength;
-    };
+    }
 
     function initGL () {
 
@@ -14394,7 +14391,7 @@ WebMol.Renderer = function ( parameters ) {
 
         }
 
-    };
+    }
 
     function setDefaultGLState () {
 
@@ -14415,7 +14412,7 @@ WebMol.Renderer = function ( parameters ) {
 
         _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
 
-    };
+    }
     
     this.addPostPlugin(new WebMol.SpritePlugin());
         
@@ -14489,7 +14486,7 @@ WebMol.Scene.prototype.__addObject = function(object) {
 
 WebMol.Scene.prototype.__removeObject = function(object) {
     
-    var i;
+    var i, il;
     
     if (object instanceof WebMol.Light) {
         
@@ -14522,7 +14519,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     }
     
     //Remove object's children
-    for (var i in object.children)
+    for (i = 0, il = object.children.length; i < il; i++)
         this.__removeObject(object.children[i]);
     
 };

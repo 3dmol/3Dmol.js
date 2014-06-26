@@ -66,7 +66,7 @@ WebMol.Scene.prototype.__addObject = function(object) {
 
 WebMol.Scene.prototype.__removeObject = function(object) {
     
-    var i;
+    var i, il;
     
     if (object instanceof WebMol.Light) {
         
@@ -99,7 +99,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     }
     
     //Remove object's children
-    for (i in object.children)
+    for (i = 0, il = object.children.length; i < il; i++)
         this.__removeObject(object.children[i]);
     
 };
