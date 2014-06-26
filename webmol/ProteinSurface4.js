@@ -120,7 +120,7 @@ var ProteinSurface = function() {
 	};
 
     this.getFacesAndVertices = function(atomlist) {
-        var atomsToShow = new Object();
+        var atomsToShow = {};
         for ( var i = 0, lim = atomlist.length; i < lim; i++)
             atomsToShow[atomlist[i]] = true;
         var vertices = verts;

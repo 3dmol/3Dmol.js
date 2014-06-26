@@ -1,5 +1,6 @@
 
 module.exports = function(grunt) {
+    'use strict';
     
     grunt.initConfig({    
           
@@ -15,7 +16,7 @@ module.exports = function(grunt) {
                 src : ['webmol/**.js', 'README.md'],
                 options : {
                     destination: 'doc',
-                    configure: '.jsdocrc',
+                    configure: 'jsdoc.conf.json',
                     template: 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template'
                 }                
             }                   
@@ -23,7 +24,8 @@ module.exports = function(grunt) {
         
         jshint : {
             main : {
-                src : ['Gruntfile.js', 'webmol/*.js', '!webmol/jmol*']    
+                src : ['Gruntfile.js', 'webmol/*.js', '!webmol/glcartoon.js', '!webmol/glmodel.js', '!webmol/glviewer.js', '!webmol/glshape.js',
+                       '!webmol/jmolmodel.js', '!webmol/jmolviewer.js']    
             },
             webgl : {
                 src : ['webmol/WebGL/*.js']
@@ -37,7 +39,7 @@ module.exports = function(grunt) {
             },
             
             dist : {
-                src : ['js/jquery-1.9.1.js', 'webmol/webmol.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
+                src : ['webmol/webmol.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
                        'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/**.js', 
                        '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
                 dest : 'build/webmol.js'
