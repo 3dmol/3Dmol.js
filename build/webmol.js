@@ -6315,8 +6315,6 @@ WebMol.Scene.prototype = Object.create(WebMol.Object3D.prototype);
 
 WebMol.Scene.prototype.__addObject = function(object) {
     
-    var i;
-    
     //Directional Lighting
     if (object instanceof WebMol.Light) {
         
@@ -6339,9 +6337,9 @@ WebMol.Scene.prototype.__addObject = function(object) {
             
             //Check if previously removed
             
-            i = this.__objectsRemoved.indexOf(object);
+            var idx = this.__objectsRemoved.indexOf(object);
             
-            if (i !== -1)
+            if (idx !== -1)
                 this.__objectsRemoved.splice(i, 1);
                 
         }
@@ -6349,20 +6347,19 @@ WebMol.Scene.prototype.__addObject = function(object) {
     
     //Add object's children
     
-    for (i= 0, il = object.children.length; i < il; i++) 
+    for (var i in object.children) 
         this.__addObject(object.children[i]);
     
 };
 
 WebMol.Scene.prototype.__removeObject = function(object) {
     
-    var i, il;
-    
+    var idx;
     if (object instanceof WebMol.Light) {
         
-        i = this.__lights.indexOf(object);
+        idx = this.__lights.indexOf(object);
         
-        if (i !== -1)
+        if (idx !== -1)
             this.__lights.splice(i, 1);
             
     }
@@ -6370,9 +6367,9 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     //Object3D
     else {
         
-        i = this.__objects.indexOf(object);
+        idx = this.__objects.indexOf(object);
         
-        if (i !== -1) {
+        if (idx !== -1) {
             
             this.__objects.splice(i, 1);
             this.__objectsRemoved.push(object);
@@ -6389,7 +6386,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     }
     
     //Remove object's children
-    for (i = 0, il = object.children.length; i < il; i++)
+    for (var i in object.children)
         this.__removeObject(object.children[i]);
     
 };
