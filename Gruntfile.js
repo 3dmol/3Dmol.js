@@ -25,7 +25,7 @@ module.exports = function(grunt) {
         
         jshint : {
             all : {
-                src : ['Gruntfile.js', 'webmol/**.js']
+                src : ['Gruntfile.js', 'webmol/**.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js']
             },
             main : {
                 src : ['Gruntfile.js', 'webmol/webmol.js', 'webmol/glcartoon.js', 'webmol/glmodel.js', 'webmol/glviewer.js', 'webmol/glshape.js']    
