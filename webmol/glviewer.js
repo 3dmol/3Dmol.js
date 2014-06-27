@@ -730,8 +730,8 @@ WebMol.GLViewer = (function() {
             var center = new WebMol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
             modelGroup.position = center.multiplyScalar(-1);
             // but all for bounding box
-            var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
-                    - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
+            var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1] -
+                    alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
 
             var maxD = Math.sqrt(x * x + y * y + z * z);
             if (maxD < 25)
@@ -749,8 +749,7 @@ WebMol.GLViewer = (function() {
             if (maxD < 25)
                 maxD = 25;
 
-            rotationGroup.position.z = -(maxD * 0.35
-                    / Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
+            rotationGroup.position.z = -(maxD * 0.35 / Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
             
             show();
         };

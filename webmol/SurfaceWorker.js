@@ -26,8 +26,6 @@ WebMol.workerString = function(){
     	}
     };
     
-    var ISDONE = 2;
-    
     var Vector3 = function(x, y, z) {
         this.x = x || 0.0;
         this.y = y || 0.0;
@@ -59,7 +57,7 @@ WebMol.workerString = function(){
     
 }.toString().replace(/(^.*?\{|\}$)/g, "");
 
-WebMol.workerString += ",ISDONE=2";
+WebMol.workerString += ";var ISDONE=2";
 WebMol.workerString += ",ProteinSurface=" + WebMol.ProteinSurface.toString().replace(/WebMol.MarchingCube./g, "");
 WebMol.workerString += ",march=" + WebMol.MarchingCube.march.toString().replace(/WebMol./g, "");
 WebMol.workerString += ",laplacianSmooth=" + WebMol.MarchingCube.laplacianSmooth.toString();

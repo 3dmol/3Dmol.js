@@ -1734,7 +1734,7 @@ WebMol.ProteinSurface = function() {
 
 
 };
-WebMol.workerString=function(){self.onmessage=function(oEvent){var obj=oEvent.data,type=obj.type;if(0>type)self.atomData=obj.atoms,self.volume=obj.volume,self.ps=new ProteinSurface;else{var ps=self.ps;ps.initparm(obj.expandedExtent,1==type?!1:!0,self.volume),ps.fillvoxels(self.atomData,obj.extendedAtoms),ps.buildboundary(),(4===type||2===type)&&(ps.fastdistancemap(),ps.boundingatom(!1),ps.fillvoxelswaals(self.atomData,obj.extendedAtoms)),ps.marchingcube(type);var VandF=ps.getFacesAndVertices(obj.atomsToShow);self.postMessage(VandF)}};var Vector3=function(x,y,z){this.x=x||0,this.y=y||0,this.z=z||0};Vector3.prototype={constructor:Vector3,copy:function(v){return this.x=v.x,this.y=v.y,this.z=v.z,this},multiplyScalar:function(s){return this.x*=s,this.y*=s,this.z*=s,this}}}.toString().replace(/(^.*?\{|\}$)/g,""),WebMol.workerString+=",ISDONE=2",WebMol.workerString+=",ProteinSurface="+WebMol.ProteinSurface.toString().replace(/WebMol.MarchingCube./g,""),WebMol.workerString+=",march="+WebMol.MarchingCube.march.toString().replace(/WebMol./g,""),WebMol.workerString+=",laplacianSmooth="+WebMol.MarchingCube.laplacianSmooth.toString(),WebMol.workerString+=",edgeTable=new Uint32Array(["+WebMol.MarchingCube.edgeTable.toString()+"])",WebMol.workerString+=",triTable=[";for(var i=0,il=WebMol.MarchingCube.triTable.length;il-1>i;i++)WebMol.workerString+="["+WebMol.MarchingCube.triTable[i].toString()+"],";WebMol.workerString+="[]]",WebMol.SurfaceWorker=window.URL.createObjectURL(new Blob([WebMol.workerString]));/*
+/*
 * math-like functionality
 * quaternion, vector, matrix
 */
@@ -6701,7 +6701,84 @@ WebMol.ShaderLib = {
         
     }
     
-};//auto-initialization
+};
+//Hackish way to create webworker (independent of WebMol namespace) within minified file
+WebMol.workerString = function(){
+
+    self.onmessage = function(oEvent) {
+    	var obj = oEvent.data;
+    	var type = obj.type;
+    	if (type < 0) // sending atom data, initialize
+    	{
+    		self.atomData = obj.atoms;
+    		self.volume = obj.volume;
+    		self.ps = new ProteinSurface();
+    	} else {
+    		var ps = self.ps;
+    		ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
+    		ps.fillvoxels(self.atomData, obj.extendedAtoms);
+    		ps.buildboundary();
+    		if (type === 4 || type === 2) {
+    			ps.fastdistancemap();
+                ps.boundingatom(false);
+                ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);	
+            }		
+    		ps.marchingcube(type);
+    		var VandF = ps.getFacesAndVertices(obj.atomsToShow);
+    		self.postMessage(VandF);
+    	}
+    };
+    
+    var Vector3 = function(x, y, z) {
+        this.x = x || 0.0;
+        this.y = y || 0.0;
+        this.z = z || 0.0;
+    };    
+    
+    Vector3.prototype =  {
+        
+        constructor : Vector3,
+        
+        copy : function(v) {
+            
+            this.x = v.x;
+            this.y = v.y;
+            this.z = v.z;
+            
+            return this;  
+        },
+        
+        multiplyScalar : function(s) {
+            
+            this.x *= s;
+            this.y *= s;
+            this.z *= s;
+            
+            return this;
+        }
+    }; 
+    
+}.toString().replace(/(^.*?\{|\}$)/g, "");
+
+WebMol.workerString += ";var ISDONE=2";
+WebMol.workerString += ",ProteinSurface=" + WebMol.ProteinSurface.toString().replace(/WebMol.MarchingCube./g, "");
+WebMol.workerString += ",march=" + WebMol.MarchingCube.march.toString().replace(/WebMol./g, "");
+WebMol.workerString += ",laplacianSmooth=" + WebMol.MarchingCube.laplacianSmooth.toString();
+
+WebMol.workerString += ",edgeTable=new Uint32Array([" + WebMol.MarchingCube.edgeTable.toString() + "])";
+
+WebMol.workerString += ",triTable=[";
+
+for (var i = 0, il = WebMol.MarchingCube.triTable.length; i < il - 1; i++)
+    WebMol.workerString += "[" + WebMol.MarchingCube.triTable[i].toString() + "],";
+
+WebMol.workerString += "[]]";
+
+
+WebMol.SurfaceWorker = window.URL.createObjectURL(new Blob([WebMol.workerString]));
+
+ 
+//auto-initialization
 //Create embedded viewer from HTML attributes if true
 
 $(document).ready(function() {
@@ -11169,8 +11246,8 @@ WebMol.GLViewer = (function() {
             var center = new WebMol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
             modelGroup.position = center.multiplyScalar(-1);
             // but all for bounding box
-            var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
-                    - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
+            var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1] -
+                    alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
 
             var maxD = Math.sqrt(x * x + y * y + z * z);
             if (maxD < 25)
@@ -11188,8 +11265,7 @@ WebMol.GLViewer = (function() {
             if (maxD < 25)
                 maxD = 25;
 
-            rotationGroup.position.z = -(maxD * 0.35
-                    / Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
+            rotationGroup.position.z = -(maxD * 0.35 / Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
             
             show();
         };

@@ -46,9 +46,9 @@ module.exports = function(grunt) {
             },
             
             dist : {
-                src : ['webmol/webmol.js', 'webmol/marchingcube.js', 'webmol/ProteinSurface4.js', 'build/tmp.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
+                src : ['webmol/webmol.js', 'webmol/marchingcube.js', 'webmol/ProteinSurface4.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
                        'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/**.js', 
-                       '!webmol/MarchingCubeData.js', '!webmol/SurfaceWorker.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
+                       '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
                 dest : 'build/webmol.js'
             }   
         },
@@ -56,11 +56,6 @@ module.exports = function(grunt) {
         uglify : {
             options : {
                 mangle : false
-            },
-            tmp : {
-                src : ['webmol/SurfaceWorker.js'],
-                dest : 'build/tmp.js'  
-                
             },
             build : {
                 src : ['js/jquery-1.9.1.js', 'build/webmol.js'],
@@ -83,7 +78,7 @@ module.exports = function(grunt) {
     });
     
     grunt.registerTask('doc', ['clean:doc', 'jsdoc']);
-    grunt.registerTask('build', ['clean:build', 'uglify:tmp', 'concat', 'clean:tmp', 'uglify:build']);
+    grunt.registerTask('build', ['clean:build', 'concat', 'uglify:build']);
     grunt.registerTask('compile', ['clean:build', 'concat', 'closure-compiler']);
     
     grunt.loadNpmTasks('grunt-jsdoc');
