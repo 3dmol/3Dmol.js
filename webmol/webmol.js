@@ -216,7 +216,8 @@ WebMol.multiLineString = function(f) {
             
 };
 
-
+//Synchronized (i.e. not threaded) surface gen? Used mainly for debugging
+WebMol.syncSurface = false;
 //WebMol constants (replaces needed THREE constants)
 
 //material constants

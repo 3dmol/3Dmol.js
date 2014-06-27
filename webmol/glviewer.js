@@ -1231,7 +1231,7 @@ WebMol.GLViewer = (function() {
         var generateMeshSyncHelper = function(type, expandedExtent,
                 extendedAtoms, atomsToShow, atoms, vol) {
             var time = new Date();
-            var ps = new ProteinSurface();
+            var ps = new WebMol.ProteinSurface();
             ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
 
             var time2 = new Date();
@@ -1316,7 +1316,7 @@ WebMol.GLViewer = (function() {
         }
 
         // add a surface
-        this.addSurface = function(type, style, atomsel, allsel, focus, sync) {
+        this.addSurface = function(type, style, atomsel, allsel, focus) {
             // type 1: VDW 3: SAS 4: MS 2: SES
             // if sync is true, does all work in main thread, otherwise uses
             // workers
@@ -1409,7 +1409,7 @@ WebMol.GLViewer = (function() {
                 };
             }
 
-            var sync = !!(sync);
+            var sync = !!(WebMol.syncSurface);
             var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 

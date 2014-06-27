@@ -23,7 +23,13 @@ module.exports = function(grunt) {
         },
         
         jshint : {
+            all : {
+                src : ['Gruntfile.js', 'webmol/**.js']
+            },
             main : {
+                src : ['Gruntfile.js', 'webmol/webmol.js', 'webmol/glcartoon.js', 'webmol/glmodel.js', 'webmol/glviewer.js', 'webmol/glshape.js']    
+            },
+            aux : {
                 src : ['Gruntfile.js', 'webmol/*.js', '!webmol/glcartoon.js', '!webmol/glmodel.js', '!webmol/glviewer.js', '!webmol/glshape.js',
                        '!webmol/jmolmodel.js', '!webmol/jmolviewer.js']    
             },
@@ -39,7 +45,7 @@ module.exports = function(grunt) {
             },
             
             dist : {
-                src : ['webmol/webmol.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
+                src : ['webmol/webmol.js', 'webmol/marchingcube.js', 'webmol/ProteinSurface4.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
                        'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/**.js', 
                        '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
                 dest : 'build/webmol.js'

@@ -102,8 +102,8 @@ WebMol.MarchingCube = (function() {
                     var code = 0;
                     
                     for (var p = 0; p < 8; ++p) {
-                        var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1))
-                                        * nZ + k + (p & 1);
+                        var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1)) *
+                                        nZ + k + (p & 1);
 
                         //TODO: Need to fix vpBits in protein surface for this to work
                         var val = !!(data[index] & ISDONE);
@@ -154,13 +154,13 @@ WebMol.MarchingCube = (function() {
                             c = intersects[ttable[t+2]];         
                                            
                         if (voxel && t >= 3) {
-                            verts.push(verts[a]), a = verts.length - 1;
-                            verts.push(verts[b]), b = verts.length - 1;
-                            verts.push(verts[c]), c = verts.length - 1;
+                            verts.push(verts[a]); a = verts.length - 1;
+                            verts.push(verts[b]); b = verts.length - 1;
+                            verts.push(verts[c]); c = verts.length - 1;
                         }
 
                         
-                        faces.push(a), faces.push(b), faces.push(c);                               
+                        faces.push(a); faces.push(b); faces.push(c);                               
                     }              
                     
                 }
@@ -326,7 +326,7 @@ WebMol.MarchingCube = (function() {
      * sensible corner numbering scheme and the discrete nature of our voxel data
      * (resulting in fewer faces).
      */
-    var edgeTable = new Uint32Array([ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+    my.edgeTable = [ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
             0xb00, 0x0, 0x0, 0x0, 0x700, 0x0, 0xd00, 0xe00, 0xf00, 0x0, 0x0, 0x0,
             0x8a, 0x0, 0x15, 0x0, 0x86, 0x0, 0x0, 0x0, 0x28c, 0x0, 0x813, 0xf19,
             0xe10, 0x0, 0x0, 0x0, 0x2a, 0x0, 0x0, 0x0, 0x126, 0x0, 0x0, 0x15, 0x1c,
@@ -349,9 +349,11 @@ WebMol.MarchingCube = (function() {
             0x12a, 0x33, 0x339, 0x230, 0xe00, 0xe00, 0xc12, 0xd9a, 0x684, 0x795,
             0x49f, 0x596, 0x92, 0xb9f, 0x815, 0x99c, 0x9a, 0x393, 0x99, 0x190,
             0xf00, 0xe08, 0xd01, 0xc0a, 0x704, 0x605, 0x50f, 0x406, 0xb02, 0xa0f,
-            0x905, 0x80c, 0x30a, 0x203, 0x109, 0x0 ]);
+            0x905, 0x80c, 0x30a, 0x203, 0x109, 0x0 ];
     
-    var triTable = [ [], [], [], [], [], [], [], [ 11, 9, 8 ], [], [], [],
+    var edgeTable = new Uint32Array(my.edgeTable);
+    
+    var triTable = my.triTable = [ [], [], [], [], [], [], [], [ 11, 9, 8 ], [], [], [],
             [ 8, 10, 9 ], [], [ 10, 8, 11 ], [ 9, 11, 10 ],
             [ 8, 10, 9, 8, 11, 10 ], [], [], [], [ 1, 7, 3 ], [], [ 4, 2, 0 ], [],
             [ 2, 1, 7 ], [], [], [], [ 2, 7, 3, 2, 9, 7 ], [],
