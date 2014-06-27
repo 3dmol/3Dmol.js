@@ -96,19 +96,19 @@ WebMol.Label.prototype = {
         var textWidth = metrics.width;
         
         // background color
-        this.context.fillStyle   = "rgba(" + this.backgroundColor.r + "," + this.backgroundColor.g + ","
-                                                                  + this.backgroundColor.b + "," + this.backgroundColor.a + ")";
+        this.context.fillStyle   = "rgba(" + this.backgroundColor.r + "," + this.backgroundColor.g + "," +
+                                                                   this.backgroundColor.b + "," + this.backgroundColor.a + ")";
         // border color
-        this.context.strokeStyle = "rgba(" + this.borderColor.r + "," + this.borderColor.g + ","
-                                                                  + this.borderColor.b + "," + this.borderColor.a + ")";
+        this.context.strokeStyle = "rgba(" + this.borderColor.r + "," + this.borderColor.g + "," +
+                                                                   this.borderColor.b + "," + this.borderColor.a + ")";
     
         this.context.lineWidth = this.borderThickness;
         roundRect(this.context, this.borderThickness/2, this.borderThickness/2, textWidth + this.borderThickness, this.fontSize * 1.4 + this.borderThickness, 6);
         // 1.4 is extra height factor for text below baseline: g,j,p,q.
     
         // text color
-        this.context.fillStyle = "rgba(" + this.fontColor.r + "," + this.fontColor.g + ","
-                                                                + this.fontColor.b + "," + this.fontColor.a + ")";
+        this.context.fillStyle = "rgba(" + this.fontColor.r + "," + this.fontColor.g + "," +
+                                                                  this.fontColor.b + "," + this.fontColor.a + ")";
     
         this.context.fillText(this.text, this.borderThickness, this.fontSize + this.borderThickness, textWidth);
         
@@ -220,7 +220,7 @@ WebMol.GLViewer = (function() {
         renderer.domElement.style.height = "100%";
         renderer.domElement.style.position = "absolute";
         renderer.domElement.style.top = "0px";
-        renderer.domElement.style["zIndex"] = "0";
+        renderer.domElement.style.zIndex = "0";
         container.append(renderer.domElement);
         renderer.setSize(WIDTH, HEIGHT);
 
@@ -272,8 +272,8 @@ WebMol.GLViewer = (function() {
                 camera.bottom = -camera.top;
             }
             camera.updateProjectionMatrix();
-            scene.fog.near = camera.near + fogStart
-                    * (camera.far - camera.near);
+            scene.fog.near = camera.near + fogStart *
+                (camera.far - camera.near);
             // if (scene.fog.near > center) scene.fog.near = center;
             scene.fog.far = camera.far;
         };
@@ -329,8 +329,9 @@ WebMol.GLViewer = (function() {
             raycaster.set(camera.position, mouseVector);
 
             var clickables = [], intersects = [];
+            var i, il;
             
-            for (var i in models) {
+            for (i = 0, il = models.length; i < il; i++) {
                 var model = models[i];
                 
                 var atoms = model.selectedAtoms({clickable: true});
@@ -338,7 +339,7 @@ WebMol.GLViewer = (function() {
 
             }
             
-            for (var i in shapes) {
+            for (i = 0, il = shapes.length; i < il; i++) {
                 
                 var shape = shapes[i];
                 if (shape.clickable) {
@@ -368,8 +369,8 @@ WebMol.GLViewer = (function() {
             if (!scene)
                 return;
             var x = ev.pageX, y = ev.pageY;
-            if (ev.originalEvent.targetTouches
-                    && ev.originalEvent.targetTouches[0]) {
+            if (ev.originalEvent.targetTouches &&
+                    ev.originalEvent.targetTouches[0]) {
                 x = ev.originalEvent.targetTouches[0].pageX;
                 y = ev.originalEvent.targetTouches[0].pageY;
             }
@@ -399,11 +400,11 @@ WebMol.GLViewer = (function() {
                 return;
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
             if (ev.originalEvent.detail) { // Webkit
-                rotationGroup.position.z += scaleFactor
-                        * ev.originalEvent.detail / 10;
+                rotationGroup.position.z += scaleFactor *
+                        ev.originalEvent.detail / 10;
             } else if (ev.originalEvent.wheelDelta) { // Firefox
-                rotationGroup.position.z -= scaleFactor
-                        * ev.originalEvent.wheelDelta / 400;
+                rotationGroup.position.z -= scaleFactor *
+                        ev.originalEvent.wheelDelta / 400;
             }
 
             show();
@@ -428,38 +429,38 @@ WebMol.GLViewer = (function() {
                 mode = parseInt(modeRadio.val());
 
             var x = ev.pageX, y = ev.pageY;
-            if (ev.originalEvent.targetTouches
-                    && ev.originalEvent.targetTouches[0]) {
+            if (ev.originalEvent.targetTouches &&
+                    ev.originalEvent.targetTouches[0]) {
                 x = ev.originalEvent.targetTouches[0].pageX;
                 y = ev.originalEvent.targetTouches[0].pageY;
             }
-            if (x == undefined)
+            if (x === undefined)
                 return;
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
             var r = Math.sqrt(dx * dx + dy * dy);
+            var scaleFactor;
             if (mode == 3 || (mouseButton == 3 && ev.ctrlKey)) { // Slab
                 slabNear = cslabNear + dx * 100;
                 slabFar = cslabFar + dy * 100;
             } else if (mode == 2 || mouseButton == 3 || ev.shiftKey) { // Zoom
-                var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+                scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
                 if (scaleFactor < 80)
                     scaleFactor = 80;
                 rotationGroup.position.z = cz - dy * scaleFactor;
             } else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
-                var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+                scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
                 if (scaleFactor < 20)
                     scaleFactor = 20;
-                var translationByScreen = new WebMol.Vector3(dx * scaleFactor, -dy
-                        * scaleFactor, 0);
+                var translationByScreen = new WebMol.Vector3(dx * scaleFactor, -dy *
+                        scaleFactor, 0);
                 var q = rotationGroup.quaternion;
-                var qinv = new WebMol.Quaternion(q.x, q.y, q.z, q.w).inverse()
-                        .normalize();
+                var qinv = new WebMol.Quaternion(q.x, q.y, q.z, q.w).inverse().normalize();
                 var translation = translationByScreen.applyQuaternion(qinv);
                 modelGroup.position.x = currentModelPos.x + translation.x;
                 modelGroup.position.y = currentModelPos.y + translation.y;
                 modelGroup.position.z = currentModelPos.z + translation.z;
-            } else if ((mode == 0 || mouseButton == 1) && r != 0) { // Rotate
+            } else if ((mode === 0 || mouseButton == 1) && r !== 0) { // Rotate
                 var rs = Math.sin(r * Math.PI) / r;
                 dq.x = Math.cos(r * Math.PI);
                 dq.y = 0;
@@ -590,20 +591,20 @@ WebMol.GLViewer = (function() {
             //spinner.show();
             var time1 = new Date();
             var view = this.getView();
-
-            for ( var i = 0; i < models.length; i++) {
+            var i;
+            for (i = 0; i < models.length; i++) {
                 if (models[i]) {
                     models[i].globj(modelGroup);
                 }
             }
             
-            for ( var i = 0; i < shapes.length; i++ ) {
+            for (i = 0; i < shapes.length; i++ ) {
                 if (shapes[i]) {
                     shapes[i].globj(modelGroup);
                 }
             }
 
-            for ( var i in surfaces) { // this is an array with possible holes
+            for (i in surfaces) { // this is an array with possible holes
                 if (surfaces.hasOwnProperty(i)) {
                     var geo = surfaces[i].geo;
                     // async surface generation can cause
@@ -644,45 +645,52 @@ WebMol.GLViewer = (function() {
                 sel = {};
 
             var ms = [];
+            var i;
+            
             if (typeof sel.model === "undefined") {
-                for ( var i = 0; i < models.length; i++) {
+                for (i = 0; i < models.length; i++) {
                     if (models[i])
                         ms.push(models[i]);
                 }
             } else { // specific to some models
-                var ms = sel.model;
+                ms = sel.model;
                 if (!$.isArray(ms))
                     ms = [ ms ];
             }
 
-            for ( var i = 0; i < ms.length; i++) {
+            for (i = 0; i < ms.length; i++) {
                 atoms = atoms.concat(ms[i].selectedAtoms(sel));
             }
+            
             return atoms;
-        };
+        }
         
         function atomIsSelected(atom,sel) {
             if (typeof (sel) === "undefined")
                 sel = {};
 
             var ms = [];
+            var i;
+            
             if (typeof sel.model === "undefined") {
-                for ( var i = 0; i < models.length; i++) {
+                for (i = 0; i < models.length; i++) {
                     if (models[i])
                         ms.push(models[i]);
                 }
-            } else { // specific to some models
-                var ms = sel.model;
+            } 
+            else { // specific to some models
+                ms = sel.model;
                 if (!$.isArray(ms))
                     ms = [ ms ];
             }
 
-            for ( var i = 0; i < ms.length; i++) {
+            for (i = 0; i < ms.length; i++) {
                 if(ms[i].atomIsSelected(atom, sel))
                     return true;
             }
+            
             return false;
-        };
+        }
 
         /**
          * Return pdb output of selected atoms (if atoms from pdb input)
