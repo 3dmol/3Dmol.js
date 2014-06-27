@@ -6360,7 +6360,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
         idx = this.__lights.indexOf(object);
         
         if (idx !== -1)
-            this.__lights.splice(i, 1);
+            this.__lights.splice(idx, 1);
             
     }
     
@@ -6371,7 +6371,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
         
         if (idx !== -1) {
             
-            this.__objects.splice(i, 1);
+            this.__objects.splice(idx, 1);
             this.__objectsRemoved.push(object);
             
             //Check if previously added
@@ -6379,7 +6379,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
             var ai = this.__objectsAdded.indexOf(object);
             
             if (ai !== -1) 
-                this.__objectsAdded.splice(i, 1);
+                this.__objectsAdded.splice(idx, 1);
                 
         }
     
