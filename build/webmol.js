@@ -11477,8 +11477,8 @@ WebMol.GLViewer = (function() {
             model.removegl(modelGroup);
             delete models[model.getID()];
             // clear off back of model array
-            while (models.length > 0
-                    && typeof (models[models.length - 1]) === "undefined")
+            while (models.length > 0 &&
+                    typeof (models[models.length - 1]) === "undefined")
                 models.pop();
         };
 
@@ -11625,8 +11625,7 @@ WebMol.GLViewer = (function() {
                     // create two halves, splitting at index
                     var a = copyExtent(extent);
                     var b = copyExtent(extent);
-                    var mid = (extent[1][index] - extent[0][index]) / 2
-                            + extent[0][index];
+                    var mid = (extent[1][index] - extent[0][index]) / 2 + extent[0][index];
                     a[1][index] = mid;
                     b[0][index] = mid;
 
@@ -11638,7 +11637,6 @@ WebMol.GLViewer = (function() {
 
             // divide up extent
             var splits = splitExtentR(extent);
-            var ret = [];
             // now compute atoms within expanded (this could be more efficient)
             var off = 6; // enough for water and 2*r, also depends on scale
             // factor
@@ -11676,9 +11674,10 @@ WebMol.GLViewer = (function() {
             // reconstruct vertices and faces
             var v = VandF.vertices;
             var offset;
-            for ( var i = 0; i < v.length; i++) {            
+            var i, il;
+            for (i = 0, il = v.length; i < il; i++) {            
                 offset = geoGroup.vertices*3;
-                geoGroup.__vertexArray[offset] = v[i].x; geoGroup.__vertexArray[offset+1] = v[i].y, geoGroup.__vertexArray[offset+2] =v[i].z;                
+                geoGroup.__vertexArray[offset] = v[i].x; geoGroup.__vertexArray[offset+1] = v[i].y; geoGroup.__vertexArray[offset+2] =v[i].z;                
                 geoGroup.vertices++;
             }
                        
@@ -11688,7 +11687,7 @@ WebMol.GLViewer = (function() {
 
             // set colors for vertices
             var colors = [];
-            for ( var i = 0; i < atoms.length; i++) {
+            for (i = 0, il = atoms.length; i < il; i++) {
                 var atom = atoms[i];
                 if (atom) {
                     if (typeof (atom.surfaceColor) != "undefined") {
@@ -11703,7 +11702,7 @@ WebMol.GLViewer = (function() {
             var faceoffset;
             
             //Setup colors, faces, and normals
-            for ( var i = 0; i < faces.length; i+=3) {
+            for (i = 0, il = faces.length; i < il; i+=3) {
                 
                 faceoffset = i;
                 //var a = faces[i].a, b = faces[i].b, c = faces[i].c;
@@ -11714,14 +11713,14 @@ WebMol.GLViewer = (function() {
                 
                 var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
-                geoGroup.__faceArray[faceoffset] = faces[i].a, geoGroup.__faceArray[faceoffset+1] = faces[i].b, 
+                geoGroup.__faceArray[faceoffset] = faces[i].a; geoGroup.__faceArray[faceoffset+1] = faces[i].b;
                     geoGroup.__faceArray[faceoffset+2] = faces[i].c;
                 
-                geoGroup.__colorArray[offsetA] = colors[A].r, geoGroup.__colorArray[offsetA+1] = colors[A].g,
+                geoGroup.__colorArray[offsetA] = colors[A].r; geoGroup.__colorArray[offsetA+1] = colors[A].g;
                          geoGroup.__colorArray[offsetA+2] = colors[A].b;
-                geoGroup.__colorArray[offsetB] = colors[B].r, geoGroup.__colorArray[offsetB+1] = colors[B].g,
+                geoGroup.__colorArray[offsetB] = colors[B].r; geoGroup.__colorArray[offsetB+1] = colors[B].g;
                          geoGroup.__colorArray[offsetB+2] = colors[B].b;
-                geoGroup.__colorArray[offsetC] = colors[C].r, geoGroup.__colorArray[offsetC+1] = colors[C].g,
+                geoGroup.__colorArray[offsetC] = colors[C].r; geoGroup.__colorArray[offsetC+1] = colors[C].g;
                          geoGroup.__colorArray[offsetC+2] = colors[C].b;
                  
                 //setup Normals
@@ -11738,9 +11737,9 @@ WebMol.GLViewer = (function() {
                 norm = vC;
                 norm.normalize();
                 
-                geoGroup.__normalArray[offsetA] += norm.x, geoGroup.__normalArray[offsetB] += norm.x, geoGroup.__normalArray[offsetC] += norm.x;
-                geoGroup.__normalArray[offsetA+1] += norm.y, geoGroup.__normalArray[offsetB+1] += norm.y, geoGroup.__normalArray[offsetC+1] += norm.y;
-                geoGroup.__normalArray[offsetA+2] += norm.z, geoGroup.__normalArray[offsetB+2] += norm.z, geoGroup.__normalArray[offsetC+2] += norm.z;
+                geoGroup.__normalArray[offsetA] += norm.x; geoGroup.__normalArray[offsetB] += norm.x; geoGroup.__normalArray[offsetC] += norm.x;
+                geoGroup.__normalArray[offsetA+1] += norm.y; geoGroup.__normalArray[offsetB+1] += norm.y; geoGroup.__normalArray[offsetC+1] += norm.y;
+                geoGroup.__normalArray[offsetA+2] += norm.z; geoGroup.__normalArray[offsetB+2] += norm.z; geoGroup.__normalArray[offsetC+2] += norm.z;
                 
             }
             geoGroup.__faceArray = new Uint16Array(faces);
@@ -11763,8 +11762,7 @@ WebMol.GLViewer = (function() {
             ps.fillvoxels(atoms, extendedAtoms);
 
             var time3 = new Date();
-            console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time)
-                    + "ms");
+            console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
 
             ps.buildboundary();
 
@@ -11776,14 +11774,13 @@ WebMol.GLViewer = (function() {
             }
 
             var time4 = new Date();
-            console.log("buildboundaryetc " + (time4 - time3) + "  "
-                    + (time4 - time) + "ms");
+            console.log("buildboundaryetc " + (time4 - time3) + "  " + (time4 - time) + "ms");
 
             ps.marchingcube(type);
 
             var time5 = new Date();
-            console.log("marching cube " + (time5 - time4) + "  "
-                    + (time5 - time) + "ms");
+            console.log("marching cube " + (time5 - time4) + "  " + (time5 - time) + "ms");
+            
             return ps.getFacesAndVertices(atomsToShow);
         };
 
@@ -11818,8 +11815,7 @@ WebMol.GLViewer = (function() {
 
             for ( var i = 0, n = atomlist.length; i < n; i++) {
                 var atom = atomlist[i];
-                if (atom.properties
-                        && typeof (atom.properties[prop]) != "undefined") {
+                if (atom.properties && typeof (atom.properties[prop]) != "undefined") {
                     var val = atom.properties[prop];
                     if (val < min)
                         min = val;
@@ -11854,13 +11850,15 @@ WebMol.GLViewer = (function() {
             var atomsToShow = getAtomsFromSel(atomsel);
             var atomlist = getAtomsFromSel(allsel);
             var focusSele = getAtomsFromSel(focus);
+            var atom;
 
             var time = new Date();
         
             var mat = getMatWithStyle(style);
 
             var extent = getExtent(atomsToShow);
-
+        
+            var i, il;
             if (style.map && style.map.prop) {
                 // map color space using already set atom properties
                 var prop = style.map.prop;
@@ -11870,8 +11868,8 @@ WebMol.GLViewer = (function() {
                     range = getPropertyRange(atomsToShow, prop);
                 }
 
-                for ( var i = 0, n = atomsToShow.length; i < n; i++) {
-                    var atom = atomsToShow[i];
+                for (i = 0, il = atomsToShow.length; i < il; i++) {
+                    atom = atomsToShow[i];
                     atom.surfaceColor = scheme.valueToHex(
                             atom.properties[prop], range);
                 }
@@ -11907,8 +11905,7 @@ WebMol.GLViewer = (function() {
                 extents.sort(sortFunc);
             }
 
-            console.log("Extents " + extents.length + "  "
-                    + (+new Date() - time) + "ms");
+            console.log("Extents " + extents.length + "  " + (+new Date() - time) + "ms");
 
             var surfobj = {
                 geo : new WebMol.Geometry(true),
@@ -11921,8 +11918,8 @@ WebMol.GLViewer = (function() {
             surfaces[surfid] = surfobj;
             var reducedAtoms = [];
             // to reduce amount data transfered, just pass x,y,z,serial and elem
-            for ( var i = 0, n = atomlist.length; i < n; i++) {
-                var atom = atomlist[i];
+            for (i = 0, il = atomlist.length; i < il; i++) {
+                atom = atomlist[i];
                 reducedAtoms[i] = {
                     x : atom.x,
                     y : atom.y,
@@ -11933,26 +11930,26 @@ WebMol.GLViewer = (function() {
             }
 
             var sync = !!(WebMol.syncSurface);
-            var view = this; //export render function to worker
             if (sync) { // don't use worker, still break up for memory purposes
 
-                for ( var i = 0; i < extents.length; i++) {
+                for (i = 0, il = extents.length; i < il; i++) {
                     //console.profile();
                     var VandF = generateMeshSyncHelper(type, extents[i].extent,
                             extents[i].atoms, extents[i].toshow, reducedAtoms,
                             totalVol);
                     var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                     WebMol.mergeGeos(surfobj.geo, mesh);
-                    view.render();
+                    _viewer.render();
                     //console.profileEnd();
                 }
             //TODO: Asynchronously generate geometryGroups (not separate meshes) and merge them into a single geometry
-            } else { // use worker
+            }            
+            else { // use worker
                 
                 var workers = [];
                 if (type < 0)
                     type = 0; // negative reserved for atom data
-                for ( var i = 0; i < numWorkers; i++) {
+                for (i = 0, il = numWorkers; i < il; i++) {
                     //var w = new Worker('webmol/SurfaceWorker.js');
                     var w = new Worker(WebMol.SurfaceWorker);
                     workers.push(w);
@@ -11963,24 +11960,27 @@ WebMol.GLViewer = (function() {
                     });
                 }
                 var cnt = 0;
-                for ( var i = 0; i < extents.length; i++) {
+                
+                var rfunction = function(event) {
+                    var VandF = event.data;  
+                    var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                    WebMol.mergeGeos(surfobj.geo, mesh);
+                    _viewer.render();
+                    console.log("async mesh generation " + (+new Date() - time) + "ms");
+                    cnt++;
+                    if (cnt == extents.length)
+                        surfobj.done = true;  
+                };
+                
+                var efunction = function(event) {
+                    console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
+                };
+                
+                for (i = 0; i < extents.length; i++) {
                     var worker = workers[i % workers.length];
-                    worker.onmessage = function(event) {
-                        var VandF = event.data;
-                        var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                        WebMol.mergeGeos(surfobj.geo, mesh);
-                        view.render();
-                        console.log("async mesh generation "
-                                + (+new Date() - time) + "ms");
-                        cnt++;
-                        if (cnt == extents.length)
-                            surfobj.done = true;
-                    };
+                    worker.onmessage = rfunction;
 
-                    worker.onerror = function(event) {
-                        console.log(event.message + " (" + event.filename + ":"
-                                + event.lineno + ")");
-                    };
+                    worker.onerror = efunction;
 
                     worker.postMessage({
                         type : type,
@@ -12021,12 +12021,10 @@ WebMol.GLViewer = (function() {
         this.jmolMoveTo = function() {
             var pos = modelGroup.position;
             // center on same position
-            var ret = "center { " + (-pos.x) + " " + (-pos.y) + " " + (-pos.z)
-                    + " }; ";
+            var ret = "center { " + (-pos.x) + " " + (-pos.y) + " " + (-pos.z) + " }; ";
             // apply rotation
             var q = rotationGroup.quaternion;
-            ret += "moveto .5 quaternion { " + q.x + " " + q.y + " " + q.z
-                    + " " + q.w + " };";
+            ret += "moveto .5 quaternion { " + q.x + " " + q.y + " " + q.z + " " + q.w + " };";
             // zoom is tricky.. maybe i would be best to let callee zoom on
             // selection?
             // can either do a bunch of math, or maybe zoom to the center with a
