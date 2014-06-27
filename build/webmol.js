@@ -7112,10 +7112,14 @@ WebMol.drawCartoon = (function() {
     var subdivide = function(_points, DIV) { // points as Vector3
         var ret = [];
         var points = _points;
-        points = new Array(); // Smoothing test
+        points = []; // Smoothing test
         points.push(_points[0]);
-        for ( var i = 1, lim = _points.length - 1; i < lim; i++) {
-            var p1 = _points[i], p2 = _points[i + 1];
+        
+        var i, lim, size;
+        var p0, p1, p2, p3, v0, v1;
+        
+        for (i = 1, lim = _points.length - 1; i < lim; i++) {
+            p1 = _points[i]; p2 = _points[i + 1];
             if (p1.smoothen)
                 points.push(new WebMol.Vector3((p1.x + p2.x) / 2, (p1.y + p2.y) / 2,
                         (p1.z + p2.z) / 2));
@@ -7125,24 +7129,24 @@ WebMol.drawCartoon = (function() {
         points.push(_points[_points.length - 1]);
 
         
-        for ( var i = -1, size = points.length; i <= size - 3; i++) {
-            var p0 = points[(i === -1) ? 0 : i];
-            var p1 = points[i + 1], p2 = points[i + 2];
-            var p3 = points[(i === size - 3) ? size - 1 : i + 3];
-            var v0 = new WebMol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
-            var v1 = new WebMol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
+        for (i = -1, size = points.length; i <= size - 3; i++) {
+            p0 = points[(i === -1) ? 0 : i];
+            p1 = points[i + 1]; p2 = points[i + 2];
+            p3 = points[(i === size - 3) ? size - 1 : i + 3];
+            v0 = new WebMol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
+            v1 = new WebMol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
 
             for ( var j = 0; j < DIV; j++) {
                 var t = 1.0 / DIV * j;
-                var x = p1.x + t * v0.x + t * t
-                        * (-3 * p1.x + 3 * p2.x - 2 * v0.x - v1.x) + t * t * t
-                        * (2 * p1.x - 2 * p2.x + v0.x + v1.x);
-                var y = p1.y + t * v0.y + t * t
-                        * (-3 * p1.y + 3 * p2.y - 2 * v0.y - v1.y) + t * t * t
-                        * (2 * p1.y - 2 * p2.y + v0.y + v1.y);
-                var z = p1.z + t * v0.z + t * t
-                        * (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t
-                        * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
+                var x = p1.x + t * v0.x + t * t * 
+                        (-3 * p1.x + 3 * p2.x - 2 * v0.x - v1.x) + t * t * t *
+                        (2 * p1.x - 2 * p2.x + v0.x + v1.x);
+                var y = p1.y + t * v0.y + t * t * 
+                        (-3 * p1.y + 3 * p2.y - 2 * v0.y - v1.y) + t * t * t *
+                        (2 * p1.y - 2 * p2.y + v0.y + v1.y);
+                var z = p1.z + t * v0.z + t * t * 
+                        (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t * 
+                        (2 * p1.z - 2 * p2.z + v0.z + v1.z);
                         
                 var pt = new WebMol.Vector3(x, y, z);
                 
@@ -7169,7 +7173,7 @@ WebMol.drawCartoon = (function() {
             color = WebMol.CC.color(colors[Math.round((i - 1) / div)]);
            
             geoGroup = geo.updateGeoGroup(2);
-            offset = geoGroup.vertices, vertoffset = offset*3;
+            offset = geoGroup.vertices; vertoffset = offset*3;
             
             geoGroup.__vertexArray[vertoffset] = p1[i].x;
             geoGroup.__vertexArray[vertoffset+1] = p1[i].y;
@@ -7227,8 +7231,11 @@ WebMol.drawCartoon = (function() {
         var offset, vertoffset, faceoffset;
         var color;
         var currentAtom, lastAtom;
+        var i, lim, j;
+        var face1, face2, face3;
+        var geoGroup;
         
-        for ( var i = 0, lim = p1.length; i < lim; i++) {
+        for (i = 0, lim = p1.length; i < lim; i++) {
         
             color = WebMol.CC.color(colors[Math.round((i - 1) / div)]);
             
@@ -7250,19 +7257,19 @@ WebMol.drawCartoon = (function() {
             if (p1v.atom !== undefined)
                 currentAtom = p1v.atom;
             
-            var geoGroup = geo.updateGeoGroup(8);
-            offset = geoGroup.vertices, vertoffset = offset*3;
+            geoGroup = geo.updateGeoGroup(8);
+            offset = geoGroup.vertices; vertoffset = offset*3;
             
-            geoGroup.__vertexArray[vertoffset] = p1v.x, geoGroup.__vertexArray[vertoffset+1] = p1v.y, geoGroup.__vertexArray[vertoffset+2] = p1v.z;
-            geoGroup.__vertexArray[vertoffset+3] = p1v.x, geoGroup.__vertexArray[vertoffset+4] = p1v.y, geoGroup.__vertexArray[vertoffset+5] = p1v.z;
-            geoGroup.__vertexArray[vertoffset+6] = p2v.x, geoGroup.__vertexArray[vertoffset+7] = p2v.y, geoGroup.__vertexArray[vertoffset+8] = p2v.z;
-            geoGroup.__vertexArray[vertoffset+9] = p2v.x, geoGroup.__vertexArray[vertoffset+10] = p2v.y, geoGroup.__vertexArray[vertoffset+11] = p2v.z;
-            geoGroup.__vertexArray[vertoffset+12] = a1v.x, geoGroup.__vertexArray[vertoffset+13] = a1v.y, geoGroup.__vertexArray[vertoffset+14] = a1v.z;
-            geoGroup.__vertexArray[vertoffset+15] = a1v.x, geoGroup.__vertexArray[vertoffset+16] = a1v.y, geoGroup.__vertexArray[vertoffset+17] = a1v.z;
-            geoGroup.__vertexArray[vertoffset+18] = a2v.x, geoGroup.__vertexArray[vertoffset+19] = a2v.y, geoGroup.__vertexArray[vertoffset+20] = a2v.z;
-            geoGroup.__vertexArray[vertoffset+21] = a2v.x, geoGroup.__vertexArray[vertoffset+22] = a2v.y, geoGroup.__vertexArray[vertoffset+23] = a2v.z;
+            geoGroup.__vertexArray[vertoffset] = p1v.x; geoGroup.__vertexArray[vertoffset+1] = p1v.y; geoGroup.__vertexArray[vertoffset+2] = p1v.z;
+            geoGroup.__vertexArray[vertoffset+3] = p1v.x; geoGroup.__vertexArray[vertoffset+4] = p1v.y; geoGroup.__vertexArray[vertoffset+5] = p1v.z;
+            geoGroup.__vertexArray[vertoffset+6] = p2v.x; geoGroup.__vertexArray[vertoffset+7] = p2v.y; geoGroup.__vertexArray[vertoffset+8] = p2v.z;
+            geoGroup.__vertexArray[vertoffset+9] = p2v.x; geoGroup.__vertexArray[vertoffset+10] = p2v.y; geoGroup.__vertexArray[vertoffset+11] = p2v.z;
+            geoGroup.__vertexArray[vertoffset+12] = a1v.x; geoGroup.__vertexArray[vertoffset+13] = a1v.y; geoGroup.__vertexArray[vertoffset+14] = a1v.z;
+            geoGroup.__vertexArray[vertoffset+15] = a1v.x; geoGroup.__vertexArray[vertoffset+16] = a1v.y; geoGroup.__vertexArray[vertoffset+17] = a1v.z;
+            geoGroup.__vertexArray[vertoffset+18] = a2v.x; geoGroup.__vertexArray[vertoffset+19] = a2v.y; geoGroup.__vertexArray[vertoffset+20] = a2v.z;
+            geoGroup.__vertexArray[vertoffset+21] = a2v.x; geoGroup.__vertexArray[vertoffset+22] = a2v.y; geoGroup.__vertexArray[vertoffset+23] = a2v.z;
             
-            for (var j = 0; j < 8; ++j) {                
+            for (j = 0; j < 8; ++j) {                
                 geoGroup.__colorArray[vertoffset+3*j] = color.r; geoGroup.__colorArray[vertoffset+1+3*j] = color.g; geoGroup.__colorArray[vertoffset+2+3*j] = color.b;                
             }
             
@@ -7271,16 +7278,14 @@ WebMol.drawCartoon = (function() {
                 //both points have distinct atoms
                 var diffAtoms = ((lastAtom !== undefined && currentAtom !== undefined) && lastAtom.serial !== currentAtom.serial);
                 
-                for ( var j = 0; j < 4; j++ ) {
+                for (j = 0; j < 4; j++ ) {
                 
-                    var face = [offset + faces[j][0], offset
-                        + faces[j][1], offset + faces[j][2], offset
-                        + faces[j][3]];
+                    var face = [offset + faces[j][0], offset + faces[j][1], offset + faces[j][2], offset + faces[j][3]];
                     
                     faceoffset = geoGroup.faceidx;    
                     
-                    geoGroup.__faceArray[faceoffset] = face[0], geoGroup.__faceArray[faceoffset+1] = face[1], geoGroup.__faceArray[faceoffset+2] = face[3];             
-                    geoGroup.__faceArray[faceoffset+3] = face[1], geoGroup.__faceArray[faceoffset+4] = face[2], geoGroup.__faceArray[faceoffset+5] = face[3];
+                    geoGroup.__faceArray[faceoffset] = face[0]; geoGroup.__faceArray[faceoffset+1] = face[1]; geoGroup.__faceArray[faceoffset+2] = face[3];             
+                    geoGroup.__faceArray[faceoffset+3] = face[1]; geoGroup.__faceArray[faceoffset+4] = face[2]; geoGroup.__faceArray[faceoffset+5] = face[3];
                     
                     geoGroup.faceidx += 6;
                     
@@ -7295,8 +7300,6 @@ WebMol.drawCartoon = (function() {
                         
                         p1b.atom = vs[face[0]].atom || null; //should be same                      
                         p2b.atom = vs[face[1]].atom || null; 
-                            
-                        var face1, face2, face3;
                         
                         if (diffAtoms) {
                             var m1 = p1a.clone().add(p1b).multiplyScalar(0.5);
@@ -7366,31 +7369,31 @@ WebMol.drawCartoon = (function() {
         var vsize = vs.length - 8; // Cap
         
         geoGroup = geo.updateGeoGroup(8);
-        offset = geoGroup.vertices, vertoffset = offset*3, faceoffset = geoGroup.faceidx;
+        offset = geoGroup.vertices; vertoffset = offset*3; faceoffset = geoGroup.faceidx;
         
-        for ( var i = 0; i < 4; i++) {
+        for (i = 0; i < 4; i++) {
             vs.push(vs[i * 2]);
             vs.push(vs[vsize + i * 2]);
             
             var v1 = vs[i * 2], v2 = vs[vsize + i * 2];
             
-            geoGroup.__vertexArray[vertoffset+6*i] = v1.x, geoGroup.__vertexArray[vertoffset+1+6*i] = v1.y, geoGroup.__vertexArray[vertoffset+2+6*i] = v1.z;
-            geoGroup.__vertexArray[vertoffset+3+6*i] = v2.x, geoGroup.__vertexArray[vertoffset+4+6*i] = v2.y, geoGroup.__vertexArray[vertoffset+5+6*i] = v2.z;
+            geoGroup.__vertexArray[vertoffset+6*i] = v1.x; geoGroup.__vertexArray[vertoffset+1+6*i] = v1.y; geoGroup.__vertexArray[vertoffset+2+6*i] = v1.z;
+            geoGroup.__vertexArray[vertoffset+3+6*i] = v2.x; geoGroup.__vertexArray[vertoffset+4+6*i] = v2.y; geoGroup.__vertexArray[vertoffset+5+6*i] = v2.z;
             
-            geoGroup.__colorArray[vertoffset+6*i] = color.r, geoGroup.__colorArray[vertoffset+1+6*i] = color.g, geoGroup.__colorArray[vertoffset+2+6*i] = color.b;
-            geoGroup.__colorArray[vertoffset+3+6*i] = color.r, geoGroup.__colorArray[vertoffset+4+6*i] = color.g, geoGroup.__colorArray[vertoffset+5+6*i] = color.b;
+            geoGroup.__colorArray[vertoffset+6*i] = color.r; geoGroup.__colorArray[vertoffset+1+6*i] = color.g; geoGroup.__colorArray[vertoffset+2+6*i] = color.b;
+            geoGroup.__colorArray[vertoffset+3+6*i] = color.r; geoGroup.__colorArray[vertoffset+4+6*i] = color.g; geoGroup.__colorArray[vertoffset+5+6*i] = color.b;
 
         }
         
         vsize += 8;
                 
-        var face1 = [offset, offset + 2, offset + 6, offset + 4];
-        var face2 = [offset + 1, offset + 5, offset + 7, offset + 3];
+        face1 = [offset, offset + 2, offset + 6, offset + 4];
+        face2 = [offset + 1, offset + 5, offset + 7, offset + 3];
         
-        geoGroup.__faceArray[faceoffset] = face1[0], geoGroup.__faceArray[faceoffset+1] = face1[1], geoGroup.__faceArray[faceoffset+2] = face1[3];
-        geoGroup.__faceArray[faceoffset+3] = face1[1], geoGroup.__faceArray[faceoffset+4] = face1[2], geoGroup.__faceArray[faceoffset+5] = face1[3];
-        geoGroup.__faceArray[faceoffset+6] = face2[0], geoGroup.__faceArray[faceoffset+7] = face2[1], geoGroup.__faceArray[faceoffset+8] = face2[3];
-        geoGroup.__faceArray[faceoffset+9] = face2[1], geoGroup.__faceArray[faceoffset+10] = face2[2], geoGroup.__faceArray[faceoffset+11] = face2[3];
+        geoGroup.__faceArray[faceoffset] = face1[0]; geoGroup.__faceArray[faceoffset+1] = face1[1]; geoGroup.__faceArray[faceoffset+2] = face1[3];
+        geoGroup.__faceArray[faceoffset+3] = face1[1]; geoGroup.__faceArray[faceoffset+4] = face1[2]; geoGroup.__faceArray[faceoffset+5] = face1[3];
+        geoGroup.__faceArray[faceoffset+6] = face2[0]; geoGroup.__faceArray[faceoffset+7] = face2[1]; geoGroup.__faceArray[faceoffset+8] = face2[3];
+        geoGroup.__faceArray[faceoffset+9] = face2[1]; geoGroup.__faceArray[faceoffset+10] = face2[2]; geoGroup.__faceArray[faceoffset+11] = face2[3];
         
         geoGroup.faceidx += 12;
         geoGroup.vertices += 8;
@@ -7410,10 +7413,10 @@ WebMol.drawCartoon = (function() {
 
     //TODO: Need to update this (will we ever use this?)
     var drawSmoothCurve = function(group, _points, width, colors, div) {
-        if (_points.length == 0)
+        if (_points.length === 0)
             return;
 
-        div = (div == undefined) ? 5 : div;
+        div = (div === undefined) ? 5 : div;
 
         var geo = new WebMol.Geometry();
         var points = subdivide(_points, div);
@@ -7437,30 +7440,30 @@ WebMol.drawCartoon = (function() {
             helixSheetWidth, doNotSmoothen, thickness) {
         num = num || strandDIV;
         div = div || axisDIV;
-        doNotSmoothen == (doNotSmoothen == undefined) ? false : doNotSmoothen;
+        doNotSmoothen = !!(doNotSmoothen);
         var points = [];
-        for ( var k = 0; k < num; k++)
+        var i, j, k;
+        for (k = 0; k < num; k++)
             points[k] = [];
         var colors = [];
         var currentChain, currentReschain, currentResi, currentCA;
         var prevCO = null, ss = null, ssborder = false;
 
-        for ( var i in atomlist) {
+        for (i in atomlist) {
             var atom = atomlist[i];
-            if (atom == undefined)
+            if (atom === undefined)
                 continue;
 
             if ((atom.atom == 'O' || atom.atom == 'CA') && !atom.hetflag) {
                 if (atom.atom == 'CA') {
-                    if (currentChain != atom.chain 
-                            || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
-                        for ( var j = 0; !thickness && j < num; j++)
+                    if (currentChain != atom.chain || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
+                        for (j = 0; !thickness && j < num; j++)
                             drawSmoothCurve(group, points[j], 1, colors, div);
                         if (fill)
                             drawStrip(group, points[0], points[num - 1],
                                     colors, div, thickness);
-                        var points = [];
-                        for ( var k = 0; k < num; k++)
+                        points = [];
+                        for (k = 0; k < num; k++)
                             points[k] = [];
                         colors = [];
                         prevCO = null;
@@ -7483,19 +7486,20 @@ WebMol.drawCartoon = (function() {
                     if (atom.clickable === true && (atom.intersectionShape === undefined || atom.intersectionShape.triangle === undefined)) 
                         atom.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
                     
-                } else { // O
+                } 
+                
+                else { // O
                     var O = new WebMol.Vector3(atom.x, atom.y, atom.z);
                     O.sub(currentCA);
                     O.normalize(); // can be omitted for performance
                     O.multiplyScalar((ss == 'c') ? coilWidth : helixSheetWidth);
-                    if (prevCO != undefined && O.dot(prevCO) < 0)
+                    if (prevCO !== null && O.dot(prevCO) < 0)
                         O.negate();
                     prevCO = O;
-                    for ( var j = 0; j < num; j++) {
+                    for (j = 0; j < num; j++) {
                         var delta = -1 + 2 / (num - 1) * j;
                         var v = new WebMol.Vector3(currentCA.x + prevCO.x * delta,
-                                currentCA.y + prevCO.y * delta, currentCA.z
-                                        + prevCO.z * delta);
+                                currentCA.y + prevCO.y * delta, currentCA.z + prevCO.z * delta);
                         v.atom = currentAtom;
                         if (!doNotSmoothen && ss == 's')
                             v.smoothen = true;
@@ -7504,7 +7508,7 @@ WebMol.drawCartoon = (function() {
                 }
             }
         }
-        for ( var j = 0; !thickness && j < num; j++)
+        for (j = 0; !thickness && j < num; j++)
             drawSmoothCurve(group, points[j], 1, colors, div);
         if (fill)
             drawStrip(group, points[0], points[num - 1], colors, div, thickness);
