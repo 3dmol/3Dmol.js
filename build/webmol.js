@@ -7621,7 +7621,7 @@ WebMol.GLModel = (function() {
         atoms.sort(function(a, b) {
             return a.z - b.z;
         });
-        for (i = 0, n < atoms.length; i < n; i++) {
+        for (i = 0, n = atoms.length; i < n; i++) {
             var ai = atoms[i];
 
             for (j = i + 1; j < n; j++) {
