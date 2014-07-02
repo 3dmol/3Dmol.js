@@ -65,12 +65,14 @@ module.exports = function(grunt) {
         
         'closure-compiler' : {
             build : {
-                js : ['build/webmol.js'],
+                closurePath : 'lib/closure_compiler',
+                js : ['js/jquery-1.9.1.js', 'build/webmol.js'],
                 jsOutputFile : 'build/webmol-min-closure.js',
                 noreport : true,
                 options : {
-                    compilation_levl: 'SIMPLE_OPTIMIZATIONS',
-                    warning_level: 'DEFAULT'
+                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
+                    'warning_level': 'DEFAULT',
+                    'language_in': 'ECMASCRIPT5'
                 }
             }
         }   
