@@ -56,10 +56,10 @@ WebMol.createViewer = function(element, config)
     if(!element) return;
 
     config = config || {};
-    if(!config['order'])
-        config['order'] = ["glmol","jmol"];
-    if(!config['defaultcolors'])
-        config['defaultcolors'] = WebMol.defaultElementColors;
+    if(!config.order)
+        config.order = ["glmol","jmol"];
+    if(!config.defaultcolors)
+        config.defaultcolors = WebMol.defaultElementColors;
 
     //try to create the appropriate viewer
     for(var i = 0; i < config.order.length; i++) {
@@ -78,7 +78,7 @@ WebMol.createViewer = function(element, config)
     }
     alert("Unable to instantiate webmol viewer: "+config.order);
     return null;
-},
+};
 
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model

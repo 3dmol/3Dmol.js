@@ -1566,4 +1566,4 @@ WebMol.GLViewer = (function() {
     
 })();
 
-WebMol.glmolViewer = WebMol.GLViewer;
+WebMol['glmolViewer'] = WebMol.GLViewer;

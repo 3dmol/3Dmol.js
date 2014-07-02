@@ -46,24 +46,29 @@ module.exports = function(grunt) {
             },
             
             pre : {
-                src : ['webmol/webmol.js', 'webmol/marchingcube.js', 'webmol/ProteinSurface4.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
-                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/**.js',
+                src : ['webmol/webmol.js', 'webmol/marchingcube.js', 'webmol/ProteinSurface4.js', 'webmol/**.js', '!webmol/WebGL/*.js',
                        '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
                 dest : 'build/webmol-pre.js'            
             },
             
+            webGL : {
+                src : ['webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
+                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js'],
+                dest : 'build/webGL-pre.js'
+            },
+            
             big : {
-                src : ['js/jquery-1.11.1.min.js', 'build/webmol-pre.js'],
+                src : ['js/jquery-1.11.1.min.js', 'build/webGL-pre.js', 'build/webmol-pre.js'],
                 dest : 'build/webmol.js'
             },
             
             min : {
-                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-pre.js'],
+                src : ['js/jquery-1.11.1.min.js', 'build/webGL-min-pre.js', 'build/webmol-min-pre.js'],
                 dest : 'build/webmol-min.js'
             },
             
             closure : {
-                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-closure-pre.js'],
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-closure-pre.js', 'build/webGL-min-pre.js',],
                 dest : 'build/webmol-min-closure.js'
             }
         },
@@ -72,9 +77,13 @@ module.exports = function(grunt) {
             options : {
                 mangle : false
             },
-            build : {
+            webmol : {
                 src : ['build/webmol-pre.js'],
                 dest : 'build/webmol-min-pre.js'
+            },
+            webGL : {
+                src : ['build/webGL-pre.js'],
+                dest : 'build/webGL-min-pre.js'
             }
         },
         
@@ -96,9 +105,10 @@ module.exports = function(grunt) {
     });
     
     grunt.registerTask('doc', ['clean:doc', 'jsdoc']);
+    grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL']);
     grunt.registerTask('concat_build', ['concat:big', 'concat:min', 'concat:closure']);
-    grunt.registerTask('build', ['clean:build', 'concat:pre', 'uglify', 'closure-compiler', 'concat_build', 'clean:tmp']);
-    grunt.registerTask('compile', ['clean:build', 'concat', 'closure-compiler']);
+    
+    grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'uglify', 'closure-compiler', 'concat_build', 'clean:tmp']);
     
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-jshint');
