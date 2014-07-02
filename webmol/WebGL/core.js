@@ -376,7 +376,7 @@ WebMol.Geometry = (function() {
         return ret;
     };
         
-    Geometry = function(mesh) {
+    var Geometry = function(mesh) {
         
         WebMol.EventDispatcher.call(this);
         

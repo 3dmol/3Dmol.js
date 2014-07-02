@@ -9,7 +9,7 @@ module.exports = function(grunt) {
         clean : {
             doc: ['doc'],
             build: ['build'],
-            tmp: ['build/tmp.js']
+            tmp: ['build/*pre.js']
         },
         
         jsdoc : {  
@@ -45,12 +45,27 @@ module.exports = function(grunt) {
                 separator : ''
             },
             
-            dist : {
+            pre : {
                 src : ['webmol/webmol.js', 'webmol/marchingcube.js', 'webmol/ProteinSurface4.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
-                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/**.js', 
+                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/**.js',
                        '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
+                dest : 'build/webmol-pre.js'            
+            },
+            
+            big : {
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-pre.js'],
                 dest : 'build/webmol.js'
-            }   
+            },
+            
+            min : {
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-pre.js'],
+                dest : 'build/webmol-min.js'
+            },
+            
+            closure : {
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-closure-pre.js'],
+                dest : 'build/webmol-min-closure.js'
+            }
         },
         
         uglify : {
@@ -58,21 +73,22 @@ module.exports = function(grunt) {
                 mangle : false
             },
             build : {
-                src : ['js/jquery-1.9.1.js', 'build/webmol.js'],
-                dest : 'build/webmol-min.js'
+                src : ['build/webmol-pre.js'],
+                dest : 'build/webmol-min-pre.js'
             }
         },
         
         'closure-compiler' : {
             build : {
                 closurePath : 'lib/closure_compiler',
-                js : ['js/jquery-1.9.1.js', 'build/webmol.js'],
-                jsOutputFile : 'build/webmol-min-closure.js',
+                js : ['build/webmol-pre.js'],
+                jsOutputFile : 'build/webmol-min-closure-pre.js',
                 noreport : true,
                 options : {
-                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
+                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
-                    'language_in': 'ECMASCRIPT5'
+                    'language_in': 'ECMASCRIPT5',
+                    'externs': 'externs/externs.js'
                 }
             }
         }   
@@ -80,7 +96,8 @@ module.exports = function(grunt) {
     });
     
     grunt.registerTask('doc', ['clean:doc', 'jsdoc']);
-    grunt.registerTask('build', ['clean:build', 'concat', 'uglify:build']);
+    grunt.registerTask('concat_build', ['concat:big', 'concat:min', 'concat:closure']);
+    grunt.registerTask('build', ['clean:build', 'concat:pre', 'uglify', 'closure-compiler', 'concat_build', 'clean:tmp']);
     grunt.registerTask('compile', ['clean:build', 'concat', 'closure-compiler']);
     
     grunt.loadNpmTasks('grunt-jsdoc');

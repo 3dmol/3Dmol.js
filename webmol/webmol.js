@@ -13,111 +13,117 @@
  * @property JmolElementColors - Jmol style atom colors (default color scheme)
  * @property rasmolElementColors - Rasmol style atom colors
  */
-var WebMol = {
+var WebMol = (function(window) {
+
+    var my = {};
+    var $ = window['jQuery'];
+    //window['WebMol'] = my;
+        
+    return my;
+
+})(window);
     
-    /**
-     * Create and initialize an appropriate viewer at supplied HTML element using specification in config
-     * @function WebMol.createViewer
-     * @param {Object | string} element Either HTML element or string identifier
-     * @param {Object} config Viewer specification
-     * @returns {WebMol.GLViewer} GLViewer
-     * 
-     * @example
-     * // Assume there exists an HTML div with id "gldiv"
-     * var element = $("#gldiv");
-     * 
-     * // Viewer config - properties 'defaultcolors' and 'callback'
-     * var config = {defaultcolors: WebMol.rasmolElementColors,
-     *               callback : function(viewer) {
-     *                            //'data' is a string containing molecule data in pdb format  
-     *                            viewer.addModel(data, "pdb");
-     *                            viewer.zoomTo();
-     *                            viewer.render();
-     *                          }  
-     *                        
-     *               };
-     * 
-     * // Create GLViewer within 'gldiv' and execute callback
-     * var myviewer = WebMol.createViewer(element, config);
-     *      
-     */
-    createViewer : function(element, config)
-    {
-        if($.type(element) === "string")
-            element = $("#"+element);
-        if(!element) return;
+/**
+ * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ * @function WebMol.createViewer
+ * @param {Object | string} element Either HTML element or string identifier
+ * @param {Object} config Viewer specification
+ * @returns {WebMol.GLViewer} GLViewer
+ * 
+ * @example
+ * // Assume there exists an HTML div with id "gldiv"
+ * var element = $("#gldiv");
+ * 
+ * // Viewer config - properties 'defaultcolors' and 'callback'
+ * var config = {defaultcolors: WebMol.rasmolElementColors,
+ *               callback : function(viewer) {
+ *                            //'data' is a string containing molecule data in pdb format  
+ *                            viewer.addModel(data, "pdb");
+ *                            viewer.zoomTo();
+ *                            viewer.render();
+ *                          }  
+ *                        
+ *               };
+ * 
+ * // Create GLViewer within 'gldiv' and execute callback
+ * var myviewer = WebMol.createViewer(element, config);
+ *      
+ */
+WebMol.createViewer = function(element, config)
+{
+    if($.type(element) === "string")
+        element = $("#"+element);
+    if(!element) return;
 
-        config = config || {};
-        if(!config.order)
-            config.order = ["glmol","jmol"];
-        if(!config.defaultcolors)
-            config.defaultcolors = WebMol.defaultElementColors;
+    config = config || {};
+    if(!config['order'])
+        config['order'] = ["glmol","jmol"];
+    if(!config['defaultcolors'])
+        config['defaultcolors'] = WebMol.defaultElementColors;
 
-        //try to create the appropriate viewer
-        for(var i = 0; i < config.order.length; i++) {
-            var kind = config.order[i];
-            var fname =kind+"Viewer";
+    //try to create the appropriate viewer
+    for(var i = 0; i < config.order.length; i++) {
+        var kind = config.order[i];
+        var fname =kind+"Viewer";
 
-            if(typeof(this[fname]) === "function")
-            {
-                try {
-                    return new this[fname](element, config.callback, config.defaultcolors);
-                }
-                catch(e) {
-                    console.log("error with "+kind+":"+e);
-                }
+        if(typeof(this[fname]) === "function")
+        {
+            try {
+                return new this[fname](element, config.callback, config.defaultcolors);
+            }
+            catch(e) {
+                console.log("error with "+kind+":"+e);
             }
         }
-        alert("Unable to instantiate webmol viewer: "+config.order);
-        return null;
-    },
-
-    /**
-     * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
-     * 
-     * @function WebMol.download
-     * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
-     * @param {Object} viewer Add new model to existing viewer
-     * @example
-     * var myviewer = WebMol.createViewer(gldiv);
-     * 
-     * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
-     * var m = WebMol.download('pdb: 2POR', myviewer);
-     * 
-     * @returns {WebMol.GLModel} GLModel
-     */    
-    download : function(query, viewer) {
-        var baseURL = '';
-        var type = "";
-        var m = null;
-        if (query.substr(0, 4) === 'pdb:') {
-            type = "pdb";
-            query = query.substr(4).toUpperCase();
-            if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
-               alert("Wrong PDB ID"); return;
-            }
-            uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
-        } else if (query.substr(0, 4) == 'cid:') {
-            type = "sdf";
-            query = query.substr(4);
-            if (!query.match(/^[1-9]+$/)) {
-               alert("Wrong Compound ID"); return;
-            }
-            uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
-              "/SDF?record_type=3d";
-        }
-
-       $.get(uri, function(ret) {
-          viewer.addModel(ret, type);
-          viewer.zoomTo();
-          viewer.render();                            
-       });
-       
-       return m;
     }
-       
+    alert("Unable to instantiate webmol viewer: "+config.order);
+    return null;
+},
 
+/**
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function WebMol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {Object} viewer Add new model to existing viewer
+ * @example
+ * var myviewer = WebMol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * var m = WebMol.download('pdb: 2POR', myviewer);
+ * 
+ * @returns {WebMol.GLModel} GLModel
+ */    
+WebMol.download = function(query, viewer) {
+    var baseURL = '';
+    var type = "";
+    var m = null;
+    if (query.substr(0, 4) === 'pdb:') {
+        type = "pdb";
+        query = query.substr(4).toUpperCase();
+        if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+           alert("Wrong PDB ID"); return;
+        }
+        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+    } else if (query.substr(0, 4) == 'cid:') {
+        type = "sdf";
+        query = query.substr(4);
+        if (!query.match(/^[1-9]+$/)) {
+           alert("Wrong Compound ID"); return;
+        }
+        uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+          "/SDF?record_type=3d";
+    }
+
+   $.get(uri, function(ret) {
+      viewer.addModel(ret, type);
+      viewer.zoomTo();
+      viewer.render();                            
+   });
+   
+   return m;
 };
+       
 
 WebMol.SurfaceType = {
     VDW : 1,
