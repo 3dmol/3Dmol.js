@@ -58,12 +58,12 @@ module.exports = function(grunt) {
             },
             
             big : {
-                src : ['js/jquery-1.11.1.min.js', 'build/webGL-pre.js', 'build/webmol-pre.js'],
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-pre.js', 'build/webGL-pre.js'],
                 dest : 'build/webmol.js'
             },
             
             min : {
-                src : ['js/jquery-1.11.1.min.js', 'build/webGL-min-pre.js', 'build/webmol-min-pre.js'],
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-pre.js', 'build/webGL-min-pre.js'],
                 dest : 'build/webmol-min.js'
             },
             
@@ -94,7 +94,7 @@ module.exports = function(grunt) {
                 jsOutputFile : 'build/webmol-min-closure-pre.js',
                 noreport : true,
                 options : {
-                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
+                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5',
                     'externs': 'externs/externs.js'

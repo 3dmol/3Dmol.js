@@ -133,7 +133,7 @@ WebMol.SurfaceType = {
 };
 
 // in an attempt to reduce memory overhead, cache all WebMol.Colors
-//this makes things a little faster
+// this makes things a little faster
 WebMol.CC = {
     cache : {},
     color : function(hex) {

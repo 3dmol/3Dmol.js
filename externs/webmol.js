@@ -48,8 +48,3 @@ ViewerSpec.defaultcolors = {};
  * @param {WebMol.GLViewer} viewer
  */
 ViewerSpec.callback = function(viewer) {};
-
-
-//WebGL functionality
-WebMol.Camera = function(fov, aspect, near, far) {};
-WebMol.Camera.prototype.lookAt = function(vector){};
