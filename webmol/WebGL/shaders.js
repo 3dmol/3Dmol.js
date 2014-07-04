@@ -32,7 +32,7 @@ WebMol.ShaderUtils = {
 };
 
 WebMol.ShaderLib = { 
-    basic : {
+    'basic' : {
         fragmentShader : [
 "uniform mat4 viewMatrix;",
 "uniform vec3 cameraPosition;",
@@ -93,7 +93,7 @@ WebMol.ShaderLib = {
     },
     
     
-    lambert : { 
+    'lambert' : { 
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
@@ -189,7 +189,7 @@ WebMol.ShaderLib = {
     },
     
     
-    sprite: {
+    'sprite': {
         
         fragmentShader: [
                                                          

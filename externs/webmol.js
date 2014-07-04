@@ -1,18 +1,30 @@
 
 var WebMol = {};
 
+/** Object with x, y, and z properties
+ * @typedef {{x:number, y:number, z:number}} */
+var vectorlike;
+
 /**
  * 
- * @param {Object} element
+ * @param {string | Object} element
  * @param {ViewerSpec} config
  */
 WebMol.createViewer = function(element, config) {};
 /**
- * 
  * @param {Object} query
- * @param {Object} viewer
+ * @param {WebMol.GLViewer} viewer
  */
 WebMol.download = function(query, viewer) {};
+
+/**
+ * @constructor
+ * @param {...number} color
+ */
+WebMol.Color = function(color) {};
+WebMol.Color.r;
+WebMol.Color.g;
+WebMol.Color.b;
 
 //Viewer
 // The constructor
@@ -35,16 +47,18 @@ WebMol.JmolElementColors = {};
 WebMol.rasmolElementColors = {};
 
 
-//Specification arguments
-
-//Viewer spec - for WebMol.createViewer
-
-var ViewerSpec = {};
-ViewerSpec.order = [];
-ViewerSpec.defaultcolors = {};
+//Specification arguments 
+//TODO: flesh out the annotations
 
 /**
- * Input specification argument for WebMol.createViewer
- * @param {WebMol.GLViewer} viewer
+ * 
+ * @constructor
+ * @struct
  */
-ViewerSpec.callback = function(viewer) {};
+var ViewerSpec = {};
+ViewerSpec.order;
+ViewerSpec.defaultcolors;
+/** @type {function(WebMol.GLViewer)} */
+ViewerSpec.callback;
+
+

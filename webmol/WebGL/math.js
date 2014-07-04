@@ -1109,8 +1109,6 @@ WebMol.Ray.prototype = {
        
     },
     
-    
-    
     applyMatrix4 : function(matrix4) {
        
        this.direction.add(this.origin).applyMatrix4(matrix4);

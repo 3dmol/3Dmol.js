@@ -53,7 +53,7 @@ module.exports = function(grunt) {
             
             webGL : {
                 src : ['webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
-                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js'],
+                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', '!webmol/WebGL/renderer.js', '!webmol/WebGL/extras.js'],
                 dest : 'build/webGL-pre.js'
             },
             
@@ -68,7 +68,13 @@ module.exports = function(grunt) {
             },
             
             closure : {
-                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-closure-pre.js', 'build/webGL-min-pre.js',],
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-closure-pre.js', 'build/webGL-min-pre.js'],
+                dest : 'build/webmol-min-closure.js'
+            },
+            
+            test : {
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-pre.js', 'build/webgl-min-closure-pre.js', 'webmol/WebGL/renderer.js', 
+                       'webmol/WebGL/extras.js'],
                 dest : 'build/webmol-min-closure.js'
             }
         },
@@ -94,12 +100,24 @@ module.exports = function(grunt) {
                 jsOutputFile : 'build/webmol-min-closure-pre.js',
                 noreport : true,
                 options : {
-                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
+                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5',
-                    'externs': 'externs/externs.js'
+                    'externs': 'externs/webmol.js'
                 }
-            }
+            },
+            webgl : {
+                closurePath : 'lib/closure_compiler',
+                js : ['build/webGL-pre.js'],
+                jsOutputFile : 'build/webgl-min-closure-pre.js',
+                //noreport : true,
+                options : {
+                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
+                    'warning_level': 'DEFAULT',
+                    'language_in': 'ECMASCRIPT5',
+                    'externs': ['externs/webGL.js', 'externs/webmol.js']
+                }
+            }            
         }   
         
     });
@@ -108,7 +126,9 @@ module.exports = function(grunt) {
     grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL']);
     grunt.registerTask('concat_build', ['concat:big', 'concat:min', 'concat:closure']);
     
-    grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'uglify', 'closure-compiler', 'concat_build', 'clean:tmp']);
+    grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler:webgl', 'concat:test']);
+    
+    grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'uglify', 'closure-compiler:build', 'concat_build', 'clean:tmp']);
     
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-jshint');

@@ -1,0 +1,657 @@
+build\webGL-pre.js:31: WARNING - dangerous use of the global this object
+    this.x = x || 0;
+    ^
+
+build\webGL-pre.js:32: WARNING - dangerous use of the global this object
+    this.y = y || 0;
+    ^
+
+build\webGL-pre.js:33: WARNING - dangerous use of the global this object
+    this.z = z || 0;
+    ^
+
+build\webGL-pre.js:34: WARNING - dangerous use of the global this object
+    this.w = (w !== undefined) ? w : 1;
+    ^
+
+build\webGL-pre.js:124: WARNING - dangerous use of the global this object
+    this.x = x || 0.0;
+    ^
+
+build\webGL-pre.js:125: WARNING - dangerous use of the global this object
+    this.y = y || 0.0;
+    ^
+
+build\webGL-pre.js:166: WARNING - dangerous use of the global this object
+    this.x = x || 0.0;
+    ^
+
+build\webGL-pre.js:167: WARNING - dangerous use of the global this object
+    this.y = y || 0.0;
+    ^
+
+build\webGL-pre.js:168: WARNING - dangerous use of the global this object
+    this.z = z || 0.0;
+    ^
+
+build\webGL-pre.js:424: WARNING - dangerous use of the global this object
+    this.elements = new Float32Array(9);
+    ^
+
+build\webGL-pre.js:426: WARNING - dangerous use of the global this object
+    this.set(
+    ^
+
+build\webGL-pre.js:551: WARNING - dangerous use of the global this object
+    var te = this.elements = new Float32Array( 16 );
+             ^
+
+build\webGL-pre.js:982: WARNING - dangerous use of the global this object
+    this.origin = (origin !== undefined) ? 
+    ^
+
+build\webGL-pre.js:985: WARNING - dangerous use of the global this object
+    this.direction = (direction !== undefined) ?
+    ^
+
+build\webGL-pre.js:1143: WARNING - dangerous use of the global this object
+    this.center = (center !== undefined) ? 
+    ^
+
+build\webGL-pre.js:1146: WARNING - dangerous use of the global this object
+    this.radius = (radius !== undefined) ?
+    ^
+
+build\webGL-pre.js:1208: WARNING - dangerous use of the global this object
+    this.c1 = (c1 !== undefined) ?
+    ^
+
+build\webGL-pre.js:1211: WARNING - dangerous use of the global this object
+    this.c2 = (c2 !== undefined) ?
+    ^
+
+build\webGL-pre.js:1214: WARNING - dangerous use of the global this object
+    this.direction = new WebMol.Vector3().subVectors(this.c2, this.c1).normalize();
+    ^
+
+build\webGL-pre.js:1214: WARNING - dangerous use of the global this object
+    this.direction = new WebMol.Vector3().subVectors(this.c2, this.c1).normalize();
+                                                     ^
+
+build\webGL-pre.js:1214: WARNING - dangerous use of the global this object
+    this.direction = new WebMol.Vector3().subVectors(this.c2, this.c1).normalize();
+                                                              ^
+
+build\webGL-pre.js:1216: WARNING - dangerous use of the global this object
+    this.radius = (radius !== undefined) ?
+    ^
+
+build\webGL-pre.js:1264: WARNING - dangerous use of the global this object
+    this.a = (a !== undefined) ?
+    ^
+
+build\webGL-pre.js:1267: WARNING - dangerous use of the global this object
+    this.b = (b !== undefined) ?
+    ^
+
+build\webGL-pre.js:1270: WARNING - dangerous use of the global this object
+    this.c = (c !== undefined) ?
+    ^
+
+build\webGL-pre.js:1333: WARNING - dangerous use of the global this object
+    this.addEventListener = function(type, listener) {
+    ^
+
+build\webGL-pre.js:1341: WARNING - dangerous use of the global this object
+    this.removeEventListener = function(type, listener) {
+    ^
+
+build\webGL-pre.js:1350: WARNING - dangerous use of the global this object
+    this.dispatchEvent = function(event) {
+    ^
+
+build\webGL-pre.js:1370: WARNING - dangerous use of the global this object
+    this.id = WebMol.Object3DIDCount++;
+    ^
+
+build\webGL-pre.js:1372: WARNING - dangerous use of the global this object
+    this.name = "";
+    ^
+
+build\webGL-pre.js:1374: WARNING - dangerous use of the global this object
+    this.parent = undefined;
+    ^
+
+build\webGL-pre.js:1375: WARNING - dangerous use of the global this object
+    this.children = [];
+    ^
+
+build\webGL-pre.js:1377: WARNING - dangerous use of the global this object
+    this.position = new WebMol.Vector3();
+    ^
+
+build\webGL-pre.js:1378: WARNING - dangerous use of the global this object
+    this.rotation = new WebMol.Vector3();
+    ^
+
+build\webGL-pre.js:1379: WARNING - dangerous use of the global this object
+    this.matrix = new WebMol.Matrix4();
+    ^
+
+build\webGL-pre.js:1380: WARNING - dangerous use of the global this object
+    this.matrixWorld = new WebMol.Matrix4();
+    ^
+
+build\webGL-pre.js:1381: WARNING - dangerous use of the global this object
+    this.quaternion = new WebMol.Quaternion();
+    ^
+
+build\webGL-pre.js:1382: WARNING - dangerous use of the global this object
+    this.eulerOrder = 'XYZ';
+    ^
+
+build\webGL-pre.js:1384: WARNING - dangerous use of the global this object
+    this.up = new WebMol.Vector3(0, 1, 0);
+    ^
+
+build\webGL-pre.js:1385: WARNING - dangerous use of the global this object
+    this.scale = new WebMol.Vector3(1, 1, 1);
+    ^
+
+build\webGL-pre.js:1387: WARNING - dangerous use of the global this object
+    this.matrixAutoUpdate = true;
+    ^
+
+build\webGL-pre.js:1388: WARNING - dangerous use of the global this object
+    this.matrixWorldNeedsUpdate = true;
+    ^
+
+build\webGL-pre.js:1389: WARNING - dangerous use of the global this object
+    this.rotationAutoUpdate = true;
+    ^
+
+build\webGL-pre.js:1390: WARNING - dangerous use of the global this object
+    this.useQuaternion = false;
+    ^
+
+build\webGL-pre.js:1392: WARNING - dangerous use of the global this object
+    this.visible = true;
+    ^
+
+build\webGL-pre.js:1803: WARNING - dangerous use of the global this object
+        for (var g in this.geometryGroups)
+                      ^
+
+build\webGL-pre.js:1804: WARNING - dangerous use of the global this object
+            vertices += this.geometryGroups[g].vertices;
+                        ^
+
+build\webGL-pre.js:2110: WARNING - dangerous use of the global this object
+    this.projectVector = function ( vector, camera ) {
+    ^
+
+build\webGL-pre.js:2120: WARNING - dangerous use of the global this object
+    this.unprojectVector = function ( vector, camera ) {
+    ^
+
+build\webGL-pre.js:2139: WARNING - dangerous use of the global this object
+    this.fov = fov !== undefined ? fov : 50;
+    ^
+
+build\webGL-pre.js:2140: WARNING - dangerous use of the global this object
+    this.aspect = aspect !== undefined ? aspect : 1;
+    ^
+
+build\webGL-pre.js:2141: WARNING - dangerous use of the global this object
+    this.near = near !== undefined ? near : 0.1;
+    ^
+
+build\webGL-pre.js:2142: WARNING - dangerous use of the global this object
+    this.far = far !== undefined ? far : 2000;
+    ^
+
+build\webGL-pre.js:2144: WARNING - dangerous use of the global this object
+    this.projectionMatrix = new WebMol.Matrix4();
+    ^
+
+build\webGL-pre.js:2145: WARNING - dangerous use of the global this object
+    this.projectionMatrixInverse = new WebMol.Matrix4();
+    ^
+
+build\webGL-pre.js:2146: WARNING - dangerous use of the global this object
+    this.matrixWorldInverse = new WebMol.Matrix4();
+    ^
+
+build\webGL-pre.js:2148: WARNING - dangerous use of the global this object
+    this.updateProjectionMatrix();
+    ^
+
+build\webGL-pre.js:2187: WARNING - dangerous use of the global this object
+    this.color = new WebMol.Color(hex);
+    ^
+
+build\webGL-pre.js:2188: WARNING - dangerous use of the global this object
+    this.position = new WebMol.Vector3( 0, 1, 0 );
+    ^
+
+build\webGL-pre.js:2189: WARNING - dangerous use of the global this object
+    this.target = new WebMol.Object3D();
+    ^
+
+build\webGL-pre.js:2191: WARNING - dangerous use of the global this object
+    this.intensity = ( intensity !== undefined ) ? intensity : 1;
+    ^
+
+build\webGL-pre.js:2193: WARNING - dangerous use of the global this object
+    this.castShadow = false;
+    ^
+
+build\webGL-pre.js:2194: WARNING - dangerous use of the global this object
+    this.onlyShadow = false;
+    ^
+
+build\webGL-pre.js:2209: WARNING - dangerous use of the global this object
+    this.id = WebMol.MaterialIdCount ++;
+    ^
+
+build\webGL-pre.js:2211: WARNING - dangerous use of the global this object
+    this.name = '';
+    ^
+
+build\webGL-pre.js:2214: WARNING - dangerous use of the global this object
+    this.side = WebMol.FrontSide;
+    ^
+
+build\webGL-pre.js:2216: WARNING - dangerous use of the global this object
+    this.opacity = 1;
+    ^
+
+build\webGL-pre.js:2217: WARNING - dangerous use of the global this object
+    this.transparent = false;
+    ^
+
+build\webGL-pre.js:2219: WARNING - dangerous use of the global this object
+    this.blending = WebMol.NormalBlending;
+    ^
+
+build\webGL-pre.js:2221: WARNING - dangerous use of the global this object
+    this.depthTest = true;
+    ^
+
+build\webGL-pre.js:2222: WARNING - dangerous use of the global this object
+    this.depthWrite = true;
+    ^
+
+build\webGL-pre.js:2224: WARNING - dangerous use of the global this object
+    this.polygonOffset = false;
+    ^
+
+build\webGL-pre.js:2225: WARNING - dangerous use of the global this object
+    this.polygonOffsetFactor = 0;
+    ^
+
+build\webGL-pre.js:2226: WARNING - dangerous use of the global this object
+    this.polygonOffsetUnits = 0;
+    ^
+
+build\webGL-pre.js:2228: WARNING - dangerous use of the global this object
+    this.alphaTest = 0;
+    ^
+
+build\webGL-pre.js:2230: WARNING - dangerous use of the global this object
+    this.visible = true;
+    ^
+
+build\webGL-pre.js:2232: WARNING - dangerous use of the global this object
+    this.needsUpdate = true;
+    ^
+
+build\webGL-pre.js:2324: WARNING - dangerous use of the global this object
+    this.color = new WebMol.Color(0xffffff);
+    ^
+
+build\webGL-pre.js:2326: WARNING - dangerous use of the global this object
+    this.linewidth = 1;
+    ^
+
+build\webGL-pre.js:2327: WARNING - dangerous use of the global this object
+    this.linecap = 'round';
+    ^
+
+build\webGL-pre.js:2328: WARNING - dangerous use of the global this object
+    this.linejoin = 'round';
+    ^
+
+build\webGL-pre.js:2330: WARNING - dangerous use of the global this object
+    this.vertexColors = false;
+    ^
+
+build\webGL-pre.js:2332: WARNING - dangerous use of the global this object
+    this.fog = true;
+    ^
+
+build\webGL-pre.js:2334: WARNING - dangerous use of the global this object
+    this.setValues(parameters);
+    ^
+
+build\webGL-pre.js:2356: WARNING - dangerous use of the global this object
+    this.color = new WebMol.Color(0xffffff);
+    ^
+
+build\webGL-pre.js:2357: WARNING - dangerous use of the global this object
+    this.ambient = new WebMol.Color(0xfffff);
+    ^
+
+build\webGL-pre.js:2358: WARNING - dangerous use of the global this object
+    this.emissive = new WebMol.Color(0x000000);
+    ^
+
+build\webGL-pre.js:2361: WARNING - dangerous use of the global this object
+    this.wrapAround = false;
+    ^
+
+build\webGL-pre.js:2362: WARNING - dangerous use of the global this object
+    this.wrapRGB = new WebMol.Vector3(1,1,1);
+    ^
+
+build\webGL-pre.js:2364: WARNING - dangerous use of the global this object
+    this.map = null;
+    ^
+
+build\webGL-pre.js:2366: WARNING - dangerous use of the global this object
+    this.lightMap = null;
+    ^
+
+build\webGL-pre.js:2368: WARNING - dangerous use of the global this object
+    this.specularMap = null;
+    ^
+
+build\webGL-pre.js:2370: WARNING - dangerous use of the global this object
+    this.envMap = null;
+    ^
+
+build\webGL-pre.js:2371: WARNING - dangerous use of the global this object
+    this.reflectivity = 1;
+    ^
+
+build\webGL-pre.js:2372: WARNING - dangerous use of the global this object
+    this.refractionRatio = 0.98;
+    ^
+
+build\webGL-pre.js:2374: WARNING - dangerous use of the global this object
+    this.fog = true;
+    ^
+
+build\webGL-pre.js:2376: WARNING - dangerous use of the global this object
+    this.wireframe = false;
+    ^
+
+build\webGL-pre.js:2377: WARNING - dangerous use of the global this object
+    this.wireframeLinewidth = 1;
+    ^
+
+build\webGL-pre.js:2378: WARNING - dangerous use of the global this object
+    this.wireframeLinecap = 'round';
+    ^
+
+build\webGL-pre.js:2379: WARNING - dangerous use of the global this object
+    this.wireframeLinejoin = 'round';
+    ^
+
+build\webGL-pre.js:2381: WARNING - dangerous use of the global this object
+    this.shading = WebMol.SmoothShading;
+    ^
+
+build\webGL-pre.js:2383: WARNING - dangerous use of the global this object
+    this.vertexColors = WebMol.NoColors;
+    ^
+
+build\webGL-pre.js:2385: WARNING - dangerous use of the global this object
+    this.skinning = false;
+    ^
+
+build\webGL-pre.js:2387: WARNING - dangerous use of the global this object
+    this.setValues(parameters);
+    ^
+
+build\webGL-pre.js:2437: WARNING - dangerous use of the global this object
+    this.color = new WebMol.Color(0xffffff);
+    ^
+
+build\webGL-pre.js:2438: WARNING - dangerous use of the global this object
+    this.map = new WebMol.Texture();
+    ^
+
+build\webGL-pre.js:2440: WARNING - dangerous use of the global this object
+    this.useScreenCoordinates = true;
+    ^
+
+build\webGL-pre.js:2441: WARNING - dangerous use of the global this object
+    this.depthTest = !this.useScreenCoordinates;
+    ^
+
+build\webGL-pre.js:2441: WARNING - dangerous use of the global this object
+    this.depthTest = !this.useScreenCoordinates;
+                      ^
+
+build\webGL-pre.js:2442: WARNING - dangerous use of the global this object
+    this.sizeAttenuation = !this.useScreenCoordinates;
+    ^
+
+build\webGL-pre.js:2442: WARNING - dangerous use of the global this object
+    this.sizeAttenuation = !this.useScreenCoordinates;
+                            ^
+
+build\webGL-pre.js:2443: WARNING - dangerous use of the global this object
+    this.scaleByViewPort = !this.sizeAttenuation;
+    ^
+
+build\webGL-pre.js:2443: WARNING - dangerous use of the global this object
+    this.scaleByViewPort = !this.sizeAttenuation;
+                            ^
+
+build\webGL-pre.js:2444: WARNING - dangerous use of the global this object
+    this.alignment = WebMol.SpriteAlignment.center.clone();
+    ^
+
+build\webGL-pre.js:2446: WARNING - dangerous use of the global this object
+    this.fog = false; // use scene fog
+    ^
+
+build\webGL-pre.js:2448: WARNING - dangerous use of the global this object
+    this.uvOffset = new WebMol.Vector2(0, 0);
+    ^
+
+build\webGL-pre.js:2449: WARNING - dangerous use of the global this object
+    this.uvScale = new WebMol.Vector2(1, 1);
+    ^
+
+build\webGL-pre.js:2451: WARNING - dangerous use of the global this object
+    this.setValues(parameters);
+    ^
+
+build\webGL-pre.js:2456: WARNING - dangerous use of the global this object
+        this.depthTest = !this.useScreenCoordinates;
+        ^
+
+build\webGL-pre.js:2456: WARNING - dangerous use of the global this object
+        this.depthTest = !this.useScreenCoordinates;
+                          ^
+
+build\webGL-pre.js:2458: WARNING - dangerous use of the global this object
+        this.sizeAttenuation = !this.useScreenCoordinates;
+        ^
+
+build\webGL-pre.js:2458: WARNING - dangerous use of the global this object
+        this.sizeAttenuation = !this.useScreenCoordinates;
+                                ^
+
+build\webGL-pre.js:2460: WARNING - dangerous use of the global this object
+        this.scaleByViewPort = !this.sizeAttenuation;
+        ^
+
+build\webGL-pre.js:2460: WARNING - dangerous use of the global this object
+        this.scaleByViewPort = !this.sizeAttenuation;
+                                ^
+
+build\webGL-pre.js:2507: WARNING - dangerous use of the global this object
+    this.id = WebMol.TextureIdCount++;
+    ^
+
+build\webGL-pre.js:2509: WARNING - dangerous use of the global this object
+    this.name = "";
+    ^
+
+build\webGL-pre.js:2511: WARNING - dangerous use of the global this object
+    this.image = image;
+    ^
+
+build\webGL-pre.js:2512: WARNING - dangerous use of the global this object
+    this.mipmaps = [];
+    ^
+
+build\webGL-pre.js:2514: WARNING - dangerous use of the global this object
+    this.mapping = new WebMol.UVMapping();
+    ^
+
+build\webGL-pre.js:2516: WARNING - dangerous use of the global this object
+    this.wrapS = WebMol.ClampToEdgeWrapping;
+    ^
+
+build\webGL-pre.js:2517: WARNING - dangerous use of the global this object
+    this.wrapT = WebMol.ClampToEdgeWrapping;
+    ^
+
+build\webGL-pre.js:2519: WARNING - dangerous use of the global this object
+    this.magFilter = WebMol.LinearFilter;
+    ^
+
+build\webGL-pre.js:2520: WARNING - dangerous use of the global this object
+    this.minFilter = WebMol.LinearMipMapLinearFilter;
+    ^
+
+build\webGL-pre.js:2522: WARNING - dangerous use of the global this object
+    this.anisotropy = 1;
+    ^
+
+build\webGL-pre.js:2524: WARNING - dangerous use of the global this object
+    this.format = WebMol.RGBAFormat;
+    ^
+
+build\webGL-pre.js:2525: WARNING - dangerous use of the global this object
+    this.type = WebMol.UnsignedByteType;
+    ^
+
+build\webGL-pre.js:2527: WARNING - dangerous use of the global this object
+    this.offset = new WebMol.Vector2(0, 0);
+    ^
+
+build\webGL-pre.js:2528: WARNING - dangerous use of the global this object
+    this.repeat = new WebMol.Vector2(1, 1);
+    ^
+
+build\webGL-pre.js:2530: WARNING - dangerous use of the global this object
+    this.generateMipmaps = true;
+    ^
+
+build\webGL-pre.js:2531: WARNING - dangerous use of the global this object
+    this.premultiplyAlpha = false;
+    ^
+
+build\webGL-pre.js:2532: WARNING - dangerous use of the global this object
+    this.flipY = true;
+    ^
+
+build\webGL-pre.js:2533: WARNING - dangerous use of the global this object
+    this.unpackAlignment = 4;
+    ^
+
+build\webGL-pre.js:2535: WARNING - dangerous use of the global this object
+    this.needsUpdate = false;
+    ^
+
+build\webGL-pre.js:2536: WARNING - dangerous use of the global this object
+    this.onUpdate = null;
+    ^
+
+build\webGL-pre.js:2599: WARNING - dangerous use of the global this object
+    this.geometry = geometry;
+    ^
+
+build\webGL-pre.js:2601: WARNING - dangerous use of the global this object
+    this.material = (material !== undefined) ? material : new WebMol.LineBasicMaterial( { color: Math.random() * 0xffffff } );
+    ^
+
+build\webGL-pre.js:2602: WARNING - dangerous use of the global this object
+    this.type = (type !== undefined) ? type : WebMol.LineStrip;
+    ^
+
+build\webGL-pre.js:2628: WARNING - dangerous use of the global this object
+    this.geometry = geometry;
+    ^
+
+build\webGL-pre.js:2629: WARNING - dangerous use of the global this object
+    this.material = (material !== undefined) ? material : new WebMol.MeshBasicMaterial( { color: Math.random() * 0xffffff, wireframe: true } );
+    ^
+
+build\webGL-pre.js:2652: WARNING - dangerous use of the global this object
+    this.material = (material !== undefined) ? material : new WebMol.SpriteMaterial();
+    ^
+
+build\webGL-pre.js:2654: WARNING - dangerous use of the global this object
+    this.rotation3d = this.rotation;
+    ^
+
+build\webGL-pre.js:2654: WARNING - dangerous use of the global this object
+    this.rotation3d = this.rotation;
+                      ^
+
+build\webGL-pre.js:2655: WARNING - dangerous use of the global this object
+    this.rotation = 0;
+    ^
+
+build\webGL-pre.js:2693: WARNING - dangerous use of the global this object
+    this.fog = null;
+    ^
+
+build\webGL-pre.js:2696: WARNING - dangerous use of the global this object
+    this.overrideMaterial = null;
+    ^
+
+build\webGL-pre.js:2698: WARNING - dangerous use of the global this object
+    this.matrixAutoUpdate = false;
+    ^
+
+build\webGL-pre.js:2700: WARNING - dangerous use of the global this object
+    this.__objects = [];
+    ^
+
+build\webGL-pre.js:2701: WARNING - dangerous use of the global this object
+    this.__lights = [];
+    ^
+
+build\webGL-pre.js:2703: WARNING - dangerous use of the global this object
+    this.__objectsAdded = [];
+    ^
+
+build\webGL-pre.js:2704: WARNING - dangerous use of the global this object
+    this.__objectsRemoved = [];
+    ^
+
+build\webGL-pre.js:2796: WARNING - dangerous use of the global this object
+    this.name = '';
+    ^
+
+build\webGL-pre.js:2798: WARNING - dangerous use of the global this object
+    this.color = new WebMol.Color( hex );
+    ^
+
+build\webGL-pre.js:2800: WARNING - dangerous use of the global this object
+    this.near = ( near !== undefined ) ? near : 1;
+    ^
+
+build\webGL-pre.js:2801: WARNING - dangerous use of the global this object
+    this.far = ( far !== undefined ) ? far : 1000;
+    ^
+
+0 error(s), 164 warning(s)
