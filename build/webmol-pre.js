@@ -5770,7 +5770,8 @@ WebMol.GLViewer = (function() {
 
         var camera = new WebMol.Camera(20, ASPECT, 1, 800);
         camera.position = new WebMol.Vector3(0, 0, CAMERA_Z);
-        camera.lookAt(new WebMol.Vector3(0, 0, 0));
+        var vec = new WebMol.Vector3();
+        camera.lookAt(vec);
         
         var raycaster = new WebMol.Raycaster(new WebMol.Vector3(0,0,0), new WebMol.Vector3(0,0,0));
         var projector = new WebMol.Projector();

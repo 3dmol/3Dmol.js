@@ -2,7 +2,7 @@
  * Simplified Perspective Camera
  */
 
-
+/** @constructor */
 WebMol.Camera = function(fov, aspect, near, far) {
     
     WebMol.Object3D.call(this);

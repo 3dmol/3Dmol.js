@@ -1,11 +1,9 @@
-/* 
- * Externs for WebGL functionality
- */
+
 
 /** @typeDef {(string|number)} */
 var numlike;
 
-//Math functions
+
 var WebMol = {};
 
 WebMol.Math = {};
@@ -381,26 +379,58 @@ WebMol.Sphere.prototype.set = function(center, radius) {};
  * @param {WebMol.Sphere} sphere
  * @return {WebMol.Sphere} */
 WebMol.Sphere.prototype.copy = function(sphere) {};
+/** 
+ * @param {WebMol.Matrix4} matrix
+ * @return {WebMol.Sphere} */
 WebMol.Sphere.prototype.applyMatrix4 = function(matrix) {};
+/** @return {WebMol.Sphere} */
 WebMol.Sphere.prototype.translate = function(offset) {};
+/**
+ * @param {WebMol.Sphere} sphere
+ * @returns {boolean}
+ */
 WebMol.Sphere.prototype.equals = function(sphere) {};
+/** @return {WebMol.Sphere} */
 WebMol.Sphere.prototype.clone = function() {};
 
-//Bounding cylinder for stick render  
+/**
+ * @constructor
+ * @param {WebMol.Vector3=} c1
+ * @param {WebMol.Vector3=} c2
+ * @param {number=} radius
+ */
 WebMol.Cylinder = function(c1, c2, radius) {};
+/** 
+ * @param {WebMol.Cylinder} cylinder
+ * @return {WebMol.Cylinder} */
 WebMol.Cylinder.prototype.copy = function(cylinder) {};
 WebMol.Cylinder.prototype.lengthSq = function() {};
+/** 
+ * @param {WebMol.Matrix4} matrix
+ * @return {WebMol.Cylinder} */
 WebMol.Cylinder.prototype.applyMatrix4 = function(matrix) {};
 
-//plane specified by three points
+/**
+ * @constructor 
+ * @param {WebMol.Vector3=} a
+ * @param {WebMol.Vector3=} b
+ * @param {WebMol.Vector3=} c
+ */
 WebMol.Triangle = function(a, b, c){};
+/**
+ * @param {WebMol.Triangle} triangle
+ * @returns {WebMol.Triangle}
+ */
 WebMol.Triangle.prototype.copy = function(triangle) {};
+/**
+ * @param {WebMol.Matrix4} matrix
+ * @return {WebMol.Triangle} */
 WebMol.Triangle.prototype.applyMatrix4 = function(matrix) {};
+/** @return {WebMol.Vector3} */
 WebMol.Triangle.prototype.getNormal = function() {};
 
 //Event Handling
 WebMol.EventDispatcher = function() {};
-
 
 //Object3D base constructor function
 /** @constructor */
@@ -459,6 +489,7 @@ WebMol.Geometry = function(mesh) {};
  * @param {number=} id
  */
 var geometryGroup = function(id) {};
+/** @return {WebMol.Vector3} */
 geometryGroup.prototype.getCentroid = function() {}; 
 geometryGroup.prototype.setNormals = function() {};
 geometryGroup.prototype.setLineIndices = function() {};
@@ -468,7 +499,7 @@ geometryGroup.prototype.truncateArrayBuffers = function() {};
 /** @return {geometryGroup} */
 WebMol.Geometry.prototype.addGeoGroup = function() {};
 /** 
- * @param {number} addVertices
+ * @param {number=} addVertices
  * @return {geometryGroup} */
 WebMol.Geometry.prototype.updateGeoGroup = function(addVertices) {};
 /**

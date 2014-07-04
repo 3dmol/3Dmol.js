@@ -1,9 +1,7 @@
-/* 
+/**
  * Line and Mesh material types
+ * @constructor
  */
-
-//Material base class
-
 WebMol.Material = function () {
 
     WebMol.EventDispatcher.call( this );
@@ -118,7 +116,7 @@ WebMol.Material.prototype.dispose = function () {
 WebMol.MaterialIdCount = 0;
 
 //Line basic material
-
+/** @constructor */
 WebMol.LineBasicMaterial = function(parameters) {
     
     WebMol.Material.call(this);
@@ -150,7 +148,7 @@ WebMol.LineBasicMaterial.prototype.clone = function() {
 };
 
 //Mesh Lambert material
-
+/** @constructor */
 WebMol.MeshLambertMaterial = function(parameters) {
     
     WebMol.Material.call(this);
@@ -232,6 +230,7 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
 
 
 //Sprite material
+/** @constructor */
 WebMol.SpriteMaterial = function(parameters) {
     
     WebMol.Material.call(this);
@@ -301,7 +300,7 @@ WebMol.SpriteAlignment.bottomRight = new WebMol.Vector2(-1, 1);
 
 //Texture
 //We really only create textures from 2d rendering contexts (to display text labels)
-
+/** @constructor */
 WebMol.Texture = function(image) {
 
     WebMol.EventDispatcher.call(this);

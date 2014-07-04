@@ -1,7 +1,7 @@
 /*
  * Scene class
  */
-
+/** @constructor */
 WebMol.Scene = function() {
     
     WebMol.Object3D.call(this);
@@ -106,7 +106,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
  * Fog Class
  */
 
-
+/** @constructor */
 WebMol.Fog = function ( hex, near, far ) {
 
     this.name = '';

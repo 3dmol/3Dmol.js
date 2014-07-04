@@ -1,5 +1,6 @@
-/* 
+/** 
  * WebMol Lighting
+ * @constructor
  */
 
 //TODO: Strip down this class - do I really use all of these instance variables?

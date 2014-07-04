@@ -1,4 +1,4 @@
-
+/** @namespace */
 var WebMol = {};
 
 /** Object with x, y, and z properties
