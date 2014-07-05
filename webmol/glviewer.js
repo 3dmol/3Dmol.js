@@ -176,18 +176,8 @@ WebMol.GLViewer = (function() {
                 [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
     };
         
-    // The constructor
-    /**
-     * WebGL WebMol viewer
-     * Note: The preferred method of instantiating a GLViewer is through {@link WebMol.createViewer} 
-     * 
-     * @constructor WebMol.GLViewer
-     * @param {Object} element HTML element within which to create viewer
-     * @param {Function} callback - Callback function to be immediately executed on this viewer
-     * @param {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
-     */
-    function GLViewer(element, callback, defaultcolors) {
 
+    function GLViewer(element, callback, defaultcolors) {
         // set variables
         var _viewer = this;
         var container = element;
@@ -199,7 +189,7 @@ WebMol.GLViewer = (function() {
 
         var WIDTH = container.width();
         var HEIGHT = container.height();
-        
+
         var spinner = $('<div class="glviewerSpinnerWrap" style = "position: absolute; width: 100%; height: 100%; display: table; z-index: 1;"><div class="glviewerSpinner" style="display: table-cell; text-align: center; vertical-align: middle; z-index:1"><img src="webmol/spinner.gif"></div></div>');
         $(element).append(spinner);
         spinner.hide();
@@ -223,7 +213,6 @@ WebMol.GLViewer = (function() {
         renderer.domElement.style.zIndex = "0";
         container.append(renderer.domElement);
         renderer.setSize(WIDTH, HEIGHT);
-
         var camera = new WebMol.Camera(20, ASPECT, 1, 800);
         camera.position = new WebMol.Vector3(0, 0, CAMERA_Z);
         var vec = new WebMol.Vector3();

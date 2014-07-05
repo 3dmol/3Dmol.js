@@ -82,6 +82,7 @@ WebMol.GLModel = (function() {
         return true;
     };
 
+    /** @param {Array.<AtomSpec>} atomsarray */
     var assignBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var atoms = atomsarray.slice(0);
@@ -118,6 +119,7 @@ WebMol.GLModel = (function() {
     
     // this is optimized for proteins where it is assumed connected
     // atoms are on the same or next residue
+    /** @param {Array.<AtomSpec>} atomsarray */
     var assignPDBBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var protatoms = [];
@@ -591,6 +593,12 @@ WebMol.GLModel = (function() {
     // parse pdb file from str and create atoms
     //if computeStruct is true will always perform secondary structure analysis,
     //otherwise only do analysis of SHEET/HELIX comments are missing
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     * @param {keepH=} boolean
+     * @param {computeStruct=} boolean
+     */
     var parsePDB = function(atoms, str, keepH, computeStruct) {
 
         var atoms_cnt = 0;
@@ -604,8 +612,8 @@ WebMol.GLModel = (function() {
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
-        lines = str.split("\n");
-        var i, j, k;
+        var lines = str.split("\n");
+        var i, j, k, line;
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
@@ -744,13 +752,6 @@ WebMol.GLModel = (function() {
         return true;
     };
 
-    /**
-     * GLModel represents a group of related atoms
-     * @constructor WebMol.GLModel
-     * @param {number} mid 
-     * @param {Object} defaultcolors Object defining default atom colors as atom => color property value pairs
-     * @see WebMol.download
-     */
     function GLModel(mid, defaultcolors) {
         // private variables
         var atoms = [];
@@ -1018,6 +1019,11 @@ WebMol.GLModel = (function() {
         };
         
         // cross drawing
+        /**
+         * 
+         * @param {AtomSpec} atom
+         * @param {Object.<numlike,WebMol.Geometry>} geos
+         */
         var drawAtomCross = function(atom, geos) {
             if (!atom.style.cross)
                 return;
@@ -1068,6 +1074,12 @@ WebMol.GLModel = (function() {
 
         // bonds - both atoms must match bond style
         // standardize on only drawing for lowest to highest
+        /**
+         * 
+         * @param {AtomSpec} atom
+         * @param {Array.<AtomSpec>} atoms
+         * @param {Object.<numlike, WebMol.Geometry>} geos
+         */
         var drawBondLines = function(atom, atoms, geos) {
             if (!atom.style.line)
                 return;
@@ -1080,9 +1092,9 @@ WebMol.GLModel = (function() {
 
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
+            /** @type {geometryGroup} */
             var geoGroup = geos[linewidth].updateGeoGroup(2*atom.bonds.length);
             
-
             for ( var i = 0; i < atom.bonds.length; i++) {
                 
                 var j = atom.bonds[i]; // our neighbor
@@ -1784,6 +1796,7 @@ WebMol.GLModel = (function() {
         // faster
         // at some point we should optimize this to avoid unnecessary
         // recalculation
+        /** @type {Array.<AtomSpec>} atoms */
         var createMolObj = function(atoms) {
 
             console.log("creating for "+id);
@@ -2161,10 +2174,6 @@ WebMol.GLModel = (function() {
         };
 
     }
-    
-    GLModel.prototype.testMethod = function() {
-          
-    };
 
     return GLModel;
     

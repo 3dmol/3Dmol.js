@@ -2,53 +2,15 @@
 //This defines the WebMol object which is used to create viewers
 //and configure system-wide settings
 
-//TODO: automated build system.  (doc gen system, too?)
-
-//the presence of jquery is assumed
-/** 
- * WebMol global namespace
- * 
- * @namespace
- * 
- * @property JmolElementColors - Jmol style atom colors (default color scheme)
- * @property rasmolElementColors - Rasmol style atom colors
- */
-var WebMol = (function(window) {
-
-    var my = {};
-    var $ = window['jQuery'];
-    //window['WebMol'] = my;
+WebMol = (function(window) {
+    
+    var my = window['WebMol'] || {};
+    //var $ = window['jQuery'];
         
     return my;
 
 })(window);
     
-/**
- * Create and initialize an appropriate viewer at supplied HTML element using specification in config
- * @function WebMol.createViewer
- * @param {Object | string} element Either HTML element or string identifier
- * @param {Object} config Viewer specification
- * @returns {WebMol.GLViewer} GLViewer
- * 
- * @example
- * // Assume there exists an HTML div with id "gldiv"
- * var element = $("#gldiv");
- * 
- * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: WebMol.rasmolElementColors,
- *               callback : function(viewer) {
- *                            //'data' is a string containing molecule data in pdb format  
- *                            viewer.addModel(data, "pdb");
- *                            viewer.zoomTo();
- *                            viewer.render();
- *                          }  
- *                        
- *               };
- * 
- * // Create GLViewer within 'gldiv' and execute callback
- * var myviewer = WebMol.createViewer(element, config);
- *      
- */
 WebMol.createViewer = function(element, config)
 {
     if($.type(element) === "string")
@@ -146,60 +108,6 @@ WebMol.CC = {
             return c;
         }
     }
-};
-
-WebMol.Color = function( color ){
-    
-    if ( arguments.length > 1) {
-            this.r = arguments[0] || 0.0;
-            this.g = arguments[1] || 0.0;
-            this.b = arguments[2] || 0.0;
-
-            return this;
-    }
-    
-    return this.set(color);
-                
-};
-
-WebMol.Color.prototype = {
-    
-    constructor: WebMol.Color,
-    
-    r: 0.0, g: 0.0, b: 0.0,
-    
-    set : function(val) {
-        
-            if (val instanceof WebMol.Color) 
-                return val.clone();
-
-            else if (typeof val === 'number')
-                this.setHex(val);
-    },
-    
-    setHex: function(hex) {
-        
-            hex = Math.floor(hex);
-
-            this.r = (hex >> 16 & 255) / 255;
-            this.g = (hex >> 8 & 255) / 255;
-            this.b = (hex & 255) / 255;                                                                                     
-        
-            return this;
-    },
-    
-    clone : function() {
-            return new WebMol.Color(this.r, this.g, this.b);
-    },
-        
-    copy : function(color) {
-        this.r = color.r;
-        this.g = color.g;
-        this.b = color.b;
-        
-        return this;
-    }
-    
 };
 
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
@@ -1837,107 +1745,106 @@ $(document).ready(function() {
     }
 });
     
-var WebMol = WebMol || {};
 WebMol.defaultElementColor = 0xff1493;
 
 WebMol.JmolElementColors = {
-		H: 0xFFFFFF,
-		He: 0xD9FFFF,
-		HE: 0xD9FFFF,
-		Li: 0xCC80FF,
-		LI: 0xCC80FF,
-		B: 0xFFB5B5,
-		C: 0x909090,
-		N: 0x3050F8,
-		O: 0xFF0D0D,
-		F: 0x90E050,
-		Na: 0xAB5CF2,
-		NA: 0xAB5CF2,
-		Mg: 0x8AFF00,
-		MG: 0x8AFF00,
-		Al: 0xBFA6A6,
-		AL: 0xBFA6A6,
-		Si: 0xF0C8A0,
-		SI: 0xF0C8A0,
-		P: 0xFF8000,
-		S: 0xFFFF30,
-		Cl: 0x1FF01F,
-		CL: 0x1FF01F,
-		Ca: 0x3DFF00,
-		CA: 0x3DFF00,
-		Ti: 0xBFC2C7,
-		TI: 0xBFC2C7,
-		Cr: 0x8A99C7,
-		CR: 0x8A99C7,
-		Mn: 0x9C7AC7,
-		MN: 0x9C7AC7,
-		Fe: 0xE06633,
-		FE: 0xE06633,
-		Ni: 0x50D050,
-		NI: 0x50D050,
-		Cu: 0xC88033,
-		CU: 0xC88033,
-		Zn: 0x7D80B0,
-		ZN: 0x7D80B0,
-		Br: 0xA62929,
-		BR: 0xA62929,
-		Ag: 0xC0C0C0,
-		AG: 0xC0C0C0,
-		I: 0x940094,
-		Ba: 0x00C900,
-		BA: 0x00C900,
-		Au: 0xFFD123,
-		AU: 0xFFD123
+		'H': 0xFFFFFF,
+		'He': 0xD9FFFF,
+		'HE': 0xD9FFFF,
+		'Li': 0xCC80FF,
+		'LI': 0xCC80FF,
+		'B': 0xFFB5B5,
+		'C': 0x909090,
+		'N': 0x3050F8,
+		'O': 0xFF0D0D,
+		'F': 0x90E050,
+		'Na': 0xAB5CF2,
+		'NA': 0xAB5CF2,
+		'Mg': 0x8AFF00,
+		'MG': 0x8AFF00,
+		'Al': 0xBFA6A6,
+		'AL': 0xBFA6A6,
+		'Si': 0xF0C8A0,
+		'SI': 0xF0C8A0,
+		'P': 0xFF8000,
+		'S': 0xFFFF30,
+		'Cl': 0x1FF01F,
+		'CL': 0x1FF01F,
+		'Ca': 0x3DFF00,
+		'CA': 0x3DFF00,
+		'Ti': 0xBFC2C7,
+		'TI': 0xBFC2C7,
+		'Cr': 0x8A99C7,
+		'CR': 0x8A99C7,
+		'Mn': 0x9C7AC7,
+		'MN': 0x9C7AC7,
+		'Fe': 0xE06633,
+		'FE': 0xE06633,
+		'Ni': 0x50D050,
+		'NI': 0x50D050,
+		'Cu': 0xC88033,
+		'CU': 0xC88033,
+		'Zn': 0x7D80B0,
+		'ZN': 0x7D80B0,
+		'Br': 0xA62929,
+		'BR': 0xA62929,
+		'Ag': 0xC0C0C0,
+		'AG': 0xC0C0C0,
+		'I': 0x940094,
+		'Ba': 0x00C900,
+		'BA': 0x00C900,
+		'Au': 0xFFD123,
+		'AU': 0xFFD123
 };
 
 WebMol.rasmolElementColors = {
-		H: 0xFFFFFF,
-		He: 0xFFC0CB,
-		HE: 0xFFC0CB,
-		Li: 0xB22222,
-		LI: 0xB22222,
-		B: 0x00FF00,
-		C: 0xC8C8C8,
-		N: 0x8F8FFF,
-		O: 0xF00000,
-		F: 0xDAA520,
-		Na: 0x0000FF,
-		NA: 0x0000FF,
-		Mg: 0x228B22,
-		MG: 0x228B22,
-		Al: 0x808090,
-		AL: 0x808090,
-		Si: 0xDAA520,
-		SI: 0xDAA520,
-		P: 0xFFA500,
-		S: 0xFFC832,
-		Cl: 0x00FF00,
-		CL: 0x00FF00,
-		Ca: 0x808090,
-		CA: 0x808090,
-		Ti: 0x808090,
-		TI: 0x808090,
-		Cr: 0x808090,
-		CR: 0x808090,
-		Mn: 0x808090,
-		MN: 0x808090,
-		Fe: 0xFFA500,
-		FE: 0xFFA500,
-		Ni: 0xA52A2A,
-		NI: 0xA52A2A,
-		Cu: 0xA52A2A,
-		CU: 0xA52A2A,
-		Zn: 0xA52A2A,
-		ZN: 0xA52A2A,
-		Br: 0xA52A2A,
-		BR: 0xA52A2A,
-		Ag: 0x808090,
-		AG: 0x808090,
-		I: 0xA020F0,
-		Ba: 0xFFA500,
-		BA: 0xFFA500,
-		Au: 0xDAA520,
-		AU: 0xDAA520	
+		'H': 0xFFFFFF,
+		'He': 0xFFC0CB,
+		'HE': 0xFFC0CB,
+		'Li': 0xB22222,
+		'LI': 0xB22222,
+		'B': 0x00FF00,
+		'C': 0xC8C8C8,
+		'N': 0x8F8FFF,
+		'O': 0xF00000,
+		'F': 0xDAA520,
+		'Na': 0x0000FF,
+		'NA': 0x0000FF,
+		'Mg': 0x228B22,
+		'MG': 0x228B22,
+		'Al': 0x808090,
+		'AL': 0x808090,
+		'Si': 0xDAA520,
+		'SI': 0xDAA520,
+		'P': 0xFFA500,
+		'S': 0xFFC832,
+		'Cl': 0x00FF00,
+		'CL': 0x00FF00,
+		'Ca': 0x808090,
+		'CA': 0x808090,
+		'Ti': 0x808090,
+		'TI': 0x808090,
+		'Cr': 0x808090,
+		'CR': 0x808090,
+		'Mn': 0x808090,
+		'MN': 0x808090,
+		'Fe': 0xFFA500,
+		'FE': 0xFFA500,
+		'Ni': 0xA52A2A,
+		'NI': 0xA52A2A,
+		'Cu': 0xA52A2A,
+		'CU': 0xA52A2A,
+		'Zn': 0xA52A2A,
+		'ZN': 0xA52A2A,
+		'Br': 0xA52A2A,
+		'BR': 0xA52A2A,
+		'Ag': 0x808090,
+		'AG': 0x808090,
+		'I': 0xA020F0,
+		'Ba': 0xFFA500,
+		'BA': 0xFFA500,
+		'Au': 0xDAA520,
+		'AU': 0xDAA520	
 };
 
 WebMol.defaultElementColors = WebMol.JmolElementColors;//color scheme mappings
@@ -2624,6 +2531,7 @@ WebMol.GLModel = (function() {
         return true;
     };
 
+    /** @param {Array.<AtomSpec>} atomsarray */
     var assignBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var atoms = atomsarray.slice(0);
@@ -2660,6 +2568,7 @@ WebMol.GLModel = (function() {
     
     // this is optimized for proteins where it is assumed connected
     // atoms are on the same or next residue
+    /** @param {Array.<AtomSpec>} atomsarray */
     var assignPDBBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var protatoms = [];
@@ -3133,6 +3042,12 @@ WebMol.GLModel = (function() {
     // parse pdb file from str and create atoms
     //if computeStruct is true will always perform secondary structure analysis,
     //otherwise only do analysis of SHEET/HELIX comments are missing
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     * @param {keepH=} boolean
+     * @param {computeStruct=} boolean
+     */
     var parsePDB = function(atoms, str, keepH, computeStruct) {
 
         var atoms_cnt = 0;
@@ -3146,8 +3061,8 @@ WebMol.GLModel = (function() {
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
-        lines = str.split("\n");
-        var i, j, k;
+        var lines = str.split("\n");
+        var i, j, k, line;
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
@@ -3560,6 +3475,11 @@ WebMol.GLModel = (function() {
         };
         
         // cross drawing
+        /**
+         * 
+         * @param {AtomSpec} atom
+         * @param {Object.<numlike,WebMol.Geometry>} geos
+         */
         var drawAtomCross = function(atom, geos) {
             if (!atom.style.cross)
                 return;
@@ -3610,6 +3530,12 @@ WebMol.GLModel = (function() {
 
         // bonds - both atoms must match bond style
         // standardize on only drawing for lowest to highest
+        /**
+         * 
+         * @param {AtomSpec} atom
+         * @param {Array.<AtomSpec>} atoms
+         * @param {Object.<numlike, WebMol.Geometry>} geos
+         */
         var drawBondLines = function(atom, atoms, geos) {
             if (!atom.style.line)
                 return;
@@ -3622,9 +3548,9 @@ WebMol.GLModel = (function() {
 
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
+            /** @type {geometryGroup} */
             var geoGroup = geos[linewidth].updateGeoGroup(2*atom.bonds.length);
             
-
             for ( var i = 0; i < atom.bonds.length; i++) {
                 
                 var j = atom.bonds[i]; // our neighbor
@@ -4326,6 +4252,7 @@ WebMol.GLModel = (function() {
         // faster
         // at some point we should optimize this to avoid unnecessary
         // recalculation
+        /** @type {Array.<AtomSpec>} atoms */
         var createMolObj = function(atoms) {
 
             console.log("creating for "+id);
@@ -4703,10 +4630,6 @@ WebMol.GLModel = (function() {
         };
 
     }
-    
-    GLModel.prototype.testMethod = function() {
-          
-    };
 
     return GLModel;
     
@@ -5720,18 +5643,8 @@ WebMol.GLViewer = (function() {
                 [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
     };
         
-    // The constructor
-    /**
-     * WebGL WebMol viewer
-     * Note: The preferred method of instantiating a GLViewer is through {@link WebMol.createViewer} 
-     * 
-     * @constructor WebMol.GLViewer
-     * @param {Object} element HTML element within which to create viewer
-     * @param {Function} callback - Callback function to be immediately executed on this viewer
-     * @param {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
-     */
-    function GLViewer(element, callback, defaultcolors) {
 
+    function GLViewer(element, callback, defaultcolors) {
         // set variables
         var _viewer = this;
         var container = element;
@@ -5743,7 +5656,7 @@ WebMol.GLViewer = (function() {
 
         var WIDTH = container.width();
         var HEIGHT = container.height();
-        
+
         var spinner = $('<div class="glviewerSpinnerWrap" style = "position: absolute; width: 100%; height: 100%; display: table; z-index: 1;"><div class="glviewerSpinner" style="display: table-cell; text-align: center; vertical-align: middle; z-index:1"><img src="webmol/spinner.gif"></div></div>');
         $(element).append(spinner);
         spinner.hide();
@@ -5767,7 +5680,6 @@ WebMol.GLViewer = (function() {
         renderer.domElement.style.zIndex = "0";
         container.append(renderer.domElement);
         renderer.setSize(WIDTH, HEIGHT);
-
         var camera = new WebMol.Camera(20, ASPECT, 1, 800);
         camera.position = new WebMol.Vector3(0, 0, CAMERA_Z);
         var vec = new WebMol.Vector3();

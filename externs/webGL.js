@@ -6,6 +6,15 @@ var numlike;
 
 var WebMol = {};
 
+/**
+ * @constructor
+ * @param {...number} color
+ */
+WebMol.Color = function(color) {};
+WebMol.Color.r;
+WebMol.Color.g;
+WebMol.Color.b;
+
 WebMol.Math = {};
 WebMol.Math.clamp = function(x, min, max) {};
 WebMol.Math.degToRad = function(deg) {};
@@ -494,7 +503,11 @@ geometryGroup.prototype.getCentroid = function() {};
 geometryGroup.prototype.setNormals = function() {};
 geometryGroup.prototype.setLineIndices = function() {};
 geometryGroup.prototype.truncateArrayBuffers = function() {};
-
+geometryGroup.__vertexArray;
+geometryGroup.__colorArray;
+geometryGroup.__normalArray;
+geometryGroup.__faceArray;
+geometryGroup.__lineArray;
 
 /** @return {geometryGroup} */
 WebMol.Geometry.prototype.addGeoGroup = function() {};
@@ -770,7 +783,6 @@ WebMol.Sprite.prototype.updateMatrix = function() {};
 WebMol.Sprite.prototype.clone = function(object) {};
 
 /** 
- * 
  * @constructor
  * @struct
  */
@@ -791,7 +803,24 @@ rendererSpec.devicePixelRatio;
  * @param {rendererSpec} parameters
  */
 WebMol.Renderer = function(parameters) {};
-WebMol.Renderer.render = function() {};
+WebMol.Renderer.domElement;
+/**
+ * @param {number} width
+ * @param {number} height
+ */
+WebMol.Renderer.setSize = function(width, height) {};
+/*
+ * @param {number} hex
+ * @param {number} alpha
+ */
+WebMol.Renderer.setClearColorHex = function(hex, alpha) {};
+/**
+ * 
+ * @param {WebMol.Scene} scene
+ * @param {WebMol.Camera} camera
+ * @param {boolean=} forceClear
+ */
+WebMol.Renderer.render = function(scene, camera, forceClear) {};
 
 /**
  * @constructor

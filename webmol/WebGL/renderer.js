@@ -202,9 +202,9 @@ WebMol.Renderer = function ( parameters ) {
 
     };
 
-    this.clearTarget = function ( renderTarget, color, depth, stencil ) {
+    this.clearTarget = function ( color, depth, stencil ) {
 
-            this.setRenderTarget( renderTarget );
+            
             this.clear( color, depth, stencil );
 
     };
@@ -919,7 +919,7 @@ WebMol.Renderer = function ( parameters ) {
 
     }
     
-    this.render = function ( scene, camera, renderTarget, forceClear ) {
+    this.render = function ( scene, camera, forceClear ) {
 
         if ( camera instanceof WebMol.Camera === false )  {
 

@@ -14,7 +14,7 @@ module.exports = function(grunt) {
         
         jsdoc : {  
             dist : {
-                src : ['webmol/**.js', 'README.md'],
+                src : ['externs/webmol.js', 'README.md'],
                 options : {
                     destination: 'doc',
                     configure: 'jsdoc.conf.json',
@@ -73,8 +73,8 @@ module.exports = function(grunt) {
             },
             
             append : {
-                src : ['build/webmol-closure.js', 'append.js'],
-                dest : 'build/webmol-min-closure.js'
+                src : ['build/webmol-closure-pre.js', 'append.js'],
+                dest : 'build/webmol-closure.js'
             }
         },
         
@@ -103,9 +103,23 @@ module.exports = function(grunt) {
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5',
                     'externs': ['externs/jquery.js', 'externs/webmol.js', 'externs/webGL.js'],
-                    'create_source_map': 'script.map'
+                    'create_source_map': 'script.map',
+                    'process_jquery_primitives': null
                 }
             },
+            webmol : {
+                closurePath : 'lib/closure_compiler',
+                js : ['build/webmol-pre.js'],
+                jsOutputFile : 'build/webmol-closure-pre.js',
+                //noreport : true,
+                options : {
+                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
+                    'warning_level': 'DEFAULT',
+                    'language_in': 'ECMASCRIPT5',
+                    'externs': ['externs/jquery.js', 'externs/webmol.js', 'externs/webGL.js'],
+                    'create_source_map': 'script.map'                 
+                }
+            },            
             webgl : {
                 closurePath : 'lib/closure_compiler',
                 js : ['build/webGL-pre.js'],
@@ -115,7 +129,7 @@ module.exports = function(grunt) {
                     'compilation_level': 'ADVANCED_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5',
-                    'externs': ['externs/webmol.js', 'externs/webGL.js'],
+                    'externs': ['externs/webmol.js', 'externs/webGL.js', 'externs/jquery.js'],
                     'create_source_map': 'script.map'
                 }
             },
@@ -139,7 +153,7 @@ module.exports = function(grunt) {
     grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL', 'concat:closure']);
     grunt.registerTask('concat_build', ['concat:big', 'concat:min']);
     
-    grunt.registerTask('test', ['clean:build', 'closure-compiler:test']);
+    grunt.registerTask('test', ['clean:build', 'concat:pre', 'concat:webGL', 'closure-compiler:webmol', 'concat:append']);
     grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler:build', 'concat:append']);
     
     grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'uglify', 'closure-compiler:build', 'concat_build', 'clean:tmp']);

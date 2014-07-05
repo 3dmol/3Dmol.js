@@ -1325,7 +1325,6 @@ WebMol.Triangle.prototype = {
  * Geometry class
  */
 
-
 //Event Handling
 /** @this {WebMol.EventDispatcher} */
 WebMol.EventDispatcher = function() {
@@ -1365,6 +1364,59 @@ WebMol.EventDispatcher = function() {
     
 };
 
+WebMol.Color = function( color ){
+    
+    if ( arguments.length > 1) {
+            this.r = arguments[0] || 0.0;
+            this.g = arguments[1] || 0.0;
+            this.b = arguments[2] || 0.0;
+
+            return this;
+    }
+    
+    return this.set(color);
+                
+};
+
+WebMol.Color.prototype = {
+    
+    constructor: WebMol.Color,
+    
+    r: 0.0, g: 0.0, b: 0.0,
+    
+    set : function(val) {
+        
+            if (val instanceof WebMol.Color) 
+                return val.clone();
+
+            else if (typeof val === 'number')
+                this.setHex(val);
+    },
+    
+    setHex: function(hex) {
+        
+            hex = Math.floor(hex);
+
+            this.r = (hex >> 16 & 255) / 255;
+            this.g = (hex >> 8 & 255) / 255;
+            this.b = (hex & 255) / 255;                                                                                     
+        
+            return this;
+    },
+    
+    clone : function() {
+            return new WebMol.Color(this.r, this.g, this.b);
+    },
+        
+    copy : function(color) {
+        this.r = color.r;
+        this.g = color.g;
+        this.b = color.b;
+        
+        return this;
+    }
+    
+};
 
 //Object3D base constructor function
 /** @this {WebMol.Object3D} */
@@ -3198,9 +3250,9 @@ WebMol.Renderer = function ( parameters ) {
 
     };
 
-    this.clearTarget = function ( renderTarget, color, depth, stencil ) {
+    this.clearTarget = function ( color, depth, stencil ) {
 
-            this.setRenderTarget( renderTarget );
+            
             this.clear( color, depth, stencil );
 
     };
@@ -3915,7 +3967,7 @@ WebMol.Renderer = function ( parameters ) {
 
     }
     
-    this.render = function ( scene, camera, renderTarget, forceClear ) {
+    this.render = function ( scene, camera, forceClear ) {
 
         if ( camera instanceof WebMol.Camera === false )  {
 

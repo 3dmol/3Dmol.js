@@ -42,19 +42,25 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="WebMol.GLModel.html">GLModel</a>
-						</li>
-						
-						<li>
-							<a href="WebMol.GLShape.html">GLShape</a>
-						</li>
-						
-						<li>
 							<a href="WebMol.GLViewer.html">GLViewer</a>
 						</li>
 						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
 						<li>
-							<a href="WebMol.Label.html">Label</a>
+							<a href="global.html#setView">setView</a>
+						</li>
+						
+						<li>
+							<a href="global.html#ViewerSpec">ViewerSpec</a>
 						</li>
 						
 
@@ -90,10 +96,76 @@
 
     
         
-            <div class="description"><p>WebMol global namespace</p></div>
-        
 
         
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="WebMol.GLViewer.html">GLViewer</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
+            
+<dt>
+    <h4 class="name" id="JmolElementColors"><span class="type-signature">&lt;static> </span>JmolElementColors<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    
+
+    
 <dl class="details">
 	
 
@@ -137,6 +209,82 @@
             <td class="description last"><p>Jmol style atom colors (default color scheme)</p></td>
         </tr>
 
+	
+	</tbody>
+</table>
+</dl>
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="rasmolElementColors"><span class="type-signature">&lt;static> </span>rasmolElementColors<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    
+
+    
+<dl class="details">
+	
+
+	<h5 class="subsection-title">Properties:</h5>
+
+	<dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
 	
 
         <tr>
@@ -189,37 +337,11 @@
 	
 </dl>
 
-
-        
     
-    </div>
-
     
+</dd>
 
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="WebMol.GLModel.html">GLModel</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.GLShape.html">GLShape</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.GLViewer.html">GLViewer</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.Label.html">Label</a></dt>
-            <dd></dd>
         </dl>
-    
-
-    
-
     
 
     
@@ -302,7 +424,7 @@
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type"><a href="global.html#ViewerSpec">ViewerSpec</a></span>
 
 
             
@@ -414,16 +536,12 @@ var myviewer = WebMol.createViewer(element, config);
         
             
 <dt>
-    <h4 class="name" id="download"><span class="type-signature">&lt;static> </span>download<span class="signature">(query, viewer)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLModel.html">WebMol.GLModel</a>}</span></h4>
+    <h4 class="name" id="download"><span class="type-signature">&lt;static> </span>download<span class="signature">(query, viewer)</span><span class="type-signature"></span></h4>
     
     
 </dt>
 <dd>
     
-    
-    <div class="description">
-        <p>Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model</p>
-    </div>
     
 
     
@@ -462,7 +580,7 @@ var myviewer = WebMol.createViewer(element, config);
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">Object</span>
 
 
             
@@ -472,7 +590,7 @@ var myviewer = WebMol.createViewer(element, config);
 
             
 
-            <td class="description last"><p>String specifying pdb or pubchem id; must be prefaced with &quot;pdb: &quot; or &quot;cid: &quot;, respectively</p></td>
+            <td class="description last"></td>
         </tr>
 
 	
@@ -485,7 +603,7 @@ var myviewer = WebMol.createViewer(element, config);
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type"><a href="WebMol.GLViewer.html">WebMol.GLViewer</a></span>
 
 
             
@@ -495,7 +613,7 @@ var myviewer = WebMol.createViewer(element, config);
 
             
 
-            <td class="description last"><p>Add new model to existing viewer</p></td>
+            <td class="description last"></td>
         </tr>
 
 	
@@ -545,39 +663,7 @@ var myviewer = WebMol.createViewer(element, config);
     
     
     
-    <h5>Returns:</h5>
     
-            
-<div class="param-desc">
-    <p>GLModel</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="WebMol.GLModel.html">WebMol.GLModel</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-        <h5>Example</h5>
-        
-    <pre class="sunlight-highlight-javascript">var myviewer = WebMol.createViewer(gldiv);
-
-&#x2F;&#x2F; GLModel &#x27;m&#x27; created and loaded into glviewer for PDB id 2POR
-var m = WebMol.download(&#x27;pdb: 2POR&#x27;, myviewer);</pre>
-
-
     
 </dd>
 
@@ -602,7 +688,7 @@ var m = WebMol.download(&#x27;pdb: 2POR&#x27;, myviewer);</pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on 2014-07-02T12:50:00-04:00 using the <a
+		on 2014-07-05T13:27:49-04:00 using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>

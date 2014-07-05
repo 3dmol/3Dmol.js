@@ -1,0 +1,177 @@
+build\webmol-pre.js:31: WARNING - dangerous use of the global this object
+        if(typeof(this[fname]) === "function")
+                  ^
+
+build\webmol-pre.js:34: WARNING - dangerous use of the global this object
+                return new this[fname](element, config.callback, config.defaultcolors);
+                           ^
+
+build\webmol-pre.js:102: WARNING - dangerous use of the global this object
+        if(typeof(this.cache[hex]) !== "undefined") {
+                  ^
+
+build\webmol-pre.js:103: WARNING - dangerous use of the global this object
+            return this.cache[hex];
+                   ^
+
+build\webmol-pre.js:107: WARNING - dangerous use of the global this object
+            this.cache[hex] = c;
+            ^
+
+build\webmol-pre.js:186: WARNING - namespace WebMol should not be redefined
+WebMol = WebMol || {};
+^
+
+build\webmol-pre.js:925: WARNING - dangerous use of the global this object
+    this.getFacesAndVertices = function(atomlist) {
+    ^
+
+build\webmol-pre.js:976: WARNING - dangerous use of the global this object
+    this.initparm = function(extent, btype, volume) {
+    ^
+
+build\webmol-pre.js:1018: WARNING - dangerous use of the global this object
+        this.boundingatom(btype);
+        ^
+
+build\webmol-pre.js:1033: WARNING - dangerous use of the global this object
+    this.boundingatom = function(btype) {
+    ^
+
+build\webmol-pre.js:1066: WARNING - dangerous use of the global this object
+    this.fillvoxels = function(atoms, atomlist) { // (int seqinit,int
+    ^
+
+build\webmol-pre.js:1081: WARNING - dangerous use of the global this object
+            this.fillAtom(atom, atoms);
+            ^
+
+build\webmol-pre.js:1091: WARNING - dangerous use of the global this object
+    this.fillAtom = function(atom, atoms) {
+    ^
+
+build\webmol-pre.js:1152: WARNING - dangerous use of the global this object
+    this.fillvoxelswaals = function(atoms, atomlist) {
+    ^
+
+build\webmol-pre.js:1162: WARNING - dangerous use of the global this object
+            this.fillAtomWaals(atom, atoms);
+            ^
+
+build\webmol-pre.js:1166: WARNING - dangerous use of the global this object
+    this.fillAtomWaals = function(atom, atoms) {
+    ^
+
+build\webmol-pre.js:1220: WARNING - dangerous use of the global this object
+    this.buildboundary = function() {
+    ^
+
+build\webmol-pre.js:1257: WARNING - dangerous use of the global this object
+        this.set = function(x, y, z, pt) {
+        ^
+
+build\webmol-pre.js:1265: WARNING - dangerous use of the global this object
+        this.get = function(x, y, z) {
+        ^
+
+build\webmol-pre.js:1275: WARNING - dangerous use of the global this object
+    this.fastdistancemap = function() {
+    ^
+
+build\webmol-pre.js:1313: WARNING - dangerous use of the global this object
+            outarray = this.fastoneshell(inarray, boundPoint);
+                       ^
+
+build\webmol-pre.js:1355: WARNING - dangerous use of the global this object
+    this.fastoneshell = function(inarray, boundPoint) { // (int* innum,int
+    ^
+
+build\webmol-pre.js:1544: WARNING - dangerous use of the global this object
+    this.marchingcubeinit = function(stype) {
+    ^
+
+build\webmol-pre.js:1571: WARNING - dangerous use of the global this object
+        this.incrementUsed = function(i, j) {
+        ^
+
+build\webmol-pre.js:1580: WARNING - dangerous use of the global this object
+        this.incrementUnused = function(i, j) {
+        ^
+
+build\webmol-pre.js:1604: WARNING - dangerous use of the global this object
+        this.print = function() {
+        ^
+
+build\webmol-pre.js:1628: WARNING - dangerous use of the global this object
+    this.marchingcube = function(stype) {
+    ^
+
+build\webmol-pre.js:1629: WARNING - dangerous use of the global this object
+        this.marchingcubeinit(stype);
+        ^
+
+build\webmol-pre.js:1851: WARNING - namespace WebMol should not be redefined
+var WebMol = WebMol || {};
+    ^
+
+build\webmol-pre.js:1857: WARNING - dangerous use of the global this object
+	this.valueToHex = function(val, range) {
+	^
+
+build\webmol-pre.js:1890: WARNING - dangerous use of the global this object
+	this.jmolID = function() {
+	^
+
+build\webmol-pre.js:1895: WARNING - dangerous use of the global this object
+	this.range = function() {
+	^
+
+build\webmol-pre.js:1908: WARNING - dangerous use of the global this object
+	this.valueToHex = function(val, range) {
+	^
+
+build\webmol-pre.js:1953: WARNING - dangerous use of the global this object
+	this.jmolID = function() {
+	^
+
+build\webmol-pre.js:1958: WARNING - dangerous use of the global this object
+	this.range = function() {
+	^
+
+build\webmol-pre.js:1971: WARNING - dangerous use of the global this object
+	this.valueToHex = function(val, range) {
+	^
+
+build\webmol-pre.js:2000: WARNING - dangerous use of the global this object
+	this.jmolID = function() {
+	^
+
+build\webmol-pre.js:2005: WARNING - dangerous use of the global this object
+	this.range = function() {
+	^
+
+build\webmol-pre.js:2020: WARNING - namespace WebMol should not be redefined
+var WebMol = WebMol || {};
+    ^
+
+build\webmol-pre.js:2455: WARNING - namespace WebMol should not be redefined
+var WebMol = WebMol || {};
+    ^
+
+build\webmol-pre.js:5470: WARNING - namespace WebMol should not be redefined
+var WebMol = WebMol || {};
+    ^
+
+build\webmol-pre.js:7026: WARNING - incomplete alias created for namespace WebMol
+WebMol['glmolViewer'] = WebMol.GLViewer;
+^
+
+build\webmol-pre.js:7027: WARNING - namespace WebMol should not be redefined
+var WebMol = WebMol || {};
+    ^
+
+externs\webGL.js:811: WARNING - Parse error. Non-JSDoc comment has annotations. Did you mean to start it with '/**'?
+WebMol.Renderer.setSize = function(width, height) {};
+^
+
+0 error(s), 44 warning(s)
