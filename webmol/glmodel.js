@@ -310,6 +310,10 @@ WebMol.GLModel = (function() {
         }
     };
     
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     */
     var parseCube = function(atoms, str) {
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
@@ -369,6 +373,10 @@ WebMol.GLModel = (function() {
     };
         
     // read an XYZ file from str and put the result in atoms
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     */
     var parseXYZ = function(atoms, str) {
 
         var lines = str.split("\n");
@@ -406,6 +414,10 @@ WebMol.GLModel = (function() {
 
     // put atoms specified in sdf fromat in str into atoms
     // adds to atoms, does not replace
+    /** 
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     */
     var parseSDF = function(atoms, str) {
 
         var lines = str.split("\n");
@@ -459,6 +471,11 @@ WebMol.GLModel = (function() {
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
     // tag
     // TODO: Figure out how to handle multi molecule files (for SDF, too)
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     * @param {boolean=} keepH
+     */
     var parseMOL2 = function(atoms, str, keepH) {
         
         var noH = !keepH; // again, suppress H's by default
@@ -775,6 +792,13 @@ WebMol.GLModel = (function() {
         var defaultSphereRadius = 1.5;
 
         // return proper radius for atom given style
+        /** 
+         * 
+         * @param {AtomSpec} atom
+         * @param {atomstyle} style
+         * @returns {number} 
+         * 
+         */
         var getRadiusFromStyle = function(atom, style) {
             var r = defaultSphereRadius;
             if (typeof (style.radius) != "undefined")

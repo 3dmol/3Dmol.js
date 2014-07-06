@@ -6,7 +6,25 @@ WebMol = (function(window) {
     
     var my = window['WebMol'] || {};
     //var $ = window['jQuery'];
-        
+    
+    // function for drawing rounded rectangles - for Label drawing
+    var roundRect = function(ctx, x, y, w, h, r) {
+
+        ctx.beginPath();
+        ctx.moveTo(x+r, y);
+        ctx.lineTo(x+w-r, y);
+        ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+        ctx.lineTo(x+w, y+h-r);
+        ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+        ctx.lineTo(x+r, y+h);
+        ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+        ctx.lineTo(x, y+r);
+        ctx.quadraticCurveTo(x, y, x+r, y);
+        ctx.closePath();
+        ctx.fill();
+
+    };    
+    
     return my;
 
 })(window);
@@ -41,21 +59,7 @@ WebMol.createViewer = function(element, config)
     alert("Unable to instantiate webmol viewer: "+config.order);
     return null;
 };
-
-/**
- * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * 
- * @function WebMol.download
- * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
- * @param {Object} viewer Add new model to existing viewer
- * @example
- * var myviewer = WebMol.createViewer(gldiv);
- * 
- * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
- * var m = WebMol.download('pdb: 2POR', myviewer);
- * 
- * @returns {WebMol.GLModel} GLModel
- */    
+   
 WebMol.download = function(query, viewer) {
     var baseURL = '';
     var type = "";
@@ -111,7 +115,12 @@ WebMol.CC = {
 };
 
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
-
+/**
+ * 
+ * @param {WebMol.Geometry} geometry
+ * @param {WebMol.Mesh} mesh
+ * @returns {undefined}
+ */
 WebMol.mergeGeos = function(geometry, mesh) {
     
     var meshGeo = mesh.geometry;
@@ -136,49 +145,5 @@ WebMol.syncSurface = false;
 
 //material constants
 
-// sides
-WebMol.FrontSide = 0;
-WebMol.BackSide = 1;
-WebMol.DoubleSide = 2;
 
-// blending modes
-WebMol.NoBlending = 0;
-WebMol.NormalBlending = 1;
-WebMol.AdditiveBlending = 2;
-WebMol.SubtractiveBlending = 3;
-WebMol.MultiplyBlending = 4;
-WebMol.CustomBlending = 5;
-
-// shading
-WebMol.NoShading = 0;
-WebMol.FlatShading = 1;
-WebMol.SmoothShading = 2;
-
-// colors
-WebMol.NoColors = 0;
-WebMol.FaceColors = 1;
-WebMol.VertexColors = 2;
-
-//Texture constants
-//TODO: Which of these do I need (since I only use textures to display label sprites) ?
-WebMol.MultiplyOperation = 0;
-WebMol.MixOperation = 1;
-WebMol.AddOperation = 2;
-
-// mapping modes
-
-WebMol.UVMapping = function() {};
-
-// wrapping modes
-WebMol.ClampToEdgeWrapping = 1001;
-
-//Filters
-WebMol.LinearFilter = 1006;
-WebMol.LinearMipMapLinearFilter = 1008;
-
-//Data types
-WebMol.UnsignedByteType = 1009;
-
-//Pixel formats
-WebMol.RGBAFormat = 1021;
 

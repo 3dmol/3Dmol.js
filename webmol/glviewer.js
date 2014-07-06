@@ -1,26 +1,6 @@
 //a molecular viewer based on GLMol
 
-var WebMol = WebMol || {};
-
 //Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
-
-// function for drawing rounded rectangles
-var roundRect = function(ctx, x, y, w, h, r) {
-
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.lineTo(x+w-r, y);
-    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r);
-    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r);
-    ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.closePath();
-    ctx.fill();
- 
-};
 
 WebMol.LabelCount = 0;
 
@@ -144,6 +124,9 @@ WebMol.GLViewer = (function() {
     // private class helper functions
 
     // computes the bounding box around the provided atoms
+    /** @param {Array.<AtomSpec>} atomlist 
+     * @return {Array} 
+     */
     var getExtent = function(atomlist) {
         var xmin, ymin, zmin,
             xmax, ymax, zmax,
@@ -629,6 +612,11 @@ WebMol.GLViewer = (function() {
             console.log("render time: " + (time2 - time1));
         };
         
+        /** 
+         * 
+         * @param {AtomSpec} sel
+         * @returns {Array.<AtomSpec>}
+         */
         function getAtomsFromSel(sel) {
             var atoms = [];
             if (typeof (sel) === "undefined")
@@ -655,6 +643,12 @@ WebMol.GLViewer = (function() {
             return atoms;
         }
         
+        /**
+         * 
+         * @param {AtomSpec} atom
+         * @param {AtomSpec} sel
+         * @return {boolean}
+         */
         function atomIsSelected(atom,sel) {
             if (typeof (sel) === "undefined")
                 sel = {};
@@ -1031,7 +1025,13 @@ WebMol.GLViewer = (function() {
         this.setColorByElement = function(sel, colors) {
             applyToModels("setColorByElement", sel, colors);
         };
-
+        
+        /**
+         * 
+         * @param {Array.<AtomSpec>} atomlist
+         * @param {Array} extent
+         * @returns {Array}
+         */
         var getAtomsWithin = function(atomlist, extent) {
             var ret = [];
 
@@ -1063,6 +1063,13 @@ WebMol.GLViewer = (function() {
          * with webworkers and also limit the size of the working memory Returns
          * a list of bounding boxes with the corresponding atoms. These extents
          * are expanded by 4 angstroms on each side.
+         */
+        /**
+         * 
+         * @param {Array} extent
+         * @param {Array.<AtomSpec>} atomlist
+         * @param {Array.<AtomSpec>} atomstoshow
+         * @returns {Array}
          */
         var carveUpExtent = function(extent, atomlist, atomstoshow) {
             var ret = [];
@@ -1139,6 +1146,13 @@ WebMol.GLViewer = (function() {
 
         // create a mesh defined from the passed vertices and faces and material
         // Just create a single geometry chunk - broken up whether sync or not
+        /** 
+         * 
+         * @param {Array.<AtomSpec>} atoms
+         * @param {Object} VandF
+         * @param {WebMol.MeshLambertMaterial} mat
+         * @return {WebMol.Mesh}
+         */
         var generateSurfaceMesh = function(atoms, VandF, mat) {
         
             var geo = new WebMol.Geometry(true);  
@@ -1224,6 +1238,16 @@ WebMol.GLViewer = (function() {
         };
 
         // do same thing as worker in main thread
+        /** 
+         * 
+         * @param {WebMol.SurfaceType} type
+         * @param {Array} expandedExtent
+         * @param {Array} extendedAtoms
+         * @param {Array} atomsToShow
+         * @param {Array.<AtomSpec>} atoms
+         * @param {number} vol
+         * @return {Object}
+         */
         var generateMeshSyncHelper = function(type, expandedExtent,
                 extendedAtoms, atomsToShow, atoms, vol) {
             var time = new Date();
@@ -1257,7 +1281,12 @@ WebMol.GLViewer = (function() {
             
             return ps.getFacesAndVertices(atomsToShow);
         };
-
+        
+        /**
+         * 
+         * @param {matSpec} style
+         * @return {WebMol.MeshLambertMaterial}
+         */
         function getMatWithStyle(style) {
             var mat = new WebMol.MeshLambertMaterial();
             mat.vertexColors = WebMol.VertexColors;

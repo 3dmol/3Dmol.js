@@ -2,12 +2,11 @@
 <html style="height:100%; padding: 0; margin: 0">
     <head>
         <title>WebMol Test</title>
-        <!--
+        
         <script src="js/jquery-1.9.1.js"></script>
         <script src="build/webGL-pre.js"></script>
-        <script src="build/webmol-pre.js"></script>
-        -->
-        <script src="build/webmol.js"></script>
+        <script src="build/webmol-closure.js"></script>
+        
         <script>
         
         var glviewer = null;
@@ -29,7 +28,7 @@
         var toggleSurfTrans = function(surf) {
             
             var opacity = !!(lastsurfstyle) ? 0.75 : 1;
-            glviewer.setSurfaceMaterialStyle(surf,{ opacity: opacity}); 
+            glviewer.setSurfaceMaterialStyle(surf,{ 'opacity': opacity}); 
             glviewer.render();
             lastsurfstyle = !(lastsurfstyle);
         };  
@@ -102,12 +101,12 @@
                         
             //$.get("test_structs/1YCR.pdb", function(data){
                 
-                moldata = data = $("#moldata_sdf_small").val();
+                moldata = data = $("#moldata_pdb_large").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
                                         
-                    receptorModel = m = viewer.addModel(data, "sdf");
+                    receptorModel = m = viewer.addModel(data, "pdb");
                     //shape = viewer.addSphere({radius:1});
                     //shape.wireframe = true;
                     //ligandModel = viewer.createModelFrom({chain: "C"}, true);                    

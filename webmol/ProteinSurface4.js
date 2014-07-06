@@ -35,8 +35,11 @@ if (typeof console === 'undefined') {
 WebMol.ProteinSurface = function() {
 
     // constants for vpbits bitmasks
+    /** @const */
     var INOUT = 1;
+    /** @const */
     var ISDONE = 2;
+    /** @const */
     var ISBOUND = 4;
 
     var ptranx = 0, ptrany = 0, ptranz = 0;
@@ -72,7 +75,8 @@ WebMol.ProteinSurface = function() {
             "NI" : 1.63,
             "X" : 2
         };
-
+    
+    /** @param {AtomSpec} atom */
     var getVDWIndex = function(atom) {
         if(!atom.elem || typeof(vdwRadii[atom.elem]) == "undefined") {
             return "X";

@@ -34,7 +34,7 @@ WebMol.Quaternion = function(x, y, z, w) {};
  * @param {number} y
  * @param {number} z
  * @param {number} w
- * @returns {undefined}
+ * @return {undefined}
  */
 WebMol.Quaternion.x;
 WebMol.Quaternion.y;
@@ -45,7 +45,7 @@ WebMol.Quaternion.prototype.set = function(x, y, z, w) {};
 /**
  * 
  * @param {WebMol.Quaternion} q
- * @returns {WebMol.Quaternion}
+ * @return {WebMol.Quaternion}
  */
 WebMol.Quaternion.prototype.copy = function(q) {};
 /** @return {WebMol.Quaternion} */
@@ -58,7 +58,7 @@ WebMol.Quaternion.prototype.normalize = function () {};
 /**
  * 
  * @param {WebMol.Quaternion} g
- * @returns {WebMol.Quaternion}
+ * @return {WebMol.Quaternion}
  */
 WebMol.Quaternion.prototype.multiply = function(g) {};
 /** 
@@ -321,7 +321,7 @@ WebMol.Ray = function(origin, direction) {};
 /**
  * @param {WebMol.Vector3} origin
  * @param {WebMol.Vector3} direction
- * @returns {WebMol.Ray}
+ * @return {WebMol.Ray}
  */
 WebMol.Ray.prototype.set = function(origin, direction){};
 /** 
@@ -331,7 +331,7 @@ WebMol.Ray.prototype.copy = function(ray) {};
 /**
  * @param {number} t
  * @param {WebMol.Vector3=} optionalTarget
- * @returns {WebMol.Vector3}
+ * @return {WebMol.Vector3}
  */
 WebMol.Ray.prototype.at = function(t, optionalTarget) {};
 /** @return {WebMol.Ray} */
@@ -340,20 +340,20 @@ WebMol.Ray.prototype.recast = function(t) {};
  * 
  * @param {WebMol.Vector3} point
  * @param {WebMol.Vector3=} optionalTarget
- * @returns {WebMol.Vector3}
+ * @return {WebMol.Vector3}
  */
 WebMol.Ray.prototype.closestPointToPoint = function(point, optionalTarget) {};
 /**
  * 
  * @param {WebMol.Vector3} point
- * @returns {number}
+ * @return {number}
  */
 WebMol.Ray.prototype.distanceToPoint = function(point) {};
 WebMol.Ray.prototype.isIntersectionCylinder = function() {};
 /**
  * 
  * @param {WebMol.Sphere} sphere
- * @returns {boolean}
+ * @return {boolean}
  */
 WebMol.Ray.prototype.isIntersectionSphere = function(sphere) {};
 WebMol.Ray.prototype.isIntersectionPlane = function(plane) {};
@@ -366,7 +366,7 @@ WebMol.Ray.prototype.applyMatrix4 = function(matrix4) {};
 /**
  * 
  * @param {WebMol.Ray} ray
- * @returns {boolean}
+ * @return {boolean}
  */
 WebMol.Ray.prototype.equals = function(ray) {};
 /** @return {WebMol.Ray} */
@@ -396,7 +396,7 @@ WebMol.Sphere.prototype.applyMatrix4 = function(matrix) {};
 WebMol.Sphere.prototype.translate = function(offset) {};
 /**
  * @param {WebMol.Sphere} sphere
- * @returns {boolean}
+ * @return {boolean}
  */
 WebMol.Sphere.prototype.equals = function(sphere) {};
 /** @return {WebMol.Sphere} */
@@ -428,7 +428,7 @@ WebMol.Cylinder.prototype.applyMatrix4 = function(matrix) {};
 WebMol.Triangle = function(a, b, c){};
 /**
  * @param {WebMol.Triangle} triangle
- * @returns {WebMol.Triangle}
+ * @return {WebMol.Triangle}
  */
 WebMol.Triangle.prototype.copy = function(triangle) {};
 /**
@@ -508,6 +508,10 @@ geometryGroup.__colorArray;
 geometryGroup.__normalArray;
 geometryGroup.__faceArray;
 geometryGroup.__lineArray;
+geometryGroup.vertices;
+geometryGroup.faceidx;
+geometryGroup.lineidx;
+geometryGroup.id;
 
 /** @return {geometryGroup} */
 WebMol.Geometry.prototype.addGeoGroup = function() {};
@@ -528,6 +532,23 @@ WebMol.Geometry.prototype.initTypedArrays = function() {};
 WebMol.Geometry.prototype.dispose = function() {};
 /** @type {number} */
 WebMol.Geometry.prototype.vertices;
+
+WebMol.Geometry.id;
+
+WebMol.Geometry.name;
+
+WebMol.Geometry.hasTangents;
+
+WebMol.Geometry.dynamic;
+WebMol.Geometry.mesh;
+WebMol.Geometry.verticesNeedUpdate;
+WebMol.Geometry.elementsNeedUpdate;
+WebMol.Geometry.normalsNeedUpdate;
+WebMol.Geometry.colorsNeedUpdate;
+WebMol.Geometry.buffersNeedUpdate;
+/** @type {Array.<geometryGroup>} */
+WebMol.Geometry.geometryGroups;
+WebMol.Geometry.groups;
 
 WebMol.GeometryIDCount;
 
@@ -560,14 +581,14 @@ WebMol.Projector = function () {};
 /**
  * @param {WebMol.Vector3} vector
  * @param {WebMol.Camera} camera
- * @returns {WebMol.Vector3}
+ * @return {WebMol.Vector3}
  */
 WebMol.Projector.projectVector = function(vector, camera) {};
 /**
  * 
  * @param {WebMol.Vector3} vector
  * @param {WebMol.Camera} camera
- * @returns {WebMol.Vector3}
+ * @return {WebMol.Vector3}
  */
 WebMol.Projector.unprojectVector = function(vector, camera) {};
 
@@ -587,6 +608,21 @@ WebMol.Camera.prototype.lookAt = function(vector){};
 
 WebMol.Camera.prototype.updateProjectionMatrix = function () {};
 
+/** @type {number} */
+WebMol.Camera.fov;
+/** @type {number} */
+WebMol.Camera.aspect;
+/** @type {number} */
+WebMol.Camera.near;
+/** @type {number} */
+WebMol.Camera.far;
+
+/** @type {WebMol.Matrix4} */
+WebMol.Camera.projectionMatrix;
+/** @type {WebMol.Matrix4} */
+WebMol.Camera.projectionMatrixInverse;
+/** @type {WebMol.Matrix4} */
+WebMol.Camera.matrixWorldInverse;
 
 WebMol.SpritePlugin = function () {};
 
@@ -597,8 +633,18 @@ WebMol.SpritePlugin = function () {};
  * @param {number=} intensity
  */
 WebMol.Light = function(hex, intensity) {};
+/** @type {WebMol.Color} */
+WebMol.Light.color;
+/** @type {WebMol.Vector3} */
+WebMol.Light.position;
+/** @type {WebMol.Object3D} */
+WebMol.Light.target;
 /** @type {number} */
 WebMol.Light.intensity;
+/** @type {boolean} */
+WebMol.Light.castShadow;
+/** @type {boolean} */
+WebMol.Light.onlyShadow;
 
 /** 
  * @constructor 
@@ -627,7 +673,7 @@ WebMol.Material.needsUpdate;
 WebMol.Material.prototype.setValues = function(values) {};
 /**
  * @param {WebMol.Material=} material
- * @returns {WebMol.Material}
+ * @return {WebMol.Material}
  */
 WebMol.Material.prototype.clone = function(material) {};
 
@@ -672,6 +718,54 @@ matSpec.uvOffset;
 matSpec.uvScale;
 
 WebMol.MaterialIdCount;
+
+//material constants
+// sides
+
+WebMol.FrontSide;
+WebMol.BackSide;
+WebMol.DoubleSide;
+
+// blending modes
+WebMol.NoBlending;
+WebMol.NormalBlending;
+WebMol.AdditiveBlending;
+WebMol.SubtractiveBlending;
+WebMol.MultiplyBlending;
+WebMol.CustomBlending;
+
+// shading
+WebMol.NoShading;
+WebMol.FlatShading;
+WebMol.SmoothShading;
+
+// colors
+WebMol.NoColors;
+WebMol.FaceColors;
+WebMol.VertexColors;
+
+//Texture constants
+//TODO: Which of these do I need (since I only use textures to display label sprites) ?
+WebMol.MultiplyOperation;
+WebMol.MixOperation;
+WebMol.AddOperation;
+
+// mapping modes
+
+WebMol.UVMapping = function() {};
+
+// wrapping modes
+WebMol.ClampToEdgeWrapping;
+
+//Filters
+WebMol.LinearFilter;
+WebMol.LinearMipMapLinearFilter;
+
+//Data types
+WebMol.UnsignedByteType;
+
+//Pixel formats
+WebMol.RGBAFormat;
 
 /**
  * @constructor
@@ -725,7 +819,7 @@ WebMol.Texture = function(image) {};
 WebMol.Texture.needsUpdate;
 /**
  * @param {WebMol.Texture=} texture
- * @returns {WebMol.Texture}
+ * @return {WebMol.Texture}
  */
 WebMol.Texture.prototype.clone = function(texture) {};
 WebMol.Texture.prototype.dispose = function() {};
@@ -760,9 +854,14 @@ WebMol.Mesh = function(geometry, material) {};
 
 /**
  * @param {WebMol.Mesh} object
- * @returns {WebMol.Mesh}
+ * @return {WebMol.Mesh}
  */
 WebMol.Mesh.prototype.clone = function (object) {};
+
+/** @type {WebMol.Geometry} */
+WebMol.Mesh.geometry;
+/** @type {WebMol.Material} */
+WebMol.Mesh.material;
 
 /**
  * 
@@ -778,7 +877,7 @@ WebMol.Sprite.prototype.updateMatrix = function() {};
 /** 
  * 
  * @param {type} object
- * @returns {WebMol.Sprite|WebMol.Sprite.prototype.clone.object|WebMol.Object3D|_L16.my.Sprite.prototype.clone.object|WebMol.Object3D.prototype.clone.object}@param {WebMol.Sprite}
+ * @return {WebMol.Sprite|WebMol.Sprite.prototype.clone.object|WebMol.Object3D|_L16.my.Sprite.prototype.clone.object|WebMol.Object3D.prototype.clone.object}@param {WebMol.Sprite}
  * @return {WebMol.Sprite}
  */
 WebMol.Sprite.prototype.clone = function(object) {};
@@ -828,12 +927,17 @@ WebMol.Renderer.render = function(scene, camera, forceClear) {};
  * @extends {WebMol.Object3D}
  */
 WebMol.Scene = function() {};
+/** @type {WebMol.Fog} */
 WebMol.Scene.fog;    
 WebMol.Scene.overrideMaterial;
 WebMol.Scene.matrixAutoUpdate;
+/** @type {Array.<WebMol.Object3D>} */
 WebMol.Scene.__objects;
+/** @type {Array.<WebMol.Light>} */
 WebMol.Scene.__lights;
+/** @type {Array.<WebMol.Object3D>} */
 WebMol.Scene.__objectsAdded;
+/** @type {Array.<WebMol.Object3D>} */
 WebMol.Scene.__objectsRemoved;
 
 /**
@@ -849,12 +953,16 @@ WebMol.Scene.prototype.__removeObject = function(object) {};
 /**
  * @constructor
  * @param {number} hex
- * @param {number} near
- * @param {number} far
+ * @param {number=} near
+ * @param {number=} far
  */
 WebMol.Fog = function(hex, near, far) {};
-
-/** @returns {WebMol.Fog} */
+WebMol.Fog.name;
+/** @type {WebMol.Color} */
+WebMol.Fog.color;
+WebMol.Fog.near;
+WebMol.Fog.far;
+/** @return {WebMol.Fog} */
 WebMol.Fog.prototype.clone = function() {};
 
 /**
@@ -864,7 +972,7 @@ WebMol.ShaderUtils = {};
 
 /**
  * @param {uniformsList} uniforms_src
- * @returns {uniformsList}
+ * @return {uniformsList}
  */    
 WebMol.ShaderUtils.clone = function(uniforms_src) {};
 

@@ -13,7 +13,7 @@ var colorlike;
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
- * @returns {WebMol.GLViewer} GLViewer
+ * @return {WebMol.GLViewer} GLViewer
  * 
  * @example
  * // Assume there exists an HTML div with id "gldiv"
@@ -35,10 +35,21 @@ var colorlike;
  *      
  */
 WebMol.createViewer = function(element, config) {};
+
 /**
- * @param {Object} query
- * @param {WebMol.GLViewer} viewer
- */
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function WebMol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {WebMol.GLViewer} viewer - Add new model to existing viewer
+ * @example
+ * var myviewer = WebMol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * var m = WebMol.download('pdb: 2POR', myviewer);
+ * 
+ * @return {WebMol.GLModel} GLModel
+ */ 
 WebMol.download = function(query, viewer) {};
 
 /** @property JmolElementColors - Jmol style atom colors (default color scheme) */
@@ -70,6 +81,7 @@ AtomSpec.x;
 AtomSpec.y;
 AtomSpec.z;
 AtomSpec.color;
+AtomSpec.surfaceColor;
 AtomSpec.elem;
 AtomSpec.hetflag;
 AtomSpec.chain;
@@ -89,7 +101,7 @@ AtomSpec.clickable;
 /** @type {function(AtomSpec, WebMol.GLViewer)} */
 AtomSpec.callback;
 
-/** @typedef {{linewidth:number, color:colorlike, radius:number}} */
+/** @typedef {{linewidth:number, color:colorlike, radius:number, scale:number, hidden:boolean}} */
 var atomstyle;
 AtomSpec.style = {};
 /** @type {atomstyle} */
@@ -160,7 +172,7 @@ WebMol.GLViewer.resize = function() {};
  * @function WebMol.GLViewer#getModel
  * @param {number=} [id=last model id] - Retrieve model with specified id
  * @default Returns last model added to viewer
- * @returns {WebMol.GLModel}
+ * @return {WebMol.GLModel}
  * 
  * @example
  * // Retrieve reference to first GLModel added
@@ -187,7 +199,7 @@ WebMol.GLViewer.render = function() {};
  * 
  * @function WebMol.GLViewer#pdbData  
  * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
- * @returns {string} PDB string of selected atoms
+ * @return {string} PDB string of selected atoms
  */
 WebMol.GLViewer.pdbData = function(sel) {};
 
@@ -212,7 +224,7 @@ WebMol.GLViewer.zoomTo = function(sel) {};
  * @function WebMol.GLViewer#addLabel
  * @param {string} text - Label text
  * @param {Object} data - Label style specification
- * @returns {WebMol.Label}
+ * @return {WebMol.Label}
  * 
  * @example
  * 
@@ -262,7 +274,7 @@ WebMol.GLViewer.removeLabel = function(label) {};
  * @function WebMol.GLViewer#setLabelStyle
  * @param {WebMol.Label} label - WebMol label
  * @param {Object} stylespec - Label style specification
- * @returns {WebMol.Label}
+ * @return {WebMol.Label}
  */
 WebMol.GLViewer.setLabelStyle = function(label, stylespec) {};
 
@@ -273,7 +285,7 @@ WebMol.GLViewer.setLabelStyle = function(label, stylespec) {};
  * @function WebMol.GLViewer#setLabelText
  * @param {WebMol.Label} label - WebMol label
  * @param {String} text - Label text
- * @returns {WebMol.Label}
+ * @return {WebMol.Label}
  */
 WebMol.GLViewer.setLabelText = function(label, text) {};
 
@@ -283,7 +295,7 @@ WebMol.GLViewer.setLabelText = function(label, text) {};
  * 
  * @function WebMol.GLViewer#addShape
  * @param {Object} shapeSpec - style specification for label
- * @returns {WebMol.GLShape}
+ * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addShape = function(shapeSpec) {};
 
@@ -293,7 +305,7 @@ WebMol.GLViewer.addShape = function(shapeSpec) {};
  * 
  * @function WebMol.GLViewer#addSphere
  * @param {Object} spec - Sphere shape style specification
- * @returns {WebMol.GLShape}
+ * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addSphere = function(spec) {};
 
@@ -302,7 +314,7 @@ WebMol.GLViewer.addSphere = function(spec) {};
  * 
  * @function WebMol.GLViewer#addArrow
  * @param {Object} spec - Style specification
- * @returns {WebMol.GLShape}
+ * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addArrow = function(spec) {};
 
@@ -311,7 +323,7 @@ WebMol.GLViewer.addArrow = function(spec) {};
  * 
  * @function WebMol.GLViewer#addCustom
  * @param {Object} spec - Style specification
- * @returns {WebMol.GLShape}
+ * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addCustom = function(spec) {};
 
@@ -322,7 +334,7 @@ WebMol.GLViewer.addCustom = function(spec) {};
  * @param {String} data - Input file contents 
  * @param {String} format - Input file format (currently only supports "cube")
  * @param {Object} spec - Shape style specification
- * @returns {WebMol.GLShape}
+ * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addVolumetricData = function(data, format, spec) {};
 
@@ -333,7 +345,7 @@ WebMol.GLViewer.addVolumetricData = function(data, format, spec) {};
  * @function WebMol.GLViewer#addModel
  * @param {string} data - Input data
  * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
- * @returns {WebMol.GLModel}
+ * @return {WebMol.GLModel}
  */
 WebMol.GLViewer.addModel = function(data, format) {};
 
@@ -358,9 +370,53 @@ WebMol.GLViewer.removeAllModels = function() {};
  * @function WebMol.GLViewer#createModelFrom
  * @param {Object} sel - Atom selection specification
  * @param {boolean=} extract - If true, remove selected atoms from existing models
- * @returns {WebMol.GLModel}
+ * @return {WebMol.GLModel}
  */
 WebMol.GLViewer.createModelFrom = function(sel, extract) {};
+
+/**
+ * Add surface representation to atoms
+ * 
+ * @param {WebMol.SurfaceType} type - Surface type
+ * @param {Object} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
+ * @param {AtomSpec} atomsel - Show surface for atoms in this selection
+ * @param {AtomSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
+ * @param {AtomSpec} focus - Optionally begin rendering surface specified atoms
+ * 
+ * @return {number} surfid - Identifying number for this surface
+ */
+WebMol.GLViewer.addSurface = function(type, style, atomsel, allsel, focus) {};
+
+/**
+ * WebMol surface types
+ * @enum {number}
+ */
+WebMol.SurfaceType = {};
+WebMol.SurfaceType.VDW;
+WebMol.SurfaceType.MS;
+WebMol.SurfaceType.SAS;
+WebMol.SurfaceType.SES;
+
+/** 
+ * Render surface synchronously if true
+ * @param {boolean} [WebMol.SyncSurface=false]
+ * @type {boolean} */
+WebMol.syncSurface;
+
+/**
+ * Set the surface material to something else, must render change
+ * 
+ * @param {number} surf - Surface ID to apply changes to
+ * @param {matSpec} style - new material style specification
+ */ 
+WebMol.GLViewer.setSurfaceMaterialStyle = function(surf, style) {};
+
+/**
+ * Remove surface with given ID
+ * 
+ * @param {number} surf - surface id
+ */
+this.removeSurface = function(surf) {};
 
 /**
  * Set style properties to all selected atoms
@@ -408,7 +464,7 @@ WebMol.GLModel = function(mid, defaultcolors) {};
  * Returns model id number
  * 
  * @function WebMol.GLMode#getID
- * @returns {number} Model ID
+ * @return {number} Model ID
  */
 WebMol.GLModel.getID = function() {};
 
@@ -425,7 +481,7 @@ WebMol.GLModel.addMolData = function(data, format) {};
  * @function WebMol.GLModel#atomIsSelected
  * @param {type} atom
  * @param {type} sel
- * @returns {boolean}
+ * @return {boolean}
  */
 WebMol.GLModel.atomIsSelected = function(atom, sel) {};
 
@@ -433,7 +489,7 @@ WebMol.GLModel.atomIsSelected = function(atom, sel) {};
  * 
  * @function WebMol.GLModel#selectedAtoms
  * @param {type} sel
- * @returns {Array.<Object>}
+ * @return {Array.<Object>}
  */
 WebMol.GLModel.selectedAtoms = function(sel) {};
 
@@ -448,7 +504,7 @@ WebMol.GLModel.addAtoms = function(newatoms) {};
  * 
  * @function WebMol.GLModel#removeAtoms
  * @param {type} badatoms
- * @returns {removeAtoms}
+ * @return {removeAtoms}
  */
 WebMol.GLModel.removeAtoms = function(badatoms) {};
 
@@ -490,4 +546,6 @@ WebMol.GLModel.globj = function(group) {};
  * @param {WebMol.Object3D} group
  */
 WebMol.GLModel.removegl = function(group) {};
+
+
 
