@@ -6,8 +6,12 @@ var WebMol = {};
 var vectorlike;
 
 /** Object with r, g, and b properties 
- * @typedef {{r:number, g:number, b:number} | WebMol.Color} */
-var colorlike;
+ * @struct */
+var colorlike = {};
+colorlike.r;
+colorlike.g;
+colorlike.b;
+colorlike.a;
 
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
@@ -97,6 +101,8 @@ AtomSpec.bondOrder;
 AtomSpec.properties;
 AtomSpec.b;
 AtomSpec.pdbline;
+/** @type {IntersectionShapes} */
+AtomSpec.intersectionShape;
 AtomSpec.clickable;
 /** @type {function(AtomSpec, WebMol.GLViewer)} */
 AtomSpec.callback;
@@ -223,7 +229,7 @@ WebMol.GLViewer.zoomTo = function(sel) {};
  * 
  * @function WebMol.GLViewer#addLabel
  * @param {string} text - Label text
- * @param {Object} data - Label style specification
+ * @param {LabelSpec} data - Label style specification
  * @return {WebMol.Label}
  * 
  * @example
@@ -273,7 +279,7 @@ WebMol.GLViewer.removeLabel = function(label) {};
  * 
  * @function WebMol.GLViewer#setLabelStyle
  * @param {WebMol.Label} label - WebMol label
- * @param {Object} stylespec - Label style specification
+ * @param {LabelSpec} stylespec - Label style specification
  * @return {WebMol.Label}
  */
 WebMol.GLViewer.setLabelStyle = function(label, stylespec) {};
@@ -547,49 +553,104 @@ WebMol.GLModel.globj = function(group) {};
  */
 WebMol.GLModel.removegl = function(group) {};
 
-//color schemes
+
+WebMol.LabelCount;
+
 /**
- * Color scheme red to white to blue, for charges
- * @constructor
+ * Label type specification
+ * @struct
+ */
+var LabelSpec = {};
+
+/** Label text font style
+ * @type {string} */
+LabelSpec.font;
+
+/** Label text font pt size
+ * @type {number} */
+LabelSpec.fontSize;
+
+/** Label font color - specify with an object with r, g, b, and a (alpha) values
+ * @type {colorlike | WebMol.Color} */
+LabelSpec.fontColor;
+
+LabelSpec.borderThickness;
+/** @type {colorlike} */
+LabelSpec.borderColor;
+/** @type {colorlike} */
+LabelSpec.backgroundColor;
+/**
+ * Label position
+ * @type {vectorlike}
+ */
+LabelSpec.position;
+
+/** labels always rendered in front of model(s) if true
+ * 
+ * @type {boolean}
+ */
+LabelSpec.inFront;
+
+/**
+ * Renderable labels
+ * @constructor WebMol.Label
+ * @extends {LabelSpec}
+ * @param {string} tag - Label text
+ * @param {Object} parameters Label style and font specifications
+ */
+WebMol.Label = function(text, parameters) {};
+        
+WebMol.Label.id;    
+/** @type {LabelSpec} */
+WebMol.Label.stylespec;
+WebMol.Label.canvas;
+WebMol.Label.context;
+/** @type {WebMol.Sprite} */
+WebMol.Label.sprite;
+WebMol.Label.text;
+
+WebMol.Label.prototype.setContext = function() {};
+WebMol.Label.prototype.dispose = function() {};
+
+
+//color schemes
+/** Color mapping scheme
+ * @interface
  * @param {number} min
  * @param {number} max
  */
+var ColorScheme = function(min, max) {};
+
+/**
+ * Map value to hex color
+ * @param {number} val
+ * @param {number} range
+ * @returns {number}
+ */
+ColorScheme.valueToHex = function(val, range) {};
+ColorScheme.jmolID = function() {};
+//return range used for color mapping, null if none set
+ColorScheme.range = function() {};
+
+/**
+ * Color scheme red to white to blue, for charges
+ * @constructor
+ * @implements {ColorScheme}
+ */
 WebMol.RWB = function(min, max) {};
-/**
- * Map value to hex color
- * @param {number} val
- * @param {number} range
- * @returns {number}
- */
-WebMol.RWB.valueToHex = function(val, range) {};
-WebMol.RWB.jmolID = function() {};
-//return range used for color mapping, null if none set
-WebMol.RWB.range = function() {};
 
-//rainbow gradient, but without purple to match jmol
+/**
+ * rainbow gradient, but without purple to match jmol
+ * @constructor
+ * @implements {ColorScheme}
+ */
 WebMol.ROYGB = function(min, max) {};
-/**
- * Map value to hex color
- * @param {number} val
- * @param {number} range
- * @returns {number}
- */
-WebMol.ROYGB.valueToHex = function(val, range) {};
-WebMol.ROYGB.jmolID = function() {};
-//return range used for color mapping, null if none set
-WebMol.ROYGB.range = function() {};
 
-//rainbow gradient with constant saturation, all the way to purple!
-WebMol.Sinebow = function(min, max) {};
 /**
- * Map value to hex color
- * @param {number} val
- * @param {number} range
- * @returns {number}
+ * rainbow gradient with constant saturation, all the way to purple!
+ * @constructor
+ * @implements {ColorScheme}
  */
-WebMol.Sinebow.valueToHex = function(val, range) {};
-WebMol.Sinebow.jmolID = function() {};
-//return range used for color mapping, null if none set
-WebMol.Sinebow.range = function() {};
+WebMol.Sinebow = function(min, max) {};
 
 

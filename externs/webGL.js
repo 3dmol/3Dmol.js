@@ -475,8 +475,9 @@ WebMol.Object3D.matrixWorld;
 WebMol.Object3D.quaternion;
 /** @type {string} */
 WebMol.Object3D.eulerOrder;
-
+/** @type {WebMol.Vector3} */
 WebMol.Object3D.up;
+/** @type {WebMol.Vector3} */
 WebMol.Object3D.scale;
 
 WebMol.Object3D.matrixAutoUpdate;
@@ -566,7 +567,6 @@ WebMol.Raycaster.prototype.linePrecision;
 /**
  * @param {WebMol.Vector3} origin
  * @param {WebMol.Vector3} direction
- * @return {undefined}
  */
 WebMol.Raycaster.prototype.set = function(origin, direction) {};
 /**
@@ -575,6 +575,17 @@ WebMol.Raycaster.prototype.set = function(origin, direction) {};
  * @return {Array.<Object>} 
  */
 WebMol.Raycaster.prototype.intersectObjects = function(group, objects) {};
+
+/** @struct */
+var IntersectionShapes = {};
+/** @type {Array.<WebMol.Sphere>} */
+IntersectionShapes.sphere;
+/** @type {Array.<WebMol.Vector3>} */
+IntersectionShapes.line;
+/** @type {Array.<WebMol.Triangle> */
+IntersectionShapes.triangle;
+/** @type {Array.<WebMol.Cylinder> */
+IntersectionShapes.cylinder;
 
 /** @constructor */
 WebMol.Projector = function () {};

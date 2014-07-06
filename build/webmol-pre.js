@@ -7,24 +7,6 @@ WebMol = (function(window) {
     var my = window['WebMol'] || {};
     //var $ = window['jQuery'];
     
-    // function for drawing rounded rectangles - for Label drawing
-    var roundRect = function(ctx, x, y, w, h, r) {
-
-        ctx.beginPath();
-        ctx.moveTo(x+r, y);
-        ctx.lineTo(x+w-r, y);
-        ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-        ctx.lineTo(x+w, y+h-r);
-        ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-        ctx.lineTo(x+r, y+h);
-        ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-        ctx.lineTo(x, y+r);
-        ctx.quadraticCurveTo(x, y, x+r, y);
-        ctx.closePath();
-        ctx.fill();
-
-    };    
-    
     return my;
 
 })(window);
@@ -5461,14 +5443,8 @@ WebMol.ShapeIDCount = 0;//a molecular viewer based on GLMol
 
 WebMol.LabelCount = 0;
 
-/**
- * Renderable labels
- * @constructor WebMol.Label
- * @param {string} tag Label text
- * @param {Object} parameters Label style and font specifications
- */
 WebMol.Label = function(text, parameters) {
-        
+       
     this.id = WebMol.LabelCount++;    
     this.stylespec = parameters || {};
 
@@ -5487,79 +5463,90 @@ WebMol.Label.prototype = {
     constructor : WebMol.Label,
     
     setContext : function() {
+        // function for drawing rounded rectangles - for Label drawing
+        var roundRect = function(ctx, x, y, w, h, r) {
+
+            ctx.beginPath();
+            ctx.moveTo(x+r, y);
+            ctx.lineTo(x+w-r, y);
+            ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+            ctx.lineTo(x+w, y+h-r);
+            ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+            ctx.lineTo(x+r, y+h);
+            ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+            ctx.lineTo(x, y+r);
+            ctx.quadraticCurveTo(x, y, x+r, y);
+            ctx.closePath();
+            ctx.fill();
+
+        };      
         
-        //Update stylespec
-        /** Label text font style
-         * @public
-         * @type {string} */
-        this.font = this.stylespec.font = 
-            this.stylespec.font ? this.stylespec.font : "Arial";
-    
-         
-        /** Label text font pt size
-         * @type {number} */
-        this.fontSize = this.stylespec.fontSize =
-            this.stylespec.fontSize ? this.stylespec.fontSize : 20;
+        return function() {
             
-        /** Label font color - specify with an object with r, g, b, and a (alpha) values
-         * @type {Object | WebMol.Color} */
-        this.fontColor = this.stylespec.fontColor =
-            this.stylespec.fontColor ? this.stylespec.fontColor : { r:255, g:255, b:255, a:1.0};
-    
-        this.borderThickness = this.stylespec.borderThickness =
-            this.stylespec.borderThickness ? this.stylespec.borderThickness : 4;
-    
-        this.borderColor = this.stylespec.borderColor =
-            this.stylespec.borderColor ? this.stylespec.borderColor : { r:0, g:0, b:0, a:1.0 };
-    
-        this.backgroundColor = this.stylespec.backgroundColor =
-            this.stylespec.backgroundColor ? this.stylespec.backgroundColor : { r:0, g:0, b:0, a:1.0 };
-            
-        this.position = this.stylespec.position =
-            this.stylespec.position ? this.stylespec.position : { x:-10, y:1, z:1 };
+            this.font = this.stylespec.font = 
+                this.stylespec.font ? this.stylespec.font : "Arial";
+
+            this.fontSize = this.stylespec.fontSize =
+                this.stylespec.fontSize ? this.stylespec.fontSize : 20;
+            /** @type {colorlike} */
+            this.fontColor = this.stylespec.fontColor =
+                this.stylespec.fontColor ? this.stylespec.fontColor : { r:255, g:255, b:255, a:1.0};
+
+            this.borderThickness = this.stylespec.borderThickness =
+                this.stylespec.borderThickness ? this.stylespec.borderThickness : 4;
+
+            this.borderColor = this.stylespec.borderColor =
+                this.stylespec.borderColor ? this.stylespec.borderColor : { r:0, g:0, b:0, a:1.0 };
+
+            this.backgroundColor = this.stylespec.backgroundColor =
+                this.stylespec.backgroundColor ? this.stylespec.backgroundColor : { r:0, g:0, b:0, a:1.0 };
+
+            this.position = this.stylespec.position =
+                this.stylespec.position ? this.stylespec.position : { x:-10, y:1, z:1 };
+
+            //Should labels always be in front of model? 
+            this.inFront = this.stylespec.inFront = 
+                (this.stylespec.inFront !== undefined) ? this.stylespec.inFront : true;
+
+            //clear canvas
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+            var spriteAlignment = WebMol.SpriteAlignment.topLeft;
+
+            this.context.font = this.fontSize + "pt " + this.font;
+
+            var metrics = this.context.measureText(this.text);           
+            var textWidth = metrics.width;
+
+            // background color
+            this.context.fillStyle   = "rgba(" + this.backgroundColor.r + "," + this.backgroundColor.g + "," +
+                                                                       this.backgroundColor.b + "," + this.backgroundColor.a + ")";
+            // border color
+            this.context.strokeStyle = "rgba(" + this.borderColor.r + "," + this.borderColor.g + "," +
+                                                                       this.borderColor.b + "," + this.borderColor.a + ")";
+
+            this.context.lineWidth = this.borderThickness;
+            roundRect(this.context, this.borderThickness/2, this.borderThickness/2, textWidth + this.borderThickness, this.fontSize * 1.4 + this.borderThickness, 6);
+            // 1.4 is extra height factor for text below baseline: g,j,p,q.
+
+            // text color
+            this.context.fillStyle = "rgba(" + this.fontColor.r + "," + this.fontColor.g + "," +
+                                                                      this.fontColor.b + "," + this.fontColor.a + ")";
+
+            this.context.fillText(this.text, this.borderThickness, this.fontSize + this.borderThickness, textWidth);
+
+            // canvas contents will be used for a texture
+            var texture = new WebMol.Texture(this.canvas);
+            texture.needsUpdate = true;
+
+            this.sprite.material = new WebMol.SpriteMaterial( 
+                    { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !this.inFront } );
+
+            this.sprite.scale.set(2 * this.fontSize, this.fontSize, 1);
+            this.sprite.position.set(this.position.x, this.position.y, this.position.z);
+        };
         
-        //Should labels always be in front of model? 
-        this.inFront = this.stylespec.inFront = 
-            (this.stylespec.inFront !== undefined) ? this.stylespec.inFront : true;
-            
-        //clear canvas
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            
-        var spriteAlignment = WebMol.SpriteAlignment.topLeft;
-        
-        this.context.font = this.fontSize + "pt " + this.font;
-        
-        var metrics = this.context.measureText(this.text);           
-        var textWidth = metrics.width;
-        
-        // background color
-        this.context.fillStyle   = "rgba(" + this.backgroundColor.r + "," + this.backgroundColor.g + "," +
-                                                                   this.backgroundColor.b + "," + this.backgroundColor.a + ")";
-        // border color
-        this.context.strokeStyle = "rgba(" + this.borderColor.r + "," + this.borderColor.g + "," +
-                                                                   this.borderColor.b + "," + this.borderColor.a + ")";
-    
-        this.context.lineWidth = this.borderThickness;
-        roundRect(this.context, this.borderThickness/2, this.borderThickness/2, textWidth + this.borderThickness, this.fontSize * 1.4 + this.borderThickness, 6);
-        // 1.4 is extra height factor for text below baseline: g,j,p,q.
-    
-        // text color
-        this.context.fillStyle = "rgba(" + this.fontColor.r + "," + this.fontColor.g + "," +
-                                                                  this.fontColor.b + "," + this.fontColor.a + ")";
-    
-        this.context.fillText(this.text, this.borderThickness, this.fontSize + this.borderThickness, textWidth);
-        
-        // canvas contents will be used for a texture
-        var texture = new WebMol.Texture(this.canvas);
-        texture.needsUpdate = true;
-        
-        this.sprite.material = new WebMol.SpriteMaterial( 
-                { map: texture, useScreenCoordinates: false, alignment: spriteAlignment, depthTest: !this.inFront } );
-                    
-        this.sprite.scale.set(2 * this.fontSize, this.fontSize, 1);
-        this.sprite.position.set(this.position.x, this.position.y, this.position.z);
-        
-    },
+    }(),
     
     //clean up material and texture
     dispose : function() {
@@ -6819,10 +6806,12 @@ WebMol.GLViewer = (function() {
             var extent = getExtent(atomsToShow);
         
             var i, il;
-            if (style.map && style.map.prop) {
+            if (style['map'] && style['map']['prop']) {
                 // map color space using already set atom properties
-                var prop = style.map.prop;
-                var scheme = style.map.scheme || new WebMol.RWB();
+                /** @type {AtomSpec} */
+                var prop = style['map']['prop'];
+                /** @type {ColorScheme} */
+                var scheme = style['map']['scheme'] || new WebMol.RWB();
                 var range = scheme.range();
                 if (!range) {
                     range = getPropertyRange(atomsToShow, prop);
