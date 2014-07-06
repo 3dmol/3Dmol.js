@@ -300,7 +300,7 @@ WebMol.GLViewer.setLabelText = function(label, text) {};
  * @see {@link WebMol.GLShape}
  * 
  * @function WebMol.GLViewer#addShape
- * @param {Object} shapeSpec - style specification for label
+ * @param {ShapeSpec} shapeSpec - style specification for label
  * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addShape = function(shapeSpec) {};
@@ -310,7 +310,7 @@ WebMol.GLViewer.addShape = function(shapeSpec) {};
  * way to create a spherical shape object
  * 
  * @function WebMol.GLViewer#addSphere
- * @param {Object} spec - Sphere shape style specification
+ * @param {SphereSpec} spec - Sphere shape style specification
  * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addSphere = function(spec) {};
@@ -319,7 +319,7 @@ WebMol.GLViewer.addSphere = function(spec) {};
  * Create and add arrow shape
  * 
  * @function WebMol.GLViewer#addArrow
- * @param {Object} spec - Style specification
+ * @param {ArrowSpec} spec - Style specification
  * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addArrow = function(spec) {};
@@ -328,7 +328,7 @@ WebMol.GLViewer.addArrow = function(spec) {};
  * Add custom shape component from user supplied function
  * 
  * @function WebMol.GLViewer#addCustom
- * @param {Object} spec - Style specification
+ * @param {CustomSpec} spec - Style specification
  * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addCustom = function(spec) {};
@@ -339,7 +339,7 @@ WebMol.GLViewer.addCustom = function(spec) {};
  * @function WebMol.GLViewer#addVolumetricData
  * @param {String} data - Input file contents 
  * @param {String} format - Input file format (currently only supports "cube")
- * @param {Object} spec - Shape style specification
+ * @param {VolSpec} spec - Shape style specification
  * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addVolumetricData = function(data, format, spec) {};
@@ -611,6 +611,126 @@ WebMol.Label.text;
 
 WebMol.Label.prototype.setContext = function() {};
 WebMol.Label.prototype.dispose = function() {};
+
+/** 
+ * GLShape style specification
+ * @struct
+ */
+var ShapeSpec = {};
+/** @type {WebMol.Color} */
+ShapeSpec.color;
+ShapeSpec.wireframe;
+ShapeSpec.alpha;
+ShapeSpec.side;
+ShapeSpec.clickable;
+/** @type {function(WebMol.GLShape, WebMol.GLViewer)} */
+ShapeSpec.callback;
+
+/**
+ * Specification for adding custom shape
+ * @struct
+ */
+var CustomShapeSpec = {};
+CustomShapeSpec.vertexArr;
+CustomShapeSpec.faceArr;
+CustomShapeSpec.normalArr;
+CustomShapeSpec.lineArr;
+
+/**
+ * Sphere shape specification
+ * @struct
+ */
+var SphereSpec = {};
+SphereSpec.radius;
+/** @type {vectorlike} */
+SphereSpec.center;
+
+/**
+ * Arrow shape specification
+ * @struct
+ */
+var ArrowSpec = {};
+/** @type {WebMol.Vector3} */
+arrowSpec.start;
+/** @type {WebMol.Vector3} */
+arrowSpec.end;
+arrowSpec.radius;
+arrowSpec.radiusRatio;
+arrowSpec.mid;
+
+/**
+ * Volumetric data specification
+ * @struct
+ */
+var VolSpec = {};
+VolSpec.isoval;
+VolSpec.voxel;
+
+/**
+ * A GLShape is a collection of user specified shapes.
+ * 
+ * @constructor WebMol.GLShape
+ * @extends {ShapeSpec}
+ * @param {number} sid - Unique identifier
+ * @param {ShapeSpec} stylespec - shape style specification
+ */
+WebMol.GLShape = function(sid, stylespec) {};
+
+WebMol.GLShape.id;
+WebMol.GLShape.boundingSphere;
+/** @type {IntersectionShapes} */
+WebMol.GLShape.intersectionShape;
+/** @type {WebMol.Vector3} */
+WebMol.GLShape.position;
+WebMol.GLShape.x;
+WebMol.GLShape.y;
+WebMol.GLShape.z;
+
+/** Update shape with new style specification
+ * @param {ShapeSpec} newspec
+ * @return {WebMol.GLShape}
+ */
+WebMol.GLShape.updateStyle = function(newspec) {};
+
+/**
+ * Creates a custom shape from supplied vertex and face arrays
+ * @param {CustomSpec} customSpec
+ * @return {WebMol.GLShape}
+ */
+WebMol.GLShape.addCustom = function(customSpec) {};
+        
+       
+/**
+ * Creates a sphere shape
+ * @param {SphereSpec} sphereSpec
+ * @return {WebMol.GLShape}
+ */
+WebMol.GLShape.addSphere = function(sphereSpec) {};    
+
+/**
+ * Creates an arrow shape
+ * @param {ArrowSpec} arrowSpec
+ * @return {WebMol.GLShape}
+ */
+WebMol.GLShape.addArrow = function(arrowSpec) {};
+
+/** 
+ * Creates custom shape from volumetric data 
+ * @param {string} data - Volumetric input data 
+ * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
+ * @param {VolSpec} volSpec - Volumetric data shape specification
+ * @return {WebMol.GLShape}
+ */
+WebMol.GLShape.addVolumetricData = function(data, fmt, volSpec) {};
+
+/**
+ * Initialize webgl objects for rendering
+ * @param {WebMol.Object3D} group
+ * 
+ */  
+WebMol.GLShape.globj = function(group) {};
+
+WebMol.ShapeIDCount;
 
 
 //color schemes

@@ -96,6 +96,9 @@ WebMol.CC = {
     }
 };
 
+WebMol['CC'] = WebMol.CC;
+WebMol['CC']['color'] = WebMol.CC.color;
+
 //Miscellaneous functions and classes - to be incorporated into WebMol proper
 /**
  * 

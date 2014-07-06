@@ -842,14 +842,6 @@ WebMol.GLViewer = (function() {
 
         };
         
-        /**
-         * Add shape object to viewer 
-         * @see {@link WebMol.GLShape}
-         * 
-         * @function WebMol.GLViewer#addShape
-         * @param {Object} shapeSpec - style specification for label
-         * @returns {WebMol.GLShape}
-         */
         this.addShape = function(shapeSpec) {
             shapeSpec = shapeSpec || {};
             var shape = new WebMol.GLShape(shapes.length, shapeSpec);
@@ -859,13 +851,6 @@ WebMol.GLViewer = (function() {
               
         };
         
-        /**
-         * Create and add sphere shape. This method provides a shorthand 
-         * way to create a spherical shape object
-         * 
-         * @param {Object} spec - Sphere shape style specification
-         * @returns {WebMol.GLShape}
-         */
         this.addSphere = function(spec) {
             var s = new WebMol.GLShape(shapes.length);
             spec = spec || {};
@@ -875,12 +860,6 @@ WebMol.GLViewer = (function() {
             return s;
         };
         
-        /**
-         * Create and add arrow shape
-         * 
-         * @param {Object} spec - Style specification
-         * @returns {WebMol.GLShape}
-         */
         this.addArrow = function(spec) {            
             var s = new WebMol.GLShape(shapes.length);            
             spec = spec || {};
@@ -889,13 +868,7 @@ WebMol.GLViewer = (function() {
             
             return s;
         };
-        
-        /**
-         * Add custom shape component from user supplied function
-         * 
-         * @param {Object} spec - Style specification
-         * @returns {WebMol.GLShape}
-         */
+
         this.addCustom = function(spec) {   
             var s = new WebMol.GLShape(shapes.length);                         
             spec = spec || {};
@@ -904,15 +877,7 @@ WebMol.GLViewer = (function() {
             
             return s;                       
         };
-        
-        /**
-         * Construct isosurface from volumetric data in gaussian cube format
-         * 
-         * @param {String} data - Input file contents 
-         * @param {String} format - Input file format (currently only supports "cube")
-         * @param {Object} spec - Shape style specification
-         * @returns {WebMol.GLShape}
-         */
+
         this.addVolumetricData = function(data, format, spec) {
             var s = new WebMol.GLShape(shapes.length);
             spec = spec || {};            
@@ -922,14 +887,6 @@ WebMol.GLViewer = (function() {
             return s;       
         };
 
-        /**
-         * Create and add model to viewer, given molecular data and its format 
-         * (pdb, sdf, xyz, or mol2)
-         * 
-         * @param {String} data - Input data
-         * @param {String} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
-         * @returns {WebMol.GLModel}
-         */
         this.addModel = function(data, format) {
            
             var m = new WebMol.GLModel(models.length, defaultcolors);
@@ -939,11 +896,6 @@ WebMol.GLViewer = (function() {
             return m;
         };
 
-        /**
-         * Delete specified model from viewer
-         * 
-         * @param {WebMol.GLModel} model
-         */
         this.removeModel = function(model) {
             if (!model)
                 return;
@@ -955,9 +907,6 @@ WebMol.GLViewer = (function() {
                 models.pop();
         };
 
-        /** 
-         * Delete all existing models
-         */
         this.removeAllModels = function() {
             for (var i = 0; i < models.length; i++) {
                 var model = models[i];
@@ -967,13 +916,6 @@ WebMol.GLViewer = (function() {
             models = [];
         };
 
-        /**
-         * Create a new model from atoms specified by sel.
-         * If extract, removes selected atoms from existing models 
-         * @param {Object} sel - Atom selection specification
-         * @param {Boolean} extract - If true, remove selected atoms from existing models
-         * @returns {WebMol.GLModel}
-         */
         this.createModelFrom = function(sel, extract) {
             var m = new WebMol.GLModel(models.length, defaultcolors);
             for ( var i = 0; i < models.length; i++) {
@@ -996,33 +938,15 @@ WebMol.GLViewer = (function() {
             }
         }
 
-        /**
-         * Set style properties to all selected atoms
-         * 
-         * @param {Object} sel - Atom selection specification
-         * @param {Object} style - Style spec to apply to specified atoms
-         */
         this.setStyle = function(sel, style) {
             applyToModels("setStyle", sel, style, false);
         };
-        
-        /**
-         * Add style properties to all selected atoms
-         * 
-         * @param {Object} sel - Atom selection specification
-         * @param {Object} style - style spec to add to specified atoms
-         */
+
         this.addStyle = function(sel, style) {
             applyToModels("setStyle", sel, style, true);
         };
 
-        /**
-         * 
-         * @param {type} sel
-         * @param {type} prop
-         * @param {type} scheme
-         * @returns {undefined}
-         */
+
         this.setColorByProperty = function(sel, prop, scheme) {
             applyToModels("setColorByProperty", sel, prop, scheme);
         };

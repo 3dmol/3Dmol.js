@@ -5,14 +5,19 @@ WebMol.GLShape = (function() {
     
     //Marching cube, to match with protein surface generation
     var ISDONE = 2;
-
+    
+    /**
+     * 
+     * @param {WebMol.Geometry} geo
+     * @param {WebMol.Color | colorlike} color
+     */
     var updateColor = function(geo, color) {
         
         var C = color || WebMol.CC.color(color);
         geo.colorsNeedUpdate = true;
         
         for (var g in geo.geometryGroups) {
-            
+    
             var geoGroup = geo.geometryGroups[g];
             var colorArr = geoGroup.__colorArray;
             
@@ -90,6 +95,11 @@ WebMol.GLShape = (function() {
         
     }; 
     
+    /**
+     * @param {WebMol.GLShape} shape
+     * @param {geometryGroup} geoGroup
+     * @param {SphereSpec} spec
+     */
     var drawSphere = function(shape, geoGroup, spec) {
         
         var pos = spec.center, radius = spec.radius;        
@@ -209,6 +219,11 @@ WebMol.GLShape = (function() {
 
     };
     
+    /**
+     * @param {WebMol.GLShape} shape
+     * @param {geometryGroup} geoGroup
+     * @param {ArrowSpec} spec
+     */
     var drawArrow = function(shape, geoGroup, spec) {
         
         var from = spec.start, end = spec.end, radius = spec.radius, radiusRatio = spec.radiusRatio, mid = spec.mid;
@@ -456,6 +471,11 @@ WebMol.GLShape = (function() {
     
     //handles custom shape generation from user supplied arrays
     //May need to generate normal and/or line indices
+    /**
+     * @param {WebMol.GLShape} shape
+     * @param {geometryGroup} geoGroup
+     * @param {CustomSpec} customSpec
+     */
     var drawCustom = function(shape, geoGroup, customSpec) {
         
         var vertexArr = customSpec.vertexArr, normalArr = customSpec.normalArr, faceArr = customSpec.faceArr, lineArr = customSpec.lineArr;        
@@ -509,6 +529,13 @@ WebMol.GLShape = (function() {
     };
     
     //Read a cube file - generate model and possibly shape(s)
+    /**
+     * @param {WebMol.GLShape} shape
+     * @param {geometryGroup} geoGroup
+     * @param {string} str
+     * @param {number} isoval
+     * @param {boolean} voxel
+     */
     var parseCube = function(shape, geoGroup, str, isoval, voxel) {
         
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
@@ -586,6 +613,11 @@ WebMol.GLShape = (function() {
     
     //Update a bounding sphere's position and radius
     //from list of centroids and new points
+    /**
+     * @param {WebMol.Sphere} sphere
+     * @param {Object} components
+     * @param {Array} points
+     */
     var updateBoundingFromPoints = function(sphere, components, points) {       
            
         sphere.center.set(0,0,0);
@@ -614,6 +646,12 @@ WebMol.GLShape = (function() {
 
     };
     
+    /**
+     * 
+     * @param {WebMol.GLShape} shape
+     * @param {ShapeSpec} stylespec
+     * @returns {undefined}
+     */
     var updateFromStyle = function(shape, stylespec) {
         shape.color = stylespec.color || new WebMol.Color();
         shape.wireframe = stylespec.wireframe ? true : false;
