@@ -641,6 +641,7 @@ WebMol.Material.prototype.dispose = function () {};
  */
 var matSpec = {};
 matSpec.color;
+/** @type {numlike} */
 matSpec.linewidth;
 matSpec.linecap;
 matSpec.linejoin;

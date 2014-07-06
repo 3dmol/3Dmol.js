@@ -1132,6 +1132,11 @@ WebMol.GLModel = (function() {
 
         //sphere drawing
         //See also: drawCylinder
+        /** 
+         * 
+         * @param {AtomSpec} atom
+         * @param {WebMol.Geometry} geo
+         */
         var drawAtomSphere = function(atom, geo) {
             
             if (!atom.style.sphere)
@@ -1870,11 +1875,11 @@ WebMol.GLModel = (function() {
                 ret.add(sticks);
             }
             
-            var linewidth;
+            //var linewidth;
             // add any line geometries, distinguished by line width
             for (i in lineGeometries) {
                 if (lineGeometries.hasOwnProperty(i)) {
-                    linewidth = i;
+                    var linewidth = i;
                     var lineMaterial = new WebMol.LineBasicMaterial({
                         linewidth : linewidth,
                         vertexColors : true
@@ -1892,7 +1897,7 @@ WebMol.GLModel = (function() {
             // add any cross geometries
             for (i in crossGeometries) {
                 if (crossGeometries.hasOwnProperty(i)) {
-                    linewidth = i;
+                    var linewidth = i;
                     var crossMaterial = new WebMol.LineBasicMaterial({
                         linewidth : linewidth,
                         vertexColors : true

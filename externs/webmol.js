@@ -2,8 +2,12 @@
 var WebMol = {};
 
 /** Object with x, y, and z properties
- * @typedef {{x:number, y:number, z:number}} */
+ * @typedef {{x:number, y:number, z:number} | WebMol.Vector3} */
 var vectorlike;
+
+/** Object with r, g, and b properties 
+ * @typedef {{r:number, g:number, b:number} | WebMol.Color} */
+var colorlike;
 
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
@@ -65,6 +69,7 @@ AtomSpec.resn;
 AtomSpec.x;
 AtomSpec.y;
 AtomSpec.z;
+AtomSpec.color;
 AtomSpec.elem;
 AtomSpec.hetflag;
 AtomSpec.chain;
@@ -81,11 +86,22 @@ AtomSpec.properties;
 AtomSpec.b;
 AtomSpec.pdbline;
 AtomSpec.clickable;
+/** @type {function(AtomSpec, WebMol.GLViewer)} */
 AtomSpec.callback;
-/** @type {{stick:atomstyle, line:atomstyle, sphere:atomstyle, cross:atomstyle, cartoon:atomstyle}}*/
-AtomSpec.style;
-/** @typedef {{linewidth:number, color:Object}} */
+
+/** @typedef {{linewidth:number, color:colorlike, radius:number}} */
 var atomstyle;
+AtomSpec.style = {};
+/** @type {atomstyle} */
+AtomSpec.style.line;
+/** @type {atomstyle} */
+AtomSpec.style.cross;
+/** @type {atomstyle} */
+AtomSpec.style.sphere;
+/** @type {atomstyle} */
+AtomSpec.style.stick;
+/** @type {atomstyle} */
+AtomSpec.style.cartoon;
 
 //Viewer
 // The constructor
