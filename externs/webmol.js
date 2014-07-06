@@ -547,5 +547,49 @@ WebMol.GLModel.globj = function(group) {};
  */
 WebMol.GLModel.removegl = function(group) {};
 
+//color schemes
+/**
+ * Color scheme red to white to blue, for charges
+ * @constructor
+ * @param {number} min
+ * @param {number} max
+ */
+WebMol.RWB = function(min, max) {};
+/**
+ * Map value to hex color
+ * @param {number} val
+ * @param {number} range
+ * @returns {number}
+ */
+WebMol.RWB.valueToHex = function(val, range) {};
+WebMol.RWB.jmolID = function() {};
+//return range used for color mapping, null if none set
+WebMol.RWB.range = function() {};
+
+//rainbow gradient, but without purple to match jmol
+WebMol.ROYGB = function(min, max) {};
+/**
+ * Map value to hex color
+ * @param {number} val
+ * @param {number} range
+ * @returns {number}
+ */
+WebMol.ROYGB.valueToHex = function(val, range) {};
+WebMol.ROYGB.jmolID = function() {};
+//return range used for color mapping, null if none set
+WebMol.ROYGB.range = function() {};
+
+//rainbow gradient with constant saturation, all the way to purple!
+WebMol.Sinebow = function(min, max) {};
+/**
+ * Map value to hex color
+ * @param {number} val
+ * @param {number} range
+ * @returns {number}
+ */
+WebMol.Sinebow.valueToHex = function(val, range) {};
+WebMol.Sinebow.jmolID = function() {};
+//return range used for color mapping, null if none set
+WebMol.Sinebow.range = function() {};
 
 

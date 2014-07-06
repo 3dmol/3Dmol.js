@@ -1149,7 +1149,7 @@ WebMol.GLViewer = (function() {
         /** 
          * 
          * @param {Array.<AtomSpec>} atoms
-         * @param {Object} VandF
+         * @param {{vertices:number,faces:number}} VandF
          * @param {WebMol.MeshLambertMaterial} mat
          * @return {WebMol.Mesh}
          */
@@ -1160,7 +1160,7 @@ WebMol.GLViewer = (function() {
             var geoGroup = geo.updateGeoGroup(0);
             
             // reconstruct vertices and faces
-            var v = VandF.vertices;
+            var v = VandF['vertices'];
             var offset;
             var i, il;
             for (i = 0, il = v.length; i < il; i++) {            
@@ -1169,7 +1169,7 @@ WebMol.GLViewer = (function() {
                 geoGroup.vertices++;
             }
                        
-            var faces = VandF.faces;
+            var faces = VandF['faces'];
             geoGroup.faceidx = faces.length;//*3;
             geo.initTypedArrays();
 
@@ -1195,9 +1195,9 @@ WebMol.GLViewer = (function() {
                 faceoffset = i;
                 //var a = faces[i].a, b = faces[i].b, c = faces[i].c;
                 var a = faces[i], b = faces[i+1], c = faces[i+2];
-                var A = v[a].atomid;
-                var B = v[b].atomid;
-                var C = v[c].atomid;
+                var A = v[a]['atomid'];
+                var B = v[b]['atomid'];
+                var C = v[c]['atomid'];
                 
                 var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
@@ -1457,9 +1457,9 @@ WebMol.GLViewer = (function() {
                     var w = new Worker(WebMol.SurfaceWorker);
                     workers.push(w);
                     w.postMessage({
-                        type : -1,
-                        atoms : reducedAtoms,
-                        volume : totalVol
+                        'type' : -1,
+                        'atoms' : reducedAtoms,
+                        'volume' : totalVol
                     });
                 }
                 var cnt = 0;
@@ -1486,10 +1486,10 @@ WebMol.GLViewer = (function() {
                     worker.onerror = efunction;
 
                     worker.postMessage({
-                        type : type,
-                        expandedExtent : extents[i].extent,
-                        extendedAtoms : extents[i].atoms,
-                        atomsToShow : extents[i].toshow,
+                        'type' : type,
+                        'expandedExtent' : extents[i].extent,
+                        'extendedAtoms' : extents[i].atoms,
+                        'atomsToShow' : extents[i].toshow
                     });
                 }
             }

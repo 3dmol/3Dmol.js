@@ -50,6 +50,5 @@ WebMol.workerString = 'self.onmessage=function(oEvent){var obj=oEvent.data,type=
 
 WebMol.SurfaceWorker = window.URL.createObjectURL(new Blob([WebMol.workerString]));
 
- 
- 
- 
+WebMol['workerString'] = WebMol.workerString;
+WebMol['SurfaceWorker'] = WebMol.SurfaceWorker;

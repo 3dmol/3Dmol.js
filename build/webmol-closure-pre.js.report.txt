@@ -110,59 +110,67 @@ build\webmol-pre.js:1598: WARNING - dangerous use of the global this object
         this.marchingcubeinit(stype);
         ^
 
-build\webmol-pre.js:1820: WARNING - namespace WebMol should not be redefined
+build\webmol-pre.js:1672: WARNING - incomplete alias created for namespace WebMol
+WebMol['workerString'] = WebMol.workerString;
+^
+
+build\webmol-pre.js:1673: WARNING - incomplete alias created for namespace WebMol
+WebMol['SurfaceWorker'] = WebMol.SurfaceWorker;
+^
+
+build\webmol-pre.js:1819: WARNING - namespace WebMol should not be redefined
 var WebMol = WebMol || {};
     ^
 
-build\webmol-pre.js:1826: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1825: WARNING - dangerous use of the global this object
 	this.valueToHex = function(val, range) {
 	^
 
-build\webmol-pre.js:1859: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1858: WARNING - dangerous use of the global this object
 	this.jmolID = function() {
 	^
 
-build\webmol-pre.js:1864: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1863: WARNING - dangerous use of the global this object
 	this.range = function() {
 	^
 
-build\webmol-pre.js:1877: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1876: WARNING - dangerous use of the global this object
 	this.valueToHex = function(val, range) {
 	^
 
-build\webmol-pre.js:1922: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1921: WARNING - dangerous use of the global this object
 	this.jmolID = function() {
 	^
 
-build\webmol-pre.js:1927: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1926: WARNING - dangerous use of the global this object
 	this.range = function() {
 	^
 
-build\webmol-pre.js:1940: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1939: WARNING - dangerous use of the global this object
 	this.valueToHex = function(val, range) {
 	^
 
-build\webmol-pre.js:1969: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1968: WARNING - dangerous use of the global this object
 	this.jmolID = function() {
 	^
 
-build\webmol-pre.js:1974: WARNING - dangerous use of the global this object
+build\webmol-pre.js:1973: WARNING - dangerous use of the global this object
 	this.range = function() {
 	^
 
-build\webmol-pre.js:1989: WARNING - namespace WebMol should not be redefined
+build\webmol-pre.js:1988: WARNING - namespace WebMol should not be redefined
 var WebMol = WebMol || {};
     ^
 
-build\webmol-pre.js:2424: WARNING - namespace WebMol should not be redefined
+build\webmol-pre.js:2423: WARNING - namespace WebMol should not be redefined
 var WebMol = WebMol || {};
     ^
 
-build\webmol-pre.js:7046: WARNING - incomplete alias created for namespace WebMol
+build\webmol-pre.js:7045: WARNING - incomplete alias created for namespace WebMol
 WebMol['glmolViewer'] = WebMol.GLViewer;
 ^
 
-build\webmol-pre.js:7047: WARNING - namespace WebMol should not be redefined
+build\webmol-pre.js:7046: WARNING - namespace WebMol should not be redefined
 var WebMol = WebMol || {};
     ^
 
@@ -170,4 +178,4 @@ externs\webGL.js:911: WARNING - Parse error. Non-JSDoc comment has annotations. 
 WebMol.Renderer.setSize = function(width, height) {};
 ^
 
-0 error(s), 43 warning(s)
+0 error(s), 45 warning(s)

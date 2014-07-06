@@ -139,7 +139,7 @@ WebMol.ProteinSurface = function() {
         for (i = 0, il = faces.length; i < il; i += 3) {
             //var f = faces[i];
             var fa = faces[i], fb = faces[i+1], fc = faces[i+2];
-            var a = vertices[fa].atomid, b = vertices[fb].atomid, c = vertices[fc].atomid;
+            var a = vertices[fa]['atomid'], b = vertices[fb]['atomid'], c = vertices[fc]['atomid'];
 
             // must be a unique face for each atom
             var which = a;
@@ -168,8 +168,8 @@ WebMol.ProteinSurface = function() {
         vpAtomID = null; // intarray
         
         return {
-            vertices : vertices,
-            faces : finalfaces
+            'vertices' : vertices,
+            'faces' : finalfaces
         };
     };
 
@@ -839,7 +839,7 @@ WebMol.ProteinSurface = function() {
 
         var pWH = pWidth*pHeight;
         for (var i = 0, vlen = verts.length; i < vlen; i++) {
-            verts[i].atomid = vpAtomID[verts[i].x * pWH + pHeight *
+            verts[i]['atomid'] = vpAtomID[verts[i].x * pWH + pHeight *
                     verts[i].y + verts[i].z];
         }  
 
