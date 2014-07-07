@@ -52,28 +52,23 @@ module.exports = function(grunt) {
             },
             
             webGL : {
-                src : ['webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
-                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js'],
+                src : ['js/jquery-1.9.1.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
+                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/properties.js'],
                 dest : 'build/webGL-pre.js'
             },
             
             big : {
-                src : ['js/jquery-1.11.1.min.js', 'build/webmol-pre.js', 'build/webGL-pre.js'],
+                src : ['build/webGL-pre.js', 'build/webmol-pre.js'],
                 dest : 'build/webmol.js'
             },
             
-            min : {
-                src : ['js/jquery-1.11.1.min.js', 'build/webmol-min-pre.js', 'build/webGL-min-pre.js'],
+            closure : {
+                src : ['build/webGL-min-pre.js', 'build/webmol-min-pre.js'],
                 dest : 'build/webmol-min.js'
             },
             
-            closure : {
-                src : ['js/jquery-1.9.1.js', 'build/webmol-pre.js', 'build/webGL-pre.js'],
-                dest : 'build/webmol-closure-pre.js'
-            },
-            
             append : {
-                src : ['build/webmol-closure-pre.js', 'append.js'],
+                src : ['js/jquery-1.11.1.min.js', 'build/webmol-closure-pre.js', 'append.js'],
                 dest : 'build/webmol-closure.js'
             }
         },
@@ -93,24 +88,11 @@ module.exports = function(grunt) {
         },
         
         'closure-compiler' : {
-            build : {
-                closurePath : 'lib/closure_compiler',
-                js : ['build/webmol-closure-pre.js'],
-                jsOutputFile : 'build/webmol-closure.js',
-                noreport : true,
-                options : {
-                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
-                    'warning_level': 'DEFAULT',
-                    'language_in': 'ECMASCRIPT5',
-                    'externs': ['externs/jquery.js', 'externs/webmol.js', 'externs/webGL.js'],
-                    'create_source_map': 'script.map',
-                    'process_jquery_primitives': null
-                }
-            },
+            
             webmol : {
                 closurePath : 'lib/closure_compiler',
                 js : ['build/webmol-pre.js'],
-                jsOutputFile : 'build/webmol-closure-pre.js',
+                jsOutputFile : 'build/webmol-min-pre.js',
                 //noreport : true,
                 options : {
                     'compilation_level': 'ADVANCED_OPTIMIZATIONS',
@@ -123,26 +105,12 @@ module.exports = function(grunt) {
             webgl : {
                 closurePath : 'lib/closure_compiler',
                 js : ['build/webGL-pre.js'],
-                jsOutputFile : 'build/webgl-min-closure-pre.js',
+                jsOutputFile : 'build/webgl-min-pre.js',
                 //noreport : true,
                 options : {
-                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
+                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
-                    'language_in': 'ECMASCRIPT5',
-                    'externs': ['externs/webmol.js', 'externs/webGL.js', 'externs/jquery.js'],
-                    'create_source_map': 'script.map'
-                }
-            },
-            test : {
-                closurePath : 'lib/closure_compiler',
-                js : ['tests/test-vector-closure.js'],
-                jsOutputFile : 'build/webgl-test.js',
-                noreport : true,
-                options : {
-                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
-                    'warning_level': 'DEFAULT',
-                    'language_in': 'ECMASCRIPT5',
-                    'externs' : ['externs/test.js']
+                    'language_in': 'ECMASCRIPT5'
                 }
             }
         }   
@@ -150,13 +118,13 @@ module.exports = function(grunt) {
     });
     
     grunt.registerTask('doc', ['clean:doc', 'jsdoc']);
-    grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL', 'concat:closure']);
-    grunt.registerTask('concat_build', ['concat:big', 'concat:min']);
+    grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL']);
+    grunt.registerTask('concat_post_build', ['concat:big', 'concat:closure']);
     
-    grunt.registerTask('test', ['clean:build', 'concat:pre', 'concat:webGL', 'closure-compiler:webmol', 'concat:append']);
+    grunt.registerTask('test', ['clean:build', 'concat_pre_build', 'closure-compiler:test', 'concat:append']);
     grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler:build', 'concat:append']);
     
-    grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'uglify', 'closure-compiler:build', 'concat_build', 'clean:tmp']);
+    grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'clean:tmp']);
     
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-jshint');

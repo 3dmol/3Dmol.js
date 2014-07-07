@@ -553,6 +553,17 @@ WebMol.GLModel.globj = function(group) {};
  */
 WebMol.GLModel.removegl = function(group) {};
 
+/** Clear all models, surfaces, and shapes from viewer */
+WebMol.GLViewer.clear = function() {};
+
+// props is a list of objects that select certain atoms and enumerate
+// properties for those atom
+/**
+ * Add specified properties to all atoms matching input argument
+ * @param {AtomSpec} props
+ */
+WebMol.GLViewer.mapAtomProperties = function(props) {};
+
 
 WebMol.LabelCount;
 

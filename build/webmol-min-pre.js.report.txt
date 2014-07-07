@@ -174,23 +174,23 @@ externs\webGL.js:922: WARNING - Parse error. Non-JSDoc comment has annotations. 
 WebMol.Renderer.setSize = function(width, height) {};
 ^
 
-externs\webmol.js:654: WARNING - name arrowSpec is not defined in the externs.
+externs\webmol.js:665: WARNING - name arrowSpec is not defined in the externs.
 arrowSpec.start;
 ^
 
-externs\webmol.js:656: WARNING - name arrowSpec is not defined in the externs.
+externs\webmol.js:667: WARNING - name arrowSpec is not defined in the externs.
 arrowSpec.end;
 ^
 
-externs\webmol.js:657: WARNING - name arrowSpec is not defined in the externs.
+externs\webmol.js:668: WARNING - name arrowSpec is not defined in the externs.
 arrowSpec.radius;
 ^
 
-externs\webmol.js:658: WARNING - name arrowSpec is not defined in the externs.
+externs\webmol.js:669: WARNING - name arrowSpec is not defined in the externs.
 arrowSpec.radiusRatio;
 ^
 
-externs\webmol.js:659: WARNING - name arrowSpec is not defined in the externs.
+externs\webmol.js:670: WARNING - name arrowSpec is not defined in the externs.
 arrowSpec.mid;
 ^
 
