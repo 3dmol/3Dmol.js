@@ -93,7 +93,7 @@ module.exports = function(grunt) {
                 closurePath : 'lib/closure_compiler',
                 js : ['build/webmol-pre.js'],
                 jsOutputFile : 'build/webmol-min-pre.js',
-                //noreport : true,
+                noreport : true,
                 options : {
                     'compilation_level': 'ADVANCED_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
@@ -105,8 +105,8 @@ module.exports = function(grunt) {
             webgl : {
                 closurePath : 'lib/closure_compiler',
                 js : ['build/webGL-pre.js'],
-                jsOutputFile : 'build/webgl-min-pre.js',
-                //noreport : true,
+                jsOutputFile : 'build/webGL-min-pre.js',
+                noreport : true,
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',

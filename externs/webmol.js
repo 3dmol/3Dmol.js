@@ -662,12 +662,12 @@ SphereSpec.center;
  */
 var ArrowSpec = {};
 /** @type {WebMol.Vector3} */
-arrowSpec.start;
+ArrowSpec.start;
 /** @type {WebMol.Vector3} */
-arrowSpec.end;
-arrowSpec.radius;
-arrowSpec.radiusRatio;
-arrowSpec.mid;
+ArrowSpec.end;
+ArrowSpec.radius;
+ArrowSpec.radiusRatio;
+ArrowSpec.mid;
 
 /**
  * Volumetric data specification
