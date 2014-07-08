@@ -11,8 +11,8 @@
             var extractselectors = function(cmdarr) {
                 
                 if (typeof(cmdarr) === "string") {
-                    if (!!parseFloat(cmdarr))
-                        return parseFloat(cmdarr);
+                    if (!!parseInt(cmdarr))
+                        return parseInt(cmdarr);
                     
                     if (cmdarr == "true" || cmdarr == "false")
                         return (cmdarr == "true");
@@ -47,7 +47,14 @@
                         currentsel = extractselectors(cmdarr);
                     
                     else if (cmdname == 'style') {
-                        var styletype = cmdarr.splice(0,1)[0];
+                        
+                        var styletype;
+                        
+                        if (!(cmdarr[0] == 'line' || cmdarr[0] == 'stick' || cmdarr[0] == 'cross' || cmdarr[0] == 'sphere' || cmdarr[0] == 'cartoon'))
+                            styletype = 'line'; //Default to line style
+                        else
+                            styletype = cmdarr.splice(0,1)[0];
+                            
                         var stylespec = extractselectors(cmdarr);
                         var styleobj = {}; 
                         styleobj[styletype] = stylespec;
@@ -66,7 +73,7 @@
                     var loc = cmds.splice(0,1)[0].split("=");
                     var src = loc[0], data = loc[1];
                     
-                    glviewer = WebMol.createViewer("gldiv");                    
+                    glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors});                    
                     glviewer.setBackgroundColor(0xffffff);
                     
                     if (src == 'pdb') {

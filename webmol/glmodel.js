@@ -796,7 +796,7 @@ WebMol.GLModel = (function() {
          * 
          * @param {AtomSpec} atom
          * @param {atomstyle} style
-         * @returns {number} 
+         * @return {number} 
          * 
          */
         var getRadiusFromStyle = function(atom, style) {
@@ -1851,6 +1851,7 @@ WebMol.GLModel = (function() {
                     if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                         cartoonAtoms.push(atom);
                     }
+                    
 
                 }
             }
@@ -2101,30 +2102,34 @@ WebMol.GLModel = (function() {
             
             if(add) lastStyle = null; // todo: compute merged style
             else lastStyle = style;
-            
-            var atoms = this.selectedAtoms(sel);
-            if(atoms.length > 0)
-                molObj = null; // force rebuild
+
             // do a copy to enforce style changes through this function
             var mystyle = $.extend(true, {}, style);
-
+            var changedAtoms = false;
             // somethings we only calculate if there is a change in a certain
             // style, although these checks will only catch cases where both
             // are either null or undefined
             for ( var i = 0; i < atoms.length; i++) {
-                
-                if (atoms[i].clickable) 
-                    atoms[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
-                
                 atoms[i].capDrawn = false; //reset for proper stick render
-               
-                if(!add) atoms[i].style = {};
-                for(var s in mystyle) {
-                    if(mystyle.hasOwnProperty(s)) {
-                        atoms[i].style[s] = mystyle[s];
+                
+                if (this.atomIsSelected(atoms[i], sel)) {
+                    changedAtoms = true;
+                    if (atoms[i].clickable) 
+                        atoms[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
+    
+                   
+                    if(!add) atoms[i].style = {};
+                    for(var s in mystyle) {
+                        if(mystyle.hasOwnProperty(s)) {
+                            atoms[i].style[s] = mystyle[s];
+                        }
                     }
                 }
             }
+            
+            if (changedAtoms)
+                molObj = null; //force rebuild
+            
         };
         
         // given a mapping from element to color, set atom colors
