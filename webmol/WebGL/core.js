@@ -3,9 +3,8 @@
  * Geometry class
  */
 
-var WebMol = WebMol || {};
-
 //Event Handling
+/** @this {WebMol.EventDispatcher} */
 WebMol.EventDispatcher = function() {
   
     var listeners = {};
@@ -43,8 +42,62 @@ WebMol.EventDispatcher = function() {
     
 };
 
+WebMol.Color = function( color ){
+    
+    if ( arguments.length > 1) {
+            this.r = arguments[0] || 0.0;
+            this.g = arguments[1] || 0.0;
+            this.b = arguments[2] || 0.0;
+
+            return this;
+    }
+    
+    return this.set(color);
+                
+};
+
+WebMol.Color.prototype = {
+    
+    constructor: WebMol.Color,
+    
+    r: 0.0, g: 0.0, b: 0.0,
+    
+    set : function(val) {
+        
+            if (val instanceof WebMol.Color) 
+                return val.clone();
+
+            else if (typeof val === 'number')
+                this.setHex(val);
+    },
+    
+    setHex: function(hex) {
+        
+            hex = Math.floor(hex);
+
+            this.r = (hex >> 16 & 255) / 255;
+            this.g = (hex >> 8 & 255) / 255;
+            this.b = (hex & 255) / 255;                                                                                     
+        
+            return this;
+    },
+    
+    clone : function() {
+            return new WebMol.Color(this.r, this.g, this.b);
+    },
+        
+    copy : function(color) {
+        this.r = color.r;
+        this.g = color.g;
+        this.b = color.b;
+        
+        return this;
+    }
+    
+};
 
 //Object3D base constructor function
+/** @this {WebMol.Object3D} */
 WebMol.Object3D = function() {
     
     this.id = WebMol.Object3DIDCount++;
@@ -227,7 +280,7 @@ WebMol.Geometry = (function() {
             return new Float32Array(arr.buffer.slice(arr.byteOffset, end*4));
     };
     
-    
+    /** @constructor */
     var geometryGroup = function(id) {
         this.id = id || 0;
         this.__vertexArray = null;
@@ -375,8 +428,8 @@ WebMol.Geometry = (function() {
         
         return ret;
     };
-        
-    Geometry = function(mesh) {
+    /** @constructor */
+    var Geometry = function(mesh) {
         
         WebMol.EventDispatcher.call(this);
         
@@ -401,7 +454,6 @@ WebMol.Geometry = (function() {
         this.groups = 0;
         
     };
-    
     
     Geometry.prototype = {
         
@@ -478,6 +530,7 @@ WebMol.Geometry = (function() {
 
 Object.defineProperty(WebMol.Geometry.prototype, "vertices", {
     
+    /** @this {WebMol.Geometry} */
     get : function() {
         var vertices = 0;
         for (var g in this.geometryGroups)
@@ -492,7 +545,7 @@ WebMol.GeometryIDCount = 0;
 
 
 //Raycaster
-
+/** @constructor */
 WebMol.Raycaster = (function() {
     
     var Raycaster = function(origin, direction, far, near) {
@@ -782,6 +835,7 @@ WebMol.Raycaster = (function() {
 
 //WebMol Projecion 
 //TODO: can probably strip this down a lot (only used for selection handling)
+/** @constructor */
 WebMol.Projector = function () {
 
     var _viewMatrix = new WebMol.Matrix4(),

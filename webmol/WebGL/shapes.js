@@ -2,6 +2,7 @@
 
 
 //Intersection sphere for sphere, stick render
+/** @constructor */
 WebMol.Sphere = function(center, radius) {
 
     this.center = (center !== undefined) ? 
@@ -67,6 +68,7 @@ WebMol.Sphere.prototype = {
 
 
 //Bounding cylinder for stick render  
+/** @constructor */
 WebMol.Cylinder = function(c1, c2, radius) {
 
     this.c1 = (c1 !== undefined) ?
@@ -123,6 +125,7 @@ WebMol.Cylinder.prototype = {
 
 
 //plane specified by three points
+/** @constructor */
 WebMol.Triangle = function(a, b, c){
    
     this.a = (a !== undefined) ?

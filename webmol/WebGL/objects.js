@@ -4,7 +4,7 @@
 
 
 //Line Object
-
+/** @constructor */
 WebMol.Line = function (geometry, material, type) {
 
     WebMol.Object3D.call(this);
@@ -33,7 +33,7 @@ WebMol.Line.prototype.clone = function (object) {
 
 
 //Mesh Object
-
+/** @constructor */
 WebMol.Mesh = function(geometry, material) {
 
     WebMol.Object3D.call(this);
@@ -57,7 +57,7 @@ WebMol.Mesh.prototype.clone = function (object) {
 
 
 //Sprite object
-
+/** @constructor */
 WebMol.Sprite = function(material) {
     
     WebMol.Object3D.call(this);

@@ -2,6 +2,7 @@
 
 /**
  * Sprite render plugin
+ * @this {WebMol.SpritePlugin}
  */
 
 WebMol.SpritePlugin = function () {

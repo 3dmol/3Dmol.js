@@ -2,7 +2,7 @@
 <html style="height:100%; padding: 0; margin: 0">
     <head>
         <title>WebMol Test</title>
-        <script src="build/webmol.js"></script>
+        <script src="build/webmol-min.js"></script>       
         <script>
         var glviewer = null;
         var m = null;
@@ -13,7 +13,30 @@
         var modelgroup = null;
         var molObj = null; //Object3D for each rendered model      
         var voldata = null;
-       
+        var sphere, arrow;
+        
+        var shapecallback = function(shape, viewer) {
+            if(shape.clickLabel === undefined || !shape.clickLabel instanceof WebMol.Label) { 
+                shape.clickLabel = viewer.addLabel("Shape " + shape.id, {fontSize:14, position:
+                    {x:shape.position.x, y:shape.position.y, z:shape.position.z}});
+                shape.clicked=true;
+            } 
+            
+            else { 
+                if (shape.clicked) { 
+                    var newstyle = shape.clickLabel.stylespec; 
+                    newstyle.backgroundColor = {r:100, g:0, b:255, a:0.8}; 
+                    viewer.setLabelStyle(shape.clickLabel, newstyle); 
+                    shape.clicked = !shape.clicked; 
+                } 
+                else { 
+                    viewer.removeLabel(shape.clickLabel); 
+                    shape.clickLabel = undefined; 
+                    shape.clicked = false; 
+                } 
+            } 
+        };      
+         
         $(document).ready(function() {     
                        
             $.get('test_structs/benzene-homo.cube', function(data){
@@ -28,7 +51,18 @@
                     posLobe = viewer.addVolumetricData(voldata, "cube", {isoval: 0.01, color: new WebMol.Color(0,0,1),
                                                                          alpha: 0.95});              
                     negLobe = viewer.addVolumetricData(voldata, "cube", {isoval: -0.01, color: new WebMol.Color(1,0,0),
-                                                                         alpha: 0.95});                     
+                                                                         alpha: 0.95});  
+                                                                         
+                    posLobe.callback = shapecallback; posLobe.clickable = true;
+                    negLobe.callback = shapecallback; negLobe.clickable = true;
+                    
+                    sphere = viewer.addSphere({center: posLobe.boundingSphere.center, radius:posLobe.boundingSphere.radius});  
+                    sphere.color = WebMol.CC.color(0xE06633); sphere.wireframe = true;
+                    
+                    arrow = viewer.addArrow({end: new WebMol.Vector3(5,1,1)});
+                    arrow.color = WebMol.CC.color(0x00FF00); arrow.wireframe = true;
+                    arrow.callback = shapecallback; arrow.clickable = true;
+                                                                                      
                     viewer.zoomTo();
                     viewer.render();    
                 }});  

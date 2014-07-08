@@ -1,8 +1,4 @@
-/* 
- * WebMol Lighting
- */
 
-//TODO: Strip down this class - do I really use all of these instance variables?
 WebMol.Light = function(hex, intensity) {
     
     WebMol.Object3D.call(this);

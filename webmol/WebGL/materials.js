@@ -1,9 +1,7 @@
-/* 
+/**
  * Line and Mesh material types
+ * @constructor
  */
-
-//Material base class
-
 WebMol.Material = function () {
 
     WebMol.EventDispatcher.call( this );
@@ -118,7 +116,7 @@ WebMol.Material.prototype.dispose = function () {
 WebMol.MaterialIdCount = 0;
 
 //Line basic material
-
+/** @constructor */
 WebMol.LineBasicMaterial = function(parameters) {
     
     WebMol.Material.call(this);
@@ -150,7 +148,7 @@ WebMol.LineBasicMaterial.prototype.clone = function() {
 };
 
 //Mesh Lambert material
-
+/** @constructor */
 WebMol.MeshLambertMaterial = function(parameters) {
     
     WebMol.Material.call(this);
@@ -232,6 +230,7 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
 
 
 //Sprite material
+/** @constructor */
 WebMol.SpriteMaterial = function(parameters) {
     
     WebMol.Material.call(this);
@@ -301,7 +300,7 @@ WebMol.SpriteAlignment.bottomRight = new WebMol.Vector2(-1, 1);
 
 //Texture
 //We really only create textures from 2d rendering contexts (to display text labels)
-
+/** @constructor */
 WebMol.Texture = function(image) {
 
     WebMol.EventDispatcher.call(this);
@@ -387,3 +386,48 @@ WebMol.Texture.prototype = {
 WebMol.TextureIdCount = 0;
 
 
+// sides
+WebMol.FrontSide = 0;
+WebMol.BackSide = 1;
+WebMol.DoubleSide = 2;
+
+// blending modes
+WebMol.NoBlending = 0;
+WebMol.NormalBlending = 1;
+WebMol.AdditiveBlending = 2;
+WebMol.SubtractiveBlending = 3;
+WebMol.MultiplyBlending = 4;
+WebMol.CustomBlending = 5;
+
+// shading
+WebMol.NoShading = 0;
+WebMol.FlatShading = 1;
+WebMol.SmoothShading = 2;
+
+// colors
+WebMol.NoColors = 0;
+WebMol.FaceColors = 1;
+WebMol.VertexColors = 2;
+
+//Texture constants
+//TODO: Which of these do I need (since I only use textures to display label sprites) ?
+WebMol.MultiplyOperation = 0;
+WebMol.MixOperation = 1;
+WebMol.AddOperation = 2;
+
+// mapping modes
+
+WebMol.UVMapping = function() {};
+
+// wrapping modes
+WebMol.ClampToEdgeWrapping = 1001;
+
+//Filters
+WebMol.LinearFilter = 1006;
+WebMol.LinearMipMapLinearFilter = 1008;
+
+//Data types
+WebMol.UnsignedByteType = 1009;
+
+//Pixel formats
+WebMol.RGBAFormat = 1021;

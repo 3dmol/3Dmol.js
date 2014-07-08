@@ -2,7 +2,7 @@ var WebMol = WebMol || {};
 
 //properties for mapping
 WebMol.partialCharges = [
-{ resn: "ALA", atom: "N", props: {partialCharge: -0.15}},
+        { resn: "ALA", atom: "N", props: {partialCharge: -0.15}},
 	{ resn: "ALA", atom: "CA", props: {partialCharge: 0.10}},
 	{ resn: "ALA", atom: "CB", props: {partialCharge: 0.00}},
 	{ resn: "ALA", atom: "C", props: {partialCharge: 0.60}},

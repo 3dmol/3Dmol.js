@@ -3,9 +3,7 @@
 * quaternion, vector, matrix
 */
 
-//Math functions
 var WebMol = WebMol || {};
-
 WebMol.Math = {
 
     clamp : function(x, min, max) {
@@ -25,7 +23,7 @@ WebMol.Math = {
 
 
 // Quaternion
-
+/** @constructor */
 WebMol.Quaternion = function(x, y, z, w) {
 
     this.x = x || 0;
@@ -119,6 +117,7 @@ WebMol.Quaternion.prototype = {
 };
 
 //A 2 Vector
+/** @constructor */
 WebMol.Vector2 = function(x, y) {
     
     this.x = x || 0.0;
@@ -167,7 +166,7 @@ WebMol.Vector3 = function(x, y, z) {
     this.y = y || 0.0;
     this.z = z || 0.0;
 };
-
+/** @this {WebMol.Vector3} */
 WebMol.Vector3.prototype =  {
     
     constructor : WebMol.Vector3,
@@ -418,7 +417,7 @@ WebMol.Vector3.prototype =  {
 //Matrices
 
 //Matrix3
-
+/** @constructor */
 WebMol.Matrix3 = function(n11, n12, n13, n21, n22, n23, n31, n32, n33) {
     
     this.elements = new Float32Array(9);
@@ -545,7 +544,7 @@ WebMol.Matrix3.prototype = {
 };
 
 //Matrix 4
-
+/** @constructor */
 WebMol.Matrix4 = function(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44) {
 
     var te = this.elements = new Float32Array( 16 );
@@ -976,7 +975,7 @@ WebMol.Matrix4.prototype = {
     }
     
 };
-
+/** @constructor */
 WebMol.Ray = function(origin, direction) {
     
     this.origin = (origin !== undefined) ? 
@@ -1108,8 +1107,6 @@ WebMol.Ray.prototype = {
        return this.at(t, optionalTarget);
        
     },
-    
-    
     
     applyMatrix4 : function(matrix4) {
        

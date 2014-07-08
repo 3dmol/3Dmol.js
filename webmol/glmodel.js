@@ -73,8 +73,7 @@ WebMol.GLModel = (function() {
         if (distSquared < 0.5)
             return false; // maybe duplicate position.
 
-        if (distSquared > 1.3
-                && (atom1.elem == 'H' || atom2.elem == 'H' || atom1.elem == 'D' || atom2.elem == 'D'))
+        if (distSquared > 1.3 && (atom1.elem == 'H' || atom2.elem == 'H' || atom1.elem == 'D' || atom2.elem == 'D'))
             return false;
         if (distSquared < 3.6 && (atom1.elem == 'S' || atom2.elem == 'S'))
             return true;
@@ -83,10 +82,12 @@ WebMol.GLModel = (function() {
         return true;
     };
 
+    /** @param {Array.<AtomSpec>} atomsarray */
     var assignBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var atoms = atomsarray.slice(0);
-        for ( var i = 0; i < atomsarray.length; i++)
+        var i, j, n;
+        for (i = 0, n = atomsarray.length; i < n; i++)
         {
             //Don't reindex if atoms are already indexed 
             if (!atomsarray[i].index)
@@ -96,10 +97,10 @@ WebMol.GLModel = (function() {
         atoms.sort(function(a, b) {
             return a.z - b.z;
         });
-        for ( var i = 0; i < atoms.length; i++) {
+        for (i = 0, n = atoms.length; i < n; i++) {
             var ai = atoms[i];
 
-            for ( var j = i + 1; j < atoms.length; j++) {
+            for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
                 if (aj.z - ai.z > 1.9) // can't be connected
                     break;
@@ -118,12 +119,13 @@ WebMol.GLModel = (function() {
     
     // this is optimized for proteins where it is assumed connected
     // atoms are on the same or next residue
+    /** @param {Array.<AtomSpec>} atomsarray */
     var assignPDBBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var protatoms = [];
         var hetatoms = [];        
-        
-        for ( var i = 0; i < atomsarray.length; i++) {
+        var i, n;
+        for (i = 0, n = atomsarray.length; i < n; i++) {
             var atom = atomsarray[i];
             atom.index = i;
             if(atom.hetflag)
@@ -146,7 +148,7 @@ WebMol.GLModel = (function() {
         var reschain = -1;
         var lastResConnected;
         
-        for ( var i = 0; i < protatoms.length; i++) {
+        for (i = 0, n = protatoms.length; i < n; i++) {
             var ai = protatoms[i];
             
             if (ai.resi !== currentResi) {
@@ -189,8 +191,7 @@ WebMol.GLModel = (function() {
             if(Math.abs(a1.resi-a2.resi) < 4)
                 return Number.POSITIVE_INFINITY;
         }
-        if ((a1.atom === "O" && a2.atom === "N")
-                || (a1.atom === "N" && a2.atom === "O")) {
+        if ((a1.atom === "O" && a2.atom === "N") || (a1.atom === "N" && a2.atom === "O")) {
             var xdiff = a1.x - a2.x;
             if (xdiff > maxlength)
                 return Number.POSITIVE_INFINITY;
@@ -214,7 +215,8 @@ WebMol.GLModel = (function() {
     var assignBackboneHBonds = function(atomsarray) {
         var maxlength = 3.5; // ver generous hbond distance
         var atoms = [];
-        for ( var i = 0; i < atomsarray.length; i++) {
+        var i, j, n;
+        for (i = 0, n = atomsarray.length; i < n; i++) {
             atomsarray[i].index = i;
             // only consider 'N' and 'O'
             var atom = atomsarray[i];
@@ -228,10 +230,10 @@ WebMol.GLModel = (function() {
         atoms.sort(function(a, b) {
             return a.z - b.z;
         });
-        for ( var i = 0; i < atoms.length; i++) {
+        for (i = 0, n = atoms.length; i < n; i++) {
             var ai = atoms[i];
 
-            for ( var j = i + 1; j < atoms.length; j++) {
+            for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
                 if (aj.z - ai.z > maxlength) // can't be connected
                     break;
@@ -253,15 +255,18 @@ WebMol.GLModel = (function() {
         
         // compute, per residue, what the secondary structure is
         var chres = {}; // lookup by chain and resid
-        for ( var i = 0; i < atomsarray.length; i++) {
-            var atom = atomsarray[i];
+        var i, il, c, r;
+        var atom, val;
+        
+        for (i = 0, il = atomsarray.length; i < il; i++) {
+            atom = atomsarray[i];
             
-            if(typeof(chres[atom.chain]) === "undefined")
+            if (typeof(chres[atom.chain]) === "undefined")
                 chres[atom.chain] = [];
             
-            if(isFinite(atom.hbondDistance)) {
+            if (isFinite(atom.hbondDistance)) {
                 var other = atom.hbondOther;
-                if(Math.abs(other.resi - atom.resi) === 4) { 
+                if (Math.abs(other.resi - atom.resi) === 4) { 
                     // helix
                     chres[atom.chain][atom.resi] = 'h';
                 }
@@ -272,19 +277,19 @@ WebMol.GLModel = (function() {
         }
         
         // plug gaps and remove singletons
-        for(c in chres) {
-            for(var r = 1; r < chres[c].length-1; r++) {
+        for (c in chres) {
+            for (r = 1; r < chres[c].length-1; r++) {
                 var valbefore = chres[c][r-1];
                 var valafter = chres[c][r+1];
-                var val = chres[c][r];
+                val = chres[c][r];
                 if(valbefore == valafter && val != valbefore) {
                     chres[c][r] = valbefore;
                 }
             }
-            for(var r = 0; r < chres[c].length; r++) {
-                var val = chres[c][r];
-                if(val == 'h' || val == 's') {
-                    if(chres[c][r-1] != val && chres[c][r+1] != val)
+            for (r = 0; r < chres[c].length; r++) {
+                val = chres[c][r];
+                if (val == 'h' || val == 's') {
+                    if (chres[c][r-1] != val && chres[c][r+1] != val)
                         delete chres[c][r];
                 }
             }
@@ -292,9 +297,9 @@ WebMol.GLModel = (function() {
         
         // assign to all atoms in residue, keep track of start
         var curres = null;
-        for ( var i = 0; i < atomsarray.length; i++) {
-            var atom = atomsarray[i];
-            var val = chres[atom.chain][atom.resi];
+        for (i = 0, il = atomsarray.length; i < il; i++) {
+            atom = atomsarray[i];
+            val = chres[atom.chain][atom.resi];
             if(typeof(val) == "undefined")
                 continue;
             atom.ss = val;
@@ -305,6 +310,10 @@ WebMol.GLModel = (function() {
         }
     };
     
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     */
     var parseCube = function(atoms, str) {
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
@@ -364,6 +373,10 @@ WebMol.GLModel = (function() {
     };
         
     // read an XYZ file from str and put the result in atoms
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     */
     var parseXYZ = function(atoms, str) {
 
         var lines = str.split("\n");
@@ -401,6 +414,10 @@ WebMol.GLModel = (function() {
 
     // put atoms specified in sdf fromat in str into atoms
     // adds to atoms, does not replace
+    /** 
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     */
     var parseSDF = function(atoms, str) {
 
         var lines = str.split("\n");
@@ -415,8 +432,9 @@ WebMol.GLModel = (function() {
             return;
         var start = atoms.length;
         var end = start + atomCount;
-        for ( var i = start; i < end; i++) {
-            var line = lines[offset];
+        var i, line;
+        for (i = start; i < end; i++) {
+            line = lines[offset];
             offset++;
             var atom = {};
             atom.serial = i;
@@ -431,14 +449,16 @@ WebMol.GLModel = (function() {
             atom.properties = {};
             atoms[i] = atom;
         }
+        
         for (i = 0; i < bondCount; i++) {
-            var line = lines[offset];
+            line = lines[offset];
             offset++;
             var from = parseInt(line.substr(0, 3)) - 1 + start;
             var to = parseInt(line.substr(3, 3)) - 1 + start;
             var order = parseInt(line.substr(6, 3));
-            if (order > 1)
-                atoms[from].singleBonds = false, atoms[to].singleBonds = false;
+            if (order > 1) {
+                atoms[from].singleBonds = false; atoms[to].singleBonds = false;
+            }                
             atoms[from].bonds.push(to);
             atoms[from].bondOrder.push(order);
             atoms[to].bonds.push(from);
@@ -451,6 +471,11 @@ WebMol.GLModel = (function() {
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
     // tag
     // TODO: Figure out how to handle multi molecule files (for SDF, too)
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     * @param {boolean=} keepH
+     */
     var parseMOL2 = function(atoms, str, keepH) {
         
         var noH = !keepH; // again, suppress H's by default
@@ -475,15 +500,15 @@ WebMol.GLModel = (function() {
         var lines = str.substr(mol_pos, str.length).split("\n");
         var tokens = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
         var natoms = parseInt(tokens[0]);
+        var nbonds = 0;
+        
         if (tokens.length > 1)
-            var nbonds = parseInt(tokens[1]); // NOTE: this may or may not be
-                                                // set
-        else
-            var nbonds = 0;
+            nbonds = parseInt(tokens[1]); 
         
         var offset = 4;
+        var i;
         // Continue until 'Atom' section
-        for (var i = 3; ;i++)
+        for (i = 3; i < lines.length; i++)
         {
             if (lines[i] == "@<TRIPOS>ATOM")
             {
@@ -494,13 +519,11 @@ WebMol.GLModel = (function() {
         
         var start = atoms.length;
         var end = start + natoms;
-        
+        var line;
         // Process ATOMS
-        for (var i = start; i < end; i++)
-        {
-            var line = lines[offset++];
-            var tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
-                    " ");
+        for (i = start; i < end; i++) {
+            line = lines[offset++];
+            tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
             var atom = {};
             
             // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
@@ -543,11 +566,11 @@ WebMol.GLModel = (function() {
         
         if (bonds_found && nbonds)
         {
-            for (var i = 0; i < nbonds; i++)
+            for (i = 0; i < nbonds; i++)
             {
-                var line = lines[offset++];
+                line = lines[offset++];
 
-                var tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
+                tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
                             " ");
                 var from = parseInt(tokens[1]);
                 fromAtom = atoms[serialToIndex[from]];
@@ -559,10 +582,11 @@ WebMol.GLModel = (function() {
                 if (isNaN(order))
                     order = 1;
                 
-                if (order > 1)
-                    fromAtom.singleBonds = false, toAtom.singleBonds = false;
+                if (order > 1) {
+                    fromAtom.singleBonds = false; toAtom.singleBonds = false;   
+                }                   
                 
-                if (fromAtom != undefined && toAtom != undefined){
+                if (fromAtom !== undefined && toAtom !== undefined){
                     fromAtom.bonds.push(serialToIndex[to]);
                     fromAtom.bondOrder.push(order);
                     toAtom.bonds.push(serialToIndex[from]);
@@ -586,11 +610,18 @@ WebMol.GLModel = (function() {
     // parse pdb file from str and create atoms
     //if computeStruct is true will always perform secondary structure analysis,
     //otherwise only do analysis of SHEET/HELIX comments are missing
+    /**
+     * @param {Array.<AtomSpec>} atoms
+     * @param {string} str
+     * @param {keepH=} boolean
+     * @param {computeStruct=} boolean
+     */
     var parsePDB = function(atoms, str, keepH, computeStruct) {
 
         var atoms_cnt = 0;
         var noH = !keepH; // suppress hydrogens by default
         var start = atoms.length;
+        var atom;
         var protein = {
             sheet : [],
             helix : []
@@ -598,12 +629,14 @@ WebMol.GLModel = (function() {
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
-        lines = str.split("\n");
-        for ( var i = 0; i < lines.length; i++) {
+        var lines = str.split("\n");
+        var i, j, k, line;
+        for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
+            var startChain, startResi, endChain, endResi;
             if (recordName == 'ATOM  ' || recordName == 'HETATM') {
-                var atom, resn, chain, resi, icode, x, y, z, hetflag, elem, serial, altLoc, b;
+                var resn, chain, resi, icode, x, y, z, hetflag, elem, serial, altLoc, b;
                 altLoc = line.substr(16, 1);
                 if (altLoc != ' ' && altLoc != 'A')
                     continue; // FIXME: ad hoc
@@ -618,7 +651,7 @@ WebMol.GLModel = (function() {
                 z = parseFloat(line.substr(46, 8));
                 b = parseFloat(line.substr(60, 8));
                 elem = line.substr(76, 2).replace(/ /g, "");
-                if (elem == '') { // for some incorrect PDB files
+                if (elem === '') { // for some incorrect PDB files
                     elem = line.substr(12, 2).replace(/ /g, "");
                 }
                 if((elem == 'H' || elem == 'HH' || elem == 'HD') && noH)
@@ -647,7 +680,6 @@ WebMol.GLModel = (function() {
                     'bonds' : [],
                     'ss' : 'c',
                     'singleBonds' : true,
-                    'bonds' : [],
                     'bondOrder' : [],
                     'properties' : {},
                     'b' : b,
@@ -655,10 +687,10 @@ WebMol.GLModel = (function() {
                 });
             } else if (recordName == 'SHEET ') {
             	hasStruct = true;
-                var startChain = line.substr(21, 1);
-                var startResi = parseInt(line.substr(22, 4));
-                var endChain = line.substr(32, 1);
-                var endResi = parseInt(line.substr(33, 4));
+                startChain = line.substr(21, 1);
+                startResi = parseInt(line.substr(22, 4));
+                endChain = line.substr(32, 1);
+                endResi = parseInt(line.substr(33, 4));
                 protein.sheet
                         .push([ startChain, startResi, endChain, endResi ]);
             } else if (recordName == 'CONECT') {
@@ -667,20 +699,20 @@ WebMol.GLModel = (function() {
                 // described in CONECT. But what about 2JYT???
                 var from = parseInt(line.substr(6, 5));
                 var fromAtom = atoms[serialToIndex[from]];
-                for ( var j = 0; j < 4; j++) {
+                for (j = 0; j < 4; j++) {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
                     var toAtom = atoms[serialToIndex[to]];
-                    if (fromAtom != undefined && toAtom != undefined) {
+                    if (fromAtom !== undefined && toAtom !== undefined) {
                         fromAtom.bonds.push(serialToIndex[to]);
                         fromAtom.bondOrder.push(1);
                     }
                 }
             } else if (recordName == 'HELIX ') {
             	hasStruct = true;
-                var startChain = line.substr(19, 1);
-                var startResi = parseInt(line.substr(21, 4));
-                var endChain = line.substr(31, 1);
-                var endResi = parseInt(line.substr(33, 4));
+                startChain = line.substr(19, 1);
+                startResi = parseInt(line.substr(21, 4));
+                endChain = line.substr(31, 1);
+                endResi = parseInt(line.substr(33, 4));
                 protein.helix
                         .push([ startChain, startResi, endChain, endResi ]);
             }
@@ -694,7 +726,7 @@ WebMol.GLModel = (function() {
         
         
         if(computeStruct || !hasStruct) {
-            var starttime = (new Date()).getTime();
+            starttime = (new Date()).getTime();
         	computeSecondaryStructure(atoms);
         	console.log("secondary structure " + ((new Date()).getTime() - starttime));
         }
@@ -702,7 +734,7 @@ WebMol.GLModel = (function() {
         // Assign secondary structures from pdb file
         for (i = start; i < atoms.length; i++) {
             atom = atoms[i];
-            if (atom == undefined)
+            if (atom === undefined)
                 continue;
 
             var found = false;
@@ -737,13 +769,6 @@ WebMol.GLModel = (function() {
         return true;
     };
 
-    /**
-     * GLModel represents a group of related atoms
-     * @constructor WebMol.GLModel
-     * @param {number} mid 
-     * @param {Object} defaultcolors Object defining default atom colors as atom => color property value pairs
-     * @see WebMol.download
-     */
     function GLModel(mid, defaultcolors) {
         // private variables
         var atoms = [];
@@ -767,6 +792,13 @@ WebMol.GLModel = (function() {
         var defaultSphereRadius = 1.5;
 
         // return proper radius for atom given style
+        /** 
+         * 
+         * @param {AtomSpec} atom
+         * @param {atomstyle} style
+         * @returns {number} 
+         * 
+         */
         var getRadiusFromStyle = function(atom, style) {
             var r = defaultSphereRadius;
             if (typeof (style.radius) != "undefined")
@@ -831,6 +863,7 @@ WebMol.GLModel = (function() {
                 var dir = new WebMol.Vector3(0,1,0);    
                 var w = this.basisVectors.length;
                 var nvecs = [], norms = [];
+                var n;
                 
                 for (var i = 0; i < w; i++) {
                     //bottom
@@ -840,7 +873,7 @@ WebMol.GLModel = (function() {
                     
                     //NOTE: this normal is used for constructing sphere caps - 
                     // cylinder normals taken care of in drawCylinder
-                    var n = this.basisVectors[i].clone().normalize();
+                    n = this.basisVectors[i].clone().normalize();
                     norms.push(n);
                     norms.push(n);
                 }
@@ -881,7 +914,7 @@ WebMol.GLModel = (function() {
                         // Two vertices rows for equator pointing to previously constructed cyl points
                         if (equator) {
                             var xi = (x < widthSegments) ? 2*x : 0;
-                            toRow.push(xi+1), verticesRow.push(xi);
+                            toRow.push(xi+1); verticesRow.push(xi);
                             
                             continue;
                         }
@@ -895,18 +928,15 @@ WebMol.GLModel = (function() {
                             
                             if (x < widthSegments) {
                                 var vertex = new WebMol.Vector3();
-                                vertex.x = -radius * Math.cos(phiStart + u * phiLength)
-                                        * Math.sin(thetaStart + v * thetaLength);
-                                vertex.y = radius
-                                        * Math.cos(thetaStart + v * thetaLength);
-                                vertex.z = radius * Math.sin(phiStart + u * phiLength)
-                                        * Math.sin(thetaStart + v * thetaLength);
+                                vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+                                vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
+                                vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
 
                                 if (Math.abs(vertex.x) < 1e-5) vertex.x = 0;
                                 if (Math.abs(vertex.y) < 1e-5) vertex.y = 0;
                                 if (Math.abs(vertex.z) < 1e-5) vertex.z = 0;
 
-                                var n = new WebMol.Vector3(vertex.x, vertex.y, vertex.z);
+                                n = new WebMol.Vector3(vertex.x, vertex.y, vertex.z);
                                 n.normalize();
 
                                 nvecs.push(vertex);
@@ -989,12 +1019,9 @@ WebMol.GLModel = (function() {
                         var v = y / heightSegments;
 
                         var vertex = {};
-                        vertex.x = -radius * Math.cos(phiStart + u * phiLength)
-                                * Math.sin(thetaStart + v * thetaLength);
-                        vertex.y = radius
-                                * Math.cos(thetaStart + v * thetaLength);
-                        vertex.z = radius * Math.sin(phiStart + u * phiLength)
-                                * Math.sin(thetaStart + v * thetaLength);
+                        vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+                        vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
+                        vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
 
                         var n = new WebMol.Vector3(vertex.x, vertex.y, vertex.z);
                         n.normalize();
@@ -1016,6 +1043,11 @@ WebMol.GLModel = (function() {
         };
         
         // cross drawing
+        /**
+         * 
+         * @param {AtomSpec} atom
+         * @param {Object.<numlike,WebMol.Geometry>} geos
+         */
         var drawAtomCross = function(atom, geos) {
             if (!atom.style.cross)
                 return;
@@ -1066,6 +1098,12 @@ WebMol.GLModel = (function() {
 
         // bonds - both atoms must match bond style
         // standardize on only drawing for lowest to highest
+        /**
+         * 
+         * @param {AtomSpec} atom
+         * @param {Array.<AtomSpec>} atoms
+         * @param {Object.<numlike, WebMol.Geometry>} geos
+         */
         var drawBondLines = function(atom, atoms, geos) {
             if (!atom.style.line)
                 return;
@@ -1078,9 +1116,9 @@ WebMol.GLModel = (function() {
 
             if (!geos[linewidth])
                 geos[linewidth] = new WebMol.Geometry();
+            /** @type {geometryGroup} */
             var geoGroup = geos[linewidth].updateGeoGroup(2*atom.bonds.length);
             
-
             for ( var i = 0; i < atom.bonds.length; i++) {
                 
                 var j = atom.bonds[i]; // our neighbor
@@ -1104,20 +1142,25 @@ WebMol.GLModel = (function() {
                 var offset = geoGroup.vertices*3;
                 geoGroup.vertices += 2;
 
-                geoGroup.__vertexArray[offset] = p1.x, geoGroup.__vertexArray[offset+1] = p1.y, geoGroup.__vertexArray[offset+2] = p1.z;
-                geoGroup.__colorArray[offset] = c1.r, geoGroup.__colorArray[offset+1] = c1.g, geoGroup.__colorArray[offset+2] = c1.b;
-                geoGroup.__vertexArray[offset+3] = mp.x, geoGroup.__vertexArray[offset+4] = mp.y, geoGroup.__vertexArray[offset+5] = mp.z;
-                geoGroup.__colorArray[offset+3] = c1.r, geoGroup.__colorArray[offset+4] = c1.g, geoGroup.__colorArray[offset+5] = c1.b;
+                geoGroup.__vertexArray[offset] = p1.x; geoGroup.__vertexArray[offset+1] = p1.y; geoGroup.__vertexArray[offset+2] = p1.z;
+                geoGroup.__colorArray[offset] = c1.r; geoGroup.__colorArray[offset+1] = c1.g; geoGroup.__colorArray[offset+2] = c1.b;
+                geoGroup.__vertexArray[offset+3] = mp.x; geoGroup.__vertexArray[offset+4] = mp.y; geoGroup.__vertexArray[offset+5] = mp.z;
+                geoGroup.__colorArray[offset+3] = c1.r; geoGroup.__colorArray[offset+4] = c1.g; geoGroup.__colorArray[offset+5] = c1.b;
 
             }
 
         };
 
         // bonds as cylinders
-        var defaultStickRadius = .25;
+        var defaultStickRadius = 0.25;
 
         //sphere drawing
         //See also: drawCylinder
+        /** 
+         * 
+         * @param {AtomSpec} atom
+         * @param {WebMol.Geometry} geo
+         */
         var drawAtomSphere = function(atom, geo) {
             
             if (!atom.style.sphere)
@@ -1187,9 +1230,9 @@ WebMol.GLModel = (function() {
                         //face = [v1, v3, v4];
                         //norm = [n1, n3, n4];
                         
-                        geoGroup.__normalArray[v1offset] = n1.x, geoGroup.__normalArray[v3offset] = n3.x, geoGroup.__normalArray[v4offset] = n4.x;
-                        geoGroup.__normalArray[v1offset+1] = n1.y, geoGroup.__normalArray[v3offset+1] = n3.y, geoGroup.__normalArray[v4offset+1] = n4.y;
-                        geoGroup.__normalArray[v1offset+2] = n1.z, geoGroup.__normalArray[v3offset+2] = n3.z, geoGroup.__normalArray[v4offset+2] = n4.z;
+                        geoGroup.__normalArray[v1offset] = n1.x; geoGroup.__normalArray[v3offset] = n3.x; geoGroup.__normalArray[v4offset] = n4.x;
+                        geoGroup.__normalArray[v1offset+1] = n1.y; geoGroup.__normalArray[v3offset+1] = n3.y; geoGroup.__normalArray[v4offset+1] = n4.y;
+                        geoGroup.__normalArray[v1offset+2] = n1.z; geoGroup.__normalArray[v3offset+2] = n3.z; geoGroup.__normalArray[v4offset+2] = n4.z;
 
                         geoGroup.__faceArray[faceoffset] = v1; 
                         geoGroup.__faceArray[faceoffset+1] = v3;
@@ -1201,9 +1244,9 @@ WebMol.GLModel = (function() {
                         //face = [v1, v2, v3];            
                         //norm = [n1, n2, n3];
                         
-                        geoGroup.__normalArray[v1offset] = n1.x, geoGroup.__normalArray[v2offset] = n2.x, geoGroup.__normalArray[v3offset] = n3.x;
-                        geoGroup.__normalArray[v1offset+1] = n1.y, geoGroup.__normalArray[v2offset+1] = n2.y, geoGroup.__normalArray[v3offset+1] = n3.y;
-                        geoGroup.__normalArray[v1offset+2] = n1.z, geoGroup.__normalArray[v2offset+2] = n2.z, geoGroup.__normalArray[v3offset+2] = n3.z;
+                        geoGroup.__normalArray[v1offset] = n1.x; geoGroup.__normalArray[v2offset] = n2.x; geoGroup.__normalArray[v3offset] = n3.x;
+                        geoGroup.__normalArray[v1offset+1] = n1.y; geoGroup.__normalArray[v2offset+1] = n2.y; geoGroup.__normalArray[v3offset+1] = n3.y;
+                        geoGroup.__normalArray[v1offset+2] = n1.z; geoGroup.__normalArray[v2offset+2] = n2.z; geoGroup.__normalArray[v3offset+2] = n3.z;
 
                         geoGroup.__faceArray[faceoffset] = v1;
                         geoGroup.__faceArray[faceoffset+1] = v2;
@@ -1215,13 +1258,13 @@ WebMol.GLModel = (function() {
                         //face = [v1, v2, v3, v4];
                         //norm = [n1, n2, n3, n4];
                         
-                        geoGroup.__normalArray[v1offset] = n1.x, geoGroup.__normalArray[v2offset] = n2.x, geoGroup.__normalArray[v4offset] = n4.x;
-                        geoGroup.__normalArray[v1offset+1] = n1.y, geoGroup.__normalArray[v2offset+1] = n2.y, geoGroup.__normalArray[v4offset+1] = n4.y;
-                        geoGroup.__normalArray[v1offset+2] = n1.z, geoGroup.__normalArray[v2offset+2] = n2.z, geoGroup.__normalArray[v4offset+2] = n4.z;
+                        geoGroup.__normalArray[v1offset] = n1.x; geoGroup.__normalArray[v2offset] = n2.x; geoGroup.__normalArray[v4offset] = n4.x;
+                        geoGroup.__normalArray[v1offset+1] = n1.y; geoGroup.__normalArray[v2offset+1] = n2.y; geoGroup.__normalArray[v4offset+1] = n4.y;
+                        geoGroup.__normalArray[v1offset+2] = n1.z; geoGroup.__normalArray[v2offset+2] = n2.z; geoGroup.__normalArray[v4offset+2] = n4.z;
                         
-                        geoGroup.__normalArray[v2offset] = n2.x, geoGroup.__normalArray[v3offset] = n3.x, geoGroup.__normalArray[v4offset] = n4.x;
-                        geoGroup.__normalArray[v2offset+1] = n2.y, geoGroup.__normalArray[v3offset+1] = n3.y, geoGroup.__normalArray[v4offset+1] = n4.y;
-                        geoGroup.__normalArray[v2offset+2] = n2.z, geoGroup.__normalArray[v3offset+2] = n3.z, geoGroup.__normalArray[v4offset+2] = n4.z;
+                        geoGroup.__normalArray[v2offset] = n2.x; geoGroup.__normalArray[v3offset] = n3.x; geoGroup.__normalArray[v4offset] = n4.x;
+                        geoGroup.__normalArray[v2offset+1] = n2.y; geoGroup.__normalArray[v3offset+1] = n3.y; geoGroup.__normalArray[v4offset+1] = n4.y;
+                        geoGroup.__normalArray[v2offset+2] = n2.z; geoGroup.__normalArray[v3offset+2] = n3.z; geoGroup.__normalArray[v4offset+2] = n4.z;
                         
                         geoGroup.__faceArray[faceoffset] = v1;
                         geoGroup.__faceArray[faceoffset+1] = v2;
@@ -1259,18 +1302,14 @@ WebMol.GLModel = (function() {
                 var sinA, cosA, sinB, cosB, sinC, cosC;
                 
                 // about z axis - Phi
-                if (dxy < 0.0001)
-                    sinA = 0, cosA = 1;
-                else 
-                    sinA = -dx / dxy, cosA = dy / dxy;
-                
-                /* 
-                Rphi.set( cosA, -sinA,  0, 0,
-                          sinA,  cosA,  0, 0,
-                          0,     0,     1, 0,
-                          0,     0,     0, 1 );   
-                */
-               
+                if (dxy < 0.0001) {
+                   sinA = 0; cosA = 1; 
+                }
+                    
+                else {
+                    sinA = -dx / dxy; cosA = dy / dxy; 
+                }                   
+                  
                 //recast dy in terms of new axes - z is the same
                 
                 dy = -sinA*dx + cosA*dy;
@@ -1278,26 +1317,19 @@ WebMol.GLModel = (function() {
                  
                 // about new x axis - Theta
                 
-                if (dyz < 0.0001)
-                    sinB = 0, cosB = 1;
-                else 
-                    sinB =  dz / dyz, cosB = dy / dyz;                                     
-
-                /*        
-                Rtheta.set( 1,  0,     0,    0,
-                            0,  cosB, -sinB, 0,
-                            0,  sinB,  cosB, 0,
-                            0,  0,     0,    1 );
-
-                rot.multiplyMatrices(Rphi, Rtheta);
-                */
+                if (dyz < 0.0001) {
+                    sinB = 0; cosB = 1;
+                }
+                    
+                else {
+                    sinB =  dz / dyz; cosB = dy / dyz; 
+                }                                                       
                
-
-                                   
                 rot = new Float32Array(9);
-                rot[0] = cosA, rot[1] = sinA, rot[2] = 0;
-                rot[3] = -sinA*cosB, rot[4] = cosA*cosB, rot[5] = sinB;
-                rot[6] = sinA*sinB, rot[7] = -cosA*sinB, rot[8] = cosB;
+                rot[0] = cosA; rot[1] = sinA; rot[2] = 0;
+                rot[3] = -sinA*cosB; rot[4] = cosA*cosB; rot[5] = sinB;
+                rot[6] = sinA*sinB; rot[7] = -cosA*sinB; rot[8] = cosB;
+                
                 return rot;
             
             };
@@ -1336,19 +1368,20 @@ WebMol.GLModel = (function() {
             
             var start = geoGroup.vertices;
             var offset, faceoffset;
+            var i, x, y, z;
             
             // add vertices, opposing vertices paired together
-            for ( var i = 0; i < n; ++i) {
+            for (i = 0; i < n; ++i) {
                 
                 var vi = 2*i;
                 
-                var x = e[0]*vertices[vi].x + e[3]*vertices[vi].y + e[6]*vertices[vi].z,
-                    y = e[1]*vertices[vi].x + e[4]*vertices[vi].y + e[7]*vertices[vi].z,
-                    z =                       e[5]*vertices[vi].y + e[8]*vertices[vi].z;
+                x = e[0]*vertices[vi].x + e[3]*vertices[vi].y + e[6]*vertices[vi].z;
+                y = e[1]*vertices[vi].x + e[4]*vertices[vi].y + e[7]*vertices[vi].z;
+                z =                       e[5]*vertices[vi].y + e[8]*vertices[vi].z;
                               
                 //var xn = x/radius, yn = y/radius, zn = z/radius;
                 
-                offset = 3*(start + vi), faceoffset = geoGroup.faceidx;
+                offset = 3*(start + vi); faceoffset = geoGroup.faceidx;
                 
                 //from
                 geoGroup.__vertexArray[offset] = x + from.x;
@@ -1360,23 +1393,23 @@ WebMol.GLModel = (function() {
                 geoGroup.__vertexArray[offset+5] = z + to.z;
                 
                 //normals
-                geoGroup.__normalArray[offset] = x, geoGroup.__normalArray[offset+3] = x;
-                geoGroup.__normalArray[offset+1] = y, geoGroup.__normalArray[offset+4] = y;
-                geoGroup.__normalArray[offset+2] = z, geoGroup.__normalArray[offset+5] = z;
+                geoGroup.__normalArray[offset] = x; geoGroup.__normalArray[offset+3] = x;
+                geoGroup.__normalArray[offset+1] = y; geoGroup.__normalArray[offset+4] = y;
+                geoGroup.__normalArray[offset+2] = z; geoGroup.__normalArray[offset+5] = z;
                 
                 //colors               
-                geoGroup.__colorArray[offset] = color.r, geoGroup.__colorArray[offset+3] = color.r;
-                geoGroup.__colorArray[offset+1] = color.g, geoGroup.__colorArray[offset+4] = color.g;
-                geoGroup.__colorArray[offset+2] = color.b, geoGroup.__colorArray[offset+5] = color.b;  
+                geoGroup.__colorArray[offset] = color.r; geoGroup.__colorArray[offset+3] = color.r;
+                geoGroup.__colorArray[offset+1] = color.g; geoGroup.__colorArray[offset+4] = color.g;
+                geoGroup.__colorArray[offset+2] = color.b; geoGroup.__colorArray[offset+5] = color.b;  
                 
                 //faces
                 // 0 - 2 - 1
-                geoGroup.__faceArray[faceoffset] = fromRow[i] + start,
-                geoGroup.__faceArray[faceoffset+1] = fromRow[i+1] + start,
+                geoGroup.__faceArray[faceoffset] = fromRow[i] + start;
+                geoGroup.__faceArray[faceoffset+1] = fromRow[i+1] + start;
                 geoGroup.__faceArray[faceoffset+2] = toRow[i] + start;
                 // 1 - 2 - 3
-                geoGroup.__faceArray[faceoffset+3] = toRow[i] + start,
-                geoGroup.__faceArray[faceoffset+4] = fromRow[i+1] + start,
+                geoGroup.__faceArray[faceoffset+3] = toRow[i] + start;
+                geoGroup.__faceArray[faceoffset+4] = fromRow[i+1] + start;
                 geoGroup.__faceArray[faceoffset+5] = toRow[i+1] + start;
                 
                 geoGroup.faceidx += 6;
@@ -1393,22 +1426,23 @@ WebMol.GLModel = (function() {
                 var yend = (fromCap) ? h + 1 : h/2+1;
                 
                 var v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4,
-                nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4;
+                nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4,
+                v1offset, v2offset, v3offset, v4offset;              
                 
-                for (var y = ystart; y < yend; y++) {
+                for (y = ystart; y < yend; y++) {
                     if (y === h/2)
                         continue;
                     // n number of points for each level (verticesRows[i].length - 1)
                     var cap = (y <= h/2) ? to : from;
                     
-                    for (var x = 0; x < n; x++) {
+                    for (x = 0; x < n; x++) {
                                            
                         faceoffset = geoGroup.faceidx;
                         
-                        v1 = verticesRows[y][x + 1], v1offset = (v1 + start) * 3;
-                        v2 = verticesRows[y][x], v2offset = (v2 + start) * 3;
-                        v3 = verticesRows[y + 1][x], v3offset = (v3 + start) * 3;
-                        v4 = verticesRows[y + 1][x + 1], v4offset = (v4 + start) * 3;
+                        v1 = verticesRows[y][x + 1]; v1offset = (v1 + start) * 3;
+                        v2 = verticesRows[y][x]; v2offset = (v2 + start) * 3;
+                        v3 = verticesRows[y + 1][x]; v3offset = (v3 + start) * 3;
+                        v4 = verticesRows[y + 1][x + 1]; v4offset = (v4 + start) * 3;
                         
                         //rotate sphere vectors
                         x1 = e[0]*vertices[v1].x + e[3]*vertices[v1].y + e[6]*vertices[v1].z;
@@ -1426,23 +1460,29 @@ WebMol.GLModel = (function() {
                         z3 =                       e[5]*vertices[v3].y + e[8]*vertices[v3].z;
                         z4 =                       e[5]*vertices[v4].y + e[8]*vertices[v4].z;
                         
-                        geoGroup.__vertexArray[v1offset] = x1 + cap.x, geoGroup.__vertexArray[v2offset] = x2 + cap.x,
-                        geoGroup.__vertexArray[v3offset] = x3 + cap.x, geoGroup.__vertexArray[v4offset] = x4 + cap.x;
+                        geoGroup.__vertexArray[v1offset] = x1 + cap.x; 
+                        geoGroup.__vertexArray[v2offset] = x2 + cap.x;
+                        geoGroup.__vertexArray[v3offset] = x3 + cap.x; 
+                        geoGroup.__vertexArray[v4offset] = x4 + cap.x;
     
-                        geoGroup.__vertexArray[v1offset+1] = y1 + cap.y, geoGroup.__vertexArray[v2offset+1] = y2 + cap.y,
-                        geoGroup.__vertexArray[v3offset+1] = y3 + cap.y, geoGroup.__vertexArray[v4offset+1] = y4 + cap.y;
+                        geoGroup.__vertexArray[v1offset+1] = y1 + cap.y; 
+                        geoGroup.__vertexArray[v2offset+1] = y2 + cap.y;
+                        geoGroup.__vertexArray[v3offset+1] = y3 + cap.y; 
+                        geoGroup.__vertexArray[v4offset+1] = y4 + cap.y;
     
-                        geoGroup.__vertexArray[v1offset+2] = z1 + cap.z, geoGroup.__vertexArray[v2offset+2] = z2 + cap.z,
-                        geoGroup.__vertexArray[v3offset+2] = z3 + cap.z, geoGroup.__vertexArray[v4offset+2] = z4 + cap.z;
+                        geoGroup.__vertexArray[v1offset+2] = z1 + cap.z; 
+                        geoGroup.__vertexArray[v2offset+2] = z2 + cap.z;
+                        geoGroup.__vertexArray[v3offset+2] = z3 + cap.z; 
+                        geoGroup.__vertexArray[v4offset+2] = z4 + cap.z;
     
-                        geoGroup.__colorArray[v1offset] = color.r, geoGroup.__colorArray[v2offset] = color.r,
-                        geoGroup.__colorArray[v3offset] = color.r, geoGroup.__colorArray[v4offset] = color.r;
+                        geoGroup.__colorArray[v1offset] = color.r; geoGroup.__colorArray[v2offset] = color.r;
+                        geoGroup.__colorArray[v3offset] = color.r; geoGroup.__colorArray[v4offset] = color.r;
     
-                        geoGroup.__colorArray[v1offset+1] = color.g, geoGroup.__colorArray[v2offset+1] = color.g,
-                        geoGroup.__colorArray[v3offset+1] = color.g, geoGroup.__colorArray[v4offset+1] = color.g;
+                        geoGroup.__colorArray[v1offset+1] = color.g; geoGroup.__colorArray[v2offset+1] = color.g;
+                        geoGroup.__colorArray[v3offset+1] = color.g; geoGroup.__colorArray[v4offset+1] = color.g;
     
-                        geoGroup.__colorArray[v1offset+2] = color.b, geoGroup.__colorArray[v2offset+2] = color.b,
-                        geoGroup.__colorArray[v3offset+2] = color.b, geoGroup.__colorArray[v4offset+2] = color.b;                                      
+                        geoGroup.__colorArray[v1offset+2] = color.b; geoGroup.__colorArray[v2offset+2] = color.b;
+                        geoGroup.__colorArray[v3offset+2] = color.b; geoGroup.__colorArray[v4offset+2] = color.b;                                      
                              
                         
                                              
@@ -1466,9 +1506,9 @@ WebMol.GLModel = (function() {
                             //face = [v1, v3, v4];
                             //norm = [n1, n3, n4];
                             
-                            geoGroup.__normalArray[v1offset] = nx1, geoGroup.__normalArray[v3offset] = nx3, geoGroup.__normalArray[v4offset] = nx4;
-                            geoGroup.__normalArray[v1offset+1] = ny1, geoGroup.__normalArray[v3offset+1] = ny3, geoGroup.__normalArray[v4offset+1] = ny4;
-                            geoGroup.__normalArray[v1offset+2] = nz1, geoGroup.__normalArray[v3offset+2] = nz3, geoGroup.__normalArray[v4offset+2] = nz4;
+                            geoGroup.__normalArray[v1offset] = nx1; geoGroup.__normalArray[v3offset] = nx3; geoGroup.__normalArray[v4offset] = nx4;
+                            geoGroup.__normalArray[v1offset+1] = ny1; geoGroup.__normalArray[v3offset+1] = ny3; geoGroup.__normalArray[v4offset+1] = ny4;
+                            geoGroup.__normalArray[v1offset+2] = nz1; geoGroup.__normalArray[v3offset+2] = nz3; geoGroup.__normalArray[v4offset+2] = nz4;
     
                             geoGroup.__faceArray[faceoffset] = v1 + start; 
                             geoGroup.__faceArray[faceoffset+1] = v3 + start;
@@ -1483,9 +1523,9 @@ WebMol.GLModel = (function() {
                             //face = [v1, v2, v3];            
                             //norm = [n1, n2, n3];
                             
-                            geoGroup.__normalArray[v1offset] = nx1, geoGroup.__normalArray[v2offset] = nx2, geoGroup.__normalArray[v3offset] = nx3;
-                            geoGroup.__normalArray[v1offset+1] = ny1, geoGroup.__normalArray[v2offset+1] = ny2, geoGroup.__normalArray[v3offset+1] = ny3;
-                            geoGroup.__normalArray[v1offset+2] = nz1, geoGroup.__normalArray[v2offset+2] = nz2, geoGroup.__normalArray[v3offset+2] = nz3;
+                            geoGroup.__normalArray[v1offset] = nx1; geoGroup.__normalArray[v2offset] = nx2; geoGroup.__normalArray[v3offset] = nx3;
+                            geoGroup.__normalArray[v1offset+1] = ny1; geoGroup.__normalArray[v2offset+1] = ny2; geoGroup.__normalArray[v3offset+1] = ny3;
+                            geoGroup.__normalArray[v1offset+2] = nz1; geoGroup.__normalArray[v2offset+2] = nz2; geoGroup.__normalArray[v3offset+2] = nz3;
                             
                             geoGroup.__faceArray[faceoffset] = v1 + start;
                             geoGroup.__faceArray[faceoffset+1] = v2 + start;
@@ -1499,13 +1539,13 @@ WebMol.GLModel = (function() {
                             //face = [v1, v2, v3, v4];
                             //norm = [n1, n2, n3, n4];
                             
-                            geoGroup.__normalArray[v1offset] = nx1, geoGroup.__normalArray[v2offset] = nx2, geoGroup.__normalArray[v4offset] = nx4;
-                            geoGroup.__normalArray[v1offset+1] = ny1, geoGroup.__normalArray[v2offset+1] = ny2, geoGroup.__normalArray[v4offset+1] = ny4;
-                            geoGroup.__normalArray[v1offset+2] = nz1, geoGroup.__normalArray[v2offset+2] = nz2, geoGroup.__normalArray[v4offset+2] = nz4;
+                            geoGroup.__normalArray[v1offset] = nx1; geoGroup.__normalArray[v2offset] = nx2; geoGroup.__normalArray[v4offset] = nx4;
+                            geoGroup.__normalArray[v1offset+1] = ny1; geoGroup.__normalArray[v2offset+1] = ny2; geoGroup.__normalArray[v4offset+1] = ny4;
+                            geoGroup.__normalArray[v1offset+2] = nz1; geoGroup.__normalArray[v2offset+2] = nz2; geoGroup.__normalArray[v4offset+2] = nz4;
                             
-                            geoGroup.__normalArray[v2offset] = nx2, geoGroup.__normalArray[v3offset] = nx3, geoGroup.__normalArray[v4offset] = nx4;
-                            geoGroup.__normalArray[v2offset+1] = ny2, geoGroup.__normalArray[v3offset+1] = ny3, geoGroup.__normalArray[v4offset+1] = ny4;
-                            geoGroup.__normalArray[v2offset+2] = nz2, geoGroup.__normalArray[v3offset+2] = nz3, geoGroup.__normalArray[v4offset+2] = nz4;
+                            geoGroup.__normalArray[v2offset] = nx2; geoGroup.__normalArray[v3offset] = nx3; geoGroup.__normalArray[v4offset] = nx4;
+                            geoGroup.__normalArray[v2offset+1] = ny2; geoGroup.__normalArray[v3offset+1] = ny3; geoGroup.__normalArray[v4offset+1] = ny4;
+                            geoGroup.__normalArray[v2offset+2] = nz2; geoGroup.__normalArray[v3offset+2] = nz3; geoGroup.__normalArray[v4offset+2] = nz4;
                             
                             geoGroup.__faceArray[faceoffset] = v1 + start;
                             geoGroup.__faceArray[faceoffset+1] = v2 + start;
@@ -1601,26 +1641,32 @@ WebMol.GLModel = (function() {
 
                         }
                         
-                    } else if (atom.bondOrder[i] > 1) {
-                        fromCap = false, toCap = false;
+                    } 
+                    
+                    else if (atom.bondOrder[i] > 1) {
+                        fromCap = false; toCap = false;
                         var dir = p2.clone();
                         var v = null;
                         dir.sub(p1);
-
+                        
+                        var r, p1a, p1b, p2a, p2b;
+                        var cylinder1a, cylinder1b, cylinder1c;
+                        var i2, j2, atom3, p3, dir2;
                         if (atom.bonds.length === 1) {
                             if (atom2.bonds.length === 1) {
                                 v = dir.clone();
-                                if (Math.abs(v.x) > .0001)
+                                if (Math.abs(v.x) > 0.0001)
                                     v.y += 1;
                                 else
                                     v.x += 1;
-                            } else {
-                                var i2 = (i + 1) % atom2.bonds.length;
-                                var j2 = atom2.bonds[i2];
-                                var atom3 = atoms[j2];
-                                var p3 = new WebMol.Vector3(atom3.x, atom3.y, atom3.z);
+                            } 
+                            else {
+                                i2 = (i + 1) % atom2.bonds.length;
+                                j2 = atom2.bonds[i2];
+                                atom3 = atoms[j2];
+                                p3 = new WebMol.Vector3(atom3.x, atom3.y, atom3.z);
 
-                                var dir2 = p3.clone();
+                                dir2 = p3.clone();
                                 dir2.sub(p1);
 
                                 v = dir2.clone();
@@ -1628,32 +1674,32 @@ WebMol.GLModel = (function() {
                             }
                         } else {
                             // get vector 2 different neighboring atom
-                            var i2 = (i + 1) % atom.bonds.length;
-                            var j2 = atom.bonds[i2];
-                            var atom3 = atoms[j2];
-                            var p3 = new WebMol.Vector3(atom3.x, atom3.y, atom3.z);
+                            i2 = (i + 1) % atom.bonds.length;
+                            j2 = atom.bonds[i2];
+                            atom3 = atoms[j2];
+                            p3 = new WebMol.Vector3(atom3.x, atom3.y, atom3.z);
 
-                            var dir2 = p3.clone();
+                            dir2 = p3.clone();
                             dir2.sub(p1);
 
                             v = dir2.clone();
                             v.cross(dir);
                         }
-
+                        
                         if (atom.bondOrder[i] == 2) {
-                            var r = bondR / 2.5;
+                            r = bondR / 2.5;
                             v.cross(dir);
                             v.normalize();
                             v.multiplyScalar(r * 1.5);
 
-                            var p1a = p1.clone();
+                            p1a = p1.clone();
                             p1a.add(v);
-                            var p1b = p1.clone();
+                            p1b = p1.clone();
                             p1b.sub(v);
 
-                            var p2a = p1a.clone();
+                            p2a = p1a.clone();
                             p2a.add(dir);
-                            var p2b = p1b.clone();
+                            p2b = p1b.clone();
                             p2b.add(dir);
                                                                  
                             if (c1 != c2) {
@@ -1675,32 +1721,33 @@ WebMol.GLModel = (function() {
                                 mp2 = new WebMol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
                                 if (atom.clickable) {
-                                    var cylinder1a = new WebMol.Cylinder(p1a.clone(), mp.clone(), r);
-                                    var cylinder1b = new WebMol.Cylinder(p1b.clone(), mp2.clone(), r);
+                                    cylinder1a = new WebMol.Cylinder(p1a.clone(), mp.clone(), r);
+                                    cylinder1b = new WebMol.Cylinder(p1b.clone(), mp2.clone(), r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                 }
                                 if (atom2.clickable) {
-                                    var cylinder2a = new WebMol.Cylinder(p2a.clone(), mp.clone(), r);
-                                    var cylinder2b = new WebMol.Cylinder(p2b.clone(), mp2.clone(), r);
+                                    cylinder2a = new WebMol.Cylinder(p2a.clone(), mp.clone(), r);
+                                    cylinder2b = new WebMol.Cylinder(p2b.clone(), mp2.clone(), r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);                               
                                 }
                             }
-                        } else if (atom.bondOrder[i] == 3) {
-                            var r = bondR / 4;
+                        } 
+                        else if (atom.bondOrder[i] == 3) {
+                            r = bondR / 4;
                             v.cross(dir);
                             v.normalize();
                             v.multiplyScalar(r * 3);
 
-                            var p1a = p1.clone();
+                            p1a = p1.clone();
                             p1a.add(v);
-                            var p1b = p1.clone();
+                            p1b = p1.clone();
                             p1b.sub(v);
 
-                            var p2a = p1a.clone();
+                            p2a = p1a.clone();
                             p2a.add(dir);
-                            var p2b = p1b.clone();
+                            p2b = p1b.clone();
                             p2b.add(dir);
 
                             if (c1 != c2) {
@@ -1729,19 +1776,19 @@ WebMol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp3 = new WebMol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
-                                
+                                                                
                                 if (atom.clickable) {
-                                    var cylinder1a = new WebMol.Cylinder(p1a.clone(), mp.clone(), r);
-                                    var cylinder1b = new WebMol.Cylinder(p1b.clone(), mp2.clone(), r);
-                                    var cylinder1c = new WebMol.Cylinder(p1.clone(), mp3.clone(), r);
+                                    cylinder1a = new WebMol.Cylinder(p1a.clone(), mp.clone(), r);
+                                    cylinder1b = new WebMol.Cylinder(p1b.clone(), mp2.clone(), r);
+                                    cylinder1c = new WebMol.Cylinder(p1.clone(), mp3.clone(), r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                     atom.intersectionShape.cylinder.push(cylinder1c);
                                 } 
                                 if (atom2.clickable) {                               
-                                    var cylinder2a = new WebMol.Cylinder(p2a.clone(), mp.clone(), r);
-                                    var cylinder2b = new WebMol.Cylinder(p2b.clone(), mp2.clone(), r);
-                                    var cylinder2c = new WebMol.Cylinder(p2.clone(), mp3.clone(), r);
+                                    cylinder2a = new WebMol.Cylinder(p2a.clone(), mp.clone(), r);
+                                    cylinder2b = new WebMol.Cylinder(p2b.clone(), mp2.clone(), r);
+                                    cylinder2c = new WebMol.Cylinder(p2.clone(), mp3.clone(), r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);
                                     atom2.intersectionShape.cylinder.push(cylinder2c);                                
@@ -1778,6 +1825,7 @@ WebMol.GLModel = (function() {
         // faster
         // at some point we should optimize this to avoid unnecessary
         // recalculation
+        /** @type {Array.<AtomSpec>} atoms */
         var createMolObj = function(atoms) {
 
             console.log("creating for "+id);
@@ -1787,8 +1835,9 @@ WebMol.GLModel = (function() {
             var crossGeometries = {};
             var sphereGeometry = new WebMol.Geometry(true);                                                         
             var stickGeometry = new WebMol.Geometry(true);
+            var i, n;
             
-            for ( var i = 0; i < atoms.length; i++) {
+            for (i = 0, n = atoms.length; i < n; i++) {
                 var atom = atoms[i];
                 // recreate gl info for each atom as necessary
                 // set up appropriate intersection spheres for clickable atoms
@@ -1799,8 +1848,7 @@ WebMol.GLModel = (function() {
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
-                    if (typeof (atom.style.cartoon) !== "undefined"
-                            && !atom.style.cartoon.hidden) {
+                    if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                         cartoonAtoms.push(atom);
                     }
 
@@ -1810,7 +1858,7 @@ WebMol.GLModel = (function() {
             if (cartoonAtoms.length > 0) {
                 WebMol.drawCartoon(ret, cartoonAtoms, false);
                 
-                for (var i = 0; i < ret.children.length; i++){
+                for (i = 0; i < ret.children.length; i++){
                     var geo = ret.children[i].geometry;
                 }
             }
@@ -1828,8 +1876,7 @@ WebMol.GLModel = (function() {
                 
                 var sphere = new WebMol.Mesh(sphereGeometry, sphereMaterial);
                 console
-                        .log("sphere geometry "
-                                + sphereGeometry.vertices.length);
+                        .log("sphere geometry " + sphereGeometry.vertices.length);
 
                 ret.add(sphere);
             }
@@ -1851,9 +1898,10 @@ WebMol.GLModel = (function() {
                 var sticks = new WebMol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
             }
-
+            
+            //var linewidth;
             // add any line geometries, distinguished by line width
-            for ( var i in lineGeometries) {
+            for (i in lineGeometries) {
                 if (lineGeometries.hasOwnProperty(i)) {
                     var linewidth = i;
                     var lineMaterial = new WebMol.LineBasicMaterial({
@@ -1871,20 +1919,20 @@ WebMol.GLModel = (function() {
             }
 
             // add any cross geometries
-            for ( var i in crossGeometries) {
+            for (i in crossGeometries) {
                 if (crossGeometries.hasOwnProperty(i)) {
                     var linewidth = i;
-                    var lineMaterial = new WebMol.LineBasicMaterial({
+                    var crossMaterial = new WebMol.LineBasicMaterial({
                         linewidth : linewidth,
                         vertexColors : true
                     });
 
                     crossGeometries[i].initTypedArrays();
                     
-                    var line = new WebMol.Line(crossGeometries[i], lineMaterial,
+                    var cross = new WebMol.Line(crossGeometries[i], crossMaterial,
                             WebMol.LinePieces);
 
-                    ret.add(line);
+                    ret.add(cross);
                 }
             }
 
@@ -1901,8 +1949,7 @@ WebMol.GLModel = (function() {
                 var atom = atoms[i];
                 if (atom) {
                     atom.style = atom.style || defaultAtomStyle;
-                    atom.color = atom.color || ElementColors[atom.elem]
-                            || defaultColor;
+                    atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
                     atom.model = id;
                     if (atom.clickable)
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
@@ -1995,12 +2042,13 @@ WebMol.GLModel = (function() {
             var start = atoms.length;
             var indexmap = [];
             // mapping from old index to new index
-            for(var i = 0; i < newatoms.length; i++) {
+            var i;
+            for(i = 0; i < newatoms.length; i++) {
                 indexmap[newatoms[i].index] = start+i;
             }
             
             // copy and push newatoms onto atoms
-            for(var i = 0; i < newatoms.length; i++) {
+            for(i = 0; i < newatoms.length; i++) {
                 var olda = newatoms[i];
                 var nindex = indexmap[olda.index];
                 var a = $.extend(false, {}, olda);
@@ -2025,13 +2073,14 @@ WebMol.GLModel = (function() {
             molObj = null;
             // make map of all baddies
             var baddies = [];
-            for(var i = 0; i < badatoms.length; i++) {
+            var i;
+            for(i = 0; i < badatoms.length; i++) {
                 baddies[badatoms[i].index] = true;
             }
             
             // create list of good atoms
             var newatoms = [];
-            for(var i = 0; i < atoms.length; i++) {
+            for(i = 0; i < atoms.length; i++) {
                 var a = atoms[i];
                 if(!baddies[a.index])
                     newatoms.push(a);
@@ -2047,7 +2096,7 @@ WebMol.GLModel = (function() {
         // style the select atoms with style
         this.setStyle = function(sel, style, add) {
             
-            if(!add && molObj != null && sameObj(style, lastStyle))
+            if(!add && molObj !== null && sameObj(style, lastStyle))
                 return; // no need to recompute
             
             if(add) lastStyle = null; // todo: compute merged style
@@ -2102,20 +2151,20 @@ WebMol.GLModel = (function() {
                 molObj = null; // force rebuild
             var min =  Number.POSITIVE_INFINITY;
             var max =  Number.NEGATIVE_INFINITY;
-            
-            // compute the range
-            for ( var i = 0; i < atoms.length; i++) {
-                var a = atoms[i];
-                if(a.properties && typeof(a.properties[prop]) != undefined) {
+            var i, a;
+            // compute the range            
+            for (i = 0; i < atoms.length; i++) {
+                a = atoms[i];
+                if(a.properties && typeof(a.properties[prop]) !== undefined) {
                     var p = parseFloat(a.properties[prop]);
                     if(p < min) min = p;
                     if(p > max) max = p;
                 }                    
             }
             // now apply colors using scheme
-            for ( var i = 0; i < atoms.length; i++) {
-                var a = atoms[i];
-                if(a.properties && typeof(a.properties[prop]) != undefined) {
+            for (i = 0; i < atoms.length; i++) {
+                a = atoms[i];
+                if(a.properties && typeof(a.properties[prop]) !== undefined) {
                     var c = scheme.valueToHex(parseFloat(a.properties[prop]), [min,max]);
                     a.color = c;
                 }                    
@@ -2153,11 +2202,7 @@ WebMol.GLModel = (function() {
             molObj = null;
         };
 
-    };
-    
-    GLModel.prototype.testMethod = function() {
-          
-    };
+    }
 
     return GLModel;
     
