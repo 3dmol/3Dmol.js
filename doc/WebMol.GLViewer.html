@@ -42,7 +42,31 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
+							<a href="WebMol.GLModel.html">GLModel</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.GLShape.html">GLShape</a>
+						</li>
+						
+						<li>
 							<a href="WebMol.GLViewer.html">GLViewer</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.Label.html">Label</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.ROYGB.html">ROYGB</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.RWB.html">RWB</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.Sinebow.html">Sinebow</a>
 						</li>
 						
 
@@ -56,11 +80,47 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="global.html#setView">setView</a>
+							<a href="global.html#ArrowSpec">ArrowSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#AtomSpec">AtomSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#colorlike">colorlike</a>
+						</li>
+						
+						<li>
+							<a href="global.html#ColorScheme">ColorScheme</a>
+						</li>
+						
+						<li>
+							<a href="global.html#CustomShapeSpec">CustomShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#LabelSpec">LabelSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#removeSurface">removeSurface</a>
+						</li>
+						
+						<li>
+							<a href="global.html#ShapeSpec">ShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#SphereSpec">SphereSpec</a>
 						</li>
 						
 						<li>
 							<a href="global.html#ViewerSpec">ViewerSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#VolSpec">VolSpec</a>
 						</li>
 						
 
@@ -279,7 +339,2046 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <dl>
             
 <dt>
-    <h4 class="name" id="getModel"><span class="type-signature"></span>getModel<span class="signature">(<span class="optional">id</span>)</span><span class="type-signature"> &rarr; {WebMol.GLModel}</span></h4>
+    <h4 class="name" id="addSurface"><span class="type-signature">&lt;static> </span>addSurface<span class="signature">(type, style, atomsel, allsel, focus)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add surface representation to atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="WebMol.html#SurfaceType">WebMol.SurfaceType</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Surface type</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>optional style specification for surface material (e.g. for different coloring scheme, etc)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>atomsel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#AtomSpec">AtomSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Show surface for atoms in this selection</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>allsel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#AtomSpec">AtomSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Use atoms in this selection to calculate surface; may be larger group than 'atomsel'</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>focus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#AtomSpec">AtomSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optionally begin rendering surface specified atoms</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>surfid - Identifying number for this surface</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">number</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="clear"><span class="type-signature">&lt;static> </span>clear<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Clear all models, surfaces, and shapes from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="mapAtomProperties"><span class="type-signature">&lt;static> </span>mapAtomProperties<span class="signature">(props)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add specified properties to all atoms matching input argument</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#AtomSpec">AtomSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setSurfaceMaterialStyle"><span class="type-signature">&lt;static> </span>setSurfaceMaterialStyle<span class="signature">(surf, style)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set the surface material to something else, must render change</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>surf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Surface ID to apply changes to</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">matSpec</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>new material style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setView"><span class="type-signature">&lt;static> </span>setView<span class="signature">(arg)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>arg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addArrow"><span class="type-signature"></span>addArrow<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLShape.html">WebMol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add arrow shape</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ArrowSpec">ArrowSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.GLShape.html">WebMol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addCustom"><span class="type-signature"></span>addCustom<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLShape.html">WebMol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add custom shape component from user supplied function</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CustomSpec</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.GLShape.html">WebMol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addLabel"><span class="type-signature"></span>addLabel<span class="signature">(text, data)</span><span class="type-signature"> &rarr; {<a href="WebMol.Label.html">WebMol.Label</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add label to viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Label text</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#LabelSpec">LabelSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Label style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
+
+&#x2F;&#x2F; Select all alpha carbons (have property atom : &quot;CA&quot;) from last model added
+var atoms = glviewer.getModel().selectedAtoms({atom:&quot;CA&quot;});
+var labels = [];
+
+for (var a in atoms) {
+    var atom = atoms[a];
+
+    &#x2F;&#x2F; Create label at alpha carbon&#x27;s position displaying atom&#x27;s residue and residue number
+    var labelText = atom.resname + &quot; &quot; + atom.resi;
+     
+    var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z});
+
+    labels.push(l);
+}
+
+&#x2F;&#x2F; Render labels
+glviewer.render();</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addModel"><span class="type-signature"></span>addModel<span class="signature">(data, format)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLModel.html">WebMol.GLModel</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add model to viewer, given molecular data and its format 
+(pdb, sdf, xyz, or mol2)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>format</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input format ('pdb', 'sdf', 'xyz', or 'mol2')</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.GLModel.html">WebMol.GLModel</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addShape"><span class="type-signature"></span>addShape<span class="signature">(shapeSpec)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLShape.html">WebMol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add shape object to viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>shapeSpec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ShapeSpec">ShapeSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>style specification for label</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+	<dt class="tag-see">See:</dt>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="WebMol.GLShape.html">WebMol.GLShape</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.GLShape.html">WebMol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addSphere"><span class="type-signature"></span>addSphere<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLShape.html">WebMol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add sphere shape. This method provides a shorthand 
+way to create a spherical shape object</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#SphereSpec">SphereSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Sphere shape style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.GLShape.html">WebMol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addStyle"><span class="type-signature"></span>addStyle<span class="signature">(sel, style)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add style properties to all selected atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Atom selection specification</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>style spec to add to specified atoms</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addVolumetricData"><span class="type-signature"></span>addVolumetricData<span class="signature">(data, format, spec)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLShape.html">WebMol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Construct isosurface from volumetric data in gaussian cube format</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input file contents</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>format</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input file format (currently only supports &quot;cube&quot;)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#VolSpec">VolSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Shape style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.GLShape.html">WebMol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="createModelFrom"><span class="type-signature"></span>createModelFrom<span class="signature">(sel, <span class="optional">extract</span>)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLModel.html">WebMol.GLModel</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create a new model from atoms specified by sel.
+If extract, removes selected atoms from existing models</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Atom selection specification</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>extract</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>If true, remove selected atoms from existing models</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.GLModel.html">WebMol.GLModel</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getModel"><span class="type-signature"></span>getModel<span class="signature">(<span class="optional">id</span>)</span><span class="type-signature"> &rarr; {<a href="WebMol.GLModel.html">WebMol.GLModel</a>}</span></h4>
     
     
 </dt>
@@ -425,7 +2524,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 	</dt>
 	<dd>
 		
-<span class="param-type">WebMol.GLModel</span>
+<span class="param-type"><a href="WebMol.GLModel.html">WebMol.GLModel</a></span>
 
 
 	</dd>
@@ -441,6 +2540,464 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 var m = glviewer.getModel(0);</pre>
 
 
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="pdbData"><span class="type-signature"></span>pdbData<span class="signature">(<span class="optional">sel</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return pdb output of selected atoms (if atoms from pdb input)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Selection specification specifying model and atom properties to select.  Default: all atoms in viewer</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>PDB string of selected atoms</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeAllModels"><span class="type-signature"></span>removeAllModels<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Delete all existing models</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeLabel"><span class="type-signature"></span>removeLabel<span class="signature">(label)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove label from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>WebMol label</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Remove labels created in <a href="WebMol.GLViewer.html#addLabel">addLabel example</a>
+
+for (var i = 0; i &lt; labels.length; i++) {
+    glviewer.removeLabel(label);
+}
+
+glviewer.render();</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeModel"><span class="type-signature"></span>removeModel<span class="signature">(model)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Delete specified model from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="WebMol.GLModel.html">WebMol.GLModel</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
     
 </dd>
 
@@ -725,6 +3282,297 @@ myviewer.setBackgroundColor(0xffffff)</pre>
         
             
 <dt>
+    <h4 class="name" id="setColorByElement"><span class="type-signature"></span>setColorByElement<span class="signature">(sel, colors)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>colors</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setColorByProperty"><span class="type-signature"></span>setColorByProperty<span class="signature">(sel, prop, scheme)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>prop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>scheme</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="setHeight"><span class="type-signature"></span>setHeight<span class="signature">(h)</span><span class="type-signature"></span></h4>
     
     
@@ -784,6 +3632,458 @@ myviewer.setBackgroundColor(0xffffff)</pre>
             
 
             <td class="description last"><p>Height in pixels</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setLabelStyle"><span class="type-signature"></span>setLabelStyle<span class="signature">(label, stylespec)</span><span class="type-signature"> &rarr; {<a href="WebMol.Label.html">WebMol.Label</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Modify existing label's style</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>WebMol label</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>stylespec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#LabelSpec">LabelSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Label style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setLabelText"><span class="type-signature"></span>setLabelText<span class="signature">(label, text)</span><span class="type-signature"> &rarr; {<a href="WebMol.Label.html">WebMol.Label</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Modify existing label's text</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>WebMol label</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Label text</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="WebMol.Label.html">WebMol.Label</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setStyle"><span class="type-signature"></span>setStyle<span class="signature">(sel, style)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set style properties to all selected atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Atom selection specification</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style spec to apply to specified atoms</p></td>
         </tr>
 
 	
@@ -952,6 +4252,143 @@ myviewer.setBackgroundColor(0xffffff)</pre>
     
 </dd>
 
+        
+            
+<dt>
+    <h4 class="name" id="zoomTo"><span class="type-signature"></span>zoomTo<span class="signature">(<span class="optional">sel</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Zoom to center of atom selection</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Selection specification specifying model and atom properties to select. Default: all atoms in viewer</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
+glviewer.zoomTo({chain: &#x27;B&#x27;});
+
+&#x2F;&#x2F; Focus on centroid of all atoms of all models in this viewer
+glviewer.zoomTo();  &#x2F;&#x2F; (equivalent to glviewer.zoomTo({}) )</pre>
+
+
+    
+</dd>
+
         </dl>
     
 
@@ -973,7 +4410,7 @@ myviewer.setBackgroundColor(0xffffff)</pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on 2014-07-05T13:27:49-04:00 using the <a
+		on 2014-07-08T12:45:24-04:00 using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
