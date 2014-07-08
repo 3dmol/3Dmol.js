@@ -18088,8 +18088,7 @@ WebMol.GLModel = (function() {
             
             getVerticesForRadius : function(radius) {
                 
-                if (this.cache[radius] !== undefined)
-                    return this.cache[radius];
+                if (this.cache[radius] !== undefined) return this.cache[radius];
                 
                 var dir = new WebMol.Vector3(0,1,0);    
                 var w = this.basisVectors.length;
@@ -18859,14 +18858,14 @@ WebMol.GLModel = (function() {
                         if (atom.clickable || atom2.clickable) {
                             mp = new WebMol.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
                             if (atom.clickable){
-                                var cylinder1 = new WebMol.Cylinder(p1.clone(), mp.clone(), bondR);
-                                var sphere1 = new WebMol.Sphere(p1.clone(), bondR);
+                                var cylinder1 = new WebMol.Cylinder(p1 , mp , bondR);
+                                var sphere1 = new WebMol.Sphere(p1 , bondR);
                                 atom.intersectionShape.cylinder.push(cylinder1);   
                                 atom.intersectionShape.sphere.push(sphere1);                             
                             }
                             if (atom2.clickable){
-                                var cylinder2 = new WebMol.Cylinder(p2.clone(), mp.clone(), bondR);
-                                var sphere2 = new WebMol.Sphere(p2.clone(), bondR);
+                                var cylinder2 = new WebMol.Cylinder(p2 , mp , bondR);
+                                var sphere2 = new WebMol.Sphere(p2 , bondR);
                                 atom2.intersectionShape.cylinder.push(cylinder2);
                                 atom2.intersectionShape.sphere.push(sphere2);
                             }
@@ -18953,14 +18952,14 @@ WebMol.GLModel = (function() {
                                 mp2 = new WebMol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
                                 if (atom.clickable) {
-                                    cylinder1a = new WebMol.Cylinder(p1a.clone(), mp.clone(), r);
-                                    cylinder1b = new WebMol.Cylinder(p1b.clone(), mp2.clone(), r);
+                                    cylinder1a = new WebMol.Cylinder(p1a , mp , r);
+                                    cylinder1b = new WebMol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                 }
                                 if (atom2.clickable) {
-                                    cylinder2a = new WebMol.Cylinder(p2a.clone(), mp.clone(), r);
-                                    cylinder2b = new WebMol.Cylinder(p2b.clone(), mp2.clone(), r);
+                                    cylinder2a = new WebMol.Cylinder(p2a , mp , r);
+                                    cylinder2b = new WebMol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);                               
                                 }
