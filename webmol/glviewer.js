@@ -1499,7 +1499,7 @@ WebMol.GLViewer = (function() {
             }
         };
         
-        getModelGroup = function() {
+        var getModelGroup = function() {
             return modelGroup;
         };       
         

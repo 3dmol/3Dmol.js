@@ -779,11 +779,9 @@ WebMol.GLModel = (function() {
         var lastColors = null;
         
         var defaultColor = WebMol.defaultElementColor;
+        
+        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.defaultElementColors;
 
-        if (defaultcolors)
-            ElementColors = defaultcolors;
-        else
-            ElementColors = WebMol.defaultElementColors;
 
         // drawing functions must be associated with model object since
         // geometries can't span multiple canvases
@@ -1292,7 +1290,7 @@ WebMol.GLModel = (function() {
            
             return function(dir) {
                
-                d.copy(dir);
+                d.set(dir[0], dir[1], dir[2]);
                 
                 var dx = d.x, dy = d.y, dz = d.z;
                 
@@ -1347,8 +1345,9 @@ WebMol.GLModel = (function() {
             var drawcaps = fromCap || toCap;
             //drawcaps = false;
             
-            var dir = to.clone();
-            dir.sub(from);
+            /** @type {Array.<number>} */
+            var dir = [to.x, to.y, to.z];
+            dir[0] -= from.x; dir[1] -= from.y; dir[2] -= from.z;
             
             var e = getRotationMatrix(dir);
             //get orthonormal vectors from cache

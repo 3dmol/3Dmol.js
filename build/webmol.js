@@ -11140,7 +11140,7 @@ WebMol.Object3D.prototype = {
         this.matrixWorldNeedsUpdate = false;
         
         //Update matrices of all children
-        for (var i in this.children) {
+        for (var i = 0; i < this.children.length; i++) {
             this.children[i].updateMatrixWorld(true);
         }
     },
@@ -11167,7 +11167,7 @@ WebMol.Object3D.prototype = {
         
         object.visible = this.visible;
         
-        for (var i in this.children) {
+        for (var i = 0; i < this.children.length; i++) {
             var child = this.children[i];
             object.add(child.clone());
         }
@@ -11401,7 +11401,7 @@ WebMol.Geometry = (function() {
             
             three = three || false;
             
-            for ( var g in this.geometryGroups ) {
+            for (var g = 0; g < this.groups; g++) {
             
                 var geoGroup = this.geometryGroups[g];            
                 
@@ -11412,7 +11412,7 @@ WebMol.Geometry = (function() {
         },
         
         setUpWireframe : function() {
-            for (var g in this.geometryGroups ) {
+            for (var g = 0; g < this.groups; g++) {
                 var geoGroup = this.geometryGroups[g];
                 
                 geoGroup.setLineIndices();
@@ -11424,7 +11424,7 @@ WebMol.Geometry = (function() {
         // or shorten last typed array
         initTypedArrays : function() {
                 
-            for (var g in this.geometryGroups) {
+            for (var g = 0; g < this.groups; g++) {
                 
                 var group = this.geometryGroups[g];
                 
@@ -11452,7 +11452,7 @@ Object.defineProperty(WebMol.Geometry.prototype, "vertices", {
     /** @this {WebMol.Geometry} */
     get : function() {
         var vertices = 0;
-        for (var g in this.geometryGroups)
+        for (var g = 0; g < this.groups; g++)
             vertices += this.geometryGroups[g].vertices;
             
         return vertices;
@@ -14302,7 +14302,7 @@ WebMol.Scene.prototype.__addObject = function(object) {
     
     //Add object's children
     
-    for (var i in object.children) 
+    for (var i = 0; i < object.children.length; i++) 
         this.__addObject(object.children[i]);
     
 };
@@ -14341,7 +14341,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     }
     
     //Remove object's children
-    for (var i in object.children)
+    for (var i = 0; i < object.children.length; i++)
         this.__removeObject(object.children[i]);
     
 };
@@ -18012,11 +18012,9 @@ WebMol.GLModel = (function() {
         var lastColors = null;
         
         var defaultColor = WebMol.defaultElementColor;
+        
+        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.defaultElementColors;
 
-        if (defaultcolors)
-            ElementColors = defaultcolors;
-        else
-            ElementColors = WebMol.defaultElementColors;
 
         // drawing functions must be associated with model object since
         // geometries can't span multiple canvases
@@ -18525,7 +18523,7 @@ WebMol.GLModel = (function() {
            
             return function(dir) {
                
-                d.copy(dir);
+                d.set(dir[0], dir[1], dir[2]);
                 
                 var dx = d.x, dy = d.y, dz = d.z;
                 
@@ -18580,8 +18578,9 @@ WebMol.GLModel = (function() {
             var drawcaps = fromCap || toCap;
             //drawcaps = false;
             
-            var dir = to.clone();
-            dir.sub(from);
+            /** @type {Array.<number>} */
+            var dir = [to.x, to.y, to.z];
+            dir[0] -= from.x; dir[1] -= from.y; dir[2] -= from.z;
             
             var e = getRotationMatrix(dir);
             //get orthonormal vectors from cache
@@ -21815,7 +21814,7 @@ WebMol.GLViewer = (function() {
             }
         };
         
-        getModelGroup = function() {
+        var getModelGroup = function() {
             return modelGroup;
         };       
         
