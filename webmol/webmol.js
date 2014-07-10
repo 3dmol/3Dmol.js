@@ -85,16 +85,52 @@ WebMol.SurfaceType = {
 WebMol.CC = {
     cache : {},
     color : function(hex) {
+
         if(typeof(this.cache[hex]) !== "undefined") {
             return this.cache[hex];
         }
         else {
+            hex = this.getHex(hex);
             var c = new WebMol.Color(hex);
             this.cache[hex] = c;
             return c;
         }
+    },
+    colorTab : {
+        'white' : 0xFFFFFF,
+        'silver' : 0xC0C0C0,
+        'gray' : 0x808080,
+        'grey' : 0x808080,
+        'black' : 0x000000,
+        'red' : 0xFF0000,
+        'maroon' : 0x800000,
+        'yellow' : 0xFFFF00,
+        'olive' : 0x808000,
+        'lime' : 0x00FF00,
+        'green' : 0x008000,
+        'aqua' : 0x00FFFF,
+        'cyan' : 0x00FFFF,
+        'teal' : 0x008080,
+        'blue' : 0x0000FF,
+        'navy' : 0x000080,
+        'fuchsia' : 0xFF00FF,
+        'magenta' : 0xFF00FF,
+        'purple' : 0x800080
+    },    
+    getHex : function(hex) {
+        if (parseInt(hex))
+            return hex;
+        
+        else if (typeof(hex) === 'string') {
+            
+            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
+        }
+        
     }
+    
 };
+
+
 
 WebMol['CC'] = WebMol.CC;
 WebMol['CC']['color'] = WebMol.CC.color;
