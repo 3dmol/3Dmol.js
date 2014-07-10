@@ -920,7 +920,7 @@ WebMol.Renderer.domElement;
  * @param {number} height
  */
 WebMol.Renderer.setSize = function(width, height) {};
-/*
+/**
  * @param {number} hex
  * @param {number} alpha
  */

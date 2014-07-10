@@ -11140,7 +11140,7 @@ WebMol.Object3D.prototype = {
         this.matrixWorldNeedsUpdate = false;
         
         //Update matrices of all children
-        for (var i in this.children) {
+        for (var i = 0; i < this.children.length; i++) {
             this.children[i].updateMatrixWorld(true);
         }
     },
@@ -11167,7 +11167,7 @@ WebMol.Object3D.prototype = {
         
         object.visible = this.visible;
         
-        for (var i in this.children) {
+        for (var i = 0; i < this.children.length; i++) {
             var child = this.children[i];
             object.add(child.clone());
         }
@@ -11401,7 +11401,7 @@ WebMol.Geometry = (function() {
             
             three = three || false;
             
-            for ( var g in this.geometryGroups ) {
+            for (var g = 0; g < this.groups; g++) {
             
                 var geoGroup = this.geometryGroups[g];            
                 
@@ -11412,7 +11412,7 @@ WebMol.Geometry = (function() {
         },
         
         setUpWireframe : function() {
-            for (var g in this.geometryGroups ) {
+            for (var g = 0; g < this.groups; g++) {
                 var geoGroup = this.geometryGroups[g];
                 
                 geoGroup.setLineIndices();
@@ -11424,7 +11424,7 @@ WebMol.Geometry = (function() {
         // or shorten last typed array
         initTypedArrays : function() {
                 
-            for (var g in this.geometryGroups) {
+            for (var g = 0; g < this.groups; g++) {
                 
                 var group = this.geometryGroups[g];
                 
@@ -11452,7 +11452,7 @@ Object.defineProperty(WebMol.Geometry.prototype, "vertices", {
     /** @this {WebMol.Geometry} */
     get : function() {
         var vertices = 0;
-        for (var g in this.geometryGroups)
+        for (var g = 0; g < this.groups; g++)
             vertices += this.geometryGroups[g].vertices;
             
         return vertices;
@@ -14302,7 +14302,7 @@ WebMol.Scene.prototype.__addObject = function(object) {
     
     //Add object's children
     
-    for (var i in object.children) 
+    for (var i = 0; i < object.children.length; i++) 
         this.__addObject(object.children[i]);
     
 };
@@ -14341,7 +14341,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     }
     
     //Remove object's children
-    for (var i in object.children)
+    for (var i = 0; i < object.children.length; i++)
         this.__removeObject(object.children[i]);
     
 };
@@ -14660,175 +14660,176 @@ WebMol.ShaderLib = {
 
 //properties for mapping
 WebMol.partialCharges = [
-        { resn: "ALA", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ALA", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ALA", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ALA", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ALA", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "ARG", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ARG", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ARG", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ARG", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "ARG", atom: "CD", props: {partialCharge: 0.10}},
-	{ resn: "ARG", atom: "NE", props: {partialCharge: -0.10}},
-	{ resn: "ARG", atom: "CZ", props: {partialCharge: 0.50}},
-	{ resn: "ARG", atom: "NH1", props: {partialCharge: 0.25}},
-	{ resn: "ARG", atom: "NH2", props: {partialCharge: 0.25}},
-	{ resn: "ARG", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ARG", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "ASN", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ASN", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ASN", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ASN", atom: "CG", props: {partialCharge: 0.55}},
-	{ resn: "ASN", atom: "OD1", props: {partialCharge: -0.55}},
-	{ resn: "ASN", atom: "ND2", props: {partialCharge: 0.00}},
-	{ resn: "ASN", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ASN", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "ASP", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ASP", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ASP", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ASP", atom: "CG", props: {partialCharge: 0.14}},
-	{ resn: "ASP", atom: "OD1", props: {partialCharge: -0.57}},
-	{ resn: "ASP", atom: "OD2", props: {partialCharge: -0.57}},
-	{ resn: "ASP", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ASP", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "CYS", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "CYS", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "CYS", atom: "CB", props: {partialCharge: 0.19}},
-	{ resn: "CYS", atom: "SG", props: {partialCharge: -0.19}},
-	{ resn: "CYS", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "CYS", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "GLN", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "GLN", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "GLN", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "GLN", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "GLN", atom: "CD", props: {partialCharge: 0.55}},
-	{ resn: "GLN", atom: "OE1", props: {partialCharge: -0.55}},
-	{ resn: "GLN", atom: "NE2", props: {partialCharge: 0.00}},
-	{ resn: "GLN", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "GLN", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "GLU", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "GLU", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "GLU", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "GLU", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "GLU", atom: "CD", props: {partialCharge: 0.14}},
-	{ resn: "GLU", atom: "OE1", props: {partialCharge: -0.57}},
-	{ resn: "GLU", atom: "OE2", props: {partialCharge: -0.57}},
-	{ resn: "GLU", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "GLU", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "GLY", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "GLY", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "GLY", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "GLY", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "HIS", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "HIS", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "HIS", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "HIS", atom: "CG", props: {partialCharge: 0.10}},
-	{ resn: "HIS", atom: "ND1", props: {partialCharge: -0.10}},
-	{ resn: "HIS", atom: "CD2", props: {partialCharge: 0.10}},
-	{ resn: "HIS", atom: "NE2", props: {partialCharge: -0.40}},
-	{ resn: "HIS", atom: "CE1", props: {partialCharge: 0.30}},
-	{ resn: "HIS", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "HIS", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "ILE", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ILE", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ILE", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ILE", atom: "CG2", props: {partialCharge: 0.00}},
-	{ resn: "ILE", atom: "CG1", props: {partialCharge: 0.00}},
-	{ resn: "ILE", atom: "CD", props: {partialCharge: 0.00}},
-	{ resn: "ILE", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ILE", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "LEU", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "LEU", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "LEU", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "LEU", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "LEU", atom: "CD1", props: {partialCharge: 0.00}},
-	{ resn: "LEU", atom: "CD2", props: {partialCharge: 0.00}},
-	{ resn: "LEU", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "LEU", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "LYS", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "LYS", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "LYS", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "LYS", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "LYS", atom: "CD", props: {partialCharge: 0.00}},
-	{ resn: "LYS", atom: "CE", props: {partialCharge: 0.25}},
-	{ resn: "LYS", atom: "NZ", props: {partialCharge: 0.75}},
-	{ resn: "LYS", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "LYS", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "MET", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "MET", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "MET", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "MET", atom: "CG", props: {partialCharge: 0.06}},
-	{ resn: "MET", atom: "SD", props: {partialCharge: -0.12}},
-	{ resn: "MET", atom: "CE", props: {partialCharge: 0.06}},
-	{ resn: "MET", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "MET", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "PHE", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "PHE", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "PHE", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CD1", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CD2", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CE1", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CE2", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CZ", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "PHE", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "PRO", atom: "N", props: {partialCharge: -0.25}},
-	{ resn: "PRO", atom: "CD", props: {partialCharge: 0.10}},
-	{ resn: "PRO", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "PRO", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "PRO", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "PRO", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "PRO", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "SER", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "SER", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "SER", atom: "CB", props: {partialCharge: 0.25}},
-	{ resn: "SER", atom: "OG", props: {partialCharge: -0.25}},
-	{ resn: "SER", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "SER", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "THR", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "THR", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "THR", atom: "CB", props: {partialCharge: 0.25}},
-	{ resn: "THR", atom: "OG1", props: {partialCharge: -0.25}},
-	{ resn: "THR", atom: "CG2", props: {partialCharge: 0.00}},
-	{ resn: "THR", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "THR", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "TRP", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "TRP", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "TRP", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "TRP", atom: "CG", props: {partialCharge: -0.03}},
-	{ resn: "TRP", atom: "CD2", props: {partialCharge: 0.10}},
-	{ resn: "TRP", atom: "CE2", props: {partialCharge: -0.04}},
-	{ resn: "TRP", atom: "CE3", props: {partialCharge: -0.03}},
-	{ resn: "TRP", atom: "CD1", props: {partialCharge: 0.06}},
-	{ resn: "TRP", atom: "NE1", props: {partialCharge: -0.06}},
-	{ resn: "TRP", atom: "CZ2", props: {partialCharge: 0.00}},
-	{ resn: "TRP", atom: "CZ3", props: {partialCharge: 0.00}},
-	{ resn: "TRP", atom: "CH2", props: {partialCharge: 0.00}},
-	{ resn: "TRP", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "TRP", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "TYR", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "TYR", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "TYR", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CD1", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CE1", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CD2", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CE2", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CZ", props: {partialCharge: 0.25}},
-	{ resn: "TYR", atom: "OH", props: {partialCharge: -0.25}},
-	{ resn: "TYR", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "TYR", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "VAL", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "VAL", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "VAL", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "VAL", atom: "CG1", props: {partialCharge: 0.00}},
-	{ resn: "VAL", atom: "CG2", props: {partialCharge: 0.00}},
-	{ resn: "VAL", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "VAL", atom: "O", props: {partialCharge: -0.55}}
+    { resn: "ALA", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ALA", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ALA", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ALA", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ALA", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "ARG", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ARG", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ARG", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ARG", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "ARG", atom: "CD", props: {'partialCharge': 0.10}},
+	{ resn: "ARG", atom: "NE", props: {'partialCharge': -0.10}},
+	{ resn: "ARG", atom: "CZ", props: {'partialCharge': 0.50}},
+	{ resn: "ARG", atom: "NH1", props: {'partialCharge': 0.25}},
+	{ resn: "ARG", atom: "NH2", props: {'partialCharge': 0.25}},
+	{ resn: "ARG", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ARG", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "ASN", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ASN", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ASN", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ASN", atom: "CG", props: {'partialCharge': 0.55}},
+	{ resn: "ASN", atom: "OD1", props: {'partialCharge': -0.55}},
+	{ resn: "ASN", atom: "ND2", props: {'partialCharge': 0.00}},
+	{ resn: "ASN", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ASN", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "ASP", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ASP", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ASP", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ASP", atom: "CG", props: {'partialCharge': 0.14}},
+	{ resn: "ASP", atom: "OD1", props: {'partialCharge': -0.57}},
+	{ resn: "ASP", atom: "OD2", props: {'partialCharge': -0.57}},
+	{ resn: "ASP", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ASP", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "CYS", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "CYS", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "CYS", atom: "CB", props: {'partialCharge': 0.19}},
+	{ resn: "CYS", atom: "SG", props: {'partialCharge': -0.19}},
+	{ resn: "CYS", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "CYS", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "GLN", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "GLN", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "GLN", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "GLN", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "GLN", atom: "CD", props: {'partialCharge': 0.55}},
+	{ resn: "GLN", atom: "OE1", props: {'partialCharge': -0.55}},
+	{ resn: "GLN", atom: "NE2", props: {'partialCharge': 0.00}},
+	{ resn: "GLN", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "GLN", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "GLU", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "GLU", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "GLU", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "GLU", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "GLU", atom: "CD", props: {'partialCharge': 0.14}},
+	{ resn: "GLU", atom: "OE1", props: {'partialCharge': -0.57}},
+	{ resn: "GLU", atom: "OE2", props: {'partialCharge': -0.57}},
+	{ resn: "GLU", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "GLU", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "GLY", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "GLY", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "GLY", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "GLY", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "HIS", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "HIS", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "HIS", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "HIS", atom: "CG", props: {'partialCharge': 0.10}},
+	{ resn: "HIS", atom: "ND1", props: {'partialCharge': -0.10}},
+	{ resn: "HIS", atom: "CD2", props: {'partialCharge': 0.10}},
+	{ resn: "HIS", atom: "NE2", props: {'partialCharge': -0.40}},
+	{ resn: "HIS", atom: "CE1", props: {'partialCharge': 0.30}},
+	{ resn: "HIS", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "HIS", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "ILE", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ILE", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ILE", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ILE", atom: "CG2", props: {'partialCharge': 0.00}},
+	{ resn: "ILE", atom: "CG1", props: {'partialCharge': 0.00}},
+	{ resn: "ILE", atom: "CD", props: {'partialCharge': 0.00}},
+	{ resn: "ILE", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ILE", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "LEU", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "LEU", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "LEU", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "LEU", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "LEU", atom: "CD1", props: {'partialCharge': 0.00}},
+	{ resn: "LEU", atom: "CD2", props: {'partialCharge': 0.00}},
+	{ resn: "LEU", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "LEU", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "LYS", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "LYS", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "LYS", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "LYS", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "LYS", atom: "CD", props: {'partialCharge': 0.00}},
+	{ resn: "LYS", atom: "CE", props: {'partialCharge': 0.25}},
+	{ resn: "LYS", atom: "NZ", props: {'partialCharge': 0.75}},
+	{ resn: "LYS", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "LYS", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "MET", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "MET", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "MET", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "MET", atom: "CG", props: {'partialCharge': 0.06}},
+	{ resn: "MET", atom: "SD", props: {'partialCharge': -0.12}},
+	{ resn: "MET", atom: "CE", props: {'partialCharge': 0.06}},
+	{ resn: "MET", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "MET", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "PHE", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "PHE", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "PHE", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CD1", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CD2", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CE1", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CE2", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CZ", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "PHE", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "PRO", atom: "N", props: {'partialCharge': -0.25}},
+	{ resn: "PRO", atom: "CD", props: {'partialCharge': 0.10}},
+	{ resn: "PRO", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "PRO", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "PRO", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "PRO", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "PRO", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "SER", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "SER", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "SER", atom: "CB", props: {'partialCharge': 0.25}},
+	{ resn: "SER", atom: "OG", props: {'partialCharge': -0.25}},
+	{ resn: "SER", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "SER", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "THR", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "THR", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "THR", atom: "CB", props: {'partialCharge': 0.25}},
+	{ resn: "THR", atom: "OG1", props: {'partialCharge': -0.25}},
+	{ resn: "THR", atom: "CG2", props: {'partialCharge': 0.00}},
+	{ resn: "THR", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "THR", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "TRP", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "TRP", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "TRP", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "TRP", atom: "CG", props: {'partialCharge': -0.03}},
+	{ resn: "TRP", atom: "CD2", props: {'partialCharge': 0.10}},
+	{ resn: "TRP", atom: "CE2", props: {'partialCharge': -0.04}},
+	{ resn: "TRP", atom: "CE3", props: {'partialCharge': -0.03}},
+	{ resn: "TRP", atom: "CD1", props: {'partialCharge': 0.06}},
+	{ resn: "TRP", atom: "NE1", props: {'partialCharge': -0.06}},
+	{ resn: "TRP", atom: "CZ2", props: {'partialCharge': 0.00}},
+	{ resn: "TRP", atom: "CZ3", props: {'partialCharge': 0.00}},
+	{ resn: "TRP", atom: "CH2", props: {'partialCharge': 0.00}},
+	{ resn: "TRP", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "TRP", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "TYR", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "TYR", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "TYR", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CD1", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CE1", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CD2", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CE2", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CZ", props: {'partialCharge': 0.25}},
+	{ resn: "TYR", atom: "OH", props: {'partialCharge': -0.25}},
+	{ resn: "TYR", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "TYR", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "VAL", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "VAL", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "VAL", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "VAL", atom: "CG1", props: {'partialCharge': 0.00}},
+	{ resn: "VAL", atom: "CG2", props: {'partialCharge': 0.00}},
+	{ resn: "VAL", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "VAL", atom: "O", props: {'partialCharge': -0.55}}
 ]; 
 	
+WebMol['partialCharges'] = WebMol.partialCharges;
 
 //This defines the WebMol object which is used to create viewers
 //and configure system-wide settings
@@ -14916,16 +14917,52 @@ WebMol.SurfaceType = {
 WebMol.CC = {
     cache : {},
     color : function(hex) {
+
         if(typeof(this.cache[hex]) !== "undefined") {
             return this.cache[hex];
         }
         else {
+            hex = this.getHex(hex);
             var c = new WebMol.Color(hex);
             this.cache[hex] = c;
             return c;
         }
+    },
+    colorTab : {
+        'white' : 0xFFFFFF,
+        'silver' : 0xC0C0C0,
+        'gray' : 0x808080,
+        'grey' : 0x808080,
+        'black' : 0x000000,
+        'red' : 0xFF0000,
+        'maroon' : 0x800000,
+        'yellow' : 0xFFFF00,
+        'olive' : 0x808000,
+        'lime' : 0x00FF00,
+        'green' : 0x008000,
+        'aqua' : 0x00FFFF,
+        'cyan' : 0x00FFFF,
+        'teal' : 0x008080,
+        'blue' : 0x0000FF,
+        'navy' : 0x000080,
+        'fuchsia' : 0xFF00FF,
+        'magenta' : 0xFF00FF,
+        'purple' : 0x800080
+    },    
+    getHex : function(hex) {
+        if (parseInt(hex))
+            return hex;
+        
+        else if (typeof(hex) === 'string') {
+            
+            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
+        }
+        
     }
+    
 };
+
+
 
 WebMol['CC'] = WebMol.CC;
 WebMol['CC']['color'] = WebMol.CC.color;
@@ -16631,7 +16668,8 @@ WebMol.rasmolElementColors = {
 		'AU': 0xDAA520	
 };
 
-WebMol.defaultElementColors = WebMol.JmolElementColors;//color scheme mappings
+WebMol.defaultElementColors = WebMol.JmolElementColors;
+//color scheme mappings
 var WebMol = WebMol || {};
 
 //red to white to blue, for charges
@@ -18012,11 +18050,9 @@ WebMol.GLModel = (function() {
         var lastColors = null;
         
         var defaultColor = WebMol.defaultElementColor;
+        
+        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.defaultElementColors;
 
-        if (defaultcolors)
-            ElementColors = defaultcolors;
-        else
-            ElementColors = WebMol.defaultElementColors;
 
         // drawing functions must be associated with model object since
         // geometries can't span multiple canvases
@@ -18029,7 +18065,7 @@ WebMol.GLModel = (function() {
          * 
          * @param {AtomSpec} atom
          * @param {atomstyle} style
-         * @returns {number} 
+         * @return {number} 
          * 
          */
         var getRadiusFromStyle = function(atom, style) {
@@ -18090,8 +18126,7 @@ WebMol.GLModel = (function() {
             
             getVerticesForRadius : function(radius) {
                 
-                if (this.cache[radius] !== undefined)
-                    return this.cache[radius];
+                if (this.cache[radius] !== undefined) return this.cache[radius];
                 
                 var dir = new WebMol.Vector3(0,1,0);    
                 var w = this.basisVectors.length;
@@ -18525,7 +18560,7 @@ WebMol.GLModel = (function() {
            
             return function(dir) {
                
-                d.copy(dir);
+                d.set(dir[0], dir[1], dir[2]);
                 
                 var dx = d.x, dy = d.y, dz = d.z;
                 
@@ -18580,8 +18615,9 @@ WebMol.GLModel = (function() {
             var drawcaps = fromCap || toCap;
             //drawcaps = false;
             
-            var dir = to.clone();
-            dir.sub(from);
+            /** @type {Array.<number>} */
+            var dir = [to.x, to.y, to.z];
+            dir[0] -= from.x; dir[1] -= from.y; dir[2] -= from.z;
             
             var e = getRotationMatrix(dir);
             //get orthonormal vectors from cache
@@ -18860,14 +18896,14 @@ WebMol.GLModel = (function() {
                         if (atom.clickable || atom2.clickable) {
                             mp = new WebMol.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
                             if (atom.clickable){
-                                var cylinder1 = new WebMol.Cylinder(p1.clone(), mp.clone(), bondR);
-                                var sphere1 = new WebMol.Sphere(p1.clone(), bondR);
+                                var cylinder1 = new WebMol.Cylinder(p1 , mp , bondR);
+                                var sphere1 = new WebMol.Sphere(p1 , bondR);
                                 atom.intersectionShape.cylinder.push(cylinder1);   
                                 atom.intersectionShape.sphere.push(sphere1);                             
                             }
                             if (atom2.clickable){
-                                var cylinder2 = new WebMol.Cylinder(p2.clone(), mp.clone(), bondR);
-                                var sphere2 = new WebMol.Sphere(p2.clone(), bondR);
+                                var cylinder2 = new WebMol.Cylinder(p2 , mp , bondR);
+                                var sphere2 = new WebMol.Sphere(p2 , bondR);
                                 atom2.intersectionShape.cylinder.push(cylinder2);
                                 atom2.intersectionShape.sphere.push(sphere2);
                             }
@@ -18954,14 +18990,14 @@ WebMol.GLModel = (function() {
                                 mp2 = new WebMol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
                                 if (atom.clickable) {
-                                    cylinder1a = new WebMol.Cylinder(p1a.clone(), mp.clone(), r);
-                                    cylinder1b = new WebMol.Cylinder(p1b.clone(), mp2.clone(), r);
+                                    cylinder1a = new WebMol.Cylinder(p1a , mp , r);
+                                    cylinder1b = new WebMol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                 }
                                 if (atom2.clickable) {
-                                    cylinder2a = new WebMol.Cylinder(p2a.clone(), mp.clone(), r);
-                                    cylinder2b = new WebMol.Cylinder(p2b.clone(), mp2.clone(), r);
+                                    cylinder2a = new WebMol.Cylinder(p2a , mp , r);
+                                    cylinder2b = new WebMol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);                               
                                 }
@@ -19084,6 +19120,7 @@ WebMol.GLModel = (function() {
                     if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                         cartoonAtoms.push(atom);
                     }
+                    
 
                 }
             }
@@ -19334,30 +19371,34 @@ WebMol.GLModel = (function() {
             
             if(add) lastStyle = null; // todo: compute merged style
             else lastStyle = style;
-            
-            var atoms = this.selectedAtoms(sel);
-            if(atoms.length > 0)
-                molObj = null; // force rebuild
+
             // do a copy to enforce style changes through this function
             var mystyle = $.extend(true, {}, style);
-
+            var changedAtoms = false;
             // somethings we only calculate if there is a change in a certain
             // style, although these checks will only catch cases where both
             // are either null or undefined
             for ( var i = 0; i < atoms.length; i++) {
-                
-                if (atoms[i].clickable) 
-                    atoms[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
-                
                 atoms[i].capDrawn = false; //reset for proper stick render
-               
-                if(!add) atoms[i].style = {};
-                for(var s in mystyle) {
-                    if(mystyle.hasOwnProperty(s)) {
-                        atoms[i].style[s] = mystyle[s];
+                
+                if (this.atomIsSelected(atoms[i], sel)) {
+                    changedAtoms = true;
+                    if (atoms[i].clickable) 
+                        atoms[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
+    
+                   
+                    if(!add) atoms[i].style = {};
+                    for(var s in mystyle) {
+                        if(mystyle.hasOwnProperty(s)) {
+                            atoms[i].style[s] = mystyle[s];
+                        }
                     }
                 }
             }
+            
+            if (changedAtoms)
+                molObj = null; //force rebuild
+            
         };
         
         // given a mapping from element to color, set atom colors
@@ -20829,7 +20870,7 @@ WebMol.GLViewer = (function() {
          * @function WebMol.GLViewer#getModel
          * @param {number} [id=last model id] - Retrieve model with specified id
          * @default Returns last model added to viewer
-         * @returns {GLModel}
+         * @return {GLModel}
          * 
          * @example
          * // Retrieve reference to first GLModel added
@@ -20931,7 +20972,7 @@ WebMol.GLViewer = (function() {
         /** 
          * 
          * @param {AtomSpec} sel
-         * @returns {Array.<AtomSpec>}
+         * @return {Array.<AtomSpec>}
          */
         function getAtomsFromSel(sel) {
             var atoms = [];
@@ -20997,7 +21038,7 @@ WebMol.GLViewer = (function() {
          * 
          * @function WebMol.GLViewer#pdbData  
          * @param {Object} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
-         * @returns {string} PDB string of selected atoms
+         * @return {string} PDB string of selected atoms
          */
         this.pdbData = function(sel) {
             var atoms = getAtomsFromSel(sel);
@@ -21060,7 +21101,7 @@ WebMol.GLViewer = (function() {
          * @function WebMol.GLViewer#addLabel
          * @param {string} text - Label text
          * @param {Object} data - Label style specification
-         * @returns {WebMol.Label}
+         * @return {WebMol.Label}
          * 
          * @example
          * 
@@ -21120,7 +21161,7 @@ WebMol.GLViewer = (function() {
          * @function WebMol.GLViewer#setLabelStyle
          * @param {WebMol.Label} label - WebMol label
          * @param {Object} stylespec - Label style specification
-         * @returns {WebMol.Label}
+         * @return {WebMol.Label}
          */
         this.setLabelStyle = function(label, stylespec) {   
              
@@ -21140,7 +21181,7 @@ WebMol.GLViewer = (function() {
          * @function WebMol.GLViewer#setLabelText
          * @param {WebMol.Label} label - WebMol label
          * @param {String} text - Label text
-         * @returns {WebMol.Label}
+         * @return {WebMol.Label}
          */
         this.setLabelText = function(label, text) {
          
@@ -21270,7 +21311,7 @@ WebMol.GLViewer = (function() {
          * 
          * @param {Array.<AtomSpec>} atomlist
          * @param {Array} extent
-         * @returns {Array}
+         * @return {Array}
          */
         var getAtomsWithin = function(atomlist, extent) {
             var ret = [];
@@ -21309,7 +21350,7 @@ WebMol.GLViewer = (function() {
          * @param {Array} extent
          * @param {Array.<AtomSpec>} atomlist
          * @param {Array.<AtomSpec>} atomstoshow
-         * @returns {Array}
+         * @return {Array}
          */
         var carveUpExtent = function(extent, atomlist, atomstoshow) {
             var ret = [];
@@ -21810,7 +21851,7 @@ WebMol.GLViewer = (function() {
             }
         };
         
-        getModelGroup = function() {
+        var getModelGroup = function() {
             return modelGroup;
         };       
         
@@ -21832,172 +21873,173 @@ var WebMol = WebMol || {};
 
 //properties for mapping
 WebMol.partialCharges = [
-        { resn: "ALA", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ALA", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ALA", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ALA", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ALA", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "ARG", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ARG", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ARG", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ARG", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "ARG", atom: "CD", props: {partialCharge: 0.10}},
-	{ resn: "ARG", atom: "NE", props: {partialCharge: -0.10}},
-	{ resn: "ARG", atom: "CZ", props: {partialCharge: 0.50}},
-	{ resn: "ARG", atom: "NH1", props: {partialCharge: 0.25}},
-	{ resn: "ARG", atom: "NH2", props: {partialCharge: 0.25}},
-	{ resn: "ARG", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ARG", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "ASN", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ASN", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ASN", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ASN", atom: "CG", props: {partialCharge: 0.55}},
-	{ resn: "ASN", atom: "OD1", props: {partialCharge: -0.55}},
-	{ resn: "ASN", atom: "ND2", props: {partialCharge: 0.00}},
-	{ resn: "ASN", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ASN", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "ASP", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ASP", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ASP", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ASP", atom: "CG", props: {partialCharge: 0.14}},
-	{ resn: "ASP", atom: "OD1", props: {partialCharge: -0.57}},
-	{ resn: "ASP", atom: "OD2", props: {partialCharge: -0.57}},
-	{ resn: "ASP", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ASP", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "CYS", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "CYS", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "CYS", atom: "CB", props: {partialCharge: 0.19}},
-	{ resn: "CYS", atom: "SG", props: {partialCharge: -0.19}},
-	{ resn: "CYS", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "CYS", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "GLN", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "GLN", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "GLN", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "GLN", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "GLN", atom: "CD", props: {partialCharge: 0.55}},
-	{ resn: "GLN", atom: "OE1", props: {partialCharge: -0.55}},
-	{ resn: "GLN", atom: "NE2", props: {partialCharge: 0.00}},
-	{ resn: "GLN", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "GLN", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "GLU", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "GLU", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "GLU", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "GLU", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "GLU", atom: "CD", props: {partialCharge: 0.14}},
-	{ resn: "GLU", atom: "OE1", props: {partialCharge: -0.57}},
-	{ resn: "GLU", atom: "OE2", props: {partialCharge: -0.57}},
-	{ resn: "GLU", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "GLU", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "GLY", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "GLY", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "GLY", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "GLY", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "HIS", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "HIS", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "HIS", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "HIS", atom: "CG", props: {partialCharge: 0.10}},
-	{ resn: "HIS", atom: "ND1", props: {partialCharge: -0.10}},
-	{ resn: "HIS", atom: "CD2", props: {partialCharge: 0.10}},
-	{ resn: "HIS", atom: "NE2", props: {partialCharge: -0.40}},
-	{ resn: "HIS", atom: "CE1", props: {partialCharge: 0.30}},
-	{ resn: "HIS", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "HIS", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "ILE", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "ILE", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "ILE", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "ILE", atom: "CG2", props: {partialCharge: 0.00}},
-	{ resn: "ILE", atom: "CG1", props: {partialCharge: 0.00}},
-	{ resn: "ILE", atom: "CD", props: {partialCharge: 0.00}},
-	{ resn: "ILE", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "ILE", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "LEU", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "LEU", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "LEU", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "LEU", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "LEU", atom: "CD1", props: {partialCharge: 0.00}},
-	{ resn: "LEU", atom: "CD2", props: {partialCharge: 0.00}},
-	{ resn: "LEU", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "LEU", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "LYS", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "LYS", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "LYS", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "LYS", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "LYS", atom: "CD", props: {partialCharge: 0.00}},
-	{ resn: "LYS", atom: "CE", props: {partialCharge: 0.25}},
-	{ resn: "LYS", atom: "NZ", props: {partialCharge: 0.75}},
-	{ resn: "LYS", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "LYS", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "MET", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "MET", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "MET", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "MET", atom: "CG", props: {partialCharge: 0.06}},
-	{ resn: "MET", atom: "SD", props: {partialCharge: -0.12}},
-	{ resn: "MET", atom: "CE", props: {partialCharge: 0.06}},
-	{ resn: "MET", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "MET", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "PHE", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "PHE", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "PHE", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CD1", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CD2", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CE1", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CE2", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "CZ", props: {partialCharge: 0.00}},
-	{ resn: "PHE", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "PHE", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "PRO", atom: "N", props: {partialCharge: -0.25}},
-	{ resn: "PRO", atom: "CD", props: {partialCharge: 0.10}},
-	{ resn: "PRO", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "PRO", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "PRO", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "PRO", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "PRO", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "SER", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "SER", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "SER", atom: "CB", props: {partialCharge: 0.25}},
-	{ resn: "SER", atom: "OG", props: {partialCharge: -0.25}},
-	{ resn: "SER", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "SER", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "THR", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "THR", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "THR", atom: "CB", props: {partialCharge: 0.25}},
-	{ resn: "THR", atom: "OG1", props: {partialCharge: -0.25}},
-	{ resn: "THR", atom: "CG2", props: {partialCharge: 0.00}},
-	{ resn: "THR", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "THR", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "TRP", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "TRP", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "TRP", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "TRP", atom: "CG", props: {partialCharge: -0.03}},
-	{ resn: "TRP", atom: "CD2", props: {partialCharge: 0.10}},
-	{ resn: "TRP", atom: "CE2", props: {partialCharge: -0.04}},
-	{ resn: "TRP", atom: "CE3", props: {partialCharge: -0.03}},
-	{ resn: "TRP", atom: "CD1", props: {partialCharge: 0.06}},
-	{ resn: "TRP", atom: "NE1", props: {partialCharge: -0.06}},
-	{ resn: "TRP", atom: "CZ2", props: {partialCharge: 0.00}},
-	{ resn: "TRP", atom: "CZ3", props: {partialCharge: 0.00}},
-	{ resn: "TRP", atom: "CH2", props: {partialCharge: 0.00}},
-	{ resn: "TRP", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "TRP", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "TYR", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "TYR", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "TYR", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CG", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CD1", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CE1", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CD2", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CE2", props: {partialCharge: 0.00}},
-	{ resn: "TYR", atom: "CZ", props: {partialCharge: 0.25}},
-	{ resn: "TYR", atom: "OH", props: {partialCharge: -0.25}},
-	{ resn: "TYR", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "TYR", atom: "O", props: {partialCharge: -0.55}},
-	{ resn: "VAL", atom: "N", props: {partialCharge: -0.15}},
-	{ resn: "VAL", atom: "CA", props: {partialCharge: 0.10}},
-	{ resn: "VAL", atom: "CB", props: {partialCharge: 0.00}},
-	{ resn: "VAL", atom: "CG1", props: {partialCharge: 0.00}},
-	{ resn: "VAL", atom: "CG2", props: {partialCharge: 0.00}},
-	{ resn: "VAL", atom: "C", props: {partialCharge: 0.60}},
-	{ resn: "VAL", atom: "O", props: {partialCharge: -0.55}}
+    { resn: "ALA", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ALA", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ALA", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ALA", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ALA", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "ARG", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ARG", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ARG", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ARG", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "ARG", atom: "CD", props: {'partialCharge': 0.10}},
+	{ resn: "ARG", atom: "NE", props: {'partialCharge': -0.10}},
+	{ resn: "ARG", atom: "CZ", props: {'partialCharge': 0.50}},
+	{ resn: "ARG", atom: "NH1", props: {'partialCharge': 0.25}},
+	{ resn: "ARG", atom: "NH2", props: {'partialCharge': 0.25}},
+	{ resn: "ARG", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ARG", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "ASN", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ASN", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ASN", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ASN", atom: "CG", props: {'partialCharge': 0.55}},
+	{ resn: "ASN", atom: "OD1", props: {'partialCharge': -0.55}},
+	{ resn: "ASN", atom: "ND2", props: {'partialCharge': 0.00}},
+	{ resn: "ASN", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ASN", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "ASP", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ASP", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ASP", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ASP", atom: "CG", props: {'partialCharge': 0.14}},
+	{ resn: "ASP", atom: "OD1", props: {'partialCharge': -0.57}},
+	{ resn: "ASP", atom: "OD2", props: {'partialCharge': -0.57}},
+	{ resn: "ASP", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ASP", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "CYS", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "CYS", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "CYS", atom: "CB", props: {'partialCharge': 0.19}},
+	{ resn: "CYS", atom: "SG", props: {'partialCharge': -0.19}},
+	{ resn: "CYS", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "CYS", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "GLN", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "GLN", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "GLN", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "GLN", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "GLN", atom: "CD", props: {'partialCharge': 0.55}},
+	{ resn: "GLN", atom: "OE1", props: {'partialCharge': -0.55}},
+	{ resn: "GLN", atom: "NE2", props: {'partialCharge': 0.00}},
+	{ resn: "GLN", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "GLN", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "GLU", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "GLU", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "GLU", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "GLU", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "GLU", atom: "CD", props: {'partialCharge': 0.14}},
+	{ resn: "GLU", atom: "OE1", props: {'partialCharge': -0.57}},
+	{ resn: "GLU", atom: "OE2", props: {'partialCharge': -0.57}},
+	{ resn: "GLU", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "GLU", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "GLY", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "GLY", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "GLY", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "GLY", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "HIS", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "HIS", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "HIS", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "HIS", atom: "CG", props: {'partialCharge': 0.10}},
+	{ resn: "HIS", atom: "ND1", props: {'partialCharge': -0.10}},
+	{ resn: "HIS", atom: "CD2", props: {'partialCharge': 0.10}},
+	{ resn: "HIS", atom: "NE2", props: {'partialCharge': -0.40}},
+	{ resn: "HIS", atom: "CE1", props: {'partialCharge': 0.30}},
+	{ resn: "HIS", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "HIS", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "ILE", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "ILE", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "ILE", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "ILE", atom: "CG2", props: {'partialCharge': 0.00}},
+	{ resn: "ILE", atom: "CG1", props: {'partialCharge': 0.00}},
+	{ resn: "ILE", atom: "CD", props: {'partialCharge': 0.00}},
+	{ resn: "ILE", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "ILE", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "LEU", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "LEU", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "LEU", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "LEU", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "LEU", atom: "CD1", props: {'partialCharge': 0.00}},
+	{ resn: "LEU", atom: "CD2", props: {'partialCharge': 0.00}},
+	{ resn: "LEU", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "LEU", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "LYS", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "LYS", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "LYS", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "LYS", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "LYS", atom: "CD", props: {'partialCharge': 0.00}},
+	{ resn: "LYS", atom: "CE", props: {'partialCharge': 0.25}},
+	{ resn: "LYS", atom: "NZ", props: {'partialCharge': 0.75}},
+	{ resn: "LYS", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "LYS", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "MET", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "MET", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "MET", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "MET", atom: "CG", props: {'partialCharge': 0.06}},
+	{ resn: "MET", atom: "SD", props: {'partialCharge': -0.12}},
+	{ resn: "MET", atom: "CE", props: {'partialCharge': 0.06}},
+	{ resn: "MET", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "MET", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "PHE", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "PHE", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "PHE", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CD1", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CD2", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CE1", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CE2", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "CZ", props: {'partialCharge': 0.00}},
+	{ resn: "PHE", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "PHE", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "PRO", atom: "N", props: {'partialCharge': -0.25}},
+	{ resn: "PRO", atom: "CD", props: {'partialCharge': 0.10}},
+	{ resn: "PRO", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "PRO", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "PRO", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "PRO", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "PRO", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "SER", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "SER", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "SER", atom: "CB", props: {'partialCharge': 0.25}},
+	{ resn: "SER", atom: "OG", props: {'partialCharge': -0.25}},
+	{ resn: "SER", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "SER", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "THR", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "THR", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "THR", atom: "CB", props: {'partialCharge': 0.25}},
+	{ resn: "THR", atom: "OG1", props: {'partialCharge': -0.25}},
+	{ resn: "THR", atom: "CG2", props: {'partialCharge': 0.00}},
+	{ resn: "THR", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "THR", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "TRP", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "TRP", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "TRP", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "TRP", atom: "CG", props: {'partialCharge': -0.03}},
+	{ resn: "TRP", atom: "CD2", props: {'partialCharge': 0.10}},
+	{ resn: "TRP", atom: "CE2", props: {'partialCharge': -0.04}},
+	{ resn: "TRP", atom: "CE3", props: {'partialCharge': -0.03}},
+	{ resn: "TRP", atom: "CD1", props: {'partialCharge': 0.06}},
+	{ resn: "TRP", atom: "NE1", props: {'partialCharge': -0.06}},
+	{ resn: "TRP", atom: "CZ2", props: {'partialCharge': 0.00}},
+	{ resn: "TRP", atom: "CZ3", props: {'partialCharge': 0.00}},
+	{ resn: "TRP", atom: "CH2", props: {'partialCharge': 0.00}},
+	{ resn: "TRP", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "TRP", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "TYR", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "TYR", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "TYR", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CG", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CD1", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CE1", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CD2", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CE2", props: {'partialCharge': 0.00}},
+	{ resn: "TYR", atom: "CZ", props: {'partialCharge': 0.25}},
+	{ resn: "TYR", atom: "OH", props: {'partialCharge': -0.25}},
+	{ resn: "TYR", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "TYR", atom: "O", props: {'partialCharge': -0.55}},
+	{ resn: "VAL", atom: "N", props: {'partialCharge': -0.15}},
+	{ resn: "VAL", atom: "CA", props: {'partialCharge': 0.10}},
+	{ resn: "VAL", atom: "CB", props: {'partialCharge': 0.00}},
+	{ resn: "VAL", atom: "CG1", props: {'partialCharge': 0.00}},
+	{ resn: "VAL", atom: "CG2", props: {'partialCharge': 0.00}},
+	{ resn: "VAL", atom: "C", props: {'partialCharge': 0.60}},
+	{ resn: "VAL", atom: "O", props: {'partialCharge': -0.55}}
 ]; 
 	
+WebMol['partialCharges'] = WebMol.partialCharges;

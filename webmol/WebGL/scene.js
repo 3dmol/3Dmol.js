@@ -57,7 +57,7 @@ WebMol.Scene.prototype.__addObject = function(object) {
     
     //Add object's children
     
-    for (var i in object.children) 
+    for (var i = 0; i < object.children.length; i++) 
         this.__addObject(object.children[i]);
     
 };
@@ -96,7 +96,7 @@ WebMol.Scene.prototype.__removeObject = function(object) {
     }
     
     //Remove object's children
-    for (var i in object.children)
+    for (var i = 0; i < object.children.length; i++)
         this.__removeObject(object.children[i]);
     
 };
