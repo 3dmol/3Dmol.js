@@ -123,7 +123,7 @@ QUnit.module( "A. Bovine Calbindin, 637 atoms (1YCR)", {
 });
 
 //new tester("sphere", profile);
-//runtests(profile);
+runtests(profile);
 
 //moldata 2
 
@@ -147,7 +147,7 @@ QUnit.module( "B. Cathodic Hemoglobin, 5,085 atoms (2AA1)", {
 	}
 });
 
-//runtests(profile);
+runtests(profile);
 
 //moldata 3
 
@@ -198,7 +198,7 @@ QUnit.module( "D. Dihydrolipoyl Transacetylase Biological Assembly,  71,820 atom
     
 });
 
-//runtests(profile);
+runtests(profile);
 
 
 

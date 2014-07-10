@@ -518,7 +518,7 @@ WebMol.GLViewer = (function() {
          * @function WebMol.GLViewer#getModel
          * @param {number} [id=last model id] - Retrieve model with specified id
          * @default Returns last model added to viewer
-         * @returns {GLModel}
+         * @return {GLModel}
          * 
          * @example
          * // Retrieve reference to first GLModel added
@@ -620,7 +620,7 @@ WebMol.GLViewer = (function() {
         /** 
          * 
          * @param {AtomSpec} sel
-         * @returns {Array.<AtomSpec>}
+         * @return {Array.<AtomSpec>}
          */
         function getAtomsFromSel(sel) {
             var atoms = [];
@@ -686,7 +686,7 @@ WebMol.GLViewer = (function() {
          * 
          * @function WebMol.GLViewer#pdbData  
          * @param {Object} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
-         * @returns {string} PDB string of selected atoms
+         * @return {string} PDB string of selected atoms
          */
         this.pdbData = function(sel) {
             var atoms = getAtomsFromSel(sel);
@@ -749,7 +749,7 @@ WebMol.GLViewer = (function() {
          * @function WebMol.GLViewer#addLabel
          * @param {string} text - Label text
          * @param {Object} data - Label style specification
-         * @returns {WebMol.Label}
+         * @return {WebMol.Label}
          * 
          * @example
          * 
@@ -809,7 +809,7 @@ WebMol.GLViewer = (function() {
          * @function WebMol.GLViewer#setLabelStyle
          * @param {WebMol.Label} label - WebMol label
          * @param {Object} stylespec - Label style specification
-         * @returns {WebMol.Label}
+         * @return {WebMol.Label}
          */
         this.setLabelStyle = function(label, stylespec) {   
              
@@ -829,7 +829,7 @@ WebMol.GLViewer = (function() {
          * @function WebMol.GLViewer#setLabelText
          * @param {WebMol.Label} label - WebMol label
          * @param {String} text - Label text
-         * @returns {WebMol.Label}
+         * @return {WebMol.Label}
          */
         this.setLabelText = function(label, text) {
          
@@ -959,7 +959,7 @@ WebMol.GLViewer = (function() {
          * 
          * @param {Array.<AtomSpec>} atomlist
          * @param {Array} extent
-         * @returns {Array}
+         * @return {Array}
          */
         var getAtomsWithin = function(atomlist, extent) {
             var ret = [];
@@ -998,7 +998,7 @@ WebMol.GLViewer = (function() {
          * @param {Array} extent
          * @param {Array.<AtomSpec>} atomlist
          * @param {Array.<AtomSpec>} atomstoshow
-         * @returns {Array}
+         * @return {Array}
          */
         var carveUpExtent = function(extent, atomlist, atomstoshow) {
             var ret = [];
@@ -1498,7 +1498,7 @@ WebMol.GLViewer = (function() {
             }
         };
         
-        getModelGroup = function() {
+        var getModelGroup = function() {
             return modelGroup;
         };       
         

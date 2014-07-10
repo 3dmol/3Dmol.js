@@ -2,11 +2,9 @@
 var WebMol = {};
 
 /** Object with x, y, and z properties
- * @typedef {{x:number, y:number, z:number} | WebMol.Vector3} */
+ * @typedef {{x:number, y:number, z:number}} */
 var vectorlike;
 
-/** Object with r, g, and b properties 
- * @struct */
 var colorlike = {};
 colorlike.r;
 colorlike.g;
@@ -76,9 +74,35 @@ ViewerSpec.defaultcolors;
 ViewerSpec.callback;
 
 /**
- * Atom type specification object literal
- * @struct
+ * Object literal Atom representation.  Can be used as a selection specification to 
+ * select all atoms with matching properties
+ * @typedef AtomSpec
+ * @prop {string} resn - Residue this atom belongs to 
+ * @prop {number} x - Atom x coordinate
+ * @prop {number} y - Atom y coordinate
+ * @prop {number} z - Atom z coordinate
+ * @prop {number} color - Atom's color, as hex code
+ * @prop {number} surfaceColor - Hex code for color to be used for surface patch over this atom
+ * @prop {string} elem - Element abbreviation (e.g. 'H', 'Ca', etc)
+ * @prop {boolean} hetflag - Set to true if atom is a heteroatom
+ * @prop {string} chain - Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+ * @prop {number} resi - Residue number 
+ * @prop {number} icode
+ * @prop {number} rescode
+ * @prop {number} serial - Atom's serial id number
+ * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+ * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
+ * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
+ * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
+ * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
+ * @prop {Object} properties - Optional mapping of additional properties
+ * @prop {number} b - Atom b factor data
+ * @prop {string} pdbline - If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
+ * @prop {boolean} clickable - Set this flag to true to enable click selection handling for this atom
+ * @prop {function(this, WebMol.GLViewer)} callback - Callback click handler function to be executed on this atom and its parent viewer
  */
+
+
 var AtomSpec = {};
 AtomSpec.resn;
 AtomSpec.x;
@@ -422,7 +446,7 @@ WebMol.GLViewer.setSurfaceMaterialStyle = function(surf, style) {};
  * 
  * @param {number} surf - surface id
  */
-this.removeSurface = function(surf) {};
+WebMol.GLViewer.removeSurface = function(surf) {};
 
 /**
  * Set style properties to all selected atoms
@@ -456,6 +480,17 @@ WebMol.GLViewer.setColorByProperty = function(sel, prop, scheme) {};
  * @param {type} colors
  */
 WebMol.GLViewer.setColorByElement = function(sel, colors) {};
+
+/** Clear all models, surfaces, and shapes from viewer */
+WebMol.GLViewer.clear = function() {};
+
+// props is a list of objects that select certain atoms and enumerate
+// properties for those atom
+/**
+ * Add specified properties to all atoms matching input argument
+ * @param {AtomSpec} props
+ */
+WebMol.GLViewer.mapAtomProperties = function(props) {};
 
 /**
  * GLModel represents a group of related atoms
@@ -552,17 +587,6 @@ WebMol.GLModel.globj = function(group) {};
  * @param {WebMol.Object3D} group
  */
 WebMol.GLModel.removegl = function(group) {};
-
-/** Clear all models, surfaces, and shapes from viewer */
-WebMol.GLViewer.clear = function() {};
-
-// props is a list of objects that select certain atoms and enumerate
-// properties for those atom
-/**
- * Add specified properties to all atoms matching input argument
- * @param {AtomSpec} props
- */
-WebMol.GLViewer.mapAtomProperties = function(props) {};
 
 
 WebMol.LabelCount;
@@ -661,13 +685,14 @@ SphereSpec.center;
  * @struct
  */
 var ArrowSpec = {};
-/** @type {WebMol.Vector3} */
-arrowSpec.start;
-/** @type {WebMol.Vector3} */
-arrowSpec.end;
-arrowSpec.radius;
-arrowSpec.radiusRatio;
-arrowSpec.mid;
+/** @var {WebMol.Vector3} ArrowSpec.start - Arrow start point*/
+ArrowSpec.start;
+/** @property {WebMol.Vector3} */
+ArrowSpec.end;
+ArrowSpec.radius;
+ArrowSpec.radiusRatio;
+ArrowSpec.mid;
+
 
 /**
  * Volumetric data specification
@@ -750,7 +775,7 @@ WebMol.ShapeIDCount;
  * @param {number} min
  * @param {number} max
  */
-var ColorScheme = function(min, max) {};
+WebMol.ColorScheme = function(min, max) {};
 
 /**
  * Map value to hex color
@@ -758,29 +783,29 @@ var ColorScheme = function(min, max) {};
  * @param {number} range
  * @returns {number}
  */
-ColorScheme.valueToHex = function(val, range) {};
-ColorScheme.jmolID = function() {};
+WebMol.ColorScheme.valueToHex = function(val, range) {};
+WebMol.ColorScheme.jmolID = function() {};
 //return range used for color mapping, null if none set
-ColorScheme.range = function() {};
+WebMol.ColorScheme.range = function() {};
 
 /**
  * Color scheme red to white to blue, for charges
  * @constructor
- * @implements {ColorScheme}
+ * @implements {WebMol.ColorScheme}
  */
 WebMol.RWB = function(min, max) {};
 
 /**
  * rainbow gradient, but without purple to match jmol
  * @constructor
- * @implements {ColorScheme}
+ * @implements {WebMol.ColorScheme}
  */
 WebMol.ROYGB = function(min, max) {};
 
 /**
  * rainbow gradient with constant saturation, all the way to purple!
  * @constructor
- * @implements {ColorScheme}
+ * @implements {WebMol.ColorScheme}
  */
 WebMol.Sinebow = function(min, max) {};
 

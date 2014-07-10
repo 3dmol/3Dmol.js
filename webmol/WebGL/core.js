@@ -221,7 +221,7 @@ WebMol.Object3D.prototype = {
         this.matrixWorldNeedsUpdate = false;
         
         //Update matrices of all children
-        for (var i in this.children) {
+        for (var i = 0; i < this.children.length; i++) {
             this.children[i].updateMatrixWorld(true);
         }
     },
@@ -248,7 +248,7 @@ WebMol.Object3D.prototype = {
         
         object.visible = this.visible;
         
-        for (var i in this.children) {
+        for (var i = 0; i < this.children.length; i++) {
             var child = this.children[i];
             object.add(child.clone());
         }
@@ -482,7 +482,7 @@ WebMol.Geometry = (function() {
             
             three = three || false;
             
-            for ( var g in this.geometryGroups ) {
+            for (var g = 0; g < this.groups; g++) {
             
                 var geoGroup = this.geometryGroups[g];            
                 
@@ -493,7 +493,7 @@ WebMol.Geometry = (function() {
         },
         
         setUpWireframe : function() {
-            for (var g in this.geometryGroups ) {
+            for (var g = 0; g < this.groups; g++) {
                 var geoGroup = this.geometryGroups[g];
                 
                 geoGroup.setLineIndices();
@@ -505,7 +505,7 @@ WebMol.Geometry = (function() {
         // or shorten last typed array
         initTypedArrays : function() {
                 
-            for (var g in this.geometryGroups) {
+            for (var g = 0; g < this.groups; g++) {
                 
                 var group = this.geometryGroups[g];
                 
@@ -533,7 +533,7 @@ Object.defineProperty(WebMol.Geometry.prototype, "vertices", {
     /** @this {WebMol.Geometry} */
     get : function() {
         var vertices = 0;
-        for (var g in this.geometryGroups)
+        for (var g = 0; g < this.groups; g++)
             vertices += this.geometryGroups[g].vertices;
             
         return vertices;
