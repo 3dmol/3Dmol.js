@@ -189,8 +189,8 @@ WebMol.GLModel = (function() {
     // atoms; assume atom names are correct, only identifies
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
-	var maxlength = 3.5;
-	var maxlengthSq = 12.25;
+	var maxlength = 3.2;
+	var maxlengthSq = 10.24;
         var atoms = [];
         var i, j, n;
         for (i = 0, n = atomsarray.length; i < n; i++) {
@@ -1959,7 +1959,7 @@ WebMol.GLModel = (function() {
                 parseXYZ(atoms, data);
                 break;
             case "pdb":
-                parsePDB(atoms, data, options.keepH, options.computeStruct);
+                parsePDB(atoms, data, options.keepH, true, options.computeStruct);
                 break;
             case "sdf":
                 parseSDF(atoms, data);
