@@ -1193,7 +1193,7 @@ WebMol.Renderer = function ( parameters ) {
                 geometryGroup = geometry.geometryGroups[ g ];
 
                 if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate || geometry.colorsNeedUpdate || geometry.normalsNeedUpdate) {
-                    setBuffers( geometryGroup, _gl.DYNAMIC_DRAW );
+                    setBuffers( geometryGroup, _gl.STATIC_DRAW );
                 }
             }
             

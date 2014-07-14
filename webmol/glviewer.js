@@ -190,7 +190,7 @@ WebMol.GLViewer = (function() {
         var CAMERA_Z = 150;
         
         var renderer = new WebMol.Renderer({
-            antialias : true
+            antialias : true,
         });
         // renderer.sortObjects = false; // hopefully improve performance
 

@@ -13870,7 +13870,7 @@ WebMol.Renderer = function ( parameters ) {
                 geometryGroup = geometry.geometryGroups[ g ];
 
                 if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate || geometry.colorsNeedUpdate || geometry.normalsNeedUpdate) {
-                    setBuffers( geometryGroup, _gl.DYNAMIC_DRAW );
+                    setBuffers( geometryGroup, _gl.STATIC_DRAW );
                 }
             }
             
@@ -17448,35 +17448,12 @@ WebMol.GLModel = (function() {
         
     };
 
-    // return distance between donor-acceptor, if not valid pair, return inf
-    var hbondDistance = function(a1, a2, maxlength) {
-        if(a1.chain == a2.chain) { // ignore if residues too close
-            if(Math.abs(a1.resi-a2.resi) < 4)
-                return Number.POSITIVE_INFINITY;
-        }
-        if ((a1.atom === "O" && a2.atom === "N") || (a1.atom === "N" && a2.atom === "O")) {
-            var xdiff = a1.x - a2.x;
-            if (xdiff > maxlength)
-                return Number.POSITIVE_INFINITY;
-            var ydiff = a1.y - a2.y;
-            if (ydiff > maxlength)
-                return Number.POSITIVE_INFINITY;
-            var zdiff = a1.z - a2.z;
-            if (zdiff > maxlength)
-                return Number.POSITIVE_INFINITY;
-            
-            var dist = Math.sqrt(xdiff*xdiff+ydiff*ydiff+zdiff*zdiff);
-            if(dist < maxlength)
-                return dist;
-        }
-        return Number.POSITIVE_INFINITY;
-    };
-
     // this will identify all hydrogen bonds between backbone
     // atoms; assume atom names are correct, only identifies
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
-        var maxlength = 3.5; // ver generous hbond distance
+	var maxlength = 3.5;
+	var maxlengthSq = 12.25;
         var atoms = [];
         var i, j, n;
         for (i = 0, n = atomsarray.length; i < n; i++) {
@@ -17486,7 +17463,7 @@ WebMol.GLModel = (function() {
             if (!atom.hetflag && (atom.atom === "N" || atom.atom === "O")) {
                 atoms.push(atom);
                 atom.hbondOther = null;
-                atom.hbondDistance = Number.POSITIVE_INFINITY;                
+                atom.hbondDistanceSq = Number.POSITIVE_INFINITY;                
             }
         }
 
@@ -17498,16 +17475,31 @@ WebMol.GLModel = (function() {
 
             for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
-                if (aj.z - ai.z > maxlength) // can't be connected
+		var zdiff = aj.z - ai.z;
+                if (zdiff > maxlength) // can't be connected
                     break;
-                var dist = hbondDistance(ai,aj,maxlength);
-                if (dist < ai.hbondDistance) {
+		if (aj.atom == ai.atom)
+		    continue; //can't be connected, but later might be	
+		var ydiff = Math.abs(aj.y - ai.y);
+		if( ydiff > maxlength)
+		    continue;
+		var xdiff = Math.abs(aj.x - ai.x);
+		if(xdiff > maxlength)
+		    continue;
+                var dist = xdiff*xdiff+ydiff*ydiff+zdiff*zdiff;
+		if (dist >  maxlengthSq)
+		    continue;
+
+		if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
+		    continue; //ignore bonds between too close residues
+		//select closest hbond
+                if (dist < ai.hbondDistanceSq) {
                     ai.hbondOther = aj;
-                    ai.hbondDistance = dist;
+                    ai.hbondDistanceSq = dist;
                 }
-                if(dist < aj.hbondDistance) {
+                if(dist < aj.hbondDistanceSq) {
                     aj.hbondOther = ai;
-                    aj.hbondDistance = dist;
+                    aj.hbondDistanceSq = dist;
                 }
             }
         }
@@ -17527,7 +17519,7 @@ WebMol.GLModel = (function() {
             if (typeof(chres[atom.chain]) === "undefined")
                 chres[atom.chain] = [];
             
-            if (isFinite(atom.hbondDistance)) {
+            if (isFinite(atom.hbondDistanceSq)) {
                 var other = atom.hbondOther;
                 if (Math.abs(other.resi - atom.resi) === 4) { 
                     // helix
@@ -19220,8 +19212,8 @@ WebMol.GLModel = (function() {
         };
 
         // add atoms to this model from molecular data string
-        this.addMolData = function(data, format) {
-            
+        this.addMolData = function(data, format, options) {
+            options = options || {}; 
             if (!data)
                 console.error("Erorr with addMolData: No input data specified");
             
@@ -19230,7 +19222,7 @@ WebMol.GLModel = (function() {
                 parseXYZ(atoms, data);
                 break;
             case "pdb":
-                parsePDB(atoms, data, false, true);
+                parsePDB(atoms, data, options.keepH, options.computeStruct);
                 break;
             case "sdf":
                 parseSDF(atoms, data);
@@ -20534,7 +20526,7 @@ WebMol.GLViewer = (function() {
         var CAMERA_Z = 150;
         
         var renderer = new WebMol.Renderer({
-            antialias : true
+            antialias : true,
         });
         // renderer.sortObjects = false; // hopefully improve performance
 
