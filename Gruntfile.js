@@ -18,7 +18,7 @@ module.exports = function(grunt) {
                 options : {
                     destination: 'doc',
                     configure: 'jsdoc.conf.json',
-                    template: 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template'
+                    //template: 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template'
                 }                
             },
             index : {
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
             	options : {
             		destination: '.',
             		configure: 'jsdoc.conf.json',
-            		template: 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template'
+            		//template: 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template'
             	}
             }                   
         },
