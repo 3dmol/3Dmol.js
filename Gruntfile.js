@@ -11,28 +11,9 @@ module.exports = function(grunt) {
         },
         
         clean : {
-            doc: ['doc', 'index.html', 'scripts', 'styles'],
+            doc: ['doc', 'index.html', 'scripts', 'styles', 'img'],
             build: ['build'],
             tmp: ['build/*pre.js']
-        },
-        
-        jsdoc : {  
-            dist : {
-                src : ['externs/webmol.js'],
-                options : {
-                    destination: 'doc',
-                    configure: 'jsdoc.conf.json',
-                    template: 'node_modules/webmol-template'
-                }                
-            },
-            index : {
-            	src : ['doc.js', 'README.md'],
-            	options : {
-            		destination: '.',
-            		configure: 'jsdoc.conf.json',
-            		template: 'node_modules/webmol-template'
-            	}
-            }                   
         },
         
         jshint : {
@@ -141,12 +122,19 @@ module.exports = function(grunt) {
                         stdout: true
                     },
                     command: "node-debug (Resolve-Path ~\AppData\Roaming\npm\node_modules\grunt-cli\bin\grunt) jsdoc:index"
+            },
+            
+            doc : {
+                options : {
+                    stdout: true
+                },
+                command: "node node_modules/jsdoc/jsdoc.js externs/webmol.js README.md -c jsdoc.conf.json -t webmol-doc-template/ -d doc/"
             }
         }
         
     });
     
-    grunt.registerTask('doc', ['clean:doc', 'jsdoc']);
+    grunt.registerTask('doc', ['clean:doc', 'shell:doc']);
     grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL']);
     grunt.registerTask('concat_post_build', ['concat:big', 'concat:closure']);
     
@@ -157,7 +145,6 @@ module.exports = function(grunt) {
     
     grunt.registerTask('debug-doc', ['shell:default']);
     
-    grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');

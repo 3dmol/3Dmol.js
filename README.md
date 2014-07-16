@@ -5,7 +5,7 @@ WebMol.js is an object-oriented, webGL based JavaScript library for online molec
 
 With WebMol.js, you can add beautifully rendered molecular visualizations to your web applications.  
 
-<div id='webmoljs_viewer' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='{"stick":{}}' "></div>
+
 
 ### Getting Started ###
 
@@ -20,6 +20,8 @@ You can begin using WebMol.js right away by downloading the [javascript source](
 in an HTML div element:
 
 ```
+{@lang xml}
+
 <!DOCTYPE html>
 <html>
     <head> <script src="webmol-min.js"></script> </head>    
