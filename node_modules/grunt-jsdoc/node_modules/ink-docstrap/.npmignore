@@ -1,7 +1,0 @@
-node_modules*
-components*
-bower_components*
-*.map
-.idea*
-npm-debug.log
-

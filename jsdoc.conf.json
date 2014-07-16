@@ -7,6 +7,8 @@
         "cleverLinks": false,
         "monospaceLinks": false,
         "systemName": "WebMol.js",
+        "footer": "",
+        "copyright":"WebMol.js © 2014",
         "navType": "vertical",
         "theme": "cerulean",
         "linenums"              : true,
@@ -21,5 +23,4 @@
     "opts":{
         "recurse": true
      }
-    
 }

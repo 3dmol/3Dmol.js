@@ -8,6 +8,8 @@
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
+
+	
 	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
 
 	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
@@ -18,17 +20,17 @@
 <div class="container-fluid">
 	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">WebMol.js</a>
+			<a class="brand" href="../index.html">WebMol.js</a>
 			<ul class="nav">
 				
 				<li class="dropdown">
-					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b
-						class="caret"></b></a>
+					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">
+					Namespaces<b class="caret"></b></a>
 
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="WebMol.html">WebMol</a>
+							<a href="WebMol.html">WebMol</a>		
 						</li>
 						
 
@@ -36,37 +38,37 @@
 				</li>
 				
 				<li class="dropdown">
-					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
-						class="caret"></b></a>
+					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">
+					Classes<b class="caret"></b></a>
 
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="WebMol.GLModel.html">GLModel</a>
+							<a href="WebMol.GLModel.html">GLModel</a>		
 						</li>
 						
 						<li>
-							<a href="WebMol.GLShape.html">GLShape</a>
+							<a href="WebMol.GLShape.html">GLShape</a>		
 						</li>
 						
 						<li>
-							<a href="WebMol.GLViewer.html">GLViewer</a>
+							<a href="WebMol.GLViewer.html">GLViewer</a>		
 						</li>
 						
 						<li>
-							<a href="WebMol.Label.html">Label</a>
+							<a href="WebMol.Label.html">Label</a>		
 						</li>
 						
 						<li>
-							<a href="WebMol.ROYGB.html">ROYGB</a>
+							<a href="WebMol.ROYGB.html">ROYGB</a>		
 						</li>
 						
 						<li>
-							<a href="WebMol.RWB.html">RWB</a>
+							<a href="WebMol.RWB.html">RWB</a>		
 						</li>
 						
 						<li>
-							<a href="WebMol.Sinebow.html">Sinebow</a>
+							<a href="WebMol.Sinebow.html">Sinebow</a>		
 						</li>
 						
 
@@ -74,37 +76,41 @@
 				</li>
 				
 				<li class="dropdown">
-					<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b
-						class="caret"></b></a>
+					<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">
+					Type Specifications<b class="caret"></b></a>
 
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="global.html#ArrowSpec">ArrowSpec</a>
+							<a href="global.html#ArrowSpec">ArrowSpec</a>		
 						</li>
 						
 						<li>
-							<a href="global.html#CustomShapeSpec">CustomShapeSpec</a>
+							<a href="global.html#AtomSpec">AtomSpec</a>		
 						</li>
 						
 						<li>
-							<a href="global.html#LabelSpec">LabelSpec</a>
+							<a href="global.html#CustomShapeSpec">CustomShapeSpec</a>		
 						</li>
 						
 						<li>
-							<a href="global.html#ShapeSpec">ShapeSpec</a>
+							<a href="global.html#LabelSpec">LabelSpec</a>		
 						</li>
 						
 						<li>
-							<a href="global.html#SphereSpec">SphereSpec</a>
+							<a href="global.html#ShapeSpec">ShapeSpec</a>		
 						</li>
 						
 						<li>
-							<a href="global.html#ViewerSpec">ViewerSpec</a>
+							<a href="global.html#SphereSpec">SphereSpec</a>		
 						</li>
 						
 						<li>
-							<a href="global.html#VolSpec">VolSpec</a>
+							<a href="global.html#ViewerSpec">ViewerSpec</a>		
+						</li>
+						
+						<li>
+							<a href="global.html#VolSpec">VolSpec</a>		
 						</li>
 						
 
@@ -1520,16 +1526,16 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
     
         <h5>Example</h5>
         
-    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
+    <pre class="sunlight-highlight-javascript">// Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
 
-&#x2F;&#x2F; Select all alpha carbons (have property atom : &quot;CA&quot;) from last model added
+// Select all alpha carbons (have property atom : &quot;CA&quot;) from last model added
 var atoms = glviewer.getModel().selectedAtoms({atom:&quot;CA&quot;});
 var labels = [];
 
 for (var a in atoms) {
     var atom = atoms[a];
 
-    &#x2F;&#x2F; Create label at alpha carbon&#x27;s position displaying atom&#x27;s residue and residue number
+    // Create label at alpha carbon&#x27;s position displaying atom&#x27;s residue and residue number
     var labelText = atom.resname + &quot; &quot; + atom.resi;
      
     var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z});
@@ -1537,7 +1543,7 @@ for (var a in atoms) {
     labels.push(l);
 }
 
-&#x2F;&#x2F; Render labels
+// Render labels
 glviewer.render();</pre>
 
 
@@ -2635,7 +2641,7 @@ If extract, removes selected atoms from existing models</p>
     
         <h5>Example</h5>
         
-    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Retrieve reference to first GLModel added
+    <pre class="sunlight-highlight-javascript">// Retrieve reference to first GLModel added
 var m = glviewer.getModel(0);</pre>
 
 
@@ -2973,7 +2979,7 @@ var m = glviewer.getModel(0);</pre>
     
         <h5>Example</h5>
         
-    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Remove labels created in <a href="WebMol.GLViewer.html#addLabel">addLabel example</a>
+    <pre class="sunlight-highlight-javascript">// Remove labels created in <a href="WebMol.GLViewer.html#addLabel">addLabel example</a>
 
 for (var i = 0; i &lt; labels.length; i++) {
     glviewer.removeLabel(label);
@@ -3371,7 +3377,7 @@ adding/removing models, applying styles, etc.</p>
     
         <h5>Example</h5>
         
-    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F;Set &#x27;myviewer&#x27; background color to white
+    <pre class="sunlight-highlight-javascript">//Set &#x27;myviewer&#x27; background color to white
 myviewer.setBackgroundColor(0xffffff)</pre>
 
 
@@ -4478,11 +4484,11 @@ myviewer.setBackgroundColor(0xffffff)</pre>
     
         <h5>Example</h5>
         
-    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
+    <pre class="sunlight-highlight-javascript">// Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
 glviewer.zoomTo({chain: &#x27;B&#x27;});
 
-&#x2F;&#x2F; Focus on centroid of all atoms of all models in this viewer
-glviewer.zoomTo();  &#x2F;&#x2F; (equivalent to glviewer.zoomTo({}) )</pre>
+// Focus on centroid of all atoms of all models in this viewer
+glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )</pre>
 
 
     
@@ -4507,9 +4513,14 @@ glviewer.zoomTo();  &#x2F;&#x2F; (equivalent to glviewer.zoomTo({}) )</pre>
 				<footer>
 					
 					
+		<span class="copyright">
+		WebMol.js © 2014
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
-		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on 2014-07-10T15:03:16-04:00 using the <a
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a>
+		on Wed Jul 16 2014 17:24:26 GMT-0400 (Eastern Daylight Time) using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>

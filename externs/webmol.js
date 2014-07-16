@@ -1,9 +1,8 @@
-/** @namespace */
+/** 
+ * All of the functionality of WebMol.js is contained within the
+ * WebMol global namespace
+ * @namespace */
 var WebMol = {};
-
-/** Object with x, y, and z properties
- * @typedef {{x:number, y:number, z:number}} */
-var vectorlike;
 
 var colorlike = {};
 colorlike.r;
@@ -131,7 +130,10 @@ AtomSpec.clickable;
 /** @type {function(AtomSpec, WebMol.GLViewer)} */
 AtomSpec.callback;
 
-/** @typedef {{linewidth:number, color:colorlike, radius:number, scale:number, hidden:boolean}} */
+/** 
+ * @ignore
+ * @typedef {{linewidth:number, color:colorlike, radius:number, scale:number, hidden:boolean}} 
+ */
 var atomstyle;
 AtomSpec.style = {};
 /** @type {atomstyle} */
@@ -616,7 +618,7 @@ LabelSpec.borderColor;
 LabelSpec.backgroundColor;
 /**
  * Label position
- * @type {vectorlike}
+ * @type {WebMol.Vector3}
  */
 LabelSpec.position;
 
@@ -677,7 +679,7 @@ CustomShapeSpec.lineArr;
  */
 var SphereSpec = {};
 SphereSpec.radius;
-/** @type {vectorlike} */
+/** @type {WebMol.Vector3} */
 SphereSpec.center;
 
 /**

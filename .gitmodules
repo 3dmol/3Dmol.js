@@ -4,3 +4,6 @@
 [submodule "GLmol"]
 	path = GLmol
 	url = https://github.com/dkoes/GLmol.git
+[submodule "webmol-doc-template"]
+	path = webmol-doc-template
+	url = https://github.com/nbr2/webmol-doc-template.git
