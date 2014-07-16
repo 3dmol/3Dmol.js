@@ -363,7 +363,7 @@ function buildNav( members ) {
 
 	if ( members.globals.length ) {
 		members.globals.forEach( function ( g ) {
-			if ( g.kind !== 'typedef' && !hasOwnProp.call( seen, g.longname ) ) {
+			if ( !hasOwnProp.call( seen, g.longname ) ) {
 
 				nav.global.members.push( [ g.longname, g.name ] );
 			}
