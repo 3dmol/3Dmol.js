@@ -1,31 +1,132 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>JSDoc: Class: GLViewer</title>
-    
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <script src="build/webmol-min.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+	<meta charset="utf-8">
+	<title>WebMol.js Class: GLViewer</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
 </head>
 
 <body>
+<div class="container-fluid">
+	<div class="navbar navbar-fixed-top navbar-inverse">
+		<div class="navbar-inner">
+			<a class="brand" href="index.html">WebMol.js</a>
+			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b
+						class="caret"></b></a>
 
-<div id="main">
-    
-    <h1 class="page-title">Class: GLViewer</h1>
-    
-    
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="WebMol.html">WebMol</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="WebMol.GLModel.html">GLModel</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.GLShape.html">GLShape</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.GLViewer.html">GLViewer</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.Label.html">Label</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.ROYGB.html">ROYGB</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.RWB.html">RWB</a>
+						</li>
+						
+						<li>
+							<a href="WebMol.Sinebow.html">Sinebow</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="global.html#ArrowSpec">ArrowSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#CustomShapeSpec">CustomShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#LabelSpec">LabelSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#ShapeSpec">ShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#SphereSpec">SphereSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#ViewerSpec">ViewerSpec</a>
+						</li>
+						
+						<li>
+							<a href="global.html#VolSpec">VolSpec</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+			</ul>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+
+		
+		<div class="span8">
+			
+				<div id="main">
+					
 
 
-
+	<h1 class="page-title">Class: GLViewer</h1>
 <section>
-    
+
 <header>
     <h2>
         <span class="ancestors"><a href="WebMol.html">WebMol</a>.</span>
@@ -33,12 +134,12 @@
     GLViewer
     </h2>
     
-</header>  
+</header>
 
 <article>
     <div class="container-overview">
     
-    
+
     
         
 <dt>
@@ -63,31 +164,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>element</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -96,21 +197,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>HTML element within which to create viewer</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>callback</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -119,21 +220,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Callback function to be immediately executed on this viewer</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>defaultcolors</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -142,51 +243,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Object defining default atom colors as atom =&gt; color property value pairs for all models within this viewer</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line159">line 159</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -205,22 +304,22 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
     
     </div>
+
     
+
     
+
     
+
     
+
     
+
     
-    
-    
-    
-    
-    
-    
-    
+
     
         <h3 class="subsection-title">Methods</h3>
-        
+
         <dl>
             
 <dt>
@@ -244,31 +343,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>type</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -277,21 +376,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Surface type</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>style</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -300,21 +399,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>optional style specification for surface material (e.g. for different coloring scheme, etc)</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>atomsel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -323,21 +422,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Show surface for atoms in this selection</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>allsel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -346,21 +445,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Use atoms in this selection to calculate surface; may be larger group than 'atomsel'</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>focus</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -369,51 +468,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Optionally begin rendering surface specified atoms</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line418">line 418</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -447,6 +544,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 	</dd>
 </dl>
 
+
         
     
     
@@ -475,36 +573,33 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
     
     
 <dl class="details">
-    
-        
-    
-    
-    
+	
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line485">line 485</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -544,31 +639,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>props</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -577,51 +672,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line493">line 493</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -661,31 +754,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>surf</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -694,51 +787,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>surface id</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line449">line 449</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -778,31 +869,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>surf</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -811,21 +902,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Surface ID to apply changes to</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>style</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -834,51 +925,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>new material style specification</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line442">line 442</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -914,31 +1003,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>arg</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -947,51 +1036,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line216">line 216</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -1031,31 +1118,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>spec</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1064,51 +1151,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Style specification</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line342">line 342</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -1137,6 +1222,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
 	</dd>
 </dl>
+
 
         
     
@@ -1166,31 +1252,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>spec</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1199,51 +1285,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Style specification</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line351">line 351</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -1272,6 +1356,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
 	</dd>
 </dl>
+
 
         
     
@@ -1301,31 +1386,31 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>text</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1334,21 +1419,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Label text</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>data</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1357,51 +1442,49 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Label style specification</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line251">line 251</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -1431,30 +1514,32 @@ Note: The preferred method of instantiating a GLViewer is through <a href="WebMo
 	</dd>
 </dl>
 
+
         
     
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
 
-// Select all alpha carbons (have property atom : "CA") from last model added
-var atoms = glviewer.getModel().selectedAtoms({atom:"CA"});
+&#x2F;&#x2F; Select all alpha carbons (have property atom : &quot;CA&quot;) from last model added
+var atoms = glviewer.getModel().selectedAtoms({atom:&quot;CA&quot;});
 var labels = [];
 
 for (var a in atoms) {
     var atom = atoms[a];
 
-    // Create label at alpha carbon's position displaying atom's residue and residue number
-    var labelText = atom.resname + " " + atom.resi;
+    &#x2F;&#x2F; Create label at alpha carbon&#x27;s position displaying atom&#x27;s residue and residue number
+    var labelText = atom.resname + &quot; &quot; + atom.resi;
      
     var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z});
 
     labels.push(l);
 }
 
-// Render labels
-glviewer.render();</code></pre>
+&#x2F;&#x2F; Render labels
+glviewer.render();</pre>
+
 
     
 </dd>
@@ -1483,31 +1568,31 @@ glviewer.render();</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>data</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1516,21 +1601,21 @@ glviewer.render();</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Input data</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>format</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1539,51 +1624,49 @@ glviewer.render();</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Input format ('pdb', 'sdf', 'xyz', or 'mol2')</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line371">line 371</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -1613,6 +1696,7 @@ glviewer.render();</code></pre>
 	</dd>
 </dl>
 
+
         
     
     
@@ -1641,31 +1725,31 @@ glviewer.render();</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>shapeSpec</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1674,58 +1758,56 @@ glviewer.render();</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>style specification for label</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line322">line 322</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="WebMol.GLShape.html">WebMol.GLShape</a></li>
-        </ul>
-    </dd>
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+	<dt class="tag-see">See:</dt>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="WebMol.GLShape.html">WebMol.GLShape</a></li>
+			</ul>
+	</dd>
+	
+
+	
 </dl>
 
     
@@ -1754,6 +1836,7 @@ glviewer.render();</code></pre>
 
 	</dd>
 </dl>
+
 
         
     
@@ -1784,31 +1867,31 @@ way to create a spherical shape object</p>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>spec</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1817,51 +1900,49 @@ way to create a spherical shape object</p>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Sphere shape style specification</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line332">line 332</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -1891,6 +1972,7 @@ way to create a spherical shape object</p>
 	</dd>
 </dl>
 
+
         
     
     
@@ -1919,31 +2001,31 @@ way to create a spherical shape object</p>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>sel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1952,21 +2034,21 @@ way to create a spherical shape object</p>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Atom selection specification</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>style</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -1975,51 +2057,49 @@ way to create a spherical shape object</p>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>style spec to add to specified atoms</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line460">line 460</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -2059,31 +2139,31 @@ way to create a spherical shape object</p>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>data</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2092,21 +2172,21 @@ way to create a spherical shape object</p>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Input file contents</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>format</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2115,21 +2195,21 @@ way to create a spherical shape object</p>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Input file format (currently only supports &quot;cube&quot;)</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>spec</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2138,51 +2218,49 @@ way to create a spherical shape object</p>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Shape style specification</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line360">line 360</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -2211,6 +2289,7 @@ way to create a spherical shape object</p>
 
 	</dd>
 </dl>
+
 
         
     
@@ -2241,33 +2320,33 @@ If extract, removes selected atoms from existing models</p>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
-		
+
 		
 		<th>Argument</th>
 		
+
 		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>sel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2276,29 +2355,29 @@ If extract, removes selected atoms from existing models</p>
 
             
             </td>
-            
+
             
                 <td class="attributes">
                 
-                    
+
                 
-                    
+
                 
                 </td>
             
+
             
-            
-            
+
             <td class="description last"><p>Atom selection specification</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>extract</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2307,61 +2386,59 @@ If extract, removes selected atoms from existing models</p>
 
             
             </td>
-            
+
             
                 <td class="attributes">
                 
                     &lt;optional><br>
                 
-                    
+
                 
-                    
+
                 
                 </td>
             
+
             
-            
-            
+
             <td class="description last"><p>If true, remove selected atoms from existing models</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line396">line 396</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -2390,6 +2467,7 @@ If extract, removes selected atoms from existing models</p>
 
 	</dd>
 </dl>
+
 
         
     
@@ -2419,35 +2497,35 @@ If extract, removes selected atoms from existing models</p>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
-		
+
 		
 		<th>Argument</th>
 		
-		
+
 		
 		<th>Default</th>
 		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>id</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2456,19 +2534,19 @@ If extract, removes selected atoms from existing models</p>
 
             
             </td>
-            
+
             
                 <td class="attributes">
                 
                     &lt;optional><br>
                 
-                    
+
                 
-                    
+
                 
                 </td>
             
-            
+
             
                 <td class="default">
                 
@@ -2476,52 +2554,52 @@ If extract, removes selected atoms from existing models</p>
                 
                 </td>
             
-            
+
             <td class="description last"><p>Retrieve model with specified id</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy">
-            <li>Returns last model added to viewer</li>
-        </ul></dd>
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line199">line 199</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<dt class="tag-default">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>Returns last model added to viewer</li>
+		</ul>
+	</dd>
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -2551,13 +2629,15 @@ If extract, removes selected atoms from existing models</p>
 	</dd>
 </dl>
 
+
         
     
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// Retrieve reference to first GLModel added
-var m = glviewer.getModel(0);</code></pre>
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Retrieve reference to first GLModel added
+var m = glviewer.getModel(0);</pre>
+
 
     
 </dd>
@@ -2585,33 +2665,33 @@ var m = glviewer.getModel(0);</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
-		
+
 		
 		<th>Argument</th>
 		
+
 		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>sel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2620,61 +2700,59 @@ var m = glviewer.getModel(0);</code></pre>
 
             
             </td>
-            
+
             
                 <td class="attributes">
                 
                     &lt;optional><br>
                 
-                    
+
                 
-                    
+
                 
                 </td>
             
+
             
-            
-            
+
             <td class="description last"><p>Selection specification specifying model and atom properties to select.  Default: all atoms in viewer</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line227">line 227</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -2708,6 +2786,7 @@ var m = glviewer.getModel(0);</code></pre>
 	</dd>
 </dl>
 
+
         
     
     
@@ -2736,36 +2815,33 @@ var m = glviewer.getModel(0);</code></pre>
     
     
 <dl class="details">
-    
-        
-    
-    
-    
+	
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line390">line 390</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -2805,31 +2881,31 @@ var m = glviewer.getModel(0);</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>label</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2838,51 +2914,49 @@ var m = glviewer.getModel(0);</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>WebMol label</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line283">line 283</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -2899,13 +2973,14 @@ var m = glviewer.getModel(0);</code></pre>
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// Remove labels created in <a href="WebMol.GLViewer.html#addLabel">addLabel example</a>
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Remove labels created in <a href="WebMol.GLViewer.html#addLabel">addLabel example</a>
 
-for (var i = 0; i < labels.length; i++) {
+for (var i = 0; i &lt; labels.length; i++) {
     glviewer.removeLabel(label);
 }
 
-glviewer.render();</code></pre>
+glviewer.render();</pre>
+
 
     
 </dd>
@@ -2933,31 +3008,31 @@ glviewer.render();</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>model</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -2966,51 +3041,49 @@ glviewer.render();</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line382">line 382</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -3051,36 +3124,33 @@ adding/removing models, applying styles, etc.</p>
     
     
 <dl class="details">
-    
-        
-    
-    
-    
+	
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line219">line 219</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -3120,36 +3190,33 @@ adding/removing models, applying styles, etc.</p>
     
     
 <dl class="details">
-    
-        
-    
-    
-    
+	
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line192">line 192</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -3189,31 +3256,31 @@ adding/removing models, applying styles, etc.</p>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>hex</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3222,21 +3289,21 @@ adding/removing models, applying styles, etc.</p>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Hexcode specified background color</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>a</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3245,51 +3312,49 @@ adding/removing models, applying styles, etc.</p>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Alpha level (default 1.0)</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line161">line 161</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -3306,8 +3371,9 @@ adding/removing models, applying styles, etc.</p>
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>//Set 'myviewer' background color to white
-myviewer.setBackgroundColor(0xffffff)</code></pre>
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F;Set &#x27;myviewer&#x27; background color to white
+myviewer.setBackgroundColor(0xffffff)</pre>
+
 
     
 </dd>
@@ -3331,31 +3397,31 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>sel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3364,21 +3430,21 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>colors</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3387,51 +3453,49 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line477">line 477</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -3467,31 +3531,31 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>sel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3500,21 +3564,21 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>prop</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3523,21 +3587,21 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>scheme</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3546,51 +3610,49 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line469">line 469</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -3630,31 +3692,31 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>h</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3663,51 +3725,49 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Height in pixels</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line184">line 184</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -3747,31 +3807,31 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>label</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3780,21 +3840,21 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>WebMol label</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>stylespec</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3803,51 +3863,49 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Label style specification</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line301">line 301</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -3876,6 +3934,7 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
 	</dd>
 </dl>
+
 
         
     
@@ -3905,31 +3964,31 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>label</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3938,21 +3997,21 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>WebMol label</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>text</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -3961,51 +4020,49 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Label text</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line312">line 312</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -4035,6 +4092,7 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 	</dd>
 </dl>
 
+
         
     
     
@@ -4063,31 +4121,31 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>sel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -4096,21 +4154,21 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Atom selection specification</p></td>
         </tr>
+
 	
-	
-	
+
         <tr>
             
                 <td class="name"><code>style</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -4119,51 +4177,49 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Style spec to apply to specified atoms</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line451">line 451</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -4203,31 +4259,31 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
+
 		
+
 		
-		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>w</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -4236,51 +4292,49 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
+
             
+
             
-            
-            
-            
+
             <td class="description last"><p>Width in pixels</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line176">line 176</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -4320,33 +4374,33 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
         <h5>Parameters:</h5>
         
 
-<table class="params">
+<table class="params table table-striped">
     <thead>
 	<tr>
 		
 		<th>Name</th>
 		
-		
+
 		<th>Type</th>
-		
+
 		
 		<th>Argument</th>
 		
+
 		
-		
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	
-	
+
         <tr>
             
                 <td class="name"><code>sel</code></td>
             
-            
+
             <td class="type">
             
                 
@@ -4355,61 +4409,59 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
 
             
             </td>
-            
+
             
                 <td class="attributes">
                 
                     &lt;optional><br>
                 
-                    
+
                 
-                    
+
                 
                 </td>
             
+
             
-            
-            
+
             <td class="description last"><p>Selection specification specifying model and atom properties to select. Default: all atoms in viewer</p></td>
         </tr>
-	
+
 	
 	</tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
 
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webmol.js.html">webmol.js</a>, <a href="webmol.js.html#line236">line 236</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
 </dl>
 
     
@@ -4426,43 +4478,115 @@ myviewer.setBackgroundColor(0xffffff)</code></pre>
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
-glviewer.zoomTo({chain: 'B'});
+    <pre class="sunlight-highlight-javascript">&#x2F;&#x2F; Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
+glviewer.zoomTo({chain: &#x27;B&#x27;});
 
-// Focus on centroid of all atoms of all models in this viewer
-glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )</code></pre>
+&#x2F;&#x2F; Focus on centroid of all atoms of all models in this viewer
+glviewer.zoomTo();  &#x2F;&#x2F; (equivalent to glviewer.zoomTo({}) )</pre>
+
 
     
 </dd>
 
         </dl>
     
+
     
-    
-    
+
     
 </article>
 
-</section>  
+</section>
 
 
 
 
-</div>
+				</div>
 
-<div id='webmoljs_viewer' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='{"stick":{}}'></div>
+				<div class="clearfix"></div>
+				<footer>
+					
+					
+		<span class="copyright">
+		WebMol.js © 2014
+		</span>
+					<br />
+					
+		<span class="jsdoc-message">
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
+		on Tue Jul 15 2014 18:21:00 GMT-0400 (EDT) using the <a
+			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		</span>
+				</footer>
+			</div>
 
-<nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="WebMol.GLModel.html">GLModel</a></li><li><a href="WebMol.GLShape.html">GLShape</a></li><li><a href="WebMol.GLViewer.html">GLViewer</a></li><li><a href="WebMol.Label.html">Label</a></li><li><a href="WebMol.ROYGB.html">ROYGB</a></li><li><a href="WebMol.RWB.html">RWB</a></li><li><a href="WebMol.Sinebow.html">Sinebow</a></li></ul><h3>Namespaces</h3><ul><li><a href="WebMol.html">WebMol</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ArrowSpec">ArrowSpec</a></li><li><a href="global.html#CustomShapeSpec">CustomShapeSpec</a></li><li><a href="global.html#LabelSpec">LabelSpec</a></li><li><a href="global.html#ShapeSpec">ShapeSpec</a></li><li><a href="global.html#SphereSpec">SphereSpec</a></li><li><a href="global.html#ViewerSpec">ViewerSpec</a></li><li><a href="global.html#VolSpec">VolSpec</a></li></ul>
-</nav>
+			
+			<div class="span3">
+				<div id="toc"></div>
+			</div>
+			
+			<br clear="both">
+		</div>
 
-<br clear="both">
+	</div>
+	<!--<script src="scripts/sunlight.js"></script>-->
+	<script src="scripts/docstrap.lib.js"></script>
+	<script src="scripts/bootstrap-dropdown.js"></script>
+	<script src="scripts/toc.js"></script>
 
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Tue Jul 15 2014 13:57:38 GMT-0400 (EDT)
-</footer>
+	<script>
+		$( function () {
+			$( "#toc" ).toc( {
+				anchorName  : function ( i, heading, prefix ) {
+					return $( heading ).attr( "id" ) || ( prefix + i );
+				},
+				selectors   : "h1,h2,h3,h4",
+				showAndHide : false,
+				scrollTo    : 60
+			} );
+			$( "#toc>ul" ).addClass( "nav nav-pills nav-stacked" );
+			$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+			$('.dropdown-toggle').dropdown();
+//			$( ".tutorial-section pre, .readme-section pre" ).addClass( "sunlight-highlight-javascript" ).addClass( "linenums" );
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+			$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+				var $this = $( this );
+
+				var example = $this.find("code" );
+				exampleText = example.html();
+				var lang = /{@lang (.*?)}/.exec( exampleText );
+				if ( lang && lang[1] ) {
+					exampleText = exampleText.replace( lang[0], "" );
+					example.html(exampleText);
+					lang = lang[1];
+				} else {
+					lang = "javascript";
+				}
+
+				if ( lang ) {
+
+					$this
+						.addClass( "sunlight-highlight-" + lang )
+						.addClass( "linenums" )
+						.html( example.html() );
+
+				}
+			} );
+
+			Sunlight.highlightAll( {
+				lineNumbers : true,
+				showMenu:true,
+				enableDoclinks:true
+		} );
+		} );
+
+	</script>
+
+	<!--Google Analytics-->
+	
+
+	<!--Navigation and Symbol Display-->
+	
+
 </body>
 </html>

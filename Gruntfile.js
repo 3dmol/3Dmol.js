@@ -6,6 +6,10 @@ module.exports = function(grunt) {
           
         pkg: grunt.file.readJSON('package.json'),
         
+        'node-inspector': {
+            dev: {}
+        },
+        
         clean : {
             doc: ['doc', 'index.html', 'scripts', 'styles'],
             build: ['build'],
@@ -18,7 +22,7 @@ module.exports = function(grunt) {
                 options : {
                     destination: 'doc',
                     configure: 'jsdoc.conf.json',
-                    //template: 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template'
+                    template: 'node_modules/webmol-template'
                 }                
             },
             index : {
@@ -26,7 +30,7 @@ module.exports = function(grunt) {
             	options : {
             		destination: '.',
             		configure: 'jsdoc.conf.json',
-            		template: 'node_modules/grunt-jsdoc/node_modules/webmol-template'
+            		template: 'node_modules/webmol-template'
             	}
             }                   
         },
@@ -129,7 +133,16 @@ module.exports = function(grunt) {
                     'language_in': 'ECMASCRIPT5'
                 }
             }
-        }   
+        },
+        
+        shell : {
+            default: {
+                    options: {
+                        stdout: true
+                    },
+                    command: "node-debug (Resolve-Path ~\AppData\Roaming\npm\node_modules\grunt-cli\bin\grunt) jsdoc:index"
+            }
+        }
         
     });
     
@@ -142,11 +155,15 @@ module.exports = function(grunt) {
     
     grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'clean:tmp']);
     
+    grunt.registerTask('debug-doc', ['shell:default']);
+    
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-closure-compiler');
+    grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-node-inspector');
     
 };
