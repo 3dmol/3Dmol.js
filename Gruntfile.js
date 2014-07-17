@@ -11,7 +11,7 @@ module.exports = function(grunt) {
         },
         
         clean : {
-            doc: ['doc', 'index.html', 'scripts', 'styles', 'img'],
+            doc: ['doc'],
             build: ['build'],
             tmp: ['build/*pre.js']
         },

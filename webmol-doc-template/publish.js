@@ -35,6 +35,7 @@ var navOptions = {
 	footer                : conf.footer || "",
 	copyright             : conf.copyright || "",
 	theme                 : conf.theme || "simplex",
+	syntaxTheme           : conf.syntaxTheme || "default",
 	linenums              : conf.linenums,
 	collapseSymbols       : conf.collapseSymbols || false,
 	inverseNav            : conf.inverseNav,
@@ -163,18 +164,25 @@ function addAttribs( f ) {
 }
 
 function shortenPaths( files, commonPrefix ) {
-	// always use forward slashes
-	var regexp = new RegExp( '\\\\', 'g' );
+//	// always use forward slashes
+//	var regexp = new RegExp( '\\\\', 'g' );
+//
+//	var prefix = commonPrefix.toLowerCase().replace( regexp, "/" );
+//
+//	Object.keys( files ).forEach( function ( file ) {
+//		files[file].shortened = files[file]
+//			.resolved
+//			.toLowerCase()
+//			.replace( regexp, '/' )
+//			.replace( prefix, '' );
+//	} );
 
-	var prefix = commonPrefix.toLowerCase().replace( regexp, "/" );
+	Object.keys(files).forEach(function(file) {
+		files[file].shortened = files[file].resolved.replace(commonPrefix, '')
+			// always use forward slashes
+			.replace(/\\/g, '/');
+	});
 
-	Object.keys( files ).forEach( function ( file ) {
-		files[file].shortened = files[file]
-			.resolved
-			.toLowerCase()
-			.replace( regexp, '/' )
-			.replace( prefix, '' );
-	} );
 
 	return files;
 }
@@ -184,30 +192,22 @@ function getPathFromDoclet( doclet ) {
 		return;
 	}
 
-	return doclet.meta.path && doclet.meta.path !== 'null' ?
+	return path.normalize(doclet.meta.path && doclet.meta.path !== 'null' ?
 		doclet.meta.path + '/' + doclet.meta.filename :
-		doclet.meta.filename;
+		doclet.meta.filename);
 }
 
 function generate( docType, title, docs, filename, resolveLinks ) {
 	resolveLinks = resolveLinks === false ? false : true;
-	var isIndex = (docType === 'index');
-	//Prefix for generating links in page - for the index page,
-	//must prepend 'outdir/' to each link;
-	//If not index page, must prepend "../" to "WebMol.js" href to
-	//get back to index page.
-	var indexPrefix = (isIndex ? "" : "../")
-	var hrefPrefix = (isIndex ? outdir : "")
+
 	var docData = {
 		title   : title,
 		docs    : docs,
-		docType : docType,
-		indexPrefix : indexPrefix,
-		hrefPrefix : hrefPrefix
+		docType : docType
 	};
 
-	var outpath = path.join( isIndex ? '.' : outdir, filename );
-	var html = view.render( 'container.tmpl', docData );
+	var outpath = path.join( outdir, filename ),
+		html = view.render( 'container.tmpl', docData );
 
 	if ( resolveLinks ) {
 		html = helper.resolveLinks( html ); // turn {@link foo} into <a href="foodoc.html">foo</a>
@@ -287,7 +287,7 @@ function buildNav( members ) {
 		members.modules.forEach( function ( m ) {
 			if ( !hasOwnProp.call( seen, m.longname ) ) {
 
-				nav.module.members.push( [ m.longname, m.name ] );
+				nav.module.members.push( linkto( m.longname, m.longname.replace("module:", "") ) );
 			}
 			seen[m.longname] = true;
 		} );
@@ -298,7 +298,7 @@ function buildNav( members ) {
 		members.externals.forEach( function ( e ) {
 			if ( !hasOwnProp.call( seen, e.longname ) ) {
 
-				nav.external.members.push( [ e.longname, e.name.replace( /(^"|"$)/g, '' ) ] );
+				nav.external.members.push( linkto( e.longname, e.name.replace( /(^"|"$)/g, '' ) ) );
 			}
 			seen[e.longname] = true;
 		} );
@@ -309,7 +309,7 @@ function buildNav( members ) {
 		members.classes.forEach( function ( c ) {
 			if ( !hasOwnProp.call( seen, c.longname ) ) {
 
-				nav.class.members.push( [ c.longname, c.name ] );
+				nav.class.members.push( linkto( c.longname, c.longname.replace("module:", "") ) );
 			}
 			seen[c.longname] = true;
 		} );
@@ -321,7 +321,7 @@ function buildNav( members ) {
 		members.events.forEach( function ( e ) {
 			if ( !hasOwnProp.call( seen, e.longname ) ) {
 
-				nav.event.members.push( [ e.longname, e.name ] );
+				nav.event.members.push( linkto( e.longname, e.longname.replace("module:", "") ) );
 			}
 			seen[e.longname] = true;
 		} );
@@ -333,7 +333,7 @@ function buildNav( members ) {
 		members.namespaces.forEach( function ( n ) {
 			if ( !hasOwnProp.call( seen, n.longname ) ) {
 
-				nav.namespace.members.push( [ n.longname, n.name ] );
+				nav.namespace.members.push( linkto( n.longname, n.longname.replace("module:", "") ) );
 			}
 			seen[n.longname] = true;
 		} );
@@ -345,7 +345,7 @@ function buildNav( members ) {
 		members.mixins.forEach( function ( m ) {
 			if ( !hasOwnProp.call( seen, m.longname ) ) {
 
-				nav.mixin.members.push( [ m.longname, m.name ] );
+				nav.mixin.members.push( linkto( m.longname, m.longname.replace("module:", "") ) );
 			}
 			seen[m.longname] = true;
 		} );
@@ -363,9 +363,9 @@ function buildNav( members ) {
 
 	if ( members.globals.length ) {
 		members.globals.forEach( function ( g ) {
-			if ( !hasOwnProp.call( seen, g.longname ) ) {
+			if ( g.kind !== 'typedef' && !hasOwnProp.call( seen, g.longname ) ) {
 
-				nav.global.members.push( [ g.longname, g.name ] );
+				nav.global.members.push( linkto( g.longname, g.longname.replace("module:", "") ) );
 			}
 			seen[g.longname] = true;
 		} );
@@ -434,6 +434,7 @@ exports.publish = function ( taffyData, opts, tutorials ) {
 				if ( lang && lang[1] ) {
 					example = example.replace( lang[0], "" );
 					lang = lang[1];
+
 				} else {
 					lang = null;
 				}
@@ -479,9 +480,6 @@ exports.publish = function ( taffyData, opts, tutorials ) {
 	staticFiles.forEach( function ( fileName ) {
 		var toDir = fs.toDir( fileName.replace( fromDir, outdir ) );
 		fs.mkPath( toDir );
-		fs.copyFileSync( fileName, toDir );
-		toDir = fs.toDir( fileName.replace( fromDir, '.' ) );
-		fs.mkPath(toDir);
 		fs.copyFileSync( fileName, toDir );
 	} );
 
