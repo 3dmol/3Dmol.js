@@ -63,7 +63,7 @@ WebMol.rasmolElementColors = {};
 
 /**
  * GLViewer input specification
- * @struct
+ * @typedef
  */
 var ViewerSpec = {};
 ViewerSpec.order;
@@ -651,7 +651,7 @@ WebMol.Label.prototype.dispose = function() {};
 
 /** 
  * GLShape style specification
- * @struct
+ * @typedef
  */
 var ShapeSpec = {};
 /** @type {WebMol.Color} */
@@ -665,7 +665,7 @@ ShapeSpec.callback;
 
 /**
  * Specification for adding custom shape
- * @struct
+ * @typedef
  */
 var CustomShapeSpec = {};
 CustomShapeSpec.vertexArr;
@@ -675,7 +675,7 @@ CustomShapeSpec.lineArr;
 
 /**
  * Sphere shape specification
- * @struct
+ * @typedef
  */
 var SphereSpec = {};
 SphereSpec.radius;
@@ -684,7 +684,7 @@ SphereSpec.center;
 
 /**
  * Arrow shape specification
- * @struct
+ * @typedef
  */
 var ArrowSpec = {};
 /** @var {WebMol.Vector3} ArrowSpec.start - Arrow start point*/
@@ -698,7 +698,7 @@ ArrowSpec.mid;
 
 /**
  * Volumetric data specification
- * @struct
+ * @typedef
  */
 var VolSpec = {};
 VolSpec.isoval;
