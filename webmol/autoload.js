@@ -21,7 +21,7 @@ $(document).ready(function() {
             var bgcolor = Number(viewerdiv.data("backgroundcolor")) || 0x000000;
             var style = viewerdiv.data("style") || {line:{}};
             
-            WebMol.viewers[this.id || nviewers++] = WebMol.createViewer(viewerdiv, {defaultcolors: WebMol.rasmolElementColors, callback: function(viewer) {            
+            var glviewer = WebMol.viewers[this.id || nviewers++] = WebMol.createViewer(viewerdiv, {defaultcolors: WebMol.rasmolElementColors, callback: function(viewer) {            
                 viewer.setBackgroundColor(bgcolor);            
             }});
             
@@ -30,10 +30,10 @@ $(document).ready(function() {
                 var type = viewerdiv.data("datatype") || "pdb";
                  
                 $.get(datauri, function(ret) {
-                    WebMol.glviewer.addModel(ret, type);
-                    WebMol.glviewer.setStyle({}, style);
-                    WebMol.glviewer.zoomTo();
-                    WebMol.glviewer.render();                                           
+                    glviewer.addModel(ret, type);
+                    glviewer.setStyle({}, style);
+                    glviewer.zoomTo();
+                    glviewer.render();                                           
                 }, 'text');
            
             }            

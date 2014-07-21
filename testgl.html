@@ -3,7 +3,7 @@
     <head>
         <title>WebMol Test</title>
         <script src="build/webmol-min.js"></script>     
-        <style> head, body {margin: 0; border: 0; padding: 0; }</style>  
+        <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
         <script>
         
         var glviewer = null;
@@ -126,7 +126,7 @@
         </script>
     </head>
     <body>
-         <div id="gldiv" style="width: 100%; height: 82vh; margin: 0; padding: 0; border: 0; "></div> 
+         <div id="gldiv" style="width: 100%; height: 80vh; margin: 0; padding: 0; border: 0; "></div> 
 
          <hr style="margin: 0;"> 
 
@@ -149,8 +149,8 @@
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = WebMol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
  
  
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_download"></textarea>
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_ch3cl_sdf">
+<textarea style="display: none;" id="moldata_download"></textarea>
+<textarea style="display: none" id="moldata_ch3cl_sdf">
     
  OpenBabel05201415003D
 
@@ -166,7 +166,7 @@
   4  1  1  0  0  0  0
 M  END
 </textarea>
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_benzene_sdf">
+<textarea style="display: none" id="moldata_benzene_sdf">
 
  OpenBabel05131411233D
 
@@ -197,7 +197,7 @@ M  END
  11  5  1  0  0  0  0
 M  END
 </textarea>
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small_xy">v:U4C5Cr:4
+<textarea style="display: none;" id="moldata_sdf_small_xy">v:U4C5Cr:4
   -OEChem-12201211493D
 
   9  8  0     1  0  0  0  0  0999 V2000
@@ -220,7 +220,7 @@ M  END
   1  9  1  0  0  0  0
 M  END
 </textarea> 
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small_yz">v:U4C5Cr:4
+<textarea style="display: none;" id="moldata_sdf_small_yz">v:U4C5Cr:4
   -OEChem-12201211493D
 
  9  8  0     1  0  0  0  0  0999 V2000
@@ -243,7 +243,7 @@ M  END
   1  9  1  0  0  0  0
 M  END
 </textarea> 
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small">v:U4C5Cr:4
+<textarea style="display: none;" id="moldata_sdf_small">v:U4C5Cr:4
   -OEChem-12201211493D
 
  2 1  0     1  0  0  0  0  0999 V2000
@@ -252,7 +252,7 @@ M  END
   1  2  1  0  0  0  0
 M  END
 </textarea> 
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf_small2">v:U4C5Cr:4
+<textarea style="display: none;" id="moldata_sdf_small2">v:U4C5Cr:4
   -OEChem-12201211493D
   
  4 3  0     1  0  0  0  0  0999 V2000
@@ -264,7 +264,7 @@ M  END
   1  2  3  0  0  0  0
   2  4  1  0  0  0  0
 </textarea>
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_sdf">v:U4C5Cr:4
+<textarea style="display: none;" id="moldata_sdf">v:U4C5Cr:4
   -OEChem-12201211493D
 
  43 44  0     1  0  0  0  0  0999 V2000
@@ -358,7 +358,7 @@ M  END
 M  CHG  2  35   1  40  -1
 M  END
 </textarea> 
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_xyz">
+<textarea style="display: none;" id="moldata_xyz">
 43
 v:U4C5Cr:4
 C         -8.19670        0.51910        0.79890
@@ -405,7 +405,7 @@ O          0.04070        1.14920        2.23100
 O         -3.14300       -1.46310       -0.65440
 O          4.24270       -1.32650        2.01370
 </textarea>   
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_mol2">
+<textarea style="display: none;" id="moldata_mol2">
 @<TRIPOS>MOLECULE
 v:U4C5Cr:4
  96 97 0 0 0
@@ -608,7 +608,7 @@ GASTEIGER
     96    38    95    1
     97    39    96    1
 </textarea>   
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_pdb_large">           
+<textarea style="display: none;" id="moldata_pdb_large">           
 HEADER    COMPLEX (ONCOGENE PROTEIN/PEPTIDE)      30-SEP-96   1YCR              
 TITLE     MDM2 BOUND TO THE TRANSACTIVATION DOMAIN OF P53                       
 COMPND    MOL_ID: 1;                                                            
@@ -1742,7 +1742,7 @@ TER     820      ASN B  29
 MASTER      247    0    0    5    2    0    0    6  818    2    0   11          
 END                                                                                                                                                                                                               
 </textarea>        
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_pdb_small">
+<textarea style="display: none;" id="moldata_pdb_small">
 HELIX    5   5 PHE B   19  LEU B   25  1                                   7    
 ATOM    723  N   PHE B  19      32.143 -27.542 -11.625  1.00 22.45           N  
 ATOM    724  CA  PHE B  19      31.769 -26.453 -10.742  1.00 17.73           C  
@@ -1844,7 +1844,7 @@ ATOM    819  OXT ASN B  29      16.296 -17.351   0.139  1.00 30.36           O
 TER     820      ASN B  29  
 END                                                    
 </textarea>
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_pdb_small2">
+<textarea style="display: none;" id="moldata_pdb_small2">
 HELIX    2   2 PHE B   19  SER B   20  1                                   7    
 ATOM    723  N   PHE B  19      32.143 -27.542 -11.625  1.00 22.45           N  
 ATOM    724  CA  PHE B  19      31.769 -26.453 -10.742  1.00 17.73           C  
@@ -1866,7 +1866,7 @@ ATOM    739  OG  SER B  20      28.286 -23.593 -14.268  1.00 30.01           O
 TER     740      SER B  20
 END
 </textarea>
-<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_pdb_small3">
+<textarea style="display: none;" id="moldata_pdb_small3">
 HELIX    3   3 PHE B   19  ASP B   21  1                                   7    
 ATOM    723  N   PHE B  19      32.143 -27.542 -11.625  1.00 22.45           N  
 ATOM    724  CA  PHE B  19      31.769 -26.453 -10.742  1.00 17.73           C  
