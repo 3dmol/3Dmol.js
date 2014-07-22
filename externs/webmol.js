@@ -11,6 +11,12 @@ colorlike.b;
 colorlike.a;
 
 /**
+ * 
+ *@struct 
+ * Type Specifications
+ */
+
+/**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
@@ -595,7 +601,7 @@ WebMol.LabelCount;
 
 /**
  * Label type specification
- * @struct
+ * @typedef
  */
 var LabelSpec = {};
 

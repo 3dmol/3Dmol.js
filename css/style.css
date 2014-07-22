@@ -1,5 +1,9 @@
 @import url(http://fonts.googleapis.com/css?family=Telex);
 
+* {
+    box-sizing: border-box;
+}
+
 html {
     font-size: 100%;
 }
@@ -30,7 +34,7 @@ h1, h2, h3 {
     line-height: 40px;
 }
 
-h3 {
+h1 {
     display: block;
     font-size: 24.5px;
     -webkit-margin-before: 1em;
@@ -62,10 +66,38 @@ h3 {
     border-color: #033464;
     box-shadow: 0 1px 10px rgba(0,0,0,.1);
     border-radius: 0;
+    min-height: 51px;
 }
 
 .navbar:after {
     clear: both;
+}
+
+.navbar .nav {
+    position: relative;
+    left: 0;
+    display: block;
+    float: left;
+    margin: 0 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.navbar .nav li {
+    display: list-item;
+    float: left;
+    text-align: -webkit-match-parent;
+    text-align: -webkit-match-parent;
+}
+
+.navbar .nav > li > a {
+    padding: 16px 10px 14px;
+    font-family: 'Telex', sans-serif;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+    float: none;
+    color: #ffffff;
+    display: block;
+    text-decoration: none;
 }
 
 .brand {
@@ -112,24 +144,33 @@ footer {
 }
 
 #viewercontainer {
+    display: box;
     position: fixed;
     top: 56px;
-    width: 45%;
-    max-height: 90%;
+    width: 48%;
+    margin: 5px;
     overflow: auto;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
     border-radius: 5px;
     border: 1px #2fa4e7 solid;
-    padding: 5px;
-    
+    height: 90vh;
+}
+
+.table {
+    display: table;
+    height: 100%;
+    width: 100%;
+}
+
+.row {
+    display: table-row;
 }
 
 .webmoljs_viewer {
-    width: 45%;
-    height: 40vh;
-    display: inline-block;
-    position: relative;
+    display: table-cell;
+    position: relative;   
+    width: 50%;
+    height: 50%;
+    
 }
 
 #main {
