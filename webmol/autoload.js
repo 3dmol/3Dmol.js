@@ -13,6 +13,9 @@ $(document).ready(function() {
             var viewerdiv = $(this);
             var datauri = null;
             
+            var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
+                    window[viewerdiv.data("callback")] : null;
+            
             if (viewerdiv.data("pdb"))
                 datauri = "http://www.pdb.org/pdb/files/" + viewerdiv.data("pdb") + ".pdb";
             else if (viewerdiv.data("href"))
@@ -32,11 +35,27 @@ $(document).ready(function() {
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
                     glviewer.setStyle({}, style);
+                    
+                    // Allowing us to fire callback after viewer has added model
+                    if (callback) 
+                        callback(glviewer);                    
+                    
                     glviewer.zoomTo();
-                    glviewer.render();                                           
+                    glviewer.render();          
+                    
                 }, 'text');
            
-            }            
+            }
+            
+            else {
+                console.log("Executing callback on viewer " + this.id + ". No input data specified");
+                if (callback) 
+                    callback(glviewer);
+                
+                glviewer.zoomTo();
+                glviewer.render();
+            }
+            
         });              
     }
 });
