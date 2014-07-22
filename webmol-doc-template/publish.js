@@ -26,7 +26,7 @@ var template = require( 'jsdoc/template' ),
 	view,
 	outdir = env.opts.destination;
 
-var globalUrl = helper.getUniqueFilename( 'global' );
+var globalUrl = helper.getUniqueFilename( 'types' );
 var indexUrl = helper.getUniqueFilename( 'index' );
 
 var navOptions = {
@@ -85,7 +85,7 @@ var navigationMaster = {
 		members : []
 	},
 	global   : {
-		title   : "Global",
+		title   : "Type Specifications",
 		link    : globalUrl,
 		members : []
 
@@ -363,7 +363,7 @@ function buildNav( members ) {
 
 	if ( members.globals.length ) {
 		members.globals.forEach( function ( g ) {
-			if ( g.kind !== 'typedef' && !hasOwnProp.call( seen, g.longname ) ) {
+			if ( !hasOwnProp.call( seen, g.longname ) ) {
 
 				nav.global.members.push( linkto( g.longname, g.longname.replace("module:", "") ) );
 			}

@@ -18,8 +18,12 @@
 <div class="container-fluid">
 	<div class="navbar navbar-fixed-top <?js= this.navOptions.inverseNav ? 'navbar-inverse' : '' ?>">
 		<div class="navbar-inner">
-			<a class="brand" href="<?js= this.nav.index.link ?>"><?js= this.nav.index.title ?></a>
+			<a class="brand" href="../index.html"><?js= this.nav.index.title ?></a>
+                        
 			<ul class="nav">
+                                <li>
+                                <a href="<?js= this.nav.index.link ?>">Documentation</a>
+                                </li>
 				<?js this.nav.topLevelNav.forEach(function(entry){ ?>
 				<li class="dropdown">
 					<a href="<?js= entry.link ?>" class="dropdown-toggle" data-toggle="dropdown"><?js= entry.title ?><b
