@@ -128,7 +128,7 @@ module.exports = function(grunt) {
                 options : {
                     stdout: true
                 },
-                command: "node node_modules/jsdoc/jsdoc.js externs/webmol.js README.md -c jsdoc.conf.json -t webmol-doc-template/ -d doc/"
+                command: "node node_modules/jsdoc/jsdoc.js externs/webmol.js README.md -c jsdoc.conf.json -t webmol-doc-template/ -u tutorials/ -d doc/"
             }
         }
         

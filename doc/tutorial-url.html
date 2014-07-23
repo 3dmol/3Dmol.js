@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>WebMol.js Namespaces</title>
+	<title>WebMol.js tutorialurl</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -140,120 +140,34 @@
 	<div class="row-fluid">
 
 		
-		<div class="span8">
-			
+			<div class="span12">
+				
 				<div id="main">
-					
-
-
-	<h1 class="page-title">Namespaces</h1>
-<section>
+					<section class="tutorial-section">
 
 <header>
-    <h2>
     
-    </h2>
-    
+
+    <h2>url</h2>
 </header>
 
 <article>
-    <div class="container-overview">
-    
-
-    
-        
-
-        
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="WebMol.GLModel.html">GLModel</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.GLShape.html">GLShape</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.GLViewer.html">GLViewer</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.Label.html">Label</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.ROYGB.html">ROYGB</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.RWB.html">RWB</a></dt>
-            <dd></dd>
-        
-            <dt><a href="WebMol.Sinebow.html">Sinebow</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-    
-        <h3 class="subsection-title">Namespaces</h3>
-
-        <dl>
-            <dt><a href="namespaces.html#WebMol"><a href="WebMol.html">WebMol</a></a></dt>
-            <dd></dd>
-        </dl>
-    
-
-    
-
-    
-
-    
-
-    
+    <h2>Viewing Molecules with the WebMol.js Server</h2><p>You can view a PDB structure immediately by visiting the WebMol.js server.  Simply type <code>webmol.csb.pitt.edu/viewer.html</code> with an appropriately formatted <a href="http://en.wikipedia.org/wiki/Query_string">URL query string</a> into your browser.</p>
+<p>A URL takes the form: <code>webmol.csb.pitt.edu/viewer.html?[query string]</code>, where the <code>query string</code> specifies a structure (i.e. a PDB ID) and specific WebMol styles to apply.</p>
+<h3>Building a Query String</h3><p>The URL query can be composed of three types of specifiers: a single <strong>structure identifier</strong> that is optionally followed by a number of alternating <strong>atom selectors</strong> and <strong>style specifications</strong>. The viewer will load the specified structure, and then alternately select a group of atoms and apply a specified viewing style.</p>
+<p>Specifiers are read in the order they are added, and are separated by an '&' character.</p>
+<p>The full url specification, then, is:</p>
+<p><code>webmol.csb.pitt.edu/viewer.html?[structure identifier[[atom selector]style specification]</code></p>
+<p>Let's work through a simple example:</p>
+<h4>Specifying a Structure</h4><p>The <strong>structure identifier</strong> portion of the URL is a single selector formatted as <code>pdb=[PDB ID]</code>.  </p>
+<p>Let's try viewing a structore of  <a href="http://www.rcsb.org/pdb/explore/explore.do?structureId=4KW4">green flurorescent protein</a> (GFP).  </p>
+<p>For this example, we'll use the crystal structure with PDB ID 4KW4.</p>
+<p>So, the structure identifier portion of the url is <code>pdb=4K4W</code>, and the url to view the structure on the WebMol.js server is:</p>
+<p><code>webmol.csb.pitt.edu/viewer.html?pdb=4KW4</code></p>
+<p>Try copying and pasting this URL into your browser to view GFP!</p>
 </article>
 
 </section>
-
-
-
 
 				</div>
 
@@ -274,10 +188,6 @@
 				</footer>
 			</div>
 
-			
-			<div class="span3">
-				<div id="toc"></div>
-			</div>
 			
 			<br clear="both">
 		</div>
