@@ -11,7 +11,7 @@ module.exports = function(grunt) {
         },
         
         clean : {
-            doc: ['doc', 'index.html', 'scripts', 'styles', 'img'],
+            doc: ['doc'],
             build: ['build'],
             tmp: ['build/*pre.js']
         },
@@ -142,6 +142,7 @@ module.exports = function(grunt) {
     grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler:build', 'concat:append']);
     
     grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'clean:tmp']);
+    grunt.registerTask('build-quick', ['clean:build', 'concat_pre_build', 'concat_post_build', 'clean:tmp']);
     
     grunt.registerTask('debug-doc', ['shell:default']);
     
