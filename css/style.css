@@ -113,10 +113,10 @@ h1 {
 }
 
 #textdiv {
-    box-sizing: border-box;
     display: block;
     width: 50%;
     margin-left: 0;
+    margin-top: 20px;
     min-height: 30px;
     float: left;
 }
@@ -134,25 +134,18 @@ footer {
     display: block;   
 }
 
-#viewerdiv {
-    box-sizing: border-box;
-    display: block;
-    min-height: 30px;
-    width: 50%;
-    margin-left: 2%;
-    float: right;
-}
-
 #viewercontainer {
     display: box;
     position: fixed;
     top: 56px;
+    right: 5px;
     width: 48%;
     margin: 5px;
     overflow: auto;
     border-radius: 5px;
     border: 1px #2fa4e7 solid;
     height: 90vh;
+    float: right;
 }
 
 .table {
@@ -169,8 +162,11 @@ footer {
     display: table-cell;
     position: relative;   
     width: 50%;
-    height: 50%;
-    
+    height: 50%;   
+}
+
+canvas {
+    max-width: 100%;
 }
 
 #main {

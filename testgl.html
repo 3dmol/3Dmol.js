@@ -98,12 +98,12 @@
                         
             //$.get("test_structs/1YCR.pdb", function(data){
                 
-                moldata = data = $("#moldata_pdb_large").val();
+                moldata = data = $("#moldata_sdf").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
                                         
-                    receptorModel = m = viewer.addModel(data, "pdb");               
+                    receptorModel = m = viewer.addModel(data, "sdf");               
                     
                     atoms = m.selectedAtoms({ }); 
                     
@@ -134,7 +134,7 @@
         <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
-        <input type="button" value="Sphere" onclick="glviewer.setStyle({chain:'A',hetflag:false},{sphere:{}}); glviewer.render();"></input>
+        <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({chain:'A', hetflag:false},{cartoon:{color:'blue'}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>

@@ -850,6 +850,17 @@ WebMol.GLViewer = (function() {
             return shape;
               
         };
+
+        this.removeShape = function(shape) {
+            if (!shape)
+                return;
+            shape.removegl(modelGroup);
+            delete shapes[shape.id];
+            // clear off back of model array
+            while (shapes.length > 0 &&
+                    typeof (shapes[shapes.length - 1]) === "undefined")
+                shapes.pop();            
+        };
         
         this.addSphere = function(spec) {
             var s = new WebMol.GLShape(shapes.length);

@@ -20315,6 +20315,17 @@ WebMol.GLShape = (function() {
             group.add(renderedShapeObj);
             
         };
+
+        this.removegl = function(group) {
+            if(renderedShapeObj) {
+                //dispose of geos and materials
+                if (renderedShapeObj.geometry !== undefined) renderedShapeObj.geometry.dispose();             
+                if (renderedShapeObj.material !== undefined) renderedShapeObj.material.dispose();
+                group.remove(renderedShapeObj);
+                renderedShapeObj = null;
+            }
+            shapeObj = null;
+        };
     
     };
 
@@ -21205,6 +21216,17 @@ WebMol.GLViewer = (function() {
             
             return shape;
               
+        };
+
+        this.removeShape = function(shape) {
+            if (!shape)
+                return;
+            shape.removegl(modelGroup);
+            delete shapes[shape.id];
+            // clear off back of model array
+            while (shapes.length > 0 &&
+                    typeof (shapes[shapes.length - 1]) === "undefined")
+                shapes.pop();            
         };
         
         this.addSphere = function(spec) {

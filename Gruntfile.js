@@ -13,7 +13,8 @@ module.exports = function(grunt) {
         clean : {
             doc: ['doc'],
             build: ['build'],
-            tmp: ['build/*pre.js']
+            tmp: ['build/*pre.js'],
+            release: ['release']
         },
         
         jshint : {
@@ -117,18 +118,21 @@ module.exports = function(grunt) {
         },
         
         shell : {
-            default: {
-                    options: {
-                        stdout: true
-                    },
-                    command: "node-debug (Resolve-Path ~\AppData\Roaming\npm\node_modules\grunt-cli\bin\grunt) jsdoc:index"
-            },
             
             doc : {
                 options : {
                     stdout: true
                 },
-                command: "node node_modules/jsdoc/jsdoc.js externs/webmol.js README.md -c jsdoc.conf.json -t webmol-doc-template/ -d doc/"
+                command: "node node_modules/jsdoc/jsdoc.js externs/webmol.js README.md -c jsdoc.conf.json -t webmol-doc-template -u tutorials/ -d doc/"
+            }
+        },
+
+        copy : {
+            release : {
+                expand : true,
+                src : 'build/*.js',
+                dest : 'release/',
+                flatten : 'true'
             }
         }
         
@@ -143,6 +147,8 @@ module.exports = function(grunt) {
     
     grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'clean:tmp']);
     grunt.registerTask('build-quick', ['clean:build', 'concat_pre_build', 'concat_post_build', 'clean:tmp']);
+
+    grunt.registerTask('release-update', ['clean:release', 'build', 'copy:release']);
     
     grunt.registerTask('debug-doc', ['shell:default']);
     
@@ -153,5 +159,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-closure-compiler');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-node-inspector');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     
 };
