@@ -77,10 +77,10 @@ ViewerSpec.callback;
  * select all atoms with matching properties
  * @typedef AtomSpec
  * @struct
- * @prop {string} resn - Residue this atom belongs to 
- * @prop {number} x - Atom x coordinate
- * @prop {number} y - Atom y coordinate
- * @prop {number} z - Atom z coordinate
+ * @prop {string} resn - Parent residue name
+ * @prop {number} x - Atom's x coordinate
+ * @prop {number} y - Atom's y coordinate
+ * @prop {number} z - Atom's z coordinate
  * @prop {number} color - Atom's color, as hex code
  * @prop {number} surfaceColor - Hex code for color to be used for surface patch over this atom
  * @prop {string} elem - Element abbreviation (e.g. 'H', 'Ca', etc)
@@ -100,6 +100,7 @@ ViewerSpec.callback;
  * @prop {string} pdbline - If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
  * @prop {boolean} clickable - Set this flag to true to enable click selection handling for this atom
  * @prop {function(this, WebMol.GLViewer)} callback - Callback click handler function to be executed on this atom and its parent viewer
+ * @prop {AtomStyleSpec} style - Atom style specification
  */
 var AtomSpec = {};
 AtomSpec.resn;
@@ -130,8 +131,7 @@ AtomSpec.clickable;
 AtomSpec.callback;
 
 /** 
- * @ignore
- * @typedef {{linewidth:number, color:colorlike, radius:number, scale:number, hidden:boolean}} 
+ * @typedef AtomStyleSpec
  */
 var atomstyle;
 AtomSpec.style = {};
@@ -329,6 +329,14 @@ WebMol.GLViewer.setLabelText = function(label, text) {};
  * @return {WebMol.GLShape}
  */
 WebMol.GLViewer.addShape = function(shapeSpec) {};
+
+/**
+ * Remove shape object from viewe
+ *
+ * @function WebMol.GLViewer#removeShape
+ * @param {WebMol.GLShape} shape - Reference to shape object to remove
+ */
+WebMol.GLViewer.removeShape = function(shape) {};
 
 /**
  * Create and add sphere shape. This method provides a shorthand 

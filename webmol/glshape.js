@@ -828,6 +828,17 @@ WebMol.GLShape = (function() {
             group.add(renderedShapeObj);
             
         };
+
+        this.removegl = function(group) {
+            if(renderedShapeObj) {
+                //dispose of geos and materials
+                if (renderedShapeObj.geometry !== undefined) renderedShapeObj.geometry.dispose();             
+                if (renderedShapeObj.material !== undefined) renderedShapeObj.material.dispose();
+                group.remove(renderedShapeObj);
+                renderedShapeObj = null;
+            }
+            shapeObj = null;
+        };
     
     };
 

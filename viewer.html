@@ -52,14 +52,21 @@
                         
                         var styletype;
                         
-                        if (!(cmdarr[0] == 'line' || cmdarr[0] == 'stick' || cmdarr[0] == 'cross' || cmdarr[0] == 'sphere' || cmdarr[0] == 'cartoon'))
+                        if (!(cmdarr[0] == 'line' || cmdarr[0] == 'stick' || cmdarr[0] == 'cross' || cmdarr[0] == 'sphere' || cmdarr[0] == 'cartoon' || cmdarr[0] == 'hidden'))
                             styletype = 'line'; //Default to line style
                         else
                             styletype = cmdarr.splice(0,1)[0];
-                            
-                        var stylespec = extractselectors(cmdarr);
-                        var styleobj = {}; 
-                        styleobj[styletype] = stylespec;
+
+                        var styleobj = {};
+
+                        if (styletype === 'hidden') 
+                            styleobj.line = {'hidden': true};
+                        
+                        else {
+                            var stylespec = extractselectors(cmdarr);
+                            styleobj[styletype] = stylespec;                            
+                        }
+
                         viewer.setStyle(currentsel, styleobj);
                     }
                     
