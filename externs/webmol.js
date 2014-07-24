@@ -11,12 +11,6 @@ colorlike.b;
 colorlike.a;
 
 /**
- * 
- *@struct 
- * Type Specifications
- */
-
-/**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
@@ -69,7 +63,7 @@ WebMol.rasmolElementColors = {};
 
 /**
  * GLViewer input specification
- * @typedef
+ * @typedef ViewerSpec
  */
 var ViewerSpec = {};
 ViewerSpec.order;
@@ -82,6 +76,7 @@ ViewerSpec.callback;
  * Object literal Atom representation.  Can be used as a selection specification to 
  * select all atoms with matching properties
  * @typedef AtomSpec
+ * @struct
  * @prop {string} resn - Residue this atom belongs to 
  * @prop {number} x - Atom x coordinate
  * @prop {number} y - Atom y coordinate
@@ -106,8 +101,6 @@ ViewerSpec.callback;
  * @prop {boolean} clickable - Set this flag to true to enable click selection handling for this atom
  * @prop {function(this, WebMol.GLViewer)} callback - Callback click handler function to be executed on this atom and its parent viewer
  */
-
-
 var AtomSpec = {};
 AtomSpec.resn;
 AtomSpec.x;
@@ -460,8 +453,8 @@ WebMol.GLViewer.removeSurface = function(surf) {};
  * Set style properties to all selected atoms
  * 
  * @function WebMol.GLViewer#setStyle
- * @param {Object} sel - Atom selection specification
- * @param {Object} style - Style spec to apply to specified atoms
+ * @param {AtomSpec} sel - Atom selection specification
+ * @param {AtomSpec.style} style - Style spec to apply to specified atoms
  */
 WebMol.GLViewer.setStyle = function(sel, style) {};
 
