@@ -48,7 +48,24 @@ $(document).ready(function() {
             }
             
             else {
-                console.log("Executing callback on viewer " + this.id + ". No input data specified");
+                
+                if (viewerdiv.data("element")) {
+                    var moldata = $("#" + viewerdiv.data("element")).val() || "";
+                    var type = viewerdiv.data("datatype");
+
+                    if (!type){
+
+                        console.log("Warning: No type specified for embedded viewer with moldata from " + viewerdiv.data("element") +
+                                    "\n assuming type 'pdb'")
+
+                        type = 'pdb';
+                    }
+
+                    glviewer.addModel(moldata, type);
+                    glviewer.setStyle({}, style);
+                }
+
+
                 if (callback) 
                     callback(glviewer);
                 

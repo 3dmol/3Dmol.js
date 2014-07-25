@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>WebMol Test</title>
-        <script src="build/webmol-min.js"></script>     
+        <script src="build/webmol.js"></script>     
         <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
         <script>
         
@@ -98,12 +98,12 @@
                         
             //$.get("test_structs/1YCR.pdb", function(data){
                 
-                moldata = data = $("#moldata_sdf").val();
+                moldata = data = $("#moldata_pdb_large").val();
                 glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {             
                     
                     viewer.setBackgroundColor(0xffffff);
                                         
-                    receptorModel = m = viewer.addModel(data, "sdf");               
+                    receptorModel = m = viewer.addModel(data, "pdb");               
                     
                     atoms = m.selectedAtoms({ }); 
                     
@@ -135,7 +135,7 @@
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
         <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
-        <input type="button" value="Cartoon" onclick="glviewer.setStyle({chain:'A', hetflag:false},{cartoon:{color:'blue'}}); glviewer.render();"></input>
+        <input type="button" value="Cartoon" onclick="glviewer.setStyle({chain:'A'},{cartoon:{gradient: true}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.VDW, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>

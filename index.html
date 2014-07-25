@@ -6,16 +6,26 @@
 	<title>WebMol.js</title>
 
 	<link type="text/css" rel="stylesheet" href="css/style.css">
-	<script src="build/webmol-min.js"></script>
+	<script src="build/webmol.js"></script>
         
         <script>
             var WebMol = WebMol || {};
             var $ = jQuery || {};
             var initSDF = function(viewer) {
-                var moldata = $("#moldata_sdf").val();
-                
-                viewer.addModel(moldata, "sdf");
-                viewer.setStyle({}, {stick:{}});
+                var s1 = viewer.addSphere({radius: 1.25, center: {x:-6.89, y:0.75, z:0.35}});
+                s1.wireframe = true; s1.color = WebMol.CC.color("purple");
+
+                var s2 = viewer.addSphere({radius: 1.25, center: {x:1.32, y:2.91, z:-1.49}});
+                s2.wireframe = true; s2.color = WebMol.CC.color("purple");
+
+                var s3 = viewer.addSphere({radius: 0.5, center: {x:-0.42, y:-0.48, z:0.64}});
+                s3.wireframe = true; s3.color = WebMol.CC.color(0xbbbbbb);
+
+                var a = viewer.addArrow({start: {x:-0.4217, y:-0.4795, z:0.6395}, end: {x:-0.613, y:-0.891, z:-0.198},
+                                           radius: 0.1});
+                a.color = WebMol.CC.color(0xff6600);
+
+                viewer.render();
                 
             };
             
@@ -31,7 +41,7 @@
                 }, 'text');
             };
 
-            var initProt = function(viewer) {
+            var addSurf = function(viewer) {
                 viewer.addSurface(WebMol.SurfaceType.VDW, {opacity:0.75},
                                   {hetflag: false}, {hetflag:false}, {chain: 'B'});
             };
@@ -57,8 +67,8 @@
           
           <div class="table">
               <div class="row">
-          <div id='viewer1' class='webmoljs_viewer' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"color":255}}' data-callback='initProt'></div> 
-          <div id='viewer2' class='webmoljs_viewer' data-callback='initSDF' data-backgroundcolor='0xeeeeee'></div>           
+          <div id='viewer1' class='webmoljs_viewer' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"gradient":true}}'></div> 
+          <div id='viewer2' class='webmoljs_viewer' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xeeeeee'></div>           
               </div>
               
               <div class="row">

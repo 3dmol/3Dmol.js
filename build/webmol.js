@@ -14937,6 +14937,7 @@ WebMol.CC = {
         'red' : 0xFF0000,
         'maroon' : 0x800000,
         'yellow' : 0xFFFF00,
+        'orange' : 0xFF6600,
         'olive' : 0x808000,
         'lime' : 0x00FF00,
         'green' : 0x008000,
@@ -16574,7 +16575,24 @@ $(document).ready(function() {
             }
             
             else {
-                console.log("Executing callback on viewer " + this.id + ". No input data specified");
+                
+                if (viewerdiv.data("element")) {
+                    var moldata = $("#" + viewerdiv.data("element")).val() || "";
+                    var type = viewerdiv.data("datatype");
+
+                    if (!type){
+
+                        console.log("Warning: No type specified for embedded viewer with moldata from " + viewerdiv.data("element") +
+                                    "\n assuming type 'pdb'")
+
+                        type = 'pdb';
+                    }
+
+                    glviewer.addModel(moldata, type);
+                    glviewer.setStyle({}, style);
+                }
+
+
                 if (callback) 
                     callback(glviewer);
                 
@@ -17203,7 +17221,7 @@ WebMol.drawCartoon = (function() {
     };
 
     var drawStrand = function(group, atomlist, num, div, fill, coilWidth,
-            helixSheetWidth, doNotSmoothen, thickness) {
+            helixSheetWidth, doNotSmoothen, thickness, gradientscheme) {
         num = num || strandDIV;
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
@@ -17244,6 +17262,9 @@ WebMol.drawCartoon = (function() {
                     ss = atom.ss;
                     ssborder = atom.ssbegin || atom.ssend;
                     var atomcolor = atom.color;
+                    if (gradientscheme) {
+                        atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
+                    }
                     if(typeof(atom.style.cartoon.color) != "undefined") {
                         atomcolor = atom.style.cartoon.color;
                     }
@@ -17281,10 +17302,10 @@ WebMol.drawCartoon = (function() {
     };
 
     // actual function call
-    var drawCartoon = function(group, atomlist) {
+    var drawCartoon = function(group, atomlist, gradientscheme) {
         
         drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
-                false, thickness);
+                false, thickness, gradientscheme);
     };
 
     return drawCartoon;
@@ -19125,7 +19146,7 @@ WebMol.GLModel = (function() {
             var sphereGeometry = new WebMol.Geometry(true);                                                         
             var stickGeometry = new WebMol.Geometry(true);
             var i, n;
-            
+            var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
             for (i = 0, n = atoms.length; i < n; i++) {
                 var atom = atoms[i];
                 // recreate gl info for each atom as necessary
@@ -19138,6 +19159,14 @@ WebMol.GLModel = (function() {
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
                     if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
+                        //gradient color scheme range
+                        if (atom.style.cartoon.gradient && typeof(atom.resi) === "number") {                            
+                            if (atom.resi < range[0])
+                                range[0] = atom.resi;
+                            if (atom.resi > range[1])
+                                range[1] = atom.resi;
+                        }
+                        
                         cartoonAtoms.push(atom);
                     }
                     
@@ -19146,7 +19175,12 @@ WebMol.GLModel = (function() {
             }
             // create cartoon if needed - this is a whole model analysis
             if (cartoonAtoms.length > 0) {
-                WebMol.drawCartoon(ret, cartoonAtoms, false);
+                var gradientscheme = null;
+                //TODO: Should have an option to choose color scheme
+                if (range[0] < range[1])
+                    gradientscheme = new WebMol.Sinebow(range[0], range[1]);
+
+                WebMol.drawCartoon(ret, cartoonAtoms, gradientscheme);
                 
                 for (i = 0; i < ret.children.length; i++){
                     var geo = ret.children[i].geometry;
@@ -19731,7 +19765,7 @@ WebMol.GLShape = (function() {
         
         var from = spec.start, end = spec.end, radius = spec.radius, radiusRatio = spec.radiusRatio, mid = spec.mid;
 
-        if (!from || !end)
+        if (!(from && end)) 
             return;
         
         // vertices
@@ -20254,8 +20288,17 @@ WebMol.GLShape = (function() {
             arrowSpec.end = arrowSpec.end || {};
             
             arrowSpec.start = new WebMol.Vector3(arrowSpec.start.x || 0, arrowSpec.start.y || 0, arrowSpec.start.z || 0);
-            arrowSpec.end = new WebMol.Vector3(arrowSpec.end.x || 3, arrowSpec.end.y || 0, arrowSpec.end.z || 0);
-            arrowSpec.radius = arrowSpec.radius || 0.25;
+
+            if (arrowSpec.dir instanceof WebMol.Vector3 && arrowSpec.length instanceof number) {
+                var end = arrowSpec.dir.clone().multiplyScalar(length).add(start);
+                arrowSpec.end = end;
+            }
+
+            else{
+                arrowSpec.end = new WebMol.Vector3(arrowSpec.end.x || 3, arrowSpec.end.y || 0, arrowSpec.end.z || 0);
+            }
+            
+            arrowSpec.radius = arrowSpec.radius || 0.1;
             
             arrowSpec.radiusRatio = arrowSpec.radiusRatio || 1.618034;
             arrowSpec.mid = ( 0 < arrowSpec.mid && arrowSpec.mid < 1) ? arrowSpec.mid : 0.618034;

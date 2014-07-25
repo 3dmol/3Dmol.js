@@ -1834,7 +1834,7 @@ WebMol.GLModel = (function() {
             var sphereGeometry = new WebMol.Geometry(true);                                                         
             var stickGeometry = new WebMol.Geometry(true);
             var i, n;
-            
+            var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
             for (i = 0, n = atoms.length; i < n; i++) {
                 var atom = atoms[i];
                 // recreate gl info for each atom as necessary
@@ -1847,6 +1847,14 @@ WebMol.GLModel = (function() {
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
                     if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
+                        //gradient color scheme range
+                        if (atom.style.cartoon.gradient && typeof(atom.resi) === "number") {                            
+                            if (atom.resi < range[0])
+                                range[0] = atom.resi;
+                            if (atom.resi > range[1])
+                                range[1] = atom.resi;
+                        }
+                        
                         cartoonAtoms.push(atom);
                     }
                     
@@ -1855,7 +1863,12 @@ WebMol.GLModel = (function() {
             }
             // create cartoon if needed - this is a whole model analysis
             if (cartoonAtoms.length > 0) {
-                WebMol.drawCartoon(ret, cartoonAtoms, false);
+                var gradientscheme = null;
+                //TODO: Should have an option to choose color scheme
+                if (range[0] < range[1])
+                    gradientscheme = new WebMol.Sinebow(range[0], range[1]);
+
+                WebMol.drawCartoon(ret, cartoonAtoms, gradientscheme);
                 
                 for (i = 0; i < ret.children.length; i++){
                     var geo = ret.children[i].geometry;

@@ -349,7 +349,7 @@ WebMol.drawCartoon = (function() {
     };
 
     var drawStrand = function(group, atomlist, num, div, fill, coilWidth,
-            helixSheetWidth, doNotSmoothen, thickness) {
+            helixSheetWidth, doNotSmoothen, thickness, gradientscheme) {
         num = num || strandDIV;
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
@@ -390,6 +390,9 @@ WebMol.drawCartoon = (function() {
                     ss = atom.ss;
                     ssborder = atom.ssbegin || atom.ssend;
                     var atomcolor = atom.color;
+                    if (gradientscheme) {
+                        atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
+                    }
                     if(typeof(atom.style.cartoon.color) != "undefined") {
                         atomcolor = atom.style.cartoon.color;
                     }
@@ -427,10 +430,10 @@ WebMol.drawCartoon = (function() {
     };
 
     // actual function call
-    var drawCartoon = function(group, atomlist) {
+    var drawCartoon = function(group, atomlist, gradientscheme) {
         
         drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
-                false, thickness);
+                false, thickness, gradientscheme);
     };
 
     return drawCartoon;
