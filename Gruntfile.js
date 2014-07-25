@@ -70,7 +70,7 @@ module.exports = function(grunt) {
             },
             
             append : {
-                src : ['build/webmol-min-pre.js', 'append.js'],
+                src : ['build/webmol-min.js', 'append.js'],
                 dest : 'build/webmol-min.js'
             }
         },
@@ -143,7 +143,7 @@ module.exports = function(grunt) {
     grunt.registerTask('concat_post_build', ['concat:big', 'concat:closure']);
     
     grunt.registerTask('test', ['clean:build', 'concat:test', 'closure-compiler:test', 'concat:append']);
-    grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler:build', 'concat:append']);
+    grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'concat:append']);
     
     grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'clean:tmp']);
     grunt.registerTask('build-quick', ['clean:build', 'concat_pre_build', 'concat_post_build', 'clean:tmp']);
