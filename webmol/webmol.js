@@ -105,6 +105,7 @@ WebMol.CC = {
         'red' : 0xFF0000,
         'maroon' : 0x800000,
         'yellow' : 0xFFFF00,
+        'orange' : 0xFF6600,
         'olive' : 0x808000,
         'lime' : 0x00FF00,
         'green' : 0x008000,

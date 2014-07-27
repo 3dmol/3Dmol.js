@@ -53,6 +53,14 @@ WebMol.createViewer = function(element, config) {};
  */ 
 WebMol.download = function(query, viewer) {};
 
+/**
+ * @ignore
+ * @param {WebMol.Object3D} group
+ * @param {AtomSpec} atomlist
+ * @param {WebMol.ColorScheme} gradientscheme
+ */
+WebMol.drawCartoon = function(group, atomlist, gradientscheme) {};
+
 /** @property JmolElementColors - Jmol style atom colors (default color scheme) */
 WebMol.JmolElementColors = {};
 /** @property rasmolElementColors - Rasmol style atom colors */
@@ -133,7 +141,8 @@ AtomSpec.callback;
 /** 
  * @typedef AtomStyleSpec
  */
-var atomstyle;
+var AtomStyleSpec = {};
+
 AtomSpec.style = {};
 /** @type {atomstyle} */
 AtomSpec.style.line;
@@ -145,6 +154,7 @@ AtomSpec.style.sphere;
 AtomSpec.style.stick;
 /** @type {atomstyle} */
 AtomSpec.style.cartoon;
+AtomSpec.style.cartoon.gradient;
 
 //Viewer
 // The constructor

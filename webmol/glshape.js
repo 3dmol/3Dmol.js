@@ -228,7 +228,7 @@ WebMol.GLShape = (function() {
         
         var from = spec.start, end = spec.end, radius = spec.radius, radiusRatio = spec.radiusRatio, mid = spec.mid;
 
-        if (!from || !end)
+        if (!(from && end)) 
             return;
         
         // vertices
@@ -751,8 +751,17 @@ WebMol.GLShape = (function() {
             arrowSpec.end = arrowSpec.end || {};
             
             arrowSpec.start = new WebMol.Vector3(arrowSpec.start.x || 0, arrowSpec.start.y || 0, arrowSpec.start.z || 0);
-            arrowSpec.end = new WebMol.Vector3(arrowSpec.end.x || 3, arrowSpec.end.y || 0, arrowSpec.end.z || 0);
-            arrowSpec.radius = arrowSpec.radius || 0.25;
+
+            if (arrowSpec.dir instanceof WebMol.Vector3 && arrowSpec.length instanceof number) {
+                var end = arrowSpec.dir.clone().multiplyScalar(length).add(start);
+                arrowSpec.end = end;
+            }
+
+            else{
+                arrowSpec.end = new WebMol.Vector3(arrowSpec.end.x || 3, arrowSpec.end.y || 0, arrowSpec.end.z || 0);
+            }
+            
+            arrowSpec.radius = arrowSpec.radius || 0.1;
             
             arrowSpec.radiusRatio = arrowSpec.radiusRatio || 1.618034;
             arrowSpec.mid = ( 0 < arrowSpec.mid && arrowSpec.mid < 1) ? arrowSpec.mid : 0.618034;
