@@ -2,15 +2,15 @@
 
 //var glviewer = null;
 
-QUnit.config.autostart = false;
+$(document).ready(function() {
 
-//Add profile option to QUnit header
-QUnit.config.urlConfig.push({
-	id: "profilecheck",
-	label: "profile",
-	value: "",
-	tooltip: "Profile rendering"
-});
+    glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
+        viewer.setBackgroundColor(0xffffff);
+    }});
+
+    //starts QUnit tests
+    start();
+}); 
 
 var profile = QUnit.urlParams.profilecheck;
 var resultXML = null;
@@ -54,7 +54,7 @@ QUnit.jUnitReport = function(data) {
 
 };
 
-var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:0x0000ff}}};
+var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{}}};
 
 
 //Generic style render testcase
@@ -182,7 +182,7 @@ QUnit.module( "D. Dihydrolipoyl Transacetylase Biological Assembly,  71,820 atom
         
         glviewer.removeAllModels();
         stop();
-        $.get("test_structs/1B5S.pdb", function(data) {             
+        $.get("../../test_structs/1B5S.pdb", function(data) {             
                 glviewer.addModel(data, "pdb");
                 glviewer.zoomTo();
                 glviewer.render();
@@ -198,7 +198,7 @@ QUnit.module( "D. Dihydrolipoyl Transacetylase Biological Assembly,  71,820 atom
     
 });
 
-runtests(profile);
+//runtests(profile);
 
 
 

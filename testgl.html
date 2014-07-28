@@ -136,7 +136,7 @@
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
         <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
-        <input type="button" value="Cartoon" onclick="glviewer.setStyle({chain:'A'},{cartoon:{gradient: true}}); glviewer.render();"></input>
+        <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.VDW, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
