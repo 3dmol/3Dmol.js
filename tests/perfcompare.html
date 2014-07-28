@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebMol Test</title>
+        <link rel="stylesheet" href="qunit.css">
+        
+        
+        <style>
+        	html body { padding: 0; margin: 0 }
+        </style>   
+        <script src="../build/webmol-min.js"></script>
+        <script src="glmol/GLmol.js"></script>
+        <script src="jsmol/jsmol/JSmol.min.nojq.js"></script>
+        <script src="qunit.js"></script>    
+        <script src="qunit-once.js"></script> 
+        <script src="qunit-reporter-junit.js"></script>
+        <script>
+         
+	var glviewer;
+          
+        QUnit.config.autostart = false;
+
+        //Add profile option to QUnit header
+        QUnit.config.urlConfig.push({
+            id: "profilecheck",
+            label: "profile",
+            value: "",
+            tooltip: "Profile rendering"
+        });        
+        
+        QUnit.config.urlConfig.push({
+            id: "testsuite", 
+            label: "Test suite",
+            value: ["webmol", "glmol", "jsmol"],
+            tooltip: "Run tests on selected software"
+        });
+        
+        var testsuite = QUnit.urlParams.testsuite || "webmol";
+        
+        //$.getScript(scriptsrc, function() {
+            $.getScript(testsuite + "/perftest.js");
+        //});
+        
+        </script> 
+        
+</head>
+<body>
+
+    <div id="gldiv" style="width: 40%; height: 90vh; display: inline-block;"></div>
+    <div style="display: inline-block; vertical-align: top; max-width: 50%;">
+        <div id="qunit"></div>
+        <div id="qunit-fixture"></div>
+    </div>
+                
+
+</body>
+</html>

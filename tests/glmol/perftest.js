@@ -1,20 +1,15 @@
-//Test rendering performance for different sized pdb's
-
-//var glviewer = null;
+//GLMol performance tests
 
 $(document).ready(function() {
 
-    glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors, callback : function(viewer) {
-        viewer.setBackgroundColor(0xffffff);
-    }});
-
+    glviewer = new GLmol("gldiv", true);
     //starts QUnit tests
     start();
 }); 
 
-var profile = QUnit.urlParams.profilecheck;
 var resultXML = null;
 var resultStr = "";
+var profile = QUnit.urlParams.profilecheck;
 
 //QUnit-reporter hook to output test results in XML format
 QUnit.jUnitReport = function(data) {
@@ -24,7 +19,7 @@ QUnit.jUnitReport = function(data) {
 	//Wrap XML result in JQuery object; parse and setup output string
 	$result = $(resultXML);
 	
-	resultStr += "WebMol Performance Tests\n";
+	resultStr += "GLMol Performance Tests\n";
 	var runTime = $result.find("testsuites").attr("time");
 	var runDate = $result.find("testsuites").attr("timestamp");
 	resultStr += "Total Test Time: " + runTime + " s\n";
@@ -54,8 +49,29 @@ QUnit.jUnitReport = function(data) {
 
 };
 
-var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{}}};
+var styleSpec = ["stick", "line", "cross", "sphere", "cartoon"];
 
+var defineRep = function(style) {
+    
+    return function() {
+        var all = this.getAllAtoms();
+        var target = this.modelGroup;
+
+        if (style === 'stick') 
+            this.drawBondsAsStick(target, all, this.cylinderRadius, this.cylinderRadius, true);
+        else if (style === 'line')
+            this.drawBondsAsLine(target, all, this.lineWidth);
+        else if (style === 'cross') 
+            this.drawAsCross(target, all, 0.3, true);
+        else if (style === 'sphere') 
+            this.drawAtomsAsSphere(target, all, this.sphereRadius);
+        else if (style === 'cartoon') {
+            this.colorChainbow(all);
+            this.drawCartoon(target, all, false, this.thickness);
+        }
+    };
+    
+};
 
 //Generic style render testcase
 
@@ -64,18 +80,20 @@ var testcase = function(styleType, profile) {
     var testName = styleType + " render";
     var timeName = styleType + " render time: ";
     var testMsg = styleType + " style set correctly";
-    var styleExpected = styleSpec[styleType];
+    
     
     test(testName, function() {
-        var m = glviewer.getModel(0);
+        
         console.group(testName);
         console.time(timeName);
+        
         
         if (profile)
             console.profile();
             
-        glviewer.setStyle({}, styleExpected);
-        glviewer.render();
+        glviewer.defineRepresentation = defineRep(styleType);
+        glviewer.rebuildScene();
+        glviewer.show();       
         
         if (profile)
             console.profileEnd();
@@ -83,8 +101,8 @@ var testcase = function(styleType, profile) {
         console.timeEnd(timeName);
         console.groupEnd();
         
-        var styleActual = m.selectedAtoms()[0].style;
-        equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), testMsg); 
+        
+        ok(true, testMsg); 
         
     });
 };
@@ -92,113 +110,45 @@ var testcase = function(styleType, profile) {
 
 var runtests = (function(profile) {
 	for (var style in styleSpec)
-		new testcase(style, profile);
+		new testcase(styleSpec[style], profile);
 });
 //test cases
 
 //TESTS
 
-//moldata 1
-
-QUnit.module( "A. Bovine Calbindin, 637 atoms (1YCR)", {
-	
-	setupOnce: function() {
-		
-		glviewer.removeAllModels();
-		stop();
-   		$.get("test_structs/1YCR.pdb", function(data) {				
-	      		glviewer.addModel(data, "pdb");
-	      		glviewer.zoomTo();
-	      		glviewer.render();
-	      		start();
-   		}, "text");
-		glviewer.mapAtomProperties(WebMol.partialCharges);
-		console.group("Calbindin (637 atoms)");
-	},
-		
-	teardownOnce: function() {		
-		console.groupEnd();
-	}
-	
-});
-
-//new tester("sphere", profile);
-runtests(profile);
-
-//moldata 2
-
-QUnit.module( "B. Cathodic Hemoglobin, 5,085 atoms (2AA1)", {
-	
-	setupOnce: function() {
-		glviewer.removeAllModels();
-		stop();
-   		$.get("test_structs/2AA1.pdb", function(data) {				
-	      		glviewer.addModel(data, "pdb");
-	      		glviewer.zoomTo();
-	      		glviewer.render();
-	      		start();
-   		}, "text");
-   		console.groupEnd();
-   		console.group("Hemoglobin (5,085 atoms)");
-	},
-	
-	teardownOnce: function() {
-		console.groupEnd();
-	}
-});
-
-runtests(profile);
 
 //moldata 3
 
 QUnit.module( "C. Calicivirus Capsid, 12,362 atoms (3M8L)", {
 	
-	setupOnce: function() {
-		console.log("Testing third molecule");
-		glviewer.removeAllModels();
-		stop();
-   		$.get("test_structs/3M8L.pdb", function(data) {
-	      		glviewer.addModel(data, "pdb");
-	      		glviewer.zoomTo();
-	      		glviewer.render();
-	      		start();
-   		}, "text");
-   		console.groupEnd();
-   		console.group("Capsid (12,362 atoms)");
-	},
-		
-	teardownOnce: function() {
-		console.groupEnd();
-		//glviewer.removeAllModels();
-	}
+    setupOnce: function() {
+
+        stop();
+        $.get("test_structs/3M8L.pdb", function(data) {
+                //glviewer.loadMoleculeStr(false, data);
+            glviewer.protein = {sheet: [], helix: [], biomtChains: '', biomtMatrices: [], symMat: [], pdbID: '', title: ''};
+            glviewer.atoms = [];
+            glviewer.parsePDB2(data);
+            var all = glviewer.getAllAtoms();
+            glviewer.colorByAtom(all, {});
+            glviewer.initializeScene();
+            glviewer.setBackground(0xffffff);
+            glviewer.zoomInto(glviewer.getAllAtoms());
+
+                start();
+        }, "text");
+        console.groupEnd();
+        console.group("Capsid (12,362 atoms)");
+    },
+
+    teardownOnce: function() {
+        console.groupEnd();
+        //glviewer.removeAllModels();
+    }
 });
 
 runtests(profile);
 
-
-QUnit.module( "D. Dihydrolipoyl Transacetylase Biological Assembly,  71,820 atoms (1B5S)", {
-    
-    setupOnce: function() {
-        
-        glviewer.removeAllModels();
-        stop();
-        $.get("../../test_structs/1B5S.pdb", function(data) {             
-                glviewer.addModel(data, "pdb");
-                glviewer.zoomTo();
-                glviewer.render();
-                start();
-        }, "text");
-        glviewer.mapAtomProperties(WebMol.partialCharges);
-        console.group("Calbindin (71,820 atoms)");
-    },
-        
-    teardownOnce: function() {      
-        console.groupEnd();
-    }
-    
-});
-
-//runtests(profile);
 
 
 
