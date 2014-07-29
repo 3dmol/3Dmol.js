@@ -1,0 +1,11 @@
+Clazz.load(["java.lang.Enum"],"java.lang.annotation.ElementType",null,function(){
+c$=Clazz.declareType(java.lang.annotation,"ElementType",Enum);
+Clazz.defineEnumConstant(c$,"TYPE",0,[]);
+Clazz.defineEnumConstant(c$,"FIELD",1,[]);
+Clazz.defineEnumConstant(c$,"METHOD",2,[]);
+Clazz.defineEnumConstant(c$,"PARAMETER",3,[]);
+Clazz.defineEnumConstant(c$,"CONSTRUCTOR",4,[]);
+Clazz.defineEnumConstant(c$,"LOCAL_VARIABLE",5,[]);
+Clazz.defineEnumConstant(c$,"ANNOTATION_TYPE",6,[]);
+Clazz.defineEnumConstant(c$,"PACKAGE",7,[]);
+});

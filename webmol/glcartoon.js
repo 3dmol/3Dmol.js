@@ -393,7 +393,7 @@ WebMol.drawCartoon = (function() {
                     if (gradientscheme) {
                         atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
                     }
-                    if(typeof(atom.style.cartoon.color) != "undefined") {
+                    else if(typeof(atom.style.cartoon.color) !== "undefined") {
                         atomcolor = atom.style.cartoon.color;
                     }
                     colors.push(atomcolor);
