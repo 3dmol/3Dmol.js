@@ -30,7 +30,7 @@
             };
             
             var initShapes = function(viewer) {
-                $.get('test_structs/benzene-homo.cube', function(data){
+                $.get('tests/test_structs/benzene-homo.cube', function(data){
                     viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: new WebMol.Color(0,0,1),
                                                                          alpha: 0.95});              
                     viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: new WebMol.Color(1,0,0),
@@ -67,12 +67,12 @@
           
           <div class="table">
               <div class="row">
-          <div id='viewer1' class='webmoljs_viewer' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"gradient":true}}'></div> 
+          <div id='viewer1' class='webmoljs_viewer' data-pdb='2POR' data-backgroundcolor='0xffffff' data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div> 
           <div id='viewer2' class='webmoljs_viewer' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xeeeeee'></div>           
               </div>
               
               <div class="row">
-          <div id='viewer4' class='webmoljs_viewer' data-href="test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xeeeeee'></div>
+          <div id='viewer4' class='webmoljs_viewer' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xeeeeee'></div>
           <div id='viewer3' class='webmoljs_viewer' data-pdb='1YCR' data-backgroundcolor='0xffffff' data-style='{"sphere":{}}'></div>  
               </div>
           </div>

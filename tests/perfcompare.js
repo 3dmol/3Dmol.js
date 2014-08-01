@@ -44,33 +44,39 @@ QUnit.jUnitReport = function(data) {
 };
 
 // Style types to test
-var styleSpec = ["line", "stick", "sphere", "cartoon"];
+var styleSpec = ["line", "stick", "sphere"];
 
 // WebMol testcase generator
 
 var genWebMolTestCase = function(styleType, profile) {
     
     var testName = styleType + " render";
-    var timeName = styleType + " render time: ";
+    var timeMsg = styleType + " render time: ";
     var testMsg = styleType + " style set correctly";
     var style = {}; style[styleType] = {};
     
     test(testName, function() {
         
-        console.group(testName);
-        viewer.setStyle({}, style);
+        viewer.setStyle({}, {cross:{}});
+        viewer.render();
+        console.group(testName);   
         
-        console.time(timeName);
+        console.time(timeMsg);
         
         if (profile)
             console.profile();
-                   
+        
+        var start = new Date();
+        viewer.setStyle({}, style);           
         viewer.render();
+        var end = new Date();
+        var testTime = end - start;
+        console.timeEnd(timeMsg);
         
         if (profile)
             console.profileEnd();
         
-        console.timeEnd(timeName);
+        console.log(timeMsg + (testTime) + "ms");
         console.groupEnd();
         
         QUnit.ok(true, testMsg);
@@ -160,10 +166,7 @@ var genJSmolTestCase = function(styleType, profile) {
         if (profile)
             console.profile();
         
-        var arr = Jmol.scriptWait(viewer, script);
-        
-        while ((arr.length < 3))
-            continue;
+        Jmol.scriptWait(viewer, script);
         
         if (profile)
             console.profileEnd();
@@ -191,25 +194,17 @@ QUnit.module( "WebMol Tests", {
         viewer.setBackgroundColor(0xffffff);
         $.get("test_structs/3M8L.pdb", function(data) {
                 viewer.addModel(data, "pdb");
-                viewer.setStyle({}, {cross:{}});
                 viewer.zoomTo();
-                viewer.render();
                 QUnit.start();
         }, "text");
 
         console.group("WebMol");
     },
-    
-    teardown: function() {
-        QUnit.stop();
-        viewer.setStyle({}, {cross:{}});
-        QUnit.start();
-    },
 		
     teardownOnce: function() {
         console.groupEnd();
-
     }
+    
 });
 
 // WebMol test cases
@@ -276,7 +271,7 @@ QUnit.module( "JSmol Tests", {
     
     setup: function() {
         console.log("setting up test...");
-        Jmol.scriptWait(viewer, "wireframe -0.1; spacefill off; cartoon off; set cartoonFancy true;");       
+        //Jmol.scriptWait(viewer, "wireframe -0.1; spacefill off; cartoon off; set cartoonFancy true;");       
     }
     
 });

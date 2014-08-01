@@ -830,6 +830,9 @@ function done() {
 		html = [
 			"Tests completed in ",
 			runtime,
+                        " milliseconds.<br/>",
+                        "<br/>Initialization: ",
+                        window["resultTimes"]["initialization"],
 			" milliseconds.<br/>",
 			"<span class='passed'>",
 			passed,
@@ -1349,6 +1352,8 @@ Test.prototype = {
 			tests = id( "qunit-tests" );
 
 		this.runtime = +new Date() - this.started;
+                //nrego - short render runtime - unfortunately need global
+                this.runtimeShort = window["resultTimes"][this.testName];
 		config.stats.all += this.assertions.length;
 		config.moduleStats.all += this.assertions.length;
 
@@ -1409,7 +1414,9 @@ Test.prototype = {
 			// `time` initialized at top of scope
 			time = document.createElement( "span" );
 			time.className = "runtime";
-			time.innerHTML = this.runtime + " ms";
+                        
+                        //nrego - Also display render-only runtime
+			time.innerHTML = this.runtimeShort + " ms    (Total: " + this.runtime + " ms)";
 
 			// `li` initialized at top of scope
 			li = id( this.id );
