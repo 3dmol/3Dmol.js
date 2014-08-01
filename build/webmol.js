@@ -16542,10 +16542,12 @@ $(document).ready(function() {
                 
             var bgcolor = Number(viewerdiv.data("backgroundcolor")) || 0x000000;
             var style = viewerdiv.data("style") || {line:{}};
+            var select = viewerdiv.data("select") || {};
             
             var glviewer = WebMol.viewers[this.id || nviewers++] = WebMol.createViewer(viewerdiv, {defaultcolors: WebMol.rasmolElementColors, callback: function(viewer) {            
                 viewer.setBackgroundColor(bgcolor);            
             }});
+            
             
             if (datauri) {  
                 
@@ -16553,7 +16555,7 @@ $(document).ready(function() {
                  
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
-                    glviewer.setStyle({}, style);
+                    glviewer.setStyle(select, style);
                     
                     // Allowing us to fire callback after viewer has added model
                     if (callback) 
@@ -16581,7 +16583,7 @@ $(document).ready(function() {
                     }
 
                     glviewer.addModel(moldata, type);
-                    glviewer.setStyle({}, style);
+                    glviewer.setStyle(select, style);
                 }
 
 

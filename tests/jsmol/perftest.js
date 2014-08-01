@@ -1,33 +1,4 @@
-//Test rendering performance for different sized pdb's
-jmol_isReady = function(applet) {
-    start();
-};
-//var glviewer = null;
-var Info = {
-    width: '100%',
-    height: '100%',
-    debug: false,
-    color: "0xFFFFFF",
-    use: "HTML5",   // JAVA HTML5 WEBGL are all options
-    j2sPath: "./jsmol/jsmol/j2s", // this needs to point to where the j2s directory is.
-    jarPath: "./jsmol/jsmol/java",// this needs to point to where the java directory is.
-    jarFile: "JmolAppletSigned.jar",
-    isSigned: true,
-    script: "load test_structs/3M8L.pdb",
-    readyFunction: jmol_isReady,
-    disableJ2SLoadMonitor: true,
-    disableInitialConsole: true,
-    allowJavaScript: true,
-    //defaultModel: "$dopamine",
-    console: "none" // default will be jmolApplet0_infodiv, but you can designate another div here or "none"
-};
-
-$(document).ready(function() {
-    stop();
-    $("#gldiv").html(Jmol.getAppletHtml("viewer", Info));
-    start();
-
-}); 
+//Test rendering performance for different sized pdb's 
 
 var profile = QUnit.urlParams.profilecheck;
 var resultXML = null;
@@ -70,6 +41,8 @@ QUnit.jUnitReport = function(data) {
 
 };
 
+
+
 var styleSpec = ["line", "stick", "sphere", "cartoon"];
 
 
@@ -80,7 +53,7 @@ var testcase = function(styleType, profile) {
     var testName = styleType + " render";
     var timeName = styleType + " render time: ";
     var testMsg = styleType + " style set correctly";
-    var script = "select all; spacefill off;";
+    var script = "select *;";
     if (styleType === "line") {
         script += "wireframe;";
     }
@@ -91,20 +64,29 @@ var testcase = function(styleType, profile) {
         script += "spacefill;";
     }
     else if (styleType === "cartoon")
-        script += "cartoon;";
+        script += "cartoon only;";
     
-    test(testName, function() {
+    window["endTime"] = function(a, b, c, d) {
+        console.log(a);
+        console.log(b);
+    };    
+    
+    QUnit.test(testName, function() {
+
         console.group(testName);
         console.time(timeName);
         
         if (profile)
             console.profile();
         
-        var msg = Jmol.scriptEcho(viewer, script);
+        var arr = Jmol.scriptWait(viewer, script);
+        
+        while ((arr.length < 3))
+            continue;
         
         if (profile)
             console.profileEnd();
-        console.log(msg);
+        
         console.timeEnd(timeName);
         console.groupEnd();
         
@@ -113,27 +95,28 @@ var testcase = function(styleType, profile) {
     });
 };
 
-
-var runtests = (function(profile) {
-    for (var style in styleSpec)
-        new testcase(styleSpec[style], profile);
-});
-
-
 QUnit.module( "C. Calicivirus Capsid, 12,362 atoms (3M8L)", {
 
     setupOnce: function() {
         
         console.group("Capsid (12,362 atoms)");
+        
     },
 
     teardownOnce: function() {
         console.groupEnd();
             //glviewer.removeAllModels();
+    },
+    
+    setup: function() {
+        
+        Jmol.scriptWait(viewer, "wireframe -0.1; spacefill off; cartoon off; set cartoonFancy true;");
+        
     }
 });
 
-runtests(profile);
+for (var style in styleSpec)
+    testcase(styleSpec[style], profile);
 
 
 

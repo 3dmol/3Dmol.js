@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
+
     <head>
         <title>WebMol Test</title>
-        <link rel="stylesheet" href="qunit.css">
-        
+        <link rel="stylesheet" href="qunit.css">       
         
         <style>
         	html body { padding: 0; margin: 0 }
@@ -16,8 +16,9 @@
         <script src="qunit-reporter-junit.js"></script>
         <script>
          
-	var glviewer;
+	var glviewer, viewer;
           
+        //Don't start tests until everything is setup  
         QUnit.config.autostart = false;
 
         //Add profile option to QUnit header
@@ -34,24 +35,49 @@
             value: ["webmol", "glmol", "jsmol"],
             tooltip: "Run tests on selected software"
         });
-        
-        var testsuite = QUnit.urlParams.testsuite || "webmol";
-        
-        //$.getScript(scriptsrc, function() {
-            $.getScript(testsuite + "/perftest.js");
-        //});
-        
+
+        jmol_isReady = function(applet) {
+            //applet.scriptWait("wireframe -0.1; set cartoonFancy true;");
+            QUnit.start();
+        };
+
+        //var glviewer = null;
+        Info = {
+            width: '100%',
+            height: '100%',
+            debug: false,
+            color: "0xFFFFFF",
+            use: "JAVA",   // JAVA HTML5 WEBGL are all options
+            j2sPath: "./jsmol/jsmol/j2s", // this needs to point to where the j2s directory is.
+            jarPath: "./jsmol/jsmol/java",// this needs to point to where the java directory is.
+            jarFile: "JmolAppletSigned.jar",
+            isSigned: true,
+            script: "load test_structs/3M8L.pdb",
+            readyFunction: jmol_isReady,
+            disableJ2SLoadMonitor: true,
+            disableInitialConsole: true,
+            allowJavaScript: true,
+            console: "none" // default will be jmolApplet0_infodiv, but you can designate another div here or "none"
+        };
+
+        $(document).ready(function() {
+            QUnit.start();
+            console.log("Starting tests");
+        });
+
         </script> 
         
-</head>
-<body>
+        <script src="perfcompare.js"></script> 
+        
+    </head>
+    
+    <body>
 
-    <div id="gldiv" style="width: 40%; height: 90vh; display: inline-block;"></div>
-    <div style="display: inline-block; vertical-align: top; max-width: 50%;">
+        <div id="viewerdiv" style="width: 40%; height: 90vh; display: inline-block;"></div>
+        <div style="display: inline-block; vertical-align: top; max-width: 50%;">
         <div id="qunit"></div>
         <div id="qunit-fixture"></div>
-    </div>
-                
+        </div>
 
-</body>
+    </body>
 </html>
