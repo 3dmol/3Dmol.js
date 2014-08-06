@@ -770,9 +770,9 @@ WebMol.GLModel = (function() {
         var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
-        var defaultColor = WebMol.defaultElementColor;
+        var defaultColor = WebMol.elementColors.defaultColor;
         
-        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.defaultElementColors;
+        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.elementColors.defaultColors;
 
 
         // drawing functions must be associated with model object since

@@ -6,7 +6,7 @@
 	<title>WebMol.js</title>
 
 	<link type="text/css" rel="stylesheet" href="css/index.css">
-	<script src="release/webmol-min.js"></script>
+	<script src="release/webmol.js"></script>
         
         <script>
             var WebMol = WebMol || {};
@@ -39,6 +39,15 @@
                     viewer.zoomTo();
                     viewer.render();
                 }, 'text');
+            };
+            
+            var init1YCR = function(viewer) {
+            	viewer.addStyle({}, {"line":{}});
+                viewer.setColorByElement({"chain":"A"}, WebMol.elementColors.whiteCarbon);
+                viewer.setColorByElement({"chain":"B"}, WebMol.elementColors.Jmol);
+            	viewer.addSurface(WebMol.SurfaceType.VDW, {'opacity':0.8}, {"chain":"A"},{"chain":"A"});
+            	viewer.addStyle({"chain":"B"}, {"stick":{}});
+            	viewer.zoomTo({"chain":"B"});
             };
 
             var addSurf = function(viewer) {
@@ -109,12 +118,12 @@ $( document ).ready(function() {
         <div class="table">
             <div class="tablerow">
         <div id='viewer1' class='webmoljs_viewer' data-href='tests/test_structs/2por.pdb' data-backgroundcolor='0xffffff' data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div> 
-        <div id='viewer2' class='webmoljs_viewer' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xeeeeee'></div>           
+        <div id='viewer2' class='webmoljs_viewer' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xf6f6f6'></div>           
             </div>
             
             <div class="tablerow">
-        <div id='viewer4' class='webmoljs_viewer' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xeeeeee'></div>
-        <div id='viewer3' class='webmoljs_viewer' data-href='tests/test_structs/1YCR.pdb' data-backgroundcolor='0xffffff' data-style='{"sphere":{}}'></div>  
+        <div id='viewer4' class='webmoljs_viewer' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xf6f6f6'></div>
+        <div id='viewer3' class='webmoljs_viewer' data-href='tests/test_structs/1YCR.pdb' data-backgroundcolor='0xffffff' data-style='{"cartoon":{}}' data-callback='init1YCR'></div>  
             </div>
         </div>           
 

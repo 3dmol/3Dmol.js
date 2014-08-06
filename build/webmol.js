@@ -14846,7 +14846,7 @@ WebMol.createViewer = function(element, config)
     if(!config.order)
         config.order = ["glmol","jmol"];
     if(!config.defaultcolors)
-        config.defaultcolors = WebMol.defaultElementColors;
+        config.defaultcolors = WebMol.elementColors.defaultColors;
 
     //try to create the appropriate viewer
     for(var i = 0; i < config.order.length; i++) {
@@ -16598,9 +16598,11 @@ $(document).ready(function() {
     }
 });
     
-WebMol.defaultElementColor = 0xff1493;
+WebMol.elementColors = WebMol.elementColors || {};
 
-WebMol.JmolElementColors = {
+WebMol.elementColors.defaultColor = 0xff1493;
+
+WebMol.elementColors.Jmol = {
 		'H': 0xFFFFFF,
 		'He': 0xD9FFFF,
 		'HE': 0xD9FFFF,
@@ -16650,7 +16652,7 @@ WebMol.JmolElementColors = {
 		'AU': 0xFFD123
 };
 
-WebMol.rasmolElementColors = {
+WebMol.elementColors.rasmol = {
 		'H': 0xFFFFFF,
 		'He': 0xFFC0CB,
 		'HE': 0xFFC0CB,
@@ -16700,7 +16702,28 @@ WebMol.rasmolElementColors = {
 		'AU': 0xDAA520	
 };
 
-WebMol.defaultElementColors = WebMol.JmolElementColors;
+WebMol.elementColors.defaultColors = WebMol.elementColors.rasmol;
+
+WebMol.elementColors.greenCarbon = $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.greenCarbon['C'] = 0x00ff00;
+
+WebMol.elementColors.cyanCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.cyanCarbon['C'] = 0x00ffff;
+
+WebMol.elementColors.magentaCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.magentaCarbon['C'] = 0xff00ff;
+
+WebMol.elementColors.yellowCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.yellowCarbon['C'] = 0xffff00;
+
+WebMol.elementColors.whiteCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.whiteCarbon['C'] = 0xffffff;
+
+WebMol.elementColors.orangeCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.orangeCarbon['C'] = 0xff6600;
+
+WebMol.elementColors.purpleCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.purpleCarbon['C'] = 0x800080;
 //color scheme mappings
 var WebMol = WebMol || {};
 
@@ -18076,9 +18099,9 @@ WebMol.GLModel = (function() {
         var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
-        var defaultColor = WebMol.defaultElementColor;
+        var defaultColor = WebMol.elementColors.defaultColor;
         
-        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.defaultElementColors;
+        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.elementColors.defaultColors;
 
 
         // drawing functions must be associated with model object since

@@ -21,7 +21,7 @@ WebMol.createViewer = function(element, config)
     if(!config.order)
         config.order = ["glmol","jmol"];
     if(!config.defaultcolors)
-        config.defaultcolors = WebMol.defaultElementColors;
+        config.defaultcolors = WebMol.elementColors.defaultColors;
 
     //try to create the appropriate viewer
     for(var i = 0; i < config.order.length; i++) {

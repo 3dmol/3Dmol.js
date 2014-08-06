@@ -11183,21 +11183,8 @@ WebMol.Object3DIDCount = 0;
 //Geometry class
 //TODO: What can I remove - how can I optimize ?
 WebMol.Geometry = (function() {
-
-    //return truncated typed array, including its buffer
-    // type == 0 => Uint16Array; type == 1 => Float32Array
-    //TODO: Should integrate this directly into geometryGroup's truncateArrayBuffers method
-    var truncateArrayBuffer = function(arr, type, end) {
-        
-        if (arr === null || arr === undefined) {
-            return (type === 0) ? new Uint16Array() : new Float32Array();
-        }
-        
-        if (type === 0)
-            return new Uint16Array(arr.buffer.slice(arr.byteOffset, end*2));
-        else if (type === 1) 
-            return new Float32Array(arr.buffer.slice(arr.byteOffset, end*4));
-    };
+   
+    var BUFFERSIZE = 65535; //limited to 16bit indices
     
     /** @constructor */
     var geometryGroup = function(id) {
@@ -11307,19 +11294,24 @@ WebMol.Geometry = (function() {
             normalArr = this.__normalArray,
             faceArr = this.__faceArray,
             lineArr = this.__lineArray;
-                       
-        this.__vertexArray = truncateArrayBuffer(vertexArr, 1, this.vertices*3);
-        this.__colorArray = truncateArrayBuffer(colorArr, 1, this.vertices*3);
+
+	//subarray to avoid copying and reallocating memory
+        this.__vertexArray = vertexArr.subarray(0,this.vertices*3);
+        this.__colorArray = colorArr.subarray(0,this.vertices*3);
         
         if (mesh) {
-            this.__normalArray = truncateArrayBuffer(normalArr, 1, this.vertices*3);
-            this.__faceArray = truncateArrayBuffer(faceArr, 0, this.faceidx);
-            this.__lineArray = truncateArrayBuffer(lineArr, 0, this.lineidx);
+            this.__normalArray = normalArr.subarray(0,this.vertices*3);
+            this.__faceArray = faceArr.subarray(0,this.faceidx); 
+
+            if(this.lineidx > 0) //not always set so reclaim memory
+                this.__lineArray = lineArr.subarray(0,this.lineidx); 
+            else
+                this.__lineArray = new Uint16Array();
         }
         else {
-            this.__normalArray = truncateArrayBuffer(normalArr, 1, 0);
-            this.__faceArray = truncateArrayBuffer(faceArr, 0, 0);
-            this.__lineArray = truncateArrayBuffer(lineArr, 0, 0);            
+            this.__normalArray = new Float32Array(); 
+            this.__faceArray = new Uint16Array(); 
+            this.__lineArray = new Uint16Array(); 
         }
         
         this.__inittedArrays = true;        
@@ -11331,17 +11323,17 @@ WebMol.Geometry = (function() {
         geo.geometryGroups.push(ret);
         geo.groups = geo.geometryGroups.length;
         
-        ret.__vertexArray = new Float32Array(65535*3);
-        ret.__colorArray = new Float32Array(65535*3);
+        ret.__vertexArray = new Float32Array(BUFFERSIZE*3);
+        ret.__colorArray = new Float32Array(BUFFERSIZE*3);
         
         //TODO: instantiating uint arrays according to max number of vertices
         // is dangerous, since there exists the possibility that there will be 
         // more face or line indices than vertex points - but so far that doesn't
         // seem to be the case for any of the renders 
         if (geo.mesh) {
-            ret.__normalArray = new Float32Array(65535*3);
-            ret.__faceArray = new Uint16Array(65535*6);
-            ret.__lineArray = new Uint16Array(65535*6);
+            ret.__normalArray = new Float32Array(BUFFERSIZE*3);
+            ret.__faceArray = new Uint16Array(BUFFERSIZE*6);
+            ret.__lineArray = new Uint16Array(BUFFERSIZE*6);
         }
         
         
@@ -11386,7 +11378,7 @@ WebMol.Geometry = (function() {
             
             var retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
             
-            if (!retGroup || retGroup.vertices + addVertices > 65535) 
+            if (!retGroup || retGroup.vertices + addVertices > BUFFERSIZE) 
                 retGroup = addGroup(this);
                 
             return retGroup;
@@ -11780,7 +11772,8 @@ WebMol.Projector = function () {
 
     };
 
-};/*
+};
+/*
  * Simplified Perspective Camera
  */
 
@@ -13877,7 +13870,7 @@ WebMol.Renderer = function ( parameters ) {
                 geometryGroup = geometry.geometryGroups[ g ];
 
                 if ( geometry.verticesNeedUpdate || geometry.elementsNeedUpdate || geometry.colorsNeedUpdate || geometry.normalsNeedUpdate) {
-                    setBuffers( geometryGroup, _gl.DYNAMIC_DRAW );
+                    setBuffers( geometryGroup, _gl.STATIC_DRAW );
                 }
             }
             
@@ -14853,7 +14846,7 @@ WebMol.createViewer = function(element, config)
     if(!config.order)
         config.order = ["glmol","jmol"];
     if(!config.defaultcolors)
-        config.defaultcolors = WebMol.defaultElementColors;
+        config.defaultcolors = WebMol.elementColors.defaultColors;
 
     //try to create the appropriate viewer
     for(var i = 0; i < config.order.length; i++) {
@@ -16458,7 +16451,6 @@ WebMol.ProteinSurface = function() {
             nZ : pHeight        
         });      
 
-
         var pWH = pWidth*pHeight;
         for (var i = 0, vlen = verts.length; i < vlen; i++) {
             verts[i]['atomid'] = vpAtomID[verts[i].x * pWH + pHeight *
@@ -16606,9 +16598,11 @@ $(document).ready(function() {
     }
 });
     
-WebMol.defaultElementColor = 0xff1493;
+WebMol.elementColors = WebMol.elementColors || {};
 
-WebMol.JmolElementColors = {
+WebMol.elementColors.defaultColor = 0xff1493;
+
+WebMol.elementColors.Jmol = {
 		'H': 0xFFFFFF,
 		'He': 0xD9FFFF,
 		'HE': 0xD9FFFF,
@@ -16658,7 +16652,7 @@ WebMol.JmolElementColors = {
 		'AU': 0xFFD123
 };
 
-WebMol.rasmolElementColors = {
+WebMol.elementColors.rasmol = {
 		'H': 0xFFFFFF,
 		'He': 0xFFC0CB,
 		'HE': 0xFFC0CB,
@@ -16708,7 +16702,28 @@ WebMol.rasmolElementColors = {
 		'AU': 0xDAA520	
 };
 
-WebMol.defaultElementColors = WebMol.JmolElementColors;
+WebMol.elementColors.defaultColors = WebMol.elementColors.rasmol;
+
+WebMol.elementColors.greenCarbon = $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.greenCarbon['C'] = 0x00ff00;
+
+WebMol.elementColors.cyanCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.cyanCarbon['C'] = 0x00ffff;
+
+WebMol.elementColors.magentaCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.magentaCarbon['C'] = 0xff00ff;
+
+WebMol.elementColors.yellowCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.yellowCarbon['C'] = 0xffff00;
+
+WebMol.elementColors.whiteCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.whiteCarbon['C'] = 0xffffff;
+
+WebMol.elementColors.orangeCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.orangeCarbon['C'] = 0xff6600;
+
+WebMol.elementColors.purpleCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.purpleCarbon['C'] = 0x800080;
 //color scheme mappings
 var WebMol = WebMol || {};
 
@@ -17499,35 +17514,12 @@ WebMol.GLModel = (function() {
         
     };
 
-    // return distance between donor-acceptor, if not valid pair, return inf
-    var hbondDistance = function(a1, a2, maxlength) {
-        if(a1.chain == a2.chain) { // ignore if residues too close
-            if(Math.abs(a1.resi-a2.resi) < 4)
-                return Number.POSITIVE_INFINITY;
-        }
-        if ((a1.atom === "O" && a2.atom === "N") || (a1.atom === "N" && a2.atom === "O")) {
-            var xdiff = a1.x - a2.x;
-            if (xdiff > maxlength)
-                return Number.POSITIVE_INFINITY;
-            var ydiff = a1.y - a2.y;
-            if (ydiff > maxlength)
-                return Number.POSITIVE_INFINITY;
-            var zdiff = a1.z - a2.z;
-            if (zdiff > maxlength)
-                return Number.POSITIVE_INFINITY;
-            
-            var dist = Math.sqrt(xdiff*xdiff+ydiff*ydiff+zdiff*zdiff);
-            if(dist < maxlength)
-                return dist;
-        }
-        return Number.POSITIVE_INFINITY;
-    };
-
     // this will identify all hydrogen bonds between backbone
     // atoms; assume atom names are correct, only identifies
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
-        var maxlength = 3.5; // ver generous hbond distance
+	var maxlength = 3.2;
+	var maxlengthSq = 10.24;
         var atoms = [];
         var i, j, n;
         for (i = 0, n = atomsarray.length; i < n; i++) {
@@ -17537,7 +17529,7 @@ WebMol.GLModel = (function() {
             if (!atom.hetflag && (atom.atom === "N" || atom.atom === "O")) {
                 atoms.push(atom);
                 atom.hbondOther = null;
-                atom.hbondDistance = Number.POSITIVE_INFINITY;                
+                atom.hbondDistanceSq = Number.POSITIVE_INFINITY;                
             }
         }
 
@@ -17549,16 +17541,31 @@ WebMol.GLModel = (function() {
 
             for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
-                if (aj.z - ai.z > maxlength) // can't be connected
+		var zdiff = aj.z - ai.z;
+                if (zdiff > maxlength) // can't be connected
                     break;
-                var dist = hbondDistance(ai,aj,maxlength);
-                if (dist < ai.hbondDistance) {
+		if (aj.atom == ai.atom)
+		    continue; //can't be connected, but later might be	
+		var ydiff = Math.abs(aj.y - ai.y);
+		if( ydiff > maxlength)
+		    continue;
+		var xdiff = Math.abs(aj.x - ai.x);
+		if(xdiff > maxlength)
+		    continue;
+                var dist = xdiff*xdiff+ydiff*ydiff+zdiff*zdiff;
+		if (dist >  maxlengthSq)
+		    continue;
+
+		if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
+		    continue; //ignore bonds between too close residues
+		//select closest hbond
+                if (dist < ai.hbondDistanceSq) {
                     ai.hbondOther = aj;
-                    ai.hbondDistance = dist;
+                    ai.hbondDistanceSq = dist;
                 }
-                if(dist < aj.hbondDistance) {
+                if(dist < aj.hbondDistanceSq) {
                     aj.hbondOther = ai;
-                    aj.hbondDistance = dist;
+                    aj.hbondDistanceSq = dist;
                 }
             }
         }
@@ -17578,7 +17585,7 @@ WebMol.GLModel = (function() {
             if (typeof(chres[atom.chain]) === "undefined")
                 chres[atom.chain] = [];
             
-            if (isFinite(atom.hbondDistance)) {
+            if (isFinite(atom.hbondDistanceSq)) {
                 var other = atom.hbondOther;
                 if (Math.abs(other.resi - atom.resi) === 4) { 
                     // helix
@@ -18092,9 +18099,9 @@ WebMol.GLModel = (function() {
         var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
-        var defaultColor = WebMol.defaultElementColor;
+        var defaultColor = WebMol.elementColors.defaultColor;
         
-        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.defaultElementColors;
+        var ElementColors = (defaultcolors) ? defaultcolors : WebMol.elementColors.defaultColors;
 
 
         // drawing functions must be associated with model object since
@@ -19284,8 +19291,8 @@ WebMol.GLModel = (function() {
         };
 
         // add atoms to this model from molecular data string
-        this.addMolData = function(data, format) {
-            
+        this.addMolData = function(data, format, options) {
+            options = options || {}; 
             if (!data)
                 console.error("Erorr with addMolData: No input data specified");
             
@@ -19294,7 +19301,7 @@ WebMol.GLModel = (function() {
                 parseXYZ(atoms, data);
                 break;
             case "pdb":
-                parsePDB(atoms, data, false, true);
+                parsePDB(atoms, data, options.keepH, true, options.computeStruct);
                 break;
             case "sdf":
                 parseSDF(atoms, data);
@@ -20618,7 +20625,7 @@ WebMol.GLViewer = (function() {
         var CAMERA_Z = 150;
         
         var renderer = new WebMol.Renderer({
-            antialias : true
+            antialias : true,
         });
         // renderer.sortObjects = false; // hopefully improve performance
 
@@ -21631,7 +21638,6 @@ WebMol.GLViewer = (function() {
             console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
 
             ps.buildboundary();
-
 
             if (type == WebMol.SurfaceType.SES) {
                 ps.fastdistancemap();
