@@ -836,7 +836,6 @@ WebMol.ProteinSurface = function() {
             nZ : pHeight        
         });      
 
-
         var pWH = pWidth*pHeight;
         for (var i = 0, vlen = verts.length; i < vlen; i++) {
             verts[i]['atomid'] = vpAtomID[verts[i].x * pWH + pHeight *

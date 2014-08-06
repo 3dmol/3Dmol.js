@@ -2,12 +2,13 @@
 <html>
     <head>
         <title>WebMol</title>
-        <script src="build/webmol.js"></script>
+        <script src="release/webmol.js"></script>
         <style>
         	* {margin:0; padding:0}
         </style>
         <script>
             var glviewer = null;
+            //http://localhost/WebMol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
             
             //Return a selection specification from an array of 'key~val' string pairs (split on ',')
             var extractselectors = function(cmdarr) {
@@ -48,26 +49,41 @@
                     if (cmdname == 'select')
                         currentsel = extractselectors(cmdarr);
                     
-                    else if (cmdname == 'style') {
+                    else if (cmdname == 'style' || cmdname == 'addstyle') {
                         
-                        var styletype;
-                        
-                        if (!(cmdarr[0] == 'line' || cmdarr[0] == 'stick' || cmdarr[0] == 'cross' || cmdarr[0] == 'sphere' || cmdarr[0] == 'cartoon' || cmdarr[0] == 'hidden'))
-                            styletype = 'line'; //Default to line style
-                        else
-                            styletype = cmdarr.splice(0,1)[0];
-
-                        var styleobj = {};
-
-                        if (styletype === 'hidden') 
-                            styleobj.line = {'hidden': true};
-                        
-                        else {
-                            var stylespec = extractselectors(cmdarr);
-                            styleobj[styletype] = stylespec;                            
-                        }
-
-                        viewer.setStyle(currentsel, styleobj);
+                    	if(cmdarr[0] == 'surface') {
+                    		  cmdarr.splice(0,1); //remove surface
+                    		  var styleobj = extractselectors(cmdarr);
+                    		  viewer.addSurface(WebMol.SurfaceType.VDW, styleobj, currentsel, currentsel);
+                    	}
+                    	else {
+	                        var styletype;
+	                        
+	                        if (!(cmdarr[0] == 'line' || cmdarr[0] == 'stick' || cmdarr[0] == 'cross' || cmdarr[0] == 'sphere' || cmdarr[0] == 'cartoon' || cmdarr[0] == 'hidden'))
+	                            styletype = 'line'; //Default to line style
+	                        else
+	                            styletype = cmdarr.splice(0,1)[0];
+	
+	                        var styleobj = {};
+	
+	                        if (styletype === 'hidden') 
+	                            styleobj.line = {'hidden': true};
+	                        
+	                        else {
+	                            var stylespec = extractselectors(cmdarr);
+	                            styleobj[styletype] = stylespec;                            
+	                        }
+	
+	                        if(cmdname == 'addstyle')
+	                            viewer.addStyle(currentsel, styleobj);
+	                        else
+	                        	viewer.setStyle(currentsel, styleobj);
+	                    }
+                    }
+                    else if(cmdname == 'colorbyelement')
+                    {
+                    	if(typeof(WebMol.elementColors[cmdarr[0]]) != "undefined")
+                    	    viewer.setColorByElement(currentsel, WebMol.elementColors[cmdarr[0]]);	
                     }
                     
                 }

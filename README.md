@@ -9,9 +9,9 @@ With WebMol.js, you can add beautifully rendered molecular visualizations to you
 
 ### Getting Started ###
 
-The quickest way to begin using WebMol.js is to simply [download the source code](build/webmol-min.js) and include it in your application's HTML file.
+The quickest way to begin using WebMol.js is to simply [link to the minimified source code](http://webmol.csb.pitt.edu/build/webmol-min.js) in your application's HTML file.
 
-For developers, you can also clone from source
+For developers, you can also clone from source.
 
 
 ## Embedding a viewer ##

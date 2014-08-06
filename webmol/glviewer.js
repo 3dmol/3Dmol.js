@@ -190,7 +190,7 @@ WebMol.GLViewer = (function() {
         var CAMERA_Z = 150;
         
         var renderer = new WebMol.Renderer({
-            antialias : true
+            antialias : true,
         });
         // renderer.sortObjects = false; // hopefully improve performance
 
@@ -697,6 +697,21 @@ WebMol.GLViewer = (function() {
             return ret;
         };
 
+        
+        /**
+         * Zoom current view by a constant factor
+         * 
+         * @function WebMol.GLViewer#zoom
+         * @param {number} [factor] - Magnification factor. Values greater than 1 will zoom in, less than one will zoom out. Default 2.
+
+         */
+        this.zoom = function(factor) {
+        	var factor = factor || 2;
+           var scale = (CAMERA_Z - rotationGroup.position.z)/factor;
+           rotationGroup.position.z = CAMERA_Z - scale;
+            show();
+        };
+        
         /**
          * Zoom to center of atom selection
          * 
@@ -1203,7 +1218,6 @@ WebMol.GLViewer = (function() {
             console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
 
             ps.buildboundary();
-
 
             if (type == WebMol.SurfaceType.SES) {
                 ps.fastdistancemap();

@@ -5,8 +5,8 @@
 	<meta charset="utf-8">
 	<title>WebMol.js</title>
 
-	<link type="text/css" rel="stylesheet" href="css/style.css">
-	<script src="release/webmol-min.js"></script>
+	<link type="text/css" rel="stylesheet" href="css/index.css">
+	<script src="release/webmol.js"></script>
         
         <script>
             var WebMol = WebMol || {};
@@ -37,8 +37,18 @@
                                                                          alpha: 0.95}); 
                     viewer.setStyle({}, {stick:{}});
                     viewer.zoomTo();
+                    viewer.zoom(2);
                     viewer.render();
                 }, 'text');
+            };
+            
+            var init1YCR = function(viewer) {
+            	viewer.addStyle({}, {"line":{}});
+                viewer.setColorByElement({"chain":"A"}, WebMol.elementColors.whiteCarbon);
+                viewer.setColorByElement({"chain":"B"}, WebMol.elementColors.Jmol);
+            	viewer.addSurface(WebMol.SurfaceType.VDW, {'opacity':0.8}, {"chain":"A"},{"chain":"A"});
+            	viewer.addStyle({"chain":"B"}, {"stick":{}});
+            	viewer.zoomTo({"chain":"B"});
             };
 
             var addSurf = function(viewer) {
@@ -46,107 +56,80 @@
                                   {hetflag: false}, {hetflag:false}, {chain: 'B'});
             };
 
+$( document ).ready(function() {
+  $('#view').hover(
+  function () {
+	$("#webmoltext").hide();
+    $("#viewtext").show();
+  }, 
+  function () {
+    $("#viewtext").hide();
+		$("#webmoltext").show();
+  });
+    $('#embed').hover(
+  function () {
+	$("#webmoltext").hide();
+    $("#embedtext").show();
+  }, 
+  function () {
+    $("#embedtext").hide();
+		$("#webmoltext").show();
+  });
+      $('#develop').hover(
+  function () {
+	$("#webmoltext").hide();
+    $("#developtext").show();
+  }, 
+  function () {
+    $("#developtext").hide();
+		$("#webmoltext").show();
+  });
+});
         </script>
 
 </head>
 
 <body>
-<div class="container-fluid">
-    
-	<div class="navbar">
-            <a class="brand" href="index.html">WebMol.js</a>
-            <ul class="nav">
-                <li>
-                <a href="doc/index.html">Documentation</a>
-                </li>
-            </ul>
-	</div>
-	
-      
-          <div id="viewercontainer">
-          
-          <div class="table">
-              <div class="row">
-          <div id='viewer1' class='webmoljs_viewer' data-pdb='2POR' data-backgroundcolor='0xffffff' data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div> 
-          <div id='viewer2' class='webmoljs_viewer' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xeeeeee'></div>           
-              </div>
-              
-              <div class="row">
-          <div id='viewer4' class='webmoljs_viewer' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xeeeeee'></div>
-          <div id='viewer3' class='webmoljs_viewer' data-pdb='1YCR' data-backgroundcolor='0xffffff' data-style='{"sphere":{}}'></div>  
-              </div>
-          </div>
-              
-          </div>
-      
+<div id=content>
+ <div class="header">
+  <div id="webmol">WebMol<font style="font-weight:400">.js</font></div>
+  <div id="webmolright" >
+   <div id="strip" class = "titlefont">
+    <a href="doc/tutorial-url.html" id="view" class="titletext">View</a>
+    <a href="doc/tutorial-embeddable.html" id="embed" class="titletext">Embed</a>
+    <a href="doc/index.html" id="develop" class="titletext">Develop</a>
+   </div>
+   <div id="infotext">
+    <span id="webmoltext" class="floattext">A modern, object-oriented JavaScript library for visualizing molecular data</span>
+    <span id="viewtext" class="floattext">View structures through a declarative URL interface</span>
+    <span id="embedtext" class="floattext">Embed molecular viewers in webpages with two lines of code</span>
+    <span id="developtext" class="floattext">Develop web applications using a full featured API</span>
 
-        <div id="textdiv">
-			
-            <div id="main">
-
-            <section class="readme-section">
-
-<article>
-
-<p>WebMol.js is an object-oriented, webGL based JavaScript library for online molecular visualization - No Java required! </p>
-
-<p>With WebMol.js, you can add beautifully rendered molecular visualizations to your web applications.</p>
-
-<p> <b>Click and drag to rotate the structures on the right, and right click and drag (or mouse wheel) to zoom </b></p>
-
-<p> WebMol.js can be used in different ways depending on your specific needs, from a viewing molecules on the WebMol.js server to a fully functional
-    development API </p>
-
-<h3>WebMol.js Server - Visualize molecules directly in your browser</h3>
-
-<p>Just want to view a PDB structure? With the WebMol.js server, you can immediately view a structure by 
-    specifying an appropriate URL query.</p>
-
-<p>Check out the <a href="doc/tutorial-url.html">webmol url reference</a> for more information on specifying a server query! </p>
-
-<h3>Embeddable Viewer - Add a customizable viewer to your existing application</h3>
-
-<p>Interested in adding a molecular visualization to your webpage? WebMol provides an embeddable viewer that enables you to easily add molecular visualization to your own web applications.</p>
-
-<p>For a detailed overview of embedding a viewer into your site, check out the <a href="doc/tutorial-embeddable.html">embeddable viewer reference</a> </p>
-
-<h3>Fully functional API - Develop custom applications with the WebMol.js API</h3>
-
-<p>WebMol.js also provides an extensible, expansive JavaScript API to allow you to develop your own web based molecular visualization application.</p>
-
-<p>Check out the <a href="doc/index.html">documentation homepage</a> and <a href="doc/WebMol.html">API documentation</a> for more information</p>
-
-<h2>Get WebMol.js</h2>
-
-<p>WebMol.js is available as an <a href="release/webmol.js">uncompressed</a> and <a href="release/webmol-min.js">minified</a> version </p>
-
-
-</article>
-                
-    </section>
-
-
-    </div>
-
-
-    <footer>
-
-
-    <span class="copyright">
-    WebMol.js © 2014
-    </span>
-                    <br />
-
-    <span class="jsdoc-message">
-    </span>
-    </footer>
-
+   </div>
+  </div>
+  <div id="rightstrip" class="titlefont">
+    <a id="help" href="https://github.com/dkoes/WebMol" class="titletext">Download</a>
+  </div>
+ </div>
 </div>
 
-<br clear="both">
-	
 
-</div>
+        <div id="viewercontainer" class = "body row">
+        
+        <div class="table">
+            <div class="tablerow">
+        <div id='viewer1' class='webmoljs_viewer' data-href='tests/test_structs/2por.pdb' data-backgroundcolor='0xffffff' data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div> 
+        <div id='viewer2' class='webmoljs_viewer' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xf6f6f6'></div>           
+            </div>
+            
+            <div class="tablerow">
+        <div id='viewer4' class='webmoljs_viewer' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xf6f6f6'></div>
+        <div id='viewer3' class='webmoljs_viewer' data-href='tests/test_structs/1YCR.pdb' data-backgroundcolor='0xffffff' data-style='{"cartoon":{}}' data-callback='init1YCR'></div>  
+            </div>
+        </div>           
+
+   
+  
 
 <textarea style="display: none;" id="moldata_sdf">v:U4C5Cr:4
   -OEChem-12201211493D

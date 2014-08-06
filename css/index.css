@@ -1,0 +1,202 @@
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 100%;
+	margin: 0;
+	height: 100%;
+}
+
+body {
+  margin: 0px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #555555;
+  background-color: #ffffff;
+  height: 100%;
+}
+
+a {
+    text-decoration: none;
+}
+
+
+
+
+#textdiv {
+    display: block;
+    width: 50%;
+    margin-left: 0;
+    margin-top: 20px;
+    min-height: 30px;
+    float: left;
+}
+
+footer {
+    border-top: 1px solid #04498c;
+    padding-top: 15px;
+}
+
+.copyright, .jsdoc-message {
+    font-size: 90%;
+    text-align: center;
+    color: #033c73;
+    width: 100%;
+    display: block;   
+}
+
+	
+#viewercontainer {
+    border: 0px;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	padding-top: 90px;
+	margin: 0;
+	z-index: 0;
+}
+
+.table {
+    display: table;
+    height: 100%;
+    width: 100%;
+}
+
+.tablerow {
+    display: table-row;
+}
+
+.row, .col { overflow: hidden; 
+ }
+    .row { left: 0; right: 0; }
+.header { height: 90px;
+margin-top: 0px;
+vertical-align: top;
+position: relative;
+display: table;
+width: 100%;
+z-index:10;
+}
+
+a:link {
+    color: black;
+}
+
+/* visited link */
+a:visited {
+    color: black;;
+}
+
+a:hover{
+	color: #006;
+}
+
+#content {
+	  margin: 0px;
+	position: absolute:
+	top: 0;
+	z-index: 10;
+}
+.footer.row { height: 50px; bottom: 0; }
+	
+.webmoljs_viewer {
+    display: table-cell;
+    position: relative;   
+    width: 50%;
+    height: 50%;   
+}
+
+#webmol {
+	    display: table-cell;
+    font-size: 70px;
+	font-weight:800;
+	color:#006;
+	padding-left: 28px;
+	vertical-align: top;
+	width: 50px;
+}
+
+#webmolright {
+	display: table-cell;
+	vertical-align: top;
+	padding-left: 36px;
+	padding-top: 14px;
+	width: auto;
+	
+}
+
+.titlefont {
+		font-size: 24px;
+   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+   font-weight: 100;
+
+}
+
+#strip {
+	display: inline-block;
+	vertical-align: top;
+	
+}
+
+#rightstrip {
+	display: inline-block;
+	float: right;
+	vertical-align: top;
+		padding-top: 14px;
+
+}
+
+#infotext {
+	margin-top: 8px;
+	font-style:oblique;
+	float:left;
+	position: relative;
+	display:block;
+	width: 100%;
+}
+
+.floattext {
+		position: absolute;
+		top: 0;
+		vertical-align: top;
+		display: none;
+}
+
+#webmoltext {
+	display: block;
+}
+
+.titletext {
+	display: inline-block;
+	line-height: 1em;
+}
+
+.titletext:hover {
+	font-weight: 800;
+}
+
+#view {
+	width: 3em;
+}
+
+
+#embed {
+	width: 4em;
+}
+
+#develop {
+	width: 5em;
+}
+
+#help {
+	width: 5.5em;
+}
+
+canvas {
+    max-width: 100%;
+}
+
+

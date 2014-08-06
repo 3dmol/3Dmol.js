@@ -264,21 +264,8 @@ WebMol.Object3DIDCount = 0;
 //Geometry class
 //TODO: What can I remove - how can I optimize ?
 WebMol.Geometry = (function() {
-
-    //return truncated typed array, including its buffer
-    // type == 0 => Uint16Array; type == 1 => Float32Array
-    //TODO: Should integrate this directly into geometryGroup's truncateArrayBuffers method
-    var truncateArrayBuffer = function(arr, type, end) {
-        
-        if (arr === null || arr === undefined) {
-            return (type === 0) ? new Uint16Array() : new Float32Array();
-        }
-        
-        if (type === 0)
-            return new Uint16Array(arr.buffer.slice(arr.byteOffset, end*2));
-        else if (type === 1) 
-            return new Float32Array(arr.buffer.slice(arr.byteOffset, end*4));
-    };
+   
+    var BUFFERSIZE = 65535; //limited to 16bit indices
     
     /** @constructor */
     var geometryGroup = function(id) {
@@ -388,19 +375,24 @@ WebMol.Geometry = (function() {
             normalArr = this.__normalArray,
             faceArr = this.__faceArray,
             lineArr = this.__lineArray;
-                       
-        this.__vertexArray = truncateArrayBuffer(vertexArr, 1, this.vertices*3);
-        this.__colorArray = truncateArrayBuffer(colorArr, 1, this.vertices*3);
+
+	//subarray to avoid copying and reallocating memory
+        this.__vertexArray = vertexArr.subarray(0,this.vertices*3);
+        this.__colorArray = colorArr.subarray(0,this.vertices*3);
         
         if (mesh) {
-            this.__normalArray = truncateArrayBuffer(normalArr, 1, this.vertices*3);
-            this.__faceArray = truncateArrayBuffer(faceArr, 0, this.faceidx);
-            this.__lineArray = truncateArrayBuffer(lineArr, 0, this.lineidx);
+            this.__normalArray = normalArr.subarray(0,this.vertices*3);
+            this.__faceArray = faceArr.subarray(0,this.faceidx); 
+
+            if(this.lineidx > 0) //not always set so reclaim memory
+                this.__lineArray = lineArr.subarray(0,this.lineidx); 
+            else
+                this.__lineArray = new Uint16Array();
         }
         else {
-            this.__normalArray = truncateArrayBuffer(normalArr, 1, 0);
-            this.__faceArray = truncateArrayBuffer(faceArr, 0, 0);
-            this.__lineArray = truncateArrayBuffer(lineArr, 0, 0);            
+            this.__normalArray = new Float32Array(); 
+            this.__faceArray = new Uint16Array(); 
+            this.__lineArray = new Uint16Array(); 
         }
         
         this.__inittedArrays = true;        
@@ -412,17 +404,17 @@ WebMol.Geometry = (function() {
         geo.geometryGroups.push(ret);
         geo.groups = geo.geometryGroups.length;
         
-        ret.__vertexArray = new Float32Array(65535*3);
-        ret.__colorArray = new Float32Array(65535*3);
+        ret.__vertexArray = new Float32Array(BUFFERSIZE*3);
+        ret.__colorArray = new Float32Array(BUFFERSIZE*3);
         
         //TODO: instantiating uint arrays according to max number of vertices
         // is dangerous, since there exists the possibility that there will be 
         // more face or line indices than vertex points - but so far that doesn't
         // seem to be the case for any of the renders 
         if (geo.mesh) {
-            ret.__normalArray = new Float32Array(65535*3);
-            ret.__faceArray = new Uint16Array(65535*6);
-            ret.__lineArray = new Uint16Array(65535*6);
+            ret.__normalArray = new Float32Array(BUFFERSIZE*3);
+            ret.__faceArray = new Uint16Array(BUFFERSIZE*6);
+            ret.__lineArray = new Uint16Array(BUFFERSIZE*6);
         }
         
         
@@ -467,7 +459,7 @@ WebMol.Geometry = (function() {
             
             var retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
             
-            if (!retGroup || retGroup.vertices + addVertices > 65535) 
+            if (!retGroup || retGroup.vertices + addVertices > BUFFERSIZE) 
                 retGroup = addGroup(this);
                 
             return retGroup;
