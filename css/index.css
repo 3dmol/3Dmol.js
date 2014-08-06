@@ -171,6 +171,7 @@ a:hover{
 
 .titletext {
 	display: inline-block;
+	line-height: 1em;
 }
 
 .titletext:hover {
