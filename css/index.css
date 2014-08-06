@@ -81,7 +81,18 @@ width: 100%;
 z-index:10;
 }
 
+a:link {
+    color: black;
+}
 
+/* visited link */
+a:visited {
+    color: black;;
+}
+
+a:hover{
+	color: #006;
+}
 
 #content {
 	  margin: 0px;
