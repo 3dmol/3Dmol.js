@@ -14988,6 +14988,13 @@ WebMol.multiLineString = function(f) {
 
 //Synchronized (i.e. not threaded) surface gen? Used mainly for debugging
 WebMol.syncSurface = false;
+
+// Internet Explorer refuses to allow webworkers in data blobs.  I can find
+// no way of checking for this feature directly, so must do a brower check
+if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
+		window.navigator.userAgent.indexOf('Trident/') >= 0) {
+	WebMol.syncSurface = true; // can't use webworkers
+}
 //WebMol constants (replaces needed THREE constants)
 
 //material constants
