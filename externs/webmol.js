@@ -61,10 +61,41 @@ WebMol.download = function(query, viewer) {};
  */
 WebMol.drawCartoon = function(group, atomlist, gradientscheme) {};
 
-/** @property JmolElementColors - Jmol style atom colors (default color scheme) */
-WebMol.JmolElementColors = {};
-/** @property rasmolElementColors - Rasmol style atom colors */
-WebMol.rasmolElementColors = {};
+/** Preset element coloring - from individual element colors to entire mappings (e.g. 'WebMol.elementColors.Jmol' colors atoms with Jmol stylings)
+ * @struct
+ */
+WebMol.elementColors = {};
+
+WebMol.elementColors.defaultColor;
+
+/** @property Jmol-like element colors*/
+WebMol.elementColors.Jmol = {};
+
+/** @property rasmol-like element colors */
+WebMol.elementColors.rasmol = {};
+
+WebMol.elementColors.defaultColors = WebMol.elementColors.rasmol;
+
+WebMol.elementColors.greenCarbon = $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.greenCarbon['C'] = 0x00ff00;
+
+WebMol.elementColors.cyanCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.cyanCarbon['C'] = 0x00ffff;
+
+WebMol.elementColors.magentaCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.magentaCarbon['C'] = 0xff00ff;
+
+WebMol.elementColors.yellowCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.yellowCarbon['C'] = 0xffff00;
+
+WebMol.elementColors.whiteCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.whiteCarbon['C'] = 0xffffff;
+
+WebMol.elementColors.orangeCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.orangeCarbon['C'] = 0xff6600;
+
+WebMol.elementColors.purpleCarbon =  $.extend({},WebMol.elementColors.defaultColors);
+WebMol.elementColors.purpleCarbon['C'] = 0x800080;
 
 //Specification arguments 
 //TODO: flesh out the annotations
