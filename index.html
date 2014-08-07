@@ -59,31 +59,37 @@
             };
 
 $( document ).ready(function() {
+  var hidetext = function () {
+	  $("#webmoltext").hide();
+	    $("#viewtext").hide();
+	    $("#embedtext").hide();
+	    $("#developtext").hide();
+  };
   $('#view').hover(
   function () {
-	$("#webmoltext").hide();
+	hidetext();
     $("#viewtext").show();
   }, 
   function () {
-    $("#viewtext").hide();
+	    hidetext();
 		$("#webmoltext").show();
   });
     $('#embed').hover(
   function () {
-	$("#webmoltext").hide();
+	    hidetext();
     $("#embedtext").show();
   }, 
   function () {
-    $("#embedtext").hide();
+	    hidetext();
 		$("#webmoltext").show();
   });
       $('#develop').hover(
   function () {
-	$("#webmoltext").hide();
+	    hidetext();
     $("#developtext").show();
   }, 
   function () {
-    $("#developtext").hide();
+	    hidetext();
 		$("#webmoltext").show();
   });
 });
