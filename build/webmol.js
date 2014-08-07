@@ -14987,7 +14987,7 @@ WebMol.multiLineString = function(f) {
 };
 
 //Synchronized (i.e. not threaded) surface gen? Used mainly for debugging
-WebMol.syncSurface = false;
+WebMol.syncSurface = true;
 
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
 // no way of checking for this feature directly, so must do a brower check
@@ -21833,16 +21833,23 @@ WebMol.GLViewer = (function() {
             var sync = !!(WebMol.syncSurface);
             if (sync) { // don't use worker, still break up for memory purposes
 
-                for (i = 0, il = extents.length; i < il; i++) {
-                    //console.profile();
+            	//to keep the browser from locking up, call through setTimeout
+            	var callSyncHelper = function callSyncHelper(i) {
+            		if(i >= extents.length)
+            			return;
+            		
                     var VandF = generateMeshSyncHelper(type, extents[i].extent,
                             extents[i].atoms, extents[i].toshow, reducedAtoms,
                             totalVol);
                     var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                     WebMol.mergeGeos(surfobj.geo, mesh);
                     _viewer.render();
-                    //console.profileEnd();
-                }
+                                        
+                    setTimeout(callSyncHelper, 1, i+1);
+            	}
+            	
+            	setTimeout(callSyncHelper,1, 0);
+
             //TODO: Asynchronously generate geometryGroups (not separate meshes) and merge them into a single geometry
             }            
             else { // use worker
