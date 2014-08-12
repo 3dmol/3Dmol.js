@@ -20668,6 +20668,7 @@ WebMol.GLViewer = (function() {
         var isDragging = false;
         var mouseStartX = 0;
         var mouseStartY = 0;
+	var touchDistanceStart = 0;
         var currentModelPos = 0;
         var cz = 0;
         var cslabNear = 0;
@@ -20780,10 +20781,12 @@ WebMol.GLViewer = (function() {
             show();        
         }; 
         
-        // TODO: Better touch panel support.
-        // Contribution is needed as I don't own any iOS or Android device
-        // with
-        // WebGL support.
+		var calcTouchDistance = function(ev) { //distance between first two fingers
+			var xdiff = ev.originalEvent.targetTouches[0].pageX - ev.originalEvent.targetTouches[1].pageX;
+			var ydiff = ev.originalEvent.targetTouches[0].pageY - ev.originalEvent.targetTouches[1].pageY;
+			return Math.sqrt(xdiff*xdiff+ydiff*ydiff);
+		}
+		
         glDOM.bind('mousedown touchstart', function(ev) {
             ev.preventDefault();
             if (!scene)
@@ -20801,6 +20804,10 @@ WebMol.GLViewer = (function() {
             mouseButton = ev.which;
             mouseStartX = x;
             mouseStartY = y;
+	    touchDistanceStart = 0;
+            if(ev.originalEvent.targetTouches && ev.originalEvent.targetTouches.length == 2) {
+	        touchDistanceStart = calcTouchDistance(ev); 
+            }
             cq = rotationGroup.quaternion;
             cz = rotationGroup.position.z;
             currentModelPos = modelGroup.position.clone();
@@ -20858,6 +20865,18 @@ WebMol.GLViewer = (function() {
                 return;
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
+			//check for pinch
+	    if(touchDistanceStart != 0 && ev.originalEvent.targetTouches && ev.originalEvent.targetTouches.length == 2) {
+                var newdist = calcTouchDistance(ev); 
+		//change to zoom
+		mode = 2;
+		dy = (touchDistanceStart-newdist)*2/(WIDTH+HEIGHT);
+	    }
+            else if(ev.originalEvent.targetTouches && ev.originalEvent.targetTouches.length == 3) {
+                //translate
+                mode = 1;
+            }
+			
             var r = Math.sqrt(dx * dx + dy * dy);
             var scaleFactor;
             if (mode == 3 || (mouseButton == 3 && ev.ctrlKey)) { // Slab

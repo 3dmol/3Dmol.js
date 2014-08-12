@@ -226,7 +226,7 @@ WebMol.GLViewer = (function() {
         var isDragging = false;
         var mouseStartX = 0;
         var mouseStartY = 0;
-		var touchDistanceStart = 0;
+	var touchDistanceStart = 0;
         var currentModelPos = 0;
         var cz = 0;
         var cslabNear = 0;
@@ -362,10 +362,10 @@ WebMol.GLViewer = (function() {
             mouseButton = ev.which;
             mouseStartX = x;
             mouseStartY = y;
-			touchDistanceStart = 0;
-			if(ev.originalEvent.targetTouches && ev.originalEvent.targetTouches.length == 2) {
-				touchDistanceStart = calcTouchDistance(ev.originalEvent); 
-			}
+	    touchDistanceStart = 0;
+            if(ev.originalEvent.targetTouches && ev.originalEvent.targetTouches.length == 2) {
+	        touchDistanceStart = calcTouchDistance(ev); 
+            }
             cq = rotationGroup.quaternion;
             cz = rotationGroup.position.z;
             currentModelPos = modelGroup.position.clone();
@@ -424,12 +424,16 @@ WebMol.GLViewer = (function() {
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
 			//check for pinch
-			if(touchDistanceStart != 0 && ev.originalEvent.targetTouches && ev.originalEvent.targetTouches.length == 2) {
-				var newdist = calcTouchDistance(ev.originalEvent); 
-				//change to zoom
-				mode = 2;
-				dy = (newdist-touchDistanceStart)*2/(WIDTH+HEIGHT);
-			}
+	    if(touchDistanceStart != 0 && ev.originalEvent.targetTouches && ev.originalEvent.targetTouches.length == 2) {
+                var newdist = calcTouchDistance(ev); 
+		//change to zoom
+		mode = 2;
+		dy = (touchDistanceStart-newdist)*2/(WIDTH+HEIGHT);
+	    }
+            else if(ev.originalEvent.targetTouches && ev.originalEvent.targetTouches.length == 3) {
+                //translate
+                mode = 1;
+            }
 			
             var r = Math.sqrt(dx * dx + dy * dy);
             var scaleFactor;
