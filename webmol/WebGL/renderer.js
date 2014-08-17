@@ -1262,8 +1262,8 @@ WebMol.Renderer = function ( parameters ) {
 
     function setBuffers( geometryGroup, hint, line ) {
 
-        var vertexArray = geometryGroup.__vertexArray;
-        var colorArray = geometryGroup.__colorArray;
+        var vertexArray = geometryGroup.vertexArray;
+        var colorArray = geometryGroup.colorArray;
          
         //vertex buffers
         _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer );
@@ -1275,24 +1275,24 @@ WebMol.Renderer = function ( parameters ) {
               
         
         //normal buffers
-        if (geometryGroup.__normalArray !== undefined && geometryGroup.__webglNormalBuffer !== undefined) {
-            var normalArray = geometryGroup.__normalArray;
+        if (geometryGroup.normalArray !== undefined && geometryGroup.__webglNormalBuffer !== undefined) {
+            var normalArray = geometryGroup.normalArray;
             _gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer );
             _gl.bufferData( _gl.ARRAY_BUFFER, normalArray, hint );       
              
         }
         
         //face (index) buffers
-        if (geometryGroup.__faceArray !== undefined && geometryGroup.__webglFaceBuffer !== undefined) {
-            var faceArray = geometryGroup.__faceArray;
+        if (geometryGroup.faceArray !== undefined && geometryGroup.__webglFaceBuffer !== undefined) {
+            var faceArray = geometryGroup.faceArray;
             _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
             _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, faceArray, hint );  
                       
         }
         
         //line (index) buffers (for wireframe)
-        if (geometryGroup.__lineArray !== undefined && geometryGroup.__webglLineBuffer !== undefined) {
-            var lineArray = geometryGroup.__lineArray;            
+        if (geometryGroup.lineArray !== undefined && geometryGroup.__webglLineBuffer !== undefined) {
+            var lineArray = geometryGroup.lineArray;            
             _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglLineBuffer );
             _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, lineArray, hint );
         }

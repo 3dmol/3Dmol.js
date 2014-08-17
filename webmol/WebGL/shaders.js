@@ -92,6 +92,67 @@ WebMol.ShaderLib = {
 
     },
     
+ 'sphereimposter' : {
+        fragmentShader : [
+"uniform mat4 viewMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform vec3 diffuse;",
+"uniform float opacity;",
+
+"uniform vec3 fogColor;",
+"uniform float fogNear;",
+"uniform float fogFar;",
+
+"varying vec3 vColor;",
+
+"void main() {",
+    
+"    gl_FragColor = vec4( diffuse, opacity );",
+"    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
+    
+"    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
+"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
+    
+"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+
+"}"
+                                                     
+].join("\n"),
+        
+        vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform mat4 viewMatrix;",
+"uniform mat3 normalMatrix;",
+"uniform vec3 cameraPosition;",
+
+"attribute vec3 position;",
+"attribute vec3 color;",
+"attribute vec3 impostercoords;",
+
+"varying vec3 vColor;",
+
+"void main() {",
+
+"    vColor = color;",
+"    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    gl_Position = projectionMatrix * mvPosition;",
+
+"}"
+        
+].join("\n"),
+    
+        uniforms : {
+            opacity: { type: 'f', value: 1.0 },
+            diffuse: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new WebMol.Color(1.0, 1.0, 1.0) },
+            fogNear: { type: 'f', value: 1.0 },
+            fogFar: { type: 'f', value: 2000}
+        }
+
+    },
+    
     
     'lambert' : { 
         fragmentShader : [

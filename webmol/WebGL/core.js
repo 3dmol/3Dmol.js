@@ -267,18 +267,30 @@ WebMol.Geometry = (function() {
    
     var BUFFERSIZE = 65535; //limited to 16bit indices
     
+    
     /** @constructor */
     var geometryGroup = function(id) {
         this.id = id || 0;
-        this.__vertexArray = null;
-        this.__colorArray = null;
-        this.__normalArray = null;
-        this.__faceArray = null;
-        this.__lineArray = null;
+        //for performance reasons, callers must directly modify these
+        this.vertexArray = null;
+        this.colorArray = null;
+        this.normalArray = null;
+        this.faceArray = null;
+        this.lineArray = null;
         this.vertices = 0;
         this.faceidx = 0;
         this.lineidx = 0;
+        
     };
+    
+    geometryGroup.prototype.getNumVertices = function() {
+    	return this.vertices;
+    };
+    
+    geometryGroup.prototype.getVertices = function() {
+    	return this.vertexArray;
+    };
+    
     
     geometryGroup.prototype.getCentroid = function() {
         
@@ -288,7 +300,7 @@ WebMol.Geometry = (function() {
         for (var i = 0; i < this.vertices; ++i) {
             offset = i*3;
             
-            x = this.__vertexArray[offset]; y = this.__vertexArray[offset+1]; z = this.__vertexArray[offset+2];
+            x = this.vertexArray[offset]; y = this.vertexArray[offset+1]; z = this.vertexArray[offset+2];
             
             centroid.x += x; centroid.y += y; centroid.z += z;
         }
@@ -302,9 +314,9 @@ WebMol.Geometry = (function() {
     //setup normals - vertex and face array must exist
     geometryGroup.prototype.setNormals = function() {        
         
-        var faces = this.__faceArray;
-        var verts = this.__vertexArray;
-        var norms = this.__normalArray;
+        var faces = this.faceArray;
+        var verts = this.vertexArray;
+        var norms = this.normalArray;
         
         if (! this.vertices || ! this.faceidx) 
             return;
@@ -350,7 +362,7 @@ WebMol.Geometry = (function() {
         if (! this.faceidx)
             return;
                     
-        var faceArr = this.__faceArray, lineArr = this.__lineArray = new Uint16Array(this.faceidx*2);      
+        var faceArr = this.faceArray, lineArr = this.lineArray = new Uint16Array(this.faceidx*2);      
         this.lineidx = this.faceidx*2;         
         var faceoffset;
             
@@ -370,29 +382,29 @@ WebMol.Geometry = (function() {
         
         mesh = (mesh === true) ? true : false;
         
-        var vertexArr = this.__vertexArray,
-            colorArr = this.__colorArray,
-            normalArr = this.__normalArray,
-            faceArr = this.__faceArray,
-            lineArr = this.__lineArray;
+        var vertexArr = this.vertexArray,
+            colorArr = this.colorArray,
+            normalArr = this.normalArray,
+            faceArr = this.faceArray,
+            lineArr = this.lineArray;
 
 	//subarray to avoid copying and reallocating memory
-        this.__vertexArray = vertexArr.subarray(0,this.vertices*3);
-        this.__colorArray = colorArr.subarray(0,this.vertices*3);
+        this.vertexArray = vertexArr.subarray(0,this.vertices*3);
+        this.colorArray = colorArr.subarray(0,this.vertices*3);
         
         if (mesh) {
-            this.__normalArray = normalArr.subarray(0,this.vertices*3);
-            this.__faceArray = faceArr.subarray(0,this.faceidx); 
+            this.normalArray = normalArr.subarray(0,this.vertices*3);
+            this.faceArray = faceArr.subarray(0,this.faceidx); 
 
             if(this.lineidx > 0) //not always set so reclaim memory
-                this.__lineArray = lineArr.subarray(0,this.lineidx); 
+                this.lineArray = lineArr.subarray(0,this.lineidx); 
             else
-                this.__lineArray = new Uint16Array();
+                this.lineArray = new Uint16Array();
         }
         else {
-            this.__normalArray = new Float32Array(); 
-            this.__faceArray = new Uint16Array(); 
-            this.__lineArray = new Uint16Array(); 
+            this.normalArray = new Float32Array(); 
+            this.faceArray = new Uint16Array(); 
+            this.lineArray = new Uint16Array(); 
         }
         
         this.__inittedArrays = true;        
@@ -404,17 +416,17 @@ WebMol.Geometry = (function() {
         geo.geometryGroups.push(ret);
         geo.groups = geo.geometryGroups.length;
         
-        ret.__vertexArray = new Float32Array(BUFFERSIZE*3);
-        ret.__colorArray = new Float32Array(BUFFERSIZE*3);
+        ret.vertexArray = new Float32Array(BUFFERSIZE*3);
+        ret.colorArray = new Float32Array(BUFFERSIZE*3);
         
         //TODO: instantiating uint arrays according to max number of vertices
         // is dangerous, since there exists the possibility that there will be 
         // more face or line indices than vertex points - but so far that doesn't
         // seem to be the case for any of the renders 
         if (geo.mesh) {
-            ret.__normalArray = new Float32Array(BUFFERSIZE*3);
-            ret.__faceArray = new Uint16Array(BUFFERSIZE*6);
-            ret.__lineArray = new Uint16Array(BUFFERSIZE*6);
+            ret.normalArray = new Float32Array(BUFFERSIZE*3);
+            ret.faceArray = new Uint16Array(BUFFERSIZE*6);
+            ret.lineArray = new Uint16Array(BUFFERSIZE*6);
         }
         
         

@@ -1133,13 +1133,14 @@ WebMol.GLViewer = (function() {
             //Only one group per call to generate surface mesh (addSurface should split up mesh render)     
             var geoGroup = geo.updateGeoGroup(0);
             
+            var vertexArray = geoGroup.vertexArray;
             // reconstruct vertices and faces
             var v = VandF['vertices'];
             var offset;
             var i, il;
             for (i = 0, il = v.length; i < il; i++) {            
                 offset = geoGroup.vertices*3;
-                geoGroup.__vertexArray[offset] = v[i].x; geoGroup.__vertexArray[offset+1] = v[i].y; geoGroup.__vertexArray[offset+2] =v[i].z;                
+                vertexArray[offset] = v[i].x; vertexArray[offset+1] = v[i].y; vertexArray[offset+2] =v[i].z;                
                 geoGroup.vertices++;
             }
                        
@@ -1159,14 +1160,14 @@ WebMol.GLViewer = (function() {
                 }
             }
             
-            var verts = geoGroup.__vertexArray;
+            var verts = geoGroup.vertexArray;
+            var colorArray = geoGroup.colorArray;
+            var normalArray = geoGroup.normalArray;
             var vA, vB, vC, norm;
-            var faceoffset;
             
             //Setup colors, faces, and normals
             for (i = 0, il = faces.length; i < il; i+=3) {
                 
-                faceoffset = i;
                 //var a = faces[i].a, b = faces[i].b, c = faces[i].c;
                 var a = faces[i], b = faces[i+1], c = faces[i+2];
                 var A = v[a]['atomid'];
@@ -1175,15 +1176,13 @@ WebMol.GLViewer = (function() {
                 
                 var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
-                geoGroup.__faceArray[faceoffset] = faces[i].a; geoGroup.__faceArray[faceoffset+1] = faces[i].b;
-                    geoGroup.__faceArray[faceoffset+2] = faces[i].c;
                 
-                geoGroup.__colorArray[offsetA] = colors[A].r; geoGroup.__colorArray[offsetA+1] = colors[A].g;
-                         geoGroup.__colorArray[offsetA+2] = colors[A].b;
-                geoGroup.__colorArray[offsetB] = colors[B].r; geoGroup.__colorArray[offsetB+1] = colors[B].g;
-                         geoGroup.__colorArray[offsetB+2] = colors[B].b;
-                geoGroup.__colorArray[offsetC] = colors[C].r; geoGroup.__colorArray[offsetC+1] = colors[C].g;
-                         geoGroup.__colorArray[offsetC+2] = colors[C].b;
+                colorArray[offsetA] = colors[A].r; colorArray[offsetA+1] = colors[A].g;
+                         colorArray[offsetA+2] = colors[A].b;
+                colorArray[offsetB] = colors[B].r; colorArray[offsetB+1] = colors[B].g;
+                         colorArray[offsetB+2] = colors[B].b;
+                colorArray[offsetC] = colors[C].r; colorArray[offsetC+1] = colors[C].g;
+                         colorArray[offsetC+2] = colors[C].b;
                  
                 //setup Normals
                 
@@ -1199,12 +1198,12 @@ WebMol.GLViewer = (function() {
                 norm = vC;
                 norm.normalize();
                 
-                geoGroup.__normalArray[offsetA] += norm.x; geoGroup.__normalArray[offsetB] += norm.x; geoGroup.__normalArray[offsetC] += norm.x;
-                geoGroup.__normalArray[offsetA+1] += norm.y; geoGroup.__normalArray[offsetB+1] += norm.y; geoGroup.__normalArray[offsetC+1] += norm.y;
-                geoGroup.__normalArray[offsetA+2] += norm.z; geoGroup.__normalArray[offsetB+2] += norm.z; geoGroup.__normalArray[offsetC+2] += norm.z;
+                normalArray[offsetA] += norm.x; normalArray[offsetB] += norm.x; normalArray[offsetC] += norm.x;
+                normalArray[offsetA+1] += norm.y; normalArray[offsetB+1] += norm.y; normalArray[offsetC+1] += norm.y;
+                normalArray[offsetA+2] += norm.z; normalArray[offsetB+2] += norm.z; normalArray[offsetC+2] += norm.z;
                 
             }
-            geoGroup.__faceArray = new Uint16Array(faces);
+            geoGroup.faceArray = new Uint16Array(faces);
             var mesh = new WebMol.Mesh(geo, mat);
             mesh.doubleSided = true;
 
