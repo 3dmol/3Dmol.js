@@ -14,16 +14,18 @@
             var initSDF = function(viewer) {
                 var s1 = viewer.addSphere({radius: 1.25, center: {x:-6.89, y:0.75, z:0.35}});
                 s1.wireframe = true; s1.color = WebMol.CC.color("purple");
-
+		viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35},fontSize: 14,backgroundColor: {r:128,g:0,b:128,a:0.8}});
                 var s2 = viewer.addSphere({radius: 1.25, center: {x:1.32, y:2.91, z:-1.49}});
                 s2.wireframe = true; s2.color = WebMol.CC.color("purple");
+		viewer.addLabel("Aromatic", {position: {x:1.32, y:2.91, z:-1.49},fontSize: 14,backgroundColor: {r:128,g:0,b:128,a:0.8}});
 
                 var s3 = viewer.addSphere({radius: 0.5, center: {x:-0.42, y:-0.48, z:0.64}});
                 s3.wireframe = true; s3.color = WebMol.CC.color(0xbbbbbb);
 
                 var a = viewer.addArrow({start: {x:-0.4217, y:-0.4795, z:0.6395}, end: {x:-0.613, y:-0.891, z:-0.198},
                                            radius: 0.1});
-                a.color = WebMol.CC.color(0xff6600);
+ 		viewer.addLabel("Hydrogen Donor", {position: {x:-0.4217, y:-0.4795, z:0.6395},fontSize: 14,backgroundColor: {r:128,g:128,b:128,a:0.8}});
+                a.color = WebMol.CC.color(0xeeeeee);
 
                 viewer.render();
                 
@@ -57,31 +59,37 @@
             };
 
 $( document ).ready(function() {
+  var hidetext = function () {
+	  $("#webmoltext").hide();
+	    $("#viewtext").hide();
+	    $("#embedtext").hide();
+	    $("#developtext").hide();
+  };
   $('#view').hover(
   function () {
-	$("#webmoltext").hide();
+	hidetext();
     $("#viewtext").show();
   }, 
   function () {
-    $("#viewtext").hide();
+	    hidetext();
 		$("#webmoltext").show();
   });
     $('#embed').hover(
   function () {
-	$("#webmoltext").hide();
+	    hidetext();
     $("#embedtext").show();
   }, 
   function () {
-    $("#embedtext").hide();
+	    hidetext();
 		$("#webmoltext").show();
   });
       $('#develop').hover(
   function () {
-	$("#webmoltext").hide();
+	    hidetext();
     $("#developtext").show();
   }, 
   function () {
-    $("#developtext").hide();
+	    hidetext();
 		$("#webmoltext").show();
   });
 });
