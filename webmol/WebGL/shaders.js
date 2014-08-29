@@ -110,7 +110,10 @@ WebMol.ShaderLib = {
 "	 float lensqr = dot(mapping,mapping);",
 "	 if(lensqr > 2.0)",
 "	    discard;",
-"    gl_FragColor = vec4( vColor, 1 );",
+"	 float w = sqrt(2.0 - lensqr);",
+"	 float z = sqrt(sqrt(2.0)-lensqr);",
+//"	 gl_FragDepthEXT = z;",
+"    gl_FragColor = vec4( w*vColor, 1 );",
     
 
 

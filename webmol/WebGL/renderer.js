@@ -685,7 +685,7 @@ WebMol.Renderer = function ( parameters ) {
             p_uniforms = program.uniforms,
             m_uniforms = material.uniforms;
 
-        if (program != _currentProgram) {        
+        if (program != _currentProgram) {   
             _gl.useProgram(program);
             _currentProgram = program;
 
@@ -1532,7 +1532,6 @@ WebMol.Renderer = function ( parameters ) {
             console.error( error );
 
         }
-
     }
 
     function setDefaultGLState () {

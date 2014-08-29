@@ -13456,7 +13456,7 @@ WebMol.Renderer = function ( parameters ) {
             p_uniforms = program.uniforms,
             m_uniforms = material.uniforms;
 
-        if (program != _currentProgram) {        
+        if (program != _currentProgram) {   
             _gl.useProgram(program);
             _currentProgram = program;
 
@@ -14303,7 +14303,6 @@ WebMol.Renderer = function ( parameters ) {
             console.error( error );
 
         }
-
     }
 
     function setDefaultGLState () {
@@ -14567,7 +14566,10 @@ WebMol.ShaderLib = {
 "	 float lensqr = dot(mapping,mapping);",
 "	 if(lensqr > 2.0)",
 "	    discard;",
-"    gl_FragColor = vec4( vColor, 1 );",
+"	 float w = sqrt(2.0 - lensqr);",
+"	 float z = sqrt(sqrt(2.0)-lensqr);",
+//"	 gl_FragDepthEXT = z;",
+"    gl_FragColor = vec4( w*vColor, 1 );",
     
 
 
