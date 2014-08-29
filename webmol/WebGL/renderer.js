@@ -646,10 +646,7 @@ WebMol.Renderer = function ( parameters ) {
 
         var u, a, identifiers, i, parameters, maxLightCount, maxBones, maxShadows, shaderID;
 
-        if (material instanceof WebMol.LineBasicMaterial)
-            shaderID = "basic";
-        else if (material instanceof WebMol.MeshLambertMaterial)
-            shaderID = "lambert";
+        shaderID = material.shaderID;
 
         if (shaderID) {
 

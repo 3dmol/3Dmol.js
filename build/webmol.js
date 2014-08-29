@@ -12290,7 +12290,7 @@ WebMol.LineBasicMaterial = function(parameters) {
     this.vertexColors = false;
     
     this.fog = true;
-    
+    this.shaderID = "basic";
     this.setValues(parameters);
     
 };
@@ -12304,7 +12304,7 @@ WebMol.LineBasicMaterial.prototype.clone = function() {
     WebMol.Material.prototype.clone.call(this, material);
     
     material.color.copy();
-    
+    return material;
 };
 
 //Mesh Lambert material
@@ -12339,7 +12339,7 @@ WebMol.MeshLambertMaterial = function(parameters) {
     this.wireframeLinejoin = 'round';
     
     this.shading = WebMol.SmoothShading;
-    
+    this.shaderID = "lambert";
     this.vertexColors = WebMol.NoColors;
     
     this.skinning = false;
@@ -12377,7 +12377,7 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
     material.fog = this.fog;
     
     material.shading = this.shading;
-    
+    material.shaderID = this.shaderID;
     material.vertexColors = this.vertexColors;
     
     material.skinning = this.skinning;
@@ -12386,6 +12386,88 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
     
     return material;
     
+};
+
+
+//Imposter material
+/** @constructor */
+WebMol.ImposterMaterial = function(parameters) {
+  
+  WebMol.Material.call(this);
+  
+  this.color = new WebMol.Color(0xffffff);
+  this.ambient = new WebMol.Color(0xfffff);
+  this.emissive = new WebMol.Color(0x000000);
+  
+  //TODO: Which of these instance variables do I really need?
+  this.wrapAround = false;
+  this.wrapRGB = new WebMol.Vector3(1,1,1);
+  
+  this.map = null;
+  
+  this.lightMap = null;
+  
+  this.specularMap = null;
+  
+  this.envMap = null;
+  this.reflectivity = 1;
+  this.refractionRatio = 0.98;
+  
+  this.fog = true;
+  
+  this.wireframe = false;
+  this.wireframeLinewidth = 1;
+  this.wireframeLinecap = 'round';
+  this.wireframeLinejoin = 'round';
+  
+  this.shading = WebMol.SmoothShading;
+  this.shaderID = "sphereimposter";
+  this.vertexColors = WebMol.NoColors;
+  
+  this.skinning = false;
+  
+  this.setValues(parameters);
+  
+};
+
+WebMol.ImposterMaterial.prototype = Object.create(WebMol.Material.prototype);
+
+WebMol.ImposterMaterial.prototype.clone = function() {
+
+  var material = new WebMol.ImposterMaterial();
+  
+  WebMol.Material.prototype.clone.call(this, material);
+  
+  material.color.copy(this.color);
+  material.ambient.copy(this.ambient);
+  material.emissive.copy(this.emissive);
+  
+  material.wrapAround = this.wrapAround;
+  material.wrapRGB.copy(this.wrapRGB);
+  
+  material.map = this.map;
+  
+  material.lightMap = this.lightMap;
+  
+  material.specularMap = this.specularMap;
+  
+  material.envMap = this.envMap;
+  material.combine = this.combine;
+  material.reflectivity = this.reflectivity;
+  material.refractionRatio = this.refractionRatio;
+  
+  material.fog = this.fog;
+  
+  material.shading = this.shading;
+  material.shaderID = this.shaderID;
+  material.vertexColors = this.vertexColors;
+  
+  material.skinning = this.skinning;
+  material.morphTargets = this.morphTargets;
+  material.morphNormals = this.morphNormals;
+  
+  return material;
+  
 };
 
 
@@ -13335,10 +13417,7 @@ WebMol.Renderer = function ( parameters ) {
 
         var u, a, identifiers, i, parameters, maxLightCount, maxBones, maxShadows, shaderID;
 
-        if (material instanceof WebMol.LineBasicMaterial)
-            shaderID = "basic";
-        else if (material instanceof WebMol.MeshLambertMaterial)
-            shaderID = "lambert";
+        shaderID = material.shaderID;
 
         if (shaderID) {
 
@@ -14481,13 +14560,9 @@ WebMol.ShaderLib = {
 
 "void main() {",
     
-"    gl_FragColor = vec4( diffuse, opacity );",
-"    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
+"    gl_FragColor = vec4( vColor, 1 );",
     
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
-"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-    
-"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+
 
 "}"
                                                      
@@ -18740,11 +18815,16 @@ WebMol.GLModel = (function() {
             vertexArray[start+11] = atom.z;
 
             //same colors for all 4 vertices
+            var normalArray = geoGroup.normalArray;
             var colorArray = geoGroup.colorArray;
             for(var i = 0; i < 4; i++) {
             	colorArray[start+3*i] = C.r;
             	colorArray[start+3*i+1] = C.g;
             	colorArray[start+3*i+2] = C.b;
+            	
+            	normalArray[start+3*i] = 0;
+            	normalArray[start+3*i+1] = 0;
+            	normalArray[start+3*i+2] = -1;
             }
             
 
@@ -19385,7 +19465,7 @@ WebMol.GLModel = (function() {
             
             // add imposter geometry
             if (imposterGeometry.vertices > 0) {
-                var imposterMaterial = new WebMol.MeshLambertMaterial({
+                var imposterMaterial = new WebMol.ImposterMaterial({
                     ambient : 0x000000,
                     vertexColors : true,
                     reflectivity : 0

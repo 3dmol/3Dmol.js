@@ -1321,11 +1321,16 @@ WebMol.GLModel = (function() {
             vertexArray[start+11] = atom.z;
 
             //same colors for all 4 vertices
+            var normalArray = geoGroup.normalArray;
             var colorArray = geoGroup.colorArray;
             for(var i = 0; i < 4; i++) {
             	colorArray[start+3*i] = C.r;
             	colorArray[start+3*i+1] = C.g;
             	colorArray[start+3*i+2] = C.b;
+            	
+            	normalArray[start+3*i] = 0;
+            	normalArray[start+3*i+1] = 0;
+            	normalArray[start+3*i+2] = -1;
             }
             
 
@@ -1966,7 +1971,7 @@ WebMol.GLModel = (function() {
             
             // add imposter geometry
             if (imposterGeometry.vertices > 0) {
-                var imposterMaterial = new WebMol.MeshLambertMaterial({
+                var imposterMaterial = new WebMol.ImposterMaterial({
                     ambient : 0x000000,
                     vertexColors : true,
                     reflectivity : 0

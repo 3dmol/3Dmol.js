@@ -130,7 +130,7 @@ WebMol.LineBasicMaterial = function(parameters) {
     this.vertexColors = false;
     
     this.fog = true;
-    
+    this.shaderID = "basic";
     this.setValues(parameters);
     
 };
@@ -144,7 +144,7 @@ WebMol.LineBasicMaterial.prototype.clone = function() {
     WebMol.Material.prototype.clone.call(this, material);
     
     material.color.copy();
-    
+    return material;
 };
 
 //Mesh Lambert material
@@ -179,7 +179,7 @@ WebMol.MeshLambertMaterial = function(parameters) {
     this.wireframeLinejoin = 'round';
     
     this.shading = WebMol.SmoothShading;
-    
+    this.shaderID = "lambert";
     this.vertexColors = WebMol.NoColors;
     
     this.skinning = false;
@@ -217,7 +217,7 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
     material.fog = this.fog;
     
     material.shading = this.shading;
-    
+    material.shaderID = this.shaderID;
     material.vertexColors = this.vertexColors;
     
     material.skinning = this.skinning;
@@ -226,6 +226,88 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
     
     return material;
     
+};
+
+
+//Imposter material
+/** @constructor */
+WebMol.ImposterMaterial = function(parameters) {
+  
+  WebMol.Material.call(this);
+  
+  this.color = new WebMol.Color(0xffffff);
+  this.ambient = new WebMol.Color(0xfffff);
+  this.emissive = new WebMol.Color(0x000000);
+  
+  //TODO: Which of these instance variables do I really need?
+  this.wrapAround = false;
+  this.wrapRGB = new WebMol.Vector3(1,1,1);
+  
+  this.map = null;
+  
+  this.lightMap = null;
+  
+  this.specularMap = null;
+  
+  this.envMap = null;
+  this.reflectivity = 1;
+  this.refractionRatio = 0.98;
+  
+  this.fog = true;
+  
+  this.wireframe = false;
+  this.wireframeLinewidth = 1;
+  this.wireframeLinecap = 'round';
+  this.wireframeLinejoin = 'round';
+  
+  this.shading = WebMol.SmoothShading;
+  this.shaderID = "sphereimposter";
+  this.vertexColors = WebMol.NoColors;
+  
+  this.skinning = false;
+  
+  this.setValues(parameters);
+  
+};
+
+WebMol.ImposterMaterial.prototype = Object.create(WebMol.Material.prototype);
+
+WebMol.ImposterMaterial.prototype.clone = function() {
+
+  var material = new WebMol.ImposterMaterial();
+  
+  WebMol.Material.prototype.clone.call(this, material);
+  
+  material.color.copy(this.color);
+  material.ambient.copy(this.ambient);
+  material.emissive.copy(this.emissive);
+  
+  material.wrapAround = this.wrapAround;
+  material.wrapRGB.copy(this.wrapRGB);
+  
+  material.map = this.map;
+  
+  material.lightMap = this.lightMap;
+  
+  material.specularMap = this.specularMap;
+  
+  material.envMap = this.envMap;
+  material.combine = this.combine;
+  material.reflectivity = this.reflectivity;
+  material.refractionRatio = this.refractionRatio;
+  
+  material.fog = this.fog;
+  
+  material.shading = this.shading;
+  material.shaderID = this.shaderID;
+  material.vertexColors = this.vertexColors;
+  
+  material.skinning = this.skinning;
+  material.morphTargets = this.morphTargets;
+  material.morphNormals = this.morphNormals;
+  
+  return material;
+  
 };
 
 

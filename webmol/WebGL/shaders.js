@@ -107,13 +107,9 @@ WebMol.ShaderLib = {
 
 "void main() {",
     
-"    gl_FragColor = vec4( diffuse, opacity );",
-"    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
+"    gl_FragColor = vec4( vColor, 1 );",
     
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
-"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-    
-"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+
 
 "}"
                                                      
