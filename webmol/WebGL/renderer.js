@@ -651,7 +651,6 @@ WebMol.Renderer = function ( parameters ) {
         if (shaderID) {
 
             var shader = WebMol.ShaderLib[shaderID];
-            material.shaderType = shaderID;
             material.vertexShader = shader.vertexShader;
             material.fragmentShader = shader.fragmentShader;
             material.uniforms = WebMol.ShaderUtils.clone(shader.uniforms);
@@ -716,7 +715,7 @@ WebMol.Renderer = function ( parameters ) {
             m_uniforms.fogFar.value = fog.far;
 
             //Set up lights for lambert shader
-            if (material.shaderType === "lambert") {
+            if (material.shaderID === "lambert") {
 
                 //load view and normal matrices for directional and object lighting
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
@@ -736,6 +735,11 @@ WebMol.Renderer = function ( parameters ) {
                 m_uniforms.emissive.value = material.emissive;
 
             }
+            else if( material.shaderID === "sphereimposter") {
+                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
+                _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+            }
+            	
 
             //opacity, diffuse, emissive, etc
             m_uniforms.opacity.value = material.opacity;

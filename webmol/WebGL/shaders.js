@@ -104,9 +104,12 @@ WebMol.ShaderLib = {
 "uniform float fogFar;",
 
 "varying vec3 vColor;",
+"varying vec2 mapping;",
 
 "void main() {",
-    
+"	 float lensqr = dot(mapping,mapping);",
+"	 if(lensqr > 2.0)",
+"	    discard;",
 "    gl_FragColor = vec4( vColor, 1 );",
     
 
@@ -124,16 +127,20 @@ WebMol.ShaderLib = {
 "uniform vec3 cameraPosition;",
 
 "attribute vec3 position;",
+"attribute vec3 normal;",
 "attribute vec3 color;",
-"attribute vec3 impostercoords;",
 
+"varying vec2 mapping;",
 "varying vec3 vColor;",
 
 "void main() {",
 
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-"    gl_Position = projectionMatrix * mvPosition;",
+"    vec4 projPosition = projectionMatrix * mvPosition;",
+"	 vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
+"	 mapping = normal.xy;",
+"	 gl_Position = projPosition+adjust;",
 
 "}"
         

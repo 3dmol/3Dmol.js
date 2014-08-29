@@ -13422,7 +13422,6 @@ WebMol.Renderer = function ( parameters ) {
         if (shaderID) {
 
             var shader = WebMol.ShaderLib[shaderID];
-            material.shaderType = shaderID;
             material.vertexShader = shader.vertexShader;
             material.fragmentShader = shader.fragmentShader;
             material.uniforms = WebMol.ShaderUtils.clone(shader.uniforms);
@@ -13487,7 +13486,7 @@ WebMol.Renderer = function ( parameters ) {
             m_uniforms.fogFar.value = fog.far;
 
             //Set up lights for lambert shader
-            if (material.shaderType === "lambert") {
+            if (material.shaderID === "lambert") {
 
                 //load view and normal matrices for directional and object lighting
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
@@ -13507,6 +13506,11 @@ WebMol.Renderer = function ( parameters ) {
                 m_uniforms.emissive.value = material.emissive;
 
             }
+            else if( material.shaderID === "sphereimposter") {
+                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
+                _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+            }
+            	
 
             //opacity, diffuse, emissive, etc
             m_uniforms.opacity.value = material.opacity;
@@ -14557,9 +14561,12 @@ WebMol.ShaderLib = {
 "uniform float fogFar;",
 
 "varying vec3 vColor;",
+"varying vec2 mapping;",
 
 "void main() {",
-    
+"	 float lensqr = dot(mapping,mapping);",
+"	 if(lensqr > 2.0)",
+"	    discard;",
 "    gl_FragColor = vec4( vColor, 1 );",
     
 
@@ -14577,16 +14584,20 @@ WebMol.ShaderLib = {
 "uniform vec3 cameraPosition;",
 
 "attribute vec3 position;",
+"attribute vec3 normal;",
 "attribute vec3 color;",
-"attribute vec3 impostercoords;",
 
+"varying vec2 mapping;",
 "varying vec3 vColor;",
 
 "void main() {",
 
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-"    gl_Position = projectionMatrix * mvPosition;",
+"    vec4 projPosition = projectionMatrix * mvPosition;",
+"	 vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
+"	 mapping = normal.xy;",
+"	 gl_Position = projPosition+adjust;",
 
 "}"
         
@@ -18798,21 +18809,13 @@ WebMol.GLModel = (function() {
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             
-            vertexArray[start+0] = atom.x - radius;
-            vertexArray[start+1] = atom.y - radius;
-            vertexArray[start+2] = atom.z;           
-
-            vertexArray[start+3] = atom.x - radius;
-            vertexArray[start+4] = atom.y + radius;
-            vertexArray[start+5] = atom.z;   
+            //use center point for each vertex
+            for(var i = 0; i < 4; i++) {
+                vertexArray[start+3*i] = atom.x;
+                vertexArray[start+3*i+1] = atom.y ;
+                vertexArray[start+3*i+2] = atom.z;                       	
+            }
             
-            vertexArray[start+6] = atom.x + radius;
-            vertexArray[start+7] = atom.y + radius;
-            vertexArray[start+8] = atom.z;   
-            
-            vertexArray[start+9] = atom.x + radius;
-            vertexArray[start+10] = atom.y - radius;
-            vertexArray[start+11] = atom.z;
 
             //same colors for all 4 vertices
             var normalArray = geoGroup.normalArray;
@@ -18822,12 +18825,24 @@ WebMol.GLModel = (function() {
             	colorArray[start+3*i+1] = C.g;
             	colorArray[start+3*i+2] = C.b;
             	
-            	normalArray[start+3*i] = 0;
-            	normalArray[start+3*i+1] = 0;
-            	normalArray[start+3*i+2] = -1;
             }
             
-
+        	normalArray[start+0] = -radius;
+        	normalArray[start+1] = -radius;
+        	normalArray[start+2] = 0;
+        	
+        	normalArray[start+3] = -radius;
+        	normalArray[start+4] = radius;
+        	normalArray[start+5] = 0;
+        	
+        	normalArray[start+6] = radius;
+        	normalArray[start+7] = radius;
+        	normalArray[start+8] = 0;
+        	
+        	normalArray[start+9] = radius;
+        	normalArray[start+10] = -radius;
+        	normalArray[start+11] = 0;
+        	
             geoGroup.vertices += 4;
             
             //two faces

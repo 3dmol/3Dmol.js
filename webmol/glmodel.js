@@ -1304,21 +1304,13 @@ WebMol.GLModel = (function() {
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             
-            vertexArray[start+0] = atom.x - radius;
-            vertexArray[start+1] = atom.y - radius;
-            vertexArray[start+2] = atom.z;           
-
-            vertexArray[start+3] = atom.x - radius;
-            vertexArray[start+4] = atom.y + radius;
-            vertexArray[start+5] = atom.z;   
+            //use center point for each vertex
+            for(var i = 0; i < 4; i++) {
+                vertexArray[start+3*i] = atom.x;
+                vertexArray[start+3*i+1] = atom.y ;
+                vertexArray[start+3*i+2] = atom.z;                       	
+            }
             
-            vertexArray[start+6] = atom.x + radius;
-            vertexArray[start+7] = atom.y + radius;
-            vertexArray[start+8] = atom.z;   
-            
-            vertexArray[start+9] = atom.x + radius;
-            vertexArray[start+10] = atom.y - radius;
-            vertexArray[start+11] = atom.z;
 
             //same colors for all 4 vertices
             var normalArray = geoGroup.normalArray;
@@ -1328,12 +1320,24 @@ WebMol.GLModel = (function() {
             	colorArray[start+3*i+1] = C.g;
             	colorArray[start+3*i+2] = C.b;
             	
-            	normalArray[start+3*i] = 0;
-            	normalArray[start+3*i+1] = 0;
-            	normalArray[start+3*i+2] = -1;
             }
             
-
+        	normalArray[start+0] = -radius;
+        	normalArray[start+1] = -radius;
+        	normalArray[start+2] = 0;
+        	
+        	normalArray[start+3] = -radius;
+        	normalArray[start+4] = radius;
+        	normalArray[start+5] = 0;
+        	
+        	normalArray[start+6] = radius;
+        	normalArray[start+7] = radius;
+        	normalArray[start+8] = 0;
+        	
+        	normalArray[start+9] = radius;
+        	normalArray[start+10] = -radius;
+        	normalArray[start+11] = 0;
+        	
             geoGroup.vertices += 4;
             
             //two faces
