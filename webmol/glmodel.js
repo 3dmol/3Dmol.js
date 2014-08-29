@@ -1281,6 +1281,69 @@ WebMol.GLModel = (function() {
 
         };
         
+        //dkoes - test code for sphere imposters
+        var drawAtomImposter = function(atom, geo) {
+            
+            if (!atom.style.spherei)
+                return;
+            var style = atom.style.spherei;
+            if (style.hidden)
+                return;
+            
+            var radius = getRadiusFromStyle(atom, style);
+            var color = atom.color;
+            if (typeof (style.color) != "undefined")
+                color = style.color;
+            var C = WebMol.CC.color(color);
+            
+            //create flat square                       
+            
+            var geoGroup = geo.updateGeoGroup(4);
+            var startv =  geoGroup.vertices;
+            var start = startv*3;
+            var vertexArray = geoGroup.vertexArray;
+            var colorArray = geoGroup.colorArray;
+            
+            vertexArray[start+0] = atom.x - radius;
+            vertexArray[start+1] = atom.y - radius;
+            vertexArray[start+2] = atom.z;           
+
+            vertexArray[start+3] = atom.x - radius;
+            vertexArray[start+4] = atom.y + radius;
+            vertexArray[start+5] = atom.z;   
+            
+            vertexArray[start+6] = atom.x + radius;
+            vertexArray[start+7] = atom.y + radius;
+            vertexArray[start+8] = atom.z;   
+            
+            vertexArray[start+9] = atom.x + radius;
+            vertexArray[start+10] = atom.y - radius;
+            vertexArray[start+11] = atom.z;
+
+            //same colors for all 4 vertices
+            var colorArray = geoGroup.colorArray;
+            for(var i = 0; i < 4; i++) {
+            	colorArray[start+3*i] = C.r;
+            	colorArray[start+3*i+1] = C.g;
+            	colorArray[start+3*i+2] = C.b;
+            }
+            
+
+            geoGroup.vertices += 4;
+            
+            //two faces
+            var faceArray = geoGroup.faceArray;
+            var faceoffset = geoGroup.faceidx; //not number faces, but index
+            faceArray[faceoffset+0] = startv;
+            faceArray[faceoffset+1] = startv+1;
+            faceArray[faceoffset+2] = startv+2;
+            faceArray[faceoffset+3] = startv+2;
+            faceArray[faceoffset+4] = startv+3;
+            faceArray[faceoffset+5] = startv;
+            geoGroup.faceidx += 6;
+            
+        };
+        
         // Rotation matrix around z and x axis - 
         // according to y basis vector
         // TODO: Try to optimize this (square roots?)
@@ -1838,6 +1901,7 @@ WebMol.GLModel = (function() {
             var lineGeometries = {};
             var crossGeometries = {};
             var sphereGeometry = new WebMol.Geometry(true);                                                         
+            var imposterGeometry = new WebMol.Geometry(true);                                                         
             var stickGeometry = new WebMol.Geometry(true);
             var i, n;
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
@@ -1849,6 +1913,7 @@ WebMol.GLModel = (function() {
                     if (atom.clickable && atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};                    
                     drawAtomSphere(atom, sphereGeometry);
+                    drawAtomImposter(atom, imposterGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
@@ -1898,7 +1963,25 @@ WebMol.GLModel = (function() {
 
                 ret.add(sphere);
             }
+            
+            // add imposter geometry
+            if (imposterGeometry.vertices > 0) {
+                var imposterMaterial = new WebMol.MeshLambertMaterial({
+                    ambient : 0x000000,
+                    vertexColors : true,
+                    reflectivity : 0
+                });
+                
+                //Initialize buffers in geometry                
+                imposterGeometry.initTypedArrays();
+                
+                var spherei = new WebMol.Mesh(imposterGeometry, imposterMaterial);
+                console
+                        .log("spherei geometry " + imposterGeometry.vertices.length);
 
+                ret.add(spherei);
+            }
+            
             // add stick geometry
             if (stickGeometry.vertices > 0) {
                 var cylinderMaterial = new WebMol.MeshLambertMaterial({

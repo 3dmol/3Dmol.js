@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>WebMol Test</title>
-        <script src="release/webmol-min.js"></script> 
+        <script src="build/webmol.js"></script> 
             
         <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
         <script>
@@ -136,6 +136,7 @@
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
         <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
+        <input type="button" value="SphereI" onclick="glviewer.setStyle({},{spherei:{}}); glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
