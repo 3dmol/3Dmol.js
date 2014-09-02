@@ -167,6 +167,35 @@ if (testSuite === 'webmol') {
     // WebMol test cases
     for (var style in styleSpec)
         genWebMolTestCase(styleSpec[style], profile);    
+
+    //surface test
+
+    var testName = "SURF render";
+    var timeMsg = "surface render time: ";
+    var testMsg = "surface style set correctly";
+    
+    QUnit.test(testName, function() {
+        
+        viewer.setStyle({}, {cross:{}});
+        viewer.render();
+        console.group(testName);          
+        
+        var start = new Date();
+        
+        viewer.addSurface(WebMol.SurfaceType.VDW, {}, {}, {}, {});           
+        viewer.render();
+        
+        var end = new Date();
+        var testTime = end - start;
+        
+        resultTimes[testName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");
+        console.groupEnd();
+        
+        QUnit.ok(true, testMsg);
+        
+    });
+
 }
 
 
@@ -189,7 +218,74 @@ else if (testSuite === "glmol") {
 
     for (var style in styleSpec)
         genGLmolTestCase(styleSpec[style], profile);  
+
     
+}
+
+else if (testSuite === "glmol_surf") {
+
+    QUnit.module( "GLmol Surface Test", {
+
+        setupOnce: function() {
+            var all = viewer.getAllAtoms();
+            viewer.zoomInto(all);
+            console.group("GLmol");
+        },
+
+        teardownOnce: function() {
+            console.groupEnd();
+        }
+    });
+
+
+    var testName = "surf render";
+    var timeMsg = "surf render time: ";
+    var testMsg = "surf style set correctly";
+    
+    var defineRep = function(){
+        var all = viewer.getAllAtoms();
+        
+        return function() {
+            //var all = this.getAllAtoms();
+            var target = this.modelGroup;          
+            this.drawAsCross(target, all, 0.3, true);
+
+            
+        }; 
+        
+    };
+    
+    QUnit.test(testName, function() {
+        
+        console.group(testName);
+        
+        var view = viewer.getView();
+        viewer.initializeScene();
+        var all = viewer.getAllAtoms();
+        viewer.zoomInto(all);
+        viewer.defineRepresentation = defineRep();
+        
+        
+        //Draw appropriate style        
+        //viewer.defineRepresentation();
+        //viewer.drawAsCross(viewer.modelGroup, all, 0.3, true);
+        var start = new Date();
+        viewer.generateMesh(viewer.modelGroup, all, 1, false);
+        
+        viewer.setView(view);        
+        viewer.show();     
+        
+        var end = new Date();
+        var testTime = end - start;
+        
+        resultTimes[testName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");        
+        console.groupEnd();
+             
+        ok(true, testMsg); 
+        
+    });
+
 }
 
 else if (testSuite === "jmol") {
@@ -215,6 +311,35 @@ else if (testSuite === "jmol") {
 
     for (var style in styleSpec)
         genJSmolTestCase(styleSpec[style], profile);
+
+
+    // Surf test
+    var testName = "surface render";
+    var timeMsg = "surface render time: ";
+    var testMsg = "surface style set correctly";
+      
+    //Create test case
+    QUnit.test(testName, function() {
+        
+        Jmol.scriptWait(viewer, "select *; wireframe off; cartoon off; spacefill off;");
+        
+        console.group(testName);
+        
+        var start = new Date();
+        
+        Jmol.scriptWait(viewer, "select *; isosurface vdw;");
+        
+        var end = new Date();      
+        
+        var testTime = end - start;
+        
+        resultTimes[testName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");          
+        console.groupEnd();
+        
+        QUnit.ok(true, testMsg); 
+        
+    });
     
 }
 
