@@ -1530,8 +1530,8 @@ WebMol.Renderer = function ( parameters ) {
         } catch ( error ) {
 
             console.error( error );
-
         }
+        _gl.getExtension('EXT_frag_depth');
     }
 
     function setDefaultGLState () {
@@ -1552,6 +1552,8 @@ WebMol.Renderer = function ( parameters ) {
         _gl.blendFunc( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA );
 
         _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
+        _gl.getExtension('EXT_frag_depth');
+
 
     }
     

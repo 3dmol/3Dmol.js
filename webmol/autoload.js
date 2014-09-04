@@ -13,6 +13,9 @@ $(document).ready(function() {
             var viewerdiv = $(this);
             var datauri = null;
             
+            if(typeof($(viewerdiv).css('position')) === "undefined") {
+            	$(viewerdiv).css('position','relative'); //to overlap spinner need positioned container
+            }
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
             

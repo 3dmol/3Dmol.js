@@ -130,11 +130,24 @@ function toTags(docletSrc) {
 }
 
 function fixDescription(docletSrc) {
-    if (!/^\s*@/.test(docletSrc)) {
+    if (!/^\s*@/.test(docletSrc) && docletSrc.replace(/\s/g, '').length) {
         docletSrc = '@description ' + docletSrc;
     }
     return docletSrc;
 }
+
+/**
+ * Replace the existing tag dictionary with a new tag dictionary.
+ *
+ * Used for testing only.
+ *
+ * @private
+ * @param {module:jsdoc/tag/dictionary.Dictionary} dict - The new tag dictionary.
+ */
+exports._replaceDictionary = function _replaceDictionary(dict) {
+    jsdoc.tag.dictionary = dict;
+    require('jsdoc/tag')._replaceDictionary(dict);
+};
 
 /**
  * @class
@@ -217,7 +230,7 @@ Doclet.prototype.addTag = function(title, text) {
 };
 
 function removeGlobal(longname) {
-    var globalRegexp = new RegExp('^' + jsdoc.name.GLOBAL_LONGNAME + '\\.?');
+    var globalRegexp = new RegExp('^' + jsdoc.name.LONGNAMES.GLOBAL + '\\.?');
 
     return longname.replace(globalRegexp, '');
 }
@@ -233,7 +246,7 @@ Doclet.prototype.setMemberof = function(sid) {
      * @type string
      */
     this.memberof = removeGlobal(sid)
-        .replace(/\.prototype/g, jsdoc.name.INSTANCE);
+        .replace(/\.prototype/g, jsdoc.name.SCOPE.PUNC.INSTANCE);
 };
 
 /**
@@ -270,22 +283,22 @@ function getFilepath(doclet) {
 
 /**
  * Set the doclet's `scope` property. Must correspond to a scope name that is defined in
- * {@link module:jsdoc/name.SCOPE_NAMES}.
+ * {@link module:jsdoc/name.SCOPE.NAMES}.
  *
- * @param {module:jsdoc/name.SCOPE_NAMES} scope - The scope for the doclet relative to the symbol's
+ * @param {module:jsdoc/name.SCOPE.NAMES} scope - The scope for the doclet relative to the symbol's
  * parent.
  * @throws {Error} If the scope name is not recognized.
  */
 Doclet.prototype.setScope = function(scope) {
     var errorMessage;
     var filepath;
-    var scopeNames = Object.keys(jsdoc.name.SCOPE_NAMES);
+    var scopeNames = _.values(jsdoc.name.SCOPE.NAMES);
 
     if (scopeNames.indexOf(scope) === -1) {
         filepath = getFilepath(this);
 
-        errorMessage = util.format('The scope name "%s" is not recognized. Use one of the names ' +
-            'defined in module:jsdoc/name.SCOPE_NAMES.', scope);
+        errorMessage = util.format('The scope name "%s" is not recognized. Use one of the ' +
+            'following values: %j', scope, scopeNames);
         if (filepath) {
             errorMessage += util.format(' (Source file: %s)', filepath);
         }

@@ -12290,7 +12290,7 @@ WebMol.LineBasicMaterial = function(parameters) {
     this.vertexColors = false;
     
     this.fog = true;
-    
+    this.shaderID = "basic";
     this.setValues(parameters);
     
 };
@@ -12304,7 +12304,7 @@ WebMol.LineBasicMaterial.prototype.clone = function() {
     WebMol.Material.prototype.clone.call(this, material);
     
     material.color.copy();
-    
+    return material;
 };
 
 //Mesh Lambert material
@@ -12339,7 +12339,7 @@ WebMol.MeshLambertMaterial = function(parameters) {
     this.wireframeLinejoin = 'round';
     
     this.shading = WebMol.SmoothShading;
-    
+    this.shaderID = "lambert";
     this.vertexColors = WebMol.NoColors;
     
     this.skinning = false;
@@ -12377,7 +12377,7 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
     material.fog = this.fog;
     
     material.shading = this.shading;
-    
+    material.shaderID = this.shaderID;
     material.vertexColors = this.vertexColors;
     
     material.skinning = this.skinning;
@@ -12386,6 +12386,88 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
     
     return material;
     
+};
+
+
+//Imposter material
+/** @constructor */
+WebMol.ImposterMaterial = function(parameters) {
+  
+  WebMol.Material.call(this);
+  
+  this.color = new WebMol.Color(0xffffff);
+  this.ambient = new WebMol.Color(0xfffff);
+  this.emissive = new WebMol.Color(0x000000);
+  
+  //TODO: Which of these instance variables do I really need?
+  this.wrapAround = false;
+  this.wrapRGB = new WebMol.Vector3(1,1,1);
+  
+  this.map = null;
+  
+  this.lightMap = null;
+  
+  this.specularMap = null;
+  
+  this.envMap = null;
+  this.reflectivity = 1;
+  this.refractionRatio = 0.98;
+  
+  this.fog = true;
+  
+  this.wireframe = false;
+  this.wireframeLinewidth = 1;
+  this.wireframeLinecap = 'round';
+  this.wireframeLinejoin = 'round';
+  
+  this.shading = WebMol.SmoothShading;
+  this.shaderID = "sphereimposter";
+  this.vertexColors = WebMol.NoColors;
+  
+  this.skinning = false;
+  
+  this.setValues(parameters);
+  
+};
+
+WebMol.ImposterMaterial.prototype = Object.create(WebMol.Material.prototype);
+
+WebMol.ImposterMaterial.prototype.clone = function() {
+
+  var material = new WebMol.ImposterMaterial();
+  
+  WebMol.Material.prototype.clone.call(this, material);
+  
+  material.color.copy(this.color);
+  material.ambient.copy(this.ambient);
+  material.emissive.copy(this.emissive);
+  
+  material.wrapAround = this.wrapAround;
+  material.wrapRGB.copy(this.wrapRGB);
+  
+  material.map = this.map;
+  
+  material.lightMap = this.lightMap;
+  
+  material.specularMap = this.specularMap;
+  
+  material.envMap = this.envMap;
+  material.combine = this.combine;
+  material.reflectivity = this.reflectivity;
+  material.refractionRatio = this.refractionRatio;
+  
+  material.fog = this.fog;
+  
+  material.shading = this.shading;
+  material.shaderID = this.shaderID;
+  material.vertexColors = this.vertexColors;
+  
+  material.skinning = this.skinning;
+  material.morphTargets = this.morphTargets;
+  material.morphNormals = this.morphNormals;
+  
+  return material;
+  
 };
 
 
@@ -13335,15 +13417,11 @@ WebMol.Renderer = function ( parameters ) {
 
         var u, a, identifiers, i, parameters, maxLightCount, maxBones, maxShadows, shaderID;
 
-        if (material instanceof WebMol.LineBasicMaterial)
-            shaderID = "basic";
-        else if (material instanceof WebMol.MeshLambertMaterial)
-            shaderID = "lambert";
+        shaderID = material.shaderID;
 
         if (shaderID) {
 
             var shader = WebMol.ShaderLib[shaderID];
-            material.shaderType = shaderID;
             material.vertexShader = shader.vertexShader;
             material.fragmentShader = shader.fragmentShader;
             material.uniforms = WebMol.ShaderUtils.clone(shader.uniforms);
@@ -13378,7 +13456,7 @@ WebMol.Renderer = function ( parameters ) {
             p_uniforms = program.uniforms,
             m_uniforms = material.uniforms;
 
-        if (program != _currentProgram) {        
+        if (program != _currentProgram) {   
             _gl.useProgram(program);
             _currentProgram = program;
 
@@ -13408,7 +13486,7 @@ WebMol.Renderer = function ( parameters ) {
             m_uniforms.fogFar.value = fog.far;
 
             //Set up lights for lambert shader
-            if (material.shaderType === "lambert") {
+            if (material.shaderID === "lambert") {
 
                 //load view and normal matrices for directional and object lighting
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
@@ -13428,6 +13506,11 @@ WebMol.Renderer = function ( parameters ) {
                 m_uniforms.emissive.value = material.emissive;
 
             }
+            else if( material.shaderID === "sphereimposter") {
+                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
+                _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+            }
+            	
 
             //opacity, diffuse, emissive, etc
             m_uniforms.opacity.value = material.opacity;
@@ -14218,9 +14301,8 @@ WebMol.Renderer = function ( parameters ) {
         } catch ( error ) {
 
             console.error( error );
-
         }
-
+        _gl.getExtension('EXT_frag_depth');
     }
 
     function setDefaultGLState () {
@@ -14241,6 +14323,8 @@ WebMol.Renderer = function ( parameters ) {
         _gl.blendFunc( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA );
 
         _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
+        _gl.getExtension('EXT_frag_depth');
+
 
     }
     
@@ -14478,16 +14562,18 @@ WebMol.ShaderLib = {
 "uniform float fogFar;",
 
 "varying vec3 vColor;",
+"varying vec2 mapping;",
 
 "void main() {",
+"	 float lensqr = dot(mapping,mapping);",
+"	 if(lensqr > 2.0)",
+"	    discard;",
+"	 float w = sqrt(2.0 - lensqr);",
+"	 float z = sqrt(sqrt(2.0)-lensqr);",
+"	 gl_FragDepthEXT = -.1*z;",
+"    gl_FragColor = vec4( w*vColor, 1 );",
     
-"    gl_FragColor = vec4( diffuse, opacity );",
-"    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
-    
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
-"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-    
-"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+
 
 "}"
                                                      
@@ -14502,16 +14588,20 @@ WebMol.ShaderLib = {
 "uniform vec3 cameraPosition;",
 
 "attribute vec3 position;",
+"attribute vec3 normal;",
 "attribute vec3 color;",
-"attribute vec3 impostercoords;",
 
+"varying vec2 mapping;",
 "varying vec3 vColor;",
 
 "void main() {",
 
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-"    gl_Position = projectionMatrix * mvPosition;",
+"    vec4 projPosition = projectionMatrix * mvPosition;",
+"	 vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
+"	 mapping = normal.xy;",
+"	 gl_Position = projPosition+adjust;",
 
 "}"
         
@@ -16612,6 +16702,9 @@ $(document).ready(function() {
             var viewerdiv = $(this);
             var datauri = null;
             
+            if(typeof($(viewerdiv).css('position')) === "undefined") {
+            	$(viewerdiv).css('position','relative'); //to overlap spinner need positioned container
+            }
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
             
@@ -16678,6 +16771,7 @@ $(document).ready(function() {
     }
 });
     
+
 WebMol.elementColors = WebMol.elementColors || {};
 
 WebMol.elementColors.defaultColor = 0xff1493;
@@ -18700,6 +18794,78 @@ WebMol.GLModel = (function() {
 
         };
         
+        //dkoes - test code for sphere imposters
+        var drawAtomImposter = function(atom, geo) {
+            
+            if (!atom.style.spherei)
+                return;
+            var style = atom.style.spherei;
+            if (style.hidden)
+                return;
+            
+            var radius = getRadiusFromStyle(atom, style);
+            var color = atom.color;
+            if (typeof (style.color) != "undefined")
+                color = style.color;
+            var C = WebMol.CC.color(color);
+            
+            //create flat square                       
+            
+            var geoGroup = geo.updateGeoGroup(4);
+            var startv =  geoGroup.vertices;
+            var start = startv*3;
+            var vertexArray = geoGroup.vertexArray;
+            var colorArray = geoGroup.colorArray;
+            
+            //use center point for each vertex
+            for(var i = 0; i < 4; i++) {
+                vertexArray[start+3*i] = atom.x;
+                vertexArray[start+3*i+1] = atom.y ;
+                vertexArray[start+3*i+2] = atom.z;                       	
+            }
+            
+
+            //same colors for all 4 vertices
+            var normalArray = geoGroup.normalArray;
+            var colorArray = geoGroup.colorArray;
+            for(var i = 0; i < 4; i++) {
+            	colorArray[start+3*i] = C.r;
+            	colorArray[start+3*i+1] = C.g;
+            	colorArray[start+3*i+2] = C.b;
+            	
+            }
+            
+        	normalArray[start+0] = -radius;
+        	normalArray[start+1] = -radius;
+        	normalArray[start+2] = 0;
+        	
+        	normalArray[start+3] = -radius;
+        	normalArray[start+4] = radius;
+        	normalArray[start+5] = 0;
+        	
+        	normalArray[start+6] = radius;
+        	normalArray[start+7] = radius;
+        	normalArray[start+8] = 0;
+        	
+        	normalArray[start+9] = radius;
+        	normalArray[start+10] = -radius;
+        	normalArray[start+11] = 0;
+        	
+            geoGroup.vertices += 4;
+            
+            //two faces
+            var faceArray = geoGroup.faceArray;
+            var faceoffset = geoGroup.faceidx; //not number faces, but index
+            faceArray[faceoffset+0] = startv;
+            faceArray[faceoffset+1] = startv+1;
+            faceArray[faceoffset+2] = startv+2;
+            faceArray[faceoffset+3] = startv+2;
+            faceArray[faceoffset+4] = startv+3;
+            faceArray[faceoffset+5] = startv;
+            geoGroup.faceidx += 6;
+            
+        };
+        
         // Rotation matrix around z and x axis - 
         // according to y basis vector
         // TODO: Try to optimize this (square roots?)
@@ -19257,6 +19423,7 @@ WebMol.GLModel = (function() {
             var lineGeometries = {};
             var crossGeometries = {};
             var sphereGeometry = new WebMol.Geometry(true);                                                         
+            var imposterGeometry = new WebMol.Geometry(true);                                                         
             var stickGeometry = new WebMol.Geometry(true);
             var i, n;
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
@@ -19268,6 +19435,7 @@ WebMol.GLModel = (function() {
                     if (atom.clickable && atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};                    
                     drawAtomSphere(atom, sphereGeometry);
+                    drawAtomImposter(atom, imposterGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
@@ -19317,7 +19485,25 @@ WebMol.GLModel = (function() {
 
                 ret.add(sphere);
             }
+            
+            // add imposter geometry
+            if (imposterGeometry.vertices > 0) {
+                var imposterMaterial = new WebMol.ImposterMaterial({
+                    ambient : 0x000000,
+                    vertexColors : true,
+                    reflectivity : 0
+                });
+                
+                //Initialize buffers in geometry                
+                imposterGeometry.initTypedArrays();
+                
+                var spherei = new WebMol.Mesh(imposterGeometry, imposterMaterial);
+                console
+                        .log("spherei geometry " + imposterGeometry.vertices.length);
 
+                ret.add(spherei);
+            }
+            
             // add stick geometry
             if (stickGeometry.vertices > 0) {
                 var cylinderMaterial = new WebMol.MeshLambertMaterial({

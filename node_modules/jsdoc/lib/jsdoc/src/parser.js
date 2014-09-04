@@ -5,15 +5,22 @@
  */
 'use strict';
 
+var events = require('events');
+var fs = require('jsdoc/fs');
 var jsdoc = {
     doclet: require('jsdoc/doclet'),
     name: require('jsdoc/name'),
     src: {
         astnode: require('jsdoc/src/astnode'),
         syntax: require('jsdoc/src/syntax')
+    },
+    util: {
+        doop: require('jsdoc/util/doop'),
+        runtime: require('jsdoc/util/runtime')
     }
 };
 var logger = require('jsdoc/util/logger');
+var path = require('jsdoc/path');
 var util = require('util');
 
 var hasOwnProp = Object.prototype.hasOwnProperty;
@@ -45,13 +52,11 @@ function makeGlobalDoclet(globalScope) {
 
 // TODO: docs
 exports.createParser = function(type) {
-    var path = require('jsdoc/path');
-    var runtime = require('jsdoc/util/runtime');
 
     var modulePath;
 
     if (!type) {
-        type = runtime.isRhino() ? 'rhino' : 'esprima';
+        type = jsdoc.util.runtime.isRhino() ? 'rhino' : 'esprima';
     }
 
     if (PARSERS[type]) {
@@ -72,6 +77,7 @@ exports.createParser = function(type) {
 // TODO: docs
 /**
  * @class
+ * @alias module:jsdoc/src/parser.Parser
  * @mixes module:events.EventEmitter
  *
  * @example <caption>Create a new parser.</caption>
@@ -102,7 +108,7 @@ var Parser = exports.Parser = function(builderInstance, visitorInstance, walkerI
         }
     });
 };
-util.inherits(Parser, require('events').EventEmitter);
+util.inherits(Parser, events.EventEmitter);
 
 // TODO: docs
 Parser.prototype.clear = function() {
@@ -157,7 +163,7 @@ Parser.prototype.parse = function(sourceFiles, encoding) {
         else {
             filename = sourceFiles[i];
             try {
-                sourceCode = require('jsdoc/fs').readFileSync(filename, encoding);
+                sourceCode = fs.readFileSync(filename, encoding);
             }
             catch(e) {
                 logger.error('Unable to read and parse the source file %s: %s', filename, e);
@@ -268,7 +274,7 @@ Parser.prototype.addDocletRef = function(e) {
             (node.type === Syntax.FunctionDeclaration || node.type === Syntax.FunctionExpression) &&
             !this.refs[node.nodeId] ) {
             this.refs[node.nodeId] = {
-                longname: jsdoc.name.ANONYMOUS_LONGNAME,
+                longname: jsdoc.name.LONGNAMES.ANONYMOUS,
                 meta: {
                     code: e.code
                 }
@@ -322,10 +328,10 @@ Parser.prototype.astnodeToMemberof = function(node) {
         doclet = this._getDoclet(node.enclosingScope.nodeId);
 
         if (!doclet) {
-            result = jsdoc.name.ANONYMOUS_LONGNAME + jsdoc.name.INNER;
+            result = jsdoc.name.LONGNAMES.ANONYMOUS + jsdoc.name.SCOPE.PUNC.INNER;
        }
         else {
-            result = (doclet.longname || doclet.name) + jsdoc.name.INNER;
+            result = (doclet.longname || doclet.name) + jsdoc.name.SCOPE.PUNC.INNER;
         }
     }
     else {
@@ -384,7 +390,7 @@ Parser.prototype.resolveThis = function(node) {
         doclet = this._getDoclet(node.enclosingScope.nodeId);
 
         if (!doclet) {
-            result = jsdoc.name.ANONYMOUS_LONGNAME; // TODO handle global this?
+            result = jsdoc.name.LONGNAMES.ANONYMOUS; // TODO handle global this?
         }
         else if (doclet['this']) {
             result = doclet['this'];
@@ -447,10 +453,14 @@ Parser.prototype.resolvePropertyParent = function(node) {
 Parser.prototype.resolveVar = function(node, basename) {
     var doclet;
     var result;
-
     var scope = node.enclosingScope;
 
-    if (!scope) {
+    // HACK: return an empty string for function declarations so they don't end up in anonymous
+    // scope (see #685 and #693)
+    if (node.type === Syntax.FunctionDeclaration) {
+        result = '';
+    }
+    else if (!scope) {
         result = ''; // global
     }
     else {
@@ -484,7 +494,7 @@ Parser.prototype.resolveEnum = function(e) {
         e.doclet.defaultvalue = e.doclet.meta.code.value;
 
         // add a copy of the doclet to the parent's properties
-        doclet.properties.push( require('jsdoc/util/doop').doop(e.doclet) );
+        doclet.properties.push( jsdoc.util.doop(e.doclet) );
     }
 };
 
@@ -493,8 +503,8 @@ Parser.prototype.resolveEnum = function(e) {
  * Fired once for each JSDoc comment in the current source code.
  * @event jsdocCommentFound
  * @memberof module:jsdoc/src/parser.Parser
- * @param {event} e
- * @param {string} e.comment The text content of the JSDoc comment
- * @param {number} e.lineno The line number associated with the found comment.
- * @param {string} e.filename The file name associated with the found comment.
+ * @type {Object}
+ * @property {string} comment The text content of the JSDoc comment
+ * @property {number} lineno The line number associated with the found comment.
+ * @property {string} filename The file name associated with the found comment.
  */

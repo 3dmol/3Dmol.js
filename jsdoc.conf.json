@@ -21,6 +21,7 @@
         "hardwrap" : true
     },
     "opts":{
-        "recurse": true
+        "recurse": true,
+        "tutorials": "tutorials"
      }
 }

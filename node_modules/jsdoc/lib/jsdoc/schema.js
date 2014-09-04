@@ -110,6 +110,11 @@ var TYPE_PROPERTY_SCHEMA = exports.TYPE_PROPERTY_SCHEMA = {
             items: {
                 type: STRING
             }
+        },
+        // type parser output
+        parsedType: {
+           type: OBJECT,
+           additionalProperties: true
         }
     }
 };
@@ -329,10 +334,16 @@ var DOCLET_SCHEMA = exports.DOCLET_SCHEMA = {
             type: BOOLEAN,
             optional: true
         },
+        implementations: {
+            type: ARRAY,
+            optional: true,
+            items: {
+                type: STRING
+            }
+        },
         implements: {
             type: ARRAY,
             optional: true,
-            uniqueItems: true,
             items: {
                 type: STRING
             }
@@ -363,6 +374,7 @@ var DOCLET_SCHEMA = exports.DOCLET_SCHEMA = {
                 'external',
                 'file',
                 'function',
+                'interface',
                 'member',
                 'mixin',
                 'module',
@@ -617,7 +629,6 @@ var PACKAGE_SCHEMA = exports.PACKAGE_SCHEMA = {
 
 var DOCLETS_SCHEMA = exports.DOCLETS_SCHEMA = {
     type: ARRAY,
-    uniqueItems: true,
     items: {
         anyOf: [DOCLET_SCHEMA, PACKAGE_SCHEMA]
     }

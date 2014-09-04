@@ -14301,8 +14301,8 @@ WebMol.Renderer = function ( parameters ) {
         } catch ( error ) {
 
             console.error( error );
-
         }
+        _gl.getExtension('EXT_frag_depth');
     }
 
     function setDefaultGLState () {
@@ -14323,6 +14323,8 @@ WebMol.Renderer = function ( parameters ) {
         _gl.blendFunc( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA );
 
         _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
+        _gl.getExtension('EXT_frag_depth');
+
 
     }
     
@@ -14568,7 +14570,7 @@ WebMol.ShaderLib = {
 "	    discard;",
 "	 float w = sqrt(2.0 - lensqr);",
 "	 float z = sqrt(sqrt(2.0)-lensqr);",
-//"	 gl_FragDepthEXT = z;",
+"	 gl_FragDepthEXT = -.1*z;",
 "    gl_FragColor = vec4( w*vColor, 1 );",
     
 
@@ -16700,6 +16702,9 @@ $(document).ready(function() {
             var viewerdiv = $(this);
             var datauri = null;
             
+            if(typeof($(viewerdiv).css('position')) === "undefined") {
+            	$(viewerdiv).css('position','relative'); //to overlap spinner need positioned container
+            }
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
             
@@ -16766,6 +16771,7 @@ $(document).ready(function() {
     }
 });
     
+
 WebMol.elementColors = WebMol.elementColors || {};
 
 WebMol.elementColors.defaultColor = 0xff1493;
