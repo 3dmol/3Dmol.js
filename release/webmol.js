@@ -21284,7 +21284,31 @@ WebMol.GLViewer = (function() {
             return models[id];
         };
         
- 
+        /**
+         * Rotate scene by angle degrees around axis
+         * 
+         * @function WebMol.GLViewer#rotate
+         * @param {number} [angle] - Angle, in degrees, to rotate by.
+         * @param {string} [angle] - Axis ("x", "y", or "z") to rotate around. Default "y"
+         * 
+         */
+        this.rotate = function(angle, axis) {
+        	if(typeof(axis) === "undefined") {
+        		axis = "y";
+        	}
+        	var i = 0, j = 0, k = 0;
+        	var rangle = Math.PI*angle/180.0;
+        	var s = Math.sin(rangle/2.0);
+        	var c = Math.cos(rangle/2.0);
+        	if(axis == "x") i = s;
+        	if(axis == "y") j = s;
+        	if(axis == "z") k = s;        
+
+        	var q = new WebMol.Quaternion(i,j,k,c).normalize();
+        	rotationGroup.quaternion.multiply(q);
+        	show();
+        };
+        
         this.getView = function() {
             if (!modelGroup)
                 return [ 0, 0, 0, 0, 0, 0, 0, 1 ];

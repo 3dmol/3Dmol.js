@@ -38,6 +38,13 @@ colorlike.a;
 WebMol.createViewer = function(element, config) {};
 
 /**
+  * Contains a dictionary of embedded viewers created from HTML elements
+  * with a the webmoljs_viewer css class indexed by their id (or numerically
+  * if they do not have an id).
+ */
+WebMol.viewers = {}
+
+/**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
  * 
  * @function WebMol.download
