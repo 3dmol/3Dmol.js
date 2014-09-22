@@ -475,6 +475,17 @@ WebMol.GLViewer.createModelFrom = function(sel, extract) {};
 WebMol.GLViewer.addSurface = function(type, style, atomsel, allsel, focus) {};
 
 /**
+ * Adds an explicit mesh as a surface object.
+ * 
+ * @param {WebMol.Mesh}
+ *            mesh
+ * @param {Object}
+ *            style
+ * @returns {Number} surfid
+ */
+WebMol.GLViewer.addMesh = function(mesh) {};
+
+/**
  * WebMol surface types
  * @enum {number}
  */

@@ -31,7 +31,7 @@ WebMol.createViewer = function(element, config)
         if(typeof(this[fname]) === "function")
         {
             try {
-                return new this[fname](element, config.callback, config.defaultcolors);
+                return new this[fname](element, config.callback, config.defaultcolors, config.nomouse);
             }
             catch(e) {
                 console.log("error with "+kind+":"+e);

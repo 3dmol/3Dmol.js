@@ -190,9 +190,9 @@ WebMol.MeshLambertMaterial = function(parameters) {
 
 WebMol.MeshLambertMaterial.prototype = Object.create(WebMol.Material.prototype);
 
-WebMol.MeshLambertMaterial.prototype.clone = function() {
+WebMol.MeshLambertMaterial.prototype.clone = function(material) {
   
-    var material = new WebMol.MeshLambertMaterial();
+    if ( typeof material === "undefined" ) material = new WebMol.MeshLambertMaterial();
     
     WebMol.Material.prototype.clone.call(this, material);
     
@@ -224,6 +224,29 @@ WebMol.MeshLambertMaterial.prototype.clone = function() {
     material.morphTargets = this.morphTargets;
     material.morphNormals = this.morphNormals;
     
+    return material;
+    
+};
+
+//Double sided Mesh Lambert material
+/** @constructor */
+WebMol.MeshDoubleLambertMaterial = function(parameters) {
+    
+    WebMol.MeshLambertMaterial.call(this);
+
+    this.shaderID = "lambertdouble";
+    this.side = WebMol.DoubleSide;    
+    
+};
+
+WebMol.MeshDoubleLambertMaterial.prototype = Object.create(WebMol.MeshLambertMaterial.prototype);
+
+WebMol.MeshDoubleLambertMaterial.prototype.clone = function() {
+  
+    var material = new WebMol.MeshDoubleLambertMaterial();
+    
+    WebMol.MeshLambertMaterial.prototype.clone.call(this, material);
+        
     return material;
     
 };

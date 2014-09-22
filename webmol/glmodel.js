@@ -9,7 +9,7 @@ WebMol.GLModel = (function() {
 
     // class variables go here
     var defaultAtomStyle = {
-        line : {},
+        line : {}
     };
 
     var Nucleotides = [ '  G', '  A', '  T', '  C', '  U', ' DG', ' DA', ' DT',
@@ -351,7 +351,6 @@ WebMol.GLModel = (function() {
             atom.z = parseFloat(tokens[4]) * convFactor;
             
             atom.hetflag = true;
-            atom.singleBonds = true;
             atom.bonds = [];
             atom.bondOrder = [];
             atom.properties = {};
@@ -395,7 +394,6 @@ WebMol.GLModel = (function() {
             atom.hetflag = true;
             atom.bonds = [];
             atom.bondOrder = [];
-            atom.singleBonds = true;
             atom.properties = {};
             atoms[i] = atom;
         }
@@ -434,7 +432,6 @@ WebMol.GLModel = (function() {
             atom.y = parseFloat(line.substr(10, 10));
             atom.z = parseFloat(line.substr(20, 10));
             atom.hetflag = true;
-            atom.singleBonds = true; //atom only makes single bonds ?
             atom.atom = atom.elem = line.substr(31, 3).replace(/ /g, "");
             atom.bonds = [];
             atom.bondOrder = [];
@@ -447,10 +444,7 @@ WebMol.GLModel = (function() {
             offset++;
             var from = parseInt(line.substr(0, 3)) - 1 + start;
             var to = parseInt(line.substr(3, 3)) - 1 + start;
-            var order = parseInt(line.substr(6, 3));
-            if (order > 1) {
-                atoms[from].singleBonds = false; atoms[to].singleBonds = false;
-            }                
+            var order = parseInt(line.substr(6, 3));            
             atoms[from].bonds.push(to);
             atoms[from].bondOrder.push(order);
             atoms[to].bonds.push(from);
@@ -529,9 +523,7 @@ WebMol.GLModel = (function() {
             atom.y = parseFloat(tokens[3]);
             atom.z = parseFloat(tokens[4]);
             atom.atom = atom.elem = tokens[5].split('.')[0];
-            
-            atom.singleBonds = true;
-            
+                        
             // TODO: Add capability to ignore H's
 
             if (atom.elem == 'H' && noH)
@@ -573,10 +565,6 @@ WebMol.GLModel = (function() {
                 var order = parseInt(tokens[3]);
                 if (isNaN(order))
                     order = 1;
-                
-                if (order > 1) {
-                    fromAtom.singleBonds = false; toAtom.singleBonds = false;   
-                }                   
                 
                 if (fromAtom !== undefined && toAtom !== undefined){
                     fromAtom.bonds.push(serialToIndex[to]);
@@ -671,7 +659,6 @@ WebMol.GLModel = (function() {
                     'atom' : atom,
                     'bonds' : [],
                     'ss' : 'c',
-                    'singleBonds' : true,
                     'bondOrder' : [],
                     'properties' : {},
                     'b' : b,
@@ -987,8 +974,8 @@ WebMol.GLModel = (function() {
                 var widthSegments = 12;
                 var heightSegments = 10;
                 if (radius < 1) {
-                    widthSegments = 8;
-                    heightSegments = 6;
+                    widthSegments = 10;
+                    heightSegments = 8;
                 }
 
                 var phiStart = 0;
@@ -1059,6 +1046,7 @@ WebMol.GLModel = (function() {
                 atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
             var c = WebMol.CC.color(atom.color);
+            if(style.color) c = WebMol.CC.color(style.color);
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -1115,7 +1103,7 @@ WebMol.GLModel = (function() {
             var colorArray = geoGroup.colorArray;
             
             for ( var i = 0; i < atom.bonds.length; i++) {
-                
+                //these are cheap so just always draw half bonds
                 var j = atom.bonds[i]; // our neighbor
                 // TODO: handle bond orders
                 var atom2 = atoms[j];
@@ -1134,6 +1122,19 @@ WebMol.GLModel = (function() {
                 }
 
                 var c1 = WebMol.CC.color(atom.color);
+                var singleBond = true; //TODO: implement valences with wires
+                if(atom.bondStyles && atom.bondStyles[i]) {
+                	var bstyle = atom.bondStyles[i];
+                	if(!bstyle.iswire) {
+                		continue;
+                	}
+                	if(bstyle.radius) bondR = bstyle.radius;
+                	if(bstyle.singleBond) singleBond = true;
+                	if(typeof(bstyle.color1) != "undefined") {
+                		c1 = WebMol.CC.color(bstyle.color1);
+                	}
+                }
+                
                 var offset = geoGroup.vertices*3;
                 geoGroup.vertices += 2;
 
@@ -1651,7 +1652,9 @@ WebMol.GLModel = (function() {
             if (style.hidden)
                 return;
 
-            var bondR = style.radius || defaultStickRadius;
+            var atomBondR = style.radius || defaultStickRadius;
+            var bondR = atomBondR;
+            var atomSingleBond = style.singleBonds || false;
             var fromCap = false, toCap = false;
 
             var c1 = atom.color;
@@ -1672,21 +1675,38 @@ WebMol.GLModel = (function() {
                     // lets us combine
                     // cylinders of the same
                     // color
-                    // TODO: handle bond orders
-                    if (!atom2.style.stick)
+                	var style2 = atom2.style;
+                    if (!style2.stick)
                         continue; // don't sweat the details                     
 
+                    var c2 = atom2.color;
+                    if (typeof (style2.stick.color) != "undefined") {
+                        c2 = style2.stick.color;
+                    }
+                    var C2 = WebMol.CC.color(c2);
+                    
+                    //support bond specific styles
+                    bondR = atomBondR;                    
+                    var singleBond = atomSingleBond;
+                    if(atom.bondStyles && atom.bondStyles[i]) {
+                    	var bstyle = atom.bondStyles[i];
+                    	if(bstyle.iswire) {
+                    		continue;
+                    	}
+                    	if(bstyle.radius) bondR = bstyle.radius;
+                    	if(bstyle.singleBond) singleBond = true;
+                    	if(typeof(bstyle.color1) != "undefined") {
+                    		C1 = WebMol.CC.color(bstyle.color1);
+                    	}
+                    	if(typeof(bstyle.color2) != "undefined") {
+                    		C2 = WebMol.CC.color(bstyle.color2);
+                    	}
+                    }
                     var p1 = new WebMol.Vector3(atom.x, atom.y, atom.z);
                     var p2 = new WebMol.Vector3(atom2.x, atom2.y, atom2.z);
 
-                    var c2 = atom2.color;
-                    if (typeof (style.color) != "undefined") {
-                        c2 = style.color;
-                    }
-                    var C2 = WebMol.CC.color(c2);
-
                     // draw cylinders
-                    if (atom.bondOrder[i] === 1) {
+                    if (atom.bondOrder[i] === 1 || singleBond) {
 
                         if (!atom2.capDrawn && atom2.bonds.length < 4)
                             toCap = true;       
@@ -1720,7 +1740,14 @@ WebMol.GLModel = (function() {
                     } 
                     
                     else if (atom.bondOrder[i] > 1) {
-                        fromCap = false; toCap = false;
+                        var mfromCap = false; mtoCap = false; //multi bond caps
+                        
+                        if(bondR != atomBondR) {
+                        	//assume jmol style multiple bonds - the radius doesn't fit within atom sphere
+                        	mfromCap = true;
+                        	mtoCap = true;
+                        }
+                        
                         var dir = p2.clone();
                         var v = null;
                         dir.sub(p1);
@@ -1759,7 +1786,17 @@ WebMol.GLModel = (function() {
                             dir2.sub(p1);
 
                             v = dir2.clone();
-                            v.cross(dir);
+                            v.cross(dir);                           
+                        }
+                        
+                        //especially for C#C (triple bond) dir and dir2
+                        //may be opposites resulting in a zero v
+                        if(v.lengthSq() < 0.01) {
+                        	 v = dir.clone();
+                             if (Math.abs(v.x) > 0.0001)
+                                 v.y += 1;
+                             else
+                                 v.x += 1;
                         }
                         
                         if (atom.bondOrder[i] == 2) {
@@ -1783,13 +1820,13 @@ WebMol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp2 = new WebMol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                drawCylinder(geo, p1a, mp, r, C1, fromCap, false);
-                                drawCylinder(geo, mp, p2a, r, C2, false, toCap);
-                                drawCylinder(geo, p1b, mp2, r, C1, fromCap, false);
-                                drawCylinder(geo, mp2, p2b, r, C2, false, toCap);
+                                drawCylinder(geo, p1a, mp, r, C1, mfromCap, false);
+                                drawCylinder(geo, mp, p2a, r, C2, false, mtoCap);
+                                drawCylinder(geo, p1b, mp2, r, C1, mfromCap, false);
+                                drawCylinder(geo, mp2, p2b, r, C2, false, mtoCap);
                             } else {
-                                drawCylinder(geo, p1a, p2a, r, C1, fromCap, toCap);
-                                drawCylinder(geo, p1b, p2b, r, C1, fromCap, toCap);
+                                drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
+                                drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
                             }
                             if (atom.clickable || atom2.clickable){
                                 mp = new WebMol.Vector3().addVectors(p1a, p2a)
@@ -1833,16 +1870,16 @@ WebMol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp3 = new WebMol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
-                                drawCylinder(geo, p1a, mp, r, C1, fromCap, false);
-                                drawCylinder(geo, mp, p2a, r, C2, false, toCap);
+                                drawCylinder(geo, p1a, mp, r, C1, mfromCap, false);
+                                drawCylinder(geo, mp, p2a, r, C2, false, mtoCap);
                                 drawCylinder(geo, p1, mp3, r, C1, fromCap, false);
                                 drawCylinder(geo, mp3, p2, r, C2, false, toCap);
-                                drawCylinder(geo, p1b, mp2, r, C1, fromCap, false);
-                                drawCylinder(geo, mp2, p2b, r, C2, false, toCap);
+                                drawCylinder(geo, p1b, mp2, r, C1, mfromCap, false);
+                                drawCylinder(geo, mp2, p2b, r, C2, false, mtoCap);
                             } else {
-                                drawCylinder(geo, p1a, p2a, r, C1, fromCap, toCap);
+                                drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
                                 drawCylinder(geo, p1, p2, r, C1, fromCap, toCap);
-                                drawCylinder(geo, p1b, p2b, r, C1, fromCap, toCap);
+                                drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
 
                             }
                             if (atom.clickable || atom2.clickable) {
@@ -1880,10 +1917,28 @@ WebMol.GLModel = (function() {
                                  
             }            
 
-            // draw non bonded heteroatoms as spheres   
-            var drawSphere = (!atom.singleBonds && atom.bonds.length === 1) || (!atom.bonds.length);
+            // draw non bonded heteroatoms as spheres
+            var drawSphere = atom.bonds.length == 0;
+            //also, if any bonds were drawn as multiples, need sphere
+            for(var i = 0; i < atom.bonds.length; i++) {
+                var singleBond = atomSingleBond;
+                if(atom.bondStyles && atom.bondStyles[i]) {
+                	var bstyle = atom.bondStyles[i];
+                	if(bstyle.singleBond) singleBond = true;
+                	if(bstyle.radius && bstyle.radius != atomBondR)
+                		break; //jmol style
+                }
+            	if(atom.bondOrder[i] > 1 && !singleBond) {
+            		drawSphere = true;
+            		break;
+            	}
+            }
+           
             if (drawSphere) {
                 var savedstyle = atom.style;
+                bondR = atomBondR;
+                //do not use bond style as this can be variable, particularly
+                //with jmol export of double/triple bonds
                 atom.style = {
                     sphere : {
                         radius : bondR,
@@ -1960,16 +2015,13 @@ WebMol.GLModel = (function() {
                 var sphereMaterial = new WebMol.MeshLambertMaterial({
                     ambient : 0x000000,
                     vertexColors : true,
-                    reflectivity : 0
+                    reflectivity : 0,
                 });
                 
                 //Initialize buffers in geometry                
                 sphereGeometry.initTypedArrays();
                 
                 var sphere = new WebMol.Mesh(sphereGeometry, sphereMaterial);
-                console
-                        .log("sphere geometry " + sphereGeometry.vertices.length);
-
                 ret.add(sphere);
             }
             

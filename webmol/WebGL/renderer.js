@@ -715,7 +715,7 @@ WebMol.Renderer = function ( parameters ) {
             m_uniforms.fogFar.value = fog.far;
 
             //Set up lights for lambert shader
-            if (material.shaderID === "lambert") {
+            if (material.shaderID.lastIndexOf("lambert",0) === 0) {
 
                 //load view and normal matrices for directional and object lighting
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
