@@ -756,6 +756,37 @@ WebMol.GLShape = (function() {
             updateBoundingFromPoints( this.boundingSphere, components, geoGroup.vertexArray );
         };        
         
+        //add a cylinder
+        //TODO: specialize drawArrow to be more efficient for this case
+        this.addCylinder = function(cylinderSpec) {
+            
+        	cylinderSpec.start = cylinderSpec.start || {};
+        	cylinderSpec.end = cylinderSpec.end || {};
+            
+        	cylinderSpec.start = new WebMol.Vector3(cylinderSpec.start.x || 0, cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+        	cylinderSpec.end = new WebMol.Vector3(cylinderSpec.end.x || 3, cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);            
+            
+        	cylinderSpec.radius = cylinderSpec.radius || 0.1;
+            
+        	cylinderSpec.radiusRatio = 1.0; //no arrow protrusion
+        	cylinderSpec.mid = 1.0; //no arrowhead
+            
+            var geoGroup = geo.addGeoGroup();
+            
+            drawArrow(this, geoGroup, cylinderSpec);
+            geoGroup.truncateArrayBuffers(true);
+            
+            var centroid = new WebMol.Vector3();
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : centroid.addVectors(cylinderSpec.start, cylinderSpec.end).multiplyScalar(0.5)
+            });
+            
+            updateBoundingFromPoints( this.boundingSphere, components, geoGroup.vertexArray );
+                            
+        };
+        
         this.addArrow = function(arrowSpec) {
             
             arrowSpec.start = arrowSpec.start || {};

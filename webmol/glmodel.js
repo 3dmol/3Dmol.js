@@ -1919,19 +1919,28 @@ WebMol.GLModel = (function() {
 
             // draw non bonded heteroatoms as spheres
             var drawSphere = atom.bonds.length == 0;
+            var numsinglebonds = 0;
+            var differentradii = false;
             //also, if any bonds were drawn as multiples, need sphere
             for(var i = 0; i < atom.bonds.length; i++) {
                 var singleBond = atomSingleBond;
                 if(atom.bondStyles && atom.bondStyles[i]) {
                 	var bstyle = atom.bondStyles[i];
                 	if(bstyle.singleBond) singleBond = true;
-                	if(bstyle.radius && bstyle.radius != atomBondR)
-                		break; //jmol style
+                	if(bstyle.radius && bstyle.radius != atomBondR) {
+                		differentradii = true;
+                	}
                 }
-            	if(atom.bondOrder[i] > 1 && !singleBond) {
-            		drawSphere = true;
-            		break;
-            	}
+                if(singleBond || atom.bondOrder[i] == 1) {
+                	numsinglebonds++;
+                }
+            }
+            
+            if(differentradii) { //jmol style double/triple bonds - no sphere
+            	if(numsinglebonds > 0) drawSphere = true; //unless needed as a cap
+            }
+            else if(numsinglebonds != atom.bonds.length) {
+            	drawSphere = true;
             }
            
             if (drawSphere) {

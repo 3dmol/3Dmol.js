@@ -2,7 +2,7 @@
 <html style="height:100%; padding: 0; margin: 0">
     <head>
         <title>WebMol Test</title>
-        <script src="build/webmol-min.js"></script>       
+        <script src="build/webmol.js"></script>       
         <script>
         var glviewer = null;
         var m = null;
@@ -39,7 +39,7 @@
          
         $(document).ready(function() {     
                        
-            $.get('test_structs/benzene-homo.cube', function(data){
+            $.get('tests/test_structs/benzene-homo.cube', function(data){
                 
                 moldata = $("#moldata_benzene_sdf").val();
                 voldata = data;
@@ -60,9 +60,12 @@
                     sphere.color = WebMol.CC.color(0xE06633); sphere.wireframe = true;
                     
                     arrow = viewer.addArrow({end: new WebMol.Vector3(5,1,1)});
-                    arrow.color = WebMol.CC.color(0x00FF00); arrow.wireframe = true;
+                    arrow.color = WebMol.CC.color(0x00FF00); arrow.wireframe = false;
                     arrow.callback = shapecallback; arrow.clickable = true;
-                                                                                      
+
+                    cyl = viewer.addCylinder({end: new WebMol.Vector3(1,1,5)});
+                    cyl.color = WebMol.CC.color(0x0000FF); 
+                                                                                                          
                     viewer.zoomTo();
                     viewer.render();    
                 }});  

@@ -406,6 +406,15 @@ WebMol.GLViewer.addSphere = function(spec) {};
 WebMol.GLViewer.addArrow = function(spec) {};
 
 /**
+ * Create and add cylinder shape
+ * 
+ * @function WebMol.GLViewer#addArrow
+ * @param {CylinderSpec} spec - Style specification
+ * @return {WebMol.GLShape}
+ */
+WebMol.GLViewer.addCylinder = function(spec) {};
+
+/**
  * Add custom shape component from user supplied function
  * 
  * @function WebMol.GLViewer#addCustom
@@ -817,6 +826,13 @@ WebMol.GLShape.addSphere = function(sphereSpec) {};
  * @return {WebMol.GLShape}
  */
 WebMol.GLShape.addArrow = function(arrowSpec) {};
+
+/**
+ * Creates a Cylinder shape
+ * @param {CylinderSpec} cylinderSpec
+ * @return {WebMol.GLShape}
+ */
+WebMol.GLShape.addCylinder = function(cylinderSpec) {};
 
 /** 
  * Creates custom shape from volumetric data 

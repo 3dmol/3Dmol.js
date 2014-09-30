@@ -835,18 +835,7 @@ WebMol.GLViewer = (function() {
 			rotationGroup.position.z = CAMERA_Z - scale;
 			show();
 		};
-
-		/**
-		 * Set the zoom to a certain amount
-		 * 
-		 * @function WebMol.GLViewer#zoom
-		 * @param {number}
-		 *            [amount] a distance to set the camera Z to
-		 */
-		this.setZoom = function(amount) {
-			rotationGroup.position.z = CAMERA_Z + amount;
-			show();
-		}
+		
 
 		/**
 		 * Zoom to center of atom selection
@@ -1036,6 +1025,15 @@ WebMol.GLViewer = (function() {
 			var s = new WebMol.GLShape(shapes.length);
 			spec = spec || {};
 			s.addArrow(spec);
+			shapes.push(s);
+
+			return s;
+		};
+		
+		this.addCylinder = function(spec) {
+			var s = new WebMol.GLShape(shapes.length);
+			spec = spec || {};
+			s.addCylinder(spec);
 			shapes.push(s);
 
 			return s;

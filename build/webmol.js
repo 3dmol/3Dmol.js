@@ -14714,7 +14714,7 @@ WebMol.ShaderLib = {
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
     
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    vLightFront = vLightFront * color + ambient * ambientLightColor + emissive;",
+"    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
     
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -19562,19 +19562,28 @@ WebMol.GLModel = (function() {
 
             // draw non bonded heteroatoms as spheres
             var drawSphere = atom.bonds.length == 0;
+            var numsinglebonds = 0;
+            var differentradii = false;
             //also, if any bonds were drawn as multiples, need sphere
             for(var i = 0; i < atom.bonds.length; i++) {
                 var singleBond = atomSingleBond;
                 if(atom.bondStyles && atom.bondStyles[i]) {
                 	var bstyle = atom.bondStyles[i];
                 	if(bstyle.singleBond) singleBond = true;
-                	if(bstyle.radius && bstyle.radius != atomBondR)
-                		break; //jmol style
+                	if(bstyle.radius && bstyle.radius != atomBondR) {
+                		differentradii = true;
+                	}
                 }
-            	if(atom.bondOrder[i] > 1 && !singleBond) {
-            		drawSphere = true;
-            		break;
-            	}
+                if(singleBond || atom.bondOrder[i] == 1) {
+                	numsinglebonds++;
+                }
+            }
+            
+            if(differentradii) { //jmol style double/triple bonds - no sphere
+            	if(numsinglebonds > 0) drawSphere = true; //unless needed as a cap
+            }
+            else if(numsinglebonds != atom.bonds.length) {
+            	drawSphere = true;
             }
            
             if (drawSphere) {
@@ -20774,6 +20783,37 @@ WebMol.GLShape = (function() {
             updateBoundingFromPoints( this.boundingSphere, components, geoGroup.vertexArray );
         };        
         
+        //add a cylinder
+        //TODO: specialize drawArrow to be more efficient for this case
+        this.addCylinder = function(cylinderSpec) {
+            
+        	cylinderSpec.start = cylinderSpec.start || {};
+        	cylinderSpec.end = cylinderSpec.end || {};
+            
+        	cylinderSpec.start = new WebMol.Vector3(cylinderSpec.start.x || 0, cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+        	cylinderSpec.end = new WebMol.Vector3(cylinderSpec.end.x || 3, cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);            
+            
+        	cylinderSpec.radius = cylinderSpec.radius || 0.1;
+            
+        	cylinderSpec.radiusRatio = 1.0; //no arrow protrusion
+        	cylinderSpec.mid = 1.0; //no arrowhead
+            
+            var geoGroup = geo.addGeoGroup();
+            
+            drawArrow(this, geoGroup, cylinderSpec);
+            geoGroup.truncateArrayBuffers(true);
+            
+            var centroid = new WebMol.Vector3();
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : centroid.addVectors(cylinderSpec.start, cylinderSpec.end).multiplyScalar(0.5)
+            });
+            
+            updateBoundingFromPoints( this.boundingSphere, components, geoGroup.vertexArray );
+                            
+        };
+        
         this.addArrow = function(arrowSpec) {
             
             arrowSpec.start = arrowSpec.start || {};
@@ -21753,18 +21793,7 @@ WebMol.GLViewer = (function() {
 			rotationGroup.position.z = CAMERA_Z - scale;
 			show();
 		};
-
-		/**
-		 * Set the zoom to a certain amount
-		 * 
-		 * @function WebMol.GLViewer#zoom
-		 * @param {number}
-		 *            [amount] a distance to set the camera Z to
-		 */
-		this.setZoom = function(amount) {
-			rotationGroup.position.z = CAMERA_Z + amount;
-			show();
-		}
+		
 
 		/**
 		 * Zoom to center of atom selection
@@ -21954,6 +21983,15 @@ WebMol.GLViewer = (function() {
 			var s = new WebMol.GLShape(shapes.length);
 			spec = spec || {};
 			s.addArrow(spec);
+			shapes.push(s);
+
+			return s;
+		};
+		
+		this.addCylinder = function(spec) {
+			var s = new WebMol.GLShape(shapes.length);
+			spec = spec || {};
+			s.addCylinder(spec);
 			shapes.push(s);
 
 			return s;
