@@ -378,7 +378,7 @@ WebMol.Geometry = (function() {
         }
     };
     
-    geometryGroup.prototype.truncateArrayBuffers = function(mesh) {
+    geometryGroup.prototype.truncateArrayBuffers = function(mesh, reallocatemem) {
         
         mesh = (mesh === true) ? true : false;
         
@@ -407,6 +407,15 @@ WebMol.Geometry = (function() {
             this.lineArray = new Uint16Array(); 
         }
         
+        if(reallocatemem) { 
+        	//actually copy smaller arrays to save memory
+        	if(this.normalArray) this.normalArray = new Float32Array(this.normalArray);
+        	if(this.faceArray) this.faceArray = new Uint16Array(this.faceArray);
+        	if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
+        	if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
+        	if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
+        	
+        }
         this.__inittedArrays = true;        
         
     };
@@ -505,8 +514,7 @@ WebMol.Geometry = (function() {
         },
         
         //After vertices, colors, etc are collected in regular or typed arrays,
-        // either create typed arrays from regular arrays if they don't already exist,
-        // or shorten last typed array
+        //  create typed arrays from regular arrays if they don't already exist,
         initTypedArrays : function() {
                 
             for (var g = 0; g < this.groups; g++) {
@@ -516,7 +524,10 @@ WebMol.Geometry = (function() {
                 if (group.__inittedArrays === true)
                     continue;
                 
-                group.truncateArrayBuffers(this.mesh);
+                //do not actually reallocate smaller memory here because
+                //of the performance hit - if you know your geometry is small,
+                //truncate manually with the second parameter true
+                group.truncateArrayBuffers(this.mesh, false);
             }
             
         

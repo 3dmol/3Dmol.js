@@ -724,7 +724,14 @@ WebMol.GLViewer = (function() {
 							modelGroup.remove(surfaces[i].lastGL);
 
 						// create new surface
-						var smesh = new WebMol.Mesh(geo, surfaces[i].mat);
+						var smesh = null;
+						if(surfaces[i].mat instanceof WebMol.LineBasicMaterial) {
+							//special case line meshes
+							smesh = new WebMol.Line(geo, surfaces[i].mat);
+						}
+						else {
+							smesh = new WebMol.Mesh(geo, surfaces[i].mat);
+						}
 						surfaces[i].lastGL = smesh;
 						modelGroup.add(smesh);
 					} // else final surface already there
@@ -1011,6 +1018,14 @@ WebMol.GLViewer = (function() {
 					&& typeof (shapes[shapes.length - 1]) === "undefined")
 				shapes.pop();
 		};
+		
+		this.removeAllShapes = function() {
+			for (var i = 0; i < shapes.length; i++) {
+				var shape = shapes[i];
+				shape.removegl(modelGroup);
+			}
+			shapes = [];
+		}
 
 		this.addSphere = function(spec) {
 			var s = new WebMol.GLShape(shapes.length);
@@ -1711,12 +1726,10 @@ WebMol.GLViewer = (function() {
 		};
 
 		this.clear = function() {
-			// models = [];
 			this.removeAllSurfaces();
 			this.removeAllModels();
 			this.removeAllLabels();
-			
-			//TODO: shapes
+			this.removeAllShapes();
 			show();
 		};
 

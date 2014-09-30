@@ -176,7 +176,7 @@ if (testSuite === 'webmol') {
     
     QUnit.test(testName, function() {
         
-        viewer.setStyle({}, {cross:{}});
+        viewer.setStyle({}, {});
         viewer.render();
         console.group(testName);          
         
