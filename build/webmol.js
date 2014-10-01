@@ -21410,6 +21410,8 @@ WebMol.Label.prototype = {
 
 		return function() {
 			var fontMult = 2.0;
+			var useScreen =  typeof(this.stylespec.useScreen) == "undefined" ? false : this.stylespec.useScreen;
+
 			this.showBackground = this.stylespec.showBackground;
 			if(typeof(this.showBackground) == "undefined") this.showBackground = true; //default
 			this.font = this.stylespec.font = this.stylespec.font ? this.stylespec.font
@@ -21504,17 +21506,15 @@ WebMol.Label.prototype = {
 			// canvas contents will be used for a texture
 			var texture = new WebMol.Texture(this.canvas);
 			texture.needsUpdate = true;
-
 			this.sprite.material = new WebMol.SpriteMaterial({
 				map : texture,
-				useScreenCoordinates : this.stylespec.useScreen,
+				useScreenCoordinates : useScreen,
 				alignment : spriteAlignment,
 				depthTest : !this.inFront
 			});
 
-			if(this.stylespec.useScreen)
-				this.position.z = 0;
-			this.sprite.scale.set(1.5*this.fontSize/fontMult, this.fontSize/fontMult, 1);
+			//TODO: figure out why the magic number 2.0 is needed
+			this.sprite.scale.set(2.0*this.fontSize/fontMult, this.fontSize/fontMult, 1);
 			this.sprite.position.set(this.position.x, this.position.y,
 					this.position.z);
 		};

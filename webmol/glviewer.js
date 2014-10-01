@@ -43,6 +43,8 @@ WebMol.Label.prototype = {
 
 		return function() {
 			var fontMult = 2.0;
+			var useScreen =  typeof(this.stylespec.useScreen) == "undefined" ? false : this.stylespec.useScreen;
+
 			this.showBackground = this.stylespec.showBackground;
 			if(typeof(this.showBackground) == "undefined") this.showBackground = true; //default
 			this.font = this.stylespec.font = this.stylespec.font ? this.stylespec.font
@@ -137,10 +139,9 @@ WebMol.Label.prototype = {
 			// canvas contents will be used for a texture
 			var texture = new WebMol.Texture(this.canvas);
 			texture.needsUpdate = true;
-
 			this.sprite.material = new WebMol.SpriteMaterial({
 				map : texture,
-				useScreenCoordinates : this.stylespec.useScreen,
+				useScreenCoordinates : useScreen,
 				alignment : spriteAlignment,
 				depthTest : !this.inFront
 			});
