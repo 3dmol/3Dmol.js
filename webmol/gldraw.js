@@ -69,50 +69,50 @@ WebMol.GLDraw = (function() {
 		};
 
 	}();
+	
+	// Ortho normal vectors for cylinder radius/ sphere cap equator and cones
+	// Direction is j basis (0,1,0)
+	var basisVectors = function() {
+
+		var ret = {
+			vertices : [],
+			norms : []
+		};
+
+		var nvecs = [];
+
+		nvecs[0] = new WebMol.Vector3(-1, 0, 0);
+		nvecs[4] = new WebMol.Vector3(0, 0, 1);
+		nvecs[8] = new WebMol.Vector3(1, 0, 0);
+		nvecs[12] = new WebMol.Vector3(0, 0, -1);
+
+		// now quarter positions
+		nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
+		nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
+		nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
+		nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
+
+		// eights
+		nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
+		nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
+		nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
+		nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
+		nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
+		nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
+		nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
+		nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
+
+		/*
+		 * nvecs[0] = new WebMol.Vector3(-1,0,0); nvecs[1] = new
+		 * WebMol.Vector3(0,0,1); nvecs[2] = new WebMol.Vector3(1,0,0);
+		 * nvecs[3] = new WebMol.Vector3(0,0,-1);
+		 */
+		return nvecs;
+
+	}();
 
 	// memoize capped cylinder for given radius
 	var cylVertexCache = {
-
-		// Ortho normal vectors for cylinder radius/ sphere cap equator
-		// Direction is j basis (0,1,0)
-		basisVectors : function() {
-
-			var ret = {
-				vertices : [],
-				norms : []
-			};
-
-			var nvecs = [];
-
-			nvecs[0] = new WebMol.Vector3(-1, 0, 0);
-			nvecs[4] = new WebMol.Vector3(0, 0, 1);
-			nvecs[8] = new WebMol.Vector3(1, 0, 0);
-			nvecs[12] = new WebMol.Vector3(0, 0, -1);
-
-			// now quarter positions
-			nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
-			nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
-			nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
-			nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
-
-			// eights
-			nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
-			nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
-			nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
-			nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
-			nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
-			nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
-			nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
-			nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
-
-			/*
-			 * nvecs[0] = new WebMol.Vector3(-1,0,0); nvecs[1] = new
-			 * WebMol.Vector3(0,0,1); nvecs[2] = new WebMol.Vector3(1,0,0);
-			 * nvecs[3] = new WebMol.Vector3(0,0,-1);
-			 */
-			return nvecs;
-
-		}(),
 
 		cache : {},
 
@@ -122,19 +122,19 @@ WebMol.GLDraw = (function() {
 				return this.cache[radius];
 
 			var dir = new WebMol.Vector3(0, 1, 0);
-			var w = this.basisVectors.length;
+			var w = basisVectors.length;
 			var nvecs = [], norms = [];
 			var n;
 
 			for (var i = 0; i < w; i++) {
 				// bottom
-				nvecs.push(this.basisVectors[i].clone().multiplyScalar(radius));
+				nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
 				// top
-				nvecs.push(this.basisVectors[i].clone().multiplyScalar(radius));
+				nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
 
 				// NOTE: this normal is used for constructing sphere caps -
 				// cylinder normals taken care of in drawCylinder
-				n = this.basisVectors[i].clone().normalize();
+				n = basisVectors[i].clone().normalize();
 				norms.push(n);
 				norms.push(n);
 			}
@@ -547,6 +547,113 @@ WebMol.GLDraw = (function() {
 		geoGroup.vertices += n_verts;
 	};
 
+	
+	draw.drawCone = function(geo, from, to, radius, color) {
+		if (!from || !to)
+			return;
+
+		color = color || {r:0, g:0, b:0};
+
+		var dir =[to.x, to.y, to.z ];		
+		dir.x -= from.x;
+		dir.y -= from.y;
+		dir.z -= from.z;
+
+		var e = getRotationMatrix(dir);
+
+
+		// n vertices around bottom plust the two points
+		var n = basisVectors.length;
+		var basis = basisVectors;
+		var n_verts =  n + 2;
+
+		
+		//setup geo structures
+		var geoGroup = geo.updateGeoGroup(n_verts);
+		var start = geoGroup.vertices;	
+		var offset, faceoffset;
+		var i, x, y, z;
+		var vertexArray = geoGroup.vertexArray;
+		var normalArray = geoGroup.normalArray;
+		var colorArray = geoGroup.colorArray;
+		var faceArray = geoGroup.faceArray;
+		
+		var offset = start*3;
+		var ndir = new WebMol.Vector3(dir[0],dir[1],dir[2]).normalize();
+		//base point first vertex
+		vertexArray[offset] = from.x;
+		vertexArray[offset+1] = from.y;
+		vertexArray[offset+2] = from.z;
+		normalArray[offset] = -ndir.x;
+		normalArray[offset + 1] = -ndir.y;
+		normalArray[offset + 2] = -ndir.z;
+		colorArray[offset] = color.r;
+		colorArray[offset + 1] = color.g;
+		colorArray[offset + 2] = color.b;
+		
+		//second vertex top
+		vertexArray[offset+3] = to.x;
+		vertexArray[offset+4] = to.y;
+		vertexArray[offset+5] = to.z;
+		
+		normalArray[offset+3] = ndir.x;
+		normalArray[offset+4] = ndir.y;
+		normalArray[offset+5] = ndir.z;
+		colorArray[offset+3] = color.r;
+		colorArray[offset + 4] = color.g;
+		colorArray[offset + 5] = color.b;
+		
+		offset += 6;
+		
+		// add circle vertices
+		for (i = 0; i < n; ++i) {
+			var vec = basis[i].clone();
+			vec.multiplyScalar(radius);
+			x = e[0] * vec.x + e[3] * vec.y + e[6]
+					* vec.z;
+			y = e[1] * vec.x + e[4] * vec.y + e[7]
+					* vec.z;
+			z = e[5] * vec.y + e[8] * vec.z;
+
+			// from
+			vertexArray[offset] = x + from.x;
+			vertexArray[offset + 1] = y + from.y;
+			vertexArray[offset + 2] = z + from.z;
+
+			// normals
+			normalArray[offset] = x;
+			normalArray[offset + 1] = y;
+			normalArray[offset + 2] = z;
+
+			// colors
+			colorArray[offset] = color.r;
+			colorArray[offset + 1] = color.g;
+			colorArray[offset + 2] = color.b;
+			
+			offset += 3;
+
+		}
+		geoGroup.vertices += (n+2);
+		//faces
+		var faceoffset = geoGroup.faceidx;
+		for( i = 0; i < n; i++) {
+			//two neighboring circle vertices
+			var v1 = start+2+i;
+			var v2 = start+2+ ((i+1)%n);
+			
+			faceArray[faceoffset] = v1;
+			faceArray[faceoffset+1] = v2;
+			faceArray[faceoffset+2] = 0;
+			faceoffset += 3;
+			faceArray[faceoffset] = v1;
+			faceArray[faceoffset+1] = v2;
+			faceArray[faceoffset+2] = 1;
+			faceoffset += 3;
+		}
+		geoGroup.faceidx += 6*n;
+	};
+
+	
 	// Sphere component
 	var sphereVertexCache = {
 		cache : {},

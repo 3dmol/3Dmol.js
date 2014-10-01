@@ -11011,6 +11011,16 @@ WebMol.Color.prototype = {
         this.b = color.b;
         
         return this;
+    },
+    
+    //return object that represents color components from 0 to 255
+    scaled : function() {
+    	var ret = {};
+    	ret.r = Math.round(this.r*255);
+    	ret.g = Math.round(this.g*255);
+    	ret.b = Math.round(this.b*255);
+    	ret.a = 1.0;
+    	return ret;
     }
     
 };
@@ -17723,50 +17733,50 @@ WebMol.GLDraw = (function() {
 		};
 
 	}();
+	
+	// Ortho normal vectors for cylinder radius/ sphere cap equator and cones
+	// Direction is j basis (0,1,0)
+	var basisVectors = function() {
+
+		var ret = {
+			vertices : [],
+			norms : []
+		};
+
+		var nvecs = [];
+
+		nvecs[0] = new WebMol.Vector3(-1, 0, 0);
+		nvecs[4] = new WebMol.Vector3(0, 0, 1);
+		nvecs[8] = new WebMol.Vector3(1, 0, 0);
+		nvecs[12] = new WebMol.Vector3(0, 0, -1);
+
+		// now quarter positions
+		nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
+		nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
+		nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
+		nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
+
+		// eights
+		nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
+		nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
+		nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
+		nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
+		nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
+		nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
+		nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
+		nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
+
+		/*
+		 * nvecs[0] = new WebMol.Vector3(-1,0,0); nvecs[1] = new
+		 * WebMol.Vector3(0,0,1); nvecs[2] = new WebMol.Vector3(1,0,0);
+		 * nvecs[3] = new WebMol.Vector3(0,0,-1);
+		 */
+		return nvecs;
+
+	}();
 
 	// memoize capped cylinder for given radius
 	var cylVertexCache = {
-
-		// Ortho normal vectors for cylinder radius/ sphere cap equator
-		// Direction is j basis (0,1,0)
-		basisVectors : function() {
-
-			var ret = {
-				vertices : [],
-				norms : []
-			};
-
-			var nvecs = [];
-
-			nvecs[0] = new WebMol.Vector3(-1, 0, 0);
-			nvecs[4] = new WebMol.Vector3(0, 0, 1);
-			nvecs[8] = new WebMol.Vector3(1, 0, 0);
-			nvecs[12] = new WebMol.Vector3(0, 0, -1);
-
-			// now quarter positions
-			nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
-			nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
-			nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
-			nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
-
-			// eights
-			nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
-			nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
-			nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
-			nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
-			nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
-			nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
-			nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
-			nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
-
-			/*
-			 * nvecs[0] = new WebMol.Vector3(-1,0,0); nvecs[1] = new
-			 * WebMol.Vector3(0,0,1); nvecs[2] = new WebMol.Vector3(1,0,0);
-			 * nvecs[3] = new WebMol.Vector3(0,0,-1);
-			 */
-			return nvecs;
-
-		}(),
 
 		cache : {},
 
@@ -17776,19 +17786,19 @@ WebMol.GLDraw = (function() {
 				return this.cache[radius];
 
 			var dir = new WebMol.Vector3(0, 1, 0);
-			var w = this.basisVectors.length;
+			var w = basisVectors.length;
 			var nvecs = [], norms = [];
 			var n;
 
 			for (var i = 0; i < w; i++) {
 				// bottom
-				nvecs.push(this.basisVectors[i].clone().multiplyScalar(radius));
+				nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
 				// top
-				nvecs.push(this.basisVectors[i].clone().multiplyScalar(radius));
+				nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
 
 				// NOTE: this normal is used for constructing sphere caps -
 				// cylinder normals taken care of in drawCylinder
-				n = this.basisVectors[i].clone().normalize();
+				n = basisVectors[i].clone().normalize();
 				norms.push(n);
 				norms.push(n);
 			}
@@ -18201,6 +18211,113 @@ WebMol.GLDraw = (function() {
 		geoGroup.vertices += n_verts;
 	};
 
+	
+	draw.drawCone = function(geo, from, to, radius, color) {
+		if (!from || !to)
+			return;
+
+		color = color || {r:0, g:0, b:0};
+
+		var dir =[to.x, to.y, to.z ];		
+		dir.x -= from.x;
+		dir.y -= from.y;
+		dir.z -= from.z;
+
+		var e = getRotationMatrix(dir);
+
+
+		// n vertices around bottom plust the two points
+		var n = basisVectors.length;
+		var basis = basisVectors;
+		var n_verts =  n + 2;
+
+		
+		//setup geo structures
+		var geoGroup = geo.updateGeoGroup(n_verts);
+		var start = geoGroup.vertices;	
+		var offset, faceoffset;
+		var i, x, y, z;
+		var vertexArray = geoGroup.vertexArray;
+		var normalArray = geoGroup.normalArray;
+		var colorArray = geoGroup.colorArray;
+		var faceArray = geoGroup.faceArray;
+		
+		var offset = start*3;
+		var ndir = new WebMol.Vector3(dir[0],dir[1],dir[2]).normalize();
+		//base point first vertex
+		vertexArray[offset] = from.x;
+		vertexArray[offset+1] = from.y;
+		vertexArray[offset+2] = from.z;
+		normalArray[offset] = -ndir.x;
+		normalArray[offset + 1] = -ndir.y;
+		normalArray[offset + 2] = -ndir.z;
+		colorArray[offset] = color.r;
+		colorArray[offset + 1] = color.g;
+		colorArray[offset + 2] = color.b;
+		
+		//second vertex top
+		vertexArray[offset+3] = to.x;
+		vertexArray[offset+4] = to.y;
+		vertexArray[offset+5] = to.z;
+		
+		normalArray[offset+3] = ndir.x;
+		normalArray[offset+4] = ndir.y;
+		normalArray[offset+5] = ndir.z;
+		colorArray[offset+3] = color.r;
+		colorArray[offset + 4] = color.g;
+		colorArray[offset + 5] = color.b;
+		
+		offset += 6;
+		
+		// add circle vertices
+		for (i = 0; i < n; ++i) {
+			var vec = basis[i].clone();
+			vec.multiplyScalar(radius);
+			x = e[0] * vec.x + e[3] * vec.y + e[6]
+					* vec.z;
+			y = e[1] * vec.x + e[4] * vec.y + e[7]
+					* vec.z;
+			z = e[5] * vec.y + e[8] * vec.z;
+
+			// from
+			vertexArray[offset] = x + from.x;
+			vertexArray[offset + 1] = y + from.y;
+			vertexArray[offset + 2] = z + from.z;
+
+			// normals
+			normalArray[offset] = x;
+			normalArray[offset + 1] = y;
+			normalArray[offset + 2] = z;
+
+			// colors
+			colorArray[offset] = color.r;
+			colorArray[offset + 1] = color.g;
+			colorArray[offset + 2] = color.b;
+			
+			offset += 3;
+
+		}
+		geoGroup.vertices += (n+2);
+		//faces
+		var faceoffset = geoGroup.faceidx;
+		for( i = 0; i < n; i++) {
+			//two neighboring circle vertices
+			var v1 = start+2+i;
+			var v2 = start+2+ ((i+1)%n);
+			
+			faceArray[faceoffset] = v1;
+			faceArray[faceoffset+1] = v2;
+			faceArray[faceoffset+2] = 0;
+			faceoffset += 3;
+			faceArray[faceoffset] = v1;
+			faceArray[faceoffset+1] = v2;
+			faceArray[faceoffset+2] = 1;
+			faceoffset += 3;
+		}
+		geoGroup.faceidx += 6*n;
+	};
+
+	
 	// Sphere component
 	var sphereVertexCache = {
 		cache : {},
@@ -21292,13 +21409,15 @@ WebMol.Label.prototype = {
 		};
 
 		return function() {
+			var fontMult = 2.0;
 			this.showBackground = this.stylespec.showBackground;
 			if(typeof(this.showBackground) == "undefined") this.showBackground = true; //default
 			this.font = this.stylespec.font = this.stylespec.font ? this.stylespec.font
-					: "Arial";
+					: "Verdana";
 
 			this.fontSize = this.stylespec.fontSize = this.stylespec.fontSize ? this.stylespec.fontSize
 					: 20;
+			this.fontSize *= fontMult;
 			/** @type {colorlike} */
 			this.fontColor = this.stylespec.fontColor = this.stylespec.fontColor ? this.stylespec.fontColor
 					: {
@@ -21333,6 +21452,12 @@ WebMol.Label.prototype = {
 						y : 1,
 						z : 1
 					};
+					
+			//convert colors from 0-1.0 to 255
+			if(this.backgroundColor instanceof WebMol.Color) this.backgroundColor = this.backgroundColor.scaled();
+			if(this.borderColor instanceof WebMol.Color) this.borderColor = this.borderColor.scaled();
+			if(this.fontColor instanceof WebMol.Color) this.fontColor = this.fontColor.scaled();
+		
 
 			// Should labels always be in front of model?
 			this.inFront = this.stylespec.inFront = (this.stylespec.inFront !== undefined) ? this.stylespec.inFront
@@ -21341,9 +21466,12 @@ WebMol.Label.prototype = {
 			// clear canvas
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-			var spriteAlignment = WebMol.SpriteAlignment.topLeft;
+			var spriteAlignment = this.stylespec.alignment || WebMol.SpriteAlignment.topLeft;
 
-			this.context.font = this.fontSize + "pt " + this.font;
+			var bold = "";
+			if(this.stylespec.bold)
+				bold = "bold ";
+			this.context.font = bold+this.fontSize + "px  " + this.font;
 
 			var metrics = this.context.measureText(this.text);
 			var textWidth = metrics.width;
@@ -21358,12 +21486,13 @@ WebMol.Label.prototype = {
 					+ this.borderColor.a + ")";
 
 			this.context.lineWidth = this.borderThickness;
-			if(this.showBackground)
+			if(this.showBackground) {
 				roundRect(this.context, this.borderThickness / 2,
-					this.borderThickness / 2, textWidth + this.borderThickness,
-					this.fontSize * 1.4 + this.borderThickness, 6);
-			// 1.4 is extra height factor for text below baseline: g,j,p,q.
-
+					this.borderThickness / 2, textWidth + 2*this.borderThickness,
+					this.fontSize * 1.25 + 2*this.borderThickness, 6);
+			// 1.25 is extra height factor for text below baseline: g,j,p,q.
+			}
+			
 			// text color
 			this.context.fillStyle = "rgba(" + this.fontColor.r + ","
 					+ this.fontColor.g + "," + this.fontColor.b + ","
@@ -21378,12 +21507,14 @@ WebMol.Label.prototype = {
 
 			this.sprite.material = new WebMol.SpriteMaterial({
 				map : texture,
-				useScreenCoordinates : false,
+				useScreenCoordinates : this.stylespec.useScreen,
 				alignment : spriteAlignment,
 				depthTest : !this.inFront
 			});
 
-			this.sprite.scale.set(2 * this.fontSize, this.fontSize, 1);
+			if(this.stylespec.useScreen)
+				this.position.z = 0;
+			this.sprite.scale.set(1.5*this.fontSize/fontMult, this.fontSize/fontMult, 1);
 			this.sprite.position.set(this.position.x, this.position.y,
 					this.position.z);
 		};
@@ -21481,7 +21612,7 @@ WebMol.GLViewer = (function() {
 		renderer.domElement.style.zIndex = "0";
 		container.append(renderer.domElement);
 		renderer.setSize(WIDTH, HEIGHT);
-		var camera = new WebMol.Camera(20, ASPECT, 1, 800);
+		var camera = new WebMol.Camera(10, ASPECT, 1, 800);
 		camera.position = new WebMol.Vector3(0, 0, CAMERA_Z);
 		var vec = new WebMol.Vector3();
 		camera.lookAt(vec);
@@ -21922,6 +22053,10 @@ WebMol.GLViewer = (function() {
 			rotationGroup.quaternion.y = arg[5];
 			rotationGroup.quaternion.z = arg[6];
 			rotationGroup.quaternion.w = arg[7];
+			if(typeof(arg[8]) != "undefined") {
+				rotationGroup.position.x = arg[8];
+				rotationGroup.position.y = arg[9];
+			}
 			show();
 		};
 

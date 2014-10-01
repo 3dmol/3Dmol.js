@@ -92,6 +92,16 @@ WebMol.Color.prototype = {
         this.b = color.b;
         
         return this;
+    },
+    
+    //return object that represents color components from 0 to 255
+    scaled : function() {
+    	var ret = {};
+    	ret.r = Math.round(this.r*255);
+    	ret.g = Math.round(this.g*255);
+    	ret.b = Math.round(this.b*255);
+    	ret.a = 1.0;
+    	return ret;
     }
     
 };

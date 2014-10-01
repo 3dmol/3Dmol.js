@@ -42,13 +42,15 @@ WebMol.Label.prototype = {
 		};
 
 		return function() {
+			var fontMult = 2.0;
 			this.showBackground = this.stylespec.showBackground;
 			if(typeof(this.showBackground) == "undefined") this.showBackground = true; //default
 			this.font = this.stylespec.font = this.stylespec.font ? this.stylespec.font
-					: "Arial";
+					: "Verdana";
 
 			this.fontSize = this.stylespec.fontSize = this.stylespec.fontSize ? this.stylespec.fontSize
 					: 20;
+			this.fontSize *= fontMult;
 			/** @type {colorlike} */
 			this.fontColor = this.stylespec.fontColor = this.stylespec.fontColor ? this.stylespec.fontColor
 					: {
@@ -83,6 +85,12 @@ WebMol.Label.prototype = {
 						y : 1,
 						z : 1
 					};
+					
+			//convert colors from 0-1.0 to 255
+			if(this.backgroundColor instanceof WebMol.Color) this.backgroundColor = this.backgroundColor.scaled();
+			if(this.borderColor instanceof WebMol.Color) this.borderColor = this.borderColor.scaled();
+			if(this.fontColor instanceof WebMol.Color) this.fontColor = this.fontColor.scaled();
+		
 
 			// Should labels always be in front of model?
 			this.inFront = this.stylespec.inFront = (this.stylespec.inFront !== undefined) ? this.stylespec.inFront
@@ -91,9 +99,12 @@ WebMol.Label.prototype = {
 			// clear canvas
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-			var spriteAlignment = WebMol.SpriteAlignment.topLeft;
+			var spriteAlignment = this.stylespec.alignment || WebMol.SpriteAlignment.topLeft;
 
-			this.context.font = this.fontSize + "pt " + this.font;
+			var bold = "";
+			if(this.stylespec.bold)
+				bold = "bold ";
+			this.context.font = bold+this.fontSize + "px  " + this.font;
 
 			var metrics = this.context.measureText(this.text);
 			var textWidth = metrics.width;
@@ -108,12 +119,13 @@ WebMol.Label.prototype = {
 					+ this.borderColor.a + ")";
 
 			this.context.lineWidth = this.borderThickness;
-			if(this.showBackground)
+			if(this.showBackground) {
 				roundRect(this.context, this.borderThickness / 2,
-					this.borderThickness / 2, textWidth + this.borderThickness,
-					this.fontSize * 1.4 + this.borderThickness, 6);
-			// 1.4 is extra height factor for text below baseline: g,j,p,q.
-
+					this.borderThickness / 2, textWidth + 2*this.borderThickness,
+					this.fontSize * 1.25 + 2*this.borderThickness, 6);
+			// 1.25 is extra height factor for text below baseline: g,j,p,q.
+			}
+			
 			// text color
 			this.context.fillStyle = "rgba(" + this.fontColor.r + ","
 					+ this.fontColor.g + "," + this.fontColor.b + ","
@@ -128,12 +140,13 @@ WebMol.Label.prototype = {
 
 			this.sprite.material = new WebMol.SpriteMaterial({
 				map : texture,
-				useScreenCoordinates : false,
+				useScreenCoordinates : this.stylespec.useScreen,
 				alignment : spriteAlignment,
 				depthTest : !this.inFront
 			});
 
-			this.sprite.scale.set(2 * this.fontSize, this.fontSize, 1);
+			//TODO: figure out why the magic number 2.0 is needed
+			this.sprite.scale.set(2.0*this.fontSize/fontMult, this.fontSize/fontMult, 1);
 			this.sprite.position.set(this.position.x, this.position.y,
 					this.position.z);
 		};
@@ -231,7 +244,7 @@ WebMol.GLViewer = (function() {
 		renderer.domElement.style.zIndex = "0";
 		container.append(renderer.domElement);
 		renderer.setSize(WIDTH, HEIGHT);
-		var camera = new WebMol.Camera(20, ASPECT, 1, 800);
+		var camera = new WebMol.Camera(10, ASPECT, 1, 800);
 		camera.position = new WebMol.Vector3(0, 0, CAMERA_Z);
 		var vec = new WebMol.Vector3();
 		camera.lookAt(vec);
@@ -672,6 +685,10 @@ WebMol.GLViewer = (function() {
 			rotationGroup.quaternion.y = arg[5];
 			rotationGroup.quaternion.z = arg[6];
 			rotationGroup.quaternion.w = arg[7];
+			if(typeof(arg[8]) != "undefined") {
+				rotationGroup.position.x = arg[8];
+				rotationGroup.position.y = arg[9];
+			}
 			show();
 		};
 
