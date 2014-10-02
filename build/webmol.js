@@ -21514,7 +21514,10 @@ WebMol.Label.prototype = {
 			});
 
 			//TODO: figure out why the magic number 2.0 is needed
-			this.sprite.scale.set(2.0*this.fontSize/fontMult, this.fontSize/fontMult, 1);
+			if(useScreen)
+				this.sprite.scale.set(2.0/fontMult,1/fontMult,1);
+			else
+				this.sprite.scale.set(2.0*this.fontSize/fontMult, this.fontSize/fontMult, 1);
 			this.sprite.position.set(this.position.x, this.position.y,
 					this.position.z);
 		};
