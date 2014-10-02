@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html style="height:100%; padding: 0; margin: 0">
+    <head>
+        <title>$3Dmol Test</title>
+        <script src="build/3Dmol.js"></script>       
+        <script>
+        var glviewer = null;
+        var m = null;
+        var posLobe = null;
+        var negLobe = null;
+        var atoms = null;
+        var moldata = null;
+        var modelgroup = null;
+        var molObj = null; //Object3D for each rendered model      
+        var voldata = null;
+        var sphere, arrow;
+        
+        var shapecallback = function(shape, viewer) {
+            if(shape.clickLabel === undefined || !shape.clickLabel instanceof $3Dmol.Label) { 
+                shape.clickLabel = viewer.addLabel("Shape " + shape.id, {fontSize:14, position:
+                    {x:shape.position.x, y:shape.position.y, z:shape.position.z}});
+                shape.clicked=true;
+            } 
+            
+            else { 
+                if (shape.clicked) { 
+                    var newstyle = shape.clickLabel.stylespec; 
+                    newstyle.backgroundColor = {r:100, g:0, b:255, a:0.8}; 
+                    viewer.setLabelStyle(shape.clickLabel, newstyle); 
+                    shape.clicked = !shape.clicked; 
+                } 
+                else { 
+                    viewer.removeLabel(shape.clickLabel); 
+                    shape.clickLabel = undefined; 
+                    shape.clicked = false; 
+                } 
+            } 
+        };      
+         
+        $(document).ready(function() {     
+                       
+            $.get('tests/test_structs/benzene-homo.cube', function(data){
+                
+                moldata = $("#moldata_benzene_sdf").val();
+                voldata = data;
+                
+                glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors, callback : function(viewer) {
+                    viewer.setBackgroundColor(0xffffff);
+
+                    m = viewer.addModel(moldata, "sdf");
+                    posLobe = viewer.addVolumetricData(voldata, "cube", {isoval: 0.01, color: new $3Dmol.Color(0,0,1),
+                                                                         alpha: 0.95});              
+                    negLobe = viewer.addVolumetricData(voldata, "cube", {isoval: -0.01, color: new $3Dmol.Color(1,0,0),
+                                                                         alpha: 0.95});  
+                                                                         
+                    posLobe.callback = shapecallback; posLobe.clickable = true;
+                    negLobe.callback = shapecallback; negLobe.clickable = true;
+                    
+                    sphere = viewer.addSphere({center: posLobe.boundingSphere.center, radius:posLobe.boundingSphere.radius});  
+                    sphere.color = $3Dmol.CC.color(0xE06633); sphere.wireframe = true;
+                    
+                    arrow = viewer.addArrow({end: new $3Dmol.Vector3(5,1,1)});
+                    arrow.color = $3Dmol.CC.color(0x00FF00); arrow.wireframe = false;
+                    arrow.callback = shapecallback; arrow.clickable = true;
+
+                    cyl = viewer.addCylinder({end: new $3Dmol.Vector3(1,1,5)});
+                    cyl.color = $3Dmol.CC.color(0x0000FF); 
+                                                                                                          
+                    viewer.zoomTo();
+                    viewer.render();    
+                }});  
+                              
+            }, "text"); 
+           
+        });
+        
+        </script>
+    </head>
+    <body>
+         <div id="gldiv" style="width: 100%; height: 800px; border: 2px solid black; "></div>       
+        <br>
+        <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
+        <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
+        <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
+        <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
+        <br>
+        <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
+ 
+
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_ch3cl_sdf">
+    
+ OpenBabel05201415003D
+
+  5  4  0  0  0  0  0  0  0  0999 V2000
+    0.0000    0.0000   -1.1275 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.0225   -1.4687 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.8855   -0.5113   -1.4687 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.8855   -0.5113   -1.4687 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000    0.6571 Cl  0  0  0  0  0  0  0  0  0  0  0  0
+  1  5  1  0  0  0  0
+  2  1  1  0  0  0  0
+  3  1  1  0  0  0  0
+  4  1  1  0  0  0  0
+M  END
+</textarea>
+<textarea style="visibility: hidden; width: 0; height: 0;" id="moldata_benzene_sdf">
+
+ OpenBabel05131411233D
+
+ 12 12  0  0  0  0  0  0  0  0999 V2000
+    0.3122    1.3530   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.3278    0.4060   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0156   -0.9469   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.3123   -1.3529   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.3278   -0.4061    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0155    0.9469    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.5536    2.3986   -0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    2.3541    0.7199    0.0001 H   0  0  0  0  0  0  0  0  0  0  0  0
+    1.8004   -1.6788    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.5536   -2.3986    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.3541   -0.7198   -0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.8005    1.6787    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  7  1  0  0  0  0
+  1  6  2  0  0  0  0
+  2  3  2  0  0  0  0
+  2  1  1  0  0  0  0
+  2  8  1  0  0  0  0
+  3  4  1  0  0  0  0
+  3  9  1  0  0  0  0
+  4  5  2  0  0  0  0
+  4 10  1  0  0  0  0
+  5  6  1  0  0  0  0
+  6 12  1  0  0  0  0
+ 11  5  1  0  0  0  0
+M  END
+</textarea>
+    </body>
+</html>

@@ -1,0 +1,147 @@
+\documentclass[]{bioinfo}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{hyperref}
+\copyrightyear{2014}
+\pubyear{2014}
+
+\begin{document}
+\firstpage{1}
+
+\title[$3Dmol.js: Molecular Visualization with WebGL]{$3Dmol.js: Molecular Visualization with WebGL}
+\author{Nicholas Rego\,$^{1,2}$ David Koes$^{1}$\footnote{to whom correspondence should be addressed}}
+\address{$^{1}$Department of Computational and Systems Biology, University of Pittsburgh, Pittsburgh, PA 15260\\
+$^{2}$Department of XXXXXXXX, Address XXXX etc.}
+
+\history{Received on XXXXX; revised on XXXXX; accepted on XXXXX}
+
+\editor{Associate Editor: XXXXXXX}
+
+\maketitle
+\begin{abstract}
+\section{Summary} $3Dmol.js is a modern, object-oriented JavaScript library that uses the latest web technologies
+to provide interactive, hardware-accelerated three dimensional representations of molecular data without the
+need to install browser plugins or Java.  WeMol.js provides a full featured API for developers as well
+as a straightforward declarative interface that lets users easily share and embed molecular data in websites.
+\section{Availability} $3Dmol.js is distrubuted under the permissive MIT open source license.
+Source code and documentation can be found at \url{http://3Dmol.csb.pitt.edu}
+\section{Contact:} \href{dkoes@pitt.edu}{dkoes@pitt.edu}
+\end{abstract}
+
+\section{Introduction}
+As computation has become more important in the field of biology, so has the need for competant visualization software. Stand alone applications, such as PyMol and VMD, remainpopular choices for desktop viewing.  
+
+Recently, the performance of client side web based applications has approached that of traditional desktop software. Applications that can run directly in the web browser offer convenience not available for desktop applications, since web applications can be ran immediately from the user's web browser, and require no additional downloads or installations.
+
+Currently, Jmol \cite{jmol} is the currently only major web-based viewer.  Implemented in Java with a JavaScript interface, Jmol provides both a stand alone application as well as a Java applet for viewing molecular structures through an internet browser.  The performance of Jmol's web viewer approaches that of desktop based viewers. However, Jmol's Java implementation provides browser security issues and inconveniences.  All current browsers need to be configured to allow Java applications to run.  Even after configuration, users must navigate and bypass a number of browser generated security prompts in order to initialize any Java web applications, including Jmol.  
+
+To address these browser compatibility concerns, Jmol has recently been released as a pure JavaScript version using the Java2Script Java to JavaScript translator utility.  Unfortunately, despite the similiarity in name, JavaScript and Java are very different languages. Though JavaScript is the defacto web browser scripting language and therefore suffers from none of the security or configuration difficulties as Java, its performance is significantly slower.  Specifically, the complete JavaScript implementation of Jmol utilizes HTML5's 2D rendering context to produce graphics, which is unsuitable to smoothly display the complexities demanded by molecular visualization software.  
+
+To circumvent JavaScript and HTML5's inability to adequately handle complex graphics, a low level graphics-card level interface called WebGL is supported by most current browsers.  Based on the open source library OpenGL, WebGL provides an interface between JavaScript and the graphics card (also known as the graphics processing unit, or GPU), thus enabling hardware-accelerated graphics in the web browser.
+
+Recent efforts by [GLmol developer] have resulted in GLmol, a pure JavaScript, WebGL compatible molecular visualizor. While a promising initial effort, GLmol is provided more as a stand alone web application.  While it enables its molecular viewer to be embedded within a client's HTML, it does not allow for more extensive development within existing web applications.
+
+\section{$3Dmol.js - an Object oriented, pure JavaScript molecular visualization library}
+To this end, we have developed $3Dmol.js, based on GLmol, as purely JavaScript (with WebGL), object-oriented molecular visualization library to enable web developers and casual users alike to visualize molecules in a web browser with desktop application like performance.  
+
+Unlike GLmol, $3Dmol.js is a JavaScript library and provides an object-oriented API for developers.  However, $3Dmol.js is also developed with non developers in mind, and contains built in capabilities to meet most users' visualization needs.
+
+By taking advantage of WebGL, $3Dmol.js sidesteps JavaScript's inherent speed limitations and allows fast and smooth image manipulation.  By leveraging native graphics hardware, common image manipulations, including rotating, translating, and zooming are smooth and comparable to Jmol's Java implementation.
+
+$3Dmol.js requires installation and can be used immediately by simply including the JavaScript source code.
+
+$3Dmol.js provides three main usage scenaries:
+
+\begin{itemize}
+\item \emph{For developers}
+After including the $3Dmol.js source code, web developers can create applications with $3Dmol's API.
+
+Webmol is also easily embeddable in existing HTML pages.
+
+\item \emph{For collaboration}
+$3Dmol also provides a collaborative interface, so that users not interested in development can view and share molecules immediately.
+
+\end{itemize}
+
+\subsection{$3Dmol.js JavaScript API}
+$3Dmol.js provides a high-level JavaScript interface for web developers to create their own visualization applications. 
+
+After including the $3Dmol.js source, all functionality is accessable through the global $3Dmol namespace. $3Dmol uses a GLViewer object instances for individual viewers.  A single webpage can contain multiple viewers.  Each viewer object, in turn, contains any number of model and shape objects.  $3Dmol GLModel objects represent molecules, while GLShape objects can represent user-defined generic shapes.
+
+A viewer can be instantiated and attached to an HTML element by calling:
+
+\begin{verbatim}
+var viewer = $3Dmol.createViewer(element);
+\end{verbatim}
+
+Multiple viewers can be added to separate elements in an HTML file.  A viewer represents molecular structures as collections of atoms in a \emph{GLModel} object.  Multiple models can be added to a single viewer, though a single structure must be contained in one model object.  Models are most easily added to a viewer by reading in a structure file string (currently \emph{PDB}, \emph{sdf}, \emph{mol2}, \emph{xyz}, and Gaussian \emph{cube} formats are supported).  $3Dmol can also load PDB structures directly from the RCSB Protein Data Bank.
+
+For instance:
+
+\begin{verbatim}
+var pdbdata = $(`#pdbdiv').val();  //PDB file, as a string
+var model = viewer.addModel();
+model.addMolData(pdbdata, `pdb');
+\end{verbatim}
+
+To download a structure with PDB id `2POR' onto viewer from PDB database:
+
+\begin{verbatim}
+var model = $3Dmol.download(viewer, ``pdb:2POR'');
+\end{verbatim}
+
+Models can select and apply styles to its atoms, or a viewer can apply styles to atoms matching a certain specification in any of its models.
+
+A viewer instance can select atoms and apply styles on an individual atom basis.  Each viewer has a \emph{render} method to display changes:
+
+\begin{verbatim}
+
+viewer.setStyle({hetflag: true}, {sphere:{}});
+viewer.setStyle({hetflag: false}, {cartoon:{color:`spectrum'} });
+
+viewer.render();
+\end{verbatim}
+
+\subsection{Embeddable viewer}
+Users can also directly embed viewers into HTML elements. This allows users to easily add $3Dmol content to their page by including a single line in their HTML, for instance:
+
+\begin{verbatim}
+<div class=`3Dmoljs_viewer' id=`myviewer' data-pdb=`1ycr' 
+data-backgroundcolor=`white' data-style=`{``stick'':{}}'></div>
+\end{verbatim}
+
+\subsection{Direct molecule viewing with collaborative interface}
+$3Dmol also provides a URL based viewer that allows users to specify and view a molecule by simply entering a URL into a web browser.  This allows collaborators to share molecular structures by simply navigating to a url in the browser. 
+
+For instance, to immediately view a cartoon representation of a bacterial \emph{porin} protein (PDB ID: 2POR), simply enter the following URL into your browser:
+
+\emph{3Dmol.csb.pitt.edu/viewer.html?pdb=2por\&select=chain\~{}A\&style=cartoon,color\~{}gradient}
+
+\section{Performance Comparisons}
+
+\begin{table}[h]
+\caption{Performance Comparisons in seconds}
+\begin{tabular}{ccccccccc}
+\multicolumn{1}{l}{}                                                         & \multicolumn{2}{c}{\textbf{$3Dmol}}                        & \multicolumn{2}{c}{\textbf{GLmol}}                           & \multicolumn{2}{c}{\textbf{Jmol}}                          & \multicolumn{2}{c}{\textbf{JSmol}}              \\
+\multicolumn{1}{l}{}                                                         & \textbf{Firefox}              & \textbf{Chrome}            & \textbf{Firefox}               & \textbf{Chrome}             & \textbf{Firefox}              & \textbf{Chrome}            & \textbf{Firefox}              & \textbf{Chrome} \\
+\textbf{Initialization}                                                      & \cellcolor[HTML]{C0C0C0}0.763 & \multicolumn{1}{c|}{0.915} & \cellcolor[HTML]{C0C0C0}0.507  & \multicolumn{1}{c|}{0.536}  & \cellcolor[HTML]{C0C0C0}6.487 & \multicolumn{1}{c|}{3.535} & \cellcolor[HTML]{C0C0C0}6.736 & 4.326           \\
+\textbf{Line}                                                                & \cellcolor[HTML]{C0C0C0}0.204 & \multicolumn{1}{c|}{0.145} & \cellcolor[HTML]{C0C0C0}0.173  & \multicolumn{1}{c|}{0.273}  & \cellcolor[HTML]{C0C0C0}0.008 & \multicolumn{1}{c|}{0.010} & \cellcolor[HTML]{C0C0C0}0.027 & 0.020           \\
+\textbf{Stick}                                                               & \cellcolor[HTML]{C0C0C0}1.763 & \multicolumn{1}{c|}{1.277} & \cellcolor[HTML]{C0C0C0}43.484 & \multicolumn{1}{c|}{45.448} & \cellcolor[HTML]{C0C0C0}0.006 & \multicolumn{1}{c|}{0.006} & \cellcolor[HTML]{C0C0C0}0.019 & 0.011           \\
+\textbf{Sphere}                                                              & \cellcolor[HTML]{C0C0C0}1.651 & \multicolumn{1}{c|}{1.052} & \cellcolor[HTML]{C0C0C0}7.012  & \multicolumn{1}{c|}{8.105}  & \cellcolor[HTML]{C0C0C0}0.005 & \multicolumn{1}{c|}{0.007} & \cellcolor[HTML]{C0C0C0}0.033 & 0.021           \\
+\textbf{Cartoon}                                                             & \cellcolor[HTML]{C0C0C0}0.318 & \multicolumn{1}{c|}{0.346} & \cellcolor[HTML]{C0C0C0}0.955  & \multicolumn{1}{c|}{0.817}  & \cellcolor[HTML]{C0C0C0}0.038 & \multicolumn{1}{c|}{0.035} & \cellcolor[HTML]{C0C0C0}0.100 & 0.059           \\
+\textbf{\begin{tabular}[c]{@{}c@{}}van der Waals \\ Isosurface\end{tabular}} & \cellcolor[HTML]{C0C0C0}4.720 & \multicolumn{1}{c|}{4.667}     & \cellcolor[HTML]{C0C0C0}22.373 & \multicolumn{1}{c|}{23.562}      & \cellcolor[HTML]{C0C0C0}1.819 & \multicolumn{1}{c|}{1.730}     & \cellcolor[HTML]{C0C0C0}6.442 & 6.458              
+\end{tabular}
+\\[1.5pt]
+$3Dmol, GLmol, Jmol and JSmol rendering performance comparisons.  Times are in seconds.  Three trials were run for each test case; best results are displayed.  Tests run on HP Pavilion G7 laptop - 4GB RAM, 1.8GHz AMD Quad core processor, ATI Radeon HD 4250 Graphics card
+\label{my-label}
+\end{table}
+
+\section*{Acknowledgements}
+This work was supported by the National Institute of Health [R01GM108340].
+The content is solely the responsibility of the authors and does not necessarily
+represent the official views of the National Institute of General Medical Sciences
+or the National Institutes of Health.
+\paragraph{Funding\textcolon} 
+
+\bibliographystyle{plain}
+\bibliography{citations}
+\end{document}
