@@ -1,18 +1,18 @@
 /* 
- * QUnit benchmark tests for WebMol, GLmol, and JSmol
+ * QUnit benchmark tests for $3Dmol, GLmol, and JSmol
  */
 //Test rendering performance for different sized pdb's 
 
 var profile = QUnit.urlParams.profilecheck;
 
-var testSuite = testSuite || "webmol";
+var testSuite = testSuite || "3Dmol";
 
 // Style types to test
 var styleSpec = ["line", "stick", "sphere", "cartoon"];
 
-// WebMol testcase generator
+// $3Dmol testcase generator
 
-var genWebMolTestCase = function(styleType) {
+var gen$3DmolTestCase = function(styleType) {
     
     var testName = styleType + " render";
     var timeMsg = styleType + " render time: ";
@@ -149,13 +149,13 @@ var genJSmolTestCase = function(styleType, profile) {
 // Setup test modules
 
 
-//WebMol tests
-if (testSuite === 'webmol') {
-    QUnit.module( "WebMol Tests", {
+//$3Dmol tests
+if (testSuite === '3Dmol') {
+    QUnit.module( "$3Dmol Tests", {
 
         setupOnce: function() {
             viewer.zoomTo();
-            console.group("WebMol");
+            console.group("$3Dmol");
         },
 
         teardownOnce: function() {
@@ -164,9 +164,9 @@ if (testSuite === 'webmol') {
 
     });
 
-    // WebMol test cases
+    // $3Dmol test cases
     for (var style in styleSpec)
-        genWebMolTestCase(styleSpec[style], profile);    
+        gen$3DmolTestCase(styleSpec[style], profile);    
 
     //surface test
 
@@ -182,7 +182,7 @@ if (testSuite === 'webmol') {
         
         var start = new Date();
         
-        viewer.addSurface(WebMol.SurfaceType.VDW, {}, {}, {}, {});           
+        viewer.addSurface($3Dmol.SurfaceType.VDW, {}, {}, {}, {});           
         viewer.render();
         
         var end = new Date();

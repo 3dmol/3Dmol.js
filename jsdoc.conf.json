@@ -6,9 +6,9 @@
     "templates": {
         "cleverLinks": false,
         "monospaceLinks": false,
-        "systemName": "WebMol.js",
+        "systemName": "$3Dmol.js",
         "footer": "",
-        "copyright":"WebMol.js © 2014",
+        "copyright":"$3Dmol.js © 2014",
         "navType": "vertical",
         "theme": "cerulean",
         "linenums"              : true,

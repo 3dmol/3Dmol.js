@@ -1,5 +1,5 @@
 /* 
- * QUnit benchmark tests for WebMol, GLmol, and JSmol
+ * QUnit benchmark tests for $3Dmol, GLmol, and JSmol
  */
 //Test rendering performance for different sized pdb's 
 
@@ -46,9 +46,9 @@ QUnit.jUnitReport = function(data) {
 // Style types to test
 var styleSpec = ["line", "stick", "sphere"];
 
-// WebMol testcase generator
+// $3Dmol testcase generator
 
-var genWebMolTestCase = function(styleType, profile) {
+var gen$3DmolTestCase = function(styleType, profile) {
     
     var testName = styleType + " render";
     var timeMsg = styleType + " render time: ";
@@ -183,14 +183,14 @@ var genJSmolTestCase = function(styleType, profile) {
 // Setup test modules
 
 
-//WebMol tests
+//$3Dmol tests
 
-QUnit.module( "WebMol Tests", {
+QUnit.module( "$3Dmol Tests", {
 	
     setupOnce: function() {
         QUnit.stop();
         $("#viewerdiv").empty();
-        viewer = WebMol.createViewer("viewerdiv");
+        viewer = $3Dmol.createViewer("viewerdiv");
         viewer.setBackgroundColor(0xffffff);
         $.get("test_structs/3M8L.pdb", function(data) {
                 viewer.addModel(data, "pdb");
@@ -198,7 +198,7 @@ QUnit.module( "WebMol Tests", {
                 QUnit.start();
         }, "text");
 
-        console.group("WebMol");
+        console.group("$3Dmol");
     },
 		
     teardownOnce: function() {
@@ -207,9 +207,9 @@ QUnit.module( "WebMol Tests", {
     
 });
 
-// WebMol test cases
+// $3Dmol test cases
 for (var style in styleSpec)
-    genWebMolTestCase(styleSpec[style], profile);
+    gen$3DmolTestCase(styleSpec[style], profile);
 
 
 //GLmol testing module
@@ -255,7 +255,7 @@ QUnit.module( "JSmol Tests", {
 
     setupOnce: function() {    
         QUnit.stop();
-        if (viewer !== undefined && viewer instanceof WebMol.GLViewer)
+        if (viewer !== undefined && viewer instanceof $3Dmol.GLViewer)
             viewer.removeAllModels();
         $("#viewerdiv").empty();
         console.group("JSmol");  

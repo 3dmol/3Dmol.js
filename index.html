@@ -3,29 +3,29 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>3Dmol.js</title>
+	<title>$3Dmol.js</title>
 
 	<link type="text/css" rel="stylesheet" href="css/index.css">
-	<script src="build/webmol.js"></script>
+	<script src="build/3Dmol.js"></script>
         
         <script>
-            var WebMol = WebMol || {};
+            var $3Dmol = $3Dmol || {};
             var $ = jQuery || {};
             var initSDF = function(viewer) {
                 var s1 = viewer.addSphere({radius: 1.25, center: {x:-6.89, y:0.75, z:0.35}});
-                s1.wireframe = true; s1.color = WebMol.CC.color("purple");
+                s1.wireframe = true; s1.color = $3Dmol.CC.color("purple");
 		viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35},fontSize: 14,backgroundColor: {r:128,g:0,b:128,a:0.8}});
                 var s2 = viewer.addSphere({radius: 1.25, center: {x:1.32, y:2.91, z:-1.49}});
-                s2.wireframe = true; s2.color = WebMol.CC.color("purple");
+                s2.wireframe = true; s2.color = $3Dmol.CC.color("purple");
 		viewer.addLabel("Aromatic", {position: {x:1.32, y:2.91, z:-1.49},fontSize: 14,backgroundColor: {r:128,g:0,b:128,a:0.8}});
 
                 var s3 = viewer.addSphere({radius: 0.5, center: {x:-0.42, y:-0.48, z:0.64}});
-                s3.wireframe = true; s3.color = WebMol.CC.color(0xbbbbbb);
+                s3.wireframe = true; s3.color = $3Dmol.CC.color(0xbbbbbb);
 
                 var a = viewer.addArrow({start: {x:-0.4217, y:-0.4795, z:0.6395}, end: {x:-0.613, y:-0.891, z:-0.198},
                                            radius: 0.1});
  		viewer.addLabel("Hydrogen Donor", {position: {x:-0.4217, y:-0.4795, z:0.6395},fontSize: 14,backgroundColor: {r:128,g:128,b:128,a:0.8}});
-                a.color = WebMol.CC.color(0xeeeeee);
+                a.color = $3Dmol.CC.color(0xeeeeee);
 
                 viewer.render();
                 
@@ -33,9 +33,9 @@
             
             var initShapes = function(viewer) {
                 $.get('tests/test_structs/benzene-homo.cube', function(data){
-                    viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: new WebMol.Color(0,0,1),
+                    viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: new $3Dmol.Color(0,0,1),
                                                                          alpha: 0.95});              
-                    viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: new WebMol.Color(1,0,0),
+                    viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: new $3Dmol.Color(1,0,0),
                                                                          alpha: 0.95}); 
                     viewer.setStyle({}, {stick:{}});
                     viewer.zoomTo();
@@ -46,21 +46,21 @@
             
             var init1YCR = function(viewer) {
             	viewer.addStyle({}, {"line":{}});
-                viewer.setColorByElement({"chain":"A"}, WebMol.elementColors.whiteCarbon);
-                viewer.setColorByElement({"chain":"B"}, WebMol.elementColors.Jmol);
-            	viewer.addSurface(WebMol.SurfaceType.VDW, {'opacity':0.8}, {"chain":"A"},{"chain":"A"});
+                viewer.setColorByElement({"chain":"A"}, $3Dmol.elementColors.whiteCarbon);
+                viewer.setColorByElement({"chain":"B"}, $3Dmol.elementColors.Jmol);
+            	viewer.addSurface($3Dmol.SurfaceType.VDW, {'opacity':0.8}, {"chain":"A"},{"chain":"A"});
             	viewer.addStyle({"chain":"B"}, {"stick":{}});
             	viewer.zoomTo({"chain":"B"});
             };
 
             var addSurf = function(viewer) {
-                viewer.addSurface(WebMol.SurfaceType.VDW, {opacity:0.75},
+                viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.75},
                                   {hetflag: false}, {hetflag:false}, {chain: 'B'});
             };
 
 $( document ).ready(function() {
   var hidetext = function () {
-	  $("#webmoltext").hide();
+	  $("#text3Dmol").hide();
 	    $("#viewtext").hide();
 	    $("#embedtext").hide();
 	    $("#developtext").hide();
@@ -72,7 +72,7 @@ $( document ).ready(function() {
   }, 
   function () {
 	    hidetext();
-		$("#webmoltext").show();
+		$("#text3Dmol").show();
   });
     $('#embed').hover(
   function () {
@@ -81,7 +81,7 @@ $( document ).ready(function() {
   }, 
   function () {
 	    hidetext();
-		$("#webmoltext").show();
+		$("#text3Dmol").show();
   });
       $('#develop').hover(
   function () {
@@ -90,7 +90,7 @@ $( document ).ready(function() {
   }, 
   function () {
 	    hidetext();
-		$("#webmoltext").show();
+		$("#text3Dmol").show();
   });
 });
         </script>
@@ -100,15 +100,15 @@ $( document ).ready(function() {
 <body>
 <div id=content>
  <div class="header">
-  <div id="webmol"><b>3D</b>mol<font style="font-weight:400">.js</font></div>
-  <div id="webmolright" >
+  <div id="title3Dmol"><b>3D</b>mol<font style="font-weight:400">.js</font></div>
+  <div id="title3Dmolright" >
    <div id="strip" class = "titlefont">
     <a href="doc/tutorial-url.html" id="view" class="titletext">View</a>
     <a href="doc/tutorial-embeddable.html" id="embed" class="titletext">Embed</a>
     <a href="doc/index.html" id="develop" class="titletext">Develop</a>
    </div>
    <div id="infotext">
-    <span id="webmoltext" class="floattext">A modern, object-oriented JavaScript library for visualizing molecular data</span>
+    <span id="text3Dmol" class="floattext">A modern, object-oriented JavaScript library for visualizing molecular data</span>
     <span id="viewtext" class="floattext">View structures through a declarative URL interface</span>
     <span id="embedtext" class="floattext">Embed molecular viewers in webpages with two lines of code</span>
     <span id="developtext" class="floattext">Develop web applications using a full featured API</span>
@@ -116,7 +116,7 @@ $( document ).ready(function() {
    </div>
   </div>
   <div id="rightstrip" class="titlefont">
-    <a id="help" href="https://github.com/dkoes/WebMol" class="titletext">Download</a>
+    <a id="help" href="https://github.com/dkoes/3Dmol" class="titletext">Download</a>
   </div>
  </div>
 </div>
@@ -126,13 +126,13 @@ $( document ).ready(function() {
         
         <div class="table">
             <div class="tablerow">
-        <div id='viewer1' class='webmoljs_viewer' data-href='tests/test_structs/2por.pdb' data-backgroundcolor='0xffffff' data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div> 
-        <div id='viewer2' class='webmoljs_viewer' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xf6f6f6'></div>           
+        <div id='viewer1' class='viewer_3Dmoljs' data-href='tests/test_structs/2por.pdb' data-backgroundcolor='0xffffff' data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div> 
+        <div id='viewer2' class='viewer_3Dmoljs' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xf6f6f6'></div>           
             </div>
             
             <div class="tablerow">
-        <div id='viewer4' class='webmoljs_viewer' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xf6f6f6'></div>
-        <div id='viewer3' class='webmoljs_viewer' data-href='tests/test_structs/1YCR.pdb' data-backgroundcolor='0xffffff' data-style='{"cartoon":{}}' data-callback='init1YCR'></div>  
+        <div id='viewer4' class='viewer_3Dmoljs' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xf6f6f6'></div>
+        <div id='viewer3' class='viewer_3Dmoljs' data-href='tests/test_structs/1YCR.pdb' data-backgroundcolor='0xffffff' data-style='{"cartoon":{}}' data-callback='init1YCR'></div>  
             </div>
         </div>           
 

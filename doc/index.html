@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>WebMol.js Index</title>
+	<title>$3Dmol.js Index</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -18,7 +18,7 @@
 <div class="container-fluid">
 	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="../index.html">WebMol.js</a>
+			<a class="brand" href="../index.html">$3Dmol.js</a>
                         
 			<ul class="nav">
                                 <li>
@@ -32,7 +32,7 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="WebMol.html">WebMol</a>
+							<a href="$3Dmol.html">$3Dmol</a>
 						</li>
 						
 
@@ -46,31 +46,31 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="WebMol.GLModel.html">WebMol.GLModel</a>
+							<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>
 						</li>
 						
 						<li>
-							<a href="WebMol.GLShape.html">WebMol.GLShape</a>
+							<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>
 						</li>
 						
 						<li>
-							<a href="WebMol.GLViewer.html">WebMol.GLViewer</a>
+							<a href="$3Dmol.GLViewer.html">$3Dmol.GLViewer</a>
 						</li>
 						
 						<li>
-							<a href="WebMol.Label.html">WebMol.Label</a>
+							<a href="$3Dmol.Label.html">$3Dmol.Label</a>
 						</li>
 						
 						<li>
-							<a href="WebMol.ROYGB.html">WebMol.ROYGB</a>
+							<a href="$3Dmol.ROYGB.html">$3Dmol.ROYGB</a>
 						</li>
 						
 						<li>
-							<a href="WebMol.RWB.html">WebMol.RWB</a>
+							<a href="$3Dmol.RWB.html">$3Dmol.RWB</a>
 						</li>
 						
 						<li>
-							<a href="WebMol.Sinebow.html">WebMol.Sinebow</a>
+							<a href="$3Dmol.Sinebow.html">$3Dmol.Sinebow</a>
 						</li>
 						
 
@@ -84,11 +84,11 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="tutorial-embeddable.html">Embedding a WebMol Viewer</a>
+							<a href="tutorial-embeddable.html">Embedding a $3Dmol Viewer</a>
 						</li>
 						
 						<li>
-							<a href="tutorial-url.html">Viewing Molecules with the WebMol Server</a>
+							<a href="tutorial-url.html">Viewing Molecules with the $3Dmol Server</a>
 						</li>
 						
 
@@ -181,18 +181,18 @@
         <article><p><style>
 .page-title {visibility: hidden; height: 0px; width: 0px;} //hack to get rid of Index
 </style></p>
-<p><script src="http://webmol.csb.pitt.edu/release/webmol-min.js"></script> </p>
-<h1>WebMol.js</h1><p><div  style="float: right; height: 250px; width: 250px; position: relative;" class='webmoljs_viewer' data-pdb='1UBQ' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"color": "spectrum"}}'></div>  </p>
+<p><script src="http://3Dmol.csb.pitt.edu/release/3Dmol-min.js"></script> </p>
+<h1>$3Dmol.js</h1><p><div  style="float: right; height: 250px; width: 250px; position: relative;" class='3Dmoljs_viewer' data-pdb='1UBQ' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"color": "spectrum"}}'></div>  </p>
 <p><script>
 setInterval(function() {
- if(WebMol.viewers) if(WebMol.viewers[0]) {
-    var view = WebMol.viewers[0];
+ if($3Dmol.viewers) if($3Dmol.viewers[0]) {
+    var view = $3Dmol.viewers[0];
     view.rotate(1);
  }
 }, 50);
 </script></p>
-<h2>Overview</h2><p>WebMol.js is an object-oriented, webGL based JavaScript library for online molecular visualization - No Java required!
-With WebMol.js, you can add beautifully rendered molecular visualizations to your web applications.  Features include</p>
+<h2>Overview</h2><p>$3Dmol.js is an object-oriented, webGL based JavaScript library for online molecular visualization - No Java required!
+With $3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications.  Features include</p>
 <ul>
 <li>support for pdb, sdf, mol2, xyz, and cube formats</li>
 <li>parallelized molecular surface computation</li>
@@ -203,22 +203,22 @@ With WebMol.js, you can add beautifully rendered molecular visualizations to you
 <li>geometric shapes included spheres and arrows</li>
 </ul>
 <h2>Getting Started</h2><p>Molecular data can be shared and visualized without writing any HTML
- using only a declarative URL specification and our hosted viewer (see <a href="tutorial-url.html">Viewing Molecules with the WebMol Server</a>).</p>
-<p>Viewers can be quickly embedded in any HTML document using just two lines of source code (see <a href="tutorial-embeddable.html">Embedding a WebMol Viewer</a>).</p>
-<h2>Developing with WebMol.js</h2><p>WebMol.js provides a full-featured API for manipulating and styling molecular data.</p>
+ using only a declarative URL specification and our hosted viewer (see <a href="tutorial-url.html">Viewing Molecules with the $3Dmol Server</a>).</p>
+<p>Viewers can be quickly embedded in any HTML document using just two lines of source code (see <a href="tutorial-embeddable.html">Embedding a $3Dmol Viewer</a>).</p>
+<h2>Developing with $3Dmol.js</h2><p>$3Dmol.js provides a full-featured API for manipulating and styling molecular data.</p>
 <h3>Getting the source code</h3><p>The library is available as a single minified JavaScript file:</p>
-<pre class="prettyprint source"><code>{@lang xml}&lt;script src=&quot;http://webmol.csb.pitt.edu/release/webmol-min.js&quot;>&lt;/script></code></pre><p><br>
+<pre class="prettyprint source"><code>{@lang xml}&lt;script src=&quot;http://3Dmol.csb.pitt.edu/release/3Dmol-min.js&quot;>&lt;/script></code></pre><p><br>
 An un-minified file is also provided for debugging purposes.</p>
-<pre class="prettyprint source"><code>{@lang xml}&lt;script src=&quot;http://webmol.csb.pitt.edu/release/webmol.js&quot;>&lt;/script></code></pre><p><br>
-The full source distribution is available <a href="https://github.com/dkoes/WebMol">from github</a>.</p>
-<pre class="prettyprint source"><code>git clone https://github.com/dkoes/WebMol.git</code></pre><h3>Using the source code</h3><p>Every WebMol.js viewer canvas corresponds to a <a href="WebMol.GLViewer.html">WebMol.GLViewer</a> object. The viewer object
+<pre class="prettyprint source"><code>{@lang xml}&lt;script src=&quot;http://3Dmol.csb.pitt.edu/release/3Dmol.js&quot;>&lt;/script></code></pre><p><br>
+The full source distribution is available <a href="https://github.com/dkoes/$3Dmol">from github</a>.</p>
+<pre class="prettyprint source"><code>git clone https://github.com/dkoes/$3Dmol.git</code></pre><h3>Using the source code</h3><p>Every $3Dmol.js viewer canvas corresponds to a <a href="$3Dmol.GLViewer.html">$3Dmol.GLViewer</a> object. The viewer object
 includes methods for setting viewer properties and for creating and manipulating molecular models, surfaces
 and custom geometric shapes within the view.</p>
-<p>A <a href="WebMol.GLModel.html">WebMol.GLModel</a> object represents molecular data.  Each model object stores its own
+<p>A <a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a> object represents molecular data.  Each model object stores its own
 rendering data and provides a convient way to reference a defined part of the scene.</p>
 <p>Models are manipulated and styled using <a href="types.html#AtomSpec">AtomSpec</a> JavaScript objects. </p>
 <p>An example of a viewer that manipulates the styles of the embedded objects is shown below.  View the source code for the implementation details.</p>
-<iframe width=800, height=800 src="http://webmol.csb.pitt.edu/doc/example.html"></iframe></article>
+<iframe width=800, height=800 src="http://3Dmol.csb.pitt.edu/doc/example.html"></iframe></article>
     </section>
 
 
@@ -234,7 +234,7 @@ rendering data and provides a convient way to reference a defined part of the sc
 					
 					
 		<span class="copyright">
-		WebMol.js © 2014
+		$3Dmol.js © 2014
 		</span>
 					<br />
 					

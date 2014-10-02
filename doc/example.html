@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>WebMol Example</title>
-<script src="http://webmol.csb.pitt.edu/release/webmol-min.js"></script>
+<title>$3Dmol Example</title>
+<script src="http://3Dmol.csb.pitt.edu/release/3Dmol-min.js"></script>
 
 <style>
 head, body {
@@ -39,7 +39,7 @@ head, body {
 
 	var atomcallback = function(atom, viewer) {
 		if (atom.clickLabel === undefined
-				|| !atom.clickLabel instanceof WebMol.Label) {
+				|| !atom.clickLabel instanceof $3Dmol.Label) {
 			atom.clickLabel = viewer.addLabel(atom.elem + atom.serial, {
 				fontSize : 14,
 				position : {
@@ -82,8 +82,8 @@ head, body {
 	$(document).ready(function() {
 
 		moldata = data = $("#moldata_pdb_large").val();
-		glviewer = WebMol.createViewer("gldiv", {
-			defaultcolors : WebMol.rasmolElementColors,
+		glviewer = $3Dmol.createViewer("gldiv", {
+			defaultcolors : $3Dmol.rasmolElementColors,
 			callback : function(viewer) {
 
 				viewer.setBackgroundColor(0xffffff);
@@ -98,7 +98,7 @@ head, body {
 					atom.callback = atomcallback;
 				}
 
-				viewer.mapAtomProperties(WebMol.partialCharges);
+				viewer.mapAtomProperties($3Dmol.partialCharges);
 				viewer.zoomTo();
 				viewer.render();
 
@@ -129,9 +129,9 @@ head, body {
 		onclick="addLabels(glviewer); glviewer.render();"></input>
 	<br>
 	<input type="button" value="Surface1"
-		onclick="surf1 = glviewer.addSurface(WebMol.SurfaceType.VDW, {}, {hetflag:false,chain:'A'},{hetflag:false,chain:'A'});"></input>
+		onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false,chain:'A'},{hetflag:false,chain:'A'});"></input>
 	<input type="button" value="Surface2"
-		onclick="surf2 = glviewer.addSurface(WebMol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new WebMol.RWB(-.6,.6)}, opacity:0.85}, {chain:'B'},{chain:'B'});"></input>
+		onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.RWB(-.6,.6)}, opacity:0.85}, {chain:'B'},{chain:'B'});"></input>
 	<input type="button" value="RM Surface1"
 		onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
 	<input type="button" value="RM Surface2"
@@ -141,7 +141,7 @@ head, body {
 	<br>
 	<input id="pdbid" value="1UBQ" size=4>
 	<button
-		onclick="glviewer.clear(); m = WebMol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button>
+		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button>
 	<br>
 
 

@@ -19,17 +19,17 @@ module.exports = function(grunt) {
         
         jshint : {
             all : {
-                src : ['Gruntfile.js', 'webmol/**.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js']
+                src : ['Gruntfile.js', '3Dmol/**.js', '!3Dmol/jmolmodel.js', '!3Dmol/jmolviewer.js']
             },
             main : {
-                src : ['Gruntfile.js', 'webmol/webmol.js', 'webmol/glcartoon.js', 'webmol/glmodel.js', 'webmol/glviewer.js', 'webmol/glshape.js', 'webmol/gldraw.js']    
+                src : ['Gruntfile.js', '3Dmol/3Dmol.js', '3Dmol/glcartoon.js', '3Dmol/glmodel.js', '3Dmol/glviewer.js', '3Dmol/glshape.js', '3Dmol/gldraw.js']    
             },
             aux : {
-                src : ['Gruntfile.js', 'webmol/*.js', '!webmol/glcartoon.js', '!webmol/glmodel.js', '!webmol/glviewer.js', '!webmol/glshape.js',
-                       '!webmol/jmolmodel.js', '!webmol/jmolviewer.js']    
+                src : ['Gruntfile.js', '3Dmol/*.js', '!3Dmol/glcartoon.js', '!3Dmol/glmodel.js', '!3Dmol/glviewer.js', '!3Dmol/glshape.js',
+                       '!3Dmol/jmolmodel.js', '!3Dmol/jmolviewer.js']    
             },
             webgl : {
-                src : ['webmol/WebGL/*.js']
+                src : ['3Dmol/WebGL/*.js']
             }
             
         },
@@ -40,38 +40,38 @@ module.exports = function(grunt) {
             },
             
             pre : {
-                src : ['webmol/webmol.js', 'webmol/marchingcube.js', 'webmol/ProteinSurface4.js', 'webmol/**.js', '!webmol/WebGL/*.js',
-                       '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
-                dest : 'build/webmol-pre.js'            
+                src : ['3Dmol/3Dmol.js', '3Dmol/marchingcube.js', '3Dmol/ProteinSurface4.js', '3Dmol/**.js', '!3Dmol/WebGL/*.js',
+                       '!3Dmol/MarchingCubeData.js', '!3Dmol/jmolmodel.js', '!3Dmol/jmolviewer.js'],
+                dest : 'build/3Dmol-pre.js'            
             },
             
             webGL : {
-                src : ['js/jquery-1.9.1.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
-                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/properties.js'],
+                src : ['js/jquery-1.9.1.js', '3Dmol/WebGL/math.js', '3Dmol/WebGL/shapes.js', 
+                       '3Dmol/WebGL/core.js', '3Dmol/WebGL/*.js', '3Dmol/properties.js'],
                 dest : 'build/webGL-pre.js'
             },
             
             test : {
-            	src : ['js/jquery-1.9.1.js', 'webmol/WebGL/math.js', 'webmol/WebGL/shapes.js', 
-                       'webmol/WebGL/core.js', 'webmol/WebGL/*.js', 'webmol/properties.js',
-                       'webmol/webmol.js', 'webmol/marchingcube.js', 'webmol/ProteinSurface4.js', 'webmol/**.js',
-                       '!webmol/MarchingCubeData.js', '!webmol/jmolmodel.js', '!webmol/jmolviewer.js'],
-                dest : 'build/webmol-pre.js'
+            	src : ['js/jquery-1.9.1.js', '3Dmol/WebGL/math.js', '3Dmol/WebGL/shapes.js', 
+                       '3Dmol/WebGL/core.js', '3Dmol/WebGL/*.js', '3Dmol/properties.js',
+                       '3Dmol/3Dmol.js', '3Dmol/marchingcube.js', '3Dmol/ProteinSurface4.js', '3Dmol/**.js',
+                       '!3Dmol/MarchingCubeData.js', '!3Dmol/jmolmodel.js', '!3Dmol/jmolviewer.js'],
+                dest : 'build/3Dmol-pre.js'
             },
             
             big : {
-                src : ['build/webGL-pre.js', 'build/webmol-pre.js'],
-                dest : 'build/webmol.js'
+                src : ['build/webGL-pre.js', 'build/3Dmol-pre.js'],
+                dest : 'build/3Dmol.js'
             },
             
             closure : {
-                src : ['build/webGL-min-pre.js', 'build/webmol-min-pre.js'],
-                dest : 'build/webmol-min.js'
+                src : ['build/webGL-min-pre.js', 'build/3Dmol-min-pre.js'],
+                dest : 'build/3Dmol-min.js'
             },
             
             append : {
-                src : ['build/webmol-min.js', 'append.js'],
-                dest : 'build/webmol-min.js'
+                src : ['build/3Dmol-min.js', 'append.js'],
+                dest : 'build/3Dmol-min.js'
             }
         },
         
@@ -79,9 +79,9 @@ module.exports = function(grunt) {
             options : {
                 mangle : false
             },
-            webmol : {
-                src : ['build/webmol-pre.js'],
-                dest : 'build/webmol-min-pre.js'
+            $3Dmol : {
+                src : ['build/3Dmol-pre.js'],
+                dest : 'build/3Dmol-min-pre.js'
             },
             webGL : {
                 src : ['build/webGL-pre.js'],
@@ -91,16 +91,16 @@ module.exports = function(grunt) {
         
         'closure-compiler' : {
             
-            webmol : {
+            $3Dmol : {
                 closurePath : 'lib/closure_compiler',
-                js : ['build/webmol-pre.js'],
-                jsOutputFile : 'build/webmol-min-pre.js',
+                js : ['build/3Dmol-pre.js'],
+                jsOutputFile : 'build/3Dmol-min-pre.js',
                 noreport : true,
                 options : {
                     'compilation_level': 'ADVANCED_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5',
-                    'externs': ['externs/jquery.js', 'externs/webmol.js', 'externs/webGL.js'],
+                    'externs': ['externs/jquery.js', 'externs/3Dmol.js', 'externs/webGL.js'],
                     'create_source_map': 'script.map'                 
                 }
             },            
@@ -123,7 +123,7 @@ module.exports = function(grunt) {
                 options : {
                     stdout: true
                 },
-                command: "node node_modules/jsdoc/jsdoc.js externs/webmol.js README.md -c jsdoc.conf.json -t webmol-doc-template -u tutorials/ -d doc/"
+                command: "node node_modules/jsdoc/jsdoc.js externs/3Dmol.js README.md -c jsdoc.conf.json -t 3Dmol-doc-template -u tutorials/ -d doc/"
             }
         },
 

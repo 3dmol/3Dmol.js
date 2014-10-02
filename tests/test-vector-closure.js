@@ -1,13 +1,13 @@
-var WebMol = {};
+var $3Dmol = {};
 
 /** @constructor */
-WebMol.Vector3 = function(x, y, z) {
+$3Dmol.Vector3 = function(x, y, z) {
     this.x = x || 0.0;
     this.y = y || 0.0;
     this.z = z || 0.0;
 };
 
-WebMol.Vector3.prototype =  {
+$3Dmol.Vector3.prototype =  {
     
     constructor : Vector3,
     
@@ -119,7 +119,7 @@ WebMol.Vector3.prototype =  {
     
     applyProjection : function(m) {
         
-        //input: WebMol.Matrix4 projection matrix
+        //input: $3Dmol.Matrix4 projection matrix
         
         var x = this.x, y = this.y, z = this.z;
         
@@ -225,7 +225,7 @@ WebMol.Vector3.prototype =  {
 
         if ( order === undefined || order === 'XYZ' ) {
 
-            this.y = Math.asin( WebMol.Math.clamp( m13, -1, 1 ) );
+            this.y = Math.asin( $3Dmol.Math.clamp( m13, -1, 1 ) );
 
             if ( Math.abs( m13 ) < 0.99999 ) {
 
@@ -249,7 +249,7 @@ WebMol.Vector3.prototype =  {
     },
     
     clone : function() {
-        return new WebMol.Vector3(this.x, this.y, this.z);
+        return new $3Dmol.Vector3(this.x, this.y, this.z);
     }
     
 };

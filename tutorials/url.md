@@ -1,8 +1,8 @@
 
 
-You can view a PDB structure immediately by visiting the WebMol.js server.  Simply type `webmol.csb.pitt.edu/viewer.html` with an appropriately formatted [URL query string](http://en.wikipedia.org/wiki/Query_string) into your browser.
+You can view a PDB structure immediately by visiting the $3Dmol.js server.  Simply type `3Dmol.csb.pitt.edu/viewer.html` with an appropriately formatted [URL query string](http://en.wikipedia.org/wiki/Query_string) into your browser.
 
-A WebMol viewer URL takes the form `webmol.csb.pitt.edu/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific WebMol styles to apply.
+A $3Dmol viewer URL takes the form `3Dmol.csb.pitt.edu/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific $3Dmol styles to apply.
 
 
 ### Building a Query String ###
@@ -14,7 +14,7 @@ Specifiers are read in the order they are added, and are separated by an '&' cha
 
 The full url specification, then, is:
 
-`webmol.csb.pitt.edu/viewer.html?[structure identifier[[atom selector]style specification]`
+`3Dmol.csb.pitt.edu/viewer.html?[structure identifier[[atom selector]style specification]`
 
 Let's work through a simple example:
 
@@ -27,9 +27,9 @@ Let's try viewing a structure of  [green fluorescent protein](http://www.rcsb.or
 
 For this example, we'll use the crystal structure with PDB ID 4KW4.
 
-So, the structure identifier portion of the url is `pdb=4KW4`, and the url to view the structure on the WebMol.js server is:
+So, the structure identifier portion of the url is `pdb=4KW4`, and the url to view the structure on the $3Dmol.js server is:
 
-`webmol.csb.pitt.edu/viewer.html?pdb=4KW4`
+`3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4`
 
 Try copying and pasting this URL into your browser to view GFP!
 
@@ -50,7 +50,7 @@ Currently, the available styles are **line** (default), **cross**, **cartoon**, 
 
 To render GFP with a **cartoon** representation, enter
 
-`webmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`
+`3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`
 
 Besides specifying the style type, you can also tune various characteristics of the style, such as line width and color, by appending comma separated key-value pairs, formatted as:
 
@@ -60,7 +60,7 @@ Check out {@link AtomStyleSpec} for a list of possible atom style specification 
 
 For example, in order to change the color of the cartoon representation to blue, change the style specification to `style=cartoon,color~blue`:
 
-`webmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon,color~blue`
+`3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon,color~blue`
 
 ##### Selecting atoms #####
 
@@ -78,5 +78,5 @@ Any subsequent style specifications will only be applied to these atoms, until a
 
 So, to view the chromophore as a stick structure within our cartoon representation, use:
 
-`webmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon&select=resn~CRO&style=stick`
+`3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon&select=resn~CRO&style=stick`
 

@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>WebMol</title>
-        <script src="release/webmol-min.js"></script>
+        <title>$3Dmol</title>
+        <script src="release/3Dmol-min.js"></script>
         <style>
         	* {margin:0; padding:0}
         </style>
         <script>
             var glviewer = null;
-            //http://localhost/WebMol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
+            //http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
             
             //Return a selection specification from an array of 'key~val' string pairs (split on ',')
             var extractselectors = function(cmdarr) {
@@ -54,7 +54,7 @@
                     	if(cmdarr[0] == 'surface') {
                     		  cmdarr.splice(0,1); //remove surface
                     		  var styleobj = extractselectors(cmdarr);
-                    		  viewer.addSurface(WebMol.SurfaceType.VDW, styleobj, currentsel, currentsel);
+                    		  viewer.addSurface($3Dmol.SurfaceType.VDW, styleobj, currentsel, currentsel);
                     	}
                     	else {
 	                        var styletype;
@@ -82,8 +82,8 @@
                     }
                     else if(cmdname == 'colorbyelement')
                     {
-                    	if(typeof(WebMol.elementColors[cmdarr[0]]) != "undefined")
-                    	    viewer.setColorByElement(currentsel, WebMol.elementColors[cmdarr[0]]);	
+                    	if(typeof($3Dmol.elementColors[cmdarr[0]]) != "undefined")
+                    	    viewer.setColorByElement(currentsel, $3Dmol.elementColors[cmdarr[0]]);	
                     }
                     
                 }
@@ -98,7 +98,7 @@
                     var loc = cmds.splice(0,1)[0].split("=");
                     var src = loc[0], data = loc[1];
                     
-                    glviewer = WebMol.createViewer("gldiv", {defaultcolors: WebMol.rasmolElementColors});                    
+                    glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});                    
                     glviewer.setBackgroundColor(0xffffff);
                     
                     if (src == 'pdb') {
