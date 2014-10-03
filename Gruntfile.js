@@ -46,7 +46,7 @@ module.exports = function(grunt) {
             },
             
             webGL : {
-                src : ['js/jquery-1.9.1.js', '3Dmol/WebGL/math.js', '3Dmol/WebGL/shapes.js', 
+                src : ['3Dmol/WebGL/math.js', '3Dmol/WebGL/shapes.js', 
                        '3Dmol/WebGL/core.js', '3Dmol/WebGL/*.js', '3Dmol/properties.js'],
                 dest : 'build/webGL-pre.js'
             },
@@ -60,8 +60,13 @@ module.exports = function(grunt) {
             },
             
             big : {
-                src : ['build/webGL-pre.js', 'build/3Dmol-pre.js'],
+                src : ['js/jquery-1.9.1.js','build/webGL-pre.js', 'build/3Dmol-pre.js'],
                 dest : 'build/3Dmol.js'
+            },
+            
+            bignojquery : {
+                src : ['build/webGL-pre.js', 'build/3Dmol-pre.js'],
+                dest : 'build/3Dmol-nojquery.js'
             },
             
             closure : {
@@ -140,7 +145,7 @@ module.exports = function(grunt) {
     
     grunt.registerTask('doc', ['clean:doc', 'shell:doc']);
     grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL']);
-    grunt.registerTask('concat_post_build', ['concat:big', 'concat:closure']);
+    grunt.registerTask('concat_post_build', ['concat:big', 'concat:bignojquery', 'concat:closure']);
     
     grunt.registerTask('test', ['clean:build', 'concat:test', 'closure-compiler:test', 'concat:append']);
     grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'concat:append']);

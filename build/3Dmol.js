@@ -21402,19 +21402,21 @@ $3Dmol.Label.prototype = {
 		};
 
 		return function() {
+			
+			var style = this.stylespec;
 			var fontMult = 2.0;
-			var useScreen =  typeof(this.stylespec.useScreen) == "undefined" ? false : this.stylespec.useScreen;
+			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
 
-			this.showBackground = this.stylespec.showBackground;
+			this.showBackground = style.showBackground;
 			if(typeof(this.showBackground) == "undefined") this.showBackground = true; //default
-			this.font = this.stylespec.font = this.stylespec.font ? this.stylespec.font
+			this.font = style.font = style.font ? style.font
 					: "Verdana";
 
-			this.fontSize = this.stylespec.fontSize = this.stylespec.fontSize ? this.stylespec.fontSize
+			this.fontSize = style.fontSize = style.fontSize ? style.fontSize
 					: 20;
 			this.fontSize *= fontMult;
 			/** @type {colorlike} */
-			this.fontColor = this.stylespec.fontColor = this.stylespec.fontColor ? this.stylespec.fontColor
+			this.fontColor = style.fontColor = style.fontColor ? style.fontColor
 					: {
 						r : 255,
 						g : 255,
@@ -21422,10 +21424,10 @@ $3Dmol.Label.prototype = {
 						a : 1.0
 					};
 
-			this.borderThickness = this.stylespec.borderThickness = this.stylespec.borderThickness ? this.stylespec.borderThickness
+			this.borderThickness = style.borderThickness = style.borderThickness ? style.borderThickness
 					: 4;
 
-			this.borderColor = this.stylespec.borderColor = this.stylespec.borderColor ? this.stylespec.borderColor
+			this.borderColor = style.borderColor = style.borderColor ? style.borderColor
 					: {
 						r : 0,
 						g : 0,
@@ -21433,7 +21435,7 @@ $3Dmol.Label.prototype = {
 						a : 1.0
 					};
 
-			this.backgroundColor = this.stylespec.backgroundColor = this.stylespec.backgroundColor ? this.stylespec.backgroundColor
+			this.backgroundColor = style.backgroundColor = style.backgroundColor ? style.backgroundColor
 					: {
 						r : 0,
 						g : 0,
@@ -21441,7 +21443,7 @@ $3Dmol.Label.prototype = {
 						a : 1.0
 					};
 
-			this.position = this.stylespec.position = this.stylespec.position ? this.stylespec.position
+			this.position = style.position = style.position ? style.position
 					: {
 						x : -10,
 						y : 1,
@@ -21455,16 +21457,16 @@ $3Dmol.Label.prototype = {
 		
 
 			// Should labels always be in front of model?
-			this.inFront = this.stylespec.inFront = (this.stylespec.inFront !== undefined) ? this.stylespec.inFront
+			this.inFront = style.inFront = (style.inFront !== undefined) ? style.inFront
 					: true;
 
 			// clear canvas
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-			var spriteAlignment = this.stylespec.alignment || $3Dmol.SpriteAlignment.topLeft;
+			var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
 
 			var bold = "";
-			if(this.stylespec.bold)
+			if(style.bold)
 				bold = "bold ";
 			this.context.font = bold+this.fontSize + "px  " + this.font;
 
@@ -21488,13 +21490,20 @@ $3Dmol.Label.prototype = {
 			// 1.25 is extra height factor for text below baseline: g,j,p,q.
 			}
 			
+			if(style.backgroundImage) {
+				var img = style.backgroundImage;
+				var w = style.backgroundWidth ? style.backgroundWidth : img.width;
+				var h = style.backgroundHeight ? style.backgroundHeight : img.height;
+				this.context.drawImage(img,0,0, w, h);
+			}
+			
 			// text color
 			this.context.fillStyle = "rgba(" + this.fontColor.r + ","
 					+ this.fontColor.g + "," + this.fontColor.b + ","
 					+ this.fontColor.a + ")";
 
 			this.context.fillText(this.text, this.borderThickness,
-					this.fontSize + this.borderThickness, textWidth);
+					this.fontSize + this.borderThickness);
 
 			// canvas contents will be used for a texture
 			var texture = new $3Dmol.Texture(this.canvas);
@@ -21506,11 +21515,11 @@ $3Dmol.Label.prototype = {
 				depthTest : !this.inFront
 			});
 
-			//TODO: figure out why the magic number 2.0 is needed
+
 			if(useScreen)
-				this.sprite.scale.set(2.0/fontMult,1/fontMult,1);
+				this.sprite.scale.set(1/fontMult,1/fontMult,1);
 			else
-				this.sprite.scale.set(2.0*this.fontSize/fontMult, this.fontSize/fontMult, 1);
+				this.sprite.scale.set(this.fontSize/fontMult, this.fontSize/fontMult, 1);
 			this.sprite.position.set(this.position.x, this.position.y,
 					this.position.z);
 		};
