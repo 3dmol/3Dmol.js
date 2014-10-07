@@ -46,15 +46,15 @@ $3Dmol.Label.prototype = {
 			
 			var style = this.stylespec;
 			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
-			var scaleMul = 8.0;
-			var fontMul = 2.0;
+			var scaleMul = 16.0;
+			
 			this.showBackground = style.showBackground;
 			if(typeof(this.showBackground) == "undefined") this.showBackground = true; //default
 			this.font = style.font = style.font ? style.font
 					: "Verdana";
 
 			this.fontSize = style.fontSize = style.fontSize ? style.fontSize
-					: 20;
+					: 54;
 			/** @type {colorlike} */
 			this.fontColor = style.fontColor = style.fontColor ? style.fontColor
 					: {
@@ -90,7 +90,6 @@ $3Dmol.Label.prototype = {
 						z : 1
 					};
 					
-			this.fontSize *= fontMul;
 			//convert colors from 0-1.0 to 255
 			if(this.backgroundColor instanceof $3Dmol.Color) this.backgroundColor = this.backgroundColor.scaled();
 			if(this.borderColor instanceof $3Dmol.Color) this.borderColor = this.borderColor.scaled();
@@ -179,11 +178,10 @@ $3Dmol.Label.prototype = {
 			});
 
 
-			var ratio = this.canvas.width/this.canvas.height;
 			if(useScreen)
-				this.sprite.scale.set(1,1/ratio,1);
-			else
-				this.sprite.scale.set(ratio*this.fontSize/scaleMul, this.fontSize/scaleMul, 1);
+				this.sprite.scale.set(1,1,1);
+			else //need some multiplier between screen pixels and model coordinates
+				this.sprite.scale.set(scaleMul, scaleMul, 1);
 			this.sprite.position.set(this.position.x, this.position.y,
 					this.position.z);
 		};

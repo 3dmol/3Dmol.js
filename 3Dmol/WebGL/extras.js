@@ -183,7 +183,12 @@ $3Dmol.SpritePlugin = function () {
             if ( material.map && material.map.image && material.map.image.width ) {
 
                 _gl.uniform1f( uniforms.alphaTest, material.alphaTest );
-
+                var w = material.map.image.width;
+                var h = material.map.image.height;
+                
+                scale[ 0 ] = w*_renderer.devicePixelRatio/viewportWidth;
+                scale[ 1 ] = h*_renderer.devicePixelRatio/viewportHeight;
+                
                 if ( material.useScreenCoordinates === true ) {
 
                     _gl.uniform1i( uniforms.useScreenCoordinates, 1 );
@@ -194,18 +199,11 @@ $3Dmol.SpritePlugin = function () {
                         Math.max( 0, Math.min( 1, sprite.position.z ) )
                     );
 
-                    scale[ 0 ] = _renderer.devicePixelRatio;
-                    scale[ 1 ] = _renderer.devicePixelRatio;
-
                 } else {
 
                     _gl.uniform1i( uniforms.useScreenCoordinates, 0 );
                     _gl.uniform1i( uniforms.sizeAttenuation, material.sizeAttenuation ? 1 : 0 );
                     _gl.uniformMatrix4fv( uniforms.modelViewMatrix, false, sprite._modelViewMatrix.elements );
-
-                    scale[ 0 ] = 1;
-                    scale[ 1 ] = 1;
-
                 }
 
                 if ( scene.fog && material.fog ) {
@@ -227,7 +225,7 @@ $3Dmol.SpritePlugin = function () {
 
                 size = 1 / ( material.scaleByViewport ? viewportHeight : 1 );
 
-                scale[ 0 ] *= size * invAspect * sprite.scale.x;
+                scale[ 0 ] *= size * sprite.scale.x;
                 scale[ 1 ] *= size * sprite.scale.y;
 
                 _gl.uniform2f( uniforms.uvScale, material.uvScale.x, material.uvScale.y );
