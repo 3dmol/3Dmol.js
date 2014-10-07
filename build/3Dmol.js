@@ -11923,7 +11923,6 @@ $3Dmol.SpritePlugin = function () {
         _sprite.uniforms.opacity              = _gl.getUniformLocation( _sprite.program, "opacity" );
 
         _sprite.uniforms.useScreenCoordinates = _gl.getUniformLocation( _sprite.program, "useScreenCoordinates" );
-        _sprite.uniforms.sizeAttenuation      = _gl.getUniformLocation( _sprite.program, "sizeAttenuation" );
         _sprite.uniforms.screenPosition       = _gl.getUniformLocation( _sprite.program, "screenPosition" );
         _sprite.uniforms.modelViewMatrix      = _gl.getUniformLocation( _sprite.program, "modelViewMatrix" );
         _sprite.uniforms.projectionMatrix     = _gl.getUniformLocation( _sprite.program, "projectionMatrix" );
@@ -12058,7 +12057,6 @@ $3Dmol.SpritePlugin = function () {
                 } else {
 
                     _gl.uniform1i( uniforms.useScreenCoordinates, 0 );
-                    _gl.uniform1i( uniforms.sizeAttenuation, material.sizeAttenuation ? 1 : 0 );
                     _gl.uniformMatrix4fv( uniforms.modelViewMatrix, false, sprite._modelViewMatrix.elements );
                 }
 
@@ -14913,7 +14911,6 @@ $3Dmol.ShaderLib = {
         vertexShader: [
 
 "uniform int useScreenCoordinates;",
-"uniform int sizeAttenuation;",     
 "uniform vec3 screenPosition;",
 "uniform mat4 modelViewMatrix;",
 "uniform mat4 projectionMatrix;",
@@ -14945,8 +14942,8 @@ $3Dmol.ShaderLib = {
 "    }",
     
 "    else {",
-"        finalPosition = projectionMatrix * modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);",
-"        finalPosition.xy += rotatedPosition * (sizeAttenuation == 1 ? 1.0 : finalPosition.z);",
+"        finalPosition = projectionMatrix * modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0); finalPosition /= finalPosition.w;",
+"        finalPosition.xy += rotatedPosition; ",
 "    }",
     
 "    gl_Position = finalPosition;",
@@ -21383,7 +21380,7 @@ $3Dmol.Label.prototype = {
 
 	setContext : function() {
 		// function for drawing rounded rectangles - for Label drawing
-		var roundRect = function(ctx, x, y, w, h, r) {
+		var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
 
 			ctx.beginPath();
 			ctx.moveTo(x + r, y);
@@ -21397,6 +21394,8 @@ $3Dmol.Label.prototype = {
 			ctx.quadraticCurveTo(x, y, x + r, y);
 			ctx.closePath();
 			ctx.fill();
+			if(drawBorder)
+				ctx.stroke();
 
 		};
 
@@ -21404,17 +21403,14 @@ $3Dmol.Label.prototype = {
 			
 			var style = this.stylespec;
 			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
-			var scaleMul = 16.0;
 			
-			this.showBackground = style.showBackground;
-			if(typeof(this.showBackground) == "undefined") this.showBackground = true; //default
-			this.font = style.font = style.font ? style.font
-					: "Verdana";
+			var showBackground = style.showBackground;
+			if(typeof(showBackground) == "undefined") showBackground = true; //default
+			var font = style.font ? style.font : "sans-serif";
 
-			this.fontSize = style.fontSize = style.fontSize ? style.fontSize
-					: 54;
-			/** @type {colorlike} */
-			this.fontColor = style.fontColor = style.fontColor ? style.fontColor
+			var fontSize = style.fontSize ? style.fontSize : 18;
+
+			var fontColor = style.fontColor ? style.fontColor
 					: {
 						r : 255,
 						g : 255,
@@ -21422,26 +21418,23 @@ $3Dmol.Label.prototype = {
 						a : 1.0
 					};
 
-			this.borderThickness = style.borderThickness = style.borderThickness ? style.borderThickness
-					: 4;
-
-			this.borderColor = style.borderColor = style.borderColor ? style.borderColor
+			var padding = style.padding ? style.padding : 4;
+			var borderThickness = style.borderThickness ? style.borderThickness
+					: 0;
+	
+			var backgroundColor = style.backgroundColor ? style.backgroundColor
 					: {
 						r : 0,
 						g : 0,
 						b : 0,
 						a : 1.0
 					};
+					
+			var borderColor = style.borderColor ? style.borderColor
+							: backgroundColor;
 
-			this.backgroundColor = style.backgroundColor = style.backgroundColor ? style.backgroundColor
-					: {
-						r : 0,
-						g : 0,
-						b : 0,
-						a : 1.0
-					};
-
-			this.position = style.position = style.position ? style.position
+					
+			var position = style.position ? style.position
 					: {
 						x : -10,
 						y : 1,
@@ -21449,30 +21442,31 @@ $3Dmol.Label.prototype = {
 					};
 					
 			//convert colors from 0-1.0 to 255
-			if(this.backgroundColor instanceof $3Dmol.Color) this.backgroundColor = this.backgroundColor.scaled();
-			if(this.borderColor instanceof $3Dmol.Color) this.borderColor = this.borderColor.scaled();
-			if(this.fontColor instanceof $3Dmol.Color) this.fontColor = this.fontColor.scaled();
+			if(backgroundColor instanceof $3Dmol.Color) backgroundColor = backgroundColor.scaled();
+			if(borderColor instanceof $3Dmol.Color) borderColor = borderColor.scaled();
+			if(fontColor instanceof $3Dmol.Color) fontColor = fontColor.scaled();
 		
 
 			// Should labels always be in front of model?
-			this.inFront = style.inFront = (style.inFront !== undefined) ? style.inFront
-					: true;
+			var inFront = (style.inFront !== undefined) ? style.inFront	: true;
 
 			// clear canvas
 
-			var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
+			var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.bottomLeft;
 
 			var bold = "";
 			if(style.bold)
 				bold = "bold ";
-			this.context.font = bold+this.fontSize + "px  " + this.font;
+			this.context.font = bold+fontSize + "px  " + font;
 
 			var metrics = this.context.measureText(this.text);
 			var textWidth = metrics.width;
 			
-			//calculate correct size
-			var width = textWidth+2*this.borderThickness+2;
-			var height = this.fontSize*1.25+2*this.borderThickness+2;
+			if(!showBackground) borderThickness = 0;
+		
+			var width = textWidth+2.5*borderThickness +2*padding;
+			var height = fontSize*1.25+2*borderThickness+2*padding;			// 1.25 is extra height factor for text below baseline: g,j,p,q.
+
 			
 			if(style.backgroundImage) {
 				var img = style.backgroundImage;
@@ -21489,24 +21483,20 @@ $3Dmol.Label.prototype = {
 			var bold = "";
 			if(style.bold)
 				bold = "bold ";
-			this.context.font = bold+this.fontSize + "px  " + this.font;
-			var metrics = this.context.measureText(this.text);
-			var textWidth = metrics.width;
-			// background color
-			this.context.fillStyle = "rgba(" + this.backgroundColor.r + ","
-					+ this.backgroundColor.g + "," + this.backgroundColor.b
-					+ "," + this.backgroundColor.a + ")";
-			// border color
-			this.context.strokeStyle = "rgba(" + this.borderColor.r + ","
-					+ this.borderColor.g + "," + this.borderColor.b + ","
-					+ this.borderColor.a + ")";
+			this.context.font = bold+fontSize + "px  " + font;
 
-			this.context.lineWidth = this.borderThickness;
-			if(this.showBackground) {
-				roundRect(this.context, this.borderThickness / 2,
-					this.borderThickness / 2, textWidth + 2*this.borderThickness,
-					this.fontSize * 1.25 + 2*this.borderThickness, 6);
-			// 1.25 is extra height factor for text below baseline: g,j,p,q.
+			// background color
+			this.context.fillStyle = "rgba(" + backgroundColor.r + ","
+					+ backgroundColor.g + "," + backgroundColor.b
+					+ "," + backgroundColor.a + ")";
+			// border color
+			this.context.strokeStyle = "rgba(" + borderColor.r + ","
+					+ borderColor.g + "," + borderColor.b + ","
+					+ borderColor.a + ")";
+
+			this.context.lineWidth = borderThickness;
+			if(showBackground) {
+				roundRect(this.context, borderThickness,borderThickness , width-2*borderThickness,height-2*borderThickness, 6, borderThickness > 0);
 			}
 			
 			if(style.backgroundImage) {
@@ -21518,12 +21508,12 @@ $3Dmol.Label.prototype = {
 			
 
 			// text color
-			this.context.fillStyle = "rgba(" + this.fontColor.r + ","
-					+ this.fontColor.g + "," + this.fontColor.b + ","
-					+ this.fontColor.a + ")";
+			this.context.fillStyle = "rgba(" + fontColor.r + ","
+					+ fontColor.g + "," + fontColor.b + ","
+					+ fontColor.a + ")";
 			
-			this.context.fillText(this.text, this.borderThickness,
-					this.fontSize + this.borderThickness);
+			this.context.fillText(this.text, borderThickness+padding,
+					fontSize + borderThickness+padding, textWidth);
 
 			// canvas contents will be used for a texture
 			var texture = new $3Dmol.Texture(this.canvas);
@@ -21532,16 +21522,12 @@ $3Dmol.Label.prototype = {
 				map : texture,
 				useScreenCoordinates : useScreen,
 				alignment : spriteAlignment,
-				depthTest : !this.inFront
+				depthTest : !inFront
 			});
 
+			this.sprite.scale.set(1,1,1);
 
-			if(useScreen)
-				this.sprite.scale.set(1,1,1);
-			else //need some multiplier between screen pixels and model coordinates
-				this.sprite.scale.set(scaleMul, scaleMul, 1);
-			this.sprite.position.set(this.position.x, this.position.y,
-					this.position.z);
+			this.sprite.position.set(position.x, position.y, position.z);
 		};
 
 	}(),

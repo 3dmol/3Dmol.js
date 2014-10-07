@@ -413,7 +413,6 @@ $3Dmol.ShaderLib = {
         vertexShader: [
 
 "uniform int useScreenCoordinates;",
-"uniform int sizeAttenuation;",     
 "uniform vec3 screenPosition;",
 "uniform mat4 modelViewMatrix;",
 "uniform mat4 projectionMatrix;",
@@ -445,8 +444,8 @@ $3Dmol.ShaderLib = {
 "    }",
     
 "    else {",
-"        finalPosition = projectionMatrix * modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);",
-"        finalPosition.xy += rotatedPosition * (sizeAttenuation == 1 ? 1.0 : finalPosition.z);",
+"        finalPosition = projectionMatrix * modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0); finalPosition /= finalPosition.w;",
+"        finalPosition.xy += rotatedPosition; ",
 "    }",
     
 "    gl_Position = finalPosition;",

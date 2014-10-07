@@ -67,7 +67,6 @@ $3Dmol.SpritePlugin = function () {
         _sprite.uniforms.opacity              = _gl.getUniformLocation( _sprite.program, "opacity" );
 
         _sprite.uniforms.useScreenCoordinates = _gl.getUniformLocation( _sprite.program, "useScreenCoordinates" );
-        _sprite.uniforms.sizeAttenuation      = _gl.getUniformLocation( _sprite.program, "sizeAttenuation" );
         _sprite.uniforms.screenPosition       = _gl.getUniformLocation( _sprite.program, "screenPosition" );
         _sprite.uniforms.modelViewMatrix      = _gl.getUniformLocation( _sprite.program, "modelViewMatrix" );
         _sprite.uniforms.projectionMatrix     = _gl.getUniformLocation( _sprite.program, "projectionMatrix" );
@@ -202,7 +201,6 @@ $3Dmol.SpritePlugin = function () {
                 } else {
 
                     _gl.uniform1i( uniforms.useScreenCoordinates, 0 );
-                    _gl.uniform1i( uniforms.sizeAttenuation, material.sizeAttenuation ? 1 : 0 );
                     _gl.uniformMatrix4fv( uniforms.modelViewMatrix, false, sprite._modelViewMatrix.elements );
                 }
 
