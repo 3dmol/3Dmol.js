@@ -643,11 +643,11 @@ $3Dmol.GLDraw = (function() {
 			
 			faceArray[faceoffset] = v1;
 			faceArray[faceoffset+1] = v2;
-			faceArray[faceoffset+2] = 0;
+			faceArray[faceoffset+2] = start;
 			faceoffset += 3;
 			faceArray[faceoffset] = v1;
 			faceArray[faceoffset+1] = v2;
-			faceArray[faceoffset+2] = 1;
+			faceArray[faceoffset+2] = start+1;
 			faceoffset += 3;
 		}
 		geoGroup.faceidx += 6*n;

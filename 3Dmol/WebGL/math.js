@@ -876,7 +876,7 @@ $3Dmol.Matrix4.prototype = {
 
             translation = ( translation instanceof $3Dmol.Vector3 ) ? translation : new $3Dmol.Vector3();
             rotation = ( rotation instanceof $3Dmol.Quaternion ) ? rotation : new $3Dmol.Quaternion();
-            scale = ( scale instanceof Webmol.Vector3 ) ? scale : new $3Dmol.Vector3();
+            scale = ( scale instanceof $3Dmol.Vector3 ) ? scale : new $3Dmol.Vector3();
 
             scale.x = x.length();
             scale.y = y.length();

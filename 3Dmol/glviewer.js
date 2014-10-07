@@ -10,9 +10,10 @@ $3Dmol.Label = function(text, parameters) {
 	this.stylespec = parameters || {};
 
 	this.canvas = document.createElement('canvas');
-
+	//todo: implement resizing canvas..
+	this.canvas.width = 134;
+	this.canvas.height = 35;
 	this.context = this.canvas.getContext('2d');
-
 	this.sprite = new $3Dmol.Sprite();
 	this.text = text;
 
@@ -44,9 +45,9 @@ $3Dmol.Label.prototype = {
 		return function() {
 			
 			var style = this.stylespec;
-			var fontMult = 2.0;
 			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
-
+			var scaleMul = 8.0;
+			var fontMul = 2.0;
 			this.showBackground = style.showBackground;
 			if(typeof(this.showBackground) == "undefined") this.showBackground = true; //default
 			this.font = style.font = style.font ? style.font
@@ -54,7 +55,6 @@ $3Dmol.Label.prototype = {
 
 			this.fontSize = style.fontSize = style.fontSize ? style.fontSize
 					: 20;
-			this.fontSize *= fontMult;
 			/** @type {colorlike} */
 			this.fontColor = style.fontColor = style.fontColor ? style.fontColor
 					: {
@@ -90,6 +90,7 @@ $3Dmol.Label.prototype = {
 						z : 1
 					};
 					
+			this.fontSize *= fontMul;
 			//convert colors from 0-1.0 to 255
 			if(this.backgroundColor instanceof $3Dmol.Color) this.backgroundColor = this.backgroundColor.scaled();
 			if(this.borderColor instanceof $3Dmol.Color) this.borderColor = this.borderColor.scaled();
@@ -101,7 +102,6 @@ $3Dmol.Label.prototype = {
 					: true;
 
 			// clear canvas
-			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
 			var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
 
@@ -112,7 +112,29 @@ $3Dmol.Label.prototype = {
 
 			var metrics = this.context.measureText(this.text);
 			var textWidth = metrics.width;
+			
+			//calculate correct size
+			var width = textWidth+2*this.borderThickness+2;
+			var height = this.fontSize*1.25+2*this.borderThickness+2;
+			
+			if(style.backgroundImage) {
+				var img = style.backgroundImage;
+				var w = style.backgroundWidth ? style.backgroundWidth : img.width;
+				var h = style.backgroundHeight ? style.backgroundHeight : img.height;
+				if(w > width) width = w;
+				if(h > height) height = h;
+			}
 
+			this.canvas.width = width;
+			this.canvas.height = height;
+			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+			var bold = "";
+			if(style.bold)
+				bold = "bold ";
+			this.context.font = bold+this.fontSize + "px  " + this.font;
+			var metrics = this.context.measureText(this.text);
+			var textWidth = metrics.width;
 			// background color
 			this.context.fillStyle = "rgba(" + this.backgroundColor.r + ","
 					+ this.backgroundColor.g + "," + this.backgroundColor.b
@@ -137,11 +159,12 @@ $3Dmol.Label.prototype = {
 				this.context.drawImage(img,0,0, w, h);
 			}
 			
+
 			// text color
 			this.context.fillStyle = "rgba(" + this.fontColor.r + ","
 					+ this.fontColor.g + "," + this.fontColor.b + ","
 					+ this.fontColor.a + ")";
-
+			
 			this.context.fillText(this.text, this.borderThickness,
 					this.fontSize + this.borderThickness);
 
@@ -156,10 +179,11 @@ $3Dmol.Label.prototype = {
 			});
 
 
+			var ratio = this.canvas.width/this.canvas.height;
 			if(useScreen)
-				this.sprite.scale.set(1/fontMult,1/fontMult,1);
+				this.sprite.scale.set(1,1/ratio,1);
 			else
-				this.sprite.scale.set(this.fontSize/fontMult, this.fontSize/fontMult, 1);
+				this.sprite.scale.set(ratio*this.fontSize/scaleMul, this.fontSize/scaleMul, 1);
 			this.sprite.position.set(this.position.x, this.position.y,
 					this.position.z);
 		};
