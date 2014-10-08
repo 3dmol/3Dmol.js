@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$3Dmol.js Class: GLViewer</title>
+	<title>3Dmol.js Class: GLViewer</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -18,7 +18,7 @@
 <div class="container-fluid">
 	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="../index.html">$3Dmol.js</a>
+			<a class="brand" href="../index.html">3Dmol.js</a>
                         
 			<ul class="nav">
                                 <li>
@@ -84,11 +84,11 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="tutorial-embeddable.html">Embedding a $3Dmol Viewer</a>
+							<a href="tutorial-embeddable.html">Embedding a 3Dmol Viewer</a>
 						</li>
 						
 						<li>
-							<a href="tutorial-url.html">Viewing Molecules with the $3Dmol Server</a>
+							<a href="tutorial-url.html">Viewing Molecules with the 3Dmol Server</a>
 						</li>
 						
 
@@ -351,6 +351,167 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
+            
+<dt>
+    <h4 class="name" id="addMesh"><span class="type-signature">&lt;static> </span>addMesh<span class="signature">(mesh, style)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Adds an explicit mesh as a surface object.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>mesh</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Mesh</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>surfid</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Number</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
             
 <dt>
     <h4 class="name" id="addSurface"><span class="type-signature">&lt;static> </span>addSurface<span class="signature">(type, style, atomsel, allsel, focus)</span><span class="type-signature"> &rarr; {number}</span></h4>
@@ -1177,6 +1338,140 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
             
                 
 <span class="param-type"><a href="types.html#ArrowSpec">ArrowSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addArrow"><span class="type-signature"></span>addArrow<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add cylinder shape</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CylinderSpec</span>
 
 
             
@@ -4653,13 +4948,13 @@ glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )</pre>
 					
 					
 		<span class="copyright">
-		$3Dmol.js © 2014
+		3Dmol.js © 2014
 		</span>
 					<br />
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Fri Sep 05 2014 15:37:40 GMT-0400 (EDT) using the <a
+		on Wed Oct 08 2014 11:33:19 GMT-0400 (EDT) using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>

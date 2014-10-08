@@ -158,7 +158,7 @@ footer {
     display: table-row;
 }
 
-.3Dmoljs_viewer {
+.viewer_3Dmoljs {
     display: table-cell;
     position: relative;   
     width: 50%;

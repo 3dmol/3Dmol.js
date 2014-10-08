@@ -1,8 +1,8 @@
 
 
-You can view a PDB structure immediately by visiting the $3Dmol.js server.  Simply type `3Dmol.csb.pitt.edu/viewer.html` with an appropriately formatted [URL query string](http://en.wikipedia.org/wiki/Query_string) into your browser.
+You can view a PDB structure immediately by visiting the 3Dmol.js server.  Simply type `3Dmol.csb.pitt.edu/viewer.html` with an appropriately formatted [URL query string](http://en.wikipedia.org/wiki/Query_string) into your browser.
 
-A $3Dmol viewer URL takes the form `3Dmol.csb.pitt.edu/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific $3Dmol styles to apply.
+A 3Dmol viewer URL takes the form `3Dmol.csb.pitt.edu/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific 3Dmol styles to apply.
 
 
 ### Building a Query String ###
@@ -27,7 +27,7 @@ Let's try viewing a structure of  [green fluorescent protein](http://www.rcsb.or
 
 For this example, we'll use the crystal structure with PDB ID 4KW4.
 
-So, the structure identifier portion of the url is `pdb=4KW4`, and the url to view the structure on the $3Dmol.js server is:
+So, the structure identifier portion of the url is `pdb=4KW4`, and the url to view the structure on the 3Dmol.js server is:
 
 `3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4`
 

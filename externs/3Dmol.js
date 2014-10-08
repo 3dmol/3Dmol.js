@@ -39,7 +39,7 @@ $3Dmol.createViewer = function(element, config) {};
 
 /**
   * Contains a dictionary of embedded viewers created from HTML elements
-  * with a the 3Dmoljs_viewer css class indexed by their id (or numerically
+  * with a the viewer_3Dmoljs css class indexed by their id (or numerically
   * if they do not have an id).
  */
 $3Dmol.viewers = {}
