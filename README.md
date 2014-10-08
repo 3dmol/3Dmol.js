@@ -68,4 +68,4 @@ Models are manipulated and styled using {@link AtomSpec} JavaScript objects.
 
 An example of a viewer that manipulates the styles of the embedded objects is shown below.  View the source code for the implementation details.
 
-<iframe width=800, height=800 src="http://3Dmol.csb.pitt.edu/doc/example.html"></iframe> 
+<iframe width=800, height=800 src="http://3dmol.csb.pitt.edu/doc/example.html"></iframe> 
