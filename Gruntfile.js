@@ -70,7 +70,7 @@ module.exports = function(grunt) {
             },
             
             closure : {
-                src : ['build/webGL-min-pre.js', 'build/3Dmol-min-pre.js'],
+                src : ['build/jquery-1.9.1-min-pre.js','build/webGL-min-pre.js', 'build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-min.js'
             },
             
@@ -91,6 +91,10 @@ module.exports = function(grunt) {
             webGL : {
                 src : ['build/webGL-pre.js'],
                 dest : 'build/webGL-min-pre.js'
+            },
+            jquery : {
+                src : ['js/jquery-1.9.1.js'],
+                dest : 'build/jquery-1.9.1-min-pre.js'
             }
         },
         
@@ -119,7 +123,18 @@ module.exports = function(grunt) {
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5'
                 }
-            }
+            },
+            jquery : {
+                closurePath : 'lib/closure_compiler',
+                js : ['js/jquery-1.9.1.js'],
+                jsOutputFile : 'build/jquery-1.9.1-min-pre.js',
+                noreport : true,
+                options : {
+                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
+                    'warning_level': 'DEFAULT',
+                    'language_in': 'ECMASCRIPT5'
+                }
+            }            
         },
         
         shell : {
