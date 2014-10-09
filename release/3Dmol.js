@@ -16841,9 +16841,7 @@ $(document).ready(function() {
             var viewerdiv = $(this);
             var datauri = null;
             
-            if(typeof($(viewerdiv).css('position')) === "undefined") {
-            	$(viewerdiv).css('position','relative'); //to overlap spinner need positioned container
-            }
+        
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
             
@@ -16855,6 +16853,7 @@ $(document).ready(function() {
             var bgcolor = Number(viewerdiv.data("backgroundcolor")) || 0x000000;
             var style = viewerdiv.data("style") || {line:{}};
             var select = viewerdiv.data("select") || {};
+            var selectstylelist = viewerdiv.data("select-style-list") || [];
             
             var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
                 viewer.setBackgroundColor(bgcolor);            
@@ -16867,8 +16866,12 @@ $(document).ready(function() {
                  
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
-                    glviewer.setStyle(select, style);
-                    
+                    glviewer.setStyle(select,style);
+                    for(var i = 0; i < selectstylelist.length; i++) {
+                    	var sel = selectstylelist[i][0] || {};
+                    	var sty = selectstylelist[i][1] || {"line":{}}
+                    	glviewer.setStyle(sel, sty);
+                    }
                     // Allowing us to fire callback after viewer has added model
                     if (callback) 
                         callback(glviewer);                    
@@ -16895,7 +16898,12 @@ $(document).ready(function() {
                     }
 
                     glviewer.addModel(moldata, type);
-                    glviewer.setStyle(select, style);
+                	glviewer.setStyle(select, style);
+                    for(var i = 0; i < selectstylelist.length; i++) {
+                    	var sel = selectstylelist[i][0] || {};
+                    	var sty = selectstylelist[i][1] || {"line":{}}
+                    	glviewer.setStyle(sel, sty);
+                    }                
                 }
 
 
@@ -21600,9 +21608,6 @@ $3Dmol.GLViewer = (function() {
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
 
-		var spinner = $('<div class="glviewerSpinnerWrap" style = "position: absolute; width: 100%; height: 100%; display: table; z-index: 1;"><div class="glviewerSpinner" style="display: table-cell; text-align: center; vertical-align: middle; z-index:1"><img src="3Dmol/spinner.gif"></div></div>');
-		$(element).append(spinner);
-		spinner.hide();
 		// set dimensions
 		// $(container).width(WIDTH);
 		// $(container).height(HEIGHT);
@@ -22080,7 +22085,6 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.render = function() {
 
-			// spinner.show();
 			var time1 = new Date();
 			var view = this.getView();
 			var i;
@@ -22135,7 +22139,6 @@ $3Dmol.GLViewer = (function() {
 			}
 			this.setView(view); // Calls show() => renderer render
 			var time2 = new Date();
-			spinner.hide();
 			console.log("render time: " + (time2 - time1));
 		};
 

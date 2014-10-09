@@ -245,9 +245,6 @@ $3Dmol.GLViewer = (function() {
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
 
-		var spinner = $('<div class="glviewerSpinnerWrap" style = "position: absolute; width: 100%; height: 100%; display: table; z-index: 1;"><div class="glviewerSpinner" style="display: table-cell; text-align: center; vertical-align: middle; z-index:1"><img src="3Dmol/spinner.gif"></div></div>');
-		$(element).append(spinner);
-		spinner.hide();
 		// set dimensions
 		// $(container).width(WIDTH);
 		// $(container).height(HEIGHT);
@@ -725,7 +722,6 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.render = function() {
 
-			// spinner.show();
 			var time1 = new Date();
 			var view = this.getView();
 			var i;
@@ -780,7 +776,6 @@ $3Dmol.GLViewer = (function() {
 			}
 			this.setView(view); // Calls show() => renderer render
 			var time2 = new Date();
-			spinner.hide();
 			console.log("render time: " + (time2 - time1));
 		};
 

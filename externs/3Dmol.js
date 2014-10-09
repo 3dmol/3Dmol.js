@@ -525,6 +525,10 @@ $3Dmol.GLViewer.setSurfaceMaterialStyle = function(surf, style) {};
  */
 $3Dmol.GLViewer.removeSurface = function(surf) {};
 
+
+/** Remove all surfaces. */
+$3Dmol.GLViewer.removeAllSurfaces = function() {};
+
 /**
  * Set style properties to all selected atoms
  * 

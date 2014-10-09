@@ -33,8 +33,12 @@ var gen$3DmolTestCase = function(styleType) {
         var end = new Date();
         var testTime = end - start;
         
+        viewer.rotate(10);
+        var time2 = new Date() - end;
+        
         resultTimes[testName] = testTime;
         console.log(timeMsg + (testTime) + "ms");
+        console.log(timeMsg + (testTime) + "ms; rotate "+time2+"ms");          
         console.groupEnd();
         
         QUnit.ok(true, testMsg);
@@ -69,6 +73,7 @@ var genGLmolTestCase = function(styleType, profile) {
                 //this.colorChainbow(all);
                 this.drawCartoon(target, all, false, this.thickness);
             }
+
         }; 
         
     };
@@ -99,6 +104,8 @@ var genGLmolTestCase = function(styleType, profile) {
         ok(true, testMsg); 
         
     });
+    
+
 };
 
 //JSmol testcase generator
@@ -108,15 +115,15 @@ var genJSmolTestCase = function(styleType, profile) {
     var testName = styleType + " render";
     var timeMsg = styleType + " render time: ";
     var testMsg = styleType + " style set correctly";
-    var script = "select *;";
+    var script = "";
     if (styleType === "line") {
-        script += "wireframe;";
+        script += "wireframe only;";
     }
     else if (styleType === "stick") {
-        script += "wireframe 100;";
+        script += "wireframe 100 only;";
     }
     else if (styleType === "sphere") {
-        script += "spacefill;";
+        script += "spacefill only;";
     }
     else if (styleType === "cartoon")
         script += "set cartoonFancy true; cartoon only;";
@@ -124,20 +131,21 @@ var genJSmolTestCase = function(styleType, profile) {
     //Create test case
     QUnit.test(testName, function() {
         
-        Jmol.scriptWait(viewer, "select *; wireframe off; cartoon off; spacefill off;");
-        
         console.group(testName);
-        
         var start = new Date();
-        
         Jmol.scriptWait(viewer, script);
+        
+        Jmol.scriptWaitOutput(viewer, "refresh;");
         
         var end = new Date();      
         
         var testTime = end - start;
         
+        Jmol.scriptWaitOutput(viewer,"rotate 10; refresh;");
+        
+        var time2 = new Date() - end;
         resultTimes[testName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");          
+        console.log(timeMsg + (testTime) + "ms; rotate "+time2+"ms");          
         console.groupEnd();
         
         QUnit.ok(true, testMsg); 
@@ -195,6 +203,53 @@ if (testSuite === '3Dmol') {
         QUnit.ok(true, testMsg);
         
     });
+    
+        
+    //Combo testcase
+	var comboName = "combined";
+    QUnit.test(comboName, function() {
+        
+        viewer.setStyle({}, {});
+        viewer.removeAllSurfaces();
+        viewer.render();        
+        console.group(comboName);
+        var start = new Date();
+
+        viewer.setStyle({chain: 'A'}, {sphere: {} });
+        viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'} });
+        viewer.setStyle({chain: 'C'}, {stick: {} });
+        viewer.render();
+        //Jmol.scriptWait(viewer, "select chain=A; spacefill; select chain=B; cartoon; color group; wireframe; select chain=C; wireframe 80;");
+        var end = new Date();      
+        
+        var testTime = end - start;
+        
+        resultTimes[comboName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");          
+        console.groupEnd();
+        
+        QUnit.ok(true, testMsg); 
+    });
+    
+    var rotateName = "rotate";
+    QUnit.test(rotateName, function() {
+        
+
+        console.group(rotateName);
+        var start = new Date();
+        
+        viewer.rotate(10);
+
+        var end = new Date();      
+        
+        var testTime = end - start;
+        
+        resultTimes[rotateName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");          
+        console.groupEnd();
+        
+        QUnit.ok(true, testMsg); 
+    });
 
 }
 
@@ -218,7 +273,84 @@ else if (testSuite === "glmol") {
 
     for (var style in styleSpec)
         genGLmolTestCase(styleSpec[style], profile);  
+    var combinedName = "combined";
+    QUnit.test(combinedName, function() {
+        
+        console.group(combinedName);
+        
+        var view = viewer.getView();
+        viewer.initializeScene();
+        var all = viewer.getAllAtoms();
+		var chainA = [];
+		var chainB = [];
+		var chainC = [];
+		
+		for(var i = 0; i < all.length; i++) {
+			if(viewer.atoms[all[i]].chain == 'A') chainA.push(all[i]);
+			else if(viewer.atoms[all[i]].chain == 'B') chainB.push(all[i]);
+			else if(viewer.atoms[all[i]].chain == 'C') chainC.push(all[i]);
+		}
+        
+        var start = new Date();
+        //Draw appropriate style        
+          //      viewer.setStyle({chain: 'A'}, {sphere: {} });
+        //viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'} });
+        viewer.drawAtomsAsSphere(viewer.modelGroup, chainA, viewer.sphereRadius);
+        viewer.colorChainbow(chainB);
+        viewer.drawCartoon(viewer.modelGroup, chainB, false, viewer.thickness);
+        viewer.drawBondsAsStick(viewer.modelGroup, chainC, viewer.cylinderRadius, viewer.cylinderRadius, true);
+        
+        viewer.zoomInto(all);
+        viewer.show();     
+        
+        var end = new Date();
+        var testTime = end - start;
+        
+        resultTimes[combinedName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");        
+        console.groupEnd();
+             
+        QUnit.ok(true, testMsg); 
+        
+    });
+    
+        var rotateNAme = "rotate";
+    QUnit.test(rotateName, function() {
+        
+        console.group(rotateName);
+        
+        var view = viewer.getView();
+        var dx = .1;
+      var dy = 0;
+      var r = Math.sqrt(dx * dx + dy * dy);
 
+           var rs = Math.sin(r * Math.PI) / r;
+
+
+        var start = new Date();
+        //Draw appropriate style        
+          //      viewer.setStyle({chain: 'A'}, {sphere: {} });
+        //viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'} });
+                 viewer.dq.x = Math.cos(r * Math.PI); 
+         viewer.dq.y = 0;
+         viewer.dq.z =  rs * dx; 
+         viewer.dq.w =  rs * dy;
+         viewer.rotationGroup.quaternion = new THREE.Quaternion(1, 0, 0, 0); 
+         viewer.rotationGroup.quaternion.multiplySelf(viewer.dq);
+         viewer.rotationGroup.quaternion.multiplySelf(viewer.cq);
+
+        viewer.show();     
+        
+        var end = new Date();
+        var testTime = end - start;
+        
+        resultTimes[rotateName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");        
+        console.groupEnd();
+             
+        QUnit.ok(true, testMsg); 
+        
+    });
     
 }
 
@@ -321,13 +453,13 @@ else if (testSuite === "jmol") {
     //Create test case
     QUnit.test(testName, function() {
         
-        Jmol.scriptWait(viewer, "select *; wireframe off; cartoon off; spacefill off;");
+        Jmol.scriptWait(viewer, "select *; wireframe off; cartoon off; spacefill off; refresh;");
         
         console.group(testName);
         
         var start = new Date();
         
-        Jmol.scriptWait(viewer, "select *; isosurface vdw;");
+        Jmol.scriptWait(viewer, "select *; isosurface vdw; refresh;");
         
         var end = new Date();      
         
@@ -339,6 +471,48 @@ else if (testSuite === "jmol") {
         
         QUnit.ok(true, testMsg); 
         
+    });
+    
+    //Combo testcase
+	var comboName = "combined";
+    QUnit.test(comboName, function() {
+        
+        Jmol.scriptWait(viewer, "select *; wireframe off; cartoon off; spacefill off; isosurface off; refresh;");
+        
+        console.group(comboName);
+        var start = new Date();
+
+        
+        Jmol.scriptWait(viewer, "select chain=A; spacefill; select chain=B; cartoon; color group; wireframe; select chain=C; wireframe 80;");
+        Jmol.scriptWaitOutput(viewer,"refresh;");
+        var end = new Date();      
+        
+        var testTime = end - start;
+        
+        resultTimes[comboName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");          
+        console.groupEnd();
+        
+        QUnit.ok(true, testMsg); 
+    });
+    
+    var rotateName = "rotate";
+    QUnit.test(rotateName, function() {
+        
+
+        console.group(rotateName);
+        var start = new Date();
+        
+        Jmol.scriptWaitOutput(viewer,"rotate 10; refresh;");
+        var end = new Date();      
+        
+        var testTime = end - start;
+        
+        resultTimes[rotateName] = testTime;
+        console.log(timeMsg + (testTime) + "ms");          
+        console.groupEnd();
+        
+        QUnit.ok(true, testMsg); 
     });
     
 }
