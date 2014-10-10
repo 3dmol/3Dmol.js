@@ -2,26 +2,23 @@
 
 You can view a PDB structure immediately by visiting the 3Dmol.js server.  Simply type `3Dmol.csb.pitt.edu/viewer.html` with an appropriately formatted [URL query string](http://en.wikipedia.org/wiki/Query_string) into your browser.
 
-A 3Dmol viewer URL takes the form `3Dmol.csb.pitt.edu/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific 3Dmol styles to apply.
+A 3Dmol viewer URL takes the form `3Dmol.csb.pitt.edu/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific 3Dmol styles to apply.  Click the URL below for an example.
+
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick)
 
 
 ### Building a Query String ###
 
-The URL query can be composed of three types of specifiers: a single **structure identifier** that is optionally followed by a number of alternating **atom selectors** and **style specifications**. The viewer will load the specified structure, and then alternately select a group of atoms and apply a specified viewing style.
-
-
+The URL query can be composed of three types of specifiers: a single **structure identifier** that is optionally followed by a number of alternating **atom selectors** and **style specifications**. The viewer will load the specified structure, and then apply the selectors and style specifications.
 Specifiers are read in the order they are added, and are separated by an '&' character.
 
-The full url specification, then, is:
-
-`3Dmol.csb.pitt.edu/viewer.html?[structure identifier[[atom selector]style specification]`
-
-Let's work through a simple example:
 
 
 #### Specifying a Structure ####
 
-The **structure identifier** portion of the URL is a single selector formatted as `pdb=[PDB ID]`.  
+The **structure identifier** portion of the URL is a single selector formatted as `pdb=[PDB ID]`, `cid=[PubChem CID]`, or `url=[URL]`
+to fetch molecules form the the PDB, the PubChem database, or any arbitrary URL.
+
 
 Let's try viewing a structure of  [green fluorescent protein](http://www.rcsb.org/pdb/explore/explore.do?structureId=4KW4) (GFP).  
 
@@ -29,15 +26,16 @@ For this example, we'll use the crystal structure with PDB ID 4KW4.
 
 So, the structure identifier portion of the url is `pdb=4KW4`, and the url to view the structure on the 3Dmol.js server is:
 
-`3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4`
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4`](../viewer.html?pdb=4KW4)
 
-Try copying and pasting this URL into your browser to view GFP!
+Arbitrary URLs can also be provided.
 
-You can click and drag to rotate the structure, and right click and drag (or use your mouse wheel) to zoom.
+[`http://3Dmol.csb.pitt.edu/viewer.html?url=http://3dmol.csb.pitt.edu/tests/test_structs/benzene.sdf&type=sdf`](../viewer.html?url=http://3dmol.csb.pitt.edu/tests/test_structs/benzene.sdf&type=sdf)
 
-Of course, you can change the pdb ID in the url to view any PDB structure you wish.
+Be default, the file format will be inferred by any extension (e.g., `.sdf`) present in the URL.  The file format may be
+manually specified using the type parameter, as shown above.
 
-Next, let's experiment with some different styles.
+
 
 </br>
 #### Selecting atoms and specifying style ####
@@ -46,21 +44,30 @@ Next, let's experiment with some different styles.
 
 After specifying a structure, we can apply styles to specific atoms by adding a **style specification** to the URL, formatted as `style=[style spec]`
 
+
 Currently, the available styles are **line** (default), **cross**, **cartoon**, **stick**, and **sphere**.  Note that the viewer initially applies the **line** style to all atoms in the structure
 
 To render GFP with a **cartoon** representation, enter
 
-`3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`](http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`)
 
-Besides specifying the style type, you can also tune various characteristics of the style, such as line width and color, by appending comma separated key-value pairs, formatted as:
+You can apply multiple styles at once to the selected atoms using a semi-colon separated list:
 
-`style=[stylespec],[key~val],[key~val],...`  
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon;stick`](../viewer.html?pdb=4KW4&style=cartoon;stick`)
 
-Check out {@link AtomStyleSpec} for a list of possible atom style specification key value pairs.
+Characteristics of each style, such as line width and color, may also be set.  These key-value pairs take the form of a comma separated list after a colon.  Since `=` has special meaning within a URL, `~` is used to associate the key-value pairs:
 
-For example, in order to change the color of the cartoon representation to blue, change the style specification to `style=cartoon,color~blue`:
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon:color~spectrum;stick:radius~0.25,colorscheme~greenCarbon&select=bonds:0&style=sphere:radius~0.5`](../viewer.html?pdb=4KW4&style=cartoon:color~spectrum;stick:radius~0.25,colorscheme~greenCarbon&select=bonds:0&style=sphere:radius~0.5)
 
-`3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon,color~blue`
+
+{@link AtomStyleSpec} provides for a list of possible atom style specification options.
+
+##### Adding a surface #####
+
+A surface style specification draws the Van der Waals surface of the currently selected atoms.  It can specify the opacity and color of the surface.
+
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon`](../viewer.html?pdb=4KW4&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon)
+
 
 ##### Selecting atoms #####
 
@@ -68,15 +75,16 @@ Whenever the viewer encounters a **style specification**, it applies the style t
 
 You can choose to apply styles to select groups of atoms by adding **atom selectors** to the URL before the **style specification**.
 
-Atoms can be selected based upon properties defined in the {@link AtomSpec}, are formatted as key-value pairs `select=[key~value,key~value]`.
+Atoms can be selected based upon properties defined in the {@link AtomSpec}.  They are formated like styles, with atom properties in a semi-colon separated list and the atom property values following a colon.  All specified properties must hold for an atom to be selected.  For example, to select all tryptophans on chain B:
 
-GFP has a modified residue called a *chromophore* that is nestled within the protein's beta barrel structure.  The PDB entry for GFP names this residue 'CRO'.
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=1YCR&select=resn:TRP;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=resn:TRP;chain:B&style=stick)
 
-We can select the chromophore atoms by selecting atoms that have the *resn* property set to 'CRO': `select=resn~CRO`.  
+Some atom properties, such as residue ids and names, can be specified in a comma separated list.  In this case, *any* property may match to select the atom. For example, to select the three residues 19, 23, and 26:
 
-Any subsequent style specifications will only be applied to these atoms, until another atom specification is supplied in the URL.
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&style=stick)
 
-So, to view the chromophore as a stick structure within our cartoon representation, use:
+Selections and styles are processed in the order they are specified in the URL.  These directives can be chained together to produce complex scenes:
 
-`3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon&select=resn~CRO&style=stick`
+
+ 
 

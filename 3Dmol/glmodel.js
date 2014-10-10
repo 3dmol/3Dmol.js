@@ -789,6 +789,25 @@ $3Dmol.GLModel = (function() {
         };
 
   
+        /** Return proper color for atom given style
+         * @param {AtomSpec} atom
+         * @param {AtomStyle} style
+         * @return {$3Dmol.Color}
+         */
+        var getColorFromStyle = function(atom, style) {
+            var color = atom.color;
+            if (typeof (style.color) != "undefined")
+                color = style.color;
+            if(typeof(style.colorscheme) != "undefined" &&
+            		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+            	var scheme = $3Dmol.elementColors[style.colorscheme];
+            	if(typeof(scheme[atom.elem]) != "undefined") {
+            		color = scheme[atom.elem];
+            	}
+            }
+            var C = $3Dmol.CC.color(color);
+            return C;
+        }
 
         // cross drawing
         /**
@@ -817,8 +836,7 @@ $3Dmol.GLModel = (function() {
             if (clickable && atom.intersectionShape === undefined)
                 atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
-            var c = $3Dmol.CC.color(atom.color);
-            if(style.color) c = $3Dmol.CC.color(style.color);
+            var c = getColorFromStyle(atom, style);
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -988,8 +1006,8 @@ $3Dmol.GLModel = (function() {
                     atom.intersectionShape.line.push(p2);
                 }
 
-                var c1 = $3Dmol.CC.color(atom.color);
-                var c2 = $3Dmol.CC.color(atom2.color);
+                var c1 = getColorFromStyle(atom, atom.style.line);
+                var c2 = getColorFromStyle(atom2, atom2.style.line);
                
                 if(atom.bondStyles && atom.bondStyles[i]) {
                 	var bstyle = atom.bondStyles[i];
@@ -1114,11 +1132,8 @@ $3Dmol.GLModel = (function() {
             if (style.hidden)
                 return;
                                                                  
-            var color = atom.color;
-            if (typeof (style.color) != "undefined")
-                color = style.color;
-            var C = $3Dmol.CC.color(color);
-
+            var C = getColorFromStyle(atom, style);
+            
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
             
@@ -1127,8 +1142,7 @@ $3Dmol.GLModel = (function() {
                 atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
             }
             
-            $3Dmol.GLDraw.drawSphere(geo, atom, radius, C);
-    
+            $3Dmol.GLDraw.drawSphere(geo, atom, radius, C);    
             
         };
         
@@ -1142,10 +1156,7 @@ $3Dmol.GLModel = (function() {
                 return;
             
             var radius = getRadiusFromStyle(atom, style);
-            var color = atom.color;
-            if (typeof (style.color) != "undefined")
-                color = style.color;
-            var C = $3Dmol.CC.color(color);
+            var C = getColorFromStyle(atom, style);
             
             //create flat square                       
             
@@ -1218,11 +1229,8 @@ $3Dmol.GLModel = (function() {
             var atomSingleBond = style.singleBonds || false;
             var fromCap = false, toCap = false;
 
-            var c1 = atom.color;
-            if (typeof (style.color) != "undefined") {
-                c1 = style.color;
-            }
-            var C1 = $3Dmol.CC.color(c1);
+            var C1 = getColorFromStyle(atom, style);
+
             var mp, mp1, mp2;
             
             if (!atom.capDrawn && atom.bonds.length < 4)
@@ -1239,12 +1247,8 @@ $3Dmol.GLModel = (function() {
                 	var style2 = atom2.style;
                     if (!style2.stick)
                         continue; // don't sweat the details                     
-
-                    var c2 = atom2.color;
-                    if (typeof (style2.stick.color) != "undefined") {
-                        c2 = style2.stick.color;
-                    }
-                    var C2 = $3Dmol.CC.color(c2);
+                   
+                    var C2 = getColorFromStyle(atom2, style2.stick);
                     
                     //support bond specific styles
                     bondR = atomBondR;                    
@@ -1272,7 +1276,7 @@ $3Dmol.GLModel = (function() {
                         if (!atom2.capDrawn && atom2.bonds.length < 4)
                             toCap = true;       
                                                 
-                        if (c1 != c2) {
+                        if (C1 != C2) {
                             mp = new $3Dmol.Vector3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
                             $3Dmol.GLDraw.drawCylinder(geo, p1, mp, bondR, C1, fromCap, false);
@@ -1332,7 +1336,7 @@ $3Dmol.GLModel = (function() {
                 			p2b.add(dir);
 
                                                                  
-                            if (c1 != c2) {
+                            if (C1 != C2) {
                                 mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
@@ -1380,7 +1384,7 @@ $3Dmol.GLModel = (function() {
                             p2b = p1b.clone();
                             p2b.add(dir);
 
-                            if (c1 != c2) {
+                            if (C1 != C2) {
                                 mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
@@ -1432,7 +1436,7 @@ $3Dmol.GLModel = (function() {
             }            
 
             // draw non bonded heteroatoms as spheres
-            var drawSphere = atom.bonds.length == 0;
+            var drawSphere = false;
             var numsinglebonds = 0;
             var differentradii = false;
             //also, if any bonds were drawn as multiples, need sphere
@@ -1453,7 +1457,7 @@ $3Dmol.GLModel = (function() {
             if(differentradii) { //jmol style double/triple bonds - no sphere
             	if(numsinglebonds > 0) drawSphere = true; //unless needed as a cap
             }
-            else if(numsinglebonds == 0) {
+            else if(numsinglebonds == 0 && atom.bonds.length > 0) {
             	drawSphere = true;
             }
            
@@ -1462,14 +1466,7 @@ $3Dmol.GLModel = (function() {
                 bondR = atomBondR;
                 //do not use bond style as this can be variable, particularly
                 //with jmol export of double/triple bonds
-                atom.style = {
-                    sphere : {
-                        radius : bondR,
-                        color : c1
-                    }
-                };
-                drawAtomSphere(atom, geo);                
-                atom.style = savedstyle;
+                $3Dmol.GLDraw.drawSphere(geo, atom, bondR, C1);    
             }
             
         };
@@ -1682,7 +1679,15 @@ $3Dmol.GLModel = (function() {
                         break;
                     }
                     var isokay = false;
-                    if ($.isArray(sel[key])) {
+                    if(key === "bonds") {
+                    	//special case counting number of bonds, for selecting nonbonded mostly
+                    	var val = sel[key];
+                    	if(val != atom.bonds.length) {
+                    		ret = false;
+                    		break;
+                    	}
+                    }
+                    else if ($.isArray(sel[key])) {
                         // can be any of the listed values
                         var valarr = sel[key];
                         for ( var i = 0; i < valarr.length; i++) {

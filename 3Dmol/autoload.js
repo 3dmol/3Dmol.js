@@ -23,13 +23,18 @@ $(document).ready(function() {
                 datauri = viewerdiv.data("href");
                 
             var bgcolor = Number(viewerdiv.data("backgroundcolor")) || 0x000000;
-            var style = viewerdiv.data("style") || {line:{}};
-            var select = viewerdiv.data("select") || {};
-            var selectstylelist = viewerdiv.data("select-style-list") || [];
+            var style = {line:{}};
+            if(viewerdiv.data("style")) style = $3Dmol.specStringToObject(viewerdiv.data("style"));
+            var select = {};
+            if(viewerdiv.data("select")) select = $3Dmol.specStringToObject(viewerdiv.data("select"));
+            var selectstylelist = [];
+            var surfaces = []
             var d = viewerdiv.data();
+            
             //let users specify individual but matching select/style tags, eg.
             //data-select1 data-style1
             var stylere = /style(.+)/;
+            var surfre = /surface(.*)/;
             var keys = [];
             for(var dataname in d) {
             	if(d.hasOwnProperty(dataname)) {
@@ -41,13 +46,18 @@ $(document).ready(function() {
             	var dataname = keys[i];
             	var m = stylere.exec(dataname);
             	if(m) {
-            		var newsel = {};
             		var selname = "select"+m[1];
-            		if(typeof(d[selname]) != "undefined") {
-            			newsel = d[selname];
-            		}
-            		selectstylelist.push([newsel,d[dataname]]);
-            	}            	
+            		var newsel = $3Dmol.specStringToObject(d[selname]);
+            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
+            		selectstylelist.push([newsel,styleobj]);
+            	}         
+            	m = surfre.exec(dataname);
+            	if(m) {
+            		var selname = "select"+m[1];
+            		var newsel = $3Dmol.specStringToObject(d[selname]);
+            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
+            		surfaces.push([newsel,styleobj]);
+            	}
             }
             
             var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
@@ -66,6 +76,11 @@ $(document).ready(function() {
                     	var sel = selectstylelist[i][0] || {};
                     	var sty = selectstylelist[i][1] || {"line":{}}
                     	glviewer.setStyle(sel, sty);
+                    }
+                    for(var i = 0; i < surfaces.length; i++) {
+                    	var sel = surfaces[i][0] || {};
+                    	var sty = surfaces[i][1] || {}
+                    	glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
                     }
                     // Allowing us to fire callback after viewer has added model
                     if (callback) 

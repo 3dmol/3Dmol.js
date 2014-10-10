@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>$3Dmol</title>
-        <script src="release/3Dmol-min.js"></script>
+        <script src="build/3Dmol.js"></script>
         <style>
         	* {margin:0; padding:0}
         </style>
@@ -10,33 +10,6 @@
             var glviewer = null;
             //http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
             
-            //Return a selection specification from an array of 'key~val' string pairs (split on ',')
-            var extractselectors = function(cmdarr) {
-                
-                if (typeof(cmdarr) === "string") {
-                    if (!!parseInt(cmdarr))
-                        return parseInt(cmdarr);
-                    
-                    if (cmdarr == "true" || cmdarr == "false")
-                        return (cmdarr == "true");
-                    
-                    return cmdarr;
-                }
-                    
-                
-                var selectionspec = {};
-                
-                for (var i = 0; i < cmdarr.length; i++) {
-                    var k = cmdarr[i].split('~')[0], v = cmdarr[i].split('~')[1];
-                    
-                    if (!v) 
-                        console.error("error parsing " + cmdarr[i] + "; no value specified");
-                    
-                    selectionspec[k] = extractselectors(v);
-                }
-                
-                return selectionspec;
-            };
             
             //Process commands, in order, and run on viewer (array of strings split on '&')
             var runcmds = function(cmds, viewer) {
@@ -44,46 +17,25 @@
                 var currentsel = {};
                 
                 for (var i = 0; i < cmds.length; i++) {
-                    var cmdname = cmds[i].split('=')[0], cmdarr = cmds[i].split('=')[1].split(',');
+                	var kv = cmds[i].split('=');
+                	var cmdname = kv[0];
+                	var cmdobj = $3Dmol.specStringToObject(kv[1]);
                     
                     if (cmdname == 'select')
-                        currentsel = extractselectors(cmdarr);
-                    
-                    else if (cmdname == 'style' || cmdname == 'addstyle') {
-                        
-                    	if(cmdarr[0] == 'surface') {
-                    		  cmdarr.splice(0,1); //remove surface
-                    		  var styleobj = extractselectors(cmdarr);
-                    		  viewer.addSurface($3Dmol.SurfaceType.VDW, styleobj, currentsel, currentsel);
-                    	}
-                    	else {
-	                        var styletype;
-	                        
-	                        if (!(cmdarr[0] == 'line' || cmdarr[0] == 'stick' || cmdarr[0] == 'cross' || cmdarr[0] == 'sphere' || cmdarr[0] == 'cartoon' || cmdarr[0] == 'hidden'))
-	                            styletype = 'line'; //Default to line style
-	                        else
-	                            styletype = cmdarr.splice(0,1)[0];
-	
-	                        var styleobj = {};
-	
-	                        if (styletype === 'hidden') 
-	                            styleobj.line = {'hidden': true};
-	                        
-	                        else {
-	                            var stylespec = extractselectors(cmdarr);
-	                            styleobj[styletype] = stylespec;                            
-	                        }
-	
-	                        if(cmdname == 'addstyle')
-	                            viewer.addStyle(currentsel, styleobj);
-	                        else
-	                        	viewer.setStyle(currentsel, styleobj);
-	                    }
+                        currentsel = cmdobj;
+                    else if(cmdname == 'surface') {
+                    	viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel, currentsel);
+                    }
+                    else if(cmdname == 'style') {
+                    	viewer.setStyle(currentsel,cmdobj);
+                    }
+                    else if(cmdname == 'addstyle') {
+                    	viewer.addStyle(currentsel, cmdobj);
                     }
                     else if(cmdname == 'colorbyelement')
                     {
-                    	if(typeof($3Dmol.elementColors[cmdarr[0]]) != "undefined")
-                    	    viewer.setColorByElement(currentsel, $3Dmol.elementColors[cmdarr[0]]);	
+                    	if(typeof($3Dmol.elementColors[cmdobj]) != "undefined")
+                    	    viewer.setColorByElement(currentsel, $3Dmol.elementColors[cmdobj]);	
                     }
                     
                 }
@@ -95,8 +47,10 @@
                 try {
                     var url = window.location.search.substr(1);
                     var cmds = url.split("&");
-                    var loc = cmds.splice(0,1)[0].split("=");
-                    var src = loc[0], data = loc[1];
+                    var first = cmds.splice(0,1)[0];
+                    var pos = first.indexOf('=');
+                    var src = first.substring(0,pos), data = first.substring(pos+1);
+                    var type = "pdb";
                     
                     glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});                    
                     glviewer.setBackgroundColor(0xffffff);
@@ -106,11 +60,24 @@
                         if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                            alert("Wrong PDB ID"); return;
                         }
-                        data = "http://www.pdb.org/pdb/files/" + data + ".pdb";                       
+                        data = "http://www.pdb.org/pdb/files/" + data + ".pdb";  
+                        type = "pdb";
                     }  
+                    else if(src == 'cid') {
+                    	type = "sdf";
+                        data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + data + 
+                        "/SDF?record_type=3d";
+                    }
+                    else { //url
+                    	//try to extract 3 character extension
+                    	type = data.substr(data.lastIndexOf('.')+1).substring(0,3);
+                    }
+                    if(cmds[0] && cmds[0].indexOf('type=') == 0) {
+                    	type = cmds[0].split('=')[1];
+                    }
                         
-                    $.get(data, function(ret) {
-                        var type = data.substr(-5).split('.')[1];
+                    $.post("echo.cgi", {'url': data}, function(ret, txt, response) {
+                    	
                         glviewer.addModel(ret, type);     
                         runcmds(cmds, glviewer);
                         glviewer.render();

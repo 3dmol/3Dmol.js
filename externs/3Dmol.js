@@ -897,4 +897,20 @@ $3Dmol.ROYGB = function(min, max) {};
  */
 $3Dmol.Sinebow = function(min, max) {};
 
+/**
+ * Parse a string that represents a style or atom selection and convert it
+ * into an object.  The goal is to make it easier to write out these specifications
+ * without resorting to json. Objects cannot be defined recursively.
+ * ; - delineates fields of the object 
+ * : - if the field has a value other than an empty object, it comes after a colon
+ * , - delineates key/value pairs of a value object
+ *     If the value object consists of ONLY keys (no = present) the keys are 
+ *     converted to a list.  Otherwise a object of key/value pairs is created with
+ *     any missing values set to null
+ * = OR ~ - separates key/value pairs of a value object, if not provided value is null
+ * 	twiddle is supported since = has special meaning in URLs
+ * @param (String) str
+ * @returns {Object}
+ */
+$3Dmol.specStringToObject = function(str) {};
 

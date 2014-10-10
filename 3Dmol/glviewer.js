@@ -1339,7 +1339,7 @@ $3Dmol.GLViewer = (function() {
 				var atom = atoms[i];
 				if (atom) {
 					if (typeof (atom.surfaceColor) != "undefined") {
-						colors[i] = $3Dmol.CC.color(atom.surfaceColor);
+						colors[i] = atom.surfaceColor;
 					} else if (atom.color) // map from atom
 						colors[i] = $3Dmol.CC.color(atom.color);
 				}
@@ -1470,10 +1470,7 @@ $3Dmol.GLViewer = (function() {
 			mat.vertexColors = $3Dmol.VertexColors;
 
 			for ( var prop in style) {
-				if (prop === "color") {
-					mat[prop] = $3Dmol.CC.color(style.color);
-					delete mat.vertexColors; // ignore
-				} else if (prop === "map") {
+				if (prop === "color" || prop === "map") {
 					// ignore
 				} else if (style.hasOwnProperty(prop))
 					mat[prop] = style[prop];
@@ -1568,8 +1565,24 @@ $3Dmol.GLViewer = (function() {
 
 				for (i = 0, il = atomsToShow.length; i < il; i++) {
 					atom = atomsToShow[i];
-					atom.surfaceColor = scheme.valueToHex(
-							atom.properties[prop], range);
+					atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
+							atom.properties[prop], range));
+				}
+			}
+			else if(typeof(style['color']) != 'undefined') {
+				//explicitly set color, otherwise material color just blends
+				for (i = 0, il = atomsToShow.length; i < il; i++) {
+					atom = atomsToShow[i];
+					atom.surfaceColor = $3Dmol.CC.color(style['color']);
+				}
+			}
+			else if(typeof(style['colorscheme']) != 'undefined') {
+				for (i = 0, il = atomsToShow.length; i < il; i++) {
+					atom = atomsToShow[i];
+					var scheme = $3Dmol.elementColors[style.colorscheme];
+	            	if(scheme && typeof(scheme[atom.elem]) != "undefined") {
+						atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
+	            	}
 				}
 			}
 

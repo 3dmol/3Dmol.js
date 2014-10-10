@@ -113,7 +113,7 @@ $3Dmol.CC = {
     },    
     getHex : function(hex) {
         if (parseInt(hex))
-            return hex;
+            return parseInt(hex);
         
         else if (typeof(hex) === 'string') {
             
@@ -163,9 +163,48 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
 		window.navigator.userAgent.indexOf('Trident/') >= 0) {
 	$3Dmol.syncSurface = true; // can't use webworkers
 }
-//$3Dmol constants (replaces needed THREE constants)
 
-//material constants
+/**
+ * Parse a string that represents a style or atom selection and convert it
+ * into an object.  
+ */
+$3Dmol.specStringToObject = function(str) {
+	if(typeof(str) === "object") {
+		return str; //not string, assume was converted already
+	}
+	else if(typeof(str) === "undefined" || str == null) {
+		return str; 
+	}
+	var ret = {};
+	var fields = str.split(';');
+	for(var i = 0; i < fields.length; i++) {
+		var fv = fields[i].split(':');
+		var f = fv[0];
+		var val = {};
+		var vstr = fv[1];
+		if(vstr) {
+			vstr = vstr.replace(/~/g,"=");
+			if(vstr.indexOf('=') !== -1) {
+				//has key=value pairs, must be object
+				var kvs = vstr.split(',');
+				for(var j = 0; j < kvs.length; j++) {
+					var kv = kvs[j].split('=',2);
+					val[kv[0]] = kv[1];
+				}
+			}
+			else if(vstr.indexOf(',') !== -1) {
+				//has multiple values, must list
+				val = vstr.split(',');
+			}
+			else {
+				val = vstr; //value itself
+			}
+		}
+		ret[f] = val;
+	}
+	
+	return ret;
+}
 
 
 

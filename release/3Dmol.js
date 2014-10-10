@@ -11001,6 +11001,10 @@ $3Dmol.Color.prototype = {
             return this;
     },
     
+    getHex: function() {
+    	return Math.round( ((this.r * 255) + this.g)*255+this.b);
+    },
+    
     clone : function() {
             return new $3Dmol.Color(this.r, this.g, this.b);
     },
@@ -16716,7 +16720,7 @@ $3Dmol.CC = {
     },    
     getHex : function(hex) {
         if (parseInt(hex))
-            return hex;
+            return parseInt(hex);
         
         else if (typeof(hex) === 'string') {
             
@@ -16766,9 +16770,48 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
 		window.navigator.userAgent.indexOf('Trident/') >= 0) {
 	$3Dmol.syncSurface = true; // can't use webworkers
 }
-//$3Dmol constants (replaces needed THREE constants)
 
-//material constants
+/**
+ * Parse a string that represents a style or atom selection and convert it
+ * into an object.  
+ */
+$3Dmol.specStringToObject = function(str) {
+	if(typeof(str) === "object") {
+		return str; //not string, assume was converted already
+	}
+	else if(typeof(str) === "undefined" || str == null) {
+		return str; 
+	}
+	var ret = {};
+	var fields = str.split(';');
+	for(var i = 0; i < fields.length; i++) {
+		var fv = fields[i].split(':');
+		var f = fv[0];
+		var val = {};
+		var vstr = fv[1];
+		if(vstr) {
+			vstr = vstr.replace(/~/g,"=");
+			if(vstr.indexOf('=') !== -1) {
+				//has key=value pairs, must be object
+				var kvs = vstr.split(',');
+				for(var j = 0; j < kvs.length; j++) {
+					var kv = kvs[j].split('=',2);
+					val[kv[0]] = kv[1];
+				}
+			}
+			else if(vstr.indexOf(',') !== -1) {
+				//has multiple values, must list
+				val = vstr.split(',');
+			}
+			else {
+				val = vstr; //value itself
+			}
+		}
+		ret[f] = val;
+	}
+	
+	return ret;
+}
 
 
 
@@ -16851,9 +16894,42 @@ $(document).ready(function() {
                 datauri = viewerdiv.data("href");
                 
             var bgcolor = Number(viewerdiv.data("backgroundcolor")) || 0x000000;
-            var style = viewerdiv.data("style") || {line:{}};
-            var select = viewerdiv.data("select") || {};
-            var selectstylelist = viewerdiv.data("select-style-list") || [];
+            var style = {line:{}};
+            if(viewerdiv.data("style")) style = $3Dmol.specStringToObject(viewerdiv.data("style"));
+            var select = {};
+            if(viewerdiv.data("select")) select = $3Dmol.specStringToObject(viewerdiv.data("select"));
+            var selectstylelist = [];
+            var surfaces = []
+            var d = viewerdiv.data();
+            
+            //let users specify individual but matching select/style tags, eg.
+            //data-select1 data-style1
+            var stylere = /style(.+)/;
+            var surfre = /surface(.*)/;
+            var keys = [];
+            for(var dataname in d) {
+            	if(d.hasOwnProperty(dataname)) {
+            		keys.push(dataname);
+            	}
+            }
+            keys.sort();
+            for(var i = 0; i < keys.length; i++) {
+            	var dataname = keys[i];
+            	var m = stylere.exec(dataname);
+            	if(m) {
+            		var selname = "select"+m[1];
+            		var newsel = $3Dmol.specStringToObject(d[selname]);
+            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
+            		selectstylelist.push([newsel,styleobj]);
+            	}         
+            	m = surfre.exec(dataname);
+            	if(m) {
+            		var selname = "select"+m[1];
+            		var newsel = $3Dmol.specStringToObject(d[selname]);
+            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
+            		surfaces.push([newsel,styleobj]);
+            	}
+            }
             
             var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
                 viewer.setBackgroundColor(bgcolor);            
@@ -16871,6 +16947,11 @@ $(document).ready(function() {
                     	var sel = selectstylelist[i][0] || {};
                     	var sty = selectstylelist[i][1] || {"line":{}}
                     	glviewer.setStyle(sel, sty);
+                    }
+                    for(var i = 0; i < surfaces.length; i++) {
+                    	var sel = surfaces[i][0] || {};
+                    	var sty = surfaces[i][1] || {}
+                    	glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
                     }
                     // Allowing us to fire callback after viewer has added model
                     if (callback) 
@@ -19343,6 +19424,25 @@ $3Dmol.GLModel = (function() {
         };
 
   
+        /** Return proper color for atom given style
+         * @param {AtomSpec} atom
+         * @param {AtomStyle} style
+         * @return {$3Dmol.Color}
+         */
+        var getColorFromStyle = function(atom, style) {
+            var color = atom.color;
+            if (typeof (style.color) != "undefined")
+                color = style.color;
+            if(typeof(style.colorscheme) != "undefined" &&
+            		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+            	var scheme = $3Dmol.elementColors[style.colorscheme];
+            	if(typeof(scheme[atom.elem]) != "undefined") {
+            		color = scheme[atom.elem];
+            	}
+            }
+            var C = $3Dmol.CC.color(color);
+            return C;
+        }
 
         // cross drawing
         /**
@@ -19371,8 +19471,7 @@ $3Dmol.GLModel = (function() {
             if (clickable && atom.intersectionShape === undefined)
                 atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
-            var c = $3Dmol.CC.color(atom.color);
-            if(style.color) c = $3Dmol.CC.color(style.color);
+            var c = getColorFromStyle(atom, style);
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -19542,8 +19641,8 @@ $3Dmol.GLModel = (function() {
                     atom.intersectionShape.line.push(p2);
                 }
 
-                var c1 = $3Dmol.CC.color(atom.color);
-                var c2 = $3Dmol.CC.color(atom2.color);
+                var c1 = getColorFromStyle(atom, atom.style.line);
+                var c2 = getColorFromStyle(atom2, atom2.style.line);
                
                 if(atom.bondStyles && atom.bondStyles[i]) {
                 	var bstyle = atom.bondStyles[i];
@@ -19668,11 +19767,8 @@ $3Dmol.GLModel = (function() {
             if (style.hidden)
                 return;
                                                                  
-            var color = atom.color;
-            if (typeof (style.color) != "undefined")
-                color = style.color;
-            var C = $3Dmol.CC.color(color);
-
+            var C = getColorFromStyle(atom, style);
+            
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
             
@@ -19681,8 +19777,7 @@ $3Dmol.GLModel = (function() {
                 atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
             }
             
-            $3Dmol.GLDraw.drawSphere(geo, atom, radius, C);
-    
+            $3Dmol.GLDraw.drawSphere(geo, atom, radius, C);    
             
         };
         
@@ -19696,10 +19791,7 @@ $3Dmol.GLModel = (function() {
                 return;
             
             var radius = getRadiusFromStyle(atom, style);
-            var color = atom.color;
-            if (typeof (style.color) != "undefined")
-                color = style.color;
-            var C = $3Dmol.CC.color(color);
+            var C = getColorFromStyle(atom, style);
             
             //create flat square                       
             
@@ -19772,11 +19864,8 @@ $3Dmol.GLModel = (function() {
             var atomSingleBond = style.singleBonds || false;
             var fromCap = false, toCap = false;
 
-            var c1 = atom.color;
-            if (typeof (style.color) != "undefined") {
-                c1 = style.color;
-            }
-            var C1 = $3Dmol.CC.color(c1);
+            var C1 = getColorFromStyle(atom, style);
+
             var mp, mp1, mp2;
             
             if (!atom.capDrawn && atom.bonds.length < 4)
@@ -19793,12 +19882,8 @@ $3Dmol.GLModel = (function() {
                 	var style2 = atom2.style;
                     if (!style2.stick)
                         continue; // don't sweat the details                     
-
-                    var c2 = atom2.color;
-                    if (typeof (style2.stick.color) != "undefined") {
-                        c2 = style2.stick.color;
-                    }
-                    var C2 = $3Dmol.CC.color(c2);
+                   
+                    var C2 = getColorFromStyle(atom2, style2.stick);
                     
                     //support bond specific styles
                     bondR = atomBondR;                    
@@ -19826,7 +19911,7 @@ $3Dmol.GLModel = (function() {
                         if (!atom2.capDrawn && atom2.bonds.length < 4)
                             toCap = true;       
                                                 
-                        if (c1 != c2) {
+                        if (C1 != C2) {
                             mp = new $3Dmol.Vector3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
                             $3Dmol.GLDraw.drawCylinder(geo, p1, mp, bondR, C1, fromCap, false);
@@ -19886,7 +19971,7 @@ $3Dmol.GLModel = (function() {
                 			p2b.add(dir);
 
                                                                  
-                            if (c1 != c2) {
+                            if (C1 != C2) {
                                 mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
@@ -19934,7 +20019,7 @@ $3Dmol.GLModel = (function() {
                             p2b = p1b.clone();
                             p2b.add(dir);
 
-                            if (c1 != c2) {
+                            if (C1 != C2) {
                                 mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
@@ -19986,7 +20071,7 @@ $3Dmol.GLModel = (function() {
             }            
 
             // draw non bonded heteroatoms as spheres
-            var drawSphere = atom.bonds.length == 0;
+            var drawSphere = false;
             var numsinglebonds = 0;
             var differentradii = false;
             //also, if any bonds were drawn as multiples, need sphere
@@ -20007,7 +20092,7 @@ $3Dmol.GLModel = (function() {
             if(differentradii) { //jmol style double/triple bonds - no sphere
             	if(numsinglebonds > 0) drawSphere = true; //unless needed as a cap
             }
-            else if(numsinglebonds == 0) {
+            else if(numsinglebonds == 0 && atom.bonds.length > 0) {
             	drawSphere = true;
             }
            
@@ -20016,14 +20101,7 @@ $3Dmol.GLModel = (function() {
                 bondR = atomBondR;
                 //do not use bond style as this can be variable, particularly
                 //with jmol export of double/triple bonds
-                atom.style = {
-                    sphere : {
-                        radius : bondR,
-                        color : c1
-                    }
-                };
-                drawAtomSphere(atom, geo);                
-                atom.style = savedstyle;
+                $3Dmol.GLDraw.drawSphere(geo, atom, bondR, C1);    
             }
             
         };
@@ -20236,7 +20314,15 @@ $3Dmol.GLModel = (function() {
                         break;
                     }
                     var isokay = false;
-                    if ($.isArray(sel[key])) {
+                    if(key === "bonds") {
+                    	//special case counting number of bonds, for selecting nonbonded mostly
+                    	var val = sel[key];
+                    	if(val != atom.bonds.length) {
+                    		ret = false;
+                    		break;
+                    	}
+                    }
+                    else if ($.isArray(sel[key])) {
                         // can be any of the listed values
                         var valarr = sel[key];
                         for ( var i = 0; i < valarr.length; i++) {
@@ -22702,7 +22788,7 @@ $3Dmol.GLViewer = (function() {
 				var atom = atoms[i];
 				if (atom) {
 					if (typeof (atom.surfaceColor) != "undefined") {
-						colors[i] = $3Dmol.CC.color(atom.surfaceColor);
+						colors[i] = atom.surfaceColor;
 					} else if (atom.color) // map from atom
 						colors[i] = $3Dmol.CC.color(atom.color);
 				}
@@ -22833,10 +22919,7 @@ $3Dmol.GLViewer = (function() {
 			mat.vertexColors = $3Dmol.VertexColors;
 
 			for ( var prop in style) {
-				if (prop === "color") {
-					mat[prop] = $3Dmol.CC.color(style.color);
-					delete mat.vertexColors; // ignore
-				} else if (prop === "map") {
+				if (prop === "color" || prop === "map") {
 					// ignore
 				} else if (style.hasOwnProperty(prop))
 					mat[prop] = style[prop];
@@ -22931,8 +23014,24 @@ $3Dmol.GLViewer = (function() {
 
 				for (i = 0, il = atomsToShow.length; i < il; i++) {
 					atom = atomsToShow[i];
-					atom.surfaceColor = scheme.valueToHex(
-							atom.properties[prop], range);
+					atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
+							atom.properties[prop], range));
+				}
+			}
+			else if(typeof(style['color']) != 'undefined') {
+				//explicitly set color, otherwise material color just blends
+				for (i = 0, il = atomsToShow.length; i < il; i++) {
+					atom = atomsToShow[i];
+					atom.surfaceColor = $3Dmol.CC.color(style['color']);
+				}
+			}
+			else if(typeof(style['colorscheme']) != 'undefined') {
+				for (i = 0, il = atomsToShow.length; i < il; i++) {
+					atom = atomsToShow[i];
+					var scheme = $3Dmol.elementColors[style.colorscheme];
+	            	if(scheme && typeof(scheme[atom.elem]) != "undefined") {
+						atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
+	            	}
 				}
 			}
 
