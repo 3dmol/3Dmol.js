@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/python
 #fetchs a file - workaround for cross site scripting prevention
 import cgi,requests,sys
 
