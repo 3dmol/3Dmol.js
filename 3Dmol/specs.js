@@ -74,19 +74,8 @@ var AtomStyleSpec = {};
 
 
 
-/**
- * Label type specification
- * @typedef LabelSpec
- * @struct
- * @prop {string} font - font name
- * @prop {number} fontSize - Size in pixels of text
- * @prop {string} fontColor - font color
- * @prop {number} borderThickness - line width of border around label
- * @prop {string} borderColor - color of border
- * @prop {string} backgroundColor - color of background, can provide r,g,b,a
- * @prop {Object} position - x,y,z coordinates for label
- * @prop {boolean} inFront - always put labels in from of model
- */
+
+
 
 
 

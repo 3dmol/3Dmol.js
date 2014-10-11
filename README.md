@@ -1,7 +1,7 @@
 <style>
 .page-title {visibility: hidden; height: 0px; width: 0px;} //hack to get rid of Index
 </style>
-<script src="http://3Dmol.csb.pitt.edu/release/3Dmol-min.js"></script> 
+<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script> 
 #3Dmol.js
 <div  style="float: right; height: 250px; width: 250px; position: relative;" class='viewer_3Dmoljs' data-pdb='1UBQ' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"color": "spectrum"}}'></div>  
 <script>
@@ -36,16 +36,16 @@ Viewers can be quickly embedded in any HTML document using just two lines of sou
 3Dmol.js provides a full-featured API for manipulating and styling molecular data.
 
 ###Getting the source code###
-The library is available as a single minified JavaScript file:
+The library is available as a single minified JavaScript file (includes jQuery):
 
 ``` 
-{@lang xml}<script src="http://3Dmol.csb.pitt.edu/release/3Dmol-min.js"></script> 
+{@lang xml}<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script> 
 ```
 
 <br>
 An un-minified file is also provided for debugging purposes.
 ``` 
-{@lang xml}<script src="http://3Dmol.csb.pitt.edu/release/3Dmol.js"></script> 
+{@lang xml}<script src="http://3Dmol.csb.pitt.edu/build/3Dmol.js"></script> 
 ```
 
 <br>

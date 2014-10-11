@@ -1973,7 +1973,7 @@ $3Dmol.GLModel = (function() {
         		var c = a.chain;
         		var resn = a.resn;
         		var resi = a.resi;
-        		var label =  resn + ':' + resi;
+        		var label =  resn + '' + resi;
         		if(!bylabel[c]) bylabel[c] = {};
         		if(!bylabel[c][label]) bylabel[c][label] = []
         		bylabel[c][label].push(a);

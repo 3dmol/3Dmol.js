@@ -64,6 +64,23 @@ $3Dmol.Label.prototype = {
 			return ret;
 		}
 
+		/**
+		 * Label type specification
+		 * @typedef LabelSpec
+		 * @struct
+		 * @prop {string} font - font name, default sans-serif
+		 * @prop {number} fontSize - height of text, default 18
+		 * @prop {string} fontColor - font color, default white
+		 * @prop {number} fontOpacity - font opacity, default 1
+		 * @prop {number} borderThickness - line width of border around label, default 0
+		 * @prop {string} borderColor - color of border, default backgroundColor
+		 * @prop {string} borderOpacity - color of border
+		 * @prop {string} backgroundColor - color of background, default black
+		 * @prop {string} backgroundOpacity - opacity of background, default 1
+		 * @prop {Object} position - x,y,z coordinates for label
+		 * @prop {boolean} inFront - always put labels in from of model
+		 * @prop {boolean} showBackground - show background rounded rectangle, default true
+		 */
 		return function() {
 			
 			var style = this.stylespec;
@@ -74,9 +91,9 @@ $3Dmol.Label.prototype = {
 			if(typeof(showBackground) == "undefined") showBackground = true; //default
 			var font = style.font ? style.font : "sans-serif";
 
-			var fontSize = style.fontSize ? style.fontSize : 18;
+			var fontSize = parseInt(style.fontSize) ? parseInt(style.fontSize) : 18;
 
-			var fontColor = getColor(style.fontColor, style.fontColorOpacity,
+			var fontColor = getColor(style.fontColor, style.fontOpacity,
 					 {
 						r : 255,
 						g : 255,
@@ -88,7 +105,7 @@ $3Dmol.Label.prototype = {
 			var borderThickness = style.borderThickness ? style.borderThickness
 					: 0;
 	
-			var backgroundColor = getColor(style.backgroundColor, style.backgroundColorOpacity, 
+			var backgroundColor = getColor(style.backgroundColor, style.backgroundOpacity, 
 					 {
 						r : 0,
 						g : 0,
@@ -96,7 +113,7 @@ $3Dmol.Label.prototype = {
 						a : 1.0
 					});
 					
-			var borderColor = getColor(style.borderColor, style.borderColorOpacity, backgroundColor);
+			var borderColor = getColor(style.borderColor, style.borderOpacity, backgroundColor);
 
 					
 			var position = style.position ? style.position
