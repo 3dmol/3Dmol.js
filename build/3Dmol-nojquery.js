@@ -7894,6 +7894,9 @@ $3Dmol.elementColors.orangeCarbon['C'] = 0xff6600;
 
 $3Dmol.elementColors.purpleCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
+
+$3Dmol.elementColors.blueCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 //glcartoon.js
 //This contains all the routines for rendering a cartoon given a set
 //of atoms with assigned secondary structure
@@ -7901,6 +7904,11 @@ $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
 //TODO: generate normals directly in drawStrip and drawThinStrip
 
 var $3Dmol = $3Dmol || {};
+
+
+/**@typedef CartoonStyleSpec
+ * @prop {string} color - solid color, may specify as 'spectrum'
+ */
 
 /**
  * @ignore
@@ -10097,6 +10105,14 @@ $3Dmol.GLModel = (function() {
         }
 
         // cross drawing
+		/** @typedef CrossStyleSpec
+		 * @prop {boolean} hidden - do not show 
+		 * @prop {number} linewidth 
+		 * @prop {number} radius 
+		 * @prop {string} colorscheme - element based coloring
+		 * @prop {string} color - fixed coloring, overrides colorscheme
+		 */
+		
         /**
          * 
          * @param {AtomSpec} atom
@@ -10242,6 +10258,13 @@ $3Dmol.GLModel = (function() {
             vertexArray[offset+3] = p2.x; vertexArray[offset+4] = p2.y; vertexArray[offset+5] = p2.z;
             colorArray[offset+3] = c1.r; colorArray[offset+4] = c1.g; colorArray[offset+5] = c1.b;            
 		}
+		
+		/**@typedef LineStyleSpec
+		 * @prop {boolean} hidden - do not show line
+		 * @prop {number} linewidth 
+		 * @prop {string} colorscheme - element based coloring
+		 * @prop {string} color - fixed coloring, overrides colorscheme
+		 */
 		
         // bonds - both atoms must match bond style
         // standardize on only drawing for lowest to highest
@@ -10402,6 +10425,13 @@ $3Dmol.GLModel = (function() {
         // bonds as cylinders
         var defaultStickRadius = 0.25;
 
+		/**@typedef SphereStyleSpec
+		 * @prop {boolean} hidden - do not show atom
+		 * @prop {number} radius - override van der waals radius
+		 * @prop {string} colorscheme - element based coloring
+		 * @prop {string} color - fixed coloring, overrides colorscheme
+		 */
+		
         //sphere drawing
         //See also: drawCylinder
         /** 
@@ -10501,6 +10531,14 @@ $3Dmol.GLModel = (function() {
         };
                 
            
+		/**@typedef StickStyleSpec
+		 * @prop {boolean} hidden - do not show 
+		 * @prop {number} radius 
+		 * @prop {boolean} singleBonds - draw all bonds as single bonds if set
+		 * @prop {string} colorscheme - element based coloring
+		 * @prop {string} color - fixed coloring, overrides colorscheme
+		 */
+		
         // draws cylinders and small spheres (at bond radius)
         var drawBondSticks = function(atom, atoms, geo) {
             if (!atom.style.stick)
@@ -14651,7 +14689,6 @@ ViewerSpec.callback;
  * Object literal Atom representation.  Can be used as a selection specification to 
  * select all atoms with matching properties
  * @typedef AtomSpec
- * @struct
  * @prop {string} resn - Parent residue name
  * @prop {number} x - Atom's x coordinate
  * @prop {number} y - Atom's y coordinate
@@ -14666,7 +14703,7 @@ ViewerSpec.callback;
  * @prop {number} rescode
  * @prop {number} serial - Atom's serial id number
  * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
- * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
+ * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to; for selection can be used to select atoms with a specific number of bonds
  * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
  * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
  * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
@@ -14675,47 +14712,19 @@ ViewerSpec.callback;
  * @prop {string} pdbline - If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
  * @prop {boolean} clickable - Set this flag to true to enable click selection handling for this atom
  * @prop {function(this, $3Dmol.GLViewer)} callback - Callback click handler function to be executed on this atom and its parent viewer
- * @prop {AtomStyleSpec} style - Atom style specification
+ * @prop {boolean} invert - for selection, inverts the meaning of the selection
  */
-var AtomSpec = {};
-AtomSpec.resn;
-AtomSpec.x;
-AtomSpec.y;
-AtomSpec.z;
-AtomSpec.color;
-AtomSpec.surfaceColor;
-AtomSpec.elem;
-AtomSpec.hetflag;
-AtomSpec.chain;
-AtomSpec.resi;
-AtomSpec.icode;
-AtomSpec.rescode;
-AtomSpec.serial;
-AtomSpec.atom;
-AtomSpec.bonds;
-AtomSpec.ss;
-AtomSpec.singleBonds;
-AtomSpec.bondOrder;
-AtomSpec.properties;
-AtomSpec.b;
-AtomSpec.pdbline;
-/** @type {IntersectionShapes} */
-AtomSpec.intersectionShape;
-AtomSpec.clickable;
-/** @type {function(AtomSpec, $3Dmol.GLViewer)} */
-AtomSpec.callback;
+
+
 
 /** 
  * @typedef AtomStyleSpec
+ * @prop {LineStyleSpec} line - draw bonds as lines
+ * @prop {CrossStyleSpec} cross - draw atoms as crossed lines (aka stars)
+ * @prop {StickStyleSpec} stick  - draw bonds as capped cylinders
+ * @prop {SphereStyleSpec} sphere - draw atoms as spheres
+ * @prop {CartoonStyleSpec} cartoon - draw cartoon representation of secondary structure
  */
-var AtomStyleSpec = {};
-
-
-
-
-
-
-
 
 
 

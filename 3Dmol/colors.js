@@ -130,3 +130,6 @@ $3Dmol.elementColors.orangeCarbon['C'] = 0xff6600;
 
 $3Dmol.elementColors.purpleCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
+
+$3Dmol.elementColors.blueCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;

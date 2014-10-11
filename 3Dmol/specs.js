@@ -13,7 +13,6 @@ ViewerSpec.callback;
  * Object literal Atom representation.  Can be used as a selection specification to 
  * select all atoms with matching properties
  * @typedef AtomSpec
- * @struct
  * @prop {string} resn - Parent residue name
  * @prop {number} x - Atom's x coordinate
  * @prop {number} y - Atom's y coordinate
@@ -28,7 +27,7 @@ ViewerSpec.callback;
  * @prop {number} rescode
  * @prop {number} serial - Atom's serial id number
  * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
- * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
+ * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to; for selection can be used to select atoms with a specific number of bonds
  * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
  * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
  * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
@@ -37,47 +36,19 @@ ViewerSpec.callback;
  * @prop {string} pdbline - If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
  * @prop {boolean} clickable - Set this flag to true to enable click selection handling for this atom
  * @prop {function(this, $3Dmol.GLViewer)} callback - Callback click handler function to be executed on this atom and its parent viewer
- * @prop {AtomStyleSpec} style - Atom style specification
+ * @prop {boolean} invert - for selection, inverts the meaning of the selection
  */
-var AtomSpec = {};
-AtomSpec.resn;
-AtomSpec.x;
-AtomSpec.y;
-AtomSpec.z;
-AtomSpec.color;
-AtomSpec.surfaceColor;
-AtomSpec.elem;
-AtomSpec.hetflag;
-AtomSpec.chain;
-AtomSpec.resi;
-AtomSpec.icode;
-AtomSpec.rescode;
-AtomSpec.serial;
-AtomSpec.atom;
-AtomSpec.bonds;
-AtomSpec.ss;
-AtomSpec.singleBonds;
-AtomSpec.bondOrder;
-AtomSpec.properties;
-AtomSpec.b;
-AtomSpec.pdbline;
-/** @type {IntersectionShapes} */
-AtomSpec.intersectionShape;
-AtomSpec.clickable;
-/** @type {function(AtomSpec, $3Dmol.GLViewer)} */
-AtomSpec.callback;
+
+
 
 /** 
  * @typedef AtomStyleSpec
+ * @prop {LineStyleSpec} line - draw bonds as lines
+ * @prop {CrossStyleSpec} cross - draw atoms as crossed lines (aka stars)
+ * @prop {StickStyleSpec} stick  - draw bonds as capped cylinders
+ * @prop {SphereStyleSpec} sphere - draw atoms as spheres
+ * @prop {CartoonStyleSpec} cartoon - draw cartoon representation of secondary structure
  */
-var AtomStyleSpec = {};
-
-
-
-
-
-
-
 
 
 

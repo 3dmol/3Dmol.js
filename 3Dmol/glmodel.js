@@ -817,6 +817,14 @@ $3Dmol.GLModel = (function() {
         }
 
         // cross drawing
+		/** @typedef CrossStyleSpec
+		 * @prop {boolean} hidden - do not show 
+		 * @prop {number} linewidth 
+		 * @prop {number} radius 
+		 * @prop {string} colorscheme - element based coloring
+		 * @prop {string} color - fixed coloring, overrides colorscheme
+		 */
+		
         /**
          * 
          * @param {AtomSpec} atom
@@ -962,6 +970,13 @@ $3Dmol.GLModel = (function() {
             vertexArray[offset+3] = p2.x; vertexArray[offset+4] = p2.y; vertexArray[offset+5] = p2.z;
             colorArray[offset+3] = c1.r; colorArray[offset+4] = c1.g; colorArray[offset+5] = c1.b;            
 		}
+		
+		/**@typedef LineStyleSpec
+		 * @prop {boolean} hidden - do not show line
+		 * @prop {number} linewidth 
+		 * @prop {string} colorscheme - element based coloring
+		 * @prop {string} color - fixed coloring, overrides colorscheme
+		 */
 		
         // bonds - both atoms must match bond style
         // standardize on only drawing for lowest to highest
@@ -1122,6 +1137,13 @@ $3Dmol.GLModel = (function() {
         // bonds as cylinders
         var defaultStickRadius = 0.25;
 
+		/**@typedef SphereStyleSpec
+		 * @prop {boolean} hidden - do not show atom
+		 * @prop {number} radius - override van der waals radius
+		 * @prop {string} colorscheme - element based coloring
+		 * @prop {string} color - fixed coloring, overrides colorscheme
+		 */
+		
         //sphere drawing
         //See also: drawCylinder
         /** 
@@ -1221,6 +1243,14 @@ $3Dmol.GLModel = (function() {
         };
                 
            
+		/**@typedef StickStyleSpec
+		 * @prop {boolean} hidden - do not show 
+		 * @prop {number} radius 
+		 * @prop {boolean} singleBonds - draw all bonds as single bonds if set
+		 * @prop {string} colorscheme - element based coloring
+		 * @prop {string} color - fixed coloring, overrides colorscheme
+		 */
+		
         // draws cylinders and small spheres (at bond radius)
         var drawBondSticks = function(atom, atoms, geo) {
             if (!atom.style.stick)

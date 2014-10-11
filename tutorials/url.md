@@ -82,7 +82,7 @@ Characteristics of each style, such as line width and color, may also be set.  T
 
 A surface style specification draws the Van der Waals surface of the currently selected atoms.  It can specify the opacity and color of the surface.
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon`](../viewer.html?pdb=4KW4&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon)
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&select=resn:HOH;invert:1&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon`](../viewer.html?pdb=4KW4&select=resn:HOH;invert:1&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon)
 
 ##### Labeling Residues #####
 

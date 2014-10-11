@@ -6,6 +6,11 @@
 
 var $3Dmol = $3Dmol || {};
 
+
+/**@typedef CartoonStyleSpec
+ * @prop {string} color - solid color, may specify as 'spectrum'
+ */
+
 /**
  * @ignore
  * @param {$3Dmol.Object3D} group
