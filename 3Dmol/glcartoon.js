@@ -1,12 +1,17 @@
 //glcartoon.js
 //This contains all the routines for rendering a cartoon given a set
 //of atoms with assigned secondary structure
-//TODO: secondary structure calculation
 
 //TODO: generate normals directly in drawStrip and drawThinStrip
 
 var $3Dmol = $3Dmol || {};
 
+/**
+ * @ignore
+ * @param {$3Dmol.Object3D} group
+ * @param {AtomSpec} atomlist
+ * @param {$3Dmol.Gradient} gradientscheme
+ */
 $3Dmol.drawCartoon = (function() {
 
     var axisDIV = 5; // 3 still gives acceptable quality

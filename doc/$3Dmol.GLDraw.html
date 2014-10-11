@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>3Dmol.js Class: GLShape</title>
+	<title>3Dmol.js Namespace: GLDraw</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -158,14 +158,14 @@
 					
 
 
-	<h1 class="page-title">Class: GLShape</h1>
+	<h1 class="page-title">Namespace: GLDraw</h1>
 <section>
 
 <header>
     <h2>
         <span class="ancestors"><a href="$3Dmol.html">$3Dmol</a>.</span>
     
-    GLShape
+    GLDraw
     </h2>
     
 </header>
@@ -176,8 +176,65 @@
 
     
         
+            <div class="description"><p>Lower level utilities for creating WebGL shape geometries.
+These are not intended for general consumption.</p></div>
+        
+
+        
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
 <dt>
-    <h4 class="name" id="GLShape"><span class="type-signature"></span>new GLShape<span class="signature">(sid, stylespec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    <h4 class="name" id="drawCone"><span class="type-signature">&lt;static> </span>drawCone<span class="signature">(geo, from, to, radius, color)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -185,7 +242,7 @@
     
     
     <div class="description">
-        <p>Custom renderable shape</p>
+        <p>Create a cone</p>
     </div>
     
 
@@ -219,13 +276,13 @@
 
         <tr>
             
-                <td class="name"><code>sid</code></td>
+                <td class="name"><code>geo</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">geometry</span>
 
 
             
@@ -235,20 +292,89 @@
 
             
 
-            <td class="description last"><p>Unique identifier</p></td>
+            <td class="description last"></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>stylespec</code></td>
+                <td class="name"><code>from</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">Point</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>to</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Point</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>radius</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">float</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>color</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Color</span>
 
 
             
@@ -308,77 +434,14 @@
     
     
     
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
     
     
 </dd>
 
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-
-	<h1 class="page-title">Class: GLShape</h1>
-<section>
-
-<header>
-    <h2>
-        <span class="ancestors"><a href="$3Dmol.html">$3Dmol</a>.</span>
-    
-    GLShape
-    </h2>
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-
-    
         
+            
 <dt>
-    <h4 class="name" id="GLShape"><span class="type-signature"></span>new GLShape<span class="signature">(sid, stylespec)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="drawCylinder"><span class="type-signature">&lt;static> </span>drawCylinder<span class="signature">(geo, from, to, radius, color, fromCap, toCap)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -386,7 +449,7 @@
     
     
     <div class="description">
-        <p>A GLShape is a collection of user specified shapes.</p>
+        <p>Create a cylinder</p>
     </div>
     
 
@@ -420,13 +483,13 @@
 
         <tr>
             
-                <td class="name"><code>sid</code></td>
+                <td class="name"><code>geo</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">geometry</span>
 
 
             
@@ -436,20 +499,20 @@
 
             
 
-            <td class="description last"><p>Unique identifier</p></td>
+            <td class="description last"></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>stylespec</code></td>
+                <td class="name"><code>from</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="types.html#ShapeSpec">ShapeSpec</a></span>
+<span class="param-type">Point</span>
 
 
             
@@ -459,7 +522,122 @@
 
             
 
-            <td class="description last"><p>shape style specification</p></td>
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>to</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Point</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>radius</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">float</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>color</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Color</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>fromCap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>toCap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
 	
@@ -513,27 +691,191 @@
     
 </dd>
 
+        
+            
+<dt>
+    <h4 class="name" id="drawSphere"><span class="type-signature">&lt;static> </span>drawSphere<span class="signature">(geo, pos, radius, color)</span><span class="type-signature"></span></h4>
     
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create a sphere.</p>
     </div>
-
-    
-        <h3 class="subsection-title">Extends</h3>
-
-        <ul>
-            <li><a href="types.html#ShapeSpec">ShapeSpec</a></li>
-        </ul>
     
 
     
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
 
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>geo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">geometry</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>pos</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Point</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>radius</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">float</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>color</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Color</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
     
 
     
 
     
-
     
+    
+    
+    
+    
+    
+</dd>
 
+        </dl>
     
 
     

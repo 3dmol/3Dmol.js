@@ -5540,6 +5540,284 @@ $3Dmol.partialCharges = [
 	
 $3Dmol['partialCharges'] = $3Dmol.partialCharges;
 
+//This defines the $3Dmol object which is used to create viewers
+//and configure system-wide settings
+
+/** 
+ * All of the functionality of $3Dmol.js is contained within the
+ * $3Dmol global namespace
+ * @namespace */
+$3Dmol = (function(window) {
+    
+    var my = window['$3Dmol'] || {};
+    //var $ = window['jQuery'];
+    
+    return my;
+
+})(window);
+    
+/**
+ * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ * @param {Object | string} element - Either HTML element or string identifier
+ * @param {ViewerSpec} config Viewer specification
+ * @return {$3Dmol.GLViewer} GLViewer
+ * 
+ * @example
+ * // Assume there exists an HTML div with id "gldiv"
+ * var element = $("#gldiv");
+ * 
+ * // Viewer config - properties 'defaultcolors' and 'callback'
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors,
+ *               callback : function(viewer) {
+ *                            //'data' is a string containing molecule data in pdb format  
+ *                            viewer.addModel(data, "pdb");
+ *                            viewer.zoomTo();
+ *                            viewer.render();
+ *                          }  
+ *                        
+ *               };
+ * 
+ * // Create GLViewer within 'gldiv' and execute callback
+ * var myviewer = $3Dmol.createViewer(element, config);
+ *      
+ */
+$3Dmol.createViewer = function(element, config)
+{
+    if($.type(element) === "string")
+        element = $("#"+element);
+    if(!element) return;
+
+    config = config || {};
+ 
+    
+    if(!config.defaultcolors)
+        config.defaultcolors = $3Dmol.elementColors.defaultColors;
+
+    //try to create the  viewer
+    try {
+    	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+    }
+    catch(e) {
+    	console.log("error with "+kind+":"+e);
+    }
+    
+    alert("Unable to instantiate 3Dmol viewer: "+config.order);
+    return null;
+};
+   
+/**
+ * Contains a dictionary of embedded viewers created from HTML elements
+ * with a the viewer_3Dmoljs css class indexed by their id (or numerically
+ * if they do not have an id).
+*/
+$3Dmol.viewers = {};
+
+/**
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function $3Dmol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @example
+ * var myviewer = $3Dmol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * var m = $3Dmol.download('pdb: 2POR', myviewer);
+ * 
+ * @return {$3Dmol.GLModel} GLModel
+ */ 
+$3Dmol.download = function(query, viewer) {
+    var baseURL = '';
+    var type = "";
+    var m = null;
+    if (query.substr(0, 4) === 'pdb:') {
+        type = "pdb";
+        query = query.substr(4).toUpperCase();
+        if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+           alert("Wrong PDB ID"); return;
+        }
+        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+    } else if (query.substr(0, 4) == 'cid:') {
+        type = "sdf";
+        query = query.substr(4);
+        if (!query.match(/^[1-9]+$/)) {
+           alert("Wrong Compound ID"); return;
+        }
+        uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+          "/SDF?record_type=3d";
+    }
+
+   $.get(uri, function(ret) {
+      viewer.addModel(ret, type);
+      viewer.zoomTo();
+      viewer.render();                            
+   });
+   
+   return m;
+};
+       
+
+/**
+ * $3Dmol surface types
+ * @enum {number}
+ */
+$3Dmol.SurfaceType = {
+    VDW : 1,
+    MS : 2,
+    SAS : 3,
+    SES  : 4
+};
+
+// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
+// this makes things a little faster
+$3Dmol.CC = {
+    cache : {},
+    color : function(hex) {
+
+        if(typeof(this.cache[hex]) !== "undefined") {
+            return this.cache[hex];
+        }
+        else {
+            hex = this.getHex(hex);
+            var c = new $3Dmol.Color(hex);
+            this.cache[hex] = c;
+            return c;
+        }
+    },
+    colorTab : {
+        'white' : 0xFFFFFF,
+        'silver' : 0xC0C0C0,
+        'gray' : 0x808080,
+        'grey' : 0x808080,
+        'black' : 0x000000,
+        'red' : 0xFF0000,
+        'maroon' : 0x800000,
+        'yellow' : 0xFFFF00,
+        'orange' : 0xFF6600,
+        'olive' : 0x808000,
+        'lime' : 0x00FF00,
+        'green' : 0x008000,
+        'aqua' : 0x00FFFF,
+        'cyan' : 0x00FFFF,
+        'teal' : 0x008080,
+        'blue' : 0x0000FF,
+        'navy' : 0x000080,
+        'fuchsia' : 0xFF00FF,
+        'magenta' : 0xFF00FF,
+        'purple' : 0x800080
+    },    
+    getHex : function(hex) {
+        if (parseInt(hex))
+            return parseInt(hex);
+        
+        else if (typeof(hex) === 'string') {
+            
+            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
+        }
+        
+    }
+    
+};
+
+
+
+$3Dmol['CC'] = $3Dmol.CC;
+$3Dmol['CC']['color'] = $3Dmol.CC.color;
+
+//Miscellaneous functions and classes - to be incorporated into $3Dmol proper
+/**
+ * 
+ * @param {$3Dmol.Geometry} geometry
+ * @param {$3Dmol.Mesh} mesh
+ * @returns {undefined}
+ */
+$3Dmol.mergeGeos = function(geometry, mesh) {
+    
+    var meshGeo = mesh.geometry;
+    
+    if (meshGeo === undefined) 
+        return;
+    
+    geometry.geometryGroups.push( meshGeo.geometryGroups[0] );
+    
+};
+
+$3Dmol.multiLineString = function(f) {
+    return f.toString()
+            .replace(/^[^\/]+\/\*!?/, '')
+            .replace(/\*\/[^\/]+$/, '');
+            
+};
+
+/** 
+ * Render surface synchronously if true
+ * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @type {boolean} */
+$3Dmol.syncSurface = false;
+
+// Internet Explorer refuses to allow webworkers in data blobs.  I can find
+// no way of checking for this feature directly, so must do a brower check
+if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
+		window.navigator.userAgent.indexOf('Trident/') >= 0) {
+	$3Dmol.syncSurface = true; // can't use webworkers
+}
+
+/**
+ * Parse a string that represents a style or atom selection and convert it
+ * into an object.  The goal is to make it easier to write out these specifications
+ * without resorting to json. Objects cannot be defined recursively.
+ * ; - delineates fields of the object 
+ * : - if the field has a value other than an empty object, it comes after a colon
+ * , - delineates key/value pairs of a value object
+ *     If the value object consists of ONLY keys (no = present) the keys are 
+ *     converted to a list.  Otherwise a object of key/value pairs is created with
+ *     any missing values set to null
+ * = OR ~ - separates key/value pairs of a value object, if not provided value is null
+ * 	twiddle is supported since = has special meaning in URLs
+ * @param (String) str
+ * @returns {Object}
+ */
+$3Dmol.specStringToObject = function(str) {
+	if(typeof(str) === "object") {
+		return str; //not string, assume was converted already
+	}
+	else if(typeof(str) === "undefined" || str == null) {
+		return str; 
+	}
+	var ret = {};
+	var fields = str.split(';');
+	for(var i = 0; i < fields.length; i++) {
+		var fv = fields[i].split(':');
+		var f = fv[0];
+		var val = {};
+		var vstr = fv[1];
+		if(vstr) {
+			vstr = vstr.replace(/~/g,"=");
+			if(vstr.indexOf('=') !== -1) {
+				//has key=value pairs, must be object
+				var kvs = vstr.split(',');
+				for(var j = 0; j < kvs.length; j++) {
+					var kv = kvs[j].split('=',2);
+					val[kv[0]] = kv[1];
+				}
+			}
+			else if(vstr.indexOf(',') !== -1) {
+				//has multiple values, must list
+				val = vstr.split(',');
+			}
+			else {
+				val = vstr; //value itself
+			}
+		}
+		ret[f] = val;
+	}
+	
+	return ret;
+}
+
+
+
+
 $3Dmol = $3Dmol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
@@ -7012,6 +7290,10 @@ $3Dmol.ProteinSurface = function() {
 //This defines the $3Dmol object which is used to create viewers
 //and configure system-wide settings
 
+/** 
+ * All of the functionality of $3Dmol.js is contained within the
+ * $3Dmol global namespace
+ * @namespace */
 $3Dmol = (function(window) {
     
     var my = window['$3Dmol'] || {};
@@ -7021,6 +7303,31 @@ $3Dmol = (function(window) {
 
 })(window);
     
+/**
+ * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ * @param {Object | string} element - Either HTML element or string identifier
+ * @param {ViewerSpec} config Viewer specification
+ * @return {$3Dmol.GLViewer} GLViewer
+ * 
+ * @example
+ * // Assume there exists an HTML div with id "gldiv"
+ * var element = $("#gldiv");
+ * 
+ * // Viewer config - properties 'defaultcolors' and 'callback'
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors,
+ *               callback : function(viewer) {
+ *                            //'data' is a string containing molecule data in pdb format  
+ *                            viewer.addModel(data, "pdb");
+ *                            viewer.zoomTo();
+ *                            viewer.render();
+ *                          }  
+ *                        
+ *               };
+ * 
+ * // Create GLViewer within 'gldiv' and execute callback
+ * var myviewer = $3Dmol.createViewer(element, config);
+ *      
+ */
 $3Dmol.createViewer = function(element, config)
 {
     if($.type(element) === "string")
@@ -7045,6 +7352,27 @@ $3Dmol.createViewer = function(element, config)
     return null;
 };
    
+/**
+ * Contains a dictionary of embedded viewers created from HTML elements
+ * with a the viewer_3Dmoljs css class indexed by their id (or numerically
+ * if they do not have an id).
+*/
+$3Dmol.viewers = {};
+
+/**
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function $3Dmol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @example
+ * var myviewer = $3Dmol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * var m = $3Dmol.download('pdb: 2POR', myviewer);
+ * 
+ * @return {$3Dmol.GLModel} GLModel
+ */ 
 $3Dmol.download = function(query, viewer) {
     var baseURL = '';
     var type = "";
@@ -7076,6 +7404,10 @@ $3Dmol.download = function(query, viewer) {
 };
        
 
+/**
+ * $3Dmol surface types
+ * @enum {number}
+ */
 $3Dmol.SurfaceType = {
     VDW : 1,
     MS : 2,
@@ -7164,7 +7496,10 @@ $3Dmol.multiLineString = function(f) {
             
 };
 
-//Synchronized (i.e. not threaded) surface gen? Used mainly for debugging
+/** 
+ * Render surface synchronously if true
+ * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @type {boolean} */
 $3Dmol.syncSurface = false;
 
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
@@ -7176,7 +7511,18 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
 
 /**
  * Parse a string that represents a style or atom selection and convert it
- * into an object.  
+ * into an object.  The goal is to make it easier to write out these specifications
+ * without resorting to json. Objects cannot be defined recursively.
+ * ; - delineates fields of the object 
+ * : - if the field has a value other than an empty object, it comes after a colon
+ * , - delineates key/value pairs of a value object
+ *     If the value object consists of ONLY keys (no = present) the keys are 
+ *     converted to a list.  Otherwise a object of key/value pairs is created with
+ *     any missing values set to null
+ * = OR ~ - separates key/value pairs of a value object, if not provided value is null
+ * 	twiddle is supported since = has special meaning in URLs
+ * @param (String) str
+ * @returns {Object}
  */
 $3Dmol.specStringToObject = function(str) {
 	if(typeof(str) === "object") {
@@ -7403,10 +7749,14 @@ $(document).ready(function() {
 });
     
 
+/** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
+ * @struct
+ */
 $3Dmol.elementColors = $3Dmol.elementColors || {};
 
 $3Dmol.elementColors.defaultColor = 0xff1493;
 
+/** @property Jmol-like element colors*/
 $3Dmol.elementColors.Jmol = {
 		'H': 0xFFFFFF,
 		'He': 0xD9FFFF,
@@ -7457,6 +7807,7 @@ $3Dmol.elementColors.Jmol = {
 		'AU': 0xFFD123
 };
 
+/** @property rasmol-like element colors */
 $3Dmol.elementColors.rasmol = {
 		'H': 0xFFFFFF,
 		'He': 0xFFC0CB,
@@ -7529,178 +7880,20 @@ $3Dmol.elementColors.orangeCarbon['C'] = 0xff6600;
 
 $3Dmol.elementColors.purpleCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
-//color scheme mappings
-var $3Dmol = $3Dmol || {};
-
-//red to white to blue, for charges
-$3Dmol.RWB = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(val === undefined)
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var middle = (hi+lo)/2;
-		var scale, color;
-		
-		//scale bottom from red to white
-		if(val <= middle) {
-			scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
-			color = 0xff0000 + 0x100*scale + scale;
-			return color;
-		}
-		else { //form white to blue
-			scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
-			color =  0x10000*scale+0x100*scale+0xff;
-			return color;
-		}
-	};
-	
-	this.jmolID = function() {
-		return "rwb";
-	};
-
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
-
-};
-
-//rainbow gradient, but without purple to match jmol
-$3Dmol.ROYGB = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(typeof(val) == "undefined")
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var mid = (lo+hi)/2;
-		var q1 = (lo+mid)/2;
-		var q3 = (mid+hi)/2;
-		
-		var scale, color;
-		
-		if(val < q1) { //scale green up, red up, blue down
-			scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
-			color = 0xff0000 + 0x100*scale + 0;
-			return color;
-		}
-		else if(val < mid) { //scale red down, green up, blue down
-			scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
-			color =  0x010000*scale+0xff00+0x0;
-			return color;
-		}
-		else if(val < q3) { //scale blue up, red down, green up
-			scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
-			color = 0x000000 + 0xff00 + 0x1*scale;
-			return color;
-		}
-		else { //scale green down, blue up, red down
-			scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
-			color =  0x000000+0x0100*scale+0xff;
-			return color;
-		}		
-	};
-	
-	this.jmolID = function() {
-		return "roygb";
-	};
-
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
-
-};
-
-//rainbow gradient with constant saturation, all the way to purple!
-$3Dmol.Sinebow = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(typeof(val) == "undefined")
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var scale = (val-lo)/(hi-lo);
-		var h = (5*scale/6.0+0.5);
-		var r = Math.sin(Math.PI*h);
-		r *= r*255;
-		var g = Math.sin(Math.PI*(h+1/3.0));
-		g *= g*255;
-		var b = Math.sin(Math.PI*(h+2/3.0));
-		b *= b*255;
-		
-		return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
-	};
-	
-	this.jmolID = function() {
-		return "sinebow";
-	};
-
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
-
-};
 //glcartoon.js
 //This contains all the routines for rendering a cartoon given a set
 //of atoms with assigned secondary structure
-//TODO: secondary structure calculation
 
 //TODO: generate normals directly in drawStrip and drawThinStrip
 
 var $3Dmol = $3Dmol || {};
 
+/**
+ * @ignore
+ * @param {$3Dmol.Object3D} group
+ * @param {AtomSpec} atomlist
+ * @param {$3Dmol.Gradient} gradientscheme
+ */
 $3Dmol.drawCartoon = (function() {
 
     var axisDIV = 5; // 3 still gives acceptable quality
@@ -8142,10 +8335,15 @@ $3Dmol.drawCartoon = (function() {
 
     return drawCartoon;
 })();
-//shared utility functions for gl shape creation and such
+//
 
 var $3Dmol = $3Dmol || {};
 
+/**
+ * Lower level utilities for creating WebGL shape geometries.
+ * These are not intended for general consumption.
+ * @namespace $3Dmol.GLDraw
+  */
 $3Dmol.GLDraw = (function() {
 
 	var draw = {}; // object for exporting functions
@@ -8400,6 +8598,23 @@ $3Dmol.GLDraw = (function() {
 
 	// creates a cylinder
 	var drawnC = 0;
+	
+	/** Create a cylinder 
+	 * @function $3Dmol.GLDraw.drawCylinder
+	 * @param {geometry}
+	 *            geo
+	 * @param {Point}
+	 *            from
+	 * @param {Point}
+	 *            to
+	 * @param {float}
+	 *            radius
+	 * @param {$3Dmol.Color}
+	 *            color
+	 * @param {boolean} fromCap
+	 * @param {boolean} toCap
+	 *            
+	 * */
 	draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
 		if (!from || !to)
 			return;
@@ -8691,7 +8906,19 @@ $3Dmol.GLDraw = (function() {
 		geoGroup.vertices += n_verts;
 	};
 
-	
+	/** Create a cone 
+	 * @function $3Dmol.GLDraw.drawCone
+	 * @param {geometry}
+	 *            geo
+	 * @param {Point}
+	 *            from
+	 * @param {Point}
+	 *            to
+	 * @param {float}
+	 *            radius
+	 * @param {$3Dmol.Color}
+	 *            color
+	 *            */
 	draw.drawCone = function(geo, from, to, radius, color) {
 		if (!from || !to)
 			return;
@@ -8862,7 +9089,8 @@ $3Dmol.GLDraw = (function() {
 
 	};
 
-	/**
+	/** Create a sphere.
+	 * @function $3Dmol.GLDraw.drawSphere
 	 * @param {geometry}
 	 *            geo
 	 * @param {Point}
@@ -9043,6 +9271,13 @@ $3Dmol.GLDraw = (function() {
 
 var $3Dmol = $3Dmol || {};
 
+/**
+ * GLModel represents a group of related atoms
+ * @constructor 
+ * @param {number=} mid 
+ * @param {Object=} defaultcolors Object defining default atom colors as atom => color property value pairs
+ * @see $3Dmol.download
+ */
 $3Dmol.GLModel = (function() {
 
     // class variables go here
@@ -9120,7 +9355,7 @@ $3Dmol.GLModel = (function() {
         return true;
     };
 
-    /** @param {Array.<AtomSpec>} atomsarray */
+    /** @param {AtomSpec[]} atomsarray */
     var assignBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var atoms = atomsarray.slice(0);
@@ -9157,7 +9392,7 @@ $3Dmol.GLModel = (function() {
     
     // this is optimized for proteins where it is assumed connected
     // atoms are on the same or next residue
-    /** @param {Array.<AtomSpec>} atomsarray */
+    /** @param {AtomSpec[]} atomsarray */
     var assignPDBBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var protatoms = [];
@@ -9341,7 +9576,7 @@ $3Dmol.GLModel = (function() {
     };
     
     /**
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      */
     var parseCube = function(atoms, str) {
@@ -9403,7 +9638,7 @@ $3Dmol.GLModel = (function() {
         
     // read an XYZ file from str and put the result in atoms
     /**
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      */
     var parseXYZ = function(atoms, str) {
@@ -9443,7 +9678,7 @@ $3Dmol.GLModel = (function() {
     // put atoms specified in sdf fromat in str into atoms
     // adds to atoms, does not replace
     /** 
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      */
     var parseSDF = function(atoms, str) {
@@ -9496,7 +9731,7 @@ $3Dmol.GLModel = (function() {
     // tag
     // TODO: Figure out how to handle multi molecule files (for SDF, too)
     /**
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      * @param {boolean=} keepH
      */
@@ -9629,7 +9864,7 @@ $3Dmol.GLModel = (function() {
     //if computeStruct is true will always perform secondary structure analysis,
     //otherwise only do analysis of SHEET/HELIX comments are missing
     /**
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      * @param {keepH=} boolean
      * @param {computeStruct=} boolean
@@ -9851,7 +10086,7 @@ $3Dmol.GLModel = (function() {
         /**
          * 
          * @param {AtomSpec} atom
-         * @param {Object.<numlike,$3Dmol.Geometry>} geos
+         * @param {$3Dmol.Geometry[]} geos
          */
         var drawAtomCross = function(atom, geos) {
             if (!atom.style.cross)
@@ -10000,10 +10235,8 @@ $3Dmol.GLModel = (function() {
 		 * 
 		 * @param {AtomSpec}
 		 *            atom
-		 * @param {Array.
-		 *            <AtomSpec>} atoms
-		 * @param {Object.
-		 *            <numlike, $3Dmol.Geometry>} geos
+		 * @param {AtomSpec[]} atoms
+		 * @param {$3Dmol.Geometry[]} geos
 		 */
         var drawBondLines = function(atom, atoms, geos) {
             if (!atom.style.line)
@@ -10514,7 +10747,7 @@ $3Dmol.GLModel = (function() {
         // faster
         // at some point we should optimize this to avoid unnecessary
         // recalculation
-        /** @type {Array.<AtomSpec>} atoms */
+        /** param {AtomSpec[]} atoms */
         var createMolObj = function(atoms) {
 
             console.log("creating for "+id);
@@ -10557,9 +10790,9 @@ $3Dmol.GLModel = (function() {
             // create cartoon if needed - this is a whole model analysis
             if (cartoonAtoms.length > 0) {
                 var gradientscheme = null;
-                //TODO: Should have an option to choose color scheme
+                //TODO: Should have an option to choose gradient type
                 if (range[0] < range[1])
-                    gradientscheme = new $3Dmol.Sinebow(range[0], range[1]);
+                    gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
 
                 $3Dmol.drawCartoon(ret, cartoonAtoms, gradientscheme);
                 
@@ -10659,6 +10892,12 @@ $3Dmol.GLModel = (function() {
             return ret;
         };
 
+        /**
+         * Returns model id number
+         * 
+         * @function $3Dmol.GLMode#getID
+         * @return {number} Model ID
+         */
         this.getID = function() {
             return id;
         };
@@ -10677,7 +10916,12 @@ $3Dmol.GLModel = (function() {
             }
         };
 
-        // add atoms to this model from molecular data string
+        /** add atoms to this model from molecular data string
+         * 
+         * @function $3Dmol.GLModel#addMolData
+         * @param {string} data - atom structure file input data string
+         * @param {string} format - input file string format (e.g 'pdb', 'sdf', etc.)
+         */
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             if (!data)
@@ -10703,7 +10947,13 @@ $3Dmol.GLModel = (function() {
             setAtomDefaults(atoms, id);
         };
         
-        // given a selection specification, return true if atom is selected
+        /** given a selection specification, return true if atom is selected
+         * 
+         * @function $3Dmol.GLModel#atomIsSelected
+         * @param {type} atom
+         * @param {type} sel
+         * @return {boolean}
+         */
         this.atomIsSelected = function(atom, sel) {
             if (typeof (sel) === "undefined")
                 return true; // undef gets all
@@ -10751,7 +11001,13 @@ $3Dmol.GLModel = (function() {
             return invert ? !ret : ret;
         };
 
-        // return list of atoms selected by sel, this is specific to glmodel
+
+        /** return list of atoms selected by sel, this is specific to glmodel
+         * 
+         * @function $3Dmol.GLModel#selectedAtoms
+         * @param {type} sel
+         * @return {Array.<Object>}
+         */
         this.selectedAtoms = function(sel) {
             var ret = [];
             for ( var i = 0; i < atoms.length; i++) {
@@ -10764,7 +11020,11 @@ $3Dmol.GLModel = (function() {
             return ret;
         };
         
-        // copy new atoms into this model, adjust bonds appropriately
+        /** Add list of new atoms to model.  Adjusts bonds appropriately.
+         * 
+         * @function $3Dmol.GLModel#addAtoms
+         * @param {type} newatoms
+         */        
         this.addAtoms = function(newatoms) {
             molObj = null;
             var start = atoms.length;
@@ -10796,7 +11056,12 @@ $3Dmol.GLModel = (function() {
             }
         };
 
-        // remove badatoms from model
+        /** Remove specified atoms from model
+         * 
+         * @function $3Dmol.GLModel#removeAtoms
+         * @param {type} badatoms
+         * @return {removeAtoms}
+         */
         this.removeAtoms = function(badatoms) {
             molObj = null;
             // make map of all baddies
@@ -10821,7 +11086,13 @@ $3Dmol.GLModel = (function() {
         };
         
         
-        // style the select atoms with style
+        /** Set atom style of selected atoms
+         * 
+         * @function $3Dmol.GLModel#setStyle
+         * @param {type} sel
+         * @param {type} style
+         * @param {type} add
+         */
         this.setStyle = function(sel, style, add) {
             
             if(!add && molObj !== null && sameObj(style, lastStyle))
@@ -10859,7 +11130,12 @@ $3Dmol.GLModel = (function() {
             
         };
         
-        // given a mapping from element to color, set atom colors
+        /** given a mapping from element to color, set atom colors
+         * 
+         * @function $3Dmol.GLModel#setColorByElement
+         * @param {type} sel
+         * @param {type} colors
+         */
         this.setColorByElement = function(sel, colors) {
             
             if(molObj !== null && sameObj(colors,lastColors))
@@ -10876,6 +11152,12 @@ $3Dmol.GLModel = (function() {
             }
         };
         
+        /**
+         * @function $3Dmol.GLModelSetColorByProperty
+         * @param {type} sel
+         * @param {type} prop
+         * @param {type} scheme
+         */
         this.setColorByProperty = function(sel, prop, scheme) {
             var atoms = this.selectedAtoms(sel);
             lastColors = null; // don't bother memoizing
@@ -10904,9 +11186,11 @@ $3Dmol.GLModel = (function() {
         };
 
 
-        // manage the globj for this model in the possed modelGroup -
-        // if it has to be regenerated, remove and add
-
+        /** manage the globj for this model in the possed modelGroup - if it has to be regenerated, remove and add
+         * 
+         * @function $3Dmol.GLModel#globj
+         * @param {$3Dmol.Object3D} group
+         */
         this.globj = function(group) {
             var time = new Date();
             if(molObj === null) { // have to regenerate
@@ -10922,7 +11206,11 @@ $3Dmol.GLModel = (function() {
             }
         };
         
-        // remove any rendered object from the scene
+        /** Remove any renderable mol object from scene
+         * 
+         * @function $3Dmol.GLModel#removegl
+         * @param {$3Dmol.Object3D} group
+         */
         this.removegl = function(group) {
             if(renderedMolObj) {
                 //dispose of geos and materials
@@ -10939,9 +11227,14 @@ $3Dmol.GLModel = (function() {
     return GLModel;
     
 })();
-//A GLShape is a collection of user specified shapes. Includes
-// build in sphere and arrow shapes, as well as custom user specified shapes
-
+/**
+ * A GLShape is a collection of user specified shapes.
+ * 
+ * @constructor $3Dmol.GLShape
+ * @extends {ShapeSpec}
+ * @param {number} sid - Unique identifier
+ * @param {ShapeSpec} stylespec - shape style specification
+ */
 $3Dmol.GLShape = (function() {
 
 	// Marching cube, to match with protein surface generation
@@ -11577,6 +11870,7 @@ $3Dmol.GLShape = (function() {
 		this.id = sid;
 
 		this.boundingSphere = new $3Dmol.Sphere();
+		/** @type {IntersectionShapes} */
 		this.intersectionShape = {
 			sphere : [],
 			cylinder : [],
@@ -11593,6 +11887,10 @@ $3Dmol.GLShape = (function() {
 
 		var geo = new $3Dmol.Geometry(true);
 
+		/** Update shape with new style specification
+		 * @param {ShapeSpec} newspec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.updateStyle = function(newspec) {
 
 			for ( var prop in newspec) {
@@ -11602,6 +11900,11 @@ $3Dmol.GLShape = (function() {
 			updateFromStyle(this, stylespec);
 		};
 
+		/**
+		 * Creates a custom shape from supplied vertex and face arrays
+		 * @param {CustomSpec} customSpec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addCustom = function(customSpec) {
 
 			customSpec.vertexArr = customSpec.vertexArr || [];
@@ -11630,7 +11933,11 @@ $3Dmol.GLShape = (function() {
 					geoGroup.vertexArray);
 		};
 
-		// sphere as vertices are added
+		/**
+		 * Creates a sphere shape
+		 * @param {SphereSpec} sphereSpec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addSphere = function(sphereSpec) {
 
 			sphereSpec.center = sphereSpec.center || {
@@ -11661,8 +11968,11 @@ $3Dmol.GLShape = (function() {
 					geoGroup.vertexArray);
 		};
 
-		// add a cylinder
-		// TODO: specialize drawArrow to be more efficient for this case
+		/**
+		 * Creates a cylinder shape
+		 * @param {CylinderSpec} cylinderSpec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addCylinder = function(cylinderSpec) {
 
 			cylinderSpec.start = cylinderSpec.start || {};
@@ -11696,6 +12006,11 @@ $3Dmol.GLShape = (function() {
 
 		};
 
+		/**
+		 * Creates an arrow shape
+		 * @param {ArrowSpec} arrowSpec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addArrow = function(arrowSpec) {
 
 			arrowSpec.start = arrowSpec.start || {};
@@ -11739,7 +12054,14 @@ $3Dmol.GLShape = (function() {
 					geoGroup.vertexArray);
 
 		};
-
+		
+		/** 
+		 * Creates custom shape from volumetric data 
+		 * @param {string} data - Volumetric input data 
+		 * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
+		 * @param {VolSpec} volSpec - Volumetric data shape specification
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addVolumetricData = function(data, fmt, volSpec) {
 
 			// str, fmt, isoval, vxl
@@ -11770,6 +12092,11 @@ $3Dmol.GLShape = (function() {
 
 		};
 
+		/**
+		 * Initialize webgl objects for rendering
+		 * @param {$3Dmol.Object3D} group
+		 * 
+		 */  
 		this.globj = function(group) {
 
 			geo.initTypedArrays();
@@ -11852,195 +12179,17 @@ $3Dmol.GLShape = (function() {
 
 $3Dmol.ShapeIDCount = 0;//a molecular viewer based on GLMol
 
-//Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
 
-$3Dmol.LabelCount = 0;
 
-$3Dmol.Label = function(text, parameters) {
-
-	this.id = $3Dmol.LabelCount++;
-	this.stylespec = parameters || {};
-
-	this.canvas = document.createElement('canvas');
-	//todo: implement resizing canvas..
-	this.canvas.width = 134;
-	this.canvas.height = 35;
-	this.context = this.canvas.getContext('2d');
-	this.sprite = new $3Dmol.Sprite();
-	this.text = text;
-
-};
-
-$3Dmol.Label.prototype = {
-
-	constructor : $3Dmol.Label,
-
-	setContext : function() {
-		// function for drawing rounded rectangles - for Label drawing
-		var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
-
-			ctx.beginPath();
-			ctx.moveTo(x + r, y);
-			ctx.lineTo(x + w - r, y);
-			ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-			ctx.lineTo(x + w, y + h - r);
-			ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-			ctx.lineTo(x + r, y + h);
-			ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-			ctx.lineTo(x, y + r);
-			ctx.quadraticCurveTo(x, y, x + r, y);
-			ctx.closePath();
-			ctx.fill();
-			if(drawBorder)
-				ctx.stroke();
-
-		};
-
-		return function() {
-			
-			var style = this.stylespec;
-			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
-			
-			var showBackground = style.showBackground;
-			if(typeof(showBackground) == "undefined") showBackground = true; //default
-			var font = style.font ? style.font : "sans-serif";
-
-			var fontSize = style.fontSize ? style.fontSize : 18;
-
-			var fontColor = style.fontColor ? style.fontColor
-					: {
-						r : 255,
-						g : 255,
-						b : 255,
-						a : 1.0
-					};
-
-			var padding = style.padding ? style.padding : 4;
-			var borderThickness = style.borderThickness ? style.borderThickness
-					: 0;
-	
-			var backgroundColor = style.backgroundColor ? style.backgroundColor
-					: {
-						r : 0,
-						g : 0,
-						b : 0,
-						a : 1.0
-					};
-					
-			var borderColor = style.borderColor ? style.borderColor
-							: backgroundColor;
-
-					
-			var position = style.position ? style.position
-					: {
-						x : -10,
-						y : 1,
-						z : 1
-					};
-					
-			//convert colors from 0-1.0 to 255
-			if(backgroundColor instanceof $3Dmol.Color) backgroundColor = backgroundColor.scaled();
-			if(borderColor instanceof $3Dmol.Color) borderColor = borderColor.scaled();
-			if(fontColor instanceof $3Dmol.Color) fontColor = fontColor.scaled();
-		
-
-			// Should labels always be in front of model?
-			var inFront = (style.inFront !== undefined) ? style.inFront	: true;
-
-			// clear canvas
-
-			var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
-
-			var bold = "";
-			if(style.bold)
-				bold = "bold ";
-			this.context.font = bold+fontSize + "px  " + font;
-
-			var metrics = this.context.measureText(this.text);
-			var textWidth = metrics.width;
-			
-			if(!showBackground) borderThickness = 0;
-		
-			var width = textWidth+2.5*borderThickness +2*padding;
-			var height = fontSize*1.25+2*borderThickness+2*padding;			// 1.25 is extra height factor for text below baseline: g,j,p,q.
-
-			
-			if(style.backgroundImage) {
-				var img = style.backgroundImage;
-				var w = style.backgroundWidth ? style.backgroundWidth : img.width;
-				var h = style.backgroundHeight ? style.backgroundHeight : img.height;
-				if(w > width) width = w;
-				if(h > height) height = h;
-			}
-
-			this.canvas.width = width;
-			this.canvas.height = height;
-			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-			var bold = "";
-			if(style.bold)
-				bold = "bold ";
-			this.context.font = bold+fontSize + "px  " + font;
-
-			// background color
-			this.context.fillStyle = "rgba(" + backgroundColor.r + ","
-					+ backgroundColor.g + "," + backgroundColor.b
-					+ "," + backgroundColor.a + ")";
-			// border color
-			this.context.strokeStyle = "rgba(" + borderColor.r + ","
-					+ borderColor.g + "," + borderColor.b + ","
-					+ borderColor.a + ")";
-
-			this.context.lineWidth = borderThickness;
-			if(showBackground) {
-				roundRect(this.context, borderThickness,borderThickness , width-2*borderThickness,height-2*borderThickness, 6, borderThickness > 0);
-			}
-			
-			if(style.backgroundImage) {
-				var img = style.backgroundImage;
-				var w = style.backgroundWidth ? style.backgroundWidth : img.width;
-				var h = style.backgroundHeight ? style.backgroundHeight : img.height;
-				this.context.drawImage(img,0,0, w, h);
-			}
-			
-
-			// text color
-			this.context.fillStyle = "rgba(" + fontColor.r + ","
-					+ fontColor.g + "," + fontColor.b + ","
-					+ fontColor.a + ")";
-			
-			this.context.fillText(this.text, borderThickness+padding,
-					fontSize + borderThickness+padding, textWidth);
-
-			// canvas contents will be used for a texture
-			var texture = new $3Dmol.Texture(this.canvas);
-			texture.needsUpdate = true;
-			this.sprite.material = new $3Dmol.SpriteMaterial({
-				map : texture,
-				useScreenCoordinates : useScreen,
-				alignment : spriteAlignment,
-				depthTest : !inFront
-			});
-
-			this.sprite.scale.set(1,1,1);
-
-			this.sprite.position.set(position.x, position.y, position.z);
-		};
-
-	}(),
-
-	// clean up material and texture
-	dispose : function() {
-
-		if (this.sprite.material.map !== undefined)
-			this.sprite.material.map.dispose();
-		if (this.sprite.material !== undefined)
-			this.sprite.material.dispose();
-	}
-
-};
-
-// a 3Dmol unified interace to gmol
+/**
+ * WebGL-based 3Dmol.js viewer
+ * Note: The preferred method of instantiating a GLViewer is through {@link $3Dmol.createViewer} 
+ * 
+ * @constructor 
+ * @param {Object} element HTML element within which to create viewer
+ * @param {function} callback - Callback function to be immediately executed on this viewer
+ * @param {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
+ */
 $3Dmol.GLViewer = (function() {
 	// private class variables
 	var numWorkers = 4; // number of threads for surface generation
@@ -12050,8 +12199,7 @@ $3Dmol.GLViewer = (function() {
 
 	// computes the bounding box around the provided atoms
 	/**
-	 * @param {Array.
-	 *            <AtomSpec>} atomlist
+	 * @param {AtomSpec[]} atomlist
 	 * @return {Array}
 	 */
 	var getExtent = function(atomlist) {
@@ -12533,6 +12681,9 @@ $3Dmol.GLViewer = (function() {
 			show();
 		};
 
+		/** Returns an array representing the current viewpoint.
+		 * Translation, zoom, and rotation quaternion. 
+		 * @returns {Array.<number>} arg */
 		this.getView = function() {
 			if (!modelGroup)
 				return [ 0, 0, 0, 0, 0, 0, 0, 1 ];
@@ -12542,6 +12693,8 @@ $3Dmol.GLViewer = (function() {
 					q.z, q.w ];
 		};
 
+		/** Sets the view to the specified translation, zoom, and rotation. 
+		 * @param {Array.<number>} arg */
 		this.setView = function(arg) {
 
 			if (arg === undefined
@@ -12567,8 +12720,8 @@ $3Dmol.GLViewer = (function() {
 
 		// apply styles, models, etc in viewer
 		/**
-		 * Render current state of viewer, after adding/removing models,
-		 * applying styles, etc.
+		 * Render current state of viewer, after 
+		 * adding/removing models, applying styles, etc.
 		 * 
 		 * @function $3Dmol.GLViewer#render
 		 */
@@ -12635,7 +12788,7 @@ $3Dmol.GLViewer = (function() {
 		 * 
 		 * @param {AtomSpec}
 		 *            sel
-		 * @return {Array.<AtomSpec>}
+		 * @return {AtomSpec[]}
 		 */
 		function getAtomsFromSel(sel) {
 			var atoms = [];
@@ -12700,10 +12853,8 @@ $3Dmol.GLViewer = (function() {
 		/**
 		 * Return pdb output of selected atoms (if atoms from pdb input)
 		 * 
-		 * @function $3Dmol.GLViewer#pdbData
-		 * @param {Object}
-		 *            [sel] - Selection specification specifying model and atom
-		 *            properties to select. Default: all atoms in viewer
+		 * @function $3Dmol.GLViewer#pdbData  
+		 * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
 		 * @return {string} PDB string of selected atoms
 		 */
 		this.pdbData = function(sel) {
@@ -12836,6 +12987,12 @@ $3Dmol.GLViewer = (function() {
 			modelGroup.remove(label.sprite);
 		};
 
+		/**
+		 * Remove all labels from viewer
+		 * 
+		 * @function $3Dmol.GLViewer#removeAllLabels
+
+		 */
 		this.removeAllLabels = function() {
 			for (var i = 0; i < labels.length; i++) {
 				modelGroup.remove(labels[i].sprite);
@@ -12887,6 +13044,14 @@ $3Dmol.GLViewer = (function() {
 
 		};
 
+		/**
+		 * Add shape object to viewer 
+		 * @see {@link $3Dmol.GLShape}
+		 * 
+		 * @function $3Dmol.GLViewer#addShape
+		 * @param {ShapeSpec} shapeSpec - style specification for label
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addShape = function(shapeSpec) {
 			shapeSpec = shapeSpec || {};
 			var shape = new $3Dmol.GLShape(shapes.length, shapeSpec);
@@ -12896,6 +13061,12 @@ $3Dmol.GLViewer = (function() {
 
 		};
 
+		/**
+		 * Remove shape object from viewer
+		 *
+		 * @function $3Dmol.GLViewer#removeShape
+		 * @param {$3Dmol.GLShape} shape - Reference to shape object to remove
+		 */
 		this.removeShape = function(shape) {
 			if (!shape)
 				return;
@@ -12907,6 +13078,10 @@ $3Dmol.GLViewer = (function() {
 				shapes.pop();
 		};
 		
+		/**
+		 * Remove all shape objects from viewer
+		 * @function $3Dmol.GLViewer#removeAllShapes
+		 */
 		this.removeAllShapes = function() {
 			for (var i = 0; i < shapes.length; i++) {
 				var shape = shapes[i];
@@ -12915,6 +13090,14 @@ $3Dmol.GLViewer = (function() {
 			shapes = [];
 		}
 
+		/**
+		 * Create and add sphere shape. This method provides a shorthand 
+		 * way to create a spherical shape object
+		 * 
+		 * @function $3Dmol.GLViewer#addSphere
+		 * @param {SphereSpec} spec - Sphere shape style specification
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addSphere = function(spec) {
 			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
@@ -12924,6 +13107,13 @@ $3Dmol.GLViewer = (function() {
 			return s;
 		};
 
+		/**
+		 * Create and add arrow shape
+		 * 
+		 * @function $3Dmol.GLViewer#addArrow
+		 * @param {ArrowSpec} spec - Style specification
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addArrow = function(spec) {
 			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
@@ -12933,6 +13123,13 @@ $3Dmol.GLViewer = (function() {
 			return s;
 		};
 		
+		/**
+		 * Create and add cylinder shape
+		 * 
+		 * @function $3Dmol.GLViewer#addArrow
+		 * @param {CylinderSpec} spec - Style specification
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addCylinder = function(spec) {
 			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
@@ -12942,6 +13139,13 @@ $3Dmol.GLViewer = (function() {
 			return s;
 		};
 
+		/**
+		 * Add custom shape component from user supplied function
+		 * 
+		 * @function $3Dmol.GLViewer#addCustom
+		 * @param {CustomSpec} spec - Style specification
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addCustom = function(spec) {
 			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
@@ -12951,6 +13155,15 @@ $3Dmol.GLViewer = (function() {
 			return s;
 		};
 
+		/**
+		 * Construct isosurface from volumetric data in gaussian cube format
+		 * 
+		 * @function $3Dmol.GLViewer#addVolumetricData
+		 * @param {String} data - Input file contents 
+		 * @param {String} format - Input file format (currently only supports "cube")
+		 * @param {VolSpec} spec - Shape style specification
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addVolumetricData = function(data, format, spec) {
 			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
@@ -12960,6 +13173,15 @@ $3Dmol.GLViewer = (function() {
 			return s;
 		};
 
+		/**
+		 * Create and add model to viewer, given molecular data and its format 
+		 * (pdb, sdf, xyz, or mol2)
+		 * 
+		 * @function $3Dmol.GLViewer#addModel
+		 * @param {string} data - Input data
+		 * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+		 * @return {$3Dmol.GLModel}
+		 */
 		this.addModel = function(data, format) {
 
 			var m = new $3Dmol.GLModel(models.length, defaultcolors);
@@ -12969,6 +13191,12 @@ $3Dmol.GLViewer = (function() {
 			return m;
 		};
 
+		/**
+		 * Delete specified model from viewer
+		 * 
+		 * @function $3Dmol.GLViewer#removeModel
+		 * @param {$3Dmol.GLModel} model
+		 */
 		this.removeModel = function(model) {
 			if (!model)
 				return;
@@ -12980,6 +13208,10 @@ $3Dmol.GLViewer = (function() {
 				models.pop();
 		};
 
+		/** 
+		 * Delete all existing models
+		 * @function $3Dmol.GLViewer#removeAllModels
+		 */
 		this.removeAllModels = function() {
 			for (var i = 0; i < models.length; i++) {
 				var model = models[i];
@@ -12989,6 +13221,15 @@ $3Dmol.GLViewer = (function() {
 			models = [];
 		};
 
+		/**
+		 * Create a new model from atoms specified by sel.
+		 * If extract, removes selected atoms from existing models 
+		 * 
+		 * @function $3Dmol.GLViewer#createModelFrom
+		 * @param {Object} sel - Atom selection specification
+		 * @param {boolean=} extract - If true, remove selected atoms from existing models
+		 * @return {$3Dmol.GLModel}
+		 */
 		this.createModelFrom = function(sel, extract) {
 			var m = new $3Dmol.GLModel(models.length, defaultcolors);
 			for (var i = 0; i < models.length; i++) {
@@ -13011,26 +13252,50 @@ $3Dmol.GLViewer = (function() {
 			}
 		}
 
+		/**
+		 * Set style properties to all selected atoms
+		 * 
+		 * @function $3Dmol.GLViewer#setStyle
+		 * @param {AtomSpec} sel - Atom selection specification
+		 * @param {AtomSpec.style} style - Style spec to apply to specified atoms
+		 */
 		this.setStyle = function(sel, style) {
 			applyToModels("setStyle", sel, style, false);
 		};
 
+		/**
+		 * Add style properties to all selected atoms
+		 * 
+		 * @function $3Dmol.GLViewer#addStyle
+		 * @param {Object} sel - Atom selection specification
+		 * @param {Object} style - style spec to add to specified atoms
+		 */
 		this.addStyle = function(sel, style) {
 			applyToModels("setStyle", sel, style, true);
 		};
 
+		/**
+		 * @function $3Dmol.GLViewer#setColorByProperty
+		 * @param {type} sel
+		 * @param {type} prop
+		 * @param {type} scheme
+		 */
 		this.setColorByProperty = function(sel, prop, scheme) {
 			applyToModels("setColorByProperty", sel, prop, scheme);
 		};
 
+		/**
+		 * @function $3Dmol.GLViewer#setColorByElement
+		 * @param {type} sel
+		 * @param {type} colors
+		 */
 		this.setColorByElement = function(sel, colors) {
 			applyToModels("setColorByElement", sel, colors);
 		};
 
 		/**
 		 * 
-		 * @param {Array.
-		 *            <AtomSpec>} atomlist
+		 * @param {AtomSpec[]} atomlist
 		 * @param {Array}
 		 *            extent
 		 * @return {Array}
@@ -13071,10 +13336,8 @@ $3Dmol.GLViewer = (function() {
 		 * 
 		 * @param {Array}
 		 *            extent
-		 * @param {Array.
-		 *            <AtomSpec>} atomlist
-		 * @param {Array.
-		 *            <AtomSpec>} atomstoshow
+		 * @param {AtomSpec[]} atomlist
+		 * @param {AtomSpec[]} atomstoshow
 		 * @return {Array}
 		 */
 		var carveUpExtent = function(extent, atomlist, atomstoshow) {
@@ -13153,8 +13416,7 @@ $3Dmol.GLViewer = (function() {
 		// Just create a single geometry chunk - broken up whether sync or not
 		/**
 		 * 
-		 * @param {Array.
-		 *            <AtomSpec>} atoms
+		 * @param {AtomSpec[]} atoms
 		 * @param {{vertices:number,faces:number}}
 		 *            VandF
 		 * @param {$3Dmol.MeshLambertMaterial}
@@ -13269,8 +13531,7 @@ $3Dmol.GLViewer = (function() {
 		 *            extendedAtoms
 		 * @param {Array}
 		 *            atomsToShow
-		 * @param {Array.
-		 *            <AtomSpec>} atoms
+		 * @param {AtomSpec[]} atoms
 		 * @param {number}
 		 *            vol
 		 * @return {Object}
@@ -13366,7 +13627,15 @@ $3Dmol.GLViewer = (function() {
 		}
 
 		
-		// Adds an explicit mesh as a surface object.
+		/**
+		 * Adds an explicit mesh as a surface object.
+		 * 
+		 * @param {$3Dmol.Mesh}
+		 *            mesh
+		 * @param {Object}
+		 *            style
+		 * @returns {Number} surfid
+		 */
 		this.addMesh = function(mesh) {
 			var surfobj = {
 				geo : mesh.geometry,
@@ -13379,7 +13648,17 @@ $3Dmol.GLViewer = (function() {
 			return surfid;
 		}
 
-		// add a surface
+		/**
+		 * Add surface representation to atoms
+		 * 
+		 * @param {$3Dmol.SurfaceType} type - Surface type
+		 * @param {Object} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
+		 * @param {AtomSpec} atomsel - Show surface for atoms in this selection
+		 * @param {AtomSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
+		 * @param {AtomSpec} focus - Optionally begin rendering surface specified atoms
+		 * 
+		 * @return {number} surfid - Identifying number for this surface
+		 */
 		this.addSurface = function(type, style, atomsel, allsel, focus) {
 			// type 1: VDW 3: SAS 4: MS 2: SES
 			// if sync is true, does all work in main thread, otherwise uses
@@ -13408,7 +13687,7 @@ $3Dmol.GLViewer = (function() {
 				// map color space using already set atom properties
 				/** @type {AtomSpec} */
 				var prop = style['map']['prop'];
-				/** @type {ColorScheme} */
+				/** @type {Gradient} */
 				var scheme = style['map']['scheme'] || new $3Dmol.RWB();
 				var range = scheme.range();
 				if (!range) {
@@ -13571,7 +13850,12 @@ $3Dmol.GLViewer = (function() {
 			return surfid;
 		};
 
-		// set the material to something else, must render change
+		/**
+		 * Set the surface material to something else, must render change
+		 * 
+		 * @param {number} surf - Surface ID to apply changes to
+		 * @param {matSpec} style - new material style specification
+		 */ 
 		this.setSurfaceMaterialStyle = function(surf, style) {
 			if (surfaces[surf]) {
 				surfaces[surf].mat = getMatWithStyle(style);
@@ -13580,7 +13864,11 @@ $3Dmol.GLViewer = (function() {
 			}
 		};
 
-		// given the id returned by surfid, remove surface
+		/**
+		 * Remove surface with given ID
+		 * 
+		 * @param {number} surf - surface id
+		 */
 		this.removeSurface = function(surf) {
 			if (surfaces[surf] && surfaces[surf].lastGL) {
 				if (surfaces[surf].geo !== undefined)
@@ -13593,6 +13881,8 @@ $3Dmol.GLViewer = (function() {
 			show();
 		};
 		
+		/** Remove all surfaces.
+		 * @function $3Dmol.GLViewer#removeAllSurfaces */
 		this.removeAllSurfaces = function() {
 			for(var i = 0; i < surfaces.length; i++) {
 				if (surfaces[i] && surfaces[i].lastGL) {
@@ -13607,7 +13897,7 @@ $3Dmol.GLViewer = (function() {
 			show();
 		};
 
-		// return jmol moveto command to position this scene
+		/** return Jmol moveto command to position this scene */
 		this.jmolMoveTo = function() {
 			var pos = modelGroup.position;
 			// center on same position
@@ -13626,6 +13916,9 @@ $3Dmol.GLViewer = (function() {
 			return ret;
 		};
 
+		/** Clear scene of all objects 
+		 * @function $3Dmol.GLViewer#clear
+		 * */
 		this.clear = function() {
 			this.removeAllSurfaces();
 			this.removeAllModels();
@@ -13636,6 +13929,10 @@ $3Dmol.GLViewer = (function() {
 
 		// props is a list of objects that select certain atoms and enumerate
 		// properties for those atoms
+		/**
+		 * Add specified properties to all atoms matching input argument
+		 * @param {AtomSpec} props
+		 */
 		this.mapAtomProperties = function(props) {
 			var atoms = getAtomsFromSel({});
 			for (var a = 0, numa = atoms.length; a < numa; a++) {
@@ -13676,6 +13973,395 @@ $3Dmol.GLViewer = (function() {
 })();
 
 $3Dmol['glmolViewer'] = $3Dmol.GLViewer;
+//color scheme mappings
+var $3Dmol = $3Dmol || {};
+
+/** Color mapping gradiens
+ * @interface
+ * @param {number} min
+ * @param {number} max
+ */
+$3Dmol.Gradient = function(min, max) {};
+
+/**
+ * Map value to hex color
+ * @param {number} val
+ * @param {number} range
+ * @returns {number}
+ */
+$3Dmol.Gradient.valueToHex = function(val, range) {};
+$3Dmol.Gradient.jmolID = function() {};
+//return range used for color mapping, null if none set
+$3Dmol.Gradient.range = function() {};
+
+
+
+/**
+ * Color scheme red to white to blue, for charges
+ * @constructor
+ * @implements {$3Dmol.Gradient}
+ */
+$3Dmol.Gradient.RWB = function(min, max) {
+	
+	//map value to hex color, range is provided
+	this.valueToHex = function(val, range) {
+		var lo, hi;
+		if(range) {
+			lo = range[0];
+			hi = range[1];
+		}
+		else {
+			lo = min;
+			hi = max;
+		}
+	
+		if(val === undefined)
+			return 0xffffff;
+		
+		if(val < lo) val = lo;
+		if(val > hi) val = hi;
+		
+		var middle = (hi+lo)/2;
+		var scale, color;
+		
+		//scale bottom from red to white
+		if(val <= middle) {
+			scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
+			color = 0xff0000 + 0x100*scale + scale;
+			return color;
+		}
+		else { //form white to blue
+			scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
+			color =  0x10000*scale+0x100*scale+0xff;
+			return color;
+		}
+	};
+	
+	this.jmolID = function() {
+		return "rwb";
+	};
+
+	//return range used for color mapping, null if none set
+	this.range = function() {
+		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+			return [min,max];
+		}
+		return null;
+	};
+
+};
+
+/**
+ * rainbow gradient, but without purple to match jmol
+ * @constructor
+ * @implements {$3Dmol.Gradient}
+ */
+$3Dmol.Gradient.ROYGB = function(min, max) {
+	
+	//map value to hex color, range is provided
+	this.valueToHex = function(val, range) {
+		var lo, hi;
+		if(range) {
+			lo = range[0];
+			hi = range[1];
+		}
+		else {
+			lo = min;
+			hi = max;
+		}
+	
+		if(typeof(val) == "undefined")
+			return 0xffffff;
+		
+		if(val < lo) val = lo;
+		if(val > hi) val = hi;
+		
+		var mid = (lo+hi)/2;
+		var q1 = (lo+mid)/2;
+		var q3 = (mid+hi)/2;
+		
+		var scale, color;
+		
+		if(val < q1) { //scale green up, red up, blue down
+			scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+			color = 0xff0000 + 0x100*scale + 0;
+			return color;
+		}
+		else if(val < mid) { //scale red down, green up, blue down
+			scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+			color =  0x010000*scale+0xff00+0x0;
+			return color;
+		}
+		else if(val < q3) { //scale blue up, red down, green up
+			scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+			color = 0x000000 + 0xff00 + 0x1*scale;
+			return color;
+		}
+		else { //scale green down, blue up, red down
+			scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+			color =  0x000000+0x0100*scale+0xff;
+			return color;
+		}		
+	};
+	
+	this.jmolID = function() {
+		return "roygb";
+	};
+
+	//return range used for color mapping, null if none set
+	this.range = function() {
+		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+			return [min,max];
+		}
+		return null;
+	};
+
+};
+
+/**
+ * rainbow gradient with constant saturation, all the way to purple!
+ * @constructor
+ * @implements {$3Dmol.Gradient}
+ */
+$3Dmol.Gradient.Sinebow = function(min, max) {
+	
+	//map value to hex color, range is provided
+	this.valueToHex = function(val, range) {
+		var lo, hi;
+		if(range) {
+			lo = range[0];
+			hi = range[1];
+		}
+		else {
+			lo = min;
+			hi = max;
+		}
+	
+		if(typeof(val) == "undefined")
+			return 0xffffff;
+		
+		if(val < lo) val = lo;
+		if(val > hi) val = hi;
+		
+		var scale = (val-lo)/(hi-lo);
+		var h = (5*scale/6.0+0.5);
+		var r = Math.sin(Math.PI*h);
+		r *= r*255;
+		var g = Math.sin(Math.PI*(h+1/3.0));
+		g *= g*255;
+		var b = Math.sin(Math.PI*(h+2/3.0));
+		b *= b*255;
+		
+		return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
+	};
+	
+	this.jmolID = function() {
+		return "sinebow";
+	};
+
+	//return range used for color mapping, null if none set
+	this.range = function() {
+		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+			return [min,max];
+		}
+		return null;
+	};
+
+};
+//Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
+
+$3Dmol.LabelCount = 0;
+
+/**
+ * Renderable labels
+ * @constructor $3Dmol.Label
+ * @extends {LabelSpec}
+ * @param {string} tag - Label text
+ * @param {Object} parameters Label style and font specifications
+ */
+$3Dmol.Label = function(text, parameters) {
+
+	this.id = $3Dmol.LabelCount++;
+	this.stylespec = parameters || {};
+
+	this.canvas = document.createElement('canvas');
+	//todo: implement resizing canvas..
+	this.canvas.width = 134;
+	this.canvas.height = 35;
+	this.context = this.canvas.getContext('2d');
+	this.sprite = new $3Dmol.Sprite();
+	this.text = text;
+
+};
+
+$3Dmol.Label.prototype = {
+
+	constructor : $3Dmol.Label,
+
+	setContext : function() {
+		// function for drawing rounded rectangles - for Label drawing
+		var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
+
+			ctx.beginPath();
+			ctx.moveTo(x + r, y);
+			ctx.lineTo(x + w - r, y);
+			ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+			ctx.lineTo(x + w, y + h - r);
+			ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+			ctx.lineTo(x + r, y + h);
+			ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+			ctx.lineTo(x, y + r);
+			ctx.quadraticCurveTo(x, y, x + r, y);
+			ctx.closePath();
+			ctx.fill();
+			if(drawBorder)
+				ctx.stroke();
+
+		};
+
+		return function() {
+			
+			var style = this.stylespec;
+			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
+			
+			var showBackground = style.showBackground;
+			if(typeof(showBackground) == "undefined") showBackground = true; //default
+			var font = style.font ? style.font : "sans-serif";
+
+			var fontSize = style.fontSize ? style.fontSize : 18;
+
+			var fontColor = style.fontColor ? style.fontColor
+					: {
+						r : 255,
+						g : 255,
+						b : 255,
+						a : 1.0
+					};
+
+			var padding = style.padding ? style.padding : 4;
+			var borderThickness = style.borderThickness ? style.borderThickness
+					: 0;
+	
+			var backgroundColor = style.backgroundColor ? style.backgroundColor
+					: {
+						r : 0,
+						g : 0,
+						b : 0,
+						a : 1.0
+					};
+					
+			var borderColor = style.borderColor ? style.borderColor
+							: backgroundColor;
+
+					
+			var position = style.position ? style.position
+					: {
+						x : -10,
+						y : 1,
+						z : 1
+					};
+					
+			//convert colors from 0-1.0 to 255
+			if(backgroundColor instanceof $3Dmol.Color) backgroundColor = backgroundColor.scaled();
+			if(borderColor instanceof $3Dmol.Color) borderColor = borderColor.scaled();
+			if(fontColor instanceof $3Dmol.Color) fontColor = fontColor.scaled();
+		
+
+			// Should labels always be in front of model?
+			var inFront = (style.inFront !== undefined) ? style.inFront	: true;
+
+			// clear canvas
+
+			var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
+
+			var bold = "";
+			if(style.bold)
+				bold = "bold ";
+			this.context.font = bold+fontSize + "px  " + font;
+
+			var metrics = this.context.measureText(this.text);
+			var textWidth = metrics.width;
+			
+			if(!showBackground) borderThickness = 0;
+		
+			var width = textWidth+2.5*borderThickness +2*padding;
+			var height = fontSize*1.25+2*borderThickness+2*padding;			// 1.25 is extra height factor for text below baseline: g,j,p,q.
+
+			
+			if(style.backgroundImage) {
+				var img = style.backgroundImage;
+				var w = style.backgroundWidth ? style.backgroundWidth : img.width;
+				var h = style.backgroundHeight ? style.backgroundHeight : img.height;
+				if(w > width) width = w;
+				if(h > height) height = h;
+			}
+
+			this.canvas.width = width;
+			this.canvas.height = height;
+			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+			var bold = "";
+			if(style.bold)
+				bold = "bold ";
+			this.context.font = bold+fontSize + "px  " + font;
+
+			// background color
+			this.context.fillStyle = "rgba(" + backgroundColor.r + ","
+					+ backgroundColor.g + "," + backgroundColor.b
+					+ "," + backgroundColor.a + ")";
+			// border color
+			this.context.strokeStyle = "rgba(" + borderColor.r + ","
+					+ borderColor.g + "," + borderColor.b + ","
+					+ borderColor.a + ")";
+
+			this.context.lineWidth = borderThickness;
+			if(showBackground) {
+				roundRect(this.context, borderThickness,borderThickness , width-2*borderThickness,height-2*borderThickness, 6, borderThickness > 0);
+			}
+			
+			if(style.backgroundImage) {
+				var img = style.backgroundImage;
+				var w = style.backgroundWidth ? style.backgroundWidth : img.width;
+				var h = style.backgroundHeight ? style.backgroundHeight : img.height;
+				this.context.drawImage(img,0,0, w, h);
+			}
+			
+
+			// text color
+			this.context.fillStyle = "rgba(" + fontColor.r + ","
+					+ fontColor.g + "," + fontColor.b + ","
+					+ fontColor.a + ")";
+			
+			this.context.fillText(this.text, borderThickness+padding,
+					fontSize + borderThickness+padding, textWidth);
+
+			// canvas contents will be used for a texture
+			var texture = new $3Dmol.Texture(this.canvas);
+			texture.needsUpdate = true;
+			this.sprite.material = new $3Dmol.SpriteMaterial({
+				map : texture,
+				useScreenCoordinates : useScreen,
+				alignment : spriteAlignment,
+				depthTest : !inFront
+			});
+
+			this.sprite.scale.set(1,1,1);
+
+			this.sprite.position.set(position.x, position.y, position.z);
+		};
+
+	}(),
+
+	// clean up material and texture
+	dispose : function() {
+
+		if (this.sprite.material.map !== undefined)
+			this.sprite.material.map.dispose();
+		if (this.sprite.material !== undefined)
+			this.sprite.material.dispose();
+	}
+
+};
 var $3Dmol = $3Dmol || {};
 
 //properties for mapping
@@ -13850,3 +14536,184 @@ $3Dmol.partialCharges = [
 ]; 
 	
 $3Dmol['partialCharges'] = $3Dmol.partialCharges;
+// Specifications for various object types used in 3Dmol.js
+// This is primarily for documentation 
+
+/**
+ * GLViewer input specification
+ * @typedef ViewerSpec
+ */
+var ViewerSpec = {};
+ViewerSpec.order;
+ViewerSpec.defaultcolors;
+/** 
+ * @type {function($3Dmol.GLViewer)} */
+ViewerSpec.callback;
+
+/**
+ * Object literal Atom representation.  Can be used as a selection specification to 
+ * select all atoms with matching properties
+ * @typedef AtomSpec
+ * @struct
+ * @prop {string} resn - Parent residue name
+ * @prop {number} x - Atom's x coordinate
+ * @prop {number} y - Atom's y coordinate
+ * @prop {number} z - Atom's z coordinate
+ * @prop {number} color - Atom's color, as hex code
+ * @prop {number} surfaceColor - Hex code for color to be used for surface patch over this atom
+ * @prop {string} elem - Element abbreviation (e.g. 'H', 'Ca', etc)
+ * @prop {boolean} hetflag - Set to true if atom is a heteroatom
+ * @prop {string} chain - Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+ * @prop {number} resi - Residue number 
+ * @prop {number} icode
+ * @prop {number} rescode
+ * @prop {number} serial - Atom's serial id number
+ * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+ * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
+ * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
+ * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
+ * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
+ * @prop {Object} properties - Optional mapping of additional properties
+ * @prop {number} b - Atom b factor data
+ * @prop {string} pdbline - If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
+ * @prop {boolean} clickable - Set this flag to true to enable click selection handling for this atom
+ * @prop {function(this, $3Dmol.GLViewer)} callback - Callback click handler function to be executed on this atom and its parent viewer
+ * @prop {AtomStyleSpec} style - Atom style specification
+ */
+var AtomSpec = {};
+AtomSpec.resn;
+AtomSpec.x;
+AtomSpec.y;
+AtomSpec.z;
+AtomSpec.color;
+AtomSpec.surfaceColor;
+AtomSpec.elem;
+AtomSpec.hetflag;
+AtomSpec.chain;
+AtomSpec.resi;
+AtomSpec.icode;
+AtomSpec.rescode;
+AtomSpec.serial;
+AtomSpec.atom;
+AtomSpec.bonds;
+AtomSpec.ss;
+AtomSpec.singleBonds;
+AtomSpec.bondOrder;
+AtomSpec.properties;
+AtomSpec.b;
+AtomSpec.pdbline;
+/** @type {IntersectionShapes} */
+AtomSpec.intersectionShape;
+AtomSpec.clickable;
+/** @type {function(AtomSpec, $3Dmol.GLViewer)} */
+AtomSpec.callback;
+
+/** 
+ * @typedef AtomStyleSpec
+ */
+var AtomStyleSpec = {};
+
+AtomSpec.style = {};
+/** @type {atomstyle} */
+AtomSpec.style.line;
+/** @type {atomstyle} */
+AtomSpec.style.cross;
+/** @type {atomstyle} */
+AtomSpec.style.sphere;
+/** @type {atomstyle} */
+AtomSpec.style.stick;
+/** @type {atomstyle} */
+AtomSpec.style.cartoon;
+AtomSpec.style.cartoon.gradient;
+
+
+/**
+ * Label type specification
+ * @typedef
+ */
+var LabelSpec = {};
+
+/** Label text font style
+ * @type {string} */
+LabelSpec.font;
+
+/** Label text font pt size
+ * @type {number} */
+LabelSpec.fontSize;
+
+/** Label font color - specify with an object with r, g, b, and a (alpha) values
+ * @type {colorlike | $3Dmol.Color} */
+LabelSpec.fontColor;
+
+LabelSpec.borderThickness;
+/** @type {colorlike} */
+LabelSpec.borderColor;
+/** @type {colorlike} */
+LabelSpec.backgroundColor;
+/**
+ * Label position
+ * @type {$3Dmol.Vector3}
+ */
+LabelSpec.position;
+
+/** labels always rendered in front of model(s) if true
+ * 
+ * @type {boolean}
+ */
+LabelSpec.inFront;
+
+
+/** 
+ * GLShape style specification
+ * @typedef
+ */
+var ShapeSpec = {};
+/** @type {$3Dmol.Color} */
+ShapeSpec.color;
+ShapeSpec.wireframe;
+ShapeSpec.alpha;
+ShapeSpec.side;
+ShapeSpec.clickable;
+/** @type {function($3Dmol.GLShape, $3Dmol.GLViewer)} */
+ShapeSpec.callback;
+
+/**
+ * Specification for adding custom shape
+ * @typedef
+ */
+var CustomShapeSpec = {};
+CustomShapeSpec.vertexArr;
+CustomShapeSpec.faceArr;
+CustomShapeSpec.normalArr;
+CustomShapeSpec.lineArr;
+
+/**
+ * Sphere shape specification
+ * @typedef
+ */
+var SphereSpec = {};
+SphereSpec.radius;
+/** @type {$3Dmol.Vector3} */
+SphereSpec.center;
+
+/**
+ * Arrow shape specification
+ * @typedef
+ */
+var ArrowSpec = {};
+/** @var {$3Dmol.Vector3} ArrowSpec.start - Arrow start point*/
+ArrowSpec.start;
+/** @property {$3Dmol.Vector3} */
+ArrowSpec.end;
+ArrowSpec.radius;
+ArrowSpec.radiusRatio;
+ArrowSpec.mid;
+
+
+/**
+ * Volumetric data specification
+ * @typedef
+ */
+var VolSpec = {};
+VolSpec.isoval;
+VolSpec.voxel;

@@ -1,8 +1,12 @@
 
+/** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
+ * @struct
+ */
 $3Dmol.elementColors = $3Dmol.elementColors || {};
 
 $3Dmol.elementColors.defaultColor = 0xff1493;
 
+/** @property Jmol-like element colors*/
 $3Dmol.elementColors.Jmol = {
 		'H': 0xFFFFFF,
 		'He': 0xD9FFFF,
@@ -53,6 +57,7 @@ $3Dmol.elementColors.Jmol = {
 		'AU': 0xFFD123
 };
 
+/** @property rasmol-like element colors */
 $3Dmol.elementColors.rasmol = {
 		'H': 0xFFFFFF,
 		'He': 0xFFC0CB,

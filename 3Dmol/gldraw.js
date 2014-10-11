@@ -1,7 +1,12 @@
-//shared utility functions for gl shape creation and such
+//
 
 var $3Dmol = $3Dmol || {};
 
+/**
+ * Lower level utilities for creating WebGL shape geometries.
+ * These are not intended for general consumption.
+ * @namespace $3Dmol.GLDraw
+  */
 $3Dmol.GLDraw = (function() {
 
 	var draw = {}; // object for exporting functions
@@ -256,6 +261,23 @@ $3Dmol.GLDraw = (function() {
 
 	// creates a cylinder
 	var drawnC = 0;
+	
+	/** Create a cylinder 
+	 * @function $3Dmol.GLDraw.drawCylinder
+	 * @param {geometry}
+	 *            geo
+	 * @param {Point}
+	 *            from
+	 * @param {Point}
+	 *            to
+	 * @param {float}
+	 *            radius
+	 * @param {$3Dmol.Color}
+	 *            color
+	 * @param {boolean} fromCap
+	 * @param {boolean} toCap
+	 *            
+	 * */
 	draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
 		if (!from || !to)
 			return;
@@ -547,7 +569,19 @@ $3Dmol.GLDraw = (function() {
 		geoGroup.vertices += n_verts;
 	};
 
-	
+	/** Create a cone 
+	 * @function $3Dmol.GLDraw.drawCone
+	 * @param {geometry}
+	 *            geo
+	 * @param {Point}
+	 *            from
+	 * @param {Point}
+	 *            to
+	 * @param {float}
+	 *            radius
+	 * @param {$3Dmol.Color}
+	 *            color
+	 *            */
 	draw.drawCone = function(geo, from, to, radius, color) {
 		if (!from || !to)
 			return;
@@ -718,7 +752,8 @@ $3Dmol.GLDraw = (function() {
 
 	};
 
-	/**
+	/** Create a sphere.
+	 * @function $3Dmol.GLDraw.drawSphere
 	 * @param {geometry}
 	 *            geo
 	 * @param {Point}

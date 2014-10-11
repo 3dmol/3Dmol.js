@@ -1,6 +1,11 @@
-//A GLShape is a collection of user specified shapes. Includes
-// build in sphere and arrow shapes, as well as custom user specified shapes
-
+/**
+ * A GLShape is a collection of user specified shapes.
+ * 
+ * @constructor $3Dmol.GLShape
+ * @extends {ShapeSpec}
+ * @param {number} sid - Unique identifier
+ * @param {ShapeSpec} stylespec - shape style specification
+ */
 $3Dmol.GLShape = (function() {
 
 	// Marching cube, to match with protein surface generation
@@ -636,6 +641,7 @@ $3Dmol.GLShape = (function() {
 		this.id = sid;
 
 		this.boundingSphere = new $3Dmol.Sphere();
+		/** @type {IntersectionShapes} */
 		this.intersectionShape = {
 			sphere : [],
 			cylinder : [],
@@ -652,6 +658,10 @@ $3Dmol.GLShape = (function() {
 
 		var geo = new $3Dmol.Geometry(true);
 
+		/** Update shape with new style specification
+		 * @param {ShapeSpec} newspec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.updateStyle = function(newspec) {
 
 			for ( var prop in newspec) {
@@ -661,6 +671,11 @@ $3Dmol.GLShape = (function() {
 			updateFromStyle(this, stylespec);
 		};
 
+		/**
+		 * Creates a custom shape from supplied vertex and face arrays
+		 * @param {CustomSpec} customSpec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addCustom = function(customSpec) {
 
 			customSpec.vertexArr = customSpec.vertexArr || [];
@@ -689,7 +704,11 @@ $3Dmol.GLShape = (function() {
 					geoGroup.vertexArray);
 		};
 
-		// sphere as vertices are added
+		/**
+		 * Creates a sphere shape
+		 * @param {SphereSpec} sphereSpec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addSphere = function(sphereSpec) {
 
 			sphereSpec.center = sphereSpec.center || {
@@ -720,8 +739,11 @@ $3Dmol.GLShape = (function() {
 					geoGroup.vertexArray);
 		};
 
-		// add a cylinder
-		// TODO: specialize drawArrow to be more efficient for this case
+		/**
+		 * Creates a cylinder shape
+		 * @param {CylinderSpec} cylinderSpec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addCylinder = function(cylinderSpec) {
 
 			cylinderSpec.start = cylinderSpec.start || {};
@@ -755,6 +777,11 @@ $3Dmol.GLShape = (function() {
 
 		};
 
+		/**
+		 * Creates an arrow shape
+		 * @param {ArrowSpec} arrowSpec
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addArrow = function(arrowSpec) {
 
 			arrowSpec.start = arrowSpec.start || {};
@@ -798,7 +825,14 @@ $3Dmol.GLShape = (function() {
 					geoGroup.vertexArray);
 
 		};
-
+		
+		/** 
+		 * Creates custom shape from volumetric data 
+		 * @param {string} data - Volumetric input data 
+		 * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
+		 * @param {VolSpec} volSpec - Volumetric data shape specification
+		 * @return {$3Dmol.GLShape}
+		 */
 		this.addVolumetricData = function(data, fmt, volSpec) {
 
 			// str, fmt, isoval, vxl
@@ -829,6 +863,11 @@ $3Dmol.GLShape = (function() {
 
 		};
 
+		/**
+		 * Initialize webgl objects for rendering
+		 * @param {$3Dmol.Object3D} group
+		 * 
+		 */  
 		this.globj = function(group) {
 
 			geo.initTypedArrays();

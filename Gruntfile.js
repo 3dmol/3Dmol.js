@@ -106,10 +106,9 @@ module.exports = function(grunt) {
                 jsOutputFile : 'build/3Dmol-min-pre.js',
                 noreport : true,
                 options : {
-                    'compilation_level': 'ADVANCED_OPTIMIZATIONS',
+                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5',
-                    'externs': ['externs/jquery.js', 'externs/3Dmol.js', 'externs/webGL.js'],
                     'create_source_map': 'script.map'                 
                 }
             },            
@@ -143,7 +142,7 @@ module.exports = function(grunt) {
                 options : {
                     stdout: true
                 },
-                command: "node node_modules/jsdoc/jsdoc.js externs/3Dmol.js README.md -c jsdoc.conf.json -t 3Dmol-doc-template -u tutorials/ -d doc/"
+                command: "node node_modules/jsdoc/jsdoc.js 3Dmol/*.js README.md -c jsdoc.conf.json -t 3Dmol-doc-template -u tutorials/ -d doc/"
             }
         },
 

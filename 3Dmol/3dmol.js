@@ -2,6 +2,10 @@
 //This defines the $3Dmol object which is used to create viewers
 //and configure system-wide settings
 
+/** 
+ * All of the functionality of $3Dmol.js is contained within the
+ * $3Dmol global namespace
+ * @namespace */
 $3Dmol = (function(window) {
     
     var my = window['$3Dmol'] || {};
@@ -11,6 +15,31 @@ $3Dmol = (function(window) {
 
 })(window);
     
+/**
+ * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ * @param {Object | string} element - Either HTML element or string identifier
+ * @param {ViewerSpec} config Viewer specification
+ * @return {$3Dmol.GLViewer} GLViewer
+ * 
+ * @example
+ * // Assume there exists an HTML div with id "gldiv"
+ * var element = $("#gldiv");
+ * 
+ * // Viewer config - properties 'defaultcolors' and 'callback'
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors,
+ *               callback : function(viewer) {
+ *                            //'data' is a string containing molecule data in pdb format  
+ *                            viewer.addModel(data, "pdb");
+ *                            viewer.zoomTo();
+ *                            viewer.render();
+ *                          }  
+ *                        
+ *               };
+ * 
+ * // Create GLViewer within 'gldiv' and execute callback
+ * var myviewer = $3Dmol.createViewer(element, config);
+ *      
+ */
 $3Dmol.createViewer = function(element, config)
 {
     if($.type(element) === "string")
@@ -35,6 +64,27 @@ $3Dmol.createViewer = function(element, config)
     return null;
 };
    
+/**
+ * Contains a dictionary of embedded viewers created from HTML elements
+ * with a the viewer_3Dmoljs css class indexed by their id (or numerically
+ * if they do not have an id).
+*/
+$3Dmol.viewers = {};
+
+/**
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function $3Dmol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @example
+ * var myviewer = $3Dmol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * var m = $3Dmol.download('pdb: 2POR', myviewer);
+ * 
+ * @return {$3Dmol.GLModel} GLModel
+ */ 
 $3Dmol.download = function(query, viewer) {
     var baseURL = '';
     var type = "";
@@ -66,6 +116,10 @@ $3Dmol.download = function(query, viewer) {
 };
        
 
+/**
+ * $3Dmol surface types
+ * @enum {number}
+ */
 $3Dmol.SurfaceType = {
     VDW : 1,
     MS : 2,
@@ -154,7 +208,10 @@ $3Dmol.multiLineString = function(f) {
             
 };
 
-//Synchronized (i.e. not threaded) surface gen? Used mainly for debugging
+/** 
+ * Render surface synchronously if true
+ * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @type {boolean} */
 $3Dmol.syncSurface = false;
 
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
@@ -166,7 +223,18 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
 
 /**
  * Parse a string that represents a style or atom selection and convert it
- * into an object.  
+ * into an object.  The goal is to make it easier to write out these specifications
+ * without resorting to json. Objects cannot be defined recursively.
+ * ; - delineates fields of the object 
+ * : - if the field has a value other than an empty object, it comes after a colon
+ * , - delineates key/value pairs of a value object
+ *     If the value object consists of ONLY keys (no = present) the keys are 
+ *     converted to a list.  Otherwise a object of key/value pairs is created with
+ *     any missing values set to null
+ * = OR ~ - separates key/value pairs of a value object, if not provided value is null
+ * 	twiddle is supported since = has special meaning in URLs
+ * @param (String) str
+ * @returns {Object}
  */
 $3Dmol.specStringToObject = function(str) {
 	if(typeof(str) === "object") {

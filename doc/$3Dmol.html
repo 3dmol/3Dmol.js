@@ -35,6 +35,10 @@
 							<a href="$3Dmol.html">$3Dmol</a>
 						</li>
 						
+						<li>
+							<a href="$3Dmol.GLDraw.html">$3Dmol.GLDraw</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -226,6 +230,9 @@ $3Dmol global namespace</p></div>
             <dt><a href="$3Dmol.GLShape.html">GLShape</a></dt>
             <dd></dd>
         
+            <dt><a href="$3Dmol.GLShape.html">GLShape</a></dt>
+            <dd></dd>
+        
             <dt><a href="$3Dmol.GLViewer.html">GLViewer</a></dt>
             <dd></dd>
         
@@ -243,6 +250,13 @@ $3Dmol global namespace</p></div>
         </dl>
     
 
+    
+        <h3 class="subsection-title">Namespaces</h3>
+
+        <dl>
+            <dt><a href="namespaces.html#$3Dmol.GLDraw"><a href="$3Dmol.GLDraw.html">GLDraw</a></a></dt>
+            <dd></dd>
+        </dl>
     
 
     
@@ -327,6 +341,153 @@ $3Dmol global namespace</p></div>
 
     
 <dl class="details">
+	
+
+	<h5 class="subsection-title">Properties:</h5>
+
+	<dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+		<th>Default</th>
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>VDW</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>MS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    2
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>SAS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    3
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>SES</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    4
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
 	
 
 	
@@ -996,6 +1157,159 @@ var m = $3Dmol.download(&#x27;pdb: 2POR&#x27;, myviewer);</pre>
         
             
 <dt>
+    <h4 class="name" id="mergeGeos"><span class="type-signature">&lt;static> </span>mergeGeos<span class="signature">(geometry, mesh)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>geometry</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Geometry</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>mesh</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Mesh</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">undefined</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="specStringToObject"><span class="type-signature">&lt;static> </span>specStringToObject<span class="signature">((String))</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
     
@@ -1158,7 +1472,7 @@ without resorting to json. Objects cannot be defined recursively.
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Fri Oct 10 2014 17:31:40 GMT-0400 (EDT) using the <a
+		on Fri Oct 10 2014 23:01:46 GMT-0400 (EDT) using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>

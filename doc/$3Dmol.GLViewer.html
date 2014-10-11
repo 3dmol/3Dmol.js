@@ -35,6 +35,10 @@
 							<a href="$3Dmol.html">$3Dmol</a>
 						</li>
 						
+						<li>
+							<a href="$3Dmol.GLDraw.html">$3Dmol.GLDraw</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -181,7 +185,7 @@
     
     
     <div class="description">
-        <p>WebGL $3Dmol viewer
+        <p>WebGL-based 3Dmol.js viewer
 Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmol.html#createViewer">$3Dmol.createViewer</a></p>
     </div>
     
@@ -351,1008 +355,6 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
-            
-<dt>
-    <h4 class="name" id="addMesh"><span class="type-signature">&lt;static> </span>addMesh<span class="signature">(mesh, style)</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Adds an explicit mesh as a surface object.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>mesh</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">$3Dmol.Mesh</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>style</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>surfid</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Number</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="addSurface"><span class="type-signature">&lt;static> </span>addSurface<span class="signature">(type, style, atomsel, allsel, focus)</span><span class="type-signature"> &rarr; {number}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add surface representation to atoms</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="$3Dmol.html#SurfaceType">$3Dmol.SurfaceType</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Surface type</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>style</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>optional style specification for surface material (e.g. for different coloring scheme, etc)</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>atomsel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="types.html#AtomSpec">AtomSpec</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Show surface for atoms in this selection</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>allsel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="types.html#AtomSpec">AtomSpec</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Use atoms in this selection to calculate surface; may be larger group than 'atomsel'</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>focus</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="types.html#AtomSpec">AtomSpec</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Optionally begin rendering surface specified atoms</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>surfid - Identifying number for this surface</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">number</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="clear"><span class="type-signature">&lt;static> </span>clear<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Clear all models, surfaces, and shapes from viewer</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="mapAtomProperties"><span class="type-signature">&lt;static> </span>mapAtomProperties<span class="signature">(props)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add specified properties to all atoms matching input argument</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>props</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="types.html#AtomSpec">AtomSpec</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="removeAllSurfaces"><span class="type-signature">&lt;static> </span>removeAllSurfaces<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Remove all surfaces.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="removeSurface"><span class="type-signature">&lt;static> </span>removeSurface<span class="signature">(surf)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Remove surface with given ID</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>surf</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>surface id</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setSurfaceMaterialStyle"><span class="type-signature">&lt;static> </span>setSurfaceMaterialStyle<span class="signature">(surf, style)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Set the surface material to something else, must render change</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>surf</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Surface ID to apply changes to</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>style</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">matSpec</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>new material style specification</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setView"><span class="type-signature">&lt;static> </span>setView<span class="signature">(arg)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>arg</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;number></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
             
 <dt>
     <h4 class="name" id="addArrow"><span class="type-signature"></span>addArrow<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
@@ -1828,7 +830,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
             <td class="type">
             
                 
-<span class="param-type"><a href="types.html#LabelSpec">LabelSpec</a></span>
+<span class="param-type">Object</span>
 
 
             
@@ -1911,25 +913,21 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
     
         <h5>Example</h5>
         
-    <pre class="sunlight-highlight-javascript">// Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
+    <pre class="sunlight-highlight-javascript">// Assuming glviewer contains a model representing a protein, label
+all alpha carbons with their residue name
+// Select all alpha carbons (have property atom : &quot;CA&quot;) from last
+model added var atoms =
+glviewer.getModel().selectedAtoms({atom:&quot;CA&quot;}); var labels = [];
 
-// Select all alpha carbons (have property atom : &quot;CA&quot;) from last model added
-var atoms = glviewer.getModel().selectedAtoms({atom:&quot;CA&quot;});
-var labels = [];
+for (var a in atoms) { var atom = atoms[a];
+// Create label at alpha carbon&#x27;s position displaying atom&#x27;s residue
+and residue number var labelText = atom.resname + &quot; &quot; + atom.resi;
 
-for (var a in atoms) {
-    var atom = atoms[a];
+var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:
+atom.x, y: atom.y, z: atom.z});
 
-    // Create label at alpha carbon&#x27;s position displaying atom&#x27;s residue and residue number
-    var labelText = atom.resname + &quot; &quot; + atom.resi;
-     
-    var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z});
-
-    labels.push(l);
-}
-
-// Render labels
-glviewer.render();</pre>
+labels.push(l); }
+// Render labels glviewer.render();</pre>
 
 
     
@@ -2690,6 +1688,72 @@ way to create a spherical shape object</p>
         
             
 <dt>
+    <h4 class="name" id="clear"><span class="type-signature"></span>clear<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Clear scene of all objects</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="createModelFrom"><span class="type-signature"></span>createModelFrom<span class="signature">(sel, <span class="optional">extract</span>)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>}</span></h4>
     
     
@@ -2868,7 +1932,7 @@ If extract, removes selected atoms from existing models</p>
         
             
 <dt>
-    <h4 class="name" id="getModel"><span class="type-signature"></span>getModel<span class="signature">(<span class="optional">id</span>)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>}</span></h4>
+    <h4 class="name" id="getModel"><span class="type-signature"></span>getModel<span class="signature">(<span class="optional">id</span>)</span><span class="type-signature"> &rarr; {GLModel}</span></h4>
     
     
 </dt>
@@ -3014,7 +2078,7 @@ If extract, removes selected atoms from existing models</p>
 	</dt>
 	<dd>
 		
-<span class="param-type"><a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a></span>
+<span class="param-type">GLModel</span>
 
 
 	</dd>
@@ -3026,8 +2090,8 @@ If extract, removes selected atoms from existing models</p>
     
         <h5>Example</h5>
         
-    <pre class="sunlight-highlight-javascript">// Retrieve reference to first GLModel added
-var m = glviewer.getModel(0);</pre>
+    <pre class="sunlight-highlight-javascript">// Retrieve reference to first GLModel added var m =
+        glviewer.getModel(0);</pre>
 
 
     
@@ -3186,6 +2250,72 @@ var m = glviewer.getModel(0);</pre>
         
             
 <dt>
+    <h4 class="name" id="removeAllLabels"><span class="type-signature"></span>removeAllLabels<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove all labels from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="removeAllModels"><span class="type-signature"></span>removeAllModels<span class="signature">()</span><span class="type-signature"></span></h4>
     
     
@@ -3195,6 +2325,138 @@ var m = glviewer.getModel(0);</pre>
     
     <div class="description">
         <p>Delete all existing models</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeAllShapes"><span class="type-signature"></span>removeAllShapes<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove all shape objects from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeAllSurfaces"><span class="type-signature"></span>removeAllSurfaces<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove all surfaces.</p>
     </div>
     
 
@@ -3367,8 +2629,7 @@ var m = glviewer.getModel(0);</pre>
     <pre class="sunlight-highlight-javascript">// Remove labels created in <a href="$3Dmol.GLViewer.html#addLabel">addLabel example</a>
 
 for (var i = 0; i &lt; labels.length; i++) {
-    glviewer.removeLabel(label);
-}
+glviewer.removeLabel(label); }
 
 glviewer.render();</pre>
 
@@ -3502,7 +2763,7 @@ glviewer.render();</pre>
     
     
     <div class="description">
-        <p>Remove shape object from viewe</p>
+        <p>Remove shape object from viewer</p>
     </div>
     
 
@@ -3692,6 +2953,167 @@ adding/removing models, applying styles, etc.</p>
     
     
     
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="rotate"><span class="type-signature"></span>rotate<span class="signature">(<span class="optional">angle</span>, <span class="optional">angle</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Rotate scene by angle degrees around axis</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>angle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Angle, in degrees, to rotate by.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>angle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Axis (&quot;x&quot;, &quot;y&quot;, or &quot;z&quot;) to rotate around.
+           Default &quot;y&quot;</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
     
     
     
@@ -4364,7 +3786,7 @@ myviewer.setBackgroundColor(0xffffff)</pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="types.html#LabelSpec">LabelSpec</a></span>
+<span class="param-type">Object</span>
 
 
             
@@ -4860,6 +4282,134 @@ myviewer.setBackgroundColor(0xffffff)</pre>
         
             
 <dt>
+    <h4 class="name" id="zoom"><span class="type-signature"></span>zoom<span class="signature">(<span class="optional">factor</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Zoom current view by a constant factor</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>factor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Magnification factor. Values greater than 1
+           will zoom in, less than one will zoom out. Default 2.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="zoomTo"><span class="type-signature"></span>zoomTo<span class="signature">(<span class="optional">sel</span>)</span><span class="type-signature"></span></h4>
     
     
@@ -4930,7 +4480,8 @@ myviewer.setBackgroundColor(0xffffff)</pre>
 
             
 
-            <td class="description last"><p>Selection specification specifying model and atom properties to select. Default: all atoms in viewer</p></td>
+            <td class="description last"><p>Selection specification specifying model and atom
+           properties to select. Default: all atoms in viewer</p></td>
         </tr>
 
 	
@@ -4984,11 +4535,11 @@ myviewer.setBackgroundColor(0xffffff)</pre>
     
         <h5>Example</h5>
         
-    <pre class="sunlight-highlight-javascript">// Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
-glviewer.zoomTo({chain: &#x27;B&#x27;});
-
-// Focus on centroid of all atoms of all models in this viewer
-glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )</pre>
+    <pre class="sunlight-highlight-javascript">// Assuming we have created a model of a protein with
+        multiple chains (e.g. from a PDB file), focus on atoms in
+        chain B glviewer.zoomTo({chain: &#x27;B&#x27;});
+// Focus on centroid of all atoms of all models in this
+viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )</pre>
 
 
     
@@ -5020,7 +4571,7 @@ glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )</pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Fri Oct 10 2014 17:31:40 GMT-0400 (EDT) using the <a
+		on Fri Oct 10 2014 23:01:46 GMT-0400 (EDT) using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>

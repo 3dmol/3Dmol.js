@@ -10,75 +10,25 @@ colorlike.g;
 colorlike.b;
 colorlike.a;
 
-/**
- * Create and initialize an appropriate viewer at supplied HTML element using specification in config
- * @param {Object | string} element - Either HTML element or string identifier
- * @param {ViewerSpec} config Viewer specification
- * @return {$3Dmol.GLViewer} GLViewer
- * 
- * @example
- * // Assume there exists an HTML div with id "gldiv"
- * var element = $("#gldiv");
- * 
- * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors,
- *               callback : function(viewer) {
- *                            //'data' is a string containing molecule data in pdb format  
- *                            viewer.addModel(data, "pdb");
- *                            viewer.zoomTo();
- *                            viewer.render();
- *                          }  
- *                        
- *               };
- * 
- * // Create GLViewer within 'gldiv' and execute callback
- * var myviewer = $3Dmol.createViewer(element, config);
- *      
- */
+
 $3Dmol.createViewer = function(element, config) {};
 
-/**
-  * Contains a dictionary of embedded viewers created from HTML elements
-  * with a the viewer_3Dmoljs css class indexed by their id (or numerically
-  * if they do not have an id).
- */
+
 $3Dmol.viewers = {}
 
-/**
- * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * 
- * @function $3Dmol.download
- * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
- * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
- * @example
- * var myviewer = $3Dmol.createViewer(gldiv);
- * 
- * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
- * var m = $3Dmol.download('pdb: 2POR', myviewer);
- * 
- * @return {$3Dmol.GLModel} GLModel
- */ 
+
 $3Dmol.download = function(query, viewer) {};
 
-/**
- * @ignore
- * @param {$3Dmol.Object3D} group
- * @param {AtomSpec} atomlist
- * @param {$3Dmol.ColorScheme} gradientscheme
- */
+
 $3Dmol.drawCartoon = function(group, atomlist, gradientscheme) {};
 
-/** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
- * @struct
- */
+
 $3Dmol.elementColors = {};
 
 $3Dmol.elementColors.defaultColor;
 
-/** @property Jmol-like element colors*/
 $3Dmol.elementColors.Jmol = {};
 
-/** @property rasmol-like element colors */
 $3Dmol.elementColors.rasmol = {};
 
 $3Dmol.elementColors.defaultColors = $3Dmol.elementColors.rasmol;
@@ -107,104 +57,9 @@ $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
 //Specification arguments 
 //TODO: flesh out the annotations
 
-/**
- * GLViewer input specification
- * @typedef ViewerSpec
- */
-var ViewerSpec = {};
-ViewerSpec.order;
-ViewerSpec.defaultcolors;
-/** 
- * @type {function($3Dmol.GLViewer)} */
-ViewerSpec.callback;
-
-/**
- * Object literal Atom representation.  Can be used as a selection specification to 
- * select all atoms with matching properties
- * @typedef AtomSpec
- * @struct
- * @prop {string} resn - Parent residue name
- * @prop {number} x - Atom's x coordinate
- * @prop {number} y - Atom's y coordinate
- * @prop {number} z - Atom's z coordinate
- * @prop {number} color - Atom's color, as hex code
- * @prop {number} surfaceColor - Hex code for color to be used for surface patch over this atom
- * @prop {string} elem - Element abbreviation (e.g. 'H', 'Ca', etc)
- * @prop {boolean} hetflag - Set to true if atom is a heteroatom
- * @prop {string} chain - Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
- * @prop {number} resi - Residue number 
- * @prop {number} icode
- * @prop {number} rescode
- * @prop {number} serial - Atom's serial id number
- * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
- * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
- * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
- * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
- * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
- * @prop {Object} properties - Optional mapping of additional properties
- * @prop {number} b - Atom b factor data
- * @prop {string} pdbline - If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
- * @prop {boolean} clickable - Set this flag to true to enable click selection handling for this atom
- * @prop {function(this, $3Dmol.GLViewer)} callback - Callback click handler function to be executed on this atom and its parent viewer
- * @prop {AtomStyleSpec} style - Atom style specification
- */
-var AtomSpec = {};
-AtomSpec.resn;
-AtomSpec.x;
-AtomSpec.y;
-AtomSpec.z;
-AtomSpec.color;
-AtomSpec.surfaceColor;
-AtomSpec.elem;
-AtomSpec.hetflag;
-AtomSpec.chain;
-AtomSpec.resi;
-AtomSpec.icode;
-AtomSpec.rescode;
-AtomSpec.serial;
-AtomSpec.atom;
-AtomSpec.bonds;
-AtomSpec.ss;
-AtomSpec.singleBonds;
-AtomSpec.bondOrder;
-AtomSpec.properties;
-AtomSpec.b;
-AtomSpec.pdbline;
-/** @type {IntersectionShapes} */
-AtomSpec.intersectionShape;
-AtomSpec.clickable;
-/** @type {function(AtomSpec, $3Dmol.GLViewer)} */
-AtomSpec.callback;
-
-/** 
- * @typedef AtomStyleSpec
- */
-var AtomStyleSpec = {};
-
-AtomSpec.style = {};
-/** @type {atomstyle} */
-AtomSpec.style.line;
-/** @type {atomstyle} */
-AtomSpec.style.cross;
-/** @type {atomstyle} */
-AtomSpec.style.sphere;
-/** @type {atomstyle} */
-AtomSpec.style.stick;
-/** @type {atomstyle} */
-AtomSpec.style.cartoon;
-AtomSpec.style.cartoon.gradient;
-
 //Viewer
 // The constructor
-/**
- * WebGL $3Dmol viewer
- * Note: The preferred method of instantiating a GLViewer is through {@link $3Dmol.createViewer} 
- * 
- * @constructor 
- * @param {Object} element HTML element within which to create viewer
- * @param {function} callback - Callback function to be immediately executed on this viewer
- * @param {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
- */
+
 $3Dmol.GLViewer = function(element, callback, defaultcolors) {};
 
 /**
@@ -265,68 +120,16 @@ $3Dmol.GLViewer.getView = function() {};
 $3Dmol.GLViewer.setView = function(arg) {};
 
 // apply styles, models, etc in viewer
-/**
- * Render current state of viewer, after 
- * adding/removing models, applying styles, etc.
- * 
- * @function $3Dmol.GLViewer#render
- */
+
 $3Dmol.GLViewer.render = function() {};
 
-/**
- * Return pdb output of selected atoms (if atoms from pdb input)
- * 
- * @function $3Dmol.GLViewer#pdbData  
- * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
- * @return {string} PDB string of selected atoms
- */
+
 $3Dmol.GLViewer.pdbData = function(sel) {};
 
-/**
- * Zoom to center of atom selection
- * 
- * @function $3Dmol.GLViewer#zoomTo
- * @param {Object=} [sel] - Selection specification specifying model and atom properties to select. Default: all atoms in viewer
- * 
- * @example
- * // Assuming we have created a model of a protein with multiple chains (e.g. from a PDB file), focus on atoms in chain B
- * glviewer.zoomTo({chain: 'B'});
- * 
- * // Focus on centroid of all atoms of all models in this viewer
- * glviewer.zoomTo();  // (equivalent to glviewer.zoomTo({}) )
- */
+
 $3Dmol.GLViewer.zoomTo = function(sel) {};
 
-/**
- * Add label to viewer
- * 
- * @function $3Dmol.GLViewer#addLabel
- * @param {string} text - Label text
- * @param {LabelSpec} data - Label style specification
- * @return {$3Dmol.Label}
- * 
- * @example
- * 
- * // Assuming glviewer contains a model representing a protein, label all alpha carbons with their residue name
- * 
- * // Select all alpha carbons (have property atom : "CA") from last model added
- * var atoms = glviewer.getModel().selectedAtoms({atom:"CA"});
- * var labels = [];
- * 
- * for (var a in atoms) {
- *     var atom = atoms[a];
- * 
- *     // Create label at alpha carbon's position displaying atom's residue and residue number
- *     var labelText = atom.resname + " " + atom.resi;
- *      
- *     var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z});
- * 
- *     labels.push(l);
- * }
- * 
- * // Render labels
- * glviewer.render();
- */
+
 $3Dmol.GLViewer.addLabel = function(text, data) {};
 
 /**

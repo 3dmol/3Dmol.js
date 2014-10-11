@@ -1,8 +1,32 @@
 //color scheme mappings
 var $3Dmol = $3Dmol || {};
 
-//red to white to blue, for charges
-$3Dmol.RWB = function(min, max) {
+/** Color mapping gradiens
+ * @interface
+ * @param {number} min
+ * @param {number} max
+ */
+$3Dmol.Gradient = function(min, max) {};
+
+/**
+ * Map value to hex color
+ * @param {number} val
+ * @param {number} range
+ * @returns {number}
+ */
+$3Dmol.Gradient.valueToHex = function(val, range) {};
+$3Dmol.Gradient.jmolID = function() {};
+//return range used for color mapping, null if none set
+$3Dmol.Gradient.range = function() {};
+
+
+
+/**
+ * Color scheme red to white to blue, for charges
+ * @constructor
+ * @implements {$3Dmol.Gradient}
+ */
+$3Dmol.Gradient.RWB = function(min, max) {
 	
 	//map value to hex color, range is provided
 	this.valueToHex = function(val, range) {
@@ -52,8 +76,12 @@ $3Dmol.RWB = function(min, max) {
 
 };
 
-//rainbow gradient, but without purple to match jmol
-$3Dmol.ROYGB = function(min, max) {
+/**
+ * rainbow gradient, but without purple to match jmol
+ * @constructor
+ * @implements {$3Dmol.Gradient}
+ */
+$3Dmol.Gradient.ROYGB = function(min, max) {
 	
 	//map value to hex color, range is provided
 	this.valueToHex = function(val, range) {
@@ -115,8 +143,12 @@ $3Dmol.ROYGB = function(min, max) {
 
 };
 
-//rainbow gradient with constant saturation, all the way to purple!
-$3Dmol.Sinebow = function(min, max) {
+/**
+ * rainbow gradient with constant saturation, all the way to purple!
+ * @constructor
+ * @implements {$3Dmol.Gradient}
+ */
+$3Dmol.Gradient.Sinebow = function(min, max) {
 	
 	//map value to hex color, range is provided
 	this.valueToHex = function(val, range) {

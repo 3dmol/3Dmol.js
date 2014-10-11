@@ -5,6 +5,13 @@
 
 var $3Dmol = $3Dmol || {};
 
+/**
+ * GLModel represents a group of related atoms
+ * @constructor 
+ * @param {number=} mid 
+ * @param {Object=} defaultcolors Object defining default atom colors as atom => color property value pairs
+ * @see $3Dmol.download
+ */
 $3Dmol.GLModel = (function() {
 
     // class variables go here
@@ -82,7 +89,7 @@ $3Dmol.GLModel = (function() {
         return true;
     };
 
-    /** @param {Array.<AtomSpec>} atomsarray */
+    /** @param {AtomSpec[]} atomsarray */
     var assignBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var atoms = atomsarray.slice(0);
@@ -119,7 +126,7 @@ $3Dmol.GLModel = (function() {
     
     // this is optimized for proteins where it is assumed connected
     // atoms are on the same or next residue
-    /** @param {Array.<AtomSpec>} atomsarray */
+    /** @param {AtomSpec[]} atomsarray */
     var assignPDBBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var protatoms = [];
@@ -303,7 +310,7 @@ $3Dmol.GLModel = (function() {
     };
     
     /**
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      */
     var parseCube = function(atoms, str) {
@@ -365,7 +372,7 @@ $3Dmol.GLModel = (function() {
         
     // read an XYZ file from str and put the result in atoms
     /**
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      */
     var parseXYZ = function(atoms, str) {
@@ -405,7 +412,7 @@ $3Dmol.GLModel = (function() {
     // put atoms specified in sdf fromat in str into atoms
     // adds to atoms, does not replace
     /** 
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      */
     var parseSDF = function(atoms, str) {
@@ -458,7 +465,7 @@ $3Dmol.GLModel = (function() {
     // tag
     // TODO: Figure out how to handle multi molecule files (for SDF, too)
     /**
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      * @param {boolean=} keepH
      */
@@ -591,7 +598,7 @@ $3Dmol.GLModel = (function() {
     //if computeStruct is true will always perform secondary structure analysis,
     //otherwise only do analysis of SHEET/HELIX comments are missing
     /**
-     * @param {Array.<AtomSpec>} atoms
+     * @param {AtomSpec[]} atoms
      * @param {string} str
      * @param {keepH=} boolean
      * @param {computeStruct=} boolean
@@ -813,7 +820,7 @@ $3Dmol.GLModel = (function() {
         /**
          * 
          * @param {AtomSpec} atom
-         * @param {Object.<numlike,$3Dmol.Geometry>} geos
+         * @param {$3Dmol.Geometry[]} geos
          */
         var drawAtomCross = function(atom, geos) {
             if (!atom.style.cross)
@@ -962,10 +969,8 @@ $3Dmol.GLModel = (function() {
 		 * 
 		 * @param {AtomSpec}
 		 *            atom
-		 * @param {Array.
-		 *            <AtomSpec>} atoms
-		 * @param {Object.
-		 *            <numlike, $3Dmol.Geometry>} geos
+		 * @param {AtomSpec[]} atoms
+		 * @param {$3Dmol.Geometry[]} geos
 		 */
         var drawBondLines = function(atom, atoms, geos) {
             if (!atom.style.line)
@@ -1476,7 +1481,7 @@ $3Dmol.GLModel = (function() {
         // faster
         // at some point we should optimize this to avoid unnecessary
         // recalculation
-        /** @type {Array.<AtomSpec>} atoms */
+        /** param {AtomSpec[]} atoms */
         var createMolObj = function(atoms) {
 
             console.log("creating for "+id);
@@ -1519,9 +1524,9 @@ $3Dmol.GLModel = (function() {
             // create cartoon if needed - this is a whole model analysis
             if (cartoonAtoms.length > 0) {
                 var gradientscheme = null;
-                //TODO: Should have an option to choose color scheme
+                //TODO: Should have an option to choose gradient type
                 if (range[0] < range[1])
-                    gradientscheme = new $3Dmol.Sinebow(range[0], range[1]);
+                    gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
 
                 $3Dmol.drawCartoon(ret, cartoonAtoms, gradientscheme);
                 
@@ -1621,6 +1626,12 @@ $3Dmol.GLModel = (function() {
             return ret;
         };
 
+        /**
+         * Returns model id number
+         * 
+         * @function $3Dmol.GLMode#getID
+         * @return {number} Model ID
+         */
         this.getID = function() {
             return id;
         };
@@ -1639,7 +1650,12 @@ $3Dmol.GLModel = (function() {
             }
         };
 
-        // add atoms to this model from molecular data string
+        /** add atoms to this model from molecular data string
+         * 
+         * @function $3Dmol.GLModel#addMolData
+         * @param {string} data - atom structure file input data string
+         * @param {string} format - input file string format (e.g 'pdb', 'sdf', etc.)
+         */
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             if (!data)
@@ -1665,7 +1681,13 @@ $3Dmol.GLModel = (function() {
             setAtomDefaults(atoms, id);
         };
         
-        // given a selection specification, return true if atom is selected
+        /** given a selection specification, return true if atom is selected
+         * 
+         * @function $3Dmol.GLModel#atomIsSelected
+         * @param {type} atom
+         * @param {type} sel
+         * @return {boolean}
+         */
         this.atomIsSelected = function(atom, sel) {
             if (typeof (sel) === "undefined")
                 return true; // undef gets all
@@ -1713,7 +1735,13 @@ $3Dmol.GLModel = (function() {
             return invert ? !ret : ret;
         };
 
-        // return list of atoms selected by sel, this is specific to glmodel
+
+        /** return list of atoms selected by sel, this is specific to glmodel
+         * 
+         * @function $3Dmol.GLModel#selectedAtoms
+         * @param {type} sel
+         * @return {Array.<Object>}
+         */
         this.selectedAtoms = function(sel) {
             var ret = [];
             for ( var i = 0; i < atoms.length; i++) {
@@ -1726,7 +1754,11 @@ $3Dmol.GLModel = (function() {
             return ret;
         };
         
-        // copy new atoms into this model, adjust bonds appropriately
+        /** Add list of new atoms to model.  Adjusts bonds appropriately.
+         * 
+         * @function $3Dmol.GLModel#addAtoms
+         * @param {type} newatoms
+         */        
         this.addAtoms = function(newatoms) {
             molObj = null;
             var start = atoms.length;
@@ -1758,7 +1790,12 @@ $3Dmol.GLModel = (function() {
             }
         };
 
-        // remove badatoms from model
+        /** Remove specified atoms from model
+         * 
+         * @function $3Dmol.GLModel#removeAtoms
+         * @param {type} badatoms
+         * @return {removeAtoms}
+         */
         this.removeAtoms = function(badatoms) {
             molObj = null;
             // make map of all baddies
@@ -1783,7 +1820,13 @@ $3Dmol.GLModel = (function() {
         };
         
         
-        // style the select atoms with style
+        /** Set atom style of selected atoms
+         * 
+         * @function $3Dmol.GLModel#setStyle
+         * @param {type} sel
+         * @param {type} style
+         * @param {type} add
+         */
         this.setStyle = function(sel, style, add) {
             
             if(!add && molObj !== null && sameObj(style, lastStyle))
@@ -1821,7 +1864,12 @@ $3Dmol.GLModel = (function() {
             
         };
         
-        // given a mapping from element to color, set atom colors
+        /** given a mapping from element to color, set atom colors
+         * 
+         * @function $3Dmol.GLModel#setColorByElement
+         * @param {type} sel
+         * @param {type} colors
+         */
         this.setColorByElement = function(sel, colors) {
             
             if(molObj !== null && sameObj(colors,lastColors))
@@ -1838,6 +1886,12 @@ $3Dmol.GLModel = (function() {
             }
         };
         
+        /**
+         * @function $3Dmol.GLModelSetColorByProperty
+         * @param {type} sel
+         * @param {type} prop
+         * @param {type} scheme
+         */
         this.setColorByProperty = function(sel, prop, scheme) {
             var atoms = this.selectedAtoms(sel);
             lastColors = null; // don't bother memoizing
@@ -1866,9 +1920,11 @@ $3Dmol.GLModel = (function() {
         };
 
 
-        // manage the globj for this model in the possed modelGroup -
-        // if it has to be regenerated, remove and add
-
+        /** manage the globj for this model in the possed modelGroup - if it has to be regenerated, remove and add
+         * 
+         * @function $3Dmol.GLModel#globj
+         * @param {$3Dmol.Object3D} group
+         */
         this.globj = function(group) {
             var time = new Date();
             if(molObj === null) { // have to regenerate
@@ -1884,7 +1940,11 @@ $3Dmol.GLModel = (function() {
             }
         };
         
-        // remove any rendered object from the scene
+        /** Remove any renderable mol object from scene
+         * 
+         * @function $3Dmol.GLModel#removegl
+         * @param {$3Dmol.Object3D} group
+         */
         this.removegl = function(group) {
             if(renderedMolObj) {
                 //dispose of geos and materials
