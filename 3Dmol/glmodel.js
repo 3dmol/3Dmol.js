@@ -1955,6 +1955,53 @@ $3Dmol.GLModel = (function() {
             }
             molObj = null;
         };
+        
+        /** Create labels for residues of selected atoms.
+         * Will create a single label at the center of mass of all atoms
+         * with the same chain,resn, and resi.
+         * @function $3Dmol.GLModel#addResLabels
+         * 
+         * @param {type} sel
+         * @param {$3Dmol.GLViewer} viewer
+         */
+        this.addResLabels = function(sel, viewer, style) {
+        	var atoms = this.selectedAtoms(sel);
+        	var bylabel = {}
+        	//collect by chain:resn:resi
+        	for(var i = 0; i < atoms.length; i++) {
+        		var a = atoms[i];
+        		var c = a.chain;
+        		var resn = a.resn;
+        		var resi = a.resi;
+        		var label =  resn + ':' + resi;
+        		if(!bylabel[c]) bylabel[c] = {};
+        		if(!bylabel[c][label]) bylabel[c][label] = []
+        		bylabel[c][label].push(a);
+        	}
+        	
+            var mystyle = $.extend(true, {}, style);
+        	//now compute centers of mass
+        	for(var c in bylabel) {
+        		if(bylabel.hasOwnProperty(c)) {
+        			var labels = bylabel[c];
+        			for(var label in labels) {
+        				if(labels.hasOwnProperty(label)) {
+        					var atoms = labels[label];
+        					var sum = new $3Dmol.Vector3(0,0,0);
+        					for(var i = 0; i < atoms.length; i++) {
+        						var a = atoms[i];
+        						sum.x += a.x;
+        						sum.y += a.y;
+        						sum.z += a.z;
+        					}
+        					sum.divideScalar(atoms.length);
+        					mystyle.position = sum;
+        					viewer.addLabel(label, mystyle);
+        				}        				
+        			}
+        		}
+        	}
+        }
 
     }
 

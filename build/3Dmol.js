@@ -17245,13 +17245,15 @@ $(document).ready(function() {
             var select = {};
             if(viewerdiv.data("select")) select = $3Dmol.specStringToObject(viewerdiv.data("select"));
             var selectstylelist = [];
-            var surfaces = []
+            var surfaces = [];
+            var labels = [];
             var d = viewerdiv.data();
             
             //let users specify individual but matching select/style tags, eg.
             //data-select1 data-style1
             var stylere = /style(.+)/;
             var surfre = /surface(.*)/;
+            var reslabre = /labelres(.*)/;
             var keys = [];
             for(var dataname in d) {
             	if(d.hasOwnProperty(dataname)) {
@@ -17274,6 +17276,13 @@ $(document).ready(function() {
             		var newsel = $3Dmol.specStringToObject(d[selname]);
             		var styleobj = $3Dmol.specStringToObject(d[dataname]);
             		surfaces.push([newsel,styleobj]);
+            	}
+            	m = reslabre.exec(dataname);
+            	if(m) {
+            		var selname = "select"+m[1];
+            		var newsel = $3Dmol.specStringToObject(d[selname]);
+            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
+            		labels.push([newsel,styleobj]);
             	}
             }
             
@@ -17298,6 +17307,11 @@ $(document).ready(function() {
                     	var sel = surfaces[i][0] || {};
                     	var sty = surfaces[i][1] || {}
                     	glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                    }
+                    for(var i = 0; i < labels.length; i++) {
+                    	var sel = labels[i][0] || {};
+                    	var sty = labels[i][1] || {}
+                    	glviewer.addResLabels(sel, sty);
                     }
                     // Allowing us to fire callback after viewer has added model
                     if (callback) 
@@ -20818,6 +20832,53 @@ $3Dmol.GLModel = (function() {
             }
             molObj = null;
         };
+        
+        /** Create labels for residues of selected atoms.
+         * Will create a single label at the center of mass of all atoms
+         * with the same chain,resn, and resi.
+         * @function $3Dmol.GLModel#addResLabels
+         * 
+         * @param {type} sel
+         * @param {$3Dmol.GLViewer} viewer
+         */
+        this.addResLabels = function(sel, viewer, style) {
+        	var atoms = this.selectedAtoms(sel);
+        	var bylabel = {}
+        	//collect by chain:resn:resi
+        	for(var i = 0; i < atoms.length; i++) {
+        		var a = atoms[i];
+        		var c = a.chain;
+        		var resn = a.resn;
+        		var resi = a.resi;
+        		var label =  resn + ':' + resi;
+        		if(!bylabel[c]) bylabel[c] = {};
+        		if(!bylabel[c][label]) bylabel[c][label] = []
+        		bylabel[c][label].push(a);
+        	}
+        	
+            var mystyle = $.extend(true, {}, style);
+        	//now compute centers of mass
+        	for(var c in bylabel) {
+        		if(bylabel.hasOwnProperty(c)) {
+        			var labels = bylabel[c];
+        			for(var label in labels) {
+        				if(labels.hasOwnProperty(label)) {
+        					var atoms = labels[label];
+        					var sum = new $3Dmol.Vector3(0,0,0);
+        					for(var i = 0; i < atoms.length; i++) {
+        						var a = atoms[i];
+        						sum.x += a.x;
+        						sum.y += a.y;
+        						sum.z += a.z;
+        					}
+        					sum.divideScalar(atoms.length);
+        					mystyle.position = sum;
+        					viewer.addLabel(label, mystyle);
+        				}        				
+        			}
+        		}
+        	}
+        }
 
     }
 
@@ -22563,6 +22624,18 @@ $3Dmol.GLViewer = (function() {
 			show();
 			return label;
 		};
+		
+		/** Add residue labels.  This will generate one label per a
+		 * residue within the selected atoms.  The label will be at the
+		 * centroid of the atoms and styled according to the passed style.
+		 * The label text will be [resn][resi]
+		 * 
+		 * @param {Object} sel
+		 * @param {Object} style
+		 */
+        this.addResLabels = function(sel, style) {
+			applyToModels("addResLabels", sel, this, style);
+        }
 
 		/**
 		 * Remove label from viewer
@@ -23772,9 +23845,8 @@ $3Dmol.LabelCount = 0;
 /**
  * Renderable labels
  * @constructor $3Dmol.Label
- * @extends {LabelSpec}
  * @param {string} tag - Label text
- * @param {Object} parameters Label style and font specifications
+ * @param {LabelSpec} parameters Label style and font specifications
  */
 $3Dmol.Label = function(text, parameters) {
 
@@ -23815,6 +23887,22 @@ $3Dmol.Label.prototype = {
 				ctx.stroke();
 
 		};
+		
+		//do all the checks to figure out what color is desired
+		var getColor = function(style, stylealpha, init) {
+			var ret = init;
+			if(typeof(style) != 'undefined') {
+				//convet regular colors
+				if(typeof(style) === 'string') 
+					ret = $3Dmol.CC.color(style).scaled()
+				else if(style instanceof $3Dmol.Color) 
+					ret = style.scaled();				
+			}
+			if(typeof(stylealpha) != 'undefined') {
+				ret.a = parseFloat(stylealpha);
+			}
+			return ret;
+		}
 
 		return function() {
 			
@@ -23822,33 +23910,33 @@ $3Dmol.Label.prototype = {
 			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
 			
 			var showBackground = style.showBackground;
+			if(showBackground === '0' || showBackground === 'false') showBackground = false;
 			if(typeof(showBackground) == "undefined") showBackground = true; //default
 			var font = style.font ? style.font : "sans-serif";
 
 			var fontSize = style.fontSize ? style.fontSize : 18;
 
-			var fontColor = style.fontColor ? style.fontColor
-					: {
+			var fontColor = getColor(style.fontColor, style.fontColorOpacity,
+					 {
 						r : 255,
 						g : 255,
 						b : 255,
 						a : 1.0
-					};
+					});
 
 			var padding = style.padding ? style.padding : 4;
 			var borderThickness = style.borderThickness ? style.borderThickness
 					: 0;
 	
-			var backgroundColor = style.backgroundColor ? style.backgroundColor
-					: {
+			var backgroundColor = getColor(style.backgroundColor, style.backgroundColorOpacity, 
+					 {
 						r : 0,
 						g : 0,
 						b : 0,
 						a : 1.0
-					};
+					});
 					
-			var borderColor = style.borderColor ? style.borderColor
-							: backgroundColor;
+			var borderColor = getColor(style.borderColor, style.borderColorOpacity, backgroundColor);
 
 					
 			var position = style.position ? style.position
@@ -23858,14 +23946,9 @@ $3Dmol.Label.prototype = {
 						z : 1
 					};
 					
-			//convert colors from 0-1.0 to 255
-			if(backgroundColor instanceof $3Dmol.Color) backgroundColor = backgroundColor.scaled();
-			if(borderColor instanceof $3Dmol.Color) borderColor = borderColor.scaled();
-			if(fontColor instanceof $3Dmol.Color) fontColor = fontColor.scaled();
-		
-
 			// Should labels always be in front of model?
 			var inFront = (style.inFront !== undefined) ? style.inFront	: true;
+			if(inFront === 'false' || inFront === '0') inFront = false;
 
 			// clear canvas
 
@@ -24135,16 +24218,13 @@ $3Dmol.partialCharges = [
 $3Dmol['partialCharges'] = $3Dmol.partialCharges;
 // Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation 
-
+(function() {
 /**
  * GLViewer input specification
  * @typedef ViewerSpec
  */
 var ViewerSpec = {};
-ViewerSpec.order;
 ViewerSpec.defaultcolors;
-/** 
- * @type {function($3Dmol.GLViewer)} */
 ViewerSpec.callback;
 
 /**
@@ -24210,54 +24290,24 @@ AtomSpec.callback;
  */
 var AtomStyleSpec = {};
 
-AtomSpec.style = {};
-/** @type {atomstyle} */
-AtomSpec.style.line;
-/** @type {atomstyle} */
-AtomSpec.style.cross;
-/** @type {atomstyle} */
-AtomSpec.style.sphere;
-/** @type {atomstyle} */
-AtomSpec.style.stick;
-/** @type {atomstyle} */
-AtomSpec.style.cartoon;
-AtomSpec.style.cartoon.gradient;
 
 
 /**
  * Label type specification
- * @typedef
+ * @typedef LabelSpec
+ * @struct
+ * @prop {string} font - font name
+ * @prop {number} fontSize - Size in pixels of text
+ * @prop {string} fontColor - font color
+ * @prop {number} borderThickness - line width of border around label
+ * @prop {string} borderColor - color of border
+ * @prop {string} backgroundColor - color of background, can provide r,g,b,a
+ * @prop {Object} position - x,y,z coordinates for label
+ * @prop {boolean} inFront - always put labels in from of model
  */
-var LabelSpec = {};
 
-/** Label text font style
- * @type {string} */
-LabelSpec.font;
 
-/** Label text font pt size
- * @type {number} */
-LabelSpec.fontSize;
 
-/** Label font color - specify with an object with r, g, b, and a (alpha) values
- * @type {colorlike | $3Dmol.Color} */
-LabelSpec.fontColor;
-
-LabelSpec.borderThickness;
-/** @type {colorlike} */
-LabelSpec.borderColor;
-/** @type {colorlike} */
-LabelSpec.backgroundColor;
-/**
- * Label position
- * @type {$3Dmol.Vector3}
- */
-LabelSpec.position;
-
-/** labels always rendered in front of model(s) if true
- * 
- * @type {boolean}
- */
-LabelSpec.inFront;
 
 
 /** 
@@ -24314,3 +24364,4 @@ ArrowSpec.mid;
 var VolSpec = {};
 VolSpec.isoval;
 VolSpec.voxel;
+})();

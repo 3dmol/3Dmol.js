@@ -787,6 +787,18 @@ $3Dmol.GLViewer = (function() {
 			show();
 			return label;
 		};
+		
+		/** Add residue labels.  This will generate one label per a
+		 * residue within the selected atoms.  The label will be at the
+		 * centroid of the atoms and styled according to the passed style.
+		 * The label text will be [resn][resi]
+		 * 
+		 * @param {Object} sel
+		 * @param {Object} style
+		 */
+        this.addResLabels = function(sel, style) {
+			applyToModels("addResLabels", sel, this, style);
+        }
 
 		/**
 		 * Remove label from viewer

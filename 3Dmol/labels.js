@@ -5,9 +5,8 @@ $3Dmol.LabelCount = 0;
 /**
  * Renderable labels
  * @constructor $3Dmol.Label
- * @extends {LabelSpec}
  * @param {string} tag - Label text
- * @param {Object} parameters Label style and font specifications
+ * @param {LabelSpec} parameters Label style and font specifications
  */
 $3Dmol.Label = function(text, parameters) {
 
@@ -48,6 +47,22 @@ $3Dmol.Label.prototype = {
 				ctx.stroke();
 
 		};
+		
+		//do all the checks to figure out what color is desired
+		var getColor = function(style, stylealpha, init) {
+			var ret = init;
+			if(typeof(style) != 'undefined') {
+				//convet regular colors
+				if(typeof(style) === 'string') 
+					ret = $3Dmol.CC.color(style).scaled()
+				else if(style instanceof $3Dmol.Color) 
+					ret = style.scaled();				
+			}
+			if(typeof(stylealpha) != 'undefined') {
+				ret.a = parseFloat(stylealpha);
+			}
+			return ret;
+		}
 
 		return function() {
 			
@@ -55,33 +70,33 @@ $3Dmol.Label.prototype = {
 			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
 			
 			var showBackground = style.showBackground;
+			if(showBackground === '0' || showBackground === 'false') showBackground = false;
 			if(typeof(showBackground) == "undefined") showBackground = true; //default
 			var font = style.font ? style.font : "sans-serif";
 
 			var fontSize = style.fontSize ? style.fontSize : 18;
 
-			var fontColor = style.fontColor ? style.fontColor
-					: {
+			var fontColor = getColor(style.fontColor, style.fontColorOpacity,
+					 {
 						r : 255,
 						g : 255,
 						b : 255,
 						a : 1.0
-					};
+					});
 
 			var padding = style.padding ? style.padding : 4;
 			var borderThickness = style.borderThickness ? style.borderThickness
 					: 0;
 	
-			var backgroundColor = style.backgroundColor ? style.backgroundColor
-					: {
+			var backgroundColor = getColor(style.backgroundColor, style.backgroundColorOpacity, 
+					 {
 						r : 0,
 						g : 0,
 						b : 0,
 						a : 1.0
-					};
+					});
 					
-			var borderColor = style.borderColor ? style.borderColor
-							: backgroundColor;
+			var borderColor = getColor(style.borderColor, style.borderColorOpacity, backgroundColor);
 
 					
 			var position = style.position ? style.position
@@ -91,14 +106,9 @@ $3Dmol.Label.prototype = {
 						z : 1
 					};
 					
-			//convert colors from 0-1.0 to 255
-			if(backgroundColor instanceof $3Dmol.Color) backgroundColor = backgroundColor.scaled();
-			if(borderColor instanceof $3Dmol.Color) borderColor = borderColor.scaled();
-			if(fontColor instanceof $3Dmol.Color) fontColor = fontColor.scaled();
-		
-
 			// Should labels always be in front of model?
 			var inFront = (style.inFront !== undefined) ? style.inFront	: true;
+			if(inFront === 'false' || inFront === '0') inFront = false;
 
 			// clear canvas
 

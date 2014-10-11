@@ -1,15 +1,12 @@
 // Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation 
-
+(function() {
 /**
  * GLViewer input specification
  * @typedef ViewerSpec
  */
 var ViewerSpec = {};
-ViewerSpec.order;
 ViewerSpec.defaultcolors;
-/** 
- * @type {function($3Dmol.GLViewer)} */
 ViewerSpec.callback;
 
 /**
@@ -75,54 +72,24 @@ AtomSpec.callback;
  */
 var AtomStyleSpec = {};
 
-AtomSpec.style = {};
-/** @type {atomstyle} */
-AtomSpec.style.line;
-/** @type {atomstyle} */
-AtomSpec.style.cross;
-/** @type {atomstyle} */
-AtomSpec.style.sphere;
-/** @type {atomstyle} */
-AtomSpec.style.stick;
-/** @type {atomstyle} */
-AtomSpec.style.cartoon;
-AtomSpec.style.cartoon.gradient;
 
 
 /**
  * Label type specification
- * @typedef
+ * @typedef LabelSpec
+ * @struct
+ * @prop {string} font - font name
+ * @prop {number} fontSize - Size in pixels of text
+ * @prop {string} fontColor - font color
+ * @prop {number} borderThickness - line width of border around label
+ * @prop {string} borderColor - color of border
+ * @prop {string} backgroundColor - color of background, can provide r,g,b,a
+ * @prop {Object} position - x,y,z coordinates for label
+ * @prop {boolean} inFront - always put labels in from of model
  */
-var LabelSpec = {};
 
-/** Label text font style
- * @type {string} */
-LabelSpec.font;
 
-/** Label text font pt size
- * @type {number} */
-LabelSpec.fontSize;
 
-/** Label font color - specify with an object with r, g, b, and a (alpha) values
- * @type {colorlike | $3Dmol.Color} */
-LabelSpec.fontColor;
-
-LabelSpec.borderThickness;
-/** @type {colorlike} */
-LabelSpec.borderColor;
-/** @type {colorlike} */
-LabelSpec.backgroundColor;
-/**
- * Label position
- * @type {$3Dmol.Vector3}
- */
-LabelSpec.position;
-
-/** labels always rendered in front of model(s) if true
- * 
- * @type {boolean}
- */
-LabelSpec.inFront;
 
 
 /** 
@@ -179,3 +146,4 @@ ArrowSpec.mid;
 var VolSpec = {};
 VolSpec.isoval;
 VolSpec.voxel;
+})();

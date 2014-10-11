@@ -28,13 +28,15 @@ $(document).ready(function() {
             var select = {};
             if(viewerdiv.data("select")) select = $3Dmol.specStringToObject(viewerdiv.data("select"));
             var selectstylelist = [];
-            var surfaces = []
+            var surfaces = [];
+            var labels = [];
             var d = viewerdiv.data();
             
             //let users specify individual but matching select/style tags, eg.
             //data-select1 data-style1
             var stylere = /style(.+)/;
             var surfre = /surface(.*)/;
+            var reslabre = /labelres(.*)/;
             var keys = [];
             for(var dataname in d) {
             	if(d.hasOwnProperty(dataname)) {
@@ -57,6 +59,13 @@ $(document).ready(function() {
             		var newsel = $3Dmol.specStringToObject(d[selname]);
             		var styleobj = $3Dmol.specStringToObject(d[dataname]);
             		surfaces.push([newsel,styleobj]);
+            	}
+            	m = reslabre.exec(dataname);
+            	if(m) {
+            		var selname = "select"+m[1];
+            		var newsel = $3Dmol.specStringToObject(d[selname]);
+            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
+            		labels.push([newsel,styleobj]);
             	}
             }
             
@@ -81,6 +90,11 @@ $(document).ready(function() {
                     	var sel = surfaces[i][0] || {};
                     	var sty = surfaces[i][1] || {}
                     	glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                    }
+                    for(var i = 0; i < labels.length; i++) {
+                    	var sel = labels[i][0] || {};
+                    	var sty = labels[i][1] || {}
+                    	glviewer.addResLabels(sel, sty);
                     }
                     // Allowing us to fire callback after viewer has added model
                     if (callback) 

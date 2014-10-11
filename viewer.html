@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>3Dmol.js Viewer</title>
-        <script src="build/3Dmol-min.js"></script>
+        <script src="build/3Dmol.js"></script>
         <style>
         	* {margin:0; padding:0}
         </style>
@@ -31,6 +31,9 @@
                     }
                     else if(cmdname == 'addstyle') {
                     	viewer.addStyle(currentsel, cmdobj);
+                    }
+                    else if(cmdname == 'labelres') {
+                    	viewer.addResLabels(currentsel, cmdobj);
                     }
                     else if(cmdname == 'colorbyelement')
                     {
