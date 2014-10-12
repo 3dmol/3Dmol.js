@@ -58,6 +58,11 @@ An un-minified file is also provided for debugging purposes.
 {@lang xml}<script src="http://3Dmol.csb.pitt.edu/build/3Dmol.js"></script> 
 ```
 
+There is also an unminified version provided that is missing jQuery for use when compiling your own minified libraries.
+```
+{@lang xml}<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-nojquery.js"></script>
+```
+
 <br>
 The full source distribution is available [from github](https://github.com/dkoes/3Dmol.js).
 
