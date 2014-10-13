@@ -73,7 +73,10 @@ module.exports = function(grunt) {
                 src : ['build/jquery-1.9.1-min-pre.js','build/webGL-min-pre.js', 'build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-min.js'
             },
-            
+            closurenojquery: {
+                src : ['build/webGL-min-pre.js', 'build/3Dmol-min-pre.js'],
+                dest : 'build/3Dmol-nojquery-min.js'
+            }, 
             append : {
                 src : ['build/3Dmol-min.js', 'append.js'],
                 dest : 'build/3Dmol-min.js'
@@ -159,7 +162,7 @@ module.exports = function(grunt) {
     
     grunt.registerTask('doc', ['clean:doc', 'shell:doc']);
     grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL']);
-    grunt.registerTask('concat_post_build', ['concat:big', 'concat:bignojquery', 'concat:closure']);
+    grunt.registerTask('concat_post_build', ['concat:big', 'concat:bignojquery', 'concat:closure', 'concat:closurenojquery']);
     
     grunt.registerTask('test', ['clean:build', 'concat:test', 'closure-compiler:test', 'concat:append']);
     grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'concat:append']);
