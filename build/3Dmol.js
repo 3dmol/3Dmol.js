@@ -17293,8 +17293,11 @@ $(document).ready(function() {
             
             if (datauri) {  
                 
-                var type = viewerdiv.data("datatype") || "pdb";
-                 
+                var type = viewerdiv.data("type") || viewerdiv.data("datatype");
+                if(!type) {
+                	type = datauri.substr(datauri.lastIndexOf('.')+1).substring(0,3);
+                	if(type.length != 3) type = "pdb";
+                }
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
                     glviewer.setStyle(select,style);
@@ -17328,7 +17331,7 @@ $(document).ready(function() {
                 
                 if (viewerdiv.data("element")) {
                     var moldata = $("#" + viewerdiv.data("element")).val() || "";
-                    var type = viewerdiv.data("datatype");
+                    var type = viewerdiv.data("type") || viewerdiv.data("datatype");
 
                     if (!type){
 
