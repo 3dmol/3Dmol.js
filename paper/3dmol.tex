@@ -8,7 +8,7 @@
 
 \makeatletter
 \let \@sverbatim \@verbatim
-\def \@verbatim {\@sverbatim \verbatimplus}
+\def \@verbatim {\@sverbatim \verbatimplus} %%
 {\catcode`'=13 \gdef \verbatimplus{\catcode`'=13 \chardef '=13 }} 
 \makeatother
 
@@ -49,7 +49,7 @@ An alternative to the software-based rendering of Jmol/JSmol is to use hardware-
 \section{3Dmol.js}
 
 3Dmol.js is a pure JavaScript, hardware-accelerated, object-oriented molecular visualization library that enables web developers and casual users to visualize and interact with molecular data in any modern web browser with near native performance.  The focus of 3Dmol.js is providing a full-featured API for online high-performance molecular visualization. This allows 3Dmol.js to be integrated with other web applications that provide additional cheminformatics and analysis capabilities.
-A variety of common styles are supported, as demonstrated by Figure~\ref{pic}.
+A variety of common styles are supported, as demonstrated by Figure~\ref{pic}, and supported file formats include pdb, sdf, mol2, xyz, and cube.
 3Dmol.js can be used to view molecular data by web application developers, HTML authors, and end users.  
 
 \paragraph{JavaScript API}  JavaScript developers can use 3Dmol.js by including a single minified script and using the routines provided in the \texttt{\$3Dmol} namespace. There are routines to manipulate and style molecular data, generate molecular surfaces, create arbitrary shapes such as spheres and arrows, annotate the view with text and image labels, and install callback handlers for when a user interacts with the viewer contents (e.g., clicks on an atom).  An example of programmatically controlling a 3Dmol.js viewer to create the scene shown in Figure~\ref{pic} is provided in Figure~\ref{code}.
@@ -150,6 +150,8 @@ This is demonstrated by the 2ms measured time for rotating the scene and is obse
 3D visualizations of molecular data. 3Dmol.js is available under a permissive BSD open source license from \url{http://3dmol.csb.pitt.edu}.
  
 \section*{Acknowledgements}
+The development of 3Dmol.js was greatly accelerated by being able to build off of GLmol.  We
+would like to thank Takanori Nakane for providing this open source software.
 
 \paragraph{Funding\textcolon} 
 This work was supported by the National Institute of Health [R01GM108340].
