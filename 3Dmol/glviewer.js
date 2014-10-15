@@ -607,7 +607,7 @@ $3Dmol.GLViewer = (function() {
 
 		/**
 		 * 
-		 * @param {AtomSpec}
+		 * @param {AtomSelectionSpec}
 		 *            sel
 		 * @return {AtomSpec[]}
 		 */
@@ -1089,7 +1089,7 @@ $3Dmol.GLViewer = (function() {
 		 * Set style properties to all selected atoms
 		 * 
 		 * @function $3Dmol.GLViewer#setStyle
-		 * @param {AtomSpec} sel - Atom selection specification
+		 * @param {AtomSelectionSpec} sel - Atom selection specification
 		 * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
 		 * 
 		 * @example
@@ -1104,8 +1104,8 @@ $3Dmol.GLViewer = (function() {
 		 * Add style properties to all selected atoms
 		 * 
 		 * @function $3Dmol.GLViewer#addStyle
-		 * @param {Object} sel - Atom selection specification
-		 * @param {Object} style - style spec to add to specified atoms
+		 * @param {AtomSelectionSpec} sel - Atom selection specification
+		 * @param {AtomStyleSpec} style - style spec to add to specified atoms
 		 */
 		this.addStyle = function(sel, style) {
 			applyToModels("setStyle", sel, style, true);
@@ -1113,7 +1113,7 @@ $3Dmol.GLViewer = (function() {
 
 		/**
 		 * @function $3Dmol.GLViewer#setColorByProperty
-		 * @param {type} sel
+		 * @param {AtomSelectionSpec} sel
 		 * @param {type} prop
 		 * @param {type} scheme
 		 */
@@ -1123,7 +1123,7 @@ $3Dmol.GLViewer = (function() {
 
 		/**
 		 * @function $3Dmol.GLViewer#setColorByElement
-		 * @param {type} sel
+		 * @param {AtomSelectionSpec} sel
 		 * @param {type} colors
 		 */
 		this.setColorByElement = function(sel, colors) {
@@ -1490,9 +1490,9 @@ $3Dmol.GLViewer = (function() {
 		 * 
 		 * @param {$3Dmol.SurfaceType} type - Surface type
 		 * @param {Object} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
-		 * @param {AtomSpec} atomsel - Show surface for atoms in this selection
-		 * @param {AtomSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
-		 * @param {AtomSpec} focus - Optionally begin rendering surface specified atoms
+		 * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
+		 * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
+		 * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
 		 * 
 		 * @return {number} surfid - Identifying number for this surface
 		 */

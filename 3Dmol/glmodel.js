@@ -1714,8 +1714,8 @@ $3Dmol.GLModel = (function() {
         /** given a selection specification, return true if atom is selected
          * 
          * @function $3Dmol.GLModel#atomIsSelected
-         * @param {type} atom
-         * @param {type} sel
+         * @param {AtomSpec} atom
+         * @param {AtomSelectionSpec} sel
          * @return {boolean}
          */
         this.atomIsSelected = function(atom, sel) {
@@ -1724,8 +1724,14 @@ $3Dmol.GLModel = (function() {
             var invert = !!sel.invert;
             var ret = true;
             for ( var key in sel) {
-                if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model") {
-                    // if something is in sel, atom must have it
+            	if(key === 'predicate') { //a user supplied function for evaluating atoms
+            		if(!sel['predicate'](atom) ) {
+            			ret = false;
+            			break;
+            		}
+            	}
+            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model") {
+                    // if something is in sel, atom must have it                	
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
                         break;
@@ -1769,7 +1775,7 @@ $3Dmol.GLModel = (function() {
         /** return list of atoms selected by sel, this is specific to glmodel
          * 
          * @function $3Dmol.GLModel#selectedAtoms
-         * @param {type} sel
+         * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
          */
         this.selectedAtoms = function(sel) {
@@ -1853,9 +1859,9 @@ $3Dmol.GLModel = (function() {
         /** Set atom style of selected atoms
          * 
          * @function $3Dmol.GLModel#setStyle
-         * @param {type} sel
-         * @param {type} style
-         * @param {type} add
+         * @param {AtomSelectionSpec} sel
+         * @param {AtomStyleSpec} style
+         * @param {boolean} add - if true, add to current style, don't replace
          */
         this.setStyle = function(sel, style, add) {
             
@@ -1991,7 +1997,7 @@ $3Dmol.GLModel = (function() {
          * with the same chain,resn, and resi.
          * @function $3Dmol.GLModel#addResLabels
          * 
-         * @param {type} sel
+         * @param {AtomSelectionSpec} sel
          * @param {$3Dmol.GLViewer} viewer
          */
         this.addResLabels = function(sel, viewer, style) {

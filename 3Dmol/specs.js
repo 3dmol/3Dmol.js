@@ -10,8 +10,7 @@ ViewerSpec.defaultcolors;
 ViewerSpec.callback;
 
 /**
- * Object literal Atom representation.  Can be used as a selection specification to 
- * select all atoms with matching properties
+ * Atom representation. Depending on the input file format, not all fields may be defined.
  * @typedef AtomSpec
  * @prop {string} resn - Parent residue name
  * @prop {number} x - Atom's x coordinate
@@ -27,7 +26,7 @@ ViewerSpec.callback;
  * @prop {number} rescode
  * @prop {number} serial - Atom's serial id number
  * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
- * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to; for selection can be used to select atoms with a specific number of bonds
+ * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
  * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
  * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
  * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
@@ -37,6 +36,24 @@ ViewerSpec.callback;
  * @prop {boolean} clickable - Set this flag to true to enable click selection handling for this atom
  * @prop {function(this, $3Dmol.GLViewer)} callback - Callback click handler function to be executed on this atom and its parent viewer
  * @prop {boolean} invert - for selection, inverts the meaning of the selection
+ */
+
+
+/**
+ * Atom selection object. Used to specify what atoms should be selected.  Can include
+ * any field from {@link AtomSpec} in which case atoms must equal the specified value.  
+ * All fields must match for the selection to hold. If values
+ * are provided as a list, then only one value of the list must match.
+ * 
+ * @example
+ * viewer.addResLabels({resi: [1,2,3,4,5], atom: 'CA'}); // will label alpha carbons (CA) of residues 1-5
+ * 
+ * @typedef AtomSelectionSpec
+ * @prop {AtomSpec} ... - any field from {@link AtomSpec}, values may be singletons or lists
+ * @prop {GLModel} model - a single model or list of models from which atoms should be selected
+ * @prop {number} bonds - overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
+ * @prop {function} predicate - user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
+ * @prop {boolean} invert - if set, inverts the meaning of the selection
  */
 
 
