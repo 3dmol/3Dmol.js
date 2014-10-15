@@ -42,8 +42,7 @@ Molecular visualization is an essential tool for computational chemists and biol
 Currently, Jmol\cite{jmol,hanson2010jmol} is the most used web-based molecular viewer. Jmol is implemented as a Java applet and includes a custom rendering engine for efficiently rendering common molecular data representations such as spheres and sticks.  Due to this custom rendering engine and Java's optimizing just-in-time compiler, the performance of Jmol can approach that of native, desktop applications.  However, due to heavily publicized security failures, it can no longer be assumed that users have Java installed by default\cite{doomedjava}.  Even when Java is installed, users are presented with multiple security prompts that must be correctly dealt with before a Java applet, such as Jmol, can run.
 To address these concerns, JSmol\cite{hanson2013jsmol} was developed. JSmol is largely the result of applying a Java to JavaScript translator to Jmol. As the \textit{de facto} web browser scripting language, JavaScript, unlike Java, is widely deployed and enabled by default.  However, particularly for large and complex visualizations, the performance of JSmol lags behind that of Jmol.
 
-An alternative to the software-based rendering of Jmol/JSmol is to use hardware-accelerated graphics, as is done with desktop applications.  This is enabled by the recently adopted WebGL\cite{webgl} standard, which is now supported natively in the latest versions of all the major desktop and mobile browsers. GLmol\cite{glmol} is a WebGL based molecular viewer that uses the Three.js\cite{threejs} framework for interfacing with WebGL.  However, GLmol lacks a full featured API and the use of the Three.js library results in performance inefficiencies.
-
+An alternative to the software-based rendering of Jmol/JSmol is to use hardware-accelerated graphics, as is done with desktop applications.  This is enabled by the recently adopted WebGL\cite{webgl} standard, which is now supported natively in the latest versions of all the major desktop and mobile browsers. PV\cite{pv} and GLmol\cite{glmol} are two examples of WebGL based molecular viewers. GLmol was the first WebGL viewer and uses the Three.js\cite{threejs} framework for interfacing with WebGL.  However, GLmol lacks a full featured API and the use of the Three.js library results in performance inefficiencies. We forked GLmol and radically reworked its architecture to overcome these deficiencies and create 3Dmol.js.  PV, like 3Dmol.js, uses WebGL directly, but has a focus on displaying protein structures and does not provide the same set of features as 3Dmol.js.
 
 
 \section{3Dmol.js}
@@ -62,16 +61,15 @@ A variety of common styles are supported, as demonstrated by Figure~\ref{pic}, a
 
 
 \begin{figure}
+        \captionsetup[subfigure]{aboveskip=-1pt}
 \centering
 \begin{minipage}[b]{.9\linewidth}
 \begin{subfigure}[b]{\linewidth} \centering
 \includegraphics[width=\linewidth]{screenshot}
 \caption{}\label{pic}
-\end{subfigure}
+\end{subfigure} %
 \end{minipage}
-
 \begin{minipage}[b]{\linewidth}
-
 \begin{subfigure}[b]{\linewidth} \centering
 \begin{verbatim}
 $3Dmol.download('pdb:3M8L', viewer);
@@ -82,8 +80,7 @@ viewer.setStyle({chain:'C'}, {stick:{} });
 viewer.render();
 \end{verbatim}
 \caption{}\label{code}
-\end{subfigure}
-
+\end{subfigure} %
 \begin{subfigure}[b]{\linewidth} \centering
 \begin{verbatim}
 <div style="height: 600px; width: 600px;" 
@@ -97,8 +94,7 @@ viewer.render();
  data-style3='stick'></div>
 \end{verbatim}
 \caption{}\label{embed}
-\end{subfigure}
-
+\end{subfigure} %
 \begin{subfigure}[b]{\linewidth} \centering
 \begin{verbatim}
 http://3dmol.csb.pitt.edu/viewer.html?
@@ -107,13 +103,12 @@ http://3dmol.csb.pitt.edu/viewer.html?
  select=chain:C&style=stick
 \end{verbatim}
 \caption{}\label{url}
-\end{subfigure}
-
+\end{subfigure} %
 \begin{subfigure}[b]{\linewidth} \centering
-\begin{tabular}{ccccc}
- & \textbf{Jmol} & \textbf{JSmol} & \textbf{GLmol} &\textbf{3Dmol} \\
-\textbf{Construct} & \textbf{0.136s} & 0.874s & 6.372s & 0.776s \\
-\textbf{Rotate} & 0.053s & 0.207s & 0.673s & \textbf{0.002s} 
+\begin{tabular}{cccccc}
+ & \textbf{Jmol} & \textbf{JSmol} & \textbf{GLmol} &\textbf{PV} & \textbf{3Dmol} \\
+\textbf{Construct} & 0.136s & 0.874s & 6.372s & 2.146 & 0.776s \\
+\textbf{Rotate} & 0.053s & 0.207s & 0.673s & 0.001s & 0.002s
 \end{tabular}
 \caption{}\label{perf}
 \end{subfigure}
@@ -122,8 +117,9 @@ http://3dmol.csb.pitt.edu/viewer.html?
 \caption{\subref{pic} A capsid protein (PDB: 3M8L) with 12,375 atoms as rendered by 3Dmol.js.
 This same scene can be generated \subref{code} programmatically in JavaScript, \subref{embed} from
 within HTML, or \subref{url}  by specifying a properly formatted URL to the 3Dmol.js hosted viewer.
-\subref{perf} The time required to create this scene and then rotate it for Jmol/JSmol 14.2.2, GLmol .47, and 
-3Dmol.js.
+\subref{perf} The time required to create this scene and then rotate it for Jmol/JSmol 14.2.2, GLmol .47, 
+PV v1.1-126-g85f16da, and 3Dmol.js.  PV was configured to be in high quality mode to better match
+the default quality of 3Dmol.js.
 }
 \end{figure}
 
@@ -132,9 +128,10 @@ within HTML, or \subref{url}  by specifying a properly formatted URL to the 3Dmo
 
 \section{Performance Comparison}
 
-The performance of 3Dmol.js is compared to Jmol, JSmol, and GLmol in Figure~\ref{perf}.
+The performance of 3Dmol.js is compared to Jmol, JSmol, GLmol, and PV in Figure~\ref{perf}.
 The time to create the scene of Figure~\ref{pic}, which contains several visual styles applied to 12,375 atoms,
-and then to perform a single rotation was measured using JavaScript wall clock time.  Firefox 31 on a 2.4Ghz Core Duo 2008 MacBook with 4GB of RAM running OS X 10.9.5
+and then to perform a single rotation was measured using JavaScript wall clock time.  The scene was rendered in a 600 pixel square HTML element.
+ Firefox 31 on a 2.4Ghz Core Duo 2008 MacBook with 4GB of RAM running OS X 10.9.5
 was used to time the operations and the average of the three best times of five trials is reported.
 
 The initial creation time for a scene can be more time consuming in 3Dmol.js compared to a software-rendering approach like Jmol.

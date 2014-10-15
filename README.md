@@ -32,7 +32,7 @@ With 3Dmol.js, you can add beautifully rendered molecular visualizations to your
  * atom property based selection and styling
  * labels
  * clickable interactivity with molecular data
- * geometric shapes included spheres and arrows
+ * geometric shapes including spheres and arrows
 
 ## Getting Started ##
 
