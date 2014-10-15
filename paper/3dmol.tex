@@ -2,7 +2,7 @@
 \usepackage[table,xcdraw]{xcolor}
 \usepackage{caption}
 \usepackage[subrefformat=parens]{subcaption}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \copyrightyear{2014}
 \pubyear{2014}
 
@@ -136,7 +136,7 @@ was used to time the operations and the average of the three best times of five 
 
 The initial creation time for a scene can be more time consuming in 3Dmol.js compared to a software-rendering approach like Jmol.
  The scene needs to be decomposed into a mesh of triangles since this is what is expected
-by the graphics subsystem.  However, once a 3D scene is created, interactions with the scene that do not change its fundamental geometry,
+by the graphics subsystem. However, once a 3D scene is created, interactions with the scene that do not change its fundamental geometry,
 such as rotating, translating, and zooming, are extremely fast since the 3D scene data is being managed by the native graphics subsystem.
 This is demonstrated by the 2ms measured time for rotating the scene and is observed qualitatively by the smoothness with which a user 
  interacts with a 3Dmol.js viewer, even when the scene is quite complex. 
@@ -149,7 +149,7 @@ This is demonstrated by the 2ms measured time for rotating the scene and is obse
 \section*{Acknowledgements}
 The development of 3Dmol.js was greatly accelerated by being able to build off of GLmol.  We
 are grateful to Takanori Nakane for providing this open source software. 
-We'd also like to thank Caleb Martin for helping with the early development of the code.
+We'd also like to thank Caleb Martin for his contributions.
 
 \paragraph{Funding\textcolon} 
 This work was supported by the National Institute of Health [R01GM108340].
