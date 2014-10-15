@@ -15164,19 +15164,15 @@ $3Dmol = (function(window) {
  * var element = $("#gldiv");
  * 
  * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors,
- *               callback : function(viewer) {
- *                            //'data' is a string containing molecule data in pdb format  
- *                            viewer.addModel(data, "pdb");
- *                            viewer.zoomTo();
- *                            viewer.render();
- *                          }  
- *                        
- *               };
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors };
  * 
- * // Create GLViewer within 'gldiv' and execute callback
+ * // Create GLViewer within 'gldiv' 
  * var myviewer = $3Dmol.createViewer(element, config);
- *      
+ * //'data' is a string containing molecule data in pdb format  
+ * myviewer.addModel(data, "pdb");
+ * myviewer.zoomTo();
+ * myviewer.render();                        
+ *                        
  */
 $3Dmol.createViewer = function(element, config)
 {
@@ -16911,19 +16907,15 @@ $3Dmol = (function(window) {
  * var element = $("#gldiv");
  * 
  * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors,
- *               callback : function(viewer) {
- *                            //'data' is a string containing molecule data in pdb format  
- *                            viewer.addModel(data, "pdb");
- *                            viewer.zoomTo();
- *                            viewer.render();
- *                          }  
- *                        
- *               };
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors };
  * 
- * // Create GLViewer within 'gldiv' and execute callback
+ * // Create GLViewer within 'gldiv' 
  * var myviewer = $3Dmol.createViewer(element, config);
- *      
+ * //'data' is a string containing molecule data in pdb format  
+ * myviewer.addModel(data, "pdb");
+ * myviewer.zoomTo();
+ * myviewer.render();                        
+ *                        
  */
 $3Dmol.createViewer = function(element, config)
 {
@@ -22609,8 +22601,8 @@ $3Dmol.GLViewer = (function() {
 					- alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
 
 			var maxD = Math.sqrt(x * x + y * y + z * z);
-			if (maxD < 25)
-				maxD = 25;
+			if (maxD < 5)
+				maxD = 5;
 
 			// use full bounding box for slab/fog
 			slabNear = -maxD / 1.9;
@@ -22621,8 +22613,8 @@ $3Dmol.GLViewer = (function() {
 			y = tmp[1][1] - tmp[0][1];
 			z = tmp[1][2] - tmp[0][2];
 			maxD = Math.sqrt(x * x + y * y + z * z);
-			if (maxD < 25)
-				maxD = 25;
+			if (maxD < 5)
+				maxD = 5;
 
 			rotationGroup.position.z = -(maxD * 0.35
 					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
@@ -22968,7 +22960,11 @@ $3Dmol.GLViewer = (function() {
 		 * 
 		 * @function $3Dmol.GLViewer#setStyle
 		 * @param {AtomSpec} sel - Atom selection specification
-		 * @param {AtomSpec.style} style - Style spec to apply to specified atoms
+		 * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
+		 * 
+		 * @example
+		 * viewer.setStyle({}, {stick:{}}); //set all atoms to stick
+		 * viewer.setStyle({chain: 'B'}, {carton: {color: spectrum}}); //set chain B to rainbow cartoon
 		 */
 		this.setStyle = function(sel, style) {
 			applyToModels("setStyle", sel, style, false);

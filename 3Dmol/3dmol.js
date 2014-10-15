@@ -26,19 +26,15 @@ $3Dmol = (function(window) {
  * var element = $("#gldiv");
  * 
  * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors,
- *               callback : function(viewer) {
- *                            //'data' is a string containing molecule data in pdb format  
- *                            viewer.addModel(data, "pdb");
- *                            viewer.zoomTo();
- *                            viewer.render();
- *                          }  
- *                        
- *               };
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors };
  * 
- * // Create GLViewer within 'gldiv' and execute callback
+ * // Create GLViewer within 'gldiv' 
  * var myviewer = $3Dmol.createViewer(element, config);
- *      
+ * //'data' is a string containing molecule data in pdb format  
+ * myviewer.addModel(data, "pdb");
+ * myviewer.zoomTo();
+ * myviewer.render();                        
+ *                        
  */
 $3Dmol.createViewer = function(element, config)
 {

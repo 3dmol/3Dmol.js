@@ -172,12 +172,11 @@ if (testSuite === '3Dmol') {
 
     });
 
-    // $3Dmol test cases
+    // $3Dmol test cases 
     for (var style in styleSpec)
         gen$3DmolTestCase(styleSpec[style], profile);    
-
     //surface test
-
+/*
     var testName = "SURF render";
     var timeMsg = "surface render time: ";
     var testMsg = "surface style set correctly";
@@ -203,7 +202,7 @@ if (testSuite === '3Dmol') {
         QUnit.ok(true, testMsg);
         
     });
-    
+ */   
         
     //Combo testcase
 	var comboName = "combined";

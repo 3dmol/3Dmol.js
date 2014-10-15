@@ -83,27 +83,24 @@ head, body {
 
 		moldata = data = $("#moldata_pdb_large").val();
 		glviewer = $3Dmol.createViewer("gldiv", {
-			defaultcolors : $3Dmol.rasmolElementColors,
-			callback : function(viewer) {
-
-				viewer.setBackgroundColor(0xffffff);
-
-				receptorModel = m = viewer.addModel(data, "pdb");
-
-				atoms = m.selectedAtoms({});
-
-				for ( var i in atoms) {
-					var atom = atoms[i];
-					atom.clickable = true;
-					atom.callback = atomcallback;
-				}
-
-				viewer.mapAtomProperties($3Dmol.partialCharges);
-				viewer.zoomTo();
-				viewer.render();
-
-			}
+			defaultcolors : $3Dmol.rasmolElementColors
 		});
+		glviewer.setBackgroundColor(0xffffff);
+
+		receptorModel = m = glviewer.addModel(data, "pdb");
+
+		atoms = m.selectedAtoms({});
+
+		for ( var i in atoms) {
+			var atom = atoms[i];
+			atom.clickable = true;
+			atom.callback = atomcallback;
+		}
+
+		glviewer.mapAtomProperties($3Dmol.partialCharges);
+		glviewer.zoomTo();
+		glviewer.render();
+
 
 	});
 </script>
