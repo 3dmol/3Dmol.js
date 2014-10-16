@@ -1,6 +1,7 @@
 \documentclass[]{bioinfo}
 \usepackage[table,xcdraw]{xcolor}
 \usepackage{caption}
+\usepackage{natbib}
 \usepackage[subrefformat=parens]{subcaption}
 \usepackage[hidelinks]{hyperref}
 \copyrightyear{2014}
@@ -35,16 +36,19 @@ Source code and documentation can be found at \url{http://3Dmol.csb.pitt.edu}
 \section{Contact:} \href{dkoes@pitt.edu}{dkoes@pitt.edu}
 \end{abstract}
 
+\vspace{-10pt}
 \section{Introduction}
-Molecular visualization is an essential tool for computational chemists and biologists. Due to the demanding nature of 3D graphics, most molecular viewers, such as PyMol\cite{delano2002pymol}, Chimera\cite{pettersen2004ucsf}, VMD\cite{humphrey1996vmd}, and Avogadro\cite{hanwell2012avogadro}, are desktop applications.  The need to install specialized applications and, in some cases, the restrictive nature of the software licenses, introduces hurdles to the sharing of molecular data.  Unlike a desktop application, a standards-based client-side web application comes pre-installed with every computer and mobile device with a modern web browser and can be seamlessly integrated into online environments for accessing and analyzing molecular data.
+Molecular visualization is an essential tool for computational chemists and biologists. Due to the demanding nature of 3D graphics, most molecular viewers are desktop applications.  The need to install specialized applications and, in some cases, the restrictive nature of the software licenses, introduces hurdles to the sharing of molecular data.  Unlike a desktop application, a standards-based client-side web application comes pre-installed with every computer and mobile device with a modern web browser and can be seamlessly integrated into online environments for accessing and analyzing molecular data.
 
 
-Currently, Jmol\cite{jmol,hanson2010jmol} is the most used web-based molecular viewer. Jmol is implemented as a Java applet and includes a custom rendering engine for efficiently rendering common molecular data representations such as spheres and sticks.  Due to this custom rendering engine and Java's optimizing just-in-time compiler, the performance of Jmol can approach that of native, desktop applications.  However, due to heavily publicized security failures, it can no longer be assumed that users have Java installed by default\cite{doomedjava}.  Even when Java is installed, users are presented with multiple security prompts that must be correctly dealt with before a Java applet, such as Jmol, can run.
-To address these concerns, JSmol\cite{hanson2013jsmol} was developed. JSmol is largely the result of applying a Java to JavaScript translator to Jmol. As the \textit{de facto} web browser scripting language, JavaScript, unlike Java, is widely deployed and enabled by default.  However, particularly for large and complex visualizations, the performance of JSmol lags behind that of Jmol.
+Currently, Jmol \citep{hanson2010jmol} (\url{http://www.jmol.org}) is the most used web-based molecular viewer. Jmol is implemented as a Java applet and includes a custom rendering engine for efficiently rendering common molecular data representations such as spheres and sticks.  Due to this custom rendering engine and Java's optimizing just-in-time compiler, the performance of Jmol can approach that of native, desktop applications.  However, due to heavily publicized security failures, the Java install base is shrinking \citep{doomedjava}.  Even when Java is installed, users are presented with multiple security prompts that must be correctly navigated before a Java applet, such as Jmol, can run.
+To address these concerns, JSmol \citep{hanson2013jsmol} was developed. JSmol is the product of applying a Java to JavaScript translator to Jmol. 
+%As the \textit{de facto} web browser scripting language, JavaScript, unlike Java, is widely deployed and enabled by default.  
+However, particularly for large and complex visualizations, the performance of JSmol lags behind that of Jmol.
 
-An alternative to the software-based rendering of Jmol/JSmol is to use hardware-accelerated graphics, as is done with desktop applications.  This is enabled by the recently adopted WebGL\cite{webgl} standard, which is now supported natively in the latest versions of all the major desktop and mobile browsers. PV\cite{pv} and GLmol\cite{glmol} are two examples of WebGL based molecular viewers. GLmol was the first WebGL viewer and uses the Three.js\cite{threejs} framework for interfacing with WebGL.  However, GLmol lacks a full featured API and the use of the Three.js library results in performance inefficiencies. We forked GLmol and radically reworked its architecture to overcome these deficiencies and create 3Dmol.js.  PV, like 3Dmol.js, uses WebGL directly, but has a focus on displaying protein structures and does not provide the same set of features as 3Dmol.js.
+An alternative to the software-based rendering of Jmol/JSmol is to use hardware-accelerated graphics, as is done with desktop applications.  This is enabled by the recently adopted WebGL 1.0 standard, which is now supported natively by all major desktop and mobile browsers. PV (\url{http://biasmv.github.io/pv}) and GLmol (\url{http://webglmol.sourceforge.jp}) are two examples of WebGL based molecular viewers. GLmol was the first WebGL viewer and uses the Three.js (\url{http://threejs.org}) framework for interfacing with WebGL.  However, GLmol lacks a full featured API and the use of the Three.js library results in performance inefficiencies. We forked GLmol and radically reworked its architecture to overcome these deficiencies and create 3Dmol.js.  PV, like 3Dmol.js, uses WebGL directly, but has a focus on displaying protein structures and does not provide the same set of features as 3Dmol.js.
 
-
+\vspace{-10pt}
 \section{3Dmol.js}
 
 3Dmol.js is a pure JavaScript, hardware-accelerated, object-oriented molecular visualization library that enables web developers and casual users to visualize and interact with molecular data in any modern web browser with near native performance.  The focus of 3Dmol.js is providing a full-featured API for online high-performance molecular visualization. This allows 3Dmol.js to be integrated with other web applications that provide additional cheminformatics and analysis capabilities.
@@ -125,7 +129,7 @@ the default quality of 3Dmol.js.
 
 
 
-
+\vspace{-10pt}
 \section{Performance Comparison}
 
 The performance of 3Dmol.js is compared to Jmol, JSmol, GLmol, and PV in Figure~\ref{perf}.
@@ -141,22 +145,21 @@ such as rotating, translating, and zooming, are extremely fast since the 3D scen
 This is demonstrated by the 2ms measured time for rotating the scene and is observed qualitatively by the smoothness with which a user 
  interacts with a 3Dmol.js viewer, even when the scene is quite complex. 
 
+\vspace{-10pt}
 \section{Conclusion}
 3Dmol.js is an high-performance interactive viewer for 3D molecular data that requires no plugins to work in modern desktop and mobile web browsers.
 3Dmol.js provides a full-featured API to JavaScript developers, but can also be used by HTML authors and end users to share and distribute
 3D visualizations of molecular data. 3Dmol.js is available under a permissive BSD open source license from \url{http://3dmol.csb.pitt.edu}.
  
+ \vspace{-10pt}
 \section*{Acknowledgements}
-The development of 3Dmol.js was greatly accelerated by being able to build off of GLmol.  We
-are grateful to Takanori Nakane for providing this open source software. 
+ We are grateful to Takanori Nakane for creating GLmol. 
 We'd also like to thank Caleb Martin for his contributions.
 
 \paragraph{Funding\textcolon} 
 This work was supported by the National Institute of Health [R01GM108340].
-The content is solely the responsibility of the authors and does not necessarily
-represent the official views of the National Institute of General Medical Sciences
-or the National Institutes of Health.
-
-\bibliographystyle{plain}
+The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
+\vspace{-10pt}
+\bibliographystyle{natbib}
 \bibliography{3dmol}
 \end{document}
