@@ -369,7 +369,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
     
     
     <div class="description">
-        <p>Create and add arrow shape</p>
+        <p>Create and add cylinder shape</p>
     </div>
     
 
@@ -409,7 +409,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
             <td class="type">
             
                 
-<span class="param-type"><a href="ArrowSpec.html">ArrowSpec</a></span>
+<span class="param-type">CylinderSpec</span>
 
 
             
@@ -503,7 +503,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
     
     
     <div class="description">
-        <p>Create and add cylinder shape</p>
+        <p>Create and add arrow shape</p>
     </div>
     
 
@@ -543,7 +543,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
             <td class="type">
             
                 
-<span class="param-type">CylinderSpec</span>
+<span class="param-type"><a href="ArrowSpec.html">ArrowSpec</a></span>
 
 
             
@@ -1505,6 +1505,236 @@ way to create a spherical shape object</p>
     
     
     
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addSurface"><span class="type-signature"></span>addSurface<span class="signature">(type, style, atomsel, allsel, focus)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add surface representation to atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="$3Dmol.html#SurfaceType">$3Dmol.SurfaceType</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Surface type</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>optional style specification for surface material (e.g. for different coloring scheme, etc)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>atomsel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Show surface for atoms in this selection</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>allsel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Use atoms in this selection to calculate surface; may be larger group than 'atomsel'</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>focus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optionally begin rendering surface specified atoms</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>surfid - Identifying number for this surface</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">number</span>
+
+
+	</dd>
+</dl>
+
+
+        
     
     
 </dd>
@@ -3226,7 +3456,7 @@ adding/removing models, applying styles, etc.</p>
 
             
 
-            <td class="description last"><p>Hexcode specified background color</p></td>
+            <td class="description last"><p>Hexcode specified background color, or standard color spec</p></td>
         </tr>
 
 	
@@ -4582,7 +4812,7 @@ viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )</pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Wed Oct 15 2014 09:38:02 GMT-0400 (EDT) using the <a
+		on Fri Oct 17 2014 13:33:40 GMT-0400 (EDT) using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>

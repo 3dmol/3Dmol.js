@@ -395,7 +395,7 @@ $3Dmol.GLViewer = (function() {
 		 * 
 		 * @function $3Dmol.GLViewer#setBackgroundColor
 		 * @param {number}
-		 *            hex Hexcode specified background color
+		 *            hex Hexcode specified background color, or standard color spec
 		 * @param {number}
 		 *            a Alpha level (default 1.0)
 		 * 
@@ -407,9 +407,10 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.setBackgroundColor = function(hex, a) {
 			a = a | 1.0;
-			bgColor = hex;
-			renderer.setClearColorHex(hex, a);
-			scene.fog.color = $3Dmol.CC.color(hex);
+			var c = $3Dmol.CC.color(hex);
+			scene.fog.color = c;
+			bgColor = c.getHex();
+			renderer.setClearColorHex(c.getHex(), a);
 			show();
 		};
 
@@ -1487,7 +1488,7 @@ $3Dmol.GLViewer = (function() {
 
 		/**
 		 * Add surface representation to atoms
-		 * 
+		 *  @function $3Dmol.GLViewer#addSurface
 		 * @param {$3Dmol.SurfaceType} type - Surface type
 		 * @param {Object} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
 		 * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection

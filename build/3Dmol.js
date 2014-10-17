@@ -21997,7 +21997,7 @@ $3Dmol.GLViewer = (function() {
 		 * 
 		 * @function $3Dmol.GLViewer#setBackgroundColor
 		 * @param {number}
-		 *            hex Hexcode specified background color
+		 *            hex Hexcode specified background color, or standard color spec
 		 * @param {number}
 		 *            a Alpha level (default 1.0)
 		 * 
@@ -22009,9 +22009,10 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.setBackgroundColor = function(hex, a) {
 			a = a | 1.0;
-			bgColor = hex;
-			renderer.setClearColorHex(hex, a);
-			scene.fog.color = $3Dmol.CC.color(hex);
+			var c = $3Dmol.CC.color(hex);
+			scene.fog.color = c;
+			bgColor = c.getHex();
+			renderer.setClearColorHex(c.getHex(), a);
 			show();
 		};
 
@@ -24030,7 +24031,7 @@ ViewerSpec.callback;
  * @prop {number} rescode
  * @prop {number} serial - Atom's serial id number
  * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
- * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to; for selection can be used to select atoms with a specific number of bonds
+ * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
  * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
  * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
  * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
@@ -24045,13 +24046,19 @@ ViewerSpec.callback;
 
 /**
  * Atom selection object. Used to specify what atoms should be selected.  Can include
- * any field from {AtomSpec} in which case atoms must equal the specified value.  If values
- * are provided as a list, then need only match one of the values in the list.
+ * any field from {@link AtomSpec} in which case atoms must equal the specified value.  
+ * All fields must match for the selection to hold. If values
+ * are provided as a list, then only one value of the list must match.
+ * 
+ * @example
+ * viewer.addResLabels({resi: [1,2,3,4,5], atom: 'CA'}); // will label alpha carbons (CA) of residues 1-5
+ * 
  * @typedef AtomSelectionSpec
- * @prop {...} ... - any field from {AtomSpec}
+ * @prop {AtomSpec} ... - any field from {@link AtomSpec}, values may be singletons or lists
  * @prop {GLModel} model - a single model or list of models from which atoms should be selected
+ * @prop {number} bonds - overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
  * @prop {function} predicate - user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
- * @prop {boolean} invert - for selection, inverts the meaning of the selection
+ * @prop {boolean} invert - if set, inverts the meaning of the selection
  */
 
 
