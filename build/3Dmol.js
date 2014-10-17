@@ -16629,7 +16629,7 @@ $3Dmol = (function(window) {
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
- * @return {$3Dmol.GLViewer} GLViewer
+ * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
  * 
  * @example
  * // Assume there exists an HTML div with id "gldiv"
@@ -16663,10 +16663,9 @@ $3Dmol.createViewer = function(element, config)
     	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
     }
     catch(e) {
-    	console.log("error with "+kind+":"+e);
+    	console.log("error creating viewer: "+e);
     }
     
-    alert("Unable to instantiate 3Dmol viewer: "+config.order);
     return null;
 };
    
