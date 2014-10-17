@@ -83,7 +83,10 @@ $3Dmol.Color.prototype = {
     },
     
     getHex: function() {
-    	return Math.round( ((this.r * 255) + this.g)*255+this.b);
+    	var R = Math.round(this.r*255);
+    	var G = Math.round(this.g*255);
+    	var B = Math.round(this.b*255);
+    	return R<<16 | G << 8 | B;
     },
     
     clone : function() {

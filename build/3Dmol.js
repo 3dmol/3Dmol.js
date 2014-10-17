@@ -11002,7 +11002,10 @@ $3Dmol.Color.prototype = {
     },
     
     getHex: function() {
-    	return Math.round( ((this.r * 255) + this.g)*255+this.b);
+    	var R = Math.round(this.r*255);
+    	var G = Math.round(this.g*255);
+    	var B = Math.round(this.b*255);
+    	return R<<16 | G << 8 | B;
     },
     
     clone : function() {
@@ -23090,7 +23093,7 @@ $3Dmol.GLViewer = (function() {
 
 		/**
 		 * Add surface representation to atoms
-		 * 
+		 *  @function $3Dmol.GLViewer#addSurface
 		 * @param {$3Dmol.SurfaceType} type - Surface type
 		 * @param {Object} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
 		 * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
