@@ -22351,8 +22351,8 @@ $3Dmol.GLViewer = (function() {
 			if (maxD < 5)
 				maxD = 5;
 
-			rotationGroup.position.z = -(maxD * 0.35
-					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - 150);
+			rotationGroup.position.z = -(maxD * 0.5
+					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
 
 			show();
 		};
