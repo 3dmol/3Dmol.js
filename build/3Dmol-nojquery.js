@@ -12088,7 +12088,8 @@ $3Dmol.GLViewer = (function() {
 
 		renderer.domElement.style.width = "100%";
 		renderer.domElement.style.height = "100%";
-		renderer.domElement.style.position = "absolute";
+		renderer.domElement.style.padding = "0";
+		renderer.domElement.style.position = "absolute"; //TODO: get rid of this
 		renderer.domElement.style.top = "0px";
 		renderer.domElement.style.zIndex = "0";
 		container.append(renderer.domElement);
@@ -12733,7 +12734,7 @@ $3Dmol.GLViewer = (function() {
 			var alltmp = getExtent(allatoms);
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
-			modelGroup.position = center.multiplyScalar(-1);
+			modelGroup.position = center.clone().multiplyScalar(-1);
 			// but all for bounding box
 			var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
 					- alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
@@ -12744,7 +12745,7 @@ $3Dmol.GLViewer = (function() {
 
 			// use full bounding box for slab/fog
 			slabNear = -maxD / 1.9;
-			slabFar = maxD / 3;
+			slabFar = maxD / 2;
 
 			// for zoom, use selection box
 			x = tmp[1][0] - tmp[0][0];
@@ -12753,6 +12754,16 @@ $3Dmol.GLViewer = (function() {
 			maxD = Math.sqrt(x * x + y * y + z * z);
 			if (maxD < 5)
 				maxD = 5;
+			
+			//find the farthest atom from center to get max distance needed for view
+			var maxDsq = 25;
+			for (var i = 0; i < atoms.length; i++) {
+				var dsq = center.distanceToSquared(atoms[i]);
+				if(dsq > maxDsq)
+					maxDsq = dsq;
+			}
+			
+			var maxD = Math.sqrt(maxDsq)*2;
 
 			rotationGroup.position.z = -(maxD * 0.5
 					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
