@@ -1524,6 +1524,7 @@ $3Dmol.GLViewer = (function() {
 			var atomlist = getAtomsFromSel(allsel);
 			var focusSele = getAtomsFromSel(focus);
 			var atom;
+			style = style || {};
 
 			var time = new Date();
 

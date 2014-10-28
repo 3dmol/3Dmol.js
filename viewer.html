@@ -47,8 +47,15 @@
                     }
                     else if(cmdname == 'colorbyelement')
                     {
-                    	if(typeof($3Dmol.elementColors[cmdobj]) != "undefined")
-                    	    viewer.setColorByElement(currentsel, $3Dmol.elementColors[cmdobj]);	
+                    	if(typeof($3Dmol.elementColors[cmdobj.colorscheme]) != "undefined")
+                    	    viewer.setColorByElement(currentsel, $3Dmol.elementColors[cmdobj.colorscheme]);	
+                    }
+                    else if(cmdname == 'colorbyproperty')
+                    {
+                    	if(typeof(cmdobj.prop) != "undefined" && 
+                    			typeof($3Dmol.Gradient[cmdobj.scheme]) != "undefined") {
+                    		   viewer.setColorByProperty(currentsel, cmdobj.prop, new $3Dmol.Gradient[cmdobj.scheme]());
+                    	}
                     }
                     
                 }
