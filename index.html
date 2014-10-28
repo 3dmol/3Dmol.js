@@ -42,9 +42,9 @@
             
             var initShapes = function(viewer) {
                 $.get('tests/test_structs/benzene-homo.cube', function(data){
-                    viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: new $3Dmol.Color(0,0,1),
+                    viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue",
                                                                          alpha: 0.95});              
-                    viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: new $3Dmol.Color(1,0,0),
+                    viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red",
                                                                          alpha: 0.95}); 
                     viewer.setStyle({}, {stick:{}});
                     viewer.zoomTo();

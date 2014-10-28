@@ -611,6 +611,8 @@ $3Dmol.GLShape = (function() {
 	 */
 	var updateFromStyle = function(shape, stylespec) {
 		shape.color = stylespec.color || new $3Dmol.Color();
+		if(! (stylespec.color instanceof $3Dmol.Color))
+			shape.color = $3Dmol.CC.color(stylespec.color);
 		shape.wireframe = stylespec.wireframe ? true : false;
 		shape.alpha = stylespec.alpha ? $3Dmol.Math.clamp(stylespec.alpha, 0.0,
 				1.0) : 1.0;
