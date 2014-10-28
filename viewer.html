@@ -96,13 +96,20 @@
                     	type = cmds[0].split('=')[1];
                     }
                         
-                    $.post("echo.cgi", {'url': data}, function(ret, txt, response) {
-                    	
+                    $.post(data, function(ret, txt, response) {
                         glviewer.addModel(ret, type);     
                         runcmds(cmds, glviewer);
                         glviewer.render();
                         glviewer.zoomTo();
-                    });
+                    }).fail(
+                    		//if couldn't get url natively, go through echo server
+	                    $.post("echo.cgi", {'url': data}, function(ret, txt, response) {
+	                    	
+	                        glviewer.addModel(ret, type);     
+	                        runcmds(cmds, glviewer);
+	                        glviewer.render();
+	                        glviewer.zoomTo();
+	                    }));
                                 
                 }
                 
