@@ -106,10 +106,15 @@ An example of a viewer that manipulates the styles of the embedded objects is sh
 
 **What are your future plans for 3Dmol.js?**
 
-Our focus is on developing 3Dmol.js as a high-performance, modern library.
-For instance, adding support for WebGL 2.0 has a higher priority than improving the hosted
-viewer to support editing.  We are very interested in receiving feature requests and collaborating on
-web applications.
+Due to limited resources, our focus is on developing 3Dmol.js as a molecular viewer library,
+ rather than a full featured cheminformatics/bioinformatics toolkit. 
+ For example, adding support for WebGL 2.0 has a higher priority than adding
+ editing functionality to the hosted viewer.
+  We hope others use 3Dmol.js as a building block for such web applications and look 
+  forward to collaborating with web developers to deliver the visualization functionality 
+  needed to enable them.  Of course, if additional resources become available we may
+   expand the scope of our efforts.  However, the goal is to keep the core of 
+   3Dmol.js as small as possible and focused on visualization.
 
 **Are you planning on supporting additional file formats?**
 
