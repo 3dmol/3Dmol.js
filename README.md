@@ -12,7 +12,9 @@
   ga('send', 'pageview');
 
 </script>
+
 #3Dmol.js
+
 <div  style="float: right; height: 250px; width: 250px; position: relative;" class='viewer_3Dmoljs' data-pdb='1UBQ' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"color": "spectrum"}}'></div>  
 <script>
 setInterval(function() {
@@ -22,6 +24,8 @@ setInterval(function() {
  }
 }, 50);
 </script>
+
+
 ##Overview    
 
 3Dmol.js is an object-oriented, webGL based JavaScript library for online molecular visualization - No Java required!
@@ -40,6 +44,16 @@ Molecular data can be shared and visualized without writing any HTML
  using only a declarative URL specification and our hosted viewer (see {@tutorial url}).
 
 Viewers can be quickly embedded in any HTML document using just two lines of source code (see {@tutorial embeddable}).
+
+####Mouse Controls####
+
+Movement | &nbsp;&nbsp;&nbsp;&nbsp; | Mouse Input | &nbsp;&nbsp;&nbsp;&nbsp; | Touch Input
+---------|-|:------------|------------
+Rotation | |   Primary Mouse Button | | Single touch
+Translation | |    Middle Mouse Button or Ctrl+Primary | | Triple touch
+Zoom | | Scroll Wheel or Second Mouse Button or Shift+Primary | | Pinch (double touch)
+Slab | | Ctrl+Second | | Not Available
+
 
 ##Developing with 3Dmol.js##
 
@@ -87,3 +101,28 @@ Models are manipulated and styled using {@link AtomSpec} JavaScript objects.
 An example of a viewer that manipulates the styles of the embedded objects is shown below.  View the source code for the implementation details.
 
 <iframe width=800, height=800 src="http://3dmol.csb.pitt.edu/doc/example.html"></iframe> 
+
+##FAQ
+
+**What are your future plans for 3Dmol.js?**
+
+Our focus is on developing 3Dmol.js as a high-performance, modern library.
+For instance, adding support for WebGL 2.0 has a higher priority than improving the hosted
+viewer to support editing.  We are very interested in receiving feature requests and collaborating on
+web applications.
+
+**Are you planning on supporting additional file formats?**
+
+Time permitting, we will add support for additional formats as they are requested.  We also hope
+to integrate with <a href="http://sourceforge.net/projects/jsmol/">other cheminformatics libraries</a> to
+automatically provide additional formats and analyses.
+
+**Does 3Dmol.js work with touch devices?**
+
+Yes, as long as they support WebGL.  For example, it runs great in Safari on an iPad running iOS 8.
+
+##Contact
+
+Please address any questions or concerns to [dkoes@pitt.edu](mailto:dkoes+3dmol@pitt.edu).  
+You may also [submit an issue](https://github.com/dkoes/3Dmol.js/issues) on github.
+

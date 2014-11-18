@@ -6,6 +6,15 @@ A 3Dmol viewer URL takes the form `3Dmol.csb.pitt.edu/viewer.html?[query string]
 
 [`http://3Dmol.csb.pitt.edu/viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=stick&labelres=backgroundOpacity:0.8;fontSize:14`](../viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick&labelres=backgroundOpacity:0.8;fontSize:14)
 
+####Mouse Controls####
+
+Movement | &nbsp;&nbsp;&nbsp;&nbsp; | Mouse Input | &nbsp;&nbsp;&nbsp;&nbsp; | Touch Input
+---------|-|:------------|------------
+Rotation | |   Primary Mouse Button | | Single touch
+Translation | |    Middle Mouse Button or Ctrl+Primary | | Triple touch
+Zoom | | Scroll Wheel or Second Mouse Button or Shift+Primary | | Pinch (double touch)
+Slab | | Ctrl+Second | | Not Available
+
 
 ### Building a Query String ###
 
