@@ -69,9 +69,14 @@ $(document).ready(function() {
             	}
             }
             
-            var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
-                viewer.setBackgroundColor(bgcolor);            
-            }});
+            try {
+            	var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
+            		viewer.setBackgroundColor(bgcolor);            
+            	}});
+            } catch ( error ) {
+            	//for autoload, provide a useful error message
+            	window.location = "http://get.webgl.org";            		
+            }
             
             
             if (datauri) {  

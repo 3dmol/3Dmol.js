@@ -31,7 +31,7 @@ $^{2}$Department of Biochemistry and Molecular Biophysics, University of Pennsyl
 to provide interactive, hardware-accelerated three dimensional representations of molecular data without the
 need to install browser plugins or Java.  3Dmol.js provides a full featured API for developers as well
 as a straightforward declarative interface that lets users easily share and embed molecular data in websites.
-\section{Availability} 3Dmol.js is distrubuted under the permissive BSD open source license.
+\section{Availability} 3Dmol.js is distributed under the permissive BSD open source license.
 Source code and documentation can be found at \url{http://3Dmol.csb.pitt.edu}
 \section{Contact:} \href{dkoes@pitt.edu}{dkoes@pitt.edu}
 \end{abstract}
@@ -51,11 +51,11 @@ An alternative to the software-based rendering of Jmol/JSmol is to use hardware-
 \vspace{-10pt}
 \section{3Dmol.js}
 
-3Dmol.js is a pure JavaScript, hardware-accelerated, object-oriented molecular visualization library that enables web developers and casual users to visualize and interact with molecular data in any modern web browser with near native performance.  The focus of 3Dmol.js is providing a full-featured API for online high-performance molecular visualization. This allows 3Dmol.js to be integrated with other web applications that provide additional cheminformatics and analysis capabilities.
+3Dmol.js is a pure JavaScript, hardware-accelerated, object-oriented molecular visualization library that enables web developers and casual users to visualize and interact with molecular data in any modern desktop or mobile web browser with near native performance.  The focus of 3Dmol.js is providing a full-featured API for online high-performance molecular visualization. This allows 3Dmol.js to be integrated with other web applications that provide additional cheminformatics and analysis capabilities.
 A variety of common styles are supported, as demonstrated by Figure~\ref{pic}, and supported file formats include pdb, sdf, mol2, xyz, and cube.
 3Dmol.js can be used to view molecular data by web application developers, HTML authors, and end users.  
 
-\paragraph{JavaScript API}  JavaScript developers can use 3Dmol.js by including a single minified script and using the routines provided in the \texttt{\$3Dmol} namespace. There are routines to manipulate and style molecular data, generate molecular surfaces, create arbitrary shapes such as spheres and arrows, annotate the view with text and image labels, and install callback handlers for when a user interacts with the viewer contents (e.g., clicks on an atom).  An example of programmatically controlling a 3Dmol.js viewer to create the scene shown in Figure~\ref{pic} is provided in Figure~\ref{code}.
+\paragraph{JavaScript API}  JavaScript developers can use 3Dmol.js by including a single minified script and using the routines provided in the \texttt{\$3Dmol} namespace. There are routines to manipulate and style molecular data, create isosurfaces from grid data, generate molecular surfaces, create arbitrary shapes such as spheres and arrows, annotate the view with text and image labels, and install callback handlers for when a user interacts with the viewer contents (e.g., clicks on an atom). Molecular styles include lines, crosses, sticks, spheres, and cartoons, and atoms and surfaces can be colored by user specified properties such as partial charge or atom type.   An example of programmatically controlling a 3Dmol.js viewer to create the scene shown in Figure~\ref{pic} is provided in Figure~\ref{code}.
 
 \paragraph{Embeddable Viewer} HTML authors do not need to use JavaScript to embed 3D viewers within their websites.  3Dmol.js will automatically turn any HTML element annotated with the \texttt{viewer\_3Dmoljs} class into a viewer.  The contents of the viewer are set and styled through the use of HTML \texttt{data} tags, as shown in Figure~\ref{embed}.  The molecular data can be retrieved from a remote URL or from an element that is embedded within the web page.
 
@@ -141,9 +141,8 @@ was used to time the operations and the average of the three best times of five 
 The initial creation time for a scene can be more time consuming in 3Dmol.js compared to a software-rendering approach like Jmol.
  The scene needs to be decomposed into a mesh of triangles since this is what is expected
 by the graphics subsystem. However, once a 3D scene is created, interactions with the scene that do not change its fundamental geometry,
-such as rotating, translating, and zooming, are extremely fast since the 3D scene data is being managed by the native graphics subsystem.
-This is demonstrated by the 2ms measured time for rotating the scene and is observed qualitatively by the smoothness with which a user 
- interacts with a 3Dmol.js viewer, even when the scene is quite complex. 
+such as rotating, translating, and zooming, are extremely fast (a few milliseconds) since the 3D scene data is managed by the native graphics subsystem.
+Consequently, even complex scenes can be smoothly manipulated by the user.
 
 \vspace{-10pt}
 \section{Conclusion}

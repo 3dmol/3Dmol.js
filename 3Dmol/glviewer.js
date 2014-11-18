@@ -73,6 +73,8 @@ $3Dmol.GLViewer = (function() {
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
 		var CAMERA_Z = 150;
+		var fov = 20;
+
 
 		var renderer = new $3Dmol.Renderer({
 			antialias : true
@@ -87,7 +89,7 @@ $3Dmol.GLViewer = (function() {
 		renderer.domElement.style.zIndex = "0";
 		container.append(renderer.domElement);
 		renderer.setSize(WIDTH, HEIGHT);
-		var camera = new $3Dmol.Camera(10, ASPECT, 1, 800);
+		var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
 		camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
 		var vec = new $3Dmol.Vector3();
 		camera.lookAt(vec);
@@ -102,7 +104,6 @@ $3Dmol.GLViewer = (function() {
 		var modelGroup = null;
 
 		var bgColor = 0x000000;
-		var fov = 20;
 		var fogStart = 0.4;
 		var slabNear = -50; // relative to the center of rotationGroup
 		var slabFar = 50;
@@ -358,23 +359,19 @@ $3Dmol.GLViewer = (function() {
 											* scaleFactor;
 								} else if (mode == 1 || mouseButton == 2
 										|| ev.ctrlKey) { // Translate
-									scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-									if (scaleFactor < 20)
-										scaleFactor = 20;
-									var translationByScreen = new $3Dmol.Vector3(
-											dx * scaleFactor,
-											-dy * scaleFactor, 0);
 									var q = rotationGroup.quaternion;
 									var qinv = new $3Dmol.Quaternion(q.x, q.y,
 											q.z, q.w).inverse().normalize();
-									var translation = translationByScreen
-											.applyQuaternion(qinv);
-									modelGroup.position.x = currentModelPos.x
-											+ translation.x;
-									modelGroup.position.y = currentModelPos.y
-											+ translation.y;
-									modelGroup.position.z = currentModelPos.z
-											+ translation.z;
+						
+									var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
+									projector.projectVector(t, camera);
+									t.x += dx*2;
+									t.y -= dy*2;
+									projector.unprojectVector(t, camera);
+									t.z = 0;							
+									t.applyQuaternion(q);
+
+									modelGroup.position.addVectors(currentModelPos,t);
 								} else if ((mode === 0 || mouseButton == 1)
 										&& r !== 0) { // Rotate
 									var rs = Math.sin(r * Math.PI) / r;

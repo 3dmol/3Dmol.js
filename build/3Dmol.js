@@ -9892,6 +9892,7 @@ $3Dmol.Vector3.prototype =  {
     
     applyQuaternion : function(q) { 
         
+    	//save values
         var x = this.x;
         var y = this.y;
         var z = this.z;
@@ -9901,18 +9902,25 @@ $3Dmol.Vector3.prototype =  {
         var qz = q.z;
         var qw = q.w;
         
-        // calculate quaternion * vector
+        //compute this as
+        //t = 2 * cross(q.xyz, v)
+        //newv = v + q.w * t + cross(q.xyz, t)
+        //this from molecularmusings
+        //http://molecularmusings.wordpress.com/2013/05/24/a-faster-quaternion-vector-multiplication/
+        var t = {};
+        t.x = 2*(y * qz - z * qy);
+        t.y = 2*(z * qx - x * qz);
+        t.z = 2*(x * qy - y * qx);
         
-        var ix = qw * x + qy * z - qz * y;
-        var iy = qw * y + qz * x - qx * z;
-        var iz = qw * z + qx * y - qy * x;
-        var iw = -qw * x - qy * y - qz * z;
+        //cross t with q
+        var t2 = {};
+        t2.x = t.y * qz - t.z * qy;
+        t2.y = t.z * qx - t.x * qz;
+        t2.z = t.x * qy - t.y * qx;
         
-        // calculate result * inverse quaternion
-        
-        this.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
-        this.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
-        this.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+        this.x = x + q.w*t.x + t2.x;
+        this.y = y + q.w*t.y + t2.y;
+        this.z = z + q.w*t.z + t2.z;
         
         return this;
     },
@@ -14340,9 +14348,9 @@ $3Dmol.Renderer = function ( parameters ) {
         try {
 
             if ( ! ( _gl = _canvas.getContext( 'experimental-webgl', { alpha: _alpha, premultipliedAlpha: _premultipliedAlpha, antialias: _antialias, stencil: _stencil, preserveDrawingBuffer: _preserveDrawingBuffer } ) ) ) {
-
+                if ( ! ( _gl = _canvas.getContext( 'webgl', { alpha: _alpha, premultipliedAlpha: _premultipliedAlpha, antialias: _antialias, stencil: _stencil, preserveDrawingBuffer: _preserveDrawingBuffer } ) ) ) {
                 throw 'Error creating WebGL context.';
-
+                }
             }
 
         } catch ( error ) {
@@ -16663,7 +16671,7 @@ $3Dmol.createViewer = function(element, config)
     	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
     }
     catch(e) {
-    	console.log("error creating viewer: "+e);
+    	throw "error creating viewer: "+e;
     }
     
     return null;
@@ -17006,9 +17014,14 @@ $(document).ready(function() {
             	}
             }
             
-            var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
-                viewer.setBackgroundColor(bgcolor);            
-            }});
+            try {
+            	var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
+            		viewer.setBackgroundColor(bgcolor);            
+            	}});
+            } catch ( error ) {
+            	//for autoload, provide a useful error message
+            	window.location = "http://get.webgl.org";            		
+            }
             
             
             if (datauri) {  
@@ -20978,6 +20991,8 @@ $3Dmol.GLViewer = (function() {
 		var ASPECT = WIDTH / HEIGHT;
 		var NEAR = 1, FAR = 800;
 		var CAMERA_Z = 150;
+		var fov = 20;
+
 
 		var renderer = new $3Dmol.Renderer({
 			antialias : true
@@ -20992,7 +21007,7 @@ $3Dmol.GLViewer = (function() {
 		renderer.domElement.style.zIndex = "0";
 		container.append(renderer.domElement);
 		renderer.setSize(WIDTH, HEIGHT);
-		var camera = new $3Dmol.Camera(10, ASPECT, 1, 800);
+		var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
 		camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
 		var vec = new $3Dmol.Vector3();
 		camera.lookAt(vec);
@@ -21007,7 +21022,6 @@ $3Dmol.GLViewer = (function() {
 		var modelGroup = null;
 
 		var bgColor = 0x000000;
-		var fov = 20;
 		var fogStart = 0.4;
 		var slabNear = -50; // relative to the center of rotationGroup
 		var slabFar = 50;
@@ -21263,23 +21277,19 @@ $3Dmol.GLViewer = (function() {
 											* scaleFactor;
 								} else if (mode == 1 || mouseButton == 2
 										|| ev.ctrlKey) { // Translate
-									scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-									if (scaleFactor < 20)
-										scaleFactor = 20;
-									var translationByScreen = new $3Dmol.Vector3(
-											dx * scaleFactor,
-											-dy * scaleFactor, 0);
 									var q = rotationGroup.quaternion;
 									var qinv = new $3Dmol.Quaternion(q.x, q.y,
 											q.z, q.w).inverse().normalize();
-									var translation = translationByScreen
-											.applyQuaternion(qinv);
-									modelGroup.position.x = currentModelPos.x
-											+ translation.x;
-									modelGroup.position.y = currentModelPos.y
-											+ translation.y;
-									modelGroup.position.z = currentModelPos.z
-											+ translation.z;
+						
+									var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
+									projector.projectVector(t, camera);
+									t.x += dx*2;
+									t.y -= dy*2;
+									projector.unprojectVector(t, camera);
+									t.z = 0;							
+									t.applyQuaternion(q);
+
+									modelGroup.position.addVectors(currentModelPos,t);
 								} else if ((mode === 0 || mouseButton == 1)
 										&& r !== 0) { // Rotate
 									var rs = Math.sin(r * Math.PI) / r;

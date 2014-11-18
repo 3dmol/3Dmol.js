@@ -53,7 +53,7 @@ $3Dmol.createViewer = function(element, config)
     	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
     }
     catch(e) {
-    	console.log("error creating viewer: "+e);
+    	throw "error creating viewer: "+e;
     }
     
     return null;

@@ -295,6 +295,7 @@ $3Dmol.Vector3.prototype =  {
     
     applyQuaternion : function(q) { 
         
+    	//save values
         var x = this.x;
         var y = this.y;
         var z = this.z;
@@ -304,18 +305,25 @@ $3Dmol.Vector3.prototype =  {
         var qz = q.z;
         var qw = q.w;
         
-        // calculate quaternion * vector
+        //compute this as
+        //t = 2 * cross(q.xyz, v)
+        //newv = v + q.w * t + cross(q.xyz, t)
+        //this from molecularmusings
+        //http://molecularmusings.wordpress.com/2013/05/24/a-faster-quaternion-vector-multiplication/
+        var t = {};
+        t.x = 2*(y * qz - z * qy);
+        t.y = 2*(z * qx - x * qz);
+        t.z = 2*(x * qy - y * qx);
         
-        var ix = qw * x + qy * z - qz * y;
-        var iy = qw * y + qz * x - qx * z;
-        var iz = qw * z + qx * y - qy * x;
-        var iw = -qw * x - qy * y - qz * z;
+        //cross t with q
+        var t2 = {};
+        t2.x = t.y * qz - t.z * qy;
+        t2.y = t.z * qx - t.x * qz;
+        t2.z = t.x * qy - t.y * qx;
         
-        // calculate result * inverse quaternion
-        
-        this.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
-        this.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
-        this.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+        this.x = x + q.w*t.x + t2.x;
+        this.y = y + q.w*t.y + t2.y;
+        this.z = z + q.w*t.z + t2.z;
         
         return this;
     },
