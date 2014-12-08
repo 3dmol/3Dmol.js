@@ -21232,10 +21232,6 @@ $3Dmol.GLViewer = (function() {
 								if (!isDragging)
 									return;
 								var mode = 0;
-								var modeRadio = $('input[name=' + id
-										+ '_mouseMode]:checked');
-								if (modeRadio.length > 0)
-									mode = parseInt(modeRadio.val());
 
 								var x = ev.pageX, y = ev.pageY;
 								if (ev.originalEvent.targetTouches
@@ -21277,10 +21273,7 @@ $3Dmol.GLViewer = (function() {
 											* scaleFactor;
 								} else if (mode == 1 || mouseButton == 2
 										|| ev.ctrlKey) { // Translate
-									var q = rotationGroup.quaternion;
-									var qinv = new $3Dmol.Quaternion(q.x, q.y,
-											q.z, q.w).inverse().normalize();
-						
+									var q = rotationGroup.quaternion;						
 									var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
 									projector.projectVector(t, camera);
 									t.x += dx*2;
