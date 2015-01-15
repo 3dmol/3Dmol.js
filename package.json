@@ -1,13 +1,13 @@
 {
-  "name": "3Dmol.js",
-  "version": "0.1.0",
+  "name": "3Dmol",
+  "version": "1.0",
   "description": "Object oriented Javascript molecular visualization library",
   "repository": {
     "type": "git",
     "url": "https://github.com/dkoes/3Dmol.js.git"
   },
   "author": "David Koes, Nick Rego",
-  "homepage": "https://github.com/dkoes/3Dmol.js",
+  "homepage": "http://3dmol.csb.pitt.edu",
   "devDependencies": {
     "grunt": "~0.4.5",
     "grunt-closure-compiler": "0.0.21",
