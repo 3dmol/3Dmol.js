@@ -14357,7 +14357,7 @@ $3Dmol.Renderer = function ( parameters ) {
 
             console.error( error );
         }
-        _gl.getExtension('EXT_frag_depth');
+        var ext = _gl.getExtension('EXT_frag_depth');
     }
 
     function setDefaultGLState () {
@@ -14378,7 +14378,7 @@ $3Dmol.Renderer = function ( parameters ) {
         _gl.blendFunc( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA );
 
         _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
-        _gl.getExtension('EXT_frag_depth');
+        var ext = _gl.getExtension('EXT_frag_depth');
 
 
     }
@@ -16632,6 +16632,14 @@ $3Dmol = (function(window) {
     return my;
 
 })(window);
+
+/* The following code "phones home" to register that an ip 
+   address has loaded 3Dmol.js.  Being able track this usage
+   is very helpful when reporting to funding agencies.  Please
+   leave this code in if you would like to increase the 
+   likelihood of 3Dmo.js remaining supported.
+*/
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
     
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
