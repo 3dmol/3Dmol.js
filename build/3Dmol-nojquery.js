@@ -10025,6 +10025,7 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#addMolData
          * @param {string} data - atom structure file input data string
          * @param {string} format - input file string format (e.g 'pdb', 'sdf', etc.)
+         * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
          */
         this.addMolData = function(data, format, options) {
             options = options || {}; 
@@ -10033,7 +10034,7 @@ $3Dmol.GLModel = (function() {
             
             if(typeof($3Dmol.Parsers[format]) != "undefined") {
             	var parse = $3Dmol.Parsers[format];
-            	parse(atoms, data, options.keepH, true)
+            	parse(atoms, data, options)
             }
             else {
             	console.error("Unknown format: "+format);
@@ -13946,11 +13947,11 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
-     * @param {boolean=} keepH
+     * @param {Object} options - keepH (do not strip hydrogens)
      */
-    parsers.mol2 = parsers.MOL2 = function(atoms, str, keepH) {
+    parsers.mol2 = parsers.MOL2 = function(atoms, str, options) {
         
-        var noH = !keepH; // again, suppress H's by default
+        var noH = !options.keepH; // suppress hydrogens by default
         
         // Note: these regex's work, though they don't match '<TRIPOS>'
         // correctly - something to do with angle brackets
@@ -14114,13 +14115,13 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
-     * @param {keepH=} boolean
-     * @param {computeStruct=} boolean
+     * @param {Object} options - keepH (do not strip hydrogens), noSecondaryStructure (do not compute ss)
      */
-    parsers.pdb = parsers.PDB = function(atoms, str, keepH, computeStruct) {
+    parsers.pdb = parsers.PDB = function(atoms, str, options) {
 
         var atoms_cnt = 0;
-        var noH = !keepH; // suppress hydrogens by default
+        var noH = !options.keepH; // suppress hydrogens by default
+        var computeStruct = !options.noSecondaryStructure;
         var start = atoms.length;
         var atom;
         var protein = {
@@ -14276,14 +14277,14 @@ $3Dmol.Parsers = (function() {
      * 
      * @param {AtomSpec[]} atoms
      * @param {string} str
-     * @param {keepH=} boolean
-     * @param {computeStruct=} boolean
+     * @param {Object} options -  noSecondaryStructure (do not compute ss)
      */
-    parsers.pqr = parsers.PQR = function(atoms, str) {
+    parsers.pqr = parsers.PQR = function(atoms, str, options) {
 
         var atoms_cnt = 0;
         var start = atoms.length;
         var atom;
+        var computeStruct = !options.noSecondaryStructure;
 
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split("\n");
@@ -14358,7 +14359,8 @@ $3Dmol.Parsers = (function() {
 
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
-        computeSecondaryStructure(atoms);
+        if(computeStruct)
+        	computeSecondaryStructure(atoms);
         
         return true;
     };

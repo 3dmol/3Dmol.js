@@ -77,6 +77,19 @@ There is also an unminified version provided that is missing jQuery for use when
 {@lang xml}<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-nojquery.js"></script>
 ```
 
+The files hosted by 3Dmol.csb.pitt.edu closely track the development version and so
+will change frequently.  If you desire more stability you may copy the files into your
+own project or, alternatively, we host release snapshots on the <a href="http://www.jsdelivr.com">jsDeliver</a>
+content delivery network (CDN).
+```
+{@lang xml}<script src="http://cdn.jsdelivr.net/3dmol.js/latest/3Dmol-min.js"></script>
+<script src="http://cdn.jsdelivr.net/3dmol.js/latest/3Dmol-nojquery-min.js"></script>
+```
+
+Using the CDN will likely provide the best network performance to your users, but features will
+lag behind the development branch as we only plan to tag new releases a few times a year.
+
+
 <br>
 The full source distribution is available [from github](https://github.com/dkoes/3Dmol.js).
 
