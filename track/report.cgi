@@ -10,7 +10,7 @@ domain = form.getvalue('domain','')
 
 conn = MySQLdb.connect (host = "localhost",user = "tracker",db="3dmoltrack")
 cursor = conn.cursor()
-cursor.execute("INSERT INTO accessed (host,domain) VALUES(%s)",(host,domain))
+cursor.execute("INSERT INTO accessed (host,domain) VALUES(%s,%s)",(host,domain))
 conn.commit()
 cursor.close()
 conn.close()
