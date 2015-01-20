@@ -380,20 +380,37 @@ $3Dmol.drawCartoon = (function() {
         var colors = [];
         var currentChain, currentReschain, currentResi, currentCA, currentAtom;
         var prevCO = null, ss = null, ssborder = false;
-
+        var tracegeo = null;
+        var atomcolor;
+        
         for (i in atomlist) {
             var atom = atomlist[i];
             if (atom === undefined)
                 continue;
 
             if ((atom.atom == 'O' || atom.atom == 'CA') && !atom.hetflag) {
+            	
+            	//get style
+            	var cstyle = atom.style.cartoon;
                 if (atom.atom == 'CA') {
-                    if (currentChain != atom.chain || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
-                        for (j = 0; !thickness && j < num; j++)
+                    //set atom color
+                	var prevatomcolor = atomcolor;
+                    atomcolor = atom.color;
+                    if (gradientscheme) {
+                        atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
+                    }
+                    else if(typeof(cstyle.color) !== "undefined") {
+                        atomcolor = cstyle.color;
+                    }
+                    
+                	if (currentChain != atom.chain || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
+                		//end of chain of connected residues, draw accumulated points
+                       for (j = 0; !thickness && j < num; j++)
                             drawSmoothCurve(group, points[j], 1, colors, div);
                         if (fill)
                             drawStrip(group, points[0], points[num - 1],
                                     colors, div, thickness);
+                    	
                         points = [];
                         for (k = 0; k < num; k++)
                             points[k] = [];
@@ -402,6 +419,25 @@ $3Dmol.drawCartoon = (function() {
                         ss = null;
                         ssborder = false;
                     }
+                	else if(cstyle.style == 'trace') { //trace draws every pair of atoms
+                		if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
+                		//trace draws straight lines between CAs
+                		if(currentCA) {
+                			//if both atoms same color, draw single cylinder
+                			if(prevatomcolor == atomcolor) {
+                				var C = $3Dmol.CC.color(atomcolor);
+                    			$3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, atom, thickness, C, true, true);
+                			}
+                			else {
+                                var mp = new $3Dmol.Vector3().addVectors(currentCA, atom).multiplyScalar(0.5);
+                                var C1 = $3Dmol.CC.color(prevatomcolor);
+                                var C2 = $3Dmol.CC.color(atomcolor);
+                    			$3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, mp, thickness, C1, true, false);
+                       			$3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
+                			}                                    
+                		}
+                    }
+                    	
                     currentCA = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
                     currentChain = atom.chain;
@@ -409,21 +445,15 @@ $3Dmol.drawCartoon = (function() {
                     currentResi = atom.resi;
                     ss = atom.ss;
                     ssborder = atom.ssbegin || atom.ssend;
-                    var atomcolor = atom.color;
-                    if (gradientscheme) {
-                        atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
-                    }
-                    else if(typeof(atom.style.cartoon.color) !== "undefined") {
-                        atomcolor = atom.style.cartoon.color;
-                    }
+
                     colors.push(atomcolor);
                     
                     if (atom.clickable === true && (atom.intersectionShape === undefined || atom.intersectionShape.triangle === undefined)) 
                         atom.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
                     
-                } 
-                
-                else { // O
+                }                 
+                else if(cstyle.style != 'trace') { // O, unneeded for trace style
+                	//the oxygen atom is used to orient the direction of the draw strip
                     var O = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     O.sub(currentCA);
                     O.normalize(); // can be omitted for performance
@@ -447,6 +477,14 @@ $3Dmol.drawCartoon = (function() {
             drawSmoothCurve(group, points[j], 1, colors, div);
         if (fill)
             drawStrip(group, points[0], points[num - 1], colors, div, thickness);
+        
+        if(tracegeo) {
+        	var material = new $3Dmol.MeshLambertMaterial();
+        	material.vertexColors = $3Dmol.FaceColors;
+        	material.side = $3Dmol.DoubleSide;
+        	var mesh = new $3Dmol.Mesh(tracegeo, material);
+        	group.add(mesh);
+        }
     };
 
     // actual function call
