@@ -133,7 +133,7 @@
         <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
         <input type="button" value="SphereI" onclick="glviewer.setStyle({},{spherei:{}}); glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
-        <input type="button" value="Trace" onclick="glviewer.setStyle({hetflag:false},{cartoon:{style: 'trace',color: 'spectrum'}}); glviewer.render();"></input>
+        <input type="button" value="Trace" onclick="glviewer.setStyle({chain:'B'},{cartoon:{style: 'trace',color: 'red'}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>

@@ -4,11 +4,12 @@
 #this allows us to report usage to our funding agencies
 import os,MySQLdb
 
-host = os.environ["REMOTE_ADDR"];
+host = os.environ["REMOTE_ADDR"]
+domain = os.environ["HTTP_REFERER"]
 
 conn = MySQLdb.connect (host = "localhost",user = "tracker",db="3dmoltrack")
 cursor = conn.cursor()
-cursor.execute("INSERT INTO accessed (host) VALUES(%s)",(host,))
+cursor.execute("INSERT INTO accessed (host,domain) VALUES(%s)",(host,domain))
 conn.commit()
 cursor.close()
 conn.close()

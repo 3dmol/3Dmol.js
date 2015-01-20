@@ -7652,6 +7652,7 @@ var $3Dmol = $3Dmol || {};
 
 /**@typedef CartoonStyleSpec
  * @prop {string} color - solid color, may specify as 'spectrum'
+ * @prop {string} style - style of cartoon rendering (currently just default and trace)
  */
 
 /**
