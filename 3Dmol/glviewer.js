@@ -1528,7 +1528,7 @@ $3Dmol.GLViewer = (function() {
 				/** @type {AtomSpec} */
 				var prop = style['map']['prop'];
 				/** @type {Gradient} */
-				var scheme = style['map']['scheme'] || new $3Dmol.RWB();
+				var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
 				var range = scheme.range();
 				if (!range) {
 					range = getPropertyRange(atomsToShow, prop);

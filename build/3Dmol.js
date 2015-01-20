@@ -16639,7 +16639,7 @@ $3Dmol = (function(window) {
    leave this code in if you would like to increase the 
    likelihood of 3Dmo.js remaining supported.
 */
-$.get("http://3dmol.csb.pitt.edu/track/report.cgi&domain="+encodeURI(document.location.host));
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
     
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
@@ -22494,7 +22494,7 @@ $3Dmol.GLViewer = (function() {
 				/** @type {AtomSpec} */
 				var prop = style['map']['prop'];
 				/** @type {Gradient} */
-				var scheme = style['map']['scheme'] || new $3Dmol.RWB();
+				var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
 				var range = scheme.range();
 				if (!range) {
 					range = getPropertyRange(atomsToShow, prop);
