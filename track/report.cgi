@@ -2,10 +2,11 @@
 #registers the use of 3Dmol.js in a database
 #this script gets pinged everytime 3dmol.js is loaded,
 #this allows us to report usage to our funding agencies
-import os,MySQLdb
+import os,MySQLdb,cgi
 
 host = os.environ["REMOTE_ADDR"]
-domain = os.environ["HTTP_REFERER"]
+form = cgi.FieldStorage() 
+domain = form.getvalue('domain','')
 
 conn = MySQLdb.connect (host = "localhost",user = "tracker",db="3dmoltrack")
 cursor = conn.cursor()
