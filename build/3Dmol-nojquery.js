@@ -7670,7 +7670,7 @@ $3Dmol.drawCartoon = (function() {
     var coilWidth = 0.3;
     var helixSheetWidth = 1.3;
     var nucleicAcidWidth = 0.8;
-    var thickness = 0.4; 
+    var defaultThickness = 0.4; 
 
     // helper functions
 
@@ -8013,7 +8013,7 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var drawStrand = function(group, atomlist, num, div, fill, coilWidth,
-            helixSheetWidth, doNotSmoothen, thickness, gradientscheme) {
+            helixSheetWidth, doNotSmoothen, gradientscheme) {
         num = num || strandDIV;
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
@@ -8026,6 +8026,7 @@ $3Dmol.drawCartoon = (function() {
         var prevCO = null, ss = null, ssborder = false;
         var tracegeo = null;
         var atomcolor;
+        var thickness = defaultThickness;
         
         for (i in atomlist) {
             var atom = atomlist[i];
@@ -8047,26 +8048,21 @@ $3Dmol.drawCartoon = (function() {
                         atomcolor = cstyle.color;
                     }
                     
-                	if (currentChain != atom.chain || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
-                		//end of chain of connected residues, draw accumulated points
-                       for (j = 0; !thickness && j < num; j++)
-                            drawSmoothCurve(group, points[j], 1, colors, div);
-                        if (fill)
-                            drawStrip(group, points[0], points[num - 1],
-                                    colors, div, thickness);
-                    	
-                        points = [];
-                        for (k = 0; k < num; k++)
-                            points[k] = [];
-                        colors = [];
-                        prevCO = null;
-                        ss = null;
-                        ssborder = false;
+                    if($.isNumeric(cstyle.thickness)) {
+                    	thickness = cstyle.thickness;
+                    } else {
+                    	thickness = defaultThickness;
                     }
-                	else if(cstyle.style == 'trace') { //trace draws every pair of atoms
-                		if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
+                    
+                    if(cstyle.style == 'trace') { //trace draws every pair of atoms
+                		
                 		//trace draws straight lines between CAs
-                		if(currentCA) {
+                		if(currentChain != atom.chain || currentResi + 1 != atom.resi) {
+                			//do not draw connections between chains; ignore differences
+                			//in reschain to properly support CA only files
+                    		if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
+
+                		} else if(currentCA) {
                 			//if both atoms same color, draw single cylinder
                 			if(prevatomcolor == atomcolor) {
                 				var C = $3Dmol.CC.color(atomcolor);
@@ -8081,6 +8077,22 @@ $3Dmol.drawCartoon = (function() {
                 			}                                    
                 		}
                     }
+                    else if (currentChain != atom.chain || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
+                		//end of chain of connected residues, draw accumulated points
+                       for (j = 0; !thickness && j < num; j++)
+                            drawSmoothCurve(group, points[j], 1, colors, div);
+                        if (fill)
+                            drawStrip(group, points[0], points[num - 1],
+                                    colors, div, thickness);
+                    	
+                        points = [];
+                        for (k = 0; k < num; k++)
+                            points[k] = [];
+                        colors = [];
+                        prevCO = null;
+                        ss = null;
+                        ssborder = false;
+                    }                	 
                     	
                     currentCA = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
@@ -8135,7 +8147,7 @@ $3Dmol.drawCartoon = (function() {
     var drawCartoon = function(group, atomlist, gradientscheme) {
         
         drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
-                false, thickness, gradientscheme);
+                false, gradientscheme);
     };
 
     return drawCartoon;
@@ -12386,10 +12398,10 @@ $3Dmol.GLViewer = (function() {
 		 * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
 		 * @return {$3Dmol.GLModel}
 		 */
-		this.addModel = function(data, format) {
+		this.addModel = function(data, format, options) {
 
 			var m = new $3Dmol.GLModel(models.length, defaultcolors);
-			m.addMolData(data, format);
+			m.addMolData(data, format, options);
 			models.push(m);
 
 			return m;
@@ -12897,7 +12909,7 @@ $3Dmol.GLViewer = (function() {
 				/** @type {AtomSpec} */
 				var prop = style['map']['prop'];
 				/** @type {Gradient} */
-				var scheme = style['map']['scheme'] || new $3Dmol.RWB();
+				var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
 				var range = scheme.range();
 				if (!range) {
 					range = getPropertyRange(atomsToShow, prop);
@@ -13832,7 +13844,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.cube = parsers.CUBE  = function(atoms, str) {
+    parsers.cube = parsers.CUBE  = function(atoms, str, options) {
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
         if (lines.length < 6)
@@ -13894,7 +13906,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.xyz = parsers.XYZ = function(atoms, str) {
+    parsers.xyz = parsers.XYZ = function(atoms, str, options) {
 
         var lines = str.split("\n");
         if (lines.length < 3)
@@ -13934,7 +13946,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.sdf = parsers.SDF = function(atoms, str) {
+    parsers.sdf = parsers.SDF = function(atoms, str, options) {
 
         var lines = str.split("\n");
         if (lines.length < 4)
@@ -13990,7 +14002,9 @@ $3Dmol.Parsers = (function() {
      */
     parsers.mol2 = parsers.MOL2 = function(atoms, str, options) {
         
-        var noH = !options.keepH; // suppress hydrogens by default
+        var noH = false;
+        if(typeof options.keepH !== "undefined") 
+        	noH = !options.keepH;
         
         // Note: these regex's work, though they don't match '<TRIPOS>'
         // correctly - something to do with angle brackets
