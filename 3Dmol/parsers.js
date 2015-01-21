@@ -232,7 +232,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.cube = parsers.CUBE  = function(atoms, str) {
+    parsers.cube = parsers.CUBE  = function(atoms, str, options) {
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
         if (lines.length < 6)
@@ -294,7 +294,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.xyz = parsers.XYZ = function(atoms, str) {
+    parsers.xyz = parsers.XYZ = function(atoms, str, options) {
 
         var lines = str.split("\n");
         if (lines.length < 3)
@@ -334,12 +334,8 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.sdf = parsers.SDF = function(atoms, str) {
+    parsers.sdf = parsers.SDF = function(atoms, str, options) {
 
-        var noH = false;
-        if(typeof options.keepH !== "undefined") 
-        	noH = !options.keepH;
-        
         var lines = str.split("\n");
         if (lines.length < 4)
             return;
