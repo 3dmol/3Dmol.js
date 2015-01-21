@@ -993,6 +993,7 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#addMolData
          * @param {string} data - atom structure file input data string
          * @param {string} format - input file string format (e.g 'pdb', 'sdf', etc.)
+         * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
          */
         this.addMolData = function(data, format, options) {
             options = options || {}; 
@@ -1001,7 +1002,7 @@ $3Dmol.GLModel = (function() {
             
             if(typeof($3Dmol.Parsers[format]) != "undefined") {
             	var parse = $3Dmol.Parsers[format];
-            	parse(atoms, data, options.keepH, true)
+            	parse(atoms, data, options)
             }
             else {
             	console.error("Unknown format: "+format);

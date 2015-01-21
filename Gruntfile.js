@@ -145,7 +145,7 @@ module.exports = function(grunt) {
                 options : {
                     stdout: true
                 },
-                command: "node node_modules/jsdoc/jsdoc.js 3Dmol/*.js README.md -c jsdoc.conf.json -t 3Dmol-doc-template -u tutorials/ -d doc/"
+                command: "node node_modules/jsdoc/jsdoc.js 3Dmol/*.js doc.md -c jsdoc.conf.json -t 3Dmol-doc-template -u tutorials/ -d doc/"
             }
         },
 
