@@ -1017,10 +1017,10 @@ $3Dmol.GLViewer = (function() {
 		 * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
 		 * @return {$3Dmol.GLModel}
 		 */
-		this.addModel = function(data, format) {
+		this.addModel = function(data, format, options) {
 
 			var m = new $3Dmol.GLModel(models.length, defaultcolors);
-			m.addMolData(data, format);
+			m.addMolData(data, format, options);
 			models.push(m);
 
 			return m;

@@ -336,6 +336,10 @@ $3Dmol.Parsers = (function() {
      */
     parsers.sdf = parsers.SDF = function(atoms, str) {
 
+        var noH = false;
+        if(typeof options.keepH !== "undefined") 
+        	noH = !options.keepH;
+        
         var lines = str.split("\n");
         if (lines.length < 4)
             return;
@@ -390,7 +394,9 @@ $3Dmol.Parsers = (function() {
      */
     parsers.mol2 = parsers.MOL2 = function(atoms, str, options) {
         
-        var noH = !options.keepH; // suppress hydrogens by default
+        var noH = false;
+        if(typeof options.keepH !== "undefined") 
+        	noH = !options.keepH;
         
         // Note: these regex's work, though they don't match '<TRIPOS>'
         // correctly - something to do with angle brackets
