@@ -567,6 +567,9 @@ $3Dmol.Parsers = (function() {
             sheet : [],
             helix : []
         }; // get secondary structure straight from pdb
+        
+        var rotMatrix = []; // array for rotational matrix vals
+        var transVector = []; // translational vector vals
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
@@ -655,10 +658,43 @@ $3Dmol.Parsers = (function() {
                 endResi = parseInt(line.substr(33, 4));
                 protein.helix
                         .push([ startChain, startResi, endChain, endResi ]);
-            }
-
+             
+            //MY CODE BELOW            
+            } else if ((recordName == 'REMARK') && (line.substr(14, 5) == 'BIOMT')) { //checking remark/biomt is enough to assume remark350?
+            
+            	var first, second, third, translation;
+            	var matrixRow = [];
+            	var n;
+            	
+            	for (n = 1; n <= 3; n++) { 
+            		//check for all three lines by matching # @ end of "BIOMT" to n
+            		if (line.substr(19, 1) == n) { // should always be the case
+            			line = lines[i].replace(/^\s*/, ''); // first time- same line, 2nd & 3rd get following line
+            			first = parseFloat(line.substr(24, 10));
+            			second = parseFloat(line.substr(34, 10));
+            			third = parseFloat(line.substr(44, 10));
+            			translation = parseFloat(line.substr(54)); // from 54 to the rest of line?
+            			matrixRow.push(first, second, third); // DON'T want brackets, so after 3 passes will be [1, 0, 0, 0, 1, 0, 0, 0, 1]
+            			transVector.push(translation);
+            			i++;
+            		}
+            		else { // otherwise there must be an issue with the file
+            			while(line.substr(14, 5) == 'BIOMT') { //increase "i" until you leave the REMARKs
+            				i++;
+            				line = lines[i].replace(/^\s*/, '');
+            			}
+            		}
+            	}
+            	rotMatrix.push(matrixRow); 
+            	
+            	//first 3 lines may always be identity matrix
+            	//should i just skip them then? or not - to be safe
+			}
         }
 
+		
+		
+		
         var starttime = (new Date()).getTime();
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
