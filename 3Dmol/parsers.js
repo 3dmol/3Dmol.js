@@ -570,7 +570,8 @@ $3Dmol.Parsers = (function() {
             helix : []
         }; // get secondary structure straight from pdb
         
-        var rotMatrix = []; // array for rotational matrix vals
+      	var matrix = new $3Dmol.Matrix4();
+      	var allMatrices = [];
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
@@ -663,42 +664,70 @@ $3Dmol.Parsers = (function() {
             //MY CODE BELOW            
             } else if ((recordName == 'REMARK') && (line.substr(14, 5) == 'BIOMT')) { 
             
-            	var first, second, third, translation;
-            	var matrixRow = [];
             	var n;
             	
-            	for (n = 1; n <= 3; n++) { //check for all three lines by matching # @ end of "BIOMT" to n
-            		if (line.substr(19, 1) == n) { // should always be the case
+            	for (n = 1; n <= 3; n++) { 
+            		if (parseInt(line.substr(19, 1)) == n) { //check for all three lines by matching # @ end of "BIOMT" to n
             			line = lines[i].replace(/^\s*/, ''); // first time- same line, 2nd & 3rd get following line
-            			first = parseFloat(line.substr(24, 10));
-            			second = parseFloat(line.substr(34, 10));
-            			third = parseFloat(line.substr(44, 10));
-            			translation = parseFloat(line.substr(54)); // from 54 to the rest of line
-            			matrixRow.push(first, second, third, translation); // DON'T want brackets?
-            			transVector.push(translation);
+            			matrix.elements[(n-1)*4] = parseFloat(line.substr(24, 10));
+            			matrix.elements[((n-1)*4)+1] = parseFloat(line.substr(34, 10));
+            			matrix.elements[((n-1)*4)+2] = parseFloat(line.substr(44, 10));
+            			matrix.elements[(n*4)-1] = parseFloat(line.substr(54)); // from 54 to the rest of line
             			i++;
-            		}
-            		matrix.Row.push(0, 0, 0, 1); //does this match the other pushes?
+            		}	
             		else { // otherwise there must be an issue with the file
             			while(line.substr(14, 5) == 'BIOMT') { //increase "i" until you leave the REMARKs
             				i++;
             				line = lines[i].replace(/^\s*/, '');
             			}
             		}
+            		matrix.elements[12] = 0;
+            		matrix.elements[13] = 0;
+            		matrix.elements[14] = 0;
+            		matrix.elements[15] = 1;
             	}
-            	rotMatrix.push(matrixRow); 
+            	allMatrices.push(matrix); 
+            
 			}
         }
-		
-		if (rotMatrix.length() != 0) // or if length is 1 (then it is identity)
-		//if array not empty and not only just identity matrix (is there a way to check against identity matrix already in math.js?)
-		//for (int n = 0; n < rotMatrix.length; n++)
-		//	matrix = new $3Dmol.Matrix3(rotMatrix[n]) <--- is this possible?, rotMatrix is arr full of arrays?
-		//apply transformations - to all atoms in arr?
-		
-		// look thru everything in rotMatrix
-		//add atoms from rest of assembly by transforming current atom list
-		//if just identity matrix, or no remark info(?) do nothing
+
+		var end = atoms.length;
+		var idMatrix = new $3Dmol.Matrix4();
+		idMatrix.identity();
+		var t;
+
+		for (t = 0; t < allMatrices.length; t++) { // if allMatrices length is 0 it just won't do the loop
+			if (!allMatrices[t].isEqual(idMatrix)) {
+				var n;
+				var xyz = new $3Dmol.Vector3();
+				for (n = 0; n < end; n++){
+					xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+					xyz.applyMatrix4(matrix);
+					atoms.push({
+						'resn' : atoms[n].resn,
+						'x' : xyz.x,
+						'y' : xyz.y,
+						'z' : xyz.z,
+						'elem' : atoms[n].elem,
+						'hetflag' : atoms[n].hetflag,
+						'chain' : atoms[n].chain,
+						'resi' : atoms[n].resi,
+						'icode' : atoms[n].icode,
+						'rescode': atoms[n].rescode,
+						'serial' : atoms[n].serial,
+						'atom' : atoms[n].atom,
+						//not revelvant until assignPDB bonds
+						'bonds' : [], // add accordingly so in correct place
+						'ss' : atoms[n].ss,
+						'bondOrder' : atoms[n].bondOrder,
+						'properties' : atoms[n].properties,
+						'b' : atoms[n].b,
+						'pdbline' : atoms[n].pdbline,
+					});	
+				}
+			}
+		}
+
 		
 		
         var starttime = (new Date()).getTime();
