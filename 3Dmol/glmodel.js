@@ -1089,11 +1089,11 @@ $3Dmol.GLModel = (function() {
             }
 
             // byres selection flag
-            if ("byres" in sel)
-            {
+            if ("byres" in sel) {
+
                 // Keep track of visited residues, visited atoms, and atom stack
-                var vResis = [];
-                var vAtoms = [];
+                var vResis = {};
+                var vAtoms = {};
                 var stack = [];
 
                 for (var i = 0; i < ret.length; i++) {
@@ -1103,16 +1103,16 @@ $3Dmol.GLModel = (function() {
                     if (atom.hasOwnProperty("resi") && !(atom.resi in vResis)) {
 
                         // Perform a depth-first search of atoms with the same resi
-                        r = atom.resi
-                        stack.push(atom)
+                        var r = atom.resi;
+                        vResis[r] = true;
+                        stack.push(atom);
                         while(stack.length > 0) {
                             atom = stack.pop();
-                            if !(atom in vAtoms) {
-                                vAtoms.push(atom);
-                                for (int j = 0; j < (atom.bonds).length; j++) {
-                                    var atom2 = atom.bonds[j];
-                                    if (!(atom2 in vAtoms) && atom2.hasOwnProperty("resi") && atom2.resi == r)
-                                    {
+                            if (!(atom in vAtoms)) {
+                                vAtoms[atom.index] = true;
+                                for (var j = 0; j < atom.bonds.length; j++) {
+                                    var atom2 = atoms[atom.bonds[j]];
+                                    if (!(atom2.index in vAtoms) && atom2.hasOwnProperty("resi") && atom2.resi == r) {
                                         stack.push(atom2);
                                         ret.push(atom2);
                                     }

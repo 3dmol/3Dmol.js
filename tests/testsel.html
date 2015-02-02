@@ -113,8 +113,7 @@
                 atom.callback = atomcallback;
             }
 
-            m.setStyle({atom:'CA', byres:{}}, {sphere:{}});
-
+            glviewer.setStyle({}, {line:{}});
             glviewer.mapAtomProperties($3Dmol.partialCharges);
             glviewer.zoomTo();
             glviewer.render();   
@@ -146,6 +145,7 @@
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
                 <br>
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
+        <input id="atomid" value="20" size=4><button onclick="glviewer.setStyle({}, {line:{}}); glviewer.setStyle({index:$('#atomid').val()}, {sphere:{}}); glviewer.render();">Select atom</button><button onclick="glviewer.setStyle({}, {line:{}}); glviewer.setStyle({index:$('#atomid').val(), byres:{}}, {sphere:{}}); glviewer.render();">Select by residue</button><br>
  
  
 <textarea style="display: none;" id="moldata_download"></textarea>
