@@ -690,19 +690,35 @@ $3Dmol.Parsers = (function() {
             
 			}
         }
-
+        
+        //SWITCHED THE ORDER
+        
+        var starttime = (new Date()).getTime();
+        // assign bonds - yuck, can't count on connect records
+        assignPDBBonds(atoms);
+        console.log("bond connecting " + ((new Date()).getTime() - starttime));
+        
+        
 		var end = atoms.length;
+		var bondCount = end;
 		var idMatrix = new $3Dmol.Matrix4();
 		idMatrix.identity();
-		var t;
+		var t, l;
+		
 
 		for (t = 0; t < allMatrices.length; t++) { // if allMatrices length is 0 it just won't do the loop
 			if (!allMatrices[t].isEqual(idMatrix)) {
 				var n;
 				var xyz = new $3Dmol.Vector3();
 				for (n = 0; n < end; n++){
+				
+					var bondsArr = [];
+					for (l = 0; l < atoms[n].bonds.length; l++) {		
+						bondsArr.push(atoms[n].bonds[l] + bondCount); //is atoms[n].bonds[l] OK?	
+					}	
 					xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
-					xyz.applyMatrix4(matrix);
+					xyz.applyMatrix4(matrix);				
+
 					atoms.push({
 						'resn' : atoms[n].resn,
 						'x' : xyz.x,
@@ -716,24 +732,18 @@ $3Dmol.Parsers = (function() {
 						'rescode': atoms[n].rescode,
 						'serial' : atoms[n].serial,
 						'atom' : atoms[n].atom,
-						//not revelvant until assignPDB bonds
-						'bonds' : [], // add accordingly so in correct place
+						'bonds' : bondsArr,
 						'ss' : atoms[n].ss,
 						'bondOrder' : atoms[n].bondOrder,
 						'properties' : atoms[n].properties,
 						'b' : atoms[n].b,
 						'pdbline' : atoms[n].pdbline,
 					});	
+					bondCount++;
 				}
 			}
 		}
 
-		
-		
-        var starttime = (new Date()).getTime();
-        // assign bonds - yuck, can't count on connect records
-        assignPDBBonds(atoms);
-        console.log("bond connecting " + ((new Date()).getTime() - starttime));
         
         
         if(computeStruct || !hasStruct) {
