@@ -560,9 +560,11 @@ $3Dmol.Parsers = (function() {
      */
     parsers.pdb = parsers.PDB = function(atoms, str, options) {
 
-        var atoms_cnt = 0;
+        var atoms_cnt = 0; 
         var noH = !options.keepH; // suppress hydrogens by default
         var computeStruct = !options.noSecondaryStructure;
+        var noAssembly = !options.doAssembly; // don't assemble by default
+
         var start = atoms.length;
         var atom;
         var protein = {
@@ -570,7 +572,6 @@ $3Dmol.Parsers = (function() {
             helix : []
         }; // get secondary structure straight from pdb
         
-      	var matrix = new $3Dmol.Matrix4();
       	var allMatrices = [];
 
         var hasStruct = false;
@@ -662,36 +663,37 @@ $3Dmol.Parsers = (function() {
                         .push([ startChain, startResi, endChain, endResi ]);
              
             //MY CODE BELOW            
-            } else if ((recordName == 'REMARK') && (line.substr(14, 5) == 'BIOMT')) { 
-            
+            } else if ((!noAssembly) && (recordName == 'REMARK') && (line.substr(13, 5) == 'BIOMT')) { 
+             	
             	var n;
+            	var matrix = new $3Dmol.Matrix4(); //make a new one each time
             	
             	for (n = 1; n <= 3; n++) { 
-            		if (parseInt(line.substr(19, 1)) == n) { //check for all three lines by matching # @ end of "BIOMT" to n
-            			line = lines[i].replace(/^\s*/, ''); // first time- same line, 2nd & 3rd get following line
-            			matrix.elements[(n-1)*4] = parseFloat(line.substr(24, 10));
-            			matrix.elements[((n-1)*4)+1] = parseFloat(line.substr(34, 10));
-            			matrix.elements[((n-1)*4)+2] = parseFloat(line.substr(44, 10));
-            			matrix.elements[(n*4)-1] = parseFloat(line.substr(54)); // from 54 to the rest of line
+            		line = lines[i].replace(/^\s*/, ''); // first time- same line, 2nd & 3rd get following line
+            		if (parseInt(line.substr(18, 1)) == n) { //check for all three lines by matching # @ end of "BIOMT" to n	
+            			matrix.elements[(n-1)] = parseFloat(line.substr(23, 10));
+            			matrix.elements[(n-1)+4] = parseFloat(line.substr(33, 10));
+            			matrix.elements[(n-1)+8] = parseFloat(line.substr(43, 10));
+            			matrix.elements[(n-1)+12] = parseFloat(line.substr(53)); // from 54 to the rest of line
             			i++;
             		}	
             		else { // otherwise there must be an issue with the file
-            			while(line.substr(14, 5) == 'BIOMT') { //increase "i" until you leave the REMARKs
-            				i++;
+            			while(line.substr(13, 5) == 'BIOMT') { //increase "i" until you leave the REMARKs
+            				i++; 
             				line = lines[i].replace(/^\s*/, '');
             			}
             		}
-            		matrix.elements[12] = 0;
-            		matrix.elements[13] = 0;
-            		matrix.elements[14] = 0;
-            		matrix.elements[15] = 1;
             	}
+            	matrix.elements[3] = 0;
+            	matrix.elements[7] = 0;
+            	matrix.elements[11] = 0;
+        		matrix.elements[15] = 1;
             	allMatrices.push(matrix); 
+            	i--; //set it back
             
 			}
         }
-        
-        //SWITCHED THE ORDER
+
         
         var starttime = (new Date()).getTime();
         // assign bonds - yuck, can't count on connect records
@@ -700,12 +702,12 @@ $3Dmol.Parsers = (function() {
         
         
 		var end = atoms.length;
-		var bondCount = end;
+		var offset = end;
 		var idMatrix = new $3Dmol.Matrix4();
 		idMatrix.identity();
-		var t, l;
+		var t;
+		var l;
 		
-
 		for (t = 0; t < allMatrices.length; t++) { // if allMatrices length is 0 it just won't do the loop
 			if (!allMatrices[t].isEqual(idMatrix)) {
 				var n;
@@ -714,10 +716,10 @@ $3Dmol.Parsers = (function() {
 				
 					var bondsArr = [];
 					for (l = 0; l < atoms[n].bonds.length; l++) {		
-						bondsArr.push(atoms[n].bonds[l] + bondCount); //is atoms[n].bonds[l] OK?	
+						bondsArr.push(atoms[n].bonds[l] + offset); //is atoms[n].bonds[l] OK?	
 					}	
 					xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
-					xyz.applyMatrix4(matrix);				
+					xyz.applyMatrix4(allMatrices[t]);					
 
 					atoms.push({
 						'resn' : atoms[n].resn,
@@ -739,8 +741,8 @@ $3Dmol.Parsers = (function() {
 						'b' : atoms[n].b,
 						'pdbline' : atoms[n].pdbline,
 					});	
-					bondCount++;
 				}
+				offset = atoms.length;
 			}
 		}
 
