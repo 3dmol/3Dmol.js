@@ -10402,30 +10402,36 @@ $3Dmol.GLModel = (function() {
             }
 
             // byres selection flag
-            if ("byres" in sel) {
+            if (sel.hasOwnProperty("byres")) {
 
                 // Keep track of visited residues, visited atoms, and atom stack
                 var vResis = {};
-                var vAtoms = {};
+                var vAtoms = [];
                 var stack = [];
 
                 for (var i = 0; i < ret.length; i++) {
 
                     // Check if atom is part of a residue, and that the residue hasn't been traversed yet
                     var atom = ret[i];
-                    if (atom.hasOwnProperty("resi") && !(atom.resi in vResis)) {
+                    var c = atom.chain;
+                    var r = atom.resi;
+                    if (vResis[c] === undefined) {
+                        vResis[c] = {};
+                    }
+                    if (atom.hasOwnProperty("resi") && vResis[c][r] === undefined) {
 
                         // Perform a depth-first search of atoms with the same resi
-                        var r = atom.resi;
-                        vResis[r] = true;
+                        vResis[c][r] = true;
                         stack.push(atom);
                         while(stack.length > 0) {
                             atom = stack.pop();
-                            if (!(atom in vAtoms)) {
+                            c = atom.chain;
+                            r = atom.resi;
+                            if (vAtoms[atom.index] === undefined) {
                                 vAtoms[atom.index] = true;
                                 for (var j = 0; j < atom.bonds.length; j++) {
                                     var atom2 = atoms[atom.bonds[j]];
-                                    if (!(atom2.index in vAtoms) && atom2.hasOwnProperty("resi") && atom2.resi == r) {
+                                    if (vAtoms[atom2.index] === undefined && atom2.hasOwnProperty("resi") && atom2.chain == c && atom2.resi == r) {
                                         stack.push(atom2);
                                         ret.push(atom2);
                                     }
