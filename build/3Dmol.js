@@ -20007,14 +20007,12 @@ $3Dmol.GLModel = (function() {
                 var stack = [];
 
                 for (var i = 0; i < ret.length; i++) {
-
+                    
                     // Check if atom is part of a residue, and that the residue hasn't been traversed yet
                     var atom = ret[i];
                     var c = atom.chain;
                     var r = atom.resi;
-                    if (vResis[c] === undefined) {
-                        vResis[c] = {};
-                    }
+                    if (vResis[c] === undefined) vResis[c] = {};
                     if (atom.hasOwnProperty("resi") && vResis[c][r] === undefined) {
 
                         // Perform a depth-first search of atoms with the same resi
