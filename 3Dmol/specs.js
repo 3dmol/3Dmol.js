@@ -54,6 +54,7 @@ ViewerSpec.callback;
  * @prop {number} bonds - overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
  * @prop {function} predicate - user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
  * @prop {boolean} invert - if set, inverts the meaning of the selection
+ * @prop {boolean} byres - if set, expands the selection to include all atoms of any residue that has any atom selected
  */
 
 
