@@ -726,7 +726,7 @@ $3Dmol.Parsers = (function() {
      * @param {string} str
      * @param {Object} options - keepH (do not strip hydrogens), noSecondaryStructure (do not compute ss)
      */
-    parsers.pdb = parsers.PDB = function(atoms, str, options) {
+    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options) {
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
