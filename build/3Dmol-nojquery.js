@@ -14023,6 +14023,10 @@ $3Dmol.Parsers = (function() {
             return sections;
         }
 
+        //Parser puts all of the data in the file in an object
+        //uses getDataItem() to get an array for the category and data item given
+        //The possible categories and data items in each category are defined in
+        //the mmCIF specification
         function getDataItem(categoryName, dataItemName) {
             if (! (categoryName in mmCIF)) {
                 mmCIF[categoryName] = {};
@@ -14035,10 +14039,9 @@ $3Dmol.Parsers = (function() {
             return dataItem;
         }
 
-        lines = str.split("\n");    //temporarily global for debugging purposes
-
+        var lines = str.split("\n");
         //Filter text to remove comments, trailing spaces, and empty lines
-        linesFiltered = [];     //temporarily global for debugging purposes
+        var linesFiltered = [];
         var trimDisabled = false;
         for (var lineNum = 0; lineNum < lines.length; lineNum++) {
             [][0];
@@ -14070,7 +14073,7 @@ $3Dmol.Parsers = (function() {
         }
 
         //Process the lines and puts all of the data into an object.
-        mmCIF = {};     //temporarily global for debugging purposes
+        var mmCIF = {};
         var lineNum = 0;
         while (lineNum < linesFiltered.length) {
             if (linesFiltered[lineNum][0] === undefined) {
@@ -14315,7 +14318,7 @@ $3Dmol.Parsers = (function() {
      * @param {string} str
      * @param {Object} options - keepH (do not strip hydrogens), noSecondaryStructure (do not compute ss)
      */
-    parsers.pdb = parsers.PDB = function(atoms, str, options) {
+    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options) {
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
