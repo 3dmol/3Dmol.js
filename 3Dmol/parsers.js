@@ -386,7 +386,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.mcif = parsers.mmCIF = function(atoms, str, options) {
+    parsers.mcif = parsers.cif = function(atoms, str, options) {
 
         //Used to handle quotes correctly
         function splitRespectingQuotes(string, separator) {
@@ -399,6 +399,12 @@ $3Dmol.Parsers = (function() {
                     if (string[sectionEnd] === "'") {
                         sectionEnd++;
                         while (sectionEnd < string.length && string[sectionEnd] !== "'") {
+                            sectionEnd++;
+                        }
+                    }
+                    else if (string[sectionEnd] === '"') {
+                        sectionEnd++;
+                        while (sectionEnd < string.length && string[sectionEnd] !== '"') {
                             sectionEnd++;
                         }
                     }
