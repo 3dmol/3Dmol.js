@@ -23741,6 +23741,20 @@ $3Dmol.Parsers = (function() {
                 lineNum++;
             }
         }
+
+        //Pulls atom information out of the data
+        for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+            var atom = {};
+            atom.x = mmCIF._atom_site.cartn_x[i];
+            atom.y = mmCIF._atom_site.cartn_y[i];
+            atom.z = mmCIF._atom_site.cartn_z[i];
+            atom.hetflag = true; //need to figure out what this is
+            atom.bonds = [];
+            atom.bondOrder = [];
+            atom.properties = {};
+            atoms.push(atom);
+        }
+        assignBonds(atoms);
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
