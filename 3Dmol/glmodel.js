@@ -1029,7 +1029,7 @@ $3Dmol.GLModel = (function() {
             			break;
             		}
             	}
-            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres") {
+            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand") {
                     // if something is in sel, atom must have it                	
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
@@ -1088,6 +1088,34 @@ $3Dmol.GLModel = (function() {
                 }
             }
 
+            // expand selection by some distance
+            if (sel.hasOwnProperty("expand") && sel.expand === parseInt(sel.expand, 10)) {
+
+                // extend bounding box of atom selection
+                var pb = getExtent(ret);
+                var nb = extendBounds(pb, sel.expand);
+
+                //[ [ xmin, ymin, zmin ],
+                //  [ xmax, ymax, zmax ],
+                //  [ xctr, yctr, zctr ] ]
+
+                // look in added box "shell" for new atoms to select
+                for (var i = 0; i < atoms.length; i++) {
+
+                    var x = atoms[i].x;
+                    var y = atoms[i].y;
+                    var z = atoms[i].z;
+
+                    if (x >= nb[0][0] && x < pb[0][0] || x > pb[1][0] && x <= nb[1][0]) {
+                        if (y >= nb[0][1] && y < pb[0][1] || y > pb[1][1] && y <= nb[1][1]) {
+                            if (z >= nb[0][2] && z < pb[0][2] || z > pb[1][2] && z <= nb[1][2]) {
+                                ret.push(atoms[i]);
+                            }
+                        }
+                    }
+                }
+            }
+
             // byres selection flag
             if (sel.hasOwnProperty("byres")) {
 
@@ -1129,6 +1157,60 @@ $3Dmol.GLModel = (function() {
 
             return ret;
         };
+
+        // helper function also found in glviewer.js
+        var getExtent = function(atomlist) {
+            var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+            xmin = ymin = zmin = 9999;
+            xmax = ymax = zmax = -9999;
+            xsum = ysum = zsum = cnt = 0;
+
+            if (atomlist.length === 0)
+                return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+            for (var i = 0; i < atomlist.length; i++) {
+                var atom = atomlist[i];
+                if (atom === undefined)
+                    continue;
+                cnt++;
+                xsum += atom.x;
+                ysum += atom.y;
+                zsum += atom.z;
+
+                xmin = (xmin < atom.x) ? xmin : atom.x;
+                ymin = (ymin < atom.y) ? ymin : atom.y;
+                zmin = (zmin < atom.z) ? zmin : atom.z;
+                xmax = (xmax > atom.x) ? xmax : atom.x;
+                ymax = (ymax > atom.y) ? ymax : atom.y;
+                zmax = (zmax > atom.z) ? zmax : atom.z;
+            }
+
+            return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+                    [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+        };
+
+        /** extends the given bounding box by some amount in every direction
+         *
+         *  Bounding boxes return from getExtent() as follows:
+         *
+         *    [ [ xmin, ymin, zmin ],
+         *      [ xmax, ymax, zmax ],
+         *      [ xctr, yctr, zctr ] ]
+         *
+         **/
+        var extendBounds = function(currBounds, amt) {
+
+            var newBounds = [[],[],[]];
+
+            for (var i = 0; i<3; i++)
+            {
+                newBounds[0][i] = currBounds[0][i]-amt;
+                newBounds[1][i] = currBounds[1][i]+amt;
+                newBounds[2][i] = currBounds[2][i];
+            }
+
+            return newBounds;
+        }
         
         /** Add list of new atoms to model.  Adjusts bonds appropriately.
          * 
