@@ -232,7 +232,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.cube = parsers.CUBE  = function(atoms, str) {
+    parsers.cube = parsers.CUBE  = function(atoms, str, options) {
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
         
         if (lines.length < 6)
@@ -294,7 +294,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.xyz = parsers.XYZ = function(atoms, str) {
+    parsers.xyz = parsers.XYZ = function(atoms, str, options) {
 
         var lines = str.split("\n");
         if (lines.length < 3)
@@ -334,7 +334,7 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.sdf = parsers.SDF = function(atoms, str) {
+    parsers.sdf = parsers.SDF = function(atoms, str, options) {
 
         var lines = str.split("\n");
         if (lines.length < 4)
@@ -380,17 +380,187 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
+    // will put atoms specified in mmCIF fromat in str into atoms when completed
+    // currently only parses the file
+    /**
+     * @param {AtomSpec[]} atoms
+     * @param {string} str
+     */
+    parsers.mcif = parsers.cif = function(atoms, str, options) {
+
+        //Used to handle quotes correctly
+        function splitRespectingQuotes(string, separator) {
+            var sections = [];
+            var sectionStart = 0;
+            var sectionEnd = 0;
+            while (sectionEnd < string.length) {
+                while (string.substr(sectionEnd, separator.length) !== separator && sectionEnd < string.length) {
+                    //currently does not support escaping quotes
+                    if (string[sectionEnd] === "'") {
+                        sectionEnd++;
+                        while (sectionEnd < string.length && string[sectionEnd] !== "'") {
+                            sectionEnd++;
+                        }
+                    }
+                    else if (string[sectionEnd] === '"') {
+                        sectionEnd++;
+                        while (sectionEnd < string.length && string[sectionEnd] !== '"') {
+                            sectionEnd++;
+                        }
+                    }
+                    sectionEnd++;
+                    
+                }
+                sections.push(string.substr(sectionStart, sectionEnd - sectionStart));
+                sectionStart = sectionEnd = sectionEnd + separator.length;
+            }
+            return sections;
+        }
+
+        //Parser puts all of the data in the file in an object
+        //uses getDataItem() to get an array for the category and data item given
+        //The possible categories and data items in each category are defined in
+        //the mmCIF specification
+        function getDataItem(categoryName, dataItemName) {
+            if (! (categoryName in mmCIF)) {
+                mmCIF[categoryName] = {};
+            }
+            var category = mmCIF[categoryName];
+            if (! (dataItemName in category)) {
+                category[dataItemName] = [];
+            }
+            var dataItem = category[dataItemName];
+            return dataItem;
+        }
+
+        var lines = str.split("\n");
+        //Filter text to remove comments, trailing spaces, and empty lines
+        var linesFiltered = [];
+        var trimDisabled = false;
+        for (var lineNum = 0; lineNum < lines.length; lineNum++) {
+            [][0];
+            //first remove comments
+            //incorrect if #'s are allowed in strings
+            //comments might only be allowed at beginning of line, not sure
+            var line = lines[lineNum].split('#')[0];
+
+            //inside data blocks, the string must be left verbatim
+            //datablocks are started with a ';' at the beginning of a line
+            //and ended with a ';' on its own line.
+            if (trimDisabled) {
+                if (line[0] === ';') {
+                    trimDisabled = false;
+                }
+            }
+            else {
+                if (line[0] === ';') {
+                    trimDisabled = true;
+                }
+            }
+
+            if (trimDisabled) {
+                linesFiltered.push(line);
+            }
+            else if (line !== "") {
+                linesFiltered.push(line.trim());
+            }
+        }
+
+        //Process the lines and puts all of the data into an object.
+        var mmCIF = {};
+        var lineNum = 0;
+        while (lineNum < linesFiltered.length) {
+            if (linesFiltered[lineNum][0] === undefined) {
+                lineNum++;
+            }
+            else if (linesFiltered[lineNum][0] === '_') {
+                var categoryName = linesFiltered[lineNum].split('.')[0];
+                var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                var dataItem = getDataItem(categoryName, dataItemName);
+                
+
+                //if nothing left on the line go to the next one
+                var restOfLine = linesFiltered[lineNum].substr(linesFiltered[lineNum].indexOf(dataItemName) + dataItemName.length);
+                if (restOfLine === "") {
+                    lineNum++;
+                    if (linesFiltered[lineNum][0] === ';') {
+                        var dataBlock = linesFiltered[lineNum].substr(1);
+                        lineNum++;
+                        while (linesFiltered[lineNum] !== ';') {
+                            dataBlock = dataBlock + '\n' + linesFiltered[lineNum];
+                            lineNum++;
+                        }
+                        dataItem.push(dataBlock);
+                    }
+                    else {
+                        dataItem.push(linesFiltered[lineNum]);
+                    }
+                }
+                else {
+                    dataItem.push(restOfLine.trim());
+                }
+                lineNum++;
+            }
+            else if (linesFiltered[lineNum].substr(0, 5) === "loop_") {
+                lineNum++;
+                var dataItems = [];
+                var dataItemNames = []
+                while (linesFiltered[lineNum] === "" || linesFiltered[lineNum][0] === '_') {
+                    if (linesFiltered[lineNum] !== "") {
+                        var categoryName = linesFiltered[lineNum].split('.')[0];
+                        var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                        var dataItem = getDataItem(categoryName, dataItemName);
+                        dataItems.push(dataItem);
+                        dataItemNames.push(dataItemName);
+                    }
+                    lineNum++;
+                }
+
+                var currentDataItem = 0;
+                while (lineNum < linesFiltered.length && linesFiltered[lineNum][0] !== '_' && linesFiltered[lineNum].substr(0,5) !== "loop_") {
+                    var line = splitRespectingQuotes(linesFiltered[lineNum], " ");
+                    for (var field = 0; field < line.length; field++) {
+                        if (line[field] !== "") {
+                            dataItems[currentDataItem].push(line[field]);
+                            currentDataItem = (currentDataItem + 1) % dataItems.length;
+                        }
+                    }
+                    lineNum++;
+                }
+            }
+            else {
+                lineNum++;
+            }
+        }
+
+        //Pulls atom information out of the data
+        for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+            var atom = {};
+            atom.x = mmCIF._atom_site.cartn_x[i];
+            atom.y = mmCIF._atom_site.cartn_y[i];
+            atom.z = mmCIF._atom_site.cartn_z[i];
+            atom.hetflag = true; //need to figure out what this is
+            atom.bonds = [];
+            atom.bondOrder = [];
+            atom.properties = {};
+            atoms.push(atom);
+        }
+        assignBonds(atoms);
+    }
+
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
     // tag
     // TODO: Figure out how to handle multi molecule files (for SDF, too)
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
-     * @param {boolean=} keepH
+     * @param {Object} options - keepH (do not strip hydrogens)
      */
-    parsers.mol2 = parsers.MOL2 = function(atoms, str, keepH) {
+    parsers.mol2 = parsers.MOL2 = function(atoms, str, options) {
         
-        var noH = !keepH; // again, suppress H's by default
+        var noH = false;
+        if(typeof options.keepH !== "undefined") 
+        	noH = !options.keepH;
         
         // Note: these regex's work, though they don't match '<TRIPOS>'
         // correctly - something to do with angle brackets
@@ -554,13 +724,13 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
-     * @param {keepH=} boolean
-     * @param {computeStruct=} boolean
+     * @param {Object} options - keepH (do not strip hydrogens), noSecondaryStructure (do not compute ss)
      */
-    parsers.pdb = parsers.PDB = function(atoms, str, keepH, computeStruct) {
+    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options) {
 
         var atoms_cnt = 0;
-        var noH = !keepH; // suppress hydrogens by default
+        var noH = !options.keepH; // suppress hydrogens by default
+        var computeStruct = !options.noSecondaryStructure;
         var start = atoms.length;
         var atom;
         var protein = {
@@ -716,14 +886,14 @@ $3Dmol.Parsers = (function() {
      * 
      * @param {AtomSpec[]} atoms
      * @param {string} str
-     * @param {keepH=} boolean
-     * @param {computeStruct=} boolean
+     * @param {Object} options -  noSecondaryStructure (do not compute ss)
      */
-    parsers.pqr = parsers.PQR = function(atoms, str) {
+    parsers.pqr = parsers.PQR = function(atoms, str, options) {
 
         var atoms_cnt = 0;
         var start = atoms.length;
         var atom;
+        var computeStruct = !options.noSecondaryStructure;
 
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split("\n");
@@ -798,7 +968,8 @@ $3Dmol.Parsers = (function() {
 
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
-        computeSecondaryStructure(atoms);
+        if(computeStruct)
+        	computeSecondaryStructure(atoms);
         
         return true;
     };

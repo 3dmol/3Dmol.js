@@ -1017,10 +1017,10 @@ $3Dmol.GLViewer = (function() {
 		 * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
 		 * @return {$3Dmol.GLModel}
 		 */
-		this.addModel = function(data, format) {
+		this.addModel = function(data, format, options) {
 
 			var m = new $3Dmol.GLModel(models.length, defaultcolors);
-			m.addMolData(data, format);
+			m.addMolData(data, format, options);
 			models.push(m);
 
 			return m;
@@ -1528,7 +1528,7 @@ $3Dmol.GLViewer = (function() {
 				/** @type {AtomSpec} */
 				var prop = style['map']['prop'];
 				/** @type {Gradient} */
-				var scheme = style['map']['scheme'] || new $3Dmol.RWB();
+				var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
 				var range = scheme.range();
 				if (!range) {
 					range = getPropertyRange(atomsToShow, prop);
