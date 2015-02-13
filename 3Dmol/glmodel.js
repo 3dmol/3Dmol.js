@@ -69,7 +69,6 @@ $3Dmol.GLModel = (function() {
         var id = mid;
         var molObj = null;
         var renderedMolObj = null;
-        var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
         var defaultColor = $3Dmol.elementColors.defaultColor;
@@ -1204,13 +1203,7 @@ $3Dmol.GLModel = (function() {
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
          */
-        this.setStyle = function(sel, style, add) {
-            
-            if(!add && molObj !== null && sameObj(style, lastStyle))
-                return; // no need to recompute
-            
-            if(add) lastStyle = null; // todo: compute merged style
-            else lastStyle = style;
+        this.setStyle = function(sel, style, add) {           
 
             // do a copy to enforce style changes through this function
             var mystyle = $.extend(true, {}, style);

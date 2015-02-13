@@ -16748,61 +16748,6 @@ $3Dmol.SurfaceType = {
     SES  : 4
 };
 
-// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
-// this makes things a little faster
-$3Dmol.CC = {
-    cache : {},
-    color : function(hex) {
-
-        if(typeof(this.cache[hex]) !== "undefined") {
-            return this.cache[hex];
-        }
-        else {
-            hex = this.getHex(hex);
-            var c = new $3Dmol.Color(hex);
-            this.cache[hex] = c;
-            return c;
-        }
-    },
-    colorTab : {
-        'white' : 0xFFFFFF,
-        'silver' : 0xC0C0C0,
-        'gray' : 0x808080,
-        'grey' : 0x808080,
-        'black' : 0x000000,
-        'red' : 0xFF0000,
-        'maroon' : 0x800000,
-        'yellow' : 0xFFFF00,
-        'orange' : 0xFF6600,
-        'olive' : 0x808000,
-        'lime' : 0x00FF00,
-        'green' : 0x008000,
-        'aqua' : 0x00FFFF,
-        'cyan' : 0x00FFFF,
-        'teal' : 0x008080,
-        'blue' : 0x0000FF,
-        'navy' : 0x000080,
-        'fuchsia' : 0xFF00FF,
-        'magenta' : 0xFF00FF,
-        'purple' : 0x800080
-    },    
-    getHex : function(hex) {
-        if (parseInt(hex))
-            return parseInt(hex);
-        
-        else if (typeof(hex) === 'string') {
-            
-            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
-        }
-        
-    }
-    
-};
-
-
-
-$3Dmol['CC'] = $3Dmol.CC;
-$3Dmol['CC']['color'] = $3Dmol.CC.color;
 
 //Miscellaneous functions and classes - to be incorporated into $3Dmol proper
 /**
@@ -17103,6 +17048,61 @@ $(document).ready(function() {
     }
 });
     
+
+
+// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
+// this makes things a little faster
+$3Dmol.CC = {
+    cache : {},
+    color : function(hex) {
+
+        if(typeof(this.cache[hex]) !== "undefined") {
+            return this.cache[hex];
+        }
+        else {
+            hex = this.getHex(hex);
+            var c = new $3Dmol.Color(hex);
+            this.cache[hex] = c;
+            return c;
+        }
+    },
+    colorTab : {
+        'white' : 0xFFFFFF,
+        'silver' : 0xC0C0C0,
+        'gray' : 0x808080,
+        'grey' : 0x808080,
+        'black' : 0x000000,
+        'red' : 0xFF0000,
+        'maroon' : 0x800000,
+        'yellow' : 0xFFFF00,
+        'orange' : 0xFF6600,
+        'olive' : 0x808000,
+        'lime' : 0x00FF00,
+        'green' : 0x008000,
+        'aqua' : 0x00FFFF,
+        'cyan' : 0x00FFFF,
+        'teal' : 0x008080,
+        'blue' : 0x0000FF,
+        'navy' : 0x000080,
+        'fuchsia' : 0xFF00FF,
+        'magenta' : 0xFF00FF,
+        'purple' : 0x800080
+    },    
+    getHex : function(hex) {
+        if (parseInt(hex))
+            return parseInt(hex);
+        
+        else if (typeof(hex) === 'string') {
+            
+            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
+        }
+        
+    }
+    
+};
+
+$3Dmol['CC'] = $3Dmol.CC;
+$3Dmol['CC']['color'] = $3Dmol.CC.color;
 
 /** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
@@ -18749,7 +18749,6 @@ $3Dmol.GLModel = (function() {
         var id = mid;
         var molObj = null;
         var renderedMolObj = null;
-        var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
         var defaultColor = $3Dmol.elementColors.defaultColor;
@@ -19884,13 +19883,7 @@ $3Dmol.GLModel = (function() {
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
          */
-        this.setStyle = function(sel, style, add) {
-            
-            if(!add && molObj !== null && sameObj(style, lastStyle))
-                return; // no need to recompute
-            
-            if(add) lastStyle = null; // todo: compute merged style
-            else lastStyle = style;
+        this.setStyle = function(sel, style, add) {           
 
             // do a copy to enforce style changes through this function
             var mystyle = $.extend(true, {}, style);
@@ -21837,7 +21830,13 @@ $3Dmol.GLViewer = (function() {
 		 * glviewer.render();
 		 */
 		this.removeLabel = function(label) {
-			labels.remove(label);
+			//todo: don't do the linear search
+			for(var i = 0; i < labels.length; i++) {
+				if(labels[i] == label) {
+					labels.splice(i,1);
+					break;
+				}
+			}
 			label.dispose();
 			modelGroup.remove(label.sprite);
 		};
@@ -21867,12 +21866,12 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.Label}
 		 */
 		this.setLabelStyle = function(label, stylespec) {
-
+			modelGroup.remove(label.sprite);
 			label.dispose();
 			label.stylespec = stylespec;
 			label.setContext();
 			modelGroup.add(label.sprite);
-
+			show();
 			return label;
 
 		};
@@ -21889,12 +21888,12 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.Label}
 		 */
 		this.setLabelText = function(label, text) {
-
+			modelGroup.remove(label.sprite);
 			label.dispose();
 			label.text = text;
 			label.setContext();
 			modelGroup.add(label.sprite);
-
+			show();
 			return label;
 
 		};
@@ -23057,6 +23056,8 @@ $3Dmol.Label.prototype = {
 
 	constructor : $3Dmol.Label,
 
+	getStyle : function () { return this.stylespec; }, 
+	
 	setContext : function() {
 		// function for drawing rounded rectangles - for Label drawing
 		var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
@@ -23083,10 +23084,10 @@ $3Dmol.Label.prototype = {
 			var ret = init;
 			if(typeof(style) != 'undefined') {
 				//convet regular colors
-				if(typeof(style) === 'string') 
-					ret = $3Dmol.CC.color(style).scaled()
-				else if(style instanceof $3Dmol.Color) 
-					ret = style.scaled();				
+				 if(style instanceof $3Dmol.Color) 
+					 ret = style.scaled();
+				 else //hex or name
+					ret = $3Dmol.CC.color(style).scaled();					
 			}
 			if(typeof(stylealpha) != 'undefined') {
 				ret.a = parseFloat(stylealpha);

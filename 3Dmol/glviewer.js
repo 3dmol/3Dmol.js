@@ -817,7 +817,13 @@ $3Dmol.GLViewer = (function() {
 		 * glviewer.render();
 		 */
 		this.removeLabel = function(label) {
-			labels.remove(label);
+			//todo: don't do the linear search
+			for(var i = 0; i < labels.length; i++) {
+				if(labels[i] == label) {
+					labels.splice(i,1);
+					break;
+				}
+			}
 			label.dispose();
 			modelGroup.remove(label.sprite);
 		};
@@ -847,12 +853,12 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.Label}
 		 */
 		this.setLabelStyle = function(label, stylespec) {
-
+			modelGroup.remove(label.sprite);
 			label.dispose();
 			label.stylespec = stylespec;
 			label.setContext();
 			modelGroup.add(label.sprite);
-
+			show();
 			return label;
 
 		};
@@ -869,12 +875,12 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.Label}
 		 */
 		this.setLabelText = function(label, text) {
-
+			modelGroup.remove(label.sprite);
 			label.dispose();
 			label.text = text;
 			label.setContext();
 			modelGroup.add(label.sprite);
-
+			show();
 			return label;
 
 		};
