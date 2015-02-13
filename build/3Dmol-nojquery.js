@@ -7151,61 +7151,6 @@ $3Dmol.SurfaceType = {
     SES  : 4
 };
 
-// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
-// this makes things a little faster
-$3Dmol.CC = {
-    cache : {},
-    color : function(hex) {
-
-        if(typeof(this.cache[hex]) !== "undefined") {
-            return this.cache[hex];
-        }
-        else {
-            hex = this.getHex(hex);
-            var c = new $3Dmol.Color(hex);
-            this.cache[hex] = c;
-            return c;
-        }
-    },
-    colorTab : {
-        'white' : 0xFFFFFF,
-        'silver' : 0xC0C0C0,
-        'gray' : 0x808080,
-        'grey' : 0x808080,
-        'black' : 0x000000,
-        'red' : 0xFF0000,
-        'maroon' : 0x800000,
-        'yellow' : 0xFFFF00,
-        'orange' : 0xFF6600,
-        'olive' : 0x808000,
-        'lime' : 0x00FF00,
-        'green' : 0x008000,
-        'aqua' : 0x00FFFF,
-        'cyan' : 0x00FFFF,
-        'teal' : 0x008080,
-        'blue' : 0x0000FF,
-        'navy' : 0x000080,
-        'fuchsia' : 0xFF00FF,
-        'magenta' : 0xFF00FF,
-        'purple' : 0x800080
-    },    
-    getHex : function(hex) {
-        if (parseInt(hex))
-            return parseInt(hex);
-        
-        else if (typeof(hex) === 'string') {
-            
-            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
-        }
-        
-    }
-    
-};
-
-
-
-$3Dmol['CC'] = $3Dmol.CC;
-$3Dmol['CC']['color'] = $3Dmol.CC.color;
 
 //Miscellaneous functions and classes - to be incorporated into $3Dmol proper
 /**
@@ -7506,6 +7451,61 @@ $(document).ready(function() {
     }
 });
     
+
+
+// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
+// this makes things a little faster
+$3Dmol.CC = {
+    cache : {},
+    color : function(hex) {
+
+        if(typeof(this.cache[hex]) !== "undefined") {
+            return this.cache[hex];
+        }
+        else {
+            hex = this.getHex(hex);
+            var c = new $3Dmol.Color(hex);
+            this.cache[hex] = c;
+            return c;
+        }
+    },
+    colorTab : {
+        'white' : 0xFFFFFF,
+        'silver' : 0xC0C0C0,
+        'gray' : 0x808080,
+        'grey' : 0x808080,
+        'black' : 0x000000,
+        'red' : 0xFF0000,
+        'maroon' : 0x800000,
+        'yellow' : 0xFFFF00,
+        'orange' : 0xFF6600,
+        'olive' : 0x808000,
+        'lime' : 0x00FF00,
+        'green' : 0x008000,
+        'aqua' : 0x00FFFF,
+        'cyan' : 0x00FFFF,
+        'teal' : 0x008080,
+        'blue' : 0x0000FF,
+        'navy' : 0x000080,
+        'fuchsia' : 0xFF00FF,
+        'magenta' : 0xFF00FF,
+        'purple' : 0x800080
+    },    
+    getHex : function(hex) {
+        if (parseInt(hex))
+            return parseInt(hex);
+        
+        else if (typeof(hex) === 'string') {
+            
+            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
+        }
+        
+    }
+    
+};
+
+$3Dmol['CC'] = $3Dmol.CC;
+$3Dmol['CC']['color'] = $3Dmol.CC.color;
 
 /** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
@@ -9152,7 +9152,6 @@ $3Dmol.GLModel = (function() {
         var id = mid;
         var molObj = null;
         var renderedMolObj = null;
-        var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
         var defaultColor = $3Dmol.elementColors.defaultColor;
@@ -10113,7 +10112,7 @@ $3Dmol.GLModel = (function() {
             			break;
             		}
             	}
-            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model") {
+            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres") {
                     // if something is in sel, atom must have it                	
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
@@ -10163,13 +10162,54 @@ $3Dmol.GLModel = (function() {
          */
         this.selectedAtoms = function(sel) {
             var ret = [];
-            for ( var i = 0; i < atoms.length; i++) {
+            var aLength = atoms.length;
+            for ( var i = 0; i < aLength; i++) {
                 var atom = atoms[i];
                 if (atom) {
                     if (this.atomIsSelected(atom, sel))
                         ret.push(atom);
                 }
             }
+
+            // byres selection flag
+            if (sel.hasOwnProperty("byres")) {
+
+                // Keep track of visited residues, visited atoms, and atom stack
+                var vResis = {};
+                var vAtoms = [];
+                var stack = [];
+
+                for (var i = 0; i < ret.length; i++) {
+                    
+                    // Check if atom is part of a residue, and that the residue hasn't been traversed yet
+                    var atom = ret[i];
+                    var c = atom.chain;
+                    var r = atom.resi;
+                    if (vResis[c] === undefined) vResis[c] = {};
+                    if (atom.hasOwnProperty("resi") && vResis[c][r] === undefined) {
+
+                        // Perform a depth-first search of atoms with the same resi
+                        vResis[c][r] = true;
+                        stack.push(atom);
+                        while(stack.length > 0) {
+                            atom = stack.pop();
+                            c = atom.chain;
+                            r = atom.resi;
+                            if (vAtoms[atom.index] === undefined) {
+                                vAtoms[atom.index] = true;
+                                for (var j = 0; j < atom.bonds.length; j++) {
+                                    var atom2 = atoms[atom.bonds[j]];
+                                    if (vAtoms[atom2.index] === undefined && atom2.hasOwnProperty("resi") && atom2.chain == c && atom2.resi == r) {
+                                        stack.push(atom2);
+                                        ret.push(atom2);
+                                    }
+                                }
+                            }
+                        }
+                    }   
+                }
+            }
+
             return ret;
         };
         
@@ -10246,13 +10286,7 @@ $3Dmol.GLModel = (function() {
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
          */
-        this.setStyle = function(sel, style, add) {
-            
-            if(!add && molObj !== null && sameObj(style, lastStyle))
-                return; // no need to recompute
-            
-            if(add) lastStyle = null; // todo: compute merged style
-            else lastStyle = style;
+        this.setStyle = function(sel, style, add) {           
 
             // do a copy to enforce style changes through this function
             var mystyle = $.extend(true, {}, style);
@@ -10260,20 +10294,21 @@ $3Dmol.GLModel = (function() {
             // somethings we only calculate if there is a change in a certain
             // style, although these checks will only catch cases where both
             // are either null or undefined
+
+            var selected = this.selectedAtoms(sel);
             for ( var i = 0; i < atoms.length; i++) {
                 atoms[i].capDrawn = false; //reset for proper stick render
-                
-                if (this.atomIsSelected(atoms[i], sel)) {
-                    changedAtoms = true;
-                    if (atoms[i].clickable) 
-                        atoms[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
-    
+            }
+
+            for ( var i = 0; i < selected.length; i++) {                
+                changedAtoms = true;
+                if (selected[i].clickable) 
+                    selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
-                    if(!add) atoms[i].style = {};
-                    for(var s in mystyle) {
-                        if(mystyle.hasOwnProperty(s)) {
-                            atoms[i].style[s] = mystyle[s];
-                        }
+                if(!add) selected[i].style = {};
+                for(var s in mystyle) {
+                    if(mystyle.hasOwnProperty(s)) {
+                        selected[i].style[s] = mystyle[s];
                     }
                 }
             }
@@ -12198,7 +12233,13 @@ $3Dmol.GLViewer = (function() {
 		 * glviewer.render();
 		 */
 		this.removeLabel = function(label) {
-			labels.remove(label);
+			//todo: don't do the linear search
+			for(var i = 0; i < labels.length; i++) {
+				if(labels[i] == label) {
+					labels.splice(i,1);
+					break;
+				}
+			}
 			label.dispose();
 			modelGroup.remove(label.sprite);
 		};
@@ -12228,12 +12269,12 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.Label}
 		 */
 		this.setLabelStyle = function(label, stylespec) {
-
+			modelGroup.remove(label.sprite);
 			label.dispose();
 			label.stylespec = stylespec;
 			label.setContext();
 			modelGroup.add(label.sprite);
-
+			show();
 			return label;
 
 		};
@@ -12250,12 +12291,12 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.Label}
 		 */
 		this.setLabelText = function(label, text) {
-
+			modelGroup.remove(label.sprite);
 			label.dispose();
 			label.text = text;
 			label.setContext();
 			modelGroup.add(label.sprite);
-
+			show();
 			return label;
 
 		};
@@ -13418,6 +13459,8 @@ $3Dmol.Label.prototype = {
 
 	constructor : $3Dmol.Label,
 
+	getStyle : function () { return this.stylespec; }, 
+	
 	setContext : function() {
 		// function for drawing rounded rectangles - for Label drawing
 		var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
@@ -13444,10 +13487,10 @@ $3Dmol.Label.prototype = {
 			var ret = init;
 			if(typeof(style) != 'undefined') {
 				//convet regular colors
-				if(typeof(style) === 'string') 
-					ret = $3Dmol.CC.color(style).scaled()
-				else if(style instanceof $3Dmol.Color) 
-					ret = style.scaled();				
+				 if(style instanceof $3Dmol.Color) 
+					 ret = style.scaled();
+				 else //hex or name
+					ret = $3Dmol.CC.color(style).scaled();					
 			}
 			if(typeof(stylealpha) != 'undefined') {
 				ret.a = parseFloat(stylealpha);
@@ -13992,6 +14035,174 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
+    // will put atoms specified in mmCIF fromat in str into atoms when completed
+    // currently only parses the file
+    /**
+     * @param {AtomSpec[]} atoms
+     * @param {string} str
+     */
+    parsers.mcif = parsers.cif = function(atoms, str, options) {
+
+        //Used to handle quotes correctly
+        function splitRespectingQuotes(string, separator) {
+            var sections = [];
+            var sectionStart = 0;
+            var sectionEnd = 0;
+            while (sectionEnd < string.length) {
+                while (string.substr(sectionEnd, separator.length) !== separator && sectionEnd < string.length) {
+                    //currently does not support escaping quotes
+                    if (string[sectionEnd] === "'") {
+                        sectionEnd++;
+                        while (sectionEnd < string.length && string[sectionEnd] !== "'") {
+                            sectionEnd++;
+                        }
+                    }
+                    else if (string[sectionEnd] === '"') {
+                        sectionEnd++;
+                        while (sectionEnd < string.length && string[sectionEnd] !== '"') {
+                            sectionEnd++;
+                        }
+                    }
+                    sectionEnd++;
+                    
+                }
+                sections.push(string.substr(sectionStart, sectionEnd - sectionStart));
+                sectionStart = sectionEnd = sectionEnd + separator.length;
+            }
+            return sections;
+        }
+
+        //Parser puts all of the data in the file in an object
+        //uses getDataItem() to get an array for the category and data item given
+        //The possible categories and data items in each category are defined in
+        //the mmCIF specification
+        function getDataItem(categoryName, dataItemName) {
+            if (! (categoryName in mmCIF)) {
+                mmCIF[categoryName] = {};
+            }
+            var category = mmCIF[categoryName];
+            if (! (dataItemName in category)) {
+                category[dataItemName] = [];
+            }
+            var dataItem = category[dataItemName];
+            return dataItem;
+        }
+
+        var lines = str.split("\n");
+        //Filter text to remove comments, trailing spaces, and empty lines
+        var linesFiltered = [];
+        var trimDisabled = false;
+        for (var lineNum = 0; lineNum < lines.length; lineNum++) {
+            [][0];
+            //first remove comments
+            //incorrect if #'s are allowed in strings
+            //comments might only be allowed at beginning of line, not sure
+            var line = lines[lineNum].split('#')[0];
+
+            //inside data blocks, the string must be left verbatim
+            //datablocks are started with a ';' at the beginning of a line
+            //and ended with a ';' on its own line.
+            if (trimDisabled) {
+                if (line[0] === ';') {
+                    trimDisabled = false;
+                }
+            }
+            else {
+                if (line[0] === ';') {
+                    trimDisabled = true;
+                }
+            }
+
+            if (trimDisabled) {
+                linesFiltered.push(line);
+            }
+            else if (line !== "") {
+                linesFiltered.push(line.trim());
+            }
+        }
+
+        //Process the lines and puts all of the data into an object.
+        var mmCIF = {};
+        var lineNum = 0;
+        while (lineNum < linesFiltered.length) {
+            if (linesFiltered[lineNum][0] === undefined) {
+                lineNum++;
+            }
+            else if (linesFiltered[lineNum][0] === '_') {
+                var categoryName = linesFiltered[lineNum].split('.')[0];
+                var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                var dataItem = getDataItem(categoryName, dataItemName);
+                
+
+                //if nothing left on the line go to the next one
+                var restOfLine = linesFiltered[lineNum].substr(linesFiltered[lineNum].indexOf(dataItemName) + dataItemName.length);
+                if (restOfLine === "") {
+                    lineNum++;
+                    if (linesFiltered[lineNum][0] === ';') {
+                        var dataBlock = linesFiltered[lineNum].substr(1);
+                        lineNum++;
+                        while (linesFiltered[lineNum] !== ';') {
+                            dataBlock = dataBlock + '\n' + linesFiltered[lineNum];
+                            lineNum++;
+                        }
+                        dataItem.push(dataBlock);
+                    }
+                    else {
+                        dataItem.push(linesFiltered[lineNum]);
+                    }
+                }
+                else {
+                    dataItem.push(restOfLine.trim());
+                }
+                lineNum++;
+            }
+            else if (linesFiltered[lineNum].substr(0, 5) === "loop_") {
+                lineNum++;
+                var dataItems = [];
+                var dataItemNames = []
+                while (linesFiltered[lineNum] === "" || linesFiltered[lineNum][0] === '_') {
+                    if (linesFiltered[lineNum] !== "") {
+                        var categoryName = linesFiltered[lineNum].split('.')[0];
+                        var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                        var dataItem = getDataItem(categoryName, dataItemName);
+                        dataItems.push(dataItem);
+                        dataItemNames.push(dataItemName);
+                    }
+                    lineNum++;
+                }
+
+                var currentDataItem = 0;
+                while (lineNum < linesFiltered.length && linesFiltered[lineNum][0] !== '_' && linesFiltered[lineNum].substr(0,5) !== "loop_") {
+                    var line = splitRespectingQuotes(linesFiltered[lineNum], " ");
+                    for (var field = 0; field < line.length; field++) {
+                        if (line[field] !== "") {
+                            dataItems[currentDataItem].push(line[field]);
+                            currentDataItem = (currentDataItem + 1) % dataItems.length;
+                        }
+                    }
+                    lineNum++;
+                }
+            }
+            else {
+                lineNum++;
+            }
+        }
+
+        //Pulls atom information out of the data
+        for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+            var atom = {};
+            atom.x = mmCIF._atom_site.cartn_x[i];
+            atom.y = mmCIF._atom_site.cartn_y[i];
+            atom.z = mmCIF._atom_site.cartn_z[i];
+            atom.hetflag = true; //need to figure out what this is
+            atom.bonds = [];
+            atom.bondOrder = [];
+            atom.properties = {};
+            atoms.push(atom);
+        }
+        assignBonds(atoms);
+    }
+
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
     // tag
     // TODO: Figure out how to handle multi molecule files (for SDF, too)
@@ -14170,7 +14381,7 @@ $3Dmol.Parsers = (function() {
      * @param {string} str
      * @param {Object} options - keepH (do not strip hydrogens), noSecondaryStructure (do not compute ss)
      */
-    parsers.pdb = parsers.PDB = function(atoms, str, options) {
+    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options) {
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
@@ -14421,7 +14632,8 @@ $3Dmol.Parsers = (function() {
     
 	
 	return parsers;
-})();var $3Dmol = $3Dmol || {};
+})();
+var $3Dmol = $3Dmol || {};
 
 //properties for mapping
 $3Dmol.partialCharges = [
@@ -14651,6 +14863,7 @@ ViewerSpec.callback;
  * @prop {number} bonds - overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
  * @prop {function} predicate - user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
  * @prop {boolean} invert - if set, inverts the meaning of the selection
+ * @prop {boolean} byres - if set, expands the selection to include all atoms of any residue that has any atom selected
  */
 
 

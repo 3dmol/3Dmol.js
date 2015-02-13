@@ -69,7 +69,6 @@ $3Dmol.GLModel = (function() {
         var id = mid;
         var molObj = null;
         var renderedMolObj = null;
-        var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
         var defaultColor = $3Dmol.elementColors.defaultColor;
@@ -1030,7 +1029,7 @@ $3Dmol.GLModel = (function() {
             			break;
             		}
             	}
-            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model") {
+            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres") {
                     // if something is in sel, atom must have it                	
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
@@ -1080,13 +1079,54 @@ $3Dmol.GLModel = (function() {
          */
         this.selectedAtoms = function(sel) {
             var ret = [];
-            for ( var i = 0; i < atoms.length; i++) {
+            var aLength = atoms.length;
+            for ( var i = 0; i < aLength; i++) {
                 var atom = atoms[i];
                 if (atom) {
                     if (this.atomIsSelected(atom, sel))
                         ret.push(atom);
                 }
             }
+
+            // byres selection flag
+            if (sel.hasOwnProperty("byres")) {
+
+                // Keep track of visited residues, visited atoms, and atom stack
+                var vResis = {};
+                var vAtoms = [];
+                var stack = [];
+
+                for (var i = 0; i < ret.length; i++) {
+                    
+                    // Check if atom is part of a residue, and that the residue hasn't been traversed yet
+                    var atom = ret[i];
+                    var c = atom.chain;
+                    var r = atom.resi;
+                    if (vResis[c] === undefined) vResis[c] = {};
+                    if (atom.hasOwnProperty("resi") && vResis[c][r] === undefined) {
+
+                        // Perform a depth-first search of atoms with the same resi
+                        vResis[c][r] = true;
+                        stack.push(atom);
+                        while(stack.length > 0) {
+                            atom = stack.pop();
+                            c = atom.chain;
+                            r = atom.resi;
+                            if (vAtoms[atom.index] === undefined) {
+                                vAtoms[atom.index] = true;
+                                for (var j = 0; j < atom.bonds.length; j++) {
+                                    var atom2 = atoms[atom.bonds[j]];
+                                    if (vAtoms[atom2.index] === undefined && atom2.hasOwnProperty("resi") && atom2.chain == c && atom2.resi == r) {
+                                        stack.push(atom2);
+                                        ret.push(atom2);
+                                    }
+                                }
+                            }
+                        }
+                    }   
+                }
+            }
+
             return ret;
         };
         
@@ -1163,13 +1203,7 @@ $3Dmol.GLModel = (function() {
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
          */
-        this.setStyle = function(sel, style, add) {
-            
-            if(!add && molObj !== null && sameObj(style, lastStyle))
-                return; // no need to recompute
-            
-            if(add) lastStyle = null; // todo: compute merged style
-            else lastStyle = style;
+        this.setStyle = function(sel, style, add) {           
 
             // do a copy to enforce style changes through this function
             var mystyle = $.extend(true, {}, style);
@@ -1177,20 +1211,21 @@ $3Dmol.GLModel = (function() {
             // somethings we only calculate if there is a change in a certain
             // style, although these checks will only catch cases where both
             // are either null or undefined
+
+            var selected = this.selectedAtoms(sel);
             for ( var i = 0; i < atoms.length; i++) {
                 atoms[i].capDrawn = false; //reset for proper stick render
-                
-                if (this.atomIsSelected(atoms[i], sel)) {
-                    changedAtoms = true;
-                    if (atoms[i].clickable) 
-                        atoms[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
-    
+            }
+
+            for ( var i = 0; i < selected.length; i++) {                
+                changedAtoms = true;
+                if (selected[i].clickable) 
+                    selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
-                    if(!add) atoms[i].style = {};
-                    for(var s in mystyle) {
-                        if(mystyle.hasOwnProperty(s)) {
-                            atoms[i].style[s] = mystyle[s];
-                        }
+                if(!add) selected[i].style = {};
+                for(var s in mystyle) {
+                    if(mystyle.hasOwnProperty(s)) {
+                        selected[i].style[s] = mystyle[s];
                     }
                 }
             }

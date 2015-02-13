@@ -1,140 +1,614 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>$3Dmol Example</title>
-<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+    <head>
+        <title>$3Dmol Test</title>
+        <script src="../build/3Dmol.js"></script> 
+            
+        <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
+        <script>
+        
+        var glviewer = null;
+        var labels = [];
+        var m = null;
+        var posLobe = null;
+        var negLobe = null;
+        var m2 = null;
+        var atoms = null;
+        var moldata = "";
+        var l = null;
+        var modelgroup = null;
+        var receptorModel = null;
+        var ligandModel = null;
+        var molObj = null; //Object3D for each rendered model      
+        var lastsurfstyle = true;
+        var voldata = null;
+        
+        var toggleSurfTrans = function(surf) {
+            
+            var opacity = !!(lastsurfstyle) ? 0.75 : 1;
+            glviewer.setSurfaceMaterialStyle(surf,{ 'opacity': opacity}); 
+            glviewer.render();
+            lastsurfstyle = !(lastsurfstyle);
+        };  
+        
+        var addLabels = function() {
+            var atoms = glviewer.getModel().selectedAtoms({atom : "CA"});
+            for (var a in atoms) {
+                var atom = atoms[a];
+                
+                //if (atom.resn.trim() === "ASN") {
+                    var l = glviewer.addLabel(atom.resn + " " + atom.resi, {inFront: true, 
+                                              fontSize: 12, position: {x: atom.x, y: atom.y, z: atom.z} } ); 
+                    atom.label = l;
+                    labels.push(atom);                
+                //}
+            }
+        };
+        
+        var atomcallback = function(atom, viewer){
+            if (atom.clickLabel === undefined || !atom.clickLabel instanceof $3Dmol.Label) {
+                atom.clickLabel = viewer.addLabel(atom.elem + atom.serial,
+                                                  {fontSize : 14, 
+                                                   position : {x:atom.x, y:atom.y, z:atom.z}});
+                atom.clicked = true;
 
-<style>
-head, body {
-	margin: 0;
-	border: 0;
-	padding: 0;
-	max-height: 100vh
-}
-</style>
-<script>
-	var glviewer = null;
-	var labels = [];
+            }
+            
+            
+            //toggle label style
+            else{
 
-	var addLabels = function() {
-		var atoms = glviewer.getModel().selectedAtoms({
-			atom : "CA"
-		});
-		for ( var a in atoms) {
-			var atom = atoms[a];
+                if (atom.clicked) {
+                    var newstyle = {fontSize: atom.clickLabel.fontSize, position: atom.clickLabel.position,
+                                    backgroundColor: {r: 100, g: 0, b: 255, a: 0.8}};
+                                
+                    viewer.setLabelStyle(atom.clickLabel, newstyle);
+                    atom.clicked = !atom.clicked;
+                }
+               
+                else {
+                    viewer.removeLabel(atom.clickLabel);  
+                    atom.clickLabel = undefined;
+                    atom.clicked = false;
+                }
+                
+            }
+        };
 
-			var l = glviewer.addLabel(atom.resn + " " + atom.resi, {
-				inFront : true,
-				fontSize : 12,
-				position : {
-					x : atom.x,
-					y : atom.y,
-					z : atom.z
-				}
-			});
-			atom.label = l;
-			labels.push(atom);
-		}
-	};
+        var shapecallback = function(shape, viewer) {
+            if(shape.clickLabel === undefined || !shape.clickLabel instanceof $3Dmol.Label) { 
+                shape.clickLabel = viewer.addLabel("Shape " + shape.id, {fontSize:14, position:
+                    {x:shape.position.x, y:shape.position.y, z:shape.position.z}});
+                shape.clicked=true;
+            } 
+            
+            else { 
+                if (shape.clicked) { 
+                    var newstyle = shape.clickLabel.stylespec; 
+                    newstyle.backgroundColor = {r:100, g:0, b:255, a:0.8}; 
+                    viewer.setLabelStyle(shape.clickLabel, newstyle); 
+                    shape.clicked = !shape.clicked; 
+                } 
+                else { 
+                    viewer.removeLabel(shape.clickLabel); 
+                    shape.clickLabel = undefined; 
+                    shape.clicked = false; 
+                } 
+            } 
+        };
+        
+        $(document).ready(function() {
+                        
+            moldata = data = $("#moldata_pdb_large").val();
+            glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});            
+            glviewer.setBackgroundColor(0xffffff);
+                                       
+            receptorModel = m = glviewer.addModel(data, "pdb");               
+                   
+            atoms = m.selectedAtoms({});
+                    
+            for (var i in atoms) {
+                var atom = atoms[i];
+                atom.clickable = false;
+                atom.callback = atomcallback;
+            }
 
-	var atomcallback = function(atom, viewer) {
-		if (atom.clickLabel === undefined
-				|| !atom.clickLabel instanceof $3Dmol.Label) {
-			atom.clickLabel = viewer.addLabel(atom.elem + atom.serial, {
-				fontSize : 14,
-				position : {
-					x : atom.x,
-					y : atom.y,
-					z : atom.z
-				},
-				backgroundColor: "black"
-			});
-			atom.clicked = true;
-		}
+            glviewer.setStyle({}, {line:{}});
+            glviewer.mapAtomProperties($3Dmol.partialCharges);
+            glviewer.zoomTo();
+            glviewer.render();   
+           
+        });
+        
+        </script>
+    </head>
+    <body>
+         <div id="gldiv" style="width: 100%; height: 80vh; margin: 0; padding: 0; border: 0; "></div> 
 
-		//toggle label style
-		else {
+         <hr style="margin: 0;"> 
 
-			if (atom.clicked) {
-				var newstyle = atom.clickLabel.getStyle();
-				newstyle.backgroundColor = 0x66ccff;
+        <br>
+        <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
+        <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
+        <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
+        <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
+        <input type="button" value="SphereI" onclick="glviewer.setStyle({},{spherei:{}}); glviewer.render();"></input>
+        <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
+        <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
+        <br>
+        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
+        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'},true);"></input>
+       <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
+        <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2), lastsurfstyle = 1;"></input>
+        <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>
+        <br>
+        <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
+                <br>
+        <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
+        <input id="atomid" value="20" size=4><button onclick="glviewer.setStyle({}, {line:{}}); glviewer.setStyle({index:$('#atomid').val()}, {sphere:{}}); glviewer.render();">Select atom</button><button onclick="glviewer.setStyle({}, {line:{}}); glviewer.setStyle({index:$('#atomid').val(), byres:{}}, {sphere:{}}); glviewer.render();">Select by residue</button><br>
+ 
+ 
+<textarea style="display: none;" id="moldata_download"></textarea>
+<textarea style="display: none" id="moldata_test">
 
-				viewer.setLabelStyle(atom.clickLabel, newstyle);
-				atom.clicked = !atom.clicked;
-			}
-			else {
-				viewer.removeLabel(atom.clickLabel);
-				delete atom.clickLabel;
-				atom.clicked = false;
-			}
+     RDKit          3D
 
-		}
-	};
+  5  4  0  0  0  0  0  0  0  0999 V2000
+    2.5838   -0.0054   -0.1837 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.2815   -0.0027   -0.2004 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000   -0.2168 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.2815    0.0027   -0.2331 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.5838    0.0054   -0.2498 C   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  2  0
+  2  3  3  3
+  3  4  3  3
+  4  5  2  0
+M  END
+$$$$
+</textarea>
+<textarea style="display: none" id="moldata_benzene_sdf">
 
-	$(document).ready(function() {
+ OpenBabel05131411233D
 
-		moldata = data = $("#moldata_pdb_large").val();
-		glviewer = $3Dmol.createViewer("gldiv", {
-			defaultcolors : $3Dmol.rasmolElementColors
-		});
-		glviewer.setBackgroundColor(0xffffff);
+ 12 12  0  0  0  0  0  0  0  0999 V2000
+    0.3122    1.3530   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.3278    0.4060   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0156   -0.9469   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.3123   -1.3529   -0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.3278   -0.4061    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0155    0.9469    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.5536    2.3986   -0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    2.3541    0.7199    0.0001 H   0  0  0  0  0  0  0  0  0  0  0  0
+    1.8004   -1.6788    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.5536   -2.3986    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.3541   -0.7198   -0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.8005    1.6787    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  7  1  0  0  0  0
+  1  6  2  0  0  0  0
+  2  3  2  0  0  0  0
+  2  1  1  0  0  0  0
+  2  8  1  0  0  0  0
+  3  4  1  0  0  0  0
+  3  9  1  0  0  0  0
+  4  5  2  0  0  0  0
+  4 10  1  0  0  0  0
+  5  6  1  0  0  0  0
+  6 12  1  0  0  0  0
+ 11  5  1  0  0  0  0
+M  END
+</textarea>
+<textarea style="display: none;" id="moldata_sdf_small_xy">v:U4C5Cr:4
+  -OEChem-12201211493D
 
-		receptorModel = m = glviewer.addModel(data, "pdb");
+  9  8  0     1  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.4142    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0000    1.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    1.4142    0.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0000   -1.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0  
+    0.0000   -1.4142    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0000   -1.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.4142    0.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.0000    1.0000    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0    
+  1  2  1  0  0  0  0
+  1  3  1  0  0  0  0
+  1  4  1  0  0  0  0
+  1  5  1  0  0  0  0
+  1  6  1  0  0  0  0
+  1  7  1  0  0  0  0
+  1  8  1  0  0  0  0
+  1  9  1  0  0  0  0
+M  END
+</textarea> 
+<textarea style="display: none;" id="moldata_sdf_small_yz">v:U4C5Cr:4
+  -OEChem-12201211493D
 
-		atoms = m.selectedAtoms({});
+ 9  8  0     1  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.4142    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.0000    1.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000    1.4142 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000   -1.0000    1.0000 S   0  0  0  0  0  0  0  0  0  0  0  0  
+    0.0000   -1.4142    0.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000   -1.0000   -1.0000 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000   -1.4142 S   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.0000   -1.0000 S   0  0  0  0  0  0  0  0  0  0  0  0    
+  1  2  1  0  0  0  0
+  1  3  1  0  0  0  0
+  1  4  1  0  0  0  0
+  1  5  1  0  0  0  0
+  1  6  1  0  0  0  0
+  1  7  1  0  0  0  0
+  1  8  1  0  0  0  0
+  1  9  1  0  0  0  0
+M  END
+</textarea> 
+<textarea style="display: none;" id="moldata_sdf_small">v:U4C5Cr:4
+  -OEChem-12201211493D
 
-		for ( var i in atoms) {
-			var atom = atoms[i];
-			atom.clickable = true;
-			atom.callback = atomcallback;
-		}
+ 2 1  0     1  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.0000    0.0000 S  0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+M  END
+</textarea> 
+<textarea style="display: none;" id="moldata_sdf_small2">v:U4C5Cr:4
+  -OEChem-12201211493D
+  
+ 4 3  0     1  0  0  0  0  0999 V2000
+    1.7096    1.6571   -1.9242 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.5556    2.6951   -2.8322 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.4684    1.9044   -0.5763 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.1810    3.9094   -2.4070 N   0  3  0  0  0  0  0  0  0  0  0  0
+  1  3  1  0  0  0  0
+  1  2  3  0  0  0  0
+  2  4  1  0  0  0  0
+</textarea>
+<textarea style="display: none;" id="moldata_sdf">v:U4C5Cr:4
+  -OEChem-12201211493D
 
-		glviewer.mapAtomProperties($3Dmol.partialCharges);
-		glviewer.zoomTo();
-		glviewer.render();
+ 43 44  0     1  0  0  0  0  0999 V2000
+   -8.1967    0.5191    0.7989 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -7.6843   -0.2222   -0.2656 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -7.4111    1.4960    1.4107 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -6.3864    0.0132   -0.7188 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.7096    1.6571   -1.9242 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0806    3.1754   -0.1629 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.5556    2.6951   -2.8322 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.9424    4.1749   -1.1154 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -6.1130    1.7316    0.9575 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.6006    0.9902   -0.1071 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.4684    1.9044   -0.5763 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.3375    0.5391    1.2056 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.7567   -0.6431    0.1759 C   0  0  0  0  0  0  0  0  0  0  0  0
+    4.1896   -0.7188    0.9465 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.2909    2.7837    1.6268 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.7605   -3.4645   -4.5901 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.7254   -2.1586    3.8348 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.5133   -4.3920    2.7268 C   0  0  0  0  0  0  0  0  0  0  0  0
+    6.6863    1.6002   -0.3205 C   0  0  0  0  0  0  0  0  0  0  0  0
+    7.5989    1.9082    1.9888 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.2066    1.2256   -0.6124 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.9764   -3.9346   -3.3752 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.3654   -3.2099   -3.2596 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.1347   -3.6640   -2.0173 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.4837   -2.9599   -1.8449 C   0  0  0  0  0  0  0  0  0  0  0  0
+    3.2863   -3.4666   -0.6437 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.6329   -2.4479    1.5093 C   0  0  0  0  0  0  0  0  0  0  0  0
+    5.1024    1.5172    1.6288 C   0  0  0  0  0  0  0  0  0  0  0  0
+    4.6041   -2.7047   -0.5026 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.6282    0.7946    0.4366 C   0  0  1  0  0  0  0  0  0  0  0  0
+   -1.6645   -0.9464    1.1968 C   0  0  2  0  0  0  0  0  0  0  0  0
+    3.9912    0.7912    0.8596 C   0  0  1  0  0  0  0  0  0  0  0  0
+   -0.5310   -2.8799    2.4982 C   0  0  0  0  0  0  0  0  0  0  0  0
+    6.5338    1.2007    1.1499 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.1810    3.9094   -2.4070 N   0  3  0  0  0  0  0  0  0  0  0  0
+   -3.2093    0.6656    0.2711 N   0  0  0  0  0  0  0  0  0  0  0  0
+    4.3505   -1.2956   -0.3057 N   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.4217   -0.4795    0.6395 N   0  0  0  0  0  0  0  0  0  0  0  0
+    2.6640    1.0826    1.3983 N   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0467    4.8534   -3.2690 O   0  5  0  0  0  0  0  0  0  0  0  0
+    0.0407    1.1492    2.2310 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.1430   -1.4631   -0.6544 O   0  0  0  0  0  0  0  0  0  0  0  0
+    4.2427   -1.3265    2.0137 O   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  6  8  1  0  0  0  0
+  3  9  1  0  0  0  0
+  9 15  1  0  0  0  0
+  4 10  1  0  0  0  0
+ 10 21  1  0  0  0  0
+  5 11  1  0  0  0  0
+ 11 30  1  0  0  0  0
+ 12 30  1  0  0  0  0
+ 12 38  1  0  0  0  0
+ 13 31  1  0  0  0  0
+ 13 36  1  0  0  0  0
+ 14 32  1  0  0  0  0
+ 14 37  1  0  0  0  0
+ 21 36  1  0  0  0  0
+ 16 22  1  0  0  0  0
+ 22 23  1  0  0  0  0
+ 23 24  1  0  0  0  0
+ 24 25  1  0  0  0  0
+ 25 26  1  0  0  0  0
+ 26 29  1  0  0  0  0
+ 29 37  1  0  0  0  0
+ 30 39  1  0  0  0  0
+ 27 31  1  0  0  0  0
+ 31 38  1  0  0  0  0
+ 28 32  1  0  0  0  0
+ 32 39  1  0  0  0  0
+ 17 33  1  0  0  0  0
+ 18 33  1  0  0  0  0
+ 27 33  1  0  0  0  0
+ 19 34  1  0  0  0  0
+ 20 34  1  0  0  0  0
+ 28 34  1  0  0  0  0
+  7 35  1  0  0  0  0
+ 35 40  1  0  0  0  0
+  1  3  2  0  0  0  0
+  2  4  2  0  0  0  0
+  5  7  2  0  0  0  0
+  9 10  2  0  0  0  0
+  6 11  2  0  0  0  0
+ 12 41  2  0  0  0  0
+ 13 42  2  0  0  0  0
+ 14 43  2  0  0  0  0
+  8 35  2  0  0  0  0
+M  CHG  2  35   1  40  -1
+M  END
+</textarea> 
+<textarea style="display: none;" id="moldata_xyz">
+43
+v:U4C5Cr:4
+C         -8.19670        0.51910        0.79890
+C         -7.68430       -0.22220       -0.26560
+C         -7.41110        1.49600        1.41070
+C         -6.38640        0.01320       -0.71880
+C          1.70960        1.65710       -1.92420
+C          1.08060        3.17540       -0.16290
+C          1.55560        2.69510       -2.83220
+C          0.94240        4.17490       -1.11540
+C         -6.11300        1.73160        0.95750
+C         -5.60060        0.99020       -0.10710
+C          1.46840        1.90440       -0.57630
+C          0.33750        0.53910        1.20560
+C         -2.75670       -0.64310        0.17590
+C          4.18960       -0.71880        0.94650
+C         -5.29090        2.78370        1.62680
+C         -1.76050       -3.46450       -4.59010
+C         -0.72540       -2.15860        3.83480
+C         -0.51330       -4.39200        2.72680
+C          6.68630        1.60020       -0.32050
+C          7.59890        1.90820        1.98880
+C         -4.20660        1.22560       -0.61240
+C         -0.97640       -3.93460       -3.37520
+C          0.36540       -3.20990       -3.25960
+C          1.13470       -3.66400       -2.01730
+C          2.48370       -2.95990       -1.84490
+C          3.28630       -3.46660       -0.64370
+C         -1.63290       -2.44790        1.50930
+C          5.10240        1.51720        1.62880
+C          4.60410       -2.70470       -0.50260
+C          1.62820        0.79460        0.43660
+C         -1.66450       -0.94640        1.19680
+C          3.99120        0.79120        0.85960
+C         -0.53100       -2.87990        2.49820
+C          6.53380        1.20070        1.14990
+N          1.18100        3.90940       -2.40700
+N         -3.20930        0.66560        0.27110
+N          4.35050       -1.29560       -0.30570
+N         -0.42170       -0.47950        0.63950
+N          2.66400        1.08260        1.39830
+O          1.04670        4.85340       -3.26900
+O          0.04070        1.14920        2.23100
+O         -3.14300       -1.46310       -0.65440
+O          4.24270       -1.32650        2.01370
+</textarea>   
+<textarea style="display: none;" id="moldata_mol2">
+@<TRIPOS>MOLECULE
+v:U4C5Cr:4
+ 96 97 0 0 0
+SMALL
+GASTEIGER
 
-
-	});
-</script>
-</head>
-<body>
-	<div id="gldiv"
-		style="width: 100%; height: 80vh; margin: 0; padding: 0; border: 0;"></div>
-
-	<hr style="margin: 0;">
-
-	<br>
-	<input type="button" value="Stick"
-		onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
-	<input type="button" value="Line"
-		onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
-	<input type="button" value="Cross"
-		onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
-	<input type="button" value="Sphere"
-		onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
-	<input type="button" value="Cartoon"
-		onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
-	<input type="button" value="Label alpha C's"
-		onclick="addLabels(glviewer); glviewer.render();"></input>
-	<br>
-	<input type="button" value="Surface1"
-		onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false,chain:'A'},{hetflag:false,chain:'A'});"></input>
-	<input type="button" value="Surface2"
-		onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.RWB(-.6,.6)}, opacity:0.85}, {chain:'B'},{chain:'B'});"></input>
-	<input type="button" value="RM Surface1"
-		onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
-	<input type="button" value="RM Surface2"
-		onclick="glviewer.removeSurface(surf2), lastsurfstyle = 1;"></input>
-	<br>
-	<input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
-	<br>
-	<input id="pdbid" value="1UBQ" size=4>
-	<button
-		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button>
-	<br>
-
-
-	<textarea style="display: none;" id="moldata_pdb_large">           
+@<TRIPOS>ATOM
+      1 C          -8.1967    0.5191    0.7989 C.ar    1  LIG1       -0.0615
+      2 C          -7.6843   -0.2222   -0.2656 C.ar    1  LIG1       -0.0614
+      3 C          -7.4111    1.4960    1.4107 C.ar    1  LIG1       -0.0585
+      4 C          -6.3864    0.0132   -0.7188 C.ar    1  LIG1       -0.0568
+      5 C           1.7096    1.6571   -1.9242 C.ar    1  LIG1        0.0085
+      6 C           1.0806    3.1754   -0.1629 C.ar    1  LIG1        0.0085
+      7 C           1.5556    2.6951   -2.8322 C.ar    1  LIG1        0.1831
+      8 C           0.9424    4.1749   -1.1154 C.ar    1  LIG1        0.1831
+      9 C          -6.1130    1.7316    0.9575 C.ar    1  LIG1       -0.0458
+     10 C          -5.6006    0.9902   -0.1071 C.ar    1  LIG1       -0.0274
+     11 C           1.4684    1.9044   -0.5763 C.ar    1  LIG1       -0.0104
+     12 C           0.3375    0.5391    1.2056 C.2     1  LIG1        0.2352
+     13 C          -2.7567   -0.6431    0.1759 C.2     1  LIG1        0.2336
+     14 C           4.1896   -0.7188    0.9465 C.2     1  LIG1        0.2301
+     15 C          -5.2909    2.7837    1.6268 C.3     1  LIG1       -0.0394
+     16 C          -1.7605   -3.4645   -4.5901 C.3     1  LIG1       -0.0653
+     17 C          -0.7254   -2.1586    3.8348 C.3     1  LIG1       -0.0626
+     18 C          -0.5133   -4.3920    2.7268 C.3     1  LIG1       -0.0626
+     19 C           6.6863    1.6002   -0.3205 C.3     1  LIG1       -0.0626
+     20 C           7.5989    1.9082    1.9888 C.3     1  LIG1       -0.0626
+     21 C          -4.2066    1.2256   -0.6124 C.3     1  LIG1        0.0371
+     22 C          -0.9764   -3.9346   -3.3752 C.3     1  LIG1       -0.0559
+     23 C           0.3654   -3.2099   -3.2596 C.3     1  LIG1       -0.0533
+     24 C           1.1347   -3.6640   -2.0173 C.3     1  LIG1       -0.0530
+     25 C           2.4837   -2.9599   -1.8449 C.3     1  LIG1       -0.0516
+     26 C           3.2863   -3.4666   -0.6437 C.3     1  LIG1       -0.0374
+     27 C          -1.6329   -2.4479    1.5093 C.3     1  LIG1       -0.0236
+     28 C           5.1024    1.5172    1.6288 C.3     1  LIG1       -0.0267
+     29 C           4.6041   -2.7047   -0.5026 C.3     1  LIG1        0.0116
+     30 C           1.6282    0.7946    0.4366 C.3     1  LIG1        0.1112
+     31 C          -1.6645   -0.9464    1.1968 C.3     1  LIG1        0.0996
+     32 C           3.9912    0.7912    0.8596 C.3     1  LIG1        0.0858
+     33 C          -0.5310   -2.8799    2.4982 C.3     1  LIG1       -0.0446
+     34 C           6.5338    1.2007    1.1499 C.3     1  LIG1       -0.0449
+     35 N           1.1810    3.9094   -2.4070 N.ar    1  LIG1       -0.1774
+     36 N          -3.2093    0.6656    0.2711 N.am    1  LIG1       -0.3097
+     37 N           4.3505   -1.2956   -0.3057 N.am    1  LIG1       -0.3140
+     38 N          -0.4217   -0.4795    0.6395 N.am    1  LIG1       -0.3024
+     39 N           2.6640    1.0826    1.3983 N.3     1  LIG1       -0.2914
+     40 O           1.0467    4.8534   -3.2690 O.co2   1  LIG1       -0.6198
+     41 O           0.0407    1.1492    2.2310 O.2     1  LIG1       -0.2737
+     42 O          -3.1430   -1.4631   -0.6544 O.2     1  LIG1       -0.2738
+     43 O           4.2427   -1.3265    2.0137 O.2     1  LIG1       -0.2741
+     44 H          -9.1571    0.3449    1.1340 H       1  LIG1        0.0618
+     45 H          -8.2656   -0.9450   -0.7180 H       1  LIG1        0.0618
+     46 H          -7.7902    2.0444    2.1985 H       1  LIG1        0.0620
+     47 H          -6.0074   -0.5353   -1.5065 H       1  LIG1        0.0621
+     48 H           1.9978    0.7188   -2.2428 H       1  LIG1        0.0680
+     49 H           0.8991    3.3710    0.8340 H       1  LIG1        0.0680
+     50 H           1.7298    2.5317   -3.8362 H       1  LIG1        0.1389
+     51 H           0.6555    5.1239   -0.8288 H       1  LIG1        0.1389
+     52 H          -5.8592    3.2344    2.4134 H       1  LIG1        0.0278
+     53 H          -4.9884    3.5249    0.9168 H       1  LIG1        0.0278
+     54 H          -4.4128    2.3336    2.0406 H       1  LIG1        0.0278
+     55 H          -2.6909   -3.9905   -4.6401 H       1  LIG1        0.0230
+     56 H          -1.1939   -3.6284   -5.4828 H       1  LIG1        0.0230
+     57 H          -1.9536   -2.4159   -4.4999 H       1  LIG1        0.0230
+     58 H           0.0405   -2.4605    4.5183 H       1  LIG1        0.0232
+     59 H          -1.6910   -2.3809    4.2387 H       1  LIG1        0.0232
+     60 H          -0.6598   -1.1023    3.6772 H       1  LIG1        0.0232
+     61 H           0.2654   -4.6397    3.4175 H       1  LIG1        0.0232
+     62 H          -0.3633   -4.9051    1.7999 H       1  LIG1        0.0232
+     63 H          -1.4546   -4.6973    3.1337 H       1  LIG1        0.0232
+     64 H           7.6802    1.3793   -0.6494 H       1  LIG1        0.0232
+     65 H           6.4780    2.6423   -0.4447 H       1  LIG1        0.0232
+     66 H           5.9887    1.0433   -0.9105 H       1  LIG1        0.0232
+     67 H           8.5706    1.6572    1.6179 H       1  LIG1        0.0232
+     68 H           7.5100    1.6242    3.0166 H       1  LIG1        0.0232
+     69 H           7.4576    2.9664    1.9170 H       1  LIG1        0.0232
+     70 H          -4.0366    2.2752   -0.7325 H       1  LIG1        0.0512
+     71 H          -4.1166    0.7318   -1.5574 H       1  LIG1        0.0512
+     72 H          -0.8162   -4.9910   -3.4315 H       1  LIG1        0.0263
+     73 H          -1.5514   -3.7049   -2.5026 H       1  LIG1        0.0263
+     74 H           0.2073   -2.1522   -3.2248 H       1  LIG1        0.0265
+     75 H           0.9508   -3.4541   -4.1213 H       1  LIG1        0.0265
+     76 H           1.2855   -4.7226   -2.0563 H       1  LIG1        0.0265
+     77 H           0.5376   -3.3961   -1.1708 H       1  LIG1        0.0265
+     78 H           2.3282   -1.9053   -1.7527 H       1  LIG1        0.0266
+     79 H           3.0613   -3.1841   -2.7173 H       1  LIG1        0.0266
+     80 H           3.4789   -4.5139   -0.7482 H       1  LIG1        0.0280
+     81 H           2.7070   -3.2994    0.2402 H       1  LIG1        0.0280
+     82 H          -1.5255   -2.9972    0.5974 H       1  LIG1        0.0290
+     83 H          -2.5617   -2.6646    1.9944 H       1  LIG1        0.0290
+     84 H           5.0190    1.2890    2.6709 H       1  LIG1        0.0287
+     85 H           4.9552    2.5600    1.4394 H       1  LIG1        0.0287
+     86 H           5.2090   -2.8516   -1.3729 H       1  LIG1        0.0462
+     87 H           5.1280   -3.0812    0.3510 H       1  LIG1        0.0462
+     88 H           1.8938   -0.0730   -0.1305 H       1  LIG1        0.0607
+     89 H          -1.8475   -0.4494    2.1265 H       1  LIG1        0.0594
+     90 H           4.0496    1.1372   -0.1512 H       1  LIG1        0.0557
+     91 H           0.4100   -2.6105    2.0659 H       1  LIG1        0.0296
+     92 H           6.6836    0.1475    1.2646 H       1  LIG1        0.0296
+     93 H          -2.8323    1.2409    0.9754 H       1  LIG1        0.1491
+     94 H           4.2888   -0.7160   -1.0991 H       1  LIG1        0.1487
+     95 H          -0.0920   -0.9035   -0.1856 H       1  LIG1        0.1495
+     96 H           2.5081    0.5418    2.2490 H       1  LIG1        0.1237
+@<TRIPOS>BOND
+     1     1     2   ar
+     2     6     8   ar
+     3     3     9   ar
+     4     9    15    1
+     5     4    10   ar
+     6    10    21    1
+     7     5    11   ar
+     8    11    30    1
+     9    12    30    1
+    10    12    38   am
+    11    13    31    1
+    12    13    36   am
+    13    14    32    1
+    14    14    37   am
+    15    21    36    1
+    16    16    22    1
+    17    22    23    1
+    18    23    24    1
+    19    24    25    1
+    20    25    26    1
+    21    26    29    1
+    22    29    37    1
+    23    30    39    1
+    24    27    31    1
+    25    31    38    1
+    26    28    32    1
+    27    32    39    1
+    28    17    33    1
+    29    18    33    1
+    30    27    33    1
+    31    19    34    1
+    32    20    34    1
+    33    28    34    1
+    34     7    35   ar
+    35    35    40    1
+    36     1     3   ar
+    37     2     4   ar
+    38     5     7   ar
+    39     9    10   ar
+    40     6    11   ar
+    41    12    41    2
+    42    13    42    2
+    43    14    43    2
+    44     8    35   ar
+    45     1    44    1
+    46     2    45    1
+    47     3    46    1
+    48     4    47    1
+    49     5    48    1
+    50     6    49    1
+    51     7    50    1
+    52     8    51    1
+    53    15    52    1
+    54    15    53    1
+    55    15    54    1
+    56    16    55    1
+    57    16    56    1
+    58    16    57    1
+    59    17    58    1
+    60    17    59    1
+    61    17    60    1
+    62    18    61    1
+    63    18    62    1
+    64    18    63    1
+    65    19    64    1
+    66    19    65    1
+    67    19    66    1
+    68    20    67    1
+    69    20    68    1
+    70    20    69    1
+    71    21    70    1
+    72    21    71    1
+    73    22    72    1
+    74    22    73    1
+    75    23    74    1
+    76    23    75    1
+    77    24    76    1
+    78    24    77    1
+    79    25    78    1
+    80    25    79    1
+    81    26    80    1
+    82    26    81    1
+    83    27    82    1
+    84    27    83    1
+    85    28    84    1
+    86    28    85    1
+    87    29    86    1
+    88    29    87    1
+    89    30    88    1
+    90    31    89    1
+    91    32    90    1
+    92    33    91    1
+    93    34    92    1
+    94    36    93    1
+    95    37    94    1
+    96    38    95    1
+    97    39    96    1
+</textarea>   
+<textarea style="display: none;" id="moldata_pdb_large">           
 HEADER    COMPLEX (ONCOGENE PROTEIN/PEPTIDE)      30-SEP-96   1YCR              
 TITLE     MDM2 BOUND TO THE TRANSACTIVATION DOMAIN OF P53                       
 COMPND    MOL_ID: 1;                                                            
@@ -1267,7 +1741,160 @@ ATOM    819  OXT ASN B  29      16.296 -17.351   0.139  1.00 30.36           O
 TER     820      ASN B  29                                                      
 MASTER      247    0    0    5    2    0    0    6  818    2    0   11          
 END                                                                                                                                                                                                               
+</textarea>        
+<textarea style="display: none;" id="moldata_pdb_small">
+HELIX    5   5 PHE B   19  LEU B   25  1                                   7    
+ATOM    723  N   PHE B  19      32.143 -27.542 -11.625  1.00 22.45           N  
+ATOM    724  CA  PHE B  19      31.769 -26.453 -10.742  1.00 17.73           C  
+ATOM    725  C   PHE B  19      30.344 -26.019 -10.974  1.00 21.74           C  
+ATOM    726  O   PHE B  19      29.549 -25.992 -10.043  1.00 22.84           O  
+ATOM    727  CB  PHE B  19      32.674 -25.245 -10.916  1.00 12.04           C  
+ATOM    728  CG  PHE B  19      32.265 -24.076 -10.062  1.00 12.01           C  
+ATOM    729  CD1 PHE B  19      32.438 -24.116  -8.685  1.00 12.17           C  
+ATOM    730  CD2 PHE B  19      31.667 -22.955 -10.628  1.00 11.53           C  
+ATOM    731  CE1 PHE B  19      32.021 -23.055  -7.889  1.00 13.45           C  
+ATOM    732  CE2 PHE B  19      31.246 -21.888  -9.839  1.00 10.96           C  
+ATOM    733  CZ  PHE B  19      31.421 -21.935  -8.468  1.00 11.75           C  
+ATOM    734  N   SER B  20      30.030 -25.693 -12.225  1.00 24.64           N  
+ATOM    735  CA  SER B  20      28.703 -25.237 -12.606  1.00 26.30           C  
+ATOM    736  C   SER B  20      27.575 -26.173 -12.205  1.00 27.49           C  
+ATOM    737  O   SER B  20      26.509 -25.712 -11.822  1.00 28.40           O  
+ATOM    738  CB  SER B  20      28.652 -24.947 -14.093  1.00 27.55           C  
+ATOM    739  OG  SER B  20      28.286 -23.593 -14.268  1.00 30.01           O  
+ATOM    740  N   ASP B  21      27.809 -27.478 -12.284  1.00 27.30           N  
+ATOM    741  CA  ASP B  21      26.814 -28.452 -11.882  1.00 28.79           C  
+ATOM    742  C   ASP B  21      26.639 -28.352 -10.378  1.00 29.54           C  
+ATOM    743  O   ASP B  21      25.519 -28.300  -9.873  1.00 33.11           O  
+ATOM    744  CB  ASP B  21      27.281 -29.875 -12.205  1.00 33.00           C  
+ATOM    745  CG  ASP B  21      27.479 -30.112 -13.692  1.00 38.52           C  
+ATOM    746  OD1 ASP B  21      26.877 -29.358 -14.503  1.00 39.73           O  
+ATOM    747  OD2 ASP B  21      28.238 -31.057 -14.042  1.00 40.32           O  
+ATOM    748  N   LEU B  22      27.761 -28.324  -9.665  1.00 26.27           N  
+ATOM    749  CA  LEU B  22      27.753 -28.274  -8.217  1.00 21.85           C  
+ATOM    750  C   LEU B  22      27.124 -27.006  -7.657  1.00 22.11           C  
+ATOM    751  O   LEU B  22      26.320 -27.064  -6.716  1.00 24.72           O  
+ATOM    752  CB  LEU B  22      29.180 -28.412  -7.685  1.00 18.73           C  
+ATOM    753  CG  LEU B  22      29.872 -29.738  -7.354  1.00 15.80           C  
+ATOM    754  CD1 LEU B  22      29.042 -30.916  -7.782  1.00 14.53           C  
+ATOM    755  CD2 LEU B  22      31.236 -29.774  -8.020  1.00 14.98           C  
+ATOM    756  N   TRP B  23      27.477 -25.871  -8.251  1.00 19.21           N  
+ATOM    757  CA  TRP B  23      27.021 -24.553  -7.803  1.00 20.10           C  
+ATOM    758  C   TRP B  23      25.532 -24.284  -8.011  1.00 25.27           C  
+ATOM    759  O   TRP B  23      24.919 -23.498  -7.297  1.00 27.09           O  
+ATOM    760  CB  TRP B  23      27.892 -23.448  -8.451  1.00 14.64           C  
+ATOM    761  CG  TRP B  23      27.585 -22.055  -8.009  1.00 11.74           C  
+ATOM    762  CD1 TRP B  23      26.730 -21.178  -8.613  1.00 10.40           C  
+ATOM    763  CD2 TRP B  23      28.090 -21.382  -6.842  1.00 11.59           C  
+ATOM    764  NE1 TRP B  23      26.659 -20.002  -7.892  1.00  8.62           N  
+ATOM    765  CE2 TRP B  23      27.478 -20.101  -6.799  1.00 10.54           C  
+ATOM    766  CE3 TRP B  23      28.990 -21.731  -5.830  1.00 11.67           C  
+ATOM    767  CZ2 TRP B  23      27.738 -19.177  -5.784  1.00 11.03           C  
+ATOM    768  CZ3 TRP B  23      29.251 -20.809  -4.825  1.00 10.73           C  
+ATOM    769  CH2 TRP B  23      28.623 -19.548  -4.812  1.00 10.81           C  
+ATOM    770  N   LYS B  24      24.939 -24.930  -8.991  1.00 30.12           N  
+ATOM    771  CA  LYS B  24      23.530 -24.716  -9.231  1.00 35.48           C  
+ATOM    772  C   LYS B  24      22.646 -25.442  -8.219  1.00 35.68           C  
+ATOM    773  O   LYS B  24      21.451 -25.171  -8.134  1.00 39.75           O  
+ATOM    774  CB  LYS B  24      23.180 -25.083 -10.671  1.00 41.39           C  
+ATOM    775  CG  LYS B  24      23.805 -24.114 -11.676  1.00 46.84           C  
+ATOM    776  CD  LYS B  24      23.803 -24.649 -13.100  1.00 50.66           C  
+ATOM    777  CE  LYS B  24      24.657 -23.764 -13.999  1.00 52.44           C  
+ATOM    778  NZ  LYS B  24      24.754 -24.351 -15.355  1.00 53.53           N  
+ATOM    779  N   LEU B  25      23.240 -26.308  -7.408  1.00 31.53           N  
+ATOM    780  CA  LEU B  25      22.485 -27.035  -6.394  1.00 28.43           C  
+ATOM    781  C   LEU B  25      22.403 -26.295  -5.067  1.00 27.36           C  
+ATOM    782  O   LEU B  25      22.155 -26.900  -4.030  1.00 28.91           O  
+ATOM    783  CB  LEU B  25      23.113 -28.401  -6.153  1.00 28.84           C  
+ATOM    784  CG  LEU B  25      23.201 -29.321  -7.366  1.00 30.87           C  
+ATOM    785  CD1 LEU B  25      23.891 -30.600  -6.922  1.00 30.42           C  
+ATOM    786  CD2 LEU B  25      21.808 -29.605  -7.945  1.00 30.75           C  
+ATOM    787  N   LEU B  26      22.657 -24.998  -5.083  1.00 28.16           N  
+ATOM    788  CA  LEU B  26      22.616 -24.202  -3.862  1.00 30.58           C  
+ATOM    789  C   LEU B  26      21.235 -23.583  -3.733  1.00 32.69           C  
+ATOM    790  O   LEU B  26      20.630 -23.223  -4.753  1.00 33.43           O  
+ATOM    791  CB  LEU B  26      23.652 -23.069  -3.918  1.00 30.27           C  
+ATOM    792  CG  LEU B  26      25.131 -23.345  -4.163  1.00 29.57           C  
+ATOM    793  CD1 LEU B  26      25.825 -22.010  -4.268  1.00 29.65           C  
+ATOM    794  CD2 LEU B  26      25.723 -24.177  -3.038  1.00 29.90           C  
+ATOM    795  N   PRO B  27      20.753 -23.387  -2.477  1.00 32.15           N  
+ATOM    796  CA  PRO B  27      19.442 -22.801  -2.172  1.00 32.91           C  
+ATOM    797  C   PRO B  27      19.329 -21.458  -2.877  1.00 36.74           C  
+ATOM    798  O   PRO B  27      20.105 -20.538  -2.608  1.00 37.93           O  
+ATOM    799  CB  PRO B  27      19.491 -22.646  -0.660  1.00 31.00           C  
+ATOM    800  CG  PRO B  27      20.369 -23.774  -0.245  1.00 28.74           C  
+ATOM    801  CD  PRO B  27      21.480 -23.661  -1.226  1.00 29.37           C  
+ATOM    802  N   GLU B  28      18.368 -21.373  -3.794  1.00 39.68           N  
+ATOM    803  CA  GLU B  28      18.139 -20.187  -4.619  1.00 41.42           C  
+ATOM    804  C   GLU B  28      17.306 -19.049  -4.048  1.00 41.07           C  
+ATOM    805  O   GLU B  28      17.039 -18.062  -4.733  1.00 44.94           O  
+ATOM    806  CB  GLU B  28      17.603 -20.610  -5.988  1.00 43.50           C  
+ATOM    807  CG  GLU B  28      16.553 -21.693  -5.923  1.00 46.41           C  
+ATOM    808  CD  GLU B  28      16.395 -22.434  -7.228  1.00 50.74           C  
+ATOM    809  OE1 GLU B  28      17.341 -22.426  -8.054  1.00 50.52           O  
+ATOM    810  OE2 GLU B  28      15.315 -23.043  -7.418  1.00 54.75           O  
+ATOM    811  N   ASN B  29      16.925 -19.172  -2.791  1.00 37.74           N  
+ATOM    812  CA  ASN B  29      16.147 -18.147  -2.112  1.00 37.72           C  
+ATOM    813  C   ASN B  29      16.548 -18.261  -0.669  1.00 30.80           C  
+ATOM    814  O   ASN B  29      17.159 -19.284  -0.370  1.00 28.87           O  
+ATOM    815  CB  ASN B  29      14.634 -18.393  -2.256  1.00 44.98           C  
+ATOM    816  CG  ASN B  29      14.044 -17.784  -3.540  1.00 49.82           C  
+ATOM    817  OD1 ASN B  29      14.536 -16.773  -4.071  1.00 50.99           O  
+ATOM    818  ND2 ASN B  29      12.963 -18.387  -4.023  1.00 51.64           N  
+ATOM    819  OXT ASN B  29      16.296 -17.351   0.139  1.00 30.36           O  
+TER     820      ASN B  29  
+END                                                    
 </textarea>
-
-</body>
+<textarea style="display: none;" id="moldata_pdb_small2">
+HELIX    2   2 PHE B   19  SER B   20  1                                   7    
+ATOM    723  N   PHE B  19      32.143 -27.542 -11.625  1.00 22.45           N  
+ATOM    724  CA  PHE B  19      31.769 -26.453 -10.742  1.00 17.73           C  
+ATOM    725  C   PHE B  19      30.344 -26.019 -10.974  1.00 21.74           C  
+ATOM    726  O   PHE B  19      29.549 -25.992 -10.043  1.00 22.84           O  
+ATOM    727  CB  PHE B  19      32.674 -25.245 -10.916  1.00 12.04           C  
+ATOM    728  CG  PHE B  19      32.265 -24.076 -10.062  1.00 12.01           C  
+ATOM    729  CD1 PHE B  19      32.438 -24.116  -8.685  1.00 12.17           C  
+ATOM    730  CD2 PHE B  19      31.667 -22.955 -10.628  1.00 11.53           C  
+ATOM    731  CE1 PHE B  19      32.021 -23.055  -7.889  1.00 13.45           C  
+ATOM    732  CE2 PHE B  19      31.246 -21.888  -9.839  1.00 10.96           C  
+ATOM    733  CZ  PHE B  19      31.421 -21.935  -8.468  1.00 11.75           C  
+ATOM    734  N   SER B  20      30.030 -25.693 -12.225  1.00 24.64           N  
+ATOM    735  CA  SER B  20      28.703 -25.237 -12.606  1.00 26.30           C  
+ATOM    736  C   SER B  20      27.575 -26.173 -12.205  1.00 27.49           C  
+ATOM    737  O   SER B  20      26.509 -25.712 -11.822  1.00 28.40           O  
+ATOM    738  CB  SER B  20      28.652 -24.947 -14.093  1.00 27.55           C  
+ATOM    739  OG  SER B  20      28.286 -23.593 -14.268  1.00 30.01           O    
+TER     740      SER B  20
+END
+</textarea>
+<textarea style="display: none;" id="moldata_pdb_small3">
+HELIX    3   3 PHE B   19  ASP B   21  1                                   7    
+ATOM    723  N   PHE B  19      32.143 -27.542 -11.625  1.00 22.45           N  
+ATOM    724  CA  PHE B  19      31.769 -26.453 -10.742  1.00 17.73           C  
+ATOM    725  C   PHE B  19      30.344 -26.019 -10.974  1.00 21.74           C  
+ATOM    726  O   PHE B  19      29.549 -25.992 -10.043  1.00 22.84           O  
+ATOM    727  CB  PHE B  19      32.674 -25.245 -10.916  1.00 12.04           C  
+ATOM    728  CG  PHE B  19      32.265 -24.076 -10.062  1.00 12.01           C  
+ATOM    729  CD1 PHE B  19      32.438 -24.116  -8.685  1.00 12.17           C  
+ATOM    730  CD2 PHE B  19      31.667 -22.955 -10.628  1.00 11.53           C  
+ATOM    731  CE1 PHE B  19      32.021 -23.055  -7.889  1.00 13.45           C  
+ATOM    732  CE2 PHE B  19      31.246 -21.888  -9.839  1.00 10.96           C  
+ATOM    733  CZ  PHE B  19      31.421 -21.935  -8.468  1.00 11.75           C  
+ATOM    734  N   SER B  20      30.030 -25.693 -12.225  1.00 24.64           N  
+ATOM    735  CA  SER B  20      28.703 -25.237 -12.606  1.00 26.30           C  
+ATOM    736  C   SER B  20      27.575 -26.173 -12.205  1.00 27.49           C  
+ATOM    737  O   SER B  20      26.509 -25.712 -11.822  1.00 28.40           O  
+ATOM    738  CB  SER B  20      28.652 -24.947 -14.093  1.00 27.55           C  
+ATOM    739  OG  SER B  20      28.286 -23.593 -14.268  1.00 30.01           O  
+ATOM    740  N   ASP B  21      27.809 -27.478 -12.284  1.00 27.30           N  
+ATOM    741  CA  ASP B  21      26.814 -28.452 -11.882  1.00 28.79           C  
+ATOM    742  C   ASP B  21      26.639 -28.352 -10.378  1.00 29.54           C  
+ATOM    743  O   ASP B  21      25.519 -28.300  -9.873  1.00 33.11           O  
+ATOM    744  CB  ASP B  21      27.281 -29.875 -12.205  1.00 33.00           C  
+ATOM    745  CG  ASP B  21      27.479 -30.112 -13.692  1.00 38.52           C  
+ATOM    746  OD1 ASP B  21      26.877 -29.358 -14.503  1.00 39.73           O  
+ATOM    747  OD2 ASP B  21      28.238 -31.057 -14.042  1.00 40.32           O  
+TER     748      ASP B  21
+END
+</textarea>
+    </body>
 </html>
