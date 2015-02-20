@@ -16981,8 +16981,7 @@ $(document).ready(function() {
                 
                 var type = viewerdiv.data("type") || viewerdiv.data("datatype");
                 if(!type) {
-                	type = datauri.substr(datauri.lastIndexOf('.')+1).substring(0,3);
-                	if(type.length != 3) type = "pdb";
+                	type = datauri.substr(datauri.lastIndexOf('.')+1);
                 }
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);

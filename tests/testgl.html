@@ -99,12 +99,12 @@
                         
             //$.get("test_structs/1YCR.pdb", function(data){
                 
-                moldata = data = $("#moldata_cif").val();
+                moldata = data = $("#moldata_sdf").val();
                 glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});
                     
                 glviewer.setBackgroundColor(0xffffff);
                                         
-                receptorModel = m = glviewer.addModel(data, "mcif",{keepH:false});               
+                receptorModel = m = glviewer.addModel(data, "sdf",{keepH:false});               
                     
                 atoms = m.selectedAtoms({ }); 
                 
