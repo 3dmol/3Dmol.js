@@ -5829,6 +5829,40 @@ $3Dmol.specStringToObject = function(str) {
 	return ret;
 }
 
+// computes the bounding box around the provided atoms
+/**
+ * @param {AtomSpec[]} atomlist
+ * @return {Array}
+ */
+$3Dmol.getExtent = function(atomlist) {
+    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+    xmin = ymin = zmin = 9999;
+    xmax = ymax = zmax = -9999;
+    xsum = ysum = zsum = cnt = 0;
+
+    if (atomlist.length === 0)
+        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+    for (var i = 0; i < atomlist.length; i++) {
+        var atom = atomlist[i];
+        if (atom === undefined)
+            continue;
+        cnt++;
+        xsum += atom.x;
+        ysum += atom.y;
+        zsum += atom.z;
+
+        xmin = (xmin < atom.x) ? xmin : atom.x;
+        ymin = (ymin < atom.y) ? ymin : atom.y;
+        zmin = (zmin < atom.z) ? zmin : atom.z;
+        xmax = (xmax > atom.x) ? xmax : atom.x;
+        ymax = (ymax > atom.y) ? ymax : atom.y;
+        zmax = (zmax > atom.z) ? zmax : atom.z;
+    }
+
+    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+};
 
 
 
@@ -7579,6 +7613,40 @@ $3Dmol.specStringToObject = function(str) {
 	return ret;
 }
 
+// computes the bounding box around the provided atoms
+/**
+ * @param {AtomSpec[]} atomlist
+ * @return {Array}
+ */
+$3Dmol.getExtent = function(atomlist) {
+    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+    xmin = ymin = zmin = 9999;
+    xmax = ymax = zmax = -9999;
+    xsum = ysum = zsum = cnt = 0;
+
+    if (atomlist.length === 0)
+        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+    for (var i = 0; i < atomlist.length; i++) {
+        var atom = atomlist[i];
+        if (atom === undefined)
+            continue;
+        cnt++;
+        xsum += atom.x;
+        ysum += atom.y;
+        zsum += atom.z;
+
+        xmin = (xmin < atom.x) ? xmin : atom.x;
+        ymin = (ymin < atom.y) ? ymin : atom.y;
+        zmin = (zmin < atom.z) ? zmin : atom.z;
+        xmax = (xmax > atom.x) ? xmax : atom.x;
+        ymax = (ymax > atom.y) ? ymax : atom.y;
+        zmax = (zmax > atom.z) ? zmax : atom.z;
+    }
+
+    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+};
 
 
 /*
@@ -10455,11 +10523,11 @@ $3Dmol.GLModel = (function() {
                 }
             }
 
-            // expand selection by some distance
+            // expand selection by some distance (check that amount is int)
             if (sel.hasOwnProperty("expand") && sel.expand === parseInt(sel.expand, 10)) {
 
                 // extend bounding box of atom selection
-                var pb = getExtent(ret);
+                var pb = $3Dmol.getExtent(ret);
                 var nb = extendBounds(pb, sel.expand);
 
                 //[ [ xmin, ymin, zmin ],
@@ -10523,37 +10591,6 @@ $3Dmol.GLModel = (function() {
             }
 
             return ret;
-        };
-
-        // helper function also found in glviewer.js
-        var getExtent = function(atomlist) {
-            var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
-
-            xmin = ymin = zmin = 9999;
-            xmax = ymax = zmax = -9999;
-            xsum = ysum = zsum = cnt = 0;
-
-            if (atomlist.length === 0)
-                return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-            for (var i = 0; i < atomlist.length; i++) {
-                var atom = atomlist[i];
-                if (atom === undefined)
-                    continue;
-                cnt++;
-                xsum += atom.x;
-                ysum += atom.y;
-                zsum += atom.z;
-
-                xmin = (xmin < atom.x) ? xmin : atom.x;
-                ymin = (ymin < atom.y) ? ymin : atom.y;
-                zmin = (zmin < atom.z) ? zmin : atom.z;
-                xmax = (xmax > atom.x) ? xmax : atom.x;
-                ymax = (ymax > atom.y) ? ymax : atom.y;
-                zmax = (zmax > atom.z) ? zmax : atom.z;
-            }
-
-            return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
-                    [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
         };
 
         /** extends the given bounding box by some amount in every direction
@@ -11811,7 +11848,7 @@ $3Dmol.GLViewer = (function() {
 	 * @param {AtomSpec[]} atomlist
 	 * @return {Array}
 	 */
-	var getExtent = function(atomlist) {
+	var getExtentOld = function(atomlist) {
 		var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
 
 		xmin = ymin = zmin = 9999;
@@ -12501,8 +12538,8 @@ $3Dmol.GLViewer = (function() {
 		this.zoomTo = function(sel) {
 			var atoms = getAtomsFromSel(sel).concat(shapes);
 			var allatoms = getAtomsFromSel({}).concat(shapes);
-			var tmp = getExtent(atoms);
-			var alltmp = getExtent(allatoms);
+			var tmp = $3Dmol.getExtent(atoms);
+			var alltmp = $3DmolgetExtent(allatoms);
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
@@ -13308,7 +13345,7 @@ $3Dmol.GLViewer = (function() {
 
 			var mat = getMatWithStyle(style);
 
-			var extent = getExtent(atomsToShow);
+			var extent = $3Dmol.getExtent(atomsToShow);
 
 			var i, il;
 			if (style['map'] && style['map']['prop']) {
@@ -13349,7 +13386,7 @@ $3Dmol.GLViewer = (function() {
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
-				var seleExtent = getExtent(focusSele);
+				var seleExtent = $3Dmol.getExtent(focusSele);
 				// sort by how close to center of seleExtent
 				var sortFunc = function(a, b) {
 					var distSq = function(ex, sele) {

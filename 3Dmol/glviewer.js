@@ -23,7 +23,7 @@ $3Dmol.GLViewer = (function() {
 	 * @param {AtomSpec[]} atomlist
 	 * @return {Array}
 	 */
-	var getExtent = function(atomlist) {
+	var getExtentOld = function(atomlist) {
 		var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
 
 		xmin = ymin = zmin = 9999;
@@ -713,8 +713,8 @@ $3Dmol.GLViewer = (function() {
 		this.zoomTo = function(sel) {
 			var atoms = getAtomsFromSel(sel).concat(shapes);
 			var allatoms = getAtomsFromSel({}).concat(shapes);
-			var tmp = getExtent(atoms);
-			var alltmp = getExtent(allatoms);
+			var tmp = $3Dmol.getExtent(atoms);
+			var alltmp = $3DmolgetExtent(allatoms);
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
@@ -1520,7 +1520,7 @@ $3Dmol.GLViewer = (function() {
 
 			var mat = getMatWithStyle(style);
 
-			var extent = getExtent(atomsToShow);
+			var extent = $3Dmol.getExtent(atomsToShow);
 
 			var i, il;
 			if (style['map'] && style['map']['prop']) {
@@ -1561,7 +1561,7 @@ $3Dmol.GLViewer = (function() {
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
-				var seleExtent = getExtent(focusSele);
+				var seleExtent = $3Dmol.getExtent(focusSele);
 				// sort by how close to center of seleExtent
 				var sortFunc = function(a, b) {
 					var distSq = function(ex, sele) {

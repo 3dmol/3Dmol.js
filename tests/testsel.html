@@ -146,7 +146,7 @@
                 <br>
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
         <input id="sel" value="{index:20, expand:10}, {stick:{}}" size=40>
-        <button onclick="glviewer.setStyle({}, {line:{}}); eval('glviewer.setStyle(' + $('#sel').val() + ')'); glviewer.render();">Apply</button>
+        <button onclick="eval('glviewer.setStyle(' + $('#sel').val() + ')'); glviewer.render();">Apply</button>
  
 <textarea style="display: none;" id="moldata_download"></textarea>
 <textarea style="display: none" id="moldata_test">
