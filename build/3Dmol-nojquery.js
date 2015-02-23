@@ -14121,7 +14121,7 @@ $3Dmol.Parsers = (function() {
         }
 
         //Process the lines and puts all of the data into an object.
-        var mmCIF = {};
+        mmCIF = {}; //temporarily global
         var lineNum = 0;
         while (lineNum < linesFiltered.length) {
             if (linesFiltered[lineNum][0] === undefined) {
@@ -14188,8 +14188,10 @@ $3Dmol.Parsers = (function() {
         }
 
         //Pulls atom information out of the data
+        atomsPreBonds = []; //temporarily global for debugging purposes
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
             var atom = {};
+            atom.id = mmCIF._atom_site.id[i];
             atom.x = mmCIF._atom_site.cartn_x[i];
             atom.y = mmCIF._atom_site.cartn_y[i];
             atom.z = mmCIF._atom_site.cartn_z[i];
@@ -14197,9 +14199,50 @@ $3Dmol.Parsers = (function() {
             atom.bonds = [];
             atom.bondOrder = [];
             atom.properties = {};
-            atoms.push(atom);
+            atomsPreBonds[atom.id - 1] = atom;
         }
-        assignBonds(atoms);
+
+        //create a hash table of the atoms using label and sequence as keys
+        atomHashTable = {}; //temporarily global for debugging purposes
+        for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+            var label_alt = mmCIF._atom_site.label_alt_id[i];
+            var label_asym = mmCIF._atom_site.label_asym_id[i];
+	    var label_atom = mmCIF._atom_site.label_atom_id[i];
+	    var label_seq = mmCIF._atom_site.label_seq_id[i];
+            var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
+
+            if (atomHashTable[label_alt] === undefined) {
+                atomHashTable[label_alt] = {};
+            }
+	    if (atomHashTable[label_alt][label_asym] === undefined) {
+		atomHashTable[label_alt][label_asym] = {};
+	    }
+	    if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
+                atomHashTable[label_alt][label_asym][label_atom] = {};
+            }
+            atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
+        }
+
+        for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
+	    var offset = atoms.length;
+            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
+	                       [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
+	                       [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
+
+	    var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+
+	    atomsPreBonds[id1 - 1].bonds.push(id2 - 1 + offset);
+	    atomsPreBonds[id1 - 1].bondOrder.push(1);
+	    atomsPreBonds[id2 - 1].bonds.push(id1 - 1 + offset);
+	    atomsPreBonds[id2 - 1].bondOrder.push(1);
+	    console.log("connected " + id1 + " with " + id2 + ".");
+        }
+
+	atoms = atoms.concat(atomsPreBonds);
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
