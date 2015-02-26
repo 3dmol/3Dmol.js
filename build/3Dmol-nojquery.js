@@ -11093,17 +11093,14 @@ $3Dmol.GLShape = (function() {
 	 * 
 	 * @constructor $3Dmol.GLShape
 	 * 
-	 * @param {Number}
-	 *            sid - Unique identifier
 	 * @param {Object}
 	 *            stylespec
 	 * @returns {$3Dmol.GLShape}
 	 */
-	var GLShape = function(sid, stylespec) {
+	var GLShape = function(stylespec) {
 
 		stylespec = stylespec || {};
 		$3Dmol.ShapeIDCount++;
-		this.id = sid;
 
 		this.boundingSphere = new $3Dmol.Sphere();
 		/** @type {IntersectionShapes} */
@@ -11478,6 +11475,7 @@ $3Dmol.GLViewer = (function() {
 		var surfaces = [];
 		var shapes = []; // Generic shapes
 		var labels = [];
+		var clickables = []; //things you can click on
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
 
@@ -11601,9 +11599,33 @@ $3Dmol.GLViewer = (function() {
 		// enable mouse support
 		var glDOM = $(renderer.domElement);
 
+		//regenerate the list of clickables
+		var updateClickables = function() {
+			clickables = [];
+			var i, il;
+
+			for (i = 0, il = models.length; i < il; i++) {
+				var model = models[i];
+				if(model) {
+					var atoms = model.selectedAtoms({
+						clickable : true
+					});
+					clickables = clickables.concat(atoms);
+				}
+			}
+
+			for (i = 0, il = shapes.length; i < il; i++) {
+
+				var shape = shapes[i];
+				if (shape.clickable) {
+					clickables.push(shape);
+				}
+			}
+		};
+		
 		// Checks for selection intersects on mousedown
 		var handleClickSelection = function(mouseX, mouseY) {
-
+			if(clickables.length == 0) return;
 			var mouse = {
 				x : mouseX,
 				y : mouseY,
@@ -11615,27 +11637,7 @@ $3Dmol.GLViewer = (function() {
 
 			raycaster.set(camera.position, mouseVector);
 
-			var clickables = [], intersects = [];
-			var i, il;
-
-			for (i = 0, il = models.length; i < il; i++) {
-				var model = models[i];
-
-				var atoms = model.selectedAtoms({
-					clickable : true
-				});
-				clickables = clickables.concat(atoms);
-
-			}
-
-			for (i = 0, il = shapes.length; i < il; i++) {
-
-				var shape = shapes[i];
-				if (shape.clickable) {
-					clickables.push(shape);
-				}
-
-			}
+			var intersects = [];
 
 			intersects = raycaster.intersectObjects(modelGroup, clickables);
 
@@ -11646,8 +11648,6 @@ $3Dmol.GLViewer = (function() {
 					selected.callback(selected, _viewer);
 				}
 			}
-
-			show();
 		};
 
 		var calcTouchDistance = function(ev) { // distance between first two
@@ -11955,6 +11955,7 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.render = function() {
 
+			updateClickables(); //must render for clickable styles to take effect
 			var time1 = new Date();
 			var view = this.getView();
 			var i;
@@ -12310,7 +12311,8 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.addShape = function(shapeSpec) {
 			shapeSpec = shapeSpec || {};
-			var shape = new $3Dmol.GLShape(shapes.length, shapeSpec);
+			var shape = new $3Dmol.GLShape(shapeSpec);
+			shape.shapePosition = shapes.length;
 			shapes.push(shape);
 
 			return shape;
@@ -12327,7 +12329,7 @@ $3Dmol.GLViewer = (function() {
 			if (!shape)
 				return;
 			shape.removegl(modelGroup);
-			delete shapes[shape.id];
+			delete shapes[shape.shapePosition];
 			// clear off back of model array
 			while (shapes.length > 0
 					&& typeof (shapes[shapes.length - 1]) === "undefined")
@@ -12355,8 +12357,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addSphere = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addSphere(spec);
 			shapes.push(s);
 
@@ -12371,8 +12374,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addArrow = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addArrow(spec);
 			shapes.push(s);
 
@@ -12387,8 +12391,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addCylinder = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addCylinder(spec);
 			shapes.push(s);
 
@@ -12403,8 +12408,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addCustom = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addCustom(spec);
 			shapes.push(s);
 

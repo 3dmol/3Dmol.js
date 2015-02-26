@@ -630,17 +630,14 @@ $3Dmol.GLShape = (function() {
 	 * 
 	 * @constructor $3Dmol.GLShape
 	 * 
-	 * @param {Number}
-	 *            sid - Unique identifier
 	 * @param {Object}
 	 *            stylespec
 	 * @returns {$3Dmol.GLShape}
 	 */
-	var GLShape = function(sid, stylespec) {
+	var GLShape = function(stylespec) {
 
 		stylespec = stylespec || {};
 		$3Dmol.ShapeIDCount++;
-		this.id = sid;
 
 		this.boundingSphere = new $3Dmol.Sphere();
 		/** @type {IntersectionShapes} */
