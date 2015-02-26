@@ -102,27 +102,6 @@ $3Dmol.GLModel = (function() {
             return r;
         };
 
-  
-        /** Return proper color for atom given style
-         * @param {AtomSpec} atom
-         * @param {AtomStyle} style
-         * @return {$3Dmol.Color}
-         */
-        var getColorFromStyle = function(atom, style) {
-            var color = atom.color;
-            if (typeof (style.color) != "undefined")
-                color = style.color;
-            if(typeof(style.colorscheme) != "undefined" &&
-            		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
-            	var scheme = $3Dmol.elementColors[style.colorscheme];
-            	if(typeof(scheme[atom.elem]) != "undefined") {
-            		color = scheme[atom.elem];
-            	}
-            }
-            var C = $3Dmol.CC.color(color);
-            return C;
-        }
-
         // cross drawing
 		/** @typedef CrossStyleSpec
 		 * @prop {boolean} hidden - do not show 
@@ -158,7 +137,7 @@ $3Dmol.GLModel = (function() {
             if (clickable && atom.intersectionShape === undefined)
                 atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
-            var c = getColorFromStyle(atom, style);
+            var c = $3Dmol.getColorFromStyle(atom, style);
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -333,8 +312,8 @@ $3Dmol.GLModel = (function() {
                     atom.intersectionShape.line.push(p2);
                 }
 
-                var c1 = getColorFromStyle(atom, atom.style.line);
-                var c2 = getColorFromStyle(atom2, atom2.style.line);
+                var c1 = $3Dmol.getColorFromStyle(atom, atom.style.line);
+                var c2 = $3Dmol.getColorFromStyle(atom2, atom2.style.line);
                
                 if(atom.bondStyles && atom.bondStyles[i]) {
                 	var bstyle = atom.bondStyles[i];
@@ -466,7 +445,7 @@ $3Dmol.GLModel = (function() {
             if (style.hidden)
                 return;
                                                                  
-            var C = getColorFromStyle(atom, style);
+            var C = $3Dmol.getColorFromStyle(atom, style);
             
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
@@ -490,7 +469,7 @@ $3Dmol.GLModel = (function() {
                 return;
             
             var radius = getRadiusFromStyle(atom, style);
-            var C = getColorFromStyle(atom, style);
+            var C = $3Dmol.getColorFromStyle(atom, style);
             
             //create flat square                       
             
@@ -571,7 +550,7 @@ $3Dmol.GLModel = (function() {
             var atomSingleBond = style.singleBonds || false;
             var fromCap = false, toCap = false;
 
-            var C1 = getColorFromStyle(atom, style);
+            var C1 = $3Dmol.getColorFromStyle(atom, style);
 
             var mp, mp1, mp2;
             
@@ -590,7 +569,7 @@ $3Dmol.GLModel = (function() {
                     if (!style2.stick)
                         continue; // don't sweat the details                     
                    
-                    var C2 = getColorFromStyle(atom2, style2.stick);
+                    var C2 = $3Dmol.getColorFromStyle(atom2, style2.stick);
                     
                     //support bond specific styles
                     bondR = atomBondR;                    

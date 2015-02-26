@@ -51,8 +51,31 @@ $3Dmol.CC = {
     
 };
 
+
 $3Dmol['CC'] = $3Dmol.CC;
 $3Dmol['CC']['color'] = $3Dmol.CC.color;
+
+
+
+/** Return proper color for atom given style
+ * @param {AtomSpec} atom
+ * @param {AtomStyle} style
+ * @return {$3Dmol.Color}
+ */
+$3Dmol.getColorFromStyle = function(atom, style) {
+    var color = atom.color;
+    if (typeof (style.color) != "undefined" && style.color != "spectrum")
+        color = style.color;
+    if(typeof(style.colorscheme) != "undefined" &&
+    		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+    	var scheme = $3Dmol.elementColors[style.colorscheme];
+    	if(typeof(scheme[atom.elem]) != "undefined") {
+    		color = scheme[atom.elem];
+    	}
+    }
+    var C = $3Dmol.CC.color(color);
+    return C;
+}
 
 /** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
