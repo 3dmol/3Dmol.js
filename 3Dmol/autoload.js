@@ -17,8 +17,16 @@ $(document).ready(function() {
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
             
-            if (viewerdiv.data("pdb"))
+            var type = null;
+            if (viewerdiv.data("pdb")) {
                 datauri = "http://www.pdb.org/pdb/files/" + viewerdiv.data("pdb") + ".pdb";
+                type = "pdb";
+            } else if(viewerdiv.data("cid")) {
+            	//this doesn't actually work since pubchem does have CORS enabled
+            	type = "sdf";
+                datauri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
+                "/SDF?record_type=3d";
+            }
             else if (viewerdiv.data("href"))
                 datauri = viewerdiv.data("href");
                 
@@ -81,11 +89,11 @@ $(document).ready(function() {
             
             if (datauri) {  
                 
-                var type = viewerdiv.data("type") || viewerdiv.data("datatype");
+                type = viewerdiv.data("type") || viewerdiv.data("datatype") || type;
                 if(!type) {
-                	type = datauri.substr(datauri.lastIndexOf('.')+1).substring(0,3);
-                	if(type.length != 3) type = "pdb";
+                	type = datauri.substr(datauri.lastIndexOf('.')+1);
                 }
+                                
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
                     glviewer.setStyle(select,style);
