@@ -11678,6 +11678,21 @@ $3Dmol.GLViewer = (function() {
 			return [x,y];
 		};
 
+		//for a given screen (x,y) displacement return model displacement 
+		var screenXY2model = function(x,y) {
+			var dx = x/WIDTH;
+			var dy = y/HEIGHT;
+			var q = rotationGroup.quaternion;						
+			var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
+			projector.projectVector(t, camera);
+			t.x += dx*2;
+			t.y -= dy*2;
+			projector.unprojectVector(t, camera);
+			t.z = 0;							
+			t.applyQuaternion(q);
+			return t;
+		}
+		
 		if (!nomouse) {
 			// user can request that the mouse handlers not be installed
 			glDOM.bind('mousedown touchstart', function(ev) {
@@ -11790,16 +11805,9 @@ $3Dmol.GLViewer = (function() {
 							* scaleFactor;
 				} else if (mode == 1 || mouseButton == 2
 						|| ev.ctrlKey) { // Translate
-					var q = rotationGroup.quaternion;						
-					var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
-					projector.projectVector(t, camera);
-					t.x += dx*2;
-					t.y -= dy*2;
-					projector.unprojectVector(t, camera);
-					t.z = 0;							
-					t.applyQuaternion(q);
-
+					var t = screenXY2model(x-mouseStartX, y-mouseStartY);
 					modelGroup.position.addVectors(currentModelPos,t);
+					
 				} else if ((mode === 0 || mouseButton == 1)
 						&& r !== 0) { // Rotate
 					var rs = Math.sin(r * Math.PI) / r;
@@ -12140,6 +12148,20 @@ $3Dmol.GLViewer = (function() {
 			show();
 		};
 		
+		/**
+		 * Translate current view by x,y screen coordinates
+		 * 
+		 * @function $3Dmol.GLViewer#translate
+		 * @param {number} x
+		 * @param {number} y
+		 * 
+		 */
+		this.translate = function(x, y) {
+			var t = screenXY2model(x,y);
+			modelGroup.position.add(t);			
+			show();
+		};
+		
 
 		/**
 		 * Zoom to center of atom selection
@@ -12148,14 +12170,21 @@ $3Dmol.GLViewer = (function() {
 		 * @param {Object}
 		 *            [sel] - Selection specification specifying model and atom
 		 *            properties to select. Default: all atoms in viewer
-		 * 
+		 * @param {number} x - x-offset for zoom (screen coords)
+		 * @param {number} y - y-offset for zoom (screen coords)
 		 * @example // Assuming we have created a model of a protein with
 		 *          multiple chains (e.g. from a PDB file), focus on atoms in
 		 *          chain B glviewer.zoomTo({chain: 'B'});
 		 *  // Focus on centroid of all atoms of all models in this
 		 * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
 		 */
-		this.zoomTo = function(sel) {
+		this.zoomTo = function(sel, x, y) {
+			
+			var disp = new $3Dmol.Vector3(0,0,0);
+			if(x || y) {
+				disp = screenXY2model(x,y);
+			}
+			
 			var atoms = getAtomsFromSel(sel).concat(shapes);
 			var allatoms = getAtomsFromSel({}).concat(shapes);
 			var tmp = getExtent(atoms);
@@ -12163,6 +12192,7 @@ $3Dmol.GLViewer = (function() {
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
+			modelGroup.position.add(disp);
 			// but all for bounding box
 			var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
 					- alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
