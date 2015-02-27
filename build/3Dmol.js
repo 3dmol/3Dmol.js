@@ -20121,28 +20121,41 @@ $3Dmol.GLModel = (function() {
                 }
             }
 
-            // expand selection bounding box
+            // expand selection by some distance
             if (sel.hasOwnProperty("expand")) {
+
+            	// get atoms in expanded bounding box
             	var expand = expandAtomList(ret, sel.expand)
-                ret = ret.concat(expand);
-            }
-
-            // selection within some distance
-            if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
-
-            	// get atoms in expanded bounding box that meet within.sel criteria
-            	var expand = this.selectedAtoms(sel.within.sel, expandAtomList(ret, sel.within.distance))
             	var retlen = ret.length
             	for (var i = 0; i < expand.length; i++) {
             		for (var j = 0; j < retlen; j++) {
 
             			var dist = squaredDistance(expand[i], ret[j]);
-            			var thresh = Math.pow(sel.within.distance, 2);
+            			var thresh = Math.pow(sel.expand, 2);
             			if (dist < thresh && dist > 0) {
             				ret.push(expand[i]);
             			}
             		}
             	}
+            }
+
+            // selection within distance of sub-selection
+            if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
+
+            	// get atoms in second selection
+            	var sel2 = this.selectedAtoms(sel.within.sel, atoms)
+            	var within = []
+            	for (var i = 0; i < sel2.length; i++) {
+            		for (var j = 0; j < ret.length; j++) {
+
+            			var dist = squaredDistance(sel2[i], ret[j]);
+            			var thresh = Math.pow(sel.within.distance, 2);
+            			if (dist < thresh && dist > 0) {
+            				within.push(ret[j]);
+            			}
+            		}
+            	}
+            	ret = within;
             }
 
             // byres selection flag
