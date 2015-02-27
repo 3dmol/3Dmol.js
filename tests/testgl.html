@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>$3Dmol Test</title>
+        <title>3Dmol.js Test</title>
         <script src="../build/3Dmol.js"></script> 
             
         <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
@@ -99,19 +99,19 @@
                         
             //$.get("test_structs/1YCR.pdb", function(data){
                 
-                moldata = data = $("#moldata_cif").val();
+                moldata = data = $("#moldata_sdf").val();
                 glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});
                     
                 glviewer.setBackgroundColor(0xffffff);
                                         
-                receptorModel = m = glviewer.addModel(data, "mcif",{keepH:false});               
+                receptorModel = m = glviewer.addModel(data, "sdf",{keepH:false});               
                     
                 atoms = m.selectedAtoms({ }); 
                 
                 m.setStyle({resi:[34,35]},{sphere:{}});
 
                 
-                glviewer.mapAtomProperties($3Dmol.partialCharges);
+                glviewer.mapAtomProperties($3Dmol.applyPartialCharges);
                 glviewer.zoomTo();
                 glviewer.render();
                            

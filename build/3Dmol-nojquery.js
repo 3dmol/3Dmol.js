@@ -1585,7 +1585,7 @@ $3Dmol.Object3D.prototype = {
         object.rotation.copy(this.rotation);
         object.eulerOrder = this.eulerOrder;
         object.scale.copy(this.scale);
-        
+
         object.rotationAutoUpdate = this.rotationAutoUpdate;
         object.matrix.copy(this.matrix);
         object.matrixWorld.copy(this.matrixWorld);
@@ -2611,8 +2611,6 @@ $3Dmol.Material = function () {
     this.opacity = 1;
     this.transparent = false;
 
-    this.blending = $3Dmol.NormalBlending;
-
     this.depthTest = true;
     this.depthWrite = true;
 
@@ -2682,8 +2680,6 @@ $3Dmol.Material.prototype.clone = function ( material ) {
 
     material.opacity = this.opacity;
     material.transparent = this.transparent;
-
-    material.blending = this.blending;
 
     material.depthTest = this.depthTest;
     material.depthWrite = this.depthWrite;
@@ -2827,7 +2823,7 @@ $3Dmol.MeshLambertMaterial.prototype.clone = function(material) {
 /** @constructor */
 $3Dmol.MeshDoubleLambertMaterial = function(parameters) {
     
-    $3Dmol.MeshLambertMaterial.call(this);
+    $3Dmol.MeshLambertMaterial.call(this, parameters);
 
     this.shaderID = "lambertdouble";
     this.side = $3Dmol.DoubleSide;    
@@ -3090,14 +3086,6 @@ $3Dmol.TextureIdCount = 0;
 $3Dmol.FrontSide = 0;
 $3Dmol.BackSide = 1;
 $3Dmol.DoubleSide = 2;
-
-// blending modes
-$3Dmol.NoBlending = 0;
-$3Dmol.NormalBlending = 1;
-$3Dmol.AdditiveBlending = 2;
-$3Dmol.SubtractiveBlending = 3;
-$3Dmol.MultiplyBlending = 4;
-$3Dmol.CustomBlending = 5;
 
 // shading
 $3Dmol.NoShading = 0;
@@ -3510,16 +3498,18 @@ $3Dmol.Renderer = function ( parameters ) {
 
     this.setBlending = function( blending ) {
 
-            if (blending === $3Dmol.NoBlending) 
-                    _gl.disable( _gl.BLEND );
+        if (!blending) {
+                _gl.disable( _gl.BLEND );
 
-            else {
-                    _gl.enable( _gl.BLEND );
-                    _gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
-                    _gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
-            }
+		} 
+        else {
+			_gl.enable( _gl.BLEND );
+			_gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
+			_gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
 
-            _oldBlending = blending;
+		}
+
+        _oldBlending = blending;
     };
     
     // Plugins
@@ -4135,7 +4125,7 @@ $3Dmol.Renderer = function ( parameters ) {
                     continue;
 
                 if (useBlending)
-                    _this.setBlending(material.blending);
+                    _this.setBlending(true);
 
                 _this.setDepthTest(material.depthTest);
                 _this.setDepthWrite(material.depthWrite);
@@ -4226,7 +4216,7 @@ $3Dmol.Renderer = function ( parameters ) {
 
         // opaque pass (front-to-back order)
 
-        this.setBlending( $3Dmol.NoBlending );
+        this.setBlending( false );
 
         renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
         
@@ -5379,178 +5369,187 @@ $3Dmol.ShaderLib = {
 };var $3Dmol = $3Dmol || {};
 
 //properties for mapping
-$3Dmol.partialCharges = [
-    { resn: "ALA", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ALA", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ALA", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ALA", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ALA", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ARG", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ARG", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ARG", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ARG", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "ARG", atom: "CD", props: {'partialCharge': 0.10}},
-	{ resn: "ARG", atom: "NE", props: {'partialCharge': -0.10}},
-	{ resn: "ARG", atom: "CZ", props: {'partialCharge': 0.50}},
-	{ resn: "ARG", atom: "NH1", props: {'partialCharge': 0.25}},
-	{ resn: "ARG", atom: "NH2", props: {'partialCharge': 0.25}},
-	{ resn: "ARG", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ARG", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ASN", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ASN", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ASN", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ASN", atom: "CG", props: {'partialCharge': 0.55}},
-	{ resn: "ASN", atom: "OD1", props: {'partialCharge': -0.55}},
-	{ resn: "ASN", atom: "ND2", props: {'partialCharge': 0.00}},
-	{ resn: "ASN", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ASN", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ASP", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ASP", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ASP", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ASP", atom: "CG", props: {'partialCharge': 0.14}},
-	{ resn: "ASP", atom: "OD1", props: {'partialCharge': -0.57}},
-	{ resn: "ASP", atom: "OD2", props: {'partialCharge': -0.57}},
-	{ resn: "ASP", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ASP", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "CYS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "CYS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "CYS", atom: "CB", props: {'partialCharge': 0.19}},
-	{ resn: "CYS", atom: "SG", props: {'partialCharge': -0.19}},
-	{ resn: "CYS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "CYS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLN", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLN", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLN", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "CD", props: {'partialCharge': 0.55}},
-	{ resn: "GLN", atom: "OE1", props: {'partialCharge': -0.55}},
-	{ resn: "GLN", atom: "NE2", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLN", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLU", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLU", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLU", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "GLU", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "GLU", atom: "CD", props: {'partialCharge': 0.14}},
-	{ resn: "GLU", atom: "OE1", props: {'partialCharge': -0.57}},
-	{ resn: "GLU", atom: "OE2", props: {'partialCharge': -0.57}},
-	{ resn: "GLU", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLU", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLY", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLY", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLY", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLY", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "HIS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "HIS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "HIS", atom: "CG", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "ND1", props: {'partialCharge': -0.10}},
-	{ resn: "HIS", atom: "CD2", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "NE2", props: {'partialCharge': -0.40}},
-	{ resn: "HIS", atom: "CE1", props: {'partialCharge': 0.30}},
-	{ resn: "HIS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "HIS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ILE", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ILE", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ILE", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CG1", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CD", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ILE", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "LEU", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "LEU", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "LEU", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "LEU", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "LYS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "LYS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "LYS", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CD", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CE", props: {'partialCharge': 0.25}},
-	{ resn: "LYS", atom: "NZ", props: {'partialCharge': 0.75}},
-	{ resn: "LYS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "LYS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "MET", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "MET", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "MET", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "MET", atom: "CG", props: {'partialCharge': 0.06}},
-	{ resn: "MET", atom: "SD", props: {'partialCharge': -0.12}},
-	{ resn: "MET", atom: "CE", props: {'partialCharge': 0.06}},
-	{ resn: "MET", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "MET", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "PHE", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "PHE", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "PHE", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CE1", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CE2", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CZ", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "PHE", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "PRO", atom: "N", props: {'partialCharge': -0.25}},
-	{ resn: "PRO", atom: "CD", props: {'partialCharge': 0.10}},
-	{ resn: "PRO", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "PRO", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "PRO", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "PRO", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "PRO", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "SER", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "SER", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "SER", atom: "CB", props: {'partialCharge': 0.25}},
-	{ resn: "SER", atom: "OG", props: {'partialCharge': -0.25}},
-	{ resn: "SER", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "SER", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "THR", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "THR", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "THR", atom: "CB", props: {'partialCharge': 0.25}},
-	{ resn: "THR", atom: "OG1", props: {'partialCharge': -0.25}},
-	{ resn: "THR", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "THR", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "THR", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "TRP", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "TRP", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "TRP", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CG", props: {'partialCharge': -0.03}},
-	{ resn: "TRP", atom: "CD2", props: {'partialCharge': 0.10}},
-	{ resn: "TRP", atom: "CE2", props: {'partialCharge': -0.04}},
-	{ resn: "TRP", atom: "CE3", props: {'partialCharge': -0.03}},
-	{ resn: "TRP", atom: "CD1", props: {'partialCharge': 0.06}},
-	{ resn: "TRP", atom: "NE1", props: {'partialCharge': -0.06}},
-	{ resn: "TRP", atom: "CZ2", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CZ3", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CH2", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "TRP", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "TYR", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "TYR", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "TYR", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CE1", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CE2", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CZ", props: {'partialCharge': 0.25}},
-	{ resn: "TYR", atom: "OH", props: {'partialCharge': -0.25}},
-	{ resn: "TYR", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "TYR", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "VAL", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "VAL", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "VAL", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "CG1", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "VAL", atom: "O", props: {'partialCharge': -0.55}}
-]; 
-	
-$3Dmol['partialCharges'] = $3Dmol.partialCharges;
 
+/* partial charges for proteins */
+$3Dmol.partialCharges = {
+"ALA:N": -0.15,
+"ALA:CA": 0.10,
+"ALA:CB": 0.00,
+"ALA:C": 0.60,
+"ALA:O": -0.55,
+"ARG:N": -0.15,
+"ARG:CA": 0.10,
+"ARG:CB": 0.00,
+"ARG:CG": 0.00,
+"ARG:CD": 0.10,
+"ARG:NE": -0.10,
+"ARG:CZ": 0.50,
+"ARG:NH1": 0.25,
+"ARG:NH2": 0.25,
+"ARG:C": 0.60,
+"ARG:O": -0.55,
+"ASN:N": -0.15,
+"ASN:CA": 0.10,
+"ASN:CB": 0.00,
+"ASN:CG": 0.55,
+"ASN:OD1": -0.55,
+"ASN:ND2": 0.00,
+"ASN:C": 0.60,
+"ASN:O": -0.55,
+"ASP:N": -0.15,
+"ASP:CA": 0.10,
+"ASP:CB": 0.00,
+"ASP:CG": 0.14,
+"ASP:OD1": -0.57,
+"ASP:OD2": -0.57,
+"ASP:C": 0.60,
+"ASP:O": -0.55,
+"CYS:N": -0.15,
+"CYS:CA": 0.10,
+"CYS:CB": 0.19,
+"CYS:SG": -0.19,
+"CYS:C": 0.60,
+"CYS:O": -0.55,
+"GLN:N": -0.15,
+"GLN:CA": 0.10,
+"GLN:CB": 0.00,
+"GLN:CG": 0.00,
+"GLN:CD": 0.55,
+"GLN:OE1": -0.55,
+"GLN:NE2": 0.00,
+"GLN:C": 0.60,
+"GLN:O": -0.55,
+"GLU:N": -0.15,
+"GLU:CA": 0.10,
+"GLU:CB": 0.00,
+"GLU:CG": 0.00,
+"GLU:CD": 0.14,
+"GLU:OE1": -0.57,
+"GLU:OE2": -0.57,
+"GLU:C": 0.60,
+"GLU:O": -0.55,
+"GLY:N": -0.15,
+"GLY:CA": 0.10,
+"GLY:C": 0.60,
+"GLY:O": -0.55,
+"HIS:N": -0.15,
+"HIS:CA": 0.10,
+"HIS:CB": 0.00,
+"HIS:CG": 0.10,
+"HIS:ND1": -0.10,
+"HIS:CD2": 0.10,
+"HIS:NE2": -0.40,
+"HIS:CE1": 0.30,
+"HIS:C": 0.60,
+"HIS:O": -0.55,
+"ILE:N": -0.15,
+"ILE:CA": 0.10,
+"ILE:CB": 0.00,
+"ILE:CG2": 0.00,
+"ILE:CG1": 0.00,
+"ILE:CD": 0.00,
+"ILE:C": 0.60,
+"ILE:O": -0.55,
+"LEU:N": -0.15,
+"LEU:CA": 0.10,
+"LEU:CB": 0.00,
+"LEU:CG": 0.00,
+"LEU:CD1": 0.00,
+"LEU:CD2": 0.00,
+"LEU:C": 0.60,
+"LEU:O": -0.55,
+"LYS:N": -0.15,
+"LYS:CA": 0.10,
+"LYS:CB": 0.00,
+"LYS:CG": 0.00,
+"LYS:CD": 0.00,
+"LYS:CE": 0.25,
+"LYS:NZ": 0.75,
+"LYS:C": 0.60,
+"LYS:O": -0.55,
+"MET:N": -0.15,
+"MET:CA": 0.10,
+"MET:CB": 0.00,
+"MET:CG": 0.06,
+"MET:SD": -0.12,
+"MET:CE": 0.06,
+"MET:C": 0.60,
+"MET:O": -0.55,
+"PHE:N": -0.15,
+"PHE:CA": 0.10,
+"PHE:CB": 0.00,
+"PHE:CG": 0.00,
+"PHE:CD1": 0.00,
+"PHE:CD2": 0.00,
+"PHE:CE1": 0.00,
+"PHE:CE2": 0.00,
+"PHE:CZ": 0.00,
+"PHE:C": 0.60,
+"PHE:O": -0.55,
+"PRO:N": -0.25,
+"PRO:CD": 0.10,
+"PRO:CA": 0.10,
+"PRO:CB": 0.00,
+"PRO:CG": 0.00,
+"PRO:C": 0.60,
+"PRO:O": -0.55,
+"SER:N": -0.15,
+"SER:CA": 0.10,
+"SER:CB": 0.25,
+"SER:OG": -0.25,
+"SER:C": 0.60,
+"SER:O": -0.55,
+"THR:N": -0.15,
+"THR:CA": 0.10,
+"THR:CB": 0.25,
+"THR:OG1": -0.25,
+"THR:CG2": 0.00,
+"THR:C": 0.60,
+"THR:O": -0.55,
+"TRP:N": -0.15,
+"TRP:CA": 0.10,
+"TRP:CB": 0.00,
+"TRP:CG": -0.03,
+"TRP:CD2": 0.10,
+"TRP:CE2": -0.04,
+"TRP:CE3": -0.03,
+"TRP:CD1": 0.06,
+"TRP:NE1": -0.06,
+"TRP:CZ2": 0.00,
+"TRP:CZ3": 0.00,
+"TRP:CH2": 0.00,
+"TRP:C": 0.60,
+"TRP:O": -0.55,
+"TYR:N": -0.15,
+"TYR:CA": 0.10,
+"TYR:CB": 0.00,
+"TYR:CG": 0.00,
+"TYR:CD1": 0.00,
+"TYR:CE1": 0.00,
+"TYR:CD2": 0.00,
+"TYR:CE2": 0.00,
+"TYR:CZ": 0.25,
+"TYR:OH": -0.25,
+"TYR:C": 0.60,
+"TYR:O": -0.55,
+"VAL:N": -0.15,
+"VAL:CA": 0.10,
+"VAL:CB": 0.00,
+"VAL:CG1": 0.00,
+"VAL:CG2": 0.00,
+"VAL:C": 0.60,
+"VAL:O": -0.55
+};
+	
+//this can be supplied to mapAtomProperties
+$3Dmol.applyPartialCharges = function(atom, keepexisting) {
+	if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
+		if(atom.resn && atom.atom) {
+			var key = atom.resn+":"+atom.atom;
+			atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
+		}
+	}
+};
 //This defines the $3Dmol object which is used to create viewers
 //and configure system-wide settings
 
@@ -5682,61 +5681,6 @@ $3Dmol.SurfaceType = {
     SES  : 4
 };
 
-// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
-// this makes things a little faster
-$3Dmol.CC = {
-    cache : {},
-    color : function(hex) {
-
-        if(typeof(this.cache[hex]) !== "undefined") {
-            return this.cache[hex];
-        }
-        else {
-            hex = this.getHex(hex);
-            var c = new $3Dmol.Color(hex);
-            this.cache[hex] = c;
-            return c;
-        }
-    },
-    colorTab : {
-        'white' : 0xFFFFFF,
-        'silver' : 0xC0C0C0,
-        'gray' : 0x808080,
-        'grey' : 0x808080,
-        'black' : 0x000000,
-        'red' : 0xFF0000,
-        'maroon' : 0x800000,
-        'yellow' : 0xFFFF00,
-        'orange' : 0xFF6600,
-        'olive' : 0x808000,
-        'lime' : 0x00FF00,
-        'green' : 0x008000,
-        'aqua' : 0x00FFFF,
-        'cyan' : 0x00FFFF,
-        'teal' : 0x008080,
-        'blue' : 0x0000FF,
-        'navy' : 0x000080,
-        'fuchsia' : 0xFF00FF,
-        'magenta' : 0xFF00FF,
-        'purple' : 0x800080
-    },    
-    getHex : function(hex) {
-        if (parseInt(hex))
-            return parseInt(hex);
-        
-        else if (typeof(hex) === 'string') {
-            
-            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
-        }
-        
-    }
-    
-};
-
-
-
-$3Dmol['CC'] = $3Dmol.CC;
-$3Dmol['CC']['color'] = $3Dmol.CC.color;
 
 //Miscellaneous functions and classes - to be incorporated into $3Dmol proper
 /**
@@ -7466,61 +7410,6 @@ $3Dmol.SurfaceType = {
     SES  : 4
 };
 
-// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
-// this makes things a little faster
-$3Dmol.CC = {
-    cache : {},
-    color : function(hex) {
-
-        if(typeof(this.cache[hex]) !== "undefined") {
-            return this.cache[hex];
-        }
-        else {
-            hex = this.getHex(hex);
-            var c = new $3Dmol.Color(hex);
-            this.cache[hex] = c;
-            return c;
-        }
-    },
-    colorTab : {
-        'white' : 0xFFFFFF,
-        'silver' : 0xC0C0C0,
-        'gray' : 0x808080,
-        'grey' : 0x808080,
-        'black' : 0x000000,
-        'red' : 0xFF0000,
-        'maroon' : 0x800000,
-        'yellow' : 0xFFFF00,
-        'orange' : 0xFF6600,
-        'olive' : 0x808000,
-        'lime' : 0x00FF00,
-        'green' : 0x008000,
-        'aqua' : 0x00FFFF,
-        'cyan' : 0x00FFFF,
-        'teal' : 0x008080,
-        'blue' : 0x0000FF,
-        'navy' : 0x000080,
-        'fuchsia' : 0xFF00FF,
-        'magenta' : 0xFF00FF,
-        'purple' : 0x800080
-    },    
-    getHex : function(hex) {
-        if (parseInt(hex))
-            return parseInt(hex);
-        
-        else if (typeof(hex) === 'string') {
-            
-            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
-        }
-        
-    }
-    
-};
-
-
-
-$3Dmol['CC'] = $3Dmol.CC;
-$3Dmol['CC']['color'] = $3Dmol.CC.color;
 
 //Miscellaneous functions and classes - to be incorporated into $3Dmol proper
 /**
@@ -7722,8 +7611,16 @@ $(document).ready(function() {
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
             
-            if (viewerdiv.data("pdb"))
+            var type = null;
+            if (viewerdiv.data("pdb")) {
                 datauri = "http://www.pdb.org/pdb/files/" + viewerdiv.data("pdb") + ".pdb";
+                type = "pdb";
+            } else if(viewerdiv.data("cid")) {
+            	//this doesn't actually work since pubchem does have CORS enabled
+            	type = "sdf";
+                datauri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
+                "/SDF?record_type=3d";
+            }
             else if (viewerdiv.data("href"))
                 datauri = viewerdiv.data("href");
                 
@@ -7786,11 +7683,11 @@ $(document).ready(function() {
             
             if (datauri) {  
                 
-                var type = viewerdiv.data("type") || viewerdiv.data("datatype");
+                type = viewerdiv.data("type") || viewerdiv.data("datatype") || type;
                 if(!type) {
-                	type = datauri.substr(datauri.lastIndexOf('.')+1).substring(0,3);
-                	if(type.length != 3) type = "pdb";
+                	type = datauri.substr(datauri.lastIndexOf('.')+1);
                 }
+                                
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
                     glviewer.setStyle(select,style);
@@ -7855,6 +7752,84 @@ $(document).ready(function() {
     }
 });
     
+
+
+// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
+// this makes things a little faster
+$3Dmol.CC = {
+    cache : {},
+    color : function(hex) {
+
+        if(typeof(this.cache[hex]) !== "undefined") {
+            return this.cache[hex];
+        }
+        else {
+            hex = this.getHex(hex);
+            var c = new $3Dmol.Color(hex);
+            this.cache[hex] = c;
+            return c;
+        }
+    },
+    colorTab : {
+        'white' : 0xFFFFFF,
+        'silver' : 0xC0C0C0,
+        'gray' : 0x808080,
+        'grey' : 0x808080,
+        'black' : 0x000000,
+        'red' : 0xFF0000,
+        'maroon' : 0x800000,
+        'yellow' : 0xFFFF00,
+        'orange' : 0xFF6600,
+        'olive' : 0x808000,
+        'lime' : 0x00FF00,
+        'green' : 0x008000,
+        'aqua' : 0x00FFFF,
+        'cyan' : 0x00FFFF,
+        'teal' : 0x008080,
+        'blue' : 0x0000FF,
+        'navy' : 0x000080,
+        'fuchsia' : 0xFF00FF,
+        'magenta' : 0xFF00FF,
+        'purple' : 0x800080
+    },    
+    getHex : function(hex) {
+        if (parseInt(hex))
+            return parseInt(hex);
+        
+        else if (typeof(hex) === 'string') {
+            
+            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
+        }
+        
+    }
+    
+};
+
+
+$3Dmol['CC'] = $3Dmol.CC;
+$3Dmol['CC']['color'] = $3Dmol.CC.color;
+
+
+
+/** Return proper color for atom given style
+ * @param {AtomSpec} atom
+ * @param {AtomStyle} style
+ * @return {$3Dmol.Color}
+ */
+$3Dmol.getColorFromStyle = function(atom, style) {
+    var color = atom.color;
+    if (typeof (style.color) != "undefined" && style.color != "spectrum")
+        color = style.color;
+    if(typeof(style.colorscheme) != "undefined" &&
+    		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+    	var scheme = $3Dmol.elementColors[style.colorscheme];
+    	if(typeof(scheme[atom.elem]) != "undefined") {
+    		color = scheme[atom.elem];
+    	}
+    }
+    var C = $3Dmol.CC.color(color);
+    return C;
+}
 
 /** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
@@ -8389,12 +8364,9 @@ $3Dmol.drawCartoon = (function() {
                 if (atom.atom == 'CA') {
                     //set atom color
                 	var prevatomcolor = atomcolor;
-                    atomcolor = atom.color;
+                    atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
                     if (gradientscheme) {
                         atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
-                    }
-                    else if(typeof(cstyle.color) !== "undefined") {
-                        atomcolor = cstyle.color;
                     }
                     
                     if($.isNumeric(cstyle.thickness)) {
@@ -9501,7 +9473,6 @@ $3Dmol.GLModel = (function() {
         var id = mid;
         var molObj = null;
         var renderedMolObj = null;
-        var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
         var defaultColor = $3Dmol.elementColors.defaultColor;
@@ -9534,27 +9505,6 @@ $3Dmol.GLModel = (function() {
                 r *= style.scale;
             return r;
         };
-
-  
-        /** Return proper color for atom given style
-         * @param {AtomSpec} atom
-         * @param {AtomStyle} style
-         * @return {$3Dmol.Color}
-         */
-        var getColorFromStyle = function(atom, style) {
-            var color = atom.color;
-            if (typeof (style.color) != "undefined")
-                color = style.color;
-            if(typeof(style.colorscheme) != "undefined" &&
-            		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
-            	var scheme = $3Dmol.elementColors[style.colorscheme];
-            	if(typeof(scheme[atom.elem]) != "undefined") {
-            		color = scheme[atom.elem];
-            	}
-            }
-            var C = $3Dmol.CC.color(color);
-            return C;
-        }
 
         // cross drawing
 		/** @typedef CrossStyleSpec
@@ -9591,7 +9541,7 @@ $3Dmol.GLModel = (function() {
             if (clickable && atom.intersectionShape === undefined)
                 atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
-            var c = getColorFromStyle(atom, style);
+            var c = $3Dmol.getColorFromStyle(atom, style);
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -9766,8 +9716,8 @@ $3Dmol.GLModel = (function() {
                     atom.intersectionShape.line.push(p2);
                 }
 
-                var c1 = getColorFromStyle(atom, atom.style.line);
-                var c2 = getColorFromStyle(atom2, atom2.style.line);
+                var c1 = $3Dmol.getColorFromStyle(atom, atom.style.line);
+                var c2 = $3Dmol.getColorFromStyle(atom2, atom2.style.line);
                
                 if(atom.bondStyles && atom.bondStyles[i]) {
                 	var bstyle = atom.bondStyles[i];
@@ -9899,7 +9849,7 @@ $3Dmol.GLModel = (function() {
             if (style.hidden)
                 return;
                                                                  
-            var C = getColorFromStyle(atom, style);
+            var C = $3Dmol.getColorFromStyle(atom, style);
             
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
@@ -9923,7 +9873,7 @@ $3Dmol.GLModel = (function() {
                 return;
             
             var radius = getRadiusFromStyle(atom, style);
-            var C = getColorFromStyle(atom, style);
+            var C = $3Dmol.getColorFromStyle(atom, style);
             
             //create flat square                       
             
@@ -10004,7 +9954,7 @@ $3Dmol.GLModel = (function() {
             var atomSingleBond = style.singleBonds || false;
             var fromCap = false, toCap = false;
 
-            var C1 = getColorFromStyle(atom, style);
+            var C1 = $3Dmol.getColorFromStyle(atom, style);
 
             var mp, mp1, mp2;
             
@@ -10023,7 +9973,7 @@ $3Dmol.GLModel = (function() {
                     if (!style2.stick)
                         continue; // don't sweat the details                     
                    
-                    var C2 = getColorFromStyle(atom2, style2.stick);
+                    var C2 = $3Dmol.getColorFromStyle(atom2, style2.stick);
                     
                     //support bond specific styles
                     bondR = atomBondR;                    
@@ -10723,13 +10673,7 @@ $3Dmol.GLModel = (function() {
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
          */
-        this.setStyle = function(sel, style, add) {
-            
-            if(!add && molObj !== null && sameObj(style, lastStyle))
-                return; // no need to recompute
-            
-            if(add) lastStyle = null; // todo: compute merged style
-            else lastStyle = style;
+        this.setStyle = function(sel, style, add) {           
 
             // do a copy to enforce style changes through this function
             var mystyle = $.extend(true, {}, style);
@@ -11525,7 +11469,7 @@ $3Dmol.GLShape = (function() {
 				1.0) : 1.0;
 		shape.side = (stylespec.side !== undefined) ? stylespec.side
 				: $3Dmol.DoubleSide;
-
+		shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
 		// Click handling
 		shape.clickable = stylespec.clickable ? true : false;
 		shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
@@ -11537,17 +11481,14 @@ $3Dmol.GLShape = (function() {
 	 * 
 	 * @constructor $3Dmol.GLShape
 	 * 
-	 * @param {Number}
-	 *            sid - Unique identifier
 	 * @param {Object}
 	 *            stylespec
 	 * @returns {$3Dmol.GLShape}
 	 */
-	var GLShape = function(sid, stylespec) {
+	function GLShape(stylespec) {
 
 		stylespec = stylespec || {};
 		$3Dmol.ShapeIDCount++;
-		this.id = sid;
 
 		this.boundingSphere = new $3Dmol.Sphere();
 		/** @type {IntersectionShapes} */
@@ -11791,7 +11732,8 @@ $3Dmol.GLShape = (function() {
 				reflectivity : 0,
 				side : this.side,
 				transparent : (this.alpha < 1) ? true : false,
-				opacity : this.alpha
+				opacity : this.alpha,
+				wireframeLinewidth: this.linewidth
 			});
 
 			var mesh = new $3Dmol.Mesh(geo, material);
@@ -11887,6 +11829,7 @@ $3Dmol.GLViewer = (function() {
 		var surfaces = [];
 		var shapes = []; // Generic shapes
 		var labels = [];
+		var clickables = []; //things you can click on
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
 
@@ -11903,7 +11846,6 @@ $3Dmol.GLViewer = (function() {
 		var renderer = new $3Dmol.Renderer({
 			antialias : true
 		});
-		// renderer.sortObjects = false; // hopefully improve performance
 
 		renderer.domElement.style.width = "100%";
 		renderer.domElement.style.height = "100%";
@@ -11915,8 +11857,8 @@ $3Dmol.GLViewer = (function() {
 		renderer.setSize(WIDTH, HEIGHT);
 		var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
 		camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
-		var vec = new $3Dmol.Vector3();
-		camera.lookAt(vec);
+		var lookingAt = new $3Dmol.Vector3();
+		camera.lookAt(lookingAt);
 
 		var raycaster = new $3Dmol.Raycaster(new $3Dmol.Vector3(0, 0, 0),
 				new $3Dmol.Vector3(0, 0, 0));
@@ -12010,9 +11952,33 @@ $3Dmol.GLViewer = (function() {
 		// enable mouse support
 		var glDOM = $(renderer.domElement);
 
+		//regenerate the list of clickables
+		var updateClickables = function() {
+			clickables = [];
+			var i, il;
+
+			for (i = 0, il = models.length; i < il; i++) {
+				var model = models[i];
+				if(model) {
+					var atoms = model.selectedAtoms({
+						clickable : true
+					});
+					clickables = clickables.concat(atoms);
+				}
+			}
+
+			for (i = 0, il = shapes.length; i < il; i++) {
+
+				var shape = shapes[i];
+				if (shape && shape.clickable) {
+					clickables.push(shape);
+				}
+			}
+		};
+		
 		// Checks for selection intersects on mousedown
 		var handleClickSelection = function(mouseX, mouseY) {
-
+			if(clickables.length == 0) return;
 			var mouse = {
 				x : mouseX,
 				y : mouseY,
@@ -12024,27 +11990,7 @@ $3Dmol.GLViewer = (function() {
 
 			raycaster.set(camera.position, mouseVector);
 
-			var clickables = [], intersects = [];
-			var i, il;
-
-			for (i = 0, il = models.length; i < il; i++) {
-				var model = models[i];
-
-				var atoms = model.selectedAtoms({
-					clickable : true
-				});
-				clickables = clickables.concat(atoms);
-
-			}
-
-			for (i = 0, il = shapes.length; i < il; i++) {
-
-				var shape = shapes[i];
-				if (shape.clickable) {
-					clickables.push(shape);
-				}
-
-			}
+			var intersects = [];
 
 			intersects = raycaster.intersectObjects(modelGroup, clickables);
 
@@ -12055,8 +12001,6 @@ $3Dmol.GLViewer = (function() {
 					selected.callback(selected, _viewer);
 				}
 			}
-
-			show();
 		};
 
 		var calcTouchDistance = function(ev) { // distance between first two
@@ -12067,19 +12011,45 @@ $3Dmol.GLViewer = (function() {
 					- ev.originalEvent.targetTouches[1].pageY;
 			return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
 		}
+		
+		//check targetTouches as well
+		var getXY = function(ev) {
+			var x = ev.pageX, y = ev.pageY;
+			if (ev.originalEvent.targetTouches
+					&& ev.originalEvent.targetTouches[0]) {
+				x = ev.originalEvent.targetTouches[0].pageX;
+				y = ev.originalEvent.targetTouches[0].pageY;
+			}
+			
+			return [x,y];
+		};
 
+		//for a given screen (x,y) displacement return model displacement 
+		var screenXY2model = function(x,y,z) {
+			var dx = x/WIDTH;
+			var dy = y/HEIGHT;
+			var zpos = typeof(z) == 'undefined' ? rotationGroup.position.z : z; 
+			var q = rotationGroup.quaternion;						
+			var t = new $3Dmol.Vector3(0,0,zpos);
+			projector.projectVector(t, camera);
+			t.x += dx*2;
+			t.y -= dy*2;
+			projector.unprojectVector(t, camera);
+			t.z = 0;							
+			t.applyQuaternion(q);
+			return t;
+		}
+		
 		if (!nomouse) {
 			// user can request that the mouse handlers not be installed
 			glDOM.bind('mousedown touchstart', function(ev) {
 				ev.preventDefault();
 				if (!scene)
 					return;
-				var x = ev.pageX, y = ev.pageY;
-				if (ev.originalEvent.targetTouches
-						&& ev.originalEvent.targetTouches[0]) {
-					x = ev.originalEvent.targetTouches[0].pageX;
-					y = ev.originalEvent.targetTouches[0].pageY;
-				}
+				var xy = getXY(ev);
+				var x = xy[0];
+				var y = xy[1];
+				
 				if (x === undefined)
 					return;
 				isDragging = true;
@@ -12097,11 +12067,6 @@ $3Dmol.GLViewer = (function() {
 				currentModelPos = modelGroup.position.clone();
 				cslabNear = slabNear;
 				cslabFar = slabFar;
-
-				// handle selection
-				var mouseX = (x / $(window).width()) * 2 - 1;
-				var mouseY = -(y / HEIGHT) * 2 + 1;
-				handleClickSelection(mouseX, mouseY, ev, container);
 
 			});
 
@@ -12125,84 +12090,85 @@ $3Dmol.GLViewer = (function() {
 				ev.preventDefault();
 			});
 			$('body').bind('mouseup touchend', function(ev) {
+				
+				// handle selection
+				if(isDragging && scene) { //saw mousedown, haven't moved
+					var xy = getXY(ev);
+					var x = xy[0];
+					var y = xy[1];
+					if(x == mouseStartX && y == mouseStartY) {					
+						var mouseX = (x / $(window).width()) * 2 - 1;
+						var mouseY = -(y / HEIGHT) * 2 + 1;
+						handleClickSelection(mouseX, mouseY, ev, container);
+					}
+				}
+				
 				isDragging = false;
+
 			});
 
-			glDOM
-					.bind(
-							'mousemove touchmove',
-							function(ev) { // touchmove
-								ev.preventDefault();
-								if (!scene)
-									return;
-								if (!isDragging)
-									return;
-								var mode = 0;
+			glDOM.bind('mousemove touchmove', function(ev) { // touchmove
+				ev.preventDefault();
+				if (!scene)
+					return;
+				if (!isDragging)
+					return;
+				var mode = 0;
 
-								var x = ev.pageX, y = ev.pageY;
-								if (ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches[0]) {
-									x = ev.originalEvent.targetTouches[0].pageX;
-									y = ev.originalEvent.targetTouches[0].pageY;
-								}
-								if (x === undefined)
-									return;
-								var dx = (x - mouseStartX) / WIDTH;
-								var dy = (y - mouseStartY) / HEIGHT;
-								// check for pinch
-								if (touchDistanceStart != 0
-										&& ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches.length == 2) {
-									var newdist = calcTouchDistance(ev);
-									// change to zoom
-									mode = 2;
-									dy = (touchDistanceStart - newdist) * 2
-											/ (WIDTH + HEIGHT);
-								} else if (ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches.length == 3) {
-									// translate
-									mode = 1;
-								}
+				var xy = getXY(ev);
+				var x = xy[0];
+				var y = xy[1];
+				if (x === undefined)
+					return;
+				var dx = (x - mouseStartX) / WIDTH;
+				var dy = (y - mouseStartY) / HEIGHT;
+				// check for pinch
+				if (touchDistanceStart != 0
+						&& ev.originalEvent.targetTouches
+						&& ev.originalEvent.targetTouches.length == 2) {
+					var newdist = calcTouchDistance(ev);
+					// change to zoom
+					mode = 2;
+					dy = (touchDistanceStart - newdist) * 2
+							/ (WIDTH + HEIGHT);
+				} else if (ev.originalEvent.targetTouches
+						&& ev.originalEvent.targetTouches.length == 3) {
+					// translate
+					mode = 1;
+				}
 
-								var r = Math.sqrt(dx * dx + dy * dy);
-								var scaleFactor;
-								if (mode == 3
-										|| (mouseButton == 3 && ev.ctrlKey)) { // Slab
-									slabNear = cslabNear + dx * 100;
-									slabFar = cslabFar + dy * 100;
-								} else if (mode == 2 || mouseButton == 3
-										|| ev.shiftKey) { // Zoom
-									scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-									if (scaleFactor < 80)
-										scaleFactor = 80;
-									rotationGroup.position.z = cz - dy
-											* scaleFactor;
-								} else if (mode == 1 || mouseButton == 2
-										|| ev.ctrlKey) { // Translate
-									var q = rotationGroup.quaternion;						
-									var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
-									projector.projectVector(t, camera);
-									t.x += dx*2;
-									t.y -= dy*2;
-									projector.unprojectVector(t, camera);
-									t.z = 0;							
-									t.applyQuaternion(q);
-
-									modelGroup.position.addVectors(currentModelPos,t);
-								} else if ((mode === 0 || mouseButton == 1)
-										&& r !== 0) { // Rotate
-									var rs = Math.sin(r * Math.PI) / r;
-									dq.x = Math.cos(r * Math.PI);
-									dq.y = 0;
-									dq.z = rs * dx;
-									dq.w = -rs * dy;
-									rotationGroup.quaternion = new $3Dmol.Quaternion(
-											1, 0, 0, 0);
-									rotationGroup.quaternion.multiply(dq);
-									rotationGroup.quaternion.multiply(cq);
-								}
-								show();
-							});
+				var r = Math.sqrt(dx * dx + dy * dy);
+				var scaleFactor;
+				if (mode == 3
+						|| (mouseButton == 3 && ev.ctrlKey)) { // Slab
+					slabNear = cslabNear + dx * 100;
+					slabFar = cslabFar + dy * 100;
+				} else if (mode == 2 || mouseButton == 3
+						|| ev.shiftKey) { // Zoom
+					scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+					if (scaleFactor < 80)
+						scaleFactor = 80;
+					rotationGroup.position.z = cz - dy
+							* scaleFactor;
+				} else if (mode == 1 || mouseButton == 2
+						|| ev.ctrlKey) { // Translate
+					var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+					modelGroup.position.addVectors(currentModelPos,t);
+					
+				} else if ((mode === 0 || mouseButton == 1)
+						&& r !== 0) { // Rotate
+					var rs = Math.sin(r * Math.PI) / r;
+					dq.x = Math.cos(r * Math.PI);
+					dq.y = 0;
+					dq.z = rs * dx;
+					dq.w = -rs * dy;
+					rotationGroup.quaternion = new $3Dmol.Quaternion(
+							1, 0, 0, 0);
+					rotationGroup.quaternion.multiply(dq);
+					rotationGroup.quaternion.multiply(cq);
+				}
+				show();
+			});
 		}
 		// public methods
 		/**
@@ -12364,8 +12330,10 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.render = function() {
 
+			updateClickables(); //must render for clickable styles to take effect
 			var time1 = new Date();
 			var view = this.getView();
+			
 			var i;
 			for (i = 0; i < models.length; i++) {
 				if (models[i]) {
@@ -12378,7 +12346,7 @@ $3Dmol.GLViewer = (function() {
 					shapes[i].globj(modelGroup);
 				}
 			}
-
+			
 			for (i in surfaces) { // this is an array with possible holes
 				if (surfaces.hasOwnProperty(i)) {
 					var geo = surfaces[i].geo;
@@ -12404,6 +12372,7 @@ $3Dmol.GLViewer = (function() {
 
 						// create new surface
 						var smesh = null;
+
 						if(surfaces[i].mat instanceof $3Dmol.LineBasicMaterial) {
 							//special case line meshes
 							smesh = new $3Dmol.Line(geo, surfaces[i].mat);
@@ -12411,11 +12380,18 @@ $3Dmol.GLViewer = (function() {
 						else {
 							smesh = new $3Dmol.Mesh(geo, surfaces[i].mat);
 						}
+						if(surfaces[i].mat.transparent && surfaces[i].mat.opacity == 0) {
+							//don't bother with hidden surfaces
+							smesh.visible = false;
+						} else {
+							smesh.visible = true;
+						}
 						surfaces[i].lastGL = smesh;
 						modelGroup.add(smesh);
 					} // else final surface already there
 				}
 			}
+			
 			this.setView(view); // Calls show() => renderer render
 			var time2 = new Date();
 			console.log("render time: " + (time2 - time1));
@@ -12519,6 +12495,31 @@ $3Dmol.GLViewer = (function() {
 			show();
 		};
 		
+		/**
+		 * Translate current view by x,y screen coordinates
+		 * This pans the camera rather than translating the model.
+		 * 
+		 * @function $3Dmol.GLViewer#translate
+		 * @param {number} x
+		 * @param {number} y
+		 * 
+		 */
+		this.translate = function(x, y) {
+			
+			var dx = x/WIDTH;
+			var dy = y/HEIGHT;
+			var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
+
+			projector.projectVector(v, camera);
+			v.x -= dx;
+			v.y -= dy;
+			projector.unprojectVector(v, camera);
+			v.z = 0;			
+			lookingAt.add(v);
+			camera.lookAt(lookingAt);
+			show();
+		};
+		
 
 		/**
 		 * Zoom to center of atom selection
@@ -12527,14 +12528,14 @@ $3Dmol.GLViewer = (function() {
 		 * @param {Object}
 		 *            [sel] - Selection specification specifying model and atom
 		 *            properties to select. Default: all atoms in viewer
-		 * 
 		 * @example // Assuming we have created a model of a protein with
 		 *          multiple chains (e.g. from a PDB file), focus on atoms in
 		 *          chain B glviewer.zoomTo({chain: 'B'});
 		 *  // Focus on centroid of all atoms of all models in this
 		 * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
 		 */
-		this.zoomTo = function(sel) {
+		this.zoomTo = function(sel, x, y) {
+			
 			var atoms = getAtomsFromSel(sel).concat(shapes);
 			var allatoms = getAtomsFromSel({}).concat(shapes);
 			var tmp = $3Dmol.getExtent(atoms);
@@ -12641,7 +12642,13 @@ $3Dmol.GLViewer = (function() {
 		 * glviewer.render();
 		 */
 		this.removeLabel = function(label) {
-			labels.remove(label);
+			//todo: don't do the linear search
+			for(var i = 0; i < labels.length; i++) {
+				if(labels[i] == label) {
+					labels.splice(i,1);
+					break;
+				}
+			}
 			label.dispose();
 			modelGroup.remove(label.sprite);
 		};
@@ -12671,12 +12678,12 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.Label}
 		 */
 		this.setLabelStyle = function(label, stylespec) {
-
+			modelGroup.remove(label.sprite);
 			label.dispose();
 			label.stylespec = stylespec;
 			label.setContext();
 			modelGroup.add(label.sprite);
-
+			show();
 			return label;
 
 		};
@@ -12693,12 +12700,12 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.Label}
 		 */
 		this.setLabelText = function(label, text) {
-
+			modelGroup.remove(label.sprite);
 			label.dispose();
 			label.text = text;
 			label.setContext();
 			modelGroup.add(label.sprite);
-
+			show();
 			return label;
 
 		};
@@ -12713,7 +12720,8 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.addShape = function(shapeSpec) {
 			shapeSpec = shapeSpec || {};
-			var shape = new $3Dmol.GLShape(shapes.length, shapeSpec);
+			var shape = new $3Dmol.GLShape(shapeSpec);
+			shape.shapePosition = shapes.length;
 			shapes.push(shape);
 
 			return shape;
@@ -12730,7 +12738,7 @@ $3Dmol.GLViewer = (function() {
 			if (!shape)
 				return;
 			shape.removegl(modelGroup);
-			delete shapes[shape.id];
+			delete shapes[shape.shapePosition];
 			// clear off back of model array
 			while (shapes.length > 0
 					&& typeof (shapes[shapes.length - 1]) === "undefined")
@@ -12758,8 +12766,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addSphere = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addSphere(spec);
 			shapes.push(s);
 
@@ -12774,8 +12783,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addArrow = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addArrow(spec);
 			shapes.push(s);
 
@@ -12790,8 +12800,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addCylinder = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addCylinder(spec);
 			shapes.push(s);
 
@@ -12806,8 +12817,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addCustom = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addCustom(spec);
 			shapes.push(s);
 
@@ -12824,8 +12836,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addVolumetricData = function(data, format, spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addVolumetricData(data, format, spec);
 			shapes.push(s);
 
@@ -13595,22 +13608,33 @@ $3Dmol.GLViewer = (function() {
 		// properties for those atoms
 		/**
 		 * Add specified properties to all atoms matching input argument
-		 * @param {AtomSpec} props
+		 * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
+		 * @param {AtomSelectionSpec} sel
 		 */
-		this.mapAtomProperties = function(props) {
-			var atoms = getAtomsFromSel({});
-			for (var a = 0, numa = atoms.length; a < numa; a++) {
-				var atom = atoms[a];
-				for (var i = 0, n = props.length; i < n; i++) {
-					var prop = props[i];
-					if (prop.props) {
-						for ( var p in prop.props) {
-							if (prop.props.hasOwnProperty(p)) {
-								// check the atom
-								if (atomIsSelected(atom, prop)) {
-									if (!atom.properties)
-										atom.properties = {};
-									atom.properties[p] = prop.props[p];
+		this.mapAtomProperties = function(props, sel) {
+			sel = sel || {};
+			var atoms = getAtomsFromSel(sel);
+			
+			if(typeof(props) == "function") {
+				for (var a = 0, numa = atoms.length; a < numa; a++) {
+					var atom = atoms[a];
+					props(atom);
+				}
+			}
+			else {
+				for (var a = 0, numa = atoms.length; a < numa; a++) {
+					var atom = atoms[a];
+					for (var i = 0, n = props.length; i < n; i++) {
+						var prop = props[i];
+						if (prop.props) {
+							for ( var p in prop.props) {
+								if (prop.props.hasOwnProperty(p)) {
+									// check the atom
+									if (atomIsSelected(atom, prop)) {
+										if (!atom.properties)
+											atom.properties = {};
+										atom.properties[p] = prop.props[p];
+									}
 								}
 							}
 						}
@@ -13861,6 +13885,8 @@ $3Dmol.Label.prototype = {
 
 	constructor : $3Dmol.Label,
 
+	getStyle : function () { return this.stylespec; }, 
+	
 	setContext : function() {
 		// function for drawing rounded rectangles - for Label drawing
 		var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
@@ -13887,10 +13913,10 @@ $3Dmol.Label.prototype = {
 			var ret = init;
 			if(typeof(style) != 'undefined') {
 				//convet regular colors
-				if(typeof(style) === 'string') 
-					ret = $3Dmol.CC.color(style).scaled()
-				else if(style instanceof $3Dmol.Color) 
-					ret = style.scaled();				
+				 if(style instanceof $3Dmol.Color) 
+					 ret = style.scaled();
+				 else //hex or name
+					ret = $3Dmol.CC.color(style).scaled();					
 			}
 			if(typeof(stylealpha) != 'undefined') {
 				ret.a = parseFloat(stylealpha);
@@ -15036,178 +15062,187 @@ $3Dmol.Parsers = (function() {
 var $3Dmol = $3Dmol || {};
 
 //properties for mapping
-$3Dmol.partialCharges = [
-    { resn: "ALA", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ALA", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ALA", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ALA", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ALA", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ARG", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ARG", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ARG", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ARG", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "ARG", atom: "CD", props: {'partialCharge': 0.10}},
-	{ resn: "ARG", atom: "NE", props: {'partialCharge': -0.10}},
-	{ resn: "ARG", atom: "CZ", props: {'partialCharge': 0.50}},
-	{ resn: "ARG", atom: "NH1", props: {'partialCharge': 0.25}},
-	{ resn: "ARG", atom: "NH2", props: {'partialCharge': 0.25}},
-	{ resn: "ARG", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ARG", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ASN", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ASN", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ASN", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ASN", atom: "CG", props: {'partialCharge': 0.55}},
-	{ resn: "ASN", atom: "OD1", props: {'partialCharge': -0.55}},
-	{ resn: "ASN", atom: "ND2", props: {'partialCharge': 0.00}},
-	{ resn: "ASN", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ASN", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ASP", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ASP", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ASP", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ASP", atom: "CG", props: {'partialCharge': 0.14}},
-	{ resn: "ASP", atom: "OD1", props: {'partialCharge': -0.57}},
-	{ resn: "ASP", atom: "OD2", props: {'partialCharge': -0.57}},
-	{ resn: "ASP", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ASP", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "CYS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "CYS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "CYS", atom: "CB", props: {'partialCharge': 0.19}},
-	{ resn: "CYS", atom: "SG", props: {'partialCharge': -0.19}},
-	{ resn: "CYS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "CYS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLN", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLN", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLN", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "CD", props: {'partialCharge': 0.55}},
-	{ resn: "GLN", atom: "OE1", props: {'partialCharge': -0.55}},
-	{ resn: "GLN", atom: "NE2", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLN", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLU", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLU", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLU", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "GLU", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "GLU", atom: "CD", props: {'partialCharge': 0.14}},
-	{ resn: "GLU", atom: "OE1", props: {'partialCharge': -0.57}},
-	{ resn: "GLU", atom: "OE2", props: {'partialCharge': -0.57}},
-	{ resn: "GLU", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLU", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLY", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLY", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLY", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLY", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "HIS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "HIS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "HIS", atom: "CG", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "ND1", props: {'partialCharge': -0.10}},
-	{ resn: "HIS", atom: "CD2", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "NE2", props: {'partialCharge': -0.40}},
-	{ resn: "HIS", atom: "CE1", props: {'partialCharge': 0.30}},
-	{ resn: "HIS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "HIS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ILE", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ILE", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ILE", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CG1", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CD", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ILE", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "LEU", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "LEU", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "LEU", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "LEU", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "LYS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "LYS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "LYS", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CD", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CE", props: {'partialCharge': 0.25}},
-	{ resn: "LYS", atom: "NZ", props: {'partialCharge': 0.75}},
-	{ resn: "LYS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "LYS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "MET", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "MET", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "MET", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "MET", atom: "CG", props: {'partialCharge': 0.06}},
-	{ resn: "MET", atom: "SD", props: {'partialCharge': -0.12}},
-	{ resn: "MET", atom: "CE", props: {'partialCharge': 0.06}},
-	{ resn: "MET", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "MET", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "PHE", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "PHE", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "PHE", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CE1", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CE2", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CZ", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "PHE", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "PRO", atom: "N", props: {'partialCharge': -0.25}},
-	{ resn: "PRO", atom: "CD", props: {'partialCharge': 0.10}},
-	{ resn: "PRO", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "PRO", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "PRO", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "PRO", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "PRO", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "SER", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "SER", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "SER", atom: "CB", props: {'partialCharge': 0.25}},
-	{ resn: "SER", atom: "OG", props: {'partialCharge': -0.25}},
-	{ resn: "SER", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "SER", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "THR", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "THR", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "THR", atom: "CB", props: {'partialCharge': 0.25}},
-	{ resn: "THR", atom: "OG1", props: {'partialCharge': -0.25}},
-	{ resn: "THR", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "THR", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "THR", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "TRP", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "TRP", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "TRP", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CG", props: {'partialCharge': -0.03}},
-	{ resn: "TRP", atom: "CD2", props: {'partialCharge': 0.10}},
-	{ resn: "TRP", atom: "CE2", props: {'partialCharge': -0.04}},
-	{ resn: "TRP", atom: "CE3", props: {'partialCharge': -0.03}},
-	{ resn: "TRP", atom: "CD1", props: {'partialCharge': 0.06}},
-	{ resn: "TRP", atom: "NE1", props: {'partialCharge': -0.06}},
-	{ resn: "TRP", atom: "CZ2", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CZ3", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CH2", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "TRP", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "TYR", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "TYR", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "TYR", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CE1", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CE2", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CZ", props: {'partialCharge': 0.25}},
-	{ resn: "TYR", atom: "OH", props: {'partialCharge': -0.25}},
-	{ resn: "TYR", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "TYR", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "VAL", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "VAL", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "VAL", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "CG1", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "VAL", atom: "O", props: {'partialCharge': -0.55}}
-]; 
+
+/* partial charges for proteins */
+$3Dmol.partialCharges = {
+"ALA:N": -0.15,
+"ALA:CA": 0.10,
+"ALA:CB": 0.00,
+"ALA:C": 0.60,
+"ALA:O": -0.55,
+"ARG:N": -0.15,
+"ARG:CA": 0.10,
+"ARG:CB": 0.00,
+"ARG:CG": 0.00,
+"ARG:CD": 0.10,
+"ARG:NE": -0.10,
+"ARG:CZ": 0.50,
+"ARG:NH1": 0.25,
+"ARG:NH2": 0.25,
+"ARG:C": 0.60,
+"ARG:O": -0.55,
+"ASN:N": -0.15,
+"ASN:CA": 0.10,
+"ASN:CB": 0.00,
+"ASN:CG": 0.55,
+"ASN:OD1": -0.55,
+"ASN:ND2": 0.00,
+"ASN:C": 0.60,
+"ASN:O": -0.55,
+"ASP:N": -0.15,
+"ASP:CA": 0.10,
+"ASP:CB": 0.00,
+"ASP:CG": 0.14,
+"ASP:OD1": -0.57,
+"ASP:OD2": -0.57,
+"ASP:C": 0.60,
+"ASP:O": -0.55,
+"CYS:N": -0.15,
+"CYS:CA": 0.10,
+"CYS:CB": 0.19,
+"CYS:SG": -0.19,
+"CYS:C": 0.60,
+"CYS:O": -0.55,
+"GLN:N": -0.15,
+"GLN:CA": 0.10,
+"GLN:CB": 0.00,
+"GLN:CG": 0.00,
+"GLN:CD": 0.55,
+"GLN:OE1": -0.55,
+"GLN:NE2": 0.00,
+"GLN:C": 0.60,
+"GLN:O": -0.55,
+"GLU:N": -0.15,
+"GLU:CA": 0.10,
+"GLU:CB": 0.00,
+"GLU:CG": 0.00,
+"GLU:CD": 0.14,
+"GLU:OE1": -0.57,
+"GLU:OE2": -0.57,
+"GLU:C": 0.60,
+"GLU:O": -0.55,
+"GLY:N": -0.15,
+"GLY:CA": 0.10,
+"GLY:C": 0.60,
+"GLY:O": -0.55,
+"HIS:N": -0.15,
+"HIS:CA": 0.10,
+"HIS:CB": 0.00,
+"HIS:CG": 0.10,
+"HIS:ND1": -0.10,
+"HIS:CD2": 0.10,
+"HIS:NE2": -0.40,
+"HIS:CE1": 0.30,
+"HIS:C": 0.60,
+"HIS:O": -0.55,
+"ILE:N": -0.15,
+"ILE:CA": 0.10,
+"ILE:CB": 0.00,
+"ILE:CG2": 0.00,
+"ILE:CG1": 0.00,
+"ILE:CD": 0.00,
+"ILE:C": 0.60,
+"ILE:O": -0.55,
+"LEU:N": -0.15,
+"LEU:CA": 0.10,
+"LEU:CB": 0.00,
+"LEU:CG": 0.00,
+"LEU:CD1": 0.00,
+"LEU:CD2": 0.00,
+"LEU:C": 0.60,
+"LEU:O": -0.55,
+"LYS:N": -0.15,
+"LYS:CA": 0.10,
+"LYS:CB": 0.00,
+"LYS:CG": 0.00,
+"LYS:CD": 0.00,
+"LYS:CE": 0.25,
+"LYS:NZ": 0.75,
+"LYS:C": 0.60,
+"LYS:O": -0.55,
+"MET:N": -0.15,
+"MET:CA": 0.10,
+"MET:CB": 0.00,
+"MET:CG": 0.06,
+"MET:SD": -0.12,
+"MET:CE": 0.06,
+"MET:C": 0.60,
+"MET:O": -0.55,
+"PHE:N": -0.15,
+"PHE:CA": 0.10,
+"PHE:CB": 0.00,
+"PHE:CG": 0.00,
+"PHE:CD1": 0.00,
+"PHE:CD2": 0.00,
+"PHE:CE1": 0.00,
+"PHE:CE2": 0.00,
+"PHE:CZ": 0.00,
+"PHE:C": 0.60,
+"PHE:O": -0.55,
+"PRO:N": -0.25,
+"PRO:CD": 0.10,
+"PRO:CA": 0.10,
+"PRO:CB": 0.00,
+"PRO:CG": 0.00,
+"PRO:C": 0.60,
+"PRO:O": -0.55,
+"SER:N": -0.15,
+"SER:CA": 0.10,
+"SER:CB": 0.25,
+"SER:OG": -0.25,
+"SER:C": 0.60,
+"SER:O": -0.55,
+"THR:N": -0.15,
+"THR:CA": 0.10,
+"THR:CB": 0.25,
+"THR:OG1": -0.25,
+"THR:CG2": 0.00,
+"THR:C": 0.60,
+"THR:O": -0.55,
+"TRP:N": -0.15,
+"TRP:CA": 0.10,
+"TRP:CB": 0.00,
+"TRP:CG": -0.03,
+"TRP:CD2": 0.10,
+"TRP:CE2": -0.04,
+"TRP:CE3": -0.03,
+"TRP:CD1": 0.06,
+"TRP:NE1": -0.06,
+"TRP:CZ2": 0.00,
+"TRP:CZ3": 0.00,
+"TRP:CH2": 0.00,
+"TRP:C": 0.60,
+"TRP:O": -0.55,
+"TYR:N": -0.15,
+"TYR:CA": 0.10,
+"TYR:CB": 0.00,
+"TYR:CG": 0.00,
+"TYR:CD1": 0.00,
+"TYR:CE1": 0.00,
+"TYR:CD2": 0.00,
+"TYR:CE2": 0.00,
+"TYR:CZ": 0.25,
+"TYR:OH": -0.25,
+"TYR:C": 0.60,
+"TYR:O": -0.55,
+"VAL:N": -0.15,
+"VAL:CA": 0.10,
+"VAL:CB": 0.00,
+"VAL:CG1": 0.00,
+"VAL:CG2": 0.00,
+"VAL:C": 0.60,
+"VAL:O": -0.55
+};
 	
-$3Dmol['partialCharges'] = $3Dmol.partialCharges;
-// Specifications for various object types used in 3Dmol.js
+//this can be supplied to mapAtomProperties
+$3Dmol.applyPartialCharges = function(atom, keepexisting) {
+	if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
+		if(atom.resn && atom.atom) {
+			var key = atom.resn+":"+atom.atom;
+			atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
+		}
+	}
+};// Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation 
 (function() {
 /**

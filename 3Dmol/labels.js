@@ -27,6 +27,8 @@ $3Dmol.Label.prototype = {
 
 	constructor : $3Dmol.Label,
 
+	getStyle : function () { return this.stylespec; }, 
+	
 	setContext : function() {
 		// function for drawing rounded rectangles - for Label drawing
 		var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
@@ -53,10 +55,10 @@ $3Dmol.Label.prototype = {
 			var ret = init;
 			if(typeof(style) != 'undefined') {
 				//convet regular colors
-				if(typeof(style) === 'string') 
-					ret = $3Dmol.CC.color(style).scaled()
-				else if(style instanceof $3Dmol.Color) 
-					ret = style.scaled();				
+				 if(style instanceof $3Dmol.Color) 
+					 ret = style.scaled();
+				 else //hex or name
+					ret = $3Dmol.CC.color(style).scaled();					
 			}
 			if(typeof(stylealpha) != 'undefined') {
 				ret.a = parseFloat(stylealpha);

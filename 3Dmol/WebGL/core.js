@@ -255,7 +255,7 @@ $3Dmol.Object3D.prototype = {
         object.rotation.copy(this.rotation);
         object.eulerOrder = this.eulerOrder;
         object.scale.copy(this.scale);
-        
+
         object.rotationAutoUpdate = this.rotationAutoUpdate;
         object.matrix.copy(this.matrix);
         object.matrixWorld.copy(this.matrixWorld);
