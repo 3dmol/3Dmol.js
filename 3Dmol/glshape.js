@@ -618,7 +618,7 @@ $3Dmol.GLShape = (function() {
 				1.0) : 1.0;
 		shape.side = (stylespec.side !== undefined) ? stylespec.side
 				: $3Dmol.DoubleSide;
-
+		shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
 		// Click handling
 		shape.clickable = stylespec.clickable ? true : false;
 		shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
@@ -634,7 +634,7 @@ $3Dmol.GLShape = (function() {
 	 *            stylespec
 	 * @returns {$3Dmol.GLShape}
 	 */
-	var GLShape = function(stylespec) {
+	function GLShape(stylespec) {
 
 		stylespec = stylespec || {};
 		$3Dmol.ShapeIDCount++;
@@ -881,7 +881,8 @@ $3Dmol.GLShape = (function() {
 				reflectivity : 0,
 				side : this.side,
 				transparent : (this.alpha < 1) ? true : false,
-				opacity : this.alpha
+				opacity : this.alpha,
+				wireframeLinewidth: this.linewidth
 			});
 
 			var mesh = new $3Dmol.Mesh(geo, material);
