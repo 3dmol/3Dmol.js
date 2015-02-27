@@ -21108,8 +21108,8 @@ $3Dmol.GLViewer = (function() {
 		renderer.setSize(WIDTH, HEIGHT);
 		var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
 		camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
-		var vec = new $3Dmol.Vector3();
-		camera.lookAt(vec);
+		var lookingAt = new $3Dmol.Vector3();
+		camera.lookAt(lookingAt);
 
 		var raycaster = new $3Dmol.Raycaster(new $3Dmol.Vector3(0, 0, 0),
 				new $3Dmol.Vector3(0, 0, 0));
@@ -21276,11 +21276,12 @@ $3Dmol.GLViewer = (function() {
 		};
 
 		//for a given screen (x,y) displacement return model displacement 
-		var screenXY2model = function(x,y) {
+		var screenXY2model = function(x,y,z) {
 			var dx = x/WIDTH;
 			var dy = y/HEIGHT;
+			var zpos = typeof(z) == 'undefined' ? rotationGroup.position.z : z; 
 			var q = rotationGroup.quaternion;						
-			var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
+			var t = new $3Dmol.Vector3(0,0,zpos);
 			projector.projectVector(t, camera);
 			t.x += dx*2;
 			t.y -= dy*2;
@@ -21747,6 +21748,7 @@ $3Dmol.GLViewer = (function() {
 		
 		/**
 		 * Translate current view by x,y screen coordinates
+		 * This pans the camera rather than translating the model.
 		 * 
 		 * @function $3Dmol.GLViewer#translate
 		 * @param {number} x
@@ -21754,8 +21756,18 @@ $3Dmol.GLViewer = (function() {
 		 * 
 		 */
 		this.translate = function(x, y) {
-			var t = screenXY2model(x,y);
-			modelGroup.position.add(t);			
+			
+			var dx = x/WIDTH;
+			var dy = y/HEIGHT;
+			var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
+
+			projector.projectVector(v, camera);
+			v.x -= dx;
+			v.y -= dy;
+			projector.unprojectVector(v, camera);
+			v.z = 0;			
+			lookingAt.add(v);
+			camera.lookAt(lookingAt);
 			show();
 		};
 		
@@ -21767,8 +21779,6 @@ $3Dmol.GLViewer = (function() {
 		 * @param {Object}
 		 *            [sel] - Selection specification specifying model and atom
 		 *            properties to select. Default: all atoms in viewer
-		 * @param {number} x - x-offset for zoom (screen coords)
-		 * @param {number} y - y-offset for zoom (screen coords)
 		 * @example // Assuming we have created a model of a protein with
 		 *          multiple chains (e.g. from a PDB file), focus on atoms in
 		 *          chain B glviewer.zoomTo({chain: 'B'});
@@ -21777,11 +21787,6 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.zoomTo = function(sel, x, y) {
 			
-			var disp = new $3Dmol.Vector3(0,0,0);
-			if(x || y) {
-				disp = screenXY2model(x,y);
-			}
-			
 			var atoms = getAtomsFromSel(sel).concat(shapes);
 			var allatoms = getAtomsFromSel({}).concat(shapes);
 			var tmp = getExtent(atoms);
@@ -21789,7 +21794,6 @@ $3Dmol.GLViewer = (function() {
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
-			modelGroup.position.add(disp);
 			// but all for bounding box
 			var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
 					- alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
