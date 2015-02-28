@@ -11261,7 +11261,7 @@ $3Dmol.GLShape = (function() {
 
 			if (arrowSpec.dir instanceof $3Dmol.Vector3
 					&& arrowSpec.length instanceof number) {
-				var end = arrowSpec.dir.clone().multiplyScalar(length).add(
+				var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
 						start);
 				arrowSpec.end = end;
 			}
@@ -11679,10 +11679,10 @@ $3Dmol.GLViewer = (function() {
 		};
 
 		//for a given screen (x,y) displacement return model displacement 
-		var screenXY2model = function(x,y,z) {
+		var screenXY2model = function(x,y) {
 			var dx = x/WIDTH;
 			var dy = y/HEIGHT;
-			var zpos = typeof(z) == 'undefined' ? rotationGroup.position.z : z; 
+			var zpos = rotationGroup.position.z; 
 			var q = rotationGroup.quaternion;						
 			var t = new $3Dmol.Vector3(0,0,zpos);
 			projector.projectVector(t, camera);
@@ -11736,6 +11736,7 @@ $3Dmol.GLViewer = (function() {
 					rotationGroup.position.z -= scaleFactor
 							* ev.originalEvent.wheelDelta / 400;
 				}
+				if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
 
 				show();
 			});
@@ -11804,6 +11805,7 @@ $3Dmol.GLViewer = (function() {
 						scaleFactor = 80;
 					rotationGroup.position.z = cz - dy
 							* scaleFactor;
+					if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
 				} else if (mode == 1 || mouseButton == 2
 						|| ev.ctrlKey) { // Translate
 					var t = screenXY2model(x-mouseStartX, y-mouseStartY);

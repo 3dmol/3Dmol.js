@@ -791,7 +791,7 @@ $3Dmol.GLShape = (function() {
 
 			if (arrowSpec.dir instanceof $3Dmol.Vector3
 					&& arrowSpec.length instanceof number) {
-				var end = arrowSpec.dir.clone().multiplyScalar(length).add(
+				var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
 						start);
 				arrowSpec.end = end;
 			}
