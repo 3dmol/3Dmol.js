@@ -295,7 +295,7 @@ $3Dmol.Vector3.prototype =  {
     
     applyQuaternion : function(q) { 
         
-    	//save values
+        //save values
         var x = this.x;
         var y = this.y;
         var z = this.z;
@@ -984,17 +984,17 @@ $3Dmol.Matrix4.prototype = {
     
     isEqual: function ( m ) {
         var me = m.elements;
-		var te = this.elements;
-		
-		if (te[0] == me[0] && te[4] == me[4] && te[8] == me[8] && te[12] == me[12] &&
-			te[1] == me[1] && te[5] == me[5] && te[9] == me[9] && te[13] == me[13] &&
-			te[2] == me[2] && te[6] == me[6] && te[10] == me[10] && te[14] == me[14] &&
-			te[3] == me[3] && te[7] == me[7] && te[11] == me[11] && te[15] == me[15]) {
-			return true;
-		}
-		else {
-			return false;
-		}
+        var te = this.elements;
+        
+        if (te[0] == me[0] && te[4] == me[4] && te[8] == me[8] && te[12] == me[12] &&
+            te[1] == me[1] && te[5] == me[5] && te[9] == me[9] && te[13] == me[13] &&
+            te[2] == me[2] && te[6] == me[6] && te[10] == me[10] && te[14] == me[14] &&
+            te[3] == me[3] && te[7] == me[7] && te[11] == me[11] && te[15] == me[15]) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
 };
