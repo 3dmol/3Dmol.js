@@ -5550,6 +5550,266 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
 		}
 	}
 };
+//This defines the $3Dmol object which is used to create viewers
+//and configure system-wide settings
+
+/** 
+ * All of the functionality of $3Dmol.js is contained within the
+ * $3Dmol global namespace
+ * @namespace */
+$3Dmol = (function(window) {
+    
+    var my = window['$3Dmol'] || {};
+    //var $ = window['jQuery'];
+    
+    return my;
+
+})(window);
+
+/* The following code "phones home" to register that an ip 
+   address has loaded 3Dmol.js.  Being able track this usage
+   is very helpful when reporting to funding agencies.  Please
+   leave this code in if you would like to increase the 
+   likelihood of 3Dmo.js remaining supported.
+*/
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
+    
+/**
+ * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ * @param {Object | string} element - Either HTML element or string identifier
+ * @param {ViewerSpec} config Viewer specification
+ * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
+ * 
+ * @example
+ * // Assume there exists an HTML div with id "gldiv"
+ * var element = $("#gldiv");
+ * 
+ * // Viewer config - properties 'defaultcolors' and 'callback'
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors };
+ * 
+ * // Create GLViewer within 'gldiv' 
+ * var myviewer = $3Dmol.createViewer(element, config);
+ * //'data' is a string containing molecule data in pdb format  
+ * myviewer.addModel(data, "pdb");
+ * myviewer.zoomTo();
+ * myviewer.render();                        
+ *                        
+ */
+$3Dmol.createViewer = function(element, config)
+{
+    if($.type(element) === "string")
+        element = $("#"+element);
+    if(!element) return;
+
+    config = config || {};
+ 
+    
+    if(!config.defaultcolors)
+        config.defaultcolors = $3Dmol.elementColors.defaultColors;
+
+    //try to create the  viewer
+    try {
+    	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+    }
+    catch(e) {
+    	throw "error creating viewer: "+e;
+    }
+    
+    return null;
+};
+   
+/**
+ * Contains a dictionary of embedded viewers created from HTML elements
+ * with a the viewer_3Dmoljs css class indexed by their id (or numerically
+ * if they do not have an id).
+*/
+$3Dmol.viewers = {};
+
+/**
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function $3Dmol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @example
+ * var myviewer = $3Dmol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * var m = $3Dmol.download('pdb: 2POR', myviewer);
+ * 
+ * @return {$3Dmol.GLModel} GLModel
+ */ 
+$3Dmol.download = function(query, viewer) {
+    var baseURL = '';
+    var type = "";
+    var m = null;
+    if (query.substr(0, 4) === 'pdb:') {
+        type = "pdb";
+        query = query.substr(4).toUpperCase();
+        if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+           alert("Wrong PDB ID"); return;
+        }
+        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+    } else if (query.substr(0, 4) == 'cid:') {
+        type = "sdf";
+        query = query.substr(4);
+        if (!query.match(/^[1-9]+$/)) {
+           alert("Wrong Compound ID"); return;
+        }
+        uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+          "/SDF?record_type=3d";
+    }
+
+   $.get(uri, function(ret) {
+      viewer.addModel(ret, type);
+      viewer.zoomTo();
+      viewer.render();                            
+   });
+   
+   return m;
+};
+       
+
+/**
+ * $3Dmol surface types
+ * @enum {number}
+ */
+$3Dmol.SurfaceType = {
+    VDW : 1,
+    MS : 2,
+    SAS : 3,
+    SES  : 4
+};
+
+
+//Miscellaneous functions and classes - to be incorporated into $3Dmol proper
+/**
+ * 
+ * @param {$3Dmol.Geometry} geometry
+ * @param {$3Dmol.Mesh} mesh
+ * @returns {undefined}
+ */
+$3Dmol.mergeGeos = function(geometry, mesh) {
+    
+    var meshGeo = mesh.geometry;
+    
+    if (meshGeo === undefined) 
+        return;
+    
+    geometry.geometryGroups.push( meshGeo.geometryGroups[0] );
+    
+};
+
+$3Dmol.multiLineString = function(f) {
+    return f.toString()
+            .replace(/^[^\/]+\/\*!?/, '')
+            .replace(/\*\/[^\/]+$/, '');
+            
+};
+
+/** 
+ * Render surface synchronously if true
+ * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @type {boolean} */
+$3Dmol.syncSurface = false;
+
+// Internet Explorer refuses to allow webworkers in data blobs.  I can find
+// no way of checking for this feature directly, so must do a brower check
+if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
+		window.navigator.userAgent.indexOf('Trident/') >= 0) {
+	$3Dmol.syncSurface = true; // can't use webworkers
+}
+
+/**
+ * Parse a string that represents a style or atom selection and convert it
+ * into an object.  The goal is to make it easier to write out these specifications
+ * without resorting to json. Objects cannot be defined recursively.
+ * ; - delineates fields of the object 
+ * : - if the field has a value other than an empty object, it comes after a colon
+ * , - delineates key/value pairs of a value object
+ *     If the value object consists of ONLY keys (no = present) the keys are 
+ *     converted to a list.  Otherwise a object of key/value pairs is created with
+ *     any missing values set to null
+ * = OR ~ - separates key/value pairs of a value object, if not provided value is null
+ * 	twiddle is supported since = has special meaning in URLs
+ * @param (String) str
+ * @returns {Object}
+ */
+$3Dmol.specStringToObject = function(str) {
+	if(typeof(str) === "object") {
+		return str; //not string, assume was converted already
+	}
+	else if(typeof(str) === "undefined" || str == null) {
+		return str; 
+	}
+	var ret = {};
+	var fields = str.split(';');
+	for(var i = 0; i < fields.length; i++) {
+		var fv = fields[i].split(':');
+		var f = fv[0];
+		var val = {};
+		var vstr = fv[1];
+		if(vstr) {
+			vstr = vstr.replace(/~/g,"=");
+			if(vstr.indexOf('=') !== -1) {
+				//has key=value pairs, must be object
+				var kvs = vstr.split(',');
+				for(var j = 0; j < kvs.length; j++) {
+					var kv = kvs[j].split('=',2);
+					val[kv[0]] = kv[1];
+				}
+			}
+			else if(vstr.indexOf(',') !== -1) {
+				//has multiple values, must list
+				val = vstr.split(',');
+			}
+			else {
+				val = vstr; //value itself
+			}
+		}
+		ret[f] = val;
+	}
+	
+	return ret;
+}
+
+// computes the bounding box around the provided atoms
+/**
+ * @param {AtomSpec[]} atomlist
+ * @return {Array}
+ */
+$3Dmol.getExtent = function(atomlist) {
+    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+    xmin = ymin = zmin = 9999;
+    xmax = ymax = zmax = -9999;
+    xsum = ysum = zsum = cnt = 0;
+
+    if (atomlist.length === 0)
+        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+    for (var i = 0; i < atomlist.length; i++) {
+        var atom = atomlist[i];
+        if (atom === undefined)
+            continue;
+        cnt++;
+        xsum += atom.x;
+        ysum += atom.y;
+        zsum += atom.z;
+
+        xmin = (xmin < atom.x) ? xmin : atom.x;
+        ymin = (ymin < atom.y) ? ymin : atom.y;
+        zmin = (zmin < atom.z) ? zmin : atom.z;
+        xmax = (xmax > atom.x) ? xmax : atom.x;
+        ymax = (ymax > atom.y) ? ymax : atom.y;
+        zmax = (zmax > atom.z) ? zmax : atom.z;
+    }
+
+    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+};
+
+
+
 $3Dmol = $3Dmol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
@@ -7242,6 +7502,40 @@ $3Dmol.specStringToObject = function(str) {
 	return ret;
 }
 
+// computes the bounding box around the provided atoms
+/**
+ * @param {AtomSpec[]} atomlist
+ * @return {Array}
+ */
+$3Dmol.getExtent = function(atomlist) {
+    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+    xmin = ymin = zmin = 9999;
+    xmax = ymax = zmax = -9999;
+    xsum = ysum = zsum = cnt = 0;
+
+    if (atomlist.length === 0)
+        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+    for (var i = 0; i < atomlist.length; i++) {
+        var atom = atomlist[i];
+        if (atom === undefined)
+            continue;
+        cnt++;
+        xsum += atom.x;
+        ysum += atom.y;
+        zsum += atom.z;
+
+        xmin = (xmin < atom.x) ? xmin : atom.x;
+        ymin = (ymin < atom.y) ? ymin : atom.y;
+        zmin = (zmin < atom.z) ? zmin : atom.z;
+        xmax = (xmax > atom.x) ? xmax : atom.x;
+        ymax = (ymax > atom.y) ? ymax : atom.y;
+        zmax = (zmax > atom.z) ? zmax : atom.z;
+    }
+
+    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+};
 
 
 /*
@@ -10123,7 +10417,9 @@ $3Dmol.GLModel = (function() {
             			break;
             		}
             	}
-            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres") {
+
+            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
+
                     // if something is in sel, atom must have it                	
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
@@ -10171,15 +10467,53 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
          */
-        this.selectedAtoms = function(sel) {
+        this.selectedAtoms = function(sel, from) {
             var ret = [];
-            var aLength = atoms.length;
+            if (!from) from = atoms;
+            var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
-                var atom = atoms[i];
+                var atom = from[i];
                 if (atom) {
                     if (this.atomIsSelected(atom, sel))
                         ret.push(atom);
                 }
+            }
+
+            // expand selection by some distance
+            if (sel.hasOwnProperty("expand")) {
+
+            	// get atoms in expanded bounding box
+            	var expand = expandAtomList(ret, sel.expand)
+            	var retlen = ret.length
+            	for (var i = 0; i < expand.length; i++) {
+            		for (var j = 0; j < retlen; j++) {
+
+            			var dist = squaredDistance(expand[i], ret[j]);
+            			var thresh = Math.pow(sel.expand, 2);
+            			if (dist < thresh && dist > 0) {
+            				ret.push(expand[i]);
+            			}
+            		}
+            	}
+            }
+
+            // selection within distance of sub-selection
+            if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
+
+            	// get atoms in second selection
+            	var sel2 = this.selectedAtoms(sel.within.sel, atoms)
+            	var within = []
+            	for (var i = 0; i < sel2.length; i++) {
+            		for (var j = 0; j < ret.length; j++) {
+
+            			var dist = squaredDistance(sel2[i], ret[j]);
+            			var thresh = Math.pow(sel.within.distance, 2);
+            			if (dist < thresh && dist > 0) {
+            				within.push(ret[j]);
+            			}
+            		}
+            	}
+            	ret = within;
             }
 
             // byres selection flag
@@ -10222,6 +10556,53 @@ $3Dmol.GLModel = (function() {
             }
 
             return ret;
+        };
+
+        var squaredDistance = function(atom1, atom2) {
+        	var xd = atom2.x - atom1.x;
+        	var yd = atom2.y - atom1.y;
+        	var zd = atom2.z - atom1.z;
+        	return (Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
+        };
+
+        /** returns a list of atoms in the expanded bounding box, but not in the current one
+         *
+         *  Bounding box:
+         *
+         *    [ [ xmin, ymin, zmin ],
+         *      [ xmax, ymax, zmax ],
+         *      [ xctr, yctr, zctr ] ]
+         *
+         **/
+        var expandAtomList = function(atomList, amt) {
+
+        	var pb = $3Dmol.getExtent(atomList);
+        	var nb = [[],[],[]];
+
+            for (var i = 0; i < 3; i++)
+            {
+                nb[0][i] = pb[0][i]-amt;
+                nb[1][i] = pb[1][i]+amt;
+                nb[2][i] = pb[2][i];
+            }
+
+            // look in added box "shell" for new atoms
+            var expand = [];
+            for (var i = 0; i < atoms.length; i++) {
+
+                var x = atoms[i].x;
+                var y = atoms[i].y;
+                var z = atoms[i].z;
+
+                if (x >= nb[0][0] && x < pb[0][0] || x > pb[1][0] && x <= nb[1][0]) {
+                    if (y >= nb[0][1] && y < pb[0][1] || y > pb[1][1] && y <= nb[1][1]) {
+                        if (z >= nb[0][2] && z < pb[0][2] || z > pb[1][2] && z <= nb[1][2]) {
+                            expand.push(atoms[i]);
+                        }
+                    }
+                }
+            }
+            return expand;
         };
         
         /** Add list of new atoms to model.  Adjusts bonds appropriately.
@@ -10306,7 +10687,7 @@ $3Dmol.GLModel = (function() {
             // style, although these checks will only catch cases where both
             // are either null or undefined
 
-            var selected = this.selectedAtoms(sel);
+            var selected = this.selectedAtoms(sel, atoms);
             for ( var i = 0; i < atoms.length; i++) {
                 atoms[i].capDrawn = false; //reset for proper stick render
             }
@@ -10340,7 +10721,7 @@ $3Dmol.GLModel = (function() {
             if(molObj !== null && sameObj(colors,lastColors))
                 return; // don't recompute
             lastColors = colors;
-            var atoms = this.selectedAtoms(sel);
+            var atoms = this.selectedAtoms(sel, atoms);
             if(atoms.length > 0)
                 molObj = null; // force rebuild
             for ( var i = 0; i < atoms.length; i++) {
@@ -10358,7 +10739,7 @@ $3Dmol.GLModel = (function() {
          * @param {type} scheme
          */
         this.setColorByProperty = function(sel, prop, scheme) {
-            var atoms = this.selectedAtoms(sel);
+            var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
@@ -10430,7 +10811,7 @@ $3Dmol.GLModel = (function() {
          * @param {$3Dmol.GLViewer} viewer
          */
         this.addResLabels = function(sel, viewer, style) {
-        	var atoms = this.selectedAtoms(sel);
+        	var atoms = this.selectedAtoms(sel, atoms);
         	var bylabel = {}
         	//collect by chain:resn:resi
         	for(var i = 0; i < atoms.length; i++) {
@@ -11443,41 +11824,6 @@ $3Dmol.GLViewer = (function() {
 
 	// private class helper functions
 
-	// computes the bounding box around the provided atoms
-	/**
-	 * @param {AtomSpec[]} atomlist
-	 * @return {Array}
-	 */
-	var getExtent = function(atomlist) {
-		var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
-
-		xmin = ymin = zmin = 9999;
-		xmax = ymax = zmax = -9999;
-		xsum = ysum = zsum = cnt = 0;
-
-		if (atomlist.length === 0)
-			return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-		for (var i = 0; i < atomlist.length; i++) {
-			var atom = atomlist[i];
-			if (atom === undefined)
-				continue;
-			cnt++;
-			xsum += atom.x;
-			ysum += atom.y;
-			zsum += atom.z;
-
-			xmin = (xmin < atom.x) ? xmin : atom.x;
-			ymin = (ymin < atom.y) ? ymin : atom.y;
-			zmin = (zmin < atom.z) ? zmin : atom.z;
-			xmax = (xmax > atom.x) ? xmax : atom.x;
-			ymax = (ymax > atom.y) ? ymax : atom.y;
-			zmax = (zmax > atom.z) ? zmax : atom.z;
-		}
-
-		return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
-				[ xsum / cnt, ysum / cnt, zsum / cnt ] ];
-	};
-
 	function GLViewer(element, callback, defaultcolors, nomouse) {
 		// set variables
 		var _viewer = this;
@@ -12199,8 +12545,8 @@ $3Dmol.GLViewer = (function() {
 			
 			var atoms = getAtomsFromSel(sel).concat(shapes);
 			var allatoms = getAtomsFromSel({}).concat(shapes);
-			var tmp = getExtent(atoms);
-			var alltmp = getExtent(allatoms);
+			var tmp = $3Dmol.getExtent(atoms);
+			var alltmp = $3Dmol.getExtent(allatoms);
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
@@ -13016,7 +13362,7 @@ $3Dmol.GLViewer = (function() {
 
 			var mat = getMatWithStyle(style);
 
-			var extent = getExtent(atomsToShow);
+			var extent = $3Dmol.getExtent(atomsToShow);
 
 			var i, il;
 			if (style['map'] && style['map']['prop']) {
@@ -13057,7 +13403,7 @@ $3Dmol.GLViewer = (function() {
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
-				var seleExtent = getExtent(focusSele);
+				var seleExtent = $3Dmol.getExtent(focusSele);
 				// sort by how close to center of seleExtent
 				var sortFunc = function(a, b) {
 					var distSq = function(ex, sele) {
