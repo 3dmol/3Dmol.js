@@ -39,43 +39,43 @@ $(document).ready(function() {
             var reslabre = /labelres(.*)/;
             var keys = [];
             for(var dataname in d) {
-            	if(d.hasOwnProperty(dataname)) {
-            		keys.push(dataname);
-            	}
+                if(d.hasOwnProperty(dataname)) {
+                    keys.push(dataname);
+                }
             }
             keys.sort();
             for(var i = 0; i < keys.length; i++) {
-            	var dataname = keys[i];
-            	var m = stylere.exec(dataname);
-            	if(m) {
-            		var selname = "select"+m[1];
-            		var newsel = $3Dmol.specStringToObject(d[selname]);
-            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
-            		selectstylelist.push([newsel,styleobj]);
-            	}         
-            	m = surfre.exec(dataname);
-            	if(m) {
-            		var selname = "select"+m[1];
-            		var newsel = $3Dmol.specStringToObject(d[selname]);
-            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
-            		surfaces.push([newsel,styleobj]);
-            	}
-            	m = reslabre.exec(dataname);
-            	if(m) {
-            		var selname = "select"+m[1];
-            		var newsel = $3Dmol.specStringToObject(d[selname]);
-            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
-            		labels.push([newsel,styleobj]);
-            	}
+                var dataname = keys[i];
+                var m = stylere.exec(dataname);
+                if(m) {
+                    var selname = "select"+m[1];
+                    var newsel = $3Dmol.specStringToObject(d[selname]);
+                    var styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    selectstylelist.push([newsel,styleobj]);
+                }         
+                m = surfre.exec(dataname);
+                if(m) {
+                    var selname = "select"+m[1];
+                    var newsel = $3Dmol.specStringToObject(d[selname]);
+                    var styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    surfaces.push([newsel,styleobj]);
+                }
+                m = reslabre.exec(dataname);
+                if(m) {
+                    var selname = "select"+m[1];
+                    var newsel = $3Dmol.specStringToObject(d[selname]);
+                    var styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    labels.push([newsel,styleobj]);
+                }
             }
             
             try {
-            	var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
-            		viewer.setBackgroundColor(bgcolor);            
-            	}});
+                var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
+                    viewer.setBackgroundColor(bgcolor);            
+                }});
             } catch ( error ) {
-            	//for autoload, provide a useful error message
-            	window.location = "http://get.webgl.org";            		
+                //for autoload, provide a useful error message
+                window.location = "http://get.webgl.org";
             }
             
             
@@ -83,26 +83,26 @@ $(document).ready(function() {
                 
                 var type = viewerdiv.data("type") || viewerdiv.data("datatype");
                 if(!type) {
-                	type = datauri.substr(datauri.lastIndexOf('.')+1).substring(0,3);
-                	if(type.length != 3) type = "pdb";
+                    type = datauri.substr(datauri.lastIndexOf('.')+1).substring(0,3);
+                    if(type.length != 3) type = "pdb";
                 }
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
                     glviewer.setStyle(select,style);
                     for(var i = 0; i < selectstylelist.length; i++) {
-                    	var sel = selectstylelist[i][0] || {};
-                    	var sty = selectstylelist[i][1] || {"line":{}}
-                    	glviewer.setStyle(sel, sty);
+                        var sel = selectstylelist[i][0] || {};
+                        var sty = selectstylelist[i][1] || {"line":{}}
+                        glviewer.setStyle(sel, sty);
                     }
                     for(var i = 0; i < surfaces.length; i++) {
-                    	var sel = surfaces[i][0] || {};
-                    	var sty = surfaces[i][1] || {}
-                    	glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                        var sel = surfaces[i][0] || {};
+                        var sty = surfaces[i][1] || {}
+                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
                     }
                     for(var i = 0; i < labels.length; i++) {
-                    	var sel = labels[i][0] || {};
-                    	var sty = labels[i][1] || {}
-                    	glviewer.addResLabels(sel, sty);
+                        var sel = labels[i][0] || {};
+                        var sty = labels[i][1] || {}
+                        glviewer.addResLabels(sel, sty);
                     }
                     // Allowing us to fire callback after viewer has added model
                     if (callback) 
@@ -130,11 +130,11 @@ $(document).ready(function() {
                     }
 
                     glviewer.addModel(moldata, type);
-                	glviewer.setStyle(select, style);
+                    glviewer.setStyle(select, style);
                     for(var i = 0; i < selectstylelist.length; i++) {
-                    	var sel = selectstylelist[i][0] || {};
-                    	var sty = selectstylelist[i][1] || {"line":{}}
-                    	glviewer.setStyle(sel, sty);
+                        var sel = selectstylelist[i][0] || {};
+                        var sty = selectstylelist[i][1] || {"line":{}}
+                        glviewer.setStyle(sel, sty);
                     }                
                 }
 
