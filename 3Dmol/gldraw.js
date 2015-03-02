@@ -86,26 +86,32 @@ $3Dmol.GLDraw = (function() {
 
 		var nvecs = [];
 
+		var subdivisions = 6; // including the initial 2, eg. 4 => 16 subintervals
+		var N = Math.pow(2, subdivisions);  // eg. 2**4 = 16 subintervals in total
+		var i = 2;  // start with 2 subdivisions already done
+		var M = Math.pow(2, i); // 4
+		var spacing = N/M;  // 16/4 = 4; if there were 5 subdivs, then 32/4 = 8.
+		var j;
+
 		nvecs[0] = new $3Dmol.Vector3(-1, 0, 0);
-		nvecs[4] = new $3Dmol.Vector3(0, 0, 1);
-		nvecs[8] = new $3Dmol.Vector3(1, 0, 0);
-		nvecs[12] = new $3Dmol.Vector3(0, 0, -1);
+		nvecs[spacing] = new $3Dmol.Vector3(0, 0, 1);
+		nvecs[spacing*2] = new $3Dmol.Vector3(1, 0, 0);
+		nvecs[spacing*3] = new $3Dmol.Vector3(0, 0, -1);
 
-		// now quarter positions
-		nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
-		nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
-		nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
-		nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
-
-		// eights
-		nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
-		nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
-		nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
-		nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
-		nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
-		nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
-		nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
-		nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
+		for ( i = 3; i <= subdivisions; i ++ ) {
+			// eg. i=3, we need to add 2**(3-1) = 4 new vecs. Call it M.
+			// their spacing is N/M, eg. N=16, M=4, N/M=4; M=8, N/M=2.
+			// they start off at half this spacing
+			// and are equal to the average of the two vectors on either side
+			M = Math.pow(2, (i-1));
+			spacing = N/M;
+			for ( j = 0; j < (M-1); j ++ ) {
+				nvecs[spacing/2 + j*spacing] = nvecs[j*spacing].clone().add(nvecs[(j+1)*spacing]).normalize();
+			}
+			// treat the last one specially so it wraps around to zero
+			j = M - 1;
+			nvecs[spacing/2 + j*spacing] = nvecs[j*spacing].clone().add(nvecs[0]).normalize();
+		}
 
 		/*
 		 * nvecs[0] = new $3Dmol.Vector3(-1,0,0); nvecs[1] = new
@@ -702,11 +708,12 @@ $3Dmol.GLDraw = (function() {
 				normals : []
 			};
 			// scale quality with radius heuristically
-			var widthSegments = 16;
-			var heightSegments = 10;
+			var sphereQuality = 5;
+			var widthSegments = 16 * sphereQuality;
+			var heightSegments = 10 * sphereQuality;
 			if (radius < 1) {
-				widthSegments = 10;
-				heightSegments = 8;
+				widthSegments = 10 * sphereQuality;
+				heightSegments = 8 * sphereQuality;
 			}
 
 			var phiStart = 0;

@@ -5550,6 +5550,232 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
 		}
 	}
 };
+//This defines the $3Dmol object which is used to create viewers
+//and configure system-wide settings
+
+/** 
+ * All of the functionality of $3Dmol.js is contained within the
+ * $3Dmol global namespace
+ * @namespace */
+$3Dmol = (function(window) {
+    
+    var my = window['$3Dmol'] || {};
+    //var $ = window['jQuery'];
+    
+    return my;
+
+})(window);
+
+/* The following code "phones home" to register that an ip 
+   address has loaded 3Dmol.js.  Being able track this usage
+   is very helpful when reporting to funding agencies.  Please
+   leave this code in if you would like to increase the 
+   likelihood of 3Dmo.js remaining supported.
+*/
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
+    
+/**
+ * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ * @param {Object | string} element - Either HTML element or string identifier
+ * @param {ViewerSpec} config Viewer specification
+ * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
+ * 
+ * @example
+ * // Assume there exists an HTML div with id "gldiv"
+ * var element = $("#gldiv");
+ * 
+ * // Viewer config - properties 'defaultcolors' and 'callback'
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors };
+ * 
+ * // Create GLViewer within 'gldiv' 
+ * var myviewer = $3Dmol.createViewer(element, config);
+ * //'data' is a string containing molecule data in pdb format  
+ * myviewer.addModel(data, "pdb");
+ * myviewer.zoomTo();
+ * myviewer.render();                        
+ *                        
+ */
+$3Dmol.createViewer = function(element, config)
+{
+    if($.type(element) === "string")
+        element = $("#"+element);
+    if(!element) return;
+
+    config = config || {};
+ 
+    
+    if(!config.defaultcolors)
+        config.defaultcolors = $3Dmol.elementColors.defaultColors;
+
+    //try to create the  viewer
+    try {
+    	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+    }
+    catch(e) {
+    	throw "error creating viewer: "+e;
+    }
+    
+    return null;
+};
+   
+/**
+ * Contains a dictionary of embedded viewers created from HTML elements
+ * with a the viewer_3Dmoljs css class indexed by their id (or numerically
+ * if they do not have an id).
+*/
+$3Dmol.viewers = {};
+
+/**
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function $3Dmol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @example
+ * var myviewer = $3Dmol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * var m = $3Dmol.download('pdb: 2POR', myviewer);
+ * 
+ * @return {$3Dmol.GLModel} GLModel
+ */ 
+$3Dmol.download = function(query, viewer) {
+    var baseURL = '';
+    var type = "";
+    var m = null;
+    if (query.substr(0, 4) === 'pdb:') {
+        type = "pdb";
+        query = query.substr(4).toUpperCase();
+        if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+           alert("Wrong PDB ID"); return;
+        }
+        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+    } else if (query.substr(0, 4) == 'cid:') {
+        type = "sdf";
+        query = query.substr(4);
+        if (!query.match(/^[1-9]+$/)) {
+           alert("Wrong Compound ID"); return;
+        }
+        uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+          "/SDF?record_type=3d";
+    }
+
+   $.get(uri, function(ret) {
+      viewer.addModel(ret, type);
+      viewer.zoomTo();
+      viewer.render();                            
+   });
+   
+   return m;
+};
+       
+
+/**
+ * $3Dmol surface types
+ * @enum {number}
+ */
+$3Dmol.SurfaceType = {
+    VDW : 1,
+    MS : 2,
+    SAS : 3,
+    SES  : 4
+};
+
+
+//Miscellaneous functions and classes - to be incorporated into $3Dmol proper
+/**
+ * 
+ * @param {$3Dmol.Geometry} geometry
+ * @param {$3Dmol.Mesh} mesh
+ * @returns {undefined}
+ */
+$3Dmol.mergeGeos = function(geometry, mesh) {
+    
+    var meshGeo = mesh.geometry;
+    
+    if (meshGeo === undefined) 
+        return;
+    
+    geometry.geometryGroups.push( meshGeo.geometryGroups[0] );
+    
+};
+
+$3Dmol.multiLineString = function(f) {
+    return f.toString()
+            .replace(/^[^\/]+\/\*!?/, '')
+            .replace(/\*\/[^\/]+$/, '');
+            
+};
+
+/** 
+ * Render surface synchronously if true
+ * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @type {boolean} */
+$3Dmol.syncSurface = false;
+
+// Internet Explorer refuses to allow webworkers in data blobs.  I can find
+// no way of checking for this feature directly, so must do a brower check
+if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
+		window.navigator.userAgent.indexOf('Trident/') >= 0) {
+	$3Dmol.syncSurface = true; // can't use webworkers
+}
+
+/**
+ * Parse a string that represents a style or atom selection and convert it
+ * into an object.  The goal is to make it easier to write out these specifications
+ * without resorting to json. Objects cannot be defined recursively.
+ * ; - delineates fields of the object 
+ * : - if the field has a value other than an empty object, it comes after a colon
+ * , - delineates key/value pairs of a value object
+ *     If the value object consists of ONLY keys (no = present) the keys are 
+ *     converted to a list.  Otherwise a object of key/value pairs is created with
+ *     any missing values set to null
+ * = OR ~ - separates key/value pairs of a value object, if not provided value is null
+ * 	twiddle is supported since = has special meaning in URLs
+ * @param (String) str
+ * @returns {Object}
+ */
+$3Dmol.specStringToObject = function(str) {
+	if(typeof(str) === "object") {
+		return str; //not string, assume was converted already
+	}
+	else if(typeof(str) === "undefined" || str == null) {
+		return str; 
+	}
+	var ret = {};
+	var fields = str.split(';');
+	for(var i = 0; i < fields.length; i++) {
+		var fv = fields[i].split(':');
+		var f = fv[0];
+		var val = {};
+		var vstr = fv[1];
+		if(vstr) {
+			vstr = vstr.replace(/~/g,"=");
+			if(vstr.indexOf('=') !== -1) {
+				//has key=value pairs, must be object
+				var kvs = vstr.split(',');
+				for(var j = 0; j < kvs.length; j++) {
+					var kv = kvs[j].split('=',2);
+					val[kv[0]] = kv[1];
+				}
+			}
+			else if(vstr.indexOf(',') !== -1) {
+				//has multiple values, must list
+				val = vstr.split(',');
+			}
+			else {
+				val = vstr; //value itself
+			}
+		}
+		ret[f] = val;
+	}
+	
+	return ret;
+}
+
+
+
+
 $3Dmol = $3Dmol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
@@ -8272,26 +8498,32 @@ $3Dmol.GLDraw = (function() {
 
 		var nvecs = [];
 
+		var subdivisions = 6; // including the initial 2, eg. 4 => 16 subintervals
+		var N = Math.pow(2, subdivisions);  // eg. 2**4 = 16 subintervals in total
+		var i = 2;  // start with 2 subdivisions already done
+		var M = Math.pow(2, i); // 4
+		var spacing = N/M;  // 16/4 = 4; if there were 5 subdivs, then 32/4 = 8.
+		var j;
+
 		nvecs[0] = new $3Dmol.Vector3(-1, 0, 0);
-		nvecs[4] = new $3Dmol.Vector3(0, 0, 1);
-		nvecs[8] = new $3Dmol.Vector3(1, 0, 0);
-		nvecs[12] = new $3Dmol.Vector3(0, 0, -1);
+		nvecs[spacing] = new $3Dmol.Vector3(0, 0, 1);
+		nvecs[spacing*2] = new $3Dmol.Vector3(1, 0, 0);
+		nvecs[spacing*3] = new $3Dmol.Vector3(0, 0, -1);
 
-		// now quarter positions
-		nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
-		nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
-		nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
-		nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
-
-		// eights
-		nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
-		nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
-		nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
-		nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
-		nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
-		nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
-		nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
-		nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
+		for ( i = 3; i <= subdivisions; i ++ ) {
+			// eg. i=3, we need to add 2**(3-1) = 4 new vecs. Call it M.
+			// their spacing is N/M, eg. N=16, M=4, N/M=4; M=8, N/M=2.
+			// they start off at half this spacing
+			// and are equal to the average of the two vectors on either side
+			M = Math.pow(2, (i-1));
+			spacing = N/M;
+			for ( j = 0; j < (M-1); j ++ ) {
+				nvecs[spacing/2 + j*spacing] = nvecs[j*spacing].clone().add(nvecs[(j+1)*spacing]).normalize();
+			}
+			// treat the last one specially so it wraps around to zero
+			j = M - 1;
+			nvecs[spacing/2 + j*spacing] = nvecs[j*spacing].clone().add(nvecs[0]).normalize();
+		}
 
 		/*
 		 * nvecs[0] = new $3Dmol.Vector3(-1,0,0); nvecs[1] = new
@@ -8888,11 +9120,12 @@ $3Dmol.GLDraw = (function() {
 				normals : []
 			};
 			// scale quality with radius heuristically
-			var widthSegments = 16;
-			var heightSegments = 10;
+			var sphereQuality = 5;
+			var widthSegments = 16 * sphereQuality;
+			var heightSegments = 10 * sphereQuality;
 			if (radius < 1) {
-				widthSegments = 10;
-				heightSegments = 8;
+				widthSegments = 10 * sphereQuality;
+				heightSegments = 8 * sphereQuality;
 			}
 
 			var phiStart = 0;
