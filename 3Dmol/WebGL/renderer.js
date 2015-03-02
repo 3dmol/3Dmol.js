@@ -705,8 +705,8 @@ $3Dmol.Renderer = function ( parameters ) {
         //Load projection, model-view matrices for perspective
         _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
         _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
-		_gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
-	
+        _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+
         //Send projection matrix to uniform variable in shader
         if (refreshMaterial) {
 
@@ -1072,8 +1072,8 @@ $3Dmol.Renderer = function ( parameters ) {
             scene.__webglFlares = [];
 
         }
-		
-		
+        
+        
         //Add objects; this sets up buffers for each geometryGroup
         if (scene.__objectsAdded.length) {
             
