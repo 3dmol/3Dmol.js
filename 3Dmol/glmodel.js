@@ -72,6 +72,12 @@ $3Dmol.GLModel = (function() {
         var lastStyle = null; // cache previous styles to avoid recomputation
         var lastColors = null;
         
+        var copyMatrices = []; // transformation + rot matrices
+        var idMatrix = new $3Dmol.Matrix4();
+		idMatrix.identity(); //perhaps this is redundant
+		var noAssembly;
+        var dontDuplicateAtoms;
+        
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
@@ -960,14 +966,64 @@ $3Dmol.GLModel = (function() {
                     ret.add(cross);
                 }
             }
-
+            
+			//for BIOMT assembly
+          	if (dontDuplicateAtoms && !noAssembly) {
+				var finalRet = new $3Dmol.Object3D();
+				var t;
+				
+				for (t = 0; t < copyMatrices.length; t++) {
+					if (!copyMatrices[t].isEqual(idMatrix)) {
+						var transformedRet = new $3Dmol.Object3D();
+						transformedRet = ret.clone();
+						transformedRet.matrix.copy(copyMatrices[t]);
+						transformedRet.matrixAutoUpdate = false;
+						finalRet.add(transformedRet);
+					}
+				}
+				finalRet.add(ret);
+				return finalRet;
+            }
+            
+            
             return ret;
         };
+        
+        /**
+         * Returns list of rotational/translational matrices if there is BIOMT data
+         * Otherwise returns a list of just the identity matrix
+         *
+         * @function $3Dmol.GlModel#getSymmetries
+         * @return {Array<$3Dmol.Matrix4>}
+         *
+         */
+        this.getSymmetries = function() {
+			if (copyMatrices.length > 1) {
+				return copyMatrices; // returns copyMatrices, which has the ID matrix as 1st entry
+			}
+			else {
+				var idList = [];
+				idList.push(idMatrix);
+				return idList;
+			}  		
+        };
+        
+        /**
+        * Sets symmetries based on specified matrices in list
+        *
+        * @function $3Dmol.GLModel#setSymmetries
+        * @param {Array<$3Dmol.Matrix4>} list
+        *
+        */
+        this.setSymmetries = function(list) {
+			copyMatrices = list;
+        };
+        
 
         /**
          * Returns model id number
          * 
-         * @function $3Dmol.GLMode#getID
+         * @function $3Dmol.GLModel#getID
          * @return {number} Model ID
          */
         this.getID = function() {
@@ -1002,7 +1058,10 @@ $3Dmol.GLModel = (function() {
             
             if(typeof($3Dmol.Parsers[format]) != "undefined") {
             	var parse = $3Dmol.Parsers[format];
-            	parse(atoms, data, options)
+            	parse(atoms, data, options, copyMatrices)
+            	noAssembly = !options.doAssembly; // for BIOMT uses
+        		dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
+            	
             }
             else {
             	console.error("Unknown format: "+format);
