@@ -4,27 +4,27 @@
 $3Dmol.workerString = function(){
 
     self.onmessage = function(oEvent) {
-    	var obj = oEvent.data;
-    	var type = obj.type;
-    	if (type < 0) // sending atom data, initialize
-    	{
-    		self.atomData = obj.atoms;
-    		self.volume = obj.volume;
-    		self.ps = new ProteinSurface();
-    	} else {
-    		var ps = self.ps;
-    		ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
-    		ps.fillvoxels(self.atomData, obj.extendedAtoms);
-    		ps.buildboundary();
-    		if (type === 4 || type === 2) {
-    			ps.fastdistancemap();
+        var obj = oEvent.data;
+        var type = obj.type;
+        if (type < 0) // sending atom data, initialize
+        {
+            self.atomData = obj.atoms;
+            self.volume = obj.volume;
+            self.ps = new ProteinSurface();
+        } else {
+            var ps = self.ps;
+            ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
+            ps.fillvoxels(self.atomData, obj.extendedAtoms);
+            ps.buildboundary();
+            if (type === 4 || type === 2) {
+                ps.fastdistancemap();
                 ps.boundingatom(false);
-                ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);	
-            }		
-    		ps.marchingcube(type);
-    		var VandF = ps.getFacesAndVertices(obj.atomsToShow);
-    		self.postMessage(VandF);
-    	}
+                ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);    
+            }        
+            ps.marchingcube(type);
+            var VandF = ps.getFacesAndVertices(obj.atomsToShow);
+            self.postMessage(VandF);
+        }
     };
     
 }.toString().replace(/(^.*?\{|\}$)/g, "");

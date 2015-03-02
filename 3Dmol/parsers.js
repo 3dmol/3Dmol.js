@@ -142,7 +142,7 @@ $3Dmol.Parsers = (function() {
                 if (zdiff > maxlength) // can't be connected
                     break;
         if (aj.atom == ai.atom)
-            continue; //can't be connected, but later might be	
+            continue; //can't be connected, but later might be    
         var ydiff = Math.abs(aj.y - ai.y);
         if( ydiff > maxlength)
             continue;
