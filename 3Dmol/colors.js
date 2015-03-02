@@ -66,11 +66,16 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     var color = atom.color;
     if (typeof (style.color) != "undefined" && style.color != "spectrum")
         color = style.color;
-    if(typeof(style.colorscheme) != "undefined" &&
-    		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
-    	var scheme = $3Dmol.elementColors[style.colorscheme];
-    	if(typeof(scheme[atom.elem]) != "undefined") {
-    		color = scheme[atom.elem];
+    if(typeof(style.colorscheme) != "undefined") {
+    	if(typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+    		//name of builtin colorscheme
+	    	var scheme = $3Dmol.elementColors[style.colorscheme];
+	    	if(typeof(scheme[atom.elem]) != "undefined") {
+	    		color = scheme[atom.elem];
+	    	}
+    	} else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+    		//actual color scheme provided
+    		color = style.colorscheme[atom.elem];
     	}
     }
     var C = $3Dmol.CC.color(color);

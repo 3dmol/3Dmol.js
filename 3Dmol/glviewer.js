@@ -630,7 +630,7 @@ $3Dmol.GLViewer = (function() {
 			
 			this.setView(view); // Calls show() => renderer render
 			var time2 = new Date();
-			console.log("render time: " + (time2 - time1));
+			//console.log("render time: " + (time2 - time1));
 		};
 
 		/**
@@ -1455,13 +1455,12 @@ $3Dmol.GLViewer = (function() {
 			ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
 
 			var time2 = new Date();
-			console.log("initialize " + (time2 - time) + "ms");
+			//console.log("initialize " + (time2 - time) + "ms");
 
 			ps.fillvoxels(atoms, extendedAtoms);
 
 			var time3 = new Date();
-			console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time)
-					+ "ms");
+			//console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
 
 			ps.buildboundary();
 
@@ -1478,8 +1477,7 @@ $3Dmol.GLViewer = (function() {
 			ps.marchingcube(type);
 
 			var time5 = new Date();
-			console.log("marching cube " + (time5 - time4) + "  "
-					+ (time5 - time) + "ms");
+			//console.log("marching cube " + (time5 - time4) + "  "+ (time5 - time) + "ms");
 
 			return ps.getFacesAndVertices(atomsToShow);
 		};
@@ -1660,8 +1658,7 @@ $3Dmol.GLViewer = (function() {
 				extents.sort(sortFunc);
 			}
 
-			console.log("Extents " + extents.length + "  "
-					+ (+new Date() - time) + "ms");
+			//console.log("Extents " + extents.length + "  "+ (+new Date() - time) + "ms");
 
 			var surfobj = {
 				geo : new $3Dmol.Geometry(true),
@@ -1729,16 +1726,14 @@ $3Dmol.GLViewer = (function() {
 					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
 					$3Dmol.mergeGeos(surfobj.geo, mesh);
 					_viewer.render();
-					console.log("async mesh generation " + (+new Date() - time)
-							+ "ms");
+				//	console.log("async mesh generation " + (+new Date() - time) + "ms");
 					cnt++;
 					if (cnt == extents.length)
 						surfobj.done = true;
 				};
 
 				var efunction = function(event) {
-					console.log(event.message + " (" + event.filename + ":"
-							+ event.lineno + ")");
+					console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
 				};
 
 				for (i = 0; i < extents.length; i++) {
@@ -1758,7 +1753,7 @@ $3Dmol.GLViewer = (function() {
 
 			// NOTE: This is misleading if 'async' mesh generation - returns
 			// immediately
-			console.log("full mesh generation " + (+new Date() - time) + "ms");
+			//console.log("full mesh generation " + (+new Date() - time) + "ms");
 
 			return surfid;
 		};
