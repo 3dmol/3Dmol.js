@@ -977,15 +977,22 @@ $3Dmol.GLModel = (function() {
             options = options || {}; 
             if (!data)
                 console.error("Erorr with addMolData: No input data specified");
-            
-            if(typeof($3Dmol.Parsers[format]) != "undefined") {
-            	var parse = $3Dmol.Parsers[format];
-            	parse(atoms, data, options)
+            if(typeof($3Dmol.Parsers[format]) == "undefined") {
+            	console.log("Unknown format: "+format);
+            	//try to guess correct format from data contents
+				if(data.match(/^@<TRIPOS>MOLECULE/)) {
+					format = "mol2";
+				} else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+					format = "pdb";
+				} else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+					format = "sdf"; //could look at line 3
+				} else {
+					format = "xyz";
+				}
+				console.log("Best guess: "+format);
             }
-            else {
-            	console.error("Unknown format: "+format);
-            }
-            
+        	var parse = $3Dmol.Parsers[format];
+        	parse(atoms, data, options)
             setAtomDefaults(atoms, id);
         };
         

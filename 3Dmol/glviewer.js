@@ -735,12 +735,27 @@ $3Dmol.GLViewer = (function() {
 		 *  // Focus on centroid of all atoms of all models in this
 		 * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
 		 */
-		this.zoomTo = function(sel, x, y) {
-			
-			var atoms = getAtomsFromSel(sel).concat(shapes);
-			var allatoms = getAtomsFromSel({}).concat(shapes);
+		this.zoomTo = function(sel) {
+			var allatoms, alltmp;
+			sel = sel || {};
+			var atoms = getAtomsFromSel(sel);
 			var tmp = $3Dmol.getExtent(atoms);
-			var alltmp = $3Dmol.getExtent(allatoms);
+
+			if($.isEmptyObject(sel)) {
+				//include shapes when zooming to full scene
+				//TODO: figure out a good way to specify shapes as part of a selection
+				$.each(shapes, function(i, shape) {
+					atoms.push(shape);
+				});
+				allatoms = atoms;
+				alltmp = tmp;
+
+			}
+			else {
+				allatoms = getAtomsFromSel({});
+				alltmp = $3Dmol.getExtent(allatoms);
+			}
+
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
@@ -767,9 +782,11 @@ $3Dmol.GLViewer = (function() {
 			//find the farthest atom from center to get max distance needed for view
 			var maxDsq = 25;
 			for (var i = 0; i < atoms.length; i++) {
-				var dsq = center.distanceToSquared(atoms[i]);
-				if(dsq > maxDsq)
-					maxDsq = dsq;
+				if(atoms[i]) {
+					var dsq = center.distanceToSquared(atoms[i]);
+					if(dsq > maxDsq)
+						maxDsq = dsq;
+				}
 			}
 			
 			var maxD = Math.sqrt(maxDsq)*2;
@@ -1546,6 +1563,8 @@ $3Dmol.GLViewer = (function() {
 			// of atomsToShow are displayed (e.g., for showing cavities)
 			// if focusSele is specified, will start rending surface around the
 			// atoms specified by this selection
+			if(!allsel) allsel = atomsel;
+			if(!focus) focus = atomsel;
 			var atomsToShow = getAtomsFromSel(atomsel);
 			var atomlist = getAtomsFromSel(allsel);
 			var focusSele = getAtomsFromSel(focus);
