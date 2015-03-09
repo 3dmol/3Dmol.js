@@ -18,41 +18,6 @@ $3Dmol.GLViewer = (function() {
 
 	// private class helper functions
 
-	// computes the bounding box around the provided atoms
-	/**
-	 * @param {AtomSpec[]} atomlist
-	 * @return {Array}
-	 */
-	var getExtent = function(atomlist) {
-		var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
-
-		xmin = ymin = zmin = 9999;
-		xmax = ymax = zmax = -9999;
-		xsum = ysum = zsum = cnt = 0;
-
-		if (atomlist.length === 0)
-			return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-		for (var i = 0; i < atomlist.length; i++) {
-			var atom = atomlist[i];
-			if (atom === undefined)
-				continue;
-			cnt++;
-			xsum += atom.x;
-			ysum += atom.y;
-			zsum += atom.z;
-
-			xmin = (xmin < atom.x) ? xmin : atom.x;
-			ymin = (ymin < atom.y) ? ymin : atom.y;
-			zmin = (zmin < atom.z) ? zmin : atom.z;
-			xmax = (xmax > atom.x) ? xmax : atom.x;
-			ymax = (ymax > atom.y) ? ymax : atom.y;
-			zmax = (zmax > atom.z) ? zmax : atom.z;
-		}
-
-		return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
-				[ xsum / cnt, ysum / cnt, zsum / cnt ] ];
-	};
-
 	function GLViewer(element, callback, defaultcolors, nomouse) {
 		// set variables
 		var _viewer = this;
@@ -63,6 +28,7 @@ $3Dmol.GLViewer = (function() {
 		var surfaces = [];
 		var shapes = []; // Generic shapes
 		var labels = [];
+		var clickables = []; //things you can click on
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
 
@@ -79,7 +45,6 @@ $3Dmol.GLViewer = (function() {
 		var renderer = new $3Dmol.Renderer({
 			antialias : true
 		});
-		// renderer.sortObjects = false; // hopefully improve performance
 
 		renderer.domElement.style.width = "100%";
 		renderer.domElement.style.height = "100%";
@@ -91,8 +56,8 @@ $3Dmol.GLViewer = (function() {
 		renderer.setSize(WIDTH, HEIGHT);
 		var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
 		camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
-		var vec = new $3Dmol.Vector3();
-		camera.lookAt(vec);
+		var lookingAt = new $3Dmol.Vector3();
+		camera.lookAt(lookingAt);
 
 		var raycaster = new $3Dmol.Raycaster(new $3Dmol.Vector3(0, 0, 0),
 				new $3Dmol.Vector3(0, 0, 0));
@@ -186,9 +151,33 @@ $3Dmol.GLViewer = (function() {
 		// enable mouse support
 		var glDOM = $(renderer.domElement);
 
+		//regenerate the list of clickables
+		var updateClickables = function() {
+			clickables = [];
+			var i, il;
+
+			for (i = 0, il = models.length; i < il; i++) {
+				var model = models[i];
+				if(model) {
+					var atoms = model.selectedAtoms({
+						clickable : true
+					});
+					clickables = clickables.concat(atoms);
+				}
+			}
+
+			for (i = 0, il = shapes.length; i < il; i++) {
+
+				var shape = shapes[i];
+				if (shape && shape.clickable) {
+					clickables.push(shape);
+				}
+			}
+		};
+		
 		// Checks for selection intersects on mousedown
 		var handleClickSelection = function(mouseX, mouseY) {
-
+			if(clickables.length == 0) return;
 			var mouse = {
 				x : mouseX,
 				y : mouseY,
@@ -200,27 +189,7 @@ $3Dmol.GLViewer = (function() {
 
 			raycaster.set(camera.position, mouseVector);
 
-			var clickables = [], intersects = [];
-			var i, il;
-
-			for (i = 0, il = models.length; i < il; i++) {
-				var model = models[i];
-
-				var atoms = model.selectedAtoms({
-					clickable : true
-				});
-				clickables = clickables.concat(atoms);
-
-			}
-
-			for (i = 0, il = shapes.length; i < il; i++) {
-
-				var shape = shapes[i];
-				if (shape.clickable) {
-					clickables.push(shape);
-				}
-
-			}
+			var intersects = [];
 
 			intersects = raycaster.intersectObjects(modelGroup, clickables);
 
@@ -231,8 +200,6 @@ $3Dmol.GLViewer = (function() {
 					selected.callback(selected, _viewer);
 				}
 			}
-
-			show();
 		};
 
 		var calcTouchDistance = function(ev) { // distance between first two
@@ -243,19 +210,45 @@ $3Dmol.GLViewer = (function() {
 					- ev.originalEvent.targetTouches[1].pageY;
 			return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
 		}
+		
+		//check targetTouches as well
+		var getXY = function(ev) {
+			var x = ev.pageX, y = ev.pageY;
+			if (ev.originalEvent.targetTouches
+					&& ev.originalEvent.targetTouches[0]) {
+				x = ev.originalEvent.targetTouches[0].pageX;
+				y = ev.originalEvent.targetTouches[0].pageY;
+			}
+			
+			return [x,y];
+		};
 
+		//for a given screen (x,y) displacement return model displacement 
+		var screenXY2model = function(x,y) {
+			var dx = x/WIDTH;
+			var dy = y/HEIGHT;
+			var zpos = rotationGroup.position.z; 
+			var q = rotationGroup.quaternion;						
+			var t = new $3Dmol.Vector3(0,0,zpos);
+			projector.projectVector(t, camera);
+			t.x += dx*2;
+			t.y -= dy*2;
+			projector.unprojectVector(t, camera);
+			t.z = 0;							
+			t.applyQuaternion(q);
+			return t;
+		}
+		
 		if (!nomouse) {
 			// user can request that the mouse handlers not be installed
 			glDOM.bind('mousedown touchstart', function(ev) {
 				ev.preventDefault();
 				if (!scene)
 					return;
-				var x = ev.pageX, y = ev.pageY;
-				if (ev.originalEvent.targetTouches
-						&& ev.originalEvent.targetTouches[0]) {
-					x = ev.originalEvent.targetTouches[0].pageX;
-					y = ev.originalEvent.targetTouches[0].pageY;
-				}
+				var xy = getXY(ev);
+				var x = xy[0];
+				var y = xy[1];
+				
 				if (x === undefined)
 					return;
 				isDragging = true;
@@ -274,11 +267,6 @@ $3Dmol.GLViewer = (function() {
 				cslabNear = slabNear;
 				cslabFar = slabFar;
 
-				// handle selection
-				var mouseX = (x / $(window).width()) * 2 - 1;
-				var mouseY = -(y / HEIGHT) * 2 + 1;
-				handleClickSelection(mouseX, mouseY, ev, container);
-
 			});
 
 			glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
@@ -293,6 +281,7 @@ $3Dmol.GLViewer = (function() {
 					rotationGroup.position.z -= scaleFactor
 							* ev.originalEvent.wheelDelta / 400;
 				}
+				if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
 
 				show();
 			});
@@ -301,84 +290,86 @@ $3Dmol.GLViewer = (function() {
 				ev.preventDefault();
 			});
 			$('body').bind('mouseup touchend', function(ev) {
+				
+				// handle selection
+				if(isDragging && scene) { //saw mousedown, haven't moved
+					var xy = getXY(ev);
+					var x = xy[0];
+					var y = xy[1];
+					if(x == mouseStartX && y == mouseStartY) {					
+						var mouseX = (x / $(window).width()) * 2 - 1;
+						var mouseY = -(y / HEIGHT) * 2 + 1;
+						handleClickSelection(mouseX, mouseY, ev, container);
+					}
+				}
+				
 				isDragging = false;
+
 			});
 
-			glDOM
-					.bind(
-							'mousemove touchmove',
-							function(ev) { // touchmove
-								ev.preventDefault();
-								if (!scene)
-									return;
-								if (!isDragging)
-									return;
-								var mode = 0;
+			glDOM.bind('mousemove touchmove', function(ev) { // touchmove
+				ev.preventDefault();
+				if (!scene)
+					return;
+				if (!isDragging)
+					return;
+				var mode = 0;
 
-								var x = ev.pageX, y = ev.pageY;
-								if (ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches[0]) {
-									x = ev.originalEvent.targetTouches[0].pageX;
-									y = ev.originalEvent.targetTouches[0].pageY;
-								}
-								if (x === undefined)
-									return;
-								var dx = (x - mouseStartX) / WIDTH;
-								var dy = (y - mouseStartY) / HEIGHT;
-								// check for pinch
-								if (touchDistanceStart != 0
-										&& ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches.length == 2) {
-									var newdist = calcTouchDistance(ev);
-									// change to zoom
-									mode = 2;
-									dy = (touchDistanceStart - newdist) * 2
-											/ (WIDTH + HEIGHT);
-								} else if (ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches.length == 3) {
-									// translate
-									mode = 1;
-								}
+				var xy = getXY(ev);
+				var x = xy[0];
+				var y = xy[1];
+				if (x === undefined)
+					return;
+				var dx = (x - mouseStartX) / WIDTH;
+				var dy = (y - mouseStartY) / HEIGHT;
+				// check for pinch
+				if (touchDistanceStart != 0
+						&& ev.originalEvent.targetTouches
+						&& ev.originalEvent.targetTouches.length == 2) {
+					var newdist = calcTouchDistance(ev);
+					// change to zoom
+					mode = 2;
+					dy = (touchDistanceStart - newdist) * 2
+							/ (WIDTH + HEIGHT);
+				} else if (ev.originalEvent.targetTouches
+						&& ev.originalEvent.targetTouches.length == 3) {
+					// translate
+					mode = 1;
+				}
 
-								var r = Math.sqrt(dx * dx + dy * dy);
-								var scaleFactor;
-								if (mode == 3
-										|| (mouseButton == 3 && ev.ctrlKey)) { // Slab
-									slabNear = cslabNear + dx * 100;
-									slabFar = cslabFar + dy * 100;
-								} else if (mode == 2 || mouseButton == 3
-										|| ev.shiftKey) { // Zoom
-									scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-									if (scaleFactor < 80)
-										scaleFactor = 80;
-									rotationGroup.position.z = cz - dy
-											* scaleFactor;
-								} else if (mode == 1 || mouseButton == 2
-										|| ev.ctrlKey) { // Translate
-									var q = rotationGroup.quaternion;						
-									var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
-									projector.projectVector(t, camera);
-									t.x += dx*2;
-									t.y -= dy*2;
-									projector.unprojectVector(t, camera);
-									t.z = 0;							
-									t.applyQuaternion(q);
-
-									modelGroup.position.addVectors(currentModelPos,t);
-								} else if ((mode === 0 || mouseButton == 1)
-										&& r !== 0) { // Rotate
-									var rs = Math.sin(r * Math.PI) / r;
-									dq.x = Math.cos(r * Math.PI);
-									dq.y = 0;
-									dq.z = rs * dx;
-									dq.w = -rs * dy;
-									rotationGroup.quaternion = new $3Dmol.Quaternion(
-											1, 0, 0, 0);
-									rotationGroup.quaternion.multiply(dq);
-									rotationGroup.quaternion.multiply(cq);
-								}
-								show();
-							});
+				var r = Math.sqrt(dx * dx + dy * dy);
+				var scaleFactor;
+				if (mode == 3
+						|| (mouseButton == 3 && ev.ctrlKey)) { // Slab
+					slabNear = cslabNear + dx * 100;
+					slabFar = cslabFar + dy * 100;
+				} else if (mode == 2 || mouseButton == 3
+						|| ev.shiftKey) { // Zoom
+					scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+					if (scaleFactor < 80)
+						scaleFactor = 80;
+					rotationGroup.position.z = cz - dy
+							* scaleFactor;
+					if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+				} else if (mode == 1 || mouseButton == 2
+						|| ev.ctrlKey) { // Translate
+					var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+					modelGroup.position.addVectors(currentModelPos,t);
+					
+				} else if ((mode === 0 || mouseButton == 1)
+						&& r !== 0) { // Rotate
+					var rs = Math.sin(r * Math.PI) / r;
+					dq.x = Math.cos(r * Math.PI);
+					dq.y = 0;
+					dq.z = rs * dx;
+					dq.w = -rs * dy;
+					rotationGroup.quaternion = new $3Dmol.Quaternion(
+							1, 0, 0, 0);
+					rotationGroup.quaternion.multiply(dq);
+					rotationGroup.quaternion.multiply(cq);
+				}
+				show();
+			});
 		}
 		// public methods
 		/**
@@ -540,8 +531,10 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.render = function() {
 
+			updateClickables(); //must render for clickable styles to take effect
 			var time1 = new Date();
 			var view = this.getView();
+			
 			var i;
 			for (i = 0; i < models.length; i++) {
 				if (models[i]) {
@@ -554,7 +547,7 @@ $3Dmol.GLViewer = (function() {
 					shapes[i].globj(modelGroup);
 				}
 			}
-
+			
 			for (i in surfaces) { // this is an array with possible holes
 				if (surfaces.hasOwnProperty(i)) {
 					var geo = surfaces[i].geo;
@@ -580,6 +573,7 @@ $3Dmol.GLViewer = (function() {
 
 						// create new surface
 						var smesh = null;
+
 						if(surfaces[i].mat instanceof $3Dmol.LineBasicMaterial) {
 							//special case line meshes
 							smesh = new $3Dmol.Line(geo, surfaces[i].mat);
@@ -587,14 +581,21 @@ $3Dmol.GLViewer = (function() {
 						else {
 							smesh = new $3Dmol.Mesh(geo, surfaces[i].mat);
 						}
+						if(surfaces[i].mat.transparent && surfaces[i].mat.opacity == 0) {
+							//don't bother with hidden surfaces
+							smesh.visible = false;
+						} else {
+							smesh.visible = true;
+						}
 						surfaces[i].lastGL = smesh;
 						modelGroup.add(smesh);
 					} // else final surface already there
 				}
 			}
+			
 			this.setView(view); // Calls show() => renderer render
 			var time2 = new Date();
-			console.log("render time: " + (time2 - time1));
+			//console.log("render time: " + (time2 - time1));
 		};
 
 		/**
@@ -695,6 +696,31 @@ $3Dmol.GLViewer = (function() {
 			show();
 		};
 		
+		/**
+		 * Translate current view by x,y screen coordinates
+		 * This pans the camera rather than translating the model.
+		 * 
+		 * @function $3Dmol.GLViewer#translate
+		 * @param {number} x
+		 * @param {number} y
+		 * 
+		 */
+		this.translate = function(x, y) {
+			
+			var dx = x/WIDTH;
+			var dy = y/HEIGHT;
+			var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
+
+			projector.projectVector(v, camera);
+			v.x -= dx;
+			v.y -= dy;
+			projector.unprojectVector(v, camera);
+			v.z = 0;			
+			lookingAt.add(v);
+			camera.lookAt(lookingAt);
+			show();
+		};
+		
 
 		/**
 		 * Zoom to center of atom selection
@@ -703,7 +729,6 @@ $3Dmol.GLViewer = (function() {
 		 * @param {Object}
 		 *            [sel] - Selection specification specifying model and atom
 		 *            properties to select. Default: all atoms in viewer
-		 * 
 		 * @example // Assuming we have created a model of a protein with
 		 *          multiple chains (e.g. from a PDB file), focus on atoms in
 		 *          chain B glviewer.zoomTo({chain: 'B'});
@@ -711,10 +736,26 @@ $3Dmol.GLViewer = (function() {
 		 * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
 		 */
 		this.zoomTo = function(sel) {
-			var atoms = getAtomsFromSel(sel).concat(shapes);
-			var allatoms = getAtomsFromSel({}).concat(shapes);
-			var tmp = getExtent(atoms);
-			var alltmp = getExtent(allatoms);
+			var allatoms, alltmp;
+			sel = sel || {};
+			var atoms = getAtomsFromSel(sel);
+			var tmp = $3Dmol.getExtent(atoms);
+
+			if($.isEmptyObject(sel)) {
+				//include shapes when zooming to full scene
+				//TODO: figure out a good way to specify shapes as part of a selection
+				$.each(shapes, function(i, shape) {
+					atoms.push(shape);
+				});
+				allatoms = atoms;
+				alltmp = tmp;
+
+			}
+			else {
+				allatoms = getAtomsFromSel({});
+				alltmp = $3Dmol.getExtent(allatoms);
+			}
+
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
@@ -741,9 +782,11 @@ $3Dmol.GLViewer = (function() {
 			//find the farthest atom from center to get max distance needed for view
 			var maxDsq = 25;
 			for (var i = 0; i < atoms.length; i++) {
-				var dsq = center.distanceToSquared(atoms[i]);
-				if(dsq > maxDsq)
-					maxDsq = dsq;
+				if(atoms[i]) {
+					var dsq = center.distanceToSquared(atoms[i]);
+					if(dsq > maxDsq)
+						maxDsq = dsq;
+				}
 			}
 			
 			var maxD = Math.sqrt(maxDsq)*2;
@@ -895,7 +938,8 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.addShape = function(shapeSpec) {
 			shapeSpec = shapeSpec || {};
-			var shape = new $3Dmol.GLShape(shapes.length, shapeSpec);
+			var shape = new $3Dmol.GLShape(shapeSpec);
+			shape.shapePosition = shapes.length;
 			shapes.push(shape);
 
 			return shape;
@@ -912,7 +956,7 @@ $3Dmol.GLViewer = (function() {
 			if (!shape)
 				return;
 			shape.removegl(modelGroup);
-			delete shapes[shape.id];
+			delete shapes[shape.shapePosition];
 			// clear off back of model array
 			while (shapes.length > 0
 					&& typeof (shapes[shapes.length - 1]) === "undefined")
@@ -940,8 +984,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addSphere = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addSphere(spec);
 			shapes.push(s);
 
@@ -956,8 +1001,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addArrow = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addArrow(spec);
 			shapes.push(s);
 
@@ -972,8 +1018,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addCylinder = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addCylinder(spec);
 			shapes.push(s);
 
@@ -988,8 +1035,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addCustom = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addCustom(spec);
 			shapes.push(s);
 
@@ -1006,8 +1054,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addVolumetricData = function(data, format, spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addVolumetricData(data, format, spec);
 			shapes.push(s);
 
@@ -1388,13 +1437,12 @@ $3Dmol.GLViewer = (function() {
 			ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
 
 			var time2 = new Date();
-			console.log("initialize " + (time2 - time) + "ms");
+			//console.log("initialize " + (time2 - time) + "ms");
 
 			ps.fillvoxels(atoms, extendedAtoms);
 
 			var time3 = new Date();
-			console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time)
-					+ "ms");
+			//console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
 
 			ps.buildboundary();
 
@@ -1411,8 +1459,7 @@ $3Dmol.GLViewer = (function() {
 			ps.marchingcube(type);
 
 			var time5 = new Date();
-			console.log("marching cube " + (time5 - time4) + "  "
-					+ (time5 - time) + "ms");
+			//console.log("marching cube " + (time5 - time4) + "  "+ (time5 - time) + "ms");
 
 			return ps.getFacesAndVertices(atomsToShow);
 		};
@@ -1516,6 +1563,8 @@ $3Dmol.GLViewer = (function() {
 			// of atomsToShow are displayed (e.g., for showing cavities)
 			// if focusSele is specified, will start rending surface around the
 			// atoms specified by this selection
+			if(!allsel) allsel = atomsel;
+			if(!focus) focus = atomsel;
 			var atomsToShow = getAtomsFromSel(atomsel);
 			var atomlist = getAtomsFromSel(allsel);
 			var focusSele = getAtomsFromSel(focus);
@@ -1526,7 +1575,7 @@ $3Dmol.GLViewer = (function() {
 
 			var mat = getMatWithStyle(style);
 
-			var extent = getExtent(atomsToShow);
+			var extent = $3Dmol.getExtent(atomsToShow);
 
 			var i, il;
 			if (style['map'] && style['map']['prop']) {
@@ -1567,7 +1616,7 @@ $3Dmol.GLViewer = (function() {
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
-				var seleExtent = getExtent(focusSele);
+				var seleExtent = $3Dmol.getExtent(focusSele);
 				// sort by how close to center of seleExtent
 				var sortFunc = function(a, b) {
 					var distSq = function(ex, sele) {
@@ -1593,8 +1642,7 @@ $3Dmol.GLViewer = (function() {
 				extents.sort(sortFunc);
 			}
 
-			console.log("Extents " + extents.length + "  "
-					+ (+new Date() - time) + "ms");
+			//console.log("Extents " + extents.length + "  "+ (+new Date() - time) + "ms");
 
 			var surfobj = {
 				geo : new $3Dmol.Geometry(true),
@@ -1662,16 +1710,14 @@ $3Dmol.GLViewer = (function() {
 					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
 					$3Dmol.mergeGeos(surfobj.geo, mesh);
 					_viewer.render();
-					console.log("async mesh generation " + (+new Date() - time)
-							+ "ms");
+				//	console.log("async mesh generation " + (+new Date() - time) + "ms");
 					cnt++;
 					if (cnt == extents.length)
 						surfobj.done = true;
 				};
 
 				var efunction = function(event) {
-					console.log(event.message + " (" + event.filename + ":"
-							+ event.lineno + ")");
+					console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
 				};
 
 				for (i = 0; i < extents.length; i++) {
@@ -1691,7 +1737,7 @@ $3Dmol.GLViewer = (function() {
 
 			// NOTE: This is misleading if 'async' mesh generation - returns
 			// immediately
-			console.log("full mesh generation " + (+new Date() - time) + "ms");
+			//console.log("full mesh generation " + (+new Date() - time) + "ms");
 
 			return surfid;
 		};
@@ -1777,22 +1823,33 @@ $3Dmol.GLViewer = (function() {
 		// properties for those atoms
 		/**
 		 * Add specified properties to all atoms matching input argument
-		 * @param {AtomSpec} props
+		 * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
+		 * @param {AtomSelectionSpec} sel
 		 */
-		this.mapAtomProperties = function(props) {
-			var atoms = getAtomsFromSel({});
-			for (var a = 0, numa = atoms.length; a < numa; a++) {
-				var atom = atoms[a];
-				for (var i = 0, n = props.length; i < n; i++) {
-					var prop = props[i];
-					if (prop.props) {
-						for ( var p in prop.props) {
-							if (prop.props.hasOwnProperty(p)) {
-								// check the atom
-								if (atomIsSelected(atom, prop)) {
-									if (!atom.properties)
-										atom.properties = {};
-									atom.properties[p] = prop.props[p];
+		this.mapAtomProperties = function(props, sel) {
+			sel = sel || {};
+			var atoms = getAtomsFromSel(sel);
+			
+			if(typeof(props) == "function") {
+				for (var a = 0, numa = atoms.length; a < numa; a++) {
+					var atom = atoms[a];
+					props(atom);
+				}
+			}
+			else {
+				for (var a = 0, numa = atoms.length; a < numa; a++) {
+					var atom = atoms[a];
+					for (var i = 0, n = props.length; i < n; i++) {
+						var prop = props[i];
+						if (prop.props) {
+							for ( var p in prop.props) {
+								if (prop.props.hasOwnProperty(p)) {
+									// check the atom
+									if (atomIsSelected(atom, prop)) {
+										if (!atom.properties)
+											atom.properties = {};
+										atom.properties[p] = prop.props[p];
+									}
 								}
 							}
 						}

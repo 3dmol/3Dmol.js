@@ -618,7 +618,7 @@ $3Dmol.GLShape = (function() {
 				1.0) : 1.0;
 		shape.side = (stylespec.side !== undefined) ? stylespec.side
 				: $3Dmol.DoubleSide;
-
+		shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
 		// Click handling
 		shape.clickable = stylespec.clickable ? true : false;
 		shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
@@ -630,17 +630,14 @@ $3Dmol.GLShape = (function() {
 	 * 
 	 * @constructor $3Dmol.GLShape
 	 * 
-	 * @param {Number}
-	 *            sid - Unique identifier
 	 * @param {Object}
 	 *            stylespec
 	 * @returns {$3Dmol.GLShape}
 	 */
-	var GLShape = function(sid, stylespec) {
+	function GLShape(stylespec) {
 
 		stylespec = stylespec || {};
 		$3Dmol.ShapeIDCount++;
-		this.id = sid;
 
 		this.boundingSphere = new $3Dmol.Sphere();
 		/** @type {IntersectionShapes} */
@@ -794,7 +791,7 @@ $3Dmol.GLShape = (function() {
 
 			if (arrowSpec.dir instanceof $3Dmol.Vector3
 					&& arrowSpec.length instanceof number) {
-				var end = arrowSpec.dir.clone().multiplyScalar(length).add(
+				var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
 						start);
 				arrowSpec.end = end;
 			}
@@ -884,7 +881,8 @@ $3Dmol.GLShape = (function() {
 				reflectivity : 0,
 				side : this.side,
 				transparent : (this.alpha < 1) ? true : false,
-				opacity : this.alpha
+				opacity : this.alpha,
+				wireframeLinewidth: this.linewidth
 			});
 
 			var mesh = new $3Dmol.Mesh(geo, material);

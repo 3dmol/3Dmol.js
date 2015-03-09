@@ -16,8 +16,6 @@ $3Dmol.Material = function () {
     this.opacity = 1;
     this.transparent = false;
 
-    this.blending = $3Dmol.NormalBlending;
-
     this.depthTest = true;
     this.depthWrite = true;
 
@@ -87,8 +85,6 @@ $3Dmol.Material.prototype.clone = function ( material ) {
 
     material.opacity = this.opacity;
     material.transparent = this.transparent;
-
-    material.blending = this.blending;
 
     material.depthTest = this.depthTest;
     material.depthWrite = this.depthWrite;
@@ -232,7 +228,7 @@ $3Dmol.MeshLambertMaterial.prototype.clone = function(material) {
 /** @constructor */
 $3Dmol.MeshDoubleLambertMaterial = function(parameters) {
     
-    $3Dmol.MeshLambertMaterial.call(this);
+    $3Dmol.MeshLambertMaterial.call(this, parameters);
 
     this.shaderID = "lambertdouble";
     this.side = $3Dmol.DoubleSide;    
@@ -495,14 +491,6 @@ $3Dmol.TextureIdCount = 0;
 $3Dmol.FrontSide = 0;
 $3Dmol.BackSide = 1;
 $3Dmol.DoubleSide = 2;
-
-// blending modes
-$3Dmol.NoBlending = 0;
-$3Dmol.NormalBlending = 1;
-$3Dmol.AdditiveBlending = 2;
-$3Dmol.SubtractiveBlending = 3;
-$3Dmol.MultiplyBlending = 4;
-$3Dmol.CustomBlending = 5;
 
 // shading
 $3Dmol.NoShading = 0;

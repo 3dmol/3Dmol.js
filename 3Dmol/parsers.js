@@ -813,8 +813,12 @@ $3Dmol.Parsers = (function() {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
                     var toAtom = atoms[serialToIndex[to]];
                     if (fromAtom !== undefined && toAtom !== undefined) {
-                        fromAtom.bonds.push(serialToIndex[to]);
-                        fromAtom.bondOrder.push(1);
+                        //minimal cleanup here - pymol likes to output duplicated conect records
+                        var toindex = serialToIndex[to];
+                        if(fromAtom.bonds[fromAtom.bonds.length-1] != toindex) {
+                            fromAtom.bonds.push(toindex);
+                            fromAtom.bondOrder.push(1);
+                        }
                     }
                 }
             } else if (recordName == 'HELIX ') {
@@ -832,13 +836,13 @@ $3Dmol.Parsers = (function() {
         var starttime = (new Date()).getTime();
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
-        console.log("bond connecting " + ((new Date()).getTime() - starttime));
+        //console.log("bond connecting " + ((new Date()).getTime() - starttime));
         
         
         if(computeStruct || !hasStruct) {
             starttime = (new Date()).getTime();
         	computeSecondaryStructure(atoms);
-        	console.log("secondary structure " + ((new Date()).getTime() - starttime));
+        	//console.log("secondary structure " + ((new Date()).getTime() - starttime));
         }
         
         // Assign secondary structures from pdb file
