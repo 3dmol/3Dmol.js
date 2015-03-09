@@ -23631,8 +23631,7 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
-    // will put atoms specified in mmCIF fromat in str into atoms when completed
-    // currently only parses the file
+    // puts atoms specified in mmCIF fromat in str into atoms
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
@@ -23689,7 +23688,6 @@ $3Dmol.Parsers = (function() {
         var linesFiltered = [];
         var trimDisabled = false;
         for (var lineNum = 0; lineNum < lines.length; lineNum++) {
-            [][0];
             //first remove comments
             //incorrect if #'s are allowed in strings
             //comments might only be allowed at beginning of line, not sure
@@ -23718,7 +23716,7 @@ $3Dmol.Parsers = (function() {
         }
 
         //Process the lines and puts all of the data into an object.
-        mmCIF = {}; //temporarily global
+        var mmCIF = {};
         var lineNum = 0;
         while (lineNum < linesFiltered.length) {
             if (linesFiltered[lineNum][0] === undefined) {
@@ -23785,22 +23783,32 @@ $3Dmol.Parsers = (function() {
         }
 
         //Pulls atom information out of the data
-        atomsPreBonds = []; //temporarily global for debugging purposes
+        var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+	    if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
             var atom = {};
-            atom.id = mmCIF._atom_site.id[i];
-            atom.x = mmCIF._atom_site.cartn_x[i];
-            atom.y = mmCIF._atom_site.cartn_y[i];
-            atom.z = mmCIF._atom_site.cartn_z[i];
-            atom.hetflag = true; //need to figure out what this is
+            atom.id = parseFloat(mmCIF._atom_site.id[i]);
+            atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
+            atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
+            atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
+            atom.hetflag = true; //need to figure out what this is group_PDB == HETA
+            atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.bondOrder = [];
             atom.properties = {};
-            atomsPreBonds[atom.id - 1] = atom;
+            atomsPreBonds[atom.id] = atom;
+        }
+        var atomsIndexed = [];
+        var currentIndex = 0;
+        for (var id in atomsPreBonds) {
+            var atom = atomsPreBonds[id];
+            atom.index = currentIndex;
+            atomsIndexed[currentIndex] = atom;
+            currentIndex++;
         }
 
         //create a hash table of the atoms using label and sequence as keys
-        atomHashTable = {}; //temporarily global for debugging purposes
+        var atomHashTable = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
             var label_alt = mmCIF._atom_site.label_alt_id[i];
             var label_asym = mmCIF._atom_site.label_asym_id[i];
@@ -23817,6 +23825,7 @@ $3Dmol.Parsers = (function() {
 	    if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
                 atomHashTable[label_alt][label_asym][label_atom] = {};
             }
+	    
             atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
         }
 
@@ -23826,20 +23835,33 @@ $3Dmol.Parsers = (function() {
 	                       [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
 	                       [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
                                [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
+            //if (atomsPreBonds[id1] === undefined) continue;
+            var index1 = atomsPreBonds[id1].index;
 
 	    var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
                                [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
                                [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
                                [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+            //if (atomsPreBonds[id2] === undefined) continue;
+            var index2 = atomsPreBonds[id2].index;
 
-	    atomsPreBonds[id1 - 1].bonds.push(id2 - 1 + offset);
-	    atomsPreBonds[id1 - 1].bondOrder.push(1);
-	    atomsPreBonds[id2 - 1].bonds.push(id1 - 1 + offset);
-	    atomsPreBonds[id2 - 1].bondOrder.push(1);
-	    console.log("connected " + id1 + " with " + id2 + ".");
+	    atomsPreBonds[id1].bonds.push(index2 + offset);
+	    atomsPreBonds[id1].bondOrder.push(1);
+	    atomsPreBonds[id2].bonds.push(index1 + offset);
+	    atomsPreBonds[id2].bondOrder.push(1);
+	    console.log("connected " + index1 + " and " + index2);
         }
 
-	atoms = atoms.concat(atomsPreBonds);
+	//atoms = atoms.concat(atomsPreBonds);
+	for (var i = 0; i < atomsIndexed.length; i++) {
+            delete atomsIndexed[i].index;
+            atoms.push(atomsIndexed[i]);
+	}
+
+        assignBonds(atoms);
+	/*atomsPreBonds.prototype.foreach(function(item){
+	    a.push(item);
+	});*/
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -24109,6 +24131,13 @@ $3Dmol.Parsers = (function() {
                     if (fromAtom !== undefined && toAtom !== undefined) {
                         fromAtom.bonds.push(serialToIndex[to]);
                         fromAtom.bondOrder.push(1);
+			console.log("created bond");
+                        //minimal cleanup here - pymol likes to output duplicated conect records
+                        var toindex = serialToIndex[to];
+                        if(fromAtom.bonds[fromAtom.bonds.length-1] != toindex) {
+                            fromAtom.bonds.push(toindex);
+                            fromAtom.bondOrder.push(1);
+                        }
                     }
                 }
             } else if (recordName == 'HELIX ') {
@@ -24126,13 +24155,13 @@ $3Dmol.Parsers = (function() {
         var starttime = (new Date()).getTime();
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
-        console.log("bond connecting " + ((new Date()).getTime() - starttime));
+        //console.log("bond connecting " + ((new Date()).getTime() - starttime));
         
         
         if(computeStruct || !hasStruct) {
             starttime = (new Date()).getTime();
         	computeSecondaryStructure(atoms);
-        	console.log("secondary structure " + ((new Date()).getTime() - starttime));
+        	//console.log("secondary structure " + ((new Date()).getTime() - starttime));
         }
         
         // Assign secondary structures from pdb file
