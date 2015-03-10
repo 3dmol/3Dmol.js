@@ -281,16 +281,18 @@ $3Dmol.Renderer = function ( parameters ) {
 
     this.setBlending = function( blending ) {
 
-            if (blending === $3Dmol.NoBlending) 
-                    _gl.disable( _gl.BLEND );
+        if (!blending) {
+                _gl.disable( _gl.BLEND );
 
-            else {
-                    _gl.enable( _gl.BLEND );
-                    _gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
-                    _gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
-            }
+		} 
+        else {
+			_gl.enable( _gl.BLEND );
+			_gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
+			_gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
 
-            _oldBlending = blending;
+		}
+
+        _oldBlending = blending;
     };
     
     // Plugins
@@ -906,7 +908,7 @@ $3Dmol.Renderer = function ( parameters ) {
                     continue;
 
                 if (useBlending)
-                    _this.setBlending(material.blending);
+                    _this.setBlending(true);
 
                 _this.setDepthTest(material.depthTest);
                 _this.setDepthWrite(material.depthWrite);
@@ -997,7 +999,7 @@ $3Dmol.Renderer = function ( parameters ) {
 
         // opaque pass (front-to-back order)
 
-        this.setBlending( $3Dmol.NoBlending );
+        this.setBlending( false );
 
         renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
         

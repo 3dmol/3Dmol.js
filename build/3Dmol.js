@@ -11182,7 +11182,7 @@ $3Dmol.Object3D.prototype = {
         object.rotation.copy(this.rotation);
         object.eulerOrder = this.eulerOrder;
         object.scale.copy(this.scale);
-        
+
         object.rotationAutoUpdate = this.rotationAutoUpdate;
         object.matrix.copy(this.matrix);
         object.matrixWorld.copy(this.matrixWorld);
@@ -12208,8 +12208,6 @@ $3Dmol.Material = function () {
     this.opacity = 1;
     this.transparent = false;
 
-    this.blending = $3Dmol.NormalBlending;
-
     this.depthTest = true;
     this.depthWrite = true;
 
@@ -12279,8 +12277,6 @@ $3Dmol.Material.prototype.clone = function ( material ) {
 
     material.opacity = this.opacity;
     material.transparent = this.transparent;
-
-    material.blending = this.blending;
 
     material.depthTest = this.depthTest;
     material.depthWrite = this.depthWrite;
@@ -12424,7 +12420,7 @@ $3Dmol.MeshLambertMaterial.prototype.clone = function(material) {
 /** @constructor */
 $3Dmol.MeshDoubleLambertMaterial = function(parameters) {
     
-    $3Dmol.MeshLambertMaterial.call(this);
+    $3Dmol.MeshLambertMaterial.call(this, parameters);
 
     this.shaderID = "lambertdouble";
     this.side = $3Dmol.DoubleSide;    
@@ -12687,14 +12683,6 @@ $3Dmol.TextureIdCount = 0;
 $3Dmol.FrontSide = 0;
 $3Dmol.BackSide = 1;
 $3Dmol.DoubleSide = 2;
-
-// blending modes
-$3Dmol.NoBlending = 0;
-$3Dmol.NormalBlending = 1;
-$3Dmol.AdditiveBlending = 2;
-$3Dmol.SubtractiveBlending = 3;
-$3Dmol.MultiplyBlending = 4;
-$3Dmol.CustomBlending = 5;
 
 // shading
 $3Dmol.NoShading = 0;
@@ -13107,16 +13095,18 @@ $3Dmol.Renderer = function ( parameters ) {
 
     this.setBlending = function( blending ) {
 
-            if (blending === $3Dmol.NoBlending) 
-                    _gl.disable( _gl.BLEND );
+        if (!blending) {
+                _gl.disable( _gl.BLEND );
 
-            else {
-                    _gl.enable( _gl.BLEND );
-                    _gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
-                    _gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
-            }
+		} 
+        else {
+			_gl.enable( _gl.BLEND );
+			_gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
+			_gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
 
-            _oldBlending = blending;
+		}
+
+        _oldBlending = blending;
     };
     
     // Plugins
@@ -13732,7 +13722,7 @@ $3Dmol.Renderer = function ( parameters ) {
                     continue;
 
                 if (useBlending)
-                    _this.setBlending(material.blending);
+                    _this.setBlending(true);
 
                 _this.setDepthTest(material.depthTest);
                 _this.setDepthWrite(material.depthWrite);
@@ -13823,7 +13813,7 @@ $3Dmol.Renderer = function ( parameters ) {
 
         // opaque pass (front-to-back order)
 
-        this.setBlending( $3Dmol.NoBlending );
+        this.setBlending( false );
 
         renderObjects( scene.__webglObjects, true, "opaque", camera, lights, fog, false, material );
         
@@ -14976,178 +14966,187 @@ $3Dmol.ShaderLib = {
 };var $3Dmol = $3Dmol || {};
 
 //properties for mapping
-$3Dmol.partialCharges = [
-    { resn: "ALA", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ALA", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ALA", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ALA", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ALA", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ARG", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ARG", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ARG", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ARG", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "ARG", atom: "CD", props: {'partialCharge': 0.10}},
-	{ resn: "ARG", atom: "NE", props: {'partialCharge': -0.10}},
-	{ resn: "ARG", atom: "CZ", props: {'partialCharge': 0.50}},
-	{ resn: "ARG", atom: "NH1", props: {'partialCharge': 0.25}},
-	{ resn: "ARG", atom: "NH2", props: {'partialCharge': 0.25}},
-	{ resn: "ARG", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ARG", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ASN", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ASN", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ASN", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ASN", atom: "CG", props: {'partialCharge': 0.55}},
-	{ resn: "ASN", atom: "OD1", props: {'partialCharge': -0.55}},
-	{ resn: "ASN", atom: "ND2", props: {'partialCharge': 0.00}},
-	{ resn: "ASN", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ASN", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ASP", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ASP", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ASP", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ASP", atom: "CG", props: {'partialCharge': 0.14}},
-	{ resn: "ASP", atom: "OD1", props: {'partialCharge': -0.57}},
-	{ resn: "ASP", atom: "OD2", props: {'partialCharge': -0.57}},
-	{ resn: "ASP", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ASP", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "CYS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "CYS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "CYS", atom: "CB", props: {'partialCharge': 0.19}},
-	{ resn: "CYS", atom: "SG", props: {'partialCharge': -0.19}},
-	{ resn: "CYS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "CYS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLN", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLN", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLN", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "CD", props: {'partialCharge': 0.55}},
-	{ resn: "GLN", atom: "OE1", props: {'partialCharge': -0.55}},
-	{ resn: "GLN", atom: "NE2", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLN", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLU", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLU", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLU", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "GLU", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "GLU", atom: "CD", props: {'partialCharge': 0.14}},
-	{ resn: "GLU", atom: "OE1", props: {'partialCharge': -0.57}},
-	{ resn: "GLU", atom: "OE2", props: {'partialCharge': -0.57}},
-	{ resn: "GLU", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLU", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLY", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLY", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLY", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLY", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "HIS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "HIS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "HIS", atom: "CG", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "ND1", props: {'partialCharge': -0.10}},
-	{ resn: "HIS", atom: "CD2", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "NE2", props: {'partialCharge': -0.40}},
-	{ resn: "HIS", atom: "CE1", props: {'partialCharge': 0.30}},
-	{ resn: "HIS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "HIS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ILE", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ILE", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ILE", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CG1", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CD", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ILE", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "LEU", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "LEU", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "LEU", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "LEU", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "LYS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "LYS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "LYS", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CD", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CE", props: {'partialCharge': 0.25}},
-	{ resn: "LYS", atom: "NZ", props: {'partialCharge': 0.75}},
-	{ resn: "LYS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "LYS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "MET", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "MET", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "MET", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "MET", atom: "CG", props: {'partialCharge': 0.06}},
-	{ resn: "MET", atom: "SD", props: {'partialCharge': -0.12}},
-	{ resn: "MET", atom: "CE", props: {'partialCharge': 0.06}},
-	{ resn: "MET", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "MET", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "PHE", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "PHE", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "PHE", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CE1", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CE2", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CZ", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "PHE", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "PRO", atom: "N", props: {'partialCharge': -0.25}},
-	{ resn: "PRO", atom: "CD", props: {'partialCharge': 0.10}},
-	{ resn: "PRO", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "PRO", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "PRO", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "PRO", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "PRO", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "SER", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "SER", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "SER", atom: "CB", props: {'partialCharge': 0.25}},
-	{ resn: "SER", atom: "OG", props: {'partialCharge': -0.25}},
-	{ resn: "SER", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "SER", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "THR", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "THR", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "THR", atom: "CB", props: {'partialCharge': 0.25}},
-	{ resn: "THR", atom: "OG1", props: {'partialCharge': -0.25}},
-	{ resn: "THR", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "THR", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "THR", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "TRP", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "TRP", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "TRP", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CG", props: {'partialCharge': -0.03}},
-	{ resn: "TRP", atom: "CD2", props: {'partialCharge': 0.10}},
-	{ resn: "TRP", atom: "CE2", props: {'partialCharge': -0.04}},
-	{ resn: "TRP", atom: "CE3", props: {'partialCharge': -0.03}},
-	{ resn: "TRP", atom: "CD1", props: {'partialCharge': 0.06}},
-	{ resn: "TRP", atom: "NE1", props: {'partialCharge': -0.06}},
-	{ resn: "TRP", atom: "CZ2", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CZ3", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CH2", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "TRP", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "TYR", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "TYR", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "TYR", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CE1", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CE2", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CZ", props: {'partialCharge': 0.25}},
-	{ resn: "TYR", atom: "OH", props: {'partialCharge': -0.25}},
-	{ resn: "TYR", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "TYR", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "VAL", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "VAL", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "VAL", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "CG1", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "VAL", atom: "O", props: {'partialCharge': -0.55}}
-]; 
-	
-$3Dmol['partialCharges'] = $3Dmol.partialCharges;
 
+/* partial charges for proteins */
+$3Dmol.partialCharges = {
+"ALA:N": -0.15,
+"ALA:CA": 0.10,
+"ALA:CB": 0.00,
+"ALA:C": 0.60,
+"ALA:O": -0.55,
+"ARG:N": -0.15,
+"ARG:CA": 0.10,
+"ARG:CB": 0.00,
+"ARG:CG": 0.00,
+"ARG:CD": 0.10,
+"ARG:NE": -0.10,
+"ARG:CZ": 0.50,
+"ARG:NH1": 0.25,
+"ARG:NH2": 0.25,
+"ARG:C": 0.60,
+"ARG:O": -0.55,
+"ASN:N": -0.15,
+"ASN:CA": 0.10,
+"ASN:CB": 0.00,
+"ASN:CG": 0.55,
+"ASN:OD1": -0.55,
+"ASN:ND2": 0.00,
+"ASN:C": 0.60,
+"ASN:O": -0.55,
+"ASP:N": -0.15,
+"ASP:CA": 0.10,
+"ASP:CB": 0.00,
+"ASP:CG": 0.14,
+"ASP:OD1": -0.57,
+"ASP:OD2": -0.57,
+"ASP:C": 0.60,
+"ASP:O": -0.55,
+"CYS:N": -0.15,
+"CYS:CA": 0.10,
+"CYS:CB": 0.19,
+"CYS:SG": -0.19,
+"CYS:C": 0.60,
+"CYS:O": -0.55,
+"GLN:N": -0.15,
+"GLN:CA": 0.10,
+"GLN:CB": 0.00,
+"GLN:CG": 0.00,
+"GLN:CD": 0.55,
+"GLN:OE1": -0.55,
+"GLN:NE2": 0.00,
+"GLN:C": 0.60,
+"GLN:O": -0.55,
+"GLU:N": -0.15,
+"GLU:CA": 0.10,
+"GLU:CB": 0.00,
+"GLU:CG": 0.00,
+"GLU:CD": 0.14,
+"GLU:OE1": -0.57,
+"GLU:OE2": -0.57,
+"GLU:C": 0.60,
+"GLU:O": -0.55,
+"GLY:N": -0.15,
+"GLY:CA": 0.10,
+"GLY:C": 0.60,
+"GLY:O": -0.55,
+"HIS:N": -0.15,
+"HIS:CA": 0.10,
+"HIS:CB": 0.00,
+"HIS:CG": 0.10,
+"HIS:ND1": -0.10,
+"HIS:CD2": 0.10,
+"HIS:NE2": -0.40,
+"HIS:CE1": 0.30,
+"HIS:C": 0.60,
+"HIS:O": -0.55,
+"ILE:N": -0.15,
+"ILE:CA": 0.10,
+"ILE:CB": 0.00,
+"ILE:CG2": 0.00,
+"ILE:CG1": 0.00,
+"ILE:CD": 0.00,
+"ILE:C": 0.60,
+"ILE:O": -0.55,
+"LEU:N": -0.15,
+"LEU:CA": 0.10,
+"LEU:CB": 0.00,
+"LEU:CG": 0.00,
+"LEU:CD1": 0.00,
+"LEU:CD2": 0.00,
+"LEU:C": 0.60,
+"LEU:O": -0.55,
+"LYS:N": -0.15,
+"LYS:CA": 0.10,
+"LYS:CB": 0.00,
+"LYS:CG": 0.00,
+"LYS:CD": 0.00,
+"LYS:CE": 0.25,
+"LYS:NZ": 0.75,
+"LYS:C": 0.60,
+"LYS:O": -0.55,
+"MET:N": -0.15,
+"MET:CA": 0.10,
+"MET:CB": 0.00,
+"MET:CG": 0.06,
+"MET:SD": -0.12,
+"MET:CE": 0.06,
+"MET:C": 0.60,
+"MET:O": -0.55,
+"PHE:N": -0.15,
+"PHE:CA": 0.10,
+"PHE:CB": 0.00,
+"PHE:CG": 0.00,
+"PHE:CD1": 0.00,
+"PHE:CD2": 0.00,
+"PHE:CE1": 0.00,
+"PHE:CE2": 0.00,
+"PHE:CZ": 0.00,
+"PHE:C": 0.60,
+"PHE:O": -0.55,
+"PRO:N": -0.25,
+"PRO:CD": 0.10,
+"PRO:CA": 0.10,
+"PRO:CB": 0.00,
+"PRO:CG": 0.00,
+"PRO:C": 0.60,
+"PRO:O": -0.55,
+"SER:N": -0.15,
+"SER:CA": 0.10,
+"SER:CB": 0.25,
+"SER:OG": -0.25,
+"SER:C": 0.60,
+"SER:O": -0.55,
+"THR:N": -0.15,
+"THR:CA": 0.10,
+"THR:CB": 0.25,
+"THR:OG1": -0.25,
+"THR:CG2": 0.00,
+"THR:C": 0.60,
+"THR:O": -0.55,
+"TRP:N": -0.15,
+"TRP:CA": 0.10,
+"TRP:CB": 0.00,
+"TRP:CG": -0.03,
+"TRP:CD2": 0.10,
+"TRP:CE2": -0.04,
+"TRP:CE3": -0.03,
+"TRP:CD1": 0.06,
+"TRP:NE1": -0.06,
+"TRP:CZ2": 0.00,
+"TRP:CZ3": 0.00,
+"TRP:CH2": 0.00,
+"TRP:C": 0.60,
+"TRP:O": -0.55,
+"TYR:N": -0.15,
+"TYR:CA": 0.10,
+"TYR:CB": 0.00,
+"TYR:CG": 0.00,
+"TYR:CD1": 0.00,
+"TYR:CE1": 0.00,
+"TYR:CD2": 0.00,
+"TYR:CE2": 0.00,
+"TYR:CZ": 0.25,
+"TYR:OH": -0.25,
+"TYR:C": 0.60,
+"TYR:O": -0.55,
+"VAL:N": -0.15,
+"VAL:CA": 0.10,
+"VAL:CB": 0.00,
+"VAL:CG1": 0.00,
+"VAL:CG2": 0.00,
+"VAL:C": 0.60,
+"VAL:O": -0.55
+};
+	
+//this can be supplied to mapAtomProperties
+$3Dmol.applyPartialCharges = function(atom, keepexisting) {
+	if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
+		if(atom.resn && atom.atom) {
+			var key = atom.resn+":"+atom.atom;
+			atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
+		}
+	}
+};
 $3Dmol = $3Dmol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
@@ -16840,6 +16839,40 @@ $3Dmol.specStringToObject = function(str) {
 	return ret;
 }
 
+// computes the bounding box around the provided atoms
+/**
+ * @param {AtomSpec[]} atomlist
+ * @return {Array}
+ */
+$3Dmol.getExtent = function(atomlist) {
+    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+    xmin = ymin = zmin = 9999;
+    xmax = ymax = zmax = -9999;
+    xsum = ysum = zsum = cnt = 0;
+
+    if (atomlist.length === 0)
+        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+    for (var i = 0; i < atomlist.length; i++) {
+        var atom = atomlist[i];
+        if (atom === undefined)
+            continue;
+        cnt++;
+        xsum += atom.x;
+        ysum += atom.y;
+        zsum += atom.z;
+
+        xmin = (xmin < atom.x) ? xmin : atom.x;
+        ymin = (ymin < atom.y) ? ymin : atom.y;
+        zmin = (zmin < atom.z) ? zmin : atom.z;
+        xmax = (xmax > atom.x) ? xmax : atom.x;
+        ymax = (ymax > atom.y) ? ymax : atom.y;
+        zmax = (zmax > atom.z) ? zmax : atom.z;
+    }
+
+    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+};
 
 
 /*
@@ -16892,7 +16925,7 @@ $3Dmol.workerString += "[]]";
 //Otherwise, must uncomment and run the above with 3Dmol-min.js, and cut and paste below everytime ProteinSurface or MarchingCube modified
 $3Dmol.workerString = 'self.onmessage=function(oEvent){var obj=oEvent.data,type=obj.type;if(0>type)self.atomData=obj.atoms,self.volume=obj.volume,self.ps=new ProteinSurface;else{var ps=self.ps;ps.initparm(obj.expandedExtent,1==type?!1:!0,self.volume),ps.fillvoxels(self.atomData,obj.extendedAtoms),ps.buildboundary(),(4===type||2===type)&&(ps.fastdistancemap(),ps.boundingatom(!1),ps.fillvoxelswaals(self.atomData,obj.extendedAtoms)),ps.marchingcube(type);var VandF=ps.getFacesAndVertices(obj.atomsToShow);self.postMessage(VandF)}};var Vector3=function(x,y,z){this.x=x||0,this.y=y||0,this.z=z||0};Vector3.prototype={constructor:Vector3,copy:function(v){return this.x=v.x,this.y=v.y,this.z=v.z,this},multiplyScalar:function(s){return this.x*=s,this.y*=s,this.z*=s,this}};var ISDONE=2,ProteinSurface=function (){var faces,verts,origextent,INOUT=1,ISDONE=2,ISBOUND=4,ptranx=0,ptrany=0,ptranz=0,probeRadius=1.4,defaultScaleFactor=2,scaleFactor=defaultScaleFactor,pHeight=0,pWidth=0,pLength=0,cutRadius=0,vpBits=null,vpDistance=null,vpAtomID=null,pminx=0,pminy=0,pminz=0,pmaxx=0,pmaxy=0,pmaxz=0,vdwRadii={H:1.2,Li:1.82,Na:2.27,K:2.75,C:1.7,N:1.55,O:1.52,F:1.47,P:1.8,S:1.8,CL:1.75,BR:1.85,SE:1.9,ZN:1.39,CU:1.4,NI:1.63,X:2},getVDWIndex=function(atom){return atom.elem&&"undefined"!=typeof vdwRadii[atom.elem]?atom.elem:"X"},depty={},widxz={},nb=[new Int32Array([1,0,0]),new Int32Array([-1,0,0]),new Int32Array([0,1,0]),new Int32Array([0,-1,0]),new Int32Array([0,0,1]),new Int32Array([0,0,-1]),new Int32Array([1,1,0]),new Int32Array([1,-1,0]),new Int32Array([-1,1,0]),new Int32Array([-1,-1,0]),new Int32Array([1,0,1]),new Int32Array([1,0,-1]),new Int32Array([-1,0,1]),new Int32Array([-1,0,-1]),new Int32Array([0,1,1]),new Int32Array([0,1,-1]),new Int32Array([0,-1,1]),new Int32Array([0,-1,-1]),new Int32Array([1,1,1]),new Int32Array([1,1,-1]),new Int32Array([1,-1,1]),new Int32Array([-1,1,1]),new Int32Array([1,-1,-1]),new Int32Array([-1,-1,1]),new Int32Array([-1,1,-1]),new Int32Array([-1,-1,-1])];this.getFacesAndVertices=function(atomlist){var i,il,atomsToShow={};for(i=0,il=atomlist.length;il>i;i++)atomsToShow[atomlist[i]]=!0;var vertices=verts;for(i=0,il=vertices.length;il>i;i++)vertices[i].x=vertices[i].x/scaleFactor-ptranx,vertices[i].y=vertices[i].y/scaleFactor-ptrany,vertices[i].z=vertices[i].z/scaleFactor-ptranz;var finalfaces=[];for(i=0,il=faces.length;il>i;i+=3){var fa=faces[i],fb=faces[i+1],fc=faces[i+2],a=vertices[fa].atomid,b=vertices[fb].atomid,c=vertices[fc].atomid,which=a;if(which>b&&(which=b),which>c&&(which=c),atomsToShow[which]){{vertices[faces[i]],vertices[faces[i+1]],vertices[faces[i+2]]}fa!==fb&&fb!==fc&&fa!==fc&&(finalfaces.push(fa),finalfaces.push(fb),finalfaces.push(fc))}}return vpBits=null,vpDistance=null,vpAtomID=null,{vertices:vertices,faces:finalfaces}},this.initparm=function(extent,btype,volume){volume>1e6&&(scaleFactor=defaultScaleFactor/2);var margin=1/scaleFactor*5.5;origextent=extent,pminx=extent[0][0],pmaxx=extent[1][0],pminy=extent[0][1],pmaxy=extent[1][1],pminz=extent[0][2],pmaxz=extent[1][2],btype?(pminx-=probeRadius+margin,pminy-=probeRadius+margin,pminz-=probeRadius+margin,pmaxx+=probeRadius+margin,pmaxy+=probeRadius+margin,pmaxz+=probeRadius+margin):(pminx-=margin,pminy-=margin,pminz-=margin,pmaxx+=margin,pmaxy+=margin,pmaxz+=margin),pminx=Math.floor(pminx*scaleFactor)/scaleFactor,pminy=Math.floor(pminy*scaleFactor)/scaleFactor,pminz=Math.floor(pminz*scaleFactor)/scaleFactor,pmaxx=Math.ceil(pmaxx*scaleFactor)/scaleFactor,pmaxy=Math.ceil(pmaxy*scaleFactor)/scaleFactor,pmaxz=Math.ceil(pmaxz*scaleFactor)/scaleFactor,ptranx=-pminx,ptrany=-pminy,ptranz=-pminz,pLength=Math.ceil(scaleFactor*(pmaxx-pminx))+1,pWidth=Math.ceil(scaleFactor*(pmaxy-pminy))+1,pHeight=Math.ceil(scaleFactor*(pmaxz-pminz))+1,this.boundingatom(btype),cutRadius=probeRadius*scaleFactor,vpBits=new Uint8Array(pLength*pWidth*pHeight),vpDistance=new Float64Array(pLength*pWidth*pHeight),vpAtomID=new Int32Array(pLength*pWidth*pHeight)},this.boundingatom=function(btype){var txz,tdept,sradius,tradius=[];flagradius=btype;for(var i in vdwRadii)if(vdwRadii.hasOwnProperty(i)){var r=vdwRadii[i];for(tradius[i]=btype?(r+probeRadius)*scaleFactor+.5:r*scaleFactor+.5,sradius=tradius[i]*tradius[i],widxz[i]=Math.floor(tradius[i])+1,depty[i]=new Int32Array(widxz[i]*widxz[i]),indx=0,j=0;j<widxz[i];j++)for(k=0;k<widxz[i];k++)txz=j*j+k*k,txz>sradius?depty[i][indx]=-1:(tdept=Math.sqrt(sradius-txz),depty[i][indx]=Math.floor(tdept)),indx++}},this.fillvoxels=function(atoms,atomlist){var i,il;for(i=0,il=vpBits.length;il>i;i++)vpBits[i]=0,vpDistance[i]=-1,vpAtomID[i]=-1;for(i in atomlist){var atom=atoms[atomlist[i]];void 0!==atom&&this.fillAtom(atom,atoms)}for(i=0,il=vpBits.length;il>i;i++)vpBits[i]&INOUT&&(vpBits[i]|=ISDONE)},this.fillAtom=function(atom,atoms){var cx,cy,cz,ox,oy,oz,mi,mj,mk,i,j,k,si,sj,sk,ii,jj,kk,n;cx=Math.floor(.5+scaleFactor*(atom.x+ptranx)),cy=Math.floor(.5+scaleFactor*(atom.y+ptrany)),cz=Math.floor(.5+scaleFactor*(atom.z+ptranz));var at=getVDWIndex(atom),nind=0,pWH=pWidth*pHeight;for(i=0,n=widxz[at];n>i;i++)for(j=0;n>j;j++){if(-1!=depty[at][nind])for(ii=-1;2>ii;ii++)for(jj=-1;2>jj;jj++)for(kk=-1;2>kk;kk++)if(0!==ii&&0!==jj&&0!==kk)for(mi=ii*i,mk=kk*j,k=0;k<=depty[at][nind];k++)if(mj=k*jj,si=cx+mi,sj=cy+mj,sk=cz+mk,!(0>si||0>sj||0>sk||si>=pLength||sj>=pWidth||sk>=pHeight)){var index=si*pWH+sj*pHeight+sk;if(vpBits[index]&INOUT){var atom2=atoms[vpAtomID[index]];ox=Math.floor(.5+scaleFactor*(atom2.x+ptranx)),oy=Math.floor(.5+scaleFactor*(atom2.y+ptrany)),oz=Math.floor(.5+scaleFactor*(atom2.z+ptranz)),ox*ox+oy*oy+oz*oz>mi*mi+mj*mj+mk*mk&&(vpAtomID[index]=atom.serial)}else vpBits[index]|=INOUT,vpAtomID[index]=atom.serial}nind++}},this.fillvoxelswaals=function(atoms,atomlist){var i,il;for(i=0,il=vpBits.length;il>i;i++)vpBits[i]&=~ISDONE;for(i in atomlist){var atom=atoms[atomlist[i]];void 0!==atom&&this.fillAtomWaals(atom,atoms)}},this.fillAtomWaals=function(atom,atoms){var cx,cy,cz,ox,oy,oz,mi,mj,mk,si,sj,sk,i,j,k,ii,jj,kk,n,nind=0;cx=Math.floor(.5+scaleFactor*(atom.x+ptranx)),cy=Math.floor(.5+scaleFactor*(atom.y+ptrany)),cz=Math.floor(.5+scaleFactor*(atom.z+ptranz));var at=getVDWIndex(atom),pWH=pWidth*pHeight;for(i=0,n=widxz[at];n>i;i++)for(j=0;n>j;j++){if(-1!=depty[at][nind])for(ii=-1;2>ii;ii++)for(jj=-1;2>jj;jj++)for(kk=-1;2>kk;kk++)if(0!==ii&&0!==jj&&0!==kk)for(mi=ii*i,mk=kk*j,k=0;k<=depty[at][nind];k++)if(mj=k*jj,si=cx+mi,sj=cy+mj,sk=cz+mk,!(0>si||0>sj||0>sk||si>=pLength||sj>=pWidth||sk>=pHeight)){var index=si*pWH+sj*pHeight+sk;if(vpBits[index]&ISDONE){var atom2=atoms[vpAtomID[index]];ox=Math.floor(.5+scaleFactor*(atom2.x+ptranx)),oy=Math.floor(.5+scaleFactor*(atom2.y+ptrany)),oz=Math.floor(.5+scaleFactor*(atom2.z+ptranz)),ox*ox+oy*oy+oz*oz>mi*mi+mj*mj+mk*mk&&(vpAtomID[index]=atom.serial)}else vpBits[index]|=ISDONE,vpAtomID[index]=atom.serial}nind++}},this.buildboundary=function(){var pWH=pWidth*pHeight;for(i=0;pLength>i;i++)for(j=0;pHeight>j;j++)for(k=0;pWidth>k;k++){var index=i*pWH+k*pHeight+j;if(vpBits[index]&INOUT)for(var ii=0;26>ii;){var ti=i+nb[ii][0],tj=j+nb[ii][2],tk=k+nb[ii][1];if(ti>-1&&pLength>ti&&tk>-1&&pWidth>tk&&tj>-1&&pHeight>tj&&!(vpBits[ti*pWH+tk*pHeight+tj]&INOUT)){vpBits[index]|=ISBOUND;break}ii++}}};var PointGrid=function(length,width,height){var data=new Int32Array(length*width*height*3);this.set=function(x,y,z,pt){var index=3*((x*width+y)*height+z);data[index]=pt.ix,data[index+1]=pt.iy,data[index+2]=pt.iz},this.get=function(x,y,z){var index=3*((x*width+y)*height+z);return{ix:data[index],iy:data[index+1],iz:data[index+2]}}};this.fastdistancemap=function(){var i,j,k,n,index,boundPoint=new PointGrid(pLength,pWidth,pHeight),pWH=pWidth*pHeight,cutRSq=cutRadius*cutRadius,inarray=[],outarray=[];for(i=0;pLength>i;i++)for(j=0;pWidth>j;j++)for(k=0;pHeight>k;k++)if(index=i*pWH+j*pHeight+k,vpBits[index]&=~ISDONE,vpBits[index]&INOUT&&vpBits[index]&ISBOUND){var triple={ix:i,iy:j,iz:k};boundPoint.set(i,j,k,triple),inarray.push(triple),vpDistance[index]=0,vpBits[index]|=ISDONE,vpBits[index]&=~ISBOUND}do for(outarray=this.fastoneshell(inarray,boundPoint),inarray=[],i=0,n=outarray.length;n>i;i++)index=pWH*outarray[i].ix+pHeight*outarray[i].iy+outarray[i].iz,vpBits[index]&=~ISBOUND,vpDistance[index]<=1.0404*cutRSq&&inarray.push({ix:outarray[i].ix,iy:outarray[i].iy,iz:outarray[i].iz});while(0!==inarray.length);inarray=[],outarray=[],boundPoint=null;var cutsf=scaleFactor-.5;0>cutsf&&(cutsf=0);var cutoff=cutRSq-.5/(.1+cutsf);for(i=0;pLength>i;i++)for(j=0;pWidth>j;j++)for(k=0;pHeight>k;k++)index=i*pWH+j*pHeight+k,vpBits[index]&=~ISBOUND,vpBits[index]&INOUT&&(!(vpBits[index]&ISDONE)||vpBits[index]&ISDONE&&vpDistance[index]>=cutoff)&&(vpBits[index]|=ISBOUND)},this.fastoneshell=function(inarray,boundPoint){var tx,ty,tz,dx,dy,dz,i,j,n,square,bp,index,outarray=[];if(0===inarray.length)return outarray;tnv={ix:-1,iy:-1,iz:-1};var pWH=pWidth*pHeight;for(i=0,n=inarray.length;n>i;i++)for(tx=inarray[i].ix,ty=inarray[i].iy,tz=inarray[i].iz,bp=boundPoint.get(tx,ty,tz),j=0;6>j;j++)tnv.ix=tx+nb[j][0],tnv.iy=ty+nb[j][1],tnv.iz=tz+nb[j][2],tnv.ix<pLength&&tnv.ix>-1&&tnv.iy<pWidth&&tnv.iy>-1&&tnv.iz<pHeight&&tnv.iz>-1&&(index=tnv.ix*pWH+pHeight*tnv.iy+tnv.iz,vpBits[index]&INOUT&&!(vpBits[index]&ISDONE)?(boundPoint.set(tnv.ix,tnv.iy,tz+nb[j][2],bp),dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,vpDistance[index]=square,vpBits[index]|=ISDONE,vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})):vpBits[index]&INOUT&&vpBits[index]&ISDONE&&(dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,square<vpDistance[index]&&(boundPoint.set(tnv.ix,tnv.iy,tnv.iz,bp),vpDistance[index]=square,vpBits[index]&ISBOUND||(vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})))));for(i=0,n=inarray.length;n>i;i++)for(tx=inarray[i].ix,ty=inarray[i].iy,tz=inarray[i].iz,bp=boundPoint.get(tx,ty,tz),j=6;18>j;j++)tnv.ix=tx+nb[j][0],tnv.iy=ty+nb[j][1],tnv.iz=tz+nb[j][2],tnv.ix<pLength&&tnv.ix>-1&&tnv.iy<pWidth&&tnv.iy>-1&&tnv.iz<pHeight&&tnv.iz>-1&&(index=tnv.ix*pWH+pHeight*tnv.iy+tnv.iz,vpBits[index]&INOUT&&!(vpBits[index]&ISDONE)?(boundPoint.set(tnv.ix,tnv.iy,tz+nb[j][2],bp),dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,vpDistance[index]=square,vpBits[index]|=ISDONE,vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})):vpBits[index]&INOUT&&vpBits[index]&ISDONE&&(dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,square<vpDistance[index]&&(boundPoint.set(tnv.ix,tnv.iy,tnv.iz,bp),vpDistance[index]=square,vpBits[index]&ISBOUND||(vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})))));for(i=0,n=inarray.length;n>i;i++)for(tx=inarray[i].ix,ty=inarray[i].iy,tz=inarray[i].iz,bp=boundPoint.get(tx,ty,tz),j=18;26>j;j++)tnv.ix=tx+nb[j][0],tnv.iy=ty+nb[j][1],tnv.iz=tz+nb[j][2],tnv.ix<pLength&&tnv.ix>-1&&tnv.iy<pWidth&&tnv.iy>-1&&tnv.iz<pHeight&&tnv.iz>-1&&(index=tnv.ix*pWH+pHeight*tnv.iy+tnv.iz,vpBits[index]&INOUT&&!(vpBits[index]&ISDONE)?(boundPoint.set(tnv.ix,tnv.iy,tz+nb[j][2],bp),dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,vpDistance[index]=square,vpBits[index]|=ISDONE,vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})):vpBits[index]&INOUT&&vpBits[index]&ISDONE&&(dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,square<vpDistance[index]&&(boundPoint.set(tnv.ix,tnv.iy,tnv.iz,bp),vpDistance[index]=square,vpBits[index]&ISBOUND||(vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})))));return outarray},this.marchingcubeinit=function(stype){for(var i=0,lim=vpBits.length;lim>i;i++)1==stype?vpBits[i]&=~ISBOUND:4==stype?(vpBits[i]&=~ISDONE,vpBits[i]&ISBOUND&&(vpBits[i]|=ISDONE),vpBits[i]&=~ISBOUND):2==stype?vpBits[i]&ISBOUND&&vpBits[i]&ISDONE?vpBits[i]&=~ISBOUND:vpBits[i]&ISBOUND&&!(vpBits[i]&ISDONE)&&(vpBits[i]|=ISDONE):3==stype&&(vpBits[i]&=~ISBOUND)};this.marchingcube=function(stype){this.marchingcubeinit(stype),verts=[],faces=[],march(vpBits,verts,faces,{smooth:1,nX:pLength,nY:pWidth,nZ:pHeight});for(var pWH=pWidth*pHeight,i=0,vlen=verts.length;vlen>i;i++)verts[i].atomid=vpAtomID[verts[i].x*pWH+pHeight*verts[i].y+verts[i].z];laplacianSmooth(1,verts,faces)}},march=function (data,verts,faces,spec){var i,il,fulltable=!!spec.fulltable,origin=spec.hasOwnProperty("origin")&&spec.origin.hasOwnProperty("x")?spec.origin:{x:0,y:0,z:0},voxel=!!spec.voxel,nX=spec.nX||0,nY=spec.nY||0,nZ=spec.nZ||0,scale=spec.scale||1,unitCube=new Vector3(1,1,1).multiplyScalar(scale),vertnums=new Int32Array(nX*nY*nZ);for(i=0,il=vertnums.length;il>i;++i)vertnums[i]=-1;var getVertex=function(i,j,k,code,p1,p2){var pt=new Vector3;pt.copy(origin);var val1=!!(code&1<<p1),val2=!!(code&1<<p2),p=p1;!val1&&val2&&(p=p2),1&p&&k++,2&p&&j++,4&p&&i++,pt.x+=unitCube.x*i,pt.y+=unitCube.y*j,pt.z+=unitCube.z*k;var index=(nY*i+j)*nZ+k;return voxel?(verts.push(pt),verts.length-1):(vertnums[index]<0&&(vertnums[index]=verts.length,verts.push(pt)),vertnums[index])},intersects=new Int32Array(12),etable=fulltable?edgeTable2:edgeTable,tritable=fulltable?triTable2:triTable;for(i=0;nX-1>i;++i)for(var j=0;nY-1>j;++j)for(var k=0;nZ-1>k;++k){for(var code=0,p=0;8>p;++p){var index=(nY*(i+((4&p)>>2))+j+((2&p)>>1))*nZ+k+(1&p),val=!!(data[index]&ISDONE);code|=val<<p}if(0!==code&&255!==code){var ecode=etable[code];if(0!==ecode){var ttable=tritable[code];1&ecode&&(intersects[0]=getVertex(i,j,k,code,0,1)),2&ecode&&(intersects[1]=getVertex(i,j,k,code,1,3)),4&ecode&&(intersects[2]=getVertex(i,j,k,code,3,2)),8&ecode&&(intersects[3]=getVertex(i,j,k,code,2,0)),16&ecode&&(intersects[4]=getVertex(i,j,k,code,4,5)),32&ecode&&(intersects[5]=getVertex(i,j,k,code,5,7)),64&ecode&&(intersects[6]=getVertex(i,j,k,code,7,6)),128&ecode&&(intersects[7]=getVertex(i,j,k,code,6,4)),256&ecode&&(intersects[8]=getVertex(i,j,k,code,0,4)),512&ecode&&(intersects[9]=getVertex(i,j,k,code,1,5)),1024&ecode&&(intersects[10]=getVertex(i,j,k,code,3,7)),2048&ecode&&(intersects[11]=getVertex(i,j,k,code,2,6));for(var t=0;t<ttable.length;t+=3){var a=intersects[ttable[t]],b=intersects[ttable[t+1]],c=intersects[ttable[t+2]];voxel&&t>=3&&(verts.push(verts[a]),a=verts.length-1,verts.push(verts[b]),b=verts.length-1,verts.push(verts[c]),c=verts.length-1),faces.push(a),faces.push(b),faces.push(c)}}}}},laplacianSmooth=function (numiter,verts,faces){var i,il,j,jl,k,tps=new Array(verts.length);for(i=0,il=verts.length;il>i;i++)tps[i]={x:0,y:0,z:0};var flagvert,vertdeg=new Array(20);for(i=0;20>i;i++)vertdeg[i]=new Array(verts.length);for(i=0,il=verts.length;il>i;i++)vertdeg[0][i]=0;for(i=0,il=faces.length/3;il>i;i++){var aoffset=3*i,boffset=3*i+1,coffset=3*i+2;for(flagvert=!0,j=0,jl=vertdeg[0][faces[aoffset]];jl>j;j++)if(faces[boffset]==vertdeg[j+1][faces[aoffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[aoffset]]++,vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]]=faces[boffset]),flagvert=!0,j=0,jl=vertdeg[0][faces[aoffset]];jl>j;j++)if(faces[coffset]==vertdeg[j+1][faces[aoffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[aoffset]]++,vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]]=faces[coffset]),flagvert=!0,j=0,jl=vertdeg[0][faces[boffset]];jl>j;j++)if(faces[aoffset]==vertdeg[j+1][faces[boffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[boffset]]++,vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]]=faces[aoffset]),flagvert=!0,j=0,jl=vertdeg[0][faces[boffset]];jl>j;j++)if(faces[coffset]==vertdeg[j+1][faces[boffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[boffset]]++,vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]]=faces[coffset]),flagvert=!0,j=0;j<vertdeg[0][faces[coffset]];j++)if(faces[aoffset]==vertdeg[j+1][faces[coffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[coffset]]++,vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]]=faces[aoffset]),flagvert=!0,j=0,jl=vertdeg[0][faces[coffset]];jl>j;j++)if(faces[boffset]==vertdeg[j+1][faces[coffset]]){flagvert=!1;break}flagvert&&(vertdeg[0][faces[coffset]]++,vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]]=faces[boffset])}var wt=1,wt2=.5;for(k=0;numiter>k;k++){for(i=0,il=verts.length;il>i;i++)if(vertdeg[0][i]<3)tps[i].x=verts[i].x,tps[i].y=verts[i].y,tps[i].z=verts[i].z;else if(3==vertdeg[0][i]||4==vertdeg[0][i]){for(tps[i].x=0,tps[i].y=0,tps[i].z=0,j=0,jl=vertdeg[0][i];jl>j;j++)tps[i].x+=verts[vertdeg[j+1][i]].x,tps[i].y+=verts[vertdeg[j+1][i]].y,tps[i].z+=verts[vertdeg[j+1][i]].z;tps[i].x+=wt2*verts[i].x,tps[i].y+=wt2*verts[i].y,tps[i].z+=wt2*verts[i].z,tps[i].x/=wt2+vertdeg[0][i],tps[i].y/=wt2+vertdeg[0][i],tps[i].z/=wt2+vertdeg[0][i]}else{for(tps[i].x=0,tps[i].y=0,tps[i].z=0,j=0,jl=vertdeg[0][i];jl>j;j++)tps[i].x+=verts[vertdeg[j+1][i]].x,tps[i].y+=verts[vertdeg[j+1][i]].y,tps[i].z+=verts[vertdeg[j+1][i]].z;tps[i].x+=wt*verts[i].x,tps[i].y+=wt*verts[i].y,tps[i].z+=wt*verts[i].z,tps[i].x/=wt+vertdeg[0][i],tps[i].y/=wt+vertdeg[0][i],tps[i].z/=wt+vertdeg[0][i]}for(i=0,il=verts.length;il>i;i++)verts[i].x=tps[i].x,verts[i].y=tps[i].y,verts[i].z=tps[i].z}},edgeTable=new Uint32Array([0,0,0,0,0,0,0,2816,0,0,0,1792,0,3328,3584,3840,0,0,0,138,0,21,0,134,0,0,0,652,0,2067,3865,3600,0,0,0,42,0,0,0,294,0,0,21,28,0,3875,1049,3360,0,168,162,170,0,645,2475,2210,0,687,293,172,4010,3747,3497,3232,0,0,0,0,0,69,0,900,0,0,0,1792,138,131,1608,1920,0,81,0,2074,84,85,84,86,0,81,0,3676,330,1105,1881,1616,0,0,0,42,0,69,0,502,0,0,21,3580,138,2035,1273,1520,2816,104,2337,106,840,581,367,102,2816,3695,3429,3180,1898,1635,1385,1120,0,0,0,0,0,0,0,3910,0,0,69,588,42,2083,41,2880,0,0,0,1722,0,2293,4095,3830,0,255,757,764,2538,2291,3065,2800,0,0,81,338,0,3925,1119,3414,84,855,85,340,2130,2899,89,2384,1792,712,194,1162,4036,3781,3535,3270,708,719,197,204,3018,2755,2505,2240,0,0,0,0,168,420,168,1958,162,162,676,2988,170,163,680,928,3328,3096,3328,3642,52,53,1855,1590,2340,2111,2869,2620,298,51,825,560,3584,3584,3090,3482,1668,1941,1183,1430,146,2975,2069,2460,154,915,153,400,3840,3592,3329,3082,1796,1541,1295,1030,2818,2575,2309,2060,778,515,265,0]),triTable=[[],[],[],[],[],[],[],[11,9,8],[],[],[],[8,10,9],[],[10,8,11],[9,11,10],[8,10,9,8,11,10],[],[],[],[1,7,3],[],[4,2,0],[],[2,1,7],[],[],[],[2,7,3,2,9,7],[],[1,4,11,1,0,4],[3,8,0,11,9,4,11,10,9],[4,11,9,11,10,9],[],[],[],[5,3,1],[],[],[],[2,5,8,2,1,5],[],[],[2,4,0],[3,2,4],[],[0,9,1,8,10,5,8,11,10],[3,4,0,3,10,4],[5,8,10,8,11,10],[],[3,5,7],[7,1,5],[1,7,3,1,5,7],[],[9,2,0,9,7,2],[0,3,8,1,7,11,1,5,7],[11,1,7,1,5,7],[],[9,1,0,5,3,2,5,7,3],[8,2,5,8,0,2],[2,5,3,5,7,3],[3,9,1,3,8,9,7,11,10,7,10,5],[9,1,0,10,7,11,10,5,7],[3,8,0,7,10,5,7,11,10],[11,5,7,11,10,5],[],[],[],[],[],[0,6,2],[],[7,2,9,7,9,8],[],[],[],[8,10,9],[7,1,3],[7,1,0],[6,9,3,6,10,9],[7,10,8,10,9,8],[],[6,0,4],[],[11,1,4,11,3,1],[2,4,6],[2,0,4,2,4,6],[2,4,6],[1,4,2,4,6,2],[],[6,0,4],[],[2,11,3,6,9,4,6,10,9],[8,6,1,8,1,3],[10,0,6,0,4,6],[8,0,3,9,6,10,9,4,6],[10,4,6,10,9,4],[],[],[],[5,3,1],[],[0,6,2],[],[7,4,8,5,2,1,5,6,2],[],[],[2,4,0],[7,4,8,2,11,3,10,5,6],[7,1,3],[5,6,10,0,9,1,8,7,4],[5,6,10,7,0,3,7,4,0],[10,5,6,4,8,7],[9,11,8],[3,5,6],[0,5,11,0,11,8],[6,3,5,3,1,5],[3,9,6,3,8,9],[9,6,0,6,2,0],[0,3,8,2,5,6,2,1,5],[1,6,2,1,5,6],[9,11,8],[1,0,9,6,10,5,11,3,2],[6,10,5,2,8,0,2,11,8],[3,2,11,10,5,6],[10,5,6,9,3,8,9,1,3],[0,9,1,5,6,10],[8,0,3,10,5,6],[10,5,6],[],[],[],[],[],[],[],[1,10,2,9,11,6,9,8,11],[],[],[6,0,2],[3,6,9,3,2,6],[3,5,1],[0,5,1,0,11,5],[0,3,5],[6,9,11,9,8,11],[],[],[],[4,5,9,7,1,10,7,3,1],[],[11,6,7,2,4,5,2,0,4],[11,6,7,8,0,3,1,10,2,9,4,5],[6,7,11,1,10,2,9,4,5],[],[4,1,0,4,5,1,6,7,3,6,3,2],[9,4,5,0,6,7,0,2,6],[4,5,9,6,3,2,6,7,3],[6,7,11,5,3,8,5,1,3],[6,7,11,4,1,0,4,5,1],[4,5,9,3,8,0,11,6,7],[9,4,5,7,11,6],[],[],[0,6,4],[8,6,4,8,1,6],[],[0,10,2,0,9,10,4,8,11,4,11,6],[10,2,1,6,0,3,6,4,0],[10,2,1,11,4,8,11,6,4],[4,2,6],[1,0,9,2,4,8,2,6,4],[2,4,0,2,6,4],[8,2,4,2,6,4],[11,4,1,11,6,4],[0,9,1,4,11,6,4,8,11],[3,6,0,6,4,0],[8,6,4,8,11,6],[10,8,9],[6,3,9,6,7,3],[6,7,1],[10,7,1,7,3,1],[7,11,6,8,10,2,8,9,10],[11,6,7,10,0,9,10,2,0],[2,1,10,7,11,6,8,0,3],[1,10,2,6,7,11],[7,2,6,7,9,2],[1,0,9,3,6,7,3,2,6],[7,0,6,0,2,6],[2,7,3,2,6,7],[7,11,6,3,9,1,3,8,9],[9,1,0,11,6,7],[0,3,8,11,6,7],[11,6,7],[],[],[],[],[5,3,7],[8,5,2,8,7,5],[5,3,7],[1,10,2,5,8,7,5,9,8],[1,7,5],[1,7,5],[9,2,7,9,7,5],[11,3,2,8,5,9,8,7,5],[1,3,7,1,7,5],[0,7,1,7,5,1],[9,3,5,3,7,5],[9,7,5,9,8,7],[8,10,11],[3,4,10,3,10,11],[8,10,11],[5,9,4,1,11,3,1,10,11],[2,4,5],[5,2,4,2,0,4],[0,3,8,5,9,4,10,2,1],[2,1,10,9,4,5],[2,8,5,2,11,8],[3,2,11,1,4,5,1,0,4],[9,4,5,8,2,11,8,0,2],[11,3,2,9,4,5],[8,5,3,5,1,3],[5,0,4,5,1,0],[3,8,0,4,5,9],[9,4,5],[11,9,10],[11,9,10],[1,11,4,1,10,11],[8,7,4,11,1,10,11,3,1],[2,7,9,2,9,10],[4,8,7,0,10,2,0,9,10],[2,1,10,0,7,4,0,3,7],[10,2,1,8,7,4],[1,7,4],[3,2,11,4,8,7,9,1,0],[11,4,2,4,0,2],[2,11,3,7,4,8],[4,1,7,1,3,7],[1,0,9,8,7,4],[3,4,0,3,7,4],[8,7,4],[8,9,10,8,10,11],[3,9,11,9,10,11],[0,10,8,10,11,8],[10,3,1,10,11,3],[2,8,10,8,9,10],[9,2,0,9,10,2],[8,0,3,1,10,2],[10,2,1],[1,11,9,11,8,9],[11,3,2,0,9,1],[11,0,2,11,8,0],[11,3,2],[8,1,3,8,9,1],[9,1,0],[8,0,3],[]]';
 
-$3Dmol.SurfaceWorker = window.URL.createObjectURL(new Blob([$3Dmol.workerString]));
+$3Dmol.SurfaceWorker = window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'}));
 
 $3Dmol['workerString'] = $3Dmol.workerString;
 $3Dmol['SurfaceWorker'] = $3Dmol.SurfaceWorker;
@@ -16915,8 +16948,16 @@ $(document).ready(function() {
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
             
-            if (viewerdiv.data("pdb"))
+            var type = null;
+            if (viewerdiv.data("pdb")) {
                 datauri = "http://www.pdb.org/pdb/files/" + viewerdiv.data("pdb") + ".pdb";
+                type = "pdb";
+            } else if(viewerdiv.data("cid")) {
+            	//this doesn't actually work since pubchem does have CORS enabled
+            	type = "sdf";
+                datauri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
+                "/SDF?record_type=3d";
+            }
             else if (viewerdiv.data("href"))
                 datauri = viewerdiv.data("href");
                 
@@ -16979,10 +17020,11 @@ $(document).ready(function() {
             
             if (datauri) {  
                 
-                var type = viewerdiv.data("type") || viewerdiv.data("datatype");
+                type = viewerdiv.data("type") || viewerdiv.data("datatype") || type;
                 if(!type) {
                 	type = datauri.substr(datauri.lastIndexOf('.')+1);
                 }
+                                
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
                     glviewer.setStyle(select,style);
@@ -17100,8 +17142,36 @@ $3Dmol.CC = {
     
 };
 
+
 $3Dmol['CC'] = $3Dmol.CC;
 $3Dmol['CC']['color'] = $3Dmol.CC.color;
+
+
+
+/** Return proper color for atom given style
+ * @param {AtomSpec} atom
+ * @param {AtomStyle} style
+ * @return {$3Dmol.Color}
+ */
+$3Dmol.getColorFromStyle = function(atom, style) {
+    var color = atom.color;
+    if (typeof (style.color) != "undefined" && style.color != "spectrum")
+        color = style.color;
+    if(typeof(style.colorscheme) != "undefined") {
+    	if(typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+    		//name of builtin colorscheme
+	    	var scheme = $3Dmol.elementColors[style.colorscheme];
+	    	if(typeof(scheme[atom.elem]) != "undefined") {
+	    		color = scheme[atom.elem];
+	    	}
+    	} else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+    		//actual color scheme provided
+    		color = style.colorscheme[atom.elem];
+    	}
+    }
+    var C = $3Dmol.CC.color(color);
+    return C;
+}
 
 /** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
@@ -17636,12 +17706,9 @@ $3Dmol.drawCartoon = (function() {
                 if (atom.atom == 'CA') {
                     //set atom color
                 	var prevatomcolor = atomcolor;
-                    atomcolor = atom.color;
+                    atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
                     if (gradientscheme) {
                         atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
-                    }
-                    else if(typeof(cstyle.color) !== "undefined") {
-                        atomcolor = cstyle.color;
                     }
                     
                     if($.isNumeric(cstyle.thickness)) {
@@ -18781,27 +18848,6 @@ $3Dmol.GLModel = (function() {
             return r;
         };
 
-  
-        /** Return proper color for atom given style
-         * @param {AtomSpec} atom
-         * @param {AtomStyle} style
-         * @return {$3Dmol.Color}
-         */
-        var getColorFromStyle = function(atom, style) {
-            var color = atom.color;
-            if (typeof (style.color) != "undefined")
-                color = style.color;
-            if(typeof(style.colorscheme) != "undefined" &&
-            		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
-            	var scheme = $3Dmol.elementColors[style.colorscheme];
-            	if(typeof(scheme[atom.elem]) != "undefined") {
-            		color = scheme[atom.elem];
-            	}
-            }
-            var C = $3Dmol.CC.color(color);
-            return C;
-        }
-
         // cross drawing
 		/** @typedef CrossStyleSpec
 		 * @prop {boolean} hidden - do not show 
@@ -18837,7 +18883,7 @@ $3Dmol.GLModel = (function() {
             if (clickable && atom.intersectionShape === undefined)
                 atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
-            var c = getColorFromStyle(atom, style);
+            var c = $3Dmol.getColorFromStyle(atom, style);
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -19012,8 +19058,8 @@ $3Dmol.GLModel = (function() {
                     atom.intersectionShape.line.push(p2);
                 }
 
-                var c1 = getColorFromStyle(atom, atom.style.line);
-                var c2 = getColorFromStyle(atom2, atom2.style.line);
+                var c1 = $3Dmol.getColorFromStyle(atom, atom.style.line);
+                var c2 = $3Dmol.getColorFromStyle(atom2, atom2.style.line);
                
                 if(atom.bondStyles && atom.bondStyles[i]) {
                 	var bstyle = atom.bondStyles[i];
@@ -19145,7 +19191,7 @@ $3Dmol.GLModel = (function() {
             if (style.hidden)
                 return;
                                                                  
-            var C = getColorFromStyle(atom, style);
+            var C = $3Dmol.getColorFromStyle(atom, style);
             
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
@@ -19169,7 +19215,7 @@ $3Dmol.GLModel = (function() {
                 return;
             
             var radius = getRadiusFromStyle(atom, style);
-            var C = getColorFromStyle(atom, style);
+            var C = $3Dmol.getColorFromStyle(atom, style);
             
             //create flat square                       
             
@@ -19250,7 +19296,7 @@ $3Dmol.GLModel = (function() {
             var atomSingleBond = style.singleBonds || false;
             var fromCap = false, toCap = false;
 
-            var C1 = getColorFromStyle(atom, style);
+            var C1 = $3Dmol.getColorFromStyle(atom, style);
 
             var mp, mp1, mp2;
             
@@ -19269,7 +19315,7 @@ $3Dmol.GLModel = (function() {
                     if (!style2.stick)
                         continue; // don't sweat the details                     
                    
-                    var C2 = getColorFromStyle(atom2, style2.stick);
+                    var C2 = $3Dmol.getColorFromStyle(atom2, style2.stick);
                     
                     //support bond specific styles
                     bondR = atomBondR;                    
@@ -19500,7 +19546,7 @@ $3Dmol.GLModel = (function() {
         /** param {AtomSpec[]} atoms */
         var createMolObj = function(atoms) {
 
-            console.log("creating for "+id);
+            //console.log("creating for "+id);
             var ret = new $3Dmol.Object3D();
             var cartoonAtoms = [];
             var lineGeometries = {};
@@ -19677,15 +19723,22 @@ $3Dmol.GLModel = (function() {
             options = options || {}; 
             if (!data)
                 console.error("Erorr with addMolData: No input data specified");
-            
-            if(typeof($3Dmol.Parsers[format]) != "undefined") {
-            	var parse = $3Dmol.Parsers[format];
-            	parse(atoms, data, options)
+            if(typeof($3Dmol.Parsers[format]) == "undefined") {
+            	console.log("Unknown format: "+format);
+            	//try to guess correct format from data contents
+				if(data.match(/^@<TRIPOS>MOLECULE/)) {
+					format = "mol2";
+				} else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+					format = "pdb";
+				} else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+					format = "sdf"; //could look at line 3
+				} else {
+					format = "xyz";
+				}
+				console.log("Best guess: "+format);
             }
-            else {
-            	console.error("Unknown format: "+format);
-            }
-            
+        	var parse = $3Dmol.Parsers[format];
+        	parse(atoms, data, options)
             setAtomDefaults(atoms, id);
         };
         
@@ -19708,7 +19761,9 @@ $3Dmol.GLModel = (function() {
             			break;
             		}
             	}
-            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres") {
+
+            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
+
                     // if something is in sel, atom must have it                	
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
@@ -19756,15 +19811,53 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
          */
-        this.selectedAtoms = function(sel) {
+        this.selectedAtoms = function(sel, from) {
             var ret = [];
-            var aLength = atoms.length;
+            if (!from) from = atoms;
+            var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
-                var atom = atoms[i];
+                var atom = from[i];
                 if (atom) {
                     if (this.atomIsSelected(atom, sel))
                         ret.push(atom);
                 }
+            }
+
+            // expand selection by some distance
+            if (sel.hasOwnProperty("expand")) {
+
+            	// get atoms in expanded bounding box
+            	var expand = expandAtomList(ret, sel.expand)
+            	var retlen = ret.length
+            	for (var i = 0; i < expand.length; i++) {
+            		for (var j = 0; j < retlen; j++) {
+
+            			var dist = squaredDistance(expand[i], ret[j]);
+            			var thresh = Math.pow(sel.expand, 2);
+            			if (dist < thresh && dist > 0) {
+            				ret.push(expand[i]);
+            			}
+            		}
+            	}
+            }
+
+            // selection within distance of sub-selection
+            if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
+
+            	// get atoms in second selection
+            	var sel2 = this.selectedAtoms(sel.within.sel, atoms)
+            	var within = []
+            	for (var i = 0; i < sel2.length; i++) {
+            		for (var j = 0; j < ret.length; j++) {
+
+            			var dist = squaredDistance(sel2[i], ret[j]);
+            			var thresh = Math.pow(sel.within.distance, 2);
+            			if (dist < thresh && dist > 0) {
+            				within.push(ret[j]);
+            			}
+            		}
+            	}
+            	ret = within;
             }
 
             // byres selection flag
@@ -19807,6 +19900,53 @@ $3Dmol.GLModel = (function() {
             }
 
             return ret;
+        };
+
+        var squaredDistance = function(atom1, atom2) {
+        	var xd = atom2.x - atom1.x;
+        	var yd = atom2.y - atom1.y;
+        	var zd = atom2.z - atom1.z;
+        	return (Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
+        };
+
+        /** returns a list of atoms in the expanded bounding box, but not in the current one
+         *
+         *  Bounding box:
+         *
+         *    [ [ xmin, ymin, zmin ],
+         *      [ xmax, ymax, zmax ],
+         *      [ xctr, yctr, zctr ] ]
+         *
+         **/
+        var expandAtomList = function(atomList, amt) {
+
+        	var pb = $3Dmol.getExtent(atomList);
+        	var nb = [[],[],[]];
+
+            for (var i = 0; i < 3; i++)
+            {
+                nb[0][i] = pb[0][i]-amt;
+                nb[1][i] = pb[1][i]+amt;
+                nb[2][i] = pb[2][i];
+            }
+
+            // look in added box "shell" for new atoms
+            var expand = [];
+            for (var i = 0; i < atoms.length; i++) {
+
+                var x = atoms[i].x;
+                var y = atoms[i].y;
+                var z = atoms[i].z;
+
+                if (x >= nb[0][0] && x < pb[0][0] || x > pb[1][0] && x <= nb[1][0]) {
+                    if (y >= nb[0][1] && y < pb[0][1] || y > pb[1][1] && y <= nb[1][1]) {
+                        if (z >= nb[0][2] && z < pb[0][2] || z > pb[1][2] && z <= nb[1][2]) {
+                            expand.push(atoms[i]);
+                        }
+                    }
+                }
+            }
+            return expand;
         };
         
         /** Add list of new atoms to model.  Adjusts bonds appropriately.
@@ -19891,7 +20031,7 @@ $3Dmol.GLModel = (function() {
             // style, although these checks will only catch cases where both
             // are either null or undefined
 
-            var selected = this.selectedAtoms(sel);
+            var selected = this.selectedAtoms(sel, atoms);
             for ( var i = 0; i < atoms.length; i++) {
                 atoms[i].capDrawn = false; //reset for proper stick render
             }
@@ -19925,7 +20065,7 @@ $3Dmol.GLModel = (function() {
             if(molObj !== null && sameObj(colors,lastColors))
                 return; // don't recompute
             lastColors = colors;
-            var atoms = this.selectedAtoms(sel);
+            var atoms = this.selectedAtoms(sel, atoms);
             if(atoms.length > 0)
                 molObj = null; // force rebuild
             for ( var i = 0; i < atoms.length; i++) {
@@ -19943,7 +20083,7 @@ $3Dmol.GLModel = (function() {
          * @param {type} scheme
          */
         this.setColorByProperty = function(sel, prop, scheme) {
-            var atoms = this.selectedAtoms(sel);
+            var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
@@ -19980,7 +20120,7 @@ $3Dmol.GLModel = (function() {
             if(molObj === null) { // have to regenerate
                 molObj = createMolObj(atoms);
                 var time2 = new Date();
-                console.log("object creation time: " + (time2 - time));
+                //console.log("object creation time: " + (time2 - time));
                 if(renderedMolObj) { // previously rendered, remove
                     group.remove(renderedMolObj);
                     renderedMolObj = null;
@@ -20015,7 +20155,7 @@ $3Dmol.GLModel = (function() {
          * @param {$3Dmol.GLViewer} viewer
          */
         this.addResLabels = function(sel, viewer, style) {
-        	var atoms = this.selectedAtoms(sel);
+        	var atoms = this.selectedAtoms(sel, atoms);
         	var bylabel = {}
         	//collect by chain:resn:resi
         	for(var i = 0; i < atoms.length; i++) {
@@ -20678,7 +20818,7 @@ $3Dmol.GLShape = (function() {
 				1.0) : 1.0;
 		shape.side = (stylespec.side !== undefined) ? stylespec.side
 				: $3Dmol.DoubleSide;
-
+		shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
 		// Click handling
 		shape.clickable = stylespec.clickable ? true : false;
 		shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
@@ -20690,17 +20830,14 @@ $3Dmol.GLShape = (function() {
 	 * 
 	 * @constructor $3Dmol.GLShape
 	 * 
-	 * @param {Number}
-	 *            sid - Unique identifier
 	 * @param {Object}
 	 *            stylespec
 	 * @returns {$3Dmol.GLShape}
 	 */
-	var GLShape = function(sid, stylespec) {
+	function GLShape(stylespec) {
 
 		stylespec = stylespec || {};
 		$3Dmol.ShapeIDCount++;
-		this.id = sid;
 
 		this.boundingSphere = new $3Dmol.Sphere();
 		/** @type {IntersectionShapes} */
@@ -20854,7 +20991,7 @@ $3Dmol.GLShape = (function() {
 
 			if (arrowSpec.dir instanceof $3Dmol.Vector3
 					&& arrowSpec.length instanceof number) {
-				var end = arrowSpec.dir.clone().multiplyScalar(length).add(
+				var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
 						start);
 				arrowSpec.end = end;
 			}
@@ -20944,7 +21081,8 @@ $3Dmol.GLShape = (function() {
 				reflectivity : 0,
 				side : this.side,
 				transparent : (this.alpha < 1) ? true : false,
-				opacity : this.alpha
+				opacity : this.alpha,
+				wireframeLinewidth: this.linewidth
 			});
 
 			var mesh = new $3Dmol.Mesh(geo, material);
@@ -21030,41 +21168,6 @@ $3Dmol.GLViewer = (function() {
 
 	// private class helper functions
 
-	// computes the bounding box around the provided atoms
-	/**
-	 * @param {AtomSpec[]} atomlist
-	 * @return {Array}
-	 */
-	var getExtent = function(atomlist) {
-		var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
-
-		xmin = ymin = zmin = 9999;
-		xmax = ymax = zmax = -9999;
-		xsum = ysum = zsum = cnt = 0;
-
-		if (atomlist.length === 0)
-			return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-		for (var i = 0; i < atomlist.length; i++) {
-			var atom = atomlist[i];
-			if (atom === undefined)
-				continue;
-			cnt++;
-			xsum += atom.x;
-			ysum += atom.y;
-			zsum += atom.z;
-
-			xmin = (xmin < atom.x) ? xmin : atom.x;
-			ymin = (ymin < atom.y) ? ymin : atom.y;
-			zmin = (zmin < atom.z) ? zmin : atom.z;
-			xmax = (xmax > atom.x) ? xmax : atom.x;
-			ymax = (ymax > atom.y) ? ymax : atom.y;
-			zmax = (zmax > atom.z) ? zmax : atom.z;
-		}
-
-		return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
-				[ xsum / cnt, ysum / cnt, zsum / cnt ] ];
-	};
-
 	function GLViewer(element, callback, defaultcolors, nomouse) {
 		// set variables
 		var _viewer = this;
@@ -21075,6 +21178,7 @@ $3Dmol.GLViewer = (function() {
 		var surfaces = [];
 		var shapes = []; // Generic shapes
 		var labels = [];
+		var clickables = []; //things you can click on
 		var WIDTH = container.width();
 		var HEIGHT = container.height();
 
@@ -21091,7 +21195,6 @@ $3Dmol.GLViewer = (function() {
 		var renderer = new $3Dmol.Renderer({
 			antialias : true
 		});
-		// renderer.sortObjects = false; // hopefully improve performance
 
 		renderer.domElement.style.width = "100%";
 		renderer.domElement.style.height = "100%";
@@ -21103,8 +21206,8 @@ $3Dmol.GLViewer = (function() {
 		renderer.setSize(WIDTH, HEIGHT);
 		var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
 		camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
-		var vec = new $3Dmol.Vector3();
-		camera.lookAt(vec);
+		var lookingAt = new $3Dmol.Vector3();
+		camera.lookAt(lookingAt);
 
 		var raycaster = new $3Dmol.Raycaster(new $3Dmol.Vector3(0, 0, 0),
 				new $3Dmol.Vector3(0, 0, 0));
@@ -21198,9 +21301,33 @@ $3Dmol.GLViewer = (function() {
 		// enable mouse support
 		var glDOM = $(renderer.domElement);
 
+		//regenerate the list of clickables
+		var updateClickables = function() {
+			clickables = [];
+			var i, il;
+
+			for (i = 0, il = models.length; i < il; i++) {
+				var model = models[i];
+				if(model) {
+					var atoms = model.selectedAtoms({
+						clickable : true
+					});
+					clickables = clickables.concat(atoms);
+				}
+			}
+
+			for (i = 0, il = shapes.length; i < il; i++) {
+
+				var shape = shapes[i];
+				if (shape && shape.clickable) {
+					clickables.push(shape);
+				}
+			}
+		};
+		
 		// Checks for selection intersects on mousedown
 		var handleClickSelection = function(mouseX, mouseY) {
-
+			if(clickables.length == 0) return;
 			var mouse = {
 				x : mouseX,
 				y : mouseY,
@@ -21212,27 +21339,7 @@ $3Dmol.GLViewer = (function() {
 
 			raycaster.set(camera.position, mouseVector);
 
-			var clickables = [], intersects = [];
-			var i, il;
-
-			for (i = 0, il = models.length; i < il; i++) {
-				var model = models[i];
-
-				var atoms = model.selectedAtoms({
-					clickable : true
-				});
-				clickables = clickables.concat(atoms);
-
-			}
-
-			for (i = 0, il = shapes.length; i < il; i++) {
-
-				var shape = shapes[i];
-				if (shape.clickable) {
-					clickables.push(shape);
-				}
-
-			}
+			var intersects = [];
 
 			intersects = raycaster.intersectObjects(modelGroup, clickables);
 
@@ -21243,8 +21350,6 @@ $3Dmol.GLViewer = (function() {
 					selected.callback(selected, _viewer);
 				}
 			}
-
-			show();
 		};
 
 		var calcTouchDistance = function(ev) { // distance between first two
@@ -21255,19 +21360,45 @@ $3Dmol.GLViewer = (function() {
 					- ev.originalEvent.targetTouches[1].pageY;
 			return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
 		}
+		
+		//check targetTouches as well
+		var getXY = function(ev) {
+			var x = ev.pageX, y = ev.pageY;
+			if (ev.originalEvent.targetTouches
+					&& ev.originalEvent.targetTouches[0]) {
+				x = ev.originalEvent.targetTouches[0].pageX;
+				y = ev.originalEvent.targetTouches[0].pageY;
+			}
+			
+			return [x,y];
+		};
 
+		//for a given screen (x,y) displacement return model displacement 
+		var screenXY2model = function(x,y) {
+			var dx = x/WIDTH;
+			var dy = y/HEIGHT;
+			var zpos = rotationGroup.position.z; 
+			var q = rotationGroup.quaternion;						
+			var t = new $3Dmol.Vector3(0,0,zpos);
+			projector.projectVector(t, camera);
+			t.x += dx*2;
+			t.y -= dy*2;
+			projector.unprojectVector(t, camera);
+			t.z = 0;							
+			t.applyQuaternion(q);
+			return t;
+		}
+		
 		if (!nomouse) {
 			// user can request that the mouse handlers not be installed
 			glDOM.bind('mousedown touchstart', function(ev) {
 				ev.preventDefault();
 				if (!scene)
 					return;
-				var x = ev.pageX, y = ev.pageY;
-				if (ev.originalEvent.targetTouches
-						&& ev.originalEvent.targetTouches[0]) {
-					x = ev.originalEvent.targetTouches[0].pageX;
-					y = ev.originalEvent.targetTouches[0].pageY;
-				}
+				var xy = getXY(ev);
+				var x = xy[0];
+				var y = xy[1];
+				
 				if (x === undefined)
 					return;
 				isDragging = true;
@@ -21286,11 +21417,6 @@ $3Dmol.GLViewer = (function() {
 				cslabNear = slabNear;
 				cslabFar = slabFar;
 
-				// handle selection
-				var mouseX = (x / $(window).width()) * 2 - 1;
-				var mouseY = -(y / HEIGHT) * 2 + 1;
-				handleClickSelection(mouseX, mouseY, ev, container);
-
 			});
 
 			glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
@@ -21305,6 +21431,7 @@ $3Dmol.GLViewer = (function() {
 					rotationGroup.position.z -= scaleFactor
 							* ev.originalEvent.wheelDelta / 400;
 				}
+				if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
 
 				show();
 			});
@@ -21313,84 +21440,86 @@ $3Dmol.GLViewer = (function() {
 				ev.preventDefault();
 			});
 			$('body').bind('mouseup touchend', function(ev) {
+				
+				// handle selection
+				if(isDragging && scene) { //saw mousedown, haven't moved
+					var xy = getXY(ev);
+					var x = xy[0];
+					var y = xy[1];
+					if(x == mouseStartX && y == mouseStartY) {					
+						var mouseX = (x / $(window).width()) * 2 - 1;
+						var mouseY = -(y / HEIGHT) * 2 + 1;
+						handleClickSelection(mouseX, mouseY, ev, container);
+					}
+				}
+				
 				isDragging = false;
+
 			});
 
-			glDOM
-					.bind(
-							'mousemove touchmove',
-							function(ev) { // touchmove
-								ev.preventDefault();
-								if (!scene)
-									return;
-								if (!isDragging)
-									return;
-								var mode = 0;
+			glDOM.bind('mousemove touchmove', function(ev) { // touchmove
+				ev.preventDefault();
+				if (!scene)
+					return;
+				if (!isDragging)
+					return;
+				var mode = 0;
 
-								var x = ev.pageX, y = ev.pageY;
-								if (ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches[0]) {
-									x = ev.originalEvent.targetTouches[0].pageX;
-									y = ev.originalEvent.targetTouches[0].pageY;
-								}
-								if (x === undefined)
-									return;
-								var dx = (x - mouseStartX) / WIDTH;
-								var dy = (y - mouseStartY) / HEIGHT;
-								// check for pinch
-								if (touchDistanceStart != 0
-										&& ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches.length == 2) {
-									var newdist = calcTouchDistance(ev);
-									// change to zoom
-									mode = 2;
-									dy = (touchDistanceStart - newdist) * 2
-											/ (WIDTH + HEIGHT);
-								} else if (ev.originalEvent.targetTouches
-										&& ev.originalEvent.targetTouches.length == 3) {
-									// translate
-									mode = 1;
-								}
+				var xy = getXY(ev);
+				var x = xy[0];
+				var y = xy[1];
+				if (x === undefined)
+					return;
+				var dx = (x - mouseStartX) / WIDTH;
+				var dy = (y - mouseStartY) / HEIGHT;
+				// check for pinch
+				if (touchDistanceStart != 0
+						&& ev.originalEvent.targetTouches
+						&& ev.originalEvent.targetTouches.length == 2) {
+					var newdist = calcTouchDistance(ev);
+					// change to zoom
+					mode = 2;
+					dy = (touchDistanceStart - newdist) * 2
+							/ (WIDTH + HEIGHT);
+				} else if (ev.originalEvent.targetTouches
+						&& ev.originalEvent.targetTouches.length == 3) {
+					// translate
+					mode = 1;
+				}
 
-								var r = Math.sqrt(dx * dx + dy * dy);
-								var scaleFactor;
-								if (mode == 3
-										|| (mouseButton == 3 && ev.ctrlKey)) { // Slab
-									slabNear = cslabNear + dx * 100;
-									slabFar = cslabFar + dy * 100;
-								} else if (mode == 2 || mouseButton == 3
-										|| ev.shiftKey) { // Zoom
-									scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-									if (scaleFactor < 80)
-										scaleFactor = 80;
-									rotationGroup.position.z = cz - dy
-											* scaleFactor;
-								} else if (mode == 1 || mouseButton == 2
-										|| ev.ctrlKey) { // Translate
-									var q = rotationGroup.quaternion;						
-									var t = new $3Dmol.Vector3(0,0,rotationGroup.position.z);
-									projector.projectVector(t, camera);
-									t.x += dx*2;
-									t.y -= dy*2;
-									projector.unprojectVector(t, camera);
-									t.z = 0;							
-									t.applyQuaternion(q);
-
-									modelGroup.position.addVectors(currentModelPos,t);
-								} else if ((mode === 0 || mouseButton == 1)
-										&& r !== 0) { // Rotate
-									var rs = Math.sin(r * Math.PI) / r;
-									dq.x = Math.cos(r * Math.PI);
-									dq.y = 0;
-									dq.z = rs * dx;
-									dq.w = -rs * dy;
-									rotationGroup.quaternion = new $3Dmol.Quaternion(
-											1, 0, 0, 0);
-									rotationGroup.quaternion.multiply(dq);
-									rotationGroup.quaternion.multiply(cq);
-								}
-								show();
-							});
+				var r = Math.sqrt(dx * dx + dy * dy);
+				var scaleFactor;
+				if (mode == 3
+						|| (mouseButton == 3 && ev.ctrlKey)) { // Slab
+					slabNear = cslabNear + dx * 100;
+					slabFar = cslabFar + dy * 100;
+				} else if (mode == 2 || mouseButton == 3
+						|| ev.shiftKey) { // Zoom
+					scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+					if (scaleFactor < 80)
+						scaleFactor = 80;
+					rotationGroup.position.z = cz - dy
+							* scaleFactor;
+					if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+				} else if (mode == 1 || mouseButton == 2
+						|| ev.ctrlKey) { // Translate
+					var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+					modelGroup.position.addVectors(currentModelPos,t);
+					
+				} else if ((mode === 0 || mouseButton == 1)
+						&& r !== 0) { // Rotate
+					var rs = Math.sin(r * Math.PI) / r;
+					dq.x = Math.cos(r * Math.PI);
+					dq.y = 0;
+					dq.z = rs * dx;
+					dq.w = -rs * dy;
+					rotationGroup.quaternion = new $3Dmol.Quaternion(
+							1, 0, 0, 0);
+					rotationGroup.quaternion.multiply(dq);
+					rotationGroup.quaternion.multiply(cq);
+				}
+				show();
+			});
 		}
 		// public methods
 		/**
@@ -21552,8 +21681,10 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.render = function() {
 
+			updateClickables(); //must render for clickable styles to take effect
 			var time1 = new Date();
 			var view = this.getView();
+			
 			var i;
 			for (i = 0; i < models.length; i++) {
 				if (models[i]) {
@@ -21566,7 +21697,7 @@ $3Dmol.GLViewer = (function() {
 					shapes[i].globj(modelGroup);
 				}
 			}
-
+			
 			for (i in surfaces) { // this is an array with possible holes
 				if (surfaces.hasOwnProperty(i)) {
 					var geo = surfaces[i].geo;
@@ -21592,6 +21723,7 @@ $3Dmol.GLViewer = (function() {
 
 						// create new surface
 						var smesh = null;
+
 						if(surfaces[i].mat instanceof $3Dmol.LineBasicMaterial) {
 							//special case line meshes
 							smesh = new $3Dmol.Line(geo, surfaces[i].mat);
@@ -21599,14 +21731,21 @@ $3Dmol.GLViewer = (function() {
 						else {
 							smesh = new $3Dmol.Mesh(geo, surfaces[i].mat);
 						}
+						if(surfaces[i].mat.transparent && surfaces[i].mat.opacity == 0) {
+							//don't bother with hidden surfaces
+							smesh.visible = false;
+						} else {
+							smesh.visible = true;
+						}
 						surfaces[i].lastGL = smesh;
 						modelGroup.add(smesh);
 					} // else final surface already there
 				}
 			}
+			
 			this.setView(view); // Calls show() => renderer render
 			var time2 = new Date();
-			console.log("render time: " + (time2 - time1));
+			//console.log("render time: " + (time2 - time1));
 		};
 
 		/**
@@ -21707,6 +21846,31 @@ $3Dmol.GLViewer = (function() {
 			show();
 		};
 		
+		/**
+		 * Translate current view by x,y screen coordinates
+		 * This pans the camera rather than translating the model.
+		 * 
+		 * @function $3Dmol.GLViewer#translate
+		 * @param {number} x
+		 * @param {number} y
+		 * 
+		 */
+		this.translate = function(x, y) {
+			
+			var dx = x/WIDTH;
+			var dy = y/HEIGHT;
+			var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
+
+			projector.projectVector(v, camera);
+			v.x -= dx;
+			v.y -= dy;
+			projector.unprojectVector(v, camera);
+			v.z = 0;			
+			lookingAt.add(v);
+			camera.lookAt(lookingAt);
+			show();
+		};
+		
 
 		/**
 		 * Zoom to center of atom selection
@@ -21715,7 +21879,6 @@ $3Dmol.GLViewer = (function() {
 		 * @param {Object}
 		 *            [sel] - Selection specification specifying model and atom
 		 *            properties to select. Default: all atoms in viewer
-		 * 
 		 * @example // Assuming we have created a model of a protein with
 		 *          multiple chains (e.g. from a PDB file), focus on atoms in
 		 *          chain B glviewer.zoomTo({chain: 'B'});
@@ -21723,10 +21886,26 @@ $3Dmol.GLViewer = (function() {
 		 * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
 		 */
 		this.zoomTo = function(sel) {
-			var atoms = getAtomsFromSel(sel).concat(shapes);
-			var allatoms = getAtomsFromSel({}).concat(shapes);
-			var tmp = getExtent(atoms);
-			var alltmp = getExtent(allatoms);
+			var allatoms, alltmp;
+			sel = sel || {};
+			var atoms = getAtomsFromSel(sel);
+			var tmp = $3Dmol.getExtent(atoms);
+
+			if($.isEmptyObject(sel)) {
+				//include shapes when zooming to full scene
+				//TODO: figure out a good way to specify shapes as part of a selection
+				$.each(shapes, function(i, shape) {
+					atoms.push(shape);
+				});
+				allatoms = atoms;
+				alltmp = tmp;
+
+			}
+			else {
+				allatoms = getAtomsFromSel({});
+				alltmp = $3Dmol.getExtent(allatoms);
+			}
+
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
@@ -21753,9 +21932,11 @@ $3Dmol.GLViewer = (function() {
 			//find the farthest atom from center to get max distance needed for view
 			var maxDsq = 25;
 			for (var i = 0; i < atoms.length; i++) {
-				var dsq = center.distanceToSquared(atoms[i]);
-				if(dsq > maxDsq)
-					maxDsq = dsq;
+				if(atoms[i]) {
+					var dsq = center.distanceToSquared(atoms[i]);
+					if(dsq > maxDsq)
+						maxDsq = dsq;
+				}
 			}
 			
 			var maxD = Math.sqrt(maxDsq)*2;
@@ -21907,7 +22088,8 @@ $3Dmol.GLViewer = (function() {
 		 */
 		this.addShape = function(shapeSpec) {
 			shapeSpec = shapeSpec || {};
-			var shape = new $3Dmol.GLShape(shapes.length, shapeSpec);
+			var shape = new $3Dmol.GLShape(shapeSpec);
+			shape.shapePosition = shapes.length;
 			shapes.push(shape);
 
 			return shape;
@@ -21924,7 +22106,7 @@ $3Dmol.GLViewer = (function() {
 			if (!shape)
 				return;
 			shape.removegl(modelGroup);
-			delete shapes[shape.id];
+			delete shapes[shape.shapePosition];
 			// clear off back of model array
 			while (shapes.length > 0
 					&& typeof (shapes[shapes.length - 1]) === "undefined")
@@ -21952,8 +22134,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addSphere = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addSphere(spec);
 			shapes.push(s);
 
@@ -21968,8 +22151,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addArrow = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addArrow(spec);
 			shapes.push(s);
 
@@ -21984,8 +22168,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addCylinder = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addCylinder(spec);
 			shapes.push(s);
 
@@ -22000,8 +22185,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addCustom = function(spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addCustom(spec);
 			shapes.push(s);
 
@@ -22018,8 +22204,9 @@ $3Dmol.GLViewer = (function() {
 		 * @return {$3Dmol.GLShape}
 		 */
 		this.addVolumetricData = function(data, format, spec) {
-			var s = new $3Dmol.GLShape(shapes.length);
 			spec = spec || {};
+			var s = new $3Dmol.GLShape(spec);
+			s.shapePosition = shapes.length;
 			s.addVolumetricData(data, format, spec);
 			shapes.push(s);
 
@@ -22400,13 +22587,12 @@ $3Dmol.GLViewer = (function() {
 			ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
 
 			var time2 = new Date();
-			console.log("initialize " + (time2 - time) + "ms");
+			//console.log("initialize " + (time2 - time) + "ms");
 
 			ps.fillvoxels(atoms, extendedAtoms);
 
 			var time3 = new Date();
-			console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time)
-					+ "ms");
+			//console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
 
 			ps.buildboundary();
 
@@ -22423,8 +22609,7 @@ $3Dmol.GLViewer = (function() {
 			ps.marchingcube(type);
 
 			var time5 = new Date();
-			console.log("marching cube " + (time5 - time4) + "  "
-					+ (time5 - time) + "ms");
+			//console.log("marching cube " + (time5 - time4) + "  "+ (time5 - time) + "ms");
 
 			return ps.getFacesAndVertices(atomsToShow);
 		};
@@ -22528,6 +22713,8 @@ $3Dmol.GLViewer = (function() {
 			// of atomsToShow are displayed (e.g., for showing cavities)
 			// if focusSele is specified, will start rending surface around the
 			// atoms specified by this selection
+			if(!allsel) allsel = atomsel;
+			if(!focus) focus = atomsel;
 			var atomsToShow = getAtomsFromSel(atomsel);
 			var atomlist = getAtomsFromSel(allsel);
 			var focusSele = getAtomsFromSel(focus);
@@ -22538,7 +22725,7 @@ $3Dmol.GLViewer = (function() {
 
 			var mat = getMatWithStyle(style);
 
-			var extent = getExtent(atomsToShow);
+			var extent = $3Dmol.getExtent(atomsToShow);
 
 			var i, il;
 			if (style['map'] && style['map']['prop']) {
@@ -22579,7 +22766,7 @@ $3Dmol.GLViewer = (function() {
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
-				var seleExtent = getExtent(focusSele);
+				var seleExtent = $3Dmol.getExtent(focusSele);
 				// sort by how close to center of seleExtent
 				var sortFunc = function(a, b) {
 					var distSq = function(ex, sele) {
@@ -22605,8 +22792,7 @@ $3Dmol.GLViewer = (function() {
 				extents.sort(sortFunc);
 			}
 
-			console.log("Extents " + extents.length + "  "
-					+ (+new Date() - time) + "ms");
+			//console.log("Extents " + extents.length + "  "+ (+new Date() - time) + "ms");
 
 			var surfobj = {
 				geo : new $3Dmol.Geometry(true),
@@ -22674,16 +22860,14 @@ $3Dmol.GLViewer = (function() {
 					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
 					$3Dmol.mergeGeos(surfobj.geo, mesh);
 					_viewer.render();
-					console.log("async mesh generation " + (+new Date() - time)
-							+ "ms");
+				//	console.log("async mesh generation " + (+new Date() - time) + "ms");
 					cnt++;
 					if (cnt == extents.length)
 						surfobj.done = true;
 				};
 
 				var efunction = function(event) {
-					console.log(event.message + " (" + event.filename + ":"
-							+ event.lineno + ")");
+					console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
 				};
 
 				for (i = 0; i < extents.length; i++) {
@@ -22703,7 +22887,7 @@ $3Dmol.GLViewer = (function() {
 
 			// NOTE: This is misleading if 'async' mesh generation - returns
 			// immediately
-			console.log("full mesh generation " + (+new Date() - time) + "ms");
+			//console.log("full mesh generation " + (+new Date() - time) + "ms");
 
 			return surfid;
 		};
@@ -22789,22 +22973,33 @@ $3Dmol.GLViewer = (function() {
 		// properties for those atoms
 		/**
 		 * Add specified properties to all atoms matching input argument
-		 * @param {AtomSpec} props
+		 * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
+		 * @param {AtomSelectionSpec} sel
 		 */
-		this.mapAtomProperties = function(props) {
-			var atoms = getAtomsFromSel({});
-			for (var a = 0, numa = atoms.length; a < numa; a++) {
-				var atom = atoms[a];
-				for (var i = 0, n = props.length; i < n; i++) {
-					var prop = props[i];
-					if (prop.props) {
-						for ( var p in prop.props) {
-							if (prop.props.hasOwnProperty(p)) {
-								// check the atom
-								if (atomIsSelected(atom, prop)) {
-									if (!atom.properties)
-										atom.properties = {};
-									atom.properties[p] = prop.props[p];
+		this.mapAtomProperties = function(props, sel) {
+			sel = sel || {};
+			var atoms = getAtomsFromSel(sel);
+			
+			if(typeof(props) == "function") {
+				for (var a = 0, numa = atoms.length; a < numa; a++) {
+					var atom = atoms[a];
+					props(atom);
+				}
+			}
+			else {
+				for (var a = 0, numa = atoms.length; a < numa; a++) {
+					var atom = atoms[a];
+					for (var i = 0, n = props.length; i < n; i++) {
+						var prop = props[i];
+						if (prop.props) {
+							for ( var p in prop.props) {
+								if (prop.props.hasOwnProperty(p)) {
+									// check the atom
+									if (atomIsSelected(atom, prop)) {
+										if (!atom.properties)
+											atom.properties = {};
+										atom.properties[p] = prop.props[p];
+									}
 								}
 							}
 						}
@@ -24129,9 +24324,6 @@ $3Dmol.Parsers = (function() {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
                     var toAtom = atoms[serialToIndex[to]];
                     if (fromAtom !== undefined && toAtom !== undefined) {
-                        fromAtom.bonds.push(serialToIndex[to]);
-                        fromAtom.bondOrder.push(1);
-			console.log("created bond");
                         //minimal cleanup here - pymol likes to output duplicated conect records
                         var toindex = serialToIndex[to];
                         if(fromAtom.bonds[fromAtom.bonds.length-1] != toindex) {
@@ -24304,178 +24496,187 @@ $3Dmol.Parsers = (function() {
 var $3Dmol = $3Dmol || {};
 
 //properties for mapping
-$3Dmol.partialCharges = [
-    { resn: "ALA", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ALA", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ALA", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ALA", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ALA", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ARG", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ARG", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ARG", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ARG", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "ARG", atom: "CD", props: {'partialCharge': 0.10}},
-	{ resn: "ARG", atom: "NE", props: {'partialCharge': -0.10}},
-	{ resn: "ARG", atom: "CZ", props: {'partialCharge': 0.50}},
-	{ resn: "ARG", atom: "NH1", props: {'partialCharge': 0.25}},
-	{ resn: "ARG", atom: "NH2", props: {'partialCharge': 0.25}},
-	{ resn: "ARG", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ARG", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ASN", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ASN", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ASN", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ASN", atom: "CG", props: {'partialCharge': 0.55}},
-	{ resn: "ASN", atom: "OD1", props: {'partialCharge': -0.55}},
-	{ resn: "ASN", atom: "ND2", props: {'partialCharge': 0.00}},
-	{ resn: "ASN", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ASN", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ASP", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ASP", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ASP", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ASP", atom: "CG", props: {'partialCharge': 0.14}},
-	{ resn: "ASP", atom: "OD1", props: {'partialCharge': -0.57}},
-	{ resn: "ASP", atom: "OD2", props: {'partialCharge': -0.57}},
-	{ resn: "ASP", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ASP", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "CYS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "CYS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "CYS", atom: "CB", props: {'partialCharge': 0.19}},
-	{ resn: "CYS", atom: "SG", props: {'partialCharge': -0.19}},
-	{ resn: "CYS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "CYS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLN", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLN", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLN", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "CD", props: {'partialCharge': 0.55}},
-	{ resn: "GLN", atom: "OE1", props: {'partialCharge': -0.55}},
-	{ resn: "GLN", atom: "NE2", props: {'partialCharge': 0.00}},
-	{ resn: "GLN", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLN", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLU", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLU", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLU", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "GLU", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "GLU", atom: "CD", props: {'partialCharge': 0.14}},
-	{ resn: "GLU", atom: "OE1", props: {'partialCharge': -0.57}},
-	{ resn: "GLU", atom: "OE2", props: {'partialCharge': -0.57}},
-	{ resn: "GLU", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLU", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "GLY", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "GLY", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "GLY", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "GLY", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "HIS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "HIS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "HIS", atom: "CG", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "ND1", props: {'partialCharge': -0.10}},
-	{ resn: "HIS", atom: "CD2", props: {'partialCharge': 0.10}},
-	{ resn: "HIS", atom: "NE2", props: {'partialCharge': -0.40}},
-	{ resn: "HIS", atom: "CE1", props: {'partialCharge': 0.30}},
-	{ resn: "HIS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "HIS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "ILE", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "ILE", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "ILE", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CG1", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "CD", props: {'partialCharge': 0.00}},
-	{ resn: "ILE", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "ILE", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "LEU", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "LEU", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "LEU", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "LEU", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "LEU", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "LYS", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "LYS", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "LYS", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CD", props: {'partialCharge': 0.00}},
-	{ resn: "LYS", atom: "CE", props: {'partialCharge': 0.25}},
-	{ resn: "LYS", atom: "NZ", props: {'partialCharge': 0.75}},
-	{ resn: "LYS", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "LYS", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "MET", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "MET", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "MET", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "MET", atom: "CG", props: {'partialCharge': 0.06}},
-	{ resn: "MET", atom: "SD", props: {'partialCharge': -0.12}},
-	{ resn: "MET", atom: "CE", props: {'partialCharge': 0.06}},
-	{ resn: "MET", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "MET", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "PHE", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "PHE", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "PHE", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CE1", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CE2", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "CZ", props: {'partialCharge': 0.00}},
-	{ resn: "PHE", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "PHE", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "PRO", atom: "N", props: {'partialCharge': -0.25}},
-	{ resn: "PRO", atom: "CD", props: {'partialCharge': 0.10}},
-	{ resn: "PRO", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "PRO", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "PRO", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "PRO", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "PRO", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "SER", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "SER", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "SER", atom: "CB", props: {'partialCharge': 0.25}},
-	{ resn: "SER", atom: "OG", props: {'partialCharge': -0.25}},
-	{ resn: "SER", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "SER", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "THR", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "THR", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "THR", atom: "CB", props: {'partialCharge': 0.25}},
-	{ resn: "THR", atom: "OG1", props: {'partialCharge': -0.25}},
-	{ resn: "THR", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "THR", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "THR", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "TRP", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "TRP", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "TRP", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CG", props: {'partialCharge': -0.03}},
-	{ resn: "TRP", atom: "CD2", props: {'partialCharge': 0.10}},
-	{ resn: "TRP", atom: "CE2", props: {'partialCharge': -0.04}},
-	{ resn: "TRP", atom: "CE3", props: {'partialCharge': -0.03}},
-	{ resn: "TRP", atom: "CD1", props: {'partialCharge': 0.06}},
-	{ resn: "TRP", atom: "NE1", props: {'partialCharge': -0.06}},
-	{ resn: "TRP", atom: "CZ2", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CZ3", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "CH2", props: {'partialCharge': 0.00}},
-	{ resn: "TRP", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "TRP", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "TYR", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "TYR", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "TYR", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CG", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CD1", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CE1", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CD2", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CE2", props: {'partialCharge': 0.00}},
-	{ resn: "TYR", atom: "CZ", props: {'partialCharge': 0.25}},
-	{ resn: "TYR", atom: "OH", props: {'partialCharge': -0.25}},
-	{ resn: "TYR", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "TYR", atom: "O", props: {'partialCharge': -0.55}},
-	{ resn: "VAL", atom: "N", props: {'partialCharge': -0.15}},
-	{ resn: "VAL", atom: "CA", props: {'partialCharge': 0.10}},
-	{ resn: "VAL", atom: "CB", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "CG1", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "CG2", props: {'partialCharge': 0.00}},
-	{ resn: "VAL", atom: "C", props: {'partialCharge': 0.60}},
-	{ resn: "VAL", atom: "O", props: {'partialCharge': -0.55}}
-]; 
+
+/* partial charges for proteins */
+$3Dmol.partialCharges = {
+"ALA:N": -0.15,
+"ALA:CA": 0.10,
+"ALA:CB": 0.00,
+"ALA:C": 0.60,
+"ALA:O": -0.55,
+"ARG:N": -0.15,
+"ARG:CA": 0.10,
+"ARG:CB": 0.00,
+"ARG:CG": 0.00,
+"ARG:CD": 0.10,
+"ARG:NE": -0.10,
+"ARG:CZ": 0.50,
+"ARG:NH1": 0.25,
+"ARG:NH2": 0.25,
+"ARG:C": 0.60,
+"ARG:O": -0.55,
+"ASN:N": -0.15,
+"ASN:CA": 0.10,
+"ASN:CB": 0.00,
+"ASN:CG": 0.55,
+"ASN:OD1": -0.55,
+"ASN:ND2": 0.00,
+"ASN:C": 0.60,
+"ASN:O": -0.55,
+"ASP:N": -0.15,
+"ASP:CA": 0.10,
+"ASP:CB": 0.00,
+"ASP:CG": 0.14,
+"ASP:OD1": -0.57,
+"ASP:OD2": -0.57,
+"ASP:C": 0.60,
+"ASP:O": -0.55,
+"CYS:N": -0.15,
+"CYS:CA": 0.10,
+"CYS:CB": 0.19,
+"CYS:SG": -0.19,
+"CYS:C": 0.60,
+"CYS:O": -0.55,
+"GLN:N": -0.15,
+"GLN:CA": 0.10,
+"GLN:CB": 0.00,
+"GLN:CG": 0.00,
+"GLN:CD": 0.55,
+"GLN:OE1": -0.55,
+"GLN:NE2": 0.00,
+"GLN:C": 0.60,
+"GLN:O": -0.55,
+"GLU:N": -0.15,
+"GLU:CA": 0.10,
+"GLU:CB": 0.00,
+"GLU:CG": 0.00,
+"GLU:CD": 0.14,
+"GLU:OE1": -0.57,
+"GLU:OE2": -0.57,
+"GLU:C": 0.60,
+"GLU:O": -0.55,
+"GLY:N": -0.15,
+"GLY:CA": 0.10,
+"GLY:C": 0.60,
+"GLY:O": -0.55,
+"HIS:N": -0.15,
+"HIS:CA": 0.10,
+"HIS:CB": 0.00,
+"HIS:CG": 0.10,
+"HIS:ND1": -0.10,
+"HIS:CD2": 0.10,
+"HIS:NE2": -0.40,
+"HIS:CE1": 0.30,
+"HIS:C": 0.60,
+"HIS:O": -0.55,
+"ILE:N": -0.15,
+"ILE:CA": 0.10,
+"ILE:CB": 0.00,
+"ILE:CG2": 0.00,
+"ILE:CG1": 0.00,
+"ILE:CD": 0.00,
+"ILE:C": 0.60,
+"ILE:O": -0.55,
+"LEU:N": -0.15,
+"LEU:CA": 0.10,
+"LEU:CB": 0.00,
+"LEU:CG": 0.00,
+"LEU:CD1": 0.00,
+"LEU:CD2": 0.00,
+"LEU:C": 0.60,
+"LEU:O": -0.55,
+"LYS:N": -0.15,
+"LYS:CA": 0.10,
+"LYS:CB": 0.00,
+"LYS:CG": 0.00,
+"LYS:CD": 0.00,
+"LYS:CE": 0.25,
+"LYS:NZ": 0.75,
+"LYS:C": 0.60,
+"LYS:O": -0.55,
+"MET:N": -0.15,
+"MET:CA": 0.10,
+"MET:CB": 0.00,
+"MET:CG": 0.06,
+"MET:SD": -0.12,
+"MET:CE": 0.06,
+"MET:C": 0.60,
+"MET:O": -0.55,
+"PHE:N": -0.15,
+"PHE:CA": 0.10,
+"PHE:CB": 0.00,
+"PHE:CG": 0.00,
+"PHE:CD1": 0.00,
+"PHE:CD2": 0.00,
+"PHE:CE1": 0.00,
+"PHE:CE2": 0.00,
+"PHE:CZ": 0.00,
+"PHE:C": 0.60,
+"PHE:O": -0.55,
+"PRO:N": -0.25,
+"PRO:CD": 0.10,
+"PRO:CA": 0.10,
+"PRO:CB": 0.00,
+"PRO:CG": 0.00,
+"PRO:C": 0.60,
+"PRO:O": -0.55,
+"SER:N": -0.15,
+"SER:CA": 0.10,
+"SER:CB": 0.25,
+"SER:OG": -0.25,
+"SER:C": 0.60,
+"SER:O": -0.55,
+"THR:N": -0.15,
+"THR:CA": 0.10,
+"THR:CB": 0.25,
+"THR:OG1": -0.25,
+"THR:CG2": 0.00,
+"THR:C": 0.60,
+"THR:O": -0.55,
+"TRP:N": -0.15,
+"TRP:CA": 0.10,
+"TRP:CB": 0.00,
+"TRP:CG": -0.03,
+"TRP:CD2": 0.10,
+"TRP:CE2": -0.04,
+"TRP:CE3": -0.03,
+"TRP:CD1": 0.06,
+"TRP:NE1": -0.06,
+"TRP:CZ2": 0.00,
+"TRP:CZ3": 0.00,
+"TRP:CH2": 0.00,
+"TRP:C": 0.60,
+"TRP:O": -0.55,
+"TYR:N": -0.15,
+"TYR:CA": 0.10,
+"TYR:CB": 0.00,
+"TYR:CG": 0.00,
+"TYR:CD1": 0.00,
+"TYR:CE1": 0.00,
+"TYR:CD2": 0.00,
+"TYR:CE2": 0.00,
+"TYR:CZ": 0.25,
+"TYR:OH": -0.25,
+"TYR:C": 0.60,
+"TYR:O": -0.55,
+"VAL:N": -0.15,
+"VAL:CA": 0.10,
+"VAL:CB": 0.00,
+"VAL:CG1": 0.00,
+"VAL:CG2": 0.00,
+"VAL:C": 0.60,
+"VAL:O": -0.55
+};
 	
-$3Dmol['partialCharges'] = $3Dmol.partialCharges;
-// Specifications for various object types used in 3Dmol.js
+//this can be supplied to mapAtomProperties
+$3Dmol.applyPartialCharges = function(atom, keepexisting) {
+	if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
+		if(atom.resn && atom.atom) {
+			var key = atom.resn+":"+atom.atom;
+			atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
+		}
+	}
+};// Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation 
 (function() {
 /**
@@ -24532,6 +24733,22 @@ ViewerSpec.callback;
  * @prop {function} predicate - user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
  * @prop {boolean} invert - if set, inverts the meaning of the selection
  * @prop {boolean} byres - if set, expands the selection to include all atoms of any residue that has any atom selected
+ * @prop {number} expand - expands the selection to include all atoms within a given distance from the selection
+ * @prop {WithinSelectionSpec} within - intersects the selection with the set of atoms within a given distance from another selection
+ */
+
+/**
+ * Within selection object. Used to find the subset of an atom selection that is within
+ * some distance from another atom selection. When added as a field of an {@link AtomSelectionSpec},
+ * intersects the set of atoms in that selection with the set of atoms within a given
+ * distance from the given {@link AtomSelectionSpec}.
+ *
+ * @example
+ * viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); // stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
+ *
+ * @typedef WithinSelectionSpec
+ * @prop {number} distance - the distance in angstroms away from the atom selection to include atoms in the parent selection
+ * @prop {AtomSelectionSpec} sel - the selection of atoms against which to measure the distance from the parent atom selection
  */
 
 

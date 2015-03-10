@@ -878,9 +878,6 @@ $3Dmol.Parsers = (function() {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
                     var toAtom = atoms[serialToIndex[to]];
                     if (fromAtom !== undefined && toAtom !== undefined) {
-                        fromAtom.bonds.push(serialToIndex[to]);
-                        fromAtom.bondOrder.push(1);
-			console.log("created bond");
                         //minimal cleanup here - pymol likes to output duplicated conect records
                         var toindex = serialToIndex[to];
                         if(fromAtom.bonds[fromAtom.bonds.length-1] != toindex) {

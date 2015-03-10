@@ -397,12 +397,9 @@ $3Dmol.drawCartoon = (function() {
                 if (atom.atom == 'CA') {
                     //set atom color
                 	var prevatomcolor = atomcolor;
-                    atomcolor = atom.color;
+                    atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
                     if (gradientscheme) {
                         atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
-                    }
-                    else if(typeof(cstyle.color) !== "undefined") {
-                        atomcolor = cstyle.color;
                     }
                     
                     if($.isNumeric(cstyle.thickness)) {

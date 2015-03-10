@@ -105,7 +105,7 @@
                                        
             receptorModel = m = glviewer.addModel(data, "pdb");               
                    
-            atoms = m.selectedAtoms({});
+            atoms = m.selectedAtoms({}, m.atoms);
                     
             for (var i in atoms) {
                 var atom = atoms[i];
@@ -145,8 +145,6 @@
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
                 <br>
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
-        <input id="atomid" value="20" size=4><button onclick="glviewer.setStyle({}, {line:{}}); glviewer.setStyle({index:$('#atomid').val()}, {sphere:{}}); glviewer.render();">Select atom</button><button onclick="glviewer.setStyle({}, {line:{}}); glviewer.setStyle({index:$('#atomid').val(), byres:{}}, {sphere:{}}); glviewer.render();">Select by residue</button><br>
- 
  
 <textarea style="display: none;" id="moldata_download"></textarea>
 <textarea style="display: none" id="moldata_test">
