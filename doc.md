@@ -47,12 +47,12 @@ Viewers can be quickly embedded in any HTML document using just two lines of sou
 
 ####Mouse Controls####
 
-Movement | &nbsp;&nbsp;&nbsp;&nbsp; | Mouse Input | &nbsp;&nbsp;&nbsp;&nbsp; | Touch Input
----------|-|:------------|------------
-Rotation | |   Primary Mouse Button | | Single touch
-Translation | |    Middle Mouse Button or Ctrl+Primary | | Triple touch
-Zoom | | Scroll Wheel or Second Mouse Button or Shift+Primary | | Pinch (double touch)
-Slab | | Ctrl+Second | | Not Available
+Movement | Mouse Input | Touch Input
+---------|------------|------------
+Rotation |   Primary Mouse Button | Single touch
+Translation |    Middle Mouse Button or Ctrl+Primary | Triple touch
+Zoom | Scroll Wheel or Second Mouse Button or Shift+Primary | Pinch (double touch)
+Slab | Ctrl+Second | Not Available
 
 
 ##Developing with 3Dmol.js##
@@ -62,27 +62,27 @@ Slab | | Ctrl+Second | | Not Available
 ###Getting the source code###
 The library is available as a single minified JavaScript file (includes jQuery):
 
-``` 
-{@lang xml}<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script> 
+```xml
+<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script> 
 ```
 
 <br>
 An un-minified file is also provided for debugging purposes.
-``` 
-{@lang xml}<script src="http://3Dmol.csb.pitt.edu/build/3Dmol.js"></script> 
+```xml
+<script src="http://3Dmol.csb.pitt.edu/build/3Dmol.js"></script> 
 ```
 
 There is also an unminified version provided that is missing jQuery for use when compiling your own minified libraries.
-```
-{@lang xml}<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-nojquery.js"></script>
+```xml
+<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-nojquery.js"></script>
 ```
 
 The files hosted by 3Dmol.csb.pitt.edu closely track the development version and so
 will change frequently.  If you desire more stability you may copy the files into your
 own project or, alternatively, we host release snapshots on the <a href="http://www.jsdelivr.com">jsDeliver</a>
 content delivery network (CDN).
-```
-{@lang xml}<script src="http://cdn.jsdelivr.net/3dmol.js/latest/3Dmol-min.js"></script>
+```xml
+<script src="http://cdn.jsdelivr.net/3dmol.js/latest/3Dmol-min.js"></script>
 <script src="http://cdn.jsdelivr.net/3dmol.js/latest/3Dmol-nojquery-min.js"></script>
 ```
 
