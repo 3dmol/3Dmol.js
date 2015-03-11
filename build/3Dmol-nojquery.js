@@ -14229,8 +14229,7 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
-    // will put atoms specified in mmCIF fromat in str into atoms when completed
-    // currently only parses the file
+    // puts atoms specified in mmCIF fromat in str into atoms
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
@@ -14287,7 +14286,6 @@ $3Dmol.Parsers = (function() {
         var linesFiltered = [];
         var trimDisabled = false;
         for (var lineNum = 0; lineNum < lines.length; lineNum++) {
-            [][0];
             //first remove comments
             //incorrect if #'s are allowed in strings
             //comments might only be allowed at beginning of line, not sure
@@ -14383,18 +14381,85 @@ $3Dmol.Parsers = (function() {
         }
 
         //Pulls atom information out of the data
+        var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+	    if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
             var atom = {};
-            atom.x = mmCIF._atom_site.cartn_x[i];
-            atom.y = mmCIF._atom_site.cartn_y[i];
-            atom.z = mmCIF._atom_site.cartn_z[i];
-            atom.hetflag = true; //need to figure out what this is
+            atom.id = parseFloat(mmCIF._atom_site.id[i]);
+            atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
+            atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
+            atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
+            atom.hetflag = true; //need to figure out what this is group_PDB == HETA
+            atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.bondOrder = [];
             atom.properties = {};
-            atoms.push(atom);
+            atomsPreBonds[atom.id] = atom;
         }
+        var atomsIndexed = [];
+        var currentIndex = 0;
+        for (var id in atomsPreBonds) {
+            var atom = atomsPreBonds[id];
+            atom.index = currentIndex;
+            atomsIndexed[currentIndex] = atom;
+            currentIndex++;
+        }
+
+        //create a hash table of the atoms using label and sequence as keys
+        var atomHashTable = {};
+        for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+            var label_alt = mmCIF._atom_site.label_alt_id[i];
+            var label_asym = mmCIF._atom_site.label_asym_id[i];
+	    var label_atom = mmCIF._atom_site.label_atom_id[i];
+	    var label_seq = mmCIF._atom_site.label_seq_id[i];
+            var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
+
+            if (atomHashTable[label_alt] === undefined) {
+                atomHashTable[label_alt] = {};
+            }
+	    if (atomHashTable[label_alt][label_asym] === undefined) {
+		atomHashTable[label_alt][label_asym] = {};
+	    }
+	    if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
+                atomHashTable[label_alt][label_asym][label_atom] = {};
+            }
+	    
+            atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
+        }
+
+        for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
+	    var offset = atoms.length;
+            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
+	                       [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
+	                       [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
+            //if (atomsPreBonds[id1] === undefined) continue;
+            var index1 = atomsPreBonds[id1].index;
+
+	    var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+            //if (atomsPreBonds[id2] === undefined) continue;
+            var index2 = atomsPreBonds[id2].index;
+
+	    atomsPreBonds[id1].bonds.push(index2 + offset);
+	    atomsPreBonds[id1].bondOrder.push(1);
+	    atomsPreBonds[id2].bonds.push(index1 + offset);
+	    atomsPreBonds[id2].bondOrder.push(1);
+	    console.log("connected " + index1 + " and " + index2);
+        }
+
+	//atoms = atoms.concat(atomsPreBonds);
+	for (var i = 0; i < atomsIndexed.length; i++) {
+            delete atomsIndexed[i].index;
+            atoms.push(atomsIndexed[i]);
+	}
+
         assignBonds(atoms);
+	/*atomsPreBonds.prototype.foreach(function(item){
+	    a.push(item);
+	});*/
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
