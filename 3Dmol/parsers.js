@@ -825,7 +825,8 @@ $3Dmol.Parsers = (function() {
                 endResi = parseInt(line.substr(33, 4));
                 protein.helix
                         .push([ startChain, startResi, endChain, endResi ]);
-            }
+            } else if (recordName == 'ENDMDL')
+                break; // todo: better multi-model support
 
         }
 

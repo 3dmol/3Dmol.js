@@ -19977,7 +19977,7 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             if (!data)
-                console.error("Erorr with addMolData: No input data specified");
+                console.error("Error with addMolData: No input data specified");
             
             if(typeof($3Dmol.Parsers[format]) != "undefined") {
             	var parse = $3Dmol.Parsers[format];
@@ -24503,7 +24503,8 @@ $3Dmol.Parsers = (function() {
                 endResi = parseInt(line.substr(33, 4));
                 protein.helix
                         .push([ startChain, startResi, endChain, endResi ]);
-            }
+            } else if (recordName == 'ENDMDL')
+                break;
 
         }
 
@@ -24896,6 +24897,22 @@ ViewerSpec.callback;
  * @prop {function} predicate - user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
  * @prop {boolean} invert - if set, inverts the meaning of the selection
  * @prop {boolean} byres - if set, expands the selection to include all atoms of any residue that has any atom selected
+ * @prop {number} expand - expands the selection to include all atoms within a given distance from the selection
+ * @prop {WithinSelectionSpec} within - intersects the selection with the set of atoms within a given distance from another selection
+ */
+
+/**
+ * Within selection object. Used to find the subset of an atom selection that is within
+ * some distance from another atom selection. When added as a field of an {@link AtomSelectionSpec},
+ * intersects the set of atoms in that selection with the set of atoms within a given
+ * distance from the given {@link AtomSelectionSpec}.
+ *
+ * @example
+ * viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); // stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
+ *
+ * @typedef WithinSelectionSpec
+ * @prop {number} distance - the distance in angstroms away from the atom selection to include atoms in the parent selection
+ * @prop {AtomSelectionSpec} sel - the selection of atoms against which to measure the distance from the parent atom selection
  */
 
 

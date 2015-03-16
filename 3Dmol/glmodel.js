@@ -976,7 +976,7 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             if (!data)
-                console.error("Erorr with addMolData: No input data specified");
+                console.error("Error with addMolData: No input data specified");
             
             if(typeof($3Dmol.Parsers[format]) != "undefined") {
             	var parse = $3Dmol.Parsers[format];
