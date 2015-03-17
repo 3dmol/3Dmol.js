@@ -114,13 +114,24 @@
                 var myviewer = $3Dmol.createViewer("gldiv");
                 myviewer.setBackgroundColor(0xffffff);
                 //var m = $3Dmol.download('pdb:2POR', myviewer); //automatically calls zoomto & render
+                /*
                 var m = myviewer.addModel(data, "pdb",{doAssembly:true});
                 var n = myviewer.addModel(data, "pdb",{doAssembly:true});
                 var symmetries = m.getSymmetries().slice(); //"clone" array
-                m.setSymmetries(symmetries.splice(0, 1)); //remove & return first element (index, howmany) 
-                n.setSymmetries(symmetries);    
+                m.setSymmetries(symmetries.splice(0, 1)); //remove & return first element (index, howmany) */
+                var m = myviewer.addModel(data, "pdb",{doAssembly:false});
+                var n = myviewer.addModel(data, "pdb",{doAssembly:true});
+                /*
+                var symmetries = m.getSymmetries;
+                var list = [];
+                list.push(symmetries[0]);
+                m.setSymmetries(list);
+                symmetries.splice(0,1);  
+                n.setSymmetries(symmetries); */
+                 
                 m.setStyle({}, {sphere:{color: 0x7FFF00}}); //green (identity)
                 n.setStyle({}, {cartoon:{color: 0x003EFF}}); //blue
+                
 
 
                 //myviewer.mapAtomProperties($3Dmol.partialCharges);
