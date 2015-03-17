@@ -86,7 +86,7 @@ $3Dmol.GLDraw = (function() {
 
 		var nvecs = [];
 
-		var subdivisions = 6; // including the initial 2, eg. 4 => 16 subintervals
+		var subdivisions = 4; // including the initial 2, eg. 4 => 16 subintervals
 		var N = Math.pow(2, subdivisions);  // eg. 2**4 = 16 subintervals in total
 		var i = 2;  // start with 2 subdivisions already done
 		var M = Math.pow(2, i); // 4
@@ -708,7 +708,7 @@ $3Dmol.GLDraw = (function() {
 				normals : []
 			};
 			// scale quality with radius heuristically
-			var sphereQuality = 5;
+			var sphereQuality = 1;
 			var widthSegments = 16 * sphereQuality;
 			var heightSegments = 10 * sphereQuality;
 			if (radius < 1) {
