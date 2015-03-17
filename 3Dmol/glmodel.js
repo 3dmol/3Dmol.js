@@ -977,15 +977,22 @@ $3Dmol.GLModel = (function() {
             options = options || {}; 
             if (!data)
                 console.error("Erorr with addMolData: No input data specified");
-            
-            if(typeof($3Dmol.Parsers[format]) != "undefined") {
-            	var parse = $3Dmol.Parsers[format];
-            	parse(atoms, data, options)
+            if(typeof($3Dmol.Parsers[format]) == "undefined") {
+            	console.log("Unknown format: "+format);
+            	//try to guess correct format from data contents
+				if(data.match(/^@<TRIPOS>MOLECULE/)) {
+					format = "mol2";
+				} else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+					format = "pdb";
+				} else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+					format = "sdf"; //could look at line 3
+				} else {
+					format = "xyz";
+				}
+				console.log("Best guess: "+format);
             }
-            else {
-            	console.error("Unknown format: "+format);
-            }
-            
+        	var parse = $3Dmol.Parsers[format];
+        	parse(atoms, data, options)
             setAtomDefaults(atoms, id);
         };
         
@@ -1008,7 +1015,9 @@ $3Dmol.GLModel = (function() {
             			break;
             		}
             	}
-            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres") {
+
+            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
+
                     // if something is in sel, atom must have it                	
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
@@ -1056,15 +1065,53 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
          */
-        this.selectedAtoms = function(sel) {
+        this.selectedAtoms = function(sel, from) {
             var ret = [];
-            var aLength = atoms.length;
+            if (!from) from = atoms;
+            var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
-                var atom = atoms[i];
+                var atom = from[i];
                 if (atom) {
                     if (this.atomIsSelected(atom, sel))
                         ret.push(atom);
                 }
+            }
+
+            // expand selection by some distance
+            if (sel.hasOwnProperty("expand")) {
+
+            	// get atoms in expanded bounding box
+            	var expand = expandAtomList(ret, sel.expand)
+            	var retlen = ret.length
+            	for (var i = 0; i < expand.length; i++) {
+            		for (var j = 0; j < retlen; j++) {
+
+            			var dist = squaredDistance(expand[i], ret[j]);
+            			var thresh = Math.pow(sel.expand, 2);
+            			if (dist < thresh && dist > 0) {
+            				ret.push(expand[i]);
+            			}
+            		}
+            	}
+            }
+
+            // selection within distance of sub-selection
+            if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
+
+            	// get atoms in second selection
+            	var sel2 = this.selectedAtoms(sel.within.sel, atoms)
+            	var within = []
+            	for (var i = 0; i < sel2.length; i++) {
+            		for (var j = 0; j < ret.length; j++) {
+
+            			var dist = squaredDistance(sel2[i], ret[j]);
+            			var thresh = Math.pow(sel.within.distance, 2);
+            			if (dist < thresh && dist > 0) {
+            				within.push(ret[j]);
+            			}
+            		}
+            	}
+            	ret = within;
             }
 
             // byres selection flag
@@ -1107,6 +1154,53 @@ $3Dmol.GLModel = (function() {
             }
 
             return ret;
+        };
+
+        var squaredDistance = function(atom1, atom2) {
+        	var xd = atom2.x - atom1.x;
+        	var yd = atom2.y - atom1.y;
+        	var zd = atom2.z - atom1.z;
+        	return (Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
+        };
+
+        /** returns a list of atoms in the expanded bounding box, but not in the current one
+         *
+         *  Bounding box:
+         *
+         *    [ [ xmin, ymin, zmin ],
+         *      [ xmax, ymax, zmax ],
+         *      [ xctr, yctr, zctr ] ]
+         *
+         **/
+        var expandAtomList = function(atomList, amt) {
+
+        	var pb = $3Dmol.getExtent(atomList);
+        	var nb = [[],[],[]];
+
+            for (var i = 0; i < 3; i++)
+            {
+                nb[0][i] = pb[0][i]-amt;
+                nb[1][i] = pb[1][i]+amt;
+                nb[2][i] = pb[2][i];
+            }
+
+            // look in added box "shell" for new atoms
+            var expand = [];
+            for (var i = 0; i < atoms.length; i++) {
+
+                var x = atoms[i].x;
+                var y = atoms[i].y;
+                var z = atoms[i].z;
+
+                if (x >= nb[0][0] && x < pb[0][0] || x > pb[1][0] && x <= nb[1][0]) {
+                    if (y >= nb[0][1] && y < pb[0][1] || y > pb[1][1] && y <= nb[1][1]) {
+                        if (z >= nb[0][2] && z < pb[0][2] || z > pb[1][2] && z <= nb[1][2]) {
+                            expand.push(atoms[i]);
+                        }
+                    }
+                }
+            }
+            return expand;
         };
         
         /** Add list of new atoms to model.  Adjusts bonds appropriately.
@@ -1191,7 +1285,7 @@ $3Dmol.GLModel = (function() {
             // style, although these checks will only catch cases where both
             // are either null or undefined
 
-            var selected = this.selectedAtoms(sel);
+            var selected = this.selectedAtoms(sel, atoms);
             for ( var i = 0; i < atoms.length; i++) {
                 atoms[i].capDrawn = false; //reset for proper stick render
             }
@@ -1225,7 +1319,7 @@ $3Dmol.GLModel = (function() {
             if(molObj !== null && sameObj(colors,lastColors))
                 return; // don't recompute
             lastColors = colors;
-            var atoms = this.selectedAtoms(sel);
+            var atoms = this.selectedAtoms(sel, atoms);
             if(atoms.length > 0)
                 molObj = null; // force rebuild
             for ( var i = 0; i < atoms.length; i++) {
@@ -1243,7 +1337,7 @@ $3Dmol.GLModel = (function() {
          * @param {type} scheme
          */
         this.setColorByProperty = function(sel, prop, scheme) {
-            var atoms = this.selectedAtoms(sel);
+            var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
@@ -1315,7 +1409,7 @@ $3Dmol.GLModel = (function() {
          * @param {$3Dmol.GLViewer} viewer
          */
         this.addResLabels = function(sel, viewer, style) {
-        	var atoms = this.selectedAtoms(sel);
+        	var atoms = this.selectedAtoms(sel, atoms);
         	var bylabel = {}
         	//collect by chain:resn:resi
         	for(var i = 0; i < atoms.length; i++) {

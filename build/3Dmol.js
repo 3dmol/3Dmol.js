@@ -17065,6 +17065,40 @@ $3Dmol.specStringToObject = function(str) {
 	return ret;
 }
 
+// computes the bounding box around the provided atoms
+/**
+ * @param {AtomSpec[]} atomlist
+ * @return {Array}
+ */
+$3Dmol.getExtent = function(atomlist) {
+    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+    xmin = ymin = zmin = 9999;
+    xmax = ymax = zmax = -9999;
+    xsum = ysum = zsum = cnt = 0;
+
+    if (atomlist.length === 0)
+        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+    for (var i = 0; i < atomlist.length; i++) {
+        var atom = atomlist[i];
+        if (atom === undefined)
+            continue;
+        cnt++;
+        xsum += atom.x;
+        ysum += atom.y;
+        zsum += atom.z;
+
+        xmin = (xmin < atom.x) ? xmin : atom.x;
+        ymin = (ymin < atom.y) ? ymin : atom.y;
+        zmin = (zmin < atom.z) ? zmin : atom.z;
+        xmax = (xmax > atom.x) ? xmax : atom.x;
+        ymax = (ymax > atom.y) ? ymax : atom.y;
+        zmax = (zmax > atom.z) ? zmax : atom.z;
+    }
+
+    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+};
 
 
 /*
@@ -19922,15 +19956,22 @@ $3Dmol.GLModel = (function() {
             options = options || {}; 
             if (!data)
                 console.error("Erorr with addMolData: No input data specified");
-            
-            if(typeof($3Dmol.Parsers[format]) != "undefined") {
-            	var parse = $3Dmol.Parsers[format];
-            	parse(atoms, data, options)
+            if(typeof($3Dmol.Parsers[format]) == "undefined") {
+            	console.log("Unknown format: "+format);
+            	//try to guess correct format from data contents
+				if(data.match(/^@<TRIPOS>MOLECULE/)) {
+					format = "mol2";
+				} else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+					format = "pdb";
+				} else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+					format = "sdf"; //could look at line 3
+				} else {
+					format = "xyz";
+				}
+				console.log("Best guess: "+format);
             }
-            else {
-            	console.error("Unknown format: "+format);
-            }
-            
+        	var parse = $3Dmol.Parsers[format];
+        	parse(atoms, data, options)
             setAtomDefaults(atoms, id);
         };
         
@@ -19953,7 +19994,9 @@ $3Dmol.GLModel = (function() {
             			break;
             		}
             	}
-            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres") {
+
+            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
+
                     // if something is in sel, atom must have it                	
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
@@ -20001,15 +20044,53 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
          */
-        this.selectedAtoms = function(sel) {
+        this.selectedAtoms = function(sel, from) {
             var ret = [];
-            var aLength = atoms.length;
+            if (!from) from = atoms;
+            var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
-                var atom = atoms[i];
+                var atom = from[i];
                 if (atom) {
                     if (this.atomIsSelected(atom, sel))
                         ret.push(atom);
                 }
+            }
+
+            // expand selection by some distance
+            if (sel.hasOwnProperty("expand")) {
+
+            	// get atoms in expanded bounding box
+            	var expand = expandAtomList(ret, sel.expand)
+            	var retlen = ret.length
+            	for (var i = 0; i < expand.length; i++) {
+            		for (var j = 0; j < retlen; j++) {
+
+            			var dist = squaredDistance(expand[i], ret[j]);
+            			var thresh = Math.pow(sel.expand, 2);
+            			if (dist < thresh && dist > 0) {
+            				ret.push(expand[i]);
+            			}
+            		}
+            	}
+            }
+
+            // selection within distance of sub-selection
+            if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
+
+            	// get atoms in second selection
+            	var sel2 = this.selectedAtoms(sel.within.sel, atoms)
+            	var within = []
+            	for (var i = 0; i < sel2.length; i++) {
+            		for (var j = 0; j < ret.length; j++) {
+
+            			var dist = squaredDistance(sel2[i], ret[j]);
+            			var thresh = Math.pow(sel.within.distance, 2);
+            			if (dist < thresh && dist > 0) {
+            				within.push(ret[j]);
+            			}
+            		}
+            	}
+            	ret = within;
             }
 
             // byres selection flag
@@ -20052,6 +20133,53 @@ $3Dmol.GLModel = (function() {
             }
 
             return ret;
+        };
+
+        var squaredDistance = function(atom1, atom2) {
+        	var xd = atom2.x - atom1.x;
+        	var yd = atom2.y - atom1.y;
+        	var zd = atom2.z - atom1.z;
+        	return (Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
+        };
+
+        /** returns a list of atoms in the expanded bounding box, but not in the current one
+         *
+         *  Bounding box:
+         *
+         *    [ [ xmin, ymin, zmin ],
+         *      [ xmax, ymax, zmax ],
+         *      [ xctr, yctr, zctr ] ]
+         *
+         **/
+        var expandAtomList = function(atomList, amt) {
+
+        	var pb = $3Dmol.getExtent(atomList);
+        	var nb = [[],[],[]];
+
+            for (var i = 0; i < 3; i++)
+            {
+                nb[0][i] = pb[0][i]-amt;
+                nb[1][i] = pb[1][i]+amt;
+                nb[2][i] = pb[2][i];
+            }
+
+            // look in added box "shell" for new atoms
+            var expand = [];
+            for (var i = 0; i < atoms.length; i++) {
+
+                var x = atoms[i].x;
+                var y = atoms[i].y;
+                var z = atoms[i].z;
+
+                if (x >= nb[0][0] && x < pb[0][0] || x > pb[1][0] && x <= nb[1][0]) {
+                    if (y >= nb[0][1] && y < pb[0][1] || y > pb[1][1] && y <= nb[1][1]) {
+                        if (z >= nb[0][2] && z < pb[0][2] || z > pb[1][2] && z <= nb[1][2]) {
+                            expand.push(atoms[i]);
+                        }
+                    }
+                }
+            }
+            return expand;
         };
         
         /** Add list of new atoms to model.  Adjusts bonds appropriately.
@@ -20136,7 +20264,7 @@ $3Dmol.GLModel = (function() {
             // style, although these checks will only catch cases where both
             // are either null or undefined
 
-            var selected = this.selectedAtoms(sel);
+            var selected = this.selectedAtoms(sel, atoms);
             for ( var i = 0; i < atoms.length; i++) {
                 atoms[i].capDrawn = false; //reset for proper stick render
             }
@@ -20170,7 +20298,7 @@ $3Dmol.GLModel = (function() {
             if(molObj !== null && sameObj(colors,lastColors))
                 return; // don't recompute
             lastColors = colors;
-            var atoms = this.selectedAtoms(sel);
+            var atoms = this.selectedAtoms(sel, atoms);
             if(atoms.length > 0)
                 molObj = null; // force rebuild
             for ( var i = 0; i < atoms.length; i++) {
@@ -20188,7 +20316,7 @@ $3Dmol.GLModel = (function() {
          * @param {type} scheme
          */
         this.setColorByProperty = function(sel, prop, scheme) {
-            var atoms = this.selectedAtoms(sel);
+            var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
@@ -20260,7 +20388,7 @@ $3Dmol.GLModel = (function() {
          * @param {$3Dmol.GLViewer} viewer
          */
         this.addResLabels = function(sel, viewer, style) {
-        	var atoms = this.selectedAtoms(sel);
+        	var atoms = this.selectedAtoms(sel, atoms);
         	var bylabel = {}
         	//collect by chain:resn:resi
         	for(var i = 0; i < atoms.length; i++) {
@@ -21273,41 +21401,6 @@ $3Dmol.GLViewer = (function() {
 
 	// private class helper functions
 
-	// computes the bounding box around the provided atoms
-	/**
-	 * @param {AtomSpec[]} atomlist
-	 * @return {Array}
-	 */
-	var getExtent = function(atomlist) {
-		var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
-
-		xmin = ymin = zmin = 9999;
-		xmax = ymax = zmax = -9999;
-		xsum = ysum = zsum = cnt = 0;
-
-		if (atomlist.length === 0)
-			return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-		for (var i = 0; i < atomlist.length; i++) {
-			var atom = atomlist[i];
-			if (atom === undefined)
-				continue;
-			cnt++;
-			xsum += atom.x;
-			ysum += atom.y;
-			zsum += atom.z;
-
-			xmin = (xmin < atom.x) ? xmin : atom.x;
-			ymin = (ymin < atom.y) ? ymin : atom.y;
-			zmin = (zmin < atom.z) ? zmin : atom.z;
-			xmax = (xmax > atom.x) ? xmax : atom.x;
-			ymax = (ymax > atom.y) ? ymax : atom.y;
-			zmax = (zmax > atom.z) ? zmax : atom.z;
-		}
-
-		return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
-				[ xsum / cnt, ysum / cnt, zsum / cnt ] ];
-	};
-
 	function GLViewer(element, callback, defaultcolors, nomouse) {
 		// set variables
 		var _viewer = this;
@@ -22025,12 +22118,27 @@ $3Dmol.GLViewer = (function() {
 		 *  // Focus on centroid of all atoms of all models in this
 		 * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
 		 */
-		this.zoomTo = function(sel, x, y) {
-			
-			var atoms = getAtomsFromSel(sel).concat(shapes);
-			var allatoms = getAtomsFromSel({}).concat(shapes);
-			var tmp = getExtent(atoms);
-			var alltmp = getExtent(allatoms);
+		this.zoomTo = function(sel) {
+			var allatoms, alltmp;
+			sel = sel || {};
+			var atoms = getAtomsFromSel(sel);
+			var tmp = $3Dmol.getExtent(atoms);
+
+			if($.isEmptyObject(sel)) {
+				//include shapes when zooming to full scene
+				//TODO: figure out a good way to specify shapes as part of a selection
+				$.each(shapes, function(i, shape) {
+					atoms.push(shape);
+				});
+				allatoms = atoms;
+				alltmp = tmp;
+
+			}
+			else {
+				allatoms = getAtomsFromSel({});
+				alltmp = $3Dmol.getExtent(allatoms);
+			}
+
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
@@ -22057,9 +22165,11 @@ $3Dmol.GLViewer = (function() {
 			//find the farthest atom from center to get max distance needed for view
 			var maxDsq = 25;
 			for (var i = 0; i < atoms.length; i++) {
-				var dsq = center.distanceToSquared(atoms[i]);
-				if(dsq > maxDsq)
-					maxDsq = dsq;
+				if(atoms[i]) {
+					var dsq = center.distanceToSquared(atoms[i]);
+					if(dsq > maxDsq)
+						maxDsq = dsq;
+				}
 			}
 			
 			var maxD = Math.sqrt(maxDsq)*2;
@@ -22836,6 +22946,8 @@ $3Dmol.GLViewer = (function() {
 			// of atomsToShow are displayed (e.g., for showing cavities)
 			// if focusSele is specified, will start rending surface around the
 			// atoms specified by this selection
+			if(!allsel) allsel = atomsel;
+			if(!focus) focus = atomsel;
 			var atomsToShow = getAtomsFromSel(atomsel);
 			var atomlist = getAtomsFromSel(allsel);
 			var focusSele = getAtomsFromSel(focus);
@@ -22846,7 +22958,7 @@ $3Dmol.GLViewer = (function() {
 
 			var mat = getMatWithStyle(style);
 
-			var extent = getExtent(atomsToShow);
+			var extent = $3Dmol.getExtent(atomsToShow);
 
 			var i, il;
 			if (style['map'] && style['map']['prop']) {
@@ -22887,7 +22999,7 @@ $3Dmol.GLViewer = (function() {
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
-				var seleExtent = getExtent(focusSele);
+				var seleExtent = $3Dmol.getExtent(focusSele);
 				// sort by how close to center of seleExtent
 				var sortFunc = function(a, b) {
 					var distSq = function(ex, sele) {
@@ -23947,8 +24059,7 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
-    // will put atoms specified in mmCIF fromat in str into atoms when completed
-    // currently only parses the file
+    // puts atoms specified in mmCIF fromat in str into atoms
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
@@ -24005,7 +24116,6 @@ $3Dmol.Parsers = (function() {
         var linesFiltered = [];
         var trimDisabled = false;
         for (var lineNum = 0; lineNum < lines.length; lineNum++) {
-            [][0];
             //first remove comments
             //incorrect if #'s are allowed in strings
             //comments might only be allowed at beginning of line, not sure
@@ -24101,18 +24211,85 @@ $3Dmol.Parsers = (function() {
         }
 
         //Pulls atom information out of the data
+        var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+	    if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
             var atom = {};
-            atom.x = mmCIF._atom_site.cartn_x[i];
-            atom.y = mmCIF._atom_site.cartn_y[i];
-            atom.z = mmCIF._atom_site.cartn_z[i];
-            atom.hetflag = true; //need to figure out what this is
+            atom.id = parseFloat(mmCIF._atom_site.id[i]);
+            atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
+            atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
+            atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
+            atom.hetflag = true; //need to figure out what this is group_PDB == HETA
+            atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.bondOrder = [];
             atom.properties = {};
-            atoms.push(atom);
+            atomsPreBonds[atom.id] = atom;
         }
+        var atomsIndexed = [];
+        var currentIndex = 0;
+        for (var id in atomsPreBonds) {
+            var atom = atomsPreBonds[id];
+            atom.index = currentIndex;
+            atomsIndexed[currentIndex] = atom;
+            currentIndex++;
+        }
+
+        //create a hash table of the atoms using label and sequence as keys
+        var atomHashTable = {};
+        for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+            var label_alt = mmCIF._atom_site.label_alt_id[i];
+            var label_asym = mmCIF._atom_site.label_asym_id[i];
+	    var label_atom = mmCIF._atom_site.label_atom_id[i];
+	    var label_seq = mmCIF._atom_site.label_seq_id[i];
+            var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
+
+            if (atomHashTable[label_alt] === undefined) {
+                atomHashTable[label_alt] = {};
+            }
+	    if (atomHashTable[label_alt][label_asym] === undefined) {
+		atomHashTable[label_alt][label_asym] = {};
+	    }
+	    if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
+                atomHashTable[label_alt][label_asym][label_atom] = {};
+            }
+	    
+            atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
+        }
+
+        for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
+	    var offset = atoms.length;
+            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
+	                       [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
+	                       [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
+            //if (atomsPreBonds[id1] === undefined) continue;
+            var index1 = atomsPreBonds[id1].index;
+
+	    var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+            //if (atomsPreBonds[id2] === undefined) continue;
+            var index2 = atomsPreBonds[id2].index;
+
+	    atomsPreBonds[id1].bonds.push(index2 + offset);
+	    atomsPreBonds[id1].bondOrder.push(1);
+	    atomsPreBonds[id2].bonds.push(index1 + offset);
+	    atomsPreBonds[id2].bondOrder.push(1);
+	    console.log("connected " + index1 + " and " + index2);
+        }
+
+	//atoms = atoms.concat(atomsPreBonds);
+	for (var i = 0; i < atomsIndexed.length; i++) {
+            delete atomsIndexed[i].index;
+            atoms.push(atomsIndexed[i]);
+	}
+
         assignBonds(atoms);
+	/*atomsPreBonds.prototype.foreach(function(item){
+	    a.push(item);
+	});*/
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -24789,6 +24966,22 @@ ViewerSpec.callback;
  * @prop {function} predicate - user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
  * @prop {boolean} invert - if set, inverts the meaning of the selection
  * @prop {boolean} byres - if set, expands the selection to include all atoms of any residue that has any atom selected
+ * @prop {number} expand - expands the selection to include all atoms within a given distance from the selection
+ * @prop {WithinSelectionSpec} within - intersects the selection with the set of atoms within a given distance from another selection
+ */
+
+/**
+ * Within selection object. Used to find the subset of an atom selection that is within
+ * some distance from another atom selection. When added as a field of an {@link AtomSelectionSpec},
+ * intersects the set of atoms in that selection with the set of atoms within a given
+ * distance from the given {@link AtomSelectionSpec}.
+ *
+ * @example
+ * viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); // stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
+ *
+ * @typedef WithinSelectionSpec
+ * @prop {number} distance - the distance in angstroms away from the atom selection to include atoms in the parent selection
+ * @prop {AtomSelectionSpec} sel - the selection of atoms against which to measure the distance from the parent atom selection
  */
 
 

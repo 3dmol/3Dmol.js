@@ -18,41 +18,6 @@ $3Dmol.GLViewer = (function() {
 
 	// private class helper functions
 
-	// computes the bounding box around the provided atoms
-	/**
-	 * @param {AtomSpec[]} atomlist
-	 * @return {Array}
-	 */
-	var getExtent = function(atomlist) {
-		var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
-
-		xmin = ymin = zmin = 9999;
-		xmax = ymax = zmax = -9999;
-		xsum = ysum = zsum = cnt = 0;
-
-		if (atomlist.length === 0)
-			return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-		for (var i = 0; i < atomlist.length; i++) {
-			var atom = atomlist[i];
-			if (atom === undefined)
-				continue;
-			cnt++;
-			xsum += atom.x;
-			ysum += atom.y;
-			zsum += atom.z;
-
-			xmin = (xmin < atom.x) ? xmin : atom.x;
-			ymin = (ymin < atom.y) ? ymin : atom.y;
-			zmin = (zmin < atom.z) ? zmin : atom.z;
-			xmax = (xmax > atom.x) ? xmax : atom.x;
-			ymax = (ymax > atom.y) ? ymax : atom.y;
-			zmax = (zmax > atom.z) ? zmax : atom.z;
-		}
-
-		return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
-				[ xsum / cnt, ysum / cnt, zsum / cnt ] ];
-	};
-
 	function GLViewer(element, callback, defaultcolors, nomouse) {
 		// set variables
 		var _viewer = this;
@@ -770,12 +735,27 @@ $3Dmol.GLViewer = (function() {
 		 *  // Focus on centroid of all atoms of all models in this
 		 * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
 		 */
-		this.zoomTo = function(sel, x, y) {
-			
-			var atoms = getAtomsFromSel(sel).concat(shapes);
-			var allatoms = getAtomsFromSel({}).concat(shapes);
-			var tmp = getExtent(atoms);
-			var alltmp = getExtent(allatoms);
+		this.zoomTo = function(sel) {
+			var allatoms, alltmp;
+			sel = sel || {};
+			var atoms = getAtomsFromSel(sel);
+			var tmp = $3Dmol.getExtent(atoms);
+
+			if($.isEmptyObject(sel)) {
+				//include shapes when zooming to full scene
+				//TODO: figure out a good way to specify shapes as part of a selection
+				$.each(shapes, function(i, shape) {
+					atoms.push(shape);
+				});
+				allatoms = atoms;
+				alltmp = tmp;
+
+			}
+			else {
+				allatoms = getAtomsFromSel({});
+				alltmp = $3Dmol.getExtent(allatoms);
+			}
+
 			// use selection for center
 			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
 			modelGroup.position = center.clone().multiplyScalar(-1);
@@ -802,9 +782,11 @@ $3Dmol.GLViewer = (function() {
 			//find the farthest atom from center to get max distance needed for view
 			var maxDsq = 25;
 			for (var i = 0; i < atoms.length; i++) {
-				var dsq = center.distanceToSquared(atoms[i]);
-				if(dsq > maxDsq)
-					maxDsq = dsq;
+				if(atoms[i]) {
+					var dsq = center.distanceToSquared(atoms[i]);
+					if(dsq > maxDsq)
+						maxDsq = dsq;
+				}
 			}
 			
 			var maxD = Math.sqrt(maxDsq)*2;
@@ -1581,6 +1563,8 @@ $3Dmol.GLViewer = (function() {
 			// of atomsToShow are displayed (e.g., for showing cavities)
 			// if focusSele is specified, will start rending surface around the
 			// atoms specified by this selection
+			if(!allsel) allsel = atomsel;
+			if(!focus) focus = atomsel;
 			var atomsToShow = getAtomsFromSel(atomsel);
 			var atomlist = getAtomsFromSel(allsel);
 			var focusSele = getAtomsFromSel(focus);
@@ -1591,7 +1575,7 @@ $3Dmol.GLViewer = (function() {
 
 			var mat = getMatWithStyle(style);
 
-			var extent = getExtent(atomsToShow);
+			var extent = $3Dmol.getExtent(atomsToShow);
 
 			var i, il;
 			if (style['map'] && style['map']['prop']) {
@@ -1632,7 +1616,7 @@ $3Dmol.GLViewer = (function() {
 			var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
 			if (focusSele && focusSele.length && focusSele.length > 0) {
-				var seleExtent = getExtent(focusSele);
+				var seleExtent = $3Dmol.getExtent(focusSele);
 				// sort by how close to center of seleExtent
 				var sortFunc = function(a, b) {
 					var distSq = function(ex, sele) {
