@@ -971,15 +971,12 @@ $3Dmol.GLModel = (function() {
                 var finalRet = new $3Dmol.Object3D();
                 var t;
                 for (t = 0; t < copyMatrices.length; t++) {
-                    if (!copyMatrices[t].isEqual(idMatrix)) {
-                        var transformedRet = new $3Dmol.Object3D();
-                        transformedRet = ret.clone();
-                        transformedRet.matrix.copy(copyMatrices[t]);
-                        transformedRet.matrixAutoUpdate = false;
-                        finalRet.add(transformedRet);
-                    }
+                    var transformedRet = new $3Dmol.Object3D();
+                    transformedRet = ret.clone();
+                    transformedRet.matrix.copy(copyMatrices[t]);
+                    transformedRet.matrixAutoUpdate = false;
+                    finalRet.add(transformedRet);
                 }
-                finalRet.add(ret);
                 return finalRet;
             }
             
@@ -1014,7 +1011,14 @@ $3Dmol.GLModel = (function() {
         *
         */
         this.setSymmetries = function(list) {
-            copyMatrices = list;
+            if (!(list instanceof Array)) { //if user just sent in a single matrix
+                var listArr = []; 
+                listArr.push(list);
+                copyMatrices = listArr;
+            }
+            else {
+                copyMatrices = list;
+            }
         };
         
 

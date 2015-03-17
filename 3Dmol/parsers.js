@@ -739,6 +739,19 @@ $3Dmol.Parsers = (function() {
                 }
             }
         }
+        //ELSE - give all atoms a pointer to their symmetries 
+        else {
+            for (t = 0; t < atoms.length; t++) {
+                var symmetries = [];
+                for (l = 0; l < copyMatrices.length; l++) {
+                    var newXYZ = new $3Dmol.Vector3();
+                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].x);
+                    newXYZ.applyMatrix4(copyMatrices[l]);
+                    symmetries.push(newXYZ);
+                }
+                atoms[t].symmetries = symmetries;
+            }
+        }
         
         if(computeStruct || !hasStruct) {
             starttime = (new Date()).getTime();
