@@ -744,12 +744,10 @@ $3Dmol.Parsers = (function() {
             for (t = 0; t < atoms.length; t++) {
                 var symmetries = [];
                 for (l = 0; l < copyMatrices.length; l++) {
-                    if (!copyMatrices[l].isEqual(idMatrix)) {
-                        var newXYZ = new $3Dmol.Vector3();
-                        newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].x);
-                        newXYZ.applyMatrix4(copyMatrices[l]);
-                        symmetries.push(newXYZ);
-                    }
+                    var newXYZ = new $3Dmol.Vector3();
+                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].x);
+                    newXYZ.applyMatrix4(copyMatrices[l]);
+                    symmetries.push(newXYZ);
                 }
                 atoms[t].symmetries = symmetries;
             }

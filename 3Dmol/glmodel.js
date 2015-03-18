@@ -971,15 +971,12 @@ $3Dmol.GLModel = (function() {
                 var finalRet = new $3Dmol.Object3D();
                 var t;
                 for (t = 0; t < copyMatrices.length; t++) {
-                    if (!copyMatrices[t].isEqual(idMatrix)) {
-                        var transformedRet = new $3Dmol.Object3D();
-                        transformedRet = ret.clone();
-                        transformedRet.matrix.copy(copyMatrices[t]);
-                        transformedRet.matrixAutoUpdate = false;
-                        finalRet.add(transformedRet);
-                    }
+                    var transformedRet = new $3Dmol.Object3D();
+                    transformedRet = ret.clone();
+                    transformedRet.matrix.copy(copyMatrices[t]);
+                    transformedRet.matrixAutoUpdate = false;
+                    finalRet.add(transformedRet);
                 }
-                finalRet.add(ret);
                 return finalRet;
             }
             
@@ -1000,8 +997,7 @@ $3Dmol.GLModel = (function() {
                 return copyMatrices; // returns copyMatrices, which has the ID matrix as 1st entry
             }
             else {
-                var idList = [];
-                idList.push(idMatrix);
+                var idList = [idMatrix];
                 return idList;
             }
         };
@@ -1014,7 +1010,13 @@ $3Dmol.GLModel = (function() {
         *
         */
         this.setSymmetries = function(list) {
-            copyMatrices = list;
+            if (typeof(list) == "undefined") { //delete sym data
+                var idList = [idMatrix];
+                copyMatrices = idList;
+            }
+            else {
+                copyMatrices = list;
+            }
         };
         
 
