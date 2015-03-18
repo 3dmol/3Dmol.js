@@ -100,20 +100,24 @@
             //$.get("test_structs/1YCR.pdb", function(data){
                 
                 moldata = data = $("#moldata_sdf").val();
-                glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});
+                var viewer = glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});
                     
                 glviewer.setBackgroundColor(0xffffff);
                                         
-                receptorModel = m = glviewer.addModel(data, "sdf",{keepH:false});               
+                //receptorModel = m = glviewer.addModel(data, "sdf",{keepH:false});               
                     
-                atoms = m.selectedAtoms({ }); 
+                //atoms = m.selectedAtoms({ }); 
                 
-                m.setStyle({resi:[34,35]},{sphere:{}});
+                //m.setStyle({resi:[34,35]},{sphere:{}});
+                
+                $3Dmol.download("pdb:1ubq", viewer, null, function(m) {
+                    m.setStyle({bonds: 0}, {sphere:{radius:0.5}});
+                	viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
+                    viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
+                });
+                
+                 
 
-                
-                glviewer.mapAtomProperties($3Dmol.applyPartialCharges);
-                glviewer.zoomTo();
-                glviewer.render();
                            
         });
         

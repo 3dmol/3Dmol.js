@@ -84,14 +84,15 @@ $3Dmol.viewers = {};
  * var myviewer = $3Dmol.createViewer(gldiv);
  * 
  * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * // Note that m will not contain the atomic data until after the network request is completed
  * var m = $3Dmol.download('pdb: 2POR', myviewer);
  * 
  * @return {$3Dmol.GLModel} GLModel
  */ 
-$3Dmol.download = function(query, viewer) {
+$3Dmol.download = function(query, viewer, options, callback) {
     var baseURL = '';
     var type = "";
-    var m = null;
+    var m = viewer.addModel();
     if (query.substr(0, 4) === 'pdb:') {
         type = "pdb";
         query = query.substr(4).toUpperCase();
@@ -110,9 +111,11 @@ $3Dmol.download = function(query, viewer) {
     }
 
    $.get(uri, function(ret) {
-      viewer.addModel(ret, type);
+	  m.addMolData(ret, type, options);
       viewer.zoomTo();
-      viewer.render();                            
+      viewer.render();
+	  if(callback) callback(m);
+
    });
    
    return m;
