@@ -219,7 +219,11 @@ $3Dmol.GLViewer = (function() {
 				x = ev.originalEvent.targetTouches[0].pageX;
 				y = ev.originalEvent.targetTouches[0].pageY;
 			}
-			
+			else if (ev.originalEvent.changedTouches
+					&& ev.originalEvent.changedTouches[0]) {
+				x = ev.originalEvent.changedTouches[0].pageX;
+				y = ev.originalEvent.changedTouches[0].pageY;
+			}			
 			return [x,y];
 		};
 
@@ -290,7 +294,6 @@ $3Dmol.GLViewer = (function() {
 				ev.preventDefault();
 			});
 			$('body').bind('mouseup touchend', function(ev) {
-				
 				// handle selection
 				if(isDragging && scene) { //saw mousedown, haven't moved
 					var xy = getXY(ev);
@@ -1540,6 +1543,16 @@ $3Dmol.GLViewer = (function() {
 			return surfid;
 		}
 
+		//return a shallow copy of list l, e.g., for atoms so we can
+		//ignore superficial changes (ie surfacecolor, position) that happen
+		//while we're surface building
+		var shallowCopy = function(l) {
+			var ret = [];
+			$.each(l, function(k,v) {
+				ret[k] = $.extend({},v);
+			});
+			return ret;
+		}
 		/**
 		 * Add surface representation to atoms
 		 *  @function $3Dmol.GLViewer#addSurface
@@ -1563,11 +1576,21 @@ $3Dmol.GLViewer = (function() {
 			// of atomsToShow are displayed (e.g., for showing cavities)
 			// if focusSele is specified, will start rending surface around the
 			// atoms specified by this selection
-			if(!allsel) allsel = atomsel;
-			if(!focus) focus = atomsel;
-			var atomsToShow = getAtomsFromSel(atomsel);
-			var atomlist = getAtomsFromSel(allsel);
-			var focusSele = getAtomsFromSel(focus);
+			var atomlist = null, focusSele = null;
+			var atomsToShow = shallowCopy(getAtomsFromSel(atomsel));
+			if(!allsel) {
+				atomlist = atomsToShow;
+			}
+			else {
+				atomlist = shallowCopy(getAtomsFromSel(allsel));
+			}
+			
+			if(!focus) {
+				focusSele = atomsToShow;
+			} else {
+				focusSele = shallowCopy(getAtomsFromSel(focus));
+			}
+
 			var atom;
 			style = style || {};
 
