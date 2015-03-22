@@ -5,7 +5,9 @@
 import os,MySQLdb
 
 host = os.environ["REMOTE_ADDR"]
-domain = os.environ["HTTP_REFERER"]
+domain = host
+if "HTTP_REFERER" in os.environ:
+   domain = os.environ["HTTP_REFERER"]
 
 conn = MySQLdb.connect (host = "localhost",user = "tracker",db="3dmoltrack")
 cursor = conn.cursor()
