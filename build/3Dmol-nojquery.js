@@ -11782,7 +11782,11 @@ $3Dmol.GLViewer = (function() {
 				x = ev.originalEvent.targetTouches[0].pageX;
 				y = ev.originalEvent.targetTouches[0].pageY;
 			}
-			
+			else if (ev.originalEvent.changedTouches
+					&& ev.originalEvent.changedTouches[0]) {
+				x = ev.originalEvent.changedTouches[0].pageX;
+				y = ev.originalEvent.changedTouches[0].pageY;
+			}			
 			return [x,y];
 		};
 
@@ -11853,7 +11857,6 @@ $3Dmol.GLViewer = (function() {
 				ev.preventDefault();
 			});
 			$('body').bind('mouseup touchend', function(ev) {
-				
 				// handle selection
 				if(isDragging && scene) { //saw mousedown, haven't moved
 					var xy = getXY(ev);
