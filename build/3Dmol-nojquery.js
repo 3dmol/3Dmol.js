@@ -13177,22 +13177,22 @@ $3Dmol.GLViewer = (function() {
 					range = getPropertyRange(atomsToShow, prop);
 				}
 
-				for (i = 0, il = atomslist.length; i < il; i++) {
-					atom = atomslist[i];
+				for (i = 0, il = atomlist.length; i < il; i++) {
+					atom = atomlist[i];
 					atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
 							atom.properties[prop], range));
 				}
 			}
 			else if(typeof(style['color']) != 'undefined') {
 				//explicitly set color, otherwise material color just blends
-				for (i = 0, il = atomslist.length; i < il; i++) {
-					atom = atomslist[i];
+				for (i = 0, il = atomlist.length; i < il; i++) {
+					atom = atomlist[i];
 					atom.surfaceColor = $3Dmol.CC.color(style['color']);
 				}
 			}
 			else if(typeof(style['colorscheme']) != 'undefined') {
-				for (i = 0, il = atomslist.length; i < il; i++) {
-					atom = atomslist[i];
+				for (i = 0, il = atomlist.length; i < il; i++) {
+					atom = atomlist[i];
 					var scheme = $3Dmol.elementColors[style.colorscheme];
 	            			if(scheme && typeof(scheme[atom.elem]) != "undefined") {
 						atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
