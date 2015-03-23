@@ -22734,6 +22734,8 @@ $3Dmol.GLViewer = (function() {
 			// if focusSele is specified, will start rending surface around the
 			// atoms specified by this selection
 			var atomlist = null, focusSele = null;
+			//TODO: currently generating a shallow copy to avoid problems when atoms are chagned
+			//during surface generation - come up with a better solution
 			var atomsToShow = shallowCopy(getAtomsFromSel(atomsel));
 			if(!allsel) {
 				atomlist = atomsToShow;
@@ -22769,26 +22771,26 @@ $3Dmol.GLViewer = (function() {
 					range = getPropertyRange(atomsToShow, prop);
 				}
 
-				for (i = 0, il = atomsToShow.length; i < il; i++) {
-					atom = atomsToShow[i];
+				for (i = 0, il = atomslist.length; i < il; i++) {
+					atom = atomslist[i];
 					atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
 							atom.properties[prop], range));
 				}
 			}
 			else if(typeof(style['color']) != 'undefined') {
 				//explicitly set color, otherwise material color just blends
-				for (i = 0, il = atomsToShow.length; i < il; i++) {
-					atom = atomsToShow[i];
+				for (i = 0, il = atomslist.length; i < il; i++) {
+					atom = atomslist[i];
 					atom.surfaceColor = $3Dmol.CC.color(style['color']);
 				}
 			}
 			else if(typeof(style['colorscheme']) != 'undefined') {
-				for (i = 0, il = atomsToShow.length; i < il; i++) {
-					atom = atomsToShow[i];
+				for (i = 0, il = atomslist.length; i < il; i++) {
+					atom = atomslist[i];
 					var scheme = $3Dmol.elementColors[style.colorscheme];
-	            	if(scheme && typeof(scheme[atom.elem]) != "undefined") {
+	            			if(scheme && typeof(scheme[atom.elem]) != "undefined") {
 						atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
-	            	}
+	            			}
 				}
 			}
 
