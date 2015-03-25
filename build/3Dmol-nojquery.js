@@ -12430,11 +12430,12 @@ $3Dmol.GLViewer = (function() {
 			for(var i = 0; i < labels.length; i++) {
 				if(labels[i] == label) {
 					labels.splice(i,1);
+					label.dispose();
+					modelGroup.remove(label.sprite);
 					break;
 				}
 			}
-			label.dispose();
-			modelGroup.remove(label.sprite);
+
 		};
 
 		/**
