@@ -270,8 +270,8 @@ else if (testSuite === "glmol") {
         }
     });
 
-    for (var style in styleSpec)
-        genGLmolTestCase(styleSpec[style], profile);  
+//    for (var style in styleSpec)
+//        genGLmolTestCase(styleSpec[style], profile);  
     var combinedName = "combined";
     QUnit.test(combinedName, function() {
         
@@ -313,7 +313,7 @@ else if (testSuite === "glmol") {
         
     });
     
-        var rotateNAme = "rotate";
+        var rotateName = "rotate";
     QUnit.test(rotateName, function() {
         
         console.group(rotateName);
@@ -439,7 +439,7 @@ else if (testSuite === "jmol") {
         }
 
     });
-
+/*
     for (var style in styleSpec)
         genJSmolTestCase(styleSpec[style], profile);
 
@@ -471,7 +471,7 @@ else if (testSuite === "jmol") {
         QUnit.ok(true, testMsg); 
         
     });
-    
+ */   
     //Combo testcase
 	var comboName = "combined";
     QUnit.test(comboName, function() {
