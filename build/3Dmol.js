@@ -24476,9 +24476,25 @@ $3Dmol.Parsers = (function() {
 	}
 
         assignBonds(atoms);
-	/*atomsPreBonds.prototype.foreach(function(item){
-	    a.push(item);
-	});*/
+	
+	var matrices = [];
+	for (var i = 0; i < mmCIF._atom_sites['frac_transf_matrix[1][1]'].length; i++) {
+	    var matrix = new $3Dmol.Matrix4(
+	            mmCIF._atom_sites['frac_transf_matrix[1][1]'],
+	            mmCIF._atom_sites['frac_transf_matrix[1][2]'],
+	            mmCIF._atom_sites['frac_transf_matrix[1][3]'],
+	            mmCIF._atom_sites['frac_transf_vector[1]'],
+	            mmCIF._atom_sites['frac_transf_matrix[2][1]'],
+	            mmCIF._atom_sites['frac_transf_matrix[2][2]'],
+	            mmCIF._atom_sites['frac_transf_matrix[2][3]'],
+	            mmCIF._atom_sites['frac_transf_vector[2]'],
+	            mmCIF._atom_sites['frac_transf_matrix[3][1]'],
+	            mmCIF._atom_sites['frac_transf_matrix[3][2]'],
+	            mmCIF._atom_sites['frac_transf_matrix[3][3]'],
+	            mmCIF._atom_sites['frac_transf_vector[3]']
+	    );
+	    matrices.push(matrix);
+	}
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
