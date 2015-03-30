@@ -104,7 +104,7 @@
                     
                 glviewer.setBackgroundColor(0xffffff);
                                         
-                receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false, doAssembly:true, duplicateAssemblyAtoms:false});               
+                receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false, doAssembly:true, duplicateAssemblyAtoms:true});               
                 glviewer.zoomTo();
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 

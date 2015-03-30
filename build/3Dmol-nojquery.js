@@ -295,7 +295,7 @@ $3Dmol.Vector3.prototype =  {
     
     applyQuaternion : function(q) { 
         
-    	//save values
+        //save values
         var x = this.x;
         var y = this.y;
         var z = this.z;
@@ -994,6 +994,21 @@ $3Dmol.Matrix4.prototype = {
             te[3], te[7], te[11], te[15]
 
         );
+    },
+    
+    isEqual: function ( m ) {
+        var me = m.elements;
+        var te = this.elements;
+        
+        if (te[0] == me[0] && te[4] == me[4] && te[8] == me[8] && te[12] == me[12] &&
+            te[1] == me[1] && te[5] == me[5] && te[9] == me[9] && te[13] == me[13] &&
+            te[2] == me[2] && te[6] == me[6] && te[10] == me[10] && te[14] == me[14] &&
+            te[3] == me[3] && te[7] == me[7] && te[11] == me[11] && te[15] == me[15]) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
 };
@@ -1427,10 +1442,10 @@ $3Dmol.Color.prototype = {
     },
     
     getHex: function() {
-    	var R = Math.round(this.r*255);
-    	var G = Math.round(this.g*255);
-    	var B = Math.round(this.b*255);
-    	return R<<16 | G << 8 | B;
+        var R = Math.round(this.r*255);
+        var G = Math.round(this.g*255);
+        var B = Math.round(this.b*255);
+        return R<<16 | G << 8 | B;
     },
     
     clone : function() {
@@ -1447,12 +1462,12 @@ $3Dmol.Color.prototype = {
     
     //return object that represents color components from 0 to 255
     scaled : function() {
-    	var ret = {};
-    	ret.r = Math.round(this.r*255);
-    	ret.g = Math.round(this.g*255);
-    	ret.b = Math.round(this.b*255);
-    	ret.a = 1.0;
-    	return ret;
+        var ret = {};
+        ret.r = Math.round(this.r*255);
+        ret.g = Math.round(this.g*255);
+        ret.b = Math.round(this.b*255);
+        ret.a = 1.0;
+        return ret;
     }
     
 };
@@ -1647,11 +1662,11 @@ $3Dmol.Geometry = (function() {
     };
     
     geometryGroup.prototype.getNumVertices = function() {
-    	return this.vertices;
+        return this.vertices;
     };
     
     geometryGroup.prototype.getVertices = function() {
-    	return this.vertexArray;
+        return this.vertexArray;
     };
     
     
@@ -1751,7 +1766,7 @@ $3Dmol.Geometry = (function() {
             faceArr = this.faceArray,
             lineArr = this.lineArray;
 
-	//subarray to avoid copying and reallocating memory
+        //subarray to avoid copying and reallocating memory
         this.vertexArray = vertexArr.subarray(0,this.vertices*3);
         this.colorArray = colorArr.subarray(0,this.vertices*3);
         
@@ -1771,13 +1786,13 @@ $3Dmol.Geometry = (function() {
         }
         
         if(reallocatemem) { 
-        	//actually copy smaller arrays to save memory
-        	if(this.normalArray) this.normalArray = new Float32Array(this.normalArray);
-        	if(this.faceArray) this.faceArray = new Uint16Array(this.faceArray);
-        	if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
-        	if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
-        	if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
-        	
+            //actually copy smaller arrays to save memory
+            if(this.normalArray) this.normalArray = new Float32Array(this.normalArray);
+            if(this.faceArray) this.faceArray = new Uint16Array(this.faceArray);
+            if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
+            if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
+            if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
+            
         }
         this.__inittedArrays = true;        
         
@@ -5031,12 +5046,12 @@ $3Dmol.ShaderLib = {
 "varying vec2 mapping;",
 
 "void main() {",
-"	 float lensqr = dot(mapping,mapping);",
-"	 if(lensqr > 2.0)",
-"	    discard;",
-"	 float w = sqrt(2.0 - lensqr);",
-"	 float z = sqrt(sqrt(2.0)-lensqr);",
-"	 gl_FragDepthEXT = -.1*z;",
+"    float lensqr = dot(mapping,mapping);",
+"    if(lensqr > 2.0)",
+"       discard;",
+"    float w = sqrt(2.0 - lensqr);",
+"    float z = sqrt(sqrt(2.0)-lensqr);",
+"    gl_FragDepthEXT = -.1*z;",
 "    gl_FragColor = vec4( w*vColor, 1 );",
     
 
@@ -5065,9 +5080,9 @@ $3Dmol.ShaderLib = {
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
-"	 vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
-"	 mapping = normal.xy;",
-"	 gl_Position = projPosition+adjust;",
+"    vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
+"    mapping = normal.xy;",
+"    gl_Position = projPosition+adjust;",
 
 "}"
         
@@ -5201,10 +5216,10 @@ $3Dmol.ShaderLib = {
 "    gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
     
 "    #ifndef WIREFRAME",
-"	 if ( gl_FrontFacing )",
-"		gl_FragColor.xyz *= vLightFront;",
-"	 else",
-"		gl_FragColor.xyz *= vLightBack;",
+"    if ( gl_FrontFacing )",
+"       gl_FragColor.xyz *= vLightFront;",
+"    else",
+"       gl_FragColor.xyz *= vLightBack;",
 "    #endif",
     
 "    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
@@ -5258,13 +5273,13 @@ $3Dmol.ShaderLib = {
 "    vec3 dirVector = normalize( lDirection.xyz );",
 "    float dotProduct = dot( transformedNormal, dirVector );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
-"	 vec3 directionalLightWeightingBack = vec3( max( -dotProduct, 0.0 ) );",
+"    vec3 directionalLightWeightingBack = vec3( max( -dotProduct, 0.0 ) );",
 
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"	 vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
+"    vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
 
 "    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
-"	 vLightBack = vLightBack * diffuse + ambient * ambientLightColor + emissive;",
+"    vLightBack = vLightBack * diffuse + ambient * ambientLightColor + emissive;",
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -5627,10 +5642,10 @@ $3Dmol.createViewer = function(element, config)
 
     //try to create the  viewer
     try {
-    	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+        return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
     }
     catch(e) {
-    	throw "error creating viewer: "+e;
+        throw "error creating viewer: "+e;
     }
     
     return null;
@@ -5737,8 +5752,8 @@ $3Dmol.syncSurface = false;
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
 // no way of checking for this feature directly, so must do a brower check
 if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
-		window.navigator.userAgent.indexOf('Trident/') >= 0) {
-	$3Dmol.syncSurface = true; // can't use webworkers
+        window.navigator.userAgent.indexOf('Trident/') >= 0) {
+    $3Dmol.syncSurface = true; // can't use webworkers
 }
 
 /**
@@ -5757,41 +5772,41 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
  * @returns {Object}
  */
 $3Dmol.specStringToObject = function(str) {
-	if(typeof(str) === "object") {
-		return str; //not string, assume was converted already
-	}
-	else if(typeof(str) === "undefined" || str == null) {
-		return str; 
-	}
-	var ret = {};
-	var fields = str.split(';');
-	for(var i = 0; i < fields.length; i++) {
-		var fv = fields[i].split(':');
-		var f = fv[0];
-		var val = {};
-		var vstr = fv[1];
-		if(vstr) {
-			vstr = vstr.replace(/~/g,"=");
-			if(vstr.indexOf('=') !== -1) {
-				//has key=value pairs, must be object
-				var kvs = vstr.split(',');
-				for(var j = 0; j < kvs.length; j++) {
-					var kv = kvs[j].split('=',2);
-					val[kv[0]] = kv[1];
-				}
-			}
-			else if(vstr.indexOf(',') !== -1) {
-				//has multiple values, must list
-				val = vstr.split(',');
-			}
-			else {
-				val = vstr; //value itself
-			}
-		}
-		ret[f] = val;
-	}
-	
-	return ret;
+    if(typeof(str) === "object") {
+        return str; //not string, assume was converted already
+    }
+    else if(typeof(str) === "undefined" || str == null) {
+        return str; 
+    }
+    var ret = {};
+    var fields = str.split(';');
+    for(var i = 0; i < fields.length; i++) {
+        var fv = fields[i].split(':');
+        var f = fv[0];
+        var val = {};
+        var vstr = fv[1];
+        if(vstr) {
+            vstr = vstr.replace(/~/g,"=");
+            if(vstr.indexOf('=') !== -1) {
+                //has key=value pairs, must be object
+                var kvs = vstr.split(',');
+                for(var j = 0; j < kvs.length; j++) {
+                    var kv = kvs[j].split('=',2);
+                    val[kv[0]] = kv[1];
+                }
+            }
+            else if(vstr.indexOf(',') !== -1) {
+                //has multiple values, must list
+                val = vstr.split(',');
+            }
+            else {
+                val = vstr; //value itself
+            }
+        }
+        ret[f] = val;
+    }
+
+return ret;
 }
 
 // computes the bounding box around the provided atoms
@@ -7374,10 +7389,10 @@ $3Dmol.createViewer = function(element, config)
 
     //try to create the  viewer
     try {
-    	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+        return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
     }
     catch(e) {
-    	throw "error creating viewer: "+e;
+        throw "error creating viewer: "+e;
     }
     
     return null;
@@ -7484,8 +7499,8 @@ $3Dmol.syncSurface = false;
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
 // no way of checking for this feature directly, so must do a brower check
 if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
-		window.navigator.userAgent.indexOf('Trident/') >= 0) {
-	$3Dmol.syncSurface = true; // can't use webworkers
+        window.navigator.userAgent.indexOf('Trident/') >= 0) {
+    $3Dmol.syncSurface = true; // can't use webworkers
 }
 
 /**
@@ -7504,41 +7519,41 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
  * @returns {Object}
  */
 $3Dmol.specStringToObject = function(str) {
-	if(typeof(str) === "object") {
-		return str; //not string, assume was converted already
-	}
-	else if(typeof(str) === "undefined" || str == null) {
-		return str; 
-	}
-	var ret = {};
-	var fields = str.split(';');
-	for(var i = 0; i < fields.length; i++) {
-		var fv = fields[i].split(':');
-		var f = fv[0];
-		var val = {};
-		var vstr = fv[1];
-		if(vstr) {
-			vstr = vstr.replace(/~/g,"=");
-			if(vstr.indexOf('=') !== -1) {
-				//has key=value pairs, must be object
-				var kvs = vstr.split(',');
-				for(var j = 0; j < kvs.length; j++) {
-					var kv = kvs[j].split('=',2);
-					val[kv[0]] = kv[1];
-				}
-			}
-			else if(vstr.indexOf(',') !== -1) {
-				//has multiple values, must list
-				val = vstr.split(',');
-			}
-			else {
-				val = vstr; //value itself
-			}
-		}
-		ret[f] = val;
-	}
-	
-	return ret;
+    if(typeof(str) === "object") {
+        return str; //not string, assume was converted already
+    }
+    else if(typeof(str) === "undefined" || str == null) {
+        return str; 
+    }
+    var ret = {};
+    var fields = str.split(';');
+    for(var i = 0; i < fields.length; i++) {
+        var fv = fields[i].split(':');
+        var f = fv[0];
+        var val = {};
+        var vstr = fv[1];
+        if(vstr) {
+            vstr = vstr.replace(/~/g,"=");
+            if(vstr.indexOf('=') !== -1) {
+                //has key=value pairs, must be object
+                var kvs = vstr.split(',');
+                for(var j = 0; j < kvs.length; j++) {
+                    var kv = kvs[j].split('=',2);
+                    val[kv[0]] = kv[1];
+                }
+            }
+            else if(vstr.indexOf(',') !== -1) {
+                //has multiple values, must list
+                val = vstr.split(',');
+            }
+            else {
+                val = vstr; //value itself
+            }
+        }
+        ret[f] = val;
+    }
+
+return ret;
 }
 
 // computes the bounding box around the provided atoms
@@ -7598,27 +7613,27 @@ $3Dmol.getExtent = function(atomlist) {
 $3Dmol.workerString = function(){
 
     self.onmessage = function(oEvent) {
-    	var obj = oEvent.data;
-    	var type = obj.type;
-    	if (type < 0) // sending atom data, initialize
-    	{
-    		self.atomData = obj.atoms;
-    		self.volume = obj.volume;
-    		self.ps = new ProteinSurface();
-    	} else {
-    		var ps = self.ps;
-    		ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
-    		ps.fillvoxels(self.atomData, obj.extendedAtoms);
-    		ps.buildboundary();
-    		if (type === 4 || type === 2) {
-    			ps.fastdistancemap();
+        var obj = oEvent.data;
+        var type = obj.type;
+        if (type < 0) // sending atom data, initialize
+        {
+            self.atomData = obj.atoms;
+            self.volume = obj.volume;
+            self.ps = new ProteinSurface();
+        } else {
+            var ps = self.ps;
+            ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
+            ps.fillvoxels(self.atomData, obj.extendedAtoms);
+            ps.buildboundary();
+            if (type === 4 || type === 2) {
+                ps.fastdistancemap();
                 ps.boundingatom(false);
-                ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);	
-            }		
-    		ps.marchingcube(type);
-    		var VandF = ps.getFacesAndVertices(obj.atomsToShow);
-    		self.postMessage(VandF);
-    	}
+                ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);    
+            }        
+            ps.marchingcube(type);
+            var VandF = ps.getFacesAndVertices(obj.atomsToShow);
+            self.postMessage(VandF);
+        }
     };
     
 }.toString().replace(/(^.*?\{|\}$)/g, "");
@@ -7899,104 +7914,104 @@ $3Dmol.elementColors.defaultColor = 0xff1493;
 
 /** @property Jmol-like element colors*/
 $3Dmol.elementColors.Jmol = {
-		'H': 0xFFFFFF,
-		'He': 0xD9FFFF,
-		'HE': 0xD9FFFF,
-		'Li': 0xCC80FF,
-		'LI': 0xCC80FF,
-		'B': 0xFFB5B5,
-		'C': 0x909090,
-		'N': 0x3050F8,
-		'O': 0xFF0D0D,
-		'F': 0x90E050,
-		'Na': 0xAB5CF2,
-		'NA': 0xAB5CF2,
-		'Mg': 0x8AFF00,
-		'MG': 0x8AFF00,
-		'Al': 0xBFA6A6,
-		'AL': 0xBFA6A6,
-		'Si': 0xF0C8A0,
-		'SI': 0xF0C8A0,
-		'P': 0xFF8000,
-		'S': 0xFFFF30,
-		'Cl': 0x1FF01F,
-		'CL': 0x1FF01F,
-		'Ca': 0x3DFF00,
-		'CA': 0x3DFF00,
-		'Ti': 0xBFC2C7,
-		'TI': 0xBFC2C7,
-		'Cr': 0x8A99C7,
-		'CR': 0x8A99C7,
-		'Mn': 0x9C7AC7,
-		'MN': 0x9C7AC7,
-		'Fe': 0xE06633,
-		'FE': 0xE06633,
-		'Ni': 0x50D050,
-		'NI': 0x50D050,
-		'Cu': 0xC88033,
-		'CU': 0xC88033,
-		'Zn': 0x7D80B0,
-		'ZN': 0x7D80B0,
-		'Br': 0xA62929,
-		'BR': 0xA62929,
-		'Ag': 0xC0C0C0,
-		'AG': 0xC0C0C0,
-		'I': 0x940094,
-		'Ba': 0x00C900,
-		'BA': 0x00C900,
-		'Au': 0xFFD123,
-		'AU': 0xFFD123
+        'H': 0xFFFFFF,
+        'He': 0xD9FFFF,
+        'HE': 0xD9FFFF,
+        'Li': 0xCC80FF,
+        'LI': 0xCC80FF,
+        'B': 0xFFB5B5,
+        'C': 0x909090,
+        'N': 0x3050F8,
+        'O': 0xFF0D0D,
+        'F': 0x90E050,
+        'Na': 0xAB5CF2,
+        'NA': 0xAB5CF2,
+        'Mg': 0x8AFF00,
+        'MG': 0x8AFF00,
+        'Al': 0xBFA6A6,
+        'AL': 0xBFA6A6,
+        'Si': 0xF0C8A0,
+        'SI': 0xF0C8A0,
+        'P': 0xFF8000,
+        'S': 0xFFFF30,
+        'Cl': 0x1FF01F,
+        'CL': 0x1FF01F,
+        'Ca': 0x3DFF00,
+        'CA': 0x3DFF00,
+        'Ti': 0xBFC2C7,
+        'TI': 0xBFC2C7,
+        'Cr': 0x8A99C7,
+        'CR': 0x8A99C7,
+        'Mn': 0x9C7AC7,
+        'MN': 0x9C7AC7,
+        'Fe': 0xE06633,
+        'FE': 0xE06633,
+        'Ni': 0x50D050,
+        'NI': 0x50D050,
+        'Cu': 0xC88033,
+        'CU': 0xC88033,
+        'Zn': 0x7D80B0,
+        'ZN': 0x7D80B0,
+        'Br': 0xA62929,
+        'BR': 0xA62929,
+        'Ag': 0xC0C0C0,
+        'AG': 0xC0C0C0,
+        'I': 0x940094,
+        'Ba': 0x00C900,
+        'BA': 0x00C900,
+        'Au': 0xFFD123,
+        'AU': 0xFFD123
 };
 
 /** @property rasmol-like element colors */
 $3Dmol.elementColors.rasmol = {
-		'H': 0xFFFFFF,
-		'He': 0xFFC0CB,
-		'HE': 0xFFC0CB,
-		'Li': 0xB22222,
-		'LI': 0xB22222,
-		'B': 0x00FF00,
-		'C': 0xC8C8C8,
-		'N': 0x8F8FFF,
-		'O': 0xF00000,
-		'F': 0xDAA520,
-		'Na': 0x0000FF,
-		'NA': 0x0000FF,
-		'Mg': 0x228B22,
-		'MG': 0x228B22,
-		'Al': 0x808090,
-		'AL': 0x808090,
-		'Si': 0xDAA520,
-		'SI': 0xDAA520,
-		'P': 0xFFA500,
-		'S': 0xFFC832,
-		'Cl': 0x00FF00,
-		'CL': 0x00FF00,
-		'Ca': 0x808090,
-		'CA': 0x808090,
-		'Ti': 0x808090,
-		'TI': 0x808090,
-		'Cr': 0x808090,
-		'CR': 0x808090,
-		'Mn': 0x808090,
-		'MN': 0x808090,
-		'Fe': 0xFFA500,
-		'FE': 0xFFA500,
-		'Ni': 0xA52A2A,
-		'NI': 0xA52A2A,
-		'Cu': 0xA52A2A,
-		'CU': 0xA52A2A,
-		'Zn': 0xA52A2A,
-		'ZN': 0xA52A2A,
-		'Br': 0xA52A2A,
-		'BR': 0xA52A2A,
-		'Ag': 0x808090,
-		'AG': 0x808090,
-		'I': 0xA020F0,
-		'Ba': 0xFFA500,
-		'BA': 0xFFA500,
-		'Au': 0xDAA520,
-		'AU': 0xDAA520	
+        'H': 0xFFFFFF,
+        'He': 0xFFC0CB,
+        'HE': 0xFFC0CB,
+        'Li': 0xB22222,
+        'LI': 0xB22222,
+        'B': 0x00FF00,
+        'C': 0xC8C8C8,
+        'N': 0x8F8FFF,
+        'O': 0xF00000,
+        'F': 0xDAA520,
+        'Na': 0x0000FF,
+        'NA': 0x0000FF,
+        'Mg': 0x228B22,
+        'MG': 0x228B22,
+        'Al': 0x808090,
+        'AL': 0x808090,
+        'Si': 0xDAA520,
+        'SI': 0xDAA520,
+        'P': 0xFFA500,
+        'S': 0xFFC832,
+        'Cl': 0x00FF00,
+        'CL': 0x00FF00,
+        'Ca': 0x808090,
+        'CA': 0x808090,
+        'Ti': 0x808090,
+        'TI': 0x808090,
+        'Cr': 0x808090,
+        'CR': 0x808090,
+        'Mn': 0x808090,
+        'MN': 0x808090,
+        'Fe': 0xFFA500,
+        'FE': 0xFFA500,
+        'Ni': 0xA52A2A,
+        'NI': 0xA52A2A,
+        'Cu': 0xA52A2A,
+        'CU': 0xA52A2A,
+        'Zn': 0xA52A2A,
+        'ZN': 0xA52A2A,
+        'Br': 0xA52A2A,
+        'BR': 0xA52A2A,
+        'Ag': 0x808090,
+        'AG': 0x808090,
+        'I': 0xA020F0,
+        'Ba': 0xFFA500,
+        'BA': 0xFFA500,
+        'Au': 0xDAA520,
+        'AU': 0xDAA520	
 };
 
 $3Dmol.elementColors.defaultColors = $3Dmol.elementColors.rasmol;
@@ -12797,11 +12812,12 @@ $3Dmol.GLViewer = (function() {
 			for(var i = 0; i < labels.length; i++) {
 				if(labels[i] == label) {
 					labels.splice(i,1);
+					label.dispose();
+					modelGroup.remove(label.sprite);
 					break;
 				}
 			}
-			label.dispose();
-			modelGroup.remove(label.sprite);
+
 		};
 
 		/**
@@ -13544,22 +13560,22 @@ $3Dmol.GLViewer = (function() {
 					range = getPropertyRange(atomsToShow, prop);
 				}
 
-				for (i = 0, il = atomslist.length; i < il; i++) {
-					atom = atomslist[i];
+				for (i = 0, il = atomlist.length; i < il; i++) {
+					atom = atomlist[i];
 					atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
 							atom.properties[prop], range));
 				}
 			}
 			else if(typeof(style['color']) != 'undefined') {
 				//explicitly set color, otherwise material color just blends
-				for (i = 0, il = atomslist.length; i < il; i++) {
-					atom = atomslist[i];
+				for (i = 0, il = atomlist.length; i < il; i++) {
+					atom = atomlist[i];
 					atom.surfaceColor = $3Dmol.CC.color(style['color']);
 				}
 			}
 			else if(typeof(style['colorscheme']) != 'undefined') {
-				for (i = 0, il = atomslist.length; i < il; i++) {
-					atom = atomslist[i];
+				for (i = 0, il = atomlist.length; i < il; i++) {
+					atom = atomlist[i];
 					var scheme = $3Dmol.elementColors[style.colorscheme];
 	            			if(scheme && typeof(scheme[atom.elem]) != "undefined") {
 						atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
@@ -13860,52 +13876,52 @@ $3Dmol.Gradient.range = function() {};
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.RWB = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(val === undefined)
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var middle = (hi+lo)/2;
-		var scale, color;
-		
-		//scale bottom from red to white
-		if(val <= middle) {
-			scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
-			color = 0xff0000 + 0x100*scale + scale;
-			return color;
-		}
-		else { //form white to blue
-			scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
-			color =  0x10000*scale+0x100*scale+0xff;
-			return color;
-		}
-	};
-	
-	this.jmolID = function() {
-		return "rwb";
-	};
+    
+    //map value to hex color, range is provided
+    this.valueToHex = function(val, range) {
+        var lo, hi;
+        if(range) {
+            lo = range[0];
+            hi = range[1];
+        }
+        else {
+            lo = min;
+            hi = max;
+        }
+    
+        if(val === undefined)
+            return 0xffffff;
+        
+        if(val < lo) val = lo;
+        if(val > hi) val = hi;
+        
+        var middle = (hi+lo)/2;
+        var scale, color;
+        
+        //scale bottom from red to white
+        if(val <= middle) {
+            scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
+            color = 0xff0000 + 0x100*scale + scale;
+            return color;
+        }
+        else { //form white to blue
+            scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
+            color =  0x10000*scale+0x100*scale+0xff;
+            return color;
+        }
+    };
+    
+    this.jmolID = function() {
+        return "rwb";
+    };
 
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
+    //return range used for color mapping, null if none set
+    this.range = function() {
+        if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+            return [min,max];
+        }
+        return null;
+    };
 
 };
 
@@ -13915,64 +13931,64 @@ $3Dmol.Gradient.RWB = function(min, max) {
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.ROYGB = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(typeof(val) == "undefined")
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var mid = (lo+hi)/2;
-		var q1 = (lo+mid)/2;
-		var q3 = (mid+hi)/2;
-		
-		var scale, color;
-		
-		if(val < q1) { //scale green up, red up, blue down
-			scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
-			color = 0xff0000 + 0x100*scale + 0;
-			return color;
-		}
-		else if(val < mid) { //scale red down, green up, blue down
-			scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
-			color =  0x010000*scale+0xff00+0x0;
-			return color;
-		}
-		else if(val < q3) { //scale blue up, red down, green up
-			scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
-			color = 0x000000 + 0xff00 + 0x1*scale;
-			return color;
-		}
-		else { //scale green down, blue up, red down
-			scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
-			color =  0x000000+0x0100*scale+0xff;
-			return color;
-		}		
-	};
-	
-	this.jmolID = function() {
-		return "roygb";
-	};
+    
+    //map value to hex color, range is provided
+    this.valueToHex = function(val, range) {
+        var lo, hi;
+        if(range) {
+            lo = range[0];
+            hi = range[1];
+        }
+        else {
+            lo = min;
+            hi = max;
+        }
+    
+        if(typeof(val) == "undefined")
+            return 0xffffff;
+        
+        if(val < lo) val = lo;
+        if(val > hi) val = hi;
+        
+        var mid = (lo+hi)/2;
+        var q1 = (lo+mid)/2;
+        var q3 = (mid+hi)/2;
+        
+        var scale, color;
+        
+        if(val < q1) { //scale green up, red up, blue down
+            scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+            color = 0xff0000 + 0x100*scale + 0;
+            return color;
+        }
+        else if(val < mid) { //scale red down, green up, blue down
+            scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+            color =  0x010000*scale+0xff00+0x0;
+            return color;
+        }
+        else if(val < q3) { //scale blue up, red down, green up
+            scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+            color = 0x000000 + 0xff00 + 0x1*scale;
+            return color;
+        }
+        else { //scale green down, blue up, red down
+            scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+            color =  0x000000+0x0100*scale+0xff;
+            return color;
+        }        
+    };
+    
+    this.jmolID = function() {
+        return "roygb";
+    };
 
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
+    //return range used for color mapping, null if none set
+    this.range = function() {
+        if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+            return [min,max];
+        }
+        return null;
+    };
 
 };
 
@@ -13982,48 +13998,48 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.Sinebow = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(typeof(val) == "undefined")
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var scale = (val-lo)/(hi-lo);
-		var h = (5*scale/6.0+0.5);
-		var r = Math.sin(Math.PI*h);
-		r *= r*255;
-		var g = Math.sin(Math.PI*(h+1/3.0));
-		g *= g*255;
-		var b = Math.sin(Math.PI*(h+2/3.0));
-		b *= b*255;
-		
-		return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
-	};
-	
-	this.jmolID = function() {
-		return "sinebow";
-	};
+    
+    //map value to hex color, range is provided
+    this.valueToHex = function(val, range) {
+        var lo, hi;
+        if(range) {
+            lo = range[0];
+            hi = range[1];
+        }
+        else {
+            lo = min;
+            hi = max;
+        }
+    
+        if(typeof(val) == "undefined")
+            return 0xffffff;
+        
+        if(val < lo) val = lo;
+        if(val > hi) val = hi;
+        
+        var scale = (val-lo)/(hi-lo);
+        var h = (5*scale/6.0+0.5);
+        var r = Math.sin(Math.PI*h);
+        r *= r*255;
+        var g = Math.sin(Math.PI*(h+1/3.0));
+        g *= g*255;
+        var b = Math.sin(Math.PI*(h+2/3.0));
+        b *= b*255;
+        
+        return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
+    };
+    
+    this.jmolID = function() {
+        return "sinebow";
+    };
 
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
+    //return range used for color mapping, null if none set
+    this.range = function() {
+        if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+            return [min,max];
+        }
+        return null;
+    };
 
 };
 //Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
