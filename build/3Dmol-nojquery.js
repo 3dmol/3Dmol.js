@@ -968,6 +968,20 @@ $3Dmol.Matrix4.prototype = {
         return this.makeFrustum( xmin, xmax, ymin, ymax, near, far );
     },
     
+    isEqual : function (m) {
+        var me = m.elements;
+        var te = this.elements;
+        
+        if (te[0] == me[0] && te[4] == me[4] && te[8] == me[8] && te[12] == me[12] &&
+            te[1] == me[1] && te[5] == me[5] && te[9] == me[9] && te[13] == me[13] &&
+            te[2] == me[2] && te[6] == me[6] && te[10] == me[10] && te[14] == me[14] &&
+            te[3] == me[3] && te[7] == me[7] && te[11] == me[11] && te[15] == me[15]) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    },
 
     clone: function () {
         var te = this.elements;
@@ -1590,6 +1604,8 @@ $3Dmol.Object3D.prototype = {
         object.matrix.copy(this.matrix);
         object.matrixWorld.copy(this.matrixWorld);
         object.quaternion.copy(this.quaternion);
+        object.matrixAutoUpdate = this.matrixAutoUpdate;
+        object.matrixWorldNeedsUpdate = this.matrixWorldNeedsUpdate;
         
         object.useQuaternion = this.useQuaternion;
         
@@ -3920,13 +3936,16 @@ $3Dmol.Renderer = function ( parameters ) {
             _currentCamera = camera;
             refreshMaterial = true;
         }
-
+        
+        _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
+        _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+        _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+        
         //Send projection matrix to uniform variable in shader
         if (refreshMaterial) {
 
             //Load projection, model-view matrices for perspective
-            _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
-            _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+
 
             //Set up correct fog uniform vals
             m_uniforms.fogColor.value = fog.color;
@@ -3938,7 +3957,6 @@ $3Dmol.Renderer = function ( parameters ) {
 
                 //load view and normal matrices for directional and object lighting
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
-                _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
                 //_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
 
                 if (_lightsNeedUpdate) {
@@ -5550,6 +5568,284 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
 		}
 	}
 };
+//This defines the $3Dmol object which is used to create viewers
+//and configure system-wide settings
+
+/** 
+ * All of the functionality of $3Dmol.js is contained within the
+ * $3Dmol global namespace
+ * @namespace */
+$3Dmol = (function(window) {
+    
+    var my = window['$3Dmol'] || {};
+    //var $ = window['jQuery'];
+    
+    return my;
+
+})(window);
+
+/* The following code "phones home" to register that an ip 
+   address has loaded 3Dmol.js.  Being able track this usage
+   is very helpful when reporting to funding agencies.  Please
+   leave this code in if you would like to increase the 
+   likelihood of 3Dmo.js remaining supported.
+*/
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
+    
+/**
+ * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ * @param {Object | string} element - Either HTML element or string identifier
+ * @param {ViewerSpec} config Viewer specification
+ * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
+ * 
+ * @example
+ * // Assume there exists an HTML div with id "gldiv"
+ * var element = $("#gldiv");
+ * 
+ * // Viewer config - properties 'defaultcolors' and 'callback'
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors };
+ * 
+ * // Create GLViewer within 'gldiv' 
+ * var myviewer = $3Dmol.createViewer(element, config);
+ * //'data' is a string containing molecule data in pdb format  
+ * myviewer.addModel(data, "pdb");
+ * myviewer.zoomTo();
+ * myviewer.render();                        
+ *                        
+ */
+$3Dmol.createViewer = function(element, config)
+{
+    if($.type(element) === "string")
+        element = $("#"+element);
+    if(!element) return;
+
+    config = config || {};
+ 
+    
+    if(!config.defaultcolors)
+        config.defaultcolors = $3Dmol.elementColors.defaultColors;
+
+    //try to create the  viewer
+    try {
+    	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+    }
+    catch(e) {
+    	throw "error creating viewer: "+e;
+    }
+    
+    return null;
+};
+   
+/**
+ * Contains a dictionary of embedded viewers created from HTML elements
+ * with a the viewer_3Dmoljs css class indexed by their id (or numerically
+ * if they do not have an id).
+*/
+$3Dmol.viewers = {};
+
+/**
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function $3Dmol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @example
+ * var myviewer = $3Dmol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * // Note that m will not contain the atomic data until after the network request is completed
+ * var m = $3Dmol.download('pdb: 2POR', myviewer);
+ * 
+ * @return {$3Dmol.GLModel} GLModel
+ */ 
+$3Dmol.download = function(query, viewer, options, callback) {
+    var baseURL = '';
+    var type = "";
+    var m = viewer.addModel();
+    if (query.substr(0, 4) === 'pdb:') {
+        type = "pdb";
+        query = query.substr(4).toUpperCase();
+        if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+           alert("Wrong PDB ID"); return;
+        }
+        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+    } else if (query.substr(0, 4) == 'cid:') {
+        type = "sdf";
+        query = query.substr(4);
+        if (!query.match(/^[1-9]+$/)) {
+           alert("Wrong Compound ID"); return;
+        }
+        uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+          "/SDF?record_type=3d";
+    }
+
+   $.get(uri, function(ret) {
+	  m.addMolData(ret, type, options);
+      viewer.zoomTo();
+      viewer.render();
+	  if(callback) callback(m);
+
+   });
+   
+   return m;
+};
+       
+
+/**
+ * $3Dmol surface types
+ * @enum {number}
+ */
+$3Dmol.SurfaceType = {
+    VDW : 1,
+    MS : 2,
+    SAS : 3,
+    SES  : 4
+};
+
+
+//Miscellaneous functions and classes - to be incorporated into $3Dmol proper
+/**
+ * 
+ * @param {$3Dmol.Geometry} geometry
+ * @param {$3Dmol.Mesh} mesh
+ * @returns {undefined}
+ */
+$3Dmol.mergeGeos = function(geometry, mesh) {
+    
+    var meshGeo = mesh.geometry;
+    
+    if (meshGeo === undefined) 
+        return;
+    
+    geometry.geometryGroups.push( meshGeo.geometryGroups[0] );
+    
+};
+
+$3Dmol.multiLineString = function(f) {
+    return f.toString()
+            .replace(/^[^\/]+\/\*!?/, '')
+            .replace(/\*\/[^\/]+$/, '');
+            
+};
+
+/** 
+ * Render surface synchronously if true
+ * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @type {boolean} */
+$3Dmol.syncSurface = false;
+
+// Internet Explorer refuses to allow webworkers in data blobs.  I can find
+// no way of checking for this feature directly, so must do a brower check
+if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
+		window.navigator.userAgent.indexOf('Trident/') >= 0) {
+	$3Dmol.syncSurface = true; // can't use webworkers
+}
+
+/**
+ * Parse a string that represents a style or atom selection and convert it
+ * into an object.  The goal is to make it easier to write out these specifications
+ * without resorting to json. Objects cannot be defined recursively.
+ * ; - delineates fields of the object 
+ * : - if the field has a value other than an empty object, it comes after a colon
+ * , - delineates key/value pairs of a value object
+ *     If the value object consists of ONLY keys (no = present) the keys are 
+ *     converted to a list.  Otherwise a object of key/value pairs is created with
+ *     any missing values set to null
+ * = OR ~ - separates key/value pairs of a value object, if not provided value is null
+ * 	twiddle is supported since = has special meaning in URLs
+ * @param (String) str
+ * @returns {Object}
+ */
+$3Dmol.specStringToObject = function(str) {
+	if(typeof(str) === "object") {
+		return str; //not string, assume was converted already
+	}
+	else if(typeof(str) === "undefined" || str == null) {
+		return str; 
+	}
+	var ret = {};
+	var fields = str.split(';');
+	for(var i = 0; i < fields.length; i++) {
+		var fv = fields[i].split(':');
+		var f = fv[0];
+		var val = {};
+		var vstr = fv[1];
+		if(vstr) {
+			vstr = vstr.replace(/~/g,"=");
+			if(vstr.indexOf('=') !== -1) {
+				//has key=value pairs, must be object
+				var kvs = vstr.split(',');
+				for(var j = 0; j < kvs.length; j++) {
+					var kv = kvs[j].split('=',2);
+					val[kv[0]] = kv[1];
+				}
+			}
+			else if(vstr.indexOf(',') !== -1) {
+				//has multiple values, must list
+				val = vstr.split(',');
+			}
+			else {
+				val = vstr; //value itself
+			}
+		}
+		ret[f] = val;
+	}
+	
+	return ret;
+}
+
+// computes the bounding box around the provided atoms
+/**
+ * @param {AtomSpec[]} atomlist
+ * @return {Array}
+ */
+$3Dmol.getExtent = function(atomlist) {
+    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+    xmin = ymin = zmin = 9999;
+    xmax = ymax = zmax = -9999;
+    xsum = ysum = zsum = cnt = 0;
+
+    if (atomlist.length === 0)
+        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+    for (var i = 0; i < atomlist.length; i++) {
+        var atom = atomlist[i];
+        if (atom === undefined)
+            continue;
+        cnt++;
+        xsum += atom.x;
+        ysum += atom.y;
+        zsum += atom.z;
+        
+        if (atom.symmetries) {
+            for (var n = 0; n < atom.symmetries.length; n++) {
+                xsum += atom.symmetries[n].x;
+                ysum += atom.symmetries[n].y;
+                zsum += atom.symmetries[n].x;
+                cnt++;
+                xmin = (xmin < atom.x) ? xmin : atom.x;
+                ymin = (ymin < atom.y) ? ymin : atom.y;
+                zmin = (zmin < atom.z) ? zmin : atom.z;
+                xmax = (xmax > atom.x) ? xmax : atom.x;
+                ymax = (ymax > atom.y) ? ymax : atom.y;
+                zmax = (zmax > atom.z) ? zmax : atom.z; 
+            }
+        }
+
+        xmin = (xmin < atom.x) ? xmin : atom.x;
+        ymin = (ymin < atom.y) ? ymin : atom.y;
+        zmin = (zmin < atom.z) ? zmin : atom.z;
+        xmax = (xmax > atom.x) ? xmax : atom.x;
+        ymax = (ymax > atom.y) ? ymax : atom.y;
+        zmax = (zmax > atom.z) ? zmax : atom.z;
+    }
+
+    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+};
+
+
+
 $3Dmol = $3Dmol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
@@ -7267,6 +7563,21 @@ $3Dmol.getExtent = function(atomlist) {
         xsum += atom.x;
         ysum += atom.y;
         zsum += atom.z;
+        
+        if (atom.symmetries) {
+            for (var n = 0; n < atom.symmetries.length; n++) {
+                xsum += atom.symmetries[n].x;
+                ysum += atom.symmetries[n].y;
+                zsum += atom.symmetries[n].x;
+                cnt++;
+                xmin = (xmin < atom.x) ? xmin : atom.x;
+                ymin = (ymin < atom.y) ? ymin : atom.y;
+                zmin = (zmin < atom.z) ? zmin : atom.z;
+                xmax = (xmax > atom.x) ? xmax : atom.x;
+                ymax = (ymax > atom.y) ? ymax : atom.y;
+                zmax = (zmax > atom.z) ? zmax : atom.z; 
+            }
+        }
 
         xmin = (xmin < atom.x) ? xmin : atom.x;
         ymin = (ymin < atom.y) ? ymin : atom.y;
@@ -9229,6 +9540,11 @@ $3Dmol.GLModel = (function() {
         var molObj = null;
         var renderedMolObj = null;
         var lastColors = null;
+        var copyMatrices = []; //transformation + rot matrices
+        var idMatrix = new $3Dmol.Matrix4();
+        idMatrix.identity();
+        var noAssembly;
+        var dontDuplicateAtoms;
         
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
@@ -10097,8 +10413,57 @@ $3Dmol.GLModel = (function() {
                     ret.add(cross);
                 }
             }
+            
+            //for BIOMT assembly
+            if (dontDuplicateAtoms && !noAssembly) {
+                var finalRet = new $3Dmol.Object3D();
+                var t;
+                for (t = 0; t < copyMatrices.length; t++) {
+                    var transformedRet = new $3Dmol.Object3D();
+                    transformedRet = ret.clone();
+                    transformedRet.matrix.copy(copyMatrices[t]);
+                    transformedRet.matrixAutoUpdate = false;
+                    finalRet.add(transformedRet);
+                }
+                return finalRet;
+            }
 
             return ret;
+        };
+        
+        /**
+         * Returns list of rotational/translational matrices if there is BIOMT data
+         * Otherwise returns a list of just the ID matrix
+         *
+         * @function $3Dmol.GlModel#getSymmetries
+         * @return {Array<$3Dmol.Matrix4>}
+         *
+         */
+        this.getSymmetries = function() {
+            if (copyMatrices.length > 1) {
+                return copyMatrices; //returns copyMatrices, which has ID matrix as 1st entry
+            }
+            else {
+                var idList = [idMatrix];
+                return idList;
+            }
+        };
+        
+        /**
+         * Sets symmetries based on specified matrices in list
+         *
+         * @function $3Dmol.GlModel#setSymmetries
+         * @param {Array<$3Dmol.Matrix4>} list
+         *
+         */
+        this.setSymmetries = function(list) {
+            if (typeof(list) == "undefined") { //delete sym data
+                var idList = [idMatrix];
+                copyMatrices = idList;
+            }
+            else {
+                copyMatrices = list;
+            }
         };
 
         /**
@@ -10151,7 +10516,9 @@ $3Dmol.GLModel = (function() {
 				console.log("Best guess: "+format);
             }
         	var parse = $3Dmol.Parsers[format];
-        	parse(atoms, data, options)
+        	parse(atoms, data, options, copyMatrices)
+        	noAssembly = !options.doAssembly; //for BIOMT uses
+        	dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
             setAtomDefaults(atoms, id);
         };
         
@@ -14675,11 +15042,14 @@ $3Dmol.Parsers = (function() {
      * @param {string} str
      * @param {Object} options - keepH (do not strip hydrogens), noSecondaryStructure (do not compute ss)
      */
-    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options) {
+    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options, copyMatrices) {
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
         var computeStruct = !options.noSecondaryStructure;
+        var noAssembly = !options.doAssembly; //don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //if not specified, default to copyMatrix true
+        var allMatrices = [];
         var start = atoms.length;
         var atom;
         var protein = {
@@ -14778,7 +15148,35 @@ $3Dmol.Parsers = (function() {
                 endResi = parseInt(line.substr(33, 4));
                 protein.helix
                         .push([ startChain, startResi, endChain, endResi ]);
+            } else if ((!noAssembly) && (recordName == 'REMARK') && (line.substr(13, 5) == 'BIOMT')) {
+                var n;
+                var matrix = new $3Dmol.Matrix4();
+                for (n = 1; n <= 3; n++) {
+                    line = lines[i].replace(/^\s*/, '');
+                    if (parseInt(line.substr(18, 1)) == n) { //check for all three lines by matching # @ end of "BIOMT" to n
+                        matrix.elements[(n-1)] = parseFloat(line.substr(23, 10));
+                        matrix.elements[(n-1)+4] = parseFloat(line.substr(33, 10));
+                        matrix.elements[(n-1)+8] = parseFloat(line.substr(43, 10));
+                        matrix.elements[(n-1)+12] = parseFloat(line.substr(53));
+                        i++;
+                    }
+                    else {
+                        while(line.substr(13, 5) == 'BIOMT') { //increase "i" until you leave the REMARKs
+                            i++;
+                            line = lines[i].replace(/^\s*/, '');
+                        }
+                    }
+                }
+                matrix.elements[3] = 0;
+                matrix.elements[7] = 0;
+                matrix.elements[11] = 0;
+                matrix.elements[15] = 1;
+                allMatrices.push(matrix);
+                copyMatrices.push(matrix);
+                
+                i--; //set i back
             }
+            
 
         }
 
@@ -14787,6 +15185,63 @@ $3Dmol.Parsers = (function() {
         assignPDBBonds(atoms);
         //console.log("bond connecting " + ((new Date()).getTime() - starttime));
         
+        var end = atoms.length;
+        var offset = end;
+        var idMatrix = new $3Dmol.Matrix4();
+        idMatrix.identity();
+        var t;
+        var l;
+        if(!copyMatrix) { //do full assembly
+            for (t = 0; t < allMatrices.length; t++) {
+                if (!allMatrices[t].isEqual(idMatrix)) {
+                    var n; 
+                    var xyz = new $3Dmol.Vector3();
+                    for (n = 0; n < end; n++) {
+                        var bondsArr = [];
+                        for (l = 0; l < atoms[n].bonds.length; l++) {
+                            bondsArr.push(atoms[n].bonds[l] + offset);
+                        }
+                        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+                        xyz.applyMatrix4(allMatrices[t]);
+                        atoms.push({
+                            'resn' : atoms[n].resn,
+                            'x' : xyz.x,
+                            'y' : xyz.y,
+                            'z' : xyz.z,
+                            'elem' : atoms[n].elem,
+                            'hetflag' : atoms[n].hetflag,
+                            'chain' : atoms[n].chain,
+                            'resi' : atoms[n].resi,
+                            'icode' : atoms[n].icode,
+                            'rescode': atoms[n].rescode,
+                            'serial' : atoms[n].serial,
+                            'atom' : atoms[n].atom,
+                            'bonds' : bondsArr,
+                            'ss' : atoms[n].ss,
+                            'bondOrder' : atoms[n].bondOrder,
+                            'properties' : atoms[n].properties,
+                            'b' : atoms[n].b,
+                            'pdbline' : atoms[n].pdbline,
+                        });
+                    }
+                    offset = atoms.length;
+                }
+            }
+        }
+        //ELSE - give all atoms a pointer to their symmetries 
+        else {
+            for (t = 0; t < atoms.length; t++) {
+                var symmetries = [];
+                for (l = 0; l < copyMatrices.length; l++) {
+                    var newXYZ = new $3Dmol.Vector3();
+                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].x);
+                    newXYZ.applyMatrix4(copyMatrices[l]);
+                    symmetries.push(newXYZ);
+                }
+                atoms[t].symmetries = symmetries;
+            }
+        }
+                
         
         if(computeStruct || !hasStruct) {
             starttime = (new Date()).getTime();

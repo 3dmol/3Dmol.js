@@ -703,13 +703,16 @@ $3Dmol.Renderer = function ( parameters ) {
             _currentCamera = camera;
             refreshMaterial = true;
         }
-
+        
+        _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
+        _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+        _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+        
         //Send projection matrix to uniform variable in shader
         if (refreshMaterial) {
 
             //Load projection, model-view matrices for perspective
-            _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
-            _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+
 
             //Set up correct fog uniform vals
             m_uniforms.fogColor.value = fog.color;
@@ -721,7 +724,6 @@ $3Dmol.Renderer = function ( parameters ) {
 
                 //load view and normal matrices for directional and object lighting
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
-                _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
                 //_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
 
                 if (_lightsNeedUpdate) {

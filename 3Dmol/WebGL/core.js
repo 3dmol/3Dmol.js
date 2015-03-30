@@ -260,6 +260,8 @@ $3Dmol.Object3D.prototype = {
         object.matrix.copy(this.matrix);
         object.matrixWorld.copy(this.matrixWorld);
         object.quaternion.copy(this.quaternion);
+        object.matrixAutoUpdate = this.matrixAutoUpdate;
+        object.matrixWorldNeedsUpdate = this.matrixWorldNeedsUpdate;
         
         object.useQuaternion = this.useQuaternion;
         
