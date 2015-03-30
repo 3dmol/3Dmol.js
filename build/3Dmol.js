@@ -21650,7 +21650,9 @@ $3Dmol.GLViewer = (function() {
 
 		/** Returns an array representing the current viewpoint.
 		 * Translation, zoom, and rotation quaternion. 
-		 * @returns {Array.<number>} arg */
+		 * @function $3Dmol.GLViewer#getView
+		 * @returns {Array.<number>} arg
+		 *  */
 		this.getView = function() {
 			if (!modelGroup)
 				return [ 0, 0, 0, 0, 0, 0, 0, 1 ];
@@ -21660,8 +21662,10 @@ $3Dmol.GLViewer = (function() {
 					q.z, q.w ];
 		};
 
-		/** Sets the view to the specified translation, zoom, and rotation. 
-		 * @param {Array.<number>} arg */
+		/** Sets the view to the specified translation, zoom, and rotation.
+		 * 
+		 * @function $3Dmol.GLViewer#setView
+		 * @param {Array.<number>} arg Array formatted identically to the return value of getView */
 		this.setView = function(arg) {
 
 			if (arg === undefined
@@ -24090,9 +24094,25 @@ $3Dmol.Parsers = (function() {
 	}
 
         assignBonds(atoms);
-	/*atomsPreBonds.prototype.foreach(function(item){
-	    a.push(item);
-	});*/
+	
+	var matrices = [];
+	for (var i = 0; i < mmCIF._atom_sites['frac_transf_matrix[1][1]'].length; i++) {
+	    var matrix = new $3Dmol.Matrix4(
+	            mmCIF._atom_sites['frac_transf_matrix[1][1]'],
+	            mmCIF._atom_sites['frac_transf_matrix[1][2]'],
+	            mmCIF._atom_sites['frac_transf_matrix[1][3]'],
+	            mmCIF._atom_sites['frac_transf_vector[1]'],
+	            mmCIF._atom_sites['frac_transf_matrix[2][1]'],
+	            mmCIF._atom_sites['frac_transf_matrix[2][2]'],
+	            mmCIF._atom_sites['frac_transf_matrix[2][3]'],
+	            mmCIF._atom_sites['frac_transf_vector[2]'],
+	            mmCIF._atom_sites['frac_transf_matrix[3][1]'],
+	            mmCIF._atom_sites['frac_transf_matrix[3][2]'],
+	            mmCIF._atom_sites['frac_transf_matrix[3][3]'],
+	            mmCIF._atom_sites['frac_transf_vector[3]']
+	    );
+	    matrices.push(matrix);
+	}
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
