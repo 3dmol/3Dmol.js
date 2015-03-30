@@ -107,12 +107,12 @@ $3Dmol.ShaderLib = {
 "varying vec2 mapping;",
 
 "void main() {",
-"	 float lensqr = dot(mapping,mapping);",
-"	 if(lensqr > 2.0)",
-"	    discard;",
-"	 float w = sqrt(2.0 - lensqr);",
-"	 float z = sqrt(sqrt(2.0)-lensqr);",
-"	 gl_FragDepthEXT = -.1*z;",
+"    float lensqr = dot(mapping,mapping);",
+"    if(lensqr > 2.0)",
+"       discard;",
+"    float w = sqrt(2.0 - lensqr);",
+"    float z = sqrt(sqrt(2.0)-lensqr);",
+"    gl_FragDepthEXT = -.1*z;",
 "    gl_FragColor = vec4( w*vColor, 1 );",
     
 
@@ -141,9 +141,9 @@ $3Dmol.ShaderLib = {
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
-"	 vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
-"	 mapping = normal.xy;",
-"	 gl_Position = projPosition+adjust;",
+"    vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
+"    mapping = normal.xy;",
+"    gl_Position = projPosition+adjust;",
 
 "}"
         
@@ -277,10 +277,10 @@ $3Dmol.ShaderLib = {
 "    gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
     
 "    #ifndef WIREFRAME",
-"	 if ( gl_FrontFacing )",
-"		gl_FragColor.xyz *= vLightFront;",
-"	 else",
-"		gl_FragColor.xyz *= vLightBack;",
+"    if ( gl_FrontFacing )",
+"       gl_FragColor.xyz *= vLightFront;",
+"    else",
+"       gl_FragColor.xyz *= vLightBack;",
 "    #endif",
     
 "    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
@@ -334,13 +334,13 @@ $3Dmol.ShaderLib = {
 "    vec3 dirVector = normalize( lDirection.xyz );",
 "    float dotProduct = dot( transformedNormal, dirVector );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
-"	 vec3 directionalLightWeightingBack = vec3( max( -dotProduct, 0.0 ) );",
+"    vec3 directionalLightWeightingBack = vec3( max( -dotProduct, 0.0 ) );",
 
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"	 vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
+"    vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
 
 "    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
-"	 vLightBack = vLightBack * diffuse + ambient * ambientLightColor + emissive;",
+"    vLightBack = vLightBack * diffuse + ambient * ambientLightColor + emissive;",
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
