@@ -490,7 +490,9 @@ $3Dmol.GLViewer = (function() {
 
 		/** Returns an array representing the current viewpoint.
 		 * Translation, zoom, and rotation quaternion. 
-		 * @returns {Array.<number>} arg */
+		 * @function $3Dmol.GLViewer#getView
+		 * @returns {Array.<number>} arg
+		 *  */
 		this.getView = function() {
 			if (!modelGroup)
 				return [ 0, 0, 0, 0, 0, 0, 0, 1 ];
@@ -500,8 +502,10 @@ $3Dmol.GLViewer = (function() {
 					q.z, q.w ];
 		};
 
-		/** Sets the view to the specified translation, zoom, and rotation. 
-		 * @param {Array.<number>} arg */
+		/** Sets the view to the specified translation, zoom, and rotation.
+		 * 
+		 * @function $3Dmol.GLViewer#setView
+		 * @param {Array.<number>} arg Array formatted identically to the return value of getView */
 		this.setView = function(arg) {
 
 			if (arg === undefined
