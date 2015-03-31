@@ -993,7 +993,7 @@ $3Dmol.Parsers = (function() {
                 }
             }
         }
-        //ELSE - give all atoms a pointer to their symmetries 
+        //ELSE give all atoms a pointer to their symmetries 
         else {
             for (t = 0; t < atoms.length; t++) {
                 var symmetries = [];
