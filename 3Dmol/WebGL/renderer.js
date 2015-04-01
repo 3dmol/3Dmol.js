@@ -284,13 +284,13 @@ $3Dmol.Renderer = function ( parameters ) {
         if (!blending) {
                 _gl.disable( _gl.BLEND );
 
-		} 
+        } 
         else {
-			_gl.enable( _gl.BLEND );
-			_gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
-			_gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
+            _gl.enable( _gl.BLEND );
+            _gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
+            _gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
 
-		}
+        }
 
         _oldBlending = blending;
     };
@@ -743,7 +743,7 @@ $3Dmol.Renderer = function ( parameters ) {
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
                 _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
             }
-            	
+                
 
             //opacity, diffuse, emissive, etc
             m_uniforms.opacity.value = material.opacity;

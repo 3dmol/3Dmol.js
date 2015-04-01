@@ -111,10 +111,10 @@ $3Dmol.download = function(query, viewer, options, callback) {
     }
 
    $.get(uri, function(ret) {
-	  m.addMolData(ret, type, options);
+      m.addMolData(ret, type, options);
       viewer.zoomTo();
       viewer.render();
-	  if(callback) callback(m);
+      if(callback) callback(m);
 
    });
    
@@ -183,7 +183,7 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
  *     converted to a list.  Otherwise a object of key/value pairs is created with
  *     any missing values set to null
  * = OR ~ - separates key/value pairs of a value object, if not provided value is null
- * 	twiddle is supported since = has special meaning in URLs
+ *     twiddle is supported since = has special meaning in URLs
  * @param (String) str
  * @returns {Object}
  */
