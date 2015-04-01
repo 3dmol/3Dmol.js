@@ -104,7 +104,7 @@
                     
                 glviewer.setBackgroundColor(0xffffff);
                                         
-                receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false, doAssembly:true, duplicateAssemblyAtoms:true});               
+                receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false, doAssembly:true, duplicateAssemblyAtoms:false});               
                 glviewer.zoomTo();
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
@@ -113,7 +113,7 @@
                 
                 /*$3Dmol.download("pdb:1ubq", viewer, null, function(m) {
                     m.setStyle({bonds: 0}, {sphere:{radius:0.5}});
-                	viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
+                    viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
                 });*/
                 
