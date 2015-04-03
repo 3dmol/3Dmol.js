@@ -1062,6 +1062,15 @@ $3Dmol.GLViewer = (function() {
 			return m;
 		};
 
+		this.getLastModel = function() {
+			return models[models.length-1];
+		}
+
+		this.getModel = function(i)
+		{
+			return models[i];
+		}
+
 		/**
 		 * Delete specified model from viewer
 		 * 

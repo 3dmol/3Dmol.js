@@ -70,6 +70,11 @@ $3Dmol.GLModel = (function() {
         var molObj = null;
         var renderedMolObj = null;
         var lastColors = null;
+
+        this.getAtoms = function()
+        {
+            return atoms;
+        }
         
         var defaultColor = $3Dmol.elementColors.defaultColor;
         

@@ -19,7 +19,7 @@ $3Dmol = (function(window) {
    address has loaded 3Dmol.js.  Being able track this usage
    is very helpful when reporting to funding agencies.  Please
    leave this code in if you would like to increase the 
-   likelihood of 3Dmo.js remaining supported.
+   likelihood of 3Dmol.js remaining supported.
 */
 $.get("http://3dmol.csb.pitt.edu/track/report.cgi");
     
@@ -109,13 +109,13 @@ $3Dmol.download = function(query, viewer) {
           "/SDF?record_type=3d";
     }
 
-   $.get(uri, function(ret) {
-      viewer.addModel(ret, type);
-      viewer.zoomTo();
-      viewer.render();                            
-   });
-   
-   return m;
+    $.get(uri, function(ret) {
+        viewer.addModel(ret, type);
+        viewer.zoomTo();
+        viewer.render();
+    });
+
+    return m; // m is always null, should be the GLModel
 };
        
 
