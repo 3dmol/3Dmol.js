@@ -1343,7 +1343,7 @@ $3Dmol.GLModel = (function() {
 
             var selected = this.selectedAtoms(sel, atoms);
             for ( var i = 0; i < atoms.length; i++) {
-                atoms[i].capDrawn = false; //reset for proper stick render
+                if(atoms[i]) atoms[i].capDrawn = false; //reset for proper stick render
             }
 
             for ( var i = 0; i < selected.length; i++) {                

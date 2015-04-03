@@ -10828,7 +10828,7 @@ $3Dmol.GLModel = (function() {
 
             var selected = this.selectedAtoms(sel, atoms);
             for ( var i = 0; i < atoms.length; i++) {
-                atoms[i].capDrawn = false; //reset for proper stick render
+                if(atoms[i]) atoms[i].capDrawn = false; //reset for proper stick render
             }
 
             for ( var i = 0; i < selected.length; i++) {                
@@ -14607,6 +14607,9 @@ $3Dmol.Parsers = (function() {
      */
     parsers.sdf = parsers.SDF = function(atoms, str, options) {
 
+        var noH = false;
+        if(typeof options.keepH !== "undefined") 
+            noH = !options.keepH;
         var lines = str.split("\n");
         if (lines.length < 4)
             return;
@@ -14617,6 +14620,9 @@ $3Dmol.Parsers = (function() {
         var offset = 4;
         if (lines.length < 4 + atomCount + bondCount)
             return;
+        
+        // serial is atom's index in file; index is atoms index in 'atoms'
+        var serialToIndex = [];
         var start = atoms.length;
         var end = start + atomCount;
         var i, line;
@@ -14624,28 +14630,34 @@ $3Dmol.Parsers = (function() {
             line = lines[offset];
             offset++;
             var atom = {};
-            atom.serial = i;
-            atom.x = parseFloat(line.substr(0, 10));
-            atom.y = parseFloat(line.substr(10, 10));
-            atom.z = parseFloat(line.substr(20, 10));
-            atom.hetflag = true;
             atom.atom = atom.elem = line.substr(31, 3).replace(/ /g, "");
-            atom.bonds = [];
-            atom.bondOrder = [];
-            atom.properties = {};
-            atoms[i] = atom;
+
+            if (atom.elem != 'H' || !noH) {
+	            atom.serial = i;
+	            serialToIndex[i] = atoms.length;
+	            atom.x = parseFloat(line.substr(0, 10));
+	            atom.y = parseFloat(line.substr(10, 10));
+	            atom.z = parseFloat(line.substr(20, 10));
+	            atom.hetflag = true;
+	            atom.bonds = [];
+	            atom.bondOrder = [];
+	            atom.properties = {};
+	            atoms.push(atom);
+            }
         }
         
         for (i = 0; i < bondCount; i++) {
             line = lines[offset];
             offset++;
-            var from = parseInt(line.substr(0, 3)) - 1 + start;
-            var to = parseInt(line.substr(3, 3)) - 1 + start;
-            var order = parseInt(line.substr(6, 3));            
-            atoms[from].bonds.push(to);
-            atoms[from].bondOrder.push(order);
-            atoms[to].bonds.push(from);
-            atoms[to].bondOrder.push(order);
+            var from = serialToIndex[parseInt(line.substr(0, 3)) - 1 + start];
+            var to = serialToIndex[parseInt(line.substr(3, 3)) - 1 + start];
+            var order = parseInt(line.substr(6, 3));      
+            if(typeof(from) != 'undefined' && typeof(to) != 'undefined') {
+	            atoms[from].bonds.push(to);
+	            atoms[from].bondOrder.push(order);
+	            atoms[to].bonds.push(from);
+	            atoms[to].bondOrder.push(order);
+            }
         }
 
         return true;
@@ -14959,30 +14971,30 @@ $3Dmol.Parsers = (function() {
             line = lines[offset++];
             tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
             var atom = {};
-            
-            // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
-            // serial id in mol2 file
-            var index = i;
-            var serial = parseInt(tokens[0]);
-            atom.serial = serial;
-            // atom.serial = i;
-            
-            atom.x = parseFloat(tokens[2]);
-            atom.y = parseFloat(tokens[3]);
-            atom.z = parseFloat(tokens[4]);
+            //get element
             atom.atom = atom.elem = tokens[5].split('.')[0];
-                        
-            // TODO: Add capability to ignore H's
-
-            if (atom.elem == 'H' && noH)
-                continue;
-                
-            atom.bonds = [];
-            atom.bondOrder = [];
-            atom.properties = {};
-            
-            serialToIndex[serial] = index;
-            atoms.push(atom);
+            if (atom.elem == 'H' && noH) {
+            		//ignore
+            }
+            else {
+	            // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
+	            // serial id in mol2 file
+	            var index = atoms.length;
+	            var serial = parseInt(tokens[0]);
+	            atom.serial = serial;
+	            // atom.serial = i;
+	            
+	            atom.x = parseFloat(tokens[2]);
+	            atom.y = parseFloat(tokens[3]);
+	            atom.z = parseFloat(tokens[4]);	                        
+	                
+	            atom.bonds = [];
+	            atom.bondOrder = [];
+	            atom.properties = {};
+	            
+	            serialToIndex[serial] = index;	            	
+	            atoms.push(atom);
+            }
         }
         
         // Process BONDS
@@ -15022,11 +15034,6 @@ $3Dmol.Parsers = (function() {
                 }    
 
                 
-                /*
-                 * atoms[from].bonds.push(to);
-                 * atoms[from].bondOrder.push(order);
-                 * atoms[to].bonds.push(from); atoms[to].bondOrder.push(order);
-                 */
 
             }
         }
