@@ -715,12 +715,14 @@ $3Dmol.Parsers = (function() {
 	            
 	            atom.x = parseFloat(tokens[2]);
 	            atom.y = parseFloat(tokens[3]);
-	            atom.z = parseFloat(tokens[4]);	                        
-	                
+	            atom.z = parseFloat(tokens[4]);
+	            atom.atom = tokens[5];
+	            var charge = parseFloat(tokens[8]);
+	            
 	            atom.bonds = [];
 	            atom.bondOrder = [];
-	            atom.properties = {};
-	            
+	            atom.properties = {'charge': charge, 'partialCharge': charge};
+
 	            serialToIndex[serial] = index;	            	
 	            atoms.push(atom);
             }
@@ -1126,7 +1128,7 @@ $3Dmol.Parsers = (function() {
                     'bonds' : [],
                     'ss' : 'c',
                     'bondOrder' : [],
-                    'properties' : {'charge': charge, 'radius': radius},
+                    'properties' : {'charge': charge, 'partialCharge': charge, 'radius': radius},
                     'pdbline' : line
                 });
             } else if (recordName == 'CONECT') {

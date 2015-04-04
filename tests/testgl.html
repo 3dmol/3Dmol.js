@@ -107,16 +107,16 @@
                 glviewer.setBackgroundColor(0xffffff);
                                         
                 receptorModel = m = glviewer.addModel(data, "mol2",{keepH:false});   
-                glviewer.zoomTo();
-                glviewer.render();
-                sdfmodel = glviewer.addModel(sdfdata, "sdf");
+
+              //  m.setColorByProperty({}, 'charge', new $3Dmol.Gradient.RWB(-0.5,0.5));
+                glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.5,.5)}, opacity:0.8});
+
                 glviewer.setStyle({},{stick:{}});            
                 glviewer.zoomTo();
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
                 
                 //m.setStyle({resi:[34,35]},{sphere:{}});
-                
                 /*$3Dmol.download("pdb:1ubq", viewer, null, function(m) {
                     m.setStyle({bonds: 0}, {sphere:{radius:0.5}});
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
@@ -155,9 +155,6 @@
                 <br>
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
  
- 
- <div class='viewer_3Dmoljs' style="width: 600px; height: 600px; position: relative" data-href='file.mol2' data-type='mol2' data-backgroundcolor='0xffffff' data-style='stick'></div>
- <div class='viewer_3Dmoljs' style="width: 600px; height: 600px; position: relative" data-href='file.sdf' data-type='sdf' data-backgroundcolor='0xffffff' data-style='stick'></div>
 
 
 <textarea style="display: none" id="sdfdata">d-(+)-glucose
