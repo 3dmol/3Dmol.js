@@ -99,18 +99,24 @@
                         
             //$.get("test_structs/1YCR.pdb", function(data){
                 
-                moldata = data = $("#moldata_biomt").val();
+                moldata = data = $("#mol2data").val();
+                sdfdata = $('#sdfdata').val();
+                
                 var viewer = glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});
                     
                 glviewer.setBackgroundColor(0xffffff);
                                         
-                receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false, doAssembly:true, duplicateAssemblyAtoms:false});               
+                receptorModel = m = glviewer.addModel(data, "mol2",{keepH:false});   
+
+              //  m.setColorByProperty({}, 'charge', new $3Dmol.Gradient.RWB(-0.5,0.5));
+                glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.5,.5)}, opacity:0.8});
+
+                glviewer.setStyle({},{stick:{}});            
                 glviewer.zoomTo();
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
                 
                 //m.setStyle({resi:[34,35]},{sphere:{}});
-                
                 /*$3Dmol.download("pdb:1ubq", viewer, null, function(m) {
                     m.setStyle({bonds: 0}, {sphere:{radius:0.5}});
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
@@ -149,7 +155,118 @@
                 <br>
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
  
+
+
+<textarea style="display: none" id="sdfdata">d-(+)-glucose
+ OpenBabel04011510253D
  
+ 24 23  0  0  1  0  0  0  0  0999 V2000
+   -3.9862   -0.0915   -0.4753 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.1086   -0.7606    0.0104 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.9542   -0.0724    0.7328 C   0  0  2  0  0  0  0  0  0  0  0  0
+   -2.0091   -0.2416    1.8344 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.0231    1.3296    0.5822 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.6215   -0.5963    0.1543 C   0  0  1  0  0  0  0  0  0  0  0  0
+   -0.3770   -1.6015    0.5802 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.8043   -0.8528   -1.2167 O   0  0  0  0  0  0  0  0  0  0  0  0
+    0.5438    0.3873    0.3765 C   0  0  2  0  0  0  0  0  0  0  0  0
+    0.5651    0.7638    1.4233 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.4099    1.4762   -0.5156 O   0  0  0  0  0  0  0  0  0  0  0  0
+    1.8842   -0.2745   -0.0045 C   0  0  2  0  0  0  0  0  0  0  0  0
+    1.7892   -0.9061   -0.9163 H   0  0  0  0  0  0  0  0  0  0  0  0
+    2.1603   -1.1517    1.0714 O   0  0  0  0  0  0  0  0  0  0  0  0
+    2.9926    0.7769   -0.1479 C   0  0  0  0  0  0  0  0  0  0  0  0
+    4.2328    0.1085   -0.2614 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.1017   -1.8528   -0.0443 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.8294    1.5800    0.0611 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.6200   -0.0374   -1.7429 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.4391    1.9417   -0.3058 H   0  0  0  0  0  0  0  0  0  0  0  0
+    3.1334   -1.2087    1.2144 H   0  0  0  0  0  0  0  0  0  0  0  0
+    2.8241    1.4482   -1.0081 H   0  0  0  0  0  0  0  0  0  0  0  0
+    3.1182    1.3834    0.7690 H   0  0  0  0  0  0  0  0  0  0  0  0
+    4.3093   -0.3449   -1.1240 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  2  0  0  0  0
+  2  3  1  0  0  0  0
+  3  4  1  1  0  0  0
+  5  3  1  0  0  0  0
+  6  9  1  0  0  0  0
+  6  7  1  1  0  0  0
+  6  3  1  0  0  0  0
+  8  6  1  0  0  0  0
+  9 10  1  1  0  0  0
+ 11 20  1  0  0  0  0
+ 11  9  1  0  0  0  0
+ 12 13  1  6  0  0  0
+ 12  9  1  0  0  0  0
+ 12 14  1  0  0  0  0
+ 14 21  1  0  0  0  0
+ 15 12  1  0  0  0  0
+ 15 23  1  0  0  0  0
+ 16 15  1  0  0  0  0
+ 17  2  1  0  0  0  0
+ 18  5  1  0  0  0  0
+ 19  8  1  0  0  0  0
+ 22 15  1  0  0  0  0
+ 24 16  1  0  0  0  0
+M  END
+$$$$
+</textarea>
+<textarea style="display: none" id="mol2data">@<TRIPOS>MOLECULE
+d-(+)-glucose
+ 24 23 0 0 0
+SMALL
+USER_CHARGES
+ 
+@<TRIPOS>ATOM
+      1 O          -3.9862   -0.0915   -0.4753 O.2     1  UNL11111   -0.4322
+      2 C          -3.1086   -0.7606    0.0104 C.2     1  UNL11111    0.3255
+      3 C          -1.9542   -0.0724    0.7328 C.3     1  UNL11111   -0.0217
+      4 H          -2.0091   -0.2416    1.8344 H       1  UNL11111    0.1622
+      5 O          -2.0231    1.3296    0.5822 O.3     1  UNL11111   -0.5655
+      6 C          -0.6215   -0.5963    0.1543 C.3     1  UNL11111    0.0640
+      7 H          -0.3770   -1.6015    0.5802 H       1  UNL11111    0.1699
+      8 O          -0.8043   -0.8528   -1.2167 O.3     1  UNL11111   -0.5538
+      9 C           0.5438    0.3873    0.3765 C.3     1  UNL11111    0.0837
+     10 H           0.5651    0.7638    1.4233 H       1  UNL11111    0.1495
+     11 O           0.4099    1.4762   -0.5156 O.3     1  UNL11111   -0.5765
+     12 C           1.8842   -0.2745   -0.0045 C.3     1  UNL11111    0.0788
+     13 H           1.7892   -0.9061   -0.9163 H       1  UNL11111    0.1445
+     14 O           2.1603   -1.1517    1.0714 O.3     1  UNL11111   -0.5735
+     15 C           2.9926    0.7769   -0.1479 C.3     1  UNL11111   -0.0509
+     16 O           4.2328    0.1085   -0.2614 O.3     1  UNL11111   -0.5508
+     17 H          -3.1017   -1.8528   -0.0443 H       1  UNL11111    0.1348
+     18 H          -2.8294    1.5800    0.0611 H       1  UNL11111    0.3529
+     19 H          -0.6200   -0.0374   -1.7429 H       1  UNL11111    0.3423
+     20 H          -0.4391    1.9417   -0.3058 H       1  UNL11111    0.3528
+     21 H           3.1334   -1.2087    1.2144 H       1  UNL11111    0.3446
+     22 H           2.8241    1.4482   -1.0081 H       1  UNL11111    0.1461
+     23 H           3.1182    1.3834    0.7690 H       1  UNL11111    0.1572
+     24 H           4.3093   -0.3449   -1.1240 H       1  UNL11111    0.3160
+@<TRIPOS>BOND
+     1    19     8    1
+     2     8     6    1
+     3    24    16    1
+     4    22    15    1
+     5    13    12    1
+     6    11    20    1
+     7    11     9    1
+     8     1     2    2
+     9    16    15    1
+    10    15    12    1
+    11    15    23    1
+    12    17     2    1
+    13    12     9    1
+    14    12    14    1
+    15     2     3    1
+    16    18     5    1
+    17     6     9    1
+    18     6     7    1
+    19     6     3    1
+    20     9    10    1
+    21     5     3    1
+    22     3     4    1
+    23    14    21    1
+</textarea>
 <textarea style="display: none;" id="moldata_download"></textarea>
 <textarea style="display: none" id="moldata_test">
 
