@@ -24062,8 +24062,8 @@ $3Dmol.Parsers = (function() {
                 lineNum++;
             }
             else if (linesFiltered[lineNum][0] === '_') {
-                var categoryName = linesFiltered[lineNum].split('.')[0];
-                var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                var categoryName = (linesFiltered[lineNum].split('.')[0]).toLowerCase();
+                var dataItemName = (linesFiltered[lineNum].split('.')[1].split(/\s/)[0]).toLowerCase();
                 var dataItem = getDataItem(categoryName, dataItemName);
                 
 
@@ -24095,8 +24095,8 @@ $3Dmol.Parsers = (function() {
                 var dataItemNames = []
                 while (linesFiltered[lineNum] === "" || linesFiltered[lineNum][0] === '_') {
                     if (linesFiltered[lineNum] !== "") {
-                        var categoryName = linesFiltered[lineNum].split('.')[0];
-                        var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                        var categoryName = (linesFiltered[lineNum].split('.')[0]).toLowerCase();
+                        var dataItemName = (linesFiltered[lineNum].split('.')[1].split(/\s/)[0]).toLowerCase();
                         var dataItem = getDataItem(categoryName, dataItemName);
                         dataItems.push(dataItem);
                         dataItemNames.push(dataItemName);
@@ -24124,13 +24124,13 @@ $3Dmol.Parsers = (function() {
         //Pulls atom information out of the data
         var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
-	    if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
+	    if (mmCIF._atom_site.group_pdb[i] === "TER") continue;
             var atom = {};
             atom.id = parseFloat(mmCIF._atom_site.id[i]);
             atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
             atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
             atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
-            atom.hetflag = true; //need to figure out what this is group_PDB == HETA
+            atom.hetflag = mmCIF._atom_site.group_pdb[i] === "HETA";
             atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.bondOrder = [];
@@ -24150,9 +24150,21 @@ $3Dmol.Parsers = (function() {
         var atomHashTable = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
             var label_alt = mmCIF._atom_site.label_alt_id[i];
+            if (label_alt === undefined) {
+                label_alt = '.';
+            }
             var label_asym = mmCIF._atom_site.label_asym_id[i];
-	    var label_atom = mmCIF._atom_site.label_atom_id[i];
-	    var label_seq = mmCIF._atom_site.label_seq_id[i];
+            if (label_asym === undefined) {
+                label_asym = '.';
+            }
+	        var label_atom = mmCIF._atom_site.label_atom_id[i];
+            if (label_atom === undefined) {
+                label_atom = '.';
+            }
+	        var label_seq = mmCIF._atom_site.label_seq_id[i];
+            if (label_seq === undefined) {
+                label_seq = '.';
+            }
             var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
 
             if (atomHashTable[label_alt] === undefined) {
@@ -24169,6 +24181,7 @@ $3Dmol.Parsers = (function() {
         }
 
         for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
+<<<<<<< HEAD:release/3Dmol.js
 	    var offset = atoms.length;
             var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
                            [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
@@ -24182,6 +24195,50 @@ $3Dmol.Parsers = (function() {
                                [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
                                [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
             if (atomsPreBonds[id2] === undefined) continue;
+=======
+	        var offset = atoms.length;
+	        
+	        var alt = (mmCIF._struct_conn.ptnr1_label_alt_id || [])[i];
+	        if (alt === undefined) {
+	            alt = ".";
+	        }
+	        var asym = (mmCIF._struct_conn.ptnr1_label_asym_id || [])[i];
+	        if (asym === undefined) {
+	            asym = ".";
+	        }
+	        var atom = (mmCIF._struct_conn.ptnr1_label_atom_id || [])[i];
+	        if (atom === undefined) {
+	            atom = ".";
+	        }
+	        var seq = (mmCIF._struct_conn.ptnr1_label_seq_id || [])[i];
+	        if (seq === undefined) {
+	            seq = ".";
+	        }
+	        
+            var id1 = atomHashTable[alt][asym][atom][seq];
+            //if (atomsPreBonds[id1] === undefined) continue;
+            var index1 = atomsPreBonds[id1].index;
+            
+            var alt = (mmCIF._struct_conn.ptnr2_label_alt_id || [])[i];
+	        if (alt === undefined) {
+	            alt = ".";
+	        }
+	        var asym = (mmCIF._struct_conn.ptnr2_label_asym_id || [])[i];
+	        if (asym === undefined) {
+	            asym = ".";
+	        }
+	        var atom = (mmCIF._struct_conn.ptnr2_label_atom_id || [])[i];
+	        if (atom === undefined) {
+	            atom = ".";
+	        }
+	        var seq = (mmCIF._struct_conn.ptnr2_label_seq_id || [])[i];
+	        if (seq === undefined) {
+	            seq = ".";
+	        }
+
+	        var id2 = atomHashTable[alt][asym][atom][seq];
+            //if (atomsPreBonds[id2] === undefined) continue;
+>>>>>>> Correctly handle when some fields are null and implement case insensitivity in mmCIF files.:build/3Dmol.js
             var index2 = atomsPreBonds[id2].index;
 
 	    atomsPreBonds[id1].bonds.push(index2 + offset);
@@ -24199,7 +24256,7 @@ $3Dmol.Parsers = (function() {
 
         assignBonds(atoms);
 	
-    	matrices = [];
+    	var matrices = [];
     	if (mmCIF._pdbx_struct_oper_list !== undefined) {    // transformations may not exist.
            	for (var i = 0; i < mmCIF._pdbx_struct_oper_list.id.length; i++) {
            	    var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]']);

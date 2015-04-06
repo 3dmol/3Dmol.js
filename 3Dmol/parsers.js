@@ -572,9 +572,21 @@ $3Dmol.Parsers = (function() {
         var atomHashTable = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
             var label_alt = mmCIF._atom_site.label_alt_id[i];
+            if (label_alt === undefined) {
+                label_alt = '.';
+            }
             var label_asym = mmCIF._atom_site.label_asym_id[i];
+            if (label_asym === undefined) {
+                label_asym = '.';
+            }
             var label_atom = mmCIF._atom_site.label_atom_id[i];
+            if (label_atom === undefined) {
+                label_atom = '.';
+            }
             var label_seq = mmCIF._atom_site.label_seq_id[i];
+            if (label_seq === undefined) {
+                label_seq = '.';
+            }
             var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
 
             if (atomHashTable[label_alt] === undefined) {
@@ -591,13 +603,45 @@ $3Dmol.Parsers = (function() {
         }
 
         for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
-            var offset = atoms.length;
-            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
-                                   [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
-                                   [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
-                                   [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
-            if (atomsPreBonds[id1] === undefined) continue;
+	        var offset = atoms.length;
+	        
+	        var alt = (mmCIF._struct_conn.ptnr1_label_alt_id || [])[i];
+	        if (alt === undefined) {
+	            alt = ".";
+	        }
+	        var asym = (mmCIF._struct_conn.ptnr1_label_asym_id || [])[i];
+	        if (asym === undefined) {
+	            asym = ".";
+	        }
+	        var atom = (mmCIF._struct_conn.ptnr1_label_atom_id || [])[i];
+	        if (atom === undefined) {
+	            atom = ".";
+	        }
+	        var seq = (mmCIF._struct_conn.ptnr1_label_seq_id || [])[i];
+	        if (seq === undefined) {
+	            seq = ".";
+	        }
+	        
+            var id1 = atomHashTable[alt][asym][atom][seq];
+            //if (atomsPreBonds[id1] === undefined) continue;
             var index1 = atomsPreBonds[id1].index;
+            
+            var alt = (mmCIF._struct_conn.ptnr2_label_alt_id || [])[i];
+	    if (alt === undefined) {
+	        alt = ".";
+	    }
+	    var asym = (mmCIF._struct_conn.ptnr2_label_asym_id || [])[i];
+	    if (asym === undefined) {
+	        asym = ".";
+	    }
+	    var atom = (mmCIF._struct_conn.ptnr2_label_atom_id || [])[i];
+	    if (atom === undefined) {
+	        atom = ".";
+	    }
+	    var seq = (mmCIF._struct_conn.ptnr2_label_seq_id || [])[i];
+	    if (seq === undefined) {
+	        seq = ".";
+	    }
 
             var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
                                    [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
@@ -620,25 +664,31 @@ $3Dmol.Parsers = (function() {
         }
 
         assignBonds(atoms);
-    
-        var matrices = [];
-        for (var i = 0; i < mmCIF._atom_sites['frac_transf_matrix[1][1]'].length; i++) {
-            var matrix = new $3Dmol.Matrix4(
-                mmCIF._atom_sites['frac_transf_matrix[1][1]'],
-                mmCIF._atom_sites['frac_transf_matrix[1][2]'],
-                mmCIF._atom_sites['frac_transf_matrix[1][3]'],
-                mmCIF._atom_sites['frac_transf_vector[1]'],
-                mmCIF._atom_sites['frac_transf_matrix[2][1]'],
-                mmCIF._atom_sites['frac_transf_matrix[2][2]'],
-                mmCIF._atom_sites['frac_transf_matrix[2][3]'],
-                mmCIF._atom_sites['frac_transf_vector[2]'],
-                mmCIF._atom_sites['frac_transf_matrix[3][1]'],
-                mmCIF._atom_sites['frac_transf_matrix[3][2]'],
-                mmCIF._atom_sites['frac_transf_matrix[3][3]'],
-                mmCIF._atom_sites['frac_transf_vector[3]']
-            );
-            matrices.push(matrix);
-        }
+	
+    	var matrices = [];
+    	if (mmCIF._pdbx_struct_oper_list !== undefined) {    // transformations may not exist.
+            for (var i = 0; i < mmCIF._pdbx_struct_oper_list.id.length; i++) {
+           	var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]']);
+           	var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]']);
+           	var matrix13 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][3]']);
+           	var vector1  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[1]'   ]);
+           	var matrix21 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][1]']);
+           	var matrix22 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][2]']);
+           	var matrix23 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][3]']);
+           	var vector2  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[2]'   ]);
+           	var matrix31 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][1]']);
+           	var matrix32 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][2]']);
+           	var matrix33 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][3]']);
+           	var vector3  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[3]'   ]);
+           	
+    	        var matrix = new $3Dmol.Matrix4(
+    	                matrix11, matrix12, matrix13, vector1,
+    	                matrix21, matrix22, matrix23, vector2,
+    	                matrix31, matrix32, matrix33, vector3
+    	        );
+    	        matrices.push(matrix);
+    	    }
+    	}
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
