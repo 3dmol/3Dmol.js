@@ -397,8 +397,12 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]} atoms
      * @param {string} str
      */
-    parsers.mcif = parsers.cif = function(atoms, str, options) {
-
+    parsers.mcif = parsers.cif = function(atoms, str, options, copyMatrices) {
+        
+        var noAssembly = !options.doAssembly; //don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //if not specified, default to copyMatrix true
+        var allMatrices = [];
+        
         //Used to handle quotes correctly
         function splitRespectingQuotes(string, separator) {
             var sections = [];
@@ -549,9 +553,9 @@ $3Dmol.Parsers = (function() {
         if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
             var atom = {};
             atom.id = parseFloat(mmCIF._atom_site.id[i]);
-            atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
-            atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
-            atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
+            atom.x = parseFloat(mmCIF._atom_site.Cartn_x[i]); //CAPITALIZE C
+            atom.y = parseFloat(mmCIF._atom_site.Cartn_y[i]);
+            atom.z = parseFloat(mmCIF._atom_site.Cartn_z[i]);
             atom.hetflag = true; //need to figure out what this is group_PDB == HETA
             atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
@@ -573,17 +577,17 @@ $3Dmol.Parsers = (function() {
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
             var label_alt = mmCIF._atom_site.label_alt_id[i];
             var label_asym = mmCIF._atom_site.label_asym_id[i];
-        var label_atom = mmCIF._atom_site.label_atom_id[i];
-        var label_seq = mmCIF._atom_site.label_seq_id[i];
+            var label_atom = mmCIF._atom_site.label_atom_id[i];
+            var label_seq = mmCIF._atom_site.label_seq_id[i];
             var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
 
             if (atomHashTable[label_alt] === undefined) {
                 atomHashTable[label_alt] = {};
             }
-        if (atomHashTable[label_alt][label_asym] === undefined) {
-        atomHashTable[label_alt][label_asym] = {};
-        }
-        if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
+            if (atomHashTable[label_alt][label_asym] === undefined) {
+                atomHashTable[label_alt][label_asym] = {};
+            }
+            if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
                 atomHashTable[label_alt][label_asym][label_atom] = {};
             }
         
@@ -591,54 +595,113 @@ $3Dmol.Parsers = (function() {
         }
 
         for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
-        var offset = atoms.length;
-            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
-                           [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
-                           [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
-                               [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
+            var offset = atoms.length;
+            /*var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]] //NOT ALL FILES HAVE THESE
+                            //[mmCIF._struct_conn.ptnr1_label_asym_id[i]]
+                            //[mmCIF._struct_conn.ptnr1_label_atom_id[i]]
+                            //[mmCIF._struct_conn.ptnr1_label_seq_id[i]];*/
             if (atomsPreBonds[id1] === undefined) continue;
             var index1 = atomsPreBonds[id1].index;
 
-        var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+            /*var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]] //same
+                               //[mmCIF._struct_conn.ptnr2_label_asym_id[i]]
+                               //[mmCIF._struct_conn.ptnr2_label_atom_id[i]]
+                               //[mmCIF._struct_conn.ptnr2_label_seq_id[i]];*/
             if (atomsPreBonds[id2] === undefined) continue;
             var index2 = atomsPreBonds[id2].index;
 
-        atomsPreBonds[id1].bonds.push(index2 + offset);
-        atomsPreBonds[id1].bondOrder.push(1);
-        atomsPreBonds[id2].bonds.push(index1 + offset);
-        atomsPreBonds[id2].bondOrder.push(1);
-        console.log("connected " + index1 + " and " + index2);
+            atomsPreBonds[id1].bonds.push(index2 + offset);
+            atomsPreBonds[id1].bondOrder.push(1);
+            atomsPreBonds[id2].bonds.push(index1 + offset);
+            atomsPreBonds[id2].bondOrder.push(1);
+            console.log("connected " + index1 + " and " + index2);
         }
 
-    //atoms = atoms.concat(atomsPreBonds);
-    for (var i = 0; i < atomsIndexed.length; i++) {
-            delete atomsIndexed[i].index;
-            atoms.push(atomsIndexed[i]);
-    }
+        //atoms = atoms.concat(atomsPreBonds);
+        for (var i = 0; i < atomsIndexed.length; i++) {
+                delete atomsIndexed[i].index;
+                atoms.push(atomsIndexed[i]);
+        }
 
         assignBonds(atoms);
     
-    var matrices = [];
-    for (var i = 0; i < mmCIF._atom_sites['fract_transf_matrix[1][1]'].length; i++) {
-        var matrix = new $3Dmol.Matrix4(
-                mmCIF._atom_sites['fract_transf_matrix[1][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[1][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[1][3]'],
-                mmCIF._atom_sites['fract_transf_vector[1]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][3]'],
-                mmCIF._atom_sites['fract_transf_vector[2]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][3]'],
-                mmCIF._atom_sites['fract_transf_vector[3]']
-        );
-        matrices.push(matrix);
-    }
+        for (var i = 0; i < mmCIF._pdbx_struct_oper_list['id'].length; i++) {
+            var matrix = new $3Dmol.Matrix4(
+                    mmCIF._pdbx_struct_oper_list['matrix[1][1]'][i],
+                    mmCIF._pdbx_struct_oper_list['matrix[1][2]'][i],
+                    mmCIF._pdbx_struct_oper_list['matrix[1][3]'][i],
+                    mmCIF._pdbx_struct_oper_list['vector[1]'][i],
+                    mmCIF._pdbx_struct_oper_list['matrix[2][1]'][i],
+                    mmCIF._pdbx_struct_oper_list['matrix[2][2]'][i],
+                    mmCIF._pdbx_struct_oper_list['matrix[2][3]'][i],
+                    mmCIF._pdbx_struct_oper_list['vector[2]'][i],
+                    mmCIF._pdbx_struct_oper_list['matrix[3][1]'][i],
+                    mmCIF._pdbx_struct_oper_list['matrix[3][2]'][i],
+                    mmCIF._pdbx_struct_oper_list['matrix[3][3]'][i],
+                    mmCIF._pdbx_struct_oper_list['vector[3]'][i],
+                    0, 0, 0, 1
+            );
+            allMatrices.push(matrix);
+            copyMatrices.push(matrix);
+        }
+        
+        var end = atoms.length;
+        var offset = end;
+        var idMatrix = new $3Dmol.Matrix4();
+        idMatrix.identity();
+        var t;
+        var l;
+        if(!copyMatrix) { //do full assembly
+            for (t = 0; t < allMatrices.length; t++) {
+                if (!allMatrices[t].isEqual(idMatrix)) {
+                    var n; 
+                    var xyz = new $3Dmol.Vector3();
+                    for (n = 0; n < end; n++) {
+                        var bondsArr = [];
+                        for (l = 0; l < atoms[n].bonds.length; l++) {
+                            bondsArr.push(atoms[n].bonds[l] + offset);
+                        }
+                        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+                        xyz.applyMatrix4(allMatrices[t]);
+                        atoms.push({
+                            'resn' : atoms[n].resn,
+                            'x' : xyz.x,
+                            'y' : xyz.y,
+                            'z' : xyz.z,
+                            'elem' : atoms[n].elem,
+                            'hetflag' : atoms[n].hetflag,
+                            'chain' : atoms[n].chain,
+                            'resi' : atoms[n].resi,
+                            'icode' : atoms[n].icode,
+                            'rescode': atoms[n].rescode,
+                            'serial' : atoms[n].serial,
+                            'atom' : atoms[n].atom,
+                            'bonds' : bondsArr,
+                            'ss' : atoms[n].ss,
+                            'bondOrder' : atoms[n].bondOrder,
+                            'properties' : atoms[n].properties,
+                            'b' : atoms[n].b,
+                            'pdbline' : atoms[n].pdbline,
+                        });
+                    }
+                    offset = atoms.length;
+                }
+            }
+        }
+        //ELSE give all atoms a pointer to their symmetries 
+        else {
+            for (t = 0; t < atoms.length; t++) {
+                var symmetries = [];
+                for (l = 0; l < copyMatrices.length; l++) {
+                    var newXYZ = new $3Dmol.Vector3();
+                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].x);
+                    newXYZ.applyMatrix4(copyMatrices[l]);
+                    symmetries.push(newXYZ);
+                }
+                atoms[t].symmetries = symmetries;
+            }
+        }
+        
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
