@@ -813,6 +813,7 @@ $3Dmol.GLModel = (function() {
             var sphereGeometry = new $3Dmol.Geometry(true);                                                         
             var imposterGeometry = new $3Dmol.Geometry(true);                                                         
             var stickGeometry = new $3Dmol.Geometry(true);
+            var cartoonGeometry = new $3Dmol.Geometry(true);
             var i, n;
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
             for (i = 0, n = atoms.length; i < n; i++) {
@@ -849,7 +850,7 @@ $3Dmol.GLModel = (function() {
                 if (range[0] < range[1])
                     gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
 
-                $3Dmol.drawCartoon(ret, cartoonAtoms, gradientscheme);
+                $3Dmol.drawCartoon(ret, cartoonAtoms, cartoonGeometry, gradientscheme);
                 
                 for (i = 0; i < ret.children.length; i++){
                     var geo = ret.children[i].geometry;
@@ -905,6 +906,23 @@ $3Dmol.GLModel = (function() {
                 
                 var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
+            }
+
+            // This is only for DNA ladder rendering right now
+            if (cartoonGeometry.vertices > 0) {
+                var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
+                    vertexColors : true,
+                    ambient : 0x000000,
+                    reflectivity : 0
+                });
+
+                cartoonGeometry.initTypedArrays();
+
+                if (cylinderMaterial.wireframe)
+                    cartoonGeometry.setUpWireframe();
+
+                var ladder = new $3Dmol.Mesh(cartoonGeometry, cylinderMaterial);
+                ret.add(ladder);
             }
             
             //var linewidth;

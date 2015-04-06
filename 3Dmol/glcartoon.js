@@ -370,7 +370,7 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var drawStrand = function(group, atomlist, num, div, fill, coilWidth,
-            helixSheetWidth, doNotSmoothen, gradientscheme) {
+            helixSheetWidth, doNotSmoothen, gradientscheme, geo) {
         num = num || strandDIV;
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
@@ -543,7 +543,8 @@ $3Dmol.drawCartoon = (function() {
                     {
                         currentN1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                         if (currentC3P && currentN1) {
-                            $3Dmol.GLDraw.drawCylinder( new $3Dmol.Geometry(true), currentC3P, currentN1, 0.5, 100, false, false);
+                            $3Dmol.GLDraw.drawCylinder(geo, currentC3P, currentN1, 0.5, 100, false, false);
+                            //var cyl = new $3Dmol.Cylinder(currentC3P, currentN1, 0.5);
                         }
                     }
                 }
@@ -565,10 +566,10 @@ $3Dmol.drawCartoon = (function() {
     };
 
     // actual function call
-    var drawCartoon = function(group, atomlist, gradientscheme) {
+    var drawCartoon = function(group, atomlist, geo, gradientscheme) {
         
         drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
-                false, gradientscheme);
+                false, gradientscheme, geo);
     };
 
     return drawCartoon;
