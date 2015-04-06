@@ -115,8 +115,8 @@ $3Dmol.Parsers = (function() {
     // atoms; assume atom names are correct, only identifies
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
-    var maxlength = 3.2;
-    var maxlengthSq = 10.24;
+        var maxlength = 3.2;
+        var maxlengthSq = 10.24;
         var atoms = [];
         var i, j, n;
         for (i = 0, n = atomsarray.length; i < n; i++) {
@@ -138,24 +138,24 @@ $3Dmol.Parsers = (function() {
 
             for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
-        var zdiff = aj.z - ai.z;
+                var zdiff = aj.z - ai.z;
                 if (zdiff > maxlength) // can't be connected
                     break;
-        if (aj.atom == ai.atom)
-            continue; //can't be connected, but later might be    
-        var ydiff = Math.abs(aj.y - ai.y);
-        if( ydiff > maxlength)
-            continue;
-        var xdiff = Math.abs(aj.x - ai.x);
-        if(xdiff > maxlength)
-            continue;
+                if (aj.atom == ai.atom)
+                    continue; //can't be connected, but later might be	
+                var ydiff = Math.abs(aj.y - ai.y);
+                if( ydiff > maxlength)
+                    continue;
+                var xdiff = Math.abs(aj.x - ai.x);
+                if(xdiff > maxlength)
+                    continue;
                 var dist = xdiff*xdiff+ydiff*ydiff+zdiff*zdiff;
-        if (dist >  maxlengthSq)
-            continue;
+                if (dist >  maxlengthSq)
+                    continue;
 
-        if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
-            continue; //ignore bonds between too close residues
-        //select closest hbond
+                if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
+                    continue; //ignore bonds between too close residues
+                //select closest hbond
                 if (dist < ai.hbondDistanceSq) {
                     ai.hbondOther = aj;
                     ai.hbondDistanceSq = dist;
@@ -613,7 +613,7 @@ $3Dmol.Parsers = (function() {
             console.log("connected " + index1 + " and " + index2);
         }
 
-    //atoms = atoms.concat(atomsPreBonds);
+        //atoms = atoms.concat(atomsPreBonds);
         for (var i = 0; i < atomsIndexed.length; i++) {
             delete atomsIndexed[i].index;
             atoms.push(atomsIndexed[i]);
@@ -950,7 +950,6 @@ $3Dmol.Parsers = (function() {
                 
                 i--; //set i back
             }
-            
 
         }
 
