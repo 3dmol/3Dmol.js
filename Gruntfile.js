@@ -167,7 +167,7 @@ module.exports = function(grunt) {
     grunt.registerTask('test', ['clean:build', 'concat:test', 'closure-compiler:test', 'concat:append']);
     grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'concat:append']);
     
-    grunt.registerTask('build', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'clean:tmp']);
+    grunt.registerTask('build', ['clean:build', 'clean:doc', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'shell:doc', 'clean:tmp']);
     grunt.registerTask('build-quick', ['clean:build', 'concat_pre_build', 'concat_post_build', 'clean:tmp']);
 
     grunt.registerTask('release-update', ['clean:release', 'build', 'copy:release']);
