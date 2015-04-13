@@ -551,7 +551,6 @@ $3Dmol.drawCartoon = (function() {
                         if (gradientscheme) {
                             atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
                         }
-                        console.log(atomcolor);
                         if (currentBaseStart && currentBaseEnd) {
                             $3Dmol.GLDraw.drawCylinder(geo, currentBaseStart, currentBaseEnd, 0.4, $3Dmol.CC.color(atomcolor), false, true);
                         }
