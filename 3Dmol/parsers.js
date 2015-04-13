@@ -484,8 +484,8 @@ $3Dmol.Parsers = (function() {
                 lineNum++;
             }
             else if (linesFiltered[lineNum][0] === '_') {
-                var categoryName = linesFiltered[lineNum].split('.')[0];
-                var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                var categoryName = (linesFiltered[lineNum].split('.')[0]).toLowerCase();
+                var dataItemName = (linesFiltered[lineNum].split('.')[1].split(/\s/)[0]).toLowerCase();
                 var dataItem = getDataItem(categoryName, dataItemName);
                 
 
@@ -517,8 +517,8 @@ $3Dmol.Parsers = (function() {
                 var dataItemNames = []
                 while (linesFiltered[lineNum] === "" || linesFiltered[lineNum][0] === '_') {
                     if (linesFiltered[lineNum] !== "") {
-                        var categoryName = linesFiltered[lineNum].split('.')[0];
-                        var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                        var categoryName = (linesFiltered[lineNum].split('.')[0]).toLowerCase();
+                        var dataItemName = (linesFiltered[lineNum].split('.')[1].split(/\s/)[0]).toLowerCase();
                         var dataItem = getDataItem(categoryName, dataItemName);
                         dataItems.push(dataItem);
                         dataItemNames.push(dataItemName);
@@ -546,7 +546,7 @@ $3Dmol.Parsers = (function() {
         //Pulls atom information out of the data
         var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
-        if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
+        if (mmCIF._atom_site.group_pdb[i] === "TER") continue;
             var atom = {};
             atom.id = parseFloat(mmCIF._atom_site.id[i]);
             atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
@@ -622,20 +622,20 @@ $3Dmol.Parsers = (function() {
         assignBonds(atoms);
     
     var matrices = [];
-    for (var i = 0; i < mmCIF._atom_sites['fract_transf_matrix[1][1]'].length; i++) {
+    for (var i = 0; i < mmCIF._atom_sites['frac_transf_matrix[1][1]'].length; i++) {
         var matrix = new $3Dmol.Matrix4(
-                mmCIF._atom_sites['fract_transf_matrix[1][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[1][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[1][3]'],
-                mmCIF._atom_sites['fract_transf_vector[1]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][3]'],
-                mmCIF._atom_sites['fract_transf_vector[2]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][3]'],
-                mmCIF._atom_sites['fract_transf_vector[3]']
+                mmCIF._atom_sites['frac_transf_matrix[1][1]'],
+                mmCIF._atom_sites['frac_transf_matrix[1][2]'],
+                mmCIF._atom_sites['frac_transf_matrix[1][3]'],
+                mmCIF._atom_sites['frac_transf_vector[1]'],
+                mmCIF._atom_sites['frac_transf_matrix[2][1]'],
+                mmCIF._atom_sites['frac_transf_matrix[2][2]'],
+                mmCIF._atom_sites['frac_transf_matrix[2][3]'],
+                mmCIF._atom_sites['frac_transf_vector[2]'],
+                mmCIF._atom_sites['frac_transf_matrix[3][1]'],
+                mmCIF._atom_sites['frac_transf_matrix[3][2]'],
+                mmCIF._atom_sites['frac_transf_matrix[3][3]'],
+                mmCIF._atom_sites['frac_transf_vector[3]']
         );
         matrices.push(matrix);
     }
