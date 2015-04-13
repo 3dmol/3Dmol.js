@@ -9892,7 +9892,7 @@ $3Dmol.Vector3.prototype =  {
     
     applyQuaternion : function(q) { 
         
-    	//save values
+        //save values
         var x = this.x;
         var y = this.y;
         var z = this.z;
@@ -10565,6 +10565,20 @@ $3Dmol.Matrix4.prototype = {
         return this.makeFrustum( xmin, xmax, ymin, ymax, near, far );
     },
     
+    isEqual : function (m) {
+        var me = m.elements;
+        var te = this.elements;
+        
+        if (te[0] == me[0] && te[4] == me[4] && te[8] == me[8] && te[12] == me[12] &&
+            te[1] == me[1] && te[5] == me[5] && te[9] == me[9] && te[13] == me[13] &&
+            te[2] == me[2] && te[6] == me[6] && te[10] == me[10] && te[14] == me[14] &&
+            te[3] == me[3] && te[7] == me[7] && te[11] == me[11] && te[15] == me[15]) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    },
 
     clone: function () {
         var te = this.elements;
@@ -10577,6 +10591,21 @@ $3Dmol.Matrix4.prototype = {
             te[3], te[7], te[11], te[15]
 
         );
+    },
+    
+    isEqual: function ( m ) {
+        var me = m.elements;
+        var te = this.elements;
+        
+        if (te[0] == me[0] && te[4] == me[4] && te[8] == me[8] && te[12] == me[12] &&
+            te[1] == me[1] && te[5] == me[5] && te[9] == me[9] && te[13] == me[13] &&
+            te[2] == me[2] && te[6] == me[6] && te[10] == me[10] && te[14] == me[14] &&
+            te[3] == me[3] && te[7] == me[7] && te[11] == me[11] && te[15] == me[15]) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
 };
@@ -11010,10 +11039,10 @@ $3Dmol.Color.prototype = {
     },
     
     getHex: function() {
-    	var R = Math.round(this.r*255);
-    	var G = Math.round(this.g*255);
-    	var B = Math.round(this.b*255);
-    	return R<<16 | G << 8 | B;
+        var R = Math.round(this.r*255);
+        var G = Math.round(this.g*255);
+        var B = Math.round(this.b*255);
+        return R<<16 | G << 8 | B;
     },
     
     clone : function() {
@@ -11030,12 +11059,12 @@ $3Dmol.Color.prototype = {
     
     //return object that represents color components from 0 to 255
     scaled : function() {
-    	var ret = {};
-    	ret.r = Math.round(this.r*255);
-    	ret.g = Math.round(this.g*255);
-    	ret.b = Math.round(this.b*255);
-    	ret.a = 1.0;
-    	return ret;
+        var ret = {};
+        ret.r = Math.round(this.r*255);
+        ret.g = Math.round(this.g*255);
+        ret.b = Math.round(this.b*255);
+        ret.a = 1.0;
+        return ret;
     }
     
 };
@@ -11187,6 +11216,8 @@ $3Dmol.Object3D.prototype = {
         object.matrix.copy(this.matrix);
         object.matrixWorld.copy(this.matrixWorld);
         object.quaternion.copy(this.quaternion);
+        object.matrixAutoUpdate = this.matrixAutoUpdate;
+        object.matrixWorldNeedsUpdate = this.matrixWorldNeedsUpdate;
         
         object.useQuaternion = this.useQuaternion;
         
@@ -11228,11 +11259,11 @@ $3Dmol.Geometry = (function() {
     };
     
     geometryGroup.prototype.getNumVertices = function() {
-    	return this.vertices;
+        return this.vertices;
     };
     
     geometryGroup.prototype.getVertices = function() {
-    	return this.vertexArray;
+        return this.vertexArray;
     };
     
     
@@ -11332,7 +11363,7 @@ $3Dmol.Geometry = (function() {
             faceArr = this.faceArray,
             lineArr = this.lineArray;
 
-	//subarray to avoid copying and reallocating memory
+        //subarray to avoid copying and reallocating memory
         this.vertexArray = vertexArr.subarray(0,this.vertices*3);
         this.colorArray = colorArr.subarray(0,this.vertices*3);
         
@@ -11352,13 +11383,13 @@ $3Dmol.Geometry = (function() {
         }
         
         if(reallocatemem) { 
-        	//actually copy smaller arrays to save memory
-        	if(this.normalArray) this.normalArray = new Float32Array(this.normalArray);
-        	if(this.faceArray) this.faceArray = new Uint16Array(this.faceArray);
-        	if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
-        	if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
-        	if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
-        	
+            //actually copy smaller arrays to save memory
+            if(this.normalArray) this.normalArray = new Float32Array(this.normalArray);
+            if(this.faceArray) this.faceArray = new Uint16Array(this.faceArray);
+            if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
+            if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
+            if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
+            
         }
         this.__inittedArrays = true;        
         
@@ -13098,13 +13129,13 @@ $3Dmol.Renderer = function ( parameters ) {
         if (!blending) {
                 _gl.disable( _gl.BLEND );
 
-		} 
+        } 
         else {
-			_gl.enable( _gl.BLEND );
-			_gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
-			_gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
+            _gl.enable( _gl.BLEND );
+            _gl.blendEquationSeparate( _gl.FUNC_ADD, _gl.FUNC_ADD );
+            _gl.blendFuncSeparate( _gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA, _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA );
 
-		}
+        }
 
         _oldBlending = blending;
     };
@@ -13517,13 +13548,16 @@ $3Dmol.Renderer = function ( parameters ) {
             _currentCamera = camera;
             refreshMaterial = true;
         }
-
+        
+        _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
+        _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+        _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
+        
         //Send projection matrix to uniform variable in shader
         if (refreshMaterial) {
 
             //Load projection, model-view matrices for perspective
-            _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
-            _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false, object._modelViewMatrix.elements);
+
 
             //Set up correct fog uniform vals
             m_uniforms.fogColor.value = fog.color;
@@ -13535,7 +13569,6 @@ $3Dmol.Renderer = function ( parameters ) {
 
                 //load view and normal matrices for directional and object lighting
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
-                _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
                 //_gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
 
                 if (_lightsNeedUpdate) {
@@ -13555,7 +13588,7 @@ $3Dmol.Renderer = function ( parameters ) {
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
                 _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
             }
-            	
+                
 
             //opacity, diffuse, emissive, etc
             m_uniforms.opacity.value = material.opacity;
@@ -14610,12 +14643,12 @@ $3Dmol.ShaderLib = {
 "varying vec2 mapping;",
 
 "void main() {",
-"	 float lensqr = dot(mapping,mapping);",
-"	 if(lensqr > 2.0)",
-"	    discard;",
-"	 float w = sqrt(2.0 - lensqr);",
-"	 float z = sqrt(sqrt(2.0)-lensqr);",
-"	 gl_FragDepthEXT = -.1*z;",
+"    float lensqr = dot(mapping,mapping);",
+"    if(lensqr > 2.0)",
+"       discard;",
+"    float w = sqrt(2.0 - lensqr);",
+"    float z = sqrt(sqrt(2.0)-lensqr);",
+"    gl_FragDepthEXT = -.1*z;",
 "    gl_FragColor = vec4( w*vColor, 1 );",
     
 
@@ -14644,9 +14677,9 @@ $3Dmol.ShaderLib = {
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
-"	 vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
-"	 mapping = normal.xy;",
-"	 gl_Position = projPosition+adjust;",
+"    vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
+"    mapping = normal.xy;",
+"    gl_Position = projPosition+adjust;",
 
 "}"
         
@@ -14780,10 +14813,10 @@ $3Dmol.ShaderLib = {
 "    gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
     
 "    #ifndef WIREFRAME",
-"	 if ( gl_FrontFacing )",
-"		gl_FragColor.xyz *= vLightFront;",
-"	 else",
-"		gl_FragColor.xyz *= vLightBack;",
+"    if ( gl_FrontFacing )",
+"       gl_FragColor.xyz *= vLightFront;",
+"    else",
+"       gl_FragColor.xyz *= vLightBack;",
 "    #endif",
     
 "    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
@@ -14837,13 +14870,13 @@ $3Dmol.ShaderLib = {
 "    vec3 dirVector = normalize( lDirection.xyz );",
 "    float dotProduct = dot( transformedNormal, dirVector );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
-"	 vec3 directionalLightWeightingBack = vec3( max( -dotProduct, 0.0 ) );",
+"    vec3 directionalLightWeightingBack = vec3( max( -dotProduct, 0.0 ) );",
 
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"	 vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
+"    vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
 
 "    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
-"	 vLightBack = vLightBack * diffuse + ambient * ambientLightColor + emissive;",
+"    vLightBack = vLightBack * diffuse + ambient * ambientLightColor + emissive;",
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -15137,276 +15170,16 @@ $3Dmol.partialCharges = {
 "VAL:C": 0.60,
 "VAL:O": -0.55
 };
-	
+    
 //this can be supplied to mapAtomProperties
 $3Dmol.applyPartialCharges = function(atom, keepexisting) {
-	if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
-		if(atom.resn && atom.atom) {
-			var key = atom.resn+":"+atom.atom;
-			atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
-		}
-	}
-};
-//This defines the $3Dmol object which is used to create viewers
-//and configure system-wide settings
-
-/** 
- * All of the functionality of $3Dmol.js is contained within the
- * $3Dmol global namespace
- * @namespace */
-$3Dmol = (function(window) {
-    
-    var my = window['$3Dmol'] || {};
-    //var $ = window['jQuery'];
-    
-    return my;
-
-})(window);
-
-/* The following code "phones home" to register that an ip 
-   address has loaded 3Dmol.js.  Being able track this usage
-   is very helpful when reporting to funding agencies.  Please
-   leave this code in if you would like to increase the 
-   likelihood of 3Dmo.js remaining supported.
-*/
-$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
-    
-/**
- * Create and initialize an appropriate viewer at supplied HTML element using specification in config
- * @param {Object | string} element - Either HTML element or string identifier
- * @param {ViewerSpec} config Viewer specification
- * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
- * 
- * @example
- * // Assume there exists an HTML div with id "gldiv"
- * var element = $("#gldiv");
- * 
- * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors };
- * 
- * // Create GLViewer within 'gldiv' 
- * var myviewer = $3Dmol.createViewer(element, config);
- * //'data' is a string containing molecule data in pdb format  
- * myviewer.addModel(data, "pdb");
- * myviewer.zoomTo();
- * myviewer.render();                        
- *                        
- */
-$3Dmol.createViewer = function(element, config)
-{
-    if($.type(element) === "string")
-        element = $("#"+element);
-    if(!element) return;
-
-    config = config || {};
- 
-    
-    if(!config.defaultcolors)
-        config.defaultcolors = $3Dmol.elementColors.defaultColors;
-
-    //try to create the  viewer
-    try {
-    	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
-    }
-    catch(e) {
-    	throw "error creating viewer: "+e;
-    }
-    
-    return null;
-};
-   
-/**
- * Contains a dictionary of embedded viewers created from HTML elements
- * with a the viewer_3Dmoljs css class indexed by their id (or numerically
- * if they do not have an id).
-*/
-$3Dmol.viewers = {};
-
-/**
- * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * 
- * @function $3Dmol.download
- * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
- * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
- * @example
- * var myviewer = $3Dmol.createViewer(gldiv);
- * 
- * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
- * var m = $3Dmol.download('pdb: 2POR', myviewer);
- * 
- * @return {$3Dmol.GLModel} GLModel
- */ 
-$3Dmol.download = function(query, viewer) {
-    var baseURL = '';
-    var type = "";
-    var m = null;
-    if (query.substr(0, 4) === 'pdb:') {
-        type = "pdb";
-        query = query.substr(4).toUpperCase();
-        if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
-           alert("Wrong PDB ID"); return;
+    if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
+        if(atom.resn && atom.atom) {
+            var key = atom.resn+":"+atom.atom;
+            atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
         }
-        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
-    } else if (query.substr(0, 4) == 'cid:') {
-        type = "sdf";
-        query = query.substr(4);
-        if (!query.match(/^[1-9]+$/)) {
-           alert("Wrong Compound ID"); return;
-        }
-        uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
-          "/SDF?record_type=3d";
     }
-
-   $.get(uri, function(ret) {
-      viewer.addModel(ret, type);
-      viewer.zoomTo();
-      viewer.render();                            
-   });
-   
-   return m;
 };
-       
-
-/**
- * $3Dmol surface types
- * @enum {number}
- */
-$3Dmol.SurfaceType = {
-    VDW : 1,
-    MS : 2,
-    SAS : 3,
-    SES  : 4
-};
-
-
-//Miscellaneous functions and classes - to be incorporated into $3Dmol proper
-/**
- * 
- * @param {$3Dmol.Geometry} geometry
- * @param {$3Dmol.Mesh} mesh
- * @returns {undefined}
- */
-$3Dmol.mergeGeos = function(geometry, mesh) {
-    
-    var meshGeo = mesh.geometry;
-    
-    if (meshGeo === undefined) 
-        return;
-    
-    geometry.geometryGroups.push( meshGeo.geometryGroups[0] );
-    
-};
-
-$3Dmol.multiLineString = function(f) {
-    return f.toString()
-            .replace(/^[^\/]+\/\*!?/, '')
-            .replace(/\*\/[^\/]+$/, '');
-            
-};
-
-/** 
- * Render surface synchronously if true
- * @param {boolean} [$3Dmol.SyncSurface=false]
- * @type {boolean} */
-$3Dmol.syncSurface = false;
-
-// Internet Explorer refuses to allow webworkers in data blobs.  I can find
-// no way of checking for this feature directly, so must do a brower check
-if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
-		window.navigator.userAgent.indexOf('Trident/') >= 0) {
-	$3Dmol.syncSurface = true; // can't use webworkers
-}
-
-/**
- * Parse a string that represents a style or atom selection and convert it
- * into an object.  The goal is to make it easier to write out these specifications
- * without resorting to json. Objects cannot be defined recursively.
- * ; - delineates fields of the object 
- * : - if the field has a value other than an empty object, it comes after a colon
- * , - delineates key/value pairs of a value object
- *     If the value object consists of ONLY keys (no = present) the keys are 
- *     converted to a list.  Otherwise a object of key/value pairs is created with
- *     any missing values set to null
- * = OR ~ - separates key/value pairs of a value object, if not provided value is null
- * 	twiddle is supported since = has special meaning in URLs
- * @param (String) str
- * @returns {Object}
- */
-$3Dmol.specStringToObject = function(str) {
-	if(typeof(str) === "object") {
-		return str; //not string, assume was converted already
-	}
-	else if(typeof(str) === "undefined" || str == null) {
-		return str; 
-	}
-	var ret = {};
-	var fields = str.split(';');
-	for(var i = 0; i < fields.length; i++) {
-		var fv = fields[i].split(':');
-		var f = fv[0];
-		var val = {};
-		var vstr = fv[1];
-		if(vstr) {
-			vstr = vstr.replace(/~/g,"=");
-			if(vstr.indexOf('=') !== -1) {
-				//has key=value pairs, must be object
-				var kvs = vstr.split(',');
-				for(var j = 0; j < kvs.length; j++) {
-					var kv = kvs[j].split('=',2);
-					val[kv[0]] = kv[1];
-				}
-			}
-			else if(vstr.indexOf(',') !== -1) {
-				//has multiple values, must list
-				val = vstr.split(',');
-			}
-			else {
-				val = vstr; //value itself
-			}
-		}
-		ret[f] = val;
-	}
-	
-	return ret;
-}
-
-// computes the bounding box around the provided atoms
-/**
- * @param {AtomSpec[]} atomlist
- * @return {Array}
- */
-$3Dmol.getExtent = function(atomlist) {
-    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
-
-    xmin = ymin = zmin = 9999;
-    xmax = ymax = zmax = -9999;
-    xsum = ysum = zsum = cnt = 0;
-
-    if (atomlist.length === 0)
-        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-    for (var i = 0; i < atomlist.length; i++) {
-        var atom = atomlist[i];
-        if (atom === undefined)
-            continue;
-        cnt++;
-        xsum += atom.x;
-        ysum += atom.y;
-        zsum += atom.z;
-
-        xmin = (xmin < atom.x) ? xmin : atom.x;
-        ymin = (ymin < atom.y) ? ymin : atom.y;
-        zmin = (zmin < atom.z) ? zmin : atom.z;
-        xmax = (xmax > atom.x) ? xmax : atom.x;
-        ymax = (ymax > atom.y) ? ymax : atom.y;
-        zmax = (zmax > atom.z) ? zmax : atom.z;
-    }
-
-    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
-            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
-};
-
-
-
 $3Dmol = $3Dmol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
@@ -16935,10 +16708,10 @@ $3Dmol.createViewer = function(element, config)
 
     //try to create the  viewer
     try {
-    	return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+        return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
     }
     catch(e) {
-    	throw "error creating viewer: "+e;
+        throw "error creating viewer: "+e;
     }
     
     return null;
@@ -16961,14 +16734,15 @@ $3Dmol.viewers = {};
  * var myviewer = $3Dmol.createViewer(gldiv);
  * 
  * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * // Note that m will not contain the atomic data until after the network request is completed
  * var m = $3Dmol.download('pdb: 2POR', myviewer);
  * 
  * @return {$3Dmol.GLModel} GLModel
  */ 
-$3Dmol.download = function(query, viewer) {
+$3Dmol.download = function(query, viewer, options, callback) {
     var baseURL = '';
     var type = "";
-    var m = null;
+    var m = viewer.addModel();
     if (query.substr(0, 4) === 'pdb:') {
         type = "pdb";
         query = query.substr(4).toUpperCase();
@@ -16987,9 +16761,11 @@ $3Dmol.download = function(query, viewer) {
     }
 
    $.get(uri, function(ret) {
-      viewer.addModel(ret, type);
+      m.addMolData(ret, type, options);
       viewer.zoomTo();
-      viewer.render();                            
+      viewer.render();
+      if(callback) callback(m);
+
    });
    
    return m;
@@ -17042,8 +16818,8 @@ $3Dmol.syncSurface = false;
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
 // no way of checking for this feature directly, so must do a brower check
 if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
-		window.navigator.userAgent.indexOf('Trident/') >= 0) {
-	$3Dmol.syncSurface = true; // can't use webworkers
+        window.navigator.userAgent.indexOf('Trident/') >= 0) {
+    $3Dmol.syncSurface = true; // can't use webworkers
 }
 
 /**
@@ -17057,46 +16833,46 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
  *     converted to a list.  Otherwise a object of key/value pairs is created with
  *     any missing values set to null
  * = OR ~ - separates key/value pairs of a value object, if not provided value is null
- * 	twiddle is supported since = has special meaning in URLs
+ *     twiddle is supported since = has special meaning in URLs
  * @param (String) str
  * @returns {Object}
  */
 $3Dmol.specStringToObject = function(str) {
-	if(typeof(str) === "object") {
-		return str; //not string, assume was converted already
-	}
-	else if(typeof(str) === "undefined" || str == null) {
-		return str; 
-	}
-	var ret = {};
-	var fields = str.split(';');
-	for(var i = 0; i < fields.length; i++) {
-		var fv = fields[i].split(':');
-		var f = fv[0];
-		var val = {};
-		var vstr = fv[1];
-		if(vstr) {
-			vstr = vstr.replace(/~/g,"=");
-			if(vstr.indexOf('=') !== -1) {
-				//has key=value pairs, must be object
-				var kvs = vstr.split(',');
-				for(var j = 0; j < kvs.length; j++) {
-					var kv = kvs[j].split('=',2);
-					val[kv[0]] = kv[1];
-				}
-			}
-			else if(vstr.indexOf(',') !== -1) {
-				//has multiple values, must list
-				val = vstr.split(',');
-			}
-			else {
-				val = vstr; //value itself
-			}
-		}
-		ret[f] = val;
-	}
-	
-	return ret;
+    if(typeof(str) === "object") {
+        return str; //not string, assume was converted already
+    }
+    else if(typeof(str) === "undefined" || str == null) {
+        return str; 
+    }
+    var ret = {};
+    var fields = str.split(';');
+    for(var i = 0; i < fields.length; i++) {
+        var fv = fields[i].split(':');
+        var f = fv[0];
+        var val = {};
+        var vstr = fv[1];
+        if(vstr) {
+            vstr = vstr.replace(/~/g,"=");
+            if(vstr.indexOf('=') !== -1) {
+                //has key=value pairs, must be object
+                var kvs = vstr.split(',');
+                for(var j = 0; j < kvs.length; j++) {
+                    var kv = kvs[j].split('=',2);
+                    val[kv[0]] = kv[1];
+                }
+            }
+            else if(vstr.indexOf(',') !== -1) {
+                //has multiple values, must list
+                val = vstr.split(',');
+            }
+            else {
+                val = vstr; //value itself
+            }
+        }
+        ret[f] = val;
+    }
+
+return ret;
 }
 
 // computes the bounding box around the provided atoms
@@ -17121,6 +16897,21 @@ $3Dmol.getExtent = function(atomlist) {
         xsum += atom.x;
         ysum += atom.y;
         zsum += atom.z;
+        
+        if (atom.symmetries) {
+            for (var n = 0; n < atom.symmetries.length; n++) {
+                xsum += atom.symmetries[n].x;
+                ysum += atom.symmetries[n].y;
+                zsum += atom.symmetries[n].x;
+                cnt++;
+                xmin = (xmin < atom.x) ? xmin : atom.x;
+                ymin = (ymin < atom.y) ? ymin : atom.y;
+                zmin = (zmin < atom.z) ? zmin : atom.z;
+                xmax = (xmax > atom.x) ? xmax : atom.x;
+                ymax = (ymax > atom.y) ? ymax : atom.y;
+                zmax = (zmax > atom.z) ? zmax : atom.z; 
+            }
+        }
 
         xmin = (xmin < atom.x) ? xmin : atom.x;
         ymin = (ymin < atom.y) ? ymin : atom.y;
@@ -17141,27 +16932,27 @@ $3Dmol.getExtent = function(atomlist) {
 $3Dmol.workerString = function(){
 
     self.onmessage = function(oEvent) {
-    	var obj = oEvent.data;
-    	var type = obj.type;
-    	if (type < 0) // sending atom data, initialize
-    	{
-    		self.atomData = obj.atoms;
-    		self.volume = obj.volume;
-    		self.ps = new ProteinSurface();
-    	} else {
-    		var ps = self.ps;
-    		ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
-    		ps.fillvoxels(self.atomData, obj.extendedAtoms);
-    		ps.buildboundary();
-    		if (type === 4 || type === 2) {
-    			ps.fastdistancemap();
+        var obj = oEvent.data;
+        var type = obj.type;
+        if (type < 0) // sending atom data, initialize
+        {
+            self.atomData = obj.atoms;
+            self.volume = obj.volume;
+            self.ps = new ProteinSurface();
+        } else {
+            var ps = self.ps;
+            ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
+            ps.fillvoxels(self.atomData, obj.extendedAtoms);
+            ps.buildboundary();
+            if (type === 4 || type === 2) {
+                ps.fastdistancemap();
                 ps.boundingatom(false);
-                ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);	
-            }		
-    		ps.marchingcube(type);
-    		var VandF = ps.getFacesAndVertices(obj.atomsToShow);
-    		self.postMessage(VandF);
-    	}
+                ps.fillvoxelswaals(self.atomData, obj.extendedAtoms);    
+            }        
+            ps.marchingcube(type);
+            var VandF = ps.getFacesAndVertices(obj.atomsToShow);
+            self.postMessage(VandF);
+        }
     };
     
 }.toString().replace(/(^.*?\{|\}$)/g, "");
@@ -17185,7 +16976,7 @@ $3Dmol.workerString += "[]]";
 //Otherwise, must uncomment and run the above with 3Dmol-min.js, and cut and paste below everytime ProteinSurface or MarchingCube modified
 $3Dmol.workerString = 'self.onmessage=function(oEvent){var obj=oEvent.data,type=obj.type;if(0>type)self.atomData=obj.atoms,self.volume=obj.volume,self.ps=new ProteinSurface;else{var ps=self.ps;ps.initparm(obj.expandedExtent,1==type?!1:!0,self.volume),ps.fillvoxels(self.atomData,obj.extendedAtoms),ps.buildboundary(),(4===type||2===type)&&(ps.fastdistancemap(),ps.boundingatom(!1),ps.fillvoxelswaals(self.atomData,obj.extendedAtoms)),ps.marchingcube(type);var VandF=ps.getFacesAndVertices(obj.atomsToShow);self.postMessage(VandF)}};var Vector3=function(x,y,z){this.x=x||0,this.y=y||0,this.z=z||0};Vector3.prototype={constructor:Vector3,copy:function(v){return this.x=v.x,this.y=v.y,this.z=v.z,this},multiplyScalar:function(s){return this.x*=s,this.y*=s,this.z*=s,this}};var ISDONE=2,ProteinSurface=function (){var faces,verts,origextent,INOUT=1,ISDONE=2,ISBOUND=4,ptranx=0,ptrany=0,ptranz=0,probeRadius=1.4,defaultScaleFactor=2,scaleFactor=defaultScaleFactor,pHeight=0,pWidth=0,pLength=0,cutRadius=0,vpBits=null,vpDistance=null,vpAtomID=null,pminx=0,pminy=0,pminz=0,pmaxx=0,pmaxy=0,pmaxz=0,vdwRadii={H:1.2,Li:1.82,Na:2.27,K:2.75,C:1.7,N:1.55,O:1.52,F:1.47,P:1.8,S:1.8,CL:1.75,BR:1.85,SE:1.9,ZN:1.39,CU:1.4,NI:1.63,X:2},getVDWIndex=function(atom){return atom.elem&&"undefined"!=typeof vdwRadii[atom.elem]?atom.elem:"X"},depty={},widxz={},nb=[new Int32Array([1,0,0]),new Int32Array([-1,0,0]),new Int32Array([0,1,0]),new Int32Array([0,-1,0]),new Int32Array([0,0,1]),new Int32Array([0,0,-1]),new Int32Array([1,1,0]),new Int32Array([1,-1,0]),new Int32Array([-1,1,0]),new Int32Array([-1,-1,0]),new Int32Array([1,0,1]),new Int32Array([1,0,-1]),new Int32Array([-1,0,1]),new Int32Array([-1,0,-1]),new Int32Array([0,1,1]),new Int32Array([0,1,-1]),new Int32Array([0,-1,1]),new Int32Array([0,-1,-1]),new Int32Array([1,1,1]),new Int32Array([1,1,-1]),new Int32Array([1,-1,1]),new Int32Array([-1,1,1]),new Int32Array([1,-1,-1]),new Int32Array([-1,-1,1]),new Int32Array([-1,1,-1]),new Int32Array([-1,-1,-1])];this.getFacesAndVertices=function(atomlist){var i,il,atomsToShow={};for(i=0,il=atomlist.length;il>i;i++)atomsToShow[atomlist[i]]=!0;var vertices=verts;for(i=0,il=vertices.length;il>i;i++)vertices[i].x=vertices[i].x/scaleFactor-ptranx,vertices[i].y=vertices[i].y/scaleFactor-ptrany,vertices[i].z=vertices[i].z/scaleFactor-ptranz;var finalfaces=[];for(i=0,il=faces.length;il>i;i+=3){var fa=faces[i],fb=faces[i+1],fc=faces[i+2],a=vertices[fa].atomid,b=vertices[fb].atomid,c=vertices[fc].atomid,which=a;if(which>b&&(which=b),which>c&&(which=c),atomsToShow[which]){{vertices[faces[i]],vertices[faces[i+1]],vertices[faces[i+2]]}fa!==fb&&fb!==fc&&fa!==fc&&(finalfaces.push(fa),finalfaces.push(fb),finalfaces.push(fc))}}return vpBits=null,vpDistance=null,vpAtomID=null,{vertices:vertices,faces:finalfaces}},this.initparm=function(extent,btype,volume){volume>1e6&&(scaleFactor=defaultScaleFactor/2);var margin=1/scaleFactor*5.5;origextent=extent,pminx=extent[0][0],pmaxx=extent[1][0],pminy=extent[0][1],pmaxy=extent[1][1],pminz=extent[0][2],pmaxz=extent[1][2],btype?(pminx-=probeRadius+margin,pminy-=probeRadius+margin,pminz-=probeRadius+margin,pmaxx+=probeRadius+margin,pmaxy+=probeRadius+margin,pmaxz+=probeRadius+margin):(pminx-=margin,pminy-=margin,pminz-=margin,pmaxx+=margin,pmaxy+=margin,pmaxz+=margin),pminx=Math.floor(pminx*scaleFactor)/scaleFactor,pminy=Math.floor(pminy*scaleFactor)/scaleFactor,pminz=Math.floor(pminz*scaleFactor)/scaleFactor,pmaxx=Math.ceil(pmaxx*scaleFactor)/scaleFactor,pmaxy=Math.ceil(pmaxy*scaleFactor)/scaleFactor,pmaxz=Math.ceil(pmaxz*scaleFactor)/scaleFactor,ptranx=-pminx,ptrany=-pminy,ptranz=-pminz,pLength=Math.ceil(scaleFactor*(pmaxx-pminx))+1,pWidth=Math.ceil(scaleFactor*(pmaxy-pminy))+1,pHeight=Math.ceil(scaleFactor*(pmaxz-pminz))+1,this.boundingatom(btype),cutRadius=probeRadius*scaleFactor,vpBits=new Uint8Array(pLength*pWidth*pHeight),vpDistance=new Float64Array(pLength*pWidth*pHeight),vpAtomID=new Int32Array(pLength*pWidth*pHeight)},this.boundingatom=function(btype){var txz,tdept,sradius,tradius=[];flagradius=btype;for(var i in vdwRadii)if(vdwRadii.hasOwnProperty(i)){var r=vdwRadii[i];for(tradius[i]=btype?(r+probeRadius)*scaleFactor+.5:r*scaleFactor+.5,sradius=tradius[i]*tradius[i],widxz[i]=Math.floor(tradius[i])+1,depty[i]=new Int32Array(widxz[i]*widxz[i]),indx=0,j=0;j<widxz[i];j++)for(k=0;k<widxz[i];k++)txz=j*j+k*k,txz>sradius?depty[i][indx]=-1:(tdept=Math.sqrt(sradius-txz),depty[i][indx]=Math.floor(tdept)),indx++}},this.fillvoxels=function(atoms,atomlist){var i,il;for(i=0,il=vpBits.length;il>i;i++)vpBits[i]=0,vpDistance[i]=-1,vpAtomID[i]=-1;for(i in atomlist){var atom=atoms[atomlist[i]];void 0!==atom&&this.fillAtom(atom,atoms)}for(i=0,il=vpBits.length;il>i;i++)vpBits[i]&INOUT&&(vpBits[i]|=ISDONE)},this.fillAtom=function(atom,atoms){var cx,cy,cz,ox,oy,oz,mi,mj,mk,i,j,k,si,sj,sk,ii,jj,kk,n;cx=Math.floor(.5+scaleFactor*(atom.x+ptranx)),cy=Math.floor(.5+scaleFactor*(atom.y+ptrany)),cz=Math.floor(.5+scaleFactor*(atom.z+ptranz));var at=getVDWIndex(atom),nind=0,pWH=pWidth*pHeight;for(i=0,n=widxz[at];n>i;i++)for(j=0;n>j;j++){if(-1!=depty[at][nind])for(ii=-1;2>ii;ii++)for(jj=-1;2>jj;jj++)for(kk=-1;2>kk;kk++)if(0!==ii&&0!==jj&&0!==kk)for(mi=ii*i,mk=kk*j,k=0;k<=depty[at][nind];k++)if(mj=k*jj,si=cx+mi,sj=cy+mj,sk=cz+mk,!(0>si||0>sj||0>sk||si>=pLength||sj>=pWidth||sk>=pHeight)){var index=si*pWH+sj*pHeight+sk;if(vpBits[index]&INOUT){var atom2=atoms[vpAtomID[index]];ox=Math.floor(.5+scaleFactor*(atom2.x+ptranx)),oy=Math.floor(.5+scaleFactor*(atom2.y+ptrany)),oz=Math.floor(.5+scaleFactor*(atom2.z+ptranz)),ox*ox+oy*oy+oz*oz>mi*mi+mj*mj+mk*mk&&(vpAtomID[index]=atom.serial)}else vpBits[index]|=INOUT,vpAtomID[index]=atom.serial}nind++}},this.fillvoxelswaals=function(atoms,atomlist){var i,il;for(i=0,il=vpBits.length;il>i;i++)vpBits[i]&=~ISDONE;for(i in atomlist){var atom=atoms[atomlist[i]];void 0!==atom&&this.fillAtomWaals(atom,atoms)}},this.fillAtomWaals=function(atom,atoms){var cx,cy,cz,ox,oy,oz,mi,mj,mk,si,sj,sk,i,j,k,ii,jj,kk,n,nind=0;cx=Math.floor(.5+scaleFactor*(atom.x+ptranx)),cy=Math.floor(.5+scaleFactor*(atom.y+ptrany)),cz=Math.floor(.5+scaleFactor*(atom.z+ptranz));var at=getVDWIndex(atom),pWH=pWidth*pHeight;for(i=0,n=widxz[at];n>i;i++)for(j=0;n>j;j++){if(-1!=depty[at][nind])for(ii=-1;2>ii;ii++)for(jj=-1;2>jj;jj++)for(kk=-1;2>kk;kk++)if(0!==ii&&0!==jj&&0!==kk)for(mi=ii*i,mk=kk*j,k=0;k<=depty[at][nind];k++)if(mj=k*jj,si=cx+mi,sj=cy+mj,sk=cz+mk,!(0>si||0>sj||0>sk||si>=pLength||sj>=pWidth||sk>=pHeight)){var index=si*pWH+sj*pHeight+sk;if(vpBits[index]&ISDONE){var atom2=atoms[vpAtomID[index]];ox=Math.floor(.5+scaleFactor*(atom2.x+ptranx)),oy=Math.floor(.5+scaleFactor*(atom2.y+ptrany)),oz=Math.floor(.5+scaleFactor*(atom2.z+ptranz)),ox*ox+oy*oy+oz*oz>mi*mi+mj*mj+mk*mk&&(vpAtomID[index]=atom.serial)}else vpBits[index]|=ISDONE,vpAtomID[index]=atom.serial}nind++}},this.buildboundary=function(){var pWH=pWidth*pHeight;for(i=0;pLength>i;i++)for(j=0;pHeight>j;j++)for(k=0;pWidth>k;k++){var index=i*pWH+k*pHeight+j;if(vpBits[index]&INOUT)for(var ii=0;26>ii;){var ti=i+nb[ii][0],tj=j+nb[ii][2],tk=k+nb[ii][1];if(ti>-1&&pLength>ti&&tk>-1&&pWidth>tk&&tj>-1&&pHeight>tj&&!(vpBits[ti*pWH+tk*pHeight+tj]&INOUT)){vpBits[index]|=ISBOUND;break}ii++}}};var PointGrid=function(length,width,height){var data=new Int32Array(length*width*height*3);this.set=function(x,y,z,pt){var index=3*((x*width+y)*height+z);data[index]=pt.ix,data[index+1]=pt.iy,data[index+2]=pt.iz},this.get=function(x,y,z){var index=3*((x*width+y)*height+z);return{ix:data[index],iy:data[index+1],iz:data[index+2]}}};this.fastdistancemap=function(){var i,j,k,n,index,boundPoint=new PointGrid(pLength,pWidth,pHeight),pWH=pWidth*pHeight,cutRSq=cutRadius*cutRadius,inarray=[],outarray=[];for(i=0;pLength>i;i++)for(j=0;pWidth>j;j++)for(k=0;pHeight>k;k++)if(index=i*pWH+j*pHeight+k,vpBits[index]&=~ISDONE,vpBits[index]&INOUT&&vpBits[index]&ISBOUND){var triple={ix:i,iy:j,iz:k};boundPoint.set(i,j,k,triple),inarray.push(triple),vpDistance[index]=0,vpBits[index]|=ISDONE,vpBits[index]&=~ISBOUND}do for(outarray=this.fastoneshell(inarray,boundPoint),inarray=[],i=0,n=outarray.length;n>i;i++)index=pWH*outarray[i].ix+pHeight*outarray[i].iy+outarray[i].iz,vpBits[index]&=~ISBOUND,vpDistance[index]<=1.0404*cutRSq&&inarray.push({ix:outarray[i].ix,iy:outarray[i].iy,iz:outarray[i].iz});while(0!==inarray.length);inarray=[],outarray=[],boundPoint=null;var cutsf=scaleFactor-.5;0>cutsf&&(cutsf=0);var cutoff=cutRSq-.5/(.1+cutsf);for(i=0;pLength>i;i++)for(j=0;pWidth>j;j++)for(k=0;pHeight>k;k++)index=i*pWH+j*pHeight+k,vpBits[index]&=~ISBOUND,vpBits[index]&INOUT&&(!(vpBits[index]&ISDONE)||vpBits[index]&ISDONE&&vpDistance[index]>=cutoff)&&(vpBits[index]|=ISBOUND)},this.fastoneshell=function(inarray,boundPoint){var tx,ty,tz,dx,dy,dz,i,j,n,square,bp,index,outarray=[];if(0===inarray.length)return outarray;tnv={ix:-1,iy:-1,iz:-1};var pWH=pWidth*pHeight;for(i=0,n=inarray.length;n>i;i++)for(tx=inarray[i].ix,ty=inarray[i].iy,tz=inarray[i].iz,bp=boundPoint.get(tx,ty,tz),j=0;6>j;j++)tnv.ix=tx+nb[j][0],tnv.iy=ty+nb[j][1],tnv.iz=tz+nb[j][2],tnv.ix<pLength&&tnv.ix>-1&&tnv.iy<pWidth&&tnv.iy>-1&&tnv.iz<pHeight&&tnv.iz>-1&&(index=tnv.ix*pWH+pHeight*tnv.iy+tnv.iz,vpBits[index]&INOUT&&!(vpBits[index]&ISDONE)?(boundPoint.set(tnv.ix,tnv.iy,tz+nb[j][2],bp),dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,vpDistance[index]=square,vpBits[index]|=ISDONE,vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})):vpBits[index]&INOUT&&vpBits[index]&ISDONE&&(dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,square<vpDistance[index]&&(boundPoint.set(tnv.ix,tnv.iy,tnv.iz,bp),vpDistance[index]=square,vpBits[index]&ISBOUND||(vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})))));for(i=0,n=inarray.length;n>i;i++)for(tx=inarray[i].ix,ty=inarray[i].iy,tz=inarray[i].iz,bp=boundPoint.get(tx,ty,tz),j=6;18>j;j++)tnv.ix=tx+nb[j][0],tnv.iy=ty+nb[j][1],tnv.iz=tz+nb[j][2],tnv.ix<pLength&&tnv.ix>-1&&tnv.iy<pWidth&&tnv.iy>-1&&tnv.iz<pHeight&&tnv.iz>-1&&(index=tnv.ix*pWH+pHeight*tnv.iy+tnv.iz,vpBits[index]&INOUT&&!(vpBits[index]&ISDONE)?(boundPoint.set(tnv.ix,tnv.iy,tz+nb[j][2],bp),dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,vpDistance[index]=square,vpBits[index]|=ISDONE,vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})):vpBits[index]&INOUT&&vpBits[index]&ISDONE&&(dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,square<vpDistance[index]&&(boundPoint.set(tnv.ix,tnv.iy,tnv.iz,bp),vpDistance[index]=square,vpBits[index]&ISBOUND||(vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})))));for(i=0,n=inarray.length;n>i;i++)for(tx=inarray[i].ix,ty=inarray[i].iy,tz=inarray[i].iz,bp=boundPoint.get(tx,ty,tz),j=18;26>j;j++)tnv.ix=tx+nb[j][0],tnv.iy=ty+nb[j][1],tnv.iz=tz+nb[j][2],tnv.ix<pLength&&tnv.ix>-1&&tnv.iy<pWidth&&tnv.iy>-1&&tnv.iz<pHeight&&tnv.iz>-1&&(index=tnv.ix*pWH+pHeight*tnv.iy+tnv.iz,vpBits[index]&INOUT&&!(vpBits[index]&ISDONE)?(boundPoint.set(tnv.ix,tnv.iy,tz+nb[j][2],bp),dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,vpDistance[index]=square,vpBits[index]|=ISDONE,vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})):vpBits[index]&INOUT&&vpBits[index]&ISDONE&&(dx=tnv.ix-bp.ix,dy=tnv.iy-bp.iy,dz=tnv.iz-bp.iz,square=dx*dx+dy*dy+dz*dz,square<vpDistance[index]&&(boundPoint.set(tnv.ix,tnv.iy,tnv.iz,bp),vpDistance[index]=square,vpBits[index]&ISBOUND||(vpBits[index]|=ISBOUND,outarray.push({ix:tnv.ix,iy:tnv.iy,iz:tnv.iz})))));return outarray},this.marchingcubeinit=function(stype){for(var i=0,lim=vpBits.length;lim>i;i++)1==stype?vpBits[i]&=~ISBOUND:4==stype?(vpBits[i]&=~ISDONE,vpBits[i]&ISBOUND&&(vpBits[i]|=ISDONE),vpBits[i]&=~ISBOUND):2==stype?vpBits[i]&ISBOUND&&vpBits[i]&ISDONE?vpBits[i]&=~ISBOUND:vpBits[i]&ISBOUND&&!(vpBits[i]&ISDONE)&&(vpBits[i]|=ISDONE):3==stype&&(vpBits[i]&=~ISBOUND)};this.marchingcube=function(stype){this.marchingcubeinit(stype),verts=[],faces=[],march(vpBits,verts,faces,{smooth:1,nX:pLength,nY:pWidth,nZ:pHeight});for(var pWH=pWidth*pHeight,i=0,vlen=verts.length;vlen>i;i++)verts[i].atomid=vpAtomID[verts[i].x*pWH+pHeight*verts[i].y+verts[i].z];laplacianSmooth(1,verts,faces)}},march=function (data,verts,faces,spec){var i,il,fulltable=!!spec.fulltable,origin=spec.hasOwnProperty("origin")&&spec.origin.hasOwnProperty("x")?spec.origin:{x:0,y:0,z:0},voxel=!!spec.voxel,nX=spec.nX||0,nY=spec.nY||0,nZ=spec.nZ||0,scale=spec.scale||1,unitCube=new Vector3(1,1,1).multiplyScalar(scale),vertnums=new Int32Array(nX*nY*nZ);for(i=0,il=vertnums.length;il>i;++i)vertnums[i]=-1;var getVertex=function(i,j,k,code,p1,p2){var pt=new Vector3;pt.copy(origin);var val1=!!(code&1<<p1),val2=!!(code&1<<p2),p=p1;!val1&&val2&&(p=p2),1&p&&k++,2&p&&j++,4&p&&i++,pt.x+=unitCube.x*i,pt.y+=unitCube.y*j,pt.z+=unitCube.z*k;var index=(nY*i+j)*nZ+k;return voxel?(verts.push(pt),verts.length-1):(vertnums[index]<0&&(vertnums[index]=verts.length,verts.push(pt)),vertnums[index])},intersects=new Int32Array(12),etable=fulltable?edgeTable2:edgeTable,tritable=fulltable?triTable2:triTable;for(i=0;nX-1>i;++i)for(var j=0;nY-1>j;++j)for(var k=0;nZ-1>k;++k){for(var code=0,p=0;8>p;++p){var index=(nY*(i+((4&p)>>2))+j+((2&p)>>1))*nZ+k+(1&p),val=!!(data[index]&ISDONE);code|=val<<p}if(0!==code&&255!==code){var ecode=etable[code];if(0!==ecode){var ttable=tritable[code];1&ecode&&(intersects[0]=getVertex(i,j,k,code,0,1)),2&ecode&&(intersects[1]=getVertex(i,j,k,code,1,3)),4&ecode&&(intersects[2]=getVertex(i,j,k,code,3,2)),8&ecode&&(intersects[3]=getVertex(i,j,k,code,2,0)),16&ecode&&(intersects[4]=getVertex(i,j,k,code,4,5)),32&ecode&&(intersects[5]=getVertex(i,j,k,code,5,7)),64&ecode&&(intersects[6]=getVertex(i,j,k,code,7,6)),128&ecode&&(intersects[7]=getVertex(i,j,k,code,6,4)),256&ecode&&(intersects[8]=getVertex(i,j,k,code,0,4)),512&ecode&&(intersects[9]=getVertex(i,j,k,code,1,5)),1024&ecode&&(intersects[10]=getVertex(i,j,k,code,3,7)),2048&ecode&&(intersects[11]=getVertex(i,j,k,code,2,6));for(var t=0;t<ttable.length;t+=3){var a=intersects[ttable[t]],b=intersects[ttable[t+1]],c=intersects[ttable[t+2]];voxel&&t>=3&&(verts.push(verts[a]),a=verts.length-1,verts.push(verts[b]),b=verts.length-1,verts.push(verts[c]),c=verts.length-1),faces.push(a),faces.push(b),faces.push(c)}}}}},laplacianSmooth=function (numiter,verts,faces){var i,il,j,jl,k,tps=new Array(verts.length);for(i=0,il=verts.length;il>i;i++)tps[i]={x:0,y:0,z:0};var flagvert,vertdeg=new Array(20);for(i=0;20>i;i++)vertdeg[i]=new Array(verts.length);for(i=0,il=verts.length;il>i;i++)vertdeg[0][i]=0;for(i=0,il=faces.length/3;il>i;i++){var aoffset=3*i,boffset=3*i+1,coffset=3*i+2;for(flagvert=!0,j=0,jl=vertdeg[0][faces[aoffset]];jl>j;j++)if(faces[boffset]==vertdeg[j+1][faces[aoffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[aoffset]]++,vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]]=faces[boffset]),flagvert=!0,j=0,jl=vertdeg[0][faces[aoffset]];jl>j;j++)if(faces[coffset]==vertdeg[j+1][faces[aoffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[aoffset]]++,vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]]=faces[coffset]),flagvert=!0,j=0,jl=vertdeg[0][faces[boffset]];jl>j;j++)if(faces[aoffset]==vertdeg[j+1][faces[boffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[boffset]]++,vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]]=faces[aoffset]),flagvert=!0,j=0,jl=vertdeg[0][faces[boffset]];jl>j;j++)if(faces[coffset]==vertdeg[j+1][faces[boffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[boffset]]++,vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]]=faces[coffset]),flagvert=!0,j=0;j<vertdeg[0][faces[coffset]];j++)if(faces[aoffset]==vertdeg[j+1][faces[coffset]]){flagvert=!1;break}for(flagvert&&(vertdeg[0][faces[coffset]]++,vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]]=faces[aoffset]),flagvert=!0,j=0,jl=vertdeg[0][faces[coffset]];jl>j;j++)if(faces[boffset]==vertdeg[j+1][faces[coffset]]){flagvert=!1;break}flagvert&&(vertdeg[0][faces[coffset]]++,vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]]=faces[boffset])}var wt=1,wt2=.5;for(k=0;numiter>k;k++){for(i=0,il=verts.length;il>i;i++)if(vertdeg[0][i]<3)tps[i].x=verts[i].x,tps[i].y=verts[i].y,tps[i].z=verts[i].z;else if(3==vertdeg[0][i]||4==vertdeg[0][i]){for(tps[i].x=0,tps[i].y=0,tps[i].z=0,j=0,jl=vertdeg[0][i];jl>j;j++)tps[i].x+=verts[vertdeg[j+1][i]].x,tps[i].y+=verts[vertdeg[j+1][i]].y,tps[i].z+=verts[vertdeg[j+1][i]].z;tps[i].x+=wt2*verts[i].x,tps[i].y+=wt2*verts[i].y,tps[i].z+=wt2*verts[i].z,tps[i].x/=wt2+vertdeg[0][i],tps[i].y/=wt2+vertdeg[0][i],tps[i].z/=wt2+vertdeg[0][i]}else{for(tps[i].x=0,tps[i].y=0,tps[i].z=0,j=0,jl=vertdeg[0][i];jl>j;j++)tps[i].x+=verts[vertdeg[j+1][i]].x,tps[i].y+=verts[vertdeg[j+1][i]].y,tps[i].z+=verts[vertdeg[j+1][i]].z;tps[i].x+=wt*verts[i].x,tps[i].y+=wt*verts[i].y,tps[i].z+=wt*verts[i].z,tps[i].x/=wt+vertdeg[0][i],tps[i].y/=wt+vertdeg[0][i],tps[i].z/=wt+vertdeg[0][i]}for(i=0,il=verts.length;il>i;i++)verts[i].x=tps[i].x,verts[i].y=tps[i].y,verts[i].z=tps[i].z}},edgeTable=new Uint32Array([0,0,0,0,0,0,0,2816,0,0,0,1792,0,3328,3584,3840,0,0,0,138,0,21,0,134,0,0,0,652,0,2067,3865,3600,0,0,0,42,0,0,0,294,0,0,21,28,0,3875,1049,3360,0,168,162,170,0,645,2475,2210,0,687,293,172,4010,3747,3497,3232,0,0,0,0,0,69,0,900,0,0,0,1792,138,131,1608,1920,0,81,0,2074,84,85,84,86,0,81,0,3676,330,1105,1881,1616,0,0,0,42,0,69,0,502,0,0,21,3580,138,2035,1273,1520,2816,104,2337,106,840,581,367,102,2816,3695,3429,3180,1898,1635,1385,1120,0,0,0,0,0,0,0,3910,0,0,69,588,42,2083,41,2880,0,0,0,1722,0,2293,4095,3830,0,255,757,764,2538,2291,3065,2800,0,0,81,338,0,3925,1119,3414,84,855,85,340,2130,2899,89,2384,1792,712,194,1162,4036,3781,3535,3270,708,719,197,204,3018,2755,2505,2240,0,0,0,0,168,420,168,1958,162,162,676,2988,170,163,680,928,3328,3096,3328,3642,52,53,1855,1590,2340,2111,2869,2620,298,51,825,560,3584,3584,3090,3482,1668,1941,1183,1430,146,2975,2069,2460,154,915,153,400,3840,3592,3329,3082,1796,1541,1295,1030,2818,2575,2309,2060,778,515,265,0]),triTable=[[],[],[],[],[],[],[],[11,9,8],[],[],[],[8,10,9],[],[10,8,11],[9,11,10],[8,10,9,8,11,10],[],[],[],[1,7,3],[],[4,2,0],[],[2,1,7],[],[],[],[2,7,3,2,9,7],[],[1,4,11,1,0,4],[3,8,0,11,9,4,11,10,9],[4,11,9,11,10,9],[],[],[],[5,3,1],[],[],[],[2,5,8,2,1,5],[],[],[2,4,0],[3,2,4],[],[0,9,1,8,10,5,8,11,10],[3,4,0,3,10,4],[5,8,10,8,11,10],[],[3,5,7],[7,1,5],[1,7,3,1,5,7],[],[9,2,0,9,7,2],[0,3,8,1,7,11,1,5,7],[11,1,7,1,5,7],[],[9,1,0,5,3,2,5,7,3],[8,2,5,8,0,2],[2,5,3,5,7,3],[3,9,1,3,8,9,7,11,10,7,10,5],[9,1,0,10,7,11,10,5,7],[3,8,0,7,10,5,7,11,10],[11,5,7,11,10,5],[],[],[],[],[],[0,6,2],[],[7,2,9,7,9,8],[],[],[],[8,10,9],[7,1,3],[7,1,0],[6,9,3,6,10,9],[7,10,8,10,9,8],[],[6,0,4],[],[11,1,4,11,3,1],[2,4,6],[2,0,4,2,4,6],[2,4,6],[1,4,2,4,6,2],[],[6,0,4],[],[2,11,3,6,9,4,6,10,9],[8,6,1,8,1,3],[10,0,6,0,4,6],[8,0,3,9,6,10,9,4,6],[10,4,6,10,9,4],[],[],[],[5,3,1],[],[0,6,2],[],[7,4,8,5,2,1,5,6,2],[],[],[2,4,0],[7,4,8,2,11,3,10,5,6],[7,1,3],[5,6,10,0,9,1,8,7,4],[5,6,10,7,0,3,7,4,0],[10,5,6,4,8,7],[9,11,8],[3,5,6],[0,5,11,0,11,8],[6,3,5,3,1,5],[3,9,6,3,8,9],[9,6,0,6,2,0],[0,3,8,2,5,6,2,1,5],[1,6,2,1,5,6],[9,11,8],[1,0,9,6,10,5,11,3,2],[6,10,5,2,8,0,2,11,8],[3,2,11,10,5,6],[10,5,6,9,3,8,9,1,3],[0,9,1,5,6,10],[8,0,3,10,5,6],[10,5,6],[],[],[],[],[],[],[],[1,10,2,9,11,6,9,8,11],[],[],[6,0,2],[3,6,9,3,2,6],[3,5,1],[0,5,1,0,11,5],[0,3,5],[6,9,11,9,8,11],[],[],[],[4,5,9,7,1,10,7,3,1],[],[11,6,7,2,4,5,2,0,4],[11,6,7,8,0,3,1,10,2,9,4,5],[6,7,11,1,10,2,9,4,5],[],[4,1,0,4,5,1,6,7,3,6,3,2],[9,4,5,0,6,7,0,2,6],[4,5,9,6,3,2,6,7,3],[6,7,11,5,3,8,5,1,3],[6,7,11,4,1,0,4,5,1],[4,5,9,3,8,0,11,6,7],[9,4,5,7,11,6],[],[],[0,6,4],[8,6,4,8,1,6],[],[0,10,2,0,9,10,4,8,11,4,11,6],[10,2,1,6,0,3,6,4,0],[10,2,1,11,4,8,11,6,4],[4,2,6],[1,0,9,2,4,8,2,6,4],[2,4,0,2,6,4],[8,2,4,2,6,4],[11,4,1,11,6,4],[0,9,1,4,11,6,4,8,11],[3,6,0,6,4,0],[8,6,4,8,11,6],[10,8,9],[6,3,9,6,7,3],[6,7,1],[10,7,1,7,3,1],[7,11,6,8,10,2,8,9,10],[11,6,7,10,0,9,10,2,0],[2,1,10,7,11,6,8,0,3],[1,10,2,6,7,11],[7,2,6,7,9,2],[1,0,9,3,6,7,3,2,6],[7,0,6,0,2,6],[2,7,3,2,6,7],[7,11,6,3,9,1,3,8,9],[9,1,0,11,6,7],[0,3,8,11,6,7],[11,6,7],[],[],[],[],[5,3,7],[8,5,2,8,7,5],[5,3,7],[1,10,2,5,8,7,5,9,8],[1,7,5],[1,7,5],[9,2,7,9,7,5],[11,3,2,8,5,9,8,7,5],[1,3,7,1,7,5],[0,7,1,7,5,1],[9,3,5,3,7,5],[9,7,5,9,8,7],[8,10,11],[3,4,10,3,10,11],[8,10,11],[5,9,4,1,11,3,1,10,11],[2,4,5],[5,2,4,2,0,4],[0,3,8,5,9,4,10,2,1],[2,1,10,9,4,5],[2,8,5,2,11,8],[3,2,11,1,4,5,1,0,4],[9,4,5,8,2,11,8,0,2],[11,3,2,9,4,5],[8,5,3,5,1,3],[5,0,4,5,1,0],[3,8,0,4,5,9],[9,4,5],[11,9,10],[11,9,10],[1,11,4,1,10,11],[8,7,4,11,1,10,11,3,1],[2,7,9,2,9,10],[4,8,7,0,10,2,0,9,10],[2,1,10,0,7,4,0,3,7],[10,2,1,8,7,4],[1,7,4],[3,2,11,4,8,7,9,1,0],[11,4,2,4,0,2],[2,11,3,7,4,8],[4,1,7,1,3,7],[1,0,9,8,7,4],[3,4,0,3,7,4],[8,7,4],[8,9,10,8,10,11],[3,9,11,9,10,11],[0,10,8,10,11,8],[10,3,1,10,11,3],[2,8,10,8,9,10],[9,2,0,9,10,2],[8,0,3,1,10,2],[10,2,1],[1,11,9,11,8,9],[11,3,2,0,9,1],[11,0,2,11,8,0],[11,3,2],[8,1,3,8,9,1],[9,1,0],[8,0,3],[]]';
 
-$3Dmol.SurfaceWorker = window.URL.createObjectURL(new Blob([$3Dmol.workerString]));
+$3Dmol.SurfaceWorker = window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'}));
 
 $3Dmol['workerString'] = $3Dmol.workerString;
 $3Dmol['SurfaceWorker'] = $3Dmol.SurfaceWorker;
@@ -17213,8 +17004,8 @@ $(document).ready(function() {
                 datauri = "http://www.pdb.org/pdb/files/" + viewerdiv.data("pdb") + ".pdb";
                 type = "pdb";
             } else if(viewerdiv.data("cid")) {
-            	//this doesn't actually work since pubchem does have CORS enabled
-            	type = "sdf";
+                //this doesn't actually work since pubchem does have CORS enabled
+                type = "sdf";
                 datauri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
                 "/SDF?record_type=3d";
             }
@@ -17238,43 +17029,43 @@ $(document).ready(function() {
             var reslabre = /labelres(.*)/;
             var keys = [];
             for(var dataname in d) {
-            	if(d.hasOwnProperty(dataname)) {
-            		keys.push(dataname);
-            	}
+                if(d.hasOwnProperty(dataname)) {
+                    keys.push(dataname);
+                }
             }
             keys.sort();
             for(var i = 0; i < keys.length; i++) {
-            	var dataname = keys[i];
-            	var m = stylere.exec(dataname);
-            	if(m) {
-            		var selname = "select"+m[1];
-            		var newsel = $3Dmol.specStringToObject(d[selname]);
-            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
-            		selectstylelist.push([newsel,styleobj]);
-            	}         
-            	m = surfre.exec(dataname);
-            	if(m) {
-            		var selname = "select"+m[1];
-            		var newsel = $3Dmol.specStringToObject(d[selname]);
-            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
-            		surfaces.push([newsel,styleobj]);
-            	}
-            	m = reslabre.exec(dataname);
-            	if(m) {
-            		var selname = "select"+m[1];
-            		var newsel = $3Dmol.specStringToObject(d[selname]);
-            		var styleobj = $3Dmol.specStringToObject(d[dataname]);
-            		labels.push([newsel,styleobj]);
-            	}
+                var dataname = keys[i];
+                var m = stylere.exec(dataname);
+                if(m) {
+                    var selname = "select"+m[1];
+                    var newsel = $3Dmol.specStringToObject(d[selname]);
+                    var styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    selectstylelist.push([newsel,styleobj]);
+                }         
+                m = surfre.exec(dataname);
+                if(m) {
+                    var selname = "select"+m[1];
+                    var newsel = $3Dmol.specStringToObject(d[selname]);
+                    var styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    surfaces.push([newsel,styleobj]);
+                }
+                m = reslabre.exec(dataname);
+                if(m) {
+                    var selname = "select"+m[1];
+                    var newsel = $3Dmol.specStringToObject(d[selname]);
+                    var styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    labels.push([newsel,styleobj]);
+                }
             }
             
             try {
-            	var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
-            		viewer.setBackgroundColor(bgcolor);            
-            	}});
+                var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
+                    viewer.setBackgroundColor(bgcolor);            
+                }});
             } catch ( error ) {
-            	//for autoload, provide a useful error message
-            	window.location = "http://get.webgl.org";            		
+                //for autoload, provide a useful error message
+                window.location = "http://get.webgl.org";                    
             }
             
             
@@ -17282,26 +17073,26 @@ $(document).ready(function() {
                 
                 type = viewerdiv.data("type") || viewerdiv.data("datatype") || type;
                 if(!type) {
-                	type = datauri.substr(datauri.lastIndexOf('.')+1);
+                    type = datauri.substr(datauri.lastIndexOf('.')+1);
                 }
                                 
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
                     glviewer.setStyle(select,style);
                     for(var i = 0; i < selectstylelist.length; i++) {
-                    	var sel = selectstylelist[i][0] || {};
-                    	var sty = selectstylelist[i][1] || {"line":{}}
-                    	glviewer.setStyle(sel, sty);
+                        var sel = selectstylelist[i][0] || {};
+                        var sty = selectstylelist[i][1] || {"line":{}}
+                        glviewer.setStyle(sel, sty);
                     }
                     for(var i = 0; i < surfaces.length; i++) {
-                    	var sel = surfaces[i][0] || {};
-                    	var sty = surfaces[i][1] || {}
-                    	glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                        var sel = surfaces[i][0] || {};
+                        var sty = surfaces[i][1] || {}
+                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
                     }
                     for(var i = 0; i < labels.length; i++) {
-                    	var sel = labels[i][0] || {};
-                    	var sty = labels[i][1] || {}
-                    	glviewer.addResLabels(sel, sty);
+                        var sel = labels[i][0] || {};
+                        var sty = labels[i][1] || {}
+                        glviewer.addResLabels(sel, sty);
                     }
                     // Allowing us to fire callback after viewer has added model
                     if (callback) 
@@ -17329,11 +17120,11 @@ $(document).ready(function() {
                     }
 
                     glviewer.addModel(moldata, type);
-                	glviewer.setStyle(select, style);
+                    glviewer.setStyle(select, style);
                     for(var i = 0; i < selectstylelist.length; i++) {
-                    	var sel = selectstylelist[i][0] || {};
-                    	var sty = selectstylelist[i][1] || {"line":{}}
-                    	glviewer.setStyle(sel, sty);
+                        var sel = selectstylelist[i][0] || {};
+                        var sty = selectstylelist[i][1] || {"line":{}}
+                        glviewer.setStyle(sel, sty);
                     }                
                 }
 
@@ -17417,12 +17208,17 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     var color = atom.color;
     if (typeof (style.color) != "undefined" && style.color != "spectrum")
         color = style.color;
-    if(typeof(style.colorscheme) != "undefined" &&
-    		typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
-    	var scheme = $3Dmol.elementColors[style.colorscheme];
-    	if(typeof(scheme[atom.elem]) != "undefined") {
-    		color = scheme[atom.elem];
-    	}
+    if(typeof(style.colorscheme) != "undefined") {
+        if(typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+            //name of builtin colorscheme
+            var scheme = $3Dmol.elementColors[style.colorscheme];
+            if(typeof(scheme[atom.elem]) != "undefined") {
+                color = scheme[atom.elem];
+            }
+        } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+            //actual color scheme provided
+            color = style.colorscheme[atom.elem];
+        }
     }
     var C = $3Dmol.CC.color(color);
     return C;
@@ -17437,104 +17233,104 @@ $3Dmol.elementColors.defaultColor = 0xff1493;
 
 /** @property Jmol-like element colors*/
 $3Dmol.elementColors.Jmol = {
-		'H': 0xFFFFFF,
-		'He': 0xD9FFFF,
-		'HE': 0xD9FFFF,
-		'Li': 0xCC80FF,
-		'LI': 0xCC80FF,
-		'B': 0xFFB5B5,
-		'C': 0x909090,
-		'N': 0x3050F8,
-		'O': 0xFF0D0D,
-		'F': 0x90E050,
-		'Na': 0xAB5CF2,
-		'NA': 0xAB5CF2,
-		'Mg': 0x8AFF00,
-		'MG': 0x8AFF00,
-		'Al': 0xBFA6A6,
-		'AL': 0xBFA6A6,
-		'Si': 0xF0C8A0,
-		'SI': 0xF0C8A0,
-		'P': 0xFF8000,
-		'S': 0xFFFF30,
-		'Cl': 0x1FF01F,
-		'CL': 0x1FF01F,
-		'Ca': 0x3DFF00,
-		'CA': 0x3DFF00,
-		'Ti': 0xBFC2C7,
-		'TI': 0xBFC2C7,
-		'Cr': 0x8A99C7,
-		'CR': 0x8A99C7,
-		'Mn': 0x9C7AC7,
-		'MN': 0x9C7AC7,
-		'Fe': 0xE06633,
-		'FE': 0xE06633,
-		'Ni': 0x50D050,
-		'NI': 0x50D050,
-		'Cu': 0xC88033,
-		'CU': 0xC88033,
-		'Zn': 0x7D80B0,
-		'ZN': 0x7D80B0,
-		'Br': 0xA62929,
-		'BR': 0xA62929,
-		'Ag': 0xC0C0C0,
-		'AG': 0xC0C0C0,
-		'I': 0x940094,
-		'Ba': 0x00C900,
-		'BA': 0x00C900,
-		'Au': 0xFFD123,
-		'AU': 0xFFD123
+        'H': 0xFFFFFF,
+        'He': 0xD9FFFF,
+        'HE': 0xD9FFFF,
+        'Li': 0xCC80FF,
+        'LI': 0xCC80FF,
+        'B': 0xFFB5B5,
+        'C': 0x909090,
+        'N': 0x3050F8,
+        'O': 0xFF0D0D,
+        'F': 0x90E050,
+        'Na': 0xAB5CF2,
+        'NA': 0xAB5CF2,
+        'Mg': 0x8AFF00,
+        'MG': 0x8AFF00,
+        'Al': 0xBFA6A6,
+        'AL': 0xBFA6A6,
+        'Si': 0xF0C8A0,
+        'SI': 0xF0C8A0,
+        'P': 0xFF8000,
+        'S': 0xFFFF30,
+        'Cl': 0x1FF01F,
+        'CL': 0x1FF01F,
+        'Ca': 0x3DFF00,
+        'CA': 0x3DFF00,
+        'Ti': 0xBFC2C7,
+        'TI': 0xBFC2C7,
+        'Cr': 0x8A99C7,
+        'CR': 0x8A99C7,
+        'Mn': 0x9C7AC7,
+        'MN': 0x9C7AC7,
+        'Fe': 0xE06633,
+        'FE': 0xE06633,
+        'Ni': 0x50D050,
+        'NI': 0x50D050,
+        'Cu': 0xC88033,
+        'CU': 0xC88033,
+        'Zn': 0x7D80B0,
+        'ZN': 0x7D80B0,
+        'Br': 0xA62929,
+        'BR': 0xA62929,
+        'Ag': 0xC0C0C0,
+        'AG': 0xC0C0C0,
+        'I': 0x940094,
+        'Ba': 0x00C900,
+        'BA': 0x00C900,
+        'Au': 0xFFD123,
+        'AU': 0xFFD123
 };
 
 /** @property rasmol-like element colors */
 $3Dmol.elementColors.rasmol = {
-		'H': 0xFFFFFF,
-		'He': 0xFFC0CB,
-		'HE': 0xFFC0CB,
-		'Li': 0xB22222,
-		'LI': 0xB22222,
-		'B': 0x00FF00,
-		'C': 0xC8C8C8,
-		'N': 0x8F8FFF,
-		'O': 0xF00000,
-		'F': 0xDAA520,
-		'Na': 0x0000FF,
-		'NA': 0x0000FF,
-		'Mg': 0x228B22,
-		'MG': 0x228B22,
-		'Al': 0x808090,
-		'AL': 0x808090,
-		'Si': 0xDAA520,
-		'SI': 0xDAA520,
-		'P': 0xFFA500,
-		'S': 0xFFC832,
-		'Cl': 0x00FF00,
-		'CL': 0x00FF00,
-		'Ca': 0x808090,
-		'CA': 0x808090,
-		'Ti': 0x808090,
-		'TI': 0x808090,
-		'Cr': 0x808090,
-		'CR': 0x808090,
-		'Mn': 0x808090,
-		'MN': 0x808090,
-		'Fe': 0xFFA500,
-		'FE': 0xFFA500,
-		'Ni': 0xA52A2A,
-		'NI': 0xA52A2A,
-		'Cu': 0xA52A2A,
-		'CU': 0xA52A2A,
-		'Zn': 0xA52A2A,
-		'ZN': 0xA52A2A,
-		'Br': 0xA52A2A,
-		'BR': 0xA52A2A,
-		'Ag': 0x808090,
-		'AG': 0x808090,
-		'I': 0xA020F0,
-		'Ba': 0xFFA500,
-		'BA': 0xFFA500,
-		'Au': 0xDAA520,
-		'AU': 0xDAA520	
+        'H': 0xFFFFFF,
+        'He': 0xFFC0CB,
+        'HE': 0xFFC0CB,
+        'Li': 0xB22222,
+        'LI': 0xB22222,
+        'B': 0x00FF00,
+        'C': 0xC8C8C8,
+        'N': 0x8F8FFF,
+        'O': 0xF00000,
+        'F': 0xDAA520,
+        'Na': 0x0000FF,
+        'NA': 0x0000FF,
+        'Mg': 0x228B22,
+        'MG': 0x228B22,
+        'Al': 0x808090,
+        'AL': 0x808090,
+        'Si': 0xDAA520,
+        'SI': 0xDAA520,
+        'P': 0xFFA500,
+        'S': 0xFFC832,
+        'Cl': 0x00FF00,
+        'CL': 0x00FF00,
+        'Ca': 0x808090,
+        'CA': 0x808090,
+        'Ti': 0x808090,
+        'TI': 0x808090,
+        'Cr': 0x808090,
+        'CR': 0x808090,
+        'Mn': 0x808090,
+        'MN': 0x808090,
+        'Fe': 0xFFA500,
+        'FE': 0xFFA500,
+        'Ni': 0xA52A2A,
+        'NI': 0xA52A2A,
+        'Cu': 0xA52A2A,
+        'CU': 0xA52A2A,
+        'Zn': 0xA52A2A,
+        'ZN': 0xA52A2A,
+        'Br': 0xA52A2A,
+        'BR': 0xA52A2A,
+        'Ag': 0x808090,
+        'AG': 0x808090,
+        'I': 0xA020F0,
+        'Ba': 0xFFA500,
+        'BA': 0xFFA500,
+        'Au': 0xDAA520,
+        'AU': 0xDAA520    
 };
 
 $3Dmol.elementColors.defaultColors = $3Dmol.elementColors.rasmol;
@@ -17955,54 +17751,54 @@ $3Dmol.drawCartoon = (function() {
                 continue;
 
             if ((atom.atom == 'O' || atom.atom == 'CA') && !atom.hetflag) {
-            	
-            	//get style
-            	var cstyle = atom.style.cartoon;
+                
+                //get style
+                var cstyle = atom.style.cartoon;
                 if (atom.atom == 'CA') {
                     //set atom color
-                	var prevatomcolor = atomcolor;
+                    var prevatomcolor = atomcolor;
                     atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
                     if (gradientscheme) {
                         atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
                     }
                     
                     if($.isNumeric(cstyle.thickness)) {
-                    	thickness = cstyle.thickness;
+                        thickness = cstyle.thickness;
                     } else {
-                    	thickness = defaultThickness;
+                        thickness = defaultThickness;
                     }
                     
                     if(cstyle.style == 'trace') { //trace draws every pair of atoms
-                		
-                		//trace draws straight lines between CAs
-                		if(currentChain != atom.chain || currentResi + 1 != atom.resi) {
-                			//do not draw connections between chains; ignore differences
-                			//in reschain to properly support CA only files
-                    		if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
+                        
+                        //trace draws straight lines between CAs
+                        if(currentChain != atom.chain || currentResi + 1 != atom.resi) {
+                            //do not draw connections between chains; ignore differences
+                            //in reschain to properly support CA only files
+                            if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
 
-                		} else if(currentCA) {
-                			//if both atoms same color, draw single cylinder
-                			if(prevatomcolor == atomcolor) {
-                				var C = $3Dmol.CC.color(atomcolor);
-                    			$3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, atom, thickness, C, true, true);
-                			}
-                			else {
+                        } else if(currentCA) {
+                            //if both atoms same color, draw single cylinder
+                            if(prevatomcolor == atomcolor) {
+                                var C = $3Dmol.CC.color(atomcolor);
+                                $3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, atom, thickness, C, true, true);
+                            }
+                            else {
                                 var mp = new $3Dmol.Vector3().addVectors(currentCA, atom).multiplyScalar(0.5);
                                 var C1 = $3Dmol.CC.color(prevatomcolor);
                                 var C2 = $3Dmol.CC.color(atomcolor);
-                    			$3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, mp, thickness, C1, true, false);
-                       			$3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
-                			}                                    
-                		}
+                                $3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, mp, thickness, C1, true, false);
+                                   $3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
+                            }                                    
+                        }
                     }
                     else if (currentChain != atom.chain || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
-                		//end of chain of connected residues, draw accumulated points
+                        //end of chain of connected residues, draw accumulated points
                        for (j = 0; !thickness && j < num; j++)
                             drawSmoothCurve(group, points[j], 1, colors, div);
                         if (fill)
                             drawStrip(group, points[0], points[num - 1],
                                     colors, div, thickness);
-                    	
+                        
                         points = [];
                         for (k = 0; k < num; k++)
                             points[k] = [];
@@ -18010,8 +17806,8 @@ $3Dmol.drawCartoon = (function() {
                         prevCO = null;
                         ss = null;
                         ssborder = false;
-                    }                	 
-                    	
+                    }                     
+                        
                     currentCA = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
                     currentChain = atom.chain;
@@ -18027,7 +17823,7 @@ $3Dmol.drawCartoon = (function() {
                     
                 }                 
                 else if(cstyle.style != 'trace') { // O, unneeded for trace style
-                	//the oxygen atom is used to orient the direction of the draw strip
+                    //the oxygen atom is used to orient the direction of the draw strip
                     var O = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     O.sub(currentCA);
                     O.normalize(); // can be omitted for performance
@@ -18053,11 +17849,11 @@ $3Dmol.drawCartoon = (function() {
             drawStrip(group, points[0], points[num - 1], colors, div, thickness);
         
         if(tracegeo) {
-        	var material = new $3Dmol.MeshLambertMaterial();
-        	material.vertexColors = $3Dmol.FaceColors;
-        	material.side = $3Dmol.DoubleSide;
-        	var mesh = new $3Dmol.Mesh(tracegeo, material);
-        	group.add(mesh);
+            var material = new $3Dmol.MeshLambertMaterial();
+            material.vertexColors = $3Dmol.FaceColors;
+            material.side = $3Dmol.DoubleSide;
+            var mesh = new $3Dmol.Mesh(tracegeo, material);
+            group.add(mesh);
         }
     };
 
@@ -18081,923 +17877,930 @@ var $3Dmol = $3Dmol || {};
   */
 $3Dmol.GLDraw = (function() {
 
-	var draw = {}; // object for exporting functions
-
-	// Rotation matrix around z and x axis -
-	// according to y basis vector
-	// TODO: Try to optimize this (square roots?)
-	var getRotationMatrix = function() {
-
-		var d = new $3Dmol.Vector3();
-		// var rot = new Float32Array(9);
-
-		return function(dir) {
-
-			d.set(dir[0], dir[1], dir[2]);
-
-			var dx = d.x, dy = d.y, dz = d.z;
+    var draw = {}; // object for exporting functions
+
+    // Rotation matrix around z and x axis -
+    // according to y basis vector
+    // TODO: Try to optimize this (square roots?)
+    var getRotationMatrix = function() {
+
+        var d = new $3Dmol.Vector3();
+        // var rot = new Float32Array(9);
+
+        return function(dir) {
+
+            d.set(dir[0], dir[1], dir[2]);
+
+            var dx = d.x, dy = d.y, dz = d.z;
+
+            var dxy = Math.sqrt(dx * dx + dy * dy);
+            var dxz, dyz;
+
+            var sinA, cosA, sinB, cosB, sinC, cosC;
+
+            // about z axis - Phi
+            if (dxy < 0.0001) {
+                sinA = 0;
+                cosA = 1;
+            }
+
+            else {
+                sinA = -dx / dxy;
+                cosA = dy / dxy;
+            }
+
+            // recast dy in terms of new axes - z is the same
+
+            dy = -sinA * dx + cosA * dy;
+            dyz = Math.sqrt(dy * dy + dz * dz);
+
+            // about new x axis - Theta
+
+            if (dyz < 0.0001) {
+                sinB = 0;
+                cosB = 1;
+            }
+
+            else {
+                sinB = dz / dyz;
+                cosB = dy / dyz;
+            }
+
+            var rot = new Float32Array(9);
+            rot[0] = cosA;
+            rot[1] = sinA;
+            rot[2] = 0;
+            rot[3] = -sinA * cosB;
+            rot[4] = cosA * cosB;
+            rot[5] = sinB;
+            rot[6] = sinA * sinB;
+            rot[7] = -cosA * sinB;
+            rot[8] = cosB;
+
+            return rot;
+
+        };
+
+    }();
+    
+    // Ortho normal vectors for cylinder radius/ sphere cap equator and cones
+    // Direction is j basis (0,1,0)
+    var basisVectors = function() {
+
+        var ret = {
+            vertices : [],
+            norms : []
+        };
 
-			var dxy = Math.sqrt(dx * dx + dy * dy);
-			var dxz, dyz;
+        var nvecs = [];
 
-			var sinA, cosA, sinB, cosB, sinC, cosC;
+        var subdivisions = 4; // including the initial 2, eg. 4 => 16 subintervals
+        var N = Math.pow(2, subdivisions);  // eg. 2**4 = 16 subintervals in total
+        var i = 2;  // start with 2 subdivisions already done
+        var M = Math.pow(2, i); // 4
+        var spacing = N/M;  // 16/4 = 4; if there were 5 subdivs, then 32/4 = 8.
+        var j;
 
-			// about z axis - Phi
-			if (dxy < 0.0001) {
-				sinA = 0;
-				cosA = 1;
-			}
-
-			else {
-				sinA = -dx / dxy;
-				cosA = dy / dxy;
-			}
-
-			// recast dy in terms of new axes - z is the same
-
-			dy = -sinA * dx + cosA * dy;
-			dyz = Math.sqrt(dy * dy + dz * dz);
-
-			// about new x axis - Theta
-
-			if (dyz < 0.0001) {
-				sinB = 0;
-				cosB = 1;
-			}
-
-			else {
-				sinB = dz / dyz;
-				cosB = dy / dyz;
-			}
-
-			var rot = new Float32Array(9);
-			rot[0] = cosA;
-			rot[1] = sinA;
-			rot[2] = 0;
-			rot[3] = -sinA * cosB;
-			rot[4] = cosA * cosB;
-			rot[5] = sinB;
-			rot[6] = sinA * sinB;
-			rot[7] = -cosA * sinB;
-			rot[8] = cosB;
+        nvecs[0] = new $3Dmol.Vector3(-1, 0, 0);
+        nvecs[spacing] = new $3Dmol.Vector3(0, 0, 1);
+        nvecs[spacing*2] = new $3Dmol.Vector3(1, 0, 0);
+        nvecs[spacing*3] = new $3Dmol.Vector3(0, 0, -1);
 
-			return rot;
+        for ( i = 3; i <= subdivisions; i ++ ) {
+            // eg. i=3, we need to add 2**(3-1) = 4 new vecs. Call it M.
+            // their spacing is N/M, eg. N=16, M=4, N/M=4; M=8, N/M=2.
+            // they start off at half this spacing
+            // and are equal to the average of the two vectors on either side
+            M = Math.pow(2, (i-1));
+            spacing = N/M;
+            for ( j = 0; j < (M-1); j ++ ) {
+                nvecs[spacing/2 + j*spacing] = nvecs[j*spacing].clone().add(nvecs[(j+1)*spacing]).normalize();
+            }
+            // treat the last one specially so it wraps around to zero
+            j = M - 1;
+            nvecs[spacing/2 + j*spacing] = nvecs[j*spacing].clone().add(nvecs[0]).normalize();
+        }
 
-		};
+        /*
+         * nvecs[0] = new $3Dmol.Vector3(-1,0,0); nvecs[1] = new
+         * $3Dmol.Vector3(0,0,1); nvecs[2] = new $3Dmol.Vector3(1,0,0);
+         * nvecs[3] = new $3Dmol.Vector3(0,0,-1);
+         */
+        return nvecs;
 
-	}();
-	
-	// Ortho normal vectors for cylinder radius/ sphere cap equator and cones
-	// Direction is j basis (0,1,0)
-	var basisVectors = function() {
+    }();
 
-		var ret = {
-			vertices : [],
-			norms : []
-		};
+    // memoize capped cylinder for given radius
+    var cylVertexCache = {
 
-		var nvecs = [];
+        cache : {},
 
-		nvecs[0] = new $3Dmol.Vector3(-1, 0, 0);
-		nvecs[4] = new $3Dmol.Vector3(0, 0, 1);
-		nvecs[8] = new $3Dmol.Vector3(1, 0, 0);
-		nvecs[12] = new $3Dmol.Vector3(0, 0, -1);
+        getVerticesForRadius : function(radius) {
 
-		// now quarter positions
-		nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
-		nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
-		nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
-		nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
+            if (this.cache[radius] !== undefined)
+                return this.cache[radius];
 
-		// eights
-		nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
-		nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
-		nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
-		nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
-		nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
-		nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
-		nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
-		nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
+            var dir = new $3Dmol.Vector3(0, 1, 0);
+            var w = basisVectors.length;
+            var nvecs = [], norms = [];
+            var n;
 
-		/*
-		 * nvecs[0] = new $3Dmol.Vector3(-1,0,0); nvecs[1] = new
-		 * $3Dmol.Vector3(0,0,1); nvecs[2] = new $3Dmol.Vector3(1,0,0);
-		 * nvecs[3] = new $3Dmol.Vector3(0,0,-1);
-		 */
-		return nvecs;
+            for (var i = 0; i < w; i++) {
+                // bottom
+                nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
+                // top
+                nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
 
-	}();
+                // NOTE: this normal is used for constructing sphere caps -
+                // cylinder normals taken care of in drawCylinder
+                n = basisVectors[i].clone().normalize();
+                norms.push(n);
+                norms.push(n);
+            }
 
-	// memoize capped cylinder for given radius
-	var cylVertexCache = {
+            // norms[0]
 
-		cache : {},
+            var verticesRows = [];
 
-		getVerticesForRadius : function(radius) {
+            // Require that heightSegments is even and >= 2
+            // Equator points at h/2 (theta = pi/2)
+            // (repeated) polar points at 0 and h (theta = 0 and pi)
+            var heightSegments = 10, widthSegments = w; // 16 or however many
+                                                        // basis vectors for
+                                                        // cylinder
 
-			if (this.cache[radius] !== undefined)
-				return this.cache[radius];
+            if (heightSegments % 2 !== 0 || !heightSegments) {
+                console.error("heightSegments must be even");
 
-			var dir = new $3Dmol.Vector3(0, 1, 0);
-			var w = basisVectors.length;
-			var nvecs = [], norms = [];
-			var n;
+                return null;
+            }
 
-			for (var i = 0; i < w; i++) {
-				// bottom
-				nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
-				// top
-				nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
+            var phiStart = 0;
+            var phiLength = Math.PI * 2;
 
-				// NOTE: this normal is used for constructing sphere caps -
-				// cylinder normals taken care of in drawCylinder
-				n = basisVectors[i].clone().normalize();
-				norms.push(n);
-				norms.push(n);
-			}
+            var thetaStart = 0;
+            var thetaLength = Math.PI;
 
-			// norms[0]
+            var x, y;
+            var polar = false, equator = false;
 
-			var verticesRows = [];
+            for (y = 0; y <= heightSegments; y++) {
 
-			// Require that heightSegments is even and >= 2
-			// Equator points at h/2 (theta = pi/2)
-			// (repeated) polar points at 0 and h (theta = 0 and pi)
-			var heightSegments = 10, widthSegments = w; // 16 or however many
-														// basis vectors for
-														// cylinder
+                polar = (y === 0 || y === heightSegments) ? true : false;
+                equator = (y === heightSegments / 2) ? true : false;
 
-			if (heightSegments % 2 !== 0 || !heightSegments) {
-				console.error("heightSegments must be even");
-
-				return null;
-			}
-
-			var phiStart = 0;
-			var phiLength = Math.PI * 2;
-
-			var thetaStart = 0;
-			var thetaLength = Math.PI;
-
-			var x, y;
-			var polar = false, equator = false;
-
-			for (y = 0; y <= heightSegments; y++) {
-
-				polar = (y === 0 || y === heightSegments) ? true : false;
-				equator = (y === heightSegments / 2) ? true : false;
-
-				var verticesRow = [], toRow = [];
-
-				for (x = 0; x <= widthSegments; x++) {
-
-					// Two vertices rows for equator pointing to previously
-					// constructed cyl points
-					if (equator) {
-						var xi = (x < widthSegments) ? 2 * x : 0;
-						toRow.push(xi + 1);
-						verticesRow.push(xi);
-
-						continue;
-					}
-
-					var u = x / widthSegments;
-					var v = y / heightSegments;
-
-					// Only push first polar point
-
-					if (!polar || x === 0) {
-
-						if (x < widthSegments) {
-							var vertex = new $3Dmol.Vector3();
-							vertex.x = -radius
-									* Math.cos(phiStart + u * phiLength)
-									* Math.sin(thetaStart + v * thetaLength);
-							vertex.y = radius
-									* Math.cos(thetaStart + v * thetaLength);
-							vertex.z = radius
-									* Math.sin(phiStart + u * phiLength)
-									* Math.sin(thetaStart + v * thetaLength);
-
-							if (Math.abs(vertex.x) < 1e-5)
-								vertex.x = 0;
-							if (Math.abs(vertex.y) < 1e-5)
-								vertex.y = 0;
-							if (Math.abs(vertex.z) < 1e-5)
-								vertex.z = 0;
-
-							n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
-							n.normalize();
-
-							nvecs.push(vertex);
-							norms.push(n);
-
-							verticesRow.push(nvecs.length - 1);
-						}
-
-						// last point is just the first point for this row
-						else {
-							verticesRow.push(nvecs.length - widthSegments);
-						}
-
-					}
-
-					// x > 0; index to already added point
-					else if (polar)
-						verticesRow.push(nvecs.length - 1);
-
-				}
-
-				// extra equator row
-				if (equator)
-					verticesRows.push(toRow);
-
-				verticesRows.push(verticesRow);
-
-			}
-
-			var obj = {
-				vertices : nvecs,
-				normals : norms,
-				verticesRows : verticesRows,
-				w : widthSegments,
-				h : heightSegments
-			};
-
-			this.cache[radius] = obj;
-
-			return obj;
-
-		}
-	};
-
-	// creates a cylinder
-	var drawnC = 0;
-	
-	/** Create a cylinder 
-	 * @function $3Dmol.GLDraw.drawCylinder
-	 * @param {geometry}
-	 *            geo
-	 * @param {Point}
-	 *            from
-	 * @param {Point}
-	 *            to
-	 * @param {float}
-	 *            radius
-	 * @param {$3Dmol.Color}
-	 *            color
-	 * @param {boolean} fromCap
-	 * @param {boolean} toCap
-	 *            
-	 * */
-	draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
-		if (!from || !to)
-			return;
-		drawnC++;
-		// vertices
-		var drawcaps = fromCap || toCap;
-		color = color || {r:0, g:0, b:0};
-
-		/** @type {Array.<number>} */
-		var dir = [ to.x, to.y, to.z ];
-		dir[0] -= from.x;
-		dir[1] -= from.y;
-		dir[2] -= from.z;
-
-		var e = getRotationMatrix(dir);
-		// get orthonormal vectors from cache
-		// TODO: Will have orient with model view matrix according to direction
-		var vobj = cylVertexCache.getVerticesForRadius(radius);
-
-		// w (n) corresponds to the number of orthonormal vectors for cylinder
-		// (default 16)
-		var n = vobj.w, h = vobj.h;
-		var w = n;
-		// get orthonormal vector
-		var n_verts = (drawcaps) ? h * n + 2 : 2 * n;
-
-		var geoGroup = geo.updateGeoGroup(n_verts);
-
-		var vertices = vobj.vertices, normals = vobj.normals, verticesRows = vobj.verticesRows;
-		var toRow = verticesRows[h / 2], fromRow = verticesRows[h / 2 + 1];
-
-		var start = geoGroup.vertices;
-		var offset, faceoffset;
-		var i, x, y, z;
-
-		var vertexArray = geoGroup.vertexArray;
-		var normalArray = geoGroup.normalArray;
-		var colorArray = geoGroup.colorArray;
-		var faceArray = geoGroup.faceArray;
-		// add vertices, opposing vertices paired together
-		for (i = 0; i < n; ++i) {
-
-			var vi = 2 * i;
-
-			x = e[0] * vertices[vi].x + e[3] * vertices[vi].y + e[6]
-					* vertices[vi].z;
-			y = e[1] * vertices[vi].x + e[4] * vertices[vi].y + e[7]
-					* vertices[vi].z;
-			z = e[5] * vertices[vi].y + e[8] * vertices[vi].z;
-
-			// var xn = x/radius, yn = y/radius, zn = z/radius;
-
-			offset = 3 * (start + vi);
-			faceoffset = geoGroup.faceidx;
-
-			// from
-			vertexArray[offset] = x + from.x;
-			vertexArray[offset + 1] = y + from.y;
-			vertexArray[offset + 2] = z + from.z;
-			// to
-			vertexArray[offset + 3] = x + to.x;
-			vertexArray[offset + 4] = y + to.y;
-			vertexArray[offset + 5] = z + to.z;
-
-			// normals
-			normalArray[offset] = x;
-			normalArray[offset + 3] = x;
-			normalArray[offset + 1] = y;
-			normalArray[offset + 4] = y;
-			normalArray[offset + 2] = z;
-			normalArray[offset + 5] = z;
-
-			// colors
-			colorArray[offset] = color.r;
-			colorArray[offset + 3] = color.r;
-			colorArray[offset + 1] = color.g;
-			colorArray[offset + 4] = color.g;
-			colorArray[offset + 2] = color.b;
-			colorArray[offset + 5] = color.b;
-
-			// faces
-			// 0 - 2 - 1
-			faceArray[faceoffset] = fromRow[i] + start;
-			faceArray[faceoffset + 1] = fromRow[i + 1] + start;
-			faceArray[faceoffset + 2] = toRow[i] + start;
-			// 1 - 2 - 3
-			faceArray[faceoffset + 3] = toRow[i] + start;
-			faceArray[faceoffset + 4] = fromRow[i + 1] + start;
-			faceArray[faceoffset + 5] = toRow[i + 1] + start;
-
-			geoGroup.faceidx += 6;
-
-		}
-
-		// SPHERE CAPS
-
-		if (drawcaps) {
-
-			// h - sphere rows, verticesRows.length - 2
-			var ystart = (toCap) ? 0 : h / 2;
-			var yend = (fromCap) ? h + 1 : h / 2 + 1;
-
-			var v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4, v1offset, v2offset, v3offset, v4offset;
-
-			for (y = ystart; y < yend; y++) {
-				if (y === h / 2)
-					continue;
-				// n number of points for each level (verticesRows[i].length -
-				// 1)
-				var cap = (y <= h / 2) ? to : from;
-
-				for (x = 0; x < n; x++) {
-
-					faceoffset = geoGroup.faceidx;
-
-					v1 = verticesRows[y][x + 1];
-					v1offset = (v1 + start) * 3;
-					v2 = verticesRows[y][x];
-					v2offset = (v2 + start) * 3;
-					v3 = verticesRows[y + 1][x];
-					v3offset = (v3 + start) * 3;
-					v4 = verticesRows[y + 1][x + 1];
-					v4offset = (v4 + start) * 3;
-
-					// rotate sphere vectors
-					x1 = e[0] * vertices[v1].x + e[3] * vertices[v1].y + e[6]
-							* vertices[v1].z;
-					x2 = e[0] * vertices[v2].x + e[3] * vertices[v2].y + e[6]
-							* vertices[v2].z;
-					x3 = e[0] * vertices[v3].x + e[3] * vertices[v3].y + e[6]
-							* vertices[v3].z;
-					x4 = e[0] * vertices[v4].x + e[3] * vertices[v4].y + e[6]
-							* vertices[v4].z;
-
-					y1 = e[1] * vertices[v1].x + e[4] * vertices[v1].y + e[7]
-							* vertices[v1].z;
-					y2 = e[1] * vertices[v2].x + e[4] * vertices[v2].y + e[7]
-							* vertices[v2].z;
-					y3 = e[1] * vertices[v3].x + e[4] * vertices[v3].y + e[7]
-							* vertices[v3].z;
-					y4 = e[1] * vertices[v4].x + e[4] * vertices[v4].y + e[7]
-							* vertices[v4].z;
-
-					z1 = e[5] * vertices[v1].y + e[8] * vertices[v1].z;
-					z2 = e[5] * vertices[v2].y + e[8] * vertices[v2].z;
-					z3 = e[5] * vertices[v3].y + e[8] * vertices[v3].z;
-					z4 = e[5] * vertices[v4].y + e[8] * vertices[v4].z;
-
-					vertexArray[v1offset] = x1 + cap.x;
-					vertexArray[v2offset] = x2 + cap.x;
-					vertexArray[v3offset] = x3 + cap.x;
-					vertexArray[v4offset] = x4 + cap.x;
-
-					vertexArray[v1offset + 1] = y1 + cap.y;
-					vertexArray[v2offset + 1] = y2 + cap.y;
-					vertexArray[v3offset + 1] = y3 + cap.y;
-					vertexArray[v4offset + 1] = y4 + cap.y;
-
-					vertexArray[v1offset + 2] = z1 + cap.z;
-					vertexArray[v2offset + 2] = z2 + cap.z;
-					vertexArray[v3offset + 2] = z3 + cap.z;
-					vertexArray[v4offset + 2] = z4 + cap.z;
-
-					colorArray[v1offset] = color.r;
-					colorArray[v2offset] = color.r;
-					colorArray[v3offset] = color.r;
-					colorArray[v4offset] = color.r;
-
-					colorArray[v1offset + 1] = color.g;
-					colorArray[v2offset + 1] = color.g;
-					colorArray[v3offset + 1] = color.g;
-					colorArray[v4offset + 1] = color.g;
-
-					colorArray[v1offset + 2] = color.b;
-					colorArray[v2offset + 2] = color.b;
-					colorArray[v3offset + 2] = color.b;
-					colorArray[v4offset + 2] = color.b;
-
-					nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6]
-							* normals[v1].z;
-					nx2 = e[0] * normals[v2].x + e[3] * normals[v2].y + e[6]
-							* normals[v2].z;
-					nx3 = e[0] * normals[v3].x + e[3] * normals[v3].y + e[6]
-							* normals[v3].z;
-					nx4 = e[0] * normals[v4].x + e[3] * normals[v4].y + e[6]
-							* normals[v4].z;
-
-					ny1 = e[1] * normals[v1].x + e[4] * normals[v1].y + e[7]
-							* normals[v1].z;
-					ny2 = e[1] * normals[v2].x + e[4] * normals[v2].y + e[7]
-							* normals[v2].z;
-					ny3 = e[1] * normals[v3].x + e[4] * normals[v3].y + e[7]
-							* normals[v3].z;
-					ny4 = e[1] * normals[v4].x + e[4] * normals[v4].y + e[7]
-							* normals[v4].z;
-
-					nz1 = e[5] * normals[v1].y + e[8] * normals[v1].z;
-					nz2 = e[5] * normals[v2].y + e[8] * normals[v2].z;
-					nz3 = e[5] * normals[v3].y + e[8] * normals[v3].z;
-					nz4 = e[5] * normals[v4].y + e[8] * normals[v4].z;
-
-					// if (Math.abs(vobj.sphereVertices[v1].y) === radius) {
-					if (y === 0) {
-						// face = [v1, v3, v4];
-						// norm = [n1, n3, n4];
-
-						normalArray[v1offset] = nx1;
-						normalArray[v3offset] = nx3;
-						normalArray[v4offset] = nx4;
-						normalArray[v1offset + 1] = ny1;
-						normalArray[v3offset + 1] = ny3;
-						normalArray[v4offset + 1] = ny4;
-						normalArray[v1offset + 2] = nz1;
-						normalArray[v3offset + 2] = nz3;
-						normalArray[v4offset + 2] = nz4;
-
-						faceArray[faceoffset] = v1 + start;
-						faceArray[faceoffset + 1] = v3 + start;
-						faceArray[faceoffset + 2] = v4 + start;
-
-						geoGroup.faceidx += 3;
-
-					}
-
-					// else if (Math.abs(vobj.sphereVertices[v3].y) === radius)
-					// {
-					else if (y === yend - 1) {
-						// face = [v1, v2, v3];
-						// norm = [n1, n2, n3];
-
-						normalArray[v1offset] = nx1;
-						normalArray[v2offset] = nx2;
-						normalArray[v3offset] = nx3;
-						normalArray[v1offset + 1] = ny1;
-						normalArray[v2offset + 1] = ny2;
-						normalArray[v3offset + 1] = ny3;
-						normalArray[v1offset + 2] = nz1;
-						normalArray[v2offset + 2] = nz2;
-						normalArray[v3offset + 2] = nz3;
-
-						faceArray[faceoffset] = v1 + start;
-						faceArray[faceoffset + 1] = v2 + start;
-						faceArray[faceoffset + 2] = v3 + start;
-
-						geoGroup.faceidx += 3;
-
-					}
-
-					else {
-						// face = [v1, v2, v3, v4];
-						// norm = [n1, n2, n3, n4];
-
-						normalArray[v1offset] = nx1;
-						normalArray[v2offset] = nx2;
-						normalArray[v4offset] = nx4;
-						normalArray[v1offset + 1] = ny1;
-						normalArray[v2offset + 1] = ny2;
-						normalArray[v4offset + 1] = ny4;
-						normalArray[v1offset + 2] = nz1;
-						normalArray[v2offset + 2] = nz2;
-						normalArray[v4offset + 2] = nz4;
-
-						normalArray[v2offset] = nx2;
-						normalArray[v3offset] = nx3;
-						normalArray[v4offset] = nx4;
-						normalArray[v2offset + 1] = ny2;
-						normalArray[v3offset + 1] = ny3;
-						normalArray[v4offset + 1] = ny4;
-						normalArray[v2offset + 2] = nz2;
-						normalArray[v3offset + 2] = nz3;
-						normalArray[v4offset + 2] = nz4;
-
-						faceArray[faceoffset] = v1 + start;
-						faceArray[faceoffset + 1] = v2 + start;
-						faceArray[faceoffset + 2] = v4 + start;
-
-						faceArray[faceoffset + 3] = v2 + start;
-						faceArray[faceoffset + 4] = v3 + start;
-						faceArray[faceoffset + 5] = v4 + start;
-
-						geoGroup.faceidx += 6;
-					}
-
-				}
-			}
-
-		}
-
-		geoGroup.vertices += n_verts;
-	};
-
-	/** Create a cone 
-	 * @function $3Dmol.GLDraw.drawCone
-	 * @param {geometry}
-	 *            geo
-	 * @param {Point}
-	 *            from
-	 * @param {Point}
-	 *            to
-	 * @param {float}
-	 *            radius
-	 * @param {$3Dmol.Color}
-	 *            color
-	 *            */
-	draw.drawCone = function(geo, from, to, radius, color) {
-		if (!from || !to)
-			return;
-
-		color = color || {r:0, g:0, b:0};
-
-		var dir =[to.x, to.y, to.z ];		
-		dir.x -= from.x;
-		dir.y -= from.y;
-		dir.z -= from.z;
-
-		var e = getRotationMatrix(dir);
-
-
-		// n vertices around bottom plust the two points
-		var n = basisVectors.length;
-		var basis = basisVectors;
-		var n_verts =  n + 2;
-
-		
-		//setup geo structures
-		var geoGroup = geo.updateGeoGroup(n_verts);
-		var start = geoGroup.vertices;	
-		var offset, faceoffset;
-		var i, x, y, z;
-		var vertexArray = geoGroup.vertexArray;
-		var normalArray = geoGroup.normalArray;
-		var colorArray = geoGroup.colorArray;
-		var faceArray = geoGroup.faceArray;
-		
-		var offset = start*3;
-		var ndir = new $3Dmol.Vector3(dir[0],dir[1],dir[2]).normalize();
-		//base point first vertex
-		vertexArray[offset] = from.x;
-		vertexArray[offset+1] = from.y;
-		vertexArray[offset+2] = from.z;
-		normalArray[offset] = -ndir.x;
-		normalArray[offset + 1] = -ndir.y;
-		normalArray[offset + 2] = -ndir.z;
-		colorArray[offset] = color.r;
-		colorArray[offset + 1] = color.g;
-		colorArray[offset + 2] = color.b;
-		
-		//second vertex top
-		vertexArray[offset+3] = to.x;
-		vertexArray[offset+4] = to.y;
-		vertexArray[offset+5] = to.z;
-		
-		normalArray[offset+3] = ndir.x;
-		normalArray[offset+4] = ndir.y;
-		normalArray[offset+5] = ndir.z;
-		colorArray[offset+3] = color.r;
-		colorArray[offset + 4] = color.g;
-		colorArray[offset + 5] = color.b;
-		
-		offset += 6;
-		
-		// add circle vertices
-		for (i = 0; i < n; ++i) {
-			var vec = basis[i].clone();
-			vec.multiplyScalar(radius);
-			x = e[0] * vec.x + e[3] * vec.y + e[6]
-					* vec.z;
-			y = e[1] * vec.x + e[4] * vec.y + e[7]
-					* vec.z;
-			z = e[5] * vec.y + e[8] * vec.z;
-
-			// from
-			vertexArray[offset] = x + from.x;
-			vertexArray[offset + 1] = y + from.y;
-			vertexArray[offset + 2] = z + from.z;
-
-			// normals
-			normalArray[offset] = x;
-			normalArray[offset + 1] = y;
-			normalArray[offset + 2] = z;
-
-			// colors
-			colorArray[offset] = color.r;
-			colorArray[offset + 1] = color.g;
-			colorArray[offset + 2] = color.b;
-			
-			offset += 3;
-
-		}
-		geoGroup.vertices += (n+2);
-		//faces
-		var faceoffset = geoGroup.faceidx;
-		for( i = 0; i < n; i++) {
-			//two neighboring circle vertices
-			var v1 = start+2+i;
-			var v2 = start+2+ ((i+1)%n);
-			
-			faceArray[faceoffset] = v1;
-			faceArray[faceoffset+1] = v2;
-			faceArray[faceoffset+2] = start;
-			faceoffset += 3;
-			faceArray[faceoffset] = v1;
-			faceArray[faceoffset+1] = v2;
-			faceArray[faceoffset+2] = start+1;
-			faceoffset += 3;
-		}
-		geoGroup.faceidx += 6*n;
-	};
-
-	
-	// Sphere component
-	var sphereVertexCache = {
-		cache : {},
-		getVerticesForRadius : function(radius) {
-
-			if (typeof (this.cache[radius]) !== "undefined")
-				return this.cache[radius];
-
-			var obj = {
-				vertices : [],
-				verticesRows : [],
-				normals : []
-			};
-			// scale quality with radius heuristically
-			var widthSegments = 16;
-			var heightSegments = 10;
-			if (radius < 1) {
-				widthSegments = 10;
-				heightSegments = 8;
-			}
-
-			var phiStart = 0;
-			var phiLength = Math.PI * 2;
-
-			var thetaStart = 0;
-			var thetaLength = Math.PI;
-
-			var x, y, vertices = [], uvs = [];
-
-			for (y = 0; y <= heightSegments; y++) {
-
-				var verticesRow = [];
-				for (x = 0; x <= widthSegments; x++) {
-
-					var u = x / widthSegments;
-					var v = y / heightSegments;
-
-					var vertex = {};
-					vertex.x = -radius * Math.cos(phiStart + u * phiLength)
-							* Math.sin(thetaStart + v * thetaLength);
-					vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
-					vertex.z = radius * Math.sin(phiStart + u * phiLength)
-							* Math.sin(thetaStart + v * thetaLength);
-
-					var n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
-					n.normalize();
-
-					obj.vertices.push(vertex);
-					obj.normals.push(n);
-
-					verticesRow.push(obj.vertices.length - 1);
-
-				}
-
-				obj.verticesRows.push(verticesRow);
-
-			}
-
-			this.cache[radius] = obj;
-			return obj;
-		}
-
-	};
-
-	/** Create a sphere.
-	 * @function $3Dmol.GLDraw.drawSphere
-	 * @param {geometry}
-	 *            geo
-	 * @param {Point}
-	 *            pos
-	 * @param {float}
-	 *            radius
-	 * @param {$3Dmol.Color}
-	 *            color
-	 */
-	draw.drawSphere = function(geo, pos, radius, color) {
-
-		var center = new $3Dmol.Vector3(pos.x, pos.y, pos.z);
-
-		var x, y;
-		var vobj = sphereVertexCache.getVerticesForRadius(radius);
-
-		var vertices = vobj.vertices;
-		var normals = vobj.normals;
-
-		var geoGroup = geo.updateGeoGroup(vertices.length);
-
-		var start = geoGroup.vertices;
-		var vertexArray = geoGroup.vertexArray;
-		var colorArray = geoGroup.colorArray;
-		var faceArray = geoGroup.faceArray;
-		var lineArray = geoGroup.lineArray;
-		var normalArray = geoGroup.normalArray;
-
-		for (var i = 0, il = vertices.length; i < il; ++i) {
-			var offset = 3 * (start + i);
-			var v = vertices[i];
-
-			vertexArray[offset] = (v.x + pos.x);
-			vertexArray[offset + 1] = (v.y + pos.y);
-			vertexArray[offset + 2] = (v.z + pos.z);
-
-			colorArray[offset] = color.r;
-			colorArray[offset + 1] = color.g;
-			colorArray[offset + 2] = color.b;
-
-		}
-
-		geoGroup.vertices += vertices.length;
-
-		var verticesRows = vobj.verticesRows;
-		var h = verticesRows.length - 1;
-
-		for (y = 0; y < h; y++) {
-			var w = verticesRows[y].length - 1;
-			for (x = 0; x < w; x++) {
-
-				var faceoffset = geoGroup.faceidx, lineoffset = geoGroup.lineidx;
-
-				var v1 = verticesRows[y][x + 1] + start, v1offset = v1 * 3;
-				var v2 = verticesRows[y][x] + start, v2offset = v2 * 3;
-				var v3 = verticesRows[y + 1][x] + start, v3offset = v3 * 3;
-				var v4 = verticesRows[y + 1][x + 1] + start, v4offset = v4 * 3;
-
-				var n1 = normals[v1 - start];
-				var n2 = normals[v2 - start];
-				var n3 = normals[v3 - start];
-				var n4 = normals[v4 - start];
-				var face, norm;
-				if (Math.abs(vertices[v1 - start].y) === radius) {
-					// face = [v1, v3, v4];
-					// norm = [n1, n3, n4];
-
-					normalArray[v1offset] = n1.x;
-					normalArray[v3offset] = n3.x;
-					normalArray[v4offset] = n4.x;
-					normalArray[v1offset + 1] = n1.y;
-					normalArray[v3offset + 1] = n3.y;
-					normalArray[v4offset + 1] = n4.y;
-					normalArray[v1offset + 2] = n1.z;
-					normalArray[v3offset + 2] = n3.z;
-					normalArray[v4offset + 2] = n4.z;
-
-					faceArray[faceoffset] = v1;
-					faceArray[faceoffset + 1] = v3;
-					faceArray[faceoffset + 2] = v4;
-
-					lineArray[lineoffset] = v1;
-					lineArray[lineoffset + 1] = v3;
-					lineArray[lineoffset + 2] = v1;
-					lineArray[lineoffset + 3] = v4;
-					lineArray[lineoffset + 4] = v3;
-					lineArray[lineoffset + 5] = v4;
-
-					geoGroup.faceidx += 3;
-					geoGroup.lineidx += 6;
-
-				} else if (Math.abs(vertices[v3 - start].y) === radius) {
-					// face = [v1, v2, v3];
-					// norm = [n1, n2, n3];
-
-					normalArray[v1offset] = n1.x;
-					normalArray[v2offset] = n2.x;
-					normalArray[v3offset] = n3.x;
-					normalArray[v1offset + 1] = n1.y;
-					normalArray[v2offset + 1] = n2.y;
-					normalArray[v3offset + 1] = n3.y;
-					normalArray[v1offset + 2] = n1.z;
-					normalArray[v2offset + 2] = n2.z;
-					normalArray[v3offset + 2] = n3.z;
-
-					faceArray[faceoffset] = v1;
-					faceArray[faceoffset + 1] = v2;
-					faceArray[faceoffset + 2] = v3;
-
-					lineArray[lineoffset] = v1;
-					lineArray[lineoffset + 1] = v2;
-					lineArray[lineoffset + 2] = v1;
-					lineArray[lineoffset + 3] = v3;
-					lineArray[lineoffset + 4] = v2;
-					lineArray[lineoffset + 5] = v3;
-
-					geoGroup.faceidx += 3;
-					geoGroup.lineidx += 6;
-
-				} else {
-					// face = [v1, v2, v3, v4];
-					// norm = [n1, n2, n3, n4];
-
-					normalArray[v1offset] = n1.x;
-					normalArray[v2offset] = n2.x;
-					normalArray[v4offset] = n4.x;
-					normalArray[v1offset + 1] = n1.y;
-					normalArray[v2offset + 1] = n2.y;
-					normalArray[v4offset + 1] = n4.y;
-					normalArray[v1offset + 2] = n1.z;
-					normalArray[v2offset + 2] = n2.z;
-					normalArray[v4offset + 2] = n4.z;
-
-					normalArray[v2offset] = n2.x;
-					normalArray[v3offset] = n3.x;
-					normalArray[v4offset] = n4.x;
-					normalArray[v2offset + 1] = n2.y;
-					normalArray[v3offset + 1] = n3.y;
-					normalArray[v4offset + 1] = n4.y;
-					normalArray[v2offset + 2] = n2.z;
-					normalArray[v3offset + 2] = n3.z;
-					normalArray[v4offset + 2] = n4.z;
-
-					faceArray[faceoffset] = v1;
-					faceArray[faceoffset + 1] = v2;
-					faceArray[faceoffset + 2] = v4;
-
-					faceArray[faceoffset + 3] = v2;
-					faceArray[faceoffset + 4] = v3;
-					faceArray[faceoffset + 5] = v4;
-
-					lineArray[lineoffset] = v1;
-					lineArray[lineoffset + 1] = v2;
-					lineArray[lineoffset + 2] = v1;
-					lineArray[lineoffset + 3] = v4;
-
-					lineArray[lineoffset + 4] = v2;
-					lineArray[lineoffset + 5] = v3;
-					lineArray[lineoffset + 6] = v3;
-					lineArray[lineoffset + 7] = v4;
-
-					geoGroup.faceidx += 6;
-					geoGroup.lineidx += 8;
-
-				}
-
-			}
-		}
-
-	};
-
-	return draw;
+                var verticesRow = [], toRow = [];
+
+                for (x = 0; x <= widthSegments; x++) {
+
+                    // Two vertices rows for equator pointing to previously
+                    // constructed cyl points
+                    if (equator) {
+                        var xi = (x < widthSegments) ? 2 * x : 0;
+                        toRow.push(xi + 1);
+                        verticesRow.push(xi);
+
+                        continue;
+                    }
+
+                    var u = x / widthSegments;
+                    var v = y / heightSegments;
+
+                    // Only push first polar point
+
+                    if (!polar || x === 0) {
+
+                        if (x < widthSegments) {
+                            var vertex = new $3Dmol.Vector3();
+                            vertex.x = -radius
+                                    * Math.cos(phiStart + u * phiLength)
+                                    * Math.sin(thetaStart + v * thetaLength);
+                            vertex.y = radius
+                                    * Math.cos(thetaStart + v * thetaLength);
+                            vertex.z = radius
+                                    * Math.sin(phiStart + u * phiLength)
+                                    * Math.sin(thetaStart + v * thetaLength);
+
+                            if (Math.abs(vertex.x) < 1e-5)
+                                vertex.x = 0;
+                            if (Math.abs(vertex.y) < 1e-5)
+                                vertex.y = 0;
+                            if (Math.abs(vertex.z) < 1e-5)
+                                vertex.z = 0;
+
+                            n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
+                            n.normalize();
+
+                            nvecs.push(vertex);
+                            norms.push(n);
+
+                            verticesRow.push(nvecs.length - 1);
+                        }
+
+                        // last point is just the first point for this row
+                        else {
+                            verticesRow.push(nvecs.length - widthSegments);
+                        }
+
+                    }
+
+                    // x > 0; index to already added point
+                    else if (polar)
+                        verticesRow.push(nvecs.length - 1);
+
+                }
+
+                // extra equator row
+                if (equator)
+                    verticesRows.push(toRow);
+
+                verticesRows.push(verticesRow);
+
+            }
+
+            var obj = {
+                vertices : nvecs,
+                normals : norms,
+                verticesRows : verticesRows,
+                w : widthSegments,
+                h : heightSegments
+            };
+
+            this.cache[radius] = obj;
+
+            return obj;
+
+        }
+    };
+
+    // creates a cylinder
+    var drawnC = 0;
+    
+    /** Create a cylinder 
+     * @function $3Dmol.GLDraw.drawCylinder
+     * @param {geometry}
+     *            geo
+     * @param {Point}
+     *            from
+     * @param {Point}
+     *            to
+     * @param {float}
+     *            radius
+     * @param {$3Dmol.Color}
+     *            color
+     * @param {boolean} fromCap
+     * @param {boolean} toCap
+     *            
+     * */
+    draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
+        if (!from || !to)
+            return;
+        drawnC++;
+        // vertices
+        var drawcaps = fromCap || toCap;
+        color = color || {r:0, g:0, b:0};
+
+        /** @type {Array.<number>} */
+        var dir = [ to.x, to.y, to.z ];
+        dir[0] -= from.x;
+        dir[1] -= from.y;
+        dir[2] -= from.z;
+
+        var e = getRotationMatrix(dir);
+        // get orthonormal vectors from cache
+        // TODO: Will have orient with model view matrix according to direction
+        var vobj = cylVertexCache.getVerticesForRadius(radius);
+
+        // w (n) corresponds to the number of orthonormal vectors for cylinder
+        // (default 16)
+        var n = vobj.w, h = vobj.h;
+        var w = n;
+        // get orthonormal vector
+        var n_verts = (drawcaps) ? h * n + 2 : 2 * n;
+
+        var geoGroup = geo.updateGeoGroup(n_verts);
+
+        var vertices = vobj.vertices, normals = vobj.normals, verticesRows = vobj.verticesRows;
+        var toRow = verticesRows[h / 2], fromRow = verticesRows[h / 2 + 1];
+
+        var start = geoGroup.vertices;
+        var offset, faceoffset;
+        var i, x, y, z;
+
+        var vertexArray = geoGroup.vertexArray;
+        var normalArray = geoGroup.normalArray;
+        var colorArray = geoGroup.colorArray;
+        var faceArray = geoGroup.faceArray;
+        // add vertices, opposing vertices paired together
+        for (i = 0; i < n; ++i) {
+
+            var vi = 2 * i;
+
+            x = e[0] * vertices[vi].x + e[3] * vertices[vi].y + e[6]
+                    * vertices[vi].z;
+            y = e[1] * vertices[vi].x + e[4] * vertices[vi].y + e[7]
+                    * vertices[vi].z;
+            z = e[5] * vertices[vi].y + e[8] * vertices[vi].z;
+
+            // var xn = x/radius, yn = y/radius, zn = z/radius;
+
+            offset = 3 * (start + vi);
+            faceoffset = geoGroup.faceidx;
+
+            // from
+            vertexArray[offset] = x + from.x;
+            vertexArray[offset + 1] = y + from.y;
+            vertexArray[offset + 2] = z + from.z;
+            // to
+            vertexArray[offset + 3] = x + to.x;
+            vertexArray[offset + 4] = y + to.y;
+            vertexArray[offset + 5] = z + to.z;
+
+            // normals
+            normalArray[offset] = x;
+            normalArray[offset + 3] = x;
+            normalArray[offset + 1] = y;
+            normalArray[offset + 4] = y;
+            normalArray[offset + 2] = z;
+            normalArray[offset + 5] = z;
+
+            // colors
+            colorArray[offset] = color.r;
+            colorArray[offset + 3] = color.r;
+            colorArray[offset + 1] = color.g;
+            colorArray[offset + 4] = color.g;
+            colorArray[offset + 2] = color.b;
+            colorArray[offset + 5] = color.b;
+
+            // faces
+            // 0 - 2 - 1
+            faceArray[faceoffset] = fromRow[i] + start;
+            faceArray[faceoffset + 1] = fromRow[i + 1] + start;
+            faceArray[faceoffset + 2] = toRow[i] + start;
+            // 1 - 2 - 3
+            faceArray[faceoffset + 3] = toRow[i] + start;
+            faceArray[faceoffset + 4] = fromRow[i + 1] + start;
+            faceArray[faceoffset + 5] = toRow[i + 1] + start;
+
+            geoGroup.faceidx += 6;
+
+        }
+
+        // SPHERE CAPS
+
+        if (drawcaps) {
+
+            // h - sphere rows, verticesRows.length - 2
+            var ystart = (toCap) ? 0 : h / 2;
+            var yend = (fromCap) ? h + 1 : h / 2 + 1;
+
+            var v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4, v1offset, v2offset, v3offset, v4offset;
+
+            for (y = ystart; y < yend; y++) {
+                if (y === h / 2)
+                    continue;
+                // n number of points for each level (verticesRows[i].length -
+                // 1)
+                var cap = (y <= h / 2) ? to : from;
+
+                for (x = 0; x < n; x++) {
+
+                    faceoffset = geoGroup.faceidx;
+
+                    v1 = verticesRows[y][x + 1];
+                    v1offset = (v1 + start) * 3;
+                    v2 = verticesRows[y][x];
+                    v2offset = (v2 + start) * 3;
+                    v3 = verticesRows[y + 1][x];
+                    v3offset = (v3 + start) * 3;
+                    v4 = verticesRows[y + 1][x + 1];
+                    v4offset = (v4 + start) * 3;
+
+                    // rotate sphere vectors
+                    x1 = e[0] * vertices[v1].x + e[3] * vertices[v1].y + e[6]
+                            * vertices[v1].z;
+                    x2 = e[0] * vertices[v2].x + e[3] * vertices[v2].y + e[6]
+                            * vertices[v2].z;
+                    x3 = e[0] * vertices[v3].x + e[3] * vertices[v3].y + e[6]
+                            * vertices[v3].z;
+                    x4 = e[0] * vertices[v4].x + e[3] * vertices[v4].y + e[6]
+                            * vertices[v4].z;
+
+                    y1 = e[1] * vertices[v1].x + e[4] * vertices[v1].y + e[7]
+                            * vertices[v1].z;
+                    y2 = e[1] * vertices[v2].x + e[4] * vertices[v2].y + e[7]
+                            * vertices[v2].z;
+                    y3 = e[1] * vertices[v3].x + e[4] * vertices[v3].y + e[7]
+                            * vertices[v3].z;
+                    y4 = e[1] * vertices[v4].x + e[4] * vertices[v4].y + e[7]
+                            * vertices[v4].z;
+
+                    z1 = e[5] * vertices[v1].y + e[8] * vertices[v1].z;
+                    z2 = e[5] * vertices[v2].y + e[8] * vertices[v2].z;
+                    z3 = e[5] * vertices[v3].y + e[8] * vertices[v3].z;
+                    z4 = e[5] * vertices[v4].y + e[8] * vertices[v4].z;
+
+                    vertexArray[v1offset] = x1 + cap.x;
+                    vertexArray[v2offset] = x2 + cap.x;
+                    vertexArray[v3offset] = x3 + cap.x;
+                    vertexArray[v4offset] = x4 + cap.x;
+
+                    vertexArray[v1offset + 1] = y1 + cap.y;
+                    vertexArray[v2offset + 1] = y2 + cap.y;
+                    vertexArray[v3offset + 1] = y3 + cap.y;
+                    vertexArray[v4offset + 1] = y4 + cap.y;
+
+                    vertexArray[v1offset + 2] = z1 + cap.z;
+                    vertexArray[v2offset + 2] = z2 + cap.z;
+                    vertexArray[v3offset + 2] = z3 + cap.z;
+                    vertexArray[v4offset + 2] = z4 + cap.z;
+
+                    colorArray[v1offset] = color.r;
+                    colorArray[v2offset] = color.r;
+                    colorArray[v3offset] = color.r;
+                    colorArray[v4offset] = color.r;
+
+                    colorArray[v1offset + 1] = color.g;
+                    colorArray[v2offset + 1] = color.g;
+                    colorArray[v3offset + 1] = color.g;
+                    colorArray[v4offset + 1] = color.g;
+
+                    colorArray[v1offset + 2] = color.b;
+                    colorArray[v2offset + 2] = color.b;
+                    colorArray[v3offset + 2] = color.b;
+                    colorArray[v4offset + 2] = color.b;
+
+                    nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6]
+                            * normals[v1].z;
+                    nx2 = e[0] * normals[v2].x + e[3] * normals[v2].y + e[6]
+                            * normals[v2].z;
+                    nx3 = e[0] * normals[v3].x + e[3] * normals[v3].y + e[6]
+                            * normals[v3].z;
+                    nx4 = e[0] * normals[v4].x + e[3] * normals[v4].y + e[6]
+                            * normals[v4].z;
+
+                    ny1 = e[1] * normals[v1].x + e[4] * normals[v1].y + e[7]
+                            * normals[v1].z;
+                    ny2 = e[1] * normals[v2].x + e[4] * normals[v2].y + e[7]
+                            * normals[v2].z;
+                    ny3 = e[1] * normals[v3].x + e[4] * normals[v3].y + e[7]
+                            * normals[v3].z;
+                    ny4 = e[1] * normals[v4].x + e[4] * normals[v4].y + e[7]
+                            * normals[v4].z;
+
+                    nz1 = e[5] * normals[v1].y + e[8] * normals[v1].z;
+                    nz2 = e[5] * normals[v2].y + e[8] * normals[v2].z;
+                    nz3 = e[5] * normals[v3].y + e[8] * normals[v3].z;
+                    nz4 = e[5] * normals[v4].y + e[8] * normals[v4].z;
+
+                    // if (Math.abs(vobj.sphereVertices[v1].y) === radius) {
+                    if (y === 0) {
+                        // face = [v1, v3, v4];
+                        // norm = [n1, n3, n4];
+
+                        normalArray[v1offset] = nx1;
+                        normalArray[v3offset] = nx3;
+                        normalArray[v4offset] = nx4;
+                        normalArray[v1offset + 1] = ny1;
+                        normalArray[v3offset + 1] = ny3;
+                        normalArray[v4offset + 1] = ny4;
+                        normalArray[v1offset + 2] = nz1;
+                        normalArray[v3offset + 2] = nz3;
+                        normalArray[v4offset + 2] = nz4;
+
+                        faceArray[faceoffset] = v1 + start;
+                        faceArray[faceoffset + 1] = v3 + start;
+                        faceArray[faceoffset + 2] = v4 + start;
+
+                        geoGroup.faceidx += 3;
+
+                    }
+
+                    // else if (Math.abs(vobj.sphereVertices[v3].y) === radius)
+                    // {
+                    else if (y === yend - 1) {
+                        // face = [v1, v2, v3];
+                        // norm = [n1, n2, n3];
+
+                        normalArray[v1offset] = nx1;
+                        normalArray[v2offset] = nx2;
+                        normalArray[v3offset] = nx3;
+                        normalArray[v1offset + 1] = ny1;
+                        normalArray[v2offset + 1] = ny2;
+                        normalArray[v3offset + 1] = ny3;
+                        normalArray[v1offset + 2] = nz1;
+                        normalArray[v2offset + 2] = nz2;
+                        normalArray[v3offset + 2] = nz3;
+
+                        faceArray[faceoffset] = v1 + start;
+                        faceArray[faceoffset + 1] = v2 + start;
+                        faceArray[faceoffset + 2] = v3 + start;
+
+                        geoGroup.faceidx += 3;
+
+                    }
+
+                    else {
+                        // face = [v1, v2, v3, v4];
+                        // norm = [n1, n2, n3, n4];
+
+                        normalArray[v1offset] = nx1;
+                        normalArray[v2offset] = nx2;
+                        normalArray[v4offset] = nx4;
+                        normalArray[v1offset + 1] = ny1;
+                        normalArray[v2offset + 1] = ny2;
+                        normalArray[v4offset + 1] = ny4;
+                        normalArray[v1offset + 2] = nz1;
+                        normalArray[v2offset + 2] = nz2;
+                        normalArray[v4offset + 2] = nz4;
+
+                        normalArray[v2offset] = nx2;
+                        normalArray[v3offset] = nx3;
+                        normalArray[v4offset] = nx4;
+                        normalArray[v2offset + 1] = ny2;
+                        normalArray[v3offset + 1] = ny3;
+                        normalArray[v4offset + 1] = ny4;
+                        normalArray[v2offset + 2] = nz2;
+                        normalArray[v3offset + 2] = nz3;
+                        normalArray[v4offset + 2] = nz4;
+
+                        faceArray[faceoffset] = v1 + start;
+                        faceArray[faceoffset + 1] = v2 + start;
+                        faceArray[faceoffset + 2] = v4 + start;
+
+                        faceArray[faceoffset + 3] = v2 + start;
+                        faceArray[faceoffset + 4] = v3 + start;
+                        faceArray[faceoffset + 5] = v4 + start;
+
+                        geoGroup.faceidx += 6;
+                    }
+
+                }
+            }
+
+        }
+
+        geoGroup.vertices += n_verts;
+    };
+
+    /** Create a cone 
+     * @function $3Dmol.GLDraw.drawCone
+     * @param {geometry}
+     *            geo
+     * @param {Point}
+     *            from
+     * @param {Point}
+     *            to
+     * @param {float}
+     *            radius
+     * @param {$3Dmol.Color}
+     *            color
+     *            */
+    draw.drawCone = function(geo, from, to, radius, color) {
+        if (!from || !to)
+            return;
+
+        color = color || {r:0, g:0, b:0};
+
+        var dir =[to.x, to.y, to.z ];        
+        dir.x -= from.x;
+        dir.y -= from.y;
+        dir.z -= from.z;
+
+        var e = getRotationMatrix(dir);
+
+
+        // n vertices around bottom plust the two points
+        var n = basisVectors.length;
+        var basis = basisVectors;
+        var n_verts =  n + 2;
+
+        
+        //setup geo structures
+        var geoGroup = geo.updateGeoGroup(n_verts);
+        var start = geoGroup.vertices;    
+        var offset, faceoffset;
+        var i, x, y, z;
+        var vertexArray = geoGroup.vertexArray;
+        var normalArray = geoGroup.normalArray;
+        var colorArray = geoGroup.colorArray;
+        var faceArray = geoGroup.faceArray;
+        
+        var offset = start*3;
+        var ndir = new $3Dmol.Vector3(dir[0],dir[1],dir[2]).normalize();
+        //base point first vertex
+        vertexArray[offset] = from.x;
+        vertexArray[offset+1] = from.y;
+        vertexArray[offset+2] = from.z;
+        normalArray[offset] = -ndir.x;
+        normalArray[offset + 1] = -ndir.y;
+        normalArray[offset + 2] = -ndir.z;
+        colorArray[offset] = color.r;
+        colorArray[offset + 1] = color.g;
+        colorArray[offset + 2] = color.b;
+        
+        //second vertex top
+        vertexArray[offset+3] = to.x;
+        vertexArray[offset+4] = to.y;
+        vertexArray[offset+5] = to.z;
+        
+        normalArray[offset+3] = ndir.x;
+        normalArray[offset+4] = ndir.y;
+        normalArray[offset+5] = ndir.z;
+        colorArray[offset+3] = color.r;
+        colorArray[offset + 4] = color.g;
+        colorArray[offset + 5] = color.b;
+        
+        offset += 6;
+        
+        // add circle vertices
+        for (i = 0; i < n; ++i) {
+            var vec = basis[i].clone();
+            vec.multiplyScalar(radius);
+            x = e[0] * vec.x + e[3] * vec.y + e[6]
+                    * vec.z;
+            y = e[1] * vec.x + e[4] * vec.y + e[7]
+                    * vec.z;
+            z = e[5] * vec.y + e[8] * vec.z;
+
+            // from
+            vertexArray[offset] = x + from.x;
+            vertexArray[offset + 1] = y + from.y;
+            vertexArray[offset + 2] = z + from.z;
+
+            // normals
+            normalArray[offset] = x;
+            normalArray[offset + 1] = y;
+            normalArray[offset + 2] = z;
+
+            // colors
+            colorArray[offset] = color.r;
+            colorArray[offset + 1] = color.g;
+            colorArray[offset + 2] = color.b;
+            
+            offset += 3;
+
+        }
+        geoGroup.vertices += (n+2);
+        //faces
+        var faceoffset = geoGroup.faceidx;
+        for( i = 0; i < n; i++) {
+            //two neighboring circle vertices
+            var v1 = start+2+i;
+            var v2 = start+2+ ((i+1)%n);
+            
+            faceArray[faceoffset] = v1;
+            faceArray[faceoffset+1] = v2;
+            faceArray[faceoffset+2] = start;
+            faceoffset += 3;
+            faceArray[faceoffset] = v1;
+            faceArray[faceoffset+1] = v2;
+            faceArray[faceoffset+2] = start+1;
+            faceoffset += 3;
+        }
+        geoGroup.faceidx += 6*n;
+    };
+
+    
+    // Sphere component
+    var sphereVertexCache = {
+        cache : {},
+        getVerticesForRadius : function(radius) {
+
+            if (typeof (this.cache[radius]) !== "undefined")
+                return this.cache[radius];
+
+            var obj = {
+                vertices : [],
+                verticesRows : [],
+                normals : []
+            };
+            // scale quality with radius heuristically
+            var sphereQuality = 1;
+            var widthSegments = 16 * sphereQuality;
+            var heightSegments = 10 * sphereQuality;
+            if (radius < 1) {
+                widthSegments = 10 * sphereQuality;
+                heightSegments = 8 * sphereQuality;
+            }
+
+            var phiStart = 0;
+            var phiLength = Math.PI * 2;
+
+            var thetaStart = 0;
+            var thetaLength = Math.PI;
+
+            var x, y, vertices = [], uvs = [];
+
+            for (y = 0; y <= heightSegments; y++) {
+
+                var verticesRow = [];
+                for (x = 0; x <= widthSegments; x++) {
+
+                    var u = x / widthSegments;
+                    var v = y / heightSegments;
+
+                    var vertex = {};
+                    vertex.x = -radius * Math.cos(phiStart + u * phiLength)
+                            * Math.sin(thetaStart + v * thetaLength);
+                    vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
+                    vertex.z = radius * Math.sin(phiStart + u * phiLength)
+                            * Math.sin(thetaStart + v * thetaLength);
+
+                    var n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
+                    n.normalize();
+
+                    obj.vertices.push(vertex);
+                    obj.normals.push(n);
+
+                    verticesRow.push(obj.vertices.length - 1);
+
+                }
+
+                obj.verticesRows.push(verticesRow);
+
+            }
+
+            this.cache[radius] = obj;
+            return obj;
+        }
+
+    };
+
+    /** Create a sphere.
+     * @function $3Dmol.GLDraw.drawSphere
+     * @param {geometry}
+     *            geo
+     * @param {Point}
+     *            pos
+     * @param {float}
+     *            radius
+     * @param {$3Dmol.Color}
+     *            color
+     */
+    draw.drawSphere = function(geo, pos, radius, color) {
+
+        var center = new $3Dmol.Vector3(pos.x, pos.y, pos.z);
+
+        var x, y;
+        var vobj = sphereVertexCache.getVerticesForRadius(radius);
+
+        var vertices = vobj.vertices;
+        var normals = vobj.normals;
+
+        var geoGroup = geo.updateGeoGroup(vertices.length);
+
+        var start = geoGroup.vertices;
+        var vertexArray = geoGroup.vertexArray;
+        var colorArray = geoGroup.colorArray;
+        var faceArray = geoGroup.faceArray;
+        var lineArray = geoGroup.lineArray;
+        var normalArray = geoGroup.normalArray;
+
+        for (var i = 0, il = vertices.length; i < il; ++i) {
+            var offset = 3 * (start + i);
+            var v = vertices[i];
+
+            vertexArray[offset] = (v.x + pos.x);
+            vertexArray[offset + 1] = (v.y + pos.y);
+            vertexArray[offset + 2] = (v.z + pos.z);
+
+            colorArray[offset] = color.r;
+            colorArray[offset + 1] = color.g;
+            colorArray[offset + 2] = color.b;
+
+        }
+
+        geoGroup.vertices += vertices.length;
+
+        var verticesRows = vobj.verticesRows;
+        var h = verticesRows.length - 1;
+
+        for (y = 0; y < h; y++) {
+            var w = verticesRows[y].length - 1;
+            for (x = 0; x < w; x++) {
+
+                var faceoffset = geoGroup.faceidx, lineoffset = geoGroup.lineidx;
+
+                var v1 = verticesRows[y][x + 1] + start, v1offset = v1 * 3;
+                var v2 = verticesRows[y][x] + start, v2offset = v2 * 3;
+                var v3 = verticesRows[y + 1][x] + start, v3offset = v3 * 3;
+                var v4 = verticesRows[y + 1][x + 1] + start, v4offset = v4 * 3;
+
+                var n1 = normals[v1 - start];
+                var n2 = normals[v2 - start];
+                var n3 = normals[v3 - start];
+                var n4 = normals[v4 - start];
+                var face, norm;
+                if (Math.abs(vertices[v1 - start].y) === radius) {
+                    // face = [v1, v3, v4];
+                    // norm = [n1, n3, n4];
+
+                    normalArray[v1offset] = n1.x;
+                    normalArray[v3offset] = n3.x;
+                    normalArray[v4offset] = n4.x;
+                    normalArray[v1offset + 1] = n1.y;
+                    normalArray[v3offset + 1] = n3.y;
+                    normalArray[v4offset + 1] = n4.y;
+                    normalArray[v1offset + 2] = n1.z;
+                    normalArray[v3offset + 2] = n3.z;
+                    normalArray[v4offset + 2] = n4.z;
+
+                    faceArray[faceoffset] = v1;
+                    faceArray[faceoffset + 1] = v3;
+                    faceArray[faceoffset + 2] = v4;
+
+                    lineArray[lineoffset] = v1;
+                    lineArray[lineoffset + 1] = v3;
+                    lineArray[lineoffset + 2] = v1;
+                    lineArray[lineoffset + 3] = v4;
+                    lineArray[lineoffset + 4] = v3;
+                    lineArray[lineoffset + 5] = v4;
+
+                    geoGroup.faceidx += 3;
+                    geoGroup.lineidx += 6;
+
+                } else if (Math.abs(vertices[v3 - start].y) === radius) {
+                    // face = [v1, v2, v3];
+                    // norm = [n1, n2, n3];
+
+                    normalArray[v1offset] = n1.x;
+                    normalArray[v2offset] = n2.x;
+                    normalArray[v3offset] = n3.x;
+                    normalArray[v1offset + 1] = n1.y;
+                    normalArray[v2offset + 1] = n2.y;
+                    normalArray[v3offset + 1] = n3.y;
+                    normalArray[v1offset + 2] = n1.z;
+                    normalArray[v2offset + 2] = n2.z;
+                    normalArray[v3offset + 2] = n3.z;
+
+                    faceArray[faceoffset] = v1;
+                    faceArray[faceoffset + 1] = v2;
+                    faceArray[faceoffset + 2] = v3;
+
+                    lineArray[lineoffset] = v1;
+                    lineArray[lineoffset + 1] = v2;
+                    lineArray[lineoffset + 2] = v1;
+                    lineArray[lineoffset + 3] = v3;
+                    lineArray[lineoffset + 4] = v2;
+                    lineArray[lineoffset + 5] = v3;
+
+                    geoGroup.faceidx += 3;
+                    geoGroup.lineidx += 6;
+
+                } else {
+                    // face = [v1, v2, v3, v4];
+                    // norm = [n1, n2, n3, n4];
+
+                    normalArray[v1offset] = n1.x;
+                    normalArray[v2offset] = n2.x;
+                    normalArray[v4offset] = n4.x;
+                    normalArray[v1offset + 1] = n1.y;
+                    normalArray[v2offset + 1] = n2.y;
+                    normalArray[v4offset + 1] = n4.y;
+                    normalArray[v1offset + 2] = n1.z;
+                    normalArray[v2offset + 2] = n2.z;
+                    normalArray[v4offset + 2] = n4.z;
+
+                    normalArray[v2offset] = n2.x;
+                    normalArray[v3offset] = n3.x;
+                    normalArray[v4offset] = n4.x;
+                    normalArray[v2offset + 1] = n2.y;
+                    normalArray[v3offset + 1] = n3.y;
+                    normalArray[v4offset + 1] = n4.y;
+                    normalArray[v2offset + 2] = n2.z;
+                    normalArray[v3offset + 2] = n3.z;
+                    normalArray[v4offset + 2] = n4.z;
+
+                    faceArray[faceoffset] = v1;
+                    faceArray[faceoffset + 1] = v2;
+                    faceArray[faceoffset + 2] = v4;
+
+                    faceArray[faceoffset + 3] = v2;
+                    faceArray[faceoffset + 4] = v3;
+                    faceArray[faceoffset + 5] = v4;
+
+                    lineArray[lineoffset] = v1;
+                    lineArray[lineoffset + 1] = v2;
+                    lineArray[lineoffset + 2] = v1;
+                    lineArray[lineoffset + 3] = v4;
+
+                    lineArray[lineoffset + 4] = v2;
+                    lineArray[lineoffset + 5] = v3;
+                    lineArray[lineoffset + 6] = v3;
+                    lineArray[lineoffset + 7] = v4;
+
+                    geoGroup.faceidx += 6;
+                    geoGroup.lineidx += 8;
+
+                }
+
+            }
+        }
+
+    };
+
+    return draw;
 
 })();// A model is a collection of related atoms.  Bonds are only allowed between
 //atoms in the same model.  An atom is uniquely specified by its model id and
@@ -19071,6 +18874,11 @@ $3Dmol.GLModel = (function() {
         var molObj = null;
         var renderedMolObj = null;
         var lastColors = null;
+        var copyMatrices = []; //transformation + rot matrices
+        var idMatrix = new $3Dmol.Matrix4();
+        idMatrix.identity();
+        var noAssembly;
+        var dontDuplicateAtoms;
         
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
@@ -19104,14 +18912,14 @@ $3Dmol.GLModel = (function() {
         };
 
         // cross drawing
-		/** @typedef CrossStyleSpec
-		 * @prop {boolean} hidden - do not show 
-		 * @prop {number} linewidth 
-		 * @prop {number} radius 
-		 * @prop {string} colorscheme - element based coloring
-		 * @prop {string} color - fixed coloring, overrides colorscheme
-		 */
-		
+        /** @typedef CrossStyleSpec
+         * @prop {boolean} hidden - do not show 
+         * @prop {number} linewidth 
+         * @prop {number} radius 
+         * @prop {string} colorscheme - element based coloring
+         * @prop {string} color - fixed coloring, overrides colorscheme
+         */
+        
         /**
          * 
          * @param {AtomSpec} atom
@@ -19170,71 +18978,71 @@ $3Dmol.GLModel = (function() {
 
         //from atom, return a normalized vector v that is orthogonal and along which
         //it is appropraite to draw multiple bonds
-		var getSideBondV = function(atom, atom2, i) {
+        var getSideBondV = function(atom, atom2, i) {
 
-			var p1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
-			var p2 = new $3Dmol.Vector3(atom2.x, atom2.y, atom2.z);
+            var p1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+            var p2 = new $3Dmol.Vector3(atom2.x, atom2.y, atom2.z);
 
-			var dir = p2.clone();
-			var v = null;
-			dir.sub(p1);
+            var dir = p2.clone();
+            var v = null;
+            dir.sub(p1);
 
-			var p1a, p1b, p2a, p2b;
-			var i2, j2, atom3, p3, dir2;
-			if (atom.bonds.length === 1) {
-				if (atom2.bonds.length === 1) {
-					v = dir.clone();
-					if (Math.abs(v.x) > 0.0001)
-						v.y += 1;
-					else
-						v.x += 1;
-				} else {
-					i2 = (i + 1) % atom2.bonds.length;
-					j2 = atom2.bonds[i2];
-					atom3 = atoms[j2];
-					p3 = new $3Dmol.Vector3(atom3.x, atom3.y, atom3.z);
+            var p1a, p1b, p2a, p2b;
+            var i2, j2, atom3, p3, dir2;
+            if (atom.bonds.length === 1) {
+                if (atom2.bonds.length === 1) {
+                    v = dir.clone();
+                    if (Math.abs(v.x) > 0.0001)
+                        v.y += 1;
+                    else
+                        v.x += 1;
+                } else {
+                    i2 = (i + 1) % atom2.bonds.length;
+                    j2 = atom2.bonds[i2];
+                    atom3 = atoms[j2];
+                    p3 = new $3Dmol.Vector3(atom3.x, atom3.y, atom3.z);
 
-					dir2 = p3.clone();
-					dir2.sub(p1);
+                    dir2 = p3.clone();
+                    dir2.sub(p1);
 
-					v = dir2.clone();
-					v.cross(dir);
-				}
-			} else {
-				// get vector 2 different neighboring atom
-				i2 = (i + 1) % atom.bonds.length;
-				j2 = atom.bonds[i2];
-				atom3 = atoms[j2];
-				p3 = new $3Dmol.Vector3(atom3.x, atom3.y, atom3.z);
+                    v = dir2.clone();
+                    v.cross(dir);
+                }
+            } else {
+                // get vector 2 different neighboring atom
+                i2 = (i + 1) % atom.bonds.length;
+                j2 = atom.bonds[i2];
+                atom3 = atoms[j2];
+                p3 = new $3Dmol.Vector3(atom3.x, atom3.y, atom3.z);
 
-				dir2 = p3.clone();
-				dir2.sub(p1);
+                dir2 = p3.clone();
+                dir2.sub(p1);
 
-				v = dir2.clone();
-				v.cross(dir);
-			}
+                v = dir2.clone();
+                v.cross(dir);
+            }
 
-			// especially for C#C (triple bond) dir and dir2
-			// may be opposites resulting in a zero v
-			if (v.lengthSq() < 0.01) {
-				v = dir.clone();
-				if (Math.abs(v.x) > 0.0001)
-					v.y += 1;
-				else
-					v.x += 1;
-			}
+            // especially for C#C (triple bond) dir and dir2
+            // may be opposites resulting in a zero v
+            if (v.lengthSq() < 0.01) {
+                v = dir.clone();
+                if (Math.abs(v.x) > 0.0001)
+                    v.y += 1;
+                else
+                    v.x += 1;
+            }
 
-			v.cross(dir);
-			v.normalize();
-			
-			return v;
-			
-			v.multiplyScalar(r * 1.5);
+            v.cross(dir);
+            v.normalize();
+            
+            return v;
+            
+            v.multiplyScalar(r * 1.5);
 
-		}
-		
-		var getTripleBondPoints = function() {
-			
+        }
+        
+        var getTripleBondPoints = function() {
+            
             v.cross(dir);
             v.normalize();
             v.multiplyScalar(r * 3);
@@ -19248,32 +19056,32 @@ $3Dmol.GLModel = (function() {
             p2a.add(dir);
             p2b = p1b.clone();
             p2b.add(dir);
-		}
-		
-		var addLine = function(vertexArray, colorArray, offset, p1, p2, c1) {
-			//make line from p1 to p2, does not incremeant counts
+        }
+        
+        var addLine = function(vertexArray, colorArray, offset, p1, p2, c1) {
+            //make line from p1 to p2, does not incremeant counts
             vertexArray[offset] = p1.x; vertexArray[offset+1] = p1.y; vertexArray[offset+2] = p1.z;
             colorArray[offset] = c1.r; colorArray[offset+1] = c1.g; colorArray[offset+2] = c1.b;
             vertexArray[offset+3] = p2.x; vertexArray[offset+4] = p2.y; vertexArray[offset+5] = p2.z;
             colorArray[offset+3] = c1.r; colorArray[offset+4] = c1.g; colorArray[offset+5] = c1.b;            
-		}
-		
-		/**@typedef LineStyleSpec
-		 * @prop {boolean} hidden - do not show line
-		 * @prop {number} linewidth 
-		 * @prop {string} colorscheme - element based coloring
-		 * @prop {string} color - fixed coloring, overrides colorscheme
-		 */
-		
+        }
+        
+        /**@typedef LineStyleSpec
+         * @prop {boolean} hidden - do not show line
+         * @prop {number} linewidth 
+         * @prop {string} colorscheme - element based coloring
+         * @prop {string} color - fixed coloring, overrides colorscheme
+         */
+        
         // bonds - both atoms must match bond style
         // standardize on only drawing for lowest to highest
         /**
-		 * 
-		 * @param {AtomSpec}
-		 *            atom
-		 * @param {AtomSpec[]} atoms
-		 * @param {$3Dmol.Geometry[]} geos
-		 */
+         * 
+         * @param {AtomSpec}
+         *            atom
+         * @param {AtomSpec[]} atoms
+         * @param {$3Dmol.Geometry[]} geos
+         */
         var drawBondLines = function(atom, atoms, geos) {
             if (!atom.style.line)
                 return;
@@ -19300,7 +19108,7 @@ $3Dmol.GLModel = (function() {
                     continue; // don't sweat the details
 
                 if (atom.serial >= atom2.serial) // only draw if less, this way we can do multi bonds correctly
-                	continue;
+                    continue;
                 var p1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                 var p2 = new $3Dmol.Vector3(atom2.x, atom2.y, atom2.z);                
                 var mp = p1.clone().add(p2).multiplyScalar(0.5);
@@ -19317,18 +19125,18 @@ $3Dmol.GLModel = (function() {
                 var c2 = $3Dmol.getColorFromStyle(atom2, atom2.style.line);
                
                 if(atom.bondStyles && atom.bondStyles[i]) {
-                	var bstyle = atom.bondStyles[i];
-                	if(!bstyle.iswire) {
-                		continue;
-                	}
-                	if(bstyle.radius) bondR = bstyle.radius;
-                	if(bstyle.singleBond) singleBond = true;
-                	if(typeof(bstyle.color1) != "undefined") {
-                		c1 = $3Dmol.CC.color(bstyle.color1);
-                	}
-                	if(typeof(bstyle.color2) != "undefined") {
-                		c2 = $3Dmol.CC.color(bstyle.color2);
-                	}
+                    var bstyle = atom.bondStyles[i];
+                    if(!bstyle.iswire) {
+                        continue;
+                    }
+                    if(bstyle.radius) bondR = bstyle.radius;
+                    if(bstyle.singleBond) singleBond = true;
+                    if(typeof(bstyle.color1) != "undefined") {
+                        c1 = $3Dmol.CC.color(bstyle.color1);
+                    }
+                    if(typeof(bstyle.color2) != "undefined") {
+                        c2 = $3Dmol.CC.color(bstyle.color2);
+                    }
                 }
 
                 var offset = geoGroup.vertices*3;
@@ -19339,83 +19147,83 @@ $3Dmol.GLModel = (function() {
                     dir.sub(p1);
                     
                     if(atom.bondOrder[i] == 2) { //double
-                    	
-                    	v.multiplyScalar(.1);
-               			p1a = p1.clone();
-            			p1a.add(v);
-            			p1b = p1.clone();
-            			p1b.sub(v);
+                        
+                        v.multiplyScalar(.1);
+                           p1a = p1.clone();
+                        p1a.add(v);
+                        p1b = p1.clone();
+                        p1b.sub(v);
 
-            			p2a = p1a.clone();
-            			p2a.add(dir);
-            			p2b = p1b.clone();
-            			p2b.add(dir);
-            			
-            			if(c1 == c2) {
-    		                geoGroup.vertices += 4;
-    	                	addLine(vertexArray, colorArray, offset, p1a, p2a, c1);            				
-    	                	addLine(vertexArray, colorArray, offset+6, p1b, p2b, c1);            				
-            			}
-            			else {
-    		                geoGroup.vertices += 8;
-    		                dir.multiplyScalar(0.5);
-    		                var mpa = p1a.clone();
-    		                mpa.add(dir);
-    		                var mpb = p1b.clone();
-    		                mpb.add(dir);
-    		                
-    	                	addLine(vertexArray, colorArray, offset, p1a, mpa, c1);            				
-    	                	addLine(vertexArray, colorArray, offset+6, mpa, p2a, c2);            				
-    	                	addLine(vertexArray, colorArray, offset+12, p1b, mpb, c1); 
-    	                	addLine(vertexArray, colorArray, offset+18, mpb, p2b, c2); 
-            			}
+                        p2a = p1a.clone();
+                        p2a.add(dir);
+                        p2b = p1b.clone();
+                        p2b.add(dir);
+                        
+                        if(c1 == c2) {
+                            geoGroup.vertices += 4;
+                            addLine(vertexArray, colorArray, offset, p1a, p2a, c1);                            
+                            addLine(vertexArray, colorArray, offset+6, p1b, p2b, c1);                            
+                        }
+                        else {
+                            geoGroup.vertices += 8;
+                            dir.multiplyScalar(0.5);
+                            var mpa = p1a.clone();
+                            mpa.add(dir);
+                            var mpb = p1b.clone();
+                            mpb.add(dir);
+                            
+                            addLine(vertexArray, colorArray, offset, p1a, mpa, c1);                            
+                            addLine(vertexArray, colorArray, offset+6, mpa, p2a, c2);                            
+                            addLine(vertexArray, colorArray, offset+12, p1b, mpb, c1); 
+                            addLine(vertexArray, colorArray, offset+18, mpb, p2b, c2); 
+                        }
                     }
                     else if(atom.bondOrder[i] == 3) { //triple
-                    	
-                    	v.multiplyScalar(.1);
-               			p1a = p1.clone();
-            			p1a.add(v);
-            			p1b = p1.clone();
-            			p1b.sub(v);
+                        
+                        v.multiplyScalar(.1);
+                           p1a = p1.clone();
+                        p1a.add(v);
+                        p1b = p1.clone();
+                        p1b.sub(v);
 
-            			p2a = p1a.clone();
-            			p2a.add(dir);
-            			p2b = p1b.clone();
-            			p2b.add(dir);
-            			
-            			if(c1 == c2) {
-    		                geoGroup.vertices += 6;
-    	                	addLine(vertexArray, colorArray, offset, p1, p2, c1);            				
-    	                	addLine(vertexArray, colorArray, offset+6, p1a, p2a, c1);            				
-    	                	addLine(vertexArray, colorArray, offset+12, p1b, p2b, c1);            				
-            			}
-            			else {
-    		                geoGroup.vertices += 12;
-    		                dir.multiplyScalar(0.5);
-    		                var mpa = p1a.clone();
-    		                mpa.add(dir);
-    		                var mpb = p1b.clone();
-    		                mpb.add(dir);
+                        p2a = p1a.clone();
+                        p2a.add(dir);
+                        p2b = p1b.clone();
+                        p2b.add(dir);
+                        
+                        if(c1 == c2) {
+                            geoGroup.vertices += 6;
+                            addLine(vertexArray, colorArray, offset, p1, p2, c1);                            
+                            addLine(vertexArray, colorArray, offset+6, p1a, p2a, c1);                            
+                            addLine(vertexArray, colorArray, offset+12, p1b, p2b, c1);                            
+                        }
+                        else {
+                            geoGroup.vertices += 12;
+                            dir.multiplyScalar(0.5);
+                            var mpa = p1a.clone();
+                            mpa.add(dir);
+                            var mpb = p1b.clone();
+                            mpb.add(dir);
 
-    	                	addLine(vertexArray, colorArray, offset, p1, mp, c1);            				
-    	                	addLine(vertexArray, colorArray, offset+6, mp, p2, c2);
-    	                	addLine(vertexArray, colorArray, offset+12, p1a, mpa, c1);            				
-    	                	addLine(vertexArray, colorArray, offset+18, mpa, p2a, c2);            				
-    	                	addLine(vertexArray, colorArray, offset+24, p1b, mpb, c1); 
-    	                	addLine(vertexArray, colorArray, offset+30, mpb, p2b, c2); 
-            			}
+                            addLine(vertexArray, colorArray, offset, p1, mp, c1);                            
+                            addLine(vertexArray, colorArray, offset+6, mp, p2, c2);
+                            addLine(vertexArray, colorArray, offset+12, p1a, mpa, c1);                            
+                            addLine(vertexArray, colorArray, offset+18, mpa, p2a, c2);                            
+                            addLine(vertexArray, colorArray, offset+24, p1b, mpb, c1); 
+                            addLine(vertexArray, colorArray, offset+30, mpb, p2b, c2); 
+                        }
                     }
                 }
-                else { //single bond                	                
-	                if(c1 == c2) {
-		                geoGroup.vertices += 2;
-	                	addLine(vertexArray, colorArray, offset, p1, p2, c1);
-	                } else {
-		                geoGroup.vertices += 4;
-	                	addLine(vertexArray, colorArray, offset, p1, mp, c1);
-	                	addLine(vertexArray, colorArray, offset+6, mp, p2, c2);	                	
-	                }
-	                
+                else { //single bond                                    
+                    if(c1 == c2) {
+                        geoGroup.vertices += 2;
+                        addLine(vertexArray, colorArray, offset, p1, p2, c1);
+                    } else {
+                        geoGroup.vertices += 4;
+                        addLine(vertexArray, colorArray, offset, p1, mp, c1);
+                        addLine(vertexArray, colorArray, offset+6, mp, p2, c2);                        
+                    }
+                    
                 }
             }
 
@@ -19424,13 +19232,13 @@ $3Dmol.GLModel = (function() {
         // bonds as cylinders
         var defaultStickRadius = 0.25;
 
-		/**@typedef SphereStyleSpec
-		 * @prop {boolean} hidden - do not show atom
-		 * @prop {number} radius - override van der waals radius
-		 * @prop {string} colorscheme - element based coloring
-		 * @prop {string} color - fixed coloring, overrides colorscheme
-		 */
-		
+        /**@typedef SphereStyleSpec
+         * @prop {boolean} hidden - do not show atom
+         * @prop {number} radius - override van der waals radius
+         * @prop {string} colorscheme - element based coloring
+         * @prop {string} color - fixed coloring, overrides colorscheme
+         */
+        
         //sphere drawing
         //See also: drawCylinder
         /** 
@@ -19484,7 +19292,7 @@ $3Dmol.GLModel = (function() {
             for(var i = 0; i < 4; i++) {
                 vertexArray[start+3*i] = atom.x;
                 vertexArray[start+3*i+1] = atom.y ;
-                vertexArray[start+3*i+2] = atom.z;                       	
+                vertexArray[start+3*i+2] = atom.z;                           
             }
             
 
@@ -19492,28 +19300,28 @@ $3Dmol.GLModel = (function() {
             var normalArray = geoGroup.normalArray;
             var colorArray = geoGroup.colorArray;
             for(var i = 0; i < 4; i++) {
-            	colorArray[start+3*i] = C.r;
-            	colorArray[start+3*i+1] = C.g;
-            	colorArray[start+3*i+2] = C.b;
-            	
+                colorArray[start+3*i] = C.r;
+                colorArray[start+3*i+1] = C.g;
+                colorArray[start+3*i+2] = C.b;
+                
             }
             
-        	normalArray[start+0] = -radius;
-        	normalArray[start+1] = -radius;
-        	normalArray[start+2] = 0;
-        	
-        	normalArray[start+3] = -radius;
-        	normalArray[start+4] = radius;
-        	normalArray[start+5] = 0;
-        	
-        	normalArray[start+6] = radius;
-        	normalArray[start+7] = radius;
-        	normalArray[start+8] = 0;
-        	
-        	normalArray[start+9] = radius;
-        	normalArray[start+10] = -radius;
-        	normalArray[start+11] = 0;
-        	
+            normalArray[start+0] = -radius;
+            normalArray[start+1] = -radius;
+            normalArray[start+2] = 0;
+            
+            normalArray[start+3] = -radius;
+            normalArray[start+4] = radius;
+            normalArray[start+5] = 0;
+            
+            normalArray[start+6] = radius;
+            normalArray[start+7] = radius;
+            normalArray[start+8] = 0;
+            
+            normalArray[start+9] = radius;
+            normalArray[start+10] = -radius;
+            normalArray[start+11] = 0;
+            
             geoGroup.vertices += 4;
             
             //two faces
@@ -19530,14 +19338,14 @@ $3Dmol.GLModel = (function() {
         };
                 
            
-		/**@typedef StickStyleSpec
-		 * @prop {boolean} hidden - do not show 
-		 * @prop {number} radius 
-		 * @prop {boolean} singleBonds - draw all bonds as single bonds if set
-		 * @prop {string} colorscheme - element based coloring
-		 * @prop {string} color - fixed coloring, overrides colorscheme
-		 */
-		
+        /**@typedef StickStyleSpec
+         * @prop {boolean} hidden - do not show 
+         * @prop {number} radius 
+         * @prop {boolean} singleBonds - draw all bonds as single bonds if set
+         * @prop {string} colorscheme - element based coloring
+         * @prop {string} color - fixed coloring, overrides colorscheme
+         */
+        
         // draws cylinders and small spheres (at bond radius)
         var drawBondSticks = function(atom, atoms, geo) {
             if (!atom.style.stick)
@@ -19566,7 +19374,7 @@ $3Dmol.GLModel = (function() {
                     // lets us combine
                     // cylinders of the same
                     // color
-                	var style2 = atom2.style;
+                    var style2 = atom2.style;
                     if (!style2.stick)
                         continue; // don't sweat the details                     
                    
@@ -19576,18 +19384,18 @@ $3Dmol.GLModel = (function() {
                     bondR = atomBondR;                    
                     var singleBond = atomSingleBond;
                     if(atom.bondStyles && atom.bondStyles[i]) {
-                    	var bstyle = atom.bondStyles[i];
-                    	if(bstyle.iswire) {
-                    		continue;
-                    	}
-                    	if(bstyle.radius) bondR = bstyle.radius;
-                    	if(bstyle.singleBond) singleBond = true;
-                    	if(typeof(bstyle.color1) != "undefined") {
-                    		C1 = $3Dmol.CC.color(bstyle.color1);
-                    	}
-                    	if(typeof(bstyle.color2) != "undefined") {
-                    		C2 = $3Dmol.CC.color(bstyle.color2);
-                    	}
+                        var bstyle = atom.bondStyles[i];
+                        if(bstyle.iswire) {
+                            continue;
+                        }
+                        if(bstyle.radius) bondR = bstyle.radius;
+                        if(bstyle.singleBond) singleBond = true;
+                        if(typeof(bstyle.color1) != "undefined") {
+                            C1 = $3Dmol.CC.color(bstyle.color1);
+                        }
+                        if(typeof(bstyle.color2) != "undefined") {
+                            C2 = $3Dmol.CC.color(bstyle.color2);
+                        }
                     }
                     var p1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     var p2 = new $3Dmol.Vector3(atom2.x, atom2.y, atom2.z);
@@ -19604,7 +19412,7 @@ $3Dmol.GLModel = (function() {
                             $3Dmol.GLDraw.drawCylinder(geo, p1, mp, bondR, C1, fromCap, false);
                             $3Dmol.GLDraw.drawCylinder(geo, mp, p2, bondR, C2, false, toCap);
                         } else {
-                        	$3Dmol.GLDraw.drawCylinder(geo, p1, p2, bondR, C1, fromCap, toCap);
+                            $3Dmol.GLDraw.drawCylinder(geo, p1, p2, bondR, C1, fromCap, toCap);
                         }
                         
                         if (atom.clickable || atom2.clickable) {
@@ -19630,9 +19438,9 @@ $3Dmol.GLModel = (function() {
                         var mfromCap = false; mtoCap = false; //multi bond caps
                         
                         if(bondR != atomBondR) {
-                        	//assume jmol style multiple bonds - the radius doesn't fit within atom sphere
-                        	mfromCap = true;
-                        	mtoCap = true;
+                            //assume jmol style multiple bonds - the radius doesn't fit within atom sphere
+                            mfromCap = true;
+                            mtoCap = true;
                         }
                         
                         var dir = p2.clone();
@@ -19643,19 +19451,19 @@ $3Dmol.GLModel = (function() {
                         var v = getSideBondV(atom, atom2, i);
                         
                         if (atom.bondOrder[i] == 2) {
-                        	var r = bondR/2.5;
-                        	var v = getSideBondV(atom, atom2, i);
-                        	
-                        	v.multiplyScalar(r*1.5);
-                			p1a = p1.clone();
-                			p1a.add(v);
-                			p1b = p1.clone();
-                			p1b.sub(v);
+                            var r = bondR/2.5;
+                            var v = getSideBondV(atom, atom2, i);
+                            
+                            v.multiplyScalar(r*1.5);
+                            p1a = p1.clone();
+                            p1a.add(v);
+                            p1b = p1.clone();
+                            p1b.sub(v);
 
-                			p2a = p1a.clone();
-                			p2a.add(dir);
-                			p2b = p1b.clone();
-                			p2b.add(dir);
+                            p2a = p1a.clone();
+                            p2a.add(dir);
+                            p2b = p1b.clone();
+                            p2b.add(dir);
 
                                                                  
                             if (C1 != C2) {
@@ -19668,8 +19476,8 @@ $3Dmol.GLModel = (function() {
                                 $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, false);
                                 $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, false, mtoCap);
                             } else {
-                            	$3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
-                            	$3Dmol.GLDraw.drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
                             }
                             if (atom.clickable || atom2.clickable){
                                 mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
@@ -19720,9 +19528,9 @@ $3Dmol.GLModel = (function() {
                                 $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, false);
                                 $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, false, mtoCap);
                             } else {
-                            	$3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
-                            	$3Dmol.GLDraw.drawCylinder(geo, p1, p2, r, C1, fromCap, toCap);
-                            	$3Dmol.GLDraw.drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1, p2, r, C1, fromCap, toCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
 
                             }
                             if (atom.clickable || atom2.clickable) {
@@ -19765,22 +19573,22 @@ $3Dmol.GLModel = (function() {
             for(var i = 0; i < atom.bonds.length; i++) {
                 var singleBond = atomSingleBond;
                 if(atom.bondStyles && atom.bondStyles[i]) {
-                	var bstyle = atom.bondStyles[i];
-                	if(bstyle.singleBond) singleBond = true;
-                	if(bstyle.radius && bstyle.radius != atomBondR) {
-                		differentradii = true;
-                	}
+                    var bstyle = atom.bondStyles[i];
+                    if(bstyle.singleBond) singleBond = true;
+                    if(bstyle.radius && bstyle.radius != atomBondR) {
+                        differentradii = true;
+                    }
                 }
                 if(singleBond || atom.bondOrder[i] == 1) {
-                	numsinglebonds++;
+                    numsinglebonds++;
                 }
             }
             
             if(differentradii) { //jmol style double/triple bonds - no sphere
-            	if(numsinglebonds > 0) drawSphere = true; //unless needed as a cap
+                if(numsinglebonds > 0) drawSphere = true; //unless needed as a cap
             }
             else if(numsinglebonds == 0 && atom.bonds.length > 0) {
-            	drawSphere = true;
+                drawSphere = true;
             }
            
             if (drawSphere) {
@@ -19801,7 +19609,7 @@ $3Dmol.GLModel = (function() {
         /** param {AtomSpec[]} atoms */
         var createMolObj = function(atoms) {
 
-            console.log("creating for "+id);
+            //console.log("creating for "+id);
             var ret = new $3Dmol.Object3D();
             var cartoonAtoms = [];
             var lineGeometries = {};
@@ -19939,8 +19747,57 @@ $3Dmol.GLModel = (function() {
                     ret.add(cross);
                 }
             }
+            
+            //for BIOMT assembly
+            if (dontDuplicateAtoms && !noAssembly) {
+                var finalRet = new $3Dmol.Object3D();
+                var t;
+                for (t = 0; t < copyMatrices.length; t++) {
+                    var transformedRet = new $3Dmol.Object3D();
+                    transformedRet = ret.clone();
+                    transformedRet.matrix.copy(copyMatrices[t]);
+                    transformedRet.matrixAutoUpdate = false;
+                    finalRet.add(transformedRet);
+                }
+                return finalRet;
+            }
 
             return ret;
+        };
+        
+        /**
+         * Returns list of rotational/translational matrices if there is BIOMT data
+         * Otherwise returns a list of just the ID matrix
+         *
+         * @function $3Dmol.GlModel#getSymmetries
+         * @return {Array<$3Dmol.Matrix4>}
+         *
+         */
+        this.getSymmetries = function() {
+            if (copyMatrices.length > 1) {
+                return copyMatrices; //returns copyMatrices, which has ID matrix as 1st entry
+            }
+            else {
+                    
+                return idList;
+            }
+        };
+        
+        /**
+         * Sets symmetries based on specified matrices in list
+         *
+         * @function $3Dmol.GlModel#setSymmetries
+         * @param {Array<$3Dmol.Matrix4>} list
+         *
+         */
+        this.setSymmetries = function(list) {
+            if (typeof(list) == "undefined") { //delete sym data
+                var idList = [idMatrix];
+                copyMatrices = idList;
+            }
+            else {
+                copyMatrices = list;
+            }
         };
 
         /**
@@ -19977,6 +19834,7 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             if (!data)
+<<<<<<< HEAD:build/3Dmol.js
                 console.error("Error with addMolData: No input data specified");
             
             if(typeof($3Dmol.Parsers[format]) != "undefined") {
@@ -19985,8 +19843,27 @@ $3Dmol.GLModel = (function() {
             }
             else {
             	console.error("Unknown format: "+format);
+=======
+                return; //leave an empty model
+            if(typeof($3Dmol.Parsers[format]) == "undefined") {
+                console.log("Unknown format: "+format);
+                //try to guess correct format from data contents
+                if(data.match(/^@<TRIPOS>MOLECULE/)) {
+                    format = "mol2";
+                } else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+                    format = "pdb";
+                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+                    format = "sdf"; //could look at line 3
+                } else {
+                    format = "xyz";
+                }
+                console.log("Best guess: "+format);
+>>>>>>> 3bf4603ee45bdf982f1ac81a8ab1fb960d46a099:release/3Dmol.js
             }
-            
+            var parse = $3Dmol.Parsers[format];
+            parse(atoms, data, options, copyMatrices)
+            noAssembly = !options.doAssembly; //for BIOMT uses
+            dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
             setAtomDefaults(atoms, id);
         };
         
@@ -20003,28 +19880,28 @@ $3Dmol.GLModel = (function() {
             var invert = !!sel.invert;
             var ret = true;
             for ( var key in sel) {
-            	if(key === 'predicate') { //a user supplied function for evaluating atoms
-            		if(!sel['predicate'](atom) ) {
-            			ret = false;
-            			break;
-            		}
-            	}
+                if(key === 'predicate') { //a user supplied function for evaluating atoms
+                    if(!sel['predicate'](atom) ) {
+                        ret = false;
+                        break;
+                    }
+                }
 
-            	else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
+                else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
 
-                    // if something is in sel, atom must have it                	
+                    // if something is in sel, atom must have it                    
                     if (typeof (atom[key]) === "undefined") {
                         ret = false;
                         break;
                     }
                     var isokay = false;
                     if(key === "bonds") {
-                    	//special case counting number of bonds, for selecting nonbonded mostly
-                    	var val = sel[key];
-                    	if(val != atom.bonds.length) {
-                    		ret = false;
-                    		break;
-                    	}
+                        //special case counting number of bonds, for selecting nonbonded mostly
+                        var val = sel[key];
+                        if(val != atom.bonds.length) {
+                            ret = false;
+                            break;
+                        }
                     }
                     else if ($.isArray(sel[key])) {
                         // can be any of the listed values
@@ -20074,38 +19951,38 @@ $3Dmol.GLModel = (function() {
             // expand selection by some distance
             if (sel.hasOwnProperty("expand")) {
 
-            	// get atoms in expanded bounding box
-            	var expand = expandAtomList(ret, sel.expand)
-            	var retlen = ret.length
-            	for (var i = 0; i < expand.length; i++) {
-            		for (var j = 0; j < retlen; j++) {
+                // get atoms in expanded bounding box
+                var expand = expandAtomList(ret, sel.expand)
+                var retlen = ret.length
+                for (var i = 0; i < expand.length; i++) {
+                    for (var j = 0; j < retlen; j++) {
 
-            			var dist = squaredDistance(expand[i], ret[j]);
-            			var thresh = Math.pow(sel.expand, 2);
-            			if (dist < thresh && dist > 0) {
-            				ret.push(expand[i]);
-            			}
-            		}
-            	}
+                        var dist = squaredDistance(expand[i], ret[j]);
+                        var thresh = Math.pow(sel.expand, 2);
+                        if (dist < thresh && dist > 0) {
+                            ret.push(expand[i]);
+                        }
+                    }
+                }
             }
 
             // selection within distance of sub-selection
             if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
 
-            	// get atoms in second selection
-            	var sel2 = this.selectedAtoms(sel.within.sel, atoms)
-            	var within = []
-            	for (var i = 0; i < sel2.length; i++) {
-            		for (var j = 0; j < ret.length; j++) {
+                // get atoms in second selection
+                var sel2 = this.selectedAtoms(sel.within.sel, atoms)
+                var within = []
+                for (var i = 0; i < sel2.length; i++) {
+                    for (var j = 0; j < ret.length; j++) {
 
-            			var dist = squaredDistance(sel2[i], ret[j]);
-            			var thresh = Math.pow(sel.within.distance, 2);
-            			if (dist < thresh && dist > 0) {
-            				within.push(ret[j]);
-            			}
-            		}
-            	}
-            	ret = within;
+                        var dist = squaredDistance(sel2[i], ret[j]);
+                        var thresh = Math.pow(sel.within.distance, 2);
+                        if (dist < thresh && dist > 0) {
+                            within.push(ret[j]);
+                        }
+                    }
+                }
+                ret = within;
             }
 
             // byres selection flag
@@ -20151,10 +20028,10 @@ $3Dmol.GLModel = (function() {
         };
 
         var squaredDistance = function(atom1, atom2) {
-        	var xd = atom2.x - atom1.x;
-        	var yd = atom2.y - atom1.y;
-        	var zd = atom2.z - atom1.z;
-        	return (Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
+            var xd = atom2.x - atom1.x;
+            var yd = atom2.y - atom1.y;
+            var zd = atom2.z - atom1.z;
+            return (Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
         };
 
         /** returns a list of atoms in the expanded bounding box, but not in the current one
@@ -20168,8 +20045,8 @@ $3Dmol.GLModel = (function() {
          **/
         var expandAtomList = function(atomList, amt) {
 
-        	var pb = $3Dmol.getExtent(atomList);
-        	var nb = [[],[],[]];
+            var pb = $3Dmol.getExtent(atomList);
+            var nb = [[],[],[]];
 
             for (var i = 0; i < 3; i++)
             {
@@ -20281,7 +20158,7 @@ $3Dmol.GLModel = (function() {
 
             var selected = this.selectedAtoms(sel, atoms);
             for ( var i = 0; i < atoms.length; i++) {
-                atoms[i].capDrawn = false; //reset for proper stick render
+                if(atoms[i]) atoms[i].capDrawn = false; //reset for proper stick render
             }
 
             for ( var i = 0; i < selected.length; i++) {                
@@ -20368,7 +20245,7 @@ $3Dmol.GLModel = (function() {
             if(molObj === null) { // have to regenerate
                 molObj = createMolObj(atoms);
                 var time2 = new Date();
-                console.log("object creation time: " + (time2 - time));
+                //console.log("object creation time: " + (time2 - time));
                 if(renderedMolObj) { // previously rendered, remove
                     group.remove(renderedMolObj);
                     renderedMolObj = null;
@@ -20403,42 +20280,42 @@ $3Dmol.GLModel = (function() {
          * @param {$3Dmol.GLViewer} viewer
          */
         this.addResLabels = function(sel, viewer, style) {
-        	var atoms = this.selectedAtoms(sel, atoms);
-        	var bylabel = {}
-        	//collect by chain:resn:resi
-        	for(var i = 0; i < atoms.length; i++) {
-        		var a = atoms[i];
-        		var c = a.chain;
-        		var resn = a.resn;
-        		var resi = a.resi;
-        		var label =  resn + '' + resi;
-        		if(!bylabel[c]) bylabel[c] = {};
-        		if(!bylabel[c][label]) bylabel[c][label] = []
-        		bylabel[c][label].push(a);
-        	}
-        	
+            var atoms = this.selectedAtoms(sel, atoms);
+            var bylabel = {}
+            //collect by chain:resn:resi
+            for(var i = 0; i < atoms.length; i++) {
+                var a = atoms[i];
+                var c = a.chain;
+                var resn = a.resn;
+                var resi = a.resi;
+                var label =  resn + '' + resi;
+                if(!bylabel[c]) bylabel[c] = {};
+                if(!bylabel[c][label]) bylabel[c][label] = []
+                bylabel[c][label].push(a);
+            }
+            
             var mystyle = $.extend(true, {}, style);
-        	//now compute centers of mass
-        	for(var c in bylabel) {
-        		if(bylabel.hasOwnProperty(c)) {
-        			var labels = bylabel[c];
-        			for(var label in labels) {
-        				if(labels.hasOwnProperty(label)) {
-        					var atoms = labels[label];
-        					var sum = new $3Dmol.Vector3(0,0,0);
-        					for(var i = 0; i < atoms.length; i++) {
-        						var a = atoms[i];
-        						sum.x += a.x;
-        						sum.y += a.y;
-        						sum.z += a.z;
-        					}
-        					sum.divideScalar(atoms.length);
-        					mystyle.position = sum;
-        					viewer.addLabel(label, mystyle);
-        				}        				
-        			}
-        		}
-        	}
+            //now compute centers of mass
+            for(var c in bylabel) {
+                if(bylabel.hasOwnProperty(c)) {
+                    var labels = bylabel[c];
+                    for(var label in labels) {
+                        if(labels.hasOwnProperty(label)) {
+                            var atoms = labels[label];
+                            var sum = new $3Dmol.Vector3(0,0,0);
+                            for(var i = 0; i < atoms.length; i++) {
+                                var a = atoms[i];
+                                sum.x += a.x;
+                                sum.y += a.y;
+                                sum.z += a.z;
+                            }
+                            sum.divideScalar(atoms.length);
+                            mystyle.position = sum;
+                            viewer.addLabel(label, mystyle);
+                        }                        
+                    }
+                }
+            }
         }
 
     }
@@ -20456,943 +20333,943 @@ $3Dmol.GLModel = (function() {
  */
 $3Dmol.GLShape = (function() {
 
-	// Marching cube, to match with protein surface generation
-	var ISDONE = 2;
-
-	/**
-	 * 
-	 * @param {$3Dmol.Geometry}
-	 *            geo
-	 * @param {$3Dmol.Color |
-	 *            colorlike} color
-	 */
-	var updateColor = function(geo, color) {
-
-		var C = color || $3Dmol.CC.color(color);
-		geo.colorsNeedUpdate = true;
-
-		for ( var g in geo.geometryGroups) {
-
-			var geoGroup = geo.geometryGroups[g];
-			var colorArr = geoGroup.colorArray;
-
-			for (var i = 0, il = geoGroup.vertices; i < il; ++i) {
-				colorArr[i * 3] = C.r;
-				colorArr[i * 3 + 1] = C.g;
-				colorArr[i * 3 + 2] = C.b;
-			}
-		}
-
-	};
-
-
-	/**
-	 * @param {$3Dmol.GLShape}
-	 *            shape
-	 * @param {geometryGroup}
-	 *            geoGroup
-	 * @param {ArrowSpec}
-	 *            spec
-	 */
-	var drawArrow = function(shape, geoGroup, spec) {
-
-		var from = spec.start, end = spec.end, radius = spec.radius, radiusRatio = spec.radiusRatio, mid = spec.mid;
-
-		if (!(from && end))
-			return;
-
-		// vertices
-
-		var dir = end.clone();
-		dir.sub(from).multiplyScalar(mid);
-		var to = from.clone().add(dir);
-		var negDir = dir.clone().negate();
-
-		shape.intersectionShape.cylinder.push(new $3Dmol.Cylinder(from.clone(),
-				to.clone(), radius));
-		shape.intersectionShape.sphere.push(new $3Dmol.Sphere(from.clone(),
-				radius));
-
-		// get orthonormal vector
-		var nvecs = [];
-		nvecs[0] = dir.clone();
-		if (Math.abs(nvecs[0].x) > 0.0001)
-			nvecs[0].y += 1;
-		else
-			nvecs[0].x += 1;
-		nvecs[0].cross(dir);
-		nvecs[0].normalize();
-
-		nvecs[0] = nvecs[0];
-		// another orth vector
-		nvecs[4] = nvecs[0].clone();
-		nvecs[4].crossVectors(nvecs[0], dir);
-		nvecs[4].normalize();
-		nvecs[8] = nvecs[0].clone().negate();
-		nvecs[12] = nvecs[4].clone().negate();
-
-		// now quarter positions
-		nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
-		nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
-		nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
-		nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
-
-		// eights
-		nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
-		nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
-		nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
-		nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
-		nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
-		nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
-		nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
-		nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
-
-		// var start = geo.vertices.length;
-		var start = geoGroup.vertices;
-		var vertexArray = geoGroup.vertexArray;
-		var colorArray = geoGroup.colorArray;
-		var faceArray = geoGroup.faceArray;
-		var normalArray = geoGroup.normalArray;
-		var lineArray = geoGroup.lineArray;
-
-		var offset, i, n;
-		// add vertices, opposing vertices paired together
-		for (i = 0, n = nvecs.length; i < n; ++i) {
-			offset = 3 * (start + 3 * i);
-			var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
-			var top = nvecs[i].clone().multiplyScalar(radius).add(to);
-			var conebase = nvecs[i].clone()
-					.multiplyScalar(radius * radiusRatio).add(to);
-
-			vertexArray[offset] = bottom.x;
-			vertexArray[offset + 1] = bottom.y;
-			vertexArray[offset + 2] = bottom.z;
-
-			vertexArray[offset + 3] = top.x;
-			vertexArray[offset + 4] = top.y;
-			vertexArray[offset + 5] = top.z;
-
-			vertexArray[offset + 6] = conebase.x;
-			vertexArray[offset + 7] = conebase.y;
-			vertexArray[offset + 8] = conebase.z;
-
-			if (i > 0) {
-				var prev_x = vertexArray[offset - 3];
-				var prev_y = vertexArray[offset - 2];
-				var prev_z = vertexArray[offset - 1];
-
-				var c = new $3Dmol.Vector3(prev_x, prev_y, prev_z);
-				var b = end.clone(), b2 = to.clone();
-				var a = new $3Dmol.Vector3(conebase.x, conebase.y, conebase.z);
-
-				shape.intersectionShape.triangle.push(new $3Dmol.Triangle(a, b,
-						c));
-				shape.intersectionShape.triangle.push(new $3Dmol.Triangle(c
-						.clone(), b2, a.clone()));
-			}
-		}
-
-		geoGroup.vertices += 48;
-		offset = geoGroup.vertices * 3;
-
-		// caps
-		vertexArray[offset] = from.x;
-		vertexArray[offset + 1] = from.y;
-		vertexArray[offset + 2] = from.z;
-
-		vertexArray[offset + 3] = to.x;
-		vertexArray[offset + 4] = to.y;
-		vertexArray[offset + 5] = to.z;
-
-		vertexArray[offset + 6] = end.x;
-		vertexArray[offset + 7] = end.y;
-		vertexArray[offset + 8] = end.z;
-
-		geoGroup.vertices += 3;
-
-		// now faces
-		var face, norm, faceoffset, lineoffset;
-		var t1, t2, t2b, t3, t3b, t4, t1offset, t2offset, t2boffset, t3offset, t3boffset, t4offset;
-		var n1, n2, n3, n4;
-		var n_vertices = 0;
-		var fromi = geoGroup.vertices - 3, toi = geoGroup.vertices - 2, endi = geoGroup.vertices - 1;
-		var fromoffset = fromi * 3, tooffset = toi * 3, endoffset = endi * 3;
-		for (i = 0, n = nvecs.length - 1; i < n; ++i) {
-
-			var ti = start + 3 * i;
-			offset = ti * 3;
-			faceoffset = geoGroup.faceidx;
-			lineoffset = geoGroup.lineidx;
-
-			t1 = ti;
-			t1offset = t1 * 3;
-			t2 = ti + 1;
-			t2offset = t2 * 3;
-			t2b = ti + 2;
-			t2boffset = t2b * 3;
-			t3 = ti + 4;
-			t3offset = t3 * 3;
-			t3b = ti + 5;
-			t3boffset = t3b * 3;
-			t4 = ti + 3;
-			t4offset = t4 * 3;
-
-			// face = [t1, t2, t4], [t2, t3, t4];
-			// face = [t1, t2, t3, t4];
-
-			norm = [ nvecs[i], nvecs[i], nvecs[i + 1], nvecs[i + 1] ];
-
-			n1 = n2 = nvecs[i];
-			n3 = n4 = nvecs[i + 1];
-
-			normalArray[t1offset] = n1.x;
-			normalArray[t2offset] = n2.x;
-			normalArray[t4offset] = n4.x;
-			normalArray[t1offset + 1] = n1.y;
-			normalArray[t2offset + 1] = n2.y;
-			normalArray[t4offset + 1] = n4.y;
-			normalArray[t1offset + 2] = n1.z;
-			normalArray[t2offset + 2] = n2.z;
-			normalArray[t4offset + 2] = n4.z;
-
-			normalArray[t2offset] = n2.x;
-			normalArray[t3offset] = n3.x;
-			normalArray[t4offset] = n4.x;
-			normalArray[t2offset + 1] = n2.y;
-			normalArray[t3offset + 1] = n3.y;
-			normalArray[t4offset + 1] = n4.y;
-			normalArray[t2offset + 2] = n2.z;
-			normalArray[t3offset + 2] = n3.z;
-			normalArray[t4offset + 2] = n4.z;
-
-			normalArray[t2boffset] = n2.x;
-			normalArray[t3boffset] = n3.x;
-			normalArray[t2boffset + 1] = n2.y;
-			normalArray[t3boffset + 1] = n3.y;
-			normalArray[t2boffset + 2] = n2.z;
-			normalArray[t3boffset + 2] = n3.z;
-
-			// sides
-			faceArray[faceoffset] = t1;
-			faceArray[faceoffset + 1] = t2;
-			faceArray[faceoffset + 2] = t4;
-			faceArray[faceoffset + 3] = t2;
-			faceArray[faceoffset + 4] = t3;
-			faceArray[faceoffset + 5] = t4;
-			// caps
-			faceArray[faceoffset + 6] = t1;
-			faceArray[faceoffset + 7] = t4;
-			faceArray[faceoffset + 8] = fromi;
-			faceArray[faceoffset + 9] = t2b;
-			faceArray[faceoffset + 10] = toi;
-			faceArray[faceoffset + 11] = t3b;
-			// arrowhead
-			faceArray[faceoffset + 12] = t2b;
-			faceArray[faceoffset + 13] = endi;
-			faceArray[faceoffset + 14] = t3b;
-
-			// sides
-			lineArray[lineoffset] = t1;
-			lineArray[lineoffset + 1] = t2;
-			lineArray[lineoffset + 2] = t1;
-			lineArray[lineoffset + 3] = t4;
-			// lineArray[lineoffset+4] = t2, lineArray[lineoffset+5] = t3;
-			lineArray[lineoffset + 4] = t3;
-			lineArray[lineoffset + 5] = t4;
-			// caps
-			lineArray[lineoffset + 6] = t1;
-			lineArray[lineoffset + 7] = t4;
-			// lineArray[lineoffset+10] = t1, lineArray[lineoffset+11] = fromi;
-			// lineArray[lineoffset+12] = t4, lineArray[lineoffset+13] = fromi;
-
-			lineArray[lineoffset + 8] = t2b;
-			lineArray[lineoffset + 9] = t2; // toi
-			lineArray[lineoffset + 10] = t2b;
-			lineArray[lineoffset + 11] = t3b;
-			lineArray[lineoffset + 12] = t3;
-			lineArray[lineoffset + 13] = t3b; // toi
-			// arrowhead
-			lineArray[lineoffset + 14] = t2b;
-			lineArray[lineoffset + 15] = endi;
-			lineArray[lineoffset + 16] = t2b;
-			lineArray[lineoffset + 17] = t3b;
-			lineArray[lineoffset + 18] = endi;
-			lineArray[lineoffset + 19] = t3b;
-
-			geoGroup.faceidx += 15;
-			geoGroup.lineidx += 20;
-
-		}
-		// final face
-
-		face = [ start + 45, start + 46, start + 1, start, start + 47,
-				start + 2 ];
-		norm = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
-
-		faceoffset = geoGroup.faceidx;
-		lineoffset = geoGroup.lineidx;
-
-		t1 = face[0];
-		t1offset = t1 * 3;
-		t2 = face[1];
-		t2offset = t2 * 3;
-		t2b = face[4];
-		t2boffset = t2b * 3;
-		t3 = face[2];
-		t3offset = t3 * 3;
-		t3b = face[5];
-		t3boffset = t3b * 3;
-		t4 = face[3];
-		t4offset = t4 * 3;
-
-		n1 = n2 = nvecs[15];
-		n3 = n4 = nvecs[0];
-
-		normalArray[t1offset] = n1.x;
-		normalArray[t2offset] = n2.x;
-		normalArray[t4offset] = n4.x;
-		normalArray[t1offset + 1] = n1.y;
-		normalArray[t2offset + 1] = n2.y;
-		normalArray[t4offset + 1] = n4.y;
-		normalArray[t1offset + 2] = n1.z;
-		normalArray[t2offset + 2] = n2.z;
-		normalArray[t4offset + 2] = n4.z;
-
-		normalArray[t2offset] = n2.x;
-		normalArray[t3offset] = n3.x;
-		normalArray[t4offset] = n4.x;
-		normalArray[t2offset + 1] = n2.y;
-		normalArray[t3offset + 1] = n3.y;
-		normalArray[t4offset + 1] = n4.y;
-		normalArray[t2offset + 2] = n2.z;
-		normalArray[t3offset + 2] = n3.z;
-		normalArray[t4offset + 2] = n4.z;
-
-		normalArray[t2boffset] = n2.x;
-		normalArray[t3boffset] = n3.x;
-		normalArray[t2boffset + 1] = n2.y;
-		normalArray[t3boffset + 1] = n3.y;
-		normalArray[t2boffset + 2] = n2.z;
-		normalArray[t3boffset + 2] = n3.z;
-
-		// Cap normals
-		dir.normalize();
-		negDir.normalize();
-		normalArray[fromoffset] = negDir.x;
-		normalArray[tooffset] = normalArray[endoffset] = dir.x;
-		normalArray[fromoffset + 1] = negDir.y;
-		normalArray[tooffset + 1] = normalArray[endoffset + 1] = dir.y;
-		normalArray[fromoffset + 2] = negDir.z;
-		normalArray[tooffset + 2] = normalArray[endoffset + 2] = dir.z;
-
-		// Final side
-		faceArray[faceoffset] = t1;
-		faceArray[faceoffset + 1] = t2;
-		faceArray[faceoffset + 2] = t4;
-		faceArray[faceoffset + 3] = t2;
-		faceArray[faceoffset + 4] = t3;
-		faceArray[faceoffset + 5] = t4;
-		// final caps
-		faceArray[faceoffset + 6] = t1;
-		faceArray[faceoffset + 7] = t4;
-		faceArray[faceoffset + 8] = fromi;
-		faceArray[faceoffset + 9] = t2b;
-		faceArray[faceoffset + 10] = toi;
-		faceArray[faceoffset + 11] = t3b;
-		// final arrowhead
-		faceArray[faceoffset + 12] = t2b;
-		faceArray[faceoffset + 13] = endi;
-		faceArray[faceoffset + 14] = t3b;
-
-		// sides
-		lineArray[lineoffset] = t1;
-		lineArray[lineoffset + 1] = t2;
-		lineArray[lineoffset + 2] = t1;
-		lineArray[lineoffset + 3] = t4;
-		// lineArray[lineoffset+4] = t2, lineArray[lineoffset+5] = t3;
-		lineArray[lineoffset + 4] = t3;
-		lineArray[lineoffset + 5] = t4;
-		// caps
-		lineArray[lineoffset + 6] = t1;
-		lineArray[lineoffset + 7] = t4;
-		// lineArray[lineoffset+10] = t1, lineArray[lineoffset+11] = fromi;
-		// lineArray[lineoffset+12] = t4, lineArray[lineoffset+13] = fromi;
-
-		lineArray[lineoffset + 8] = t2b;
-		lineArray[lineoffset + 9] = t2; // toi
-		lineArray[lineoffset + 10] = t2b;
-		lineArray[lineoffset + 11] = t3b;
-		lineArray[lineoffset + 12] = t3;
-		lineArray[lineoffset + 13] = t3b; // toi
-		// arrowhead
-		lineArray[lineoffset + 14] = t2b;
-		lineArray[lineoffset + 15] = endi;
-		lineArray[lineoffset + 16] = t2b;
-		lineArray[lineoffset + 17] = t3b;
-		lineArray[lineoffset + 18] = endi;
-		lineArray[lineoffset + 19] = t3b;
-
-		geoGroup.faceidx += 15;
-		geoGroup.lineidx += 20;
-
-	};
-
-	// handles custom shape generation from user supplied arrays
-	// May need to generate normal and/or line indices
-	/**
-	 * @param {$3Dmol.GLShape}
-	 *            shape
-	 * @param {geometryGroup}
-	 *            geoGroup
-	 * @param {CustomSpec}
-	 *            customSpec
-	 */
-	var drawCustom = function(shape, geoGroup, customSpec) {
-
-		var vertexArr = customSpec.vertexArr, normalArr = customSpec.normalArr, faceArr = customSpec.faceArr, lineArr = customSpec.lineArr;
-
-		if (vertexArr.length === 0 || faceArr.length === 0) {
-			console
-					.warn("Error adding custom shape component: No vertices and/or face indices supplied!");
-		}
-
-		geoGroup.vertices = vertexArr.length;
-		geoGroup.faceidx = faceArr.length;
-
-		var offset, v, a, b, c, i, il;
-
-		for (i = 0, il = geoGroup.vertices; i < il; ++i) {
-			offset = i * 3;
-			v = vertexArr[i];
-			geoGroup.vertexArray[offset] = v.x;
-			geoGroup.vertexArray[offset + 1] = v.y;
-			geoGroup.vertexArray[offset + 2] = v.z;
-		}
-
-		for (i = 0, il = geoGroup.faceidx / 3; i < il; ++i) {
-			offset = i * 3;
-			a = faceArr[offset];
-			b = faceArr[offset + 1];
-			c = faceArr[offset + 2];
-			var vA = new $3Dmol.Vector3(), vB = new $3Dmol.Vector3(), vC = new $3Dmol.Vector3();
-			shape.intersectionShape.triangle.push(new $3Dmol.Triangle(vA
-					.copy(vertexArr[a]), vB.copy(vertexArr[b]), vC
-					.copy(vertexArr[c])));
-		}
-
-		geoGroup.faceArray = new Uint16Array(faceArr);
-
-		geoGroup.truncateArrayBuffers(true, true);
-
-		if (normalArr.length < geoGroup.vertices)
-			geoGroup.setNormals();
-		else {
-
-			geoGroup.normalArray = new Float32Array(geoGroup.vertices * 3);
-			var n;
-			for (i = 0, il = geoGroup.vertices; i < il; ++i) {
-				offset = i * 3;
-				n = normalArr[i];
-				geoGroup.normalArray[offset] = n.x;
-				geoGroup.normalArray[offset + 1] = n.y;
-				geoGroup.normalArray[offset + 2] = n.z;
-			}
-		}
-
-		if (!lineArr.length)
-			geoGroup.setLineIndices();
-		else
-			geoGroup.lineArray = new Uint16Array(lineArr);
-
-		geoGroup.lineidx = geoGroup.lineArray.length;
-
-	};
-
-	// Read a cube file - generate model and possibly shape(s)
-	/**
-	 * @param {$3Dmol.GLShape}
-	 *            shape
-	 * @param {geometryGroup}
-	 *            geoGroup
-	 * @param {string}
-	 *            str
-	 * @param {number}
-	 *            isoval
-	 * @param {boolean}
-	 *            voxel
-	 */
-	var parseCube = function(shape, geoGroup, str, isoval, voxel) {
-
-		var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
-
-		if (lines.length < 6)
-			return;
-
-		var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(
-				" ");
-
-		var natoms = Math.abs(parseFloat(lineArr[0]));
-		var origin = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-				parseFloat(lineArr[2]), parseFloat(lineArr[3]));
-
-		lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-
-		// might have to convert from bohr units to angstroms
-		var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
-
-		origin.multiplyScalar(convFactor);
-
-		var nX = Math.abs(lineArr[0]);
-		var xVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-				parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-				.multiplyScalar(convFactor);
-
-		lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-
-		var nY = Math.abs(lineArr[0]);
-		var yVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-				parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-				.multiplyScalar(convFactor);
-
-		lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-
-		var nZ = Math.abs(lineArr[0]);
-		var zVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-				parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-				.multiplyScalar(convFactor);
-
-		// lines.splice(6, natoms).join("\n");
-
-		lines = new Float32Array(lines.splice(natoms + 7).join(" ").replace(
-				/^\s+/, "").split(/[\s\r]+/));
-
-		var vertnums = new Int16Array(nX * nY * nZ);
-
-		var i, il;
-
-		for (i = 0, il = vertnums.length; i < il; ++i)
-			vertnums[i] = -1;
-
-		var bitdata = new Uint8Array(nX * nY * nZ);
-
-		for (i = 0, il = lines.length; i < il; ++i) {
-			var val = (isoval >= 0) ? lines[i] - isoval : isoval - lines[i];
-
-			if (val > 0)
-				bitdata[i] |= ISDONE;
-
-		}
-
-		var verts = [], faces = [];
-
-		$3Dmol.MarchingCube.march(bitdata, verts, faces, {
-			fulltable : true,
-			voxel : voxel,
-			scale : xVec.length(),
-			origin : origin,
-			nX : nX,
-			nY : nY,
-			nZ : nZ
-		});
-
-		if (!voxel)
-			$3Dmol.MarchingCube.laplacianSmooth(10, verts, faces);
-
-		drawCustom(shape, geoGroup, {
-			vertexArr : verts,
-			faceArr : faces,
-			normalArr : [],
-			lineArr : []
-		});
-
-	};
-
-	// Update a bounding sphere's position and radius
-	// from list of centroids and new points
-	/**
-	 * @param {$3Dmol.Sphere}
-	 *            sphere
-	 * @param {Object}
-	 *            components
-	 * @param {Array}
-	 *            points
-	 */
-	var updateBoundingFromPoints = function(sphere, components, points) {
-
-		sphere.center.set(0, 0, 0);
-
-		var i, il;
-
-		if (components.length > 0) {
-
-			for (i = 0, il = components.length; i < il; ++i) {
-				var centroid = components[i].centroid;
-				sphere.center.add(centroid);
-			}
-
-			sphere.center.divideScalar(components.length);
-		}
-
-		var maxRadiusSq = sphere.radius * sphere.radius;
-
-		for (i = 0, il = points.length / 3; i < il; i++) {
-			var x = points[i * 3], y = points[i * 3 + 1], z = points[i * 3 + 2];
-			var radiusSq = sphere.center.distanceToSquared({
-				x : x,
-				y : y,
-				z : z
-			});
-			maxRadiusSq = Math.max(maxRadiusSq, radiusSq);
-		}
-
-		sphere.radius = Math.sqrt(maxRadiusSq);
-
-	};
-
-	/**
-	 * 
-	 * @param {$3Dmol.GLShape}
-	 *            shape
-	 * @param {ShapeSpec}
-	 *            stylespec
-	 * @returns {undefined}
-	 */
-	var updateFromStyle = function(shape, stylespec) {
-		shape.color = stylespec.color || new $3Dmol.Color();
-		if(! (stylespec.color instanceof $3Dmol.Color))
-			shape.color = $3Dmol.CC.color(stylespec.color);
-		shape.wireframe = stylespec.wireframe ? true : false;
-		shape.alpha = stylespec.alpha ? $3Dmol.Math.clamp(stylespec.alpha, 0.0,
-				1.0) : 1.0;
-		shape.side = (stylespec.side !== undefined) ? stylespec.side
-				: $3Dmol.DoubleSide;
-		shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
-		// Click handling
-		shape.clickable = stylespec.clickable ? true : false;
-		shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
-				: null;
-	};
-
-	/**
-	 * Custom renderable shape
-	 * 
-	 * @constructor $3Dmol.GLShape
-	 * 
-	 * @param {Object}
-	 *            stylespec
-	 * @returns {$3Dmol.GLShape}
-	 */
-	function GLShape(stylespec) {
-
-		stylespec = stylespec || {};
-		$3Dmol.ShapeIDCount++;
-
-		this.boundingSphere = new $3Dmol.Sphere();
-		/** @type {IntersectionShapes} */
-		this.intersectionShape = {
-			sphere : [],
-			cylinder : [],
-			line : [],
-			triangle : []
-		};
-
-		updateFromStyle(this, stylespec);
-
-		// Keep track of shape components and their centroids
-		var components = [];
-		var shapeObj = null;
-		var renderedShapeObj = null;
-
-		var geo = new $3Dmol.Geometry(true);
-
-		/** Update shape with new style specification
-		 * @param {ShapeSpec} newspec
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.updateStyle = function(newspec) {
-
-			for ( var prop in newspec) {
-				stylespec[prop] = newspec[prop];
-			}
-
-			updateFromStyle(this, stylespec);
-		};
-
-		/**
-		 * Creates a custom shape from supplied vertex and face arrays
-		 * @param {CustomSpec} customSpec
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addCustom = function(customSpec) {
-
-			customSpec.vertexArr = customSpec.vertexArr || [];
-			customSpec.faceArr = customSpec.faceArr || [];
-			customSpec.normalArr = customSpec.normalArr || [];
-			customSpec.lineArr = customSpec.lineArr || [];
-
-			// Force creation of new geometryGroup for each added component
-			var geoGroup = geo.addGeoGroup();
-			drawCustom(this, geoGroup, customSpec);
-			geoGroup.truncateArrayBuffers(true, true);
-
-			for (var i = 0; i < geoGroup.colorArray.length / 3; ++i) {
-				geoGroup.colorArray[i * 3] = this.color.r;
-				geoGroup.colorArray[i * 3 + 1] = this.color.g;
-				geoGroup.colorArray[i * 3 + 2] = this.color.b;
-			}
-
-			components.push({
-				id : geoGroup.id,
-				geoGroup : geoGroup,
-				centroid : geoGroup.getCentroid()
-			});
-
-			updateBoundingFromPoints(this.boundingSphere, components,
-					geoGroup.vertexArray);
-		};
-
-		/**
-		 * Creates a sphere shape
-		 * @param {SphereSpec} sphereSpec
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addSphere = function(sphereSpec) {
-
-			sphereSpec.center = sphereSpec.center || {
-				x : 0,
-				y : 0,
-				z : 0
-			};
-			sphereSpec.radius = sphereSpec.radius ? $3Dmol.Math.clamp(
-					sphereSpec.radius, 0, Infinity) : 1.5;
-			sphereSpec.color = $3Dmol.CC.color(sphereSpec.color);
-			
-			this.intersectionShape.sphere.push(new $3Dmol.Sphere(
-					sphereSpec.center, sphereSpec.radius));
-
-			var geoGroup = geo.addGeoGroup();
-			$3Dmol.GLDraw.drawSphere(geo, sphereSpec.center,
-					sphereSpec.radius, sphereSpec.color);
-			geoGroup.truncateArrayBuffers(true, true);
-
-			components.push({
-				id : geoGroup.id,
-				geoGroup : geoGroup, // has to be last group added
-				centroid : new $3Dmol.Vector3(sphereSpec.center.x,
-						sphereSpec.center.y, sphereSpec.center.z)
-			});
-
-			updateBoundingFromPoints(this.boundingSphere, components,
-					geoGroup.vertexArray);
-		};
-
-		/**
-		 * Creates a cylinder shape
-		 * @param {CylinderSpec} cylinderSpec
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addCylinder = function(cylinderSpec) {
-
-			cylinderSpec.start = cylinderSpec.start || {};
-			cylinderSpec.end = cylinderSpec.end || {};
-
-			var start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
-					cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
-			var end = new $3Dmol.Vector3(cylinderSpec.end.x || 3,
-					cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
-
-			var radius = cylinderSpec.radius || 0.1;
-
-			var color = $3Dmol.CC.color(cylinderSpec.color);
-
-
-			var geoGroup = geo.addGeoGroup();
-
-			$3Dmol.GLDraw.drawCylinder(geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);			
-			geoGroup.truncateArrayBuffers(true, true);
-
-			var centroid = new $3Dmol.Vector3();
-			components.push({
-				id : geoGroup.id,
-				geoGroup : geoGroup,
-				centroid : centroid.addVectors(cylinderSpec.start,
-						cylinderSpec.end).multiplyScalar(0.5)
-			});
-
-			updateBoundingFromPoints(this.boundingSphere, components,
-					geoGroup.vertexArray);
-
-		};
-
-		/**
-		 * Creates an arrow shape
-		 * @param {ArrowSpec} arrowSpec
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addArrow = function(arrowSpec) {
-
-			arrowSpec.start = arrowSpec.start || {};
-			arrowSpec.end = arrowSpec.end || {};
-
-			arrowSpec.start = new $3Dmol.Vector3(arrowSpec.start.x || 0,
-					arrowSpec.start.y || 0, arrowSpec.start.z || 0);
-
-			if (arrowSpec.dir instanceof $3Dmol.Vector3
-					&& arrowSpec.length instanceof number) {
-				var end = arrowSpec.dir.clone().multiplyScalar(length).add(
-						start);
-				arrowSpec.end = end;
-			}
-
-			else {
-				arrowSpec.end = new $3Dmol.Vector3(arrowSpec.end.x || 3,
-						arrowSpec.end.y || 0, arrowSpec.end.z || 0);
-			}
-
-			arrowSpec.radius = arrowSpec.radius || 0.1;
-
-			arrowSpec.radiusRatio = arrowSpec.radiusRatio || 1.618034;
-			arrowSpec.mid = (0 < arrowSpec.mid && arrowSpec.mid < 1) ? arrowSpec.mid
-					: 0.618034;
-
-			var geoGroup = geo.addGeoGroup();
-
-			drawArrow(this, geoGroup, arrowSpec);
-			geoGroup.truncateArrayBuffers(true, true);
-
-			var centroid = new $3Dmol.Vector3();
-			components.push({
-				id : geoGroup.id,
-				geoGroup : geoGroup,
-				centroid : centroid.addVectors(arrowSpec.start, arrowSpec.end)
-						.multiplyScalar(0.5)
-			});
-
-			updateBoundingFromPoints(this.boundingSphere, components,
-					geoGroup.vertexArray);
-
-		};
-		
-		/** 
-		 * Creates custom shape from volumetric data 
-		 * @param {string} data - Volumetric input data 
-		 * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
-		 * @param {VolSpec} volSpec - Volumetric data shape specification
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addVolumetricData = function(data, fmt, volSpec) {
-
-			// str, fmt, isoval, vxl
-			var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
-					: 0.0;
-			var vxl = (volSpec.voxel) ? true : false;
-
-			var geoGroup = geo.addGeoGroup();
-
-			// TODO: Initialize geometry group here (parseCube currently calls
-			// addCustom...)
-			switch (fmt) {
-			case "cube":
-				parseCube(this, geoGroup, data, isoval, vxl);
-				break;
-			}
-
-			components.push({
-				id : geoGroup.id,
-				geoGroup : geoGroup,
-				centroid : geoGroup.getCentroid()
-			});
-
-			this.updateStyle(volSpec);
-
-			updateBoundingFromPoints(this.boundingSphere, components,
-					geoGroup.vertexArray);
-
-		};
-
-		/**
-		 * Initialize webgl objects for rendering
-		 * @param {$3Dmol.Object3D} group
-		 * 
-		 */  
-		this.globj = function(group) {
-
-			geo.initTypedArrays();
-
-			updateColor(geo, this.color);
-
-			shapeObj = new $3Dmol.Object3D();
-			var material = new $3Dmol.MeshLambertMaterial({
-				wireframe : this.wireframe,
-				vertexColors : true,
-				ambient : 0x000000,
-				reflectivity : 0,
-				side : this.side,
-				transparent : (this.alpha < 1) ? true : false,
-				opacity : this.alpha,
-				wireframeLinewidth: this.linewidth
-			});
-
-			var mesh = new $3Dmol.Mesh(geo, material);
-			shapeObj.add(mesh);
-
-			if (renderedShapeObj) {
-				group.remove(renderedShapeObj);
-				renderedShapeObj = null;
-			}
-			renderedShapeObj = shapeObj.clone();
-			group.add(renderedShapeObj);
-
-		};
-
-		this.removegl = function(group) {
-			if (renderedShapeObj) {
-				// dispose of geos and materials
-				if (renderedShapeObj.geometry !== undefined)
-					renderedShapeObj.geometry.dispose();
-				if (renderedShapeObj.material !== undefined)
-					renderedShapeObj.material.dispose();
-				group.remove(renderedShapeObj);
-				renderedShapeObj = null;
-			}
-			shapeObj = null;
-		};
-
-	};
-
-	Object.defineProperty(GLShape.prototype, "position", {
-
-		get : function() {
-			return this.boundingSphere.center;
-		}
-
-	});
-
-	Object.defineProperty(GLShape.prototype, "x", {
-
-		get : function() {
-			return this.boundingSphere.center.x;
-		}
-
-	});
-
-	Object.defineProperty(GLShape.prototype, "y", {
-
-		get : function() {
-			return this.boundingSphere.center.y;
-		}
-
-	});
-
-	Object.defineProperty(GLShape.prototype, "z", {
-
-		get : function() {
-			return this.boundingSphere.center.z;
-		}
-
-	});
-
-	return GLShape;
+    // Marching cube, to match with protein surface generation
+    var ISDONE = 2;
+
+    /**
+     * 
+     * @param {$3Dmol.Geometry}
+     *            geo
+     * @param {$3Dmol.Color |
+     *            colorlike} color
+     */
+    var updateColor = function(geo, color) {
+
+        var C = color || $3Dmol.CC.color(color);
+        geo.colorsNeedUpdate = true;
+
+        for ( var g in geo.geometryGroups) {
+
+            var geoGroup = geo.geometryGroups[g];
+            var colorArr = geoGroup.colorArray;
+
+            for (var i = 0, il = geoGroup.vertices; i < il; ++i) {
+                colorArr[i * 3] = C.r;
+                colorArr[i * 3 + 1] = C.g;
+                colorArr[i * 3 + 2] = C.b;
+            }
+        }
+
+    };
+
+
+    /**
+     * @param {$3Dmol.GLShape}
+     *            shape
+     * @param {geometryGroup}
+     *            geoGroup
+     * @param {ArrowSpec}
+     *            spec
+     */
+    var drawArrow = function(shape, geoGroup, spec) {
+
+        var from = spec.start, end = spec.end, radius = spec.radius, radiusRatio = spec.radiusRatio, mid = spec.mid;
+
+        if (!(from && end))
+            return;
+
+        // vertices
+
+        var dir = end.clone();
+        dir.sub(from).multiplyScalar(mid);
+        var to = from.clone().add(dir);
+        var negDir = dir.clone().negate();
+
+        shape.intersectionShape.cylinder.push(new $3Dmol.Cylinder(from.clone(),
+                to.clone(), radius));
+        shape.intersectionShape.sphere.push(new $3Dmol.Sphere(from.clone(),
+                radius));
+
+        // get orthonormal vector
+        var nvecs = [];
+        nvecs[0] = dir.clone();
+        if (Math.abs(nvecs[0].x) > 0.0001)
+            nvecs[0].y += 1;
+        else
+            nvecs[0].x += 1;
+        nvecs[0].cross(dir);
+        nvecs[0].normalize();
+
+        nvecs[0] = nvecs[0];
+        // another orth vector
+        nvecs[4] = nvecs[0].clone();
+        nvecs[4].crossVectors(nvecs[0], dir);
+        nvecs[4].normalize();
+        nvecs[8] = nvecs[0].clone().negate();
+        nvecs[12] = nvecs[4].clone().negate();
+
+        // now quarter positions
+        nvecs[2] = nvecs[0].clone().add(nvecs[4]).normalize();
+        nvecs[6] = nvecs[4].clone().add(nvecs[8]).normalize();
+        nvecs[10] = nvecs[8].clone().add(nvecs[12]).normalize();
+        nvecs[14] = nvecs[12].clone().add(nvecs[0]).normalize();
+
+        // eights
+        nvecs[1] = nvecs[0].clone().add(nvecs[2]).normalize();
+        nvecs[3] = nvecs[2].clone().add(nvecs[4]).normalize();
+        nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
+        nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
+        nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
+        nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
+        nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
+        nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
+
+        // var start = geo.vertices.length;
+        var start = geoGroup.vertices;
+        var vertexArray = geoGroup.vertexArray;
+        var colorArray = geoGroup.colorArray;
+        var faceArray = geoGroup.faceArray;
+        var normalArray = geoGroup.normalArray;
+        var lineArray = geoGroup.lineArray;
+
+        var offset, i, n;
+        // add vertices, opposing vertices paired together
+        for (i = 0, n = nvecs.length; i < n; ++i) {
+            offset = 3 * (start + 3 * i);
+            var bottom = nvecs[i].clone().multiplyScalar(radius).add(from);
+            var top = nvecs[i].clone().multiplyScalar(radius).add(to);
+            var conebase = nvecs[i].clone()
+                    .multiplyScalar(radius * radiusRatio).add(to);
+
+            vertexArray[offset] = bottom.x;
+            vertexArray[offset + 1] = bottom.y;
+            vertexArray[offset + 2] = bottom.z;
+
+            vertexArray[offset + 3] = top.x;
+            vertexArray[offset + 4] = top.y;
+            vertexArray[offset + 5] = top.z;
+
+            vertexArray[offset + 6] = conebase.x;
+            vertexArray[offset + 7] = conebase.y;
+            vertexArray[offset + 8] = conebase.z;
+
+            if (i > 0) {
+                var prev_x = vertexArray[offset - 3];
+                var prev_y = vertexArray[offset - 2];
+                var prev_z = vertexArray[offset - 1];
+
+                var c = new $3Dmol.Vector3(prev_x, prev_y, prev_z);
+                var b = end.clone(), b2 = to.clone();
+                var a = new $3Dmol.Vector3(conebase.x, conebase.y, conebase.z);
+
+                shape.intersectionShape.triangle.push(new $3Dmol.Triangle(a, b,
+                        c));
+                shape.intersectionShape.triangle.push(new $3Dmol.Triangle(c
+                        .clone(), b2, a.clone()));
+            }
+        }
+
+        geoGroup.vertices += 48;
+        offset = geoGroup.vertices * 3;
+
+        // caps
+        vertexArray[offset] = from.x;
+        vertexArray[offset + 1] = from.y;
+        vertexArray[offset + 2] = from.z;
+
+        vertexArray[offset + 3] = to.x;
+        vertexArray[offset + 4] = to.y;
+        vertexArray[offset + 5] = to.z;
+
+        vertexArray[offset + 6] = end.x;
+        vertexArray[offset + 7] = end.y;
+        vertexArray[offset + 8] = end.z;
+
+        geoGroup.vertices += 3;
+
+        // now faces
+        var face, norm, faceoffset, lineoffset;
+        var t1, t2, t2b, t3, t3b, t4, t1offset, t2offset, t2boffset, t3offset, t3boffset, t4offset;
+        var n1, n2, n3, n4;
+        var n_vertices = 0;
+        var fromi = geoGroup.vertices - 3, toi = geoGroup.vertices - 2, endi = geoGroup.vertices - 1;
+        var fromoffset = fromi * 3, tooffset = toi * 3, endoffset = endi * 3;
+        for (i = 0, n = nvecs.length - 1; i < n; ++i) {
+
+            var ti = start + 3 * i;
+            offset = ti * 3;
+            faceoffset = geoGroup.faceidx;
+            lineoffset = geoGroup.lineidx;
+
+            t1 = ti;
+            t1offset = t1 * 3;
+            t2 = ti + 1;
+            t2offset = t2 * 3;
+            t2b = ti + 2;
+            t2boffset = t2b * 3;
+            t3 = ti + 4;
+            t3offset = t3 * 3;
+            t3b = ti + 5;
+            t3boffset = t3b * 3;
+            t4 = ti + 3;
+            t4offset = t4 * 3;
+
+            // face = [t1, t2, t4], [t2, t3, t4];
+            // face = [t1, t2, t3, t4];
+
+            norm = [ nvecs[i], nvecs[i], nvecs[i + 1], nvecs[i + 1] ];
+
+            n1 = n2 = nvecs[i];
+            n3 = n4 = nvecs[i + 1];
+
+            normalArray[t1offset] = n1.x;
+            normalArray[t2offset] = n2.x;
+            normalArray[t4offset] = n4.x;
+            normalArray[t1offset + 1] = n1.y;
+            normalArray[t2offset + 1] = n2.y;
+            normalArray[t4offset + 1] = n4.y;
+            normalArray[t1offset + 2] = n1.z;
+            normalArray[t2offset + 2] = n2.z;
+            normalArray[t4offset + 2] = n4.z;
+
+            normalArray[t2offset] = n2.x;
+            normalArray[t3offset] = n3.x;
+            normalArray[t4offset] = n4.x;
+            normalArray[t2offset + 1] = n2.y;
+            normalArray[t3offset + 1] = n3.y;
+            normalArray[t4offset + 1] = n4.y;
+            normalArray[t2offset + 2] = n2.z;
+            normalArray[t3offset + 2] = n3.z;
+            normalArray[t4offset + 2] = n4.z;
+
+            normalArray[t2boffset] = n2.x;
+            normalArray[t3boffset] = n3.x;
+            normalArray[t2boffset + 1] = n2.y;
+            normalArray[t3boffset + 1] = n3.y;
+            normalArray[t2boffset + 2] = n2.z;
+            normalArray[t3boffset + 2] = n3.z;
+
+            // sides
+            faceArray[faceoffset] = t1;
+            faceArray[faceoffset + 1] = t2;
+            faceArray[faceoffset + 2] = t4;
+            faceArray[faceoffset + 3] = t2;
+            faceArray[faceoffset + 4] = t3;
+            faceArray[faceoffset + 5] = t4;
+            // caps
+            faceArray[faceoffset + 6] = t1;
+            faceArray[faceoffset + 7] = t4;
+            faceArray[faceoffset + 8] = fromi;
+            faceArray[faceoffset + 9] = t2b;
+            faceArray[faceoffset + 10] = toi;
+            faceArray[faceoffset + 11] = t3b;
+            // arrowhead
+            faceArray[faceoffset + 12] = t2b;
+            faceArray[faceoffset + 13] = endi;
+            faceArray[faceoffset + 14] = t3b;
+
+            // sides
+            lineArray[lineoffset] = t1;
+            lineArray[lineoffset + 1] = t2;
+            lineArray[lineoffset + 2] = t1;
+            lineArray[lineoffset + 3] = t4;
+            // lineArray[lineoffset+4] = t2, lineArray[lineoffset+5] = t3;
+            lineArray[lineoffset + 4] = t3;
+            lineArray[lineoffset + 5] = t4;
+            // caps
+            lineArray[lineoffset + 6] = t1;
+            lineArray[lineoffset + 7] = t4;
+            // lineArray[lineoffset+10] = t1, lineArray[lineoffset+11] = fromi;
+            // lineArray[lineoffset+12] = t4, lineArray[lineoffset+13] = fromi;
+
+            lineArray[lineoffset + 8] = t2b;
+            lineArray[lineoffset + 9] = t2; // toi
+            lineArray[lineoffset + 10] = t2b;
+            lineArray[lineoffset + 11] = t3b;
+            lineArray[lineoffset + 12] = t3;
+            lineArray[lineoffset + 13] = t3b; // toi
+            // arrowhead
+            lineArray[lineoffset + 14] = t2b;
+            lineArray[lineoffset + 15] = endi;
+            lineArray[lineoffset + 16] = t2b;
+            lineArray[lineoffset + 17] = t3b;
+            lineArray[lineoffset + 18] = endi;
+            lineArray[lineoffset + 19] = t3b;
+
+            geoGroup.faceidx += 15;
+            geoGroup.lineidx += 20;
+
+        }
+        // final face
+
+        face = [ start + 45, start + 46, start + 1, start, start + 47,
+                start + 2 ];
+        norm = [ nvecs[15], nvecs[15], nvecs[0], nvecs[0] ];
+
+        faceoffset = geoGroup.faceidx;
+        lineoffset = geoGroup.lineidx;
+
+        t1 = face[0];
+        t1offset = t1 * 3;
+        t2 = face[1];
+        t2offset = t2 * 3;
+        t2b = face[4];
+        t2boffset = t2b * 3;
+        t3 = face[2];
+        t3offset = t3 * 3;
+        t3b = face[5];
+        t3boffset = t3b * 3;
+        t4 = face[3];
+        t4offset = t4 * 3;
+
+        n1 = n2 = nvecs[15];
+        n3 = n4 = nvecs[0];
+
+        normalArray[t1offset] = n1.x;
+        normalArray[t2offset] = n2.x;
+        normalArray[t4offset] = n4.x;
+        normalArray[t1offset + 1] = n1.y;
+        normalArray[t2offset + 1] = n2.y;
+        normalArray[t4offset + 1] = n4.y;
+        normalArray[t1offset + 2] = n1.z;
+        normalArray[t2offset + 2] = n2.z;
+        normalArray[t4offset + 2] = n4.z;
+
+        normalArray[t2offset] = n2.x;
+        normalArray[t3offset] = n3.x;
+        normalArray[t4offset] = n4.x;
+        normalArray[t2offset + 1] = n2.y;
+        normalArray[t3offset + 1] = n3.y;
+        normalArray[t4offset + 1] = n4.y;
+        normalArray[t2offset + 2] = n2.z;
+        normalArray[t3offset + 2] = n3.z;
+        normalArray[t4offset + 2] = n4.z;
+
+        normalArray[t2boffset] = n2.x;
+        normalArray[t3boffset] = n3.x;
+        normalArray[t2boffset + 1] = n2.y;
+        normalArray[t3boffset + 1] = n3.y;
+        normalArray[t2boffset + 2] = n2.z;
+        normalArray[t3boffset + 2] = n3.z;
+
+        // Cap normals
+        dir.normalize();
+        negDir.normalize();
+        normalArray[fromoffset] = negDir.x;
+        normalArray[tooffset] = normalArray[endoffset] = dir.x;
+        normalArray[fromoffset + 1] = negDir.y;
+        normalArray[tooffset + 1] = normalArray[endoffset + 1] = dir.y;
+        normalArray[fromoffset + 2] = negDir.z;
+        normalArray[tooffset + 2] = normalArray[endoffset + 2] = dir.z;
+
+        // Final side
+        faceArray[faceoffset] = t1;
+        faceArray[faceoffset + 1] = t2;
+        faceArray[faceoffset + 2] = t4;
+        faceArray[faceoffset + 3] = t2;
+        faceArray[faceoffset + 4] = t3;
+        faceArray[faceoffset + 5] = t4;
+        // final caps
+        faceArray[faceoffset + 6] = t1;
+        faceArray[faceoffset + 7] = t4;
+        faceArray[faceoffset + 8] = fromi;
+        faceArray[faceoffset + 9] = t2b;
+        faceArray[faceoffset + 10] = toi;
+        faceArray[faceoffset + 11] = t3b;
+        // final arrowhead
+        faceArray[faceoffset + 12] = t2b;
+        faceArray[faceoffset + 13] = endi;
+        faceArray[faceoffset + 14] = t3b;
+
+        // sides
+        lineArray[lineoffset] = t1;
+        lineArray[lineoffset + 1] = t2;
+        lineArray[lineoffset + 2] = t1;
+        lineArray[lineoffset + 3] = t4;
+        // lineArray[lineoffset+4] = t2, lineArray[lineoffset+5] = t3;
+        lineArray[lineoffset + 4] = t3;
+        lineArray[lineoffset + 5] = t4;
+        // caps
+        lineArray[lineoffset + 6] = t1;
+        lineArray[lineoffset + 7] = t4;
+        // lineArray[lineoffset+10] = t1, lineArray[lineoffset+11] = fromi;
+        // lineArray[lineoffset+12] = t4, lineArray[lineoffset+13] = fromi;
+
+        lineArray[lineoffset + 8] = t2b;
+        lineArray[lineoffset + 9] = t2; // toi
+        lineArray[lineoffset + 10] = t2b;
+        lineArray[lineoffset + 11] = t3b;
+        lineArray[lineoffset + 12] = t3;
+        lineArray[lineoffset + 13] = t3b; // toi
+        // arrowhead
+        lineArray[lineoffset + 14] = t2b;
+        lineArray[lineoffset + 15] = endi;
+        lineArray[lineoffset + 16] = t2b;
+        lineArray[lineoffset + 17] = t3b;
+        lineArray[lineoffset + 18] = endi;
+        lineArray[lineoffset + 19] = t3b;
+
+        geoGroup.faceidx += 15;
+        geoGroup.lineidx += 20;
+
+    };
+
+    // handles custom shape generation from user supplied arrays
+    // May need to generate normal and/or line indices
+    /**
+     * @param {$3Dmol.GLShape}
+     *            shape
+     * @param {geometryGroup}
+     *            geoGroup
+     * @param {CustomSpec}
+     *            customSpec
+     */
+    var drawCustom = function(shape, geoGroup, customSpec) {
+
+        var vertexArr = customSpec.vertexArr, normalArr = customSpec.normalArr, faceArr = customSpec.faceArr, lineArr = customSpec.lineArr;
+
+        if (vertexArr.length === 0 || faceArr.length === 0) {
+            console
+                    .warn("Error adding custom shape component: No vertices and/or face indices supplied!");
+        }
+
+        geoGroup.vertices = vertexArr.length;
+        geoGroup.faceidx = faceArr.length;
+
+        var offset, v, a, b, c, i, il;
+
+        for (i = 0, il = geoGroup.vertices; i < il; ++i) {
+            offset = i * 3;
+            v = vertexArr[i];
+            geoGroup.vertexArray[offset] = v.x;
+            geoGroup.vertexArray[offset + 1] = v.y;
+            geoGroup.vertexArray[offset + 2] = v.z;
+        }
+
+        for (i = 0, il = geoGroup.faceidx / 3; i < il; ++i) {
+            offset = i * 3;
+            a = faceArr[offset];
+            b = faceArr[offset + 1];
+            c = faceArr[offset + 2];
+            var vA = new $3Dmol.Vector3(), vB = new $3Dmol.Vector3(), vC = new $3Dmol.Vector3();
+            shape.intersectionShape.triangle.push(new $3Dmol.Triangle(vA
+                    .copy(vertexArr[a]), vB.copy(vertexArr[b]), vC
+                    .copy(vertexArr[c])));
+        }
+
+        geoGroup.faceArray = new Uint16Array(faceArr);
+
+        geoGroup.truncateArrayBuffers(true, true);
+
+        if (normalArr.length < geoGroup.vertices)
+            geoGroup.setNormals();
+        else {
+
+            geoGroup.normalArray = new Float32Array(geoGroup.vertices * 3);
+            var n;
+            for (i = 0, il = geoGroup.vertices; i < il; ++i) {
+                offset = i * 3;
+                n = normalArr[i];
+                geoGroup.normalArray[offset] = n.x;
+                geoGroup.normalArray[offset + 1] = n.y;
+                geoGroup.normalArray[offset + 2] = n.z;
+            }
+        }
+
+        if (!lineArr.length)
+            geoGroup.setLineIndices();
+        else
+            geoGroup.lineArray = new Uint16Array(lineArr);
+
+        geoGroup.lineidx = geoGroup.lineArray.length;
+
+    };
+
+    // Read a cube file - generate model and possibly shape(s)
+    /**
+     * @param {$3Dmol.GLShape}
+     *            shape
+     * @param {geometryGroup}
+     *            geoGroup
+     * @param {string}
+     *            str
+     * @param {number}
+     *            isoval
+     * @param {boolean}
+     *            voxel
+     */
+    var parseCube = function(shape, geoGroup, str, isoval, voxel) {
+
+        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
+
+        if (lines.length < 6)
+            return;
+
+        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(
+                " ");
+
+        var natoms = Math.abs(parseFloat(lineArr[0]));
+        var origin = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+                parseFloat(lineArr[2]), parseFloat(lineArr[3]));
+
+        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+
+        // might have to convert from bohr units to angstroms
+        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
+
+        origin.multiplyScalar(convFactor);
+
+        var nX = Math.abs(lineArr[0]);
+        var xVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
+                .multiplyScalar(convFactor);
+
+        lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+
+        var nY = Math.abs(lineArr[0]);
+        var yVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
+                .multiplyScalar(convFactor);
+
+        lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+
+        var nZ = Math.abs(lineArr[0]);
+        var zVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
+                .multiplyScalar(convFactor);
+
+        // lines.splice(6, natoms).join("\n");
+
+        lines = new Float32Array(lines.splice(natoms + 7).join(" ").replace(
+                /^\s+/, "").split(/[\s\r]+/));
+
+        var vertnums = new Int16Array(nX * nY * nZ);
+
+        var i, il;
+
+        for (i = 0, il = vertnums.length; i < il; ++i)
+            vertnums[i] = -1;
+
+        var bitdata = new Uint8Array(nX * nY * nZ);
+
+        for (i = 0, il = lines.length; i < il; ++i) {
+            var val = (isoval >= 0) ? lines[i] - isoval : isoval - lines[i];
+
+            if (val > 0)
+                bitdata[i] |= ISDONE;
+
+        }
+
+        var verts = [], faces = [];
+
+        $3Dmol.MarchingCube.march(bitdata, verts, faces, {
+            fulltable : true,
+            voxel : voxel,
+            scale : xVec.length(),
+            origin : origin,
+            nX : nX,
+            nY : nY,
+            nZ : nZ
+        });
+
+        if (!voxel)
+            $3Dmol.MarchingCube.laplacianSmooth(10, verts, faces);
+
+        drawCustom(shape, geoGroup, {
+            vertexArr : verts,
+            faceArr : faces,
+            normalArr : [],
+            lineArr : []
+        });
+
+    };
+
+    // Update a bounding sphere's position and radius
+    // from list of centroids and new points
+    /**
+     * @param {$3Dmol.Sphere}
+     *            sphere
+     * @param {Object}
+     *            components
+     * @param {Array}
+     *            points
+     */
+    var updateBoundingFromPoints = function(sphere, components, points) {
+
+        sphere.center.set(0, 0, 0);
+
+        var i, il;
+
+        if (components.length > 0) {
+
+            for (i = 0, il = components.length; i < il; ++i) {
+                var centroid = components[i].centroid;
+                sphere.center.add(centroid);
+            }
+
+            sphere.center.divideScalar(components.length);
+        }
+
+        var maxRadiusSq = sphere.radius * sphere.radius;
+
+        for (i = 0, il = points.length / 3; i < il; i++) {
+            var x = points[i * 3], y = points[i * 3 + 1], z = points[i * 3 + 2];
+            var radiusSq = sphere.center.distanceToSquared({
+                x : x,
+                y : y,
+                z : z
+            });
+            maxRadiusSq = Math.max(maxRadiusSq, radiusSq);
+        }
+
+        sphere.radius = Math.sqrt(maxRadiusSq);
+
+    };
+
+    /**
+     * 
+     * @param {$3Dmol.GLShape}
+     *            shape
+     * @param {ShapeSpec}
+     *            stylespec
+     * @returns {undefined}
+     */
+    var updateFromStyle = function(shape, stylespec) {
+        shape.color = stylespec.color || new $3Dmol.Color();
+        if(! (stylespec.color instanceof $3Dmol.Color))
+            shape.color = $3Dmol.CC.color(stylespec.color);
+        shape.wireframe = stylespec.wireframe ? true : false;
+        shape.alpha = stylespec.alpha ? $3Dmol.Math.clamp(stylespec.alpha, 0.0,
+                1.0) : 1.0;
+        shape.side = (stylespec.side !== undefined) ? stylespec.side
+                : $3Dmol.DoubleSide;
+        shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
+        // Click handling
+        shape.clickable = stylespec.clickable ? true : false;
+        shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
+                : null;
+    };
+
+    /**
+     * Custom renderable shape
+     * 
+     * @constructor $3Dmol.GLShape
+     * 
+     * @param {Object}
+     *            stylespec
+     * @returns {$3Dmol.GLShape}
+     */
+    function GLShape(stylespec) {
+
+        stylespec = stylespec || {};
+        $3Dmol.ShapeIDCount++;
+
+        this.boundingSphere = new $3Dmol.Sphere();
+        /** @type {IntersectionShapes} */
+        this.intersectionShape = {
+            sphere : [],
+            cylinder : [],
+            line : [],
+            triangle : []
+        };
+
+        updateFromStyle(this, stylespec);
+
+        // Keep track of shape components and their centroids
+        var components = [];
+        var shapeObj = null;
+        var renderedShapeObj = null;
+
+        var geo = new $3Dmol.Geometry(true);
+
+        /** Update shape with new style specification
+         * @param {ShapeSpec} newspec
+         * @return {$3Dmol.GLShape}
+         */
+        this.updateStyle = function(newspec) {
+
+            for ( var prop in newspec) {
+                stylespec[prop] = newspec[prop];
+            }
+
+            updateFromStyle(this, stylespec);
+        };
+
+        /**
+         * Creates a custom shape from supplied vertex and face arrays
+         * @param {CustomSpec} customSpec
+         * @return {$3Dmol.GLShape}
+         */
+        this.addCustom = function(customSpec) {
+
+            customSpec.vertexArr = customSpec.vertexArr || [];
+            customSpec.faceArr = customSpec.faceArr || [];
+            customSpec.normalArr = customSpec.normalArr || [];
+            customSpec.lineArr = customSpec.lineArr || [];
+
+            // Force creation of new geometryGroup for each added component
+            var geoGroup = geo.addGeoGroup();
+            drawCustom(this, geoGroup, customSpec);
+            geoGroup.truncateArrayBuffers(true, true);
+
+            for (var i = 0; i < geoGroup.colorArray.length / 3; ++i) {
+                geoGroup.colorArray[i * 3] = this.color.r;
+                geoGroup.colorArray[i * 3 + 1] = this.color.g;
+                geoGroup.colorArray[i * 3 + 2] = this.color.b;
+            }
+
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : geoGroup.getCentroid()
+            });
+
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);
+        };
+
+        /**
+         * Creates a sphere shape
+         * @param {SphereSpec} sphereSpec
+         * @return {$3Dmol.GLShape}
+         */
+        this.addSphere = function(sphereSpec) {
+
+            sphereSpec.center = sphereSpec.center || {
+                x : 0,
+                y : 0,
+                z : 0
+            };
+            sphereSpec.radius = sphereSpec.radius ? $3Dmol.Math.clamp(
+                    sphereSpec.radius, 0, Infinity) : 1.5;
+            sphereSpec.color = $3Dmol.CC.color(sphereSpec.color);
+            
+            this.intersectionShape.sphere.push(new $3Dmol.Sphere(
+                    sphereSpec.center, sphereSpec.radius));
+
+            var geoGroup = geo.addGeoGroup();
+            $3Dmol.GLDraw.drawSphere(geo, sphereSpec.center,
+                    sphereSpec.radius, sphereSpec.color);
+            geoGroup.truncateArrayBuffers(true, true);
+
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup, // has to be last group added
+                centroid : new $3Dmol.Vector3(sphereSpec.center.x,
+                        sphereSpec.center.y, sphereSpec.center.z)
+            });
+
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);
+        };
+
+        /**
+         * Creates a cylinder shape
+         * @param {CylinderSpec} cylinderSpec
+         * @return {$3Dmol.GLShape}
+         */
+        this.addCylinder = function(cylinderSpec) {
+
+            cylinderSpec.start = cylinderSpec.start || {};
+            cylinderSpec.end = cylinderSpec.end || {};
+
+            var start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
+                    cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+            var end = new $3Dmol.Vector3(cylinderSpec.end.x || 3,
+                    cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
+
+            var radius = cylinderSpec.radius || 0.1;
+
+            var color = $3Dmol.CC.color(cylinderSpec.color);
+
+
+            var geoGroup = geo.addGeoGroup();
+
+            $3Dmol.GLDraw.drawCylinder(geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);            
+            geoGroup.truncateArrayBuffers(true, true);
+
+            var centroid = new $3Dmol.Vector3();
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : centroid.addVectors(cylinderSpec.start,
+                        cylinderSpec.end).multiplyScalar(0.5)
+            });
+
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);
+
+        };
+
+        /**
+         * Creates an arrow shape
+         * @param {ArrowSpec} arrowSpec
+         * @return {$3Dmol.GLShape}
+         */
+        this.addArrow = function(arrowSpec) {
+
+            arrowSpec.start = arrowSpec.start || {};
+            arrowSpec.end = arrowSpec.end || {};
+
+            arrowSpec.start = new $3Dmol.Vector3(arrowSpec.start.x || 0,
+                    arrowSpec.start.y || 0, arrowSpec.start.z || 0);
+
+            if (arrowSpec.dir instanceof $3Dmol.Vector3
+                    && arrowSpec.length instanceof number) {
+                var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
+                        start);
+                arrowSpec.end = end;
+            }
+
+            else {
+                arrowSpec.end = new $3Dmol.Vector3(arrowSpec.end.x || 3,
+                        arrowSpec.end.y || 0, arrowSpec.end.z || 0);
+            }
+
+            arrowSpec.radius = arrowSpec.radius || 0.1;
+
+            arrowSpec.radiusRatio = arrowSpec.radiusRatio || 1.618034;
+            arrowSpec.mid = (0 < arrowSpec.mid && arrowSpec.mid < 1) ? arrowSpec.mid
+                    : 0.618034;
+
+            var geoGroup = geo.addGeoGroup();
+
+            drawArrow(this, geoGroup, arrowSpec);
+            geoGroup.truncateArrayBuffers(true, true);
+
+            var centroid = new $3Dmol.Vector3();
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : centroid.addVectors(arrowSpec.start, arrowSpec.end)
+                        .multiplyScalar(0.5)
+            });
+
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);
+
+        };
+        
+        /** 
+         * Creates custom shape from volumetric data 
+         * @param {string} data - Volumetric input data 
+         * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
+         * @param {VolSpec} volSpec - Volumetric data shape specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addVolumetricData = function(data, fmt, volSpec) {
+
+            // str, fmt, isoval, vxl
+            var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
+                    : 0.0;
+            var vxl = (volSpec.voxel) ? true : false;
+
+            var geoGroup = geo.addGeoGroup();
+
+            // TODO: Initialize geometry group here (parseCube currently calls
+            // addCustom...)
+            switch (fmt) {
+            case "cube":
+                parseCube(this, geoGroup, data, isoval, vxl);
+                break;
+            }
+
+            components.push({
+                id : geoGroup.id,
+                geoGroup : geoGroup,
+                centroid : geoGroup.getCentroid()
+            });
+
+            this.updateStyle(volSpec);
+
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);
+
+        };
+
+        /**
+         * Initialize webgl objects for rendering
+         * @param {$3Dmol.Object3D} group
+         * 
+         */  
+        this.globj = function(group) {
+
+            geo.initTypedArrays();
+
+            updateColor(geo, this.color);
+
+            shapeObj = new $3Dmol.Object3D();
+            var material = new $3Dmol.MeshLambertMaterial({
+                wireframe : this.wireframe,
+                vertexColors : true,
+                ambient : 0x000000,
+                reflectivity : 0,
+                side : this.side,
+                transparent : (this.alpha < 1) ? true : false,
+                opacity : this.alpha,
+                wireframeLinewidth: this.linewidth
+            });
+
+            var mesh = new $3Dmol.Mesh(geo, material);
+            shapeObj.add(mesh);
+
+            if (renderedShapeObj) {
+                group.remove(renderedShapeObj);
+                renderedShapeObj = null;
+            }
+            renderedShapeObj = shapeObj.clone();
+            group.add(renderedShapeObj);
+
+        };
+
+        this.removegl = function(group) {
+            if (renderedShapeObj) {
+                // dispose of geos and materials
+                if (renderedShapeObj.geometry !== undefined)
+                    renderedShapeObj.geometry.dispose();
+                if (renderedShapeObj.material !== undefined)
+                    renderedShapeObj.material.dispose();
+                group.remove(renderedShapeObj);
+                renderedShapeObj = null;
+            }
+            shapeObj = null;
+        };
+
+    };
+
+    Object.defineProperty(GLShape.prototype, "position", {
+
+        get : function() {
+            return this.boundingSphere.center;
+        }
+
+    });
+
+    Object.defineProperty(GLShape.prototype, "x", {
+
+        get : function() {
+            return this.boundingSphere.center.x;
+        }
+
+    });
+
+    Object.defineProperty(GLShape.prototype, "y", {
+
+        get : function() {
+            return this.boundingSphere.center.y;
+        }
+
+    });
+
+    Object.defineProperty(GLShape.prototype, "z", {
+
+        get : function() {
+            return this.boundingSphere.center.z;
+        }
+
+    });
+
+    return GLShape;
 
 }());
 
@@ -21410,1850 +21287,1896 @@ $3Dmol.ShapeIDCount = 0;//a molecular viewer based on GLMol
  * @param {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
  */
 $3Dmol.GLViewer = (function() {
-	// private class variables
-	var numWorkers = 4; // number of threads for surface generation
-	var maxVolume = 64000; // how much to break up surface calculations
-
-	// private class helper functions
-
-	function GLViewer(element, callback, defaultcolors, nomouse) {
-		// set variables
-		var _viewer = this;
-		var container = element;
-		var id = container.id;
-
-		var models = []; // atomistic molecular models
-		var surfaces = [];
-		var shapes = []; // Generic shapes
-		var labels = [];
-		var clickables = []; //things you can click on
-		var WIDTH = container.width();
-		var HEIGHT = container.height();
-
-		// set dimensions
-		// $(container).width(WIDTH);
-		// $(container).height(HEIGHT);
-
-		var ASPECT = WIDTH / HEIGHT;
-		var NEAR = 1, FAR = 800;
-		var CAMERA_Z = 150;
-		var fov = 20;
-
-
-		var renderer = new $3Dmol.Renderer({
-			antialias : true
-		});
-
-		renderer.domElement.style.width = "100%";
-		renderer.domElement.style.height = "100%";
-		renderer.domElement.style.padding = "0";
-		renderer.domElement.style.position = "absolute"; //TODO: get rid of this
-		renderer.domElement.style.top = "0px";
-		renderer.domElement.style.zIndex = "0";
-		container.append(renderer.domElement);
-		renderer.setSize(WIDTH, HEIGHT);
-		var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
-		camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
-		var lookingAt = new $3Dmol.Vector3();
-		camera.lookAt(lookingAt);
-
-		var raycaster = new $3Dmol.Raycaster(new $3Dmol.Vector3(0, 0, 0),
-				new $3Dmol.Vector3(0, 0, 0));
-		var projector = new $3Dmol.Projector();
-		var mouseVector = new $3Dmol.Vector3(0, 0, 0);
-
-		var scene = null;
-		var rotationGroup = null; // which contains modelGroup
-		var modelGroup = null;
-
-		var bgColor = 0x000000;
-		var fogStart = 0.4;
-		var slabNear = -50; // relative to the center of rotationGroup
-		var slabFar = 50;
-
-		// UI variables
-		var cq = new $3Dmol.Quaternion(0, 0, 0, 1);
-		var dq = new $3Dmol.Quaternion(0, 0, 0, 1);
-		var isDragging = false;
-		var mouseStartX = 0;
-		var mouseStartY = 0;
-		var touchDistanceStart = 0;
-		var currentModelPos = 0;
-		var cz = 0;
-		var cslabNear = 0;
-		var cslabFar = 0;
-
-		var setSlabAndFog = function() {
-			var center = camera.position.z - rotationGroup.position.z;
-			if (center < 1)
-				center = 1;
-			camera.near = center + slabNear;
-			if (camera.near < 1)
-				camera.near = 1;
-			camera.far = center + slabFar;
-			if (camera.near + 1 > camera.far)
-				camera.far = camera.near + 1;
-			if (camera instanceof $3Dmol.Camera) {
-				camera.fov = fov;
-			} else {
-				camera.right = center * Math.tan(Math.PI / 180 * fov);
-				camera.left = -camera.right;
-				camera.top = camera.right / ASPECT;
-				camera.bottom = -camera.top;
-			}
-			camera.updateProjectionMatrix();
-			scene.fog.near = camera.near + fogStart
-					* (camera.far - camera.near);
-			// if (scene.fog.near > center) scene.fog.near = center;
-			scene.fog.far = camera.far;
-		};
-
-		// display scene
-		var show = function() {
-			if (!scene)
-				return;
-
-			// var time = new Date();
-			setSlabAndFog();
-			renderer.render(scene, camera);
-			// console.log("rendered in " + (+new Date() - time) + "ms");
-		};
-
-		var initializeScene = function() {
-
-			scene = new $3Dmol.Scene();
-			scene.fog = new $3Dmol.Fog(bgColor, 100, 200);
-
-			modelGroup = new $3Dmol.Object3D();
-			rotationGroup = new $3Dmol.Object3D();
-			rotationGroup.useQuaternion = true;
-			rotationGroup.quaternion = new $3Dmol.Quaternion(0, 0, 0, 1);
-			rotationGroup.add(modelGroup);
-
-			scene.add(rotationGroup);
-
-			// setup lights
-			var directionalLight = new $3Dmol.Light(0xFFFFFF);
-			directionalLight.position = new $3Dmol.Vector3(0.2, 0.2, 1)
-					.normalize();
-			directionalLight.intensity = 1.0;
-			scene.add(directionalLight);
-		};
-
-		initializeScene();
-
-		renderer.setClearColorHex(bgColor, 1.0);
-		scene.fog.color = $3Dmol.CC.color(bgColor);
-
-		var clickedAtom = null;
-		// enable mouse support
-		var glDOM = $(renderer.domElement);
-
-		//regenerate the list of clickables
-		var updateClickables = function() {
-			clickables = [];
-			var i, il;
-
-			for (i = 0, il = models.length; i < il; i++) {
-				var model = models[i];
-				if(model) {
-					var atoms = model.selectedAtoms({
-						clickable : true
-					});
-					clickables = clickables.concat(atoms);
-				}
-			}
-
-			for (i = 0, il = shapes.length; i < il; i++) {
-
-				var shape = shapes[i];
-				if (shape && shape.clickable) {
-					clickables.push(shape);
-				}
-			}
-		};
-		
-		// Checks for selection intersects on mousedown
-		var handleClickSelection = function(mouseX, mouseY) {
-			if(clickables.length == 0) return;
-			var mouse = {
-				x : mouseX,
-				y : mouseY,
-				z : -1.0
-			};
-			mouseVector.set(mouse.x, mouse.y, mouse.z);
-			projector.unprojectVector(mouseVector, camera);
-			mouseVector.sub(camera.position).normalize();
-
-			raycaster.set(camera.position, mouseVector);
-
-			var intersects = [];
-
-			intersects = raycaster.intersectObjects(modelGroup, clickables);
-
-			if (intersects.length) {
-				var selected = intersects[0].clickable;
-				if (selected.callback !== undefined
-						&& typeof (selected.callback) === "function") {
-					selected.callback(selected, _viewer);
-				}
-			}
-		};
-
-		var calcTouchDistance = function(ev) { // distance between first two
-												// fingers
-			var xdiff = ev.originalEvent.targetTouches[0].pageX
-					- ev.originalEvent.targetTouches[1].pageX;
-			var ydiff = ev.originalEvent.targetTouches[0].pageY
-					- ev.originalEvent.targetTouches[1].pageY;
-			return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
-		}
-		
-		//check targetTouches as well
-		var getXY = function(ev) {
-			var x = ev.pageX, y = ev.pageY;
-			if (ev.originalEvent.targetTouches
-					&& ev.originalEvent.targetTouches[0]) {
-				x = ev.originalEvent.targetTouches[0].pageX;
-				y = ev.originalEvent.targetTouches[0].pageY;
-			}
-			
-			return [x,y];
-		};
-
-		//for a given screen (x,y) displacement return model displacement 
-		var screenXY2model = function(x,y,z) {
-			var dx = x/WIDTH;
-			var dy = y/HEIGHT;
-			var zpos = typeof(z) == 'undefined' ? rotationGroup.position.z : z; 
-			var q = rotationGroup.quaternion;						
-			var t = new $3Dmol.Vector3(0,0,zpos);
-			projector.projectVector(t, camera);
-			t.x += dx*2;
-			t.y -= dy*2;
-			projector.unprojectVector(t, camera);
-			t.z = 0;							
-			t.applyQuaternion(q);
-			return t;
-		}
-		
-		if (!nomouse) {
-			// user can request that the mouse handlers not be installed
-			glDOM.bind('mousedown touchstart', function(ev) {
-				ev.preventDefault();
-				if (!scene)
-					return;
-				var xy = getXY(ev);
-				var x = xy[0];
-				var y = xy[1];
-				
-				if (x === undefined)
-					return;
-				isDragging = true;
-				clickedAtom = null;
-				mouseButton = ev.which;
-				mouseStartX = x;
-				mouseStartY = y;
-				touchDistanceStart = 0;
-				if (ev.originalEvent.targetTouches
-						&& ev.originalEvent.targetTouches.length == 2) {
-					touchDistanceStart = calcTouchDistance(ev);
-				}
-				cq = rotationGroup.quaternion;
-				cz = rotationGroup.position.z;
-				currentModelPos = modelGroup.position.clone();
-				cslabNear = slabNear;
-				cslabFar = slabFar;
-
-			});
-
-			glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
-				ev.preventDefault();
-				if (!scene)
-					return;
-				var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-				if (ev.originalEvent.detail) { // Webkit
-					rotationGroup.position.z += scaleFactor
-							* ev.originalEvent.detail / 10;
-				} else if (ev.originalEvent.wheelDelta) { // Firefox
-					rotationGroup.position.z -= scaleFactor
-							* ev.originalEvent.wheelDelta / 400;
-				}
-
-				show();
-			});
-
-			glDOM.bind("contextmenu", function(ev) {
-				ev.preventDefault();
-			});
-			$('body').bind('mouseup touchend', function(ev) {
-				
-				// handle selection
-				if(isDragging && scene) { //saw mousedown, haven't moved
-					var xy = getXY(ev);
-					var x = xy[0];
-					var y = xy[1];
-					if(x == mouseStartX && y == mouseStartY) {					
-						var mouseX = (x / $(window).width()) * 2 - 1;
-						var mouseY = -(y / HEIGHT) * 2 + 1;
-						handleClickSelection(mouseX, mouseY, ev, container);
-					}
-				}
-				
-				isDragging = false;
-
-			});
-
-			glDOM.bind('mousemove touchmove', function(ev) { // touchmove
-				ev.preventDefault();
-				if (!scene)
-					return;
-				if (!isDragging)
-					return;
-				var mode = 0;
-
-				var xy = getXY(ev);
-				var x = xy[0];
-				var y = xy[1];
-				if (x === undefined)
-					return;
-				var dx = (x - mouseStartX) / WIDTH;
-				var dy = (y - mouseStartY) / HEIGHT;
-				// check for pinch
-				if (touchDistanceStart != 0
-						&& ev.originalEvent.targetTouches
-						&& ev.originalEvent.targetTouches.length == 2) {
-					var newdist = calcTouchDistance(ev);
-					// change to zoom
-					mode = 2;
-					dy = (touchDistanceStart - newdist) * 2
-							/ (WIDTH + HEIGHT);
-				} else if (ev.originalEvent.targetTouches
-						&& ev.originalEvent.targetTouches.length == 3) {
-					// translate
-					mode = 1;
-				}
-
-				var r = Math.sqrt(dx * dx + dy * dy);
-				var scaleFactor;
-				if (mode == 3
-						|| (mouseButton == 3 && ev.ctrlKey)) { // Slab
-					slabNear = cslabNear + dx * 100;
-					slabFar = cslabFar + dy * 100;
-				} else if (mode == 2 || mouseButton == 3
-						|| ev.shiftKey) { // Zoom
-					scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-					if (scaleFactor < 80)
-						scaleFactor = 80;
-					rotationGroup.position.z = cz - dy
-							* scaleFactor;
-				} else if (mode == 1 || mouseButton == 2
-						|| ev.ctrlKey) { // Translate
-					var t = screenXY2model(x-mouseStartX, y-mouseStartY);
-					modelGroup.position.addVectors(currentModelPos,t);
-					
-				} else if ((mode === 0 || mouseButton == 1)
-						&& r !== 0) { // Rotate
-					var rs = Math.sin(r * Math.PI) / r;
-					dq.x = Math.cos(r * Math.PI);
-					dq.y = 0;
-					dq.z = rs * dx;
-					dq.w = -rs * dy;
-					rotationGroup.quaternion = new $3Dmol.Quaternion(
-							1, 0, 0, 0);
-					rotationGroup.quaternion.multiply(dq);
-					rotationGroup.quaternion.multiply(cq);
-				}
-				show();
-			});
-		}
-		// public methods
-		/**
-		 * Set the background color (default white)
-		 * 
-		 * @function $3Dmol.GLViewer#setBackgroundColor
-		 * @param {number}
-		 *            hex Hexcode specified background color, or standard color spec
-		 * @param {number}
-		 *            a Alpha level (default 1.0)
-		 * 
-		 * @example
-		 * 
-		 * //Set 'myviewer' background color to white
-		 * myviewer.setBackgroundColor(0xffffff)
-		 * 
-		 */
-		this.setBackgroundColor = function(hex, a) {
-			a = a | 1.0;
-			var c = $3Dmol.CC.color(hex);
-			scene.fog.color = c;
-			bgColor = c.getHex();
-			renderer.setClearColorHex(c.getHex(), a);
-			show();
-		};
-
-		/**
-		 * Set viewer width
-		 * 
-		 * @function $3Dmol.GLViewer#setWidth
-		 * @param {number}
-		 *            w Width in pixels
-		 */
-		this.setWidth = function(w) {
-			WIDTH = w || WIDTH;
-			renderer.setSize(WIDTH, HEIGHT);
-		};
-
-		/**
-		 * Set viewer height
-		 * 
-		 * @function $3Dmol.GLViewer#setHeight
-		 * @param {number}
-		 *            h Height in pixels
-		 */
-		this.setHeight = function(h) {
-			HEIGHT = h || HEIGHT;
-			renderer.setSize(WIDTH, HEIGHT);
-		};
-
-		/**
-		 * Resize viewer according to containing HTML element's dimensions
-		 * 
-		 * @function $3Dmol.GLViewer#resize
-		 */
-		this.resize = function() {
-			WIDTH = container.width();
-			HEIGHT = container.height();
-			ASPECT = WIDTH / HEIGHT;
-			renderer.setSize(WIDTH, HEIGHT);
-			camera.aspect = ASPECT;
-			camera.updateProjectionMatrix();
-			show();
-		};
-
-		$(window).resize(this.resize);
-
-		/**
-		 * Return specified model
-		 * 
-		 * @function $3Dmol.GLViewer#getModel
-		 * @param {number}
-		 *            [id=last model id] - Retrieve model with specified id
-		 * @default Returns last model added to viewer
-		 * @return {GLModel}
-		 * 
-		 * @example // Retrieve reference to first GLModel added var m =
-		 *          glviewer.getModel(0);
-		 */
-		this.getModel = function(id) {
-			id = id || models.length - 1;
-			return models[id];
-		};
-
-		/**
-		 * Rotate scene by angle degrees around axis
-		 * 
-		 * @function $3Dmol.GLViewer#rotate
-		 * @param {number}
-		 *            [angle] - Angle, in degrees, to rotate by.
-		 * @param {string}
-		 *            [angle] - Axis ("x", "y", or "z") to rotate around.
-		 *            Default "y"
-		 * 
-		 */
-		this.rotate = function(angle, axis) {
-			if (typeof (axis) === "undefined") {
-				axis = "y";
-			}
-			var i = 0, j = 0, k = 0;
-			var rangle = Math.PI * angle / 180.0;
-			var s = Math.sin(rangle / 2.0);
-			var c = Math.cos(rangle / 2.0);
-			if (axis == "x")
-				i = s;
-			if (axis == "y")
-				j = s;
-			if (axis == "z")
-				k = s;
-
-			var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
-			rotationGroup.quaternion.multiply(q);
-			show();
-		};
-
-		/** Returns an array representing the current viewpoint.
-		 * Translation, zoom, and rotation quaternion. 
-		 * @returns {Array.<number>} arg */
-		this.getView = function() {
-			if (!modelGroup)
-				return [ 0, 0, 0, 0, 0, 0, 0, 1 ];
-			var pos = modelGroup.position;
-			var q = rotationGroup.quaternion;
-			return [ pos.x, pos.y, pos.z, rotationGroup.position.z, q.x, q.y,
-					q.z, q.w ];
-		};
-
-		/** Sets the view to the specified translation, zoom, and rotation. 
-		 * @param {Array.<number>} arg */
-		this.setView = function(arg) {
-
-			if (arg === undefined
-					|| !(arg instanceof Array || arg.length !== 8))
-				return;
-
-			if (!modelGroup || !rotationGroup)
-				return;
-			modelGroup.position.x = arg[0];
-			modelGroup.position.y = arg[1];
-			modelGroup.position.z = arg[2];
-			rotationGroup.position.z = arg[3];
-			rotationGroup.quaternion.x = arg[4];
-			rotationGroup.quaternion.y = arg[5];
-			rotationGroup.quaternion.z = arg[6];
-			rotationGroup.quaternion.w = arg[7];
-			if(typeof(arg[8]) != "undefined") {
-				rotationGroup.position.x = arg[8];
-				rotationGroup.position.y = arg[9];
-			}
-			show();
-		};
-
-		// apply styles, models, etc in viewer
-		/**
-		 * Render current state of viewer, after 
-		 * adding/removing models, applying styles, etc.
-		 * 
-		 * @function $3Dmol.GLViewer#render
-		 */
-		this.render = function() {
-
-			updateClickables(); //must render for clickable styles to take effect
-			var time1 = new Date();
-			var view = this.getView();
-			
-			var i;
-			for (i = 0; i < models.length; i++) {
-				if (models[i]) {
-					models[i].globj(modelGroup);
-				}
-			}
-
-			for (i = 0; i < shapes.length; i++) {
-				if (shapes[i]) {
-					shapes[i].globj(modelGroup);
-				}
-			}
-			
-			for (i in surfaces) { // this is an array with possible holes
-				if (surfaces.hasOwnProperty(i)) {
-					var geo = surfaces[i].geo;
-					// async surface generation can cause
-					// the geometry to be webgl initialized before it is fully
-					// formed; force various recalculations until full surface
-					// is
-					// available
-					if (!surfaces[i].finished) {
-						geo.verticesNeedUpdate = true;
-						geo.elementsNeedUpdate = true;
-						geo.normalsNeedUpdate = true;
-						geo.colorsNeedUpdate = true;
-						geo.buffersNeedUpdate = true;
-						geo.boundingSphere = null;
-
-						if (surfaces[i].done)
-							surfaces[i].finished = true;
-
-						// remove partially rendered surface
-						if (surfaces[i].lastGL)
-							modelGroup.remove(surfaces[i].lastGL);
-
-						// create new surface
-						var smesh = null;
-
-						if(surfaces[i].mat instanceof $3Dmol.LineBasicMaterial) {
-							//special case line meshes
-							smesh = new $3Dmol.Line(geo, surfaces[i].mat);
-						}
-						else {
-							smesh = new $3Dmol.Mesh(geo, surfaces[i].mat);
-						}
-						if(surfaces[i].mat.transparent && surfaces[i].mat.opacity == 0) {
-							//don't bother with hidden surfaces
-							smesh.visible = false;
-						} else {
-							smesh.visible = true;
-						}
-						surfaces[i].lastGL = smesh;
-						modelGroup.add(smesh);
-					} // else final surface already there
-				}
-			}
-			
-			this.setView(view); // Calls show() => renderer render
-			var time2 = new Date();
-			console.log("render time: " + (time2 - time1));
-		};
-
-		/**
-		 * 
-		 * @param {AtomSelectionSpec}
-		 *            sel
-		 * @return {AtomSpec[]}
-		 */
-		function getAtomsFromSel(sel) {
-			var atoms = [];
-			if (typeof (sel) === "undefined")
-				sel = {};
-
-			var ms = [];
-			var i;
-
-			if (typeof sel.model === "undefined") {
-				for (i = 0; i < models.length; i++) {
-					if (models[i])
-						ms.push(models[i]);
-				}
-			} else { // specific to some models
-				ms = sel.model;
-				if (!$.isArray(ms))
-					ms = [ ms ];
-			}
-
-			for (i = 0; i < ms.length; i++) {
-				atoms = atoms.concat(ms[i].selectedAtoms(sel));
-			}
-
-			return atoms;
-		}
-
-		/**
-		 * 
-		 * @param {AtomSpec}
-		 *            atom
-		 * @param {AtomSpec}
-		 *            sel
-		 * @return {boolean}
-		 */
-		function atomIsSelected(atom, sel) {
-			if (typeof (sel) === "undefined")
-				sel = {};
-
-			var ms = [];
-			var i;
-
-			if (typeof sel.model === "undefined") {
-				for (i = 0; i < models.length; i++) {
-					if (models[i])
-						ms.push(models[i]);
-				}
-			} else { // specific to some models
-				ms = sel.model;
-				if (!$.isArray(ms))
-					ms = [ ms ];
-			}
-
-			for (i = 0; i < ms.length; i++) {
-				if (ms[i].atomIsSelected(atom, sel))
-					return true;
-			}
-
-			return false;
-		}
-
-		/**
-		 * Return pdb output of selected atoms (if atoms from pdb input)
-		 * 
-		 * @function $3Dmol.GLViewer#pdbData  
-		 * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
-		 * @return {string} PDB string of selected atoms
-		 */
-		this.pdbData = function(sel) {
-			var atoms = getAtomsFromSel(sel);
-			var ret = "";
-			for (var i = 0, n = atoms.length; i < n; ++i) {
-				ret += atoms[i].pdbline + "\n";
-			}
-			return ret;
-		};
-
-		/**
-		 * Zoom current view by a constant factor
-		 * 
-		 * @function $3Dmol.GLViewer#zoom
-		 * @param {number}
-		 *            [factor] - Magnification factor. Values greater than 1
-		 *            will zoom in, less than one will zoom out. Default 2.
-		 * 
-		 */
-		this.zoom = function(factor) {
-			var factor = factor || 2;
-			var scale = (CAMERA_Z - rotationGroup.position.z) / factor;
-			rotationGroup.position.z = CAMERA_Z - scale;
-			show();
-		};
-		
-		/**
-		 * Translate current view by x,y screen coordinates
-		 * This pans the camera rather than translating the model.
-		 * 
-		 * @function $3Dmol.GLViewer#translate
-		 * @param {number} x
-		 * @param {number} y
-		 * 
-		 */
-		this.translate = function(x, y) {
-			
-			var dx = x/WIDTH;
-			var dy = y/HEIGHT;
-			var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
-
-			projector.projectVector(v, camera);
-			v.x -= dx;
-			v.y -= dy;
-			projector.unprojectVector(v, camera);
-			v.z = 0;			
-			lookingAt.add(v);
-			camera.lookAt(lookingAt);
-			show();
-		};
-		
-
-		/**
-		 * Zoom to center of atom selection
-		 * 
-		 * @function $3Dmol.GLViewer#zoomTo
-		 * @param {Object}
-		 *            [sel] - Selection specification specifying model and atom
-		 *            properties to select. Default: all atoms in viewer
-		 * @example // Assuming we have created a model of a protein with
-		 *          multiple chains (e.g. from a PDB file), focus on atoms in
-		 *          chain B glviewer.zoomTo({chain: 'B'});
-		 *  // Focus on centroid of all atoms of all models in this
-		 * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
-		 */
-		this.zoomTo = function(sel, x, y) {
-			
-			var atoms = getAtomsFromSel(sel).concat(shapes);
-			var allatoms = getAtomsFromSel({}).concat(shapes);
-			var tmp = $3Dmol.getExtent(atoms);
-			var alltmp = $3Dmol.getExtent(allatoms);
-			// use selection for center
-			var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
-			modelGroup.position = center.clone().multiplyScalar(-1);
-			// but all for bounding box
-			var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
-					- alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
-
-			var maxD = Math.sqrt(x * x + y * y + z * z);
-			if (maxD < 5)
-				maxD = 5;
-
-			// use full bounding box for slab/fog
-			slabNear = -maxD / 1.9;
-			slabFar = maxD / 2;
-
-			// for zoom, use selection box
-			x = tmp[1][0] - tmp[0][0];
-			y = tmp[1][1] - tmp[0][1];
-			z = tmp[1][2] - tmp[0][2];
-			maxD = Math.sqrt(x * x + y * y + z * z);
-			if (maxD < 5)
-				maxD = 5;
-			
-			//find the farthest atom from center to get max distance needed for view
-			var maxDsq = 25;
-			for (var i = 0; i < atoms.length; i++) {
-				var dsq = center.distanceToSquared(atoms[i]);
-				if(dsq > maxDsq)
-					maxDsq = dsq;
-			}
-			
-			var maxD = Math.sqrt(maxDsq)*2;
-
-			rotationGroup.position.z = -(maxD * 0.5
-					/ Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
-
-			show();
-		};
-
-		/**
-		 * Add label to viewer
-		 * 
-		 * @function $3Dmol.GLViewer#addLabel
-		 * @param {string}
-		 *            text - Label text
-		 * @param {Object}
-		 *            data - Label style specification
-		 * @return {$3Dmol.Label}
-		 * 
-		 * @example
-		 *  // Assuming glviewer contains a model representing a protein, label
-		 * all alpha carbons with their residue name
-		 *  // Select all alpha carbons (have property atom : "CA") from last
-		 * model added var atoms =
-		 * glviewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
-		 * 
-		 * for (var a in atoms) { var atom = atoms[a];
-		 *  // Create label at alpha carbon's position displaying atom's residue
-		 * and residue number var labelText = atom.resname + " " + atom.resi;
-		 * 
-		 * var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:
-		 * atom.x, y: atom.y, z: atom.z});
-		 * 
-		 * labels.push(l); }
-		 *  // Render labels glviewer.render();
-		 */
-		this.addLabel = function(text, data) {
-			var label = new $3Dmol.Label(text, data);
-			label.setContext();
-			modelGroup.add(label.sprite);
-			labels.push(label);
-			show();
-			return label;
-		};
-		
-		/** Add residue labels.  This will generate one label per a
-		 * residue within the selected atoms.  The label will be at the
-		 * centroid of the atoms and styled according to the passed style.
-		 * The label text will be [resn][resi]
-		 * 
-		 * @param {Object} sel
-		 * @param {Object} style
-		 */
-        this.addResLabels = function(sel, style) {
-			applyToModels("addResLabels", sel, this, style);
+    // private class variables
+    var numWorkers = 4; // number of threads for surface generation
+    var maxVolume = 64000; // how much to break up surface calculations
+
+    // private class helper functions
+
+    function GLViewer(element, callback, defaultcolors, nomouse) {
+        // set variables
+        var _viewer = this;
+        var container = element;
+        var id = container.id;
+
+        var models = []; // atomistic molecular models
+        var surfaces = [];
+        var shapes = []; // Generic shapes
+        var labels = [];
+        var clickables = []; //things you can click on
+        var WIDTH = container.width();
+        var HEIGHT = container.height();
+
+        // set dimensions
+        // $(container).width(WIDTH);
+        // $(container).height(HEIGHT);
+
+        var ASPECT = WIDTH / HEIGHT;
+        var NEAR = 1, FAR = 800;
+        var CAMERA_Z = 150;
+        var fov = 20;
+
+
+        var renderer = new $3Dmol.Renderer({
+            antialias : true
+        });
+
+        renderer.domElement.style.width = "100%";
+        renderer.domElement.style.height = "100%";
+        renderer.domElement.style.padding = "0";
+        renderer.domElement.style.position = "absolute"; //TODO: get rid of this
+        renderer.domElement.style.top = "0px";
+        renderer.domElement.style.zIndex = "0";
+        container.append(renderer.domElement);
+        renderer.setSize(WIDTH, HEIGHT);
+        var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
+        camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
+        var lookingAt = new $3Dmol.Vector3();
+        camera.lookAt(lookingAt);
+
+        var raycaster = new $3Dmol.Raycaster(new $3Dmol.Vector3(0, 0, 0),
+                new $3Dmol.Vector3(0, 0, 0));
+        var projector = new $3Dmol.Projector();
+        var mouseVector = new $3Dmol.Vector3(0, 0, 0);
+
+        var scene = null;
+        var rotationGroup = null; // which contains modelGroup
+        var modelGroup = null;
+
+        var bgColor = 0x000000;
+        var fogStart = 0.4;
+        var slabNear = -50; // relative to the center of rotationGroup
+        var slabFar = 50;
+
+        // UI variables
+        var cq = new $3Dmol.Quaternion(0, 0, 0, 1);
+        var dq = new $3Dmol.Quaternion(0, 0, 0, 1);
+        var isDragging = false;
+        var mouseStartX = 0;
+        var mouseStartY = 0;
+        var touchDistanceStart = 0;
+        var currentModelPos = 0;
+        var cz = 0;
+        var cslabNear = 0;
+        var cslabFar = 0;
+
+        var setSlabAndFog = function() {
+            var center = camera.position.z - rotationGroup.position.z;
+            if (center < 1)
+                center = 1;
+            camera.near = center + slabNear;
+            if (camera.near < 1)
+                camera.near = 1;
+            camera.far = center + slabFar;
+            if (camera.near + 1 > camera.far)
+                camera.far = camera.near + 1;
+            if (camera instanceof $3Dmol.Camera) {
+                camera.fov = fov;
+            } else {
+                camera.right = center * Math.tan(Math.PI / 180 * fov);
+                camera.left = -camera.right;
+                camera.top = camera.right / ASPECT;
+                camera.bottom = -camera.top;
+            }
+            camera.updateProjectionMatrix();
+            scene.fog.near = camera.near + fogStart
+                    * (camera.far - camera.near);
+            // if (scene.fog.near > center) scene.fog.near = center;
+            scene.fog.far = camera.far;
+        };
+
+        // display scene
+        var show = function() {
+            if (!scene)
+                return;
+
+            // var time = new Date();
+            setSlabAndFog();
+            renderer.render(scene, camera);
+            // console.log("rendered in " + (+new Date() - time) + "ms");
+        };
+
+        var initializeScene = function() {
+
+            scene = new $3Dmol.Scene();
+            scene.fog = new $3Dmol.Fog(bgColor, 100, 200);
+
+            modelGroup = new $3Dmol.Object3D();
+            rotationGroup = new $3Dmol.Object3D();
+            rotationGroup.useQuaternion = true;
+            rotationGroup.quaternion = new $3Dmol.Quaternion(0, 0, 0, 1);
+            rotationGroup.add(modelGroup);
+
+            scene.add(rotationGroup);
+
+            // setup lights
+            var directionalLight = new $3Dmol.Light(0xFFFFFF);
+            directionalLight.position = new $3Dmol.Vector3(0.2, 0.2, 1)
+                    .normalize();
+            directionalLight.intensity = 1.0;
+            scene.add(directionalLight);
+        };
+
+        initializeScene();
+
+        renderer.setClearColorHex(bgColor, 1.0);
+        scene.fog.color = $3Dmol.CC.color(bgColor);
+
+        var clickedAtom = null;
+        // enable mouse support
+        var glDOM = $(renderer.domElement);
+
+        //regenerate the list of clickables
+        var updateClickables = function() {
+            clickables = [];
+            var i, il;
+
+            for (i = 0, il = models.length; i < il; i++) {
+                var model = models[i];
+                if(model) {
+                    var atoms = model.selectedAtoms({
+                        clickable : true
+                    });
+                    clickables = clickables.concat(atoms);
+                }
+            }
+
+            for (i = 0, il = shapes.length; i < il; i++) {
+
+                var shape = shapes[i];
+                if (shape && shape.clickable) {
+                    clickables.push(shape);
+                }
+            }
+        };
+        
+        // Checks for selection intersects on mousedown
+        var handleClickSelection = function(mouseX, mouseY) {
+            if(clickables.length == 0) return;
+            var mouse = {
+                x : mouseX,
+                y : mouseY,
+                z : -1.0
+            };
+            mouseVector.set(mouse.x, mouse.y, mouse.z);
+            projector.unprojectVector(mouseVector, camera);
+            mouseVector.sub(camera.position).normalize();
+
+            raycaster.set(camera.position, mouseVector);
+
+            var intersects = [];
+
+            intersects = raycaster.intersectObjects(modelGroup, clickables);
+
+            if (intersects.length) {
+                var selected = intersects[0].clickable;
+                if (selected.callback !== undefined
+                        && typeof (selected.callback) === "function") {
+                    selected.callback(selected, _viewer);
+                }
+            }
+        };
+
+        var calcTouchDistance = function(ev) { // distance between first two
+                                                // fingers
+            var xdiff = ev.originalEvent.targetTouches[0].pageX
+                    - ev.originalEvent.targetTouches[1].pageX;
+            var ydiff = ev.originalEvent.targetTouches[0].pageY
+                    - ev.originalEvent.targetTouches[1].pageY;
+            return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+        }
+        
+        //check targetTouches as well
+        var getXY = function(ev) {
+            var x = ev.pageX, y = ev.pageY;
+            if (ev.originalEvent.targetTouches
+                    && ev.originalEvent.targetTouches[0]) {
+                x = ev.originalEvent.targetTouches[0].pageX;
+                y = ev.originalEvent.targetTouches[0].pageY;
+            }
+            else if (ev.originalEvent.changedTouches
+                    && ev.originalEvent.changedTouches[0]) {
+                x = ev.originalEvent.changedTouches[0].pageX;
+                y = ev.originalEvent.changedTouches[0].pageY;
+            }            
+            return [x,y];
+        };
+
+        //for a given screen (x,y) displacement return model displacement 
+        var screenXY2model = function(x,y) {
+            var dx = x/WIDTH;
+            var dy = y/HEIGHT;
+            var zpos = rotationGroup.position.z; 
+            var q = rotationGroup.quaternion;                        
+            var t = new $3Dmol.Vector3(0,0,zpos);
+            projector.projectVector(t, camera);
+            t.x += dx*2;
+            t.y -= dy*2;
+            projector.unprojectVector(t, camera);
+            t.z = 0;                            
+            t.applyQuaternion(q);
+            return t;
+        }
+        
+        if (!nomouse) {
+            // user can request that the mouse handlers not be installed
+            glDOM.bind('mousedown touchstart', function(ev) {
+                ev.preventDefault();
+                if (!scene)
+                    return;
+                var xy = getXY(ev);
+                var x = xy[0];
+                var y = xy[1];
+                
+                if (x === undefined)
+                    return;
+                isDragging = true;
+                clickedAtom = null;
+                mouseButton = ev.which;
+                mouseStartX = x;
+                mouseStartY = y;
+                touchDistanceStart = 0;
+                if (ev.originalEvent.targetTouches
+                        && ev.originalEvent.targetTouches.length == 2) {
+                    touchDistanceStart = calcTouchDistance(ev);
+                }
+                cq = rotationGroup.quaternion;
+                cz = rotationGroup.position.z;
+                currentModelPos = modelGroup.position.clone();
+                cslabNear = slabNear;
+                cslabFar = slabFar;
+
+            });
+
+            glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
+                ev.preventDefault();
+                if (!scene)
+                    return;
+                var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+                if (ev.originalEvent.detail) { // Webkit
+                    rotationGroup.position.z += scaleFactor
+                            * ev.originalEvent.detail / 10;
+                } else if (ev.originalEvent.wheelDelta) { // Firefox
+                    rotationGroup.position.z -= scaleFactor
+                            * ev.originalEvent.wheelDelta / 400;
+                }
+                if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+
+                show();
+            });
+
+            glDOM.bind("contextmenu", function(ev) {
+                ev.preventDefault();
+            });
+            $('body').bind('mouseup touchend', function(ev) {
+                // handle selection
+                if(isDragging && scene) { //saw mousedown, haven't moved
+                    var xy = getXY(ev);
+                    var x = xy[0];
+                    var y = xy[1];
+                    if(x == mouseStartX && y == mouseStartY) {                    
+                        var mouseX = (x / $(window).width()) * 2 - 1;
+                        var mouseY = -(y / HEIGHT) * 2 + 1;
+                        handleClickSelection(mouseX, mouseY, ev, container);
+                    }
+                }
+                
+                isDragging = false;
+
+            });
+
+            glDOM.bind('mousemove touchmove', function(ev) { // touchmove
+                ev.preventDefault();
+                if (!scene)
+                    return;
+                if (!isDragging)
+                    return;
+                var mode = 0;
+
+                var xy = getXY(ev);
+                var x = xy[0];
+                var y = xy[1];
+                if (x === undefined)
+                    return;
+                var dx = (x - mouseStartX) / WIDTH;
+                var dy = (y - mouseStartY) / HEIGHT;
+                // check for pinch
+                if (touchDistanceStart != 0
+                        && ev.originalEvent.targetTouches
+                        && ev.originalEvent.targetTouches.length == 2) {
+                    var newdist = calcTouchDistance(ev);
+                    // change to zoom
+                    mode = 2;
+                    dy = (touchDistanceStart - newdist) * 2
+                            / (WIDTH + HEIGHT);
+                } else if (ev.originalEvent.targetTouches
+                        && ev.originalEvent.targetTouches.length == 3) {
+                    // translate
+                    mode = 1;
+                }
+
+                var r = Math.sqrt(dx * dx + dy * dy);
+                var scaleFactor;
+                if (mode == 3
+                        || (mouseButton == 3 && ev.ctrlKey)) { // Slab
+                    slabNear = cslabNear + dx * 100;
+                    slabFar = cslabFar + dy * 100;
+                } else if (mode == 2 || mouseButton == 3
+                        || ev.shiftKey) { // Zoom
+                    scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+                    if (scaleFactor < 80)
+                        scaleFactor = 80;
+                    rotationGroup.position.z = cz - dy
+                            * scaleFactor;
+                    if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+                } else if (mode == 1 || mouseButton == 2
+                        || ev.ctrlKey) { // Translate
+                    var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+                    modelGroup.position.addVectors(currentModelPos,t);
+                    
+                } else if ((mode === 0 || mouseButton == 1)
+                        && r !== 0) { // Rotate
+                    var rs = Math.sin(r * Math.PI) / r;
+                    dq.x = Math.cos(r * Math.PI);
+                    dq.y = 0;
+                    dq.z = rs * dx;
+                    dq.w = -rs * dy;
+                    rotationGroup.quaternion = new $3Dmol.Quaternion(
+                            1, 0, 0, 0);
+                    rotationGroup.quaternion.multiply(dq);
+                    rotationGroup.quaternion.multiply(cq);
+                }
+                show();
+            });
+        }
+        // public methods
+        /**
+         * Set the background color (default white)
+         * 
+         * @function $3Dmol.GLViewer#setBackgroundColor
+         * @param {number}
+         *            hex Hexcode specified background color, or standard color spec
+         * @param {number}
+         *            a Alpha level (default 1.0)
+         * 
+         * @example
+         * 
+         * //Set 'myviewer' background color to white
+         * myviewer.setBackgroundColor(0xffffff)
+         * 
+         */
+        this.setBackgroundColor = function(hex, a) {
+            a = a | 1.0;
+            var c = $3Dmol.CC.color(hex);
+            scene.fog.color = c;
+            bgColor = c.getHex();
+            renderer.setClearColorHex(c.getHex(), a);
+            show();
+        };
+
+        /**
+         * Set viewer width
+         * 
+         * @function $3Dmol.GLViewer#setWidth
+         * @param {number}
+         *            w Width in pixels
+         */
+        this.setWidth = function(w) {
+            WIDTH = w || WIDTH;
+            renderer.setSize(WIDTH, HEIGHT);
+        };
+
+        /**
+         * Set viewer height
+         * 
+         * @function $3Dmol.GLViewer#setHeight
+         * @param {number}
+         *            h Height in pixels
+         */
+        this.setHeight = function(h) {
+            HEIGHT = h || HEIGHT;
+            renderer.setSize(WIDTH, HEIGHT);
+        };
+
+        /**
+         * Resize viewer according to containing HTML element's dimensions
+         * 
+         * @function $3Dmol.GLViewer#resize
+         */
+        this.resize = function() {
+            WIDTH = container.width();
+            HEIGHT = container.height();
+            ASPECT = WIDTH / HEIGHT;
+            renderer.setSize(WIDTH, HEIGHT);
+            camera.aspect = ASPECT;
+            camera.updateProjectionMatrix();
+            show();
+        };
+
+        $(window).resize(this.resize);
+
+        /**
+         * Return specified model
+         * 
+         * @function $3Dmol.GLViewer#getModel
+         * @param {number}
+         *            [id=last model id] - Retrieve model with specified id
+         * @default Returns last model added to viewer
+         * @return {GLModel}
+         * 
+         * @example // Retrieve reference to first GLModel added var m =
+         *          glviewer.getModel(0);
+         */
+        this.getModel = function(id) {
+            id = id || models.length - 1;
+            return models[id];
+        };
+
+        /**
+         * Rotate scene by angle degrees around axis
+         * 
+         * @function $3Dmol.GLViewer#rotate
+         * @param {number}
+         *            [angle] - Angle, in degrees, to rotate by.
+         * @param {string}
+         *            [angle] - Axis ("x", "y", or "z") to rotate around.
+         *            Default "y"
+         * 
+         */
+        this.rotate = function(angle, axis) {
+            if (typeof (axis) === "undefined") {
+                axis = "y";
+            }
+            var i = 0, j = 0, k = 0;
+            var rangle = Math.PI * angle / 180.0;
+            var s = Math.sin(rangle / 2.0);
+            var c = Math.cos(rangle / 2.0);
+            if (axis == "x")
+                i = s;
+            if (axis == "y")
+                j = s;
+            if (axis == "z")
+                k = s;
+
+            var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
+            rotationGroup.quaternion.multiply(q);
+            show();
+        };
+
+        /** Returns an array representing the current viewpoint.
+         * Translation, zoom, and rotation quaternion. 
+         * @function $3Dmol.GLViewer#getView
+         * @returns {Array.<number>} arg
+         *  */
+        this.getView = function() {
+            if (!modelGroup)
+                return [ 0, 0, 0, 0, 0, 0, 0, 1 ];
+            var pos = modelGroup.position;
+            var q = rotationGroup.quaternion;
+            return [ pos.x, pos.y, pos.z, rotationGroup.position.z, q.x, q.y,
+                    q.z, q.w ];
+        };
+
+        /** Sets the view to the specified translation, zoom, and rotation.
+         * 
+         * @function $3Dmol.GLViewer#setView
+         * @param {Array.<number>} arg Array formatted identically to the return value of getView */
+        this.setView = function(arg) {
+
+            if (arg === undefined
+                    || !(arg instanceof Array || arg.length !== 8))
+                return;
+
+            if (!modelGroup || !rotationGroup)
+                return;
+            modelGroup.position.x = arg[0];
+            modelGroup.position.y = arg[1];
+            modelGroup.position.z = arg[2];
+            rotationGroup.position.z = arg[3];
+            rotationGroup.quaternion.x = arg[4];
+            rotationGroup.quaternion.y = arg[5];
+            rotationGroup.quaternion.z = arg[6];
+            rotationGroup.quaternion.w = arg[7];
+            if(typeof(arg[8]) != "undefined") {
+                rotationGroup.position.x = arg[8];
+                rotationGroup.position.y = arg[9];
+            }
+            show();
+        };
+
+        // apply styles, models, etc in viewer
+        /**
+         * Render current state of viewer, after 
+         * adding/removing models, applying styles, etc.
+         * 
+         * @function $3Dmol.GLViewer#render
+         */
+        this.render = function() {
+
+            updateClickables(); //must render for clickable styles to take effect
+            var time1 = new Date();
+            var view = this.getView();
+            
+            var i;
+            for (i = 0; i < models.length; i++) {
+                if (models[i]) {
+                    models[i].globj(modelGroup);
+                }
+            }
+
+            for (i = 0; i < shapes.length; i++) {
+                if (shapes[i]) {
+                    shapes[i].globj(modelGroup);
+                }
+            }
+            
+            for (i in surfaces) { // this is an array with possible holes
+                if (surfaces.hasOwnProperty(i)) {
+                    var geo = surfaces[i].geo;
+                    // async surface generation can cause
+                    // the geometry to be webgl initialized before it is fully
+                    // formed; force various recalculations until full surface
+                    // is
+                    // available
+                    if (!surfaces[i].finished) {
+                        geo.verticesNeedUpdate = true;
+                        geo.elementsNeedUpdate = true;
+                        geo.normalsNeedUpdate = true;
+                        geo.colorsNeedUpdate = true;
+                        geo.buffersNeedUpdate = true;
+                        geo.boundingSphere = null;
+
+                        if (surfaces[i].done)
+                            surfaces[i].finished = true;
+
+                        // remove partially rendered surface
+                        if (surfaces[i].lastGL)
+                            modelGroup.remove(surfaces[i].lastGL);
+
+                        // create new surface
+                        var smesh = null;
+
+                        if(surfaces[i].mat instanceof $3Dmol.LineBasicMaterial) {
+                            //special case line meshes
+                            smesh = new $3Dmol.Line(geo, surfaces[i].mat);
+                        }
+                        else {
+                            smesh = new $3Dmol.Mesh(geo, surfaces[i].mat);
+                        }
+                        if(surfaces[i].mat.transparent && surfaces[i].mat.opacity == 0) {
+                            //don't bother with hidden surfaces
+                            smesh.visible = false;
+                        } else {
+                            smesh.visible = true;
+                        }
+                        surfaces[i].lastGL = smesh;
+                        modelGroup.add(smesh);
+                    } // else final surface already there
+                }
+            }
+            
+            this.setView(view); // Calls show() => renderer render
+            var time2 = new Date();
+            //console.log("render time: " + (time2 - time1));
+        };
+
+        /**
+         * 
+         * @param {AtomSelectionSpec}
+         *            sel
+         * @return {AtomSpec[]}
+         */
+        function getAtomsFromSel(sel) {
+            var atoms = [];
+            if (typeof (sel) === "undefined")
+                sel = {};
+
+            var ms = [];
+            var i;
+
+            if (typeof sel.model === "undefined") {
+                for (i = 0; i < models.length; i++) {
+                    if (models[i])
+                        ms.push(models[i]);
+                }
+            } else { // specific to some models
+                ms = sel.model;
+                if (!$.isArray(ms))
+                    ms = [ ms ];
+            }
+
+            for (i = 0; i < ms.length; i++) {
+                atoms = atoms.concat(ms[i].selectedAtoms(sel));
+            }
+
+            return atoms;
         }
 
-		/**
-		 * Remove label from viewer
-		 * 
-		 * @function $3Dmol.GLViewer#removeLabel
-		 * @param {$3Dmol.Label}
-		 *            label - $3Dmol label
-		 * 
-		 * @example // Remove labels created in [addLabel example]{@link $3Dmol.GLViewer#addLabel}
-		 * 
-		 * for (var i = 0; i < labels.length; i++) {
-		 * glviewer.removeLabel(label); }
-		 * 
-		 * glviewer.render();
-		 */
-		this.removeLabel = function(label) {
-			//todo: don't do the linear search
-			for(var i = 0; i < labels.length; i++) {
-				if(labels[i] == label) {
-					labels.splice(i,1);
-					break;
-				}
-			}
-			label.dispose();
-			modelGroup.remove(label.sprite);
-		};
-
-		/**
-		 * Remove all labels from viewer
-		 * 
-		 * @function $3Dmol.GLViewer#removeAllLabels
-
-		 */
-		this.removeAllLabels = function() {
-			for (var i = 0; i < labels.length; i++) {
-				modelGroup.remove(labels[i].sprite);
-			}
-			labels = [];
-		};
-		
-		// Modify label style
-		/**
-		 * Modify existing label's style
-		 * 
-		 * @function $3Dmol.GLViewer#setLabelStyle
-		 * @param {$3Dmol.Label}
-		 *            label - $3Dmol label
-		 * @param {Object}
-		 *            stylespec - Label style specification
-		 * @return {$3Dmol.Label}
-		 */
-		this.setLabelStyle = function(label, stylespec) {
-			modelGroup.remove(label.sprite);
-			label.dispose();
-			label.stylespec = stylespec;
-			label.setContext();
-			modelGroup.add(label.sprite);
-			show();
-			return label;
-
-		};
-
-		// Change label text
-		/**
-		 * Modify existing label's text
-		 * 
-		 * @function $3Dmol.GLViewer#setLabelText
-		 * @param {$3Dmol.Label}
-		 *            label - $3Dmol label
-		 * @param {String}
-		 *            text - Label text
-		 * @return {$3Dmol.Label}
-		 */
-		this.setLabelText = function(label, text) {
-			modelGroup.remove(label.sprite);
-			label.dispose();
-			label.text = text;
-			label.setContext();
-			modelGroup.add(label.sprite);
-			show();
-			return label;
-
-		};
-
-		/**
-		 * Add shape object to viewer 
-		 * @see {@link $3Dmol.GLShape}
-		 * 
-		 * @function $3Dmol.GLViewer#addShape
-		 * @param {ShapeSpec} shapeSpec - style specification for label
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addShape = function(shapeSpec) {
-			shapeSpec = shapeSpec || {};
-			var shape = new $3Dmol.GLShape(shapeSpec);
-			shape.shapePosition = shapes.length;
-			shapes.push(shape);
-
-			return shape;
-
-		};
-
-		/**
-		 * Remove shape object from viewer
-		 *
-		 * @function $3Dmol.GLViewer#removeShape
-		 * @param {$3Dmol.GLShape} shape - Reference to shape object to remove
-		 */
-		this.removeShape = function(shape) {
-			if (!shape)
-				return;
-			shape.removegl(modelGroup);
-			delete shapes[shape.shapePosition];
-			// clear off back of model array
-			while (shapes.length > 0
-					&& typeof (shapes[shapes.length - 1]) === "undefined")
-				shapes.pop();
-		};
-		
-		/**
-		 * Remove all shape objects from viewer
-		 * @function $3Dmol.GLViewer#removeAllShapes
-		 */
-		this.removeAllShapes = function() {
-			for (var i = 0; i < shapes.length; i++) {
-				var shape = shapes[i];
-				shape.removegl(modelGroup);
-			}
-			shapes = [];
-		}
-
-		/**
-		 * Create and add sphere shape. This method provides a shorthand 
-		 * way to create a spherical shape object
-		 * 
-		 * @function $3Dmol.GLViewer#addSphere
-		 * @param {SphereSpec} spec - Sphere shape style specification
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addSphere = function(spec) {
-			spec = spec || {};
-			var s = new $3Dmol.GLShape(spec);
-			s.shapePosition = shapes.length;
-			s.addSphere(spec);
-			shapes.push(s);
-
-			return s;
-		};
-
-		/**
-		 * Create and add arrow shape
-		 * 
-		 * @function $3Dmol.GLViewer#addArrow
-		 * @param {ArrowSpec} spec - Style specification
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addArrow = function(spec) {
-			spec = spec || {};
-			var s = new $3Dmol.GLShape(spec);
-			s.shapePosition = shapes.length;
-			s.addArrow(spec);
-			shapes.push(s);
-
-			return s;
-		};
-		
-		/**
-		 * Create and add cylinder shape
-		 * 
-		 * @function $3Dmol.GLViewer#addArrow
-		 * @param {CylinderSpec} spec - Style specification
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addCylinder = function(spec) {
-			spec = spec || {};
-			var s = new $3Dmol.GLShape(spec);
-			s.shapePosition = shapes.length;
-			s.addCylinder(spec);
-			shapes.push(s);
-
-			return s;
-		};
-
-		/**
-		 * Add custom shape component from user supplied function
-		 * 
-		 * @function $3Dmol.GLViewer#addCustom
-		 * @param {CustomSpec} spec - Style specification
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addCustom = function(spec) {
-			spec = spec || {};
-			var s = new $3Dmol.GLShape(spec);
-			s.shapePosition = shapes.length;
-			s.addCustom(spec);
-			shapes.push(s);
-
-			return s;
-		};
-
-		/**
-		 * Construct isosurface from volumetric data in gaussian cube format
-		 * 
-		 * @function $3Dmol.GLViewer#addVolumetricData
-		 * @param {String} data - Input file contents 
-		 * @param {String} format - Input file format (currently only supports "cube")
-		 * @param {VolSpec} spec - Shape style specification
-		 * @return {$3Dmol.GLShape}
-		 */
-		this.addVolumetricData = function(data, format, spec) {
-			spec = spec || {};
-			var s = new $3Dmol.GLShape(spec);
-			s.shapePosition = shapes.length;
-			s.addVolumetricData(data, format, spec);
-			shapes.push(s);
-
-			return s;
-		};
-
-		/**
-		 * Create and add model to viewer, given molecular data and its format 
-		 * (pdb, sdf, xyz, or mol2)
-		 * 
-		 * @function $3Dmol.GLViewer#addModel
-		 * @param {string} data - Input data
-		 * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
-		 * @return {$3Dmol.GLModel}
-		 */
-		this.addModel = function(data, format, options) {
-
-			var m = new $3Dmol.GLModel(models.length, defaultcolors);
-			m.addMolData(data, format, options);
-			models.push(m);
-
-			return m;
-		};
-
-		/**
-		 * Delete specified model from viewer
-		 * 
-		 * @function $3Dmol.GLViewer#removeModel
-		 * @param {$3Dmol.GLModel} model
-		 */
-		this.removeModel = function(model) {
-			if (!model)
-				return;
-			model.removegl(modelGroup);
-			delete models[model.getID()];
-			// clear off back of model array
-			while (models.length > 0
-					&& typeof (models[models.length - 1]) === "undefined")
-				models.pop();
-		};
-
-		/** 
-		 * Delete all existing models
-		 * @function $3Dmol.GLViewer#removeAllModels
-		 */
-		this.removeAllModels = function() {
-			for (var i = 0; i < models.length; i++) {
-				var model = models[i];
-				model.removegl(modelGroup);
-
-			}
-			models = [];
-		};
-
-		/**
-		 * Create a new model from atoms specified by sel.
-		 * If extract, removes selected atoms from existing models 
-		 * 
-		 * @function $3Dmol.GLViewer#createModelFrom
-		 * @param {Object} sel - Atom selection specification
-		 * @param {boolean=} extract - If true, remove selected atoms from existing models
-		 * @return {$3Dmol.GLModel}
-		 */
-		this.createModelFrom = function(sel, extract) {
-			var m = new $3Dmol.GLModel(models.length, defaultcolors);
-			for (var i = 0; i < models.length; i++) {
-				if (models[i]) {
-					var atoms = models[i].selectedAtoms(sel);
-					m.addAtoms(atoms);
-					if (extract)
-						models[i].removeAtoms(atoms);
-				}
-			}
-			models.push(m);
-			return m;
-		};
-
-		function applyToModels(func, sel, value1, value2) {
-			for (var i = 0; i < models.length; i++) {
-				if (models[i]) {
-					models[i][func](sel, value1, value2);
-				}
-			}
-		}
-
-		/**
-		 * Set style properties to all selected atoms
-		 * 
-		 * @function $3Dmol.GLViewer#setStyle
-		 * @param {AtomSelectionSpec} sel - Atom selection specification
-		 * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
-		 * 
-		 * @example
-		 * viewer.setStyle({}, {stick:{}}); //set all atoms to stick
-		 * viewer.setStyle({chain: 'B'}, {carton: {color: spectrum}}); //set chain B to rainbow cartoon
-		 */
-		this.setStyle = function(sel, style) {
-			applyToModels("setStyle", sel, style, false);
-		};
-
-		/**
-		 * Add style properties to all selected atoms
-		 * 
-		 * @function $3Dmol.GLViewer#addStyle
-		 * @param {AtomSelectionSpec} sel - Atom selection specification
-		 * @param {AtomStyleSpec} style - style spec to add to specified atoms
-		 */
-		this.addStyle = function(sel, style) {
-			applyToModels("setStyle", sel, style, true);
-		};
-
-		/**
-		 * @function $3Dmol.GLViewer#setColorByProperty
-		 * @param {AtomSelectionSpec} sel
-		 * @param {type} prop
-		 * @param {type} scheme
-		 */
-		this.setColorByProperty = function(sel, prop, scheme) {
-			applyToModels("setColorByProperty", sel, prop, scheme);
-		};
-
-		/**
-		 * @function $3Dmol.GLViewer#setColorByElement
-		 * @param {AtomSelectionSpec} sel
-		 * @param {type} colors
-		 */
-		this.setColorByElement = function(sel, colors) {
-			applyToModels("setColorByElement", sel, colors);
-		};
-
-		/**
-		 * 
-		 * @param {AtomSpec[]} atomlist
-		 * @param {Array}
-		 *            extent
-		 * @return {Array}
-		 */
-		var getAtomsWithin = function(atomlist, extent) {
-			var ret = [];
-
-			for (var i = 0; i < atomlist.length; i++) {
-				var atom = atomlist[i];
-				if (typeof (atom) == "undefined")
-					continue;
-
-				if (atom.x < extent[0][0] || atom.x > extent[1][0])
-					continue;
-				if (atom.y < extent[0][1] || atom.y > extent[1][1])
-					continue;
-				if (atom.z < extent[0][2] || atom.z > extent[1][2])
-					continue;
-				ret.push(i);
-			}
-			return ret;
-		};
-
-		// return volume of extent
-		var volume = function(extent) {
-			var w = extent[1][0] - extent[0][0];
-			var h = extent[1][1] - extent[0][1];
-			var d = extent[1][2] - extent[0][2];
-			return w * h * d;
-		}; // volume
-		/*
-		 * Break up bounding box/atoms into smaller pieces so we can parallelize
-		 * with webworkers and also limit the size of the working memory Returns
-		 * a list of bounding boxes with the corresponding atoms. These extents
-		 * are expanded by 4 angstroms on each side.
-		 */
-		/**
-		 * 
-		 * @param {Array}
-		 *            extent
-		 * @param {AtomSpec[]} atomlist
-		 * @param {AtomSpec[]} atomstoshow
-		 * @return {Array}
-		 */
-		var carveUpExtent = function(extent, atomlist, atomstoshow) {
-			var ret = [];
-
-			var copyExtent = function(extent) {
-				// copy just the dimensions
-				var ret = [];
-				ret[0] = [ extent[0][0], extent[0][1], extent[0][2] ];
-				ret[1] = [ extent[1][0], extent[1][1], extent[1][2] ];
-				return ret;
-			}; // copyExtent
-			var splitExtentR = function(extent) {
-				// recursively split until volume is below maxVol
-				if (volume(extent) < maxVolume) {
-					return [ extent ];
-				} else {
-					// find longest edge
-					var w = extent[1][0] - extent[0][0];
-					var h = extent[1][1] - extent[0][1];
-					var d = extent[1][2] - extent[0][2];
-
-					var index;
-
-					if (w > h && w > d) {
-						index = 0;
-					} else if (h > w && h > d) {
-						index = 1;
-					} else {
-						index = 2;
-					}
-
-					// create two halves, splitting at index
-					var a = copyExtent(extent);
-					var b = copyExtent(extent);
-					var mid = (extent[1][index] - extent[0][index]) / 2
-							+ extent[0][index];
-					a[1][index] = mid;
-					b[0][index] = mid;
-
-					var alist = splitExtentR(a);
-					var blist = splitExtentR(b);
-					return alist.concat(blist);
-				}
-			}; // splitExtentR
-
-			// divide up extent
-			var splits = splitExtentR(extent);
-			// now compute atoms within expanded (this could be more efficient)
-			var off = 6; // enough for water and 2*r, also depends on scale
-			// factor
-			for (var i = 0, n = splits.length; i < n; i++) {
-				var e = copyExtent(splits[i]);
-				e[0][0] -= off;
-				e[0][1] -= off;
-				e[0][2] -= off;
-				e[1][0] += off;
-				e[1][1] += off;
-				e[1][2] += off;
-
-				var atoms = getAtomsWithin(atomlist, e);
-				var toshow = getAtomsWithin(atomstoshow, splits[i]);
-
-				// ultimately, divide up by atom for best meshing
-				ret.push({
-					extent : splits[i],
-					atoms : atoms,
-					toshow : toshow
-				});
-			}
-
-			return ret;
-		};
-
-		// create a mesh defined from the passed vertices and faces and material
-		// Just create a single geometry chunk - broken up whether sync or not
-		/**
-		 * 
-		 * @param {AtomSpec[]} atoms
-		 * @param {{vertices:number,faces:number}}
-		 *            VandF
-		 * @param {$3Dmol.MeshLambertMaterial}
-		 *            mat
-		 * @return {$3Dmol.Mesh}
-		 */
-		var generateSurfaceMesh = function(atoms, VandF, mat) {
-
-			var geo = new $3Dmol.Geometry(true);
-			// Only one group per call to generate surface mesh (addSurface
-			// should split up mesh render)
-			var geoGroup = geo.updateGeoGroup(0);
-
-			var vertexArray = geoGroup.vertexArray;
-			// reconstruct vertices and faces
-			var v = VandF['vertices'];
-			var offset;
-			var i, il;
-			for (i = 0, il = v.length; i < il; i++) {
-				offset = geoGroup.vertices * 3;
-				vertexArray[offset] = v[i].x;
-				vertexArray[offset + 1] = v[i].y;
-				vertexArray[offset + 2] = v[i].z;
-				geoGroup.vertices++;
-			}
-
-			var faces = VandF['faces'];
-			geoGroup.faceidx = faces.length;// *3;
-			geo.initTypedArrays();
-
-			// set colors for vertices
-			var colors = [];
-			for (i = 0, il = atoms.length; i < il; i++) {
-				var atom = atoms[i];
-				if (atom) {
-					if (typeof (atom.surfaceColor) != "undefined") {
-						colors[i] = atom.surfaceColor;
-					} else if (atom.color) // map from atom
-						colors[i] = $3Dmol.CC.color(atom.color);
-				}
-			}
-
-			var verts = geoGroup.vertexArray;
-			var colorArray = geoGroup.colorArray;
-			var normalArray = geoGroup.normalArray;
-			var vA, vB, vC, norm;
-
-			// Setup colors, faces, and normals
-			for (i = 0, il = faces.length; i < il; i += 3) {
-
-				// var a = faces[i].a, b = faces[i].b, c = faces[i].c;
-				var a = faces[i], b = faces[i + 1], c = faces[i + 2];
-				var A = v[a]['atomid'];
-				var B = v[b]['atomid'];
-				var C = v[c]['atomid'];
-
-				var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
-
-				colorArray[offsetA] = colors[A].r;
-				colorArray[offsetA + 1] = colors[A].g;
-				colorArray[offsetA + 2] = colors[A].b;
-				colorArray[offsetB] = colors[B].r;
-				colorArray[offsetB + 1] = colors[B].g;
-				colorArray[offsetB + 2] = colors[B].b;
-				colorArray[offsetC] = colors[C].r;
-				colorArray[offsetC + 1] = colors[C].g;
-				colorArray[offsetC + 2] = colors[C].b;
-
-				// setup Normals
-
-				vA = new $3Dmol.Vector3(verts[offsetA], verts[offsetA + 1],
-						verts[offsetA + 2]);
-				vB = new $3Dmol.Vector3(verts[offsetB], verts[offsetB + 1],
-						verts[offsetB + 2]);
-				vC = new $3Dmol.Vector3(verts[offsetC], verts[offsetC + 1],
-						verts[offsetC + 2]);
-
-				vC.subVectors(vC, vB);
-				vA.subVectors(vA, vB);
-				vC.cross(vA);
-
-				// face normal
-				norm = vC;
-				norm.normalize();
-
-				normalArray[offsetA] += norm.x;
-				normalArray[offsetB] += norm.x;
-				normalArray[offsetC] += norm.x;
-				normalArray[offsetA + 1] += norm.y;
-				normalArray[offsetB + 1] += norm.y;
-				normalArray[offsetC + 1] += norm.y;
-				normalArray[offsetA + 2] += norm.z;
-				normalArray[offsetB + 2] += norm.z;
-				normalArray[offsetC + 2] += norm.z;
-
-			}
-			geoGroup.faceArray = new Uint16Array(faces);
-			var mesh = new $3Dmol.Mesh(geo, mat);
-			mesh.doubleSided = true;
-
-			return mesh;
-		};
-
-		// do same thing as worker in main thread
-		/**
-		 * 
-		 * @param {$3Dmol.SurfaceType}
-		 *            type
-		 * @param {Array}
-		 *            expandedExtent
-		 * @param {Array}
-		 *            extendedAtoms
-		 * @param {Array}
-		 *            atomsToShow
-		 * @param {AtomSpec[]} atoms
-		 * @param {number}
-		 *            vol
-		 * @return {Object}
-		 */
-		var generateMeshSyncHelper = function(type, expandedExtent,
-				extendedAtoms, atomsToShow, atoms, vol) {
-			var time = new Date();
-			var ps = new $3Dmol.ProteinSurface();
-			ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
-
-			var time2 = new Date();
-			console.log("initialize " + (time2 - time) + "ms");
-
-			ps.fillvoxels(atoms, extendedAtoms);
-
-			var time3 = new Date();
-			console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time)
-					+ "ms");
-
-			ps.buildboundary();
-
-			if (type == $3Dmol.SurfaceType.SES) {
-				ps.fastdistancemap();
-				ps.boundingatom(false);
-				ps.fillvoxelswaals(atoms, extendedAtoms);
-			}
-
-			var time4 = new Date();
-			console.log("buildboundaryetc " + (time4 - time3) + "  "
-					+ (time4 - time) + "ms");
-
-			ps.marchingcube(type);
-
-			var time5 = new Date();
-			console.log("marching cube " + (time5 - time4) + "  "
-					+ (time5 - time) + "ms");
-
-			return ps.getFacesAndVertices(atomsToShow);
-		};
-
-		/**
-		 * 
-		 * @param {matSpec}
-		 *            style
-		 * @return {$3Dmol.MeshLambertMaterial}
-		 */
-		function getMatWithStyle(style) {
-			var mat = new $3Dmol.MeshLambertMaterial();
-			mat.vertexColors = $3Dmol.VertexColors;
-
-			for ( var prop in style) {
-				if (prop === "color" || prop === "map") {
-					// ignore
-				} else if (style.hasOwnProperty(prop))
-					mat[prop] = style[prop];
-			}
-			if (style.opacity !== undefined) {
-				if (style.opacity === 1)
-					mat.transparent = false;
-				else
-					mat.transparent = true;
-			}
-
-			return mat;
-		}
-
-		// get the min and max values of the specified property in the provided
-		// atoms
-		function getPropertyRange(atomlist, prop) {
-			var min = Number.POSITIVE_INFINITY;
-			var max = Number.NEGATIVE_INFINITY;
-
-			for (var i = 0, n = atomlist.length; i < n; i++) {
-				var atom = atomlist[i];
-				if (atom.properties
-						&& typeof (atom.properties[prop]) != "undefined") {
-					var val = atom.properties[prop];
-					if (val < min)
-						min = val;
-					if (val > max)
-						max = val;
-				}
-			}
-
-			if (!isFinite(min) && !isFinite(max))
-				min = max = 0;
-			else if (!isFinite(min))
-				min = max;
-			else if (!isFinite(max))
-				max = min;
-
-			return [ min, max ];
-		}
-
-		
-		/**
-		 * Adds an explicit mesh as a surface object.
-		 * 
-		 * @param {$3Dmol.Mesh}
-		 *            mesh
-		 * @param {Object}
-		 *            style
-		 * @returns {Number} surfid
-		 */
-		this.addMesh = function(mesh) {
-			var surfobj = {
-				geo : mesh.geometry,
-				mat : mesh.material,
-				done : true,
-				finished : false //the rendered finishes surfaces when they are done
-			};
-			var surfid = surfaces.length;
-			surfaces[surfid] = surfobj;
-			return surfid;
-		}
-
-		/**
-		 * Add surface representation to atoms
-		 *  @function $3Dmol.GLViewer#addSurface
-		 * @param {$3Dmol.SurfaceType} type - Surface type
-		 * @param {Object} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
-		 * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
-		 * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
-		 * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
-		 * 
-		 * @return {number} surfid - Identifying number for this surface
-		 */
-		this.addSurface = function(type, style, atomsel, allsel, focus) {
-			// type 1: VDW 3: SAS 4: MS 2: SES
-			// if sync is true, does all work in main thread, otherwise uses
-			// workers
-			// with workers, must ensure group is the actual modelgroup since
-			// surface
-			// will get added asynchronously
-			// all atoms in atomlist are used to compute surfaces, but only the
-			// surfaces
-			// of atomsToShow are displayed (e.g., for showing cavities)
-			// if focusSele is specified, will start rending surface around the
-			// atoms specified by this selection
-			var atomsToShow = getAtomsFromSel(atomsel);
-			var atomlist = getAtomsFromSel(allsel);
-			var focusSele = getAtomsFromSel(focus);
-			var atom;
-			style = style || {};
-
-			var time = new Date();
-
-			var mat = getMatWithStyle(style);
-
-			var extent = $3Dmol.getExtent(atomsToShow);
-
-			var i, il;
-			if (style['map'] && style['map']['prop']) {
-				// map color space using already set atom properties
-				/** @type {AtomSpec} */
-				var prop = style['map']['prop'];
-				/** @type {Gradient} */
-				var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
-				var range = scheme.range();
-				if (!range) {
-					range = getPropertyRange(atomsToShow, prop);
-				}
-
-				for (i = 0, il = atomsToShow.length; i < il; i++) {
-					atom = atomsToShow[i];
-					atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
-							atom.properties[prop], range));
-				}
-			}
-			else if(typeof(style['color']) != 'undefined') {
-				//explicitly set color, otherwise material color just blends
-				for (i = 0, il = atomsToShow.length; i < il; i++) {
-					atom = atomsToShow[i];
-					atom.surfaceColor = $3Dmol.CC.color(style['color']);
-				}
-			}
-			else if(typeof(style['colorscheme']) != 'undefined') {
-				for (i = 0, il = atomsToShow.length; i < il; i++) {
-					atom = atomsToShow[i];
-					var scheme = $3Dmol.elementColors[style.colorscheme];
-	            	if(scheme && typeof(scheme[atom.elem]) != "undefined") {
-						atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
-	            	}
-				}
-			}
-
-			var totalVol = volume(extent); // used to scale resolution
-			var extents = carveUpExtent(extent, atomlist, atomsToShow);
-
-			if (focusSele && focusSele.length && focusSele.length > 0) {
-				var seleExtent = $3Dmol.getExtent(focusSele);
-				// sort by how close to center of seleExtent
-				var sortFunc = function(a, b) {
-					var distSq = function(ex, sele) {
-						// distance from e (which has no center of mass) and
-						// sele which does
-						var e = ex.extent;
-						var x = e[1][0] - e[0][0];
-						var y = e[1][1] - e[0][1];
-						var z = e[1][2] - e[0][2];
-						var dx = (x - sele[2][0]);
-						dx *= dx;
-						var dy = (y - sele[2][1]);
-						dy *= dy;
-						var dz = (z - sele[2][2]);
-						dz *= dz;
-
-						return dx + dy + dz;
-					};
-					var d1 = distSq(a, seleExtent);
-					var d2 = distSq(b, seleExtent);
-					return d1 - d2;
-				};
-				extents.sort(sortFunc);
-			}
-
-			console.log("Extents " + extents.length + "  "
-					+ (+new Date() - time) + "ms");
-
-			var surfobj = {
-				geo : new $3Dmol.Geometry(true),
-				mat : mat,
-				done : false,
-				finished : false
-			// also webgl initialized
-			};
-			var surfid = surfaces.length;
-			surfaces[surfid] = surfobj;
-			var reducedAtoms = [];
-			// to reduce amount data transfered, just pass x,y,z,serial and elem
-			for (i = 0, il = atomlist.length; i < il; i++) {
-				atom = atomlist[i];
-				reducedAtoms[i] = {
-					x : atom.x,
-					y : atom.y,
-					z : atom.z,
-					serial : i,
-					elem : atom.elem
-				};
-			}
-
-			var sync = !!($3Dmol.syncSurface);
-			if (sync) { // don't use worker, still break up for memory purposes
-
-				// to keep the browser from locking up, call through setTimeout
-				var callSyncHelper = function callSyncHelper(i) {
-					if (i >= extents.length)
-						return;
-
-					var VandF = generateMeshSyncHelper(type, extents[i].extent,
-							extents[i].atoms, extents[i].toshow, reducedAtoms,
-							totalVol);
-					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-					$3Dmol.mergeGeos(surfobj.geo, mesh);
-					_viewer.render();
-
-					setTimeout(callSyncHelper, 1, i + 1);
-				}
-
-				setTimeout(callSyncHelper, 1, 0);
-
-				// TODO: Asynchronously generate geometryGroups (not separate
-				// meshes) and merge them into a single geometry
-			} else { // use worker
-
-				var workers = [];
-				if (type < 0)
-					type = 0; // negative reserved for atom data
-				for (i = 0, il = numWorkers; i < il; i++) {
-					// var w = new Worker('3Dmol/SurfaceWorker.js');
-					var w = new Worker($3Dmol.SurfaceWorker);
-					workers.push(w);
-					w.postMessage({
-						'type' : -1,
-						'atoms' : reducedAtoms,
-						'volume' : totalVol
-					});
-				}
-				var cnt = 0;
-
-				var rfunction = function(event) {
-					var VandF = event.data;
-					var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-					$3Dmol.mergeGeos(surfobj.geo, mesh);
-					_viewer.render();
-					console.log("async mesh generation " + (+new Date() - time)
-							+ "ms");
-					cnt++;
-					if (cnt == extents.length)
-						surfobj.done = true;
-				};
-
-				var efunction = function(event) {
-					console.log(event.message + " (" + event.filename + ":"
-							+ event.lineno + ")");
-				};
-
-				for (i = 0; i < extents.length; i++) {
-					var worker = workers[i % workers.length];
-					worker.onmessage = rfunction;
-
-					worker.onerror = efunction;
-
-					worker.postMessage({
-						'type' : type,
-						'expandedExtent' : extents[i].extent,
-						'extendedAtoms' : extents[i].atoms,
-						'atomsToShow' : extents[i].toshow
-					});
-				}
-			}
-
-			// NOTE: This is misleading if 'async' mesh generation - returns
-			// immediately
-			console.log("full mesh generation " + (+new Date() - time) + "ms");
-
-			return surfid;
-		};
-
-		/**
-		 * Set the surface material to something else, must render change
-		 * 
-		 * @param {number} surf - Surface ID to apply changes to
-		 * @param {matSpec} style - new material style specification
-		 */ 
-		this.setSurfaceMaterialStyle = function(surf, style) {
-			if (surfaces[surf]) {
-				surfaces[surf].mat = getMatWithStyle(style);
-				surfaces[surf].mat.side = $3Dmol.FrontSide;
-				surfaces[surf].finished = false; // trigger redraw
-			}
-		};
-
-		/**
-		 * Remove surface with given ID
-		 * 
-		 * @param {number} surf - surface id
-		 */
-		this.removeSurface = function(surf) {
-			if (surfaces[surf] && surfaces[surf].lastGL) {
-				if (surfaces[surf].geo !== undefined)
-					surfaces[surf].geo.dispose();
-				if (surfaces[surf].mat !== undefined)
-					surfaces[surf].mat.dispose();
-				modelGroup.remove(surfaces[surf].lastGL); // remove from scene
-			}
-			delete surfaces[surf];
-			show();
-		};
-		
-		/** Remove all surfaces.
-		 * @function $3Dmol.GLViewer#removeAllSurfaces */
-		this.removeAllSurfaces = function() {
-			for(var i = 0; i < surfaces.length; i++) {
-				if (surfaces[i] && surfaces[i].lastGL) {
-					if (surfaces[i].geo !== undefined)
-						surfaces[i].geo.dispose();
-					if (surfaces[i].mat !== undefined)
-						surfaces[i].mat.dispose();
-					modelGroup.remove(surfaces[i].lastGL); // remove from scene
-				}
-				delete surfaces[i];
-			}
-			show();
-		};
-
-		/** return Jmol moveto command to position this scene */
-		this.jmolMoveTo = function() {
-			var pos = modelGroup.position;
-			// center on same position
-			var ret = "center { " + (-pos.x) + " " + (-pos.y) + " " + (-pos.z)
-					+ " }; ";
-			// apply rotation
-			var q = rotationGroup.quaternion;
-			ret += "moveto .5 quaternion { " + q.x + " " + q.y + " " + q.z
-					+ " " + q.w + " };";
-			// zoom is tricky.. maybe i would be best to let callee zoom on
-			// selection?
-			// can either do a bunch of math, or maybe zoom to the center with a
-			// fixed
-			// but reasonable percentage
-
-			return ret;
-		};
-
-		/** Clear scene of all objects 
-		 * @function $3Dmol.GLViewer#clear
-		 * */
-		this.clear = function() {
-			this.removeAllSurfaces();
-			this.removeAllModels();
-			this.removeAllLabels();
-			this.removeAllShapes();
-			show();
-		};
-
-		// props is a list of objects that select certain atoms and enumerate
-		// properties for those atoms
-		/**
-		 * Add specified properties to all atoms matching input argument
-		 * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
-		 * @param {AtomSelectionSpec} sel
-		 */
-		this.mapAtomProperties = function(props, sel) {
-			sel = sel || {};
-			var atoms = getAtomsFromSel(sel);
-			
-			if(typeof(props) == "function") {
-				for (var a = 0, numa = atoms.length; a < numa; a++) {
-					var atom = atoms[a];
-					props(atom);
-				}
-			}
-			else {
-				for (var a = 0, numa = atoms.length; a < numa; a++) {
-					var atom = atoms[a];
-					for (var i = 0, n = props.length; i < n; i++) {
-						var prop = props[i];
-						if (prop.props) {
-							for ( var p in prop.props) {
-								if (prop.props.hasOwnProperty(p)) {
-									// check the atom
-									if (atomIsSelected(atom, prop)) {
-										if (!atom.properties)
-											atom.properties = {};
-										atom.properties[p] = prop.props[p];
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		};
-
-		var getModelGroup = function() {
-			return modelGroup;
-		};
-
-		try {
-			if (typeof (callback) === "function")
-				callback(this);
-		} catch (e) {
-			// errors in callback shouldn't invalidate the viewer
-			console.log("error with glviewer callback: " + e);
-		}
-	}
-
-	return GLViewer;
+        /**
+         * 
+         * @param {AtomSpec}
+         *            atom
+         * @param {AtomSpec}
+         *            sel
+         * @return {boolean}
+         */
+        function atomIsSelected(atom, sel) {
+            if (typeof (sel) === "undefined")
+                sel = {};
+
+            var ms = [];
+            var i;
+
+            if (typeof sel.model === "undefined") {
+                for (i = 0; i < models.length; i++) {
+                    if (models[i])
+                        ms.push(models[i]);
+                }
+            } else { // specific to some models
+                ms = sel.model;
+                if (!$.isArray(ms))
+                    ms = [ ms ];
+            }
+
+            for (i = 0; i < ms.length; i++) {
+                if (ms[i].atomIsSelected(atom, sel))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /**
+         * Return pdb output of selected atoms (if atoms from pdb input)
+         * 
+         * @function $3Dmol.GLViewer#pdbData  
+         * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
+         * @return {string} PDB string of selected atoms
+         */
+        this.pdbData = function(sel) {
+            var atoms = getAtomsFromSel(sel);
+            var ret = "";
+            for (var i = 0, n = atoms.length; i < n; ++i) {
+                ret += atoms[i].pdbline + "\n";
+            }
+            return ret;
+        };
+
+        /**
+         * Zoom current view by a constant factor
+         * 
+         * @function $3Dmol.GLViewer#zoom
+         * @param {number}
+         *            [factor] - Magnification factor. Values greater than 1
+         *            will zoom in, less than one will zoom out. Default 2.
+         * 
+         */
+        this.zoom = function(factor) {
+            var factor = factor || 2;
+            var scale = (CAMERA_Z - rotationGroup.position.z) / factor;
+            rotationGroup.position.z = CAMERA_Z - scale;
+            show();
+        };
+        
+        /**
+         * Translate current view by x,y screen coordinates
+         * This pans the camera rather than translating the model.
+         * 
+         * @function $3Dmol.GLViewer#translate
+         * @param {number} x
+         * @param {number} y
+         * 
+         */
+        this.translate = function(x, y) {
+            
+            var dx = x/WIDTH;
+            var dy = y/HEIGHT;
+            var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
+
+            projector.projectVector(v, camera);
+            v.x -= dx;
+            v.y -= dy;
+            projector.unprojectVector(v, camera);
+            v.z = 0;            
+            lookingAt.add(v);
+            camera.lookAt(lookingAt);
+            show();
+        };
+        
+
+        /**
+         * Zoom to center of atom selection
+         * 
+         * @function $3Dmol.GLViewer#zoomTo
+         * @param {Object}
+         *            [sel] - Selection specification specifying model and atom
+         *            properties to select. Default: all atoms in viewer
+         * @example // Assuming we have created a model of a protein with
+         *          multiple chains (e.g. from a PDB file), focus on atoms in
+         *          chain B glviewer.zoomTo({chain: 'B'});
+         *  // Focus on centroid of all atoms of all models in this
+         * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
+         */
+        this.zoomTo = function(sel) {
+            var allatoms, alltmp;
+            sel = sel || {};
+            var atoms = getAtomsFromSel(sel);
+            var tmp = $3Dmol.getExtent(atoms);
+
+            if($.isEmptyObject(sel)) {
+                //include shapes when zooming to full scene
+                //TODO: figure out a good way to specify shapes as part of a selection
+                $.each(shapes, function(i, shape) {
+                    atoms.push(shape);
+                });
+                allatoms = atoms;
+                alltmp = tmp;
+
+            }
+            else {
+                allatoms = getAtomsFromSel({});
+                alltmp = $3Dmol.getExtent(allatoms);
+            }
+
+            // use selection for center
+            var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
+            modelGroup.position = center.clone().multiplyScalar(-1);
+            // but all for bounding box
+            var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
+                    - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
+
+            var maxD = Math.sqrt(x * x + y * y + z * z);
+            if (maxD < 5)
+                maxD = 5;
+
+            // use full bounding box for slab/fog
+            slabNear = -maxD / 1.9;
+            slabFar = maxD / 2;
+
+            // for zoom, use selection box
+            x = tmp[1][0] - tmp[0][0];
+            y = tmp[1][1] - tmp[0][1];
+            z = tmp[1][2] - tmp[0][2];
+            maxD = Math.sqrt(x * x + y * y + z * z);
+            if (maxD < 5)
+                maxD = 5;
+            
+            //find the farthest atom from center to get max distance needed for view
+            var maxDsq = 25;
+            for (var i = 0; i < atoms.length; i++) {
+                if(atoms[i]) {
+                    var dsq = center.distanceToSquared(atoms[i]);
+                    if(dsq > maxDsq)
+                        maxDsq = dsq;
+                }
+            }
+            
+            var maxD = Math.sqrt(maxDsq)*2;
+
+            rotationGroup.position.z = -(maxD * 0.5
+                    / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
+
+            show();
+        };
+
+        /**
+         * Add label to viewer
+         * 
+         * @function $3Dmol.GLViewer#addLabel
+         * @param {string}
+         *            text - Label text
+         * @param {Object}
+         *            data - Label style specification
+         * @return {$3Dmol.Label}
+         * 
+         * @example
+         *  // Assuming glviewer contains a model representing a protein, label
+         * all alpha carbons with their residue name
+         *  // Select all alpha carbons (have property atom : "CA") from last
+         * model added var atoms =
+         * glviewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
+         * 
+         * for (var a in atoms) { var atom = atoms[a];
+         *  // Create label at alpha carbon's position displaying atom's residue
+         * and residue number var labelText = atom.resname + " " + atom.resi;
+         * 
+         * var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:
+         * atom.x, y: atom.y, z: atom.z});
+         * 
+         * labels.push(l); }
+         *  // Render labels glviewer.render();
+         */
+        this.addLabel = function(text, data) {
+            var label = new $3Dmol.Label(text, data);
+            label.setContext();
+            modelGroup.add(label.sprite);
+            labels.push(label);
+            show();
+            return label;
+        };
+        
+        /** Add residue labels.  This will generate one label per a
+         * residue within the selected atoms.  The label will be at the
+         * centroid of the atoms and styled according to the passed style.
+         * The label text will be [resn][resi]
+         * 
+         * @param {Object} sel
+         * @param {Object} style
+         */
+        this.addResLabels = function(sel, style) {
+            applyToModels("addResLabels", sel, this, style);
+        }
+
+        /**
+         * Remove label from viewer
+         * 
+         * @function $3Dmol.GLViewer#removeLabel
+         * @param {$3Dmol.Label}
+         *            label - $3Dmol label
+         * 
+         * @example // Remove labels created in [addLabel example]{@link $3Dmol.GLViewer#addLabel}
+         * 
+         * for (var i = 0; i < labels.length; i++) {
+         * glviewer.removeLabel(label); }
+         * 
+         * glviewer.render();
+         */
+        this.removeLabel = function(label) {
+            //todo: don't do the linear search
+            for(var i = 0; i < labels.length; i++) {
+                if(labels[i] == label) {
+                    labels.splice(i,1);
+                    label.dispose();
+                    modelGroup.remove(label.sprite);
+                    break;
+                }
+            }
+
+        };
+
+        /**
+         * Remove all labels from viewer
+         * 
+         * @function $3Dmol.GLViewer#removeAllLabels
+
+         */
+        this.removeAllLabels = function() {
+            for (var i = 0; i < labels.length; i++) {
+                modelGroup.remove(labels[i].sprite);
+            }
+            labels = [];
+        };
+        
+        // Modify label style
+        /**
+         * Modify existing label's style
+         * 
+         * @function $3Dmol.GLViewer#setLabelStyle
+         * @param {$3Dmol.Label}
+         *            label - $3Dmol label
+         * @param {Object}
+         *            stylespec - Label style specification
+         * @return {$3Dmol.Label}
+         */
+        this.setLabelStyle = function(label, stylespec) {
+            modelGroup.remove(label.sprite);
+            label.dispose();
+            label.stylespec = stylespec;
+            label.setContext();
+            modelGroup.add(label.sprite);
+            show();
+            return label;
+
+        };
+
+        // Change label text
+        /**
+         * Modify existing label's text
+         * 
+         * @function $3Dmol.GLViewer#setLabelText
+         * @param {$3Dmol.Label}
+         *            label - $3Dmol label
+         * @param {String}
+         *            text - Label text
+         * @return {$3Dmol.Label}
+         */
+        this.setLabelText = function(label, text) {
+            modelGroup.remove(label.sprite);
+            label.dispose();
+            label.text = text;
+            label.setContext();
+            modelGroup.add(label.sprite);
+            show();
+            return label;
+
+        };
+
+        /**
+         * Add shape object to viewer 
+         * @see {@link $3Dmol.GLShape}
+         * 
+         * @function $3Dmol.GLViewer#addShape
+         * @param {ShapeSpec} shapeSpec - style specification for label
+         * @return {$3Dmol.GLShape}
+         */
+        this.addShape = function(shapeSpec) {
+            shapeSpec = shapeSpec || {};
+            var shape = new $3Dmol.GLShape(shapeSpec);
+            shape.shapePosition = shapes.length;
+            shapes.push(shape);
+
+            return shape;
+
+        };
+
+        /**
+         * Remove shape object from viewer
+         *
+         * @function $3Dmol.GLViewer#removeShape
+         * @param {$3Dmol.GLShape} shape - Reference to shape object to remove
+         */
+        this.removeShape = function(shape) {
+            if (!shape)
+                return;
+            shape.removegl(modelGroup);
+            delete shapes[shape.shapePosition];
+            // clear off back of model array
+            while (shapes.length > 0
+                    && typeof (shapes[shapes.length - 1]) === "undefined")
+                shapes.pop();
+        };
+        
+        /**
+         * Remove all shape objects from viewer
+         * @function $3Dmol.GLViewer#removeAllShapes
+         */
+        this.removeAllShapes = function() {
+            for (var i = 0; i < shapes.length; i++) {
+                var shape = shapes[i];
+                shape.removegl(modelGroup);
+            }
+            shapes = [];
+        }
+
+        /**
+         * Create and add sphere shape. This method provides a shorthand 
+         * way to create a spherical shape object
+         * 
+         * @function $3Dmol.GLViewer#addSphere
+         * @param {SphereSpec} spec - Sphere shape style specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addSphere = function(spec) {
+            spec = spec || {};
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addSphere(spec);
+            shapes.push(s);
+
+            return s;
+        };
+
+        /**
+         * Create and add arrow shape
+         * 
+         * @function $3Dmol.GLViewer#addArrow
+         * @param {ArrowSpec} spec - Style specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addArrow = function(spec) {
+            spec = spec || {};
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addArrow(spec);
+            shapes.push(s);
+
+            return s;
+        };
+        
+        /**
+         * Create and add cylinder shape
+         * 
+         * @function $3Dmol.GLViewer#addArrow
+         * @param {CylinderSpec} spec - Style specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addCylinder = function(spec) {
+            spec = spec || {};
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addCylinder(spec);
+            shapes.push(s);
+
+            return s;
+        };
+
+        /**
+         * Add custom shape component from user supplied function
+         * 
+         * @function $3Dmol.GLViewer#addCustom
+         * @param {CustomSpec} spec - Style specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addCustom = function(spec) {
+            spec = spec || {};
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addCustom(spec);
+            shapes.push(s);
+
+            return s;
+        };
+
+        /**
+         * Construct isosurface from volumetric data in gaussian cube format
+         * 
+         * @function $3Dmol.GLViewer#addVolumetricData
+         * @param {String} data - Input file contents 
+         * @param {String} format - Input file format (currently only supports "cube")
+         * @param {VolSpec} spec - Shape style specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addVolumetricData = function(data, format, spec) {
+            spec = spec || {};
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addVolumetricData(data, format, spec);
+            shapes.push(s);
+
+            return s;
+        };
+
+        /**
+         * Create and add model to viewer, given molecular data and its format 
+         * (pdb, sdf, xyz, or mol2)
+         * 
+         * @function $3Dmol.GLViewer#addModel
+         * @param {string} data - Input data
+         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @return {$3Dmol.GLModel}
+         */
+        this.addModel = function(data, format, options) {
+
+            var m = new $3Dmol.GLModel(models.length, defaultcolors);
+            m.addMolData(data, format, options);
+            models.push(m);
+
+            return m;
+        };
+
+        /**
+         * Delete specified model from viewer
+         * 
+         * @function $3Dmol.GLViewer#removeModel
+         * @param {$3Dmol.GLModel} model
+         */
+        this.removeModel = function(model) {
+            if (!model)
+                return;
+            model.removegl(modelGroup);
+            delete models[model.getID()];
+            // clear off back of model array
+            while (models.length > 0
+                    && typeof (models[models.length - 1]) === "undefined")
+                models.pop();
+        };
+
+        /** 
+         * Delete all existing models
+         * @function $3Dmol.GLViewer#removeAllModels
+         */
+        this.removeAllModels = function() {
+            for (var i = 0; i < models.length; i++) {
+                var model = models[i];
+                model.removegl(modelGroup);
+
+            }
+            models = [];
+        };
+
+        /**
+         * Create a new model from atoms specified by sel.
+         * If extract, removes selected atoms from existing models 
+         * 
+         * @function $3Dmol.GLViewer#createModelFrom
+         * @param {Object} sel - Atom selection specification
+         * @param {boolean=} extract - If true, remove selected atoms from existing models
+         * @return {$3Dmol.GLModel}
+         */
+        this.createModelFrom = function(sel, extract) {
+            var m = new $3Dmol.GLModel(models.length, defaultcolors);
+            for (var i = 0; i < models.length; i++) {
+                if (models[i]) {
+                    var atoms = models[i].selectedAtoms(sel);
+                    m.addAtoms(atoms);
+                    if (extract)
+                        models[i].removeAtoms(atoms);
+                }
+            }
+            models.push(m);
+            return m;
+        };
+
+        function applyToModels(func, sel, value1, value2) {
+            for (var i = 0; i < models.length; i++) {
+                if (models[i]) {
+                    models[i][func](sel, value1, value2);
+                }
+            }
+        }
+
+        /**
+         * Set style properties to all selected atoms
+         * 
+         * @function $3Dmol.GLViewer#setStyle
+         * @param {AtomSelectionSpec} sel - Atom selection specification
+         * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
+         * 
+         * @example
+         * viewer.setStyle({}, {stick:{}}); //set all atoms to stick
+         * viewer.setStyle({chain: 'B'}, {carton: {color: spectrum}}); //set chain B to rainbow cartoon
+         */
+        this.setStyle = function(sel, style) {
+            applyToModels("setStyle", sel, style, false);
+        };
+
+        /**
+         * Add style properties to all selected atoms
+         * 
+         * @function $3Dmol.GLViewer#addStyle
+         * @param {AtomSelectionSpec} sel - Atom selection specification
+         * @param {AtomStyleSpec} style - style spec to add to specified atoms
+         */
+        this.addStyle = function(sel, style) {
+            applyToModels("setStyle", sel, style, true);
+        };
+
+        /**
+         * @function $3Dmol.GLViewer#setColorByProperty
+         * @param {AtomSelectionSpec} sel
+         * @param {type} prop
+         * @param {type} scheme
+         */
+        this.setColorByProperty = function(sel, prop, scheme) {
+            applyToModels("setColorByProperty", sel, prop, scheme);
+        };
+
+        /**
+         * @function $3Dmol.GLViewer#setColorByElement
+         * @param {AtomSelectionSpec} sel
+         * @param {type} colors
+         */
+        this.setColorByElement = function(sel, colors) {
+            applyToModels("setColorByElement", sel, colors);
+        };
+
+        /**
+         * 
+         * @param {AtomSpec[]} atomlist
+         * @param {Array}
+         *            extent
+         * @return {Array}
+         */
+        var getAtomsWithin = function(atomlist, extent) {
+            var ret = [];
+
+            for (var i = 0; i < atomlist.length; i++) {
+                var atom = atomlist[i];
+                if (typeof (atom) == "undefined")
+                    continue;
+
+                if (atom.x < extent[0][0] || atom.x > extent[1][0])
+                    continue;
+                if (atom.y < extent[0][1] || atom.y > extent[1][1])
+                    continue;
+                if (atom.z < extent[0][2] || atom.z > extent[1][2])
+                    continue;
+                ret.push(i);
+            }
+            return ret;
+        };
+
+        // return volume of extent
+        var volume = function(extent) {
+            var w = extent[1][0] - extent[0][0];
+            var h = extent[1][1] - extent[0][1];
+            var d = extent[1][2] - extent[0][2];
+            return w * h * d;
+        }; // volume
+        /*
+         * Break up bounding box/atoms into smaller pieces so we can parallelize
+         * with webworkers and also limit the size of the working memory Returns
+         * a list of bounding boxes with the corresponding atoms. These extents
+         * are expanded by 4 angstroms on each side.
+         */
+        /**
+         * 
+         * @param {Array}
+         *            extent
+         * @param {AtomSpec[]} atomlist
+         * @param {AtomSpec[]} atomstoshow
+         * @return {Array}
+         */
+        var carveUpExtent = function(extent, atomlist, atomstoshow) {
+            var ret = [];
+
+            var copyExtent = function(extent) {
+                // copy just the dimensions
+                var ret = [];
+                ret[0] = [ extent[0][0], extent[0][1], extent[0][2] ];
+                ret[1] = [ extent[1][0], extent[1][1], extent[1][2] ];
+                return ret;
+            }; // copyExtent
+            var splitExtentR = function(extent) {
+                // recursively split until volume is below maxVol
+                if (volume(extent) < maxVolume) {
+                    return [ extent ];
+                } else {
+                    // find longest edge
+                    var w = extent[1][0] - extent[0][0];
+                    var h = extent[1][1] - extent[0][1];
+                    var d = extent[1][2] - extent[0][2];
+
+                    var index;
+
+                    if (w > h && w > d) {
+                        index = 0;
+                    } else if (h > w && h > d) {
+                        index = 1;
+                    } else {
+                        index = 2;
+                    }
+
+                    // create two halves, splitting at index
+                    var a = copyExtent(extent);
+                    var b = copyExtent(extent);
+                    var mid = (extent[1][index] - extent[0][index]) / 2
+                            + extent[0][index];
+                    a[1][index] = mid;
+                    b[0][index] = mid;
+
+                    var alist = splitExtentR(a);
+                    var blist = splitExtentR(b);
+                    return alist.concat(blist);
+                }
+            }; // splitExtentR
+
+            // divide up extent
+            var splits = splitExtentR(extent);
+            // now compute atoms within expanded (this could be more efficient)
+            var off = 6; // enough for water and 2*r, also depends on scale
+            // factor
+            for (var i = 0, n = splits.length; i < n; i++) {
+                var e = copyExtent(splits[i]);
+                e[0][0] -= off;
+                e[0][1] -= off;
+                e[0][2] -= off;
+                e[1][0] += off;
+                e[1][1] += off;
+                e[1][2] += off;
+
+                var atoms = getAtomsWithin(atomlist, e);
+                var toshow = getAtomsWithin(atomstoshow, splits[i]);
+
+                // ultimately, divide up by atom for best meshing
+                ret.push({
+                    extent : splits[i],
+                    atoms : atoms,
+                    toshow : toshow
+                });
+            }
+
+            return ret;
+        };
+
+        // create a mesh defined from the passed vertices and faces and material
+        // Just create a single geometry chunk - broken up whether sync or not
+        /**
+         * 
+         * @param {AtomSpec[]} atoms
+         * @param {{vertices:number,faces:number}}
+         *            VandF
+         * @param {$3Dmol.MeshLambertMaterial}
+         *            mat
+         * @return {$3Dmol.Mesh}
+         */
+        var generateSurfaceMesh = function(atoms, VandF, mat) {
+
+            var geo = new $3Dmol.Geometry(true);
+            // Only one group per call to generate surface mesh (addSurface
+            // should split up mesh render)
+            var geoGroup = geo.updateGeoGroup(0);
+
+            var vertexArray = geoGroup.vertexArray;
+            // reconstruct vertices and faces
+            var v = VandF['vertices'];
+            var offset;
+            var i, il;
+            for (i = 0, il = v.length; i < il; i++) {
+                offset = geoGroup.vertices * 3;
+                vertexArray[offset] = v[i].x;
+                vertexArray[offset + 1] = v[i].y;
+                vertexArray[offset + 2] = v[i].z;
+                geoGroup.vertices++;
+            }
+
+            var faces = VandF['faces'];
+            geoGroup.faceidx = faces.length;// *3;
+            geo.initTypedArrays();
+
+            // set colors for vertices
+            var colors = [];
+            for (i = 0, il = atoms.length; i < il; i++) {
+                var atom = atoms[i];
+                if (atom) {
+                    if (typeof (atom.surfaceColor) != "undefined") {
+                        colors[i] = atom.surfaceColor;
+                    } else if (atom.color) // map from atom
+                        colors[i] = $3Dmol.CC.color(atom.color);
+                }
+            }
+
+            var verts = geoGroup.vertexArray;
+            var colorArray = geoGroup.colorArray;
+            var normalArray = geoGroup.normalArray;
+            var vA, vB, vC, norm;
+
+            // Setup colors, faces, and normals
+            for (i = 0, il = faces.length; i < il; i += 3) {
+
+                // var a = faces[i].a, b = faces[i].b, c = faces[i].c;
+                var a = faces[i], b = faces[i + 1], c = faces[i + 2];
+                var A = v[a]['atomid'];
+                var B = v[b]['atomid'];
+                var C = v[c]['atomid'];
+
+                var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
+
+                colorArray[offsetA] = colors[A].r;
+                colorArray[offsetA + 1] = colors[A].g;
+                colorArray[offsetA + 2] = colors[A].b;
+                colorArray[offsetB] = colors[B].r;
+                colorArray[offsetB + 1] = colors[B].g;
+                colorArray[offsetB + 2] = colors[B].b;
+                colorArray[offsetC] = colors[C].r;
+                colorArray[offsetC + 1] = colors[C].g;
+                colorArray[offsetC + 2] = colors[C].b;
+
+                // setup Normals
+
+                vA = new $3Dmol.Vector3(verts[offsetA], verts[offsetA + 1],
+                        verts[offsetA + 2]);
+                vB = new $3Dmol.Vector3(verts[offsetB], verts[offsetB + 1],
+                        verts[offsetB + 2]);
+                vC = new $3Dmol.Vector3(verts[offsetC], verts[offsetC + 1],
+                        verts[offsetC + 2]);
+
+                vC.subVectors(vC, vB);
+                vA.subVectors(vA, vB);
+                vC.cross(vA);
+
+                // face normal
+                norm = vC;
+                norm.normalize();
+
+                normalArray[offsetA] += norm.x;
+                normalArray[offsetB] += norm.x;
+                normalArray[offsetC] += norm.x;
+                normalArray[offsetA + 1] += norm.y;
+                normalArray[offsetB + 1] += norm.y;
+                normalArray[offsetC + 1] += norm.y;
+                normalArray[offsetA + 2] += norm.z;
+                normalArray[offsetB + 2] += norm.z;
+                normalArray[offsetC + 2] += norm.z;
+
+            }
+            geoGroup.faceArray = new Uint16Array(faces);
+            var mesh = new $3Dmol.Mesh(geo, mat);
+            mesh.doubleSided = true;
+
+            return mesh;
+        };
+
+        // do same thing as worker in main thread
+        /**
+         * 
+         * @param {$3Dmol.SurfaceType}
+         *            type
+         * @param {Array}
+         *            expandedExtent
+         * @param {Array}
+         *            extendedAtoms
+         * @param {Array}
+         *            atomsToShow
+         * @param {AtomSpec[]} atoms
+         * @param {number}
+         *            vol
+         * @return {Object}
+         */
+        var generateMeshSyncHelper = function(type, expandedExtent,
+                extendedAtoms, atomsToShow, atoms, vol) {
+            var time = new Date();
+            var ps = new $3Dmol.ProteinSurface();
+            ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
+
+            var time2 = new Date();
+            //console.log("initialize " + (time2 - time) + "ms");
+
+            ps.fillvoxels(atoms, extendedAtoms);
+
+            var time3 = new Date();
+            //console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
+
+            ps.buildboundary();
+
+            if (type == $3Dmol.SurfaceType.SES) {
+                ps.fastdistancemap();
+                ps.boundingatom(false);
+                ps.fillvoxelswaals(atoms, extendedAtoms);
+            }
+
+            var time4 = new Date();
+            console.log("buildboundaryetc " + (time4 - time3) + "  "
+                    + (time4 - time) + "ms");
+
+            ps.marchingcube(type);
+
+            var time5 = new Date();
+            //console.log("marching cube " + (time5 - time4) + "  "+ (time5 - time) + "ms");
+
+            return ps.getFacesAndVertices(atomsToShow);
+        };
+
+        /**
+         * 
+         * @param {matSpec}
+         *            style
+         * @return {$3Dmol.MeshLambertMaterial}
+         */
+        function getMatWithStyle(style) {
+            var mat = new $3Dmol.MeshLambertMaterial();
+            mat.vertexColors = $3Dmol.VertexColors;
+
+            for ( var prop in style) {
+                if (prop === "color" || prop === "map") {
+                    // ignore
+                } else if (style.hasOwnProperty(prop))
+                    mat[prop] = style[prop];
+            }
+            if (style.opacity !== undefined) {
+                if (style.opacity === 1)
+                    mat.transparent = false;
+                else
+                    mat.transparent = true;
+            }
+
+            return mat;
+        }
+
+        // get the min and max values of the specified property in the provided
+        // atoms
+        function getPropertyRange(atomlist, prop) {
+            var min = Number.POSITIVE_INFINITY;
+            var max = Number.NEGATIVE_INFINITY;
+
+            for (var i = 0, n = atomlist.length; i < n; i++) {
+                var atom = atomlist[i];
+                if (atom.properties
+                        && typeof (atom.properties[prop]) != "undefined") {
+                    var val = atom.properties[prop];
+                    if (val < min)
+                        min = val;
+                    if (val > max)
+                        max = val;
+                }
+            }
+
+            if (!isFinite(min) && !isFinite(max))
+                min = max = 0;
+            else if (!isFinite(min))
+                min = max;
+            else if (!isFinite(max))
+                max = min;
+
+            return [ min, max ];
+        }
+
+        
+        /**
+         * Adds an explicit mesh as a surface object.
+         * 
+         * @param {$3Dmol.Mesh}
+         *            mesh
+         * @param {Object}
+         *            style
+         * @returns {Number} surfid
+         */
+        this.addMesh = function(mesh) {
+            var surfobj = {
+                geo : mesh.geometry,
+                mat : mesh.material,
+                done : true,
+                finished : false //the rendered finishes surfaces when they are done
+            };
+            var surfid = surfaces.length;
+            surfaces[surfid] = surfobj;
+            return surfid;
+        }
+
+        //return a shallow copy of list l, e.g., for atoms so we can
+        //ignore superficial changes (ie surfacecolor, position) that happen
+        //while we're surface building
+        var shallowCopy = function(l) {
+            var ret = [];
+            $.each(l, function(k,v) {
+                ret[k] = $.extend({},v);
+            });
+            return ret;
+        }
+        /**
+         * Add surface representation to atoms
+         *  @function $3Dmol.GLViewer#addSurface
+         * @param {$3Dmol.SurfaceType} type - Surface type
+         * @param {Object} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
+         * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
+         * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
+         * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
+         * 
+         * @return {number} surfid - Identifying number for this surface
+         */
+        this.addSurface = function(type, style, atomsel, allsel, focus) {
+            // type 1: VDW 3: SAS 4: MS 2: SES
+            // if sync is true, does all work in main thread, otherwise uses
+            // workers
+            // with workers, must ensure group is the actual modelgroup since
+            // surface
+            // will get added asynchronously
+            // all atoms in atomlist are used to compute surfaces, but only the
+            // surfaces
+            // of atomsToShow are displayed (e.g., for showing cavities)
+            // if focusSele is specified, will start rending surface around the
+            // atoms specified by this selection
+            var atomlist = null, focusSele = null;
+            //TODO: currently generating a shallow copy to avoid problems when atoms are chagned
+            //during surface generation - come up with a better solution
+            var atomsToShow = shallowCopy(getAtomsFromSel(atomsel));
+            if(!allsel) {
+                atomlist = atomsToShow;
+            }
+            else {
+                atomlist = shallowCopy(getAtomsFromSel(allsel));
+            }
+            
+            if(!focus) {
+                focusSele = atomsToShow;
+            } else {
+                focusSele = shallowCopy(getAtomsFromSel(focus));
+            }
+
+            var atom;
+            style = style || {};
+
+            var time = new Date();
+
+            var mat = getMatWithStyle(style);
+
+            var extent = $3Dmol.getExtent(atomsToShow);
+
+            var i, il;
+            if (style['map'] && style['map']['prop']) {
+                // map color space using already set atom properties
+                /** @type {AtomSpec} */
+                var prop = style['map']['prop'];
+                /** @type {Gradient} */
+                var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
+                var range = scheme.range();
+                if (!range) {
+                    range = getPropertyRange(atomsToShow, prop);
+                }
+
+                for (i = 0, il = atomlist.length; i < il; i++) {
+                    atom = atomlist[i];
+                    atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
+                            atom.properties[prop], range));
+                }
+            }
+            else if(typeof(style['color']) != 'undefined') {
+                //explicitly set color, otherwise material color just blends
+                for (i = 0, il = atomlist.length; i < il; i++) {
+                    atom = atomlist[i];
+                    atom.surfaceColor = $3Dmol.CC.color(style['color']);
+                }
+            }
+            else if(typeof(style['colorscheme']) != 'undefined') {
+                for (i = 0, il = atomlist.length; i < il; i++) {
+                    atom = atomlist[i];
+                    var scheme = $3Dmol.elementColors[style.colorscheme];
+                            if(scheme && typeof(scheme[atom.elem]) != "undefined") {
+                        atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
+                            }
+                }
+            }
+
+            var totalVol = volume(extent); // used to scale resolution
+            var extents = carveUpExtent(extent, atomlist, atomsToShow);
+
+            if (focusSele && focusSele.length && focusSele.length > 0) {
+                var seleExtent = $3Dmol.getExtent(focusSele);
+                // sort by how close to center of seleExtent
+                var sortFunc = function(a, b) {
+                    var distSq = function(ex, sele) {
+                        // distance from e (which has no center of mass) and
+                        // sele which does
+                        var e = ex.extent;
+                        var x = e[1][0] - e[0][0];
+                        var y = e[1][1] - e[0][1];
+                        var z = e[1][2] - e[0][2];
+                        var dx = (x - sele[2][0]);
+                        dx *= dx;
+                        var dy = (y - sele[2][1]);
+                        dy *= dy;
+                        var dz = (z - sele[2][2]);
+                        dz *= dz;
+
+                        return dx + dy + dz;
+                    };
+                    var d1 = distSq(a, seleExtent);
+                    var d2 = distSq(b, seleExtent);
+                    return d1 - d2;
+                };
+                extents.sort(sortFunc);
+            }
+
+            //console.log("Extents " + extents.length + "  "+ (+new Date() - time) + "ms");
+
+            var surfobj = {
+                geo : new $3Dmol.Geometry(true),
+                mat : mat,
+                done : false,
+                finished : false
+            // also webgl initialized
+            };
+            var surfid = surfaces.length;
+            surfaces[surfid] = surfobj;
+            var reducedAtoms = [];
+            // to reduce amount data transfered, just pass x,y,z,serial and elem
+            for (i = 0, il = atomlist.length; i < il; i++) {
+                atom = atomlist[i];
+                reducedAtoms[i] = {
+                    x : atom.x,
+                    y : atom.y,
+                    z : atom.z,
+                    serial : i,
+                    elem : atom.elem
+                };
+            }
+
+            var sync = !!($3Dmol.syncSurface);
+            if (sync) { // don't use worker, still break up for memory purposes
+
+                // to keep the browser from locking up, call through setTimeout
+                var callSyncHelper = function callSyncHelper(i) {
+                    if (i >= extents.length)
+                        return;
+
+                    var VandF = generateMeshSyncHelper(type, extents[i].extent,
+                            extents[i].atoms, extents[i].toshow, reducedAtoms,
+                            totalVol);
+                    var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                    $3Dmol.mergeGeos(surfobj.geo, mesh);
+                    _viewer.render();
+
+                    setTimeout(callSyncHelper, 1, i + 1);
+                }
+
+                setTimeout(callSyncHelper, 1, 0);
+
+                // TODO: Asynchronously generate geometryGroups (not separate
+                // meshes) and merge them into a single geometry
+            } else { // use worker
+
+                var workers = [];
+                if (type < 0)
+                    type = 0; // negative reserved for atom data
+                for (i = 0, il = numWorkers; i < il; i++) {
+                    // var w = new Worker('3Dmol/SurfaceWorker.js');
+                    var w = new Worker($3Dmol.SurfaceWorker);
+                    workers.push(w);
+                    w.postMessage({
+                        'type' : -1,
+                        'atoms' : reducedAtoms,
+                        'volume' : totalVol
+                    });
+                }
+                var cnt = 0;
+
+                var rfunction = function(event) {
+                    var VandF = event.data;
+                    var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                    $3Dmol.mergeGeos(surfobj.geo, mesh);
+                    _viewer.render();
+                //    console.log("async mesh generation " + (+new Date() - time) + "ms");
+                    cnt++;
+                    if (cnt == extents.length)
+                        surfobj.done = true;
+                };
+
+                var efunction = function(event) {
+                    console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
+                };
+
+                for (i = 0; i < extents.length; i++) {
+                    var worker = workers[i % workers.length];
+                    worker.onmessage = rfunction;
+
+                    worker.onerror = efunction;
+
+                    worker.postMessage({
+                        'type' : type,
+                        'expandedExtent' : extents[i].extent,
+                        'extendedAtoms' : extents[i].atoms,
+                        'atomsToShow' : extents[i].toshow
+                    });
+                }
+            }
+
+            // NOTE: This is misleading if 'async' mesh generation - returns
+            // immediately
+            //console.log("full mesh generation " + (+new Date() - time) + "ms");
+
+            return surfid;
+        };
+
+        /**
+         * Set the surface material to something else, must render change
+         * 
+         * @param {number} surf - Surface ID to apply changes to
+         * @param {matSpec} style - new material style specification
+         */ 
+        this.setSurfaceMaterialStyle = function(surf, style) {
+            if (surfaces[surf]) {
+                surfaces[surf].mat = getMatWithStyle(style);
+                surfaces[surf].mat.side = $3Dmol.FrontSide;
+                surfaces[surf].finished = false; // trigger redraw
+            }
+        };
+
+        /**
+         * Remove surface with given ID
+         * 
+         * @param {number} surf - surface id
+         */
+        this.removeSurface = function(surf) {
+            if (surfaces[surf] && surfaces[surf].lastGL) {
+                if (surfaces[surf].geo !== undefined)
+                    surfaces[surf].geo.dispose();
+                if (surfaces[surf].mat !== undefined)
+                    surfaces[surf].mat.dispose();
+                modelGroup.remove(surfaces[surf].lastGL); // remove from scene
+            }
+            delete surfaces[surf];
+            show();
+        };
+        
+        /** Remove all surfaces.
+         * @function $3Dmol.GLViewer#removeAllSurfaces */
+        this.removeAllSurfaces = function() {
+            for(var i = 0; i < surfaces.length; i++) {
+                if (surfaces[i] && surfaces[i].lastGL) {
+                    if (surfaces[i].geo !== undefined)
+                        surfaces[i].geo.dispose();
+                    if (surfaces[i].mat !== undefined)
+                        surfaces[i].mat.dispose();
+                    modelGroup.remove(surfaces[i].lastGL); // remove from scene
+                }
+                delete surfaces[i];
+            }
+            show();
+        };
+
+        /** return Jmol moveto command to position this scene */
+        this.jmolMoveTo = function() {
+            var pos = modelGroup.position;
+            // center on same position
+            var ret = "center { " + (-pos.x) + " " + (-pos.y) + " " + (-pos.z)
+                    + " }; ";
+            // apply rotation
+            var q = rotationGroup.quaternion;
+            ret += "moveto .5 quaternion { " + q.x + " " + q.y + " " + q.z
+                    + " " + q.w + " };";
+            // zoom is tricky.. maybe i would be best to let callee zoom on
+            // selection?
+            // can either do a bunch of math, or maybe zoom to the center with a
+            // fixed
+            // but reasonable percentage
+
+            return ret;
+        };
+
+        /** Clear scene of all objects 
+         * @function $3Dmol.GLViewer#clear
+         * */
+        this.clear = function() {
+            this.removeAllSurfaces();
+            this.removeAllModels();
+            this.removeAllLabels();
+            this.removeAllShapes();
+            show();
+        };
+
+        // props is a list of objects that select certain atoms and enumerate
+        // properties for those atoms
+        /**
+         * Add specified properties to all atoms matching input argument
+         * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
+         * @param {AtomSelectionSpec} sel
+         */
+        this.mapAtomProperties = function(props, sel) {
+            sel = sel || {};
+            var atoms = getAtomsFromSel(sel);
+            
+            if(typeof(props) == "function") {
+                for (var a = 0, numa = atoms.length; a < numa; a++) {
+                    var atom = atoms[a];
+                    props(atom);
+                }
+            }
+            else {
+                for (var a = 0, numa = atoms.length; a < numa; a++) {
+                    var atom = atoms[a];
+                    for (var i = 0, n = props.length; i < n; i++) {
+                        var prop = props[i];
+                        if (prop.props) {
+                            for ( var p in prop.props) {
+                                if (prop.props.hasOwnProperty(p)) {
+                                    // check the atom
+                                    if (atomIsSelected(atom, prop)) {
+                                        if (!atom.properties)
+                                            atom.properties = {};
+                                        atom.properties[p] = prop.props[p];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        var getModelGroup = function() {
+            return modelGroup;
+        };
+
+        try {
+            if (typeof (callback) === "function")
+                callback(this);
+        } catch (e) {
+            // errors in callback shouldn't invalidate the viewer
+            console.log("error with glviewer callback: " + e);
+        }
+    }
+
+    return GLViewer;
 
 })();
 
@@ -23287,52 +23210,52 @@ $3Dmol.Gradient.range = function() {};
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.RWB = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(val === undefined)
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var middle = (hi+lo)/2;
-		var scale, color;
-		
-		//scale bottom from red to white
-		if(val <= middle) {
-			scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
-			color = 0xff0000 + 0x100*scale + scale;
-			return color;
-		}
-		else { //form white to blue
-			scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
-			color =  0x10000*scale+0x100*scale+0xff;
-			return color;
-		}
-	};
-	
-	this.jmolID = function() {
-		return "rwb";
-	};
+    
+    //map value to hex color, range is provided
+    this.valueToHex = function(val, range) {
+        var lo, hi;
+        if(range) {
+            lo = range[0];
+            hi = range[1];
+        }
+        else {
+            lo = min;
+            hi = max;
+        }
+    
+        if(val === undefined)
+            return 0xffffff;
+        
+        if(val < lo) val = lo;
+        if(val > hi) val = hi;
+        
+        var middle = (hi+lo)/2;
+        var scale, color;
+        
+        //scale bottom from red to white
+        if(val <= middle) {
+            scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
+            color = 0xff0000 + 0x100*scale + scale;
+            return color;
+        }
+        else { //form white to blue
+            scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
+            color =  0x10000*scale+0x100*scale+0xff;
+            return color;
+        }
+    };
+    
+    this.jmolID = function() {
+        return "rwb";
+    };
 
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
+    //return range used for color mapping, null if none set
+    this.range = function() {
+        if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+            return [min,max];
+        }
+        return null;
+    };
 
 };
 
@@ -23342,64 +23265,64 @@ $3Dmol.Gradient.RWB = function(min, max) {
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.ROYGB = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(typeof(val) == "undefined")
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var mid = (lo+hi)/2;
-		var q1 = (lo+mid)/2;
-		var q3 = (mid+hi)/2;
-		
-		var scale, color;
-		
-		if(val < q1) { //scale green up, red up, blue down
-			scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
-			color = 0xff0000 + 0x100*scale + 0;
-			return color;
-		}
-		else if(val < mid) { //scale red down, green up, blue down
-			scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
-			color =  0x010000*scale+0xff00+0x0;
-			return color;
-		}
-		else if(val < q3) { //scale blue up, red down, green up
-			scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
-			color = 0x000000 + 0xff00 + 0x1*scale;
-			return color;
-		}
-		else { //scale green down, blue up, red down
-			scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
-			color =  0x000000+0x0100*scale+0xff;
-			return color;
-		}		
-	};
-	
-	this.jmolID = function() {
-		return "roygb";
-	};
+    
+    //map value to hex color, range is provided
+    this.valueToHex = function(val, range) {
+        var lo, hi;
+        if(range) {
+            lo = range[0];
+            hi = range[1];
+        }
+        else {
+            lo = min;
+            hi = max;
+        }
+    
+        if(typeof(val) == "undefined")
+            return 0xffffff;
+        
+        if(val < lo) val = lo;
+        if(val > hi) val = hi;
+        
+        var mid = (lo+hi)/2;
+        var q1 = (lo+mid)/2;
+        var q3 = (mid+hi)/2;
+        
+        var scale, color;
+        
+        if(val < q1) { //scale green up, red up, blue down
+            scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+            color = 0xff0000 + 0x100*scale + 0;
+            return color;
+        }
+        else if(val < mid) { //scale red down, green up, blue down
+            scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+            color =  0x010000*scale+0xff00+0x0;
+            return color;
+        }
+        else if(val < q3) { //scale blue up, red down, green up
+            scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+            color = 0x000000 + 0xff00 + 0x1*scale;
+            return color;
+        }
+        else { //scale green down, blue up, red down
+            scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+            color =  0x000000+0x0100*scale+0xff;
+            return color;
+        }        
+    };
+    
+    this.jmolID = function() {
+        return "roygb";
+    };
 
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
+    //return range used for color mapping, null if none set
+    this.range = function() {
+        if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+            return [min,max];
+        }
+        return null;
+    };
 
 };
 
@@ -23409,48 +23332,48 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.Sinebow = function(min, max) {
-	
-	//map value to hex color, range is provided
-	this.valueToHex = function(val, range) {
-		var lo, hi;
-		if(range) {
-			lo = range[0];
-			hi = range[1];
-		}
-		else {
-			lo = min;
-			hi = max;
-		}
-	
-		if(typeof(val) == "undefined")
-			return 0xffffff;
-		
-		if(val < lo) val = lo;
-		if(val > hi) val = hi;
-		
-		var scale = (val-lo)/(hi-lo);
-		var h = (5*scale/6.0+0.5);
-		var r = Math.sin(Math.PI*h);
-		r *= r*255;
-		var g = Math.sin(Math.PI*(h+1/3.0));
-		g *= g*255;
-		var b = Math.sin(Math.PI*(h+2/3.0));
-		b *= b*255;
-		
-		return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
-	};
-	
-	this.jmolID = function() {
-		return "sinebow";
-	};
+    
+    //map value to hex color, range is provided
+    this.valueToHex = function(val, range) {
+        var lo, hi;
+        if(range) {
+            lo = range[0];
+            hi = range[1];
+        }
+        else {
+            lo = min;
+            hi = max;
+        }
+    
+        if(typeof(val) == "undefined")
+            return 0xffffff;
+        
+        if(val < lo) val = lo;
+        if(val > hi) val = hi;
+        
+        var scale = (val-lo)/(hi-lo);
+        var h = (5*scale/6.0+0.5);
+        var r = Math.sin(Math.PI*h);
+        r *= r*255;
+        var g = Math.sin(Math.PI*(h+1/3.0));
+        g *= g*255;
+        var b = Math.sin(Math.PI*(h+2/3.0));
+        b *= b*255;
+        
+        return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
+    };
+    
+    this.jmolID = function() {
+        return "sinebow";
+    };
 
-	//return range used for color mapping, null if none set
-	this.range = function() {
-		if(typeof(min) != "undefined" && typeof(max) != "undefined") {
-			return [min,max];
-		}
-		return null;
-	};
+    //return range used for color mapping, null if none set
+    this.range = function() {
+        if(typeof(min) != "undefined" && typeof(max) != "undefined") {
+            return [min,max];
+        }
+        return null;
+    };
 
 };
 //Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
@@ -23465,215 +23388,215 @@ $3Dmol.LabelCount = 0;
  */
 $3Dmol.Label = function(text, parameters) {
 
-	this.id = $3Dmol.LabelCount++;
-	this.stylespec = parameters || {};
+    this.id = $3Dmol.LabelCount++;
+    this.stylespec = parameters || {};
 
-	this.canvas = document.createElement('canvas');
-	//todo: implement resizing canvas..
-	this.canvas.width = 134;
-	this.canvas.height = 35;
-	this.context = this.canvas.getContext('2d');
-	this.sprite = new $3Dmol.Sprite();
-	this.text = text;
+    this.canvas = document.createElement('canvas');
+    //todo: implement resizing canvas..
+    this.canvas.width = 134;
+    this.canvas.height = 35;
+    this.context = this.canvas.getContext('2d');
+    this.sprite = new $3Dmol.Sprite();
+    this.text = text;
 
 };
 
 $3Dmol.Label.prototype = {
 
-	constructor : $3Dmol.Label,
+    constructor : $3Dmol.Label,
 
-	getStyle : function () { return this.stylespec; }, 
-	
-	setContext : function() {
-		// function for drawing rounded rectangles - for Label drawing
-		var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
+    getStyle : function () { return this.stylespec; }, 
+    
+    setContext : function() {
+        // function for drawing rounded rectangles - for Label drawing
+        var roundRect = function(ctx, x, y, w, h, r, drawBorder) {
 
-			ctx.beginPath();
-			ctx.moveTo(x + r, y);
-			ctx.lineTo(x + w - r, y);
-			ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-			ctx.lineTo(x + w, y + h - r);
-			ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-			ctx.lineTo(x + r, y + h);
-			ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-			ctx.lineTo(x, y + r);
-			ctx.quadraticCurveTo(x, y, x + r, y);
-			ctx.closePath();
-			ctx.fill();
-			if(drawBorder)
-				ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+            ctx.fill();
+            if(drawBorder)
+                ctx.stroke();
 
-		};
-		
-		//do all the checks to figure out what color is desired
-		var getColor = function(style, stylealpha, init) {
-			var ret = init;
-			if(typeof(style) != 'undefined') {
-				//convet regular colors
-				 if(style instanceof $3Dmol.Color) 
-					 ret = style.scaled();
-				 else //hex or name
-					ret = $3Dmol.CC.color(style).scaled();					
-			}
-			if(typeof(stylealpha) != 'undefined') {
-				ret.a = parseFloat(stylealpha);
-			}
-			return ret;
-		}
+        };
+        
+        //do all the checks to figure out what color is desired
+        var getColor = function(style, stylealpha, init) {
+            var ret = init;
+            if(typeof(style) != 'undefined') {
+                //convet regular colors
+                 if(style instanceof $3Dmol.Color) 
+                     ret = style.scaled();
+                 else //hex or name
+                    ret = $3Dmol.CC.color(style).scaled();                    
+            }
+            if(typeof(stylealpha) != 'undefined') {
+                ret.a = parseFloat(stylealpha);
+            }
+            return ret;
+        }
 
-		/**
-		 * Label type specification
-		 * @typedef LabelSpec
-		 * @struct
-		 * @prop {string} font - font name, default sans-serif
-		 * @prop {number} fontSize - height of text, default 18
-		 * @prop {string} fontColor - font color, default white
-		 * @prop {number} fontOpacity - font opacity, default 1
-		 * @prop {number} borderThickness - line width of border around label, default 0
-		 * @prop {string} borderColor - color of border, default backgroundColor
-		 * @prop {string} borderOpacity - color of border
-		 * @prop {string} backgroundColor - color of background, default black
-		 * @prop {string} backgroundOpacity - opacity of background, default 1
-		 * @prop {Object} position - x,y,z coordinates for label
-		 * @prop {boolean} inFront - always put labels in from of model
-		 * @prop {boolean} showBackground - show background rounded rectangle, default true
-		 */
-		return function() {
-			
-			var style = this.stylespec;
-			var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
-			
-			var showBackground = style.showBackground;
-			if(showBackground === '0' || showBackground === 'false') showBackground = false;
-			if(typeof(showBackground) == "undefined") showBackground = true; //default
-			var font = style.font ? style.font : "sans-serif";
+        /**
+         * Label type specification
+         * @typedef LabelSpec
+         * @struct
+         * @prop {string} font - font name, default sans-serif
+         * @prop {number} fontSize - height of text, default 18
+         * @prop {string} fontColor - font color, default white
+         * @prop {number} fontOpacity - font opacity, default 1
+         * @prop {number} borderThickness - line width of border around label, default 0
+         * @prop {string} borderColor - color of border, default backgroundColor
+         * @prop {string} borderOpacity - color of border
+         * @prop {string} backgroundColor - color of background, default black
+         * @prop {string} backgroundOpacity - opacity of background, default 1
+         * @prop {Object} position - x,y,z coordinates for label
+         * @prop {boolean} inFront - always put labels in from of model
+         * @prop {boolean} showBackground - show background rounded rectangle, default true
+         */
+        return function() {
+            
+            var style = this.stylespec;
+            var useScreen =  typeof(style.useScreen) == "undefined" ? false : style.useScreen;
+            
+            var showBackground = style.showBackground;
+            if(showBackground === '0' || showBackground === 'false') showBackground = false;
+            if(typeof(showBackground) == "undefined") showBackground = true; //default
+            var font = style.font ? style.font : "sans-serif";
 
-			var fontSize = parseInt(style.fontSize) ? parseInt(style.fontSize) : 18;
+            var fontSize = parseInt(style.fontSize) ? parseInt(style.fontSize) : 18;
 
-			var fontColor = getColor(style.fontColor, style.fontOpacity,
-					 {
-						r : 255,
-						g : 255,
-						b : 255,
-						a : 1.0
-					});
+            var fontColor = getColor(style.fontColor, style.fontOpacity,
+                     {
+                        r : 255,
+                        g : 255,
+                        b : 255,
+                        a : 1.0
+                    });
 
-			var padding = style.padding ? style.padding : 4;
-			var borderThickness = style.borderThickness ? style.borderThickness
-					: 0;
-	
-			var backgroundColor = getColor(style.backgroundColor, style.backgroundOpacity, 
-					 {
-						r : 0,
-						g : 0,
-						b : 0,
-						a : 1.0
-					});
-					
-			var borderColor = getColor(style.borderColor, style.borderOpacity, backgroundColor);
+            var padding = style.padding ? style.padding : 4;
+            var borderThickness = style.borderThickness ? style.borderThickness
+                    : 0;
+    
+            var backgroundColor = getColor(style.backgroundColor, style.backgroundOpacity, 
+                     {
+                        r : 0,
+                        g : 0,
+                        b : 0,
+                        a : 1.0
+                    });
+                    
+            var borderColor = getColor(style.borderColor, style.borderOpacity, backgroundColor);
 
-					
-			var position = style.position ? style.position
-					: {
-						x : -10,
-						y : 1,
-						z : 1
-					};
-					
-			// Should labels always be in front of model?
-			var inFront = (style.inFront !== undefined) ? style.inFront	: true;
-			if(inFront === 'false' || inFront === '0') inFront = false;
+                    
+            var position = style.position ? style.position
+                    : {
+                        x : -10,
+                        y : 1,
+                        z : 1
+                    };
+                    
+            // Should labels always be in front of model?
+            var inFront = (style.inFront !== undefined) ? style.inFront    : true;
+            if(inFront === 'false' || inFront === '0') inFront = false;
 
-			// clear canvas
+            // clear canvas
 
-			var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
+            var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
 
-			var bold = "";
-			if(style.bold)
-				bold = "bold ";
-			this.context.font = bold+fontSize + "px  " + font;
+            var bold = "";
+            if(style.bold)
+                bold = "bold ";
+            this.context.font = bold+fontSize + "px  " + font;
 
-			var metrics = this.context.measureText(this.text);
-			var textWidth = metrics.width;
-			
-			if(!showBackground) borderThickness = 0;
-		
-			var width = textWidth+2.5*borderThickness +2*padding;
-			var height = fontSize*1.25+2*borderThickness+2*padding;			// 1.25 is extra height factor for text below baseline: g,j,p,q.
+            var metrics = this.context.measureText(this.text);
+            var textWidth = metrics.width;
+            
+            if(!showBackground) borderThickness = 0;
+        
+            var width = textWidth+2.5*borderThickness +2*padding;
+            var height = fontSize*1.25+2*borderThickness+2*padding;            // 1.25 is extra height factor for text below baseline: g,j,p,q.
 
-			
-			if(style.backgroundImage) {
-				var img = style.backgroundImage;
-				var w = style.backgroundWidth ? style.backgroundWidth : img.width;
-				var h = style.backgroundHeight ? style.backgroundHeight : img.height;
-				if(w > width) width = w;
-				if(h > height) height = h;
-			}
+            
+            if(style.backgroundImage) {
+                var img = style.backgroundImage;
+                var w = style.backgroundWidth ? style.backgroundWidth : img.width;
+                var h = style.backgroundHeight ? style.backgroundHeight : img.height;
+                if(w > width) width = w;
+                if(h > height) height = h;
+            }
 
-			this.canvas.width = width;
-			this.canvas.height = height;
-			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.canvas.width = width;
+            this.canvas.height = height;
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-			var bold = "";
-			if(style.bold)
-				bold = "bold ";
-			this.context.font = bold+fontSize + "px  " + font;
+            var bold = "";
+            if(style.bold)
+                bold = "bold ";
+            this.context.font = bold+fontSize + "px  " + font;
 
-			// background color
-			this.context.fillStyle = "rgba(" + backgroundColor.r + ","
-					+ backgroundColor.g + "," + backgroundColor.b
-					+ "," + backgroundColor.a + ")";
-			// border color
-			this.context.strokeStyle = "rgba(" + borderColor.r + ","
-					+ borderColor.g + "," + borderColor.b + ","
-					+ borderColor.a + ")";
+            // background color
+            this.context.fillStyle = "rgba(" + backgroundColor.r + ","
+                    + backgroundColor.g + "," + backgroundColor.b
+                    + "," + backgroundColor.a + ")";
+            // border color
+            this.context.strokeStyle = "rgba(" + borderColor.r + ","
+                    + borderColor.g + "," + borderColor.b + ","
+                    + borderColor.a + ")";
 
-			this.context.lineWidth = borderThickness;
-			if(showBackground) {
-				roundRect(this.context, borderThickness,borderThickness , width-2*borderThickness,height-2*borderThickness, 6, borderThickness > 0);
-			}
-			
-			if(style.backgroundImage) {
-				var img = style.backgroundImage;
-				var w = style.backgroundWidth ? style.backgroundWidth : img.width;
-				var h = style.backgroundHeight ? style.backgroundHeight : img.height;
-				this.context.drawImage(img,0,0, w, h);
-			}
-			
+            this.context.lineWidth = borderThickness;
+            if(showBackground) {
+                roundRect(this.context, borderThickness,borderThickness , width-2*borderThickness,height-2*borderThickness, 6, borderThickness > 0);
+            }
+            
+            if(style.backgroundImage) {
+                var img = style.backgroundImage;
+                var w = style.backgroundWidth ? style.backgroundWidth : img.width;
+                var h = style.backgroundHeight ? style.backgroundHeight : img.height;
+                this.context.drawImage(img,0,0, w, h);
+            }
+            
 
-			// text color
-			this.context.fillStyle = "rgba(" + fontColor.r + ","
-					+ fontColor.g + "," + fontColor.b + ","
-					+ fontColor.a + ")";
-			
-			this.context.fillText(this.text, borderThickness+padding,
-					fontSize + borderThickness+padding, textWidth);
+            // text color
+            this.context.fillStyle = "rgba(" + fontColor.r + ","
+                    + fontColor.g + "," + fontColor.b + ","
+                    + fontColor.a + ")";
+            
+            this.context.fillText(this.text, borderThickness+padding,
+                    fontSize + borderThickness+padding, textWidth);
 
-			// canvas contents will be used for a texture
-			var texture = new $3Dmol.Texture(this.canvas);
-			texture.needsUpdate = true;
-			this.sprite.material = new $3Dmol.SpriteMaterial({
-				map : texture,
-				useScreenCoordinates : useScreen,
-				alignment : spriteAlignment,
-				depthTest : !inFront
-			});
+            // canvas contents will be used for a texture
+            var texture = new $3Dmol.Texture(this.canvas);
+            texture.needsUpdate = true;
+            this.sprite.material = new $3Dmol.SpriteMaterial({
+                map : texture,
+                useScreenCoordinates : useScreen,
+                alignment : spriteAlignment,
+                depthTest : !inFront
+            });
 
-			this.sprite.scale.set(1,1,1);
+            this.sprite.scale.set(1,1,1);
 
-			this.sprite.position.set(position.x, position.y, position.z);
-		};
+            this.sprite.position.set(position.x, position.y, position.z);
+        };
 
-	}(),
+    }(),
 
-	// clean up material and texture
-	dispose : function() {
+    // clean up material and texture
+    dispose : function() {
 
-		if (this.sprite.material.map !== undefined)
-			this.sprite.material.map.dispose();
-		if (this.sprite.material !== undefined)
-			this.sprite.material.dispose();
-	}
+        if (this.sprite.material.map !== undefined)
+            this.sprite.material.map.dispose();
+        if (this.sprite.material !== undefined)
+            this.sprite.material.dispose();
+    }
 
 };
 
@@ -23684,9 +23607,9 @@ $3Dmol.Label.prototype = {
  * $3Dmol.Parsers.<ext> corresponds to the parsers for files with extension ext
  */
 $3Dmol.Parsers = (function() {
-	var parsers = {};
-	
-	 /** @param {AtomSpec[]} atomsarray */
+    var parsers = {};
+    
+     /** @param {AtomSpec[]} atomsarray */
     var assignBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var atoms = atomsarray.slice(0);
@@ -23793,8 +23716,8 @@ $3Dmol.Parsers = (function() {
     // atoms; assume atom names are correct, only identifies
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
-	var maxlength = 3.2;
-	var maxlengthSq = 10.24;
+    var maxlength = 3.2;
+    var maxlengthSq = 10.24;
         var atoms = [];
         var i, j, n;
         for (i = 0, n = atomsarray.length; i < n; i++) {
@@ -23816,24 +23739,24 @@ $3Dmol.Parsers = (function() {
 
             for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
-		var zdiff = aj.z - ai.z;
+        var zdiff = aj.z - ai.z;
                 if (zdiff > maxlength) // can't be connected
                     break;
-		if (aj.atom == ai.atom)
-		    continue; //can't be connected, but later might be	
-		var ydiff = Math.abs(aj.y - ai.y);
-		if( ydiff > maxlength)
-		    continue;
-		var xdiff = Math.abs(aj.x - ai.x);
-		if(xdiff > maxlength)
-		    continue;
+        if (aj.atom == ai.atom)
+            continue; //can't be connected, but later might be    
+        var ydiff = Math.abs(aj.y - ai.y);
+        if( ydiff > maxlength)
+            continue;
+        var xdiff = Math.abs(aj.x - ai.x);
+        if(xdiff > maxlength)
+            continue;
                 var dist = xdiff*xdiff+ydiff*ydiff+zdiff*zdiff;
-		if (dist >  maxlengthSq)
-		    continue;
+        if (dist >  maxlengthSq)
+            continue;
 
-		if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
-		    continue; //ignore bonds between too close residues
-		//select closest hbond
+        if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
+            continue; //ignore bonds between too close residues
+        //select closest hbond
                 if (dist < ai.hbondDistanceSq) {
                     ai.hbondOther = aj;
                     ai.hbondDistanceSq = dist;
@@ -24014,6 +23937,9 @@ $3Dmol.Parsers = (function() {
      */
     parsers.sdf = parsers.SDF = function(atoms, str, options) {
 
+        var noH = false;
+        if(typeof options.keepH !== "undefined") 
+            noH = !options.keepH;
         var lines = str.split("\n");
         if (lines.length < 4)
             return;
@@ -24024,6 +23950,9 @@ $3Dmol.Parsers = (function() {
         var offset = 4;
         if (lines.length < 4 + atomCount + bondCount)
             return;
+        
+        // serial is atom's index in file; index is atoms index in 'atoms'
+        var serialToIndex = [];
         var start = atoms.length;
         var end = start + atomCount;
         var i, line;
@@ -24031,35 +23960,40 @@ $3Dmol.Parsers = (function() {
             line = lines[offset];
             offset++;
             var atom = {};
-            atom.serial = i;
-            atom.x = parseFloat(line.substr(0, 10));
-            atom.y = parseFloat(line.substr(10, 10));
-            atom.z = parseFloat(line.substr(20, 10));
-            atom.hetflag = true;
             atom.atom = atom.elem = line.substr(31, 3).replace(/ /g, "");
-            atom.bonds = [];
-            atom.bondOrder = [];
-            atom.properties = {};
-            atoms[i] = atom;
+
+            if (atom.elem != 'H' || !noH) {
+	            atom.serial = i;
+	            serialToIndex[i] = atoms.length;
+	            atom.x = parseFloat(line.substr(0, 10));
+	            atom.y = parseFloat(line.substr(10, 10));
+	            atom.z = parseFloat(line.substr(20, 10));
+	            atom.hetflag = true;
+	            atom.bonds = [];
+	            atom.bondOrder = [];
+	            atom.properties = {};
+	            atoms.push(atom);
+            }
         }
         
         for (i = 0; i < bondCount; i++) {
             line = lines[offset];
             offset++;
-            var from = parseInt(line.substr(0, 3)) - 1 + start;
-            var to = parseInt(line.substr(3, 3)) - 1 + start;
-            var order = parseInt(line.substr(6, 3));            
-            atoms[from].bonds.push(to);
-            atoms[from].bondOrder.push(order);
-            atoms[to].bonds.push(from);
-            atoms[to].bondOrder.push(order);
+            var from = serialToIndex[parseInt(line.substr(0, 3)) - 1 + start];
+            var to = serialToIndex[parseInt(line.substr(3, 3)) - 1 + start];
+            var order = parseInt(line.substr(6, 3));      
+            if(typeof(from) != 'undefined' && typeof(to) != 'undefined') {
+	            atoms[from].bonds.push(to);
+	            atoms[from].bondOrder.push(order);
+	            atoms[to].bonds.push(from);
+	            atoms[to].bondOrder.push(order);
+            }
         }
 
         return true;
     };
 
-    // will put atoms specified in mmCIF fromat in str into atoms when completed
-    // currently only parses the file
+    // puts atoms specified in mmCIF fromat in str into atoms
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
@@ -24116,7 +24050,6 @@ $3Dmol.Parsers = (function() {
         var linesFiltered = [];
         var trimDisabled = false;
         for (var lineNum = 0; lineNum < lines.length; lineNum++) {
-            [][0];
             //first remove comments
             //incorrect if #'s are allowed in strings
             //comments might only be allowed at beginning of line, not sure
@@ -24212,18 +24145,101 @@ $3Dmol.Parsers = (function() {
         }
 
         //Pulls atom information out of the data
+        var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+        if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
             var atom = {};
-            atom.x = mmCIF._atom_site.cartn_x[i];
-            atom.y = mmCIF._atom_site.cartn_y[i];
-            atom.z = mmCIF._atom_site.cartn_z[i];
-            atom.hetflag = true; //need to figure out what this is
+            atom.id = parseFloat(mmCIF._atom_site.id[i]);
+            atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
+            atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
+            atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
+            atom.hetflag = true; //need to figure out what this is group_PDB == HETA
+            atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.bondOrder = [];
             atom.properties = {};
-            atoms.push(atom);
+            atomsPreBonds[atom.id] = atom;
         }
+        var atomsIndexed = [];
+        var currentIndex = 0;
+        for (var id in atomsPreBonds) {
+            var atom = atomsPreBonds[id];
+            atom.index = currentIndex;
+            atomsIndexed[currentIndex] = atom;
+            currentIndex++;
+        }
+
+        //create a hash table of the atoms using label and sequence as keys
+        var atomHashTable = {};
+        for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+            var label_alt = mmCIF._atom_site.label_alt_id[i];
+            var label_asym = mmCIF._atom_site.label_asym_id[i];
+        var label_atom = mmCIF._atom_site.label_atom_id[i];
+        var label_seq = mmCIF._atom_site.label_seq_id[i];
+            var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
+
+            if (atomHashTable[label_alt] === undefined) {
+                atomHashTable[label_alt] = {};
+            }
+        if (atomHashTable[label_alt][label_asym] === undefined) {
+        atomHashTable[label_alt][label_asym] = {};
+        }
+        if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
+                atomHashTable[label_alt][label_asym][label_atom] = {};
+            }
+        
+            atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
+        }
+
+        for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
+        var offset = atoms.length;
+            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
+                           [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
+                           [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
+            if (atomsPreBonds[id1] === undefined) continue;
+            var index1 = atomsPreBonds[id1].index;
+
+        var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+            if (atomsPreBonds[id2] === undefined) continue;
+            var index2 = atomsPreBonds[id2].index;
+
+        atomsPreBonds[id1].bonds.push(index2 + offset);
+        atomsPreBonds[id1].bondOrder.push(1);
+        atomsPreBonds[id2].bonds.push(index1 + offset);
+        atomsPreBonds[id2].bondOrder.push(1);
+        console.log("connected " + index1 + " and " + index2);
+        }
+
+    //atoms = atoms.concat(atomsPreBonds);
+    for (var i = 0; i < atomsIndexed.length; i++) {
+            delete atomsIndexed[i].index;
+            atoms.push(atomsIndexed[i]);
+    }
+
         assignBonds(atoms);
+    
+    var matrices = [];
+    for (var i = 0; i < mmCIF._atom_sites['fract_transf_matrix[1][1]'].length; i++) {
+        var matrix = new $3Dmol.Matrix4(
+                mmCIF._atom_sites['fract_transf_matrix[1][1]'],
+                mmCIF._atom_sites['fract_transf_matrix[1][2]'],
+                mmCIF._atom_sites['fract_transf_matrix[1][3]'],
+                mmCIF._atom_sites['fract_transf_vector[1]'],
+                mmCIF._atom_sites['fract_transf_matrix[2][1]'],
+                mmCIF._atom_sites['fract_transf_matrix[2][2]'],
+                mmCIF._atom_sites['fract_transf_matrix[2][3]'],
+                mmCIF._atom_sites['fract_transf_vector[2]'],
+                mmCIF._atom_sites['fract_transf_matrix[3][1]'],
+                mmCIF._atom_sites['fract_transf_matrix[3][2]'],
+                mmCIF._atom_sites['fract_transf_matrix[3][3]'],
+                mmCIF._atom_sites['fract_transf_vector[3]']
+        );
+        matrices.push(matrix);
+    }
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -24238,7 +24254,7 @@ $3Dmol.Parsers = (function() {
         
         var noH = false;
         if(typeof options.keepH !== "undefined") 
-        	noH = !options.keepH;
+            noH = !options.keepH;
         
         // Note: these regex's work, though they don't match '<TRIPOS>'
         // correctly - something to do with angle brackets
@@ -24285,30 +24301,32 @@ $3Dmol.Parsers = (function() {
             line = lines[offset++];
             tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
             var atom = {};
-            
-            // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
-            // serial id in mol2 file
-            var index = i;
-            var serial = parseInt(tokens[0]);
-            atom.serial = serial;
-            // atom.serial = i;
-            
-            atom.x = parseFloat(tokens[2]);
-            atom.y = parseFloat(tokens[3]);
-            atom.z = parseFloat(tokens[4]);
+            //get element
             atom.atom = atom.elem = tokens[5].split('.')[0];
-                        
-            // TODO: Add capability to ignore H's
+            if (atom.elem == 'H' && noH) {
+            		//ignore
+            }
+            else {
+	            // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
+	            // serial id in mol2 file
+	            var index = atoms.length;
+	            var serial = parseInt(tokens[0]);
+	            atom.serial = serial;
+	            // atom.serial = i;
+	            
+	            atom.x = parseFloat(tokens[2]);
+	            atom.y = parseFloat(tokens[3]);
+	            atom.z = parseFloat(tokens[4]);
+	            atom.atom = tokens[5];
+	            var charge = parseFloat(tokens[8]);
+	            
+	            atom.bonds = [];
+	            atom.bondOrder = [];
+	            atom.properties = {'charge': charge, 'partialCharge': charge};
 
-            if (atom.elem == 'H' && noH)
-                continue;
-                
-            atom.bonds = [];
-            atom.bondOrder = [];
-            atom.properties = {};
-            
-            serialToIndex[serial] = index;
-            atoms.push(atom);
+	            serialToIndex[serial] = index;	            	
+	            atoms.push(atom);
+            }
         }
         
         // Process BONDS
@@ -24348,11 +24366,6 @@ $3Dmol.Parsers = (function() {
                 }    
 
                 
-                /*
-                 * atoms[from].bonds.push(to);
-                 * atoms[from].bondOrder.push(order);
-                 * atoms[to].bonds.push(from); atoms[to].bondOrder.push(order);
-                 */
 
             }
         }
@@ -24404,11 +24417,14 @@ $3Dmol.Parsers = (function() {
      * @param {string} str
      * @param {Object} options - keepH (do not strip hydrogens), noSecondaryStructure (do not compute ss)
      */
-    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options) {
+    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options, copyMatrices) {
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
         var computeStruct = !options.noSecondaryStructure;
+        var noAssembly = !options.doAssembly; //don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //if not specified, default to copyMatrix true
+        var allMatrices = [];
         var start = atoms.length;
         var atom;
         var protein = {
@@ -24474,7 +24490,7 @@ $3Dmol.Parsers = (function() {
                     'pdbline' : line
                 });
             } else if (recordName == 'SHEET ') {
-            	hasStruct = true;
+                hasStruct = true;
                 startChain = line.substr(21, 1);
                 startResi = parseInt(line.substr(22, 4));
                 endChain = line.substr(32, 1);
@@ -24491,33 +24507,126 @@ $3Dmol.Parsers = (function() {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
                     var toAtom = atoms[serialToIndex[to]];
                     if (fromAtom !== undefined && toAtom !== undefined) {
-                        fromAtom.bonds.push(serialToIndex[to]);
-                        fromAtom.bondOrder.push(1);
+                        //minimal cleanup here - pymol likes to output duplicated conect records
+                        var toindex = serialToIndex[to];
+                        if(fromAtom.bonds[fromAtom.bonds.length-1] != toindex) {
+                            fromAtom.bonds.push(toindex);
+                            fromAtom.bondOrder.push(1);
+                        }
                     }
                 }
             } else if (recordName == 'HELIX ') {
-            	hasStruct = true;
+                hasStruct = true;
                 startChain = line.substr(19, 1);
                 startResi = parseInt(line.substr(21, 4));
                 endChain = line.substr(31, 1);
                 endResi = parseInt(line.substr(33, 4));
                 protein.helix
                         .push([ startChain, startResi, endChain, endResi ]);
+<<<<<<< HEAD:build/3Dmol.js
             } else if (recordName == 'ENDMDL')
                 break;
+=======
+            } else if ((!noAssembly) && (recordName == 'REMARK') && (line.substr(13, 5) == 'BIOMT')) {
+                var n;
+                var matrix = new $3Dmol.Matrix4();
+                for (n = 1; n <= 3; n++) {
+                    line = lines[i].replace(/^\s*/, '');
+                    if (parseInt(line.substr(18, 1)) == n) { //check for all three lines by matching # @ end of "BIOMT" to n
+                        matrix.elements[(n-1)] = parseFloat(line.substr(23, 10));
+                        matrix.elements[(n-1)+4] = parseFloat(line.substr(33, 10));
+                        matrix.elements[(n-1)+8] = parseFloat(line.substr(43, 10));
+                        matrix.elements[(n-1)+12] = parseFloat(line.substr(53));
+                        i++;
+                    }
+                    else {
+                        while(line.substr(13, 5) == 'BIOMT') { //increase "i" until you leave the REMARKs
+                            i++;
+                            line = lines[i].replace(/^\s*/, '');
+                        }
+                    }
+                }
+                matrix.elements[3] = 0;
+                matrix.elements[7] = 0;
+                matrix.elements[11] = 0;
+                matrix.elements[15] = 1;
+                allMatrices.push(matrix);
+                copyMatrices.push(matrix);
+                
+                i--; //set i back
+            }
+            
+>>>>>>> 3bf4603ee45bdf982f1ac81a8ab1fb960d46a099:release/3Dmol.js
 
         }
 
         var starttime = (new Date()).getTime();
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
-        console.log("bond connecting " + ((new Date()).getTime() - starttime));
+        //console.log("bond connecting " + ((new Date()).getTime() - starttime));
         
+        var end = atoms.length;
+        var offset = end;
+        var idMatrix = new $3Dmol.Matrix4();
+        idMatrix.identity();
+        var t;
+        var l;
+        if(!copyMatrix) { //do full assembly
+            for (t = 0; t < allMatrices.length; t++) {
+                if (!allMatrices[t].isEqual(idMatrix)) {
+                    var n; 
+                    var xyz = new $3Dmol.Vector3();
+                    for (n = 0; n < end; n++) {
+                        var bondsArr = [];
+                        for (l = 0; l < atoms[n].bonds.length; l++) {
+                            bondsArr.push(atoms[n].bonds[l] + offset);
+                        }
+                        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+                        xyz.applyMatrix4(allMatrices[t]);
+                        atoms.push({
+                            'resn' : atoms[n].resn,
+                            'x' : xyz.x,
+                            'y' : xyz.y,
+                            'z' : xyz.z,
+                            'elem' : atoms[n].elem,
+                            'hetflag' : atoms[n].hetflag,
+                            'chain' : atoms[n].chain,
+                            'resi' : atoms[n].resi,
+                            'icode' : atoms[n].icode,
+                            'rescode': atoms[n].rescode,
+                            'serial' : atoms[n].serial,
+                            'atom' : atoms[n].atom,
+                            'bonds' : bondsArr,
+                            'ss' : atoms[n].ss,
+                            'bondOrder' : atoms[n].bondOrder,
+                            'properties' : atoms[n].properties,
+                            'b' : atoms[n].b,
+                            'pdbline' : atoms[n].pdbline,
+                        });
+                    }
+                    offset = atoms.length;
+                }
+            }
+        }
+        //ELSE give all atoms a pointer to their symmetries 
+        else {
+            for (t = 0; t < atoms.length; t++) {
+                var symmetries = [];
+                for (l = 0; l < copyMatrices.length; l++) {
+                    var newXYZ = new $3Dmol.Vector3();
+                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].x);
+                    newXYZ.applyMatrix4(copyMatrices[l]);
+                    symmetries.push(newXYZ);
+                }
+                atoms[t].symmetries = symmetries;
+            }
+        }
+                
         
         if(computeStruct || !hasStruct) {
             starttime = (new Date()).getTime();
-        	computeSecondaryStructure(atoms);
-        	console.log("secondary structure " + ((new Date()).getTime() - starttime));
+            computeSecondaryStructure(atoms);
+            //console.log("secondary structure " + ((new Date()).getTime() - starttime));
         }
         
         // Assign secondary structures from pdb file
@@ -24582,7 +24691,7 @@ $3Dmol.Parsers = (function() {
             var recordName = line.substr(0, 6);
             var startChain, startResi, endChain, endResi;
             if (recordName == 'ATOM  ' || recordName == 'HETATM') {
-	                //I would have liked to split based solely on whitespace, but
+                    //I would have liked to split based solely on whitespace, but
                 //it seems that there is no guarantee that all the fields will
                 //be filled out (e.g. the chain) so this doesn't work
                 var serial = parseInt(line.substr(6, 5));
@@ -24601,9 +24710,9 @@ $3Dmol.Parsers = (function() {
                 
                 var elem = atom[0];
                 if(atom.length > 1 && atom[1].toUpperCase() != atom[1]) {
-                	//slight hack - identify two character elements by the
-                	//second character in the atom name being lowercase
-                	elem = atom.substr(0,2);
+                    //slight hack - identify two character elements by the
+                    //second character in the atom name being lowercase
+                    elem = atom.substr(0,2);
                 }
 
                 if (line[0] == 'H')
@@ -24625,7 +24734,7 @@ $3Dmol.Parsers = (function() {
                     'bonds' : [],
                     'ss' : 'c',
                     'bondOrder' : [],
-                    'properties' : {'charge': charge, 'radius': radius},
+                    'properties' : {'charge': charge, 'partialCharge': charge, 'radius': radius},
                     'pdbline' : line
                 });
             } else if (recordName == 'CONECT') {
@@ -24648,14 +24757,14 @@ $3Dmol.Parsers = (function() {
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
         if(computeStruct)
-        	computeSecondaryStructure(atoms);
+            computeSecondaryStructure(atoms);
         
         return true;
     };
 
     
-	
-	return parsers;
+    
+    return parsers;
 })();
 var $3Dmol = $3Dmol || {};
 
@@ -24831,15 +24940,15 @@ $3Dmol.partialCharges = {
 "VAL:C": 0.60,
 "VAL:O": -0.55
 };
-	
+    
 //this can be supplied to mapAtomProperties
 $3Dmol.applyPartialCharges = function(atom, keepexisting) {
-	if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
-		if(atom.resn && atom.atom) {
-			var key = atom.resn+":"+atom.atom;
-			atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
-		}
-	}
+    if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
+        if(atom.resn && atom.atom) {
+            var key = atom.resn+":"+atom.atom;
+            atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
+        }
+    }
 };// Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation 
 (function() {

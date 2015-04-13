@@ -145,6 +145,10 @@
 							<a href="types.html#ViewerSpec">ViewerSpec</a>
 						</li>
 						
+						<li>
+							<a href="types.html#WithinSelectionSpec">WithinSelectionSpec</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -369,7 +373,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
     
     
     <div class="description">
-        <p>Create and add arrow shape</p>
+        <p>Create and add cylinder shape</p>
     </div>
     
 
@@ -409,7 +413,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
             <td class="type">
             
                 
-<span class="param-type"><a href="ArrowSpec.html">ArrowSpec</a></span>
+<span class="param-type">CylinderSpec</span>
 
 
             
@@ -503,7 +507,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
     
     
     <div class="description">
-        <p>Create and add cylinder shape</p>
+        <p>Create and add arrow shape</p>
     </div>
     
 
@@ -543,7 +547,7 @@ Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmo
             <td class="type">
             
                 
-<span class="param-type">CylinderSpec</span>
+<span class="param-type"><a href="ArrowSpec.html">ArrowSpec</a></span>
 
 
             
@@ -2328,6 +2332,96 @@ If extract, removes selected atoms from existing models</p>
         glviewer.getModel(0);</pre>
 
 
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getView"><span class="type-signature"></span>getView<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;number>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns an array representing the current viewpoint.
+Translation, zoom, and rotation quaternion.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>arg</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Array.&lt;number></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
     
 </dd>
 
@@ -4408,6 +4502,121 @@ viewer.setStyle({chain: &#x27;B&#x27;}, {carton: {color: spectrum}}); //set chai
         
             
 <dt>
+    <h4 class="name" id="setView"><span class="type-signature"></span>setView<span class="signature">(arg)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Sets the view to the specified translation, zoom, and rotation.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>arg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array formatted identically to the return value of getView</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="setWidth"><span class="type-signature"></span>setWidth<span class="signature">(w)</span><span class="type-signature"></span></h4>
     
     
@@ -4531,7 +4740,8 @@ viewer.setStyle({chain: &#x27;B&#x27;}, {carton: {color: spectrum}}); //set chai
     
     
     <div class="description">
-        <p>Translate current view by x,y screen coordinates</p>
+        <p>Translate current view by x,y screen coordinates
+This pans the camera rather than translating the model.</p>
     </div>
     
 
@@ -4789,7 +4999,7 @@ viewer.setStyle({chain: &#x27;B&#x27;}, {carton: {color: spectrum}}); //set chai
         
             
 <dt>
-    <h4 class="name" id="zoomTo"><span class="type-signature"></span>zoomTo<span class="signature">(<span class="optional">sel</span>, x, y)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="zoomTo"><span class="type-signature"></span>zoomTo<span class="signature">(<span class="optional">sel</span>)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -4861,68 +5071,6 @@ viewer.setStyle({chain: &#x27;B&#x27;}, {carton: {color: spectrum}}); //set chai
 
             <td class="description last"><p>Selection specification specifying model and atom
            properties to select. Default: all atoms in viewer</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>x</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>x-offset for zoom (screen coords)</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>y</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>y-offset for zoom (screen coords)</p></td>
         </tr>
 
 	
@@ -5012,7 +5160,7 @@ viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )</pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Fri Feb 27 2015 00:54:37 GMT-0500 (EST) using the <a
+		on Thu Apr 09 2015 16:41:10 GMT-0400 (EDT) using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>

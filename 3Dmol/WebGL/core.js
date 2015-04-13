@@ -83,10 +83,10 @@ $3Dmol.Color.prototype = {
     },
     
     getHex: function() {
-    	var R = Math.round(this.r*255);
-    	var G = Math.round(this.g*255);
-    	var B = Math.round(this.b*255);
-    	return R<<16 | G << 8 | B;
+        var R = Math.round(this.r*255);
+        var G = Math.round(this.g*255);
+        var B = Math.round(this.b*255);
+        return R<<16 | G << 8 | B;
     },
     
     clone : function() {
@@ -103,12 +103,12 @@ $3Dmol.Color.prototype = {
     
     //return object that represents color components from 0 to 255
     scaled : function() {
-    	var ret = {};
-    	ret.r = Math.round(this.r*255);
-    	ret.g = Math.round(this.g*255);
-    	ret.b = Math.round(this.b*255);
-    	ret.a = 1.0;
-    	return ret;
+        var ret = {};
+        ret.r = Math.round(this.r*255);
+        ret.g = Math.round(this.g*255);
+        ret.b = Math.round(this.b*255);
+        ret.a = 1.0;
+        return ret;
     }
     
 };
@@ -260,6 +260,8 @@ $3Dmol.Object3D.prototype = {
         object.matrix.copy(this.matrix);
         object.matrixWorld.copy(this.matrixWorld);
         object.quaternion.copy(this.quaternion);
+        object.matrixAutoUpdate = this.matrixAutoUpdate;
+        object.matrixWorldNeedsUpdate = this.matrixWorldNeedsUpdate;
         
         object.useQuaternion = this.useQuaternion;
         
@@ -301,11 +303,11 @@ $3Dmol.Geometry = (function() {
     };
     
     geometryGroup.prototype.getNumVertices = function() {
-    	return this.vertices;
+        return this.vertices;
     };
     
     geometryGroup.prototype.getVertices = function() {
-    	return this.vertexArray;
+        return this.vertexArray;
     };
     
     
@@ -405,7 +407,7 @@ $3Dmol.Geometry = (function() {
             faceArr = this.faceArray,
             lineArr = this.lineArray;
 
-	//subarray to avoid copying and reallocating memory
+        //subarray to avoid copying and reallocating memory
         this.vertexArray = vertexArr.subarray(0,this.vertices*3);
         this.colorArray = colorArr.subarray(0,this.vertices*3);
         
@@ -425,13 +427,13 @@ $3Dmol.Geometry = (function() {
         }
         
         if(reallocatemem) { 
-        	//actually copy smaller arrays to save memory
-        	if(this.normalArray) this.normalArray = new Float32Array(this.normalArray);
-        	if(this.faceArray) this.faceArray = new Uint16Array(this.faceArray);
-        	if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
-        	if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
-        	if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
-        	
+            //actually copy smaller arrays to save memory
+            if(this.normalArray) this.normalArray = new Float32Array(this.normalArray);
+            if(this.faceArray) this.faceArray = new Uint16Array(this.faceArray);
+            if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
+            if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
+            if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
+            
         }
         this.__inittedArrays = true;        
         

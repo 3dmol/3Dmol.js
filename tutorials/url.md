@@ -74,11 +74,11 @@ The available molecular styles are **line** (default), **cross**, **cartoon**, *
 
 To render GFP with a **cartoon** representation, enter
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`](http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`)
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`](http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon)
 
 You can apply multiple styles at once to the selected atoms using a semi-colon separated list:
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon;stick`](../viewer.html?pdb=4KW4&style=cartoon;stick`)
+[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon;stick`](../viewer.html?pdb=4KW4&style=cartoon;stick)
 
 Characteristics of each style, such as line width and color, may also be set.  These key-value pairs take the form of a comma separated list after a colon.  Since `=` has special meaning within a URL, `~` is used to associate the key-value pairs:
 

@@ -6,9 +6,9 @@
  * $3Dmol.Parsers.<ext> corresponds to the parsers for files with extension ext
  */
 $3Dmol.Parsers = (function() {
-	var parsers = {};
-	
-	 /** @param {AtomSpec[]} atomsarray */
+    var parsers = {};
+    
+     /** @param {AtomSpec[]} atomsarray */
     var assignBonds = function(atomsarray) {
         // assign bonds - yuck, can't count on connect records
         var atoms = atomsarray.slice(0);
@@ -115,8 +115,8 @@ $3Dmol.Parsers = (function() {
     // atoms; assume atom names are correct, only identifies
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
-	var maxlength = 3.2;
-	var maxlengthSq = 10.24;
+    var maxlength = 3.2;
+    var maxlengthSq = 10.24;
         var atoms = [];
         var i, j, n;
         for (i = 0, n = atomsarray.length; i < n; i++) {
@@ -138,24 +138,24 @@ $3Dmol.Parsers = (function() {
 
             for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
-		var zdiff = aj.z - ai.z;
+        var zdiff = aj.z - ai.z;
                 if (zdiff > maxlength) // can't be connected
                     break;
-		if (aj.atom == ai.atom)
-		    continue; //can't be connected, but later might be	
-		var ydiff = Math.abs(aj.y - ai.y);
-		if( ydiff > maxlength)
-		    continue;
-		var xdiff = Math.abs(aj.x - ai.x);
-		if(xdiff > maxlength)
-		    continue;
+        if (aj.atom == ai.atom)
+            continue; //can't be connected, but later might be    
+        var ydiff = Math.abs(aj.y - ai.y);
+        if( ydiff > maxlength)
+            continue;
+        var xdiff = Math.abs(aj.x - ai.x);
+        if(xdiff > maxlength)
+            continue;
                 var dist = xdiff*xdiff+ydiff*ydiff+zdiff*zdiff;
-		if (dist >  maxlengthSq)
-		    continue;
+        if (dist >  maxlengthSq)
+            continue;
 
-		if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
-		    continue; //ignore bonds between too close residues
-		//select closest hbond
+        if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
+            continue; //ignore bonds between too close residues
+        //select closest hbond
                 if (dist < ai.hbondDistanceSq) {
                     ai.hbondOther = aj;
                     ai.hbondDistanceSq = dist;
@@ -336,6 +336,9 @@ $3Dmol.Parsers = (function() {
      */
     parsers.sdf = parsers.SDF = function(atoms, str, options) {
 
+        var noH = false;
+        if(typeof options.keepH !== "undefined") 
+            noH = !options.keepH;
         var lines = str.split("\n");
         if (lines.length < 4)
             return;
@@ -346,6 +349,9 @@ $3Dmol.Parsers = (function() {
         var offset = 4;
         if (lines.length < 4 + atomCount + bondCount)
             return;
+        
+        // serial is atom's index in file; index is atoms index in 'atoms'
+        var serialToIndex = [];
         var start = atoms.length;
         var end = start + atomCount;
         var i, line;
@@ -353,35 +359,40 @@ $3Dmol.Parsers = (function() {
             line = lines[offset];
             offset++;
             var atom = {};
-            atom.serial = i;
-            atom.x = parseFloat(line.substr(0, 10));
-            atom.y = parseFloat(line.substr(10, 10));
-            atom.z = parseFloat(line.substr(20, 10));
-            atom.hetflag = true;
             atom.atom = atom.elem = line.substr(31, 3).replace(/ /g, "");
-            atom.bonds = [];
-            atom.bondOrder = [];
-            atom.properties = {};
-            atoms[i] = atom;
+
+            if (atom.elem != 'H' || !noH) {
+	            atom.serial = i;
+	            serialToIndex[i] = atoms.length;
+	            atom.x = parseFloat(line.substr(0, 10));
+	            atom.y = parseFloat(line.substr(10, 10));
+	            atom.z = parseFloat(line.substr(20, 10));
+	            atom.hetflag = true;
+	            atom.bonds = [];
+	            atom.bondOrder = [];
+	            atom.properties = {};
+	            atoms.push(atom);
+            }
         }
         
         for (i = 0; i < bondCount; i++) {
             line = lines[offset];
             offset++;
-            var from = parseInt(line.substr(0, 3)) - 1 + start;
-            var to = parseInt(line.substr(3, 3)) - 1 + start;
-            var order = parseInt(line.substr(6, 3));            
-            atoms[from].bonds.push(to);
-            atoms[from].bondOrder.push(order);
-            atoms[to].bonds.push(from);
-            atoms[to].bondOrder.push(order);
+            var from = serialToIndex[parseInt(line.substr(0, 3)) - 1 + start];
+            var to = serialToIndex[parseInt(line.substr(3, 3)) - 1 + start];
+            var order = parseInt(line.substr(6, 3));      
+            if(typeof(from) != 'undefined' && typeof(to) != 'undefined') {
+	            atoms[from].bonds.push(to);
+	            atoms[from].bondOrder.push(order);
+	            atoms[to].bonds.push(from);
+	            atoms[to].bondOrder.push(order);
+            }
         }
 
         return true;
     };
 
-    // will put atoms specified in mmCIF fromat in str into atoms when completed
-    // currently only parses the file
+    // puts atoms specified in mmCIF fromat in str into atoms
     /**
      * @param {AtomSpec[]} atoms
      * @param {string} str
@@ -438,7 +449,6 @@ $3Dmol.Parsers = (function() {
         var linesFiltered = [];
         var trimDisabled = false;
         for (var lineNum = 0; lineNum < lines.length; lineNum++) {
-            [][0];
             //first remove comments
             //incorrect if #'s are allowed in strings
             //comments might only be allowed at beginning of line, not sure
@@ -534,18 +544,101 @@ $3Dmol.Parsers = (function() {
         }
 
         //Pulls atom information out of the data
+        var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+        if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
             var atom = {};
-            atom.x = mmCIF._atom_site.cartn_x[i];
-            atom.y = mmCIF._atom_site.cartn_y[i];
-            atom.z = mmCIF._atom_site.cartn_z[i];
-            atom.hetflag = true; //need to figure out what this is
+            atom.id = parseFloat(mmCIF._atom_site.id[i]);
+            atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
+            atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
+            atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
+            atom.hetflag = true; //need to figure out what this is group_PDB == HETA
+            atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.bondOrder = [];
             atom.properties = {};
-            atoms.push(atom);
+            atomsPreBonds[atom.id] = atom;
         }
+        var atomsIndexed = [];
+        var currentIndex = 0;
+        for (var id in atomsPreBonds) {
+            var atom = atomsPreBonds[id];
+            atom.index = currentIndex;
+            atomsIndexed[currentIndex] = atom;
+            currentIndex++;
+        }
+
+        //create a hash table of the atoms using label and sequence as keys
+        var atomHashTable = {};
+        for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
+            var label_alt = mmCIF._atom_site.label_alt_id[i];
+            var label_asym = mmCIF._atom_site.label_asym_id[i];
+        var label_atom = mmCIF._atom_site.label_atom_id[i];
+        var label_seq = mmCIF._atom_site.label_seq_id[i];
+            var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
+
+            if (atomHashTable[label_alt] === undefined) {
+                atomHashTable[label_alt] = {};
+            }
+        if (atomHashTable[label_alt][label_asym] === undefined) {
+        atomHashTable[label_alt][label_asym] = {};
+        }
+        if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
+                atomHashTable[label_alt][label_asym][label_atom] = {};
+            }
+        
+            atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
+        }
+
+        for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
+        var offset = atoms.length;
+            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
+                           [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
+                           [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
+            if (atomsPreBonds[id1] === undefined) continue;
+            var index1 = atomsPreBonds[id1].index;
+
+        var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
+                               [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+            if (atomsPreBonds[id2] === undefined) continue;
+            var index2 = atomsPreBonds[id2].index;
+
+        atomsPreBonds[id1].bonds.push(index2 + offset);
+        atomsPreBonds[id1].bondOrder.push(1);
+        atomsPreBonds[id2].bonds.push(index1 + offset);
+        atomsPreBonds[id2].bondOrder.push(1);
+        console.log("connected " + index1 + " and " + index2);
+        }
+
+    //atoms = atoms.concat(atomsPreBonds);
+    for (var i = 0; i < atomsIndexed.length; i++) {
+            delete atomsIndexed[i].index;
+            atoms.push(atomsIndexed[i]);
+    }
+
         assignBonds(atoms);
+    
+    var matrices = [];
+    for (var i = 0; i < mmCIF._atom_sites['fract_transf_matrix[1][1]'].length; i++) {
+        var matrix = new $3Dmol.Matrix4(
+                mmCIF._atom_sites['fract_transf_matrix[1][1]'],
+                mmCIF._atom_sites['fract_transf_matrix[1][2]'],
+                mmCIF._atom_sites['fract_transf_matrix[1][3]'],
+                mmCIF._atom_sites['fract_transf_vector[1]'],
+                mmCIF._atom_sites['fract_transf_matrix[2][1]'],
+                mmCIF._atom_sites['fract_transf_matrix[2][2]'],
+                mmCIF._atom_sites['fract_transf_matrix[2][3]'],
+                mmCIF._atom_sites['fract_transf_vector[2]'],
+                mmCIF._atom_sites['fract_transf_matrix[3][1]'],
+                mmCIF._atom_sites['fract_transf_matrix[3][2]'],
+                mmCIF._atom_sites['fract_transf_matrix[3][3]'],
+                mmCIF._atom_sites['fract_transf_vector[3]']
+        );
+        matrices.push(matrix);
+    }
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -560,7 +653,7 @@ $3Dmol.Parsers = (function() {
         
         var noH = false;
         if(typeof options.keepH !== "undefined") 
-        	noH = !options.keepH;
+            noH = !options.keepH;
         
         // Note: these regex's work, though they don't match '<TRIPOS>'
         // correctly - something to do with angle brackets
@@ -607,30 +700,32 @@ $3Dmol.Parsers = (function() {
             line = lines[offset++];
             tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
             var atom = {};
-            
-            // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
-            // serial id in mol2 file
-            var index = i;
-            var serial = parseInt(tokens[0]);
-            atom.serial = serial;
-            // atom.serial = i;
-            
-            atom.x = parseFloat(tokens[2]);
-            atom.y = parseFloat(tokens[3]);
-            atom.z = parseFloat(tokens[4]);
+            //get element
             atom.atom = atom.elem = tokens[5].split('.')[0];
-                        
-            // TODO: Add capability to ignore H's
+            if (atom.elem == 'H' && noH) {
+            		//ignore
+            }
+            else {
+	            // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
+	            // serial id in mol2 file
+	            var index = atoms.length;
+	            var serial = parseInt(tokens[0]);
+	            atom.serial = serial;
+	            // atom.serial = i;
+	            
+	            atom.x = parseFloat(tokens[2]);
+	            atom.y = parseFloat(tokens[3]);
+	            atom.z = parseFloat(tokens[4]);
+	            atom.atom = tokens[5];
+	            var charge = parseFloat(tokens[8]);
+	            
+	            atom.bonds = [];
+	            atom.bondOrder = [];
+	            atom.properties = {'charge': charge, 'partialCharge': charge};
 
-            if (atom.elem == 'H' && noH)
-                continue;
-                
-            atom.bonds = [];
-            atom.bondOrder = [];
-            atom.properties = {};
-            
-            serialToIndex[serial] = index;
-            atoms.push(atom);
+	            serialToIndex[serial] = index;	            	
+	            atoms.push(atom);
+            }
         }
         
         // Process BONDS
@@ -670,11 +765,6 @@ $3Dmol.Parsers = (function() {
                 }    
 
                 
-                /*
-                 * atoms[from].bonds.push(to);
-                 * atoms[from].bondOrder.push(order);
-                 * atoms[to].bonds.push(from); atoms[to].bondOrder.push(order);
-                 */
 
             }
         }
@@ -726,11 +816,14 @@ $3Dmol.Parsers = (function() {
      * @param {string} str
      * @param {Object} options - keepH (do not strip hydrogens), noSecondaryStructure (do not compute ss)
      */
-    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options) {
+    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms, str, options, copyMatrices) {
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
         var computeStruct = !options.noSecondaryStructure;
+        var noAssembly = !options.doAssembly; //don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //if not specified, default to copyMatrix true
+        var allMatrices = [];
         var start = atoms.length;
         var atom;
         var protein = {
@@ -796,7 +889,7 @@ $3Dmol.Parsers = (function() {
                     'pdbline' : line
                 });
             } else if (recordName == 'SHEET ') {
-            	hasStruct = true;
+                hasStruct = true;
                 startChain = line.substr(21, 1);
                 startResi = parseInt(line.substr(22, 4));
                 endChain = line.substr(32, 1);
@@ -813,33 +906,121 @@ $3Dmol.Parsers = (function() {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
                     var toAtom = atoms[serialToIndex[to]];
                     if (fromAtom !== undefined && toAtom !== undefined) {
-                        fromAtom.bonds.push(serialToIndex[to]);
-                        fromAtom.bondOrder.push(1);
+                        //minimal cleanup here - pymol likes to output duplicated conect records
+                        var toindex = serialToIndex[to];
+                        if(fromAtom.bonds[fromAtom.bonds.length-1] != toindex) {
+                            fromAtom.bonds.push(toindex);
+                            fromAtom.bondOrder.push(1);
+                        }
                     }
                 }
             } else if (recordName == 'HELIX ') {
-            	hasStruct = true;
+                hasStruct = true;
                 startChain = line.substr(19, 1);
                 startResi = parseInt(line.substr(21, 4));
                 endChain = line.substr(31, 1);
                 endResi = parseInt(line.substr(33, 4));
                 protein.helix
                         .push([ startChain, startResi, endChain, endResi ]);
-            } else if (recordName == 'ENDMDL')
-                break; // todo: better multi-model support
+            } else if ((!noAssembly) && (recordName == 'REMARK') && (line.substr(13, 5) == 'BIOMT')) {
+                var n;
+                var matrix = new $3Dmol.Matrix4();
+                for (n = 1; n <= 3; n++) {
+                    line = lines[i].replace(/^\s*/, '');
+                    if (parseInt(line.substr(18, 1)) == n) { //check for all three lines by matching # @ end of "BIOMT" to n
+                        matrix.elements[(n-1)] = parseFloat(line.substr(23, 10));
+                        matrix.elements[(n-1)+4] = parseFloat(line.substr(33, 10));
+                        matrix.elements[(n-1)+8] = parseFloat(line.substr(43, 10));
+                        matrix.elements[(n-1)+12] = parseFloat(line.substr(53));
+                        i++;
+                    }
+                    else {
+                        while(line.substr(13, 5) == 'BIOMT') { //increase "i" until you leave the REMARKs
+                            i++;
+                            line = lines[i].replace(/^\s*/, '');
+                        }
+                    }
+                }
+                matrix.elements[3] = 0;
+                matrix.elements[7] = 0;
+                matrix.elements[11] = 0;
+                matrix.elements[15] = 1;
+                allMatrices.push(matrix);
+                copyMatrices.push(matrix);
+                
+                i--; //set i back
+            }
+            
 
         }
 
         var starttime = (new Date()).getTime();
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
-        console.log("bond connecting " + ((new Date()).getTime() - starttime));
+        //console.log("bond connecting " + ((new Date()).getTime() - starttime));
         
+        var end = atoms.length;
+        var offset = end;
+        var idMatrix = new $3Dmol.Matrix4();
+        idMatrix.identity();
+        var t;
+        var l;
+        if(!copyMatrix) { //do full assembly
+            for (t = 0; t < allMatrices.length; t++) {
+                if (!allMatrices[t].isEqual(idMatrix)) {
+                    var n; 
+                    var xyz = new $3Dmol.Vector3();
+                    for (n = 0; n < end; n++) {
+                        var bondsArr = [];
+                        for (l = 0; l < atoms[n].bonds.length; l++) {
+                            bondsArr.push(atoms[n].bonds[l] + offset);
+                        }
+                        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+                        xyz.applyMatrix4(allMatrices[t]);
+                        atoms.push({
+                            'resn' : atoms[n].resn,
+                            'x' : xyz.x,
+                            'y' : xyz.y,
+                            'z' : xyz.z,
+                            'elem' : atoms[n].elem,
+                            'hetflag' : atoms[n].hetflag,
+                            'chain' : atoms[n].chain,
+                            'resi' : atoms[n].resi,
+                            'icode' : atoms[n].icode,
+                            'rescode': atoms[n].rescode,
+                            'serial' : atoms[n].serial,
+                            'atom' : atoms[n].atom,
+                            'bonds' : bondsArr,
+                            'ss' : atoms[n].ss,
+                            'bondOrder' : atoms[n].bondOrder,
+                            'properties' : atoms[n].properties,
+                            'b' : atoms[n].b,
+                            'pdbline' : atoms[n].pdbline,
+                        });
+                    }
+                    offset = atoms.length;
+                }
+            }
+        }
+        //ELSE give all atoms a pointer to their symmetries 
+        else {
+            for (t = 0; t < atoms.length; t++) {
+                var symmetries = [];
+                for (l = 0; l < copyMatrices.length; l++) {
+                    var newXYZ = new $3Dmol.Vector3();
+                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
+                    newXYZ.applyMatrix4(copyMatrices[l]);
+                    symmetries.push(newXYZ);
+                }
+                atoms[t].symmetries = symmetries;
+            }
+        }
+                
         
         if(computeStruct || !hasStruct) {
             starttime = (new Date()).getTime();
-        	computeSecondaryStructure(atoms);
-        	console.log("secondary structure " + ((new Date()).getTime() - starttime));
+            computeSecondaryStructure(atoms);
+            //console.log("secondary structure " + ((new Date()).getTime() - starttime));
         }
         
         // Assign secondary structures from pdb file
@@ -904,7 +1085,7 @@ $3Dmol.Parsers = (function() {
             var recordName = line.substr(0, 6);
             var startChain, startResi, endChain, endResi;
             if (recordName == 'ATOM  ' || recordName == 'HETATM') {
-	                //I would have liked to split based solely on whitespace, but
+                    //I would have liked to split based solely on whitespace, but
                 //it seems that there is no guarantee that all the fields will
                 //be filled out (e.g. the chain) so this doesn't work
                 var serial = parseInt(line.substr(6, 5));
@@ -923,9 +1104,9 @@ $3Dmol.Parsers = (function() {
                 
                 var elem = atom[0];
                 if(atom.length > 1 && atom[1].toUpperCase() != atom[1]) {
-                	//slight hack - identify two character elements by the
-                	//second character in the atom name being lowercase
-                	elem = atom.substr(0,2);
+                    //slight hack - identify two character elements by the
+                    //second character in the atom name being lowercase
+                    elem = atom.substr(0,2);
                 }
 
                 if (line[0] == 'H')
@@ -947,7 +1128,7 @@ $3Dmol.Parsers = (function() {
                     'bonds' : [],
                     'ss' : 'c',
                     'bondOrder' : [],
-                    'properties' : {'charge': charge, 'radius': radius},
+                    'properties' : {'charge': charge, 'partialCharge': charge, 'radius': radius},
                     'pdbline' : line
                 });
             } else if (recordName == 'CONECT') {
@@ -970,12 +1151,12 @@ $3Dmol.Parsers = (function() {
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
         if(computeStruct)
-        	computeSecondaryStructure(atoms);
+            computeSecondaryStructure(atoms);
         
         return true;
     };
 
     
-	
-	return parsers;
+    
+    return parsers;
 })();
