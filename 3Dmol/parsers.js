@@ -1008,7 +1008,7 @@ $3Dmol.Parsers = (function() {
                 var symmetries = [];
                 for (l = 0; l < copyMatrices.length; l++) {
                     var newXYZ = new $3Dmol.Vector3();
-                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].x);
+                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
                     newXYZ.applyMatrix4(copyMatrices[l]);
                     symmetries.push(newXYZ);
                 }
