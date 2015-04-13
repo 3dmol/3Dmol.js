@@ -379,7 +379,7 @@ $3Dmol.drawCartoon = (function() {
         for (k = 0; k < num; k++)
             points[k] = [];
         var colors = [];
-        var currentChain, currentReschain, currentResi, currentCA, currentP, currentOP2, currentC3P, currentN1, currentAtom;
+        var currentChain, currentReschain, currentResi, currentCA, currentP, currentOP2, currentBaseStart, currentBaseEnd, currentAtom;
         var prevCO = null, ss = null, ssborder = false;
         var tracegeo = null;
         var atomcolor;
@@ -390,8 +390,13 @@ $3Dmol.drawCartoon = (function() {
             if (atom === undefined)
                 continue;
 
+            var baseStart = "O5'"
+            var baseEnd = 'N1'
+            if (atom.resn == 'DT' || atom.resn == 'DC')
+                baseEnd = 'N5'
+
             if ((atom.atom == 'O' || atom.atom == 'CA' || atom.atom =='P' ||
-                atom.atom == 'OP2' || atom.atom == "C3'" || atom.atom == 'N1') && !atom.hetflag)
+                atom.atom == 'OP2' || atom.atom == baseStart || atom.atom == baseEnd) && !atom.hetflag)
             {
             	
             	//get style
@@ -535,16 +540,20 @@ $3Dmol.drawCartoon = (function() {
 
                         colors.push(atomcolor);
 
-                    } else if (atom.atom == "C3'")
+                    } else if (atom.atom == baseStart)
                     {
-                        currentC3P = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        currentBaseStart = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
 
-                    } else if (atom.atom == 'N1')
+                    } else if (atom.atom == baseEnd)
                     {
-                        currentN1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
-                        if (currentC3P && currentN1) {
-                            $3Dmol.GLDraw.drawCylinder(geo, currentC3P, currentN1, 0.5, 100, false, false);
-                            //var cyl = new $3Dmol.Cylinder(currentC3P, currentN1, 0.5);
+                        currentBaseEnd = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
+                        if (gradientscheme) {
+                            atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
+                        }
+                        console.log(atomcolor);
+                        if (currentBaseStart && currentBaseEnd) {
+                            $3Dmol.GLDraw.drawCylinder(geo, currentBaseStart, currentBaseEnd, 0.4, $3Dmol.CC.color(atomcolor), false, true);
                         }
                     }
                 }
