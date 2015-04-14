@@ -552,7 +552,7 @@ $3Dmol.Parsers = (function() {
             atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
             atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
             atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
-            atom.hetflag = true; //need to figure out what this is group_PDB == HETA
+            atom.hetflag = mmCIF._atom_site.group_pdb[i] === "HETA";
             atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.bondOrder = [];
