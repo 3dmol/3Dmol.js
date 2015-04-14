@@ -3,7 +3,7 @@
 
 3Dmol.js is an object-oriented, webGL based JavaScript library for online molecular visualization - No Java required!
 Since 3Dmol.js is licensed under the permissive BSD open-source license, you are free to use it any any project, 
-as long the code is properly acknowledged and [cited](dx.doi.org/10.1093/bioinformatics/btu829).
+as long the code is properly acknowledged and [cited](http://dx.doi.org/10.1093/bioinformatics/btu829).
 With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications.  Features include
  * support for pdb, sdf, mol2, xyz, and cube formats
  * parallelized molecular surface computation
