@@ -403,54 +403,54 @@ $3Dmol.drawCartoon = (function() {
             if ((atom.atom == 'O' || atom.atom == 'CA' || atom.atom =='P' ||
                 atom.atom == 'OP2' || atom.atom == baseStart || atom.atom == baseEnd) && !atom.hetflag)
             {
-            	
-            	//get style
-            	var cstyle = atom.style.cartoon;
+                
+                //get style
+                var cstyle = atom.style.cartoon;
                 if (atom.atom == 'CA') {
                     //set atom color
-                	var prevatomcolor = atomcolor;
+                    var prevatomcolor = atomcolor;
                     atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
                     if (gradientscheme) {
                         atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
                     }
                     
                     if($.isNumeric(cstyle.thickness)) {
-                    	thickness = cstyle.thickness;
+                        thickness = cstyle.thickness;
                     } else {
-                    	thickness = defaultThickness;
+                        thickness = defaultThickness;
                     }
                     
                     if(cstyle.style == 'trace') { //trace draws every pair of atoms
-                		
-                		//trace draws straight lines between CAs
-                		if(currentChain != atom.chain || currentResi + 1 != atom.resi) {
-                			//do not draw connections between chains; ignore differences
-                			//in reschain to properly support CA only files
-                    		if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
+                        
+                        //trace draws straight lines between CAs
+                        if(currentChain != atom.chain || currentResi + 1 != atom.resi) {
+                            //do not draw connections between chains; ignore differences
+                            //in reschain to properly support CA only files
+                            if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
 
-                		} else if (currentCA) {
-                			//if both atoms same color, draw single cylinder
-                			if(prevatomcolor == atomcolor) {
-                				var C = $3Dmol.CC.color(atomcolor);
-                    			$3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, atom, thickness, C, true, true);
-                			}
-                			else {
+                        } else if (currentCA) {
+                            //if both atoms same color, draw single cylinder
+                            if(prevatomcolor == atomcolor) {
+                                var C = $3Dmol.CC.color(atomcolor);
+                                $3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, atom, thickness, C, true, true);
+                            }
+                            else {
                                 var mp = new $3Dmol.Vector3().addVectors(currentCA, atom).multiplyScalar(0.5);
                                 var C1 = $3Dmol.CC.color(prevatomcolor);
                                 var C2 = $3Dmol.CC.color(atomcolor);
-                    			$3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, mp, thickness, C1, true, false);
-                       			$3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
-                			}                                    
-                		}
+                                $3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, mp, thickness, C1, true, false);
+                                $3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
+                            }                                    
+                        }
                     }
                     else if (currentChain != atom.chain || currentResi + 1 != atom.resi || currentReschain != atom.reschain) {
-                		//end of chain of connected residues, draw accumulated points
+                        //end of chain of connected residues, draw accumulated points
                        for (j = 0; !thickness && j < num; j++)
                             drawSmoothCurve(group, points[j], 1, colors, div);
                         if (fill)
                             drawStrip(group, points[0], points[num - 1],
                                     colors, div, thickness);
-                    	
+                        
                         points = [];
                         for (k = 0; k < num; k++)
                             points[k] = [];
@@ -458,8 +458,8 @@ $3Dmol.drawCartoon = (function() {
                         prevCO = null;
                         ss = null;
                         ssborder = false;
-                    }                	 
-                    	
+                    }                    
+                        
                     currentCA = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
                     currentChain = atom.chain;
@@ -581,11 +581,11 @@ $3Dmol.drawCartoon = (function() {
             drawStrip(group, points[0], points[num - 1], colors, div, thickness);
         
         if (tracegeo) {
-        	var material = new $3Dmol.MeshLambertMaterial();
-        	material.vertexColors = $3Dmol.FaceColors;
-        	material.side = $3Dmol.DoubleSide;
-        	var mesh = new $3Dmol.Mesh(tracegeo, material);
-        	group.add(mesh);
+            var material = new $3Dmol.MeshLambertMaterial();
+            material.vertexColors = $3Dmol.FaceColors;
+            material.side = $3Dmol.DoubleSide;
+            var mesh = new $3Dmol.Mesh(tracegeo, material);
+            group.add(mesh);
         }
     };
 
