@@ -802,10 +802,8 @@ $3Dmol.GLViewer = (function() {
 
             rotationGroup.position.z = -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
-
             show();
         };
-
         /**
          * Add label to viewer
          * 
@@ -885,7 +883,6 @@ $3Dmol.GLViewer = (function() {
          * Remove all labels from viewer
          * 
          * @function $3Dmol.GLViewer#removeAllLabels
-
          */
         this.removeAllLabels = function() {
             for (var i = 0; i < labels.length; i++) {

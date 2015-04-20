@@ -5583,6 +5583,284 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
         }
     }
 };
+//This defines the $3Dmol object which is used to create viewers
+//and configure system-wide settings
+
+/** 
+ * All of the functionality of $3Dmol.js is contained within the
+ * $3Dmol global namespace
+ * @namespace */
+$3Dmol = (function(window) {
+    
+    var my = window['$3Dmol'] || {};
+    //var $ = window['jQuery'];
+    
+    return my;
+
+})(window);
+
+/* The following code "phones home" to register that an ip 
+   address has loaded 3Dmol.js.  Being able track this usage
+   is very helpful when reporting to funding agencies.  Please
+   leave this code in if you would like to increase the 
+   likelihood of 3Dmol.js remaining supported.
+*/
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
+    
+/**
+ * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ * @param {Object | string} element - Either HTML element or string identifier
+ * @param {ViewerSpec} config Viewer specification
+ * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
+ * 
+ * @example
+ * // Assume there exists an HTML div with id "gldiv"
+ * var element = $("#gldiv");
+ * 
+ * // Viewer config - properties 'defaultcolors' and 'callback'
+ * var config = {defaultcolors: $3Dmol.rasmolElementColors };
+ * 
+ * // Create GLViewer within 'gldiv' 
+ * var myviewer = $3Dmol.createViewer(element, config);
+ * //'data' is a string containing molecule data in pdb format  
+ * myviewer.addModel(data, "pdb");
+ * myviewer.zoomTo();
+ * myviewer.render();                        
+ *                        
+ */
+$3Dmol.createViewer = function(element, config)
+{
+    if($.type(element) === "string")
+        element = $("#"+element);
+    if(!element) return;
+
+    config = config || {};
+ 
+    
+    if(!config.defaultcolors)
+        config.defaultcolors = $3Dmol.elementColors.defaultColors;
+
+    //try to create the  viewer
+    try {
+        return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+    }
+    catch(e) {
+        throw "error creating viewer: "+e;
+    }
+    
+    return null;
+};
+   
+/**
+ * Contains a dictionary of embedded viewers created from HTML elements
+ * with a the viewer_3Dmoljs css class indexed by their id (or numerically
+ * if they do not have an id).
+*/
+$3Dmol.viewers = {};
+
+/**
+ * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
+ * 
+ * @function $3Dmol.download
+ * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @example
+ * var myviewer = $3Dmol.createViewer(gldiv);
+ * 
+ * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
+ * // Note that m will not contain the atomic data until after the network request is completed
+ * var m = $3Dmol.download('pdb: 2POR', myviewer);
+ * 
+ * @return {$3Dmol.GLModel} GLModel
+ */ 
+$3Dmol.download = function(query, viewer, options, callback) {
+    var baseURL = '';
+    var type = "";
+    var m = viewer.addModel();
+    if (query.substr(0, 4) === 'pdb:') {
+        type = "pdb";
+        query = query.substr(4).toUpperCase();
+        if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+           alert("Wrong PDB ID"); return;
+        }
+        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+    } else if (query.substr(0, 4) == 'cid:') {
+        type = "sdf";
+        query = query.substr(4);
+        if (!query.match(/^[1-9]+$/)) {
+           alert("Wrong Compound ID"); return;
+        }
+        uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+          "/SDF?record_type=3d";
+    }
+
+   $.get(uri, function(ret) {
+      m.addMolData(ret, type, options);
+      viewer.zoomTo();
+      viewer.render();
+      if(callback) callback(m);
+
+   });
+   
+   return m;
+};
+       
+
+/**
+ * $3Dmol surface types
+ * @enum {number}
+ */
+$3Dmol.SurfaceType = {
+    VDW : 1,
+    MS : 2,
+    SAS : 3,
+    SES  : 4
+};
+
+
+//Miscellaneous functions and classes - to be incorporated into $3Dmol proper
+/**
+ * 
+ * @param {$3Dmol.Geometry} geometry
+ * @param {$3Dmol.Mesh} mesh
+ * @returns {undefined}
+ */
+$3Dmol.mergeGeos = function(geometry, mesh) {
+    
+    var meshGeo = mesh.geometry;
+    
+    if (meshGeo === undefined) 
+        return;
+    
+    geometry.geometryGroups.push( meshGeo.geometryGroups[0] );
+    
+};
+
+$3Dmol.multiLineString = function(f) {
+    return f.toString()
+            .replace(/^[^\/]+\/\*!?/, '')
+            .replace(/\*\/[^\/]+$/, '');
+            
+};
+
+/** 
+ * Render surface synchronously if true
+ * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @type {boolean} */
+$3Dmol.syncSurface = false;
+
+// Internet Explorer refuses to allow webworkers in data blobs.  I can find
+// no way of checking for this feature directly, so must do a brower check
+if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
+        window.navigator.userAgent.indexOf('Trident/') >= 0) {
+    $3Dmol.syncSurface = true; // can't use webworkers
+}
+
+/**
+ * Parse a string that represents a style or atom selection and convert it
+ * into an object.  The goal is to make it easier to write out these specifications
+ * without resorting to json. Objects cannot be defined recursively.
+ * ; - delineates fields of the object 
+ * : - if the field has a value other than an empty object, it comes after a colon
+ * , - delineates key/value pairs of a value object
+ *     If the value object consists of ONLY keys (no = present) the keys are 
+ *     converted to a list.  Otherwise a object of key/value pairs is created with
+ *     any missing values set to null
+ * = OR ~ - separates key/value pairs of a value object, if not provided value is null
+ *     twiddle is supported since = has special meaning in URLs
+ * @param (String) str
+ * @returns {Object}
+ */
+$3Dmol.specStringToObject = function(str) {
+    if(typeof(str) === "object") {
+        return str; //not string, assume was converted already
+    }
+    else if(typeof(str) === "undefined" || str == null) {
+        return str; 
+    }
+    var ret = {};
+    var fields = str.split(';');
+    for(var i = 0; i < fields.length; i++) {
+        var fv = fields[i].split(':');
+        var f = fv[0];
+        var val = {};
+        var vstr = fv[1];
+        if(vstr) {
+            vstr = vstr.replace(/~/g,"=");
+            if(vstr.indexOf('=') !== -1) {
+                //has key=value pairs, must be object
+                var kvs = vstr.split(',');
+                for(var j = 0; j < kvs.length; j++) {
+                    var kv = kvs[j].split('=',2);
+                    val[kv[0]] = kv[1];
+                }
+            }
+            else if(vstr.indexOf(',') !== -1) {
+                //has multiple values, must list
+                val = vstr.split(',');
+            }
+            else {
+                val = vstr; //value itself
+            }
+        }
+        ret[f] = val;
+    }
+
+return ret;
+}
+
+// computes the bounding box around the provided atoms
+/**
+ * @param {AtomSpec[]} atomlist
+ * @return {Array}
+ */
+$3Dmol.getExtent = function(atomlist) {
+    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+
+    xmin = ymin = zmin = 9999;
+    xmax = ymax = zmax = -9999;
+    xsum = ysum = zsum = cnt = 0;
+
+    if (atomlist.length === 0)
+        return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+    for (var i = 0; i < atomlist.length; i++) {
+        var atom = atomlist[i];
+        if (atom === undefined)
+            continue;
+        cnt++;
+        xsum += atom.x;
+        ysum += atom.y;
+        zsum += atom.z;
+        
+        xmin = (xmin < atom.x) ? xmin : atom.x;
+        ymin = (ymin < atom.y) ? ymin : atom.y;
+        zmin = (zmin < atom.z) ? zmin : atom.z;
+        xmax = (xmax > atom.x) ? xmax : atom.x;
+        ymax = (ymax > atom.y) ? ymax : atom.y;
+        zmax = (zmax > atom.z) ? zmax : atom.z;
+        
+        if (atom.symmetries) {
+            for (var n = 0; n < atom.symmetries.length; n++) {
+                xsum += atom.symmetries[n].x;
+                ysum += atom.symmetries[n].y;
+                zsum += atom.symmetries[n].z;
+                xmin = (xmin < atom.x) ? xmin : atom.x;
+                ymin = (ymin < atom.y) ? ymin : atom.y;
+                zmin = (zmin < atom.z) ? zmin : atom.z;
+                xmax = (xmax > atom.x) ? xmax : atom.x;
+                ymax = (ymax > atom.y) ? ymax : atom.y;
+                zmax = (zmax > atom.z) ? zmax : atom.z; 
+                cnt++;
+            }
+        }
+    }
+
+    return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
+            [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
+};
+
+
+
 $3Dmol = $3Dmol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
@@ -7072,7 +7350,7 @@ $3Dmol = (function(window) {
    address has loaded 3Dmol.js.  Being able track this usage
    is very helpful when reporting to funding agencies.  Please
    leave this code in if you would like to increase the 
-   likelihood of 3Dmo.js remaining supported.
+   likelihood of 3Dmol.js remaining supported.
 */
 $.get("http://3dmol.csb.pitt.edu/track/report.cgi");
     
@@ -7301,27 +7579,27 @@ $3Dmol.getExtent = function(atomlist) {
         ysum += atom.y;
         zsum += atom.z;
         
-        if (atom.symmetries) {
-            for (var n = 0; n < atom.symmetries.length; n++) {
-                xsum += atom.symmetries[n].x;
-                ysum += atom.symmetries[n].y;
-                zsum += atom.symmetries[n].x;
-                cnt++;
-                xmin = (xmin < atom.x) ? xmin : atom.x;
-                ymin = (ymin < atom.y) ? ymin : atom.y;
-                zmin = (zmin < atom.z) ? zmin : atom.z;
-                xmax = (xmax > atom.x) ? xmax : atom.x;
-                ymax = (ymax > atom.y) ? ymax : atom.y;
-                zmax = (zmax > atom.z) ? zmax : atom.z; 
-            }
-        }
-
         xmin = (xmin < atom.x) ? xmin : atom.x;
         ymin = (ymin < atom.y) ? ymin : atom.y;
         zmin = (zmin < atom.z) ? zmin : atom.z;
         xmax = (xmax > atom.x) ? xmax : atom.x;
         ymax = (ymax > atom.y) ? ymax : atom.y;
         zmax = (zmax > atom.z) ? zmax : atom.z;
+        
+        if (atom.symmetries) {
+            for (var n = 0; n < atom.symmetries.length; n++) {
+                xsum += atom.symmetries[n].x;
+                ysum += atom.symmetries[n].y;
+                zsum += atom.symmetries[n].z;
+                xmin = (xmin < atom.x) ? xmin : atom.x;
+                ymin = (ymin < atom.y) ? ymin : atom.y;
+                zmin = (zmin < atom.z) ? zmin : atom.z;
+                xmax = (xmax > atom.x) ? xmax : atom.x;
+                ymax = (ymax > atom.y) ? ymax : atom.y;
+                zmax = (zmax > atom.z) ? zmax : atom.z; 
+                cnt++;
+            }
+        }
     }
 
     return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
@@ -8133,7 +8411,7 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var drawStrand = function(group, atomlist, num, div, fill, coilWidth,
-            helixSheetWidth, doNotSmoothen, gradientscheme) {
+            helixSheetWidth, doNotSmoothen, gradientscheme, geo) {
         num = num || strandDIV;
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
@@ -8142,7 +8420,7 @@ $3Dmol.drawCartoon = (function() {
         for (k = 0; k < num; k++)
             points[k] = [];
         var colors = [];
-        var currentChain, currentReschain, currentResi, currentCA, currentAtom;
+        var currentChain, currentReschain, currentResi, currentCA, currentP, currentOP2, currentBaseStart, currentBaseEnd, currentAtom;
         var prevCO = null, ss = null, ssborder = false;
         var tracegeo = null;
         var atomcolor;
@@ -8153,7 +8431,19 @@ $3Dmol.drawCartoon = (function() {
             if (atom === undefined)
                 continue;
 
-            if ((atom.atom == 'O' || atom.atom == 'CA') && !atom.hetflag) {
+            var baseStart, baseEnd;
+            if (atom.resn == ' DG' || atom.resn == ' DA') {
+                //baseStart = 'N9'
+                baseEnd = 'N1'
+            } else if (atom.resn == ' DC' || atom.resn == ' DT') {
+                //baseStart = 'C6'
+                baseEnd = 'N3'
+            }
+            baseStart = "C3'"
+
+            if ((atom.atom == 'O' || atom.atom == 'CA' || atom.atom =='P' ||
+                atom.atom == 'OP2' || atom.atom == baseStart || atom.atom == baseEnd) && !atom.hetflag)
+            {
                 
                 //get style
                 var cstyle = atom.style.cartoon;
@@ -8179,7 +8469,7 @@ $3Dmol.drawCartoon = (function() {
                             //in reschain to properly support CA only files
                             if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
 
-                        } else if(currentCA) {
+                        } else if (currentCA) {
                             //if both atoms same color, draw single cylinder
                             if(prevatomcolor == atomcolor) {
                                 var C = $3Dmol.CC.color(atomcolor);
@@ -8190,7 +8480,7 @@ $3Dmol.drawCartoon = (function() {
                                 var C1 = $3Dmol.CC.color(prevatomcolor);
                                 var C2 = $3Dmol.CC.color(atomcolor);
                                 $3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, mp, thickness, C1, true, false);
-                                   $3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
+                                $3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
                             }                                    
                         }
                     }
@@ -8209,7 +8499,7 @@ $3Dmol.drawCartoon = (function() {
                         prevCO = null;
                         ss = null;
                         ssborder = false;
-                    }                     
+                    }                    
                         
                     currentCA = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
@@ -8224,34 +8514,114 @@ $3Dmol.drawCartoon = (function() {
                     if (atom.clickable === true && (atom.intersectionShape === undefined || atom.intersectionShape.triangle === undefined)) 
                         atom.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
                     
-                }                 
-                else if(cstyle.style != 'trace') { // O, unneeded for trace style
-                    //the oxygen atom is used to orient the direction of the draw strip
-                    var O = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
-                    O.sub(currentCA);
-                    O.normalize(); // can be omitted for performance
-                    O.multiplyScalar((ss == 'c') ? coilWidth : helixSheetWidth);
-                    if (prevCO !== null && O.dot(prevCO) < 0)
-                        O.negate();
-                    prevCO = O;
-                    for (j = 0; j < num; j++) {
-                        var delta = -1 + 2 / (num - 1) * j;
-                        var v = new $3Dmol.Vector3(currentCA.x + prevCO.x * delta,
-                                currentCA.y + prevCO.y * delta, currentCA.z + prevCO.z * delta);
-                        v.atom = currentAtom;
-                        if (!doNotSmoothen && ss == 's')
-                            v.smoothen = true;
-                        points[j].push(v);
+                }
+
+                else if(cstyle.style != 'trace') {
+
+                    if (atom.resi != currentResi)
+                    {
+                        if (currentBaseStart && currentBaseEnd) {
+                            var fix1 = currentBaseStart.clone().sub(currentBaseEnd).multiplyScalar(0.05);
+                            currentBaseStart.add(fix1);
+                            $3Dmol.GLDraw.drawCylinder(geo, currentBaseStart, currentBaseEnd, 0.4, $3Dmol.CC.color(atomcolor), false, true);
+                        }
+                        currentBaseStart = null;
+                        currentBaseEnd = null;
+                    }
+
+                    if (atom.atom == 'O')
+                    {
+                        // O, unneeded for trace style
+                        //the oxygen atom is used to orient the direction of the draw strip
+                        var O = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        O.sub(currentCA);
+                        O.normalize(); // can be omitted for performance
+                        O.multiplyScalar((ss == 'c') ? coilWidth : helixSheetWidth);
+                        if (prevCO !== null && O.dot(prevCO) < 0)
+                            O.negate();
+                        prevCO = O;
+                        for (j = 0; j < num; j++) {
+                            var delta = -1 + 2 / (num - 1) * j;
+                            var v = new $3Dmol.Vector3(currentCA.x + prevCO.x * delta,
+                                    currentCA.y + prevCO.y * delta, currentCA.z + prevCO.z * delta);
+                            v.atom = currentAtom;
+                            if (!doNotSmoothen && ss == 's')
+                                v.smoothen = true;
+                            points[j].push(v);
+                        }
+
+                    } else if (atom.atom == 'P')
+                    {
+                        if (currentChain && currentChain != atom.chain)
+                        {
+                            // start of new dna strand, draw previous one
+                            for (j = 0; !thickness && j < num; j++)
+                                drawSmoothCurve(group, points[j], 1, colors, div);
+                            if (fill)
+                                drawStrip(group, points[0], points[num - 1],
+                                        colors, div, thickness);
+                            
+                            points = [];
+                            for (k = 0; k < num; k++)
+                                points[k] = [];
+                            colors = [];
+                        }
+
+                        atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
+                        if (gradientscheme) {
+                            atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
+                        }
+
+                        currentP = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        currentAtom = atom;
+                        currentChain = atom.chain;
+                        currentReschain = atom.reschain;
+                        currentResi = atom.resi; 
+
+                    } else if (atom.atom == 'OP2')
+                    {
+                        currentOP2 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        currentOP2.sub(currentP);
+                        currentOP2.normalize();
+                        for (j = 0; j < num; j++)
+                        {
+                            var delta = -1 + j * (2 / (num - 1));
+                            var v = new $3Dmol.Vector3(currentP.x + currentOP2.x * delta,
+                                currentP.y + currentOP2.y * delta, currentP.z + currentOP2.z * delta);
+                            v.atom = currentAtom;
+                            if (!doNotSmoothen)
+                                v.smoothen = true;
+                            points[j].push(v);
+
+                        }
+
+                        colors.push(atomcolor);
+
+                    }
+                    
+                    if (atom.atom == baseStart)
+                    {
+                        currentBaseStart = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+
+                    } else if (atom.atom == baseEnd)
+                    {
+                        currentBaseEnd = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
+                        if (gradientscheme) {
+                            atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
+                        }
+                        
                     }
                 }
             }
         }
+
         for (j = 0; !thickness && j < num; j++)
             drawSmoothCurve(group, points[j], 1, colors, div);
         if (fill)
             drawStrip(group, points[0], points[num - 1], colors, div, thickness);
         
-        if(tracegeo) {
+        if (tracegeo) {
             var material = new $3Dmol.MeshLambertMaterial();
             material.vertexColors = $3Dmol.FaceColors;
             material.side = $3Dmol.DoubleSide;
@@ -8261,10 +8631,10 @@ $3Dmol.drawCartoon = (function() {
     };
 
     // actual function call
-    var drawCartoon = function(group, atomlist, gradientscheme) {
+    var drawCartoon = function(group, atomlist, geo, gradientscheme) {
         
         drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
-                false, gradientscheme);
+                false, gradientscheme, geo);
     };
 
     return drawCartoon;
@@ -10020,6 +10390,7 @@ $3Dmol.GLModel = (function() {
             var sphereGeometry = new $3Dmol.Geometry(true);                                                         
             var imposterGeometry = new $3Dmol.Geometry(true);                                                         
             var stickGeometry = new $3Dmol.Geometry(true);
+            var cartoonGeometry = new $3Dmol.Geometry(true);
             var i, n;
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
             for (i = 0, n = atoms.length; i < n; i++) {
@@ -10056,7 +10427,7 @@ $3Dmol.GLModel = (function() {
                 if (range[0] < range[1])
                     gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
 
-                $3Dmol.drawCartoon(ret, cartoonAtoms, gradientscheme);
+                $3Dmol.drawCartoon(ret, cartoonAtoms, cartoonGeometry, gradientscheme);
                 
                 for (i = 0; i < ret.children.length; i++){
                     var geo = ret.children[i].geometry;
@@ -10112,6 +10483,23 @@ $3Dmol.GLModel = (function() {
                 
                 var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
+            }
+
+            // This is only for DNA ladder rendering right now
+            if (cartoonGeometry.vertices > 0) {
+                var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
+                    vertexColors : true,
+                    ambient : 0x000000,
+                    reflectivity : 0
+                });
+
+                cartoonGeometry.initTypedArrays();
+
+                if (cylinderMaterial.wireframe)
+                    cartoonGeometry.setUpWireframe();
+
+                var ladder = new $3Dmol.Mesh(cartoonGeometry, cylinderMaterial);
+                ret.add(ladder);
             }
             
             //var linewidth;
@@ -12419,8 +12807,10 @@ $3Dmol.GLViewer = (function() {
                 //include shapes when zooming to full scene
                 //TODO: figure out a good way to specify shapes as part of a selection
                 $.each(shapes, function(i, shape) {
-                    atoms.push(shape);
+                	if(shape.boundingSphere && shape.boundingSphere.center)
+                		atoms.push(shape.boundingSphere.center);
                 });
+                tmp = $3Dmol.getExtent(atoms);
                 allatoms = atoms;
                 alltmp = tmp;
 
@@ -12467,10 +12857,8 @@ $3Dmol.GLViewer = (function() {
 
             rotationGroup.position.z = -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
-
             show();
         };
-
         /**
          * Add label to viewer
          * 
@@ -12550,7 +12938,6 @@ $3Dmol.GLViewer = (function() {
          * Remove all labels from viewer
          * 
          * @function $3Dmol.GLViewer#removeAllLabels
-
          */
         this.removeAllLabels = function() {
             for (var i = 0; i < labels.length; i++) {
@@ -14108,8 +14495,8 @@ $3Dmol.Parsers = (function() {
     // atoms; assume atom names are correct, only identifies
     // single closest hbond
     var assignBackboneHBonds = function(atomsarray) {
-    var maxlength = 3.2;
-    var maxlengthSq = 10.24;
+        var maxlength = 3.2;
+        var maxlengthSq = 10.24;
         var atoms = [];
         var i, j, n;
         for (i = 0, n = atomsarray.length; i < n; i++) {
@@ -14131,24 +14518,24 @@ $3Dmol.Parsers = (function() {
 
             for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
-        var zdiff = aj.z - ai.z;
+                var zdiff = aj.z - ai.z;
                 if (zdiff > maxlength) // can't be connected
                     break;
-        if (aj.atom == ai.atom)
-            continue; //can't be connected, but later might be    
-        var ydiff = Math.abs(aj.y - ai.y);
-        if( ydiff > maxlength)
-            continue;
-        var xdiff = Math.abs(aj.x - ai.x);
-        if(xdiff > maxlength)
-            continue;
+                if (aj.atom == ai.atom)
+                    continue; //can't be connected, but later might be	
+                var ydiff = Math.abs(aj.y - ai.y);
+                if( ydiff > maxlength)
+                    continue;
+                var xdiff = Math.abs(aj.x - ai.x);
+                if(xdiff > maxlength)
+                    continue;
                 var dist = xdiff*xdiff+ydiff*ydiff+zdiff*zdiff;
-        if (dist >  maxlengthSq)
-            continue;
+                if (dist >  maxlengthSq)
+                    continue;
 
-        if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
-            continue; //ignore bonds between too close residues
-        //select closest hbond
+                if(aj.chain == ai.chain && Math.abs(aj.resi - ai.resi) < 4)
+                    continue; //ignore bonds between too close residues
+                //select closest hbond
                 if (dist < ai.hbondDistanceSq) {
                     ai.hbondOther = aj;
                     ai.hbondDistanceSq = dist;
@@ -14355,16 +14742,16 @@ $3Dmol.Parsers = (function() {
             atom.atom = atom.elem = line.substr(31, 3).replace(/ /g, "");
 
             if (atom.elem != 'H' || !noH) {
-	            atom.serial = i;
-	            serialToIndex[i] = atoms.length;
-	            atom.x = parseFloat(line.substr(0, 10));
-	            atom.y = parseFloat(line.substr(10, 10));
-	            atom.z = parseFloat(line.substr(20, 10));
-	            atom.hetflag = true;
-	            atom.bonds = [];
-	            atom.bondOrder = [];
-	            atom.properties = {};
-	            atoms.push(atom);
+                atom.serial = i;
+                serialToIndex[i] = atoms.length;
+                atom.x = parseFloat(line.substr(0, 10));
+                atom.y = parseFloat(line.substr(10, 10));
+                atom.z = parseFloat(line.substr(20, 10));
+                atom.hetflag = true;
+                atom.bonds = [];
+                atom.bondOrder = [];
+                atom.properties = {};
+                atoms.push(atom);
             }
         }
         
@@ -14375,10 +14762,10 @@ $3Dmol.Parsers = (function() {
             var to = serialToIndex[parseInt(line.substr(3, 3)) - 1 + start];
             var order = parseInt(line.substr(6, 3));      
             if(typeof(from) != 'undefined' && typeof(to) != 'undefined') {
-	            atoms[from].bonds.push(to);
-	            atoms[from].bondOrder.push(order);
-	            atoms[to].bonds.push(from);
-	            atoms[to].bondOrder.push(order);
+                atoms[from].bonds.push(to);
+                atoms[from].bondOrder.push(order);
+                atoms[to].bonds.push(from);
+                atoms[to].bondOrder.push(order);
             }
         }
 
@@ -14539,11 +14926,7 @@ $3Dmol.Parsers = (function() {
         //Pulls atom information out of the data
         var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
-<<<<<<< HEAD:release/3Dmol-nojquery.js
-        if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
-=======
-	    if (mmCIF._atom_site.group_pdb[i] === "TER") continue;
->>>>>>> Correctly handle when some fields are null and implement case insensitivity in mmCIF files.:build/3Dmol-nojquery.js
+        if (mmCIF._atom_site.group_pdb[i] === "TER") continue;
             var atom = {};
             atom.id = parseFloat(mmCIF._atom_site.id[i]);
             atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
@@ -14573,31 +14956,26 @@ $3Dmol.Parsers = (function() {
                 label_alt = '.';
             }
             var label_asym = mmCIF._atom_site.label_asym_id[i];
-<<<<<<< HEAD:release/3Dmol-nojquery.js
-        var label_atom = mmCIF._atom_site.label_atom_id[i];
-        var label_seq = mmCIF._atom_site.label_seq_id[i];
-=======
             if (label_asym === undefined) {
                 label_asym = '.';
             }
-	        var label_atom = mmCIF._atom_site.label_atom_id[i];
+            var label_atom = mmCIF._atom_site.label_atom_id[i];
             if (label_atom === undefined) {
                 label_atom = '.';
             }
-	        var label_seq = mmCIF._atom_site.label_seq_id[i];
+            var label_seq = mmCIF._atom_site.label_seq_id[i];
             if (label_seq === undefined) {
                 label_seq = '.';
             }
->>>>>>> Correctly handle when some fields are null and implement case insensitivity in mmCIF files.:build/3Dmol-nojquery.js
             var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
 
             if (atomHashTable[label_alt] === undefined) {
                 atomHashTable[label_alt] = {};
             }
-        if (atomHashTable[label_alt][label_asym] === undefined) {
-        atomHashTable[label_alt][label_asym] = {};
-        }
-        if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
+            if (atomHashTable[label_alt][label_asym] === undefined) {
+                atomHashTable[label_alt][label_asym] = {};
+            }
+            if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
                 atomHashTable[label_alt][label_asym][label_atom] = {};
             }
         
@@ -14605,21 +14983,6 @@ $3Dmol.Parsers = (function() {
         }
 
         for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
-<<<<<<< HEAD:release/3Dmol-nojquery.js
-        var offset = atoms.length;
-            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
-                           [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
-                           [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
-                               [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
-            if (atomsPreBonds[id1] === undefined) continue;
-            var index1 = atomsPreBonds[id1].index;
-
-        var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
-            if (atomsPreBonds[id2] === undefined) continue;
-=======
 	        var offset = atoms.length;
 	        
 	        var alt = (mmCIF._struct_conn.ptnr1_label_alt_id || [])[i];
@@ -14644,80 +15007,60 @@ $3Dmol.Parsers = (function() {
             var index1 = atomsPreBonds[id1].index;
             
             var alt = (mmCIF._struct_conn.ptnr2_label_alt_id || [])[i];
-	        if (alt === undefined) {
-	            alt = ".";
-	        }
-	        var asym = (mmCIF._struct_conn.ptnr2_label_asym_id || [])[i];
-	        if (asym === undefined) {
-	            asym = ".";
-	        }
-	        var atom = (mmCIF._struct_conn.ptnr2_label_atom_id || [])[i];
-	        if (atom === undefined) {
-	            atom = ".";
-	        }
-	        var seq = (mmCIF._struct_conn.ptnr2_label_seq_id || [])[i];
-	        if (seq === undefined) {
-	            seq = ".";
-	        }
+	    if (alt === undefined) {
+	        alt = ".";
+	    }
+	    var asym = (mmCIF._struct_conn.ptnr2_label_asym_id || [])[i];
+	    if (asym === undefined) {
+	        asym = ".";
+	    }
+	    var atom = (mmCIF._struct_conn.ptnr2_label_atom_id || [])[i];
+	    if (atom === undefined) {
+	        atom = ".";
+	    }
+	    var seq = (mmCIF._struct_conn.ptnr2_label_seq_id || [])[i];
+	    if (seq === undefined) {
+	        seq = ".";
+	    }
 
-	        var id2 = atomHashTable[alt][asym][atom][seq];
-            //if (atomsPreBonds[id2] === undefined) continue;
->>>>>>> Correctly handle when some fields are null and implement case insensitivity in mmCIF files.:build/3Dmol-nojquery.js
+            var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
+                                   [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
+                                   [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
+                                   [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+            if (atomsPreBonds[id2] === undefined) continue;
             var index2 = atomsPreBonds[id2].index;
 
-        atomsPreBonds[id1].bonds.push(index2 + offset);
-        atomsPreBonds[id1].bondOrder.push(1);
-        atomsPreBonds[id2].bonds.push(index1 + offset);
-        atomsPreBonds[id2].bondOrder.push(1);
-        console.log("connected " + index1 + " and " + index2);
+            atomsPreBonds[id1].bonds.push(index2 + offset);
+            atomsPreBonds[id1].bondOrder.push(1);
+            atomsPreBonds[id2].bonds.push(index1 + offset);
+            atomsPreBonds[id2].bondOrder.push(1);
+            console.log("connected " + index1 + " and " + index2);
         }
 
-    //atoms = atoms.concat(atomsPreBonds);
-    for (var i = 0; i < atomsIndexed.length; i++) {
+        //atoms = atoms.concat(atomsPreBonds);
+        for (var i = 0; i < atomsIndexed.length; i++) {
             delete atomsIndexed[i].index;
             atoms.push(atomsIndexed[i]);
-    }
+        }
 
         assignBonds(atoms);
-<<<<<<< HEAD:release/3Dmol-nojquery.js
-    
-    var matrices = [];
-    for (var i = 0; i < mmCIF._atom_sites['fract_transf_matrix[1][1]'].length; i++) {
-        var matrix = new $3Dmol.Matrix4(
-                mmCIF._atom_sites['fract_transf_matrix[1][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[1][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[1][3]'],
-                mmCIF._atom_sites['fract_transf_vector[1]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][3]'],
-                mmCIF._atom_sites['fract_transf_vector[2]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][3]'],
-                mmCIF._atom_sites['fract_transf_vector[3]']
-        );
-        matrices.push(matrix);
-    }
-    }
-=======
 	
     	var matrices = [];
     	if (mmCIF._pdbx_struct_oper_list !== undefined) {    // transformations may not exist.
-           	for (var i = 0; i < mmCIF._pdbx_struct_oper_list.id.length; i++) {
-           	    var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]']);
-           	    var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]']);
-           	    var matrix13 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][3]']);
-           	    var vector1  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[1]'   ]);
-           	    var matrix21 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][1]']);
-           	    var matrix22 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][2]']);
-           	    var matrix23 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][3]']);
-           	    var vector2  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[2]'   ]);
-           	    var matrix31 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][1]']);
-           	    var matrix32 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][2]']);
-           	    var matrix33 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][3]']);
-           	    var vector3  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[3]'   ]);
-           	    
+            for (var i = 0; i < mmCIF._pdbx_struct_oper_list.id.length; i++) {
+           	var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]']);
+           	var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]']);
+           	var matrix13 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][3]']);
+           	var vector1  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[1]'   ]);
+           	var matrix21 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][1]']);
+           	var matrix22 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][2]']);
+           	var matrix23 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][3]']);
+           	var vector2  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[2]'   ]);
+           	var matrix31 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][1]']);
+           	var matrix32 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][2]']);
+           	var matrix33 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][3]']);
+           	var vector3  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[3]'   ]);
+           	
     	        var matrix = new $3Dmol.Matrix4(
     	                matrix11, matrix12, matrix13, vector1,
     	                matrix21, matrix22, matrix23, vector2,
@@ -14726,8 +15069,7 @@ $3Dmol.Parsers = (function() {
     	        matrices.push(matrix);
     	    }
     	}
-	}
->>>>>>> Correctly handle when some fields are null and implement case insensitivity in mmCIF files.:build/3Dmol-nojquery.js
+    }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
     // tag
@@ -14791,28 +15133,28 @@ $3Dmol.Parsers = (function() {
             //get element
             atom.atom = atom.elem = tokens[5].split('.')[0];
             if (atom.elem == 'H' && noH) {
-            		//ignore
+                //ignore
             }
             else {
-	            // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
-	            // serial id in mol2 file
-	            var index = atoms.length;
-	            var serial = parseInt(tokens[0]);
-	            atom.serial = serial;
-	            // atom.serial = i;
-	            
-	            atom.x = parseFloat(tokens[2]);
-	            atom.y = parseFloat(tokens[3]);
-	            atom.z = parseFloat(tokens[4]);
-	            atom.atom = tokens[5];
-	            var charge = parseFloat(tokens[8]);
-	            
-	            atom.bonds = [];
-	            atom.bondOrder = [];
-	            atom.properties = {'charge': charge, 'partialCharge': charge};
-
-	            serialToIndex[serial] = index;	            	
-	            atoms.push(atom);
+                // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
+                // serial id in mol2 file
+                var index = atoms.length;
+                var serial = parseInt(tokens[0]);
+                atom.serial = serial;
+                // atom.serial = i;
+                
+                atom.x = parseFloat(tokens[2]);
+                atom.y = parseFloat(tokens[3]);
+                atom.z = parseFloat(tokens[4]);
+                atom.atom = tokens[5];
+                var charge = parseFloat(tokens[8]);
+                
+                atom.bonds = [];
+                atom.bondOrder = [];
+                atom.properties = {'charge': charge, 'partialCharge': charge};
+                serialToIndex[serial] = index;
+                
+                atoms.push(atom);
             }
         }
         
@@ -15038,7 +15380,6 @@ $3Dmol.Parsers = (function() {
                 
                 i--; //set i back
             }
-            
 
         }
 
@@ -15096,7 +15437,7 @@ $3Dmol.Parsers = (function() {
                 var symmetries = [];
                 for (l = 0; l < copyMatrices.length; l++) {
                     var newXYZ = new $3Dmol.Vector3();
-                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].x);
+                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
                     newXYZ.applyMatrix4(copyMatrices[l]);
                     symmetries.push(newXYZ);
                 }

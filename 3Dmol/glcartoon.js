@@ -370,7 +370,7 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var drawStrand = function(group, atomlist, num, div, fill, coilWidth,
-            helixSheetWidth, doNotSmoothen, gradientscheme) {
+            helixSheetWidth, doNotSmoothen, gradientscheme, geo) {
         num = num || strandDIV;
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
@@ -379,7 +379,7 @@ $3Dmol.drawCartoon = (function() {
         for (k = 0; k < num; k++)
             points[k] = [];
         var colors = [];
-        var currentChain, currentReschain, currentResi, currentCA, currentAtom;
+        var currentChain, currentReschain, currentResi, currentCA, currentP, currentOP2, currentBaseStart, currentBaseEnd, currentAtom;
         var prevCO = null, ss = null, ssborder = false;
         var tracegeo = null;
         var atomcolor;
@@ -390,7 +390,19 @@ $3Dmol.drawCartoon = (function() {
             if (atom === undefined)
                 continue;
 
-            if ((atom.atom == 'O' || atom.atom == 'CA') && !atom.hetflag) {
+            var baseStart, baseEnd;
+            if (atom.resn == ' DG' || atom.resn == ' DA') {
+                //baseStart = 'N9'
+                baseEnd = 'N1'
+            } else if (atom.resn == ' DC' || atom.resn == ' DT') {
+                //baseStart = 'C6'
+                baseEnd = 'N3'
+            }
+            baseStart = "C3'"
+
+            if ((atom.atom == 'O' || atom.atom == 'CA' || atom.atom =='P' ||
+                atom.atom == 'OP2' || atom.atom == baseStart || atom.atom == baseEnd) && !atom.hetflag)
+            {
                 
                 //get style
                 var cstyle = atom.style.cartoon;
@@ -416,7 +428,7 @@ $3Dmol.drawCartoon = (function() {
                             //in reschain to properly support CA only files
                             if(!tracegeo) tracegeo = new $3Dmol.Geometry(true);
 
-                        } else if(currentCA) {
+                        } else if (currentCA) {
                             //if both atoms same color, draw single cylinder
                             if(prevatomcolor == atomcolor) {
                                 var C = $3Dmol.CC.color(atomcolor);
@@ -427,7 +439,7 @@ $3Dmol.drawCartoon = (function() {
                                 var C1 = $3Dmol.CC.color(prevatomcolor);
                                 var C2 = $3Dmol.CC.color(atomcolor);
                                 $3Dmol.GLDraw.drawCylinder(tracegeo, currentCA, mp, thickness, C1, true, false);
-                                   $3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
+                                $3Dmol.GLDraw.drawCylinder(tracegeo, mp, atom, thickness, C2, false, true);
                             }                                    
                         }
                     }
@@ -446,7 +458,7 @@ $3Dmol.drawCartoon = (function() {
                         prevCO = null;
                         ss = null;
                         ssborder = false;
-                    }                     
+                    }                    
                         
                     currentCA = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                     currentAtom = atom;
@@ -461,34 +473,114 @@ $3Dmol.drawCartoon = (function() {
                     if (atom.clickable === true && (atom.intersectionShape === undefined || atom.intersectionShape.triangle === undefined)) 
                         atom.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
                     
-                }                 
-                else if(cstyle.style != 'trace') { // O, unneeded for trace style
-                    //the oxygen atom is used to orient the direction of the draw strip
-                    var O = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
-                    O.sub(currentCA);
-                    O.normalize(); // can be omitted for performance
-                    O.multiplyScalar((ss == 'c') ? coilWidth : helixSheetWidth);
-                    if (prevCO !== null && O.dot(prevCO) < 0)
-                        O.negate();
-                    prevCO = O;
-                    for (j = 0; j < num; j++) {
-                        var delta = -1 + 2 / (num - 1) * j;
-                        var v = new $3Dmol.Vector3(currentCA.x + prevCO.x * delta,
-                                currentCA.y + prevCO.y * delta, currentCA.z + prevCO.z * delta);
-                        v.atom = currentAtom;
-                        if (!doNotSmoothen && ss == 's')
-                            v.smoothen = true;
-                        points[j].push(v);
+                }
+
+                else if(cstyle.style != 'trace') {
+
+                    if (atom.resi != currentResi)
+                    {
+                        if (currentBaseStart && currentBaseEnd) {
+                            var fix1 = currentBaseStart.clone().sub(currentBaseEnd).multiplyScalar(0.05);
+                            currentBaseStart.add(fix1);
+                            $3Dmol.GLDraw.drawCylinder(geo, currentBaseStart, currentBaseEnd, 0.4, $3Dmol.CC.color(atomcolor), false, true);
+                        }
+                        currentBaseStart = null;
+                        currentBaseEnd = null;
+                    }
+
+                    if (atom.atom == 'O')
+                    {
+                        // O, unneeded for trace style
+                        //the oxygen atom is used to orient the direction of the draw strip
+                        var O = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        O.sub(currentCA);
+                        O.normalize(); // can be omitted for performance
+                        O.multiplyScalar((ss == 'c') ? coilWidth : helixSheetWidth);
+                        if (prevCO !== null && O.dot(prevCO) < 0)
+                            O.negate();
+                        prevCO = O;
+                        for (j = 0; j < num; j++) {
+                            var delta = -1 + 2 / (num - 1) * j;
+                            var v = new $3Dmol.Vector3(currentCA.x + prevCO.x * delta,
+                                    currentCA.y + prevCO.y * delta, currentCA.z + prevCO.z * delta);
+                            v.atom = currentAtom;
+                            if (!doNotSmoothen && ss == 's')
+                                v.smoothen = true;
+                            points[j].push(v);
+                        }
+
+                    } else if (atom.atom == 'P')
+                    {
+                        if (currentChain && currentChain != atom.chain)
+                        {
+                            // start of new dna strand, draw previous one
+                            for (j = 0; !thickness && j < num; j++)
+                                drawSmoothCurve(group, points[j], 1, colors, div);
+                            if (fill)
+                                drawStrip(group, points[0], points[num - 1],
+                                        colors, div, thickness);
+                            
+                            points = [];
+                            for (k = 0; k < num; k++)
+                                points[k] = [];
+                            colors = [];
+                        }
+
+                        atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
+                        if (gradientscheme) {
+                            atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
+                        }
+
+                        currentP = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        currentAtom = atom;
+                        currentChain = atom.chain;
+                        currentReschain = atom.reschain;
+                        currentResi = atom.resi; 
+
+                    } else if (atom.atom == 'OP2')
+                    {
+                        currentOP2 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        currentOP2.sub(currentP);
+                        currentOP2.normalize();
+                        for (j = 0; j < num; j++)
+                        {
+                            var delta = -1 + j * (2 / (num - 1));
+                            var v = new $3Dmol.Vector3(currentP.x + currentOP2.x * delta,
+                                currentP.y + currentOP2.y * delta, currentP.z + currentOP2.z * delta);
+                            v.atom = currentAtom;
+                            if (!doNotSmoothen)
+                                v.smoothen = true;
+                            points[j].push(v);
+
+                        }
+
+                        colors.push(atomcolor);
+
+                    }
+                    
+                    if (atom.atom == baseStart)
+                    {
+                        currentBaseStart = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+
+                    } else if (atom.atom == baseEnd)
+                    {
+                        currentBaseEnd = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                        atomcolor = $3Dmol.getColorFromStyle(atom, cstyle).getHex();
+                        if (gradientscheme) {
+                            atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
+                        }
+                        
                     }
                 }
             }
         }
+
         for (j = 0; !thickness && j < num; j++)
             drawSmoothCurve(group, points[j], 1, colors, div);
         if (fill)
             drawStrip(group, points[0], points[num - 1], colors, div, thickness);
         
-        if(tracegeo) {
+        if (tracegeo) {
             var material = new $3Dmol.MeshLambertMaterial();
             material.vertexColors = $3Dmol.FaceColors;
             material.side = $3Dmol.DoubleSide;
@@ -498,10 +590,10 @@ $3Dmol.drawCartoon = (function() {
     };
 
     // actual function call
-    var drawCartoon = function(group, atomlist, gradientscheme) {
+    var drawCartoon = function(group, atomlist, geo, gradientscheme) {
         
         drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
-                false, gradientscheme);
+                false, gradientscheme, geo);
     };
 
     return drawCartoon;
