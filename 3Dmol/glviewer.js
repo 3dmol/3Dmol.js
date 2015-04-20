@@ -752,8 +752,10 @@ $3Dmol.GLViewer = (function() {
                 //include shapes when zooming to full scene
                 //TODO: figure out a good way to specify shapes as part of a selection
                 $.each(shapes, function(i, shape) {
-                    atoms.push(shape);
+                	if(shape.boundingSphere && shape.boundingSphere.center)
+                		atoms.push(shape.boundingSphere.center);
                 });
+                tmp = $3Dmol.getExtent(atoms);
                 allatoms = atoms;
                 alltmp = tmp;
 
