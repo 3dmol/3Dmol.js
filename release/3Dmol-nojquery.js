@@ -10237,6 +10237,16 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             if (!data)
+<<<<<<< HEAD:build/3Dmol-nojquery.js
+                console.error("Error with addMolData: No input data specified");
+            
+            if(typeof($3Dmol.Parsers[format]) != "undefined") {
+            	var parse = $3Dmol.Parsers[format];
+            	parse(atoms, data, options)
+            }
+            else {
+            	console.error("Unknown format: "+format);
+=======
                 return; //leave an empty model
             if(typeof($3Dmol.Parsers[format]) == "undefined") {
                 console.log("Unknown format: "+format);
@@ -10251,6 +10261,7 @@ $3Dmol.GLModel = (function() {
                     format = "xyz";
                 }
                 console.log("Best guess: "+format);
+>>>>>>> 3bf4603ee45bdf982f1ac81a8ab1fb960d46a099:release/3Dmol-nojquery.js
             }
             var parse = $3Dmol.Parsers[format];
             parse(atoms, data, options, copyMatrices)
@@ -15010,6 +15021,10 @@ $3Dmol.Parsers = (function() {
                 endResi = parseInt(line.substr(33, 4));
                 protein.helix
                         .push([ startChain, startResi, endChain, endResi ]);
+<<<<<<< HEAD:build/3Dmol-nojquery.js
+            } else if (recordName == 'ENDMDL')
+                break;
+=======
             } else if ((!noAssembly) && (recordName == 'REMARK') && (line.substr(13, 5) == 'BIOMT')) {
                 var n;
                 var matrix = new $3Dmol.Matrix4();
@@ -15039,6 +15054,7 @@ $3Dmol.Parsers = (function() {
                 i--; //set i back
             }
             
+>>>>>>> 3bf4603ee45bdf982f1ac81a8ab1fb960d46a099:release/3Dmol-nojquery.js
 
         }
 
