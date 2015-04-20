@@ -392,10 +392,10 @@ $3Dmol.drawCartoon = (function() {
 
             var baseStart, baseEnd;
             if (atom.resn == ' DG' || atom.resn == ' DA') {
-                baseStart = 'N9'
+                //baseStart = 'N9'
                 baseEnd = 'N1'
             } else if (atom.resn == ' DC' || atom.resn == ' DT') {
-                baseStart = 'C6'
+                //baseStart = 'C6'
                 baseEnd = 'N3'
             }
             baseStart = "C3'"
@@ -481,7 +481,6 @@ $3Dmol.drawCartoon = (function() {
                     {
                         if (currentBaseStart && currentBaseEnd) {
                             var fix1 = currentBaseStart.clone().sub(currentBaseEnd).multiplyScalar(0.05);
-                            var fix2 = currentBaseStart.clone().sub(currentP);
                             currentBaseStart.add(fix1);
                             $3Dmol.GLDraw.drawCylinder(geo, currentBaseStart, currentBaseEnd, 0.4, $3Dmol.CC.color(atomcolor), false, true);
                         }
