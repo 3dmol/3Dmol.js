@@ -390,10 +390,15 @@ $3Dmol.drawCartoon = (function() {
             if (atom === undefined)
                 continue;
 
-            var baseStart = "O5'"
-            var baseEnd = 'N1'
-            if (atom.resn == 'DT' || atom.resn == 'DC')
-                baseEnd = 'N5'
+            var baseStart, baseEnd;
+            if (atom.resn == ' DG' || atom.resn == ' DA') {
+                baseStart = 'N9'
+                baseEnd = 'N1'
+            } else if (atom.resn == ' DC' || atom.resn == ' DT') {
+                baseStart = 'C6'
+                baseEnd = 'N3'
+            }
+            baseStart = "C3'"
 
             if ((atom.atom == 'O' || atom.atom == 'CA' || atom.atom =='P' ||
                 atom.atom == 'OP2' || atom.atom == baseStart || atom.atom == baseEnd) && !atom.hetflag)
@@ -472,6 +477,18 @@ $3Dmol.drawCartoon = (function() {
 
                 else if(cstyle.style != 'trace') {
 
+                    if (atom.resi != currentResi)
+                    {
+                        if (currentBaseStart && currentBaseEnd) {
+                            var fix1 = currentBaseStart.clone().sub(currentBaseEnd).multiplyScalar(0.05);
+                            var fix2 = currentBaseStart.clone().sub(currentP);
+                            currentBaseStart.add(fix1);
+                            $3Dmol.GLDraw.drawCylinder(geo, currentBaseStart, currentBaseEnd, 0.4, $3Dmol.CC.color(atomcolor), false, true);
+                        }
+                        currentBaseStart = null;
+                        currentBaseEnd = null;
+                    }
+
                     if (atom.atom == 'O')
                     {
                         // O, unneeded for trace style
@@ -540,7 +557,9 @@ $3Dmol.drawCartoon = (function() {
 
                         colors.push(atomcolor);
 
-                    } else if (atom.atom == baseStart)
+                    }
+                    
+                    if (atom.atom == baseStart)
                     {
                         currentBaseStart = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
 
@@ -551,9 +570,7 @@ $3Dmol.drawCartoon = (function() {
                         if (gradientscheme) {
                             atomcolor = gradientscheme.valueToHex(atom.resi, gradientscheme.range());
                         }
-                        if (currentBaseStart && currentBaseEnd) {
-                            $3Dmol.GLDraw.drawCylinder(geo, currentBaseStart, currentBaseEnd, 0.4, $3Dmol.CC.color(atomcolor), false, true);
-                        }
+                        
                     }
                 }
             }
