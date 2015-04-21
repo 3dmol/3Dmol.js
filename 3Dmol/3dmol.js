@@ -99,7 +99,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
         if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
            alert("Wrong PDB ID"); return;
         }
-        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+        uri = "http://www.rcsb.org/pdb/files/" + query + ".pdb";
     } else if (query.substr(0, 4) == 'cid:') {
         type = "sdf";
         query = query.substr(4);
