@@ -2,6 +2,7 @@
   "name": "3Dmol",
   "version": "1.0.2",
   "description": "Object oriented Javascript molecular visualization library",
+  "main": "build/3Dmol.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/dkoes/3Dmol.js.git"
