@@ -84,7 +84,17 @@ ViewerSpec.callback;
  * @prop {CartoonStyleSpec} cartoon - draw cartoon representation of secondary structure
  */
 
+/** 
+ * @typedef SurfaceStyleSpec
+ * @prop {number} opacity - sets the transparency: 0 to hide, 1 for fully opaque
+ * @prop {string} colorscheme - element based coloring
+ * @prop {string} color - fixed coloring, overrides colorscheme
+ * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}
+ * 
+ * @example
+ * viewer.addSurface($3Dmol.SurfaceType.MS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:0.85});
 
+ */
 
 /** 
  * GLShape style specification

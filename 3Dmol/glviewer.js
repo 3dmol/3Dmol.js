@@ -1561,7 +1561,7 @@ $3Dmol.GLViewer = (function() {
          * Add surface representation to atoms
          *  @function $3Dmol.GLViewer#addSurface
          * @param {$3Dmol.SurfaceType} type - Surface type
-         * @param {Object} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
+         * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
@@ -1636,7 +1636,7 @@ $3Dmol.GLViewer = (function() {
                     atom = atomlist[i];
                     var scheme = $3Dmol.elementColors[style.colorscheme];
                             if(scheme && typeof(scheme[atom.elem]) != "undefined") {
-                        atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
+                                atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
                             }
                 }
             }
