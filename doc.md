@@ -96,6 +96,11 @@ The full source distribution is available [from github](https://github.com/dkoes
 ```
 git clone https://github.com/dkoes/3Dmol.js.git
 ``` 
+The checked out code can be built using [grunt](http://gruntjs.com/).
+```
+grunt build
+```
+
 
 Since 3Dmol.js is licensed under the permissive BSD open-source license, you are free
 to copy this code and use it any any project, as long the code is properly acknowledged.
