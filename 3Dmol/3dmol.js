@@ -19,7 +19,7 @@ $3Dmol = (function(window) {
    address has loaded 3Dmol.js.  Being able track this usage
    is very helpful when reporting to funding agencies.  Please
    leave this code in if you would like to increase the 
-   likelihood of 3Dmo.js remaining supported.
+   likelihood of 3Dmol.js remaining supported.
 */
 $.get("http://3dmol.csb.pitt.edu/track/report.cgi");
     
@@ -99,7 +99,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
         if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
            alert("Wrong PDB ID"); return;
         }
-        uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+        uri = "http://www.rcsb.org/pdb/files/" + query + ".pdb";
     } else if (query.substr(0, 4) == 'cid:') {
         type = "sdf";
         query = query.substr(4);
@@ -248,27 +248,27 @@ $3Dmol.getExtent = function(atomlist) {
         ysum += atom.y;
         zsum += atom.z;
         
-        if (atom.symmetries) {
-            for (var n = 0; n < atom.symmetries.length; n++) {
-                xsum += atom.symmetries[n].x;
-                ysum += atom.symmetries[n].y;
-                zsum += atom.symmetries[n].x;
-                cnt++;
-                xmin = (xmin < atom.x) ? xmin : atom.x;
-                ymin = (ymin < atom.y) ? ymin : atom.y;
-                zmin = (zmin < atom.z) ? zmin : atom.z;
-                xmax = (xmax > atom.x) ? xmax : atom.x;
-                ymax = (ymax > atom.y) ? ymax : atom.y;
-                zmax = (zmax > atom.z) ? zmax : atom.z; 
-            }
-        }
-
         xmin = (xmin < atom.x) ? xmin : atom.x;
         ymin = (ymin < atom.y) ? ymin : atom.y;
         zmin = (zmin < atom.z) ? zmin : atom.z;
         xmax = (xmax > atom.x) ? xmax : atom.x;
         ymax = (ymax > atom.y) ? ymax : atom.y;
         zmax = (zmax > atom.z) ? zmax : atom.z;
+        
+        if (atom.symmetries) {
+            for (var n = 0; n < atom.symmetries.length; n++) {
+                xsum += atom.symmetries[n].x;
+                ysum += atom.symmetries[n].y;
+                zsum += atom.symmetries[n].z;
+                xmin = (xmin < atom.x) ? xmin : atom.x;
+                ymin = (ymin < atom.y) ? ymin : atom.y;
+                zmin = (zmin < atom.z) ? zmin : atom.z;
+                xmax = (xmax > atom.x) ? xmax : atom.x;
+                ymax = (ymax > atom.y) ? ymax : atom.y;
+                zmax = (zmax > atom.z) ? zmax : atom.z; 
+                cnt++;
+            }
+        }
     }
 
     return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],

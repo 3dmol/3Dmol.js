@@ -96,6 +96,11 @@ The full source distribution is available [from github](https://github.com/dkoes
 ```
 git clone https://github.com/dkoes/3Dmol.js.git
 ``` 
+The checked out code can be built using [grunt](http://gruntjs.com/).
+```
+grunt build
+```
+
 
 Since 3Dmol.js is licensed under the permissive BSD open-source license, you are free
 to copy this code and use it any any project, as long the code is properly acknowledged.
@@ -113,7 +118,7 @@ Models are manipulated and styled using {@link AtomSpec} JavaScript objects.
 
 An example of a viewer that manipulates the styles of the embedded objects is shown below.  View the source code for the implementation details.
 
-<iframe width=800, height=800 src="http://3dmol.csb.pitt.edu/doc/example.html"></iframe> 
+<iframe width=800, height=800 src="tests/example.html"></iframe> 
 
 ##FAQ
 

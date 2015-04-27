@@ -120,7 +120,7 @@ head, body {
 	<input type="button" value="Surface1"
 		onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false,chain:'A'},{hetflag:false,chain:'A'});"></input>
 	<input type="button" value="Surface2"
-		onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.RWB(-.6,.6)}, opacity:0.85}, {chain:'B'},{chain:'B'});"></input>
+		onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.MS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:0.85}, {chain:'B'},{chain:'B'});"></input>
 	<input type="button" value="RM Surface1"
 		onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
 	<input type="button" value="RM Surface2"

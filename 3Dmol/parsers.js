@@ -362,16 +362,16 @@ $3Dmol.Parsers = (function() {
             atom.atom = atom.elem = line.substr(31, 3).replace(/ /g, "");
 
             if (atom.elem != 'H' || !noH) {
-	            atom.serial = i;
-	            serialToIndex[i] = atoms.length;
-	            atom.x = parseFloat(line.substr(0, 10));
-	            atom.y = parseFloat(line.substr(10, 10));
-	            atom.z = parseFloat(line.substr(20, 10));
-	            atom.hetflag = true;
-	            atom.bonds = [];
-	            atom.bondOrder = [];
-	            atom.properties = {};
-	            atoms.push(atom);
+                atom.serial = i;
+                serialToIndex[i] = atoms.length;
+                atom.x = parseFloat(line.substr(0, 10));
+                atom.y = parseFloat(line.substr(10, 10));
+                atom.z = parseFloat(line.substr(20, 10));
+                atom.hetflag = true;
+                atom.bonds = [];
+                atom.bondOrder = [];
+                atom.properties = {};
+                atoms.push(atom);
             }
         }
         
@@ -382,10 +382,10 @@ $3Dmol.Parsers = (function() {
             var to = serialToIndex[parseInt(line.substr(3, 3)) - 1 + start];
             var order = parseInt(line.substr(6, 3));      
             if(typeof(from) != 'undefined' && typeof(to) != 'undefined') {
-	            atoms[from].bonds.push(to);
-	            atoms[from].bondOrder.push(order);
-	            atoms[to].bonds.push(from);
-	            atoms[to].bondOrder.push(order);
+                atoms[from].bonds.push(to);
+                atoms[from].bondOrder.push(order);
+                atoms[to].bonds.push(from);
+                atoms[to].bondOrder.push(order);
             }
         }
 
@@ -484,8 +484,8 @@ $3Dmol.Parsers = (function() {
                 lineNum++;
             }
             else if (linesFiltered[lineNum][0] === '_') {
-                var categoryName = linesFiltered[lineNum].split('.')[0];
-                var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                var categoryName = (linesFiltered[lineNum].split('.')[0]).toLowerCase();
+                var dataItemName = (linesFiltered[lineNum].split('.')[1].split(/\s/)[0]).toLowerCase();
                 var dataItem = getDataItem(categoryName, dataItemName);
                 
 
@@ -517,8 +517,8 @@ $3Dmol.Parsers = (function() {
                 var dataItemNames = []
                 while (linesFiltered[lineNum] === "" || linesFiltered[lineNum][0] === '_') {
                     if (linesFiltered[lineNum] !== "") {
-                        var categoryName = linesFiltered[lineNum].split('.')[0];
-                        var dataItemName = linesFiltered[lineNum].split('.')[1].split(/\s/)[0];
+                        var categoryName = (linesFiltered[lineNum].split('.')[0]).toLowerCase();
+                        var dataItemName = (linesFiltered[lineNum].split('.')[1].split(/\s/)[0]).toLowerCase();
                         var dataItem = getDataItem(categoryName, dataItemName);
                         dataItems.push(dataItem);
                         dataItemNames.push(dataItemName);
@@ -546,13 +546,13 @@ $3Dmol.Parsers = (function() {
         //Pulls atom information out of the data
         var atomsPreBonds = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
-        if (mmCIF._atom_site.group_PDB[i] === "TER") continue;
+        if (mmCIF._atom_site.group_pdb[i] === "TER") continue;
             var atom = {};
             atom.id = parseFloat(mmCIF._atom_site.id[i]);
             atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
             atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
             atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
-            atom.hetflag = true; //need to figure out what this is group_PDB == HETA
+            atom.hetflag = mmCIF._atom_site.group_pdb[i] === "HETA";
             atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.bondOrder = [];
@@ -572,18 +572,30 @@ $3Dmol.Parsers = (function() {
         var atomHashTable = {};
         for (var i = 0; i < mmCIF._atom_site.id.length; i++) {
             var label_alt = mmCIF._atom_site.label_alt_id[i];
+            if (label_alt === undefined) {
+                label_alt = '.';
+            }
             var label_asym = mmCIF._atom_site.label_asym_id[i];
-        var label_atom = mmCIF._atom_site.label_atom_id[i];
-        var label_seq = mmCIF._atom_site.label_seq_id[i];
+            if (label_asym === undefined) {
+                label_asym = '.';
+            }
+            var label_atom = mmCIF._atom_site.label_atom_id[i];
+            if (label_atom === undefined) {
+                label_atom = '.';
+            }
+            var label_seq = mmCIF._atom_site.label_seq_id[i];
+            if (label_seq === undefined) {
+                label_seq = '.';
+            }
             var id = mmCIF._atom_site.id[i]; //If file is sorted, id will be i+1
 
             if (atomHashTable[label_alt] === undefined) {
                 atomHashTable[label_alt] = {};
             }
-        if (atomHashTable[label_alt][label_asym] === undefined) {
-        atomHashTable[label_alt][label_asym] = {};
-        }
-        if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
+            if (atomHashTable[label_alt][label_asym] === undefined) {
+                atomHashTable[label_alt][label_asym] = {};
+            }
+            if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
                 atomHashTable[label_alt][label_asym][label_atom] = {};
             }
         
@@ -591,54 +603,92 @@ $3Dmol.Parsers = (function() {
         }
 
         for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
-        var offset = atoms.length;
-            var id1 = atomHashTable[mmCIF._struct_conn.ptnr1_label_alt_id[i]]
-                           [mmCIF._struct_conn.ptnr1_label_asym_id[i]]
-                           [mmCIF._struct_conn.ptnr1_label_atom_id[i]]
-                               [mmCIF._struct_conn.ptnr1_label_seq_id[i]];
-            if (atomsPreBonds[id1] === undefined) continue;
+	        var offset = atoms.length;
+	        
+	        var alt = (mmCIF._struct_conn.ptnr1_label_alt_id || [])[i];
+	        if (alt === undefined) {
+	            alt = ".";
+	        }
+	        var asym = (mmCIF._struct_conn.ptnr1_label_asym_id || [])[i];
+	        if (asym === undefined) {
+	            asym = ".";
+	        }
+	        var atom = (mmCIF._struct_conn.ptnr1_label_atom_id || [])[i];
+	        if (atom === undefined) {
+	            atom = ".";
+	        }
+	        var seq = (mmCIF._struct_conn.ptnr1_label_seq_id || [])[i];
+	        if (seq === undefined) {
+	            seq = ".";
+	        }
+	        
+            var id1 = atomHashTable[alt][asym][atom][seq];
+            //if (atomsPreBonds[id1] === undefined) continue;
             var index1 = atomsPreBonds[id1].index;
+            
+            var alt = (mmCIF._struct_conn.ptnr2_label_alt_id || [])[i];
+	    if (alt === undefined) {
+	        alt = ".";
+	    }
+	    var asym = (mmCIF._struct_conn.ptnr2_label_asym_id || [])[i];
+	    if (asym === undefined) {
+	        asym = ".";
+	    }
+	    var atom = (mmCIF._struct_conn.ptnr2_label_atom_id || [])[i];
+	    if (atom === undefined) {
+	        atom = ".";
+	    }
+	    var seq = (mmCIF._struct_conn.ptnr2_label_seq_id || [])[i];
+	    if (seq === undefined) {
+	        seq = ".";
+	    }
 
-        var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
-                               [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+            var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]]
+                                   [mmCIF._struct_conn.ptnr2_label_asym_id[i]]
+                                   [mmCIF._struct_conn.ptnr2_label_atom_id[i]]
+                                   [mmCIF._struct_conn.ptnr2_label_seq_id[i]];
             if (atomsPreBonds[id2] === undefined) continue;
             var index2 = atomsPreBonds[id2].index;
 
-        atomsPreBonds[id1].bonds.push(index2 + offset);
-        atomsPreBonds[id1].bondOrder.push(1);
-        atomsPreBonds[id2].bonds.push(index1 + offset);
-        atomsPreBonds[id2].bondOrder.push(1);
-        console.log("connected " + index1 + " and " + index2);
+            atomsPreBonds[id1].bonds.push(index2 + offset);
+            atomsPreBonds[id1].bondOrder.push(1);
+            atomsPreBonds[id2].bonds.push(index1 + offset);
+            atomsPreBonds[id2].bondOrder.push(1);
+            console.log("connected " + index1 + " and " + index2);
         }
 
-    //atoms = atoms.concat(atomsPreBonds);
-    for (var i = 0; i < atomsIndexed.length; i++) {
+        //atoms = atoms.concat(atomsPreBonds);
+        for (var i = 0; i < atomsIndexed.length; i++) {
             delete atomsIndexed[i].index;
             atoms.push(atomsIndexed[i]);
-    }
+        }
 
         assignBonds(atoms);
-    
-    var matrices = [];
-    for (var i = 0; i < mmCIF._atom_sites['fract_transf_matrix[1][1]'].length; i++) {
-        var matrix = new $3Dmol.Matrix4(
-                mmCIF._atom_sites['fract_transf_matrix[1][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[1][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[1][3]'],
-                mmCIF._atom_sites['fract_transf_vector[1]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[2][3]'],
-                mmCIF._atom_sites['fract_transf_vector[2]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][1]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][2]'],
-                mmCIF._atom_sites['fract_transf_matrix[3][3]'],
-                mmCIF._atom_sites['fract_transf_vector[3]']
-        );
-        matrices.push(matrix);
-    }
+	
+    	var matrices = [];
+    	if (mmCIF._pdbx_struct_oper_list !== undefined) {    // transformations may not exist.
+            for (var i = 0; i < mmCIF._pdbx_struct_oper_list.id.length; i++) {
+           	var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]']);
+           	var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]']);
+           	var matrix13 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][3]']);
+           	var vector1  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[1]'   ]);
+           	var matrix21 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][1]']);
+           	var matrix22 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][2]']);
+           	var matrix23 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][3]']);
+           	var vector2  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[2]'   ]);
+           	var matrix31 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][1]']);
+           	var matrix32 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][2]']);
+           	var matrix33 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][3]']);
+           	var vector3  = parseFloat(mmCIF._pdbx_struct_oper_list['vector[3]'   ]);
+           	
+    	        var matrix = new $3Dmol.Matrix4(
+    	                matrix11, matrix12, matrix13, vector1,
+    	                matrix21, matrix22, matrix23, vector2,
+    	                matrix31, matrix32, matrix33, vector3
+    	        );
+    	        matrices.push(matrix);
+    	    }
+    	}
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -703,28 +753,28 @@ $3Dmol.Parsers = (function() {
             //get element
             atom.atom = atom.elem = tokens[5].split('.')[0];
             if (atom.elem == 'H' && noH) {
-            		//ignore
+                //ignore
             }
             else {
-	            // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
-	            // serial id in mol2 file
-	            var index = atoms.length;
-	            var serial = parseInt(tokens[0]);
-	            atom.serial = serial;
-	            // atom.serial = i;
-	            
-	            atom.x = parseFloat(tokens[2]);
-	            atom.y = parseFloat(tokens[3]);
-	            atom.z = parseFloat(tokens[4]);
-	            atom.atom = tokens[5];
-	            var charge = parseFloat(tokens[8]);
-	            
-	            atom.bonds = [];
-	            atom.bondOrder = [];
-	            atom.properties = {'charge': charge, 'partialCharge': charge};
-
-	            serialToIndex[serial] = index;	            	
-	            atoms.push(atom);
+                // 'index' is this atom's index in 'atoms'; 'serial' is this atom's
+                // serial id in mol2 file
+                var index = atoms.length;
+                var serial = parseInt(tokens[0]);
+                atom.serial = serial;
+                // atom.serial = i;
+                
+                atom.x = parseFloat(tokens[2]);
+                atom.y = parseFloat(tokens[3]);
+                atom.z = parseFloat(tokens[4]);
+                atom.atom = tokens[5];
+                var charge = parseFloat(tokens[8]);
+                
+                atom.bonds = [];
+                atom.bondOrder = [];
+                atom.properties = {'charge': charge, 'partialCharge': charge};
+                serialToIndex[serial] = index;
+                
+                atoms.push(atom);
             }
         }
         
@@ -950,7 +1000,6 @@ $3Dmol.Parsers = (function() {
                 
                 i--; //set i back
             }
-            
 
         }
 
