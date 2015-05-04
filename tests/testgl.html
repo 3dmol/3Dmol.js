@@ -106,8 +106,11 @@
                 var viewer = glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});
                     
                 glviewer.setBackgroundColor(0xffffff);
-                receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false, doAssembly:true});
-                //receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false});
+                //receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false, doAssembly:true});
+                glviewer.addModel(data, "pdb",{keepH:false, doAssembly:true});
+                //m = glviewer.addModel($("#moldata_pdb_large").val(), "pdb", {keepH:false});
+                //m.setStyle({}, {sphere:{}});
+                //$3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);
 
               //  m.setColorByProperty({}, 'charge', new $3Dmol.Gradient.RWB(-0.5,0.5));
                 //glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.5,.5)}, opacity:0.8});

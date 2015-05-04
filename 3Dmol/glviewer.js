@@ -594,20 +594,21 @@ $3Dmol.GLViewer = (function() {
                         } else {
                             smesh.visible = true;
                         }
-                        surfaces[i].lastGL = smesh;
-                        var copyMatrices = models[0].getSymmetries(); //CHECK THIS WORKS EVERY TIME
-                        //getSym will return either copyMatrices or the id matrix if no sym data
-                        //so will never be undefined? - but what exactly is "models"
+                        var copyMatrices = models[0].getSymmetries(); //THIS EVENTUALLY NEEDS FIXED
                         if (copyMatrices.length > 1) {
                             var n;
-                            for (n = 0; n < copyMatrices.length; n++) {
-                                var transformedMesh = smesh.clone();
-                                transformedMesh.matrix = copyMatrices[n];
-                                transformedMesh.matrixAutoUpdate = false;
-                                modelGroup.add(transformedMesh);
+                            var transformedMeshes = new $3Dmol.Object3D();
+                            for (n = 0; n < copyMatrices.length; n++) {  
+                                var tmesh = smesh.clone();
+                                tmesh.matrix = copyMatrices[n];
+                                tmesh.matrixAutoUpdate = false;
+                                transformedMeshes.add(tmesh);
                             }    
+                            surfaces[i].lastGL = transformedMeshes;
+                            modelGroup.add(transformedMeshes);
                         }
                         else {
+                            surfaces[i].lastGL = smesh;
                             modelGroup.add(smesh);
                         }
                     } // else final surface already there
