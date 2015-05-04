@@ -975,8 +975,9 @@ $3Dmol.GLModel = (function() {
                 }
                 return finalRet;
             }
-
-            return ret;
+            else {
+                return ret;
+            }
         };
         
         /**
@@ -992,7 +993,7 @@ $3Dmol.GLModel = (function() {
                 return copyMatrices; //returns copyMatrices, which has ID matrix as 1st entry
             }
             else {
-                    
+                var idList = [idMatrix];
                 return idList;
             }
         };

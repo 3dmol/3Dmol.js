@@ -595,7 +595,21 @@ $3Dmol.GLViewer = (function() {
                             smesh.visible = true;
                         }
                         surfaces[i].lastGL = smesh;
-                        modelGroup.add(smesh);
+                        var copyMatrices = models[0].getSymmetries(); //CHECK THIS WORKS EVERY TIME
+                        //getSym will return either copyMatrices or the id matrix if no sym data
+                        //so will never be undefined? - but what exactly is "models"
+                        if (copyMatrices.length > 1) {
+                            var n;
+                            for (n = 0; n < copyMatrices.length; n++) {
+                                var transformedMesh = smesh.clone();
+                                transformedMesh.matrix = copyMatrices[n];
+                                transformedMesh.matrixAutoUpdate = false;
+                                modelGroup.add(transformedMesh);
+                            }    
+                        }
+                        else {
+                            modelGroup.add(smesh);
+                        }
                     } // else final surface already there
                 }
             }
@@ -1417,6 +1431,20 @@ $3Dmol.GLViewer = (function() {
             geoGroup.faceArray = new Uint16Array(faces);
             var mesh = new $3Dmol.Mesh(geo, mat);
             mesh.doubleSided = true;
+            /*
+            if (atom.symmetries) {
+                //var finalMesh = new $3Dmol.Mesh();
+                var finalMesh = new $3Dmol.Object3D();
+                var n;
+                for (n = 0; n < atom.copyMatrices.length; n++) {
+                    var transformedMesh = new $3Dmol.Mesh(geo, mat);
+                    transformedMesh.doubleSided = true;
+                    transformedMesh.matrix.copy(atom.copyMatrices[n]);
+                    transformedMesh.matrixAutoUpdate = false;
+                    finalMesh.add(transformedMesh);
+                }
+                return finalMesh;
+            }*/
 
             return mesh;
         };
