@@ -398,89 +398,86 @@ $3Dmol.drawCartoon = (function() {
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
 
-        var cartoonAtoms = ["CA", "O"]
-        var thickness;
-        var atomColor;
-        var currentChain, currentResi, currentReschain, currentAtom, currentSS, currentTrace;
+        var cartoonAtoms = ["CA", "P"]
+        var currentAtom, currentChain, currentReschain, currentResi, currAtomColor;
         var traceGeo = null;
-        var ss = null, ssborder = false;
         var colors = [];
 
         for (i in atomList)
         {
-            var atom = atomList[i]
-            var cartoon = atom.style.cartoon;
-
-            if (atom === undefined || $.inArray(atom.atom, cartoonAtoms) === -1)
-                continue; // skip array holes and atoms not involved in cartoon drawing
+            var nextAtom = atomList[i]
             
+            if (nextAtom === undefined || $.inArray(nextAtom.atom, cartoonAtoms) === -1)
+                continue; // skip array holes and atoms not involved in cartoon drawing
+
             // determine cartoon style
-            if (cartoon.style == "trace")
+            var cartoon = nextAtom.style.cartoon;
+            if (cartoon.style === "trace")
             {
+                /* "trace" style just draws cylinders between consecutive 'backbone' atoms,
+                    such as alpha carbon for polypeptides and phosphorus for DNA. */
+
                 if (!traceGeo) traceGeo = new $3Dmol.Geometry(true);
 
-                if (atom.atom == "CA")
+                if (nextAtom.atom === "CA" || nextAtom.atom === "P")
                 {
-
-                    // determine atom color
-                    var prevAtomColor = atomColor;
+                    // determine cylinder color
                     if (gradientScheme)
-                        atomColor = gradientScheme.valueToHex(atom.resi, gradientScheme.range());
+                        var nextAtomColor = gradientScheme.valueToHex(nextAtom.resi, gradientScheme.range());
                     else
-                        atomColor = $3Dmol.getColorFromStyle(atom, cartoon).getHex();
-                    colors.push(atomColor);
+                        var nextAtomColor = $3Dmol.getColorFromStyle(nextAtom, cartoon).getHex();
+                    colors.push(nextAtomColor);
 
-                    // determine thickness to use
+                    // determine cylinder thickness
                     if ($.isNumeric(cartoon.thickness))
-                        thickness = cartoon.thickness;
+                        var thickness = cartoon.thickness;
                     else
-                        thickness = defaultThickness;
+                        var thickness = defaultThickness;
 
-                    /* do not draw connections between chains; ignore differences
-                       in reschain to properly support CA only files */
-                    if (currentChain === atom.chain && currentResi + 1 === atom.resi && currentTrace != undefined)
+                    /* do not draw connections between different chains, but ignore
+                       differences in reschain to properly support CA-only files */
+                    if (currentChain === nextAtom.chain && currentResi + 1 === nextAtom.resi && currentAtom)
                     {
-                        // if both atoms same color, draw single cylinder
-                        if(atomColor == prevAtomColor)
+                        // if both atoms are the same color, draw single cylinder
+                        if (nextAtomColor == currAtomColor)
                         {
-                            var color = $3Dmol.CC.color(atomColor);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, currentTrace, atom, thickness, color, true, true);
+                            var color = $3Dmol.CC.color(nextAtomColor);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, currentAtom, nextAtom, thickness, color, true, true);
                         }
 
                         else // otherwise draw cylinders for each color (split down the middle)
                         {
-                            var midpoint = new $3Dmol.Vector3().addVectors(currentTrace, atom).multiplyScalar(0.5);
-                            var color1 = $3Dmol.CC.color(prevAtomColor);
-                            var color2 = $3Dmol.CC.color(atomColor);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, currentTrace, midpoint, thickness, color1, true, false);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, atom, thickness, color2, false, true);
+                            var midpoint = new $3Dmol.Vector3().addVectors(currentAtom, nextAtom).multiplyScalar(0.5);
+                            var color1 = $3Dmol.CC.color(currAtomColor);
+                            var color2 = $3Dmol.CC.color(nextAtomColor);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, currentAtom, midpoint, thickness, color1, true, false);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, nextAtom, thickness, color2, false, true);
                         }
                     }
 
                     // these pertain to the last-drawn point, the 'pencil tip' for tracing so to speak
-                    currentTrace = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
-                    currentAtom = atom;
-                    currentChain = atom.chain;
-                    currentReschain = atom.reschain;
-                    currentResi = atom.resi;
-                    currentSS = atom.ss;
-                    ssborder = atom.ssbegin || atom.ssend; // ?
+                    currentTrace = new $3Dmol.Vector3(nextAtom.x, nextAtom.y, nextAtom.z);
+                    currentAtom = nextAtom;
+                    currentChain = nextAtom.chain;
+                    currentReschain = nextAtom.reschain;
+                    currentResi = nextAtom.resi;
+                    currAtomColor = nextAtomColor;
                 }
             }
 
             else // draw default style cartoon
             {
-                //
+                // TODO
             }  
         }
 
-        if (traceGeo)
+        if (traceGeo) // generate mesh from trace geometry
         {
-            var material = new $3Dmol.MeshLambertMaterial();
-            material.vertexColors = $3Dmol.FaceColors;
-            material.side = $3Dmol.DoubleSide;
-            var mesh = new $3Dmol.Mesh(traceGeo, material);
-            group.add(mesh);
+            var traceMaterial = new $3Dmol.MeshLambertMaterial();
+            traceMaterial.vertexColors = $3Dmol.FaceColors;
+            traceMaterial.side = $3Dmol.DoubleSide;
+            var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
+            group.add(traceMesh);
         }
     };
 
