@@ -369,8 +369,139 @@ $3Dmol.drawCartoon = (function() {
         group.add(line);
     };
 
-    var drawStrand = function(group, atomlist, num, div, fill, coilWidth,
-            helixSheetWidth, doNotSmoothen, gradientscheme, geo) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    var drawStrand = function(group, atomList, num, div, fill, coilWidth, helixSheetWidth, doNotSmoothen, gradientScheme, geo)
+    {
+        num = num || strandDIV;
+        div = div || axisDIV;
+        doNotSmoothen = !!(doNotSmoothen);
+
+        var cartoonAtoms = ["CA", "O"]
+        var thickness;
+        var atomColor;
+        var currentChain, currentResi, currentReschain, currentAtom, currentSS, currentTrace;
+        var traceGeo = null;
+        var ss = null, ssborder = false;
+        var colors = [];
+
+        for (i in atomList)
+        {
+            var atom = atomList[i]
+            var cartoon = atom.style.cartoon;
+
+            if (atom === undefined || $.inArray(atom.atom, cartoonAtoms) === -1)
+                continue; // skip array holes and atoms not involved in cartoon drawing
+            
+            // determine cartoon style
+            if (cartoon.style == "trace")
+            {
+                if (!traceGeo) traceGeo = new $3Dmol.Geometry(true);
+
+                if (atom.atom == "CA")
+                {
+
+                    // determine atom color
+                    var prevAtomColor = atomColor;
+                    if (gradientScheme)
+                        atomColor = gradientScheme.valueToHex(atom.resi, gradientScheme.range());
+                    else
+                        atomColor = $3Dmol.getColorFromStyle(atom, cartoon).getHex();
+                    colors.push(atomColor);
+
+                    // determine thickness to use
+                    if ($.isNumeric(cartoon.thickness))
+                        thickness = cartoon.thickness;
+                    else
+                        thickness = defaultThickness;
+
+                    /* do not draw connections between chains; ignore differences
+                       in reschain to properly support CA only files */
+                    if (currentChain === atom.chain && currentResi + 1 === atom.resi && currentTrace != undefined)
+                    {
+                        // if both atoms same color, draw single cylinder
+                        if(atomColor == prevAtomColor)
+                        {
+                            var color = $3Dmol.CC.color(atomColor);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, currentTrace, atom, thickness, color, true, true);
+                        }
+
+                        else // otherwise draw cylinders for each color (split down the middle)
+                        {
+                            var midpoint = new $3Dmol.Vector3().addVectors(currentTrace, atom).multiplyScalar(0.5);
+                            var color1 = $3Dmol.CC.color(prevAtomColor);
+                            var color2 = $3Dmol.CC.color(atomColor);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, currentTrace, midpoint, thickness, color1, true, false);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, atom, thickness, color2, false, true);
+                        }
+                    }
+
+                    // these pertain to the last-drawn point, the 'pencil tip' for tracing so to speak
+                    currentTrace = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                    currentAtom = atom;
+                    currentChain = atom.chain;
+                    currentReschain = atom.reschain;
+                    currentResi = atom.resi;
+                    currentSS = atom.ss;
+                    ssborder = atom.ssbegin || atom.ssend; // ?
+                }
+            }
+
+            else // draw default style cartoon
+            {
+                //
+            }  
+        }
+
+        if (traceGeo)
+        {
+            var material = new $3Dmol.MeshLambertMaterial();
+            material.vertexColors = $3Dmol.FaceColors;
+            material.side = $3Dmol.DoubleSide;
+            var mesh = new $3Dmol.Mesh(traceGeo, material);
+            group.add(mesh);
+        }
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    var drawStrandOld = function(group, atomlist, num, div, fill, coilWidth, helixSheetWidth, doNotSmoothen, gradientscheme, geo) {
         num = num || strandDIV;
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
