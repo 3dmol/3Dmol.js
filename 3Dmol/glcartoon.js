@@ -398,17 +398,21 @@ $3Dmol.drawCartoon = (function() {
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
 
-        var cartoonAtoms = ["CA", "P"]
-        var currentAtom, currentChain, currentReschain, currentResi, currAtomColor;
+        var cartoonAtoms = ["CA", "O", "P"]
+        var currentAtom, currentChain, currentReschain, currentResi, currentSS, currAtomColor;
+        var currentP1, currentP2;
         var traceGeo = null;
         var colors = [];
+        var points = [];
+        for (var i = 0; i < num; i++)
+            points[i] = [];
 
         for (i in atomList)
         {
             var nextAtom = atomList[i]
             
-            if (nextAtom === undefined || $.inArray(nextAtom.atom, cartoonAtoms) === -1)
-                continue; // skip array holes and atoms not involved in cartoon drawing
+            if (nextAtom === undefined || $.inArray(nextAtom.atom, cartoonAtoms) === -1 || nextAtom.hetflag)
+                continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
 
             // determine cartoon style
             var cartoon = nextAtom.style.cartoon;
@@ -438,7 +442,7 @@ $3Dmol.drawCartoon = (function() {
                        differences in reschain to properly support CA-only files */
                     if (currentChain === nextAtom.chain && currentResi + 1 === nextAtom.resi && currentAtom)
                     {
-                        // if both atoms are the same color, draw single cylinder
+                        // if both atoms are same color, draw single cylinder
                         if (nextAtomColor == currAtomColor)
                         {
                             var color = $3Dmol.CC.color(nextAtomColor);
@@ -452,11 +456,10 @@ $3Dmol.drawCartoon = (function() {
                             var color2 = $3Dmol.CC.color(nextAtomColor);
                             $3Dmol.GLDraw.drawCylinder(traceGeo, currentAtom, midpoint, thickness, color1, true, false);
                             $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, nextAtom, thickness, color2, false, true);
-                        }
+                        } // note that an atom object can be duck-typed as a 3-vector
                     }
 
                     // these pertain to the last-drawn point, the 'pencil tip' for tracing so to speak
-                    currentTrace = new $3Dmol.Vector3(nextAtom.x, nextAtom.y, nextAtom.z);
                     currentAtom = nextAtom;
                     currentChain = nextAtom.chain;
                     currentReschain = nextAtom.reschain;
@@ -465,11 +468,78 @@ $3Dmol.drawCartoon = (function() {
                 }
             }
 
-            else // draw default style cartoon
+            else // draw default-style cartoon
             {
-                // TODO
+                if (nextAtom.atom === "CA")
+                {
+                    if (currentChain != nextAtom.chain || currentResi + 1 != nextAtom.resi || currentReschain != nextAtom.reschain)
+                    {
+                        // reached end of a chain of connected residues, so draw accumulated points
+                        for (var i = 0; !thickness && i < num; i++)
+                            drawSmoothCurve(group, points[i], 1, colors, div);
+                        if (fill)
+                            drawStrip(group, points[0], points[num - 1], colors, div, thickness);
+
+                        // forget features of previous chain (points, colors, location of most recent oxygen)
+                        points = [];
+                        for (var i = 0; i < num; i++)
+                            points[i] = [];
+                        colors = [];
+                        currentP2 = null;
+                    }                    
+
+                    // determine cylinder color
+                    if (gradientScheme)
+                        var nextAtomColor = gradientScheme.valueToHex(nextAtom.resi, gradientScheme.range());
+                    else
+                        var nextAtomColor = $3Dmol.getColorFromStyle(nextAtom, cartoon).getHex();
+                    colors.push(nextAtomColor);
+
+                    // determine cylinder thickness
+                    if ($.isNumeric(cartoon.thickness))
+                        var thickness = cartoon.thickness;
+                    else
+                        var thickness = defaultThickness;
+
+                    currentP1 = new $3Dmol.Vector3(nextAtom.x, nextAtom.y, nextAtom.z);
+                    currentAtom = nextAtom;
+                    currentChain = nextAtom.chain;
+                    currentReschain = nextAtom.reschain;
+                    currentResi = nextAtom.resi;
+                    currentSS = nextAtom.ss;
+                    currAtomColor = nextAtomColor;
+                }
+
+                else if (nextAtom.atom === "O")
+                {
+                    var nextP2 = new $3Dmol.Vector3(nextAtom.x, nextAtom.y, nextAtom.z);
+                    nextP2.sub(currentP1);
+                    nextP2.normalize();
+                    nextP2.multiplyScalar((currentSS === "c") ? coilWidth : helixSheetWidth);
+                    if (currentP2 != null && nextP2.dot(currentP2) < 0)
+                        nextP2.negate();
+                    currentP2 = nextP2;
+
+                    for (var i = 0; i < num; i++)
+                    {
+                        var delta = -1 + (2 * i) / (num - 1); // produces num increments from -1 to 1
+                        var v = new $3Dmol.Vector3(currentP1.x + delta * currentP2.x,
+                                                   currentP1.y + delta * currentP2.y,
+                                                   currentP1.z + delta * currentP2.z);
+                        v.atom = currentAtom;
+                        if (!doNotSmoothen && currentSS === "s")
+                            v.smoothen = true;
+                        points[i].push(v);
+                    }
+                }
             }  
         }
+
+        // for default style, draw the last chain
+        for (var i = 0; !thickness && i < num; i++)
+            drawSmoothCurve(group, points[i], 1, colors, div);
+        if (fill)
+            drawStrip(group, points[0], points[num - 1], colors, div, thickness);
 
         if (traceGeo) // generate mesh from trace geometry
         {
