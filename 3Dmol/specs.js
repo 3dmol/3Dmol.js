@@ -4,10 +4,10 @@
 /**
  * GLViewer input specification
  * @typedef ViewerSpec
+ * @prop {Object} defaultcolors - map of elements to colors
+ * @prop {boolean} nomouse - if true, disable handling of mouse events
+ * @prop {string} backgroundColor - color of background
  */
-var ViewerSpec = {};
-ViewerSpec.defaultcolors;
-ViewerSpec.callback;
 
 /**
  * Atom representation. Depending on the input file format, not all fields may be defined.
@@ -97,8 +97,27 @@ ViewerSpec.callback;
  */
 
 /** 
+ * Volumetric data style specification
+ * @typedef VolSpec
+ * @prop {number} isoval - specifies the isovalue to draw surface at
+ * @propr {boolean} voxel - if true uses voxel style rendering
+ * @prop {string} color - solid color
+ * @prop {number} alpha - transparency
+ * @prop {boolean} wireframe - draw as wireframe, not surface
+ * @prop {number} linewidth - width of line for wireframe rendering
+ * @prop {boolean} clickable - if true, user can click on object to trigger callback
+ * @prop {function} callback - function to call on click 
+ */
+
+/** 
  * GLShape style specification
- * @typedef
+ * @typedef ShapeSpec
+ * @prop {string} color - solid color
+ * @prop {number} alpha - transparency
+ * @prop {boolean} wireframe - draw as wireframe, not surface
+ * @prop {number} linewidth - width of line for wireframe rendering
+ * @prop {boolean} clickable - if true, user can click on object to trigger callback
+ * @prop {function} callback - function to call on click 
  */
 var ShapeSpec = {};
 /** @type {$3Dmol.Color} */
@@ -142,12 +161,4 @@ ArrowSpec.radius;
 ArrowSpec.radiusRatio;
 ArrowSpec.mid;
 
-
-/**
- * Volumetric data specification
- * @typedef
- */
-var VolSpec = {};
-VolSpec.isoval;
-VolSpec.voxel;
-})();
+});
