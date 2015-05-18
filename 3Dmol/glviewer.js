@@ -20,6 +20,7 @@ $3Dmol.GLViewer = (function() {
 
     function GLViewer(element, config) { 
         // set variables
+    	config = config || {};
     	var callback = config.callback;
     	var defaultcolors = config.defaultcolors;    	
         if(!defaultcolors)
