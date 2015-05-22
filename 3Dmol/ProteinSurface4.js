@@ -328,15 +328,17 @@ $3Dmol.ProteinSurface = function() {
                                             vpAtomID[index] = atom.serial;
                                         } else {
                                             var atom2 = atoms[vpAtomID[index]];
-                                            ox = Math.floor(0.5 + scaleFactor *
-                                                    (atom2.x + ptranx));
-                                            oy = Math.floor(0.5 + scaleFactor *
-                                                    (atom2.y + ptrany));
-                                            oz = Math.floor(0.5 + scaleFactor *
-                                                    (atom2.z + ptranz));
-                                            if (mi * mi + mj * mj + mk * mk < ox *
-                                                    ox + oy * oy + oz * oz)
-                                                vpAtomID[index] = atom.serial;
+                                            if(atom2.serial != atom.serial) {
+                                                ox = cx + mi - Math.floor(0.5 + scaleFactor *
+                                                        (atom2.x + ptranx));
+                                                oy = cy + mj - Math.floor(0.5 + scaleFactor *
+                                                        (atom2.y + ptrany));
+                                                oz = cz + mk - Math.floor(0.5 + scaleFactor *
+                                                        (atom2.z + ptranz));
+                                                if (mi * mi + mj * mj + mk * mk < ox *
+                                                        ox + oy * oy + oz * oz)
+                                                    vpAtomID[index] = atom.serial;
+                                            }
                                         }
 
                                     }// k
@@ -397,16 +399,20 @@ $3Dmol.ProteinSurface = function() {
                                         if (!(vpBits[index] & ISDONE)) {
                                             vpBits[index] |= ISDONE;
                                             vpAtomID[index] = atom.serial;
-                                        } else {
+                                        }  else {
                                             var atom2 = atoms[vpAtomID[index]];
-                                            ox = Math.floor(0.5 + scaleFactor * (atom2.x + ptranx));
-                                            oy = Math.floor(0.5 + scaleFactor * (atom2.y + ptrany));
-                                            oz = Math.floor(0.5 + scaleFactor * (atom2.z + ptranz));
-                                            if (mi * mi + mj * mj + mk * mk < ox *
-                                                    ox + oy * oy + oz * oz)
-                                                vpAtomID[index] = atom.serial;
+                                            if(atom2.serial != atom.serial) {
+                                                ox = cx + mi - Math.floor(0.5 + scaleFactor *
+                                                        (atom2.x + ptranx));
+                                                oy = cy + mj - Math.floor(0.5 + scaleFactor *
+                                                        (atom2.y + ptrany));
+                                                oz = cz + mk - Math.floor(0.5 + scaleFactor *
+                                                        (atom2.z + ptranz));
+                                                if (mi * mi + mj * mj + mk * mk < ox *
+                                                        ox + oy * oy + oz * oz)
+                                                    vpAtomID[index] = atom.serial;
+                                            }
                                         }
-
                                     }// k
                                 }// if
                             }// kk
