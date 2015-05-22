@@ -375,7 +375,7 @@ $3Dmol.drawCartoon = (function() {
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
 
-        var cartoonAtoms = ["CA", "O", "P", "O5'", "OP2", "N1", "N3"];
+        var cartoonAtoms = ["CA", "O", "P", "O5'", "C4'", "OP2", "N1", "N3"];
         var cartoon, curr, next, currColor, nextColor, thickness, i;
         var backbonePt, prevOrientPt, baseStartPt, baseEndPt;
         var traceGeo = null;
@@ -446,21 +446,24 @@ $3Dmol.drawCartoon = (function() {
                 // draw bases for dna ladder
                 if (baseEndPt && (next.atom === "P" || next.atom === "O5'"))
                 {
+                    //console.log(next.chain + " " + next.resi + " " + next.resn);
                     if (curr && curr.chain === next.chain) // use the midpoint
                         baseStartPt = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
-                    else if (next.atom === "P") // use the current point
+                    else if (next.atom === "P") // when starting a new chain
                         baseStartPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     else
                         baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                     var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.04);
                     baseStartPt.add(startFix);
+                    if (!currColor) currColor = next.color;
                     $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(currColor), false, true);
                     baseStartPt = null;
                     baseEndPt = null;
                 }
 
-                if (next.atom === "CA" || next.atom === "P")
+                if (next.atom === "CA" || next.atom === "P" || next.atom === "O5'" && next.resi === 1)
                 {
+
                     if (curr != undefined &&
                         (curr.chain != next.chain || curr.resi + 1 != next.resi || curr.reschain != next.reschain))
                     {
@@ -475,8 +478,8 @@ $3Dmol.drawCartoon = (function() {
                         for (i = 0; i < num; i++)
                             points[i] = [];
                         colors = [];
-                        backbonePt = null;
-                        prevOrientPt = null;
+                        //backbonePt = null;
+                        //prevOrientPt = null;
                     }
 
                     // determine segment color and thickness
@@ -492,6 +495,7 @@ $3Dmol.drawCartoon = (function() {
 
                     curr = next; // advance current-backbone-atom pointer
                     backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+                    backbonePt.atom = curr.atom;
                     currColor = nextColor; // used for dna bases, which lag due to midpoint calculation
 
                     // click handling
@@ -500,7 +504,7 @@ $3Dmol.drawCartoon = (function() {
                         next.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
                 }
 
-                else if (next.atom === "O" || next.atom === "OP2")
+                else if (next.atom === "O" || next.atom === "OP2" || next.atom === "C4'" && next.resi === 1)
                 {
                     var orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.sub(backbonePt);
