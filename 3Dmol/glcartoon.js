@@ -386,7 +386,7 @@ $3Dmol.drawCartoon = (function() {
 
         for (i in atomList)
         {
-            next = atomList[i]
+            next = atomList[i];
             
             if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1 || next.hetflag)
                 continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
@@ -444,13 +444,15 @@ $3Dmol.drawCartoon = (function() {
             else // draw default-style cartoons based on secondary structure
             {
                 // draw bases for dna ladder
-                if (baseEndPt && (next.atom === "P" || next.resi === 1 && next.atom === "O5'")
+                if (baseEndPt && (next.atom === "P" || next.atom === "O5'"))
                 {
-                    if (curr.chain === next.chain)
+                    if (curr && curr.chain === next.chain) // use the midpoint
                         baseStartPt = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
+                    else if (next.atom === "P") // use the current point
+                        baseStartPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     else
                         baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
-                    var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.05);
+                    var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.04);
                     baseStartPt.add(startFix);
                     $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(currColor), false, true);
                     baseStartPt = null;
@@ -538,6 +540,7 @@ $3Dmol.drawCartoon = (function() {
                 {
                     baseEndPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     baseEndPt.resi = next.resi;
+                    baseEndPt.chain = next.chain;
                 }
             }  
         }
