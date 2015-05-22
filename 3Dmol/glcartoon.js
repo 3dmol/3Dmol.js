@@ -445,53 +445,57 @@ $3Dmol.drawCartoon = (function() {
 
             else // draw default-style cartoons based on secondary structure
             {
+                // draw backbone through these atoms
                 if (next.atom === "CA" || next.atom === "P" || next.atom === "O5'")
-                { //TODO need a more general way of finding the ends of the chains
+                {
+                    // end of a chain of connected residues
+                    if (curr != undefined && (curr.chain != next.chain || !(curr.resi === next.resi || curr.resi + 1 === next.resi)
+                        || curr.reschain != next.reschain))
+                    { 
 
-                    if (curr != undefined &&
-                        (curr.chain != next.chain || !(curr.resi === next.resi || curr.resi + 1 === next.resi)
-                            || curr.reschain != next.reschain))
-                    {
-                        if (baseEndPt)
+                        if (baseEndPt) // draw the last base if it's a NA chain
                         {
                             if (terminalPt)
-                            {
                                 baseStartPt = new $3Dmol.Vector3().addVectors(curr, terminalPt).multiplyScalar(0.5);
-                                $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(currColor), false, true);
-                                addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr);
-                                colors.push(nextColor);
-                            }
+                            else
+                                baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+
+                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
+                            addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr);
+                            colors.push(nextColor);
+                            
                             baseStartPt = null;
                             baseEndPt = null;
                         }
 
-                        // reached end of a chain of connected residues, so draw accumulated points
+                        // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
                             drawSmoothCurve(group, points[i], 1, colors, div);
                         if (fill)
                             drawStrip(group, points[0], points[num - 1], colors, div, thickness);
 
-                        // forget features of previous chain (points, colors, location of most recent oxygen)
+                        // clear arrays for points and colors
                         points = [];
                         for (i = 0; i < num; i++)
                             points[i] = [];
                         colors = [];
                     }
 
-                    // advance current-backbone-atom
+                    // backbone atom of next residue
                     if (curr === undefined || curr.resi != next.resi)
                     {
-                        if (baseEndPt)
+                        if (baseEndPt) // draw last NA residue's base
                         {
+                            // start the cylinder at the midpoint between consecutive backbone atoms
                             baseStartPt = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
                             //var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.04);
                             //baseStartPt.add(startFix);
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(currColor), false, true);
+                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
                             baseStartPt = null;
                             baseEndPt = null;   
                         }
 
-                        // determine segment color and thickness
+                        // determine color and thickness of the next strand segment
                         if (gradientScheme)
                             nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
                         else
@@ -502,10 +506,10 @@ $3Dmol.drawCartoon = (function() {
                         else
                             thickness = defaultThickness;
 
-                        curr = next; 
+                        curr = next; // advance pointer
                         backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                         backbonePt.resi = curr.resi;
-                        currColor = nextColor; // used for dna bases, which lag due to midpoint calculation
+                        currColor = nextColor; // used for NA bases
                     }
 
                     // click handling
@@ -515,53 +519,56 @@ $3Dmol.drawCartoon = (function() {
 
                 }
 
+                // atoms used to orient the backbone strand
                 else if (next.atom === "O"  && curr.atom === "CA"
                       || next.atom === "OP2" && curr.atom === "P"
                       || next.atom === "C5'" && curr.atom === "O5'")
                 {
                     orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.resi = next.resi;
-                    if (next.atom === "OP2")
-                    {
+                    if (next.atom === "OP2") // for NA 3' terminus
                         termOrientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
-                    }
                 }
 
+                // NA 3' terminus is an edge case, need a vector for most recent O3'
                 else if (next.atom === "O3'")
                 {
                     terminalPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
 
-                // dna base end point is different for pyramidines and purines
+                // atoms used for drawing the NA base cylinders (diff for purines and pyramidines)
                 else if ((next.atom === "N1" && (next.resn === " DG" || next.resn ===  " DA") ||
                          next.atom === "N3" && (next.resn === " DC" || next.resn === " DT")))
                 {
                     baseEndPt = new $3Dmol.Vector3(next.x, next.y, next.z);
+                    baseEndPt.color = $3Dmol.getColorFromStyle(next, cartoon).getHex();
                 }
 
-                // add backbone strand points
+
+                // when we have a backbone point and orientation point in the same residue, accumulate strand points
                 if (orientPt && backbonePt && orientPt.resi === backbonePt.resi)
                 {
                     addBackbonePoints(points, num, !doNotSmoothen, backbonePt, orientPt, prevOrientPt, curr);
+                    prevOrientPt = orientPt;
                     backbonePt = null;
                     orientPt = null;
                 }
             }  
         }
 
-        if (baseEndPt) // draw last na base
+        if (baseEndPt) // draw last NA base if needed
         {
             if (terminalPt)
-            {
-                backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                 baseStartPt = new $3Dmol.Vector3().addVectors(curr, terminalPt).multiplyScalar(0.5);
-                $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(currColor), false, true);
-                addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr);
-                colors.push(nextColor);
-            }
+            else
+                baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+
+            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
+            addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr);
+            colors.push(nextColor);
         }
 
-        // for default style, draw the last chain
+        // for default style, draw the last strand
         for (i = 0; !thickness && i < num; i++)
             drawSmoothCurve(group, points[i], 1, colors, div);
         if (fill)
@@ -577,6 +584,7 @@ $3Dmol.drawCartoon = (function() {
         }
     };
 
+    //TODO document me
     var addBackbonePoints = function(pointsArray, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom)
     {
         var widthScalar, i, delta, v;
@@ -592,18 +600,19 @@ $3Dmol.drawCartoon = (function() {
             widthScalar = helixSheetWidth;
         orientPt.multiplyScalar(widthScalar);
 
-        if (prevOrientPt && orientPt.dot(prevOrientPt) < 0)
+        if (prevOrientPt != null && orientPt.dot(prevOrientPt) < 0)
+        {
             orientPt.negate();
-        prevOrientPt = orientPt;
+        }
 
         for (i = 0; i < num; i++)
         {
-            delta = -1 + (2 * i) / (num - 1); // produces num increments from -1 to 1
+            delta = -1 + i * 2 /(num - 1); // produces num increments from -1 to 1
             v = new $3Dmol.Vector3(backbonePt.x + delta * orientPt.x,
                                    backbonePt.y + delta * orientPt.y,
                                    backbonePt.z + delta * orientPt.z);
             v.atom = backboneAtom;
-            if (!smoothen && backboneAtom.ss === "s")
+            if (smoothen && backboneAtom.ss === "s") 
                 v.smoothen = true;
             pointsArray[i].push(v);
         }
