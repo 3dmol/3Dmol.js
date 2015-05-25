@@ -43,7 +43,8 @@ $3Dmol.GLViewer = (function() {
 
 
         var renderer = new $3Dmol.Renderer({
-            antialias : true
+            antialias : true,
+            premultipliedAlpha : false /* more traditional compositing with background */
         });
 
         renderer.domElement.style.width = "100%";
@@ -391,7 +392,12 @@ $3Dmol.GLViewer = (function() {
          * 
          */
         this.setBackgroundColor = function(hex, a) {
-            a = a | 1.0;
+            if(typeof(a) == "undefined") {
+                a = 1.0;
+            }
+            else if(a < 0 || a > 1.0) {
+                a = 1.0;
+            }
             var c = $3Dmol.CC.color(hex);
             scene.fog.color = c;
             bgColor = c.getHex();

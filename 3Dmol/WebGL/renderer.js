@@ -197,13 +197,11 @@ $3Dmol.Renderer = function ( parameters ) {
             if ( color === undefined || color ) bits |= _gl.COLOR_BUFFER_BIT;
             if ( depth === undefined || depth ) bits |= _gl.DEPTH_BUFFER_BIT;
             if ( stencil === undefined || stencil ) bits |= _gl.STENCIL_BUFFER_BIT;
-
             _gl.clear( bits );
 
     };
 
     this.clearTarget = function ( color, depth, stencil ) {
-
             
             this.clear( color, depth, stencil );
 
@@ -972,7 +970,6 @@ $3Dmol.Renderer = function ( parameters ) {
         _currentHeight = _viewportHeight;
 
         if ( this.autoClear || forceClear ) {
-
             this.clear( this.autoClearColor, this.autoClearDepth, this.autoClearStencil );
 
         }
