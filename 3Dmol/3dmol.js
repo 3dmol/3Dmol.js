@@ -50,15 +50,11 @@ $3Dmol.createViewer = function(element, config)
         element = $("#"+element);
     if(!element) return;
 
-    config = config || {};
- 
-    
-    if(!config.defaultcolors)
-        config.defaultcolors = $3Dmol.elementColors.defaultColors;
+    config = config || {}; 
 
     //try to create the  viewer
     try {
-        return new $3Dmol.GLViewer(element, config.callback, config.defaultcolors, config.nomouse);
+        return new $3Dmol.GLViewer(element, config);
     }
     catch(e) {
         throw "error creating viewer: "+e;
