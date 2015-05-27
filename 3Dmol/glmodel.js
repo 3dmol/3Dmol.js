@@ -964,20 +964,20 @@ $3Dmol.GLModel = (function() {
             
             //for BIOMT assembly
             if (dontDuplicateAtoms && !noAssembly) {
-                var finalRet = new $3Dmol.Object3D();
+                var symRet = new $3Dmol.Object3D();
                 var t;
                 for (t = 0; t < copyMatrices.length; t++) {
                     var transformedRet = new $3Dmol.Object3D();
                     transformedRet = ret.clone();
                     transformedRet.matrix.copy(copyMatrices[t]);
                     transformedRet.matrixAutoUpdate = false;
-                    finalRet.add(transformedRet);
+                    symRet.add(transformedRet);
                 }
-                return finalRet;
+                ret = symRet;
             }
-            else {
-                return ret;
-            }
+            
+            return ret;
+            
         };
         
         /**
@@ -989,8 +989,8 @@ $3Dmol.GLModel = (function() {
          *
          */
         this.getSymmetries = function() {
-            if (copyMatrices.length > 1) {
-                return copyMatrices; //returns copyMatrices, which has ID matrix as 1st entry
+            if (copyMatrices.length > 0) {
+                return copyMatrices;
             }
             else {
                 var idList = [idMatrix];

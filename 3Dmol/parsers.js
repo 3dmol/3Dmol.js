@@ -1010,14 +1010,10 @@ $3Dmol.Parsers = (function() {
         
         var end = atoms.length;
         var offset = end;
-        var idMatrix = new $3Dmol.Matrix4();
-        idMatrix.identity();
-        var t;
-        var l;
+        var t, l, n;
         if(!copyMatrix) { //do full assembly
             for (t = 0; t < allMatrices.length; t++) {
-                if (!allMatrices[t].isEqual(idMatrix)) {
-                    var n; 
+                if (!allMatrices[t].isIdentity()) {
                     var xyz = new $3Dmol.Vector3();
                     for (n = 0; n < end; n++) {
                         var bondsArr = [];
@@ -1056,10 +1052,12 @@ $3Dmol.Parsers = (function() {
             for (t = 0; t < atoms.length; t++) {
                 var symmetries = [];
                 for (l = 0; l < copyMatrices.length; l++) {
-                    var newXYZ = new $3Dmol.Vector3();
-                    newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
-                    newXYZ.applyMatrix4(copyMatrices[l]);
-                    symmetries.push(newXYZ);
+                    if (!copyMatrices[l].isIdentity()) {
+                        var newXYZ = new $3Dmol.Vector3();
+                        newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
+                        newXYZ.applyMatrix4(copyMatrices[l]);
+                        symmetries.push(newXYZ);
+                    }
                 }
                 atoms[t].symmetries = symmetries;
             }
