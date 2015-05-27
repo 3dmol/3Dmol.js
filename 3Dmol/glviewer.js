@@ -1075,6 +1075,10 @@ $3Dmol.GLViewer = (function() {
          * @param {String} format - Input file format (currently only supports "cube")
          * @param {VolSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
+         * 
+         * @example
+         * viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", alpha: 0.95});              
+         * viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", alpha: 0.95}); 
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};
