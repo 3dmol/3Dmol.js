@@ -18,8 +18,19 @@ $3Dmol.GLViewer = (function() {
 
     // private class helper functions
 
-    function GLViewer(element, callback, defaultcolors, nomouse) {
+    function GLViewer(element, config) { 
         // set variables
+    	config = config || {};
+    	var callback = config.callback;
+    	var defaultcolors = config.defaultcolors;    	
+        if(!defaultcolors)
+            defaultcolors = $3Dmol.elementColors.defaultColors;
+    	var nomouse = config.nomouse;
+    	var bgColor = 0;
+    	
+    	if(typeof(config.backgroundColor) != undefined) {
+            bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
+    	}
         var _viewer = this;
         var container = element;
         var id = container.id;
@@ -43,7 +54,8 @@ $3Dmol.GLViewer = (function() {
 
 
         var renderer = new $3Dmol.Renderer({
-            antialias : true
+            antialias : true,
+            premultipliedAlpha : false /* more traditional compositing with background */
         });
 
         renderer.domElement.style.width = "100%";
@@ -68,7 +80,6 @@ $3Dmol.GLViewer = (function() {
         var rotationGroup = null; // which contains modelGroup
         var modelGroup = null;
 
-        var bgColor = 0x000000;
         var fogStart = 0.4;
         var slabNear = -50; // relative to the center of rotationGroup
         var slabFar = 50;
@@ -391,7 +402,12 @@ $3Dmol.GLViewer = (function() {
          * 
          */
         this.setBackgroundColor = function(hex, a) {
-            a = a | 1.0;
+            if(typeof(a) == "undefined") {
+                a = 1.0;
+            }
+            else if(a < 0 || a > 1.0) {
+                a = 1.0;
+            }
             var c = $3Dmol.CC.color(hex);
             scene.fog.color = c;
             bgColor = c.getHex();
@@ -1076,6 +1092,10 @@ $3Dmol.GLViewer = (function() {
          * @param {String} format - Input file format (currently only supports "cube")
          * @param {VolSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
+         * 
+         * @example
+         * viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", alpha: 0.95});              
+         * viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", alpha: 0.95}); 
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};

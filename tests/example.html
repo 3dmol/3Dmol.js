@@ -130,7 +130,7 @@ head, body {
 	<br>
 	<input id="pdbid" value="1UBQ" size=4>
 	<button
-		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button>
+		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer, {doAssembly:true});">Download</button>
 	<br>
 
 

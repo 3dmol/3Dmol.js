@@ -1048,21 +1048,26 @@ $3Dmol.GLModel = (function() {
          */
         this.addMolData = function(data, format, options) {
             options = options || {}; 
+            format = format || "";
             if (!data)
                 return; //leave an empty model
             if(typeof($3Dmol.Parsers[format]) == "undefined") {
-                console.log("Unknown format: "+format);
-                //try to guess correct format from data contents
-                if(data.match(/^@<TRIPOS>MOLECULE/)) {
-                    format = "mol2";
-                } else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
-                    format = "pdb";
-                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
-                    format = "sdf"; //could look at line 3
-                } else {
-                    format = "xyz";
-                }
-                console.log("Best guess: "+format);
+            	//let someone provide a file name and get format from extension
+            	format = format.split('.').pop();
+            	if(typeof($3Dmol.Parsers[format] == "undefined")) {            	
+	                console.log("Unknown format: "+format);
+	                //try to guess correct format from data contents
+	                if(data.match(/^@<TRIPOS>MOLECULE/)) {
+	                    format = "mol2";
+	                } else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+	                    format = "pdb";
+	                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+	                    format = "sdf"; //could look at line 3
+	                } else {
+	                    format = "xyz";
+	                }
+	                console.log("Best guess: "+format);
+            	}
             }
             var parse = $3Dmol.Parsers[format];
             parse(atoms, data, options, copyMatrices)

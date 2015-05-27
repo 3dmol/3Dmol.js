@@ -118,7 +118,7 @@ Models are manipulated and styled using {@link AtomSpec} JavaScript objects.
 
 An example of a viewer that manipulates the styles of the embedded objects is shown below.  View the source code for the implementation details.
 
-<iframe width=800, height=800 src="tests/example.html"></iframe> 
+<iframe width=800, height=800 src="../tests/example.html"></iframe> 
 
 ##FAQ
 
