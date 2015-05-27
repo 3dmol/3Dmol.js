@@ -375,8 +375,10 @@ $3Dmol.drawCartoon = (function() {
         div = div || axisDIV;
         doNotSmoothen = !!(doNotSmoothen);
 
-                        //  protein    na          na terminus                na bases
-        var cartoonAtoms = ["CA","O",  "P","OP2",  "O5'","O3'","C5'","C2'",  "N1","N3"];
+                        //  proteins    na backbone  na terminus                  nucleobases
+        var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
+        var purResns = [" DA", " DG", "  A", "  G"];
+        var pyrResns = [" DT", " DC", "  U", "  C"];
 
         var cartoon, curr, next, currColor, nextColor, thickness, i;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
@@ -537,13 +539,12 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // atoms used for drawing the NA base cylinders (diff for purines and pyramidines)
-                else if ((next.atom === "N1" && (next.resn === " DG" || next.resn ===  " DA") ||
-                         next.atom === "N3" && (next.resn === " DC" || next.resn === " DT")))
+                else if ((next.atom === "N1" && $.inArray(next.resn, purResns) != -1) ||
+                         (next.atom === "N3" && $.inArray(next.resn, pyrResns) != -1))
                 {
                     baseEndPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     baseEndPt.color = $3Dmol.getColorFromStyle(next, cartoon).getHex();
                 }
-
 
                 // when we have a backbone point and orientation point in the same residue, accumulate strand points
                 if (orientPt && backbonePt && orientPt.resi === backbonePt.resi)
