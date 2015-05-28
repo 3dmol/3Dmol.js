@@ -752,23 +752,20 @@ $3Dmol.GLShape = (function() {
                     cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
             var end = new $3Dmol.Vector3(cylinderSpec.end.x || 3,
                     cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
-
             var radius = cylinderSpec.radius || 0.1;
-
             var color = $3Dmol.CC.color(cylinderSpec.color);
-
+            
+            this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(start, end, radius));
 
             var geoGroup = geo.addGeoGroup();
-
             $3Dmol.GLDraw.drawCylinder(geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);            
             geoGroup.truncateArrayBuffers(true, true);
-
+            
             var centroid = new $3Dmol.Vector3();
             components.push({
                 id : geoGroup.id,
                 geoGroup : geoGroup,
-                centroid : centroid.addVectors(cylinderSpec.start,
-                        cylinderSpec.end).multiplyScalar(0.5)
+                centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
             });
 
             updateBoundingFromPoints(this.boundingSphere, components,

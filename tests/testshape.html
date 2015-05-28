@@ -18,7 +18,7 @@
         
         var shapecallback = function(shape, viewer) {
             if(shape.clickLabel === undefined || !shape.clickLabel instanceof $3Dmol.Label) { 
-                shape.clickLabel = viewer.addLabel("Shape " + shape.id, {fontSize:14, position:
+                shape.clickLabel = viewer.addLabel("Shape " + shape.shapePosition, {fontSize:14, position:
                     {x:shape.position.x, y:shape.position.y, z:shape.position.z}});
                 shape.clicked=true;
             } 
@@ -26,7 +26,7 @@
             else { 
                 if (shape.clicked) { 
                     var newstyle = shape.clickLabel.stylespec; 
-                    newstyle.backgroundColor = {r:100, g:0, b:255, a:0.8}; 
+                    newstyle.backgroundColor = 0x8000ff; 
                     viewer.setLabelStyle(shape.clickLabel, newstyle); 
                     shape.clicked = !shape.clicked; 
                 } 
@@ -34,6 +34,7 @@
                     viewer.removeLabel(shape.clickLabel); 
                     shape.clickLabel = undefined; 
                     shape.clicked = false; 
+                    viewer.render();
                 } 
             } 
         };      
@@ -42,34 +43,39 @@
                        
             $.get('test_structs/benzene-homo.cube', function(data){
                 
-                moldata = $("#moldata_benzene_sdf").val();
-                voldata = data;
+                var moldata = $("#moldata_benzene_sdf").val();
+                var voldata = data;
                 
-                glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors, callback : function(viewer) {
-                    viewer.setBackgroundColor(0xffffff);
+                glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});
+                
+                glviewer.setBackgroundColor(0xffffff);
 
-                    m = viewer.addModel(moldata, "sdf");
-                    posLobe = viewer.addVolumetricData(voldata, "cube", {isoval: 0.01, color: new $3Dmol.Color(0,0,1),
-                                                                         alpha: 0.95});              
-                    negLobe = viewer.addVolumetricData(voldata, "cube", {isoval: -0.01, color: new $3Dmol.Color(1,0,0),
-                                                                         alpha: 0.95});  
-                                                                         
-                    posLobe.callback = shapecallback; posLobe.clickable = true;
-                    negLobe.callback = shapecallback; negLobe.clickable = true;
-                    
-                    sphere = viewer.addSphere({center: posLobe.boundingSphere.center, radius:posLobe.boundingSphere.radius});  
-                    sphere.color = $3Dmol.CC.color(0xE06633); sphere.wireframe = true;
-                    
-                    arrow = viewer.addArrow({end: new $3Dmol.Vector3(5,1,1)});
-                    arrow.color = $3Dmol.CC.color(0x00FF00); arrow.wireframe = false;
-                    arrow.callback = shapecallback; arrow.clickable = true;
+                m = glviewer.addModel(moldata, "sdf");
+                posLobe = glviewer.addVolumetricData(voldata, "cube", 
+                    {isoval: 0.01, color: "blue", alpha: 0.95,
+                        callback: shapecallback, clickable: true
+                        });           
+                                                                        
+                negLobe = glviewer.addVolumetricData(voldata, "cube", 
+                    {isoval: -0.01, color: "red", alpha: 0.95,
+                        callback: shapecallback, clickable: true
+                        });  
+                                                                    
+                
+                sphere = glviewer.addSphere({center: posLobe.boundingSphere.center, radius:posLobe.boundingSphere.radius,
+                    color: 0xE06633, wireframe: true
+                    });  
+                
+                arrow = glviewer.addArrow({end: new $3Dmol.Vector3(5,1,1),
+                    color: 0x00FF00, wireframe: false,
+                    callback: shapecallback, clickable: true
+                    });
 
-                    cyl = viewer.addCylinder({end: new $3Dmol.Vector3(1,1,5)});
-                    cyl.color = $3Dmol.CC.color(0x0000FF); 
-                                                                                                          
-                    viewer.zoomTo();
-                    viewer.render();    
-                }});  
+                cyl = glviewer.addCylinder({end: new $3Dmol.Vector3(1,1,5), color: 0x00ffff,
+                    callback: shapecallback, clickable: true});
+                                                                                                    
+                glviewer.zoomTo();
+                glviewer.render();    
                               
             }, "text"); 
            
