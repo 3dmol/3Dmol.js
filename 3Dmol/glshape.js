@@ -656,6 +656,7 @@ $3Dmol.GLShape = (function() {
         var renderedShapeObj = null;
 
         var geo = new $3Dmol.Geometry(true);
+        var linegeo = new $3Dmol.Geometry(true);
 
         /** Update shape with new style specification
          * @param {ShapeSpec} newspec
@@ -750,25 +751,24 @@ $3Dmol.GLShape = (function() {
 
             var start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
                     cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
-            var end = new $3Dmol.Vector3(cylinderSpec.end.x || 3,
+            var end = new $3Dmol.Vector3(cylinderSpec.end.x,
                     cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
+        	if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
 
             var radius = cylinderSpec.radius || 0.1;
-
             var color = $3Dmol.CC.color(cylinderSpec.color);
-
+            
+            this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(start, end, radius));
 
             var geoGroup = geo.addGeoGroup();
-
             $3Dmol.GLDraw.drawCylinder(geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);            
             geoGroup.truncateArrayBuffers(true, true);
-
+            
             var centroid = new $3Dmol.Vector3();
             components.push({
                 id : geoGroup.id,
                 geoGroup : geoGroup,
-                centroid : centroid.addVectors(cylinderSpec.start,
-                        cylinderSpec.end).multiplyScalar(0.5)
+                centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
             });
 
             updateBoundingFromPoints(this.boundingSphere, components,
@@ -776,6 +776,45 @@ $3Dmol.GLShape = (function() {
 
         };
 
+        /**
+         * Creates a line shape
+         * @param {LineSpec} lineSpec
+         * @return {$3Dmol.GLShape}
+         */
+        this.addLine = function(lineSpec) {
+        	lineSpec.start = lineSpec.start || {};
+        	lineSpec.end = lineSpec.end || {};
+
+        	var start = new $3Dmol.Vector3(lineSpec.start.x || 0,
+        			lineSpec.start.y || 0, lineSpec.start.z || 0);
+        	var end = new $3Dmol.Vector3(lineSpec.end.x,
+        			lineSpec.end.y || 0, lineSpec.end.z || 0);            
+        	if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
+    
+            var geoGroup = geo.addGeoGroup();
+
+            //make line from start to end
+            //for consistency with rest of shapes, uses vertices and lines rather
+            //than a separate line geometry
+            var vstart = geoGroup.vertices;
+            var i = vstart*3;
+            var vertexArray = geoGroup.vertexArray;
+            vertexArray[i] = start.x;
+            vertexArray[i+1] = start.y;
+            vertexArray[i+2] = start.z;
+            vertexArray[i+3] = end.x;
+            vertexArray[i+4] = end.y;
+            vertexArray[i+5] = end.z;
+            geoGroup.vertices += 2;
+            
+            var lineArray = geoGroup.lineArray;
+            var li =  geoGroup.lineidx;
+            lineArray[li] = vstart;
+            lineArray[li+1] = vstart+1;
+            geoGroup.lineidx += 2;
+            
+            geoGroup.truncateArrayBuffers(true, true);
+        }
         /**
          * Creates an arrow shape
          * @param {ArrowSpec} arrowSpec
@@ -797,8 +836,9 @@ $3Dmol.GLShape = (function() {
             }
 
             else {
-                arrowSpec.end = new $3Dmol.Vector3(arrowSpec.end.x || 3,
+                arrowSpec.end = new $3Dmol.Vector3(arrowSpec.end.x,
                         arrowSpec.end.y || 0, arrowSpec.end.z || 0);
+            	if(typeof(arrowSpec.end.x) == 'undefined') arrowSpec.end.x = 3; //show something even if undefined
             }
 
             arrowSpec.radius = arrowSpec.radius || 0.1;
@@ -884,9 +924,17 @@ $3Dmol.GLShape = (function() {
                 opacity : this.alpha,
                 wireframeLinewidth: this.linewidth
             });
-
+            
             var mesh = new $3Dmol.Mesh(geo, material);
             shapeObj.add(mesh);
+            
+            var lineMaterial = new $3Dmol.LineBasicMaterial({
+                linewidth : this.linewidth,
+                color: this.color
+            });
+            var line = new $3Dmol.Line(linegeo, lineMaterial,
+                    $3Dmol.LinePieces);
+            shapeObj.add(line);
 
             if (renderedShapeObj) {
                 group.remove(renderedShapeObj);

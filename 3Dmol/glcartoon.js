@@ -10,6 +10,15 @@ var $3Dmol = $3Dmol || {};
 /**@typedef CartoonStyleSpec
  * @prop {string} color - solid color, may specify as 'spectrum'
  * @prop {string} style - style of cartoon rendering (currently just default and trace)
+ * @prop {number} thickness - cartoon strand thickness, default is 0.4
+ * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
+ * is 'N1' for purines (resn: '  A', '  G', ' DA', ' DG') and 'N3' for pyrimidines (resn: '  C', '  U', ' DC', ' DT').
+ * The different nucleobases can therefore be distinguished as follows:
+ * @example
+ * viewer.setStyle({resn:' DA', atom:'N1'}, {cartoon:{color:'red'}});
+ * viewer.setStyle({resn:' DG', atom:'N1'}, {cartoon:{color:'green'}});
+ * viewer.setStyle({resn:' DC', atom:'N3'}, {cartoon:{color:'blue'}});
+ * viewer.setStyle({resn:' DT', atom:'N3'}, {cartoon:{color:'yellow'}});
  */
 
 /**
