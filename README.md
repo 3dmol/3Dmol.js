@@ -23,5 +23,5 @@ You may also [submit an issue](https://github.com/dkoes/3Dmol.js/issues) on gith
 
 ##Funding
 
-3DMol.js is funded  is funded through R01GM108340 from the National Institute of General Medical Sciences. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institute of General Medical Sciences or the National Institutes of Health. 
+3DMol.js is funded through R01GM108340 from the National Institute of General Medical Sciences. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institute of General Medical Sciences or the National Institutes of Health.
 
