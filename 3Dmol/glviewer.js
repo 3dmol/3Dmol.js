@@ -187,7 +187,7 @@ $3Dmol.GLViewer = (function() {
         };
         
         // Checks for selection intersects on mousedown
-        var handleClickSelection = function(mouseX, mouseY) {
+        var handleClickSelection = function(mouseX, mouseY, event) {
             if(clickables.length == 0) return;
             var mouse = {
                 x : mouseX,
@@ -208,7 +208,7 @@ $3Dmol.GLViewer = (function() {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined
                         && typeof (selected.callback) === "function") {
-                    selected.callback(selected, _viewer);
+                    selected.callback(selected, _viewer, event, container);
                 }
             }
         };
@@ -310,9 +310,11 @@ $3Dmol.GLViewer = (function() {
                     var xy = getXY(ev);
                     var x = xy[0];
                     var y = xy[1];
-                    if(x == mouseStartX && y == mouseStartY) {                    
-                        var mouseX = (x / $(window).width()) * 2 - 1;
-                        var mouseY = -(y / HEIGHT) * 2 + 1;
+                    if(x == mouseStartX && y == mouseStartY) {
+                        var offset = $(container).offset();
+                        var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
+                        var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
+
                         handleClickSelection(mouseX, mouseY, ev, container);
                     }
                 }
@@ -1036,7 +1038,7 @@ $3Dmol.GLViewer = (function() {
         /**
          * Create and add cylinder shape
          * 
-         * @function $3Dmol.GLViewer#addArrow
+         * @function $3Dmol.GLViewer#addCylinder
          * @param {CylinderSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
          */
@@ -1045,6 +1047,24 @@ $3Dmol.GLViewer = (function() {
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addCylinder(spec);
+            shapes.push(s);
+
+            return s;
+        };
+
+        /**
+         * Create and add line shape
+         * 
+         * @function $3Dmol.GLViewer#addLine
+         * @param {LineSpec} spec - Style specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addLine = function(spec) {
+            spec = spec || {};
+            spec.wireframe = true;
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addLine(spec);
             shapes.push(s);
 
             return s;
