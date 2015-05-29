@@ -187,7 +187,7 @@ $3Dmol.GLViewer = (function() {
         };
         
         // Checks for selection intersects on mousedown
-        var handleClickSelection = function(mouseX, mouseY) {
+        var handleClickSelection = function(mouseX, mouseY, ev) {
             if(clickables.length == 0) return;
             var mouse = {
                 x : mouseX,
@@ -208,7 +208,7 @@ $3Dmol.GLViewer = (function() {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined
                         && typeof (selected.callback) === "function") {
-                    selected.callback(selected, _viewer);
+                    selected.callback(selected, _viewer, ev);
                 }
             }
         };
