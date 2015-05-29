@@ -310,9 +310,10 @@ $3Dmol.GLViewer = (function() {
                     var xy = getXY(ev);
                     var x = xy[0];
                     var y = xy[1];
-                    if(x == mouseStartX && y == mouseStartY) {                    
-                        var mouseX = (x / $(window).width()) * 2 - 1;
-                        var mouseY = -(y / HEIGHT) * 2 + 1;
+                    if(x == mouseStartX && y == mouseStartY) {
+                        var offset = $(container).offset();
+                        var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
+                        var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
                         handleClickSelection(mouseX, mouseY, ev, container);
                     }
                 }
