@@ -119,46 +119,50 @@
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click 
  */
-var ShapeSpec = {};
-/** @type {$3Dmol.Color} */
-ShapeSpec.color;
-ShapeSpec.wireframe;
-ShapeSpec.alpha;
-ShapeSpec.side;
-ShapeSpec.clickable;
-/** @type {function($3Dmol.GLShape, $3Dmol.GLViewer)} */
-ShapeSpec.callback;
+
 
 /**
  * Specification for adding custom shape
- * @typedef
+ * @typedef CustomShapeSpec
+ * @augments ShapeSpec
  */
-var CustomShapeSpec = {};
-CustomShapeSpec.vertexArr;
-CustomShapeSpec.faceArr;
-CustomShapeSpec.normalArr;
-CustomShapeSpec.lineArr;
 
 /**
- * Sphere shape specification
- * @typedef
+ * Sphere shape specification. Extends {@link ShapeSpec}  
+ * 
+ * @typedef SphereSpec   
+ * @prop {$3Dmol.Vector3} center
+ * @prop {number} radius
+ * 
  */
-var SphereSpec = {};
-SphereSpec.radius;
-/** @type {$3Dmol.Vector3} */
-SphereSpec.center;
+
 
 /**
- * Arrow shape specification
- * @typedef
+ * Arrow shape specification.  Extends {@link ShapeSpec}  
+ * @typedef ArrowSpec
+ * @prop {$3Dmol.Vector3} start
+ * @prop {$3Dmol.Vector3} end
+ * @prop {number} radius
+ * @prop {number} radiusRatio - ratio of arrow base to cylinder (1.618034 default)
+ * @prop {number} mid - relative position of arrow base (0.618034 default)
  */
-var ArrowSpec = {};
-/** @var {$3Dmol.Vector3} ArrowSpec.start - Arrow start point*/
-ArrowSpec.start;
-/** @property {$3Dmol.Vector3} */
-ArrowSpec.end;
-ArrowSpec.radius;
-ArrowSpec.radiusRatio;
-ArrowSpec.mid;
+
+
+/**
+ * Cylinder shape specification.  Extends {@link ShapeSpec}  
+ * @typedef CylinderSpec
+ * @prop {$3Dmol.Vector3} start
+ * @prop {$3Dmol.Vector3} end
+ * @prop {number} radius
+ * @prop {boolean} fromCap
+ * @prop {boolean} toCap
+ */
+
+/**
+ * Line shape specification.  Extends {@link ShapeSpec}  (but defaults to wireframe)
+ * @typedef LineSpec
+ * @prop {$3Dmol.Vector3} start
+ * @prop {$3Dmol.Vector3} end
+ */
 
 });

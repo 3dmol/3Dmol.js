@@ -1036,7 +1036,7 @@ $3Dmol.GLViewer = (function() {
         /**
          * Create and add cylinder shape
          * 
-         * @function $3Dmol.GLViewer#addArrow
+         * @function $3Dmol.GLViewer#addCylinder
          * @param {CylinderSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
          */
@@ -1045,6 +1045,24 @@ $3Dmol.GLViewer = (function() {
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addCylinder(spec);
+            shapes.push(s);
+
+            return s;
+        };
+
+        /**
+         * Create and add line shape
+         * 
+         * @function $3Dmol.GLViewer#addLine
+         * @param {LineSpec} spec - Style specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addLine = function(spec) {
+            spec = spec || {};
+            spec.wireframe = true;
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addLine(spec);
             shapes.push(s);
 
             return s;
