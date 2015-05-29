@@ -576,7 +576,7 @@ $3Dmol.GLViewer = (function() {
             for (i in surfaces) { // this is an array with possible holes
                 var surfArr = surfaces[i];
                 for (n = 0; n < surfArr.length; n++) {
-                    if (surfArr.hasOwnProperty(n)) { //hasOwnProp(i)?? what does this line do
+                    if (surfArr.hasOwnProperty(n)) {
                         var geo = surfArr[n].geo;
                         // async surface generation can cause
                         // the geometry to be webgl initialized before it is fully
@@ -614,7 +614,9 @@ $3Dmol.GLViewer = (function() {
                             } else {
                                 smesh.visible = true;
                             }
-                            if (surfArr[n].symmetries.length > 0) { //NEED TO UPDATE THIS TOO
+                            if (surfArr[n].symmetries.length > 1 || 
+                            (surfArr[n].symmetries.length == 1 && 
+                            !(surfArr[n].symmetries[n].isIdentity()))) {
                                 var j;
                                 var tmeshes = new $3Dmol.Object3D(); //transformed meshes
                                 for (j = 0; j < surfArr[n].symmetries.length; j++) {
@@ -1648,18 +1650,16 @@ $3Dmol.GLViewer = (function() {
                 atomlist = shallowCopy(getAtomsFromSel(allsel));
             }
             
-            //START PREPROCESSING HERE?
             var symmetries = false;
             var n;
-            for (n = 0; n < models.length; n++) { //could be made more efficient?
+            for (n = 0; n < models.length; n++) { 
                 var symMatrices = models[n].getSymmetries();
-                if (symMatrices.length > 1 || !(symMatrices.length == 1 && symMatrices[0].isIdentity())) { //need to update this to check for length & NOT id matrix
+                if (symMatrices.length > 1 || (symMatrices.length == 1 && !(symMatrices[0].isIdentity()))) {
                     symmetries = true;
                     break;
                 }
             }
 
-            //HELPER FUNCTION FOR ADDSURFACE
             var addSurfaceHelper = function addSurfaceHelper(surfobj, atomlist, atomsToShow) {
             
                 if(!focus) {
@@ -1834,7 +1834,7 @@ $3Dmol.GLViewer = (function() {
             if (symmetries) { //do preprocessing
                 var modelsAtomList = {};
                 var modelsAtomsToShow = {};
-                for (n = 0; n < models.length; n++) { //does this work for all cases?
+                for (n = 0; n < models.length; n++) {
                     modelsAtomList[n] = [];
                     modelsAtomsToShow[n] = [];
                 }
