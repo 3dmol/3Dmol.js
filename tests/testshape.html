@@ -75,9 +75,12 @@
 	                cyl = glviewer.addCylinder({end: new $3Dmol.Vector3(1,1,5), color: 0x00ffff,
 	                	   callback: shapecallback, clickable: true});                                                                                 
 	                    
-	                lin = glviewer.addLine({end: {x: 5, y: 5, z: 0}, color: "purple", linewidth: 3});
-	                lin.addLine({start: {x: 5, y: 5, z:0}, end: {x:3,y:-4,z:2}});
-	                lin.addLine({start: {x:3,y:-4,z:2}, end: {x:0,y:0,z:0}});
+	                lin = glviewer.addLine({end: {x: 0, y: 0.5, z: 0}, color: "purple", linewidth: 3});
+	                for(var i = 1; i < 5; i++) {
+	                	var start = i;
+	                	var end = start+0.5;
+	                	lin.addLine({start: {x: 0, y: start, z:0}, end: {x:0,y:end,z:0}});
+	                }
 	                                                                                                          
 	                glviewer.zoomTo();
 	                glviewer.render();    
