@@ -107,9 +107,9 @@
                 glviewer.setBackgroundColor(0xffffff);
                                         
                 receptorModel = m = glviewer.addModel(data, "mol2",{keepH:false});   
-
+                m.setStyle({elem: 'O',serial: 16},{clickable: true, callback: atomcallback});
               //  m.setColorByProperty({}, 'charge', new $3Dmol.Gradient.RWB(-0.5,0.5));
-                glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.5,.5)}, opacity:0.8});
+            //    glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.5,.5)}, opacity:0.8});
 
                 glviewer.setStyle({},{stick:{}});            
                 glviewer.zoomTo();
@@ -131,9 +131,8 @@
         </script>
     </head>
     <body>
-         <div id="gldiv" style="width: 100%; height: 80vh; margin: 0; padding: 0; border: 0; "></div> 
-
-         <hr style="margin: 0;"> 
+ 		<div id="gldiv" style="width: 100%; position: relative; height: 80vh; margin: 0; padding: 0; border: 0; "></div> 
+        <hr style="margin: 0;"> 
 
         <br>
         <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>

@@ -685,12 +685,17 @@ $3Dmol.GLModel = (function() {
                                     cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
+                                    
+                                    var sphere1 = new $3Dmol.Sphere(p1 , bondR);
+                                    atom.intersectionShape.sphere.push(sphere1);                             
                                 }
                                 if (atom2.clickable) {
                                     cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
                                     cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
-                                    atom2.intersectionShape.cylinder.push(cylinder2b);                               
+                                    atom2.intersectionShape.cylinder.push(cylinder2b);          
+                                    var sphere2 = new $3Dmol.Sphere(p2, bondR);
+                                    atom2.intersectionShape.sphere.push(sphere1);  
                                 }
                             }
                         } 
@@ -744,6 +749,8 @@ $3Dmol.GLModel = (function() {
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                     atom.intersectionShape.cylinder.push(cylinder1c);
+                                    var sphere1 = new $3Dmol.Sphere(p1 , bondR);
+                                    atom.intersectionShape.sphere.push(sphere1);  
                                 } 
                                 if (atom2.clickable) {                               
                                     cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
@@ -751,7 +758,9 @@ $3Dmol.GLModel = (function() {
                                     cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);
-                                    atom2.intersectionShape.cylinder.push(cylinder2c);                                
+                                    atom2.intersectionShape.cylinder.push(cylinder2c);      
+                                    var sphere1 = new $3Dmol.Sphere(p2 , bondR);
+                                    atom2.intersectionShape.sphere.push(sphere1);  
                                 }
                             }
                         }
@@ -1371,6 +1380,13 @@ $3Dmol.GLModel = (function() {
 
             for ( var i = 0; i < selected.length; i++) {                
                 changedAtoms = true;
+                //even though clickable and callback are atom properties, let them
+                //be set through styles
+                if(typeof(mystyle.clickable) != 'undefined') 
+                    selected[i].clickable = mystyle.clickable;
+                if(typeof(mystyle.callback) != 'undefined') 
+                    selected[i].callback = mystyle.callback;
+                
                 if (selected[i].clickable) 
                     selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    

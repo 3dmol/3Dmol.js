@@ -314,6 +314,7 @@ $3Dmol.GLViewer = (function() {
                         var offset = $(container).offset();
                         var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                         var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
+
                         handleClickSelection(mouseX, mouseY, ev, container);
                     }
                 }
