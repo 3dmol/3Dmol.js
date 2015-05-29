@@ -1631,9 +1631,9 @@ $3Dmol.GLViewer = (function() {
             //START PREPROCESSING HERE?
             var symmetries = false;
             var n;
-            for (n = 0; n < models.length; n++) { //check if any of the models have symmetries
+            for (n = 0; n < models.length; n++) { //could be made more efficient?
                 var symMatrices = models[n].getSymmetries();
-                if (symMatrices.length > 0) { //need to update this to check for length & NOT id matrix
+                if (symMatrices.length > 1 || !(symMatrices.length == 1 && symMatrices[0].isIdentity())) { //need to update this to check for length & NOT id matrix
                     symmetries = true;
                     break;
                 }
@@ -1650,7 +1650,7 @@ $3Dmol.GLViewer = (function() {
 
                 var atom;
                 var time = new Date();
-                var extent = $3Dmol.getExtent(atomsToShow);
+                var extent = $3Dmol.getExtent(atomsToShow, true);
 
                 var i, il;
                 if (style['map'] && style['map']['prop']) {
@@ -1691,7 +1691,7 @@ $3Dmol.GLViewer = (function() {
                 var extents = carveUpExtent(extent, atomlist, atomsToShow);
 
                 if (focusSele && focusSele.length && focusSele.length > 0) {
-                    var seleExtent = $3Dmol.getExtent(focusSele);
+                    var seleExtent = $3Dmol.getExtent(focusSele, true);
                     // sort by how close to center of seleExtent
                     var sortFunc = function(a, b) {
                         var distSq = function(ex, sele) {
@@ -1807,7 +1807,6 @@ $3Dmol.GLViewer = (function() {
                 //console.log("full mesh generation " + (+new Date() - time) + "ms");
             }
             
-            //pulled these out for creating surfObj
             style = style || {};
             var mat = getMatWithStyle(style);
             var surfobj = [];
@@ -1835,24 +1834,22 @@ $3Dmol.GLViewer = (function() {
                     // also webgl initialized
                     });
                     addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
-                    //^^^^sending these params with the same name as a variable outside - is this ok?
                 }
             }
-            else { //THIS IF/ELSE CAN PROBABLY BE CONDENSED? maybe
+            else {
                 surfobj.push({
                     geo : new $3Dmol.Geometry(true),
                     mat : mat,
                     done : false,
                     finished : false,
-                    symmetries : models[0].getSymmetries() //there is no symmetries - what to put for this?
-                    //doesn't matter what model you choose b/c NONE of the models have symmetries?
+                    symmetries : [new $3Dmol.Matrix4()]
                 });
-                addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow); //WHAT TO SEND TO THIS?
+                addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
             } 
             var surfid = surfaces.length;
             surfaces[surfid] = surfobj;
             
-            return surfid; //THIS IS JUST TEMPORARILY HERE
+            return surfid;
 
         };
 

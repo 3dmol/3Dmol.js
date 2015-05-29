@@ -226,8 +226,9 @@ return ret;
  * @param {AtomSpec[]} atomlist
  * @return {Array}
  */
-$3Dmol.getExtent = function(atomlist) {
+$3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
     var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
+    var includeSym = !ignoreSymmetries;
 
     xmin = ymin = zmin = 9999;
     xmax = ymax = zmax = -9999;
@@ -251,7 +252,7 @@ $3Dmol.getExtent = function(atomlist) {
         ymax = (ymax > atom.y) ? ymax : atom.y;
         zmax = (zmax > atom.z) ? zmax : atom.z;
         
-        if (atom.symmetries) {
+        if (atom.symmetries && includeSym) {
             for (var n = 0; n < atom.symmetries.length; n++) {
                 cnt++;
                 xsum += atom.symmetries[n].x;
@@ -264,8 +265,7 @@ $3Dmol.getExtent = function(atomlist) {
                 ymax = (ymax > atom.symmetries[n].y) ? ymax : atom.symmetries[n].y;
                 zmax = (zmax > atom.symmetries[n].z) ? zmax : atom.symmetries[n].z; 
             }
-        }
-        
+        }  
     }
 
     return [ [ xmin, ymin, zmin ], [ xmax, ymax, zmax ],
