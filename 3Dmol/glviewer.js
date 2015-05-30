@@ -560,7 +560,7 @@ $3Dmol.GLViewer = (function() {
             var time1 = new Date();
             var view = this.getView();
             
-            var i;
+            var i, n;
             for (i = 0; i < models.length; i++) {
                 if (models[i]) {
                     models[i].globj(modelGroup);
@@ -574,47 +574,66 @@ $3Dmol.GLViewer = (function() {
             }
             
             for (i in surfaces) { // this is an array with possible holes
-                if (surfaces.hasOwnProperty(i)) {
-                    var geo = surfaces[i].geo;
-                    // async surface generation can cause
-                    // the geometry to be webgl initialized before it is fully
-                    // formed; force various recalculations until full surface
-                    // is
-                    // available
-                    if (!surfaces[i].finished) {
-                        geo.verticesNeedUpdate = true;
-                        geo.elementsNeedUpdate = true;
-                        geo.normalsNeedUpdate = true;
-                        geo.colorsNeedUpdate = true;
-                        geo.buffersNeedUpdate = true;
-                        geo.boundingSphere = null;
+                var surfArr = surfaces[i];
+                for (n = 0; n < surfArr.length; n++) {
+                    if (surfArr.hasOwnProperty(n)) {
+                        var geo = surfArr[n].geo;
+                        // async surface generation can cause
+                        // the geometry to be webgl initialized before it is fully
+                        // formed; force various recalculations until full surface
+                        // is
+                        // available
+                        if (!surfArr[n].finished) {
+                            geo.verticesNeedUpdate = true;
+                            geo.elementsNeedUpdate = true;
+                            geo.normalsNeedUpdate = true;
+                            geo.colorsNeedUpdate = true;
+                            geo.buffersNeedUpdate = true;
+                            geo.boundingSphere = null;
 
-                        if (surfaces[i].done)
-                            surfaces[i].finished = true;
+                            if (surfArr[n].done)
+                                surfArr[n].finished = true;
 
-                        // remove partially rendered surface
-                        if (surfaces[i].lastGL)
-                            modelGroup.remove(surfaces[i].lastGL);
+                            // remove partially rendered surface
+                            if (surfArr[n].lastGL)
+                                modelGroup.remove(surfArr[n].lastGL);
 
-                        // create new surface
-                        var smesh = null;
+                            // create new surface
+                            var smesh = null;
 
-                        if(surfaces[i].mat instanceof $3Dmol.LineBasicMaterial) {
-                            //special case line meshes
-                            smesh = new $3Dmol.Line(geo, surfaces[i].mat);
-                        }
-                        else {
-                            smesh = new $3Dmol.Mesh(geo, surfaces[i].mat);
-                        }
-                        if(surfaces[i].mat.transparent && surfaces[i].mat.opacity == 0) {
-                            //don't bother with hidden surfaces
-                            smesh.visible = false;
-                        } else {
-                            smesh.visible = true;
-                        }
-                        surfaces[i].lastGL = smesh;
-                        modelGroup.add(smesh);
-                    } // else final surface already there
+                            if(surfArr[n].mat instanceof $3Dmol.LineBasicMaterial) {
+                                //special case line meshes
+                                smesh = new $3Dmol.Line(geo, surfArr[n].mat);
+                            }
+                            else {
+                                smesh = new $3Dmol.Mesh(geo, surfArr[n].mat);
+                            }
+                            if(surfArr[n].mat.transparent && surfArr[n].mat.opacity == 0) {
+                                //don't bother with hidden surfaces
+                                smesh.visible = false;
+                            } else {
+                                smesh.visible = true;
+                            }
+                            if (surfArr[n].symmetries.length > 1 || 
+                            (surfArr[n].symmetries.length == 1 && 
+                            !(surfArr[n].symmetries[n].isIdentity()))) {
+                                var j;
+                                var tmeshes = new $3Dmol.Object3D(); //transformed meshes
+                                for (j = 0; j < surfArr[n].symmetries.length; j++) {
+                                    var tmesh = smesh.clone();
+                                    tmesh.matrix = surfArr[n].symmetries[j];
+                                    tmesh.matrixAutoUpdate = false;
+                                    tmeshes.add(tmesh);
+                                }
+                                surfArr[n].lastGL = tmeshes;
+                                modelGroup.add(tmeshes);
+                            }
+                            else {
+                                surfArr[n].lastGL = smesh;
+                                modelGroup.add(smesh);
+                            }
+                        } // else final surface already there
+                    }
                 }
             }
             
@@ -1457,7 +1476,7 @@ $3Dmol.GLViewer = (function() {
             geoGroup.faceArray = new Uint16Array(faces);
             var mesh = new $3Dmol.Mesh(geo, mat);
             mesh.doubleSided = true;
-
+            
             return mesh;
         };
 
@@ -1631,184 +1650,227 @@ $3Dmol.GLViewer = (function() {
                 atomlist = shallowCopy(getAtomsFromSel(allsel));
             }
             
-            if(!focus) {
-                focusSele = atomsToShow;
-            } else {
-                focusSele = shallowCopy(getAtomsFromSel(focus));
-            }
-
-            var atom;
-            style = style || {};
-
-            var time = new Date();
-
-            var mat = getMatWithStyle(style);
-
-            var extent = $3Dmol.getExtent(atomsToShow);
-
-            var i, il;
-            if (style['map'] && style['map']['prop']) {
-                // map color space using already set atom properties
-                /** @type {AtomSpec} */
-                var prop = style['map']['prop'];
-                /** @type {Gradient} */
-                var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
-                var range = scheme.range();
-                if (!range) {
-                    range = getPropertyRange(atomsToShow, prop);
-                }
-
-                for (i = 0, il = atomlist.length; i < il; i++) {
-                    atom = atomlist[i];
-                    atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
-                            atom.properties[prop], range));
-                }
-            }
-            else if(typeof(style['color']) != 'undefined') {
-                //explicitly set color, otherwise material color just blends
-                for (i = 0, il = atomlist.length; i < il; i++) {
-                    atom = atomlist[i];
-                    atom.surfaceColor = $3Dmol.CC.color(style['color']);
-                }
-            }
-            else if(typeof(style['colorscheme']) != 'undefined') {
-                for (i = 0, il = atomlist.length; i < il; i++) {
-                    atom = atomlist[i];
-                    var scheme = $3Dmol.elementColors[style.colorscheme];
-                            if(scheme && typeof(scheme[atom.elem]) != "undefined") {
-                                atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
-                            }
+            var symmetries = false;
+            var n;
+            for (n = 0; n < models.length; n++) { 
+                var symMatrices = models[n].getSymmetries();
+                if (symMatrices.length > 1 || (symMatrices.length == 1 && !(symMatrices[0].isIdentity()))) {
+                    symmetries = true;
+                    break;
                 }
             }
 
-            var totalVol = volume(extent); // used to scale resolution
-            var extents = carveUpExtent(extent, atomlist, atomsToShow);
+            var addSurfaceHelper = function addSurfaceHelper(surfobj, atomlist, atomsToShow) {
+            
+                if(!focus) {
+                    focusSele = atomsToShow;
+                } else {
+                    focusSele = shallowCopy(getAtomsFromSel(focus));
+                }
 
-            if (focusSele && focusSele.length && focusSele.length > 0) {
-                var seleExtent = $3Dmol.getExtent(focusSele);
-                // sort by how close to center of seleExtent
-                var sortFunc = function(a, b) {
-                    var distSq = function(ex, sele) {
-                        // distance from e (which has no center of mass) and
-                        // sele which does
-                        var e = ex.extent;
-                        var x = e[1][0] - e[0][0];
-                        var y = e[1][1] - e[0][1];
-                        var z = e[1][2] - e[0][2];
-                        var dx = (x - sele[2][0]);
-                        dx *= dx;
-                        var dy = (y - sele[2][1]);
-                        dy *= dy;
-                        var dz = (z - sele[2][2]);
-                        dz *= dz;
+                var atom;
+                var time = new Date();
+                var extent = $3Dmol.getExtent(atomsToShow, true);
 
-                        return dx + dy + dz;
+                var i, il;
+                if (style['map'] && style['map']['prop']) {
+                    // map color space using already set atom properties
+                    /** @type {AtomSpec} */
+                    var prop = style['map']['prop'];
+                    /** @type {Gradient} */
+                    var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
+                    var range = scheme.range();
+                    if (!range) {
+                        range = getPropertyRange(atomsToShow, prop);
+                    }
+
+                    for (i = 0, il = atomlist.length; i < il; i++) {
+                        atom = atomlist[i];
+                        atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
+                                atom.properties[prop], range));
+                    }
+                }
+                else if(typeof(style['color']) != 'undefined') {
+                    //explicitly set color, otherwise material color just blends
+                    for (i = 0, il = atomlist.length; i < il; i++) {
+                        atom = atomlist[i];
+                        atom.surfaceColor = $3Dmol.CC.color(style['color']);
+                    }
+                }
+                else if(typeof(style['colorscheme']) != 'undefined') {
+                    for (i = 0, il = atomlist.length; i < il; i++) {
+                        atom = atomlist[i];
+                        var scheme = $3Dmol.elementColors[style.colorscheme];
+                                if(scheme && typeof(scheme[atom.elem]) != "undefined") {
+                                    atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
+                                }
+                    }
+                }
+
+                var totalVol = volume(extent); // used to scale resolution
+                var extents = carveUpExtent(extent, atomlist, atomsToShow);
+
+                if (focusSele && focusSele.length && focusSele.length > 0) {
+                    var seleExtent = $3Dmol.getExtent(focusSele, true);
+                    // sort by how close to center of seleExtent
+                    var sortFunc = function(a, b) {
+                        var distSq = function(ex, sele) {
+                            // distance from e (which has no center of mass) and
+                            // sele which does
+                            var e = ex.extent;
+                            var x = e[1][0] - e[0][0];
+                            var y = e[1][1] - e[0][1];
+                            var z = e[1][2] - e[0][2];
+                            var dx = (x - sele[2][0]);
+                            dx *= dx;
+                            var dy = (y - sele[2][1]);
+                            dy *= dy;
+                            var dz = (z - sele[2][2]);
+                            dz *= dz;
+
+                            return dx + dy + dz;
+                        };
+                        var d1 = distSq(a, seleExtent);
+                        var d2 = distSq(b, seleExtent);
+                        return d1 - d2;
                     };
-                    var d1 = distSq(a, seleExtent);
-                    var d2 = distSq(b, seleExtent);
-                    return d1 - d2;
-                };
-                extents.sort(sortFunc);
+                    extents.sort(sortFunc);
+                }
+
+                //console.log("Extents " + extents.length + "  "+ (+new Date() - time) + "ms");
+
+
+                var reducedAtoms = [];
+                // to reduce amount data transfered, just pass x,y,z,serial and elem
+                for (i = 0, il = atomlist.length; i < il; i++) {
+                    atom = atomlist[i];
+                    reducedAtoms[i] = {
+                        x : atom.x,
+                        y : atom.y,
+                        z : atom.z,
+                        serial : i,
+                        elem : atom.elem
+                    };
+                }
+
+                var sync = !!($3Dmol.syncSurface);
+                if (sync) { // don't use worker, still break up for memory purposes
+
+                    // to keep the browser from locking up, call through setTimeout
+                    var callSyncHelper = function callSyncHelper(i) {
+                        if (i >= extents.length)
+                            return;
+
+                        var VandF = generateMeshSyncHelper(type, extents[i].extent,
+                                extents[i].atoms, extents[i].toshow, reducedAtoms,
+                                totalVol);
+                        var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                        $3Dmol.mergeGeos(surfobj.geo, mesh);
+                        _viewer.render();
+
+                        setTimeout(callSyncHelper, 1, i + 1);
+                    }
+
+                    setTimeout(callSyncHelper, 1, 0);
+
+                    // TODO: Asynchronously generate geometryGroups (not separate
+                    // meshes) and merge them into a single geometry
+                } else { // use worker
+
+                    var workers = [];
+                    if (type < 0)
+                        type = 0; // negative reserved for atom data
+                    for (i = 0, il = numWorkers; i < il; i++) {
+                        // var w = new Worker('3Dmol/SurfaceWorker.js');
+                        var w = new Worker($3Dmol.SurfaceWorker);
+                        workers.push(w);
+                        w.postMessage({
+                            'type' : -1,
+                            'atoms' : reducedAtoms,
+                            'volume' : totalVol
+                        });
+                    }
+                    var cnt = 0;
+
+                    var rfunction = function(event) {
+                        var VandF = event.data;
+                        var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                        $3Dmol.mergeGeos(surfobj.geo, mesh);
+                        _viewer.render();
+                    //    console.log("async mesh generation " + (+new Date() - time) + "ms");
+                        cnt++;
+                        if (cnt == extents.length)
+                            surfobj.done = true;
+                    };
+
+                    var efunction = function(event) {
+                        console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
+                    };
+
+                    for (i = 0; i < extents.length; i++) {
+                        var worker = workers[i % workers.length];
+                        worker.onmessage = rfunction;
+
+                        worker.onerror = efunction;
+
+                        worker.postMessage({
+                            'type' : type,
+                            'expandedExtent' : extents[i].extent,
+                            'extendedAtoms' : extents[i].atoms,
+                            'atomsToShow' : extents[i].toshow
+                        });
+                    }
+                }
+
+                // NOTE: This is misleading if 'async' mesh generation - returns
+                // immediately
+                //console.log("full mesh generation " + (+new Date() - time) + "ms");
             }
-
-            //console.log("Extents " + extents.length + "  "+ (+new Date() - time) + "ms");
-
-            var surfobj = {
-                geo : new $3Dmol.Geometry(true),
-                mat : mat,
-                done : false,
-                finished : false
-            // also webgl initialized
-            };
+            
+            style = style || {};
+            var mat = getMatWithStyle(style);
+            var surfobj = [];
+            
+            if (symmetries) { //do preprocessing
+                var modelsAtomList = {};
+                var modelsAtomsToShow = {};
+                for (n = 0; n < models.length; n++) {
+                    modelsAtomList[n] = [];
+                    modelsAtomsToShow[n] = [];
+                }
+                for (n = 0; n < atomlist.length; n++) {
+                    modelsAtomList[atomlist[n].model].push(atomlist[n]);
+                }
+                for (n = 0; n < atomsToShow.length; n++) {
+                    modelsAtomsToShow[atomsToShow[n].model].push(atomsToShow[n]);
+                }
+                for (n = 0; n < models.length; n++) {
+                    surfobj.push({
+                        geo : new $3Dmol.Geometry(true),
+                        mat : mat,
+                        done : false,
+                        finished : false,
+                        symmetries : models[n].getSymmetries()
+                    // also webgl initialized
+                    });
+                    addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+                }
+            }
+            else {
+                surfobj.push({
+                    geo : new $3Dmol.Geometry(true),
+                    mat : mat,
+                    done : false,
+                    finished : false,
+                    symmetries : [new $3Dmol.Matrix4()]
+                });
+                addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
+            } 
             var surfid = surfaces.length;
             surfaces[surfid] = surfobj;
-            var reducedAtoms = [];
-            // to reduce amount data transfered, just pass x,y,z,serial and elem
-            for (i = 0, il = atomlist.length; i < il; i++) {
-                atom = atomlist[i];
-                reducedAtoms[i] = {
-                    x : atom.x,
-                    y : atom.y,
-                    z : atom.z,
-                    serial : i,
-                    elem : atom.elem
-                };
-            }
-
-            var sync = !!($3Dmol.syncSurface);
-            if (sync) { // don't use worker, still break up for memory purposes
-
-                // to keep the browser from locking up, call through setTimeout
-                var callSyncHelper = function callSyncHelper(i) {
-                    if (i >= extents.length)
-                        return;
-
-                    var VandF = generateMeshSyncHelper(type, extents[i].extent,
-                            extents[i].atoms, extents[i].toshow, reducedAtoms,
-                            totalVol);
-                    var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                    $3Dmol.mergeGeos(surfobj.geo, mesh);
-                    _viewer.render();
-
-                    setTimeout(callSyncHelper, 1, i + 1);
-                }
-
-                setTimeout(callSyncHelper, 1, 0);
-
-                // TODO: Asynchronously generate geometryGroups (not separate
-                // meshes) and merge them into a single geometry
-            } else { // use worker
-
-                var workers = [];
-                if (type < 0)
-                    type = 0; // negative reserved for atom data
-                for (i = 0, il = numWorkers; i < il; i++) {
-                    // var w = new Worker('3Dmol/SurfaceWorker.js');
-                    var w = new Worker($3Dmol.SurfaceWorker);
-                    workers.push(w);
-                    w.postMessage({
-                        'type' : -1,
-                        'atoms' : reducedAtoms,
-                        'volume' : totalVol
-                    });
-                }
-                var cnt = 0;
-
-                var rfunction = function(event) {
-                    var VandF = event.data;
-                    var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                    $3Dmol.mergeGeos(surfobj.geo, mesh);
-                    _viewer.render();
-                //    console.log("async mesh generation " + (+new Date() - time) + "ms");
-                    cnt++;
-                    if (cnt == extents.length)
-                        surfobj.done = true;
-                };
-
-                var efunction = function(event) {
-                    console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
-                };
-
-                for (i = 0; i < extents.length; i++) {
-                    var worker = workers[i % workers.length];
-                    worker.onmessage = rfunction;
-
-                    worker.onerror = efunction;
-
-                    worker.postMessage({
-                        'type' : type,
-                        'expandedExtent' : extents[i].extent,
-                        'extendedAtoms' : extents[i].atoms,
-                        'atomsToShow' : extents[i].toshow
-                    });
-                }
-            }
-
-            // NOTE: This is misleading if 'async' mesh generation - returns
-            // immediately
-            //console.log("full mesh generation " + (+new Date() - time) + "ms");
-
+            
             return surfid;
+
         };
 
         /**
@@ -1819,9 +1881,12 @@ $3Dmol.GLViewer = (function() {
          */ 
         this.setSurfaceMaterialStyle = function(surf, style) {
             if (surfaces[surf]) {
-                surfaces[surf].mat = getMatWithStyle(style);
-                surfaces[surf].mat.side = $3Dmol.FrontSide;
-                surfaces[surf].finished = false; // trigger redraw
+                surfArr = surfaces[surf];
+                for (var i = 0; i < surfArr.length; i++) {
+                    surfArr[i].mat = getMatWithStyle(style);
+                    surfArr[i].mat.side = $3Dmol.FrontSide;
+                    surfArr[i].finished = false; // trigger redraw
+                }
             }
         };
 
@@ -1831,12 +1896,15 @@ $3Dmol.GLViewer = (function() {
          * @param {number} surf - surface id
          */
         this.removeSurface = function(surf) {
-            if (surfaces[surf] && surfaces[surf].lastGL) {
-                if (surfaces[surf].geo !== undefined)
-                    surfaces[surf].geo.dispose();
-                if (surfaces[surf].mat !== undefined)
-                    surfaces[surf].mat.dispose();
-                modelGroup.remove(surfaces[surf].lastGL); // remove from scene
+            var surfArr = surfaces[surf];
+            for (var i = 0; i < surfArr.length; i++) {
+                if (surfArr[i] && surfArr[i].lastGL) {
+                    if (surfArr[i].geo !== undefined)
+                        surfArr[i].geo.dispose();
+                    if (surfArr[i].mat !== undefined)
+                        surfArr[i].mat.dispose();
+                    modelGroup.remove(surfArr[i].lastGL); // remove from scene
+                }
             }
             delete surfaces[surf];
             show();
@@ -1845,17 +1913,21 @@ $3Dmol.GLViewer = (function() {
         /** Remove all surfaces.
          * @function $3Dmol.GLViewer#removeAllSurfaces */
         this.removeAllSurfaces = function() {
-            for(var i = 0; i < surfaces.length; i++) {
-                if (surfaces[i] && surfaces[i].lastGL) {
-                    if (surfaces[i].geo !== undefined)
-                        surfaces[i].geo.dispose();
-                    if (surfaces[i].mat !== undefined)
-                        surfaces[i].mat.dispose();
-                    modelGroup.remove(surfaces[i].lastGL); // remove from scene
+            for (var n = 0; n < surfaces.length; n++) {
+                surfArr = surfaces[n];
+                for(var i = 0; i < surfArr.length; i++) {
+                    if (surfArr[i] && surfArr[i].lastGL) {
+                        if (surfArr[i].geo !== undefined)
+                            surfArr[i].geo.dispose();
+                        if (surfArr[i].mat !== undefined)
+                            surfArr[i].mat.dispose();
+                        modelGroup.remove(surfArr[i].lastGL); // remove from scene
+                    }
                 }
-                delete surfaces[i];
+                delete surfaces[n];
             }
             show();
+            
         };
 
         /** return Jmol moveto command to position this scene */
