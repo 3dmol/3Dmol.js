@@ -149,13 +149,13 @@ $3Dmol.drawCartoon = (function() {
     //var drawOvalStrip
     var drawStrip = function(group, points, colors, div, thickness) {
 
-        if ((points.length) < 3)
-            return;
-
-        var i, j, num, length;
-        length = points[0].length;
+		// points[num of width points/cross-section resolution][len of strip in atoms]
+        var i, j, num, len;
         num = points.length;
+        len = points[0].length;
         div = div || axisDIV;
+		if (num < 3 || len < 2)
+            return;
 
         for (i = 0; i < num; i++) {
             points[i] = subdivide(points[i], div)
@@ -165,15 +165,16 @@ $3Dmol.drawCartoon = (function() {
             return drawThinStrip(group, points[0], points[num-1], colors, div);
 
         var geo = new $3Dmol.Geometry(true);
-        
-        //var vs = geo.vertices, fs = geo.faces;
+        //var vs = geo.vertices, fs = geo.faces; // geo is always empty
         var vs = [], fs = [];
-        var axis, pv, av;
+        var axis, cs_bottom, cs_top;
         
-        var faces = [ [ 0, 2, -6, -8 ],
-                      [ -4, -2, 6, 4 ],
-                      [ 7, -1, -5, 3 ],
-                      [ -3, 5, 1, -7 ] ];
+
+		var faces = [];
+		for (j = 0; j < (num-1)*2; j++) {
+			faces[j] = [j, j+1, j+1-2*num, j-2*num)];
+		}
+
                 
         var offset, vertoffset, faceoffset;
         var color;
@@ -181,26 +182,25 @@ $3Dmol.drawCartoon = (function() {
         var face1, face2, face3;
         var geoGroup;
         
-        for (i = 0; i < length; i++) {
+        for (i = 0; i < len; i++) {
         
             color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]);
             
-            pv = [];
-            av = [];
+            cs_bottom = [];
+            cs_top = [];
             axis = [];
             for (j = 0; j < num; j++)
             {
-                pv[j] = points[j][i];
-                vs.push(pv[j]);
-                vs.push(pv[j]);
+                cs_bottom[j] = points[j][i];
+                vs.push(cs_bottom[j]);
             }
 
-            if (i < length - 1) {
+            if (i < len-1) { // toNext must be defined
                 for (j = 1; j < num-1; j++) // determine height of ellipse at this width offset
                 {
-                    var toNext = points[j][i + 1].clone().sub(points[j][i]);
+                    var toNext = points[j][i+1].clone().sub(points[j][i]);
                     var toSide = points[j+1][i].clone().sub(points[j][i]);
-                    axis[j] = toSide.cross(toNext).normalize().multiplyScalar(thickness*num); //TODO calculate ellipse
+                    axis[j] = toSide.cross(toNext).normalize().multiplyScalar(thickness*j); //TODO calculate ellipse
                 }
                 axis[0] = 0;
                 axis[num-1] = 0;
@@ -208,62 +208,70 @@ $3Dmol.drawCartoon = (function() {
 
             for (j = 0; j < num; j++)
             {
-                av[j] = points[j][i].clone().add(axis[j]);
-                vs.push(av[j]);
-                vs.push(av[j]);
+                cs_top[j] = points[j][i].clone().add(axis[j]);
+                vs.push(cs_top[j]);
             }
             
-            if (pv[0].atom !== undefined)
-                currentAtom = pv[0].atom;
+            if (points[0][i].atom !== undefined)
+                currentAtom = points[0][i].atom;
             
-            geoGroup = geo.updateGeoGroup(4*num);
+            geoGroup = geo.updateGeoGroup(2*num);
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             var faceArray = geoGroup.faceArray;
             offset = geoGroup.vertices; vertoffset = offset*3;
 
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //////////////////////////////////////////// WORK BELOW //////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (j = 0; j < num; j++) { // bottom edge of cross-section, points 0 -> num-1
+				vertexArray[vertoffset+3*j+0] = cs_bottom[j].x;
+				vertexArray[vertoffset+3*j+1] = cs_bottom[j].y; 
+				vertexArray[vertoffset+3*j+2] = cs_bottom[j].z; 
+			}
+
+			for (j = 0; j < num; j++) { // top edge of cross-section, points num -> 2*num-1
+				vertexArray[vertoffset+3*j+0+3*num] = cs_top[j].x;
+				vertexArray[vertoffset+3*j+1+3*num] = cs_top[j].y; 
+				vertexArray[vertoffset+3*j+2+3*num] = cs_top[j].z; 
+
+			}
             
-            vertexArray[vertoffset]    = p1v.x; vertexArray[vertoffset+1]  = p1v.y; vertexArray[vertoffset+2]  = p1v.z;
-            vertexArray[vertoffset+3]  = p1v.x; vertexArray[vertoffset+4]  = p1v.y; vertexArray[vertoffset+5]  = p1v.z;
-            vertexArray[vertoffset+6]  = p2v.x; vertexArray[vertoffset+7]  = p2v.y; vertexArray[vertoffset+8]  = p2v.z;
-            vertexArray[vertoffset+9]  = p2v.x; vertexArray[vertoffset+10] = p2v.y; vertexArray[vertoffset+11] = p2v.z;
-            vertexArray[vertoffset+12] = a1v.x; vertexArray[vertoffset+13] = a1v.y; vertexArray[vertoffset+14] = a1v.z;
-            vertexArray[vertoffset+15] = a1v.x; vertexArray[vertoffset+16] = a1v.y; vertexArray[vertoffset+17] = a1v.z;
-            vertexArray[vertoffset+18] = a2v.x; vertexArray[vertoffset+19] = a2v.y; vertexArray[vertoffset+20] = a2v.z;
-            vertexArray[vertoffset+21] = a2v.x; vertexArray[vertoffset+22] = a2v.y; vertexArray[vertoffset+23] = a2v.z;
-            
-            for (j = 0; j < 8; ++j) {                
-                colorArray[vertoffset+3*j] = color.r; colorArray[vertoffset+1+3*j] = color.g; colorArray[vertoffset+2+3*j] = color.b;
+            for (j = 0; j < 2*num; ++j) {
+                colorArray[vertoffset+3*j+0] = color.r;
+				colorArray[vertoffset+3*j+1] = color.g;
+				colorArray[vertoffset+3*j+2] = color.b;
             }
             
             if (i > 0) {
              
-                //both points have distinct atoms
+                // both points have distinct atoms
                 var diffAtoms = ((lastAtom !== undefined && currentAtom !== undefined) && lastAtom.serial !== currentAtom.serial);
                 
-                for (j = 0; j < 4; j++ ) {
+                for (j = 0; j < (num-1)*2; j++ ) {
                 
+					// indices of the 4 points of a rectangular face
                     var face = [offset + faces[j][0], offset + faces[j][1], offset + faces[j][2], offset + faces[j][3]];
                     
                     faceoffset = geoGroup.faceidx;    
                     
-                    faceArray[faceoffset] = face[0]; faceArray[faceoffset+1] = face[1]; faceArray[faceoffset+2] = face[3];
-                    faceArray[faceoffset+3] = face[1]; faceArray[faceoffset+4] = face[2]; faceArray[faceoffset+5] = face[3];
+					// need 2 triangles to draw a face between 4 points
+                    faceArray[faceoffset]   = face[0];
+					faceArray[faceoffset+1] = face[1]; 
+					faceArray[faceoffset+2] = face[3];
+
+                    faceArray[faceoffset+3] = face[1];
+					faceArray[faceoffset+4] = face[2];
+					faceArray[faceoffset+5] = face[3];
                     
                     geoGroup.faceidx += 6;
                     
-                    // clickable
+                    // TODO clickable
                     
                 }
             }
             
-            geoGroup.vertices += 8;
+            geoGroup.vertices += 2*num;
             lastAtom = currentAtom;
         }
-        
+        // WORK BELOW
 
         var vsize = vs.length - 8; // Cap
         
