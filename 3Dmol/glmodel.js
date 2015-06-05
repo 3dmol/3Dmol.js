@@ -120,7 +120,7 @@ $3Dmol.GLModel = (function() {
         idMatrix.identity();
         var noAssembly;
         var dontDuplicateAtoms;
-        
+        var idList = [];
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
@@ -1051,7 +1051,7 @@ $3Dmol.GLModel = (function() {
          */
         this.setSymmetries = function(list) {
             if (typeof(list) == "undefined") { //delete sym data
-                var idList = [idMatrix];
+                idList = [idMatrix];
                 copyMatrices = idList;
             }
             else {
