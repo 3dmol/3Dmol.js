@@ -908,7 +908,7 @@ $3Dmol.Parsers = (function() {
                 if (elem === '') { // for some incorrect PDB files
                     elem = line.substr(12, 2).replace(/ /g, "");
                 }
-                if((elem == 'H' || elem == 'HH' || elem == 'HD') && noH)
+                if((elem == 'H' || elem == 'HH' || elem == 'HD' || elem == 'HG') && noH)
                     continue;
                 if (line[0] == 'H')
                     hetflag = true;
