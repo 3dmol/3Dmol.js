@@ -166,13 +166,17 @@ $3Dmol.drawCartoon = (function() {
 
         var geo = new $3Dmol.Geometry(true);
         //var vs = geo.vertices, fs = geo.faces; // geo is always empty
-        var vs = [], fs = [];
+        var vs = [], fs = [], cs_shape = [];
         var axis, cs_bottom, cs_top;
-        
+        for (j=0; j < num; j++) { // this is where shape control should be implemented
+            cs_shape.push(Math.sqrt( (num-1)*j - Math.pow(j, 2) )/(num-1)); // ellipse
+            // cs_shape[j] = 1 // rectangle
+        }
+        console.log(cs_shape);   
 
 		var faces = [];
 		for (j = 0; j < (num-1)*2; j++) {
-			faces[j] = [j, j+1, j+1-2*num, j-2*num)];
+			faces[j] = [j, j+1, j+1-2*num, j-2*num];
 		}
 
                 
@@ -189,21 +193,25 @@ $3Dmol.drawCartoon = (function() {
             cs_bottom = [];
             cs_top = [];
             axis = [];
-            for (j = 0; j < num; j++)
+            
+
+            var toNext, toSide;
+            for (j = 0; j < num; j++) // determine height of ellipse at this width offset
             {
-                cs_bottom[j] = points[j][i];
-                vs.push(cs_bottom[j]);
+                if (i < len-1) toNext = points[j][i+1].clone().sub(points[j][i]);
+                else toNext = points[j][i-1].clone().sub(points[j][i]).negate();
+                if (j < num-1) toSide = points[j+1][i].clone().sub(points[j][i]);
+                else toSide = points[j-1][i].clone().sub(points[j][i]).negate();
+                axis[j] = toSide.cross(toNext).multiplyScalar(thickness*cs_shape[j]);
             }
 
-            if (i < len-1) { // toNext must be defined
-                for (j = 1; j < num-1; j++) // determine height of ellipse at this width offset
-                {
-                    var toNext = points[j][i+1].clone().sub(points[j][i]);
-                    var toSide = points[j+1][i].clone().sub(points[j][i]);
-                    axis[j] = toSide.cross(toNext).normalize().multiplyScalar(thickness*j); //TODO calculate ellipse
-                }
-                axis[0] = 0;
-                axis[num-1] = 0;
+            axis[0] = new $3Dmol.Vector3(0, 0, 0);
+            axis[num-1] = new $3Dmol.Vector3(0, 0, 0);
+
+            for (j = 0; j < num; j++)
+            {
+                cs_bottom[j] = points[j][i].clone().add(axis[j].clone().negate());
+                vs.push(cs_bottom[j]);
             }
 
             for (j = 0; j < num; j++)
@@ -275,6 +283,7 @@ $3Dmol.drawCartoon = (function() {
 
         var vsize = vs.length - 8; // Cap
         
+        /*
         geoGroup = geo.updateGeoGroup(8);
         var vertexArray = geoGroup.vertexArray;
         var colorArray = geoGroup.colorArray;
@@ -309,6 +318,7 @@ $3Dmol.drawCartoon = (function() {
         geoGroup.vertices += 8;
         
         //TODO: Add intersection planes for caps
+        */
         
         geo.initTypedArrays();
         geo.setUpNormals();
@@ -819,7 +829,7 @@ $3Dmol.drawCartoon = (function() {
     // actual function call
     var drawCartoon = function(group, atomlist, geo, gradientscheme) {
         
-        drawStrand(group, atomlist, 5, undefined, true, coilWidth, helixSheetWidth,
+        drawStrand(group, atomlist, 7, undefined, true, coilWidth, helixSheetWidth,
                 false, gradientscheme, geo);
     };
 
