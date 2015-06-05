@@ -29,8 +29,12 @@ $3Dmol.MarchingCube = (function() {
         var nZ = spec.nZ || 0;
         
         var scale = spec.scale || 1.0;
-        
-        var unitCube = new $3Dmol.Vector3(1,1,1).multiplyScalar(scale);
+        var unitCube = null;
+        if(spec.unitCube) {
+            unitCube = spec.unitCube;
+        } else {
+            unitCube = new $3Dmol.Vector3(1,1,1).multiplyScalar(scale);
+        }
         
         //keep track of calculated vertices to avoid repeats
         var vertnums = new Int32Array(nX*nY*nZ);

@@ -484,35 +484,44 @@ $3Dmol.GLShape = (function() {
                 " ");
 
         var natoms = Math.abs(parseFloat(lineArr[0]));
+
+
         var origin = new $3Dmol.Vector3(parseFloat(lineArr[1]),
                 parseFloat(lineArr[2]), parseFloat(lineArr[3]));
 
         lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        var convFactor = (lineArr[0] > 0) ? 0.529177 : 1;
 
         // might have to convert from bohr units to angstroms
-        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
-
+        // there is a great deal of confusion here:
+        // n>0 means angstroms: http://www.gaussian.com/g_tech/g_ur/u_cubegen.htm
+        // n<0 means angstroms: http://paulbourke.net/dataformats/cube/
+        // always assume bohr: openbabel source code
+        
         origin.multiplyScalar(convFactor);
 
+        convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
         var nX = Math.abs(lineArr[0]);
         var xVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
                 parseFloat(lineArr[2]), parseFloat(lineArr[3]))
                 .multiplyScalar(convFactor);
 
         lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-
         var nY = Math.abs(lineArr[0]);
         var yVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
                 parseFloat(lineArr[2]), parseFloat(lineArr[3]))
                 .multiplyScalar(convFactor);
 
         lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-
         var nZ = Math.abs(lineArr[0]);
         var zVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
                 parseFloat(lineArr[2]), parseFloat(lineArr[3]))
                 .multiplyScalar(convFactor);
 
+        var unit = new $3Dmol.Vector3(xVec.x,yVec.y,zVec.z);
+        if(xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || 
+                zVec.x != 0 || zVec.y != 0)
+            console.log("Warning: Cube file is not axis aligned.  This isn't going to look right.");
         // lines.splice(6, natoms).join("\n");
 
         lines = new Float32Array(lines.splice(natoms + 7).join(" ").replace(
@@ -540,7 +549,7 @@ $3Dmol.GLShape = (function() {
         $3Dmol.MarchingCube.march(bitdata, verts, faces, {
             fulltable : true,
             voxel : voxel,
-            scale : xVec.length(),
+            unitCube : unit,
             origin : origin,
             nX : nX,
             nY : nY,

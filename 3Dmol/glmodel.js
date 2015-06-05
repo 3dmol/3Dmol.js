@@ -52,6 +52,51 @@ $3Dmol.GLModel = (function() {
         "Ni" : 1.63
     };
 
+    var validAtomSpecs = [
+        "resn", // Parent residue name
+        "x", // Atom's x coordinate
+        "y", // Atom's y coordinate
+        "z", // Atom's z coordinate
+        "color", // Atom's color, as hex code
+        "surfaceColor", // Hex code for color to be used for surface patch over this atom
+        "elem", // Element abbreviation (e.g. 'H', 'Ca', etc)
+        "hetflag", // Set to true if atom is a heteroatom
+        "chain", // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+        "resi", // Residue number 
+        "icode",
+        "rescode",
+        "serial", // Atom's serial id number
+        "atom", // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+        "bonds", // Array of atom ids this atom is bonded to
+        "ss", // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
+        "singleBonds", // true if this atom forms only single bonds or no bonds at all
+        "bondOrder", // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
+        "properties", // Optional mapping of additional properties
+        "b", // Atom b factor data
+        "pdbline", // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
+        "clickable", // Set this flag to true to enable click selection handling for this atom
+        "callback", // Callback click handler function to be executed on this atom and its parent viewer
+        "invert" // for selection, inverts the meaning of the selection
+    ];
+
+    var validAtomSelectionSpecs = validAtomSpecs.concat([  // valid atom specs are ok too
+        "model", // a single model or list of models from which atoms should be selected
+        "bonds", // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
+        "predicate", // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
+        "invert", // if set, inverts the meaning of the selection
+        "byres", // if set, expands the selection to include all atoms of any residue that has any atom selected
+        "expand", // expands the selection to include all atoms within a given distance from the selection
+        "within" // intersects the selection with the set of atoms within a given distance from another selection
+    ]);
+
+    var validAtomStyleSpecs = [
+        "line", // draw bonds as lines
+        "cross", // draw atoms as crossed lines (aka stars)
+        "stick", // draw bonds as capped cylinders
+        "sphere", // draw atoms as spheres
+        "cartoon" // draw cartoon representation of secondary structure
+    ];
+
     // class functions
 
     // return true if a and b represent the same style
@@ -1357,6 +1402,20 @@ $3Dmol.GLModel = (function() {
          */
         this.setStyle = function(sel, style, add) {           
 
+            // report to console if this is not a valid selector
+            var s;
+            for (s in sel) {
+                if(validAtomSelectionSpecs.indexOf(s) === -1) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+            // report to console if this is not a valid style
+            for (s in style) {
+                if(validAtomStyleSpecs.indexOf(s) === -1) {
+                    console.log('Unknown style ' + s);
+                }
+            }
+
             // do a copy to enforce style changes through this function
             var mystyle = $.extend(true, {}, style);
             var changedAtoms = false;
@@ -1375,7 +1434,7 @@ $3Dmol.GLModel = (function() {
                     selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
                 if(!add) selected[i].style = {};
-                for(var s in mystyle) {
+                for(s in mystyle) {
                     if(mystyle.hasOwnProperty(s)) {
                         selected[i].style[s] = mystyle[s];
                     }

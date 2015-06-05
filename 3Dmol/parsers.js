@@ -843,6 +843,10 @@ $3Dmol.Parsers = (function() {
 
     };
 
+	//as a first approximation for bound finding, have two cutoffs
+	//TODO: actual radii table
+	var bigAtoms = {'S': true, 'CL': true, 'Cl': true};
+					
     // return true if atom1 and atom2 are probably bonded to each other
     // based on distance alone
     var areConnected = function(atom1, atom2) {
@@ -871,7 +875,7 @@ $3Dmol.Parsers = (function() {
         if (distSquared > 1.3
                 && (atom1.elem == 'H' || atom2.elem == 'H' || atom1.elem == 'D' || atom2.elem == 'D'))
             return false;
-        if (distSquared < 3.6 && (atom1.elem == 'S' || atom2.elem == 'S'))
+        if (distSquared < 3.6 && (bigAtoms[atom1.elem] || bigAtoms[atom2.elem]))
             return true;
         if (distSquared > 2.78)
             return false;
@@ -936,7 +940,8 @@ $3Dmol.Parsers = (function() {
                 if (elem === '') { // for some incorrect PDB files
                     elem = line.substr(12, 2).replace(/ /g, "");
                 }
-                if ((elem == 'H' || elem == 'HH' || elem == 'HD') && noH)
+
+                if((elem == 'H' || elem == 'HH' || elem == 'HD' || elem == 'HG') && noH)
                     continue;
                 if (line[0] == 'H')
                     hetflag = true;
