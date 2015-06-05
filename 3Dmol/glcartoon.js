@@ -152,14 +152,13 @@ $3Dmol.drawCartoon = (function() {
 		// points[num of width points/cross-section resolution][len of strip in atoms]
         var i, j, num, len;
         num = points.length;
-        len = points[0].length;
-        div = div || axisDIV;
-		if (num < 3 || len < 2)
-            return;
+		if (num < 3 || points[0].length < 2) return;
 
+        div = div || axisDIV;
         for (i = 0; i < num; i++) {
             points[i] = subdivide(points[i], div)
         }
+        len = points[0].length;
 
         if (!thickness)
             return drawThinStrip(group, points[0], points[num-1], colors, div);
@@ -170,12 +169,11 @@ $3Dmol.drawCartoon = (function() {
         var axis, cs_bottom, cs_top;
         for (j=0; j < num; j++) { // this is where shape control should be implemented
             cs_shape.push(Math.sqrt( (num-1)*j - Math.pow(j, 2) )/(num-1)); // ellipse
-            // cs_shape[j] = 1 // rectangle
-        }
-        console.log(cs_shape);   
+            //cs_shape[j] = 1 // hexagon
+        }  
 
 		var faces = [];
-		for (j = 0; j < (num-1)*2; j++) {
+		for (j = 0; j < num*2-1; j++) {
 			faces[j] = [j, j+1, j+1-2*num, j-2*num];
 		}
 
@@ -202,11 +200,8 @@ $3Dmol.drawCartoon = (function() {
                 else toNext = points[j][i-1].clone().sub(points[j][i]).negate();
                 if (j < num-1) toSide = points[j+1][i].clone().sub(points[j][i]);
                 else toSide = points[j-1][i].clone().sub(points[j][i]).negate();
-                axis[j] = toSide.cross(toNext).multiplyScalar(thickness*cs_shape[j]);
+                axis[j] = toSide.cross(toNext).normalize().multiplyScalar(thickness*cs_shape[j]);
             }
-
-            axis[0] = new $3Dmol.Vector3(0, 0, 0);
-            axis[num-1] = new $3Dmol.Vector3(0, 0, 0);
 
             for (j = 0; j < num; j++)
             {
@@ -236,9 +231,9 @@ $3Dmol.drawCartoon = (function() {
 			}
 
 			for (j = 0; j < num; j++) { // top edge of cross-section, points num -> 2*num-1
-				vertexArray[vertoffset+3*j+0+3*num] = cs_top[j].x;
-				vertexArray[vertoffset+3*j+1+3*num] = cs_top[j].y; 
-				vertexArray[vertoffset+3*j+2+3*num] = cs_top[j].z; 
+				vertexArray[vertoffset+3*j+0+3*num] = cs_top[num-1-j].x;
+				vertexArray[vertoffset+3*j+1+3*num] = cs_top[num-1-j].y; 
+				vertexArray[vertoffset+3*j+2+3*num] = cs_top[num-1-j].z; 
 
 			}
             
@@ -253,7 +248,7 @@ $3Dmol.drawCartoon = (function() {
                 // both points have distinct atoms
                 var diffAtoms = ((lastAtom !== undefined && currentAtom !== undefined) && lastAtom.serial !== currentAtom.serial);
                 
-                for (j = 0; j < (num-1)*2; j++ ) {
+                for (j = 0; j < num*2-1; j++ ) {
                 
 					// indices of the 4 points of a rectangular face
                     var face = [offset + faces[j][0], offset + faces[j][1], offset + faces[j][2], offset + faces[j][3]];
