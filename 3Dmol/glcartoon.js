@@ -146,9 +146,180 @@ $3Dmol.drawCartoon = (function() {
         group.add(mesh);
     };
 
-    var drawStrip = function(group, p1, p2, colors, div, thickness) {
-        if ((p1.length) < 2)
+    //var drawOvalStrip
+    var drawStrip = function(group, points, colors, div, thickness) {
+
+        if ((points.length) < 3)
             return;
+
+        var i, j, num, length;
+        length = points[0].length;
+        num = points.length;
+        div = div || axisDIV;
+
+        for (i = 0; i < num; i++) {
+            points[i] = subdivide(points[i], div)
+        }
+
+        if (!thickness)
+            return drawThinStrip(group, points[0], points[num-1], colors, div);
+
+        var geo = new $3Dmol.Geometry(true);
+        
+        //var vs = geo.vertices, fs = geo.faces;
+        var vs = [], fs = [];
+        var axis, pv, av;
+        
+        var faces = [ [ 0, 2, -6, -8 ],
+                      [ -4, -2, 6, 4 ],
+                      [ 7, -1, -5, 3 ],
+                      [ -3, 5, 1, -7 ] ];
+                
+        var offset, vertoffset, faceoffset;
+        var color;
+        var currentAtom, lastAtom;
+        var face1, face2, face3;
+        var geoGroup;
+        
+        for (i = 0; i < length; i++) {
+        
+            color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]);
+            
+            pv = [];
+            av = [];
+            axis = [];
+            for (j = 0; j < num; j++)
+            {
+                pv[j] = points[j][i];
+                vs.push(pv[j]);
+                vs.push(pv[j]);
+            }
+
+            if (i < length - 1) {
+                for (j = 1; j < num-1; j++) // determine height of ellipse at this width offset
+                {
+                    var toNext = points[j][i + 1].clone().sub(points[j][i]);
+                    var toSide = points[j+1][i].clone().sub(points[j][i]);
+                    axis[j] = toSide.cross(toNext).normalize().multiplyScalar(thickness*num); //TODO calculate ellipse
+                }
+                axis[0] = 0;
+                axis[num-1] = 0;
+            }
+
+            for (j = 0; j < num; j++)
+            {
+                av[j] = points[j][i].clone().add(axis[j]);
+                vs.push(av[j]);
+                vs.push(av[j]);
+            }
+            
+            if (pv[0].atom !== undefined)
+                currentAtom = pv[0].atom;
+            
+            geoGroup = geo.updateGeoGroup(4*num);
+            var vertexArray = geoGroup.vertexArray;
+            var colorArray = geoGroup.colorArray;
+            var faceArray = geoGroup.faceArray;
+            offset = geoGroup.vertices; vertoffset = offset*3;
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////// WORK BELOW //////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////
+            
+            vertexArray[vertoffset]    = p1v.x; vertexArray[vertoffset+1]  = p1v.y; vertexArray[vertoffset+2]  = p1v.z;
+            vertexArray[vertoffset+3]  = p1v.x; vertexArray[vertoffset+4]  = p1v.y; vertexArray[vertoffset+5]  = p1v.z;
+            vertexArray[vertoffset+6]  = p2v.x; vertexArray[vertoffset+7]  = p2v.y; vertexArray[vertoffset+8]  = p2v.z;
+            vertexArray[vertoffset+9]  = p2v.x; vertexArray[vertoffset+10] = p2v.y; vertexArray[vertoffset+11] = p2v.z;
+            vertexArray[vertoffset+12] = a1v.x; vertexArray[vertoffset+13] = a1v.y; vertexArray[vertoffset+14] = a1v.z;
+            vertexArray[vertoffset+15] = a1v.x; vertexArray[vertoffset+16] = a1v.y; vertexArray[vertoffset+17] = a1v.z;
+            vertexArray[vertoffset+18] = a2v.x; vertexArray[vertoffset+19] = a2v.y; vertexArray[vertoffset+20] = a2v.z;
+            vertexArray[vertoffset+21] = a2v.x; vertexArray[vertoffset+22] = a2v.y; vertexArray[vertoffset+23] = a2v.z;
+            
+            for (j = 0; j < 8; ++j) {                
+                colorArray[vertoffset+3*j] = color.r; colorArray[vertoffset+1+3*j] = color.g; colorArray[vertoffset+2+3*j] = color.b;
+            }
+            
+            if (i > 0) {
+             
+                //both points have distinct atoms
+                var diffAtoms = ((lastAtom !== undefined && currentAtom !== undefined) && lastAtom.serial !== currentAtom.serial);
+                
+                for (j = 0; j < 4; j++ ) {
+                
+                    var face = [offset + faces[j][0], offset + faces[j][1], offset + faces[j][2], offset + faces[j][3]];
+                    
+                    faceoffset = geoGroup.faceidx;    
+                    
+                    faceArray[faceoffset] = face[0]; faceArray[faceoffset+1] = face[1]; faceArray[faceoffset+2] = face[3];
+                    faceArray[faceoffset+3] = face[1]; faceArray[faceoffset+4] = face[2]; faceArray[faceoffset+5] = face[3];
+                    
+                    geoGroup.faceidx += 6;
+                    
+                    // clickable
+                    
+                }
+            }
+            
+            geoGroup.vertices += 8;
+            lastAtom = currentAtom;
+        }
+        
+
+        var vsize = vs.length - 8; // Cap
+        
+        geoGroup = geo.updateGeoGroup(8);
+        var vertexArray = geoGroup.vertexArray;
+        var colorArray = geoGroup.colorArray;
+        var faceArray = geoGroup.faceArray;
+        offset = geoGroup.vertices; vertoffset = offset*3; faceoffset = geoGroup.faceidx;
+        
+        for (i = 0; i < 4; i++) {
+            vs.push(vs[i * 2]);
+            vs.push(vs[vsize + i * 2]);
+            
+            var v1 = vs[i * 2], v2 = vs[vsize + i * 2];
+            
+            vertexArray[vertoffset+6*i] = v1.x; vertexArray[vertoffset+1+6*i] = v1.y; vertexArray[vertoffset+2+6*i] = v1.z;
+            vertexArray[vertoffset+3+6*i] = v2.x; vertexArray[vertoffset+4+6*i] = v2.y; vertexArray[vertoffset+5+6*i] = v2.z;
+            
+            colorArray[vertoffset+6*i] = color.r; colorArray[vertoffset+1+6*i] = color.g; colorArray[vertoffset+2+6*i] = color.b;
+            colorArray[vertoffset+3+6*i] = color.r; colorArray[vertoffset+4+6*i] = color.g; colorArray[vertoffset+5+6*i] = color.b;
+
+        }
+        
+        vsize += 8;
+                
+        face1 = [offset, offset + 2, offset + 6, offset + 4];
+        face2 = [offset + 1, offset + 5, offset + 7, offset + 3];
+        
+        faceArray[faceoffset] = face1[0]; faceArray[faceoffset+1] = face1[1]; faceArray[faceoffset+2] = face1[3];
+        faceArray[faceoffset+3] = face1[1]; faceArray[faceoffset+4] = face1[2]; faceArray[faceoffset+5] = face1[3];
+        faceArray[faceoffset+6] = face2[0]; faceArray[faceoffset+7] = face2[1]; faceArray[faceoffset+8] = face2[3];
+        faceArray[faceoffset+9] = face2[1]; faceArray[faceoffset+10] = face2[2]; faceArray[faceoffset+11] = face2[3];
+        
+        geoGroup.faceidx += 12;
+        geoGroup.vertices += 8;
+        
+        //TODO: Add intersection planes for caps
+        
+        geo.initTypedArrays();
+        geo.setUpNormals();
+        
+        var material = new $3Dmol.MeshLambertMaterial();
+        material.vertexColors = $3Dmol.FaceColors;
+        material.side = $3Dmol.DoubleSide;
+        var mesh = new $3Dmol.Mesh(geo, material);
+        group.add(mesh);     
+    };
+
+    var drawRectStrip = function(group, p1, p2, colors, div, thickness) {
+        if ((points.length) < 2)
+            return;
+
+        var p1, p2;
+        p1 = points[0];
+        p2 = points[points.length-1];
+
         div = div || axisDIV;
         p1 = subdivide(p1, div);
         p2 = subdivide(p2, div);
@@ -158,11 +329,13 @@ $3Dmol.drawCartoon = (function() {
         var geo = new $3Dmol.Geometry(true);
         
         //var vs = geo.vertices, fs = geo.faces;
-                var vs = [], fs = [];
+        var vs = [], fs = [];
         var axis, p1v, p2v, a1v, a2v;
         
-        var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, -1, -5, 3 ],
-                [ -3, 5, 1, -7 ] ];
+        var faces = [ [ 0, 2, -6, -8 ],
+                      [ -4, -2, 6, 4 ],
+                      [ 7, -1, -5, 3 ],
+                      [ -3, 5, 1, -7 ] ];
                 
         var offset, vertoffset, faceoffset;
         var color;
@@ -176,9 +349,9 @@ $3Dmol.drawCartoon = (function() {
             color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]);
             
             vs.push(p1v = p1[i]); // 0
-            vs.push(p1v); // 1
+            vs.push(p1v);         // 1
             vs.push(p2v = p2[i]); // 2
-            vs.push(p2v); // 3
+            vs.push(p2v);         // 3
             if (i < lim - 1) {
                 var toNext = p1[i + 1].clone().sub(p1[i]);
                 var toSide = p2[i].clone().sub(p1[i]);
@@ -199,10 +372,10 @@ $3Dmol.drawCartoon = (function() {
             var faceArray = geoGroup.faceArray;
             offset = geoGroup.vertices; vertoffset = offset*3;
             
-            vertexArray[vertoffset] = p1v.x; vertexArray[vertoffset+1] = p1v.y; vertexArray[vertoffset+2] = p1v.z;
-            vertexArray[vertoffset+3] = p1v.x; vertexArray[vertoffset+4] = p1v.y; vertexArray[vertoffset+5] = p1v.z;
-            vertexArray[vertoffset+6] = p2v.x; vertexArray[vertoffset+7] = p2v.y; vertexArray[vertoffset+8] = p2v.z;
-            vertexArray[vertoffset+9] = p2v.x; vertexArray[vertoffset+10] = p2v.y; vertexArray[vertoffset+11] = p2v.z;
+            vertexArray[vertoffset]    = p1v.x; vertexArray[vertoffset+1]  = p1v.y; vertexArray[vertoffset+2]  = p1v.z;
+            vertexArray[vertoffset+3]  = p1v.x; vertexArray[vertoffset+4]  = p1v.y; vertexArray[vertoffset+5]  = p1v.z;
+            vertexArray[vertoffset+6]  = p2v.x; vertexArray[vertoffset+7]  = p2v.y; vertexArray[vertoffset+8]  = p2v.z;
+            vertexArray[vertoffset+9]  = p2v.x; vertexArray[vertoffset+10] = p2v.y; vertexArray[vertoffset+11] = p2v.z;
             vertexArray[vertoffset+12] = a1v.x; vertexArray[vertoffset+13] = a1v.y; vertexArray[vertoffset+14] = a1v.z;
             vertexArray[vertoffset+15] = a1v.x; vertexArray[vertoffset+16] = a1v.y; vertexArray[vertoffset+17] = a1v.z;
             vertexArray[vertoffset+18] = a2v.x; vertexArray[vertoffset+19] = a2v.y; vertexArray[vertoffset+20] = a2v.z;
@@ -349,8 +522,7 @@ $3Dmol.drawCartoon = (function() {
         material.vertexColors = $3Dmol.FaceColors;
         material.side = $3Dmol.DoubleSide;
         var mesh = new $3Dmol.Mesh(geo, material);
-        group.add(mesh);
-        
+        group.add(mesh);     
     };
 
     //TODO: Need to update this (will we ever use this?)
@@ -483,7 +655,7 @@ $3Dmol.drawCartoon = (function() {
                         for (i = 0; !thickness && i < num; i++)
                             drawSmoothCurve(group, points[i], 1, colors, div);
                         if (fill)
-                            drawStrip(group, points[0], points[num - 1], colors, div, thickness);
+                            drawStrip(group, points, colors, div, thickness);
 
                         // clear arrays for points and colors
                         points = [];
@@ -492,7 +664,7 @@ $3Dmol.drawCartoon = (function() {
                         colors = [];
                     }
 
-                    // backbone atom of next residue
+                    // reached next residue
                     if (curr === undefined || curr.resi != next.resi)
                     {
                         if (baseEndPt) // draw last NA residue's base
@@ -517,7 +689,7 @@ $3Dmol.drawCartoon = (function() {
                         else
                             thickness = defaultThickness;
 
-                        curr = next; // advance pointer
+                        curr = next; // advance backbone
                         backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                         backbonePt.resi = curr.resi;
                         currColor = nextColor; // used for NA bases
@@ -582,7 +754,7 @@ $3Dmol.drawCartoon = (function() {
         for (i = 0; !thickness && i < num; i++)
             drawSmoothCurve(group, points[i], 1, colors, div);
         if (fill)
-            drawStrip(group, points[0], points[num - 1], colors, div, thickness);
+            drawStrip(group, points, colors, div, thickness);
 
         if (traceGeo) // generate mesh for trace geometry
         {
@@ -594,12 +766,15 @@ $3Dmol.drawCartoon = (function() {
         }
     };
 
-    //TODO document me
-    var addBackbonePoints = function(pointsArray, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom)
+    var addBackbonePoints = function(points, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom)
     {
         var widthScalar, i, delta, v;
+
+        // the orientation vector is the difference from backbone atom to orientation atom
         orientPt.sub(backbonePt);
         orientPt.normalize();
+
+        // depending on secondary structure, multiply the orientation vector by some scalar
         if (backboneAtom.ss === "c")
         {
             if (backboneAtom.atom === "P")
@@ -610,28 +785,33 @@ $3Dmol.drawCartoon = (function() {
             widthScalar = helixSheetWidth;
         orientPt.multiplyScalar(widthScalar);
 
+        // if the angle between the previous orientation vector and current is greater than 90 degrees,
         if (prevOrientPt != null && orientPt.dot(prevOrientPt) < 0)
         {
-            orientPt.negate();
+            orientPt.negate(); // negate the orientation vector (ie. add 180 degrees)
         }
+        // this ensures that the strand never twists more than 90 degrees between consecutive backbone atoms
 
         for (i = 0; i < num; i++)
         {
-            delta = -1 + i * 2 /(num - 1); // produces num increments from -1 to 1
+            // produces NUM incremental points from backbone atom minus orientation vector
+            //  to backbone atom plus orientation vector
+            delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
             v = new $3Dmol.Vector3(backbonePt.x + delta * orientPt.x,
                                    backbonePt.y + delta * orientPt.y,
                                    backbonePt.z + delta * orientPt.z);
             v.atom = backboneAtom;
             if (smoothen && backboneAtom.ss === "s") 
                 v.smoothen = true;
-            pointsArray[i].push(v);
+            points[i].push(v); // a num-length array of arrays, where each inner array contains length-wise points
+                               // along the backbone offset by some constant pertaining to its cell in the outer array
         }
     }
 
     // actual function call
     var drawCartoon = function(group, atomlist, geo, gradientscheme) {
         
-        drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
+        drawStrand(group, atomlist, 5, undefined, true, coilWidth, helixSheetWidth,
                 false, gradientscheme, geo);
     };
 
