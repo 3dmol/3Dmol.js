@@ -773,7 +773,7 @@ $3Dmol.GLShape = (function() {
         /**
          * Create isosurface from voluemetric data.
          * @param {$3Dmol.VolumeData} data - volumetric input data
-         * @param {VolSpec} volSpec - volumetric data shape specification
+         * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
          */
         this.addIsosurface = function(data, volSpec) {
             var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
@@ -844,7 +844,7 @@ $3Dmol.GLShape = (function() {
          * Creates custom shape from volumetric data 
          * @param {string} data - Volumetric input data 
          * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
-         * @param {VolSpec} volSpec - Volumetric data shape specification
+         * @param {IsoSurfaceSpec} isoSpec - Volumetric data shape specification
          * @return {$3Dmol.GLShape}
          */
         this.addVolumetricData = function(data, fmt, volSpec) {

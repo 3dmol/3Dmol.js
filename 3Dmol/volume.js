@@ -3,6 +3,8 @@
  * functionality.
  * 
  * @class
+ * @param {string} str - volumetric data
+ * @param {string} format - format of supplied data (cube)
  */
 $3Dmol.VolumeData = function(str, format) {
 
@@ -32,7 +34,7 @@ $3Dmol.VolumeData = function(str, format) {
 
 /**
  * @function $3Dmol.VolumeData.getVal
- * @param x,y,z - the coordinates
+ * @param {number} x,y,z - the coordinates
  * @returns - value closest to provided coordinate; zero if coordinate invalid
  */
 $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {

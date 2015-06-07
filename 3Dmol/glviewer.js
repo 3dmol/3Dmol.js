@@ -1112,7 +1112,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addVolumetricData
          * @param {String} data - Input file contents 
          * @param {String} format - Input file format (currently only supports "cube")
-         * @param {VolSpec} spec - Shape style specification
+         * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
          * 
          * @example
@@ -1133,7 +1133,7 @@ $3Dmol.GLViewer = (function() {
          * Construct isosurface from volumetric data
          * @function $3Dmol.GLViewer#addIsosurface
          * @param {$3Dmol.VolumeData} data - volumetric data
-         * @param {VolSpec} spec - Shape style specification
+         * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
          * 
          * @example
