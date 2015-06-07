@@ -458,115 +458,7 @@ $3Dmol.GLShape = (function() {
 
         geoGroup.lineidx = geoGroup.lineArray.length;
 
-    };
-
-    // Read a cube file - generate model and possibly shape(s)
-    /**
-     * @param {$3Dmol.GLShape}
-     *            shape
-     * @param {geometryGroup}
-     *            geoGroup
-     * @param {string}
-     *            str
-     * @param {number}
-     *            isoval
-     * @param {boolean}
-     *            voxel
-     */
-    var parseCube = function(shape, geoGroup, str, isoval, voxel) {
-
-        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
-
-        if (lines.length < 6)
-            return;
-
-        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(
-                " ");
-
-        var natoms = Math.abs(parseFloat(lineArr[0]));
-
-
-        var origin = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-                parseFloat(lineArr[2]), parseFloat(lineArr[3]));
-
-        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        var convFactor = (lineArr[0] > 0) ? 0.529177 : 1;
-
-        // might have to convert from bohr units to angstroms
-        // there is a great deal of confusion here:
-        // n>0 means angstroms: http://www.gaussian.com/g_tech/g_ur/u_cubegen.htm
-        // n<0 means angstroms: http://paulbourke.net/dataformats/cube/
-        // always assume bohr: openbabel source code
-        
-        origin.multiplyScalar(convFactor);
-
-        convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
-        var nX = Math.abs(lineArr[0]);
-        var xVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-                .multiplyScalar(convFactor);
-
-        lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        var nY = Math.abs(lineArr[0]);
-        var yVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-                .multiplyScalar(convFactor);
-
-        lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-        var nZ = Math.abs(lineArr[0]);
-        var zVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-                .multiplyScalar(convFactor);
-
-        var unit = new $3Dmol.Vector3(xVec.x,yVec.y,zVec.z);
-        if(xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || 
-                zVec.x != 0 || zVec.y != 0)
-            console.log("Warning: Cube file is not axis aligned.  This isn't going to look right.");
-        // lines.splice(6, natoms).join("\n");
-
-        lines = new Float32Array(lines.splice(natoms + 7).join(" ").replace(
-                /^\s+/, "").split(/[\s\r]+/));
-
-        var vertnums = new Int16Array(nX * nY * nZ);
-
-        var i, il;
-
-        for (i = 0, il = vertnums.length; i < il; ++i)
-            vertnums[i] = -1;
-
-        var bitdata = new Uint8Array(nX * nY * nZ);
-
-        for (i = 0, il = lines.length; i < il; ++i) {
-            var val = (isoval >= 0) ? lines[i] - isoval : isoval - lines[i];
-
-            if (val > 0)
-                bitdata[i] |= ISDONE;
-
-        }
-
-        var verts = [], faces = [];
-
-        $3Dmol.MarchingCube.march(bitdata, verts, faces, {
-            fulltable : true,
-            voxel : voxel,
-            unitCube : unit,
-            origin : origin,
-            nX : nX,
-            nY : nY,
-            nZ : nZ
-        });
-
-        if (!voxel)
-            $3Dmol.MarchingCube.laplacianSmooth(10, verts, faces);
-
-        drawCustom(shape, geoGroup, {
-            vertexArr : verts,
-            faceArr : faces,
-            normalArr : [],
-            lineArr : []
-        });
-
-    };
+    }; 
 
     // Update a bounding sphere's position and radius
     // from list of centroids and new points
@@ -623,8 +515,12 @@ $3Dmol.GLShape = (function() {
         if(! (stylespec.color instanceof $3Dmol.Color))
             shape.color = $3Dmol.CC.color(stylespec.color);
         shape.wireframe = stylespec.wireframe ? true : false;
-        shape.alpha = stylespec.alpha ? $3Dmol.Math.clamp(stylespec.alpha, 0.0,
+        //opacity is the preferred nomenclature, support alpha for backwards compat
+        shape.opacity = stylespec.alpha ? $3Dmol.Math.clamp(stylespec.alpha, 0.0,
                 1.0) : 1.0;
+        if(typeof(stylespec.opacity) != 'undefined') {
+            shape.opacity = $3Dmol.Math.clamp(stylespec.opacity, 0.0, 1.0);
+        }
         shape.side = (stylespec.side !== undefined) ? stylespec.side
                 : $3Dmol.DoubleSide;
         shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
@@ -874,30 +770,63 @@ $3Dmol.GLShape = (function() {
 
         };
         
-        /** 
-         * Creates custom shape from volumetric data 
-         * @param {string} data - Volumetric input data 
-         * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
-         * @param {VolSpec} volSpec - Volumetric data shape specification
-         * @return {$3Dmol.GLShape}
+        /**
+         * Create isosurface from voluemetric data.
+         * @param {$3Dmol.VolumeData} data - volumetric input data
+         * @param {VolSpec} volSpec - volumetric data shape specification
          */
-        this.addVolumetricData = function(data, fmt, volSpec) {
-
-            // str, fmt, isoval, vxl
+        this.addIsosurface = function(data, volSpec) {
             var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
                     : 0.0;
-            var vxl = (volSpec.voxel) ? true : false;
+            var voxel = (volSpec.voxel) ? true : false;
+            var smoothness = (volSpec.smoothness === undefined) ? 1 : volSpec.smoothness;
 
             var geoGroup = geo.addGeoGroup();
 
-            // TODO: Initialize geometry group here (parseCube currently calls
-            // addCustom...)
-            switch (fmt) {
-            case "cube":
-                parseCube(this, geoGroup, data, isoval, vxl);
-                break;
+            var nX = data.size.x;
+            var nY = data.size.y;
+            var nZ = data.size.z;
+            var vertnums = new Int16Array(nX * nY * nZ);
+            var vals = data.data;
+            var i, il;
+
+            for (i = 0, il = vertnums.length; i < il; ++i)
+                vertnums[i] = -1;
+
+            //mark locations partitioned by isoval
+            var bitdata = new Uint8Array(nX * nY * nZ);
+
+            for (i = 0, il = vals.length; i < il; ++i) {
+                var val = (isoval >= 0) ? vals[i] - isoval : isoval - vals[i];
+
+                if (val > 0)
+                    bitdata[i] |= ISDONE;
+
             }
 
+            var verts = [], faces = [];
+
+            $3Dmol.MarchingCube.march(bitdata, verts, faces, {
+                fulltable : true,
+                voxel : voxel,
+                unitCube : data.unit,
+                origin : data.origin,
+                nX : nX,
+                nY : nY,
+                nZ : nZ
+            });
+
+            if (!voxel)
+                $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
+
+            drawCustom(this, geoGroup, {
+                vertexArr : verts,
+                faceArr : faces,
+                normalArr : [],
+                lineArr : []
+            });
+
+            
             components.push({
                 id : geoGroup.id,
                 geoGroup : geoGroup,
@@ -908,7 +837,19 @@ $3Dmol.GLShape = (function() {
 
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray);
-
+        };
+        
+        /** 
+         * @deprecated Use addIsosurface instead
+         * Creates custom shape from volumetric data 
+         * @param {string} data - Volumetric input data 
+         * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
+         * @param {VolSpec} volSpec - Volumetric data shape specification
+         * @return {$3Dmol.GLShape}
+         */
+        this.addVolumetricData = function(data, fmt, volSpec) {
+            var data = new $3Dmol.VolumeData(data, fmt);
+            this.addIsosurface(data, volSpec);
         };
 
         /**
@@ -929,8 +870,8 @@ $3Dmol.GLShape = (function() {
                 ambient : 0x000000,
                 reflectivity : 0,
                 side : this.side,
-                transparent : (this.alpha < 1) ? true : false,
-                opacity : this.alpha,
+                transparent : (this.opacity < 1) ? true : false,
+                opacity : this.opacity,
                 wireframeLinewidth: this.linewidth
             });
             
