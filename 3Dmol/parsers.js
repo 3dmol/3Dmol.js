@@ -667,7 +667,7 @@ $3Dmol.Parsers = (function() {
                     seq = ".";
                 }
 
-                var id2 = atomHashTable[mmCIF._struct_conn.ptnr2_label_alt_id[i]][mmCIF._struct_conn.ptnr2_label_asym_id[i]][mmCIF._struct_conn.ptnr2_label_atom_id[i]][mmCIF._struct_conn.ptnr2_label_seq_id[i]];
+                var id2 = atomHashTable[alt][asym][atom][seq];
                 if (atomsPreBonds[id2] === undefined)
                     continue;
                 var index2 = atomsPreBonds[id2].index;
