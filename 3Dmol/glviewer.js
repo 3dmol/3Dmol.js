@@ -55,6 +55,7 @@ $3Dmol.GLViewer = (function() {
 
         var renderer = new $3Dmol.Renderer({
             antialias : true,
+            preserveDrawingBuffer: true, //so we can export images
             premultipliedAlpha : false /* more traditional compositing with background */
         });
 
