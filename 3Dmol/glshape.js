@@ -389,47 +389,45 @@ $3Dmol.GLShape = (function() {
 
     };
 
-    // handles custom shape generation from user supplied arrays
-    // May need to generate normal and/or line indices
-    /**
-     * @param {$3Dmol.GLShape}
-     *            shape
-     * @param {geometryGroup}
-     *            geoGroup
-     * @param {CustomSpec}
-     *            customSpec
-     */
-    var drawCustom = function(shape, geoGroup, customSpec) {
-
-        var vertexArr = customSpec.vertexArr, normalArr = customSpec.normalArr, faceArr = customSpec.faceArr, lineArr = customSpec.lineArr;
-
-        if (vertexArr.length === 0 || faceArr.length === 0) {
-            console
-                    .warn("Error adding custom shape component: No vertices and/or face indices supplied!");
-        }
+    //helper function for adding an appropriately sized mesh
+    var addCustomGeo = function(shape, geo, mesh, color, clickable) {
+        var geoGroup = geo.addGeoGroup();
+        var vertexArr = mesh.vertexArr, normalArr = mesh.normalArr, 
+            faceArr = mesh.faceArr;
 
         geoGroup.vertices = vertexArr.length;
         geoGroup.faceidx = faceArr.length;
 
         var offset, v, a, b, c, i, il;
-
+        var vertexArray = geoGroup.vertexArray;
+        var colorArray = geoGroup.colorArray;
+        var r = color.r;
+        var g = color.g;
+        var b = color.b;
         for (i = 0, il = geoGroup.vertices; i < il; ++i) {
             offset = i * 3;
             v = vertexArr[i];
-            geoGroup.vertexArray[offset] = v.x;
-            geoGroup.vertexArray[offset + 1] = v.y;
-            geoGroup.vertexArray[offset + 2] = v.z;
+            vertexArray[offset] = v.x;
+            vertexArray[offset + 1] = v.y;
+            vertexArray[offset + 2] = v.z;
+            colorArray[offset] = r;
+            colorArray[offset + 1] = g;
+            colorArray[offset + 2] = b;
         }
+        geoGroup.truncateArrayBuffers(true, true);
 
-        for (i = 0, il = geoGroup.faceidx / 3; i < il; ++i) {
-            offset = i * 3;
-            a = faceArr[offset];
-            b = faceArr[offset + 1];
-            c = faceArr[offset + 2];
-            var vA = new $3Dmol.Vector3(), vB = new $3Dmol.Vector3(), vC = new $3Dmol.Vector3();
-            shape.intersectionShape.triangle.push(new $3Dmol.Triangle(vA
-                    .copy(vertexArr[a]), vB.copy(vertexArr[b]), vC
-                    .copy(vertexArr[c])));
+        
+        if(clickable) {
+            for (i = 0, il = geoGroup.faceidx / 3; i < il; ++i) {
+                offset = i * 3;
+                a = faceArr[offset];
+                b = faceArr[offset + 1];
+                c = faceArr[offset + 2];
+                var vA = new $3Dmol.Vector3(), vB = new $3Dmol.Vector3(), vC = new $3Dmol.Vector3();
+                shape.intersectionShape.triangle.push(new $3Dmol.Triangle(vA
+                        .copy(vertexArr[a]), vB.copy(vertexArr[b]), vC
+                        .copy(vertexArr[c])));
+            }
         }
 
         geoGroup.faceArray = new Uint16Array(faceArr);
@@ -440,23 +438,103 @@ $3Dmol.GLShape = (function() {
             geoGroup.setNormals();
         else {
 
-            geoGroup.normalArray = new Float32Array(geoGroup.vertices * 3);
+            var normalArray = geoGroup.normalArray = new Float32Array(geoGroup.vertices * 3);
             var n;
             for (i = 0, il = geoGroup.vertices; i < il; ++i) {
                 offset = i * 3;
                 n = normalArr[i];
-                geoGroup.normalArray[offset] = n.x;
-                geoGroup.normalArray[offset + 1] = n.y;
-                geoGroup.normalArray[offset + 2] = n.z;
+                normalArray[offset] = n.x;
+                normalArray[offset + 1] = n.y;
+                normalArray[offset + 2] = n.z;
             }
         }
-
-        if (!lineArr.length)
-            geoGroup.setLineIndices();
-        else
-            geoGroup.lineArray = new Uint16Array(lineArr);
-
+        
+        geoGroup.setLineIndices();
         geoGroup.lineidx = geoGroup.lineArray.length;
+    };
+    
+    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
+    //peel off 64k vertices rsvh into their own mesh
+    //duplicating vertices and normals as necessary to preserve faces and lines
+    var splitMesh = function(mesh) {
+        if(mesh.vertexArr < MAXVERT) return [mesh]; //typical case
+        
+        var nverts = mesh.vertexArr.length;
+        var slices = [{vertexArr: [], normalArr: [], faceArr: []}];
+        var vertSlice = []; //indexed by original vertex to get current slice
+        var vertIndex =[]; //indexed by original vertex to get index within slice
+        var currentSlice = 0;
+        
+        //for each face, make sure all three vertices (or copies) are in the same slice
+        var faces = mesh.faceArr;
+        var vs = [0,0,0];
+        for(var i = 0, nf = faces.length; i < nf; i += 3) {
+            var slice = slices[currentSlice];
+            for(var j = 0; j < 3; j++) {
+                //process each vertex to make sure it is assigned a slice
+                //all vertices of a face must belong to the same slice
+                var v = faces[i+j];
+                if(vertSlice[v] !== currentSlice) { //true if undefined
+                    vertSlice[v] = currentSlice;
+                    vertIndex[v] = slice.vertexArr.length;
+                    slice.vertexArr.push(mesh.vertexArr[v]);
+                    if(mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
+                }
+                slice.faceArr.push(vertIndex[v]);
+            }
+            
+            if(slice.vertexArr.length >= MAXVERT) {
+                //new slice
+                slices.push({vertexArr: [], normalArr: [], faceArr: []});
+                currentSlice++;
+            }
+        }
+        return slices;
+    }
+    
+    // handles custom shape generation from user supplied arrays
+    // May need to generate normal and/or line indices
+    /**
+     * @param {$3Dmol.GLShape}
+     *            shape
+     * @param {geometry}
+     *            geo
+     * @param {CustomSpec}
+     *            customSpec
+     */
+    var drawCustom = function(shape, geo, customSpec) {
+        var mesh = customSpec;
+        var vertexArr = mesh.vertexArr, normalArr = mesh.normalArr, 
+        faceArr = mesh.faceArr;
+        if (vertexArr.length === 0 || faceArr.length === 0) {
+            console
+                    .warn("Error adding custom shape component: No vertices and/or face indices supplied!");
+        }
+
+        var color = customSpec.color;
+        if(typeof(color) == 'undefined') {
+            color = shape.color;
+        }
+        color =  $3Dmol.CC.color(color);
+
+        var firstgeo = geo.geometryGroups.length;
+        var splits = splitMesh(mesh);
+        for(var i = 0, n = splits.length; i < n; i++) {
+            addCustomGeo(shape, geo, splits[i], color, customSpec.clickable);
+        } 
+        
+        if(customSpec.clickable) {
+            
+            var center = new $3Dmol.Vector3(0,0,0);
+            var cnt = 0;
+            for(var g = firstgeo; g < geo.geometryGroups.length; g++) {
+                center.add(geo.geometryGroups[g].getCentroid());
+                cnt++;
+            }
+            center.divideScalar(cnt);
+            
+            updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, mesh.vertexArr);
+        }
 
     }; 
 
@@ -523,6 +601,7 @@ $3Dmol.GLShape = (function() {
         }
         shape.side = (stylespec.side !== undefined) ? stylespec.side
                 : $3Dmol.DoubleSide;
+
         shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
         // Click handling
         shape.clickable = stylespec.clickable ? true : false;
@@ -586,27 +665,10 @@ $3Dmol.GLShape = (function() {
             customSpec.vertexArr = customSpec.vertexArr || [];
             customSpec.faceArr = customSpec.faceArr || [];
             customSpec.normalArr = customSpec.normalArr || [];
-            customSpec.lineArr = customSpec.lineArr || [];
 
-            // Force creation of new geometryGroup for each added component
-            var geoGroup = geo.addGeoGroup();
-            drawCustom(this, geoGroup, customSpec);
-            geoGroup.truncateArrayBuffers(true, true);
-
-            for (var i = 0; i < geoGroup.colorArray.length / 3; ++i) {
-                geoGroup.colorArray[i * 3] = this.color.r;
-                geoGroup.colorArray[i * 3 + 1] = this.color.g;
-                geoGroup.colorArray[i * 3 + 2] = this.color.b;
-            }
-
-            components.push({
-                id : geoGroup.id,
-                geoGroup : geoGroup,
-                centroid : geoGroup.getCentroid()
-            });
-
-            updateBoundingFromPoints(this.boundingSphere, components,
-                    geoGroup.vertexArray);
+            var firstgeo = geo.geometryGroups.length;
+            // will split mesh as needed
+            drawCustom(this, geo, customSpec);
         };
 
         /**
@@ -781,8 +843,6 @@ $3Dmol.GLShape = (function() {
             var voxel = (volSpec.voxel) ? true : false;
             var smoothness = (volSpec.smoothness === undefined) ? 1 : volSpec.smoothness;
 
-            var geoGroup = geo.addGeoGroup();
-
             var nX = data.size.x;
             var nY = data.size.y;
             var nZ = data.size.z;
@@ -819,24 +879,14 @@ $3Dmol.GLShape = (function() {
             if (!voxel)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
 
-            drawCustom(this, geoGroup, {
+            drawCustom(this, geo, {
                 vertexArr : verts,
                 faceArr : faces,
                 normalArr : [],
-                lineArr : []
+                clickable : volSpec.clickable
             });
-
-            
-            components.push({
-                id : geoGroup.id,
-                geoGroup : geoGroup,
-                centroid : geoGroup.getCentroid()
-            });
-
+           
             this.updateStyle(volSpec);
-
-            updateBoundingFromPoints(this.boundingSphere, components,
-                    geoGroup.vertexArray);
         };
         
         /** 
@@ -864,18 +914,27 @@ $3Dmol.GLShape = (function() {
             updateColor(geo, this.color);
 
             shapeObj = new $3Dmol.Object3D();
-            var material = new $3Dmol.MeshLambertMaterial({
-                wireframe : this.wireframe,
-                vertexColors : true,
-                ambient : 0x000000,
-                reflectivity : 0,
-                side : this.side,
-                transparent : (this.opacity < 1) ? true : false,
-                opacity : this.opacity,
-                wireframeLinewidth: this.linewidth
-            });
+            var material = null;
+            if(this.side == $3Dmol.DoubleSide) {
+                var material = new $3Dmol.MeshDoubleLambertMaterial({
+                    wireframe : this.wireframe,
+                    side : this.side,
+                    transparent : (this.opacity < 1) ? true : false,
+                    opacity : this.opacity,
+                    wireframeLinewidth: this.linewidth
+                });
+            } else {
+                var material = new $3Dmol.MeshLambertMaterial({
+                    wireframe : this.wireframe,
+                    side : this.side,
+                    transparent : (this.opacity < 1) ? true : false,
+                    opacity : this.opacity,
+                    wireframeLinewidth: this.linewidth
+                });
+            }
             
             var mesh = new $3Dmol.Mesh(geo, material);
+
             shapeObj.add(mesh);
             
             var lineMaterial = new $3Dmol.LineBasicMaterial({

@@ -1405,7 +1405,6 @@ $3Dmol.GLViewer = (function() {
          *            mat
          * @return {$3Dmol.Mesh}
          */
-var meshtime = 0;
         var generateSurfaceMesh = function(atoms, VandF, mat) {
             var geo = new $3Dmol.Geometry(true);
             // Only one group per call to generate surface mesh (addSurface

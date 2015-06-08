@@ -9,7 +9,9 @@ $3Dmol.CC = {
         if(typeof(this.cache[hex]) !== "undefined") {
             return this.cache[hex];
         }
-        else {
+        else if(hex instanceof $3Dmol.Color) {
+            return hex;
+        } else {
             hex = this.getHex(hex);
             var c = new $3Dmol.Color(hex);
             this.cache[hex] = c;
