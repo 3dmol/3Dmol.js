@@ -1044,6 +1044,15 @@ $3Dmol.Parsers = (function() {
                 copyMatrices.push(matrix);
 
                 i--; // set i back
+            } else if (recordName == 'CRYST1') {
+                var a, b, c, alpha, beta, gamma;
+                a = parseFloat(line.substr(7, 8));
+                b = parseFloat(line.substr(16, 8));
+                c = parseFloat(line.substr(25, 8));
+                alpha = parseFloat(line.substr(34, 6));
+                beta = parseFloat(line.substr(41, 6));
+                gamma = parseFloat(line.substr(48, 6));
+                
             }
 
         }
