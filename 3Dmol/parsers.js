@@ -582,6 +582,7 @@ $3Dmol.Parsers = (function() {
             atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.ss = 'c';
+            atom.serial = i;
             atom.bondOrder = [];
             atom.properties = {};
             atomsPreBonds[atom.id] = atom;
@@ -630,7 +631,8 @@ $3Dmol.Parsers = (function() {
             atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
         }
 
-        if (mmCIF._struct_conn && mmCIF._struct_conn.id) {
+        //todo, fix the below code to work correctly
+        if (false && mmCIF._struct_conn && mmCIF._struct_conn.id) {
             for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
                 var offset = atoms.length;
 
