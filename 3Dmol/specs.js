@@ -89,6 +89,8 @@
  * @prop {number} opacity - sets the transparency: 0 to hide, 1 for fully opaque
  * @prop {string} colorscheme - element based coloring
  * @prop {string} color - fixed coloring, overrides colorscheme
+ * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring
+ * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color
  * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}
  * 
  * @example
@@ -97,14 +99,15 @@
  */
 
 /** 
- * Volumetric data style specification
- * @typedef VolSpec
+ * Isosurface style specification
+ * @typedef IsoSurfaceSpec
  * @prop {number} isoval - specifies the isovalue to draw surface at
  * @propr {boolean} voxel - if true uses voxel style rendering
  * @prop {string} color - solid color
- * @prop {number} alpha - transparency
+ * @prop {number} opacity - transparency, between 0 and 1
  * @prop {boolean} wireframe - draw as wireframe, not surface
  * @prop {number} linewidth - width of line for wireframe rendering
+ * @prop {number} smoothness - amount to smooth surface (default 1)
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click 
  */

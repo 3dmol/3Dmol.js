@@ -228,7 +228,7 @@ $3Dmol.ProteinSurface = function() {
         // native
         // floats
         vpAtomID = new Int32Array(pLength * pWidth * pHeight);
-        console.log("Box size: ", pLength, pWidth, pHeight, vpBits.length);
+        //console.log("Box size: ", pLength, pWidth, pHeight, vpBits.length);
     };
 
     this.boundingatom = function(btype) {

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>3Dmol.js Tests</title>
+        <script src="../build/3Dmol.js"></script> 
+
+    </head>
+    <body>
+        
+<script>
+  $(document).ready(function() {
+    //install a right-click handler on every canvas to export png
+    $('canvas').bind('contextmenu',function(e) {
+        var dt = e.currentTarget.toDataURL('image/png');
+        window.location = dt;
+    });
+  });
+                        
+
+</script>
+        
+<!-- Every test should be self contained in its own snippet of HTML.
+    This page is organized as a table with two columns.  The first column
+    is the 3Dmol viewer, the second a picture of what should be seen -->
+
+<style>
+table td { text-align: center; }
+table th {padding-top: 1em;}
+</style>
+
+<table style="width:100%">
+    
+<!-- test start -->
+<tr>
+<th colspan=2>Load from PDB</td>  <!-- descriptive title of what is being tested -->
+</tr><tr>
+<td width="50%"><div style="width: 400px; height: 400px; position: relative;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='stick'></td>
+<td width="50%"><img src="imgs/test1.png"</td>
+</tr>
+<!-- test end -->
+
+<!-- test start -->
+<tr>
+<th colspan=2>Programmatic Load from PDB</td>  <!-- descriptive title of what is being tested -->
+</tr>
+<tr>
+<td width="50%"><div id="test2" style="width: 400px; height: 400px; position: relative;" data-style='stick'></td>
+<script>
+(function() {
+    var viewer = $3Dmol.createViewer($("#test2"));
+    $3Dmol.download("pdb:4gqb",viewer);
+})();
+</script>
+<td width="50%"><img src="imgs/test2.png"</td>
+</tr>
+<!-- test end -->
+
+<!-- test start -->
+<tr>
+<th colspan=2>Programmatic Load from PubChem</td>  <!-- descriptive title of what is being tested -->
+</tr>
+<tr>
+<td width="50%"><div id="test3" style="width: 400px; height: 400px; position: relative;" data-style='stick'></td>
+<script>
+(function() {
+    var viewer = $3Dmol.createViewer($("#test3"));
+    $3Dmol.download("cid:5",viewer,{},function() {
+        viewer.setBackgroundColor(0xffddee);
+        viewer.setStyle({},{sphere:{}});
+        viewer.render();
+        });
+})();
+</script>
+<td width="50%"><img src="imgs/test3.png"</td>
+</tr>
+<!-- test end -->
+
+
+</table>
+
+
+</body>
+</html>

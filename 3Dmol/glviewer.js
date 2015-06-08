@@ -1108,22 +1108,44 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Construct isosurface from volumetric data in gaussian cube format
-         * 
+         * @deprecated
          * @function $3Dmol.GLViewer#addVolumetricData
          * @param {String} data - Input file contents 
          * @param {String} format - Input file format (currently only supports "cube")
-         * @param {VolSpec} spec - Shape style specification
+         * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
          * 
          * @example
-         * viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", alpha: 0.95});              
-         * viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", alpha: 0.95}); 
+         * viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", opacity: 0.95});              
+         * viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addVolumetricData(data, format, spec);
+            shapes.push(s);
+
+            return s;
+        };
+        
+        /**
+         * Construct isosurface from volumetric data
+         * @function $3Dmol.GLViewer#addIsosurface
+         * @param {$3Dmol.VolumeData} data - volumetric data
+         * @param {IsoSurfaceSpec} spec - Shape style specification
+         * @return {$3Dmol.GLShape}
+         * 
+         * @example
+         * var data = new $3Dmol.VolumeData(str,"cube");
+         * viewer.addIsosurface(data, {isoval: 0.01, color: "blue", opacity: 0.95});              
+         * viewer.addIsosurface(data, {isoval: -0.01, color: "red", opacity: 0.95}); 
+         */
+        this.addIsosurface = function(data,  spec) {
+            spec = spec || {};
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addIsosurface(data, spec);
             shapes.push(s);
 
             return s;
@@ -1384,28 +1406,10 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.Mesh}
          */
         var generateSurfaceMesh = function(atoms, VandF, mat) {
-
             var geo = new $3Dmol.Geometry(true);
             // Only one group per call to generate surface mesh (addSurface
             // should split up mesh render)
             var geoGroup = geo.updateGeoGroup(0);
-
-            var vertexArray = geoGroup.vertexArray;
-            // reconstruct vertices and faces
-            var v = VandF['vertices'];
-            var offset;
-            var i, il;
-            for (i = 0, il = v.length; i < il; i++) {
-                offset = geoGroup.vertices * 3;
-                vertexArray[offset] = v[i].x;
-                vertexArray[offset + 1] = v[i].y;
-                vertexArray[offset + 2] = v[i].z;
-                geoGroup.vertices++;
-            }
-
-            var faces = VandF['faces'];
-            geoGroup.faceidx = faces.length;// *3;
-            geo.initTypedArrays();
 
             // set colors for vertices
             var colors = [];
@@ -1418,9 +1422,54 @@ $3Dmol.GLViewer = (function() {
                         colors[i] = $3Dmol.CC.color(atom.color);
                 }
             }
+            
+            var vertexArray = geoGroup.vertexArray;
+
+            // reconstruct vertices and faces
+            var v = VandF['vertices'];
+            var offset;
+            var i, il;
+            for (i = 0, il = v.length; i < il; i++) {
+                offset = geoGroup.vertices * 3;
+                vertexArray[offset] = v[i].x;
+                vertexArray[offset + 1] = v[i].y;
+                vertexArray[offset + 2] = v[i].z;
+                geoGroup.vertices++;                
+            }
+
+            //set colorArray of there are per-atom colors
+            var colorArray = geoGroup.colorArray;
+            
+            if(mat.voldata && mat.volscheme) {
+                //convert volumetric data into colors
+                var scheme = mat.volscheme;
+                var voldata = mat.voldata;
+                var range = scheme.range() || [-1,1];
+                for (i = 0, il = v.length; i < il; i++) {
+                    var val = voldata.getVal(v[i].x,v[i].y,v[i].z);
+                    var col =  $3Dmol.CC.color(scheme.valueToHex(val, range));
+                    var offset = i * 3;
+                    colorArray[offset] = col.r;
+                    colorArray[offset + 1] = col.g;
+                    colorArray[offset + 2] = col.b;
+                }
+            }
+            else if(colors.length > 0) { //have atom colors
+                for (i = 0, il = v.length; i < il; i++) {
+                    var A = v[i].atomid;
+                    var offsetA = i * 3;
+
+                    colorArray[offsetA] = colors[A].r;
+                    colorArray[offsetA + 1] = colors[A].g;
+                    colorArray[offsetA + 2] = colors[A].b;
+                }
+            }
+            
+            var faces = VandF['faces'];
+            geoGroup.faceidx = faces.length;// *3;
+            geo.initTypedArrays();
 
             var verts = geoGroup.vertexArray;
-            var colorArray = geoGroup.colorArray;
             var normalArray = geoGroup.normalArray;
             var vA, vB, vC, norm;
 
@@ -1435,18 +1484,8 @@ $3Dmol.GLViewer = (function() {
 
                 var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
-                colorArray[offsetA] = colors[A].r;
-                colorArray[offsetA + 1] = colors[A].g;
-                colorArray[offsetA + 2] = colors[A].b;
-                colorArray[offsetB] = colors[B].r;
-                colorArray[offsetB + 1] = colors[B].g;
-                colorArray[offsetB + 2] = colors[B].b;
-                colorArray[offsetC] = colors[C].r;
-                colorArray[offsetC + 1] = colors[C].g;
-                colorArray[offsetC + 2] = colors[C].b;
-
                 // setup Normals
-
+                // todo - calculate normals in parallel code
                 vA = new $3Dmol.Vector3(verts[offsetA], verts[offsetA + 1],
                         verts[offsetA + 2]);
                 vB = new $3Dmol.Vector3(verts[offsetB], verts[offsetB + 1],
@@ -1475,8 +1514,7 @@ $3Dmol.GLViewer = (function() {
             }
             geoGroup.faceArray = new Uint16Array(faces);
             var mesh = new $3Dmol.Mesh(geo, mat);
-            mesh.doubleSided = true;
-            
+            mesh.doubleSided = true;        
             return mesh;
         };
 
@@ -1519,8 +1557,7 @@ $3Dmol.GLViewer = (function() {
             }
 
             var time4 = new Date();
-            console.log("buildboundaryetc " + (time4 - time3) + "  "
-                    + (time4 - time) + "ms");
+            //console.log("buildboundaryetc " + (time4 - time3) + "  " + (time4 - time) + "ms");
 
             ps.marchingcube(type);
 
@@ -1914,7 +1951,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#removeAllSurfaces */
         this.removeAllSurfaces = function() {
             for (var n = 0; n < surfaces.length; n++) {
-                surfArr = surfaces[n];
+                var surfArr = surfaces[n];
                 for(var i = 0; i < surfArr.length; i++) {
                     if (surfArr[i] && surfArr[i].lastGL) {
                         if (surfArr[i].geo !== undefined)
