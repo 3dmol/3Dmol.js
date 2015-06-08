@@ -574,9 +574,14 @@ $3Dmol.Parsers = (function() {
             atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
             atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
             atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
-            atom.hetflag = mmCIF._atom_site.group_pdb[i] === "HETA";
+            atom.chain = mmCIF._atom_site.auth_asym_id ? mmCIF._atom_site.auth_asym_id[i] : undefined;
+            atom.resi = mmCIF._atom_site.auth_seq_id ? parseInt(mmCIF._atom_site.auth_seq_id[i]) : undefined;
+            atom.resn = mmCIF._atom_site.auth_comp_id ? mmCIF._atom_site.auth_comp_id[i].trim() : undefined;
+            atom.atom = mmCIF._atom_site.auth_atom_id ? mmCIF._atom_site.auth_atom_id[i].replace(/"/gm,'')  : undefined; //"primed" names are in quotes
+            atom.hetflag = mmCIF._atom_site.group_pdb ? mmCIF._atom_site.group_pdb[i] === "HETA" : true;
             atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
+            atom.ss = 'c';
             atom.bondOrder = [];
             atom.properties = {};
             atomsPreBonds[atom.id] = atom;
@@ -687,7 +692,8 @@ $3Dmol.Parsers = (function() {
         }
 
         assignBonds(atoms);
-
+        computeSecondaryStructure(atoms);
+        
         var matrices = [];
         if (mmCIF._pdbx_struct_oper_list !== undefined) { // transformations
                                                             // may not exist.
@@ -928,7 +934,7 @@ $3Dmol.Parsers = (function() {
                     continue; // FIXME: ad hoc
                 serial = parseInt(line.substr(6, 5));
                 atom = line.substr(12, 4).replace(/ /g, "");
-                resn = line.substr(17, 3);
+                resn = line.substr(17, 3).trim();
                 chain = line.substr(21, 1);
                 resi = parseInt(line.substr(22, 4));
                 icode = line.substr(26, 1);
@@ -1186,7 +1192,7 @@ $3Dmol.Parsers = (function() {
                 // be filled out (e.g. the chain) so this doesn't work
                 var serial = parseInt(line.substr(6, 5));
                 var atom = line.substr(12, 4).replace(/ /g, "");
-                var resn = line.substr(17, 3);
+                var resn = line.substr(17, 3).trim();
                 var chain = line.substr(21, 1);
                 var resi = parseInt(line.substr(22, 4));
                 // however let's split the coordinates, charge and radius by
