@@ -409,7 +409,10 @@ $3Dmol.Parsers = (function() {
      * @param {string}
      *            str
      */
-    parsers.mcif = parsers.cif = function(atoms, str, options) {
+    parsers.mcif = parsers.cif = function(atoms, str, options, copyMatrices) {
+    
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms;
 
         // Used to handle quotes correctly
         function splitRespectingQuotes(string, separator) {
@@ -696,30 +699,33 @@ $3Dmol.Parsers = (function() {
         assignBonds(atoms);
         computeSecondaryStructure(atoms);
         
-        var matrices = [];
-        if (mmCIF._pdbx_struct_oper_list !== undefined) { // transformations
+        if (mmCIF._pdbx_struct_oper_list !== undefined && !noAssembly) { // transformations
                                                             // may not exist.
 
             for (var i = 0; i < mmCIF._pdbx_struct_oper_list.id.length; i++) {
-                var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]']);
-                var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]']);
-                var matrix13 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][3]']);
-                var vector1 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[1]']);
-                var matrix21 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][1]']);
-                var matrix22 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][2]']);
-                var matrix23 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][3]']);
-                var vector2 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[2]']);
-                var matrix31 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][1]']);
-                var matrix32 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][2]']);
-                var matrix33 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][3]']);
-                var vector3 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[3]']);
+                var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]'][i]);
+                var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]'][i]);
+                var matrix13 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][3]'][i]);
+                var vector1 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[1]'][i]);
+                var matrix21 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][1]'][i]);
+                var matrix22 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][2]'][i]);
+                var matrix23 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][3]'][i]);
+                var vector2 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[2]'][i]);
+                var matrix31 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][1]'][i]);
+                var matrix32 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][2]'][i]);
+                var matrix33 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][3]'][i]);
+                var vector3 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[3]'][i]);
 
                 var matrix = new $3Dmol.Matrix4(matrix11, matrix12, matrix13,
                         vector1, matrix21, matrix22, matrix23, vector2,
                         matrix31, matrix32, matrix33, vector3);
-                matrices.push(matrix);
+                copyMatrices.push(matrix);
             }
+            processSymmetries("mcif", copyMatrices, copyMatrix, atoms);
         }
+        
+        
+        
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -890,6 +896,91 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
+    //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
+    var processSymmetries = function(format, copyMatrices, copyMatrix, atoms) {
+    
+        var end = atoms.length;
+        var offset = end;
+        var t, l, n;
+        if (!copyMatrix) { // do full assembly
+            for (t = 0; t < copyMatrices.length; t++) {
+                if (!copyMatrices[t].isIdentity()) {
+                    var xyz = new $3Dmol.Vector3();
+                    for (n = 0; n < end; n++) {
+                        var bondsArr = [];
+                        for (l = 0; l < atoms[n].bonds.length; l++) {
+                            bondsArr.push(atoms[n].bonds[l] + offset);
+                        }
+                        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+                        xyz.applyMatrix4(copyMatrices[t]);
+                        if (format == "pdb") {
+                            atoms.push({
+                                'resn' : atoms[n].resn,
+                                'x' : xyz.x,
+                                'y' : xyz.y,
+                                'z' : xyz.z,
+                                'elem' : atoms[n].elem,
+                                'hetflag' : atoms[n].hetflag,
+                                'chain' : atoms[n].chain,
+                                'resi' : atoms[n].resi,
+                                'icode' : atoms[n].icode,
+                                'rescode' : atoms[n].rescode,
+                                'serial' : atoms[n].serial,
+                                'atom' : atoms[n].atom,
+                                'bonds' : bondsArr,
+                                'ss' : atoms[n].ss,
+                                'bondOrder' : atoms[n].bondOrder,
+                                'properties' : atoms[n].properties,
+                                'b' : atoms[n].b,
+                                'pdbline' : atoms[n].pdbline,
+                            });
+                        }
+                        else if (format == "mcif") {
+                            atoms.push({
+                                'resn' : atoms[n].resn,
+                                'x' : xyz.x,
+                                'y' : xyz.y,
+                                'z' : xyz.z,
+                                'elem' : atoms[n].elem,
+                                'hetflag' : atoms[n].hetflag,
+                                'chain' : atoms[n].chain,
+                                'resi' : atoms[n].resi,
+                                'serial' : atoms[n].serial,
+                                'atom' : atoms[n].atom,
+                                'bonds' : bondsArr,
+                                'ss' : atoms[n].ss,
+                                'bondOrder' : atoms[n].bondOrder,
+                                'properties' : atoms[n].properties,
+                                'hbondDistanceSq' : atoms[n].hbondDistanceSq,
+                                'hbondOther' : atoms[n].hbondOther,
+                                'ssbegin' : atoms[n].ssbegin,
+                                'id' : atoms[n].id,
+                                'index' : atoms[n].index
+                            });
+                        }
+                    }
+                    offset = atoms.length;
+                }
+            }
+        }
+        // ELSE give all atoms a pointer to their symmetries
+        else {
+            for (t = 0; t < atoms.length; t++) {
+                var symmetries = [];
+                for (l = 0; l < copyMatrices.length; l++) {
+                    if (!copyMatrices[l].isIdentity()) {
+                        var newXYZ = new $3Dmol.Vector3();
+                        newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
+                        newXYZ.applyMatrix4(copyMatrices[l]);
+                        symmetries.push(newXYZ);
+                    }
+                }
+                atoms[t].symmetries = symmetries;
+            }
+        }
+    }
+
+
     // parse pdb file from str and create atoms
     // if computeStruct is true will always perform secondary structure
     // analysis,
@@ -913,7 +1004,6 @@ $3Dmol.Parsers = (function() {
         var copyMatrix = !options.duplicateAssemblyAtoms; // if not specified,
                                                             // default to
                                                             // copyMatrix true
-        var allMatrices = [];
         var start = atoms.length;
         var atom;
         var protein = {
@@ -1035,10 +1125,7 @@ $3Dmol.Parsers = (function() {
                                 .substr(53));
                         i++;
                     } else {
-                        while (line.substr(13, 5) == 'BIOMT') { // increase "i"
-                                                                // until you
-                                                                // leave the
-                                                                // REMARKs
+                        while (line.substr(13, 5) == 'BIOMT') {
                             i++;
                             line = lines[i].replace(/^\s*/, '');
                         }
@@ -1048,9 +1135,7 @@ $3Dmol.Parsers = (function() {
                 matrix.elements[7] = 0;
                 matrix.elements[11] = 0;
                 matrix.elements[15] = 1;
-                allMatrices.push(matrix);
                 copyMatrices.push(matrix);
-
                 i--; // set i back
             }
 
@@ -1061,60 +1146,9 @@ $3Dmol.Parsers = (function() {
         assignPDBBonds(atoms);
         // console.log("bond connecting " + ((new Date()).getTime() -
         // starttime));
-
-        var end = atoms.length;
-        var offset = end;
-        var t, l, n;
-        if (!copyMatrix) { // do full assembly
-            for (t = 0; t < allMatrices.length; t++) {
-                if (!allMatrices[t].isIdentity()) {
-                    var xyz = new $3Dmol.Vector3();
-                    for (n = 0; n < end; n++) {
-                        var bondsArr = [];
-                        for (l = 0; l < atoms[n].bonds.length; l++) {
-                            bondsArr.push(atoms[n].bonds[l] + offset);
-                        }
-                        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
-                        xyz.applyMatrix4(allMatrices[t]);
-                        atoms.push({
-                            'resn' : atoms[n].resn,
-                            'x' : xyz.x,
-                            'y' : xyz.y,
-                            'z' : xyz.z,
-                            'elem' : atoms[n].elem,
-                            'hetflag' : atoms[n].hetflag,
-                            'chain' : atoms[n].chain,
-                            'resi' : atoms[n].resi,
-                            'icode' : atoms[n].icode,
-                            'rescode' : atoms[n].rescode,
-                            'serial' : atoms[n].serial,
-                            'atom' : atoms[n].atom,
-                            'bonds' : bondsArr,
-                            'ss' : atoms[n].ss,
-                            'bondOrder' : atoms[n].bondOrder,
-                            'properties' : atoms[n].properties,
-                            'b' : atoms[n].b,
-                            'pdbline' : atoms[n].pdbline,
-                        });
-                    }
-                    offset = atoms.length;
-                }
-            }
-        }
-        // ELSE give all atoms a pointer to their symmetries
-        else {
-            for (t = 0; t < atoms.length; t++) {
-                var symmetries = [];
-                for (l = 0; l < copyMatrices.length; l++) {
-                    if (!copyMatrices[l].isIdentity()) {
-                        var newXYZ = new $3Dmol.Vector3();
-                        newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
-                        newXYZ.applyMatrix4(copyMatrices[l]);
-                        symmetries.push(newXYZ);
-                    }
-                }
-                atoms[t].symmetries = symmetries;
-            }
+        
+        if (!noAssembly) {
+            processSymmetries("pdb", copyMatrices, copyMatrix, atoms);
         }
 
         if (computeStruct || !hasStruct) {
