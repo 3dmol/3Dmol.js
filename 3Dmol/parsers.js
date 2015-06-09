@@ -898,7 +898,6 @@ $3Dmol.Parsers = (function() {
 
     //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
     var processSymmetries = function(format, copyMatrices, copyMatrix, atoms) {
-    
         var end = atoms.length;
         var offset = end;
         var t, l, n;
@@ -963,7 +962,6 @@ $3Dmol.Parsers = (function() {
                 }
             }
         }
-        // ELSE give all atoms a pointer to their symmetries
         else {
             for (t = 0; t < atoms.length; t++) {
                 var symmetries = [];
