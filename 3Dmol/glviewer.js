@@ -419,7 +419,7 @@ $3Dmol.GLViewer = (function() {
          * // Create GLViewer within 'gldiv'
          * var myviewer = $3Dmol.createViewer(element);
          * // Move the canvas to the other div
-         * myviewer.updateContainer(element2)
+         * myviewer.setContainer(element2)
          *
          * @example
          * // Assume there exists an HTML div with id "gldiv"
@@ -430,9 +430,9 @@ $3Dmol.GLViewer = (function() {
          * element.remove()
          * $('body').prepend("<div id='newdiv'></div>")
          * // Show the canvas in the new element
-         * myviewer.updateContainer('newdiv')
+         * myviewer.setContainer('newdiv')
          */
-        this.updateContainer = function(element) {
+        this.setContainer = function(element) {
             if($.type(element) === "string")
                 element = $("#"+element);
             if(!element) {
