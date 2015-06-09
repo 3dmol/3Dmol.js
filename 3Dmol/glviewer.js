@@ -282,12 +282,8 @@ $3Dmol.GLViewer = (function() {
             HEIGHT = container.height();
             ASPECT = WIDTH / HEIGHT;
             renderer.setSize(WIDTH, HEIGHT);
-            console.log('renderer', renderer);
-            console.log('container', container, container.children());
             container.append(renderer.domElement);
-            console.log('post-append container', container, container.children());
             glDOM = $(renderer.domElement);
-            console.log('glDOM', glDOM);
 
             if (!nomouse) {
                 // user can request that the mouse handlers not be installed
