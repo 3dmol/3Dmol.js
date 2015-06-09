@@ -55,6 +55,7 @@ $3Dmol.GLViewer = (function() {
 
         var renderer = new $3Dmol.Renderer({
             antialias : true,
+            preserveDrawingBuffer: true, //so we can export images
             premultipliedAlpha : false /* more traditional compositing with background */
         });
 
@@ -64,8 +65,7 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.position = "absolute"; //TODO: get rid of this
         renderer.domElement.style.top = "0px";
         renderer.domElement.style.zIndex = "0";
-        container.append(renderer.domElement);
-        renderer.setSize(WIDTH, HEIGHT);
+
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
         camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
         var lookingAt = new $3Dmol.Vector3();
@@ -159,8 +159,9 @@ $3Dmol.GLViewer = (function() {
         scene.fog.color = $3Dmol.CC.color(bgColor);
 
         var clickedAtom = null;
+        var glDOM = null;
+
         // enable mouse support
-        var glDOM = $(renderer.domElement);
 
         //regenerate the list of clickables
         var updateClickables = function() {
@@ -253,141 +254,192 @@ $3Dmol.GLViewer = (function() {
             t.applyQuaternion(q);
             return t;
         }
-        
-        if (!nomouse) {
-            // user can request that the mouse handlers not be installed
-            glDOM.bind('mousedown touchstart', function(ev) {
-                ev.preventDefault();
-                if (!scene)
-                    return;
+
+        // this event is bound to the body element, not the container,
+        // so no need to put it inside initContainer()
+        $('body').bind('mouseup touchend', function(ev) {
+            // handle selection
+            if(isDragging && scene) { //saw mousedown, haven't moved
                 var xy = getXY(ev);
                 var x = xy[0];
                 var y = xy[1];
-                
-                if (x === undefined)
-                    return;
-                isDragging = true;
-                clickedAtom = null;
-                mouseButton = ev.which;
-                mouseStartX = x;
-                mouseStartY = y;
-                touchDistanceStart = 0;
-                if (ev.originalEvent.targetTouches
-                        && ev.originalEvent.targetTouches.length == 2) {
-                    touchDistanceStart = calcTouchDistance(ev);
+                if(x == mouseStartX && y == mouseStartY) {
+                    var offset = $(container).offset();
+                    var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
+                    var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
+
+                    handleClickSelection(mouseX, mouseY, ev, container);
                 }
-                cq = rotationGroup.quaternion;
-                cz = rotationGroup.position.z;
-                currentModelPos = modelGroup.position.clone();
-                cslabNear = slabNear;
-                cslabFar = slabFar;
+            }
+            
+            isDragging = false;
 
-            });
+        });
+        
+        var initContainer = function(element) {
+            container = element;
+            WIDTH = container.width();
+            HEIGHT = container.height();
+            ASPECT = WIDTH / HEIGHT;
+            renderer.setSize(WIDTH, HEIGHT);
+            container.append(renderer.domElement);
+            glDOM = $(renderer.domElement);
 
-            glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
-                ev.preventDefault();
-                if (!scene)
-                    return;
-                var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-                if (ev.originalEvent.detail) { // Webkit
-                    rotationGroup.position.z += scaleFactor
-                            * ev.originalEvent.detail / 10;
-                } else if (ev.originalEvent.wheelDelta) { // Firefox
-                    rotationGroup.position.z -= scaleFactor
-                            * ev.originalEvent.wheelDelta / 400;
-                }
-                if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
-
-                show();
-            });
-
-            glDOM.bind("contextmenu", function(ev) {
-                ev.preventDefault();
-            });
-            $('body').bind('mouseup touchend', function(ev) {
-                // handle selection
-                if(isDragging && scene) { //saw mousedown, haven't moved
+            if (!nomouse) {
+                // user can request that the mouse handlers not be installed
+                glDOM.bind('mousedown touchstart', function(ev) {
+                    ev.preventDefault();
+                    if (!scene)
+                        return;
                     var xy = getXY(ev);
                     var x = xy[0];
                     var y = xy[1];
-                    if(x == mouseStartX && y == mouseStartY) {
-                        var offset = $(container).offset();
-                        var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
-                        var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
-
-                        handleClickSelection(mouseX, mouseY, ev, container);
-                    }
-                }
-                
-                isDragging = false;
-
-            });
-
-            glDOM.bind('mousemove touchmove', function(ev) { // touchmove
-                ev.preventDefault();
-                if (!scene)
-                    return;
-                if (!isDragging)
-                    return;
-                var mode = 0;
-
-                var xy = getXY(ev);
-                var x = xy[0];
-                var y = xy[1];
-                if (x === undefined)
-                    return;
-                var dx = (x - mouseStartX) / WIDTH;
-                var dy = (y - mouseStartY) / HEIGHT;
-                // check for pinch
-                if (touchDistanceStart != 0
-                        && ev.originalEvent.targetTouches
-                        && ev.originalEvent.targetTouches.length == 2) {
-                    var newdist = calcTouchDistance(ev);
-                    // change to zoom
-                    mode = 2;
-                    dy = (touchDistanceStart - newdist) * 2
-                            / (WIDTH + HEIGHT);
-                } else if (ev.originalEvent.targetTouches
-                        && ev.originalEvent.targetTouches.length == 3) {
-                    // translate
-                    mode = 1;
-                }
-
-                var r = Math.sqrt(dx * dx + dy * dy);
-                var scaleFactor;
-                if (mode == 3
-                        || (mouseButton == 3 && ev.ctrlKey)) { // Slab
-                    slabNear = cslabNear + dx * 100;
-                    slabFar = cslabFar + dy * 100;
-                } else if (mode == 2 || mouseButton == 3
-                        || ev.shiftKey) { // Zoom
-                    scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-                    if (scaleFactor < 80)
-                        scaleFactor = 80;
-                    rotationGroup.position.z = cz - dy
-                            * scaleFactor;
-                    if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
-                } else if (mode == 1 || mouseButton == 2
-                        || ev.ctrlKey) { // Translate
-                    var t = screenXY2model(x-mouseStartX, y-mouseStartY);
-                    modelGroup.position.addVectors(currentModelPos,t);
                     
-                } else if ((mode === 0 || mouseButton == 1)
-                        && r !== 0) { // Rotate
-                    var rs = Math.sin(r * Math.PI) / r;
-                    dq.x = Math.cos(r * Math.PI);
-                    dq.y = 0;
-                    dq.z = rs * dx;
-                    dq.w = -rs * dy;
-                    rotationGroup.quaternion = new $3Dmol.Quaternion(
-                            1, 0, 0, 0);
-                    rotationGroup.quaternion.multiply(dq);
-                    rotationGroup.quaternion.multiply(cq);
-                }
-                show();
-            });
-        }
+                    if (x === undefined)
+                        return;
+                    isDragging = true;
+                    clickedAtom = null;
+                    mouseButton = ev.which;
+                    mouseStartX = x;
+                    mouseStartY = y;
+                    touchDistanceStart = 0;
+                    if (ev.originalEvent.targetTouches
+                            && ev.originalEvent.targetTouches.length == 2) {
+                        touchDistanceStart = calcTouchDistance(ev);
+                    }
+                    cq = rotationGroup.quaternion;
+                    cz = rotationGroup.position.z;
+                    currentModelPos = modelGroup.position.clone();
+                    cslabNear = slabNear;
+                    cslabFar = slabFar;
+
+                });
+
+                glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
+                    ev.preventDefault();
+                    if (!scene)
+                        return;
+                    var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+                    if (ev.originalEvent.detail) { // Webkit
+                        rotationGroup.position.z += scaleFactor
+                                * ev.originalEvent.detail / 10;
+                    } else if (ev.originalEvent.wheelDelta) { // Firefox
+                        rotationGroup.position.z -= scaleFactor
+                                * ev.originalEvent.wheelDelta / 400;
+                    }
+                    if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+
+                    show();
+                });
+
+                glDOM.bind("contextmenu", function(ev) {
+                    ev.preventDefault();
+                });
+
+                glDOM.bind('mousemove touchmove', function(ev) { // touchmove
+                    ev.preventDefault();
+                    if (!scene)
+                        return;
+                    if (!isDragging)
+                        return;
+                    var mode = 0;
+
+                    var xy = getXY(ev);
+                    var x = xy[0];
+                    var y = xy[1];
+                    if (x === undefined)
+                        return;
+                    var dx = (x - mouseStartX) / WIDTH;
+                    var dy = (y - mouseStartY) / HEIGHT;
+                    // check for pinch
+                    if (touchDistanceStart != 0
+                            && ev.originalEvent.targetTouches
+                            && ev.originalEvent.targetTouches.length == 2) {
+                        var newdist = calcTouchDistance(ev);
+                        // change to zoom
+                        mode = 2;
+                        dy = (touchDistanceStart - newdist) * 2
+                                / (WIDTH + HEIGHT);
+                    } else if (ev.originalEvent.targetTouches
+                            && ev.originalEvent.targetTouches.length == 3) {
+                        // translate
+                        mode = 1;
+                    }
+
+                    var r = Math.sqrt(dx * dx + dy * dy);
+                    var scaleFactor;
+                    if (mode == 3
+                            || (mouseButton == 3 && ev.ctrlKey)) { // Slab
+                        slabNear = cslabNear + dx * 100;
+                        slabFar = cslabFar + dy * 100;
+                    } else if (mode == 2 || mouseButton == 3
+                            || ev.shiftKey) { // Zoom
+                        scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+                        if (scaleFactor < 80)
+                            scaleFactor = 80;
+                        rotationGroup.position.z = cz - dy
+                                * scaleFactor;
+                        if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+                    } else if (mode == 1 || mouseButton == 2
+                            || ev.ctrlKey) { // Translate
+                        var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+                        modelGroup.position.addVectors(currentModelPos,t);
+                        
+                    } else if ((mode === 0 || mouseButton == 1)
+                            && r !== 0) { // Rotate
+                        var rs = Math.sin(r * Math.PI) / r;
+                        dq.x = Math.cos(r * Math.PI);
+                        dq.y = 0;
+                        dq.z = rs * dx;
+                        dq.w = -rs * dy;
+                        rotationGroup.quaternion = new $3Dmol.Quaternion(
+                                1, 0, 0, 0);
+                        rotationGroup.quaternion.multiply(dq);
+                        rotationGroup.quaternion.multiply(cq);
+                    }
+                    show();
+                });
+            }
+        };
+        initContainer(container);
+
         // public methods
+        /**
+         * Change the viewer's container element 
+         * Also useful if the original container element was removed from the DOM.
+         * 
+         * @function $3Dmol.GLViewer#resetContainer
+         *
+         * @param {Object | string} element
+         *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
+
+         * @example
+         * // Assume there exist HTML divs with ids "gldiv", "gldiv2"
+         * var element = $("#gldiv"), element2 = $("#gldiv2");
+         * // Create GLViewer within 'gldiv'
+         * var myviewer = $3Dmol.createViewer(element);
+         * // Move the canvas to the other div
+         * myviewer.setContainer(element2)
+         *
+         * @example
+         * // Assume there exists an HTML div with id "gldiv"
+         * var element = $("#gldiv");
+         * // Create GLViewer within 'gldiv'
+         * var myviewer = $3Dmol.createViewer(element);
+         * // Remove the element from the DOM, and add a new element
+         * element.remove()
+         * $('body').prepend("<div id='newdiv'></div>")
+         * // Show the canvas in the new element
+         * myviewer.setContainer('newdiv')
+         */
+        this.setContainer = function(element) {
+            if($.type(element) === "string")
+                element = $("#"+element);
+            if(!element) {
+                element = container
+            };
+            initContainer(element);
+        };
         /**
          * Set the background color (default white)
          * 
@@ -1108,22 +1160,44 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Construct isosurface from volumetric data in gaussian cube format
-         * 
+         * @deprecated
          * @function $3Dmol.GLViewer#addVolumetricData
          * @param {String} data - Input file contents 
          * @param {String} format - Input file format (currently only supports "cube")
-         * @param {VolSpec} spec - Shape style specification
+         * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
          * 
          * @example
-         * viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", alpha: 0.95});              
-         * viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", alpha: 0.95}); 
+         * viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", opacity: 0.95});              
+         * viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addVolumetricData(data, format, spec);
+            shapes.push(s);
+
+            return s;
+        };
+        
+        /**
+         * Construct isosurface from volumetric data
+         * @function $3Dmol.GLViewer#addIsosurface
+         * @param {$3Dmol.VolumeData} data - volumetric data
+         * @param {IsoSurfaceSpec} spec - Shape style specification
+         * @return {$3Dmol.GLShape}
+         * 
+         * @example
+         * var data = new $3Dmol.VolumeData(str,"cube");
+         * viewer.addIsosurface(data, {isoval: 0.01, color: "blue", opacity: 0.95});              
+         * viewer.addIsosurface(data, {isoval: -0.01, color: "red", opacity: 0.95}); 
+         */
+        this.addIsosurface = function(data,  spec) {
+            spec = spec || {};
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addIsosurface(data, spec);
             shapes.push(s);
 
             return s;
@@ -1384,28 +1458,10 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.Mesh}
          */
         var generateSurfaceMesh = function(atoms, VandF, mat) {
-
             var geo = new $3Dmol.Geometry(true);
             // Only one group per call to generate surface mesh (addSurface
             // should split up mesh render)
             var geoGroup = geo.updateGeoGroup(0);
-
-            var vertexArray = geoGroup.vertexArray;
-            // reconstruct vertices and faces
-            var v = VandF['vertices'];
-            var offset;
-            var i, il;
-            for (i = 0, il = v.length; i < il; i++) {
-                offset = geoGroup.vertices * 3;
-                vertexArray[offset] = v[i].x;
-                vertexArray[offset + 1] = v[i].y;
-                vertexArray[offset + 2] = v[i].z;
-                geoGroup.vertices++;
-            }
-
-            var faces = VandF['faces'];
-            geoGroup.faceidx = faces.length;// *3;
-            geo.initTypedArrays();
 
             // set colors for vertices
             var colors = [];
@@ -1418,9 +1474,54 @@ $3Dmol.GLViewer = (function() {
                         colors[i] = $3Dmol.CC.color(atom.color);
                 }
             }
+            
+            var vertexArray = geoGroup.vertexArray;
+
+            // reconstruct vertices and faces
+            var v = VandF['vertices'];
+            var offset;
+            var i, il;
+            for (i = 0, il = v.length; i < il; i++) {
+                offset = geoGroup.vertices * 3;
+                vertexArray[offset] = v[i].x;
+                vertexArray[offset + 1] = v[i].y;
+                vertexArray[offset + 2] = v[i].z;
+                geoGroup.vertices++;                
+            }
+
+            //set colorArray of there are per-atom colors
+            var colorArray = geoGroup.colorArray;
+            
+            if(mat.voldata && mat.volscheme) {
+                //convert volumetric data into colors
+                var scheme = mat.volscheme;
+                var voldata = mat.voldata;
+                var range = scheme.range() || [-1,1];
+                for (i = 0, il = v.length; i < il; i++) {
+                    var val = voldata.getVal(v[i].x,v[i].y,v[i].z);
+                    var col =  $3Dmol.CC.color(scheme.valueToHex(val, range));
+                    var offset = i * 3;
+                    colorArray[offset] = col.r;
+                    colorArray[offset + 1] = col.g;
+                    colorArray[offset + 2] = col.b;
+                }
+            }
+            else if(colors.length > 0) { //have atom colors
+                for (i = 0, il = v.length; i < il; i++) {
+                    var A = v[i].atomid;
+                    var offsetA = i * 3;
+
+                    colorArray[offsetA] = colors[A].r;
+                    colorArray[offsetA + 1] = colors[A].g;
+                    colorArray[offsetA + 2] = colors[A].b;
+                }
+            }
+            
+            var faces = VandF['faces'];
+            geoGroup.faceidx = faces.length;// *3;
+            geo.initTypedArrays();
 
             var verts = geoGroup.vertexArray;
-            var colorArray = geoGroup.colorArray;
             var normalArray = geoGroup.normalArray;
             var vA, vB, vC, norm;
 
@@ -1435,18 +1536,8 @@ $3Dmol.GLViewer = (function() {
 
                 var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
-                colorArray[offsetA] = colors[A].r;
-                colorArray[offsetA + 1] = colors[A].g;
-                colorArray[offsetA + 2] = colors[A].b;
-                colorArray[offsetB] = colors[B].r;
-                colorArray[offsetB + 1] = colors[B].g;
-                colorArray[offsetB + 2] = colors[B].b;
-                colorArray[offsetC] = colors[C].r;
-                colorArray[offsetC + 1] = colors[C].g;
-                colorArray[offsetC + 2] = colors[C].b;
-
                 // setup Normals
-
+                // todo - calculate normals in parallel code
                 vA = new $3Dmol.Vector3(verts[offsetA], verts[offsetA + 1],
                         verts[offsetA + 2]);
                 vB = new $3Dmol.Vector3(verts[offsetB], verts[offsetB + 1],
@@ -1475,8 +1566,7 @@ $3Dmol.GLViewer = (function() {
             }
             geoGroup.faceArray = new Uint16Array(faces);
             var mesh = new $3Dmol.Mesh(geo, mat);
-            mesh.doubleSided = true;
-            
+            mesh.doubleSided = true;        
             return mesh;
         };
 
@@ -1519,8 +1609,7 @@ $3Dmol.GLViewer = (function() {
             }
 
             var time4 = new Date();
-            console.log("buildboundaryetc " + (time4 - time3) + "  "
-                    + (time4 - time) + "ms");
+            //console.log("buildboundaryetc " + (time4 - time3) + "  " + (time4 - time) + "ms");
 
             ps.marchingcube(type);
 
@@ -1914,7 +2003,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#removeAllSurfaces */
         this.removeAllSurfaces = function() {
             for (var n = 0; n < surfaces.length; n++) {
-                surfArr = surfaces[n];
+                var surfArr = surfaces[n];
                 for(var i = 0; i < surfArr.length; i++) {
                     if (surfArr[i] && surfArr[i].lastGL) {
                         if (surfArr[i].geo !== undefined)

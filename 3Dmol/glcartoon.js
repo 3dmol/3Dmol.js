@@ -386,8 +386,8 @@ $3Dmol.drawCartoon = (function() {
 
                         //  proteins    na backbone  na terminus                  nucleobases
         var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
-        var purResns = [" DA", " DG", "  A", "  G"];
-        var pyrResns = [" DT", " DC", "  U", "  C"];
+        var purResns = ["DA", "DG", "A", "G"];
+        var pyrResns = ["DT", "DC", "U", "C"];
 
         var cartoon, curr, next, currColor, nextColor, thickness, i;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
