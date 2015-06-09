@@ -29,10 +29,9 @@ var $3Dmol = $3Dmol || {};
  */
 $3Dmol.drawCartoon = (function() {
 
-    var axisDIV = 5; // 3 still gives acceptable quality
-    var strandDIV = 6;
-    var nucleicAcidStrandDIV = 4;
-    var tubeDIV = 8;
+    var defaultNum = 5; // for cross-sectional shape
+    var defaultDiv = 5; // for length-wise splicing
+
     var coilWidth = 0.3;
     var helixSheetWidth = 1.3;
     var nucleicAcidWidth = 0.8;
@@ -146,7 +145,7 @@ $3Dmol.drawCartoon = (function() {
         group.add(mesh);
     };
 
-    //var drawOvalStrip
+    //  drawShapeStrip()
     var drawStrip = function(group, points, colors, div, thickness) {
 
 		// points[num of width points/cross-section resolution][len of strip in atoms]
@@ -165,12 +164,12 @@ $3Dmol.drawCartoon = (function() {
 
         var geo = new $3Dmol.Geometry(true);
         //var vs = geo.vertices, fs = geo.faces; // geo is always empty
-        var vs = [], fs = [], cs_shape = [];
-        var axis, cs_bottom, cs_top;
-        for (j=0; j < num; j++) { // this is where shape control should be implemented
-            cs_shape.push(Math.sqrt( (num-1)*j - Math.pow(j, 2) )/(num-1)); // ellipse
-            //cs_shape[j] = 1 // hexagon
-        }  
+        var vs = [], fs = [], cs_ellipse = [], cs_rect = [];
+        var axis, cs_shape, cs_bottom, cs_top;
+        for (j=0; j < num; j++) {
+            cs_ellipse.push(1.5 * Math.sqrt((num-1)*j - Math.pow(j, 2))/(num-1));
+            cs_rect.push(0.5);
+        }
 
 		var faces = [];
 		for (j = 0; j < num*2-1; j++) {
@@ -191,6 +190,17 @@ $3Dmol.drawCartoon = (function() {
             cs_bottom = [];
             cs_top = [];
             axis = [];
+
+            if (points[0][i].atom !== undefined)
+            {
+                currentAtom = points[0][i].atom;
+                if (currentAtom.style.cartoon.shape === "oval")
+                    cs_shape = cs_ellipse;
+                else if (currentAtom.style.cartoon.shape === "rect")
+                    cs_shape = cs_rect;
+            }
+            if (!cs_shape) cs_shape = cs_rect;
+
             
 
             var toNext, toSide;
@@ -214,9 +224,6 @@ $3Dmol.drawCartoon = (function() {
                 cs_top[j] = points[j][i].clone().add(axis[j]);
                 vs.push(cs_top[j]);
             }
-            
-            if (points[0][i].atom !== undefined)
-                currentAtom = points[0][i].atom;
             
             geoGroup = geo.updateGeoGroup(2*num);
             var vertexArray = geoGroup.vertexArray;
@@ -325,7 +332,7 @@ $3Dmol.drawCartoon = (function() {
         group.add(mesh);     
     };
 
-    var drawRectStrip = function(group, p1, p2, colors, div, thickness) {
+    var drawRectStrip = function(group, points, colors, div, thickness) {
         if ((points.length) < 2)
             return;
 
@@ -563,10 +570,10 @@ $3Dmol.drawCartoon = (function() {
         group.add(line);
     };
 
-    var drawStrand = function(group, atomList, num, div, fill, coilWidth, helixSheetWidth, doNotSmoothen, gradientScheme, geo)
+    var drawStrand = function(group, atomList, geo, gradientScheme, fill, doNotSmoothen, num, div)
     {
-        num = num || strandDIV;
-        div = div || axisDIV;
+        var num = num || defaultNum;
+        var div = div || defaultDiv;
         doNotSmoothen = !!(doNotSmoothen);
 
                         //  proteins    na backbone  na terminus                  nucleobases
@@ -788,14 +795,18 @@ $3Dmol.drawCartoon = (function() {
         orientPt.normalize();
 
         // depending on secondary structure, multiply the orientation vector by some scalar
-        if (backboneAtom.ss === "c")
+        if (!backboneAtom.style.cartoon.width)
         {
-            if (backboneAtom.atom === "P")
-                widthScalar = nucleicAcidWidth;
-            else
-                widthScalar = coilWidth;
-        } else
-            widthScalar = helixSheetWidth;
+            if (backboneAtom.ss === "c")
+            {
+                if (backboneAtom.atom === "P")
+                    widthScalar = nucleicAcidWidth;
+                else
+                    widthScalar = coilWidth;
+            } else
+                widthScalar = helixSheetWidth;
+        }
+        else widthScalar = backboneAtom.style.cartoon.width;
         orientPt.multiplyScalar(widthScalar);
 
         // if the angle between the previous orientation vector and current is greater than 90 degrees,
@@ -823,9 +834,9 @@ $3Dmol.drawCartoon = (function() {
 
     // actual function call
     var drawCartoon = function(group, atomlist, geo, gradientscheme) {
-        
-        drawStrand(group, atomlist, 7, undefined, true, coilWidth, helixSheetWidth,
-                false, gradientscheme, geo);
+       
+                                                       //fill  doNotSmoothen
+        drawStrand(group, atomlist, geo, gradientscheme, true, false);
     };
 
     return drawCartoon;
