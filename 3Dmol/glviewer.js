@@ -276,14 +276,18 @@ $3Dmol.GLViewer = (function() {
 
         });
         
-        var initContainer = function() {
-
+        var initContainer = function(element) {
+            container = element;
             WIDTH = container.width();
             HEIGHT = container.height();
             ASPECT = WIDTH / HEIGHT;
             renderer.setSize(WIDTH, HEIGHT);
+            console.log('renderer', renderer);
+            console.log('container', container, container.children());
             container.append(renderer.domElement);
+            console.log('post-append container', container, container.children());
             glDOM = $(renderer.domElement);
+            console.log('glDOM', glDOM);
 
             if (!nomouse) {
                 // user can request that the mouse handlers not be installed
@@ -401,27 +405,44 @@ $3Dmol.GLViewer = (function() {
                 });
             }
         };
-        initContainer();
+        initContainer(container);
 
         // public methods
         /**
-         * Reconnect the container element if it was removed from, and then readded to, the DOM.
+         * Change the viewer's container element 
+         * Also useful if the original container element was removed from the DOM.
          * 
          * @function $3Dmol.GLViewer#resetContainer
-         * 
+         *
+         * @param {Object | string} element
+         *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
+
+         * @example
+         * // Assume there exist HTML divs with ids "gldiv", "gldiv2"
+         * var element = $("#gldiv"), element2 = $("#gldiv2");
+         * // Create GLViewer within 'gldiv'
+         * var myviewer = $3Dmol.createViewer(element);
+         * // Move the canvas to the other div
+         * myviewer.updateContainer(element2)
+         *
          * @example
          * // Assume there exists an HTML div with id "gldiv"
          * var element = $("#gldiv");
          * // Create GLViewer within 'gldiv'
          * var myviewer = $3Dmol.createViewer(element);
-         * // Remove the element from the DOM, and re-append it
+         * // Remove the element from the DOM, and add a new element
          * element.remove()
-         * $('body').prepend(element)
-         * // Reconnect the container
-         * myviewer.resetContainer(element)
+         * $('body').prepend("<div id='newdiv'></div>")
+         * // Show the canvas in the new element
+         * myviewer.updateContainer('newdiv')
          */
-        this.resetContainer = function() {
-            initContainer();
+        this.updateContainer = function(element) {
+            if($.type(element) === "string")
+                element = $("#"+element);
+            if(!element) {
+                element = container
+            };
+            initContainer(element);
         };
         /**
          * Set the background color (default white)
