@@ -120,7 +120,7 @@ $3Dmol.GLModel = (function() {
         idMatrix.identity();
         var noAssembly;
         var dontDuplicateAtoms;
-        
+        var idList = [];
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
@@ -360,13 +360,6 @@ $3Dmol.GLModel = (function() {
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                     atom.intersectionShape.line.push(p1);
                     atom.intersectionShape.line.push(p2);
-                }
-
-                if (atom2.clickable){
-                    if (atom2.intersectionShape === undefined)
-                        atom2.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
-                    atom2.intersectionShape.line.push(p2);
-                    atom2.intersectionShape.line.push(p1);
                 }
 
                 var c1 = $3Dmol.getColorFromStyle(atom, atom.style.line);
@@ -737,17 +730,12 @@ $3Dmol.GLModel = (function() {
                                     cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
-                                    
-                                    var sphere1 = new $3Dmol.Sphere(p1 , bondR);
-                                    atom.intersectionShape.sphere.push(sphere1);                             
                                 }
                                 if (atom2.clickable) {
                                     cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
                                     cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
-                                    atom2.intersectionShape.cylinder.push(cylinder2b);          
-                                    var sphere2 = new $3Dmol.Sphere(p2, bondR);
-                                    atom2.intersectionShape.sphere.push(sphere1);  
+                                    atom2.intersectionShape.cylinder.push(cylinder2b);                               
                                 }
                             }
                         } 
@@ -801,8 +789,6 @@ $3Dmol.GLModel = (function() {
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                     atom.intersectionShape.cylinder.push(cylinder1c);
-                                    var sphere1 = new $3Dmol.Sphere(p1 , bondR);
-                                    atom.intersectionShape.sphere.push(sphere1);  
                                 } 
                                 if (atom2.clickable) {                               
                                     cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
@@ -810,9 +796,7 @@ $3Dmol.GLModel = (function() {
                                     cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);
-                                    atom2.intersectionShape.cylinder.push(cylinder2c);      
-                                    var sphere1 = new $3Dmol.Sphere(p2 , bondR);
-                                    atom2.intersectionShape.sphere.push(sphere1);  
+                                    atom2.intersectionShape.cylinder.push(cylinder2c);                                
                                 }
                             }
                         }
@@ -1025,20 +1009,19 @@ $3Dmol.GLModel = (function() {
             
             //for BIOMT assembly
             if (dontDuplicateAtoms && !noAssembly) {
-                var symRet = new $3Dmol.Object3D();
+                var finalRet = new $3Dmol.Object3D();
                 var t;
                 for (t = 0; t < copyMatrices.length; t++) {
                     var transformedRet = new $3Dmol.Object3D();
                     transformedRet = ret.clone();
                     transformedRet.matrix.copy(copyMatrices[t]);
                     transformedRet.matrixAutoUpdate = false;
-                    symRet.add(transformedRet);
+                    finalRet.add(transformedRet);
                 }
-                ret = symRet;
+                return finalRet;
             }
-            
+
             return ret;
-            
         };
         
         /**
@@ -1050,11 +1033,11 @@ $3Dmol.GLModel = (function() {
          *
          */
         this.getSymmetries = function() {
-            if (copyMatrices.length > 0) {
-                return copyMatrices;
+            if (copyMatrices.length > 1) {
+                return copyMatrices; //returns copyMatrices, which has ID matrix as 1st entry
             }
             else {
-                var idList = [idMatrix];
+                    
                 return idList;
             }
         };
@@ -1068,7 +1051,7 @@ $3Dmol.GLModel = (function() {
          */
         this.setSymmetries = function(list) {
             if (typeof(list) == "undefined") { //delete sym data
-                var idList = [idMatrix];
+                idList = [idMatrix];
                 copyMatrices = idList;
             }
             else {
@@ -1447,13 +1430,6 @@ $3Dmol.GLModel = (function() {
 
             for ( var i = 0; i < selected.length; i++) {                
                 changedAtoms = true;
-                //even though clickable and callback are atom properties, let them
-                //be set through styles
-                if(typeof(mystyle.clickable) != 'undefined') 
-                    selected[i].clickable = mystyle.clickable;
-                if(typeof(mystyle.callback) != 'undefined') 
-                    selected[i].callback = mystyle.callback;
-                
                 if (selected[i].clickable) 
                     selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
