@@ -30,9 +30,9 @@ var $3Dmol = $3Dmol || {};
 $3Dmol.drawCartoon = (function() {
 
     var defaultNum = 5; // for cross-sectional shape
-    var defaultDiv = 7; // for length-wise splicing
+    var defaultDiv = 5; // for length-wise splicing
 
-    var coilWidth = 0.3;
+    var coilWidth = 0.5;
     var helixSheetWidth = 1.3;
     var nucleicAcidWidth = 0.8;
     var defaultThickness = 0.4; 
@@ -697,8 +697,8 @@ $3Dmol.drawCartoon = (function() {
                         {
                             // start the cylinder at the midpoint between consecutive backbone atoms
                             baseStartPt = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
-                            //var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.04);
-                            //baseStartPt.add(startFix);
+                            var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.02);
+                            baseStartPt.add(startFix);
                             $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
                             baseStartPt = null;
                             baseEndPt = null;   
