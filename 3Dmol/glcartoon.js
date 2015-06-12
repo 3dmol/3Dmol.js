@@ -30,7 +30,7 @@ var $3Dmol = $3Dmol || {};
 $3Dmol.drawCartoon = (function() {
 
     var defaultNum = 5; // for cross-sectional shape
-    var defaultDiv = 5; // for length-wise splicing
+    var defaultDiv = 7; // for length-wise splicing
 
     var coilWidth = 0.3;
     var helixSheetWidth = 1.3;
@@ -148,10 +148,10 @@ $3Dmol.drawCartoon = (function() {
     //  drawShapeStrip()
     var drawStrip = function(group, points, colors, div, thickness) {
 
-		// points[num of width points/cross-section resolution][len of strip in atoms]
+		// points[num = cross-sectional resolution][len = length of strip]
         var i, j, num, len;
         num = points.length;
-		if (num < 3 || points[0].length < 2) return;
+		if (num < 2 || points[0].length < 2) return;
 
         div = div || axisDIV;
         for (i = 0; i < num; i++) {
@@ -164,17 +164,20 @@ $3Dmol.drawCartoon = (function() {
 
         var geo = new $3Dmol.Geometry(true);
         //var vs = geo.vertices, fs = geo.faces; // geo is always empty
-        var vs = [], fs = [], cs_ellipse = [], cs_rect = [];
+        var vs = [], fs = [], cs_ellipse = [], cs_rectangle = [], cs_parabola = [];
         var axis, cs_shape, cs_bottom, cs_top;
         for (j=0; j < num; j++) {
-            cs_ellipse.push(1.5 * Math.sqrt((num-1)*j - Math.pow(j, 2))/(num-1));
-            cs_rect.push(0.5);
+            cs_ellipse.push(0.25 + 1.5 * Math.sqrt((num-1)*j - Math.pow(j, 2))/(num-1));
+            cs_rectangle.push(0.5);
+            cs_parabola.push(3*(Math.pow(j/num, 2) - j/num) + 1);
         }
 
 		var faces = [];
 		for (j = 0; j < num*2-1; j++) {
 			faces[j] = [j, j+1, j+1-2*num, j-2*num];
 		}
+        // last face is different
+        faces[num*2-1] = [j, j+1-2*num, j+1-4*num, j-2*num];
 
                 
         var offset, vertoffset, faceoffset;
@@ -191,20 +194,22 @@ $3Dmol.drawCartoon = (function() {
             cs_top = [];
             axis = [];
 
-            if (points[0][i].atom !== undefined)
+            if (points[0][i].atom !== undefined) // TODO better error handling
             {
                 currentAtom = points[0][i].atom;
                 if (currentAtom.style.cartoon.shape === "oval")
                     cs_shape = cs_ellipse;
-                else if (currentAtom.style.cartoon.shape === "rect")
-                    cs_shape = cs_rect;
+                else if (currentAtom.style.cartoon.shape === "rectangle")
+                    cs_shape = cs_rectangle;
+                else if (currentAtom.style.cartoon.shape === "parabola")
+                    cs_shape = cs_parabola;
             }
-            if (!cs_shape) cs_shape = cs_rect;
+            if (!cs_shape) cs_shape = cs_rectangle;
 
             
 
             var toNext, toSide;
-            for (j = 0; j < num; j++) // determine height of ellipse at this width offset
+            for (j = 0; j < num; j++) // determine thickness at each width point, from cross-sectional shape
             {
                 if (i < len-1) toNext = points[j][i+1].clone().sub(points[j][i]);
                 else toNext = points[j][i-1].clone().sub(points[j][i]).negate();
@@ -233,14 +238,14 @@ $3Dmol.drawCartoon = (function() {
 
 			for (j = 0; j < num; j++) { // bottom edge of cross-section, points 0 -> num-1
 				vertexArray[vertoffset+3*j+0] = cs_bottom[j].x;
-				vertexArray[vertoffset+3*j+1] = cs_bottom[j].y; 
-				vertexArray[vertoffset+3*j+2] = cs_bottom[j].z; 
+				vertexArray[vertoffset+3*j+1] = cs_bottom[j].y;
+				vertexArray[vertoffset+3*j+2] = cs_bottom[j].z;
 			}
 
 			for (j = 0; j < num; j++) { // top edge of cross-section, points num -> 2*num-1
 				vertexArray[vertoffset+3*j+0+3*num] = cs_top[num-1-j].x;
-				vertexArray[vertoffset+3*j+1+3*num] = cs_top[num-1-j].y; 
-				vertexArray[vertoffset+3*j+2+3*num] = cs_top[num-1-j].z; 
+				vertexArray[vertoffset+3*j+1+3*num] = cs_top[num-1-j].y;
+				vertexArray[vertoffset+3*j+2+3*num] = cs_top[num-1-j].z;
 
 			}
             
@@ -255,7 +260,7 @@ $3Dmol.drawCartoon = (function() {
                 // both points have distinct atoms
                 var diffAtoms = ((lastAtom !== undefined && currentAtom !== undefined) && lastAtom.serial !== currentAtom.serial);
                 
-                for (j = 0; j < num*2-1; j++ ) {
+                for (j = 0; j < num*2; j++ ) {
                 
 					// indices of the 4 points of a rectangular face
                     var face = [offset + faces[j][0], offset + faces[j][1], offset + faces[j][2], offset + faces[j][3]];
@@ -276,6 +281,7 @@ $3Dmol.drawCartoon = (function() {
                     // TODO clickable
                     
                 }
+
             }
             
             geoGroup.vertices += 2*num;
