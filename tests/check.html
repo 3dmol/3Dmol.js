@@ -5,19 +5,20 @@
         <script src="../build/3Dmol.js"></script> 
         <script>
 			var testNum=1;
-			const totalTest=5;
+			const totalTest=7;
             function next(){
+				testNum++;
 				if(testNum>totalTest) testNum-=totalTest;
 				var testCase="check/test"+testNum.toString()+".html";
 				document.getElementById('check').src=testCase;
-				testNum++;
 			}
 			
 			function prev(){
+				testNum--;
 				if(testNum<1) testNum+=totalTest;
 				var testCase="check/test"+testNum.toString()+".html";
 				document.getElementById('check').src=testCase;
-				testNum--;
+	
 			}
         </script>
    
