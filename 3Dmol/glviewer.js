@@ -867,6 +867,7 @@ $3Dmol.GLViewer = (function() {
          * atom.x, y: atom.y, z: atom.z});
          * 
          * labels.push(l); }
+
          *  // Render labels glviewer.render();
          */
         this.addLabel = function(text, data) {

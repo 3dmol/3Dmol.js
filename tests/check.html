@@ -7,10 +7,17 @@
 			var testNum=1;
 			const totalTest=5;
             function next(){
-				if(testNum>totalTest) testNum%=totalTest;
+				if(testNum>totalTest) testNum-=totalTest;
 				var testCase="check/test"+testNum.toString()+".html";
 				document.getElementById('check').src=testCase;
 				testNum++;
+			}
+			
+			function prev(){
+				if(testNum<1) testNum+=totalTest;
+				var testCase="check/test"+testNum.toString()+".html";
+				document.getElementById('check').src=testCase;
+				testNum--;
 			}
         </script>
    
@@ -26,7 +33,10 @@
 			  <iframe id="check" src="about:blank" frameborder=0 height=600px width=100% scrolling=no seamless=seamless></iframe>
 			</tr>
 			<tr>
-			  <div align="center"><button type="button" onclick="next()">next</button></div>
+			  <div align="center">
+				  <button type="button" onclick="prev()">prev</button>
+				  <button type="button" onclick="next()">next</button>
+			  </div>
 			</tr>
 		</table>
    
