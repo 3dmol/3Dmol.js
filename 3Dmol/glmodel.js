@@ -1086,8 +1086,8 @@ $3Dmol.GLModel = (function() {
         /** add atoms to this model from molecular data string
          * 
          * @function $3Dmol.GLModel#addMolData
-         * @param {string} data - atom structure file input data string
-         * @param {string} format - input file string format (e.g 'pdb', 'sdf', etc.)
+         * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
+         * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
          * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
          */
         this.addMolData = function(data, format, options) {
@@ -1095,6 +1095,17 @@ $3Dmol.GLModel = (function() {
             format = format || "";
             if (!data)
                 return; //leave an empty model
+            
+            if(/\.gz$/.test(format)) {
+                //unzip gzipped files
+                format = format.replace(/\.gz$/,'');
+                try {
+                    data = pako.inflate(data, {to: 'string'});
+                } catch(err) {
+                    console.log(err);
+                }
+            }
+            
             if(typeof($3Dmol.Parsers[format]) == "undefined") {
             	//let someone provide a file name and get format from extension
             	format = format.split('.').pop();
