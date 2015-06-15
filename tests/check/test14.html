@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		 <script src="../../build/3Dmol.js"></script> 
+		 <style>
+            table td { text-align: center; }
+            table th {padding-top: 1em;}
+         </style>
+	</head>
+	
+	<body>
+		<script>
+           $(document).ready(function() {
+           //install a right-click handler on every canvas to export png
+           $('canvas').bind('contextmenu',function(e) {
+           var dt = e.currentTarget.toDataURL('image/png');
+           window.location = dt;
+           });
+        });           
+        </script>
+        
+		<table width="100%">
+          <tr>
+            <th colspan=2 height=200px>13 CustomShape Cylinder</td>  
+          </tr>
+          <tr>
+            <td width="50%"><div id="test13" style="width: 400px; height: 400px; position: relative;"></td>
+              <script>
+                (function() {
+                   var viewer = $3Dmol.createViewer($("#test13"));
+                   viewer.setBackgroundColor(0xffffffff);
+                   
+
+                   $.get('../tests/test_structs/benzene-homo.cube', function(data){
+		           var voldata = new $3Dmol.VolumeData(data, "cube");
+                    viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
+                    viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
+                    viewer.setStyle({}, {stick:{}});
+                    viewer.zoomTo();
+                    //viewer.zoom(.75);
+                    viewer.render();
+                }, 'text');
+	                   
+				   viewer.render();
+              })();
+             </script>
+          <td width="50%"><img src="imgs/test9.png"</td>
+          </tr>
+		</table>
+
+	</body>
+</html>

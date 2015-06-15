@@ -21,7 +21,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>9Programmatic Cross</td>  
+            <th colspan=2 height=200px>9Programmatic Cross Label</td>  
           </tr>
           <tr>
             <td width="50%"><div id="test9" style="width: 400px; height: 400px; position: relative;"></td>
@@ -30,6 +30,7 @@
                    var viewer = $3Dmol.createViewer($("#test9"));
                    $3Dmol.download("pdb:2EJ0",viewer,{},function(){
 		           viewer.setBackgroundColor(0xffffffff);
+		           viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
 		           viewer.setStyle({chain:'A'},{cross:{hidden:true}});
 		           viewer.setStyle({chain:'B'},{cross:{hidden:false,
 					                         linewidth:1.0,
