@@ -1216,7 +1216,7 @@ $3Dmol.GLModel = (function() {
             if (sel.hasOwnProperty("expand")) {
 
                 // get atoms in expanded bounding box
-                var expand = expandAtomList(ret, sel.expand)
+                var expand = expandAtomList(ret, parseFloat(sel.expand))
                 var retlen = ret.length
                 for (var i = 0; i < expand.length; i++) {
                     for (var j = 0; j < retlen; j++) {
@@ -1240,7 +1240,7 @@ $3Dmol.GLModel = (function() {
                     for (var j = 0; j < ret.length; j++) {
 
                         var dist = squaredDistance(sel2[i], ret[j]);
-                        var thresh = Math.pow(sel.within.distance, 2);
+                        var thresh = Math.pow(parseFloat(sel.within.distance), 2);
                         if (dist < thresh && dist > 0) {
                             within.push(ret[j]);
                         }
