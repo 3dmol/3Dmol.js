@@ -27,9 +27,6 @@ module.exports = function(grunt) {
             aux : {
                 src : ['Gruntfile.js', '3Dmol/*.js', '!3Dmol/glcartoon.js', '!3Dmol/glmodel.js', '!3Dmol/glviewer.js', '!3Dmol/glshape.js',
                        '!3Dmol/jmolmodel.js', '!3Dmol/jmolviewer.js']    
-            },
-            webgl : {
-                src : ['3Dmol/WebGL/*.js']
             }
             
         },
@@ -40,41 +37,27 @@ module.exports = function(grunt) {
             },
             
             pre : {
-                src : ['3Dmol/3Dmol.js', '3Dmol/marchingcube.js', '3Dmol/ProteinSurface4.js', '3Dmol/**.js', '!3Dmol/WebGL/*.js',
-                       '!3Dmol/MarchingCubeData.js', '!3Dmol/jmolmodel.js', '!3Dmol/jmolviewer.js'],
+                src : ['3Dmol/3dmol.js','3Dmol/WebGL/math.js','3Dmol/WebGL/shapes.js',
+                '3Dmol/WebGL/core.js','3Dmol/WebGL/*.js','3Dmol/**.js'],
                 dest : 'build/3Dmol-pre.js'            
-            },
-            
-            webGL : {
-                src : ['3Dmol/WebGL/math.js', '3Dmol/WebGL/shapes.js', 
-                       '3Dmol/WebGL/core.js', '3Dmol/WebGL/*.js', '3Dmol/properties.js'],
-                dest : 'build/webGL-pre.js'
-            },
-            
-            test : {
-            	src : ['js/jquery-1.9.1.js', '3Dmol/WebGL/math.js', '3Dmol/WebGL/shapes.js', 
-                       '3Dmol/WebGL/core.js', '3Dmol/WebGL/*.js', '3Dmol/properties.js',
-                       '3Dmol/3Dmol.js', '3Dmol/marchingcube.js', '3Dmol/ProteinSurface4.js', '3Dmol/**.js',
-                       '!3Dmol/MarchingCubeData.js', '!3Dmol/jmolmodel.js', '!3Dmol/jmolviewer.js'],
-                dest : 'build/3Dmol-pre.js'
-            },
+            },            
             
             big : {
-                src : ['js/jquery-1.9.1.js','build/webGL-pre.js', 'build/3Dmol-pre.js'],
+                src : ['js/jquery-1.11.3.js','js/pako_inflate.js','build/3Dmol-pre.js'],
                 dest : 'build/3Dmol.js'
             },
             
             bignojquery : {
-                src : ['build/webGL-pre.js', 'build/3Dmol-pre.js'],
+                src : ['js/pako_inflate.js', 'build/3Dmol-pre.js'],
                 dest : 'build/3Dmol-nojquery.js'
             },
             
             closure : {
-                src : ['build/jquery-1.9.1-min-pre.js','build/webGL-min-pre.js', 'build/3Dmol-min-pre.js'],
+                src : ['build/jquery-1.11.3-min-pre.js','build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-min.js'
             },
             closurenojquery: {
-                src : ['build/webGL-min-pre.js', 'build/3Dmol-min-pre.js'],
+                src : ['build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-nojquery-min.js'
             }, 
             append : {
@@ -91,13 +74,9 @@ module.exports = function(grunt) {
                 src : ['build/3Dmol-pre.js'],
                 dest : 'build/3Dmol-min-pre.js'
             },
-            webGL : {
-                src : ['build/webGL-pre.js'],
-                dest : 'build/webGL-min-pre.js'
-            },
             jquery : {
-                src : ['js/jquery-1.9.1.js'],
-                dest : 'build/jquery-1.9.1-min-pre.js'
+                src : ['js/jquery-1.11.3.js'],
+                dest : 'build/jquery-1.11.3-min-pre.js'
             }
         },
         
@@ -115,21 +94,10 @@ module.exports = function(grunt) {
                     'create_source_map': 'script.map'                 
                 }
             },            
-            webgl : {
-                closurePath : 'lib/closure_compiler',
-                js : ['build/webGL-pre.js'],
-                jsOutputFile : 'build/webGL-min-pre.js',
-                noreport : true,
-                options : {
-                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
-                    'warning_level': 'DEFAULT',
-                    'language_in': 'ECMASCRIPT5'
-                }
-            },
             jquery : {
                 closurePath : 'lib/closure_compiler',
-                js : ['js/jquery-1.9.1.js'],
-                jsOutputFile : 'build/jquery-1.9.1-min-pre.js',
+                js : ['js/jquery-1.11.3.js'],
+                jsOutputFile : 'build/jquery-1.11.3-min-pre.js',
                 noreport : true,
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
@@ -161,7 +129,7 @@ module.exports = function(grunt) {
     });
     
     grunt.registerTask('doc', ['clean:doc', 'shell:doc']);
-    grunt.registerTask('concat_pre_build', ['concat:pre', 'concat:webGL']);
+    grunt.registerTask('concat_pre_build', ['concat:pre']);
     grunt.registerTask('concat_post_build', ['concat:big', 'concat:bignojquery', 'concat:closure', 'concat:closurenojquery']);
     
     grunt.registerTask('test', ['clean:build', 'concat:test', 'closure-compiler:test', 'concat:append']);
