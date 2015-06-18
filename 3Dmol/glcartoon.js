@@ -169,7 +169,7 @@ $3Dmol.drawCartoon = (function() {
         for (j=0; j < num; j++) {
             cs_ellipse.push(0.25 + 1.5 * Math.sqrt((num-1)*j - Math.pow(j, 2))/(num-1));
             cs_rectangle.push(0.5);
-            cs_parabola.push(3*(Math.pow(j/num, 2) - j/num) + 1);
+            cs_parabola.push(2*(Math.pow(j/num, 2) - j/num) + 0.6);
         }
 
 		var faces = [];
