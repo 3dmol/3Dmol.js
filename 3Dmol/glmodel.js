@@ -1216,6 +1216,7 @@ $3Dmol.GLModel = (function() {
             if (sel.hasOwnProperty("expand")) {
 
                 // get atoms in expanded bounding box
+
                 var expand = expandAtomList(ret, parseFloat(sel.expand));
                 var retlen = ret.length;
                 for (var i = 0; i < expand.length; i++) {
@@ -1309,8 +1310,10 @@ $3Dmol.GLModel = (function() {
          **/
         var expandAtomList = function(atomList, amt) {
 
-            var pb = $3Dmol.getExtent(atomList);
-            var nb = [[],[],[]];
+            if (amt <= 0) return atomList;
+
+            var pb = $3Dmol.getExtent(atomList); // previous bounding box
+            var nb = [[], [], []]; // expanded bounding box
 
             for (var i = 0; i < 3; i++)
             {
@@ -1327,11 +1330,9 @@ $3Dmol.GLModel = (function() {
                 var y = atoms[i].y;
                 var z = atoms[i].z;
 
-                if (x >= nb[0][0] && x < pb[0][0] || x > pb[1][0] && x <= nb[1][0]) {
-                    if (y >= nb[0][1] && y < pb[0][1] || y > pb[1][1] && y <= nb[1][1]) {
-                        if (z >= nb[0][2] && z < pb[0][2] || z > pb[1][2] && z <= nb[1][2]) {
-                            expand.push(atoms[i]);
-                        }
+                if (x >= nb[0][0] && x <= nb[1][0] && y >= nb[0][1] && y <= nb[1][1] && z >= nb[0][2] && z <= nb[1][2]) {
+                    if (!(x >= pb[0][0] && x <= pb[1][0] && y >= pb[0][1] && y <= pb[1][1] && z >= pb[0][2] && z <= pb[1][2])) {
+                        expand.push(atoms[i]);
                     }
                 }
             }
