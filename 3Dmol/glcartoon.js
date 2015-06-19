@@ -586,9 +586,8 @@ $3Dmol.drawCartoon = (function() {
         var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
         var purResns = ["DA", "DG", "A", "G"];
         var pyrResns = ["DT", "DC", "U", "C"];
-		var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10, ILE:8, LEU: 8, LYS: 9, MET:8, PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
 
-        var cartoon, curr, next, currColor, nextColor, thickness, i, nextResAtom;
+        var cartoon, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
         var traceGeo = null;
         var colors = [];
@@ -671,8 +670,9 @@ $3Dmol.drawCartoon = (function() {
                                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
                             $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
-                            addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, nextResAtom);
+                            arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
                             colors.push(nextColor);
+                            if (arrow) colors.push(nextColor);
                             
                             baseStartPt = null;
                             baseEndPt = null;
@@ -718,7 +718,7 @@ $3Dmol.drawCartoon = (function() {
 
 						
                         curr = next; // advance backbone
-                        nextResAtom = atomList[parseInt(i) + resSize[curr.resn]];
+                        //nextResAtom = atomList[parseInt(i) + resSize[curr.resn]];
                         backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                         backbonePt.resi = curr.resi;
                         currColor = nextColor; // used for NA bases
@@ -759,10 +759,12 @@ $3Dmol.drawCartoon = (function() {
                 // when we have a backbone point and orientation point in the same residue, accumulate strand points
                 if (orientPt && backbonePt && orientPt.resi === backbonePt.resi)
                 {
-                    addBackbonePoints(points, num, !doNotSmoothen, backbonePt, orientPt, prevOrientPt, curr, nextResAtom);
+                    arrow = addBackbonePoints(points, num, !doNotSmoothen, backbonePt, orientPt, prevOrientPt, curr, atomList, i);
                     prevOrientPt = orientPt;
                     backbonePt = null;
                     orientPt = null;
+                    colors.push(nextColor);
+                    if (arrow) colors.push(nextColor);
                 }
             }  
         }
@@ -775,8 +777,9 @@ $3Dmol.drawCartoon = (function() {
                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
             $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
-            addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, nextResAtom);
+            arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
             colors.push(nextColor);
+            if (arrow) colors.push(nextColor);
         }
 
         // for default style, draw the last strand
@@ -795,9 +798,15 @@ $3Dmol.drawCartoon = (function() {
         }
     };
 
-    var addBackbonePoints = function(points, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom, nextBackboneAtom)
+    var addBackbonePoints = function(points, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom, atomList, atomi)
     {
         var widthScalar, i, delta, v, addArrowPoints;
+        
+        // kind of hacky...
+        var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10, ILE:8, LEU: 8, LYS: 9, MET:8, PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
+        var nextBBAtom, nextnextBBAtom;
+        nextBBAtom = atomList[parseInt(atomi) + resSize[backboneAtom.resn]];
+        if (nextBBAtom) nextnextBBAtom = atomList[parseInt(atomi) + resSize[backboneAtom.resn] + resSize[nextBBAtom.resn]];
 
         // the orientation vector is the difference from backbone atom to orientation atom
         orientPt.sub(backbonePt);
@@ -812,12 +821,26 @@ $3Dmol.drawCartoon = (function() {
                     widthScalar = nucleicAcidWidth;
                 else
                     widthScalar = coilWidth;
-            } else
+            } else if (backboneAtom.ss === "arrowtip")
+            	widthScalar = 0.3;
+            else
                 widthScalar = helixSheetWidth;
         }
         else widthScalar = backboneAtom.style.cartoon.width;
-        if (backboneAtom.ss === "s" && ((nextBackboneAtom && nextBackboneAtom.ss != "s") || !nextBackboneAtom))
-             addArrowPoints = true;
+
+        // if 2 residues up is no longer a beta-sheet, this is where the arrowhead goes
+        if (backboneAtom.ss === "s" && backboneAtom.style.cartoon.arrows && nextnextBBAtom && nextnextBBAtom.ss != "s")
+        {
+        	addArrowPoints = true;
+
+        	for (i = atomi; i < atomList.length; i++)
+        	{
+        		if (atomList[i].resi === nextBBAtom.resi && atomList[i].atom === "CA")
+        		{
+        			atomList[i].ss = "arrowtip"
+        		}
+        	}
+        }     
 
         // if the angle between the previous orientation vector and current is greater than 90 degrees,
         if (prevOrientPt != null && orientPt.dot(prevOrientPt) < 0)
@@ -844,11 +867,6 @@ $3Dmol.drawCartoon = (function() {
 
         if (addArrowPoints)
         {
-            if (nextBackboneAtom)
-            {
-                var nudge = backbonePt.clone().sub(new $3Dmol.Vector3(nextBackboneAtom.x, nextBackboneAtom.y, nextBackboneAtom.z)).multiplyScalar(0.5);
-                backbonePt.add(nudge);
-            }
             orientPt.multiplyScalar(2);
             for (i = 0; addArrowPoints && i < num; i++)
             {
@@ -860,7 +878,8 @@ $3Dmol.drawCartoon = (function() {
                 points[i].push(v);
             }
         }
-        return addArrowPoints
+        if (backboneAtom.ss === "arrowtip") backboneAtom.ss = "s"
+        return addArrowPoints;
     }
 
     // actual function call
