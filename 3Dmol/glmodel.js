@@ -1216,8 +1216,9 @@ $3Dmol.GLModel = (function() {
             if (sel.hasOwnProperty("expand")) {
 
                 // get atoms in expanded bounding box
-                var expand = expandAtomList(ret, parseFloat(sel.expand))
-                var retlen = ret.length
+
+                var expand = expandAtomList(ret, parseFloat(sel.expand));
+                var retlen = ret.length;
                 for (var i = 0; i < expand.length; i++) {
                     for (var j = 0; j < retlen; j++) {
 
@@ -1234,8 +1235,8 @@ $3Dmol.GLModel = (function() {
             if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
 
                 // get atoms in second selection
-                var sel2 = this.selectedAtoms(sel.within.sel, atoms)
-                var within = []
+                var sel2 = this.selectedAtoms(sel.within.sel, atoms);
+                var within = [];
                 for (var i = 0; i < sel2.length; i++) {
                     for (var j = 0; j < ret.length; j++) {
 
