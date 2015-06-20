@@ -30,7 +30,7 @@ $(document).ready(function() {
             else if (viewerdiv.data("href"))
                 datauri = viewerdiv.data("href");
                 
-            var bgcolor = Number(viewerdiv.data("backgroundcolor")) || 0x000000;
+            var bgcolor = $3Dmol.CC.color(viewerdiv.data("backgroundcolor"));
             var style = {line:{}};
             if(viewerdiv.data("style")) style = $3Dmol.specStringToObject(viewerdiv.data("style"));
             var select = {};

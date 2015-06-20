@@ -190,6 +190,13 @@ $3Dmol.specStringToObject = function(str) {
     else if(typeof(str) === "undefined" || str == null) {
         return str; 
     }
+    
+    //convert things that look like numbers into numbers
+    var massage = function(val) {
+        if($.isNumeric(val)) return parseFloat(val);
+        return val;
+    }
+    
     var ret = {};
     var fields = str.split(';');
     for(var i = 0; i < fields.length; i++) {
@@ -204,7 +211,7 @@ $3Dmol.specStringToObject = function(str) {
                 var kvs = vstr.split(',');
                 for(var j = 0; j < kvs.length; j++) {
                     var kv = kvs[j].split('=',2);
-                    val[kv[0]] = kv[1];
+                    val[kv[0]] = massage(kv[1]);
                 }
             }
             else if(vstr.indexOf(',') !== -1) {
@@ -212,7 +219,7 @@ $3Dmol.specStringToObject = function(str) {
                 val = vstr.split(',');
             }
             else {
-                val = vstr; //value itself
+                val = massage(vstr); //value itself
             }
         }
         ret[f] = val;

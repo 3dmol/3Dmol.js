@@ -41,14 +41,14 @@ $3Dmol.CC = {
         'purple' : 0x800080
     },    
     getHex : function(hex) {
-        if (parseInt(hex))
+        if (!isNaN(parseInt(hex)))
             return parseInt(hex);
         
         else if (typeof(hex) === 'string') {
             
             return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
         }
-        
+        return hex;
     }
     
 };
