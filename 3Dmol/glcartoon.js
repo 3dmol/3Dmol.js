@@ -11,6 +11,7 @@ var $3Dmol = $3Dmol || {};
  * @prop {string} color - solid color, may specify as 'spectrum'
  * @prop {string} style - style of cartoon rendering (currently just default and trace)
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
+ * @prop {number} opacity - set transparency; transparency is set per-chain according to value of last backbone atom
  * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
  * is 'N1' for purines (resn: '  A', '  G', ' DA', ' DG') and 'N3' for pyrimidines (resn: '  C', '  U', ' DC', ' DT').
  * The different nucleobases can therefore be distinguished as follows:
