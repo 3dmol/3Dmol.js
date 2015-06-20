@@ -416,7 +416,7 @@ $3Dmol.drawCartoon = (function() {
                 if (next.atom === "CA" || next.atom === "P")
                 {
                     // determine cylinder color
-                    if (gradientScheme)
+                    if (gradientScheme && cartoon.color === 'spectrum')
                         nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
                     else
                         nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
@@ -507,7 +507,7 @@ $3Dmol.drawCartoon = (function() {
                         }
 
                         // determine color and thickness of the next strand segment
-                        if (gradientScheme)
+                        if (gradientScheme && cartoon.color === 'spectrum')
                             nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
                         else
                             nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
