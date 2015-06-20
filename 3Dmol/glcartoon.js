@@ -139,14 +139,18 @@ $3Dmol.drawCartoon = (function() {
         geo.initTypedArrays();
         geo.setUpNormals();
         
-        var material = new $3Dmol.MeshLambertMaterial();
+        var material = new $3Dmol.MeshDoubleLambertMaterial();
+        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
+            material.transparent = true;
+            material.opacity = opacity;
+        }
         material.vertexColors = $3Dmol.FaceColors;
-                material.side = $3Dmol.DoubleSide;
         var mesh = new $3Dmol.Mesh(geo, material);
+
         group.add(mesh);
     };
 
-    var drawStrip = function(group, p1, p2, colors, div, thickness) {
+    var drawStrip = function(group, p1, p2, colors, div, thickness, opacity) {
         if ((p1.length) < 2)
             return;
         div = div || axisDIV;
@@ -345,9 +349,12 @@ $3Dmol.drawCartoon = (function() {
         geo.initTypedArrays();
         geo.setUpNormals();
         
-        var material = new $3Dmol.MeshLambertMaterial();
+        var material = new $3Dmol.MeshDoubleLambertMaterial();
         material.vertexColors = $3Dmol.FaceColors;
-        material.side = $3Dmol.DoubleSide;
+        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
+            material.transparent = true;
+            material.opacity = opacity;
+        }
         var mesh = new $3Dmol.Mesh(geo, material);
         group.add(mesh);
         
@@ -481,9 +488,9 @@ $3Dmol.drawCartoon = (function() {
 
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
-                            drawSmoothCurve(group, points[i], 1, colors, div);
+                            drawSmoothCurve(group, points[i], 1, colors, div, curr.style.cartoon.opacity);
                         if (fill)
-                            drawStrip(group, points[0], points[num - 1], colors, div, thickness);
+                            drawStrip(group, points[0], points[num - 1], colors, div, thickness, curr.style.cartoon.opacity);
 
                         // clear arrays for points and colors
                         points = [];
@@ -580,15 +587,14 @@ $3Dmol.drawCartoon = (function() {
 
         // for default style, draw the last strand
         for (i = 0; !thickness && i < num; i++)
-            drawSmoothCurve(group, points[i], 1, colors, div);
+            drawSmoothCurve(group, points[i], 1, colors, div, curr.style.cartoon.opacity);
         if (fill)
-            drawStrip(group, points[0], points[num - 1], colors, div, thickness);
+            drawStrip(group, points[0], points[num - 1], colors, div, thickness, curr.style.cartoon.opacity);
 
         if (traceGeo) // generate mesh for trace geometry
         {
-            var traceMaterial = new $3Dmol.MeshLambertMaterial();
+            var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             traceMaterial.vertexColors = $3Dmol.FaceColors;
-            traceMaterial.side = $3Dmol.DoubleSide;
             var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
             group.add(traceMesh);
         }

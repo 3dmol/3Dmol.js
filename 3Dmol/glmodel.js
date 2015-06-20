@@ -883,9 +883,7 @@ $3Dmol.GLModel = (function() {
                         }
                         
                         cartoonAtoms.push(atom);
-                    }
-                    
-
+                    }                   
                 }
             }
             // create cartoon if needed - this is a whole model analysis
@@ -897,9 +895,6 @@ $3Dmol.GLModel = (function() {
 
                 $3Dmol.drawCartoon(ret, cartoonAtoms, cartoonGeometry, gradientscheme);
                 
-                for (i = 0; i < ret.children.length; i++){
-                    var geo = ret.children[i].geometry;
-                }
             }
 
             // add sphere geometry
