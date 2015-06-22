@@ -115,9 +115,8 @@ $3Dmol.GLModel = (function() {
         var molObj = null;
         var renderedMolObj = null;
         var lastColors = null;
-        var copyMatrices = []; //transformation + rot matrices
+        var modelData = {};
         var idMatrix = new $3Dmol.Matrix4();
-        idMatrix.identity();
         var noAssembly;
         var dontDuplicateAtoms;
         var idList = [];
@@ -1011,10 +1010,10 @@ $3Dmol.GLModel = (function() {
             if (dontDuplicateAtoms && !noAssembly) {
                 var finalRet = new $3Dmol.Object3D();
                 var t;
-                for (t = 0; t < copyMatrices.length; t++) {
+                for (t = 0; t < modelData.symmetries.length; t++) {
                     var transformedRet = new $3Dmol.Object3D();
                     transformedRet = ret.clone();
-                    transformedRet.matrix.copy(copyMatrices[t]);
+                    transformedRet.matrix.copy(modelData.symmetries[t]);
                     transformedRet.matrixAutoUpdate = false;
                     finalRet.add(transformedRet);
                 }
@@ -1023,6 +1022,16 @@ $3Dmol.GLModel = (function() {
 
             return ret;
         };
+        
+        
+        this.getCrystData = function() {
+            if (modelData.cryst) {
+                return modelData.cryst;
+            }
+            else {
+                //will this ever happen?
+            }
+        }
         
         /**
          * Returns list of rotational/translational matrices if there is BIOMT data
@@ -1033,8 +1042,8 @@ $3Dmol.GLModel = (function() {
          *
          */
         this.getSymmetries = function() {
-            if (copyMatrices.length > 1) {
-                return copyMatrices; //returns copyMatrices, which has ID matrix as 1st entry
+            if (modelData.symmetries.length > 1) {
+                return modelData.symmetries; //returns copyMatrices, which has ID matrix as 1st entry
             }
             else {
                     
@@ -1052,10 +1061,10 @@ $3Dmol.GLModel = (function() {
         this.setSymmetries = function(list) {
             if (typeof(list) == "undefined") { //delete sym data
                 idList = [idMatrix];
-                copyMatrices = idList;
+                modelData.symmetries = idList;
             }
             else {
-                copyMatrices = list;
+                modelData.symmetries = list;
             }
         };
 
@@ -1093,6 +1102,9 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             format = format || "";
+            noAssembly = !options.doAssembly; //for BIOMT uses
+            dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
+            
             if (!data)
                 return; //leave an empty model
             
@@ -1125,9 +1137,7 @@ $3Dmol.GLModel = (function() {
             	}
             }
             var parse = $3Dmol.Parsers[format];
-            parse(atoms, data, options, copyMatrices)
-            noAssembly = !options.doAssembly; //for BIOMT uses
-            dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
+            parse(atoms, data, options, modelData)
             setAtomDefaults(atoms, id);
         };
         

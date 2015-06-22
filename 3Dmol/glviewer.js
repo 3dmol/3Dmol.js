@@ -440,6 +440,7 @@ $3Dmol.GLViewer = (function() {
             };
             initContainer(element);
         };
+        
         /**
          * Set the background color (default white)
          * 
@@ -1138,6 +1139,70 @@ $3Dmol.GLViewer = (function() {
             s.addLine(spec);
             shapes.push(s);
 
+            return s;
+        };
+        
+        
+        /**
+         * Create and add unit cell
+         *
+         * @function $3Dmol.GlViewer#addUnitCell
+         * @param {GLModel}
+         * @return {$3Dmol.GLShape}
+         */
+        this.addUnitCell = function(model) {
+
+            var s = new $3Dmol.GLShape({'wireframe' : true});
+            s.shapePosition = shapes.length;
+            var data = model.getCrystData();
+            if (data) {
+                var a = data.a, b = data.b, c = data.c, alpha = data.alpha, beta = data.beta, gamma = data.gamma;
+                alpha = alpha * Math.PI/180.0;
+                beta = beta * Math.PI/180.0;
+                gamma = gamma * Math.PI/180.0;
+            
+                var u, v, w;
+            
+                u = Math.cos(beta);
+                v = (Math.cos(alpha) - Math.cos(beta)*Math.cos(gamma))/Math.sin(gamma);
+                w = Math.sqrt(Math.max(0, 1-u*u-v*v));
+            
+                var matrix = new $3Dmol.Matrix4(a, b*Math.cos(gamma), c*u, 0, 
+                                                0, b*Math.sin(gamma), c*v, 0,
+                                                0, 0,                 c*w, 0,
+                                                0, 0,                 0,   1); 
+         
+                var points = [  new $3Dmol.Vector3(0, 0, 0),
+                                new $3Dmol.Vector3(1, 0, 0),
+                                new $3Dmol.Vector3(0, 1, 0),
+                                new $3Dmol.Vector3(0, 0, 1),
+                                new $3Dmol.Vector3(1, 1, 0),
+                                new $3Dmol.Vector3(0, 1, 1),
+                                new $3Dmol.Vector3(1, 0, 1),
+                                new $3Dmol.Vector3(1, 1, 1)  ];
+                            
+                for (var i = 0; i < points.length; i++) {
+                    points[i] = points[i].applyMatrix4(matrix);
+                }
+            
+                s.addLine({start: points[0], end: points[1]});
+                s.addLine({start: points[0], end: points[2]});
+                s.addLine({start: points[1], end: points[4]});
+                s.addLine({start: points[2], end: points[4]});
+            
+                s.addLine({start: points[0], end: points[3]});
+                s.addLine({start: points[3], end: points[5]});
+                s.addLine({start: points[2], end: points[5]});
+            
+                s.addLine({start: points[1], end: points[6]});
+                s.addLine({start: points[4], end: points[7]});
+                s.addLine({start: points[6], end: points[7]});
+            
+                s.addLine({start: points[3], end: points[6]});
+                s.addLine({start: points[5], end: points[7]});
+            }
+            
+            shapes.push(s);
             return s;
         };
 
