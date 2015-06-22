@@ -1024,7 +1024,7 @@ $3Dmol.GLModel = (function() {
                 return modelData.cryst;
             }
             else {
-                //will this ever happen?
+                return null;
             }
         }
         

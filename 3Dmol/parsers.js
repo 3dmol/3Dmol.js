@@ -409,10 +409,11 @@ $3Dmol.Parsers = (function() {
      * @param {string}
      *            str
      */
-    parsers.mcif = parsers.cif = function(atoms, str, options, copyMatrices) {
+    parsers.mcif = parsers.cif = function(atoms, str, options, modelData) {
     
         var noAssembly = !options.doAssembly; // don't assemble by default
         var copyMatrix = !options.duplicateAssemblyAtoms;
+        modelData.symmetries = [];
 
         // Used to handle quotes correctly
         function splitRespectingQuotes(string, separator) {
@@ -577,9 +578,15 @@ $3Dmol.Parsers = (function() {
             atom.x = parseFloat(mmCIF._atom_site.cartn_x[i]);
             atom.y = parseFloat(mmCIF._atom_site.cartn_y[i]);
             atom.z = parseFloat(mmCIF._atom_site.cartn_z[i]);
-            atom.hetflag = mmCIF._atom_site.group_pdb[i] === "HETA";
+            atom.chain = mmCIF._atom_site.auth_asym_id ? mmCIF._atom_site.auth_asym_id[i] : undefined;
+            atom.resi = mmCIF._atom_site.auth_seq_id ? parseInt(mmCIF._atom_site.auth_seq_id[i]) : undefined;
+            atom.resn = mmCIF._atom_site.auth_comp_id ? mmCIF._atom_site.auth_comp_id[i].trim() : undefined;
+            atom.atom = mmCIF._atom_site.auth_atom_id ? mmCIF._atom_site.auth_atom_id[i].replace(/"/gm,'')  : undefined; //"primed" names are in quotes
+            atom.hetflag = mmCIF._atom_site.group_pdb ? mmCIF._atom_site.group_pdb[i] === "HETA" : true;
             atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
+            atom.ss = 'c';
+            atom.serial = i;
             atom.bondOrder = [];
             atom.properties = {};
             atomsPreBonds[atom.id] = atom;
@@ -628,7 +635,7 @@ $3Dmol.Parsers = (function() {
             atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
         }
 
-        if (mmCIF._struct_conn && mmCIF._struct_conn.id) {
+        if (false && mmCIF._struct_conn && mmCIF._struct_conn.id) {
             for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
                 var offset = atoms.length;
 
@@ -710,9 +717,9 @@ $3Dmol.Parsers = (function() {
                 var matrix = new $3Dmol.Matrix4(matrix11, matrix12, matrix13,
                         vector1, matrix21, matrix22, matrix23, vector2,
                         matrix31, matrix32, matrix33, vector3);
-                copyMatrices.push(matrix);
+                modelData.symmetries.push(matrix);
             }
-            processSymmetries("mcif", copyMatrices, copyMatrix, atoms);
+            processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
         }
         
         
@@ -985,7 +992,6 @@ $3Dmol.Parsers = (function() {
      */
     parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms,
             str, options, modelData) {
-            //modeldata object --- modeldata.symmetries, modeldata.cryst so it is generic
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
