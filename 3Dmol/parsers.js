@@ -402,6 +402,51 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
+    // This parses the ChemDoodle json file format. Although this is registered
+    // for the json file extension, other chemical json file formats exist that
+    // this can not parse. Check which one you have and do not assume that
+    // .json can be parsed
+    parsers.cdj = parsers.jso = // Hack because the file format is truncated
+                                // at the moment
+    parsers.cdjson = parsers.json = function(atoms, str, options, modelData) {
+        var molecules = str.m;  // Str is automatically parsed by JQuery
+        var atomsInFile = molecules[0].a; // Assumes there is at least one
+        var bondsInFile = molecules[0].b; // molecule and ignores any more
+                                          // Ignores any shapes
+        var offset = atoms.length; // When adding atoms their index will be
+                                   // Offset by the number of existing atoms
+        
+        for (var i = 0; i < atomsInFile.length; i++) {
+            var currentAtom = atomsInFile[i];
+            var atom = {};
+            atom.id = currentAtom.i; // Probably won't exist. Doesn't seem to
+                                     // break anything.
+            atom.x = currentAtom.x;
+            atom.y = currentAtom.y;
+            atom.z = currentAtom.z || 0; // Default value if file is 2D
+
+            atom.bonds = [];
+            atom.bondOrder = [];
+            
+            atom.elem = currentAtom.l || 'C';
+            atoms.push(atom);
+        }
+        for (var i = 0; i < bondsInFile.length; i++) {
+            var currentBond = bondsInFile[i];
+            var beginIndex = currentBond.b + offset;
+            var endIndex = currentBond.e + offset;
+            var bondOrder = currentBond.o || 1;
+            
+            var firstAtom = atoms[beginIndex];
+            var secondAtom = atoms[endIndex];
+
+            firstAtom.bonds.push(endIndex);
+            firstAtom.bondOrder.push(bondOrder);
+            secondAtom.bonds.push(beginIndex);
+            secondAtom.bondOrder.push(bondOrder);
+        }
+    }
+
     // puts atoms specified in mmCIF fromat in str into atoms
     /**
      * @param {AtomSpec[]}
