@@ -1146,9 +1146,9 @@ $3Dmol.GLViewer = (function() {
         /**
          * Create and add unit cell
          *
-         * @function $3Dmol.GlViewer#addUnitCell
-         * @param {GLModel}
-         * @return {$3Dmol.GLShape}
+         * @function $3Dmol.GLViewer#addUnitCell
+         * @param {GLModel} Model with unit cell information (e.g., pdb derived).
+         * @return {$3Dmol.GLShape}  Line shape delineating unit cell.
          */
         this.addUnitCell = function(model) {
 
