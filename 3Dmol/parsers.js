@@ -409,10 +409,11 @@ $3Dmol.Parsers = (function() {
      * @param {string}
      *            str
      */
-    parsers.mcif = parsers.cif = function(atoms, str, options, copyMatrices) {
+    parsers.mcif = parsers.cif = function(atoms, str, options, modelData) {
     
         var noAssembly = !options.doAssembly; // don't assemble by default
         var copyMatrix = !options.duplicateAssemblyAtoms;
+        modelData.symmetries = [];
 
         // Used to handle quotes correctly
         function splitRespectingQuotes(string, separator) {
@@ -634,7 +635,6 @@ $3Dmol.Parsers = (function() {
             atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
         }
 
-        //todo, fix the below code to work correctly
         if (false && mmCIF._struct_conn && mmCIF._struct_conn.id) {
             for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
                 var offset = atoms.length;
@@ -699,9 +699,7 @@ $3Dmol.Parsers = (function() {
         assignBonds(atoms);
         computeSecondaryStructure(atoms);
         
-        if (mmCIF._pdbx_struct_oper_list !== undefined && !noAssembly) { // transformations
-                                                            // may not exist.
-
+        if (mmCIF._pdbx_struct_oper_list !== undefined && !noAssembly) { 
             for (var i = 0; i < mmCIF._pdbx_struct_oper_list.id.length; i++) {
                 var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]'][i]);
                 var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]'][i]);
@@ -719,9 +717,9 @@ $3Dmol.Parsers = (function() {
                 var matrix = new $3Dmol.Matrix4(matrix11, matrix12, matrix13,
                         vector1, matrix21, matrix22, matrix23, vector2,
                         matrix31, matrix32, matrix33, vector3);
-                copyMatrices.push(matrix);
+                modelData.symmetries.push(matrix);
             }
-            processSymmetries("mcif", copyMatrices, copyMatrix, atoms);
+            processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
         }
         
         
@@ -993,15 +991,15 @@ $3Dmol.Parsers = (function() {
      *            (do not compute ss)
      */
     parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms,
-            str, options, copyMatrices) {
+            str, options, modelData) {
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
         var computeStruct = !options.noSecondaryStructure;
         var noAssembly = !options.doAssembly; // don't assemble by default
-        var copyMatrix = !options.duplicateAssemblyAtoms; // if not specified,
-                                                            // default to
-                                                            // copyMatrix true
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        modelData.symmetries = [];
+    
         var start = atoms.length;
         var atom;
         var protein = {
@@ -1024,7 +1022,7 @@ $3Dmol.Parsers = (function() {
                     continue; // FIXME: ad hoc
                 serial = parseInt(line.substr(6, 5));
                 atom = line.substr(12, 4).replace(/ /g, "");
-                resn = line.substr(17, 3).trim();
+                resn = line.substr(17, 3);
                 chain = line.substr(21, 1);
                 resi = parseInt(line.substr(22, 4));
                 icode = line.substr(26, 1);
@@ -1105,7 +1103,7 @@ $3Dmol.Parsers = (function() {
             } else if ((!noAssembly) && (recordName == 'REMARK')
                     && (line.substr(13, 5) == 'BIOMT')) {
                 var n;
-                var matrix = new $3Dmol.Matrix4();
+                var matrix = new $3Dmol.Matrix4(); 
                 for (n = 1; n <= 3; n++) {
                     line = lines[i].replace(/^\s*/, '');
                     if (parseInt(line.substr(18, 1)) == n) { // check for all
@@ -1133,10 +1131,20 @@ $3Dmol.Parsers = (function() {
                 matrix.elements[7] = 0;
                 matrix.elements[11] = 0;
                 matrix.elements[15] = 1;
-                copyMatrices.push(matrix);
+                modelData.symmetries.push(matrix);
                 i--; // set i back
-            }
+            } else if (recordName == 'CRYST1') {
+                var a, b, c, alpha, beta, gamma;
+                a = parseFloat(line.substr(7, 8));
+                b = parseFloat(line.substr(16, 8));
+                c = parseFloat(line.substr(25, 8));
+                alpha = parseFloat(line.substr(34, 6));
+                beta = parseFloat(line.substr(41, 6));
+                gamma = parseFloat(line.substr(48, 6));
+                
+                modelData.cryst = {'a' : a, 'b' : b, 'c' : c, 'alpha' : alpha, 'beta' : beta, 'gamma' : gamma};
 
+            }
         }
 
         var starttime = (new Date()).getTime();
@@ -1146,7 +1154,7 @@ $3Dmol.Parsers = (function() {
         // starttime));
         
         if (!noAssembly) {
-            processSymmetries("pdb", copyMatrices, copyMatrix, atoms);
+            processSymmetries("pdb", modelData.symmetries, copyMatrix, atoms);
         }
 
         if (computeStruct || !hasStruct) {
@@ -1226,7 +1234,7 @@ $3Dmol.Parsers = (function() {
                 // be filled out (e.g. the chain) so this doesn't work
                 var serial = parseInt(line.substr(6, 5));
                 var atom = line.substr(12, 4).replace(/ /g, "");
-                var resn = line.substr(17, 3).trim();
+                var resn = line.substr(17, 3);
                 var chain = line.substr(21, 1);
                 var resi = parseInt(line.substr(22, 4));
                 // however let's split the coordinates, charge and radius by
