@@ -409,7 +409,11 @@ $3Dmol.Parsers = (function() {
      * @param {string}
      *            str
      */
-    parsers.mcif = parsers.cif = function(atoms, str, options) {
+    parsers.mcif = parsers.cif = function(atoms, str, options, modelData) {
+    
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms;
+        modelData.symmetries = [];
 
         // Used to handle quotes correctly
         function splitRespectingQuotes(string, separator) {
@@ -582,6 +586,7 @@ $3Dmol.Parsers = (function() {
             atom.elem = mmCIF._atom_site.type_symbol[i];
             atom.bonds = [];
             atom.ss = 'c';
+            atom.serial = i;
             atom.bondOrder = [];
             atom.properties = {};
             atomsPreBonds[atom.id] = atom;
@@ -630,7 +635,7 @@ $3Dmol.Parsers = (function() {
             atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
         }
 
-        if (mmCIF._struct_conn && mmCIF._struct_conn.id) {
+        if (false && mmCIF._struct_conn && mmCIF._struct_conn.id) {
             for (var i = 0; i < mmCIF._struct_conn.id.length; i++) {
                 var offset = atoms.length;
 
@@ -694,30 +699,31 @@ $3Dmol.Parsers = (function() {
         assignBonds(atoms);
         computeSecondaryStructure(atoms);
         
-        var matrices = [];
-        if (mmCIF._pdbx_struct_oper_list !== undefined) { // transformations
-                                                            // may not exist.
-
+        if (mmCIF._pdbx_struct_oper_list !== undefined && !noAssembly) { 
             for (var i = 0; i < mmCIF._pdbx_struct_oper_list.id.length; i++) {
-                var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]']);
-                var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]']);
-                var matrix13 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][3]']);
-                var vector1 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[1]']);
-                var matrix21 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][1]']);
-                var matrix22 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][2]']);
-                var matrix23 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][3]']);
-                var vector2 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[2]']);
-                var matrix31 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][1]']);
-                var matrix32 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][2]']);
-                var matrix33 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][3]']);
-                var vector3 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[3]']);
+                var matrix11 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][1]'][i]);
+                var matrix12 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][2]'][i]);
+                var matrix13 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[1][3]'][i]);
+                var vector1 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[1]'][i]);
+                var matrix21 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][1]'][i]);
+                var matrix22 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][2]'][i]);
+                var matrix23 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[2][3]'][i]);
+                var vector2 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[2]'][i]);
+                var matrix31 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][1]'][i]);
+                var matrix32 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][2]'][i]);
+                var matrix33 = parseFloat(mmCIF._pdbx_struct_oper_list['matrix[3][3]'][i]);
+                var vector3 = parseFloat(mmCIF._pdbx_struct_oper_list['vector[3]'][i]);
 
                 var matrix = new $3Dmol.Matrix4(matrix11, matrix12, matrix13,
                         vector1, matrix21, matrix22, matrix23, vector2,
                         matrix31, matrix32, matrix33, vector3);
-                matrices.push(matrix);
+                modelData.symmetries.push(matrix);
             }
+            processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
         }
+        
+        
+        
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -888,6 +894,89 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
+    //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
+    var processSymmetries = function(format, copyMatrices, copyMatrix, atoms) {
+        var end = atoms.length;
+        var offset = end;
+        var t, l, n;
+        if (!copyMatrix) { // do full assembly
+            for (t = 0; t < copyMatrices.length; t++) {
+                if (!copyMatrices[t].isIdentity()) {
+                    var xyz = new $3Dmol.Vector3();
+                    for (n = 0; n < end; n++) {
+                        var bondsArr = [];
+                        for (l = 0; l < atoms[n].bonds.length; l++) {
+                            bondsArr.push(atoms[n].bonds[l] + offset);
+                        }
+                        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+                        xyz.applyMatrix4(copyMatrices[t]);
+                        if (format == "pdb") {
+                            atoms.push({
+                                'resn' : atoms[n].resn,
+                                'x' : xyz.x,
+                                'y' : xyz.y,
+                                'z' : xyz.z,
+                                'elem' : atoms[n].elem,
+                                'hetflag' : atoms[n].hetflag,
+                                'chain' : atoms[n].chain,
+                                'resi' : atoms[n].resi,
+                                'icode' : atoms[n].icode,
+                                'rescode' : atoms[n].rescode,
+                                'serial' : atoms[n].serial,
+                                'atom' : atoms[n].atom,
+                                'bonds' : bondsArr,
+                                'ss' : atoms[n].ss,
+                                'bondOrder' : atoms[n].bondOrder,
+                                'properties' : atoms[n].properties,
+                                'b' : atoms[n].b,
+                                'pdbline' : atoms[n].pdbline,
+                            });
+                        }
+                        else if (format == "mcif") {
+                            atoms.push({
+                                'resn' : atoms[n].resn,
+                                'x' : xyz.x,
+                                'y' : xyz.y,
+                                'z' : xyz.z,
+                                'elem' : atoms[n].elem,
+                                'hetflag' : atoms[n].hetflag,
+                                'chain' : atoms[n].chain,
+                                'resi' : atoms[n].resi,
+                                'serial' : atoms[n].serial,
+                                'atom' : atoms[n].atom,
+                                'bonds' : bondsArr,
+                                'ss' : atoms[n].ss,
+                                'bondOrder' : atoms[n].bondOrder,
+                                'properties' : atoms[n].properties,
+                                'hbondDistanceSq' : atoms[n].hbondDistanceSq,
+                                'hbondOther' : atoms[n].hbondOther,
+                                'ssbegin' : atoms[n].ssbegin,
+                                'id' : atoms[n].id,
+                                'index' : atoms[n].index
+                            });
+                        }
+                    }
+                    offset = atoms.length;
+                }
+            }
+        }
+        else {
+            for (t = 0; t < atoms.length; t++) {
+                var symmetries = [];
+                for (l = 0; l < copyMatrices.length; l++) {
+                    if (!copyMatrices[l].isIdentity()) {
+                        var newXYZ = new $3Dmol.Vector3();
+                        newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
+                        newXYZ.applyMatrix4(copyMatrices[l]);
+                        symmetries.push(newXYZ);
+                    }
+                }
+                atoms[t].symmetries = symmetries;
+            }
+        }
+    }
+
+
     // parse pdb file from str and create atoms
     // if computeStruct is true will always perform secondary structure
     // analysis,
@@ -902,16 +991,15 @@ $3Dmol.Parsers = (function() {
      *            (do not compute ss)
      */
     parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(atoms,
-            str, options, copyMatrices) {
+            str, options, modelData) {
 
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
         var computeStruct = !options.noSecondaryStructure;
         var noAssembly = !options.doAssembly; // don't assemble by default
-        var copyMatrix = !options.duplicateAssemblyAtoms; // if not specified,
-                                                            // default to
-                                                            // copyMatrix true
-        var allMatrices = [];
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        modelData.symmetries = [];
+    
         var start = atoms.length;
         var atom;
         var protein = {
@@ -934,7 +1022,7 @@ $3Dmol.Parsers = (function() {
                     continue; // FIXME: ad hoc
                 serial = parseInt(line.substr(6, 5));
                 atom = line.substr(12, 4).replace(/ /g, "");
-                resn = line.substr(17, 3).trim();
+                resn = line.substr(17, 3);
                 chain = line.substr(21, 1);
                 resi = parseInt(line.substr(22, 4));
                 icode = line.substr(26, 1);
@@ -1015,7 +1103,7 @@ $3Dmol.Parsers = (function() {
             } else if ((!noAssembly) && (recordName == 'REMARK')
                     && (line.substr(13, 5) == 'BIOMT')) {
                 var n;
-                var matrix = new $3Dmol.Matrix4();
+                var matrix = new $3Dmol.Matrix4(); 
                 for (n = 1; n <= 3; n++) {
                     line = lines[i].replace(/^\s*/, '');
                     if (parseInt(line.substr(18, 1)) == n) { // check for all
@@ -1033,10 +1121,7 @@ $3Dmol.Parsers = (function() {
                                 .substr(53));
                         i++;
                     } else {
-                        while (line.substr(13, 5) == 'BIOMT') { // increase "i"
-                                                                // until you
-                                                                // leave the
-                                                                // REMARKs
+                        while (line.substr(13, 5) == 'BIOMT') {
                             i++;
                             line = lines[i].replace(/^\s*/, '');
                         }
@@ -1046,12 +1131,20 @@ $3Dmol.Parsers = (function() {
                 matrix.elements[7] = 0;
                 matrix.elements[11] = 0;
                 matrix.elements[15] = 1;
-                allMatrices.push(matrix);
-                copyMatrices.push(matrix);
-
+                modelData.symmetries.push(matrix);
                 i--; // set i back
-            }
+            } else if (recordName == 'CRYST1') {
+                var a, b, c, alpha, beta, gamma;
+                a = parseFloat(line.substr(7, 8));
+                b = parseFloat(line.substr(16, 8));
+                c = parseFloat(line.substr(25, 8));
+                alpha = parseFloat(line.substr(34, 6));
+                beta = parseFloat(line.substr(41, 6));
+                gamma = parseFloat(line.substr(48, 6));
+                
+                modelData.cryst = {'a' : a, 'b' : b, 'c' : c, 'alpha' : alpha, 'beta' : beta, 'gamma' : gamma};
 
+            }
         }
 
         var starttime = (new Date()).getTime();
@@ -1059,60 +1152,9 @@ $3Dmol.Parsers = (function() {
         assignPDBBonds(atoms);
         // console.log("bond connecting " + ((new Date()).getTime() -
         // starttime));
-
-        var end = atoms.length;
-        var offset = end;
-        var t, l, n;
-        if (!copyMatrix) { // do full assembly
-            for (t = 0; t < allMatrices.length; t++) {
-                if (!allMatrices[t].isIdentity()) {
-                    var xyz = new $3Dmol.Vector3();
-                    for (n = 0; n < end; n++) {
-                        var bondsArr = [];
-                        for (l = 0; l < atoms[n].bonds.length; l++) {
-                            bondsArr.push(atoms[n].bonds[l] + offset);
-                        }
-                        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
-                        xyz.applyMatrix4(allMatrices[t]);
-                        atoms.push({
-                            'resn' : atoms[n].resn,
-                            'x' : xyz.x,
-                            'y' : xyz.y,
-                            'z' : xyz.z,
-                            'elem' : atoms[n].elem,
-                            'hetflag' : atoms[n].hetflag,
-                            'chain' : atoms[n].chain,
-                            'resi' : atoms[n].resi,
-                            'icode' : atoms[n].icode,
-                            'rescode' : atoms[n].rescode,
-                            'serial' : atoms[n].serial,
-                            'atom' : atoms[n].atom,
-                            'bonds' : bondsArr,
-                            'ss' : atoms[n].ss,
-                            'bondOrder' : atoms[n].bondOrder,
-                            'properties' : atoms[n].properties,
-                            'b' : atoms[n].b,
-                            'pdbline' : atoms[n].pdbline,
-                        });
-                    }
-                    offset = atoms.length;
-                }
-            }
-        }
-        // ELSE give all atoms a pointer to their symmetries
-        else {
-            for (t = 0; t < atoms.length; t++) {
-                var symmetries = [];
-                for (l = 0; l < copyMatrices.length; l++) {
-                    if (!copyMatrices[l].isIdentity()) {
-                        var newXYZ = new $3Dmol.Vector3();
-                        newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
-                        newXYZ.applyMatrix4(copyMatrices[l]);
-                        symmetries.push(newXYZ);
-                    }
-                }
-                atoms[t].symmetries = symmetries;
-            }
+        
+        if (!noAssembly) {
+            processSymmetries("pdb", modelData.symmetries, copyMatrix, atoms);
         }
 
         if (computeStruct || !hasStruct) {
@@ -1192,7 +1234,7 @@ $3Dmol.Parsers = (function() {
                 // be filled out (e.g. the chain) so this doesn't work
                 var serial = parseInt(line.substr(6, 5));
                 var atom = line.substr(12, 4).replace(/ /g, "");
-                var resn = line.substr(17, 3).trim();
+                var resn = line.substr(17, 3);
                 var chain = line.substr(21, 1);
                 var resi = parseInt(line.substr(22, 4));
                 // however let's split the coordinates, charge and radius by

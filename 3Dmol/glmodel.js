@@ -115,9 +115,8 @@ $3Dmol.GLModel = (function() {
         var molObj = null;
         var renderedMolObj = null;
         var lastColors = null;
-        var copyMatrices = []; //transformation + rot matrices
+        var modelData = {};
         var idMatrix = new $3Dmol.Matrix4();
-        idMatrix.identity();
         var noAssembly;
         var dontDuplicateAtoms;
         var idList = [];
@@ -883,9 +882,7 @@ $3Dmol.GLModel = (function() {
                         }
                         
                         cartoonAtoms.push(atom);
-                    }
-                    
-
+                    }                   
                 }
             }
             // create cartoon if needed - this is a whole model analysis
@@ -897,9 +894,6 @@ $3Dmol.GLModel = (function() {
 
                 $3Dmol.drawCartoon(ret, cartoonAtoms, cartoonGeometry, gradientscheme);
                 
-                for (i = 0; i < ret.children.length; i++){
-                    var geo = ret.children[i].geometry;
-                }
             }
 
             // add sphere geometry
@@ -1011,10 +1005,10 @@ $3Dmol.GLModel = (function() {
             if (dontDuplicateAtoms && !noAssembly) {
                 var finalRet = new $3Dmol.Object3D();
                 var t;
-                for (t = 0; t < copyMatrices.length; t++) {
+                for (t = 0; t < modelData.symmetries.length; t++) {
                     var transformedRet = new $3Dmol.Object3D();
                     transformedRet = ret.clone();
-                    transformedRet.matrix.copy(copyMatrices[t]);
+                    transformedRet.matrix.copy(modelData.symmetries[t]);
                     transformedRet.matrixAutoUpdate = false;
                     finalRet.add(transformedRet);
                 }
@@ -1023,6 +1017,16 @@ $3Dmol.GLModel = (function() {
 
             return ret;
         };
+        
+        
+        this.getCrystData = function() {
+            if (modelData.cryst) {
+                return modelData.cryst;
+            }
+            else {
+                return null;
+            }
+        }
         
         /**
          * Returns list of rotational/translational matrices if there is BIOMT data
@@ -1033,8 +1037,8 @@ $3Dmol.GLModel = (function() {
          *
          */
         this.getSymmetries = function() {
-            if (copyMatrices.length > 1) {
-                return copyMatrices; //returns copyMatrices, which has ID matrix as 1st entry
+            if (modelData.symmetries.length > 1) {
+                return modelData.symmetries; //returns copyMatrices, which has ID matrix as 1st entry
             }
             else {
                     
@@ -1052,10 +1056,10 @@ $3Dmol.GLModel = (function() {
         this.setSymmetries = function(list) {
             if (typeof(list) == "undefined") { //delete sym data
                 idList = [idMatrix];
-                copyMatrices = idList;
+                modelData.symmetries = idList;
             }
             else {
-                copyMatrices = list;
+                modelData.symmetries = list;
             }
         };
 
@@ -1086,15 +1090,29 @@ $3Dmol.GLModel = (function() {
         /** add atoms to this model from molecular data string
          * 
          * @function $3Dmol.GLModel#addMolData
-         * @param {string} data - atom structure file input data string
-         * @param {string} format - input file string format (e.g 'pdb', 'sdf', etc.)
+         * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
+         * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
          * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
          */
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             format = format || "";
+            noAssembly = !options.doAssembly; //for BIOMT uses
+            dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
+            
             if (!data)
                 return; //leave an empty model
+            
+            if(/\.gz$/.test(format)) {
+                //unzip gzipped files
+                format = format.replace(/\.gz$/,'');
+                try {
+                    data = pako.inflate(data, {to: 'string'});
+                } catch(err) {
+                    console.log(err);
+                }
+            }
+            
             if(typeof($3Dmol.Parsers[format]) == "undefined") {
             	//let someone provide a file name and get format from extension
             	format = format.split('.').pop();
@@ -1114,9 +1132,7 @@ $3Dmol.GLModel = (function() {
             	}
             }
             var parse = $3Dmol.Parsers[format];
-            parse(atoms, data, options, copyMatrices)
-            noAssembly = !options.doAssembly; //for BIOMT uses
-            dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
+            parse(atoms, data, options, modelData)
             setAtomDefaults(atoms, id);
         };
         
@@ -1205,8 +1221,8 @@ $3Dmol.GLModel = (function() {
             if (sel.hasOwnProperty("expand")) {
 
                 // get atoms in expanded bounding box
-                var expand = expandAtomList(ret, parseInt(sel.expand))
-                var retlen = ret.length
+                var expand = expandAtomList(ret, parseFloat(sel.expand));
+                var retlen = ret.length;
                 for (var i = 0; i < expand.length; i++) {
                     for (var j = 0; j < retlen; j++) {
 
@@ -1223,13 +1239,13 @@ $3Dmol.GLModel = (function() {
             if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
 
                 // get atoms in second selection
-                var sel2 = this.selectedAtoms(sel.within.sel, atoms)
-                var within = []
+                var sel2 = this.selectedAtoms(sel.within.sel, atoms);
+                var within = [];
                 for (var i = 0; i < sel2.length; i++) {
                     for (var j = 0; j < ret.length; j++) {
 
                         var dist = squaredDistance(sel2[i], ret[j]);
-                        var thresh = Math.pow(sel.within.distance, 2);
+                        var thresh = Math.pow(parseFloat(sel.within.distance), 2);
                         if (dist < thresh && dist > 0) {
                             within.push(ret[j]);
                         }
@@ -1298,8 +1314,10 @@ $3Dmol.GLModel = (function() {
          **/
         var expandAtomList = function(atomList, amt) {
 
-            var pb = $3Dmol.getExtent(atomList);
-            var nb = [[],[],[]];
+            if (amt <= 0) return atomList;
+
+            var pb = $3Dmol.getExtent(atomList); // previous bounding box
+            var nb = [[], [], []]; // expanded bounding box
 
             for (var i = 0; i < 3; i++)
             {
@@ -1316,11 +1334,9 @@ $3Dmol.GLModel = (function() {
                 var y = atoms[i].y;
                 var z = atoms[i].z;
 
-                if (x >= nb[0][0] && x < pb[0][0] || x > pb[1][0] && x <= nb[1][0]) {
-                    if (y >= nb[0][1] && y < pb[0][1] || y > pb[1][1] && y <= nb[1][1]) {
-                        if (z >= nb[0][2] && z < pb[0][2] || z > pb[1][2] && z <= nb[1][2]) {
-                            expand.push(atoms[i]);
-                        }
+                if (x >= nb[0][0] && x <= nb[1][0] && y >= nb[0][1] && y <= nb[1][1] && z >= nb[0][2] && z <= nb[1][2]) {
+                    if (!(x >= pb[0][0] && x <= pb[1][0] && y >= pb[0][1] && y <= pb[1][1] && z >= pb[0][2] && z <= pb[1][2])) {
+                        expand.push(atoms[i]);
                     }
                 }
             }

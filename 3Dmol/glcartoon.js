@@ -11,6 +11,7 @@ var $3Dmol = $3Dmol || {};
  * @prop {string} color - solid color, may specify as 'spectrum'
  * @prop {string} style - style of cartoon rendering (currently just default and trace)
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
+ * @prop {number} opacity - set transparency; transparency is set per-chain according to value of last backbone atom
  * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
  * is 'N1' for purines (resn: '  A', '  G', ' DA', ' DG') and 'N3' for pyrimidines (resn: '  C', '  U', ' DC', ' DT').
  * The different nucleobases can therefore be distinguished as follows:
@@ -139,14 +140,18 @@ $3Dmol.drawCartoon = (function() {
         geo.initTypedArrays();
         geo.setUpNormals();
         
-        var material = new $3Dmol.MeshLambertMaterial();
+        var material = new $3Dmol.MeshDoubleLambertMaterial();
+        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
+            material.transparent = true;
+            material.opacity = opacity;
+        }
         material.vertexColors = $3Dmol.FaceColors;
-                material.side = $3Dmol.DoubleSide;
         var mesh = new $3Dmol.Mesh(geo, material);
+
         group.add(mesh);
     };
 
-    var drawStrip = function(group, p1, p2, colors, div, thickness) {
+    var drawStrip = function(group, p1, p2, colors, div, thickness, opacity) {
         if ((p1.length) < 2)
             return;
         div = div || axisDIV;
@@ -345,9 +350,12 @@ $3Dmol.drawCartoon = (function() {
         geo.initTypedArrays();
         geo.setUpNormals();
         
-        var material = new $3Dmol.MeshLambertMaterial();
+        var material = new $3Dmol.MeshDoubleLambertMaterial();
         material.vertexColors = $3Dmol.FaceColors;
-        material.side = $3Dmol.DoubleSide;
+        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
+            material.transparent = true;
+            material.opacity = opacity;
+        }
         var mesh = new $3Dmol.Mesh(geo, material);
         group.add(mesh);
         
@@ -416,7 +424,7 @@ $3Dmol.drawCartoon = (function() {
                 if (next.atom === "CA" || next.atom === "P")
                 {
                     // determine cylinder color
-                    if (gradientScheme)
+                    if (gradientScheme && cartoon.color === 'spectrum')
                         nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
                     else
                         nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
@@ -481,9 +489,9 @@ $3Dmol.drawCartoon = (function() {
 
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
-                            drawSmoothCurve(group, points[i], 1, colors, div);
+                            drawSmoothCurve(group, points[i], 1, colors, div, curr.style.cartoon.opacity);
                         if (fill)
-                            drawStrip(group, points[0], points[num - 1], colors, div, thickness);
+                            drawStrip(group, points[0], points[num - 1], colors, div, thickness, curr.style.cartoon.opacity);
 
                         // clear arrays for points and colors
                         points = [];
@@ -507,7 +515,7 @@ $3Dmol.drawCartoon = (function() {
                         }
 
                         // determine color and thickness of the next strand segment
-                        if (gradientScheme)
+                        if (gradientScheme && cartoon.color === 'spectrum')
                             nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
                         else
                             nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
@@ -580,15 +588,14 @@ $3Dmol.drawCartoon = (function() {
 
         // for default style, draw the last strand
         for (i = 0; !thickness && i < num; i++)
-            drawSmoothCurve(group, points[i], 1, colors, div);
+            drawSmoothCurve(group, points[i], 1, colors, div, curr.style.cartoon.opacity);
         if (fill)
-            drawStrip(group, points[0], points[num - 1], colors, div, thickness);
+            drawStrip(group, points[0], points[num - 1], colors, div, thickness, curr.style.cartoon.opacity);
 
         if (traceGeo) // generate mesh for trace geometry
         {
-            var traceMaterial = new $3Dmol.MeshLambertMaterial();
+            var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             traceMaterial.vertexColors = $3Dmol.FaceColors;
-            traceMaterial.side = $3Dmol.DoubleSide;
             var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
             group.add(traceMesh);
         }
