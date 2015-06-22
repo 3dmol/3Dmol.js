@@ -21,7 +21,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>10Programmatic Cross</td>  
+            <th colspan=2 height=200px>10Programmatic stick(radius,singleBonds,colorscheme)</td>  
           </tr>
           <tr>
             <td width="50%"><div id="test10" style="width: 400px; height: 400px; position: relative;"></td>
@@ -30,10 +30,7 @@
                    var viewer = $3Dmol.createViewer($("#test10"));
                    $3Dmol.download("cid:5",viewer,{},function(){
 		           viewer.setBackgroundColor(0xffffffff);
-		           viewer.setStyle({chain:'A'},{stick:{hidden:true}});
-		           viewer.setStyle({chain:'B'},{stick:{radius:10.0,colorscheme:'rwb'}});
-		           viewer.setStyle({chain:'C'},{stick:{singleBonds:true}});					                         
-		           viewer.setStyle({chain:'D'},{stick:{color:'blue'}});
+		           viewer.setStyle({},{stick:{radius:0.5,singleBonds:true,colorscheme:'greenCarbon'}});
 		           viewer.render();
 		        });
               })();

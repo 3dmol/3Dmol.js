@@ -21,7 +21,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>13 CustomShape Cylinder</td>  
+            <th colspan=2 height=200px>14 CustomShape isosurface<code>callback function didn't work</code></td>  
           </tr>
           <tr>
             <td width="50%"><div id="test13" style="width: 400px; height: 400px; position: relative;"></td>
@@ -31,10 +31,12 @@
                    viewer.setBackgroundColor(0xffffffff);
                    
 
-                   $.get('../tests/test_structs/benzene-homo.cube', function(data){
+                   $.get('../test_structs/benzene-homo.cube', function(data){
 		           var voldata = new $3Dmol.VolumeData(data, "cube");
                     viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
-                    viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
+                    viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 5,
+						                           opacity:0.0, wireframe:true,linewidth:0.1,clickable:true,
+						                           callback:function(){this.opacity=1.0;}}); 
                     viewer.setStyle({}, {stick:{}});
                     viewer.zoomTo();
                     //viewer.zoom(.75);
