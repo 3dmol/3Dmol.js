@@ -21,13 +21,13 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>14 CustomShape isosurface<code>callback function didn't work</code></td>  
+            <th colspan=2 height=200px>14 Isosurface<code> isoval color alpha smoothness opacity wireframe linewidth clickable callback</code></td>  
           </tr>
           <tr>
-            <td width="50%"><div id="test13" style="width: 400px; height: 400px; position: relative;"></td>
+            <td width="50%"><div id="test14" style="width: 400px; height: 400px; position: relative;"></td>
               <script>
                 (function() {
-                   var viewer = $3Dmol.createViewer($("#test13"));
+                   var viewer = $3Dmol.createViewer($("#test14"));
                    viewer.setBackgroundColor(0xffffffff);
                    
 
@@ -35,18 +35,20 @@
 		           var voldata = new $3Dmol.VolumeData(data, "cube");
                     viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
                     viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 5,
-						                           opacity:0.0, wireframe:true,linewidth:0.1,clickable:true,
-						                           callback:function(){this.opacity=1.0;}}); 
+						                           opacity:1.0, wireframe:true,linewidth:0.1,clickable:true, callback: 
+						                           function() {
+													   this.opacity = 1.;
+													   viewer.render();
+													   }}); 
                     viewer.setStyle({}, {stick:{}});
                     viewer.zoomTo();
-                    //viewer.zoom(.75);
                     viewer.render();
                 }, 'text');
 	                   
 				   viewer.render();
               })();
              </script>
-          <td width="50%"><img src="imgs/test9.png"</td>
+          <td width="50%"><img src="imgs/test14.png"</td>
           </tr>
 		</table>
 

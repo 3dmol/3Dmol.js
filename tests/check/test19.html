@@ -2,14 +2,7 @@
 <html>
 	<head>
 		 <script src="../../build/3Dmol.js"></script> 
-		 <script>
-			 var myFunc=functon(atom){
-				 if(atom.x>-10 && atom.x<10) {
-					 return true;
-				 }
-				 return false;
-			 };
-		 </script>
+
 		 <style>
             table td { text-align: center; }
             table th {padding-top: 1em;}
@@ -29,60 +22,26 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>19 SurfaceStyleSpec</td>  
+            <th colspan=2 height=200px>19 SurfaceStyleSpec <code>opacity colorscheme color valdata volscheme map</code></td>  
           </tr>
           <tr>
-            <td width="50%"><div id="test19" style="width: 400px; height: 400px; position: relative;"><code>1.voldata added, not sure if it's correct because nothing changed if it's being added
-                                                                                                            2.volscheme not working</code></td>
+            <td width="50%"><div id="test19" style="width: 400px; height: 400px; position: relative;"></td>
               <script>
                 (function() {
-				   var data='CPMD CUBE FILE.\
-OUTER LOOP: X, MIDDLE LOOP: Y, INNER LOOP: Z\
- 4   0 0 0\
--5    1    0.000000    0.000000\
- -5    0.000000    1    0.000000\
- -5    0.000000    0.000000    1\
-   1   -0.320000   46.148000   16.581000    2.104000\
-   2    0.330000   44.862000   15.936000    2.105000\
-   3    0.550000   43.983000   16.642000    1.087000\
-   4   -0.550000   44.150000   17.855000    0.925000\
-0 0 0 0 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 0 0 0 0\
-0 0 0 0 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 0 0 0 0\
-0 0 0 0 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 0 0 0 0\
-0 0 0 0 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 0 0 0 0\
-0 0 0 0 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 1 1 1 0\
-0 0 0 0 0';
                    var viewer = $3Dmol.createViewer($("#test19"));
-                   $3Dmol.download("pdb:4UND",viewer,{},function(){
-		           viewer.setBackgroundColor(0xffffffff);
-            	   viewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)},opacity:0.7,colorscheme:'greenCarbon'},{chain:'A'}); 
-            	   //viewer.addSurface($3Dmol.SurfaceType.VDW, {voldata:{str:data,format:"cube"},volscheme:new $3Dmol.Gradient.RWB(-.6,.6)},{chain:'B'}); 
-            	   viewer.addSurface($3Dmol.SurfaceType.VDW, {voldata:{str:data,format:"cube"}},{chain:'B'}); 
-            	   glviewer.mapAtomProperties($3Dmol.applyPartialCharges);    				  
-		           viewer.render();
-		        });
+                   $.get("volData/bohr.cube",function(volumedata){
+					   var data = new $3Dmol.VolumeData(volumedata, "cube");
+					   viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, volscheme: new $3Dmol.Gradient.RWB(-10,10)},{chain:'A'});
+					    viewer.mapAtomProperties($3Dmol.applyPartialCharges);
+					    viewer.addSurface($3Dmol.SurfaceType.SAS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.05,.05)}, opacity:1.0},{chain:'B'});
+					    viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, color:'red'},{chain:'C'});
+					    viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, colorscheme:'greenCarbon'},{chain:'D'});
+				   });
+                   $3Dmol.download("pdb:4DLN",viewer,{},function(){
+		           viewer.setBackgroundColor(0xffffffff);});
               })();
              </script>
-          <td width="50%"><img src="imgs/test9.png"</td>
+          <td width="50%"><img src="imgs/test19.png"</td>
           </tr>
 		</table>
 
