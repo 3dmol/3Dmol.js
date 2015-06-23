@@ -194,7 +194,13 @@ $3Dmol.specStringToObject = function(str) {
     str = str.replace(/%7E/,'~'); //copy/pasting urls sometimes does this
     //convert things that look like numbers into numbers
     var massage = function(val) {
-        if($.isNumeric(val)) return parseFloat(val);
+        if($.isNumeric(val)) {
+           //hexadecimal does not parse as float
+           if(Math.floor(parseFloat(val)) == parseInt(val)) {
+              return parseFloat(val);
+           }
+           return parseInt(val);
+        }
         return val;
     }
     
