@@ -1,4 +1,52 @@
+//this is only used for create the enum documentation in JSDoc
+//(function() {
+	/**
+ * built-in string for color values.
+ * @readonly
+ * @enum {string}
+ */
+var colorTab = {
+	/** @description any hex number*/
+	    '0xFA0010':'0xFA0010',
+        'white' : '0xFFFFFF',
+        'silver' : '0xC0C0C0',
+        'gray' : '0x808080',
+        'grey' : '0x808080',
+        'black' : '0x000000',
+        'red' : '0xFF0000',
+        'maroon' : '0x800000',
+        'yellow' : '0xFFFF00',
+        'orange' : '0xFF6600',
+        'olive' : '0x808000',
+        'lime' : '0x00FF00',
+        'green' : '0x008000',
+        'aqua' : '0x00FFFF',
+        'cyan' : '0x00FFFF',
+        'teal' : '0x008080',
+        'blue' : '0x0000FF',
+        'navy' : '0x000080',
+        'fuchsia' : '0xFF00FF',
+        'magenta' : '0xFF00FF',
+        'purple' : '0x800080'
+};
 
+/**
+ * built-in string for colorscheme.
+ * @readonly
+ * @enum {string}
+ */
+ 
+var colorschemeTab = {
+	'greenCarbon' : '0x00FF00',
+	'cyanCarbon'  : '0x00FFFF',
+	'magentaCarbon':'0xFF00FF',
+	'yellowCarbon': '0xFFFF00',
+	'whiteCarbon' : '0xFFFFFF',
+	'orangeCarbon':'0xFF6600',
+	'purpleCarbon':'0x800080',
+	'blueCarbon'  : '0x0000FF'
+};
+//});
 
 // in an attempt to reduce memory overhead, cache all $3Dmol.Colors
 // this makes things a little faster
@@ -18,6 +66,7 @@ $3Dmol.CC = {
             return c;
         }
     },
+ 
     colorTab : {
         'white' : 0xFFFFFF,
         'silver' : 0xC0C0C0,
