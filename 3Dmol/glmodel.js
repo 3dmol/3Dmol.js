@@ -1449,10 +1449,15 @@ $3Dmol.GLModel = (function() {
                 if (selected[i].clickable) 
                     selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
+
                 if(!add) selected[i].style = {};
                 for(s in mystyle) {
+					selected[i].style[s]=selected[i].style[s]||{};
                     if(mystyle.hasOwnProperty(s)) {
-                        selected[i].style[s] = mystyle[s];
+						for(var prop in mystyle[s]){
+							console.log(prop+":"+mystyle[s][prop]);
+							selected[i].style[s][prop]=mystyle[s][prop];
+						}
                     }
                 }
             }

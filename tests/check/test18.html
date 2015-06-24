@@ -2,14 +2,6 @@
 <html>
 	<head>
 		 <script src="../../build/3Dmol.js"></script> 
-		 <script>
-			 var myFunc=functon(atom){
-				 if(atom.x>-10 && atom.x<10) {
-					 return true;
-				 }
-				 return false;
-			 };
-		 </script>
 		 <style>
             table td { text-align: center; }
             table th {padding-top: 1em;}
@@ -40,7 +32,7 @@
 		           viewer.setBackgroundColor(0xffffffff);
 
 		           viewer.setStyle({chain:'A',within:{distance:10.0,sel:{chain:'B'}}},{sphere:{color:'blue',radius:1.0}});  
-		           viewer.addStyle({chain:'A'},{stick:{color:'red'}});
+		           viewer.setStyle({chain:'B'},{stick:{color:'red'}});
 		                      					                              					                         				  
 		           viewer.render();
 		        });
