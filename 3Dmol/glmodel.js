@@ -119,7 +119,6 @@ $3Dmol.GLModel = (function() {
         var idMatrix = new $3Dmol.Matrix4();
         var noAssembly;
         var dontDuplicateAtoms;
-        var idList = [];
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
@@ -1037,13 +1036,11 @@ $3Dmol.GLModel = (function() {
          *
          */
         this.getSymmetries = function() {
-            if (modelData.symmetries.length > 1) {
-                return modelData.symmetries; //returns copyMatrices, which has ID matrix as 1st entry
+            
+            if (typeof(modelData.symmetries) == 'undefined') {
+                modelData.symmetries = [idMatrix];
             }
-            else {
-                    
-                return idList;
-            }
+            return modelData.symmetries; 
         };
         
         /**
@@ -1055,8 +1052,7 @@ $3Dmol.GLModel = (function() {
          */
         this.setSymmetries = function(list) {
             if (typeof(list) == "undefined") { //delete sym data
-                idList = [idMatrix];
-                modelData.symmetries = idList;
+                modelData.symmetries = [idMatrix];
             }
             else {
                 modelData.symmetries = list;
@@ -1207,6 +1203,7 @@ $3Dmol.GLModel = (function() {
          */
         this.selectedAtoms = function(sel, from) {
             var ret = [];
+            sel = sel || {};
             if (!from) from = atoms;
             var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
@@ -1491,7 +1488,7 @@ $3Dmol.GLModel = (function() {
          * @param {type} prop
          * @param {type} scheme
          */
-        this.setColorByProperty = function(sel, prop, scheme) {
+        this.setColorByProperty = function(sel, prop, scheme, range) {
             var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
@@ -1499,21 +1496,20 @@ $3Dmol.GLModel = (function() {
             var min =  Number.POSITIVE_INFINITY;
             var max =  Number.NEGATIVE_INFINITY;
             var i, a;
-            // compute the range            
-            for (i = 0; i < atoms.length; i++) {
-                a = atoms[i];
-                if(a.properties && typeof(a.properties[prop]) !== undefined) {
-                    var p = parseFloat(a.properties[prop]);
-                    if(p < min) min = p;
-                    if(p > max) max = p;
-                }                    
+            
+            if(!range) { //no explicit range, get from scheme
+                range = scheme.range();
+            }
+            
+            if(!range) { //no range in scheme, compute the range for this model
+                range = $3Dmol.getPropertyRange(atoms, prop);
             }
             // now apply colors using scheme
             for (i = 0; i < atoms.length; i++) {
                 a = atoms[i];
-                if(a.properties && typeof(a.properties[prop]) !== undefined) {
-                    var c = scheme.valueToHex(parseFloat(a.properties[prop]), [min,max]);
-                    a.color = c;
+                var val = $3Dmol.getAtomProperty(a, prop);
+                if(val != null) {
+                    a.color = scheme.valueToHex(parseFloat(a.properties[prop]), [range[0],range[1]]);
                 }                    
             }
         };

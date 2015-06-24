@@ -78,6 +78,16 @@ $3Dmol.getColorFromStyle = function(atom, style) {
         } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
             //actual color scheme provided
             color = style.colorscheme[atom.elem];
+        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
+                typeof(style.colorscheme.gradient) != 'undefined') {         
+            //apply a property mapping
+            var prop = style.colorscheme.prop;
+            var scheme = style.colorscheme.gradient;
+            var range = scheme.range() || [-1,1]; //sensible default
+            var val = $3Dmol.getAtomProperty(atom, prop);
+            if(val != null) {
+                color = scheme.valueToHex(val, range);
+            }
         }
     }
     var C = $3Dmol.CC.color(color);
