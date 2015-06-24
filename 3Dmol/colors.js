@@ -1,52 +1,67 @@
 //this is only used for create the enum documentation in JSDoc
-//(function() {
-	/**
- * built-in string for color values.
- * @readonly
- * @enum {string}
- */
-var colorTab = {
-	/** @description any hex number*/
-	    '0xFA0010':'0xFA0010',
-        'white' : '0xFFFFFF',
-        'silver' : '0xC0C0C0',
-        'gray' : '0x808080',
-        'grey' : '0x808080',
-        'black' : '0x000000',
-        'red' : '0xFF0000',
-        'maroon' : '0x800000',
-        'yellow' : '0xFFFF00',
-        'orange' : '0xFF6600',
-        'olive' : '0x808000',
-        'lime' : '0x00FF00',
-        'green' : '0x008000',
-        'aqua' : '0x00FFFF',
-        'cyan' : '0x00FFFF',
-        'teal' : '0x008080',
-        'blue' : '0x0000FF',
-        'navy' : '0x000080',
-        'fuchsia' : '0xFF00FF',
-        'magenta' : '0xFF00FF',
-        'purple' : '0x800080'
-};
-
+(function() {
 /**
- * built-in string for colorscheme.
- * @readonly
- * @enum {string}
+ * Color representation. 
+ * @typedef ColorSpec
+ * @prop {string} 0xAF10AB - any hex number
+ * @prop {string} white   - 0xFFFFFF
+ * @prop {string} silver  - 0xC0C0C0
+ * @prop {string} gray    - 0x808080
+ * @prop {string} grey    - 0x808080
+ * @prop {string} black   - 0x000000
+ * @prop {string} red     - 0xFF0000
+ * @prop {string} maroon  - 0x800000
+ * @prop {string} yellow  - 0xFFFF00
+ * @prop {string} orange  - 0xFF6600
+ * @prop {string} olive   - 0x808000
+ * @prop {string} lime    - 0x00FF00
+ * @prop {string} green   - 0x008000
+ * @prop {string} aqua    - 0x00FFFF
+ * @prop {string} cyan    - 0x00FFFF
+ * @prop {string} teal    - 0x008080
+ * @prop {string} blue    - 0x0000FF
+ * @prop {string} navy    - 0x000080
+ * @prop {string} fuchsia - 0xFF00FF
+ * @prop {string} magenta - 0xFF00FF
+ * @prop {string} purple  - 0x800080
+ */
+
+$3Dmol.elementColors.greenCarbon['C'] = 0x00ff00;
+
+
+$3Dmol.elementColors.cyanCarbon['C'] = 0x00ffff;
+
+
+$3Dmol.elementColors.magentaCarbon['C'] = 0xff00ff;
+
+
+$3Dmol.elementColors.yellowCarbon['C'] = 0xffff00;
+
+
+$3Dmol.elementColors.whiteCarbon['C'] = 0xffffff;
+
+
+$3Dmol.elementColors.orangeCarbon['C'] = 0xff6600;
+
+
+$3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
+
+$3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
+
+ /**
+ * Color scheme representation. 
+ * @typedef ColorschemeSpec
+ * @prop {string} greenCarbon   - 0x00FF00
+ * @prop {string} cyanCarbon    - 0x00FFFF
+ * @prop {string} magentaCarbon - 0xFF00FF
+ * @prop {string} yellowCarbon  - 0xFFFF00
+ * @prop {string} whiteCarbon   - 0xFFFFFF
+ * @prop {string} orangeCarbon  - 0xFF6600
+ * @prop {string} purpleCarbon  - 0x100080
+ * @prop {string} blueCarbon    - 0x0000FF
  */
  
-var colorschemeTab = {
-	'greenCarbon' : '0x00FF00',
-	'cyanCarbon'  : '0x00FFFF',
-	'magentaCarbon':'0xFF00FF',
-	'yellowCarbon': '0xFFFF00',
-	'whiteCarbon' : '0xFFFFFF',
-	'orangeCarbon':'0xFF6600',
-	'purpleCarbon':'0x800080',
-	'blueCarbon'  : '0x0000FF'
-};
-//});
+});
 
 // in an attempt to reduce memory overhead, cache all $3Dmol.Colors
 // this makes things a little faster
