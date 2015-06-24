@@ -156,8 +156,8 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} hidden - do not show 
          * @prop {number} linewidth 
          * @prop {number} radius 
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         /**
@@ -309,8 +309,8 @@ $3Dmol.GLModel = (function() {
         /**@typedef LineStyleSpec
          * @prop {boolean} hidden - do not show line
          * @prop {number} linewidth 
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         // bonds - both atoms must match bond style
@@ -475,8 +475,8 @@ $3Dmol.GLModel = (function() {
         /**@typedef SphereStyleSpec
          * @prop {boolean} hidden - do not show atom
          * @prop {number} radius - override van der waals radius
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         //sphere drawing
@@ -582,8 +582,8 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} hidden - do not show 
          * @prop {number} radius 
          * @prop {boolean} singleBonds - draw all bonds as single bonds if set
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         // draws cylinders and small spheres (at bond radius)
