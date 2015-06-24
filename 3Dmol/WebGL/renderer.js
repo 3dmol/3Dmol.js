@@ -1247,17 +1247,20 @@ $3Dmol.Renderer = function ( parameters ) {
         var object = globject.object;
         var material = object.material;
 
-        if ( material.transparent) {                    
+        if ( material.transparent ) {                    
             globject.opaque = null;
             globject.transparent = material;
-            var blankMaterial = material.clone();
-            blankMaterial.opacity = 0;
-            globject.blank = blankMaterial;
+            if(!material.wireframe){
+				var blankMaterial = material.clone();
+                blankMaterial.opacity = 0.0;
+                globject.blank = blankMaterial;
+			}
         }
 
         else {
             globject.opaque = material;
             globject.transparent = null;
+
         }
 
     }
