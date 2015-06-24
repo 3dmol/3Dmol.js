@@ -1432,8 +1432,6 @@ $3Dmol.GLModel = (function() {
                 }
             }
 
-            // do a copy to enforce style changes through this function
-            var mystyle = $.extend(true, {}, style);
             var changedAtoms = false;
             // somethings we only calculate if there is a change in a certain
             // style, although these checks will only catch cases where both
@@ -1451,11 +1449,11 @@ $3Dmol.GLModel = (function() {
                    
 
                 if(!add) selected[i].style = {};
-                for(s in mystyle) {
-					selected[i].style[s]=selected[i].style[s]||{};
-                    if(mystyle.hasOwnProperty(s)) {
-						for(var prop in mystyle[s]){
-							selected[i].style[s][prop]=mystyle[s][prop];
+                for(s in style) {
+                    if(style.hasOwnProperty(s)) {
+						selected[i].style[s]=selected[i].style[s]||{}; //create distinct object for each atom
+						for(var prop in style[s]){
+							selected[i].style[s][prop]=style[s][prop];
 						}
                     }
                 }

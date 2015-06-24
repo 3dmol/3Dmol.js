@@ -2118,6 +2118,7 @@ $3Dmol.GLViewer = (function() {
         // props is a list of objects that select certain atoms and enumerate
         // properties for those atoms
         /**
+         * @function $3Dmol.GLViewer#mapAtomProperties
          * Add specified properties to all atoms matching input argument
          * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
          * @param {AtomSelectionSpec} sel
