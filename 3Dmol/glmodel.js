@@ -1455,7 +1455,6 @@ $3Dmol.GLModel = (function() {
 					selected[i].style[s]=selected[i].style[s]||{};
                     if(mystyle.hasOwnProperty(s)) {
 						for(var prop in mystyle[s]){
-							console.log(prop+":"+mystyle[s][prop]);
 							selected[i].style[s][prop]=mystyle[s][prop];
 						}
                     }
