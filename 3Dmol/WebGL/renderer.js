@@ -1151,9 +1151,7 @@ $3Dmol.Renderer = function ( parameters ) {
                         geometry.colorsNeedUpdate = true;
                     }      
                 }
-                
             }
-        
         }
         
         if ( ! object.__webglActive ) {
