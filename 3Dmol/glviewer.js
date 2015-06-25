@@ -189,6 +189,7 @@ $3Dmol.GLViewer = (function() {
         
         // Checks for selection intersects on mousedown
         var handleClickSelection = function(mouseX, mouseY, event) {
+			console.log("handleClickSeletion invoked");
             if(clickables.length == 0) return;
             var mouse = {
                 x : mouseX,

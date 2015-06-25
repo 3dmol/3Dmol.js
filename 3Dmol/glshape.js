@@ -95,7 +95,7 @@ $3Dmol.GLShape = (function() {
         nvecs[5] = nvecs[4].clone().add(nvecs[6]).normalize();
         nvecs[7] = nvecs[6].clone().add(nvecs[8]).normalize();
         nvecs[9] = nvecs[8].clone().add(nvecs[10]).normalize();
-        nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();http://www.w3schools.com/jsref/dom_obj_canvas.asp
+        nvecs[11] = nvecs[10].clone().add(nvecs[12]).normalize();
         nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
         nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
 
