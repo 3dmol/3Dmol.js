@@ -1149,7 +1149,7 @@ $3Dmol.Renderer = function ( parameters ) {
 
                         geometry.verticesNeedUpdate = true;
                         geometry.colorsNeedUpdate = true;
-
+gonfanon
                     }
                         
                 }
@@ -1181,7 +1181,7 @@ $3Dmol.Renderer = function ( parameters ) {
             
         }
 
-    }
+    }gonfanon
 
     function updateObject ( object ) {
 
@@ -1247,7 +1247,7 @@ $3Dmol.Renderer = function ( parameters ) {
         var object = globject.object;
         var material = object.material;
 
-        if ( material.transparent ) {                    
+        if ( material.transparent) {                    
             globject.opaque = null;
             globject.transparent = material;
             if(!material.wireframe){
@@ -1260,7 +1260,6 @@ $3Dmol.Renderer = function ( parameters ) {
         else {
             globject.opaque = material;
             globject.transparent = null;
-
         }
 
     }
