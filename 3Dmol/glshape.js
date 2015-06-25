@@ -429,6 +429,19 @@ $3Dmol.GLShape = (function() {
                         .copy(vertexArr[c])));
             }
         }
+        
+        if(clickable) {
+            
+            var center = new $3Dmol.Vector3(0,0,0);
+            var cnt = 0;
+            for(var g = 0; g < geo.geometryGroups.length; g++) {
+                center.add(geo.geometryGroups[g].getCentroid());
+                cnt++;
+            }
+            center.divideScalar(cnt);
+            
+            updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, vertexArray);
+        }
 
         geoGroup.faceArray = new Uint16Array(faceArr);
 
@@ -522,20 +535,6 @@ $3Dmol.GLShape = (function() {
         for(var i = 0, n = splits.length; i < n; i++) {
             addCustomGeo(shape, geo, splits[i], color, customSpec.clickable);
         } 
-        
-        if(customSpec.clickable) {
-            
-            var center = new $3Dmol.Vector3(0,0,0);
-            var cnt = 0;
-            for(var g = firstgeo; g < geo.geometryGroups.length; g++) {
-                center.add(geo.geometryGroups[g].getCentroid());
-                cnt++;
-            }
-            center.divideScalar(cnt);
-            
-            updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, mesh.vertexArr);
-        }
-
     }; 
 
     // Update a bounding sphere's position and radius

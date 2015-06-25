@@ -37,6 +37,7 @@
                     viewer.addIsosurface(voldata, {isoval: -0.01, color: "red",smoothness: 5, opacity:0.5,
 						                            wireframe:true,linewidth:0.1,clickable:true, callback: 
 						                           function() {
+													   console.log("callback");
 													   this.opacity = 0.0;
 													   viewer.render();
 													   }}); 
