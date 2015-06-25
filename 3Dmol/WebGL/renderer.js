@@ -1149,8 +1149,7 @@ $3Dmol.Renderer = function ( parameters ) {
 
                         geometry.verticesNeedUpdate = true;
                         geometry.colorsNeedUpdate = true;
-                    }
-                        
+                    }      
                 }
                 
             }
