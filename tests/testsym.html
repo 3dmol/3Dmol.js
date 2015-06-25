@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>3Dmol.js Test</title>
+        <script src="../build/3Dmol.js"></script> 
+            
+        <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
+        <script>
+        var glviewer = null;
+        
+        $(document).ready(function() {
+                        
+            $.get("test_structs/4udv.pdb", function(data){
+                
+                var viewer = glviewer = $3Dmol.createViewer("gldiv");
+                    
+                glviewer.setBackgroundColor(0xffffff);
+                                        
+                var m1 = glviewer.addModel(data, "pdb",{keepH:false, doAssembly: true});   
+                
+                var m2 = glviewer.addModel(data, "pdb",{keepH:false, doAssembly: true});   
+                syms = m1.getSymmetries();
+                var sym1 = [];
+                var sym2 = [];
+                for(var i = 0; i < syms.length; i++) {
+                    if(i % 2 == 0) {
+                        sym1.push(syms[i]);
+                    } else {
+                        sym2.push(syms[i]);
+                    }
+                }
+                m1.setSymmetries(sym1);
+                m2.setSymmetries(sym2);
+
+                glviewer.addSurface($3Dmol.SurfaceType.VDW, {color: "white"},{model:m2});
+                
+                glviewer.addSurface($3Dmol.SurfaceType.VDW, {color: 0x00ccff},{model:m1});
+
+                //m1.setStyle({},{cartoon: {color: 0x4bdec}});            
+              //  m2.setStyle({},{cartoon: {color: "white"}});            
+                glviewer.zoomTo();
+                glviewer.render();
+
+                 
+
+            });
+        });
+        
+        </script>
+    </head>
+    <body>
+         <div id="gldiv" style="width: 100%; height: 90vh; margin: 0; padding: 0; border: 0; "></div> 
+
+         <hr style="margin: 0;"> 
+
+        <br>
+<center>
+        <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer, {doAssembly: true}, function() { glviewer.addSurface($3Dmol.SurfaceType.VDW,{colorscheme:'whiteCarbon'},{bonds:0,invert:true});});">Download</button><br>
+ </center>
+
+    </body>
+</html>

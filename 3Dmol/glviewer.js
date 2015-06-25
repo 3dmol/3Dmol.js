@@ -761,6 +761,17 @@ $3Dmol.GLViewer = (function() {
             return false;
         }
 
+        
+        /** return list of atoms selected by sel
+         * 
+         * @function $3Dmol.GLViewer#selectedAtoms
+         * @param {AtomSelectionSpec} sel
+         * @return {Array.<Object>}
+         */
+        this.selectedAtoms = function(sel) {
+            return getAtomsFromSel(sel);
+        };
+        
         /**
          * Return pdb output of selected atoms (if atoms from pdb input)
          * 
@@ -1341,9 +1352,24 @@ $3Dmol.GLViewer = (function() {
         };
 
         function applyToModels(func, sel, value1, value2) {
-            for (var i = 0; i < models.length; i++) {
-                if (models[i]) {
-                    models[i][func](sel, value1, value2);
+            
+            //apply func to all models that are selected by sel with value1 and 2
+            var ms = []
+            if (typeof sel.model === "undefined") {
+                for (i = 0; i < models.length; i++) {
+                    if (models[i])
+                        ms.push(models[i]);
+                }
+            } else { // specific to some models
+                ms = sel.model;
+                if (!$.isArray(ms))
+                    ms = [ ms ];
+            }
+            
+            
+            for (var i = 0; i < ms.length; i++) {
+                if (ms[i]) {
+                    ms[i][func](sel, value1, value2);
                 }
             }
         }
@@ -1711,34 +1737,6 @@ $3Dmol.GLViewer = (function() {
             return mat;
         }
 
-        // get the min and max values of the specified property in the provided
-        // atoms
-        function getPropertyRange(atomlist, prop) {
-            var min = Number.POSITIVE_INFINITY;
-            var max = Number.NEGATIVE_INFINITY;
-
-            for (var i = 0, n = atomlist.length; i < n; i++) {
-                var atom = atomlist[i];
-                if (atom.properties
-                        && typeof (atom.properties[prop]) != "undefined") {
-                    var val = atom.properties[prop];
-                    if (val < min)
-                        min = val;
-                    if (val > max)
-                        max = val;
-                }
-            }
-
-            if (!isFinite(min) && !isFinite(max))
-                min = max = 0;
-            else if (!isFinite(min))
-                min = max;
-            else if (!isFinite(max))
-                max = min;
-
-            return [ min, max ];
-        }
-
         
         /**
          * Adds an explicit mesh as a surface object.
@@ -1833,34 +1831,20 @@ $3Dmol.GLViewer = (function() {
                     /** @type {AtomSpec} */
                     var prop = style['map']['prop'];
                     /** @type {Gradient} */
-                    var scheme = style['map']['scheme'] || new $3Dmol.Gradient.RWB();
+                    var scheme = style['map']['scheme'] || style['map']['gradient'] || new $3Dmol.Gradient.RWB();
                     var range = scheme.range();
                     if (!range) {
-                        range = getPropertyRange(atomsToShow, prop);
+                        range = $3Dmol.getPropertyRange(atomsToShow, prop);
                     }
+                    style.colorscheme = {prop: prop, gradient: scheme};
 
-                    for (i = 0, il = atomlist.length; i < il; i++) {
-                        atom = atomlist[i];
-                        atom.surfaceColor = $3Dmol.CC.color(scheme.valueToHex(
-                                atom.properties[prop], range));
-                    }
                 }
-                else if(typeof(style['color']) != 'undefined') {
-                    //explicitly set color, otherwise material color just blends
-                    for (i = 0, il = atomlist.length; i < il; i++) {
-                        atom = atomlist[i];
-                        atom.surfaceColor = $3Dmol.CC.color(style['color']);
-                    }
-                }
-                else if(typeof(style['colorscheme']) != 'undefined') {
-                    for (i = 0, il = atomlist.length; i < il; i++) {
-                        atom = atomlist[i];
-                        var scheme = $3Dmol.elementColors[style.colorscheme];
-                                if(scheme && typeof(scheme[atom.elem]) != "undefined") {
-                                    atom.surfaceColor = $3Dmol.CC.color(scheme[atom.elem]);
-                                }
-                    }
-                }
+                
+                //cache surface color on each atom
+                for (i = 0, il = atomlist.length; i < il; i++) {
+                    atom = atomlist[i];
+                    atom.surfaceColor = $3Dmol.getColorFromStyle(atom, style);
+                }                
 
                 var totalVol = volume(extent); // used to scale resolution
                 var extents = carveUpExtent(extent, atomlist, atomsToShow);
@@ -2120,6 +2104,7 @@ $3Dmol.GLViewer = (function() {
         /**
          * @function $3Dmol.GLViewer#mapAtomProperties
          * Add specified properties to all atoms matching input argument
+         * @function $3Dmol.GLViewer#mapAtomProperties
          * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
          * @param {AtomSelectionSpec} sel
          */

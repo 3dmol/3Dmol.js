@@ -15,7 +15,6 @@ $3Dmol.Gradient = function(min, max) {};
  * @returns {number}
  */
 $3Dmol.Gradient.valueToHex = function(val, range) {};
-$3Dmol.Gradient.jmolID = function() {};
 //return range used for color mapping, null if none set
 $3Dmol.Gradient.range = function() {};
 
@@ -28,6 +27,11 @@ $3Dmol.Gradient.range = function() {};
  */
 $3Dmol.Gradient.RWB = function(min, max) {
     
+    if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
+        //we were passed a single range
+        max = min[1];
+        min = min[0];
+    }
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
         var lo, hi;
@@ -62,9 +66,6 @@ $3Dmol.Gradient.RWB = function(min, max) {
         }
     };
     
-    this.jmolID = function() {
-        return "rwb";
-    };
 
     //return range used for color mapping, null if none set
     this.range = function() {
@@ -82,7 +83,11 @@ $3Dmol.Gradient.RWB = function(min, max) {
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.ROYGB = function(min, max) {
-    
+    if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
+        //we were passed a single range
+        max = min[1];
+        min = min[0];
+    }
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
         var lo, hi;
@@ -128,10 +133,7 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
             return color;
         }        
     };
-    
-    this.jmolID = function() {
-        return "roygb";
-    };
+   
 
     //return range used for color mapping, null if none set
     this.range = function() {
@@ -149,7 +151,11 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.Sinebow = function(min, max) {
-    
+    if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
+        //we were passed a single range
+        max = min[1];
+        min = min[0];
+    }
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
         var lo, hi;
@@ -180,9 +186,6 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
         return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
     };
     
-    this.jmolID = function() {
-        return "sinebow";
-    };
 
     //return range used for color mapping, null if none set
     this.range = function() {
