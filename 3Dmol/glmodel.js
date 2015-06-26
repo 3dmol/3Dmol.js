@@ -155,8 +155,8 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} hidden - do not show 
          * @prop {number} linewidth 
          * @prop {number} radius 
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         /**
@@ -308,8 +308,8 @@ $3Dmol.GLModel = (function() {
         /**@typedef LineStyleSpec
          * @prop {boolean} hidden - do not show line
          * @prop {number} linewidth 
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         // bonds - both atoms must match bond style
@@ -474,8 +474,8 @@ $3Dmol.GLModel = (function() {
         /**@typedef SphereStyleSpec
          * @prop {boolean} hidden - do not show atom
          * @prop {number} radius - override van der waals radius
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         //sphere drawing
@@ -581,8 +581,8 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} hidden - do not show 
          * @prop {number} radius 
          * @prop {boolean} singleBonds - draw all bonds as single bonds if set
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         // draws cylinders and small spheres (at bond radius)
@@ -1218,7 +1218,6 @@ $3Dmol.GLModel = (function() {
             if (sel.hasOwnProperty("expand")) {
 
                 // get atoms in expanded bounding box
-
                 var expand = expandAtomList(ret, parseFloat(sel.expand));
                 var retlen = ret.length;
                 for (var i = 0; i < expand.length; i++) {
@@ -1430,8 +1429,6 @@ $3Dmol.GLModel = (function() {
                 }
             }
 
-            // do a copy to enforce style changes through this function
-            var mystyle = $.extend(true, {}, style);
             var changedAtoms = false;
             // somethings we only calculate if there is a change in a certain
             // style, although these checks will only catch cases where both
@@ -1447,10 +1444,14 @@ $3Dmol.GLModel = (function() {
                 if (selected[i].clickable) 
                     selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
+
                 if(!add) selected[i].style = {};
-                for(s in mystyle) {
-                    if(mystyle.hasOwnProperty(s)) {
-                        selected[i].style[s] = mystyle[s];
+                for(s in style) {
+                    if(style.hasOwnProperty(s)) {
+						selected[i].style[s]=selected[i].style[s]||{}; //create distinct object for each atom
+						for(var prop in style[s]){
+							selected[i].style[s][prop]=style[s][prop];
+						}
                     }
                 }
             }

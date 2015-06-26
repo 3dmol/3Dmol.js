@@ -204,7 +204,7 @@ $3Dmol.GLViewer = (function() {
             var intersects = [];
 
             intersects = raycaster.intersectObjects(modelGroup, clickables);
-
+console.log("intersects.length:"+intersects.length);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined
@@ -930,6 +930,7 @@ $3Dmol.GLViewer = (function() {
          * atom.x, y: atom.y, z: atom.z});
          * 
          * labels.push(l); }
+
          *  // Render labels glviewer.render();
          */
         this.addLabel = function(text, data) {
@@ -2101,6 +2102,7 @@ $3Dmol.GLViewer = (function() {
         // props is a list of objects that select certain atoms and enumerate
         // properties for those atoms
         /**
+         * @function $3Dmol.GLViewer#mapAtomProperties
          * Add specified properties to all atoms matching input argument
          * @function $3Dmol.GLViewer#mapAtomProperties
          * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
