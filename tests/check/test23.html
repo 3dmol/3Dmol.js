@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 		 <script src="../../build/3Dmol.js"></script> 
 		 <style>
             table td { text-align: center; }
@@ -21,7 +22,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>23 Programmatic <code>colorscheme map partialCharge</code></td>  
+            <th colspan=2 height=200px>23 Programmatic partialCharge<code>colorscheme map partialCharge</code></td>  
           </tr>
           <tr>
             <td width="50%"><div id="test23" style="width: 400px; height: 400px; position: relative;"></td>
@@ -30,8 +31,8 @@
                    var viewer = $3Dmol.createViewer($("#test23"));
                    $3Dmol.download("pdb:5BP0",viewer,{},function(){
 		           viewer.setBackgroundColor(0xffffffff);
-		           viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 	 
-		           viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 
+		           viewer.setStyle({chain:'A'},{sphere:{colorscheme:{prop:'partialCharge',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 	 
+		           /*viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 
 		           viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 
 		           viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 
 		           viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 
@@ -39,7 +40,7 @@
 		           viewer.setStyle({chain:'G'},{stick:{radius:.2,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 
 		           viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 
 		           viewer.setStyle({chain:'I'},{sphere:{hidden:true,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}}); 
-		           viewer.setStyle({chain:'J'},{sphere:{radius:3.0,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}});                              					                         				  
+		           viewer.setStyle({chain:'J'},{sphere:{radius:3.0,colorscheme:{prop:'partialCharge',scheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}});  */                            					                         				  
 		           viewer.render();
 		        });
               })();

@@ -530,7 +530,7 @@ $3Dmol.GLShape = (function() {
         }
         color =  $3Dmol.CC.color(color);
 
-        var firstgeo = geo.geometryGroups.length;
+        //var firstgeo = geo.geometryGroups.length;
         var splits = splitMesh(mesh);
         for(var i = 0, n = splits.length; i < n; i++) {
             addCustomGeo(shape, geo, splits[i], color, customSpec.clickable);
