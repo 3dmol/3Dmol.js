@@ -890,7 +890,7 @@ $3Dmol.Parsers = (function() {
 
     //as a first approximation for bound finding, have two cutoffs
     //TODO: actual radii table
-    var bigAtoms = {'S': true, 'CL': true, 'Cl': true};
+    var bigAtoms = {'S': true, 'CL': true, 'Cl': true, 'Au': true, 'AU':true, 'Sb':true, 'SB':true};
     
     // return true if atom1 and atom2 are probably bonded to each other
     // based on distance alone
