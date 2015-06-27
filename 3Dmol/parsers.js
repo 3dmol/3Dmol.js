@@ -492,16 +492,6 @@ $3Dmol.Parsers = (function() {
             return sections;
         }
 
-        // Parser puts all of the data in the file in an object
-        // uses getDataItem() to get an array for the data item
-        // given. The data item has the category name prepended to it.
-        // The possible categories and data items in each category are defined
-        // in
-        // the mmCIF specification
-        function getDataItem(dataItemName) {
-            mmCIF[dataItemName] = mmCIF[dataItemName] || [];
-            return mmCIF[dataItemName];
-        }
 
         var lines = str.split("\n");
         // Filter text to remove comments, trailing spaces, and empty lines
@@ -551,7 +541,7 @@ $3Dmol.Parsers = (function() {
                 lineNum++;
             } else if (linesFiltered[lineNum][0] === '_') {
                 var dataItemName = (linesFiltered[lineNum].split(/\s/)[0]).toLowerCase();
-                var dataItem = getDataItem(dataItemName);
+                var dataItem = (mmCIF[dataItemName] = mmCIF[dataItemName] || []);
 
                 // if nothing left on the line go to the next one
                 var restOfLine = linesFiltered[lineNum]
@@ -582,7 +572,7 @@ $3Dmol.Parsers = (function() {
                         || linesFiltered[lineNum][0] === '_') {
                     if (linesFiltered[lineNum] !== "") {
                         var dataItemName = (linesFiltered[lineNum].split(/\s/)[0]).toLowerCase();
-                        var dataItem = getDataItem(dataItemName);
+                        var dataItem = (mmCIF[dataItemName] = mmCIF[dataItemName] || []);
                         dataItems.push(dataItem);
                     }
                     lineNum++;
@@ -609,19 +599,30 @@ $3Dmol.Parsers = (function() {
         }
 
         // Pulls atom information out of the data
-        var atomsPreBonds = {};
+        var atomsPreBonds = [];
+        var currentIndex = 0;
         var atomCount = mmCIF._atom_site_id !== undefined ? mmCIF._atom_site_id.length
                         : mmCIF._atom_site_label.length;
+        var cell_a, cell_b, cell_c;
+        if (mmCIF._cell_length_a !== undefined) {
+            cell_a = parseFloat(mmCIF._cell_length_a);
+            cell_b = parseFloat(mmCIF._cell_length_b);
+            cell_c = parseFloat(mmCIF._cell_length_c);
+        }
         for (var i = 0; i < atomCount; i++) {
             if (mmCIF._atom_site_group_pdb !== undefined && mmCIF._atom_site_group_pdb[i] === "TER")
                 continue;
             var atom = {};
-            try {
-                atom.id = parseFloat(mmCIF._atom_site_id[i]); // Might not exist
-            } catch (_) {}
-            atom.x = parseFloat(mmCIF._atom_site_cartn_x[i]);
-            atom.y = parseFloat(mmCIF._atom_site_cartn_y[i]);
-            atom.z = parseFloat(mmCIF._atom_site_cartn_z[i]);
+            if (mmCIF._atom_site_cartn_x !== undefined) {
+                atom.x = parseFloat(mmCIF._atom_site_cartn_x[i]);
+                atom.y = parseFloat(mmCIF._atom_site_cartn_y[i]);
+                atom.z = parseFloat(mmCIF._atom_site_cartn_z[i]);
+            }
+            else {
+                atom.x = parseFloat(mmCIF._atom_site_fract_x[i]) * cell_a;
+                atom.y = parseFloat(mmCIF._atom_site_fract_y[i]) * cell_b;
+                atom.z = parseFloat(mmCIF._atom_site_fract_z[i]) * cell_c;
+            }
             atom.chain = mmCIF._atom_site_auth_asym_id ? mmCIF._atom_site_auth_asym_id[i] : undefined;
             atom.resi = mmCIF._atom_site_auth_seq_id ? parseInt(mmCIF._atom_site_auth_seq_id[i]) : undefined;
             atom.resn = mmCIF._atom_site_auth_comp_id ? mmCIF._atom_site_auth_comp_id[i].trim() : undefined;
@@ -633,38 +634,29 @@ $3Dmol.Parsers = (function() {
             atom.serial = i;
             atom.bondOrder = [];
             atom.properties = {};
-            atomsPreBonds[atom.id] = atom;
-        }
-        var atomsIndexed = [];
-        var currentIndex = 0;
-        for ( var id in atomsPreBonds) {
-            var atom = atomsPreBonds[id];
-            atom.index = currentIndex;
-            atomsIndexed[currentIndex] = atom;
-            currentIndex++;
+            atom.index = currentIndex++;
+            atomsPreBonds[atom.index] = atom;
         }
 
         // create a hash table of the atoms using label and sequence as keys
         var atomHashTable = {};
         for (var i = 0; i < atomCount; i++) {
-            var label_alt = mmCIF._atom_site_label_alt_id[i];
+            var label_alt = (mmCIF._atom_site_label_alt_id || [])[i];
             if (label_alt === undefined) {
                 label_alt = '.';
             }
-            var label_asym = mmCIF._atom_site_label_asym_id[i];
+            var label_asym = (mmCIF._atom_site_label_asym_id || [])[i];
             if (label_asym === undefined) {
                 label_asym = '.';
             }
-            var label_atom = mmCIF._atom_site_label_atom_id[i];
+            var label_atom = (mmCIF._atom_site_label_atom_id || [])[i];
             if (label_atom === undefined) {
                 label_atom = '.';
             }
-            var label_seq = mmCIF._atom_site_label_seq_id[i];
+            var label_seq = (mmCIF._atom_site_label_seq_id || [])[i];
             if (label_seq === undefined) {
                 label_seq = '.';
             }
-            var id = mmCIF._atom_site_id[i]; // If file is sorted, id will be
-                                                // i+1
 
             if (atomHashTable[label_alt] === undefined) {
                 atomHashTable[label_alt] = {};
@@ -676,7 +668,7 @@ $3Dmol.Parsers = (function() {
                 atomHashTable[label_alt][label_asym][label_atom] = {};
             }
 
-            atomHashTable[label_alt][label_asym][label_atom][label_seq] = id;
+            atomHashTable[label_alt][label_asym][label_atom][label_seq] = i;
         }
 
         if (false && mmCIF._struct_conn && mmCIF._struct_conn_id) {
@@ -735,9 +727,9 @@ $3Dmol.Parsers = (function() {
         }
 
         // atoms = atoms.concat(atomsPreBonds);
-        for (var i = 0; i < atomsIndexed.length; i++) {
-            delete atomsIndexed[i].index;
-            atoms.push(atomsIndexed[i]);
+        for (var i = 0; i < atomsPreBonds.length; i++) {
+            delete atomsPreBonds[i].index;
+            atoms.push(atomsPreBonds[i]);
         }
 
         assignBonds(atoms);
@@ -765,9 +757,6 @@ $3Dmol.Parsers = (function() {
             }
             processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
         }
-        
-        
-        
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -899,10 +888,10 @@ $3Dmol.Parsers = (function() {
 
     };
 
-	//as a first approximation for bound finding, have two cutoffs
-	//TODO: actual radii table
-	var bigAtoms = {'S': true, 'CL': true, 'Cl': true};
-					
+    //as a first approximation for bound finding, have two cutoffs
+    //TODO: actual radii table
+    var bigAtoms = {'S': true, 'CL': true, 'Cl': true};
+    
     // return true if atom1 and atom2 are probably bonded to each other
     // based on distance alone
     var areConnected = function(atom1, atom2) {
