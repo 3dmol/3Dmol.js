@@ -276,7 +276,7 @@ $3Dmol.Parsers = (function() {
                 atom.elem = "O";
 
             else if (tokens[0] == 17)
-                atom.elem = "CL";
+                atom.elem = "Cl";
 
             atom.x = parseFloat(tokens[2]) * convFactor;
             atom.y = parseFloat(tokens[3]) * convFactor;
@@ -321,7 +321,8 @@ $3Dmol.Parsers = (function() {
                     " ");
             var atom = {};
             atom.serial = i;
-            atom.atom = atom.elem = tokens[0];
+            var elem = tokens[0];
+            atom.atom = atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
             atom.x = parseFloat(tokens[1]);
             atom.y = parseFloat(tokens[2]);
             atom.z = parseFloat(tokens[3]);
@@ -369,7 +370,8 @@ $3Dmol.Parsers = (function() {
             line = lines[offset];
             offset++;
             var atom = {};
-            atom.atom = atom.elem = line.substr(31, 3).replace(/ /g, "");
+            var elem = line.substr(31, 3).replace(/ /g, "");
+            atom.atom = atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
 
             if (atom.elem != 'H' || !noH) {
                 atom.serial = i;
@@ -428,7 +430,7 @@ $3Dmol.Parsers = (function() {
             atom.bonds = [];
             atom.bondOrder = [];
             
-            atom.elem = currentAtom.l || 'C';
+            var elem = currentAtom.l || 'C';
             atoms.push(atom);
         }
         for (var i = 0; i < bondsInFile.length; i++) {
@@ -628,7 +630,8 @@ $3Dmol.Parsers = (function() {
             atom.resn = mmCIF._atom_site_auth_comp_id ? mmCIF._atom_site_auth_comp_id[i].trim() : undefined;
             atom.atom = mmCIF._atom_site_auth_atom_id ? mmCIF._atom_site_auth_atom_id[i].replace(/"/gm,'')  : undefined; //"primed" names are in quotes
             atom.hetflag = mmCIF._atom_site_group_pdb ? mmCIF._atom_site_group_pdb[i] === "HETA" : true;
-            atom.elem = mmCIF._atom_site_type_symbol[i];
+            var elem = mmCIF._atom_site_type_symbol[i];
+            atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
             atom.bonds = [];
             atom.ss = 'c';
             atom.serial = i;
@@ -819,7 +822,8 @@ $3Dmol.Parsers = (function() {
             tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
             var atom = {};
             // get element
-            atom.atom = atom.elem = tokens[5].split('.')[0];
+            var elem = tokens[5].split('.')[0];
+            atom.atom = atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
             if (atom.elem == 'H' && noH) {
                 // ignore
             } else {
@@ -888,14 +892,25 @@ $3Dmol.Parsers = (function() {
 
     };
 
-    //as a first approximation for bound finding, have two cutoffs
-    //TODO: actual radii table
-    var bigAtoms = {'S': true, 'CL': true, 'Cl': true, 'Au': true, 'AU':true, 'Sb':true, 'SB':true};
-    
+    var bondLength = function(elem) {
+        var bondTable = {
+            H :0.37,                                                                                                                                He:0.32,
+            Li:1.34,Be:0.90,                                                                                B :0.82,C :0.77,N :0.75,O :0.73,F :0.71,Ne:0.69,
+            Na:1.54,Mg:1.30,                                                                                Al:1.18,Si:1.11,P :1.06,S :1.02,Cl:0.99,Ar:0.97,
+            K :1.96,Ca:1.74,Sc:1.44,Ti:1.56,V :1.25,/* Cr */Mn:1.39,Fe:1.25,Co:1.26,Ni:1.21,Cu:1.38,Zn:1.31,Ga:1.26,Ge:1.22,/* As */Se:1.16,Br:1.14,Kr:1.10,
+            Rb:2.11,Sr:1.92,Y :1.62,Zr:1.48,Nb:1.37,Mo:1.45,Tc:1.56,Ru:1.26,Rh:1.35,Pd:1.31,Ag:1.53,Cd:1.48,In:1.44,Sn:1.41,Sb:1.38,Te:1.35,I :1.33,Xe:1.30,
+            Cs:2.25,Ba:1.98,Lu:1.60,Hf:1.50,Ta:1.38,W :1.46,Re:1.59,Os:1.28,Ir:1.37,Pt:1.28,Au:1.44,Hg:1.49,Tl:1.48,Pb:1.47,Bi:1.46,/* Po *//* At */Rn:1.45,
+
+            // None of the boottom row or any of the Lanthanides have bond lengths
+        }
+        return bondTable[elem] || 1.6;
+    }
     // return true if atom1 and atom2 are probably bonded to each other
     // based on distance alone
     var areConnected = function(atom1, atom2) {
-        var maxsq = 3.6;
+        var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
+        maxsq *= maxsq;
+        maxsq *= 1.01;
 
         var xdiff = atom1.x - atom2.x;
         xdiff *= xdiff;
@@ -914,17 +929,12 @@ $3Dmol.Parsers = (function() {
 
         if (isNaN(distSquared))
             return false;
-        if (distSquared < 0.5)
+        else if (distSquared < 0.5)
             return false; // maybe duplicate position.
-
-        if (distSquared > 1.3
-                && (atom1.elem == 'H' || atom2.elem == 'H' || atom1.elem == 'D' || atom2.elem == 'D'))
+        else if (distSquared > maxsq)
             return false;
-        if (distSquared < 3.6 && (bigAtoms[atom1.elem] || bigAtoms[atom2.elem]))
+        else
             return true;
-        if (distSquared > 2.78)
-            return false;
-        return true;
     };
 
     //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
@@ -1064,6 +1074,7 @@ $3Dmol.Parsers = (function() {
                 z = parseFloat(line.substr(46, 8));
                 b = parseFloat(line.substr(60, 8));
                 elem = line.substr(76, 2).replace(/ /g, "");
+                elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
                 if (elem === '') { // for some incorrect PDB files
                     elem = line.substr(12, 2).replace(/ /g, "");
                 }
