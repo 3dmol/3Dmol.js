@@ -605,11 +605,32 @@ $3Dmol.Parsers = (function() {
         var currentIndex = 0;
         var atomCount = mmCIF._atom_site_id !== undefined ? mmCIF._atom_site_id.length
                         : mmCIF._atom_site_label.length;
-        var cell_a, cell_b, cell_c;
+        function sqr(n) {
+            return n*n;
+        }
+        var cell_a, cell_b, cell_c, cell_alpha, cell_beta, cell_gamma, conversionMatrix;
         if (mmCIF._cell_length_a !== undefined) {
-            cell_a = parseFloat(mmCIF._cell_length_a);
-            cell_b = parseFloat(mmCIF._cell_length_b);
-            cell_c = parseFloat(mmCIF._cell_length_c);
+            var a = cell_a = parseFloat(mmCIF._cell_length_a);
+            var b = cell_b = parseFloat(mmCIF._cell_length_b);
+            var c = cell_c = parseFloat(mmCIF._cell_length_c);
+            var alpha = cell_alpha = parseFloat(mmCIF._cell_angle_alpha) * Math.PI / 180 || Math.PI / 2;
+            var beta = cell_beta = parseFloat(mmCIF._cell_angle_beta) * Math.PI / 180 || Math.PI / 2;
+            var gamma = cell_gamma = parseFloat(mmCIF._cell_angle_gamma) * Math.PI / 180 || Math.PI / 2;
+            var cos_alpha = Math.cos(alpha);
+            var cos_beta = Math.cos(beta);
+            var cos_gamma = Math.cos(gamma);
+            var sin_gamma = Math.sin(gamma);
+            conversionMatrix = [
+                [a, b*cos_gamma, c*cos_beta],
+                [0, b*sin_gamma, c*(cos_alpha-cos_beta*cos_gamma)/sin_gamma],
+                [0, 0, c*Math.sqrt(1-sqr(cos_alpha)-sqr(cos_beta)-sqr(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma)/sin_gamma]
+            ];
+        }
+        function fractionalToCartesian(a, b, c) {
+            var x = conversionMatrix[0][0]*a + conversionMatrix[0][1]*b + conversionMatrix[0][2]*c;
+            var y = conversionMatrix[1][0]*a + conversionMatrix[1][1]*b + conversionMatrix[1][2]*c;
+            var z = conversionMatrix[2][0]*a + conversionMatrix[2][1]*b + conversionMatrix[2][2]*c;
+            return {x:x, y:y, z:z};
         }
         for (var i = 0; i < atomCount; i++) {
             if (mmCIF._atom_site_group_pdb !== undefined && mmCIF._atom_site_group_pdb[i] === "TER")
@@ -621,9 +642,13 @@ $3Dmol.Parsers = (function() {
                 atom.z = parseFloat(mmCIF._atom_site_cartn_z[i]);
             }
             else {
-                atom.x = parseFloat(mmCIF._atom_site_fract_x[i]) * cell_a;
-                atom.y = parseFloat(mmCIF._atom_site_fract_y[i]) * cell_b;
-                atom.z = parseFloat(mmCIF._atom_site_fract_z[i]) * cell_c;
+                var coords = fractionalToCartesian(
+                        parseFloat(mmCIF._atom_site_fract_x[i]),
+                        parseFloat(mmCIF._atom_site_fract_y[i]),
+                        parseFloat(mmCIF._atom_site_fract_z[i]));
+                atom.x = coords.x;
+                atom.y = coords.y;
+                atom.z = coords.z;
             }
             atom.chain = mmCIF._atom_site_auth_asym_id ? mmCIF._atom_site_auth_asym_id[i] : undefined;
             atom.resi = mmCIF._atom_site_auth_seq_id ? parseInt(mmCIF._atom_site_auth_seq_id[i]) : undefined;
