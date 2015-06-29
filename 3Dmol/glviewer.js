@@ -1148,7 +1148,10 @@ console.log("intersects.length:"+intersects.length);
             spec.wireframe = true;
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
-            s.addLine(spec);
+            if (spec.dashed)
+                s = addLineDashed(spec, s);
+            else
+                s.addLine(spec);
             shapes.push(s);
 
             return s;
@@ -1217,6 +1220,56 @@ console.log("intersects.length:"+intersects.length);
             shapes.push(s);
             return s;
         };
+
+        function addLineDashed(spec, s) {
+            spec.dashLength = spec.dashLength || 0.5;
+            spec.gapLength = spec.gapLength || 0.5;
+            spec.start = spec.start || {};
+            spec.end = spec.end || {};
+            
+            var p1 = new $3Dmol.Vector3(spec.start.x || 0,
+        			spec.start.y || 0, spec.start.z || 0)
+        	var p2 = new $3Dmol.Vector3(spec.end.x,
+        			spec.end.y || 0, spec.end.z || 0);
+        			
+            var dir = new $3Dmol.Vector3();
+            var dash = new $3Dmol.Vector3();
+            var gap = new $3Dmol.Vector3();
+            var length, dashAmt, gapAmt;
+            var temp = p1.clone();
+            var drawn = 0;
+
+            dir.subVectors(p2, p1);
+            length = dir.length();
+            dir.normalize();
+            dash = dir.clone();
+            gap = dir.clone();
+            dash.multiplyScalar(spec.dashLength);
+            gap.multiplyScalar(spec.gapLength);
+            dashAmt = dash.length();
+            gapAmt = gap.length();
+
+            while (drawn < length) {
+                if ((drawn + dashAmt) > length) { 
+                    spec.start = p1;
+                    spec.end = p2;
+                    s.addLine(spec);
+                    break;
+                }
+                temp.addVectors(p1, dash); 
+                spec.start = p1;
+                spec.end = temp;
+                s.addLine(spec);
+                p1 = temp.clone();
+                drawn += dashAmt;
+
+                temp.addVectors(p1, gap);
+                p1 = temp.clone();   
+                drawn += gapAmt;
+            }
+        			
+        	return s;
+        }
 
         /**
          * Add custom shape component from user supplied function
