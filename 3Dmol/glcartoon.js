@@ -436,6 +436,8 @@ $3Dmol.drawCartoon = (function() {
                     else
                         thickness = defaultThickness;
 
+                    traceGeo.opacity = parseFloat(cartoon.opacity) || 1;
+
                     /* do not draw connections between different chains, but ignore
                        differences in reschain to properly support CA-only files */
                     if (curr && curr.chain === next.chain && curr.resi + 1 === next.resi)
@@ -462,10 +464,10 @@ $3Dmol.drawCartoon = (function() {
                     {
                         var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
                         traceMaterial.vertexColors = $3Dmol.FaceColors;
-                        var opacity = parseFloat(next.style.cartoon.opacity);
-                        if ( typeof(opacity) === "number" && opacity >= 0 && opacity < 1) {
+                        if ( typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
                             traceMaterial.transparent = true;
-                            traceMaterial.opacity = opacity;
+                            traceMaterial.opacity = traceGeo.opacity;
+                            delete traceGeo.opacity;
                         }
                         var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
                         group.add(traceMesh);
@@ -504,9 +506,9 @@ $3Dmol.drawCartoon = (function() {
 
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
-                            drawSmoothCurve(group, points[i], 1, colors, div, curr.style.cartoon.opacity);
+                            drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
                         if (fill)
-                            drawStrip(group, points[0], points[num - 1], colors, div, thickness, parseFloat(curr.style.cartoon.opacity));
+                            drawStrip(group, points[0], points[num - 1], colors, div, thickness, points.opacity);
 
                         // clear arrays for points and colors
                         points = [];
@@ -570,7 +572,7 @@ $3Dmol.drawCartoon = (function() {
                     terminalPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
 
-                // atoms used for drawing the NA base cylinders (diff for purines and pyramidines)
+                // atoms used for drawing the NA base cylinders (diff for purines and pyrimidines)
                 else if ((next.atom === "N1" && $.inArray(next.resn, purResns) != -1) ||
                          (next.atom === "N3" && $.inArray(next.resn, pyrResns) != -1))
                 {
@@ -603,19 +605,20 @@ $3Dmol.drawCartoon = (function() {
 
         // for default style, draw the last strand
         for (i = 0; !thickness && i < num; i++)
-            drawSmoothCurve(group, points[i], 1, colors, div, parseFloat(curr.style.cartoon.opacity));
+            drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
         if (fill)
-            drawStrip(group, points[0], points[num - 1], colors, div, thickness, parseFloat(curr.style.cartoon.opacity));
+            drawStrip(group, points[0], points[num - 1], colors, div, thickness, points.opacity);
+        delete points.opacity;
 
         if (traceGeo != null) // generate last mesh for trace geometry
         {
-            console.log("final trace");
+            console.log("traceGeo.opacity = " + traceGeo.opacity);
             var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             traceMaterial.vertexColors = $3Dmol.FaceColors;
-            var opacity = parseFloat(curr.style.cartoon.opacity);
-            if (typeof(opacity) === "number" && opacity >= 0 && opacity < 1) {
+            if (typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
                 traceMaterial.transparent = true;
-                traceMaterial.opacity = opacity;
+                traceMaterial.opacity = traceGeo.opacity;
+                delete traceGeo.opacity;
             }
             var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
             group.add(traceMesh);
@@ -654,6 +657,7 @@ $3Dmol.drawCartoon = (function() {
                 v.smoothen = true;
             pointsArray[i].push(v);
         }
+        pointsArray.opacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
     }
 
     // actual function call
