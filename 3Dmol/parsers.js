@@ -29,9 +29,12 @@ $3Dmol.Parsers = (function() {
 
             for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
-                if (aj.z - ai.z > 1.9) // can't be connected
+                if (aj.z - ai.z > 4.725) // can't be connected
                     break;
-                if (areConnected(ai, aj)) {
+                else if (Math.abs(aj.x - ai.x) > 4.725 || Math.abs(aj.y - ai.y) > 4.725) { // can't be connected either
+                    continue;
+                }
+                else if (areConnected(ai, aj)) {
                     if (ai.bonds.indexOf(aj.index) == -1) {
                         // only add if not already there
                         ai.bonds.push(aj.index);
@@ -935,7 +938,7 @@ $3Dmol.Parsers = (function() {
     var areConnected = function(atom1, atom2) {
         var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
         maxsq *= maxsq;
-        maxsq *= 1.01;
+        maxsq *= 1.05; // fudge factor
 
         var xdiff = atom1.x - atom2.x;
         xdiff *= xdiff;
