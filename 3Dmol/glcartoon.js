@@ -460,8 +460,9 @@ $3Dmol.drawCartoon = (function() {
                     }
 
                     if (curr && traceGeo && curr.style.cartoon &&
-                        (curr.style.cartoon != "trace" || curr.chain != next.chain || curr.resi+1 != next.resi))
+                        (curr.style.cartoon.style != "trace" || curr.chain != next.chain || curr.resi+1 != next.resi))
                     {
+                        console.log("new traceGeo")
                         var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
                         traceMaterial.vertexColors = $3Dmol.FaceColors;
                         if ( typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
