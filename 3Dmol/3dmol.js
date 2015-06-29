@@ -194,7 +194,13 @@ $3Dmol.specStringToObject = function(str) {
     str = str.replace(/%7E/,'~'); //copy/pasting urls sometimes does this
     //convert things that look like numbers into numbers
     var massage = function(val) {
-        if($.isNumeric(val)) return parseFloat(val);
+        if($.isNumeric(val)) {
+           //hexadecimal does not parse as float
+           if(Math.floor(parseFloat(val)) == parseInt(val)) {
+              return parseFloat(val);
+           }
+           return parseInt(val);
+        }
         return val;
     }
     
@@ -229,8 +235,10 @@ $3Dmol.specStringToObject = function(str) {
 return ret;
 }
 
-// computes the bounding box around the provided atoms
+
 /**
+ * @function $3Dmol.getExtent
+ * computes the bounding box around the provided atoms
  * @param {AtomSpec[]} atomlist
  * @return {Array}
  */
@@ -246,7 +254,8 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
         return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
     for (var i = 0; i < atomlist.length; i++) {
         var atom = atomlist[i];
-        if (atom === undefined)
+        if (typeof atom === 'undefined' || !isFinite(atom.x) ||
+                !isFinite(atom.y) || !isFinite(atom.z))
             continue;
         cnt++;
         xsum += atom.x;
@@ -280,4 +289,49 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
             [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
 };
 
+
+//return the value of an atom property prop, or null if non existent
+//looks first in properties, then in the atom itself
+$3Dmol.getAtomProperty = function(atom, prop) {
+    var val = null;
+    if (atom.properties
+            && typeof (atom.properties[prop]) != "undefined") {
+        val = atom.properties[prop];
+    } else if(typeof(atom[prop]) != 'undefined') {
+        val = atom[prop];
+    }
+    return val;
+};
+
+/* get the min and max values of the specified property in the provided
+* @function $3Dmol.getPropertyRange
+* @param {AtomSpec[]} atomlist - list of atoms to evaluate
+* @param {string} prop - name of property 
+* @return {Array} - [min, max] values
+*/
+$3Dmol.getPropertyRange = function (atomlist, prop) {
+    var min = Number.POSITIVE_INFINITY;
+    var max = Number.NEGATIVE_INFINITY;
+
+    for (var i = 0, n = atomlist.length; i < n; i++) {
+        var atom = atomlist[i];
+        var val = $3Dmol.getAtomProperty(atom, prop);
+        
+        if(val != null) {
+            if (val < min)
+                min = val;
+            if (val > max)
+                max = val;                
+        }
+    }
+
+    if (!isFinite(min) && !isFinite(max))
+        min = max = 0;
+    else if (!isFinite(min))
+        min = max;
+    else if (!isFinite(max))
+        max = min;
+
+    return [ min, max ];
+}
 

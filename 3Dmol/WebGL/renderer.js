@@ -1149,13 +1149,9 @@ $3Dmol.Renderer = function ( parameters ) {
 
                         geometry.verticesNeedUpdate = true;
                         geometry.colorsNeedUpdate = true;
-
-                    }
-                        
+                    }      
                 }
-                
             }
-        
         }
         
         if ( ! object.__webglActive ) {
@@ -1250,9 +1246,11 @@ $3Dmol.Renderer = function ( parameters ) {
         if ( material.transparent) {                    
             globject.opaque = null;
             globject.transparent = material;
-            var blankMaterial = material.clone();
-            blankMaterial.opacity = 0;
-            globject.blank = blankMaterial;
+            if(!material.wireframe){
+                var blankMaterial = material.clone();
+                blankMaterial.opacity = 0.0;
+                globject.blank = blankMaterial;
+            }
         }
 
         else {

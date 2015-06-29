@@ -128,10 +128,10 @@
          <hr style="margin: 0;"> 
 
         <br>
-        <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
+        <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow(0,50)}}}); glviewer.render();"></input>
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
-        <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
+        <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(glviewer.selectedAtoms(),'b'))}}}); glviewer.render();"></input>
         <input type="button" value="SphereI" onclick="glviewer.setStyle({},{spherei:{}}); glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>

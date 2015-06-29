@@ -72,12 +72,12 @@ $3Dmol.Label.prototype = {
          * @struct
          * @prop {string} font - font name, default sans-serif
          * @prop {number} fontSize - height of text, default 18
-         * @prop {string} fontColor - font color, default white
+         * @prop {ColorSpec} fontColor - font color, default white
          * @prop {number} fontOpacity - font opacity, default 1
          * @prop {number} borderThickness - line width of border around label, default 0
-         * @prop {string} borderColor - color of border, default backgroundColor
+         * @prop {ColorSpec} borderColor - color of border, default backgroundColor
          * @prop {string} borderOpacity - color of border
-         * @prop {string} backgroundColor - color of background, default black
+         * @prop {ColorSpec} backgroundColor - color of background, default black
          * @prop {string} backgroundOpacity - opacity of background, default 1
          * @prop {Object} position - x,y,z coordinates for label
          * @prop {boolean} inFront - always put labels in from of model
