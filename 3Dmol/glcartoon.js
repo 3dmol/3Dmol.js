@@ -8,7 +8,7 @@ var $3Dmol = $3Dmol || {};
 
 
 /**@typedef CartoonStyleSpec
- * @prop {string} color - solid color, may specify as 'spectrum'
+ * @prop {ColorSpec} color - solid color, may specify as 'spectrum'
  * @prop {string} style - style of cartoon rendering (currently just default and trace)
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
  * @prop {number} opacity - set transparency; transparency is set per-chain according to value of last backbone atom
