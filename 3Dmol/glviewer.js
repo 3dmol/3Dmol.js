@@ -1537,6 +1537,103 @@ console.log("intersects.length:"+intersects.length);
 
             return ret;
         };
+        
+        
+        // HalfEdgeRec used to store adjacency info of mesh
+        var HalfEdge=function(vertIdx){
+            this.vert=vertIdx; // Vertex index at the end of this half-edge
+            this.twin=null;    // Oppositely oriented adjacent half-edge
+            this.next=null;    //Next half-edge around the face
+		};
+		
+		var computeAdjacency=function(faces,faceCount,vertCount){
+			console.log("computeAdjacency");
+			//all pieces of the half-edge data structure
+			edges=[];
+			
+			// a hash table to hold the adjaceney info
+			// - Keys are pairs of vertex indices
+			// - Values are pointers to half-edge
+			var edgeTable={};
+			var len=0;
+			
+			//Plow through faces and fill all half-edge info except twin pointers:
+			for(var i=0;i<faceCount;i+=3){
+                var A=faces[i];
+                var B=faces[i+1];
+                var C=faces[i+2];
+               // console.log("A="+A+ " B="+ B+ " C="+C);
+                
+                //create the half-edge that goes from C to A
+                var CA=new HalfEdge(A);
+                edges.push(CA);
+                //create the half-edge that goes from A to B
+                var AB=new HalfEdge(B);
+                edges.push(AB);
+                //create the half-edge that goes from B to C
+                var BC=new HalfEdge(C);
+                edges.push(BC);
+                
+                CA.next=AB;
+                AB.next=BC;
+                BC.next=CA;
+                
+                edgeTable[C|(A<<16)]=CA; 
+                edgeTable[A|(B<<16)]=AB; 
+                edgeTable[B|(C<<16)]=BC;
+            }
+            
+            //varify that the mesh is clean
+            for(var key in edgeTable){
+				if(edgeTable.hasOwnProperty(key)){
+					len++;
+				}
+			}
+			if(len!=faceCount*3){
+				console.warn("Bad mesh: duplicated edges or inconsistent winding.len="+len+" faceCount="+faceCount);
+			}
+			
+			//Populate the twin pointers by iterating over the hash table
+			var boundaryCount=0;
+			for(var key in edgeTable){
+				if(edgeTable.hasOwnProperty(key)){
+					var twinKey=((key&0xffff)<<16)|(key>>16);
+					if(edgeTable.hasOwnProperty(twinKey)){
+						edgeTable[key].twin=edgeTable[twinKey];
+						edgeTable[twinKey].twin=edgeTable[key];
+					}else{
+						boundaryCount+=1;
+					}
+				}
+			}
+			
+			var ret=new Uint16Array(faceCount*6);
+			// Now that we have a half-edge structure, it's easy to create adjacency info for WebGL
+			if(boundaryCount>0){
+				console.log("Mesh is not watertight. Contains "+boundaryCount +" edges");
+				
+				for(var i=0;i<faceCount;i+=3){
+					ret[i*2+0]=edges[i+2].vert;
+					ret[i*2+1]=edges[i+0].twin==null?ret[i*2+0]:edges[i+0].twin.next.vert;
+					ret[i*2+2]=edges[i+0].vert;
+					ret[i*2+3]=edges[i+1].twin==null?ret[i*2+1]:edges[i+1].twin.next.vert;					
+					ret[i*2+4]=edges[i+1].vert;
+					ret[i*2+5]=edges[i+2].twin==null?ret[i*2+2]:edges[i+2].twin.next.vert;
+				}
+			}
+			else{
+				for(var i=0;i<faceCount;i+=3){
+					ret[i*2+0]=edges[i+2].vert;
+					ret[i*2+1]=edges[i+0].twin.next.vert;
+					ret[i*2+2]=edges[i+0].vert;
+					ret[i*2+3]=edges[i+1].twin.next.vert;					
+					ret[i*2+4]=edges[i+1].vert;
+					ret[i*2+5]=edges[i+2].twin.next.vert;
+				} 
+			}
+			
+			return ret;
+		};
 
         // create a mesh defined from the passed vertices and faces and material
         // Just create a single geometry chunk - broken up whether sync or not
@@ -1555,6 +1652,13 @@ console.log("intersects.length:"+intersects.length);
             // should split up mesh render)
             var geoGroup = geo.updateGeoGroup(0);
 
+            var v = VandF['vertices'];
+            console.log("v.length="+v.length);
+            var faces = VandF['faces'];            
+
+            //set colorArray of there are per-atom colors
+            var colorArray = geoGroup.colorArray;
+            
             // set colors for vertices
             var colors = [];
             for (i = 0, il = atoms.length; i < il; i++) {
@@ -1566,23 +1670,6 @@ console.log("intersects.length:"+intersects.length);
                         colors[i] = $3Dmol.CC.color(atom.color);
                 }
             }
-            
-            var vertexArray = geoGroup.vertexArray;
-
-            // reconstruct vertices and faces
-            var v = VandF['vertices'];
-            var offset;
-            var i, il;
-            for (i = 0, il = v.length; i < il; i++) {
-                offset = geoGroup.vertices * 3;
-                vertexArray[offset] = v[i].x;
-                vertexArray[offset + 1] = v[i].y;
-                vertexArray[offset + 2] = v[i].z;
-                geoGroup.vertices++;                
-            }
-
-            //set colorArray of there are per-atom colors
-            var colorArray = geoGroup.colorArray;
             
             if(mat.voldata && mat.volscheme) {
                 //convert volumetric data into colors
@@ -1609,7 +1696,22 @@ console.log("intersects.length:"+intersects.length);
                 }
             }
             
-            var faces = VandF['faces'];
+            // reconstruct vertices and faces
+            var vertexArray = geoGroup.vertexArray;
+
+            
+            var offset;
+            var i, il;
+            for (i = 0, il = v.length; i < il; i++) {
+                offset = geoGroup.vertices * 3;
+                vertexArray[offset] = v[i].x;
+                vertexArray[offset + 1] = v[i].y;
+                vertexArray[offset + 2] = v[i].z;
+                geoGroup.vertices++;                
+            }
+
+            
+
             geoGroup.faceidx = faces.length;// *3;
             geo.initTypedArrays();
 
@@ -1657,6 +1759,7 @@ console.log("intersects.length:"+intersects.length);
 
             }
             geoGroup.faceArray = new Uint16Array(faces);
+            //geoGroup.adjFaceArray = computeAdjacency(faces,faces.length,v.length);
             var mesh = new $3Dmol.Mesh(geo, mat);
             mesh.doubleSided = true;        
             return mesh;
@@ -1933,6 +2036,7 @@ console.log("intersects.length:"+intersects.length);
 
                     var rfunction = function(event) {
                         var VandF = event.data;
+//console.log("VandF.verts.length="+VandF["vertices"].length);
                         var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                         $3Dmol.mergeGeos(surfobj.geo, mesh);
                         _viewer.render();

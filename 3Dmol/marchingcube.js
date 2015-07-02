@@ -172,7 +172,6 @@ $3Dmol.MarchingCube = (function() {
             }
             
         }
-             
         
     };
 
