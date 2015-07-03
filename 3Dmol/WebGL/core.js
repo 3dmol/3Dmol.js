@@ -634,7 +634,9 @@ $3Dmol.Raycaster = (function() {
         if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof $3Dmol.Sphere) {
             sphere.copy(clickable.boundingSphere);
             sphere.applyMatrix4(group.matrixWorld);          
-            if (!raycaster.ray.isIntersectionSphere(sphere)) {               return intersects;
+            if (!raycaster.ray.isIntersectionSphere(sphere)) {     
+				console.log("not even intersect with bounding sphere");          
+				return intersects;
             }
         }      
         //Iterate through intersection objects

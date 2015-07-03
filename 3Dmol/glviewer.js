@@ -201,6 +201,20 @@ $3Dmol.GLViewer = (function() {
 
             raycaster.set(camera.position, mouseVector);
 
+//debugCode
+/*var v1 = new $3Dmol.Vector3();
+var v2 = new $3Dmol.Vector3();
+v2.copy(mouseVector).multiplyScalar(1);
+var spec={start:camera.position,end:v1.copy(camera.position).add(v2),wireframe:true};
+console.log("start=("+spec.start.x+","+spec.start.y+","+spec.start.z+")");
+console.log("end=("+spec.end.x+","+spec.end.y+","+spec.end.z+")");
+console.log("mouseVector=("+mouseVector.x+","+mouseVector.y+","+mouseVector.z);
+*/
+console.log("mouse=("+mouse.x+","+mouse.y+","+mouse.z+")");
+
+
+
+
             var intersects = [];
 
             intersects = raycaster.intersectObjects(modelGroup, clickables);
@@ -264,9 +278,18 @@ console.log("intersects.length:"+intersects.length);
                 var x = xy[0];
                 var y = xy[1];
                 if(x == mouseStartX && y == mouseStartY) {
-                    var offset = $(container).offset();
+                    var offset = $('canvas').offset();
                     var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
+
+console.log("offset.left="+offset.left);
+console.log("offset.top="+offset.top);
+console.log("x="+x);
+console.log("y="+y);
+console.log("WIDTH="+WIDTH);
+console.log("HEIGHT="+HEIGHT);
+console.log("mouseX="+mouseX);
+console.log("mouseY="+mouseY);
 
                     handleClickSelection(mouseX, mouseY, ev, container);
                 }
@@ -1892,7 +1915,7 @@ console.log("intersects.length:"+intersects.length);
             // will get added asynchronously
             // all atoms in atomlist are used to compute surfaces, but only the
             // surfaces
-            // of atomsToShow are displayed (e.g., for showing cavities)
+            // of atomsToShow are displayed (e.g., for shcameraowing cavities)
             // if focusSele is specified, will start rending surface around the
             // atoms specified by this selection
             var atomlist = null, focusSele = null;
@@ -2036,7 +2059,6 @@ console.log("intersects.length:"+intersects.length);
 
                     var rfunction = function(event) {
                         var VandF = event.data;
-//console.log("VandF.verts.length="+VandF["vertices"].length);
                         var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                         $3Dmol.mergeGeos(surfobj.geo, mesh);
                         _viewer.render();
@@ -2256,6 +2278,7 @@ console.log("intersects.length:"+intersects.length);
             console.log("error with glviewer callback: " + e);
         }
     }
+
 
     return GLViewer;
 
