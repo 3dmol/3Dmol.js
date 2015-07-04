@@ -22,7 +22,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>25 pqr b-factor<code> isoval color alpha smoothness opacity wireframe linewidth clickable callback</code></td>  
+            <th colspan=2 height=200px>25 pqr partialCharge<code> don't know if the gray surface is correct</code></td>  
           </tr>
           <tr>
             <td width="50%"><div id="test25" style="width: 400px; height: 400px; position: relative;"></td>
@@ -30,13 +30,12 @@
                 (function() {
                    var viewer = $3Dmol.createViewer($("#test25"));
                    viewer.setBackgroundColor(0xffffffff);
-                   
 
                    $.get('volData/1fas.pqr', function(data){
                     viewer.addModel(data, "pqr"); 
                          $.get("volData/1fas.cube",function(volumedata){
 					     viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), 
-							                                        volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))},{});
+							                                        volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))},{});
 				   });           
                    viewer.zoomTo();
                    viewer.render();
@@ -49,3 +48,4 @@
 
 	</body>
 </html>
+

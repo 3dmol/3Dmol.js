@@ -22,7 +22,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>27 pqr b-factor<code> don't know the gray surface is correct</code></td>  
+            <th colspan=2 height=200px>27 pqr partialCharge<code> don't know if the gray surface is correct</code></td>  
           </tr>
           <tr>
             <td width="50%"><div id="test27" style="width: 400px; height: 400px; position: relative;"></td>
@@ -36,7 +36,7 @@
                     viewer.addModel(data, "pqr"); 
                          $.get("volData/1fas.cube",function(volumedata){
 					     viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), 
-							                                        volscheme: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))},{});
+							                                        volscheme: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))},{});
 				   });           
                    viewer.zoomTo();
                    viewer.render();

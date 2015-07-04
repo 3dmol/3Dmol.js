@@ -200,21 +200,6 @@ $3Dmol.GLViewer = (function() {
             mouseVector.sub(camera.position).normalize();
 
             raycaster.set(camera.position, mouseVector);
-
-//debugCode
-/*var v1 = new $3Dmol.Vector3();
-var v2 = new $3Dmol.Vector3();
-v2.copy(mouseVector).multiplyScalar(1);
-var spec={start:camera.position,end:v1.copy(camera.position).add(v2),wireframe:true};
-console.log("start=("+spec.start.x+","+spec.start.y+","+spec.start.z+")");
-console.log("end=("+spec.end.x+","+spec.end.y+","+spec.end.z+")");
-console.log("mouseVector=("+mouseVector.x+","+mouseVector.y+","+mouseVector.z);
-*/
-console.log("mouse=("+mouse.x+","+mouse.y+","+mouse.z+")");
-
-
-
-
             var intersects = [];
 
             intersects = raycaster.intersectObjects(modelGroup, clickables);
@@ -281,16 +266,6 @@ console.log("intersects.length:"+intersects.length);
                     var offset = $('canvas').offset();
                     var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
-
-console.log("offset.left="+offset.left);
-console.log("offset.top="+offset.top);
-console.log("x="+x);
-console.log("y="+y);
-console.log("WIDTH="+WIDTH);
-console.log("HEIGHT="+HEIGHT);
-console.log("mouseX="+mouseX);
-console.log("mouseY="+mouseY);
-
                     handleClickSelection(mouseX, mouseY, ev, container);
                 }
             }
@@ -1676,7 +1651,6 @@ console.log("mouseY="+mouseY);
             var geoGroup = geo.updateGeoGroup(0);
 
             var v = VandF['vertices'];
-            console.log("v.length="+v.length);
             var faces = VandF['faces'];            
 
             //set colorArray of there are per-atom colors

@@ -442,10 +442,6 @@ $3Dmol.GLShape = (function() {
             
             
             updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, vertexArray);
-//debugCode
-shape.addSphere(shape.boundingSphere);
-//console.log("center=("+shape.boundingSphere.center.x+","+shape.boundingSphere.center.y+","+shape.boundingSphere.center.z+")");
-//console.log("radius="+shape.boundingSphere.radius);
         }
 
         geoGroup.faceArray = new Uint16Array(faceArr);

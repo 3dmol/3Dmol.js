@@ -22,7 +22,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>26 pqr partialCharge<code> don't know if the gray surface is correct</code></td>  
+            <th colspan=2 height=200px>28 pqr partialCharge</td>  
           </tr>
           <tr>
             <td width="50%"><div id="test25" style="width: 400px; height: 400px; position: relative;"></td>
@@ -36,7 +36,7 @@
                     viewer.addModel(data, "pqr"); 
                          $.get("volData/1fas.cube",function(volumedata){
 					     viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), 
-							                                        volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))},{});
+							                                        volscheme: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))},{});
 				   });           
                    viewer.zoomTo();
                    viewer.render();

@@ -634,8 +634,7 @@ $3Dmol.Raycaster = (function() {
         if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof $3Dmol.Sphere) {
             sphere.copy(clickable.boundingSphere);
             sphere.applyMatrix4(group.matrixWorld);          
-            if (!raycaster.ray.isIntersectionSphere(sphere)) {     
-				console.log("not even intersect with bounding sphere");          
+            if (!raycaster.ray.isIntersectionSphere(sphere)) {             
 				return intersects;
             }
         }      
@@ -689,9 +688,10 @@ $3Dmol.Raycaster = (function() {
                 if ( (s < 0 || s > 1) || s + t > 1)
                     continue;
                     
-                else
+                else{
                     intersects.push({clickable : clickable,
-                                     distance : distance});  
+                                     distance : distance});
+				}  
             }
         }    
         //cylinders

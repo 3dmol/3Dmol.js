@@ -1083,13 +1083,6 @@ $3Dmol.Ray.prototype = {
         return function(point) {
             var directionDistance = v1.subVectors(point, this.origin).dot(this.direction);
             v1.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
-//debugCode
-/*console.log("directionDistance="+directionDistance);
-console.log("direction        =("+this.direction.x+","+this.direction.y+","+this.direction.z+")");
-console.log("origin           =("+this.origin.x+","+this.origin.y+","+this.origin.z+")");
-console.log("v1               =("+v1.x+","+v1.y+","+v1.z+")");
-console.log("point            =("+point.x+","+point.y+","+point.z+")");*/
-
             return v1.distanceTo(point);
         };
         
@@ -1100,7 +1093,6 @@ console.log("point            =("+point.x+","+point.y+","+point.z+")");*/
     },
     
     isIntersectionSphere : function(sphere) {
-console.log("sphere.radius="+sphere.radius);
        return (this.distanceToPoint(sphere.center) <= sphere.radius);
           
     },
