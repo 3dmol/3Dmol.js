@@ -14,7 +14,7 @@
 $3Dmol.GLViewer = (function() {
     // private class variables
     var numWorkers = 4; // number of threads for surface generation
-    var maxVolume = 64000; // how much to break up surface calculations
+    var maxVolume = 56000; // how much to break up surface calculations
 
     // private class helper functions
 
