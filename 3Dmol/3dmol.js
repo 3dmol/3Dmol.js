@@ -199,7 +199,12 @@ $3Dmol.specStringToObject = function(str) {
            if(Math.floor(parseFloat(val)) == parseInt(val)) {
               return parseFloat(val);
            }
-           return parseInt(val);
+           else if(val.indexOf('.') >= 0) {
+               return parseFloat(val); // ".7" for example, does not parseInt
+           }
+           else {
+               return parseInt(val);
+           }
         }
         return val;
     }

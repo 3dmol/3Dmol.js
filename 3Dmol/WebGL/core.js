@@ -274,6 +274,14 @@ $3Dmol.Object3D.prototype = {
         
         return object;
         
+    },
+    
+    setVisible: function(val) { //recursively set visibility
+        this.visible = val;
+        for (var i = 0; i < this.children.length; i++) {
+            var child = this.children[i];
+            child.setVisible(val);
+        }
     }
     
 };

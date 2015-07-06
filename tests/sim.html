@@ -31,15 +31,16 @@
                             
                         for(var i = 1; i < frames.length; i++) {
                             var m = glviewer.addModel(frames[i],"pdb");
-                            m.setStyle({},{cartoon:{hidden:true}});
+                            m.setStyle({},{cartoon:{color:"spectrum"}});
+                            m.hide();
                             models.push(m);
                         }
                         
                         var currmol = 0;
                         var display = function() {
-                            models[currmol].setStyle({},{cartoon:{hidden:true}});
+                            models[currmol].hide();
                             currmol = (currmol+1) % models.length;
-                            models[currmol].setStyle({}, {cartoon:{color:"spectrum"}});
+                            models[currmol].show();
                             glviewer.render();
                         };
                         setInterval(display, 100);

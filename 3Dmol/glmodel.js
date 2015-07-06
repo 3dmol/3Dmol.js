@@ -112,6 +112,7 @@ $3Dmol.GLModel = (function() {
         // private variables
         var atoms = [];
         var id = mid;
+        var hidden = false;
         var molObj = null;
         var renderedMolObj = null;
         var lastColors = null;
@@ -334,7 +335,7 @@ $3Dmol.GLModel = (function() {
             if (!geos[linewidth])
                 geos[linewidth] = new $3Dmol.Geometry();
             /** @type {geometryGroup} */
-            var geoGroup = geos[linewidth].updateGeoGroup(2*atom.bonds.length);
+            var geoGroup = geos[linewidth].updateGeoGroup(6*atom.bonds.length); //reserve enough space even for triple bonds
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -1532,7 +1533,11 @@ $3Dmol.GLModel = (function() {
                     renderedMolObj = null;
                 }
                 renderedMolObj = molObj.clone();
-                group.add(renderedMolObj);
+                if(hidden) {
+                    renderedMolObj.setVisible(false);
+                    molObj.setVisible(false);
+                }
+                group.add(renderedMolObj);              
             }
         };
         
@@ -1551,6 +1556,23 @@ $3Dmol.GLModel = (function() {
             }
             molObj = null;
         };
+        
+        /** Don't show this model is future renderings.  Keep all styles and state
+         * so it can be efficiencly shown again.
+         * 
+         * @function $3Dmol.GLModel#hide
+         */
+        this.hide = function() {
+            hidden = true;
+            if(renderedMolObj) renderedMolObj.setVisible(false);
+            if(molObj) molObj.setVisible(false);
+        }
+        
+        this.show = function() {
+            hidden = false;
+            if(renderedMolObj) renderedMolObj.setVisible(true);
+            if(molObj) molObj.setVisible(true);
+        }
         
         /** Create labels for residues of selected atoms.
          * Will create a single label at the center of mass of all atoms
