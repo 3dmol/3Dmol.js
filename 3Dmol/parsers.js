@@ -1102,9 +1102,10 @@ $3Dmol.Parsers = (function() {
                 z = parseFloat(line.substr(46, 8));
                 b = parseFloat(line.substr(60, 8));
                 elem = line.substr(76, 2).replace(/ /g, "");
-                elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
                 if (elem === '') { // for some incorrect PDB files
                     elem = line.substr(12, 2).replace(/ /g, "");
+                } else {
+                    elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();                    
                 }
 
                 if((elem == 'H' || elem == 'HH' || elem == 'HD' || elem == 'HG') && noH)

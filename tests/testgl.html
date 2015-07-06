@@ -106,15 +106,15 @@
                                         
                 receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false});   
                 m.setStyle({elem: 'O',serial: 16},{clickable: true, callback: atomcallback});
-                glviewer.mapAtomProperties(function(a) { a.properties['b'] = a.b;});
-                m.setColorByProperty({}, 'b', new $3Dmol.Gradient.Sinebow(0,50));
+
             //   glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.5,.5)}, opacity:0.8});
             
                 glviewer.setStyle({},{stick:{}});            
                 
                 var gradient = new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(glviewer.selectedAtoms(),'b'));
-                glviewer.setStyle({},{sphere:{colorscheme:{prop:'b',gradient: gradient}}});
-                
+
+                viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme:{prop:'b',gradient: gradient}});
+
                 glviewer.zoomTo();
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
