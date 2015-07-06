@@ -12,3 +12,4 @@ script.map
 my_pdbs/
 build
 doc
+.DS_Store
