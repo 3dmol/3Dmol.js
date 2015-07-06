@@ -295,6 +295,7 @@ $3Dmol.Geometry = (function() {
         this.colorArray = null;
         this.normalArray = null;
         this.faceArray = null;
+        //this.adjFaceArray=null;
         this.lineArray = null;
         this.vertices = 0;
         this.faceidx = 0;
@@ -414,7 +415,7 @@ $3Dmol.Geometry = (function() {
         if (mesh) {
             this.normalArray = normalArr.subarray(0,this.vertices*3);
             this.faceArray = faceArr.subarray(0,this.faceidx); 
-
+            
             if(this.lineidx > 0) //not always set so reclaim memory
                 this.lineArray = lineArr.subarray(0,this.lineidx); 
             else
@@ -623,8 +624,7 @@ $3Dmol.Raycaster = (function() {
         matrixPosition.getPositionFromMatrix(group.matrixWorld);
         
         if ((clickable.clickable !== true) || (clickable.intersectionShape === undefined))
-            return intersects;
-console.log("627");        
+            return intersects;       
         var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
         precision *= group.matrixWorld.getMaxScaleOnAxis();
@@ -633,14 +633,11 @@ console.log("627");
         //Check for intersection with clickable's bounding sphere, if it exists
         if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof $3Dmol.Sphere) {
             sphere.copy(clickable.boundingSphere);
-            sphere.applyMatrix4(group.matrixWorld);
-console.log("center:"+sphere.center.x+" "+sphere.center.y+" "+sphere.center.z+" radius:"+sphere.radius);
-console.log("ray:"+raycaster.ray.origin.x+" "+raycaster.ray.origin.y+" "+raycaster.ray.origin.z+" direction:"+raycaster.ray.direction.x+" "+raycaster.ray.direction.y+" "+raycaster.ray.direction.z);          
-            if (!raycaster.ray.isIntersectionSphere(sphere)) {
-console.log("639");                return intersects;
+            sphere.applyMatrix4(group.matrixWorld);          
+            if (!raycaster.ray.isIntersectionSphere(sphere)) {             
+				return intersects;
             }
-        }
-console.log("642");        
+        }      
         //Iterate through intersection objects
         var i, il,
             norm, normProj, cylProj, rayProj,
@@ -691,12 +688,12 @@ console.log("642");
                 if ( (s < 0 || s > 1) || s + t > 1)
                     continue;
                     
-                else
+                else{
                     intersects.push({clickable : clickable,
-                                     distance : distance});  
+                                     distance : distance});
+				}  
             }
-        }
-console.log("698");        
+        }    
         //cylinders
         for (i = 0, il = intersectionShape.cylinder.length; i < il; i++) {
             
@@ -761,8 +758,7 @@ console.log("698");
                 
             }
             
-        }
-console.log("764");        
+        }       
         //lines
         for (i = 0, il = intersectionShape.line.length; i < il; i += 2) {
             
@@ -801,7 +797,6 @@ console.log("764");
                                 });
             
         }
-console.log("803");
         for (i = 0, il = intersectionShape.sphere.length; i < il; i++) {
             //sphere
             if (intersectionShape.sphere[i] instanceof $3Dmol.Sphere) {
@@ -834,7 +829,6 @@ console.log("803");
     
                     intersects.push({clickable : clickable, 
                                      distance : distance});
-console.log("just before return in intersectObject");
                     return intersects;
                 }
             }        

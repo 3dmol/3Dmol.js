@@ -1076,14 +1076,13 @@ $3Dmol.Ray.prototype = {
         
     },
     
-    distanceToPoint : function() {
+    distanceToPoint : function(point) {
         
         var v1 = new $3Dmol.Vector3();
         
         return function(point) {
             var directionDistance = v1.subVectors(point, this.origin).dot(this.direction);
             v1.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
-            
             return v1.distanceTo(point);
         };
         
@@ -1094,7 +1093,6 @@ $3Dmol.Ray.prototype = {
     },
     
     isIntersectionSphere : function(sphere) {
-       
        return (this.distanceToPoint(sphere.center) <= sphere.radius);
           
     },

@@ -33,7 +33,7 @@ $3Dmol.drawCartoon = (function() {
     var axisDIV = 5; // 3 still gives acceptable quality
     var strandDIV = 6;
     var nucleicAcidStrandDIV = 4;
-    var tubeDIV = 8;
+    var tubeDIV = 18;
     var coilWidth = 0.3;
     var helixSheetWidth = 1.3;
     var nucleicAcidWidth = 0.8;
@@ -349,6 +349,104 @@ $3Dmol.drawCartoon = (function() {
         
         geo.initTypedArrays();
         geo.setUpNormals();
+        
+                // HalfEdgeRec used to store adjacency info of mesh
+        var HalfEdge=function(vertIdx){
+            this.vert=vertIdx; // Vertex index at the end of this half-edge
+            this.twin=null;    // Oppositely oriented adjacent half-edge
+            this.next=null;    //Next half-edge around the face
+		};
+		
+		var computeAdjacency=function(faces,faceCount,vertCount){
+			console.log("computeAdjacency");
+			//all pieces of the half-edge data structure
+			edges=[];
+			
+			// a hash table to hold the adjaceney info
+			// - Keys are pairs of vertex indices
+			// - Values are pointers to half-edge
+			var edgeTable={};
+			var len=0;
+			
+			//Plow through faces and fill all half-edge info except twin pointers:
+			for(var i=0;i<faceCount;i+=3){
+                var A=faces[i];
+                var B=faces[i+1];
+                var C=faces[i+2];
+               // console.log("A="+A+ " B="+ B+ " C="+C);
+                
+                //create the half-edge that goes from C to A
+                var CA=new HalfEdge(A);
+                edges.push(CA);
+                //create the half-edge that goes from A to B
+                var AB=new HalfEdge(B);
+                edges.push(AB);
+                //create the half-edge that goes from B to C
+                var BC=new HalfEdge(C);
+                edges.push(BC);
+                
+                CA.next=AB;
+                AB.next=BC;
+                BC.next=CA;
+                
+                edgeTable[C|(A<<16)]=CA; 
+                edgeTable[A|(B<<16)]=AB; 
+                edgeTable[B|(C<<16)]=BC;
+            }
+            
+            //varify that the mesh is clean
+            for(var key in edgeTable){
+				if(edgeTable.hasOwnProperty(key)){
+					len++;
+				}
+			}
+			if(len!=faceCount*3){
+				console.warn("Bad mesh: duplicated edges or inconsistent winding.len="+len+" faceCount="+faceCount+" vertCount="+vertCount);
+			}
+			
+			//Populate the twin pointers by iterating over the hash table
+			var boundaryCount=0;
+			for(var key in edgeTable){
+				if(edgeTable.hasOwnProperty(key)){
+					var twinKey=((key&0xffff)<<16)|(key>>16);
+					if(edgeTable.hasOwnProperty(twinKey)){
+						edgeTable[key].twin=edgeTable[twinKey];
+						edgeTable[twinKey].twin=edgeTable[key];
+					}else{
+						boundaryCount+=1;
+					}
+				}
+			}
+			
+			var ret=new Uint16Array(faceCount*6);
+			// Now that we have a half-edge structure, it's easy to create adjacency info for WebGL
+			if(boundaryCount>0){
+				console.log("Mesh is not watertight. Contains "+boundaryCount +" edges");
+				
+				for(var i=0;i<faceCount;i+=3){
+					ret[i*2+0]=edges[i+2].vert;
+					ret[i*2+1]=edges[i+0].twin==null?ret[i*2+0]:edges[i+0].twin.next.vert;
+					ret[i*2+2]=edges[i+0].vert;
+					ret[i*2+3]=edges[i+1].twin==null?ret[i*2+1]:edges[i+1].twin.next.vert;					
+					ret[i*2+4]=edges[i+1].vert;
+					ret[i*2+5]=edges[i+2].twin==null?ret[i*2+2]:edges[i+2].twin.next.vert;
+				}
+			}
+			else{
+				for(var i=0;i<faceCount;i+=3){
+					ret[i*2+0]=edges[i+2].vert;
+					ret[i*2+1]=edges[i+0].twin.next.vert;
+					ret[i*2+2]=edges[i+0].vert;
+					ret[i*2+3]=edges[i+1].twin.next.vert;					
+					ret[i*2+4]=edges[i+1].vert;
+					ret[i*2+5]=edges[i+2].twin.next.vert;
+				} 
+			}
+			
+			return ret;
+		};
+		
+		//geoGroup.adjFaceArray = computeAdjacency(faceArray,faceArray.length,offset);
         
         var material = new $3Dmol.MeshDoubleLambertMaterial();
         material.vertexColors = $3Dmol.FaceColors;
