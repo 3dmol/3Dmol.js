@@ -6,7 +6,7 @@
  * @typedef ViewerSpec
  * @prop {Object} defaultcolors - map of elements to colors
  * @prop {boolean} nomouse - if true, disable handling of mouse events
- * @prop {string} backgroundColor - color of background
+ * @prop {ColorSpec} backgroundColor - color of background
  */
 
 /**
@@ -16,8 +16,8 @@
  * @prop {number} x - Atom's x coordinate
  * @prop {number} y - Atom's y coordinate
  * @prop {number} z - Atom's z coordinate
- * @prop {number} color - Atom's color, as hex code
- * @prop {number} surfaceColor - Hex code for color to be used for surface patch over this atom
+ * @prop {ColorSpec} color - Atom's color, as hex code or built-in color string
+ * @prop {ColorSpec} surfaceColor - Hex code for color to be used for surface patch over this atom
  * @prop {string} elem - Element abbreviation (e.g. 'H', 'Ca', etc)
  * @prop {boolean} hetflag - Set to true if atom is a heteroatom
  * @prop {string} chain - Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
@@ -87,8 +87,8 @@
 /** 
  * @typedef SurfaceStyleSpec
  * @prop {number} opacity - sets the transparency: 0 to hide, 1 for fully opaque
- * @prop {string} colorscheme - element based coloring
- * @prop {string} color - fixed coloring, overrides colorscheme
+ * @prop {ColorschemeSpec} colorscheme - element based coloring
+ * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
  * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring
  * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color
  * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead.
@@ -103,7 +103,7 @@
  * @typedef IsoSurfaceSpec
  * @prop {number} isoval - specifies the isovalue to draw surface at
  * @propr {boolean} voxel - if true uses voxel style rendering
- * @prop {string} color - solid color
+ * @prop {ColorSpec} color - solid color
  * @prop {number} opacity - transparency, between 0 and 1
  * @prop {boolean} wireframe - draw as wireframe, not surface
  * @prop {number} linewidth - width of line for wireframe rendering
@@ -115,7 +115,7 @@
 /** 
  * GLShape style specification
  * @typedef ShapeSpec
- * @prop {string} color - solid color
+ * @prop {ColorSpec} color - solid color
  * @prop {number} alpha - transparency
  * @prop {boolean} wireframe - draw as wireframe, not surface
  * @prop {number} linewidth - width of line for wireframe rendering

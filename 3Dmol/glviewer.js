@@ -14,7 +14,7 @@
 $3Dmol.GLViewer = (function() {
     // private class variables
     var numWorkers = 4; // number of threads for surface generation
-    var maxVolume = 64000; // how much to break up surface calculations
+    var maxVolume = 56000; // how much to break up surface calculations
 
     // private class helper functions
 
@@ -204,7 +204,7 @@ $3Dmol.GLViewer = (function() {
             var intersects = [];
 
             intersects = raycaster.intersectObjects(modelGroup, clickables);
-
+console.log("intersects.length:"+intersects.length);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined
@@ -930,6 +930,7 @@ $3Dmol.GLViewer = (function() {
          * atom.x, y: atom.y, z: atom.z});
          * 
          * labels.push(l); }
+
          *  // Render labels glviewer.render();
          */
         this.addLabel = function(text, data) {
@@ -1147,7 +1148,10 @@ $3Dmol.GLViewer = (function() {
             spec.wireframe = true;
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
-            s.addLine(spec);
+            if (spec.dashed)
+                s = addLineDashed(spec, s);
+            else
+                s.addLine(spec);
             shapes.push(s);
 
             return s;
@@ -1216,6 +1220,56 @@ $3Dmol.GLViewer = (function() {
             shapes.push(s);
             return s;
         };
+
+        function addLineDashed(spec, s) {
+            spec.dashLength = spec.dashLength || 0.5;
+            spec.gapLength = spec.gapLength || 0.5;
+            spec.start = spec.start || {};
+            spec.end = spec.end || {};
+            
+            var p1 = new $3Dmol.Vector3(spec.start.x || 0,
+        			spec.start.y || 0, spec.start.z || 0)
+        	var p2 = new $3Dmol.Vector3(spec.end.x,
+        			spec.end.y || 0, spec.end.z || 0);
+        			
+            var dir = new $3Dmol.Vector3();
+            var dash = new $3Dmol.Vector3();
+            var gap = new $3Dmol.Vector3();
+            var length, dashAmt, gapAmt;
+            var temp = p1.clone();
+            var drawn = 0;
+
+            dir.subVectors(p2, p1);
+            length = dir.length();
+            dir.normalize();
+            dash = dir.clone();
+            gap = dir.clone();
+            dash.multiplyScalar(spec.dashLength);
+            gap.multiplyScalar(spec.gapLength);
+            dashAmt = dash.length();
+            gapAmt = gap.length();
+
+            while (drawn < length) {
+                if ((drawn + dashAmt) > length) { 
+                    spec.start = p1;
+                    spec.end = p2;
+                    s.addLine(spec);
+                    break;
+                }
+                temp.addVectors(p1, dash); 
+                spec.start = p1;
+                spec.end = temp;
+                s.addLine(spec);
+                p1 = temp.clone();
+                drawn += dashAmt;
+
+                temp.addVectors(p1, gap);
+                p1 = temp.clone();   
+                drawn += gapAmt;
+            }
+        			
+        	return s;
+        }
 
         /**
          * Add custom shape component from user supplied function
@@ -2101,6 +2155,7 @@ $3Dmol.GLViewer = (function() {
         // props is a list of objects that select certain atoms and enumerate
         // properties for those atoms
         /**
+         * @function $3Dmol.GLViewer#mapAtomProperties
          * Add specified properties to all atoms matching input argument
          * @function $3Dmol.GLViewer#mapAtomProperties
          * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties

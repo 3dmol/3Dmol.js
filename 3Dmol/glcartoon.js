@@ -8,18 +8,18 @@ var $3Dmol = $3Dmol || {};
 
 
 /**@typedef CartoonStyleSpec
- * @prop {string} color - solid color, may specify as 'spectrum'
+ * @prop {ColorSpec} color - solid color, may specify as 'spectrum'
  * @prop {string} style - style of cartoon rendering (currently just default and trace)
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
  * @prop {number} opacity - set transparency; transparency is set per-chain according to value of last backbone atom
  * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
- * is 'N1' for purines (resn: '  A', '  G', ' DA', ' DG') and 'N3' for pyrimidines (resn: '  C', '  U', ' DC', ' DT').
+ * is 'N1' for purines (resn: 'A', 'G', 'DA', 'DG') and 'N3' for pyrimidines (resn: 'C', 'U', 'DC', 'DT').
  * The different nucleobases can therefore be distinguished as follows:
  * @example
- * viewer.setStyle({resn:' DA', atom:'N1'}, {cartoon:{color:'red'}});
- * viewer.setStyle({resn:' DG', atom:'N1'}, {cartoon:{color:'green'}});
- * viewer.setStyle({resn:' DC', atom:'N3'}, {cartoon:{color:'blue'}});
- * viewer.setStyle({resn:' DT', atom:'N3'}, {cartoon:{color:'yellow'}});
+ * viewer.setStyle({resn:'DA', atom:'N1'}, {cartoon:{color:'red'}});
+ * viewer.setStyle({resn:'DG', atom:'N1'}, {cartoon:{color:'green'}});
+ * viewer.setStyle({resn:'DC', atom:'N3'}, {cartoon:{color:'blue'}});
+ * viewer.setStyle({resn:'DT', atom:'N3'}, {cartoon:{color:'yellow'}});
  */
 
 /**
@@ -556,8 +556,8 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // atoms used for drawing the NA base cylinders (diff for purines and pyramidines)
-                else if ((next.atom === "N1" && $.inArray(next.resn, purResns) != -1) ||
-                         (next.atom === "N3" && $.inArray(next.resn, pyrResns) != -1))
+                else if ((next.atom === "N1" && $.inArray(next.resn.trim(), purResns) != -1) ||
+                         (next.atom === "N3" && $.inArray(next.resn.trim(), pyrResns) != -1))
                 {
                     baseEndPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     baseEndPt.color = $3Dmol.getColorFromStyle(next, cartoon).getHex();
