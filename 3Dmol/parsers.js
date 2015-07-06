@@ -29,9 +29,12 @@ $3Dmol.Parsers = (function() {
 
             for (j = i + 1; j < n; j++) {
                 var aj = atoms[j];
-                if (aj.z - ai.z > 1.9) // can't be connected
+                if (aj.z - ai.z > 4.725) // can't be connected
                     break;
-                if (areConnected(ai, aj)) {
+                else if (Math.abs(aj.x - ai.x) > 4.725 || Math.abs(aj.y - ai.y) > 4.725) { // can't be connected either
+                    continue;
+                }
+                else if (areConnected(ai, aj)) {
                     if (ai.bonds.indexOf(aj.index) == -1) {
                         // only add if not already there
                         ai.bonds.push(aj.index);
@@ -605,11 +608,32 @@ $3Dmol.Parsers = (function() {
         var currentIndex = 0;
         var atomCount = mmCIF._atom_site_id !== undefined ? mmCIF._atom_site_id.length
                         : mmCIF._atom_site_label.length;
-        var cell_a, cell_b, cell_c;
+        function sqr(n) {
+            return n*n;
+        }
+        var cell_a, cell_b, cell_c, cell_alpha, cell_beta, cell_gamma, conversionMatrix;
         if (mmCIF._cell_length_a !== undefined) {
-            cell_a = parseFloat(mmCIF._cell_length_a);
-            cell_b = parseFloat(mmCIF._cell_length_b);
-            cell_c = parseFloat(mmCIF._cell_length_c);
+            var a = cell_a = parseFloat(mmCIF._cell_length_a);
+            var b = cell_b = parseFloat(mmCIF._cell_length_b);
+            var c = cell_c = parseFloat(mmCIF._cell_length_c);
+            var alpha = cell_alpha = parseFloat(mmCIF._cell_angle_alpha) * Math.PI / 180 || Math.PI / 2;
+            var beta = cell_beta = parseFloat(mmCIF._cell_angle_beta) * Math.PI / 180 || Math.PI / 2;
+            var gamma = cell_gamma = parseFloat(mmCIF._cell_angle_gamma) * Math.PI / 180 || Math.PI / 2;
+            var cos_alpha = Math.cos(alpha);
+            var cos_beta = Math.cos(beta);
+            var cos_gamma = Math.cos(gamma);
+            var sin_gamma = Math.sin(gamma);
+            conversionMatrix = [
+                [a, b*cos_gamma, c*cos_beta],
+                [0, b*sin_gamma, c*(cos_alpha-cos_beta*cos_gamma)/sin_gamma],
+                [0, 0, c*Math.sqrt(1-sqr(cos_alpha)-sqr(cos_beta)-sqr(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma)/sin_gamma]
+            ];
+        }
+        function fractionalToCartesian(a, b, c) {
+            var x = conversionMatrix[0][0]*a + conversionMatrix[0][1]*b + conversionMatrix[0][2]*c;
+            var y = conversionMatrix[1][0]*a + conversionMatrix[1][1]*b + conversionMatrix[1][2]*c;
+            var z = conversionMatrix[2][0]*a + conversionMatrix[2][1]*b + conversionMatrix[2][2]*c;
+            return {x:x, y:y, z:z};
         }
         for (var i = 0; i < atomCount; i++) {
             if (mmCIF._atom_site_group_pdb !== undefined && mmCIF._atom_site_group_pdb[i] === "TER")
@@ -621,9 +645,13 @@ $3Dmol.Parsers = (function() {
                 atom.z = parseFloat(mmCIF._atom_site_cartn_z[i]);
             }
             else {
-                atom.x = parseFloat(mmCIF._atom_site_fract_x[i]) * cell_a;
-                atom.y = parseFloat(mmCIF._atom_site_fract_y[i]) * cell_b;
-                atom.z = parseFloat(mmCIF._atom_site_fract_z[i]) * cell_c;
+                var coords = fractionalToCartesian(
+                        parseFloat(mmCIF._atom_site_fract_x[i]),
+                        parseFloat(mmCIF._atom_site_fract_y[i]),
+                        parseFloat(mmCIF._atom_site_fract_z[i]));
+                atom.x = coords.x;
+                atom.y = coords.y;
+                atom.z = coords.z;
             }
             atom.chain = mmCIF._atom_site_auth_asym_id ? mmCIF._atom_site_auth_asym_id[i] : undefined;
             atom.resi = mmCIF._atom_site_auth_seq_id ? parseInt(mmCIF._atom_site_auth_seq_id[i]) : undefined;
@@ -899,7 +927,7 @@ $3Dmol.Parsers = (function() {
             Na:1.54,Mg:1.30,                                                                                Al:1.18,Si:1.11,P :1.06,S :1.02,Cl:0.99,Ar:0.97,
             K :1.96,Ca:1.74,Sc:1.44,Ti:1.56,V :1.25,/* Cr */Mn:1.39,Fe:1.25,Co:1.26,Ni:1.21,Cu:1.38,Zn:1.31,Ga:1.26,Ge:1.22,/* As */Se:1.16,Br:1.14,Kr:1.10,
             Rb:2.11,Sr:1.92,Y :1.62,Zr:1.48,Nb:1.37,Mo:1.45,Tc:1.56,Ru:1.26,Rh:1.35,Pd:1.31,Ag:1.53,Cd:1.48,In:1.44,Sn:1.41,Sb:1.38,Te:1.35,I :1.33,Xe:1.30,
-            Cs:2.25,Ba:1.98,Lu:1.60,Hf:1.50,Ta:1.38,W :1.46,Re:1.59,Os:1.28,Ir:1.37,Pt:1.28,Au:1.44,Hg:1.49,Tl:1.48,Pb:1.47,Bi:1.46,/* Po *//* At */Rn:1.45,
+            Cs:2.25,Ba:1.98,Lu:1.60,Hf:1.50,Ta:1.38,W :1.46,Re:1.59,Os:1.44,Ir:1.37,Pt:1.28,Au:1.44,Hg:1.49,Tl:1.48,Pb:1.47,Bi:1.46,/* Po *//* At */Rn:1.45,
 
             // None of the boottom row or any of the Lanthanides have bond lengths
         }
@@ -910,7 +938,7 @@ $3Dmol.Parsers = (function() {
     var areConnected = function(atom1, atom2) {
         var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
         maxsq *= maxsq;
-        maxsq *= 1.01;
+        maxsq *= 1.05; // fudge factor
 
         var xdiff = atom1.x - atom2.x;
         xdiff *= xdiff;
@@ -1074,9 +1102,10 @@ $3Dmol.Parsers = (function() {
                 z = parseFloat(line.substr(46, 8));
                 b = parseFloat(line.substr(60, 8));
                 elem = line.substr(76, 2).replace(/ /g, "");
-                elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
                 if (elem === '') { // for some incorrect PDB files
                     elem = line.substr(12, 2).replace(/ /g, "");
+                } else {
+                    elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();                    
                 }
 
                 if((elem == 'H' || elem == 'HH' || elem == 'HD' || elem == 'HG') && noH)

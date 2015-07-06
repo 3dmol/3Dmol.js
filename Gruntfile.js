@@ -38,7 +38,7 @@ module.exports = function(grunt) {
             
             pre : {
                 src : ['3Dmol/3dmol.js','3Dmol/WebGL/math.js','3Dmol/WebGL/shapes.js',
-                '3Dmol/WebGL/core.js','3Dmol/WebGL/*.js','3Dmol/**.js'],
+                '3Dmol/WebGL/core.js','3Dmol/WebGL/*.js','3Dmol/**.js','!3Dmol/SurfaceWorker.js','3Dmol/SurfaceWorker.js'],
                 dest : 'build/3Dmol-pre.js'            
             },            
             

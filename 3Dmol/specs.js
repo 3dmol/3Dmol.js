@@ -91,7 +91,7 @@
  * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
  * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring
  * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color
- * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}
+ * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead.
  * 
  * @example
  * viewer.addSurface($3Dmol.SurfaceType.MS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:0.85});
