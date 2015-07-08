@@ -254,6 +254,73 @@ $3Dmol.ShaderLib = {
         }
 
     },
+ 
+//for outline
+     'lambertoutline' : { 
+        fragmentShader : [
+
+"uniform mat4 viewMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform float opacity;",
+
+"uniform vec3 fogColor;",
+"uniform float fogNear;",
+"uniform float fogFar;",
+
+"void main() {",
+    
+"    gl_FragColor = vec4(0.0,0.0,0.0,1.0);",
+"}"
+
+
+].join("\n"),
+       
+       vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform mat4 viewMatrix;",
+"uniform mat3 normalMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform vec3 ambient;",
+"uniform vec3 diffuse;",
+"uniform vec3 emissive;",
+"uniform vec3 ambientLightColor;",
+"uniform vec3 directionalLightColor[ 1 ];",
+"uniform vec3 directionalLightDirection[ 1 ];",
+
+"attribute vec3 position;",
+"attribute vec3 normal;",
+"attribute vec3 color;",
+
+"void main() {",
+    
+"    vec3 objectNormal = normal;",  
+"    vec3 transformedNormal = normalMatrix * objectNormal;",    
+"    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    transformedNormal = normalize( transformedNormal );",
+"    gl_Position = projectionMatrix * mvPosition;",
+"    vec2 offset=transformedNormal.xy*0.01*1.5;",
+"    gl_Position.xy+=gl_Position.w*offset;",
+"    gl_Position.z+=gl_Position.w*0.0001;",
+"}"
+           
+].join("\n"),
+
+        uniforms : {
+            opacity: { type: 'f', value: 1.0 },
+            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogNear: { type: 'f', value: 1.0 },
+            fogFar: { type: 'f', value: 2000},           
+            ambient: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            emissive: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            ambientLightColor: { type: 'fv', value: [] },
+            directionalLightColor: { type: 'fv', value: [] },
+            directionalLightDirection: { type: 'fv', value: [] }
+        }
+
+    },
     
     //for double sided lighting
     'lambertdouble' : { 

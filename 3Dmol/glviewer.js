@@ -264,7 +264,7 @@ console.log("intersects.length:"+intersects.length);
                 var x = xy[0];
                 var y = xy[1];
                 if(x == mouseStartX && y == mouseStartY) {
-                    var offset = $(container).offset();
+                    var offset = $('canvas',container).offset();
                     var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
 

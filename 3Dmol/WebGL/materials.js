@@ -175,7 +175,7 @@ $3Dmol.MeshLambertMaterial = function(parameters) {
     this.wireframeLinejoin = 'round';
     
     this.shading = $3Dmol.SmoothShading;
-    this.shaderID = "lambert";
+    this.shaderID = "lambertoutline";
     this.vertexColors = $3Dmol.NoColors;
     
     this.skinning = false;
