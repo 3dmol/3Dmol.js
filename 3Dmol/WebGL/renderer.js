@@ -902,6 +902,7 @@ $3Dmol.Renderer = function ( parameters ) {
                 object = webglObject.object;
                 buffer = webglObject.buffer;
                 material = webglObject[materialType];
+                outline =new $3Dmol.MeshOutlineLambertMaterial();
 
                 if ( ! material )
                     continue;
@@ -914,8 +915,10 @@ $3Dmol.Renderer = function ( parameters ) {
                 setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
 
                 _this.setMaterialFaces(material);
-
+                
+                _this.renderBuffer(camera, lights, fog, outline, buffer, object);
                 _this.renderBuffer(camera, lights, fog, material, buffer, object);
+               
             }
         }
 

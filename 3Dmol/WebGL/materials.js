@@ -175,7 +175,7 @@ $3Dmol.MeshLambertMaterial = function(parameters) {
     this.wireframeLinejoin = 'round';
     
     this.shading = $3Dmol.SmoothShading;
-    this.shaderID = "lambertoutline";
+    this.shaderID = "lambert";
     this.vertexColors = $3Dmol.NoColors;
     
     this.skinning = false;
@@ -238,6 +238,29 @@ $3Dmol.MeshDoubleLambertMaterial = function(parameters) {
 $3Dmol.MeshDoubleLambertMaterial.prototype = Object.create($3Dmol.MeshLambertMaterial.prototype);
 
 $3Dmol.MeshDoubleLambertMaterial.prototype.clone = function() {
+  
+    var material = new $3Dmol.MeshDoubleLambertMaterial();
+    
+    $3Dmol.MeshLambertMaterial.prototype.clone.call(this, material);
+        
+    return material;
+    
+};
+
+//Outlined Mesh Lamert material
+/** @constructor */
+$3Dmol.MeshOutlineLambertMaterial = function(parameters) {
+    
+    $3Dmol.MeshLambertMaterial.call(this, parameters);
+
+    this.shaderID = "lambertoutline";
+    //this.side = $3Dmol.DoubleSide;    
+    
+};
+
+$3Dmol.MeshOutlineLambertMaterial.prototype = Object.create($3Dmol.MeshLambertMaterial.prototype);
+
+$3Dmol.MeshOutlineLambertMaterial.prototype.clone = function() {
   
     var material = new $3Dmol.MeshDoubleLambertMaterial();
     
