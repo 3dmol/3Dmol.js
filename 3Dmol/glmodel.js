@@ -1116,11 +1116,11 @@ $3Dmol.GLModel = (function() {
             	if(typeof($3Dmol.Parsers[format] == "undefined")) {            	
 	                console.log("Unknown format: "+format);
 	                //try to guess correct format from data contents
-	                if(data.match(/^@<TRIPOS>MOLECULE/)) {
+	                if(data.match(/^@<TRIPOS>MOLECULE/gm)) {
 	                    format = "mol2";
-	                } else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+	                } else if(data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
 	                    format = "pdb";
-	                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+	                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
 	                    format = "sdf"; //could look at line 3
 	                } else {
 	                    format = "xyz";

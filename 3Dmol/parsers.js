@@ -938,7 +938,7 @@ $3Dmol.Parsers = (function() {
     var areConnected = function(atom1, atom2) {
         var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
         maxsq *= maxsq;
-        maxsq *= 1.05; // fudge factor
+        maxsq *= 1.15; // fudge factor, especially important for md frames
 
         var xdiff = atom1.x - atom2.x;
         xdiff *= xdiff;
@@ -1104,11 +1104,17 @@ $3Dmol.Parsers = (function() {
                 elem = line.substr(76, 2).replace(/ /g, "");
                 if (elem === '') { // for some incorrect PDB files
                     elem = line.substr(12, 2).replace(/ /g, "");
+                    if(elem.length > 0 && elem[0] == 'H' && elem != 'Hg') {
+                        elem = 'H'; //workaround weird hydrogen names from MD, note mercury must use lowercase
+                    }
+                    if(elem.length > 1) {
+                        elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();                    
+                    }
                 } else {
                     elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();                    
                 }
 
-                if((elem == 'H' || elem == 'HH' || elem == 'HD' || elem == 'HG') && noH)
+                if(elem == 'H' && noH)
                     continue;
                 if (line[0] == 'H')
                     hetflag = true;

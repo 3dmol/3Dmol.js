@@ -6,7 +6,6 @@
             
         <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
         <script>
-        $3Dmol.syncSurface = true;
         var glviewer = null;
         var labels = [];
         var m = null;
@@ -95,26 +94,14 @@
         
         $(document).ready(function() {
                         
-            //$.get("test_structs/1YCR.pdb", function(data){
+            $.get("test_structs/hem.pdb", function(data){
                 
-                moldata = data = $("#moldata_pdb_large").val();
-                sdfdata = $('#sdfdata').val();
-                
-                var viewer = glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});
-                    
-                glviewer.setBackgroundColor(0xffffff);
-                                        
-                receptorModel = m = glviewer.addModel(data, "pdb",{keepH:false});   
-                m.setStyle({elem: 'O',serial: 16},{clickable: true, callback: atomcallback});
-
-            //   glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.5,.5)}, opacity:0.8});
-            
+                var viewer = glviewer = $3Dmol.createViewer("gldiv");
+                viewer.addModel(data, null, {keepH: true});
+                viewer.setBackgroundColor("white");        
                 glviewer.setStyle({},{stick:{}});            
                 
-                var gradient = new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(glviewer.selectedAtoms(),'b'));
-
-                viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme:{prop:'b',gradient: gradient}});
-
+    
                 glviewer.zoomTo();
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
@@ -125,7 +112,7 @@
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
                 });*/
-                
+         });       
                  
                            
         });
