@@ -938,7 +938,7 @@ $3Dmol.Parsers = (function() {
     var areConnected = function(atom1, atom2) {
         var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
         maxsq *= maxsq;
-        maxsq *= 1.15; // fudge factor, especially important for md frames
+        maxsq *= 1.1; // fudge factor, especially important for md frames
 
         var xdiff = atom1.x - atom2.x;
         xdiff *= xdiff;

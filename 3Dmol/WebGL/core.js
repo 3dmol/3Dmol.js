@@ -632,7 +632,6 @@ $3Dmol.Raycaster = (function() {
         
         if ((clickable.clickable !== true) || (clickable.intersectionShape === undefined))
             return intersects;
-console.log("627");        
         var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
         precision *= group.matrixWorld.getMaxScaleOnAxis();
@@ -642,13 +641,10 @@ console.log("627");
         if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof $3Dmol.Sphere) {
             sphere.copy(clickable.boundingSphere);
             sphere.applyMatrix4(group.matrixWorld);
-console.log("center:"+sphere.center.x+" "+sphere.center.y+" "+sphere.center.z+" radius:"+sphere.radius);
-console.log("ray:"+raycaster.ray.origin.x+" "+raycaster.ray.origin.y+" "+raycaster.ray.origin.z+" direction:"+raycaster.ray.direction.x+" "+raycaster.ray.direction.y+" "+raycaster.ray.direction.z);          
             if (!raycaster.ray.isIntersectionSphere(sphere)) {
-console.log("639");                return intersects;
+               return intersects;
             }
         }
-console.log("642");        
         //Iterate through intersection objects
         var i, il,
             norm, normProj, cylProj, rayProj,
@@ -704,7 +700,7 @@ console.log("642");
                                      distance : distance});  
             }
         }
-console.log("698");        
+
         //cylinders
         for (i = 0, il = intersectionShape.cylinder.length; i < il; i++) {
             
@@ -770,7 +766,7 @@ console.log("698");
             }
             
         }
-console.log("764");        
+
         //lines
         for (i = 0, il = intersectionShape.line.length; i < il; i += 2) {
             
@@ -809,7 +805,7 @@ console.log("764");
                                 });
             
         }
-console.log("803");
+
         for (i = 0, il = intersectionShape.sphere.length; i < il; i++) {
             //sphere
             if (intersectionShape.sphere[i] instanceof $3Dmol.Sphere) {
@@ -842,7 +838,7 @@ console.log("803");
     
                     intersects.push({clickable : clickable, 
                                      distance : distance});
-console.log("just before return in intersectObject");
+
                     return intersects;
                 }
             }        
