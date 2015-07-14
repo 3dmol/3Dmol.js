@@ -204,7 +204,6 @@ $3Dmol.GLViewer = (function() {
             var intersects = [];
 
             intersects = raycaster.intersectObjects(modelGroup, clickables);
-console.log("intersects.length:"+intersects.length);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined
