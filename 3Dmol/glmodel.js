@@ -1112,7 +1112,7 @@ $3Dmol.GLModel = (function() {
             if(typeof($3Dmol.Parsers[format]) == "undefined") {
             	//let someone provide a file name and get format from extension
             	format = format.split('.').pop();
-            	if(typeof($3Dmol.Parsers[format] == "undefined")) {            	
+            	if(typeof($3Dmol.Parsers[format]) == "undefined") {            	
 	                console.log("Unknown format: "+format);
 	                //try to guess correct format from data contents
 	                if(data.match(/^@<TRIPOS>MOLECULE/)) {
