@@ -2,7 +2,7 @@
 $3Dmol = $3Dmol || {};
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
-$3Dmol.MarchingCube = (function() {
+$3Dmol.MarchingCubeInitializer = function() {
     
     //Marching cube algorithm - assume data has been pre-treated so isovalue is 0 
     // (i.e. select points greater than 0)
@@ -33,7 +33,7 @@ $3Dmol.MarchingCube = (function() {
         if(spec.unitCube) {
             unitCube = spec.unitCube;
         } else {
-            unitCube = new $3Dmol.Vector3(1,1,1).multiplyScalar(scale);
+            unitCube = {x:scale,y:scale,z:scale};
         }
         
         //keep track of calculated vertices to avoid repeats
@@ -48,8 +48,7 @@ $3Dmol.MarchingCube = (function() {
         // the edge (p1,p2)
         
         var getVertex = function(i, j, k, code, p1, p2) {
-            var pt = new $3Dmol.Vector3();
-            pt.copy(origin);
+            var pt = {x: origin.x, y: origin.y, z: origin.z};
             var val1 = !!(code & (1 << p1));
             var val2 = !!(code & (1 << p2));
              
@@ -150,6 +149,11 @@ $3Dmol.MarchingCube = (function() {
                         intersects[10] = getVertex(i, j, k, code, 3, 7);
                     if (ecode & 2048)
                         intersects[11] = getVertex(i, j, k, code, 2, 6);       
+                    
+                    if(verts.length>=65535){
+                        console.warn("not sufficient vertex buffer index, discard vertices exceeding 635535");
+                        return;
+                    }
                         
                     for (var t = 0; t < ttable.length; t += 3) {
                         
@@ -617,7 +621,10 @@ $3Dmol.MarchingCube = (function() {
             [ 8, 1, 3, 8, 9, 1 ], [ 9, 1, 0 ], [ 8, 0, 3 ], [] ];
             
             return my;
-})();
+};
+
+//each webworker needs its own marching cube object
+$3Dmol.MarchingCube  = $3Dmol.MarchingCubeInitializer();    
 
 
 

@@ -4,7 +4,7 @@
         <title>Docking Example</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
-        <script src="http://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+        <script src="../build/3Dmol-min.js"></script>
         <style>
         	* {margin:0; padding:0}
         </style>
@@ -31,16 +31,17 @@
                     for(var i = 0; i < sdfs.length; i++) {
 						if(sdfs[i].length > 0) {
 							var m = glviewer.addModel(sdfs[i],"sdf");
-							m.setStyle({},{stick:{hidden: true}});
+							m.setStyle({},{stick:{colorscheme:"greenCarbon"}});
+							m.hide();
 							sdfmodels.push(m);
 						}
 					}
 					
 					var currmol = 0;
 					var display = function() {
-						sdfmodels[currmol].setStyle({},{hidden:true});
+						sdfmodels[currmol].hide();
 						currmol = (currmol+1) % sdfmodels.length;
-						sdfmodels[currmol].setStyle({}, {stick: {colorscheme: 'greenCarbon'}});
+						sdfmodels[currmol].show();
 						glviewer.render();
 					};
 					setInterval(display, 500);
