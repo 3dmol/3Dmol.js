@@ -88,8 +88,6 @@ $3Dmol.MarchingCubeInitializer = function() {
                 return verts.length - 1;
             }
             
-
-            
         };
             
         var intersects = new Int32Array(12);
@@ -151,11 +149,12 @@ $3Dmol.MarchingCubeInitializer = function() {
                         intersects[10] = getVertex(i, j, k, code, 3, 7);
                     if (ecode & 2048)
                         intersects[11] = getVertex(i, j, k, code, 2, 6);       
-                   
+                    
                     if(verts.length>=65535){
-                        console.warn("not sufficient vertices buffer index, discard vertices exceeding 635535");
+                        console.warn("not sufficient vertex buffer index, discard vertices exceeding 635535");
                         return;
-					}
+                    }
+                        
                     for (var t = 0; t < ttable.length; t += 3) {
                         
                         var a = intersects[ttable[t]],
@@ -177,6 +176,7 @@ $3Dmol.MarchingCubeInitializer = function() {
             }
             
         }
+             
         
     };
 
