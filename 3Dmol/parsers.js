@@ -1031,7 +1031,7 @@ $3Dmol.Parsers = (function() {
                 }
             }
         }
-        else {
+        else if(copyMatrices.length > 1) {
             for (t = 0; t < atoms.length; t++) {
                 var symmetries = [];
                 for (l = 0; l < copyMatrices.length; l++) {
