@@ -118,7 +118,6 @@ $3Dmol.GLModel = (function() {
         var lastColors = null;
         var modelData = {};
         var idMatrix = new $3Dmol.Matrix4();
-        var noAssembly;
         var dontDuplicateAtoms;
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
@@ -1002,7 +1001,7 @@ $3Dmol.GLModel = (function() {
             }
             
             //for BIOMT assembly
-            if (dontDuplicateAtoms && !noAssembly) {
+            if (dontDuplicateAtoms && modelData.symmetries && modelData.symmetries.length > 0) {
                 var finalRet = new $3Dmol.Object3D();
                 var t;
                 for (t = 0; t < modelData.symmetries.length; t++) {
@@ -1094,7 +1093,6 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             format = format || "";
-            noAssembly = !options.doAssembly; //for BIOMT uses
             dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
             
             if (!data)
