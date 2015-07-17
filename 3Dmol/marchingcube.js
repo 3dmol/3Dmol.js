@@ -150,11 +150,6 @@ $3Dmol.MarchingCubeInitializer = function() {
                     if (ecode & 2048)
                         intersects[11] = getVertex(i, j, k, code, 2, 6);       
                     
-                    if(verts.length>=65535){
-                        console.warn("not sufficient vertex buffer index, discard vertices exceeding 635535");
-                        return;
-                    }
-                        
                     for (var t = 0; t < ttable.length; t += 3) {
                         
                         var a = intersects[ttable[t]],

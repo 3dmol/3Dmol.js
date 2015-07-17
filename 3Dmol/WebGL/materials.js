@@ -253,6 +253,7 @@ $3Dmol.MeshOutlineMaterial = function(parameters) {
     $3Dmol.Material.call(this);
     this.fog = true;
     this.shaderID = "outline";
+    this.wireframe=false;
     
 };
 
@@ -263,6 +264,7 @@ $3Dmol.MeshOutlineMaterial.prototype.clone = function(material) {
     $3Dmol.Material.prototype.clone.call(this, material);
     material.fog = this.fog;
     material.shaderID = this.shaderID;
+    material.wireframe = this.wireframe;
     return material;
 };
 

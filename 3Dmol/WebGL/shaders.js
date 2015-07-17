@@ -267,24 +267,9 @@ $3Dmol.ShaderLib = {
 "uniform float fogNear;",
 "uniform float fogFar;",
 
-"varying vec3 vLightFront;",
-"varying vec3 vColor;",
-
 "void main() {",
     
-"    gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
-    
-"    #ifndef WIREFRAME",
-"    gl_FragColor.xyz *= vLightFront;",
-"    #endif",
-    
-"    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
-    
-"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-    
-"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
-
+"    gl_FragColor = vec4(0.0,0.0,0.0,1.0);",
 "}"
 
 
@@ -308,30 +293,16 @@ $3Dmol.ShaderLib = {
 "attribute vec3 normal;",
 "attribute vec3 color;",
 
-"varying vec3 vColor;",
-"varying vec3 vLightFront;",
-
 "void main() {",
     
-"    vColor = color;",
-    
 "    vec3 objectNormal = normal;",  
-"    vec3 transformedNormal = normalMatrix * objectNormal;",    
+"    vec4 transformedNormal = modelViewMatrix * vec4(objectNormal,0.0);",    
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-    
-"    vLightFront = vec3( 0.0 );",
-    
 "    transformedNormal = normalize( transformedNormal );",
-    
-"    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
-"    vec3 dirVector = normalize( lDirection.xyz );",
-"    float dotProduct = dot( transformedNormal, dirVector );",
-"    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
-    
-"    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
-    
 "    gl_Position = projectionMatrix * mvPosition;",
+"    vec2 offset=transformedNormal.xy*0.1;",
+"    gl_Position.xy+=offset;",
+"    gl_Position.z+=gl_Position.w*0.02;",
 "}"
            
 ].join("\n"),
@@ -342,11 +313,8 @@ $3Dmol.ShaderLib = {
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},           
-            ambient: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
-            emissive: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
-            ambientLightColor: { type: 'fv', value: [] },
-            directionalLightColor: { type: 'fv', value: [] },
-            directionalLightDirection: { type: 'fv', value: [] }
+            outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
+            relativePixelSize: { type: 'fv', value: [] }
         }
 
     },
