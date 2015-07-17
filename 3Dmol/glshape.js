@@ -440,6 +440,7 @@ $3Dmol.GLShape = (function() {
             }
             center.divideScalar(cnt);
             
+            
             updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, vertexArray);
         }
 

@@ -36,7 +36,7 @@
 					    viewer.mapAtomProperties($3Dmol.applyPartialCharges);
 					    viewer.addSurface($3Dmol.SurfaceType.SAS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.05,.05)}, opacity:1.0},{chain:'B'});
 					    viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, color:'red'},{chain:'C'});
-					    viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, colorscheme:'greenCarbon'},{chain:'D'});
+					    viewer.addSurface($3Dmol.SurfaceType.SAS, {opacity:0.85,voldata: data, colorscheme:'greenCarbon'},{chain:'D'});
 				   });
                    $3Dmol.download("pdb:4DLN",viewer,{},function(){
 		           viewer.setBackgroundColor(0xffffffff);});

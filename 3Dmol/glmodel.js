@@ -65,7 +65,7 @@ $3Dmol.GLModel = (function() {
         "resi", // Residue number 
         "icode",
         "rescode",
-        "serial", // Atom's serial id number
+        "serial", // Atom's serial id numbermodels
         "atom", // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds", // Array of atom ids this atom is bonded to
         "ss", // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
