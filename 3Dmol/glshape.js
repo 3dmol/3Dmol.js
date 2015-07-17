@@ -997,7 +997,7 @@ $3Dmol.splitMesh = function(mesh) {
                     vertSlice[v] = currentSlice;
                     vertIndex[v] = slice.vertexArr.length;
                     slice.vertexArr.push(mesh.vertexArr[v]);
-                    if(mesh.normalArr) slice.normalArr.push(mesh.normalArr[v]);
+                    if(mesh.normalArr && mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
                 }
                 slice.faceArr.push(vertIndex[v]);
             }
