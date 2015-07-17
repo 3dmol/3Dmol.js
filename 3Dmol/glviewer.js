@@ -14,7 +14,7 @@
 $3Dmol.GLViewer = (function() {
     // private class variables
     var numWorkers = 4; // number of threads for surface generation
-    var maxVolume = 56000; // how much to break up surface calculations
+    var maxVolume = 64000; // how much to break up surface calculations
 
     // private class helper functions
 
@@ -1984,10 +1984,16 @@ $3Dmol.GLViewer = (function() {
                     var cnt = 0;
 
                     var rfunction = function(event) {
-                        var VandF = event.data;
-                        var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                        $3Dmol.mergeGeos(surfobj.geo, mesh);
-                        _viewer.render();
+                        var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
+							                           faceArr:event.data.faces});
+					    for(var i=0,vl=VandFs.length;i<vl;i++){
+                            var VandF={vertices:VandFs[i].vertexArr,
+								       faces:VandFs[i].faceArr};
+                            var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                            $3Dmol.mergeGeos(surfobj.geo, mesh);
+                            _viewer.render();
+						}
+
                     //    console.log("async mesh generation " + (+new Date() - time) + "ms");
                         cnt++;
                         if (cnt == extents.length)
