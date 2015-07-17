@@ -307,7 +307,7 @@ $3Dmol.Parsers = (function() {
      */
     parsers.xyz = parsers.XYZ = function(atoms, str, options) {
 
-        var lines = str.split("\n");
+        var lines = str.split(/\r?\n/);
         if (lines.length < 3)
             return;
         var atomCount = parseInt(lines[0].substr(0, 3));
@@ -353,7 +353,7 @@ $3Dmol.Parsers = (function() {
         var noH = false;
         if (typeof options.keepH !== "undefined")
             noH = !options.keepH;
-        var lines = str.split("\n");
+        var lines = str.split(/\r?\n/);
         if (lines.length < 4)
             return;
         var atomCount = parseInt(lines[3].substr(0, 3));
@@ -498,7 +498,7 @@ $3Dmol.Parsers = (function() {
         }
 
 
-        var lines = str.split("\n");
+        var lines = str.split(/\r?\n/);
         // Filter text to remove comments, trailing spaces, and empty lines
         var linesFiltered = [];
         var trimDisabled = false;
@@ -822,7 +822,7 @@ $3Dmol.Parsers = (function() {
         // assert (mol_pos < atom_pos), "Unexpected formatting of mol2 file
         // (expected 'molecule' section before 'atom' section)";
 
-        var lines = str.substr(mol_pos, str.length).split("\n");
+        var lines = str.substr(mol_pos, str.length).split(/\r?\n/);
         var tokens = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(
                 " ");
         var natoms = parseInt(tokens[0]);
@@ -1080,7 +1080,7 @@ $3Dmol.Parsers = (function() {
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
-        var lines = str.split("\n");
+        var lines = str.split(/\r?\n/);
         var i, j, k, line;
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
@@ -1301,7 +1301,7 @@ $3Dmol.Parsers = (function() {
         var computeStruct = !options.noSecondaryStructure;
 
         var serialToIndex = []; // map from pdb serial to index in atoms
-        var lines = str.split("\n");
+        var lines = str.split(/\r?\n/);
         var i, j, k, line;
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
