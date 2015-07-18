@@ -300,7 +300,7 @@ $3Dmol.ShaderLib = {
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    transformedNormal = normalize( transformedNormal );",
 "    gl_Position = projectionMatrix * mvPosition;",
-"    vec2 offset=transformedNormal.xy*0.01;",
+"    vec2 offset=transformedNormal.xy*0.1;",
 "    gl_Position.xy+=offset;",
 "    gl_Position.z+=gl_Position.w*0.001;",
 "}"

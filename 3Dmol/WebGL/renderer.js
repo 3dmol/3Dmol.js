@@ -906,11 +906,12 @@ $3Dmol.Renderer = function ( parameters ) {
                 object = webglObject.object;
                 buffer = webglObject.buffer;
                 material = webglObject[materialType];
-                outline =new $3Dmol.MeshOutlineMaterial();
+
+                
 
                 if ( ! material )
                     continue;
-
+                    
                 if (useBlending)
                     _this.setBlending(true);
 
@@ -920,7 +921,9 @@ $3Dmol.Renderer = function ( parameters ) {
 
                 _this.setMaterialFaces(material);
                 
-                if(!material.wireframe && material.shaderID!='basic' ){
+                if(!material.wireframe && material.shaderID!=='basic' && material.opacity!==0.0 ){
+					console.log("drawing outline");
+                    outline =new $3Dmol.MeshOutlineMaterial();
                     _this.renderBuffer(camera, lights, fog, outline, buffer, object);
 			    }
                 _this.renderBuffer(camera, lights, fog, material, buffer, object);
