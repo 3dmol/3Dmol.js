@@ -766,7 +766,7 @@ $3Dmol.Parsers = (function() {
         assignBonds(atoms);
         computeSecondaryStructure(atoms);
         
-        if (mmCIF._pdbx_struct_oper_list !== undefined && !noAssembly) { 
+        if (mmCIF._pdbx_struct_oper_list_id !== undefined && !noAssembly) {
             for (var i = 0; i < mmCIF._pdbx_struct_oper_list_id.length; i++) {
                 var matrix11 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[1][1]'][i]);
                 var matrix12 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[1][2]'][i]);
