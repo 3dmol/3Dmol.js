@@ -852,7 +852,6 @@ $3Dmol.Renderer = function ( parameters ) {
 
                 if (updateBuffers)
                     _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
-                
                 _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );
                 
             }
@@ -903,6 +902,7 @@ $3Dmol.Renderer = function ( parameters ) {
                 object = webglObject.object;
                 buffer = webglObject.buffer;
                 material = webglObject[materialType];
+                //outline =new $3Dmol.MeshOutlineMaterial();
 
                 if ( ! material )
                     continue;
@@ -915,8 +915,10 @@ $3Dmol.Renderer = function ( parameters ) {
                 setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
 
                 _this.setMaterialFaces(material);
-
+                
+                //_this.renderBuffer(camera, lights, fog, outline, buffer, object);
                 _this.renderBuffer(camera, lights, fog, material, buffer, object);
+               
             }
         }
 
@@ -1149,9 +1151,13 @@ $3Dmol.Renderer = function ( parameters ) {
 
                         geometry.verticesNeedUpdate = true;
                         geometry.colorsNeedUpdate = true;
-                    }      
+
+                    }
+                        
                 }
+                
             }
+        
         }
         
         if ( ! object.__webglActive ) {
@@ -1243,19 +1249,20 @@ $3Dmol.Renderer = function ( parameters ) {
         var object = globject.object;
         var material = object.material;
 
-        if ( material.transparent) {                    
+        if ( material.transparent ) {                    
             globject.opaque = null;
             globject.transparent = material;
             if(!material.wireframe){
-                var blankMaterial = material.clone();
+				var blankMaterial = material.clone();
                 blankMaterial.opacity = 0.0;
                 globject.blank = blankMaterial;
-            }
+			}
         }
 
         else {
             globject.opaque = material;
             globject.transparent = null;
+
         }
 
     }

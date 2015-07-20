@@ -65,7 +65,7 @@ $3Dmol.GLModel = (function() {
         "resi", // Residue number 
         "icode",
         "rescode",
-        "serial", // Atom's serial id number
+        "serial", // Atom's serial id numbermodels
         "atom", // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds", // Array of atom ids this atom is bonded to
         "ss", // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
@@ -112,12 +112,12 @@ $3Dmol.GLModel = (function() {
         // private variables
         var atoms = [];
         var id = mid;
+        var hidden = false;
         var molObj = null;
         var renderedMolObj = null;
         var lastColors = null;
         var modelData = {};
         var idMatrix = new $3Dmol.Matrix4();
-        var noAssembly;
         var dontDuplicateAtoms;
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
@@ -334,7 +334,7 @@ $3Dmol.GLModel = (function() {
             if (!geos[linewidth])
                 geos[linewidth] = new $3Dmol.Geometry();
             /** @type {geometryGroup} */
-            var geoGroup = geos[linewidth].updateGeoGroup(2*atom.bonds.length);
+            var geoGroup = geos[linewidth].updateGeoGroup(6*atom.bonds.length); //reserve enough space even for triple bonds
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -1001,7 +1001,7 @@ $3Dmol.GLModel = (function() {
             }
             
             //for BIOMT assembly
-            if (dontDuplicateAtoms && !noAssembly) {
+            if (dontDuplicateAtoms && modelData.symmetries && modelData.symmetries.length > 0) {
                 var finalRet = new $3Dmol.Object3D();
                 var t;
                 for (t = 0; t < modelData.symmetries.length; t++) {
@@ -1093,7 +1093,6 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             format = format || "";
-            noAssembly = !options.doAssembly; //for BIOMT uses
             dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
             
             if (!data)
@@ -1112,14 +1111,14 @@ $3Dmol.GLModel = (function() {
             if(typeof($3Dmol.Parsers[format]) == "undefined") {
             	//let someone provide a file name and get format from extension
             	format = format.split('.').pop();
-            	if(typeof($3Dmol.Parsers[format] == "undefined")) {            	
+            	if(typeof($3Dmol.Parsers[format]) == "undefined") {            	
 	                console.log("Unknown format: "+format);
 	                //try to guess correct format from data contents
-	                if(data.match(/^@<TRIPOS>MOLECULE/)) {
+	                if(data.match(/^@<TRIPOS>MOLECULE/gm)) {
 	                    format = "mol2";
-	                } else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+	                } else if(data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
 	                    format = "pdb";
-	                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+	                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
 	                    format = "sdf"; //could look at line 3
 	                } else {
 	                    format = "xyz";
@@ -1532,7 +1531,11 @@ $3Dmol.GLModel = (function() {
                     renderedMolObj = null;
                 }
                 renderedMolObj = molObj.clone();
-                group.add(renderedMolObj);
+                if(hidden) {
+                    renderedMolObj.setVisible(false);
+                    molObj.setVisible(false);
+                }
+                group.add(renderedMolObj);              
             }
         };
         
@@ -1551,6 +1554,23 @@ $3Dmol.GLModel = (function() {
             }
             molObj = null;
         };
+        
+        /** Don't show this model is future renderings.  Keep all styles and state
+         * so it can be efficiencly shown again.
+         * 
+         * @function $3Dmol.GLModel#hide
+         */
+        this.hide = function() {
+            hidden = true;
+            if(renderedMolObj) renderedMolObj.setVisible(false);
+            if(molObj) molObj.setVisible(false);
+        }
+        
+        this.show = function() {
+            hidden = false;
+            if(renderedMolObj) renderedMolObj.setVisible(true);
+            if(molObj) molObj.setVisible(true);
+        }
         
         /** Create labels for residues of selected atoms.
          * Will create a single label at the center of mass of all atoms

@@ -22,7 +22,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>13 Cylinder<code>radius fromCap toCap color</code></td>  
+            <th colspan=2 height=200px>13 Cylinder(clickable)<code>radius fromCap toCap color</code></td>  
           </tr>
           <tr>
             <td width="50%"><div id="test13" style="width: 400px; height: 400px; position: relative;"></td>
@@ -35,7 +35,13 @@
 					                   radius:1.0,
 					                   fromCap:true,
 					                   toCap:true,
-					                   color:'red'});
+					                   color:'red',
+					                   clickable:true,
+					                   callback:function(){
+										   this.color.setHex(0x00FFFF00);
+										   viewer.render();
+										   }
+									   });
                    viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
 					                   end:{x:0.0,y:10.0,z:0.0},
 					                   radius:0.5,

@@ -22,7 +22,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>8 Programmatic Arrow Line<code> hidden linewidth colorscheme color</code></td>  
+            <th colspan=2 height=200px>8 Programmatic Arrow(clickable) Line<code> hidden linewidth colorscheme color</code></td>  
           </tr>
           <tr>
             <td width="50%"><div id="test8" style="width: 400px; height: 400px; position: relative;"></td>
@@ -35,14 +35,20 @@
 		                           end: {x:0.0, y:-10.0, z:0.0},
                                    radius: 1.0,
                                    radiusRadio:1.0,
-                                   mid:1.0});
+                                   mid:1.0,
+                                   clickable:true,
+                                   callback:function(){
+									   this.color.setHex(0xFF0000FF);
+									   viewer.render();
+									   }
+								   });
 		           viewer.setStyle({chain:'A'},{line:{hidden:true}});
 		           viewer.setStyle({chain:'B'},{line:{hidden:false,
 					                         linewidth:1.0,
-					                         colorscheme:'rwb'}});
+					                         colorscheme:'greenCarbon'}});
 		           viewer.setStyle({chain:'C'},{line:{hidden:false,
 					                         linewidth:2.0,
-					                         colorscheme:'rwb'}});
+					                         colorscheme:'whiteCarbon'}});
 		           viewer.setStyle({chain:'D'},{line:{hidden:false,
 					                         linewidth:1.0,
 					                         color:'black'}});					                         					                         				  

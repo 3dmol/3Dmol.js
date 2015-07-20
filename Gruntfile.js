@@ -38,7 +38,7 @@ module.exports = function(grunt) {
             
             pre : {
                 src : ['3Dmol/3dmol.js','3Dmol/WebGL/math.js','3Dmol/WebGL/shapes.js',
-                '3Dmol/WebGL/core.js','3Dmol/WebGL/*.js','3Dmol/**.js'],
+                '3Dmol/WebGL/core.js','3Dmol/WebGL/*.js','3Dmol/**.js','!3Dmol/SurfaceWorker.js','3Dmol/SurfaceWorker.js'],
                 dest : 'build/3Dmol-pre.js'            
             },            
             
@@ -137,6 +137,7 @@ module.exports = function(grunt) {
     
     grunt.registerTask('build', ['clean:build', 'clean:doc', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'shell:doc', 'clean:tmp']);
     grunt.registerTask('build-quick', ['clean:build', 'concat_pre_build', 'concat_post_build', 'clean:tmp']);
+    grunt.registerTask('build-noclean', ['concat_pre_build', 'closure-compiler', 'concat_post_build', 'shell:doc', 'clean:tmp']);
 
     grunt.registerTask('release-update', ['clean:release', 'build', 'copy:release']);
     
