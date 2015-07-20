@@ -914,19 +914,20 @@ $3Dmol.Renderer = function ( parameters ) {
                     
                 if (useBlending)
                     _this.setBlending(true);
-
+                
                 _this.setDepthTest(material.depthTest);
                 _this.setDepthWrite(material.depthWrite);
                 setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
 
                 _this.setMaterialFaces(material);
                 
-                if(!material.wireframe && material.shaderID!=='basic' && material.opacity!==0.0 ){
+                _this.renderBuffer(camera, lights, fog, material, buffer, object);
+                
+                if(!material.wireframe && material.shaderID!=='basic' && material.opacity!==0.0 && material.outline ){
 					console.log("drawing outline");
                     outline =new $3Dmol.MeshOutlineMaterial();
                     _this.renderBuffer(camera, lights, fog, outline, buffer, object);
 			    }
-                _this.renderBuffer(camera, lights, fog, material, buffer, object);
                
             }
         }

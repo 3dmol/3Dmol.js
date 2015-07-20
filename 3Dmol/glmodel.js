@@ -583,6 +583,7 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} singleBonds - draw all bonds as single bonds if set
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
+         * @prop {boolean} outline - adding outline to sticks if true
          */
         
         // draws cylinders and small spheres (at bond radius)
@@ -941,7 +942,10 @@ $3Dmol.GLModel = (function() {
                 
                 if (cylinderMaterial.wireframe)
                     stickGeometry.setUpWireframe();
-                
+            
+                if(atom.style.stick.outline) {
+					cylinderMaterial.outline=true;
+				}
                 var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
             }
