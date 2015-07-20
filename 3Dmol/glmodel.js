@@ -848,7 +848,6 @@ $3Dmol.GLModel = (function() {
         /** param {AtomSpec[]} atoms */
         var createMolObj = function(atoms) {
 
-            //console.log("creating for "+id);
             var ret = new $3Dmol.Object3D();
             var cartoonAtoms = [];
             var lineGeometries = {};
@@ -857,29 +856,49 @@ $3Dmol.GLModel = (function() {
             var imposterGeometry = new $3Dmol.Geometry(true);                                                         
             var stickGeometry = new $3Dmol.Geometry(true);
             var cartoonGeometry = new $3Dmol.Geometry(true);
-            var i, n;
+            var i, j, n, testOpacities;
+            var opacities = {};
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
             for (i = 0, n = atoms.length; i < n; i++) {
                 var atom = atoms[i];
                 // recreate gl info for each atom as necessary
                 // set up appropriate intersection spheres for clickable atoms
+
                 if (atom && atom.style) {
+
                     if (atom.clickable && atom.intersectionShape === undefined)
-                        atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};                    
+                        atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};
+
+                    testOpacities = {line:undefined, cross:undefined, stick:undefined, sphere:undefined};
+                    for (j in testOpacities)
+                    {
+                        testOpacities[j] = (atom.style[j]) ? ((atom.style[j].opacity) ? parseFloat(atom.style[j].opacity) : 1) : undefined;
+                        if (opacities[j])
+                        {
+                            if (testOpacities[j] != undefined && opacities[j] != testOpacities[j])
+                            {
+                                console.log("Warning: " + j + " opacity is ambiguous");
+                                opacities[j] = 1;
+                            }
+
+                        } else opacities[j] = testOpacities[j];
+                    }
+                    
                     drawAtomSphere(atom, sphereGeometry);
                     drawAtomImposter(atom, imposterGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
+
                     if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                         //gradient color scheme range
-                        if (atom.style.cartoon.color === 'spectrum' && typeof(atom.resi) === "number") {                            
+                        if (atom.style.cartoon.color === "spectrum" && typeof(atom.resi) === "number") {                            
                             if (atom.resi < range[0])
                                 range[0] = atom.resi;
                             if (atom.resi > range[1])
                                 range[1] = atom.resi;
                         }
-                        
+
                         cartoonAtoms.push(atom);
                     }                   
                 }
@@ -892,7 +911,7 @@ $3Dmol.GLModel = (function() {
                     gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
 
                 $3Dmol.drawCartoon(ret, cartoonAtoms, cartoonGeometry, gradientscheme);
-                
+
             }
 
             // add sphere geometry
@@ -902,6 +921,11 @@ $3Dmol.GLModel = (function() {
                     vertexColors : true,
                     reflectivity : 0,
                 });
+                if (opacities.sphere < 1 && opacities.sphere >= 0)
+                {
+                    sphereMaterial.transparent = true;
+                    sphereMaterial.opacity = opacities.sphere;
+                }
                 
                 //Initialize buffers in geometry                
                 sphereGeometry.initTypedArrays();
@@ -909,7 +933,7 @@ $3Dmol.GLModel = (function() {
                 var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
                 ret.add(sphere);
             }
-            
+
             // add imposter geometry
             if (imposterGeometry.vertices > 0) {
                 var imposterMaterial = new $3Dmol.ImposterMaterial({
@@ -922,8 +946,7 @@ $3Dmol.GLModel = (function() {
                 imposterGeometry.initTypedArrays();
                 
                 var spherei = new $3Dmol.Mesh(imposterGeometry, imposterMaterial);
-                console
-                        .log("spherei geometry " + imposterGeometry.vertices.length);
+                console.log("spherei geometry " + imposterGeometry.vertices.length);
 
                 ret.add(spherei);
             }
@@ -935,6 +958,11 @@ $3Dmol.GLModel = (function() {
                     ambient : 0x000000,
                     reflectivity : 0
                 });
+                if (opacities.stick < 1 && opacities.stick >= 0)
+                {
+                    cylinderMaterial.transparent = true;
+                    cylinderMaterial.opacity = opacities.stick;
+                }
 
                 //Initialize buffers in geometry                
                 stickGeometry.initTypedArrays();

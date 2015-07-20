@@ -686,7 +686,7 @@ $3Dmol.drawCartoon = (function() {
                     backbonePt = null;
                     orientPt = null;
                 }
-            }  
+            }
         }
 
         if (baseEndPt) // draw last NA base if needed
@@ -754,7 +754,18 @@ $3Dmol.drawCartoon = (function() {
                 v.smoothen = true;
             pointsArray[i].push(v);
         }
-        pointsArray.opacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
+
+        // make sure chain is all the same opacity
+        testOpacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
+        if (pointsArray.opacity)
+        {
+            if (pointsArray.opacity != testOpacity)
+            {
+                console.log("Warning: default cartoon opacity is ambiguous");
+                pointsArray.opacity = 1;
+            }
+
+        } else pointsArray.opacity = testOpacity;
     }
 
     // actual function call
