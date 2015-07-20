@@ -923,7 +923,7 @@ $3Dmol.Renderer = function ( parameters ) {
                 
                 _this.renderBuffer(camera, lights, fog, material, buffer, object);
                 
-                if(!material.wireframe && material.shaderID!=='basic' && material.opacity!==0.0 && material.outline ){
+                if(!material.wireframe && material.shaderID!=='basic' && material.opacity!==0.0 && object.geometry.outline ){
 					console.log("drawing outline");
                     outline =new $3Dmol.MeshOutlineMaterial();
                     _this.renderBuffer(camera, lights, fog, outline, buffer, object);

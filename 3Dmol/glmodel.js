@@ -593,6 +593,8 @@ $3Dmol.GLModel = (function() {
             var style = atom.style.stick;
             if (style.hidden)
                 return;
+                
+            if (style.outline) geo.outline=true;
 
             var atomBondR = style.radius || defaultStickRadius;
             var bondR = atomBondR;
@@ -905,8 +907,11 @@ $3Dmol.GLModel = (function() {
                 });
                 
                 //Initialize buffers in geometry                
-                sphereGeometry.initTypedArrays();
-                
+                sphereGeometry.initTypedArrays();   
+                /*if(atom.style.sphere.outline){
+					sphereMaterial.outline=true;
+				}*/
+				
                 var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
                 ret.add(sphere);
             }
@@ -943,9 +948,6 @@ $3Dmol.GLModel = (function() {
                 if (cylinderMaterial.wireframe)
                     stickGeometry.setUpWireframe();
             
-                if(atom.style.stick.outline) {
-					cylinderMaterial.outline=true;
-				}
                 var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
             }
