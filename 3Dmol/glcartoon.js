@@ -436,7 +436,7 @@ $3Dmol.drawCartoon = (function() {
                     else
                         thickness = defaultThickness;
 
-                    traceGeo.opacity = parseFloat(cartoon.opacity) || 1;
+                    
 
                     /* do not draw connections between different chains, but ignore
                        differences in reschain to properly support CA-only files */
@@ -459,10 +459,9 @@ $3Dmol.drawCartoon = (function() {
                         } // note that an atom object can be duck-typed as a 3-vector in this case
                     }
 
-                    if (curr && traceGeo && curr.style.cartoon &&
-                        (curr.style.cartoon.style != "trace" || curr.chain != next.chain || curr.resi+1 != next.resi))
+                    if (curr && traceGeo && (curr.style.cartoon && curr.style.cartoon.style != "trace"
+                        || curr.chain != next.chain))
                     {
-                        console.log("new traceGeo")
                         var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
                         traceMaterial.vertexColors = $3Dmol.FaceColors;
                         if ( typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
@@ -473,7 +472,7 @@ $3Dmol.drawCartoon = (function() {
                         var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
                         group.add(traceMesh);
                         traceGeo = null;
-                    }
+                    } else traceGeo.opacity = parseFloat(cartoon.opacity) || 1;
 
                     curr = next;
                     currColor = nextColor;
@@ -613,7 +612,6 @@ $3Dmol.drawCartoon = (function() {
 
         if (traceGeo != null) // generate last mesh for trace geometry
         {
-            console.log("traceGeo.opacity = " + traceGeo.opacity);
             var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             traceMaterial.vertexColors = $3Dmol.FaceColors;
             if (typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
