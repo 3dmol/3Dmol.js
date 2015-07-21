@@ -302,7 +302,7 @@ $3Dmol.ShaderLib = {
 "    gl_Position = projectionMatrix * mvPosition;",
 "    vec2 offset=transformedNormal.xy*0.2;",
 "    gl_Position.xy+=offset;",
-"    gl_Position.z+=gl_Position.w*0.05;",
+"    gl_Position.z+=gl_Position.w*0.005;",
 "}"
            
 ].join("\n"),

@@ -18,6 +18,7 @@ $3Dmol.Renderer = function ( parameters ) {
 
     _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color( parameters.clearColor ) : new $3Dmol.Color( 0x000000 ),
     _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0;
+    _outline = parameters.outline !== undefined ? parameters.outline : false;
     
     this.domElement = _canvas;
     this.context = null;
@@ -165,6 +166,10 @@ $3Dmol.Renderer = function ( parameters ) {
             _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
 
     };
+    
+    this.enableOutline = function (){
+		_outline = true;
+	}
 
     this.setSize = function ( width, height ) {
 
@@ -922,13 +927,12 @@ $3Dmol.Renderer = function ( parameters ) {
                 _this.setMaterialFaces(material);
                 
                 _this.renderBuffer(camera, lights, fog, material, buffer, object);
-                
-                if(!material.wireframe && material.shaderID!=='basic' && material.opacity!==0.0 && object.geometry.outline ){
+                             
+                if(_outline && !material.wireframe && material.shaderID!=='basic' && material.opacity!==0.0 ){
 					console.log("drawing outline");
                     outline =new $3Dmol.MeshOutlineMaterial();
                     _this.renderBuffer(camera, lights, fog, outline, buffer, object);
 			    }
-               
             }
         }
 
