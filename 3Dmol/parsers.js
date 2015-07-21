@@ -766,7 +766,7 @@ $3Dmol.Parsers = (function() {
         assignBonds(atoms);
         computeSecondaryStructure(atoms);
         
-        if (mmCIF._pdbx_struct_oper_list !== undefined && !noAssembly) { 
+        if (mmCIF._pdbx_struct_oper_list_id !== undefined && !noAssembly) {
             for (var i = 0; i < mmCIF._pdbx_struct_oper_list_id.length; i++) {
                 var matrix11 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[1][1]'][i]);
                 var matrix12 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[1][2]'][i]);
@@ -784,6 +784,65 @@ $3Dmol.Parsers = (function() {
                 var matrix = new $3Dmol.Matrix4(matrix11, matrix12, matrix13,
                         vector1, matrix21, matrix22, matrix23, vector2,
                         matrix31, matrix32, matrix33, vector3);
+                modelData.symmetries.push(matrix);
+            }
+            processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
+        }
+        function parseTerm(term){
+            var negative = term.match('-');
+            term = term.replace(/[-xyz]/g, "");
+            var fractionParts = term.split('/');
+
+            var numerator, denominator;
+            if (fractionParts[1] === undefined) {
+                denominator = 1;
+            }
+            else {
+                denominator = parseInt(fractionParts[1]);
+            }
+            if (fractionParts[0] === "") {
+                numerator = 1;
+            }
+            else {
+                numerator = parseInt(fractionParts[0]);
+            }
+            return numerator / denominator * (negative ? -1 : 1);
+        }
+        if (mmCIF._symmetry_equiv_pos_as_xyz !== undefined) {
+            for (var sym = 0; sym < mmCIF._symmetry_equiv_pos_as_xyz.length; sym++) {
+                var transform = mmCIF._symmetry_equiv_pos_as_xyz[sym];
+                var componentStrings = transform.split(',').map(
+                    function(val){
+                        return val.replace(/-/g,"+-");
+                    });
+                var matrix = new $3Dmol.Matrix4(0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1);
+                for (var coord = 0; coord < 3; coord++) {
+                    var terms = componentStrings[coord].split('+');
+                    var constant = 0, xTerm = 0, yTerm = 0, zTerm = 0;
+                    for (var t = 0; t < terms.length; t++) {
+                        var term = terms[t];
+                        var coefficient = parseTerm(term);
+                        if (term.match('x')) {
+                            matrix.elements[coord + 0] = coefficient;
+                        }
+                        else if (term.match('y')) {
+                            matrix.elements[coord + 4] = coefficient;
+                        }
+                        else if (term.match('z')) {
+                            matrix.elements[coord + 8] = coefficient;
+                        }
+                        else {
+                            matrix.elements[coord + 12] = coefficient;
+                        }
+                    }
+                }
+                var conversionMatrix4 = new $3Dmol.Matrix4(
+                    conversionMatrix[0][0], conversionMatrix[0][1], conversionMatrix[0][2], 0,
+                    conversionMatrix[1][0], conversionMatrix[1][1], conversionMatrix[1][2], 0,
+                    conversionMatrix[2][0], conversionMatrix[2][1], conversionMatrix[2][2], 0);
+                var conversionInverse = (new $3Dmol.Matrix4()).getInverse(conversionMatrix4, true);
+                matrix = (new $3Dmol.Matrix4()).multiplyMatrices(matrix, conversionInverse);
+                matrix = (new $3Dmol.Matrix4()).multiplyMatrices(conversionMatrix4, matrix);
                 modelData.symmetries.push(matrix);
             }
             processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);

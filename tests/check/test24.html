@@ -31,7 +31,7 @@
                    var viewer = $3Dmol.createViewer($("#test24"));
                    viewer.setBackgroundColor(0xffffffff);
                    
-
+                   viewer.enableOutline();
                    $.get('volData/1fas.pqr', function(data){
                     viewer.addModel(data, "pqr"); 
                          $.get("volData/1fas.cube",function(volumedata){
