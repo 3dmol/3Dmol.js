@@ -139,7 +139,7 @@ $3Dmol.LineBasicMaterial.prototype.clone = function() {
     
     $3Dmol.Material.prototype.clone.call(this, material);
     
-    material.color.copy();
+    material.color.copy(this.color);
     return material;
 };
 

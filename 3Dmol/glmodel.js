@@ -872,7 +872,15 @@ $3Dmol.GLModel = (function() {
                     testOpacities = {line:undefined, cross:undefined, stick:undefined, sphere:undefined};
                     for (j in testOpacities)
                     {
-                        testOpacities[j] = (atom.style[j]) ? ((atom.style[j].opacity) ? parseFloat(atom.style[j].opacity) : 1) : undefined;
+                        if (atom.style[j])
+                        {
+                            if (atom.style[j].opacity)
+                                testOpacities[j] = parseFloat(atom.style[j].opacity);
+                            else
+                                testOpacities[j] = 1;
+
+                        } else testOpacities[j] = undefined;
+
                         if (opacities[j])
                         {
                             if (testOpacities[j] != undefined && opacities[j] != testOpacities[j])
@@ -1000,6 +1008,11 @@ $3Dmol.GLModel = (function() {
                         linewidth : linewidth,
                         vertexColors : true
                     });
+                    if (opacities.line < 1 && opacities.line >= 0)
+                    {
+                        lineMaterial.transparent = true;
+                        lineMaterial.opacity = opacities.line;
+                    }
                     
                     lineGeometries[i].initTypedArrays();
                     
@@ -1018,6 +1031,11 @@ $3Dmol.GLModel = (function() {
                         linewidth : linewidth,
                         vertexColors : true
                     });
+                    if (opacities.cross < 1 && opacities.cross >= 0)
+                    {
+                        crossMaterial.transparent = true;
+                        crossMaterial.opacity = opacities.cross;
+                    }
 
                     crossGeometries[i].initTypedArrays();
                     
