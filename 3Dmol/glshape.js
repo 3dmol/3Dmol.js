@@ -429,6 +429,20 @@ $3Dmol.GLShape = (function() {
                         .copy(vertexArr[c])));
             }
         }
+        
+        if(clickable) {
+            
+            var center = new $3Dmol.Vector3(0,0,0);
+            var cnt = 0;
+            for(var g = 0; g < geo.geometryGroups.length; g++) {
+                center.add(geo.geometryGroups[g].getCentroid());
+                cnt++;
+            }
+            center.divideScalar(cnt);
+            
+            
+            updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, vertexArray);
+        }
 
         geoGroup.faceArray = new Uint16Array(faceArr);
 
@@ -453,44 +467,7 @@ $3Dmol.GLShape = (function() {
         geoGroup.lineidx = geoGroup.lineArray.length;
     };
     
-    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
-    //peel off 64k vertices rsvh into their own mesh
-    //duplicating vertices and normals as necessary to preserve faces and lines
-    var splitMesh = function(mesh) {
-        if(mesh.vertexArr < MAXVERT) return [mesh]; //typical case
-        
-        var nverts = mesh.vertexArr.length;
-        var slices = [{vertexArr: [], normalArr: [], faceArr: []}];
-        var vertSlice = []; //indexed by original vertex to get current slice
-        var vertIndex =[]; //indexed by original vertex to get index within slice
-        var currentSlice = 0;
-        
-        //for each face, make sure all three vertices (or copies) are in the same slice
-        var faces = mesh.faceArr;
-        var vs = [0,0,0];
-        for(var i = 0, nf = faces.length; i < nf; i += 3) {
-            var slice = slices[currentSlice];
-            for(var j = 0; j < 3; j++) {
-                //process each vertex to make sure it is assigned a slice
-                //all vertices of a face must belong to the same slice
-                var v = faces[i+j];
-                if(vertSlice[v] !== currentSlice) { //true if undefined
-                    vertSlice[v] = currentSlice;
-                    vertIndex[v] = slice.vertexArr.length;
-                    slice.vertexArr.push(mesh.vertexArr[v]);
-                    if(mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
-                }
-                slice.faceArr.push(vertIndex[v]);
-            }
-            
-            if(slice.vertexArr.length >= MAXVERT) {
-                //new slice
-                slices.push({vertexArr: [], normalArr: [], faceArr: []});
-                currentSlice++;
-            }
-        }
-        return slices;
-    }
+
     
     // handles custom shape generation from user supplied arrays
     // May need to generate normal and/or line indices
@@ -517,25 +494,11 @@ $3Dmol.GLShape = (function() {
         }
         color =  $3Dmol.CC.color(color);
 
-        var firstgeo = geo.geometryGroups.length;
-        var splits = splitMesh(mesh);
+        //var firstgeo = geo.geometryGroups.length;
+        var splits = $3Dmol.splitMesh(mesh);
         for(var i = 0, n = splits.length; i < n; i++) {
             addCustomGeo(shape, geo, splits[i], color, customSpec.clickable);
         } 
-        
-        if(customSpec.clickable) {
-            
-            var center = new $3Dmol.Vector3(0,0,0);
-            var cnt = 0;
-            for(var g = firstgeo; g < geo.geometryGroups.length; g++) {
-                center.add(geo.geometryGroups[g].getCentroid());
-                cnt++;
-            }
-            center.divideScalar(cnt);
-            
-            updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, mesh.vertexArr);
-        }
-
     }; 
 
     // Update a bounding sphere's position and radius
@@ -1006,3 +969,44 @@ $3Dmol.GLShape = (function() {
 }());
 
 $3Dmol.ShapeIDCount = 0;
+
+
+$3Dmol.splitMesh = function(mesh) {
+	    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
+    //peel off 64k vertices rsvh into their own mesh
+    //duplicating vertices and normals as necessary to preserve faces and lines
+    
+        if(mesh.vertexArr < MAXVERT) return [mesh]; //typical case
+        
+        var nverts = mesh.vertexArr.length;
+        var slices = [{vertexArr: [], normalArr: [], faceArr: []}];
+        var vertSlice = []; //indexed by original vertex to get current slice
+        var vertIndex =[]; //indexed by original vertex to get index within slice
+        var currentSlice = 0;
+        
+        //for each face, make sure all three vertices (or copies) are in the same slice
+        var faces = mesh.faceArr;
+        var vs = [0,0,0];
+        for(var i = 0, nf = faces.length; i < nf; i += 3) {
+            var slice = slices[currentSlice];
+            for(var j = 0; j < 3; j++) {
+                //process each vertex to make sure it is assigned a slice
+                //all vertices of a face must belong to the same slice
+                var v = faces[i+j];
+                if(vertSlice[v] !== currentSlice) { //true if undefined
+                    vertSlice[v] = currentSlice;
+                    vertIndex[v] = slice.vertexArr.length;
+                    slice.vertexArr.push(mesh.vertexArr[v]);
+                    if(mesh.normalArr && mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
+                }
+                slice.faceArr.push(vertIndex[v]);
+            }
+            
+            if(slice.vertexArr.length >= MAXVERT) {
+                //new slice
+                slices.push({vertexArr: [], normalArr: [], faceArr: []});
+                currentSlice++;
+            }
+        }
+        return slices;
+    }

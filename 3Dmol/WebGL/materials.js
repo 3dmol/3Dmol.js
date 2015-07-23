@@ -139,7 +139,7 @@ $3Dmol.LineBasicMaterial.prototype.clone = function() {
     
     $3Dmol.Material.prototype.clone.call(this, material);
     
-    material.color.copy();
+    material.color.copy(this.color);
     return material;
 };
 
@@ -245,6 +245,25 @@ $3Dmol.MeshDoubleLambertMaterial.prototype.clone = function() {
         
     return material;
     
+};
+
+//Outlined Mesh Lamert material
+/** @constructor */
+$3Dmol.MeshOutlineMaterial = function(parameters) {
+    $3Dmol.Material.call(this);
+    this.fog = true;
+    this.shaderID = "outline";
+    
+};
+
+$3Dmol.MeshOutlineMaterial.prototype = Object.create($3Dmol.Material.prototype);
+
+$3Dmol.MeshOutlineMaterial.prototype.clone = function(material) {
+    if ( typeof material === "undefined" ) material = new $3Dmol.MeshOutlineMaterial();
+    $3Dmol.Material.prototype.clone.call(this, material);
+    material.fog = this.fog;
+    material.shaderID = this.shaderID;
+    return material;
 };
 
 

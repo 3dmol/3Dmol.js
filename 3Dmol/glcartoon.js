@@ -8,17 +8,18 @@ var $3Dmol = $3Dmol || {};
 
 
 /**@typedef CartoonStyleSpec
- * @prop {string} color - solid color, may specify as 'spectrum'
+ * @prop {ColorSpec} color - solid color, may specify as 'spectrum'
  * @prop {string} style - style of cartoon rendering (currently just default and trace)
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
+ * @prop {number} opacity - set transparency; transparency is set per-chain according to value of last backbone atom
  * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
- * is 'N1' for purines (resn: '  A', '  G', ' DA', ' DG') and 'N3' for pyrimidines (resn: '  C', '  U', ' DC', ' DT').
+ * is 'N1' for purines (resn: 'A', 'G', 'DA', 'DG') and 'N3' for pyrimidines (resn: 'C', 'U', 'DC', 'DT').
  * The different nucleobases can therefore be distinguished as follows:
  * @example
- * viewer.setStyle({resn:' DA', atom:'N1'}, {cartoon:{color:'red'}});
- * viewer.setStyle({resn:' DG', atom:'N1'}, {cartoon:{color:'green'}});
- * viewer.setStyle({resn:' DC', atom:'N3'}, {cartoon:{color:'blue'}});
- * viewer.setStyle({resn:' DT', atom:'N3'}, {cartoon:{color:'yellow'}});
+ * viewer.setStyle({resn:'DA', atom:'N1'}, {cartoon:{color:'red'}});
+ * viewer.setStyle({resn:'DG', atom:'N1'}, {cartoon:{color:'green'}});
+ * viewer.setStyle({resn:'DC', atom:'N3'}, {cartoon:{color:'blue'}});
+ * viewer.setStyle({resn:'DT', atom:'N3'}, {cartoon:{color:'yellow'}});
  */
 
 /**
@@ -138,15 +139,19 @@ $3Dmol.drawCartoon = (function() {
         geo.initTypedArrays();
         geo.setUpNormals();
         
-        var material = new $3Dmol.MeshLambertMaterial();
+        var material = new $3Dmol.MeshDoubleLambertMaterial();
+        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
+            material.transparent = true;
+            material.opacity = opacity;
+        }
         material.vertexColors = $3Dmol.FaceColors;
-                material.side = $3Dmol.DoubleSide;
         var mesh = new $3Dmol.Mesh(geo, material);
+
         group.add(mesh);
     };
 
     //  drawShapeStrip()
-    var drawStrip = function(group, points, colors, div, thickness) {
+    var drawStrip = function(group, points, colors, div, thickness, opacity) {
 
 		// points[num = cross-sectional resolution][len = length of strip]
         var i, j, num, len;
@@ -331,9 +336,12 @@ $3Dmol.drawCartoon = (function() {
         geo.initTypedArrays();
         geo.setUpNormals();
         
-        var material = new $3Dmol.MeshLambertMaterial();
+        var material = new $3Dmol.MeshDoubleLambertMaterial();
         material.vertexColors = $3Dmol.FaceColors;
-        material.side = $3Dmol.DoubleSide;
+        if (typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
+            material.transparent = true;
+            material.opacity = opacity;
+        }
         var mesh = new $3Dmol.Mesh(geo, material);
         group.add(mesh);     
     };
@@ -544,9 +552,110 @@ $3Dmol.drawCartoon = (function() {
         geo.initTypedArrays();
         geo.setUpNormals();
         
-        var material = new $3Dmol.MeshLambertMaterial();
+                // HalfEdgeRec used to store adjacency info of mesh
+        var HalfEdge=function(vertIdx){
+            this.vert=vertIdx; // Vertex index at the end of this half-edge
+            this.twin=null;    // Oppositely oriented adjacent half-edge
+            this.next=null;    //Next half-edge around the face
+		};
+		
+		var computeAdjacency=function(faces,faceCount,vertCount){
+			console.log("computeAdjacency");
+			//all pieces of the half-edge data structure
+			edges=[];
+			
+			// a hash table to hold the adjaceney info
+			// - Keys are pairs of vertex indices
+			// - Values are pointers to half-edge
+			var edgeTable={};
+			var len=0;
+			
+			//Plow through faces and fill all half-edge info except twin pointers:
+			for(var i=0;i<faceCount;i+=3){
+                var A=faces[i];
+                var B=faces[i+1];
+                var C=faces[i+2];
+               // console.log("A="+A+ " B="+ B+ " C="+C);
+                
+                //create the half-edge that goes from C to A
+                var CA=new HalfEdge(A);
+                edges.push(CA);
+                //create the half-edge that goes from A to B
+                var AB=new HalfEdge(B);
+                edges.push(AB);
+                //create the half-edge that goes from B to C
+                var BC=new HalfEdge(C);
+                edges.push(BC);
+                
+                CA.next=AB;
+                AB.next=BC;
+                BC.next=CA;
+                
+                edgeTable[C|(A<<16)]=CA; 
+                edgeTable[A|(B<<16)]=AB; 
+                edgeTable[B|(C<<16)]=BC;
+            }
+            
+            //varify that the mesh is clean
+            for(var key in edgeTable){
+				if(edgeTable.hasOwnProperty(key)){
+					len++;
+				}
+			}
+			if(len!=faceCount*3){
+				console.warn("Bad mesh: duplicated edges or inconsistent winding.len="+len+" faceCount="+faceCount+" vertCount="+vertCount);
+			}
+			
+			//Populate the twin pointers by iterating over the hash table
+			var boundaryCount=0;
+			for(var key in edgeTable){
+				if(edgeTable.hasOwnProperty(key)){
+					var twinKey=((key&0xffff)<<16)|(key>>16);
+					if(edgeTable.hasOwnProperty(twinKey)){
+						edgeTable[key].twin=edgeTable[twinKey];
+						edgeTable[twinKey].twin=edgeTable[key];
+					}else{
+						boundaryCount+=1;
+					}
+				}
+			}
+			
+			var ret=new Uint16Array(faceCount*6);
+			// Now that we have a half-edge structure, it's easy to create adjacency info for WebGL
+			if(boundaryCount>0){
+				console.log("Mesh is not watertight. Contains "+boundaryCount +" edges");
+				
+				for(var i=0;i<faceCount;i+=3){
+					ret[i*2+0]=edges[i+2].vert;
+					ret[i*2+1]=edges[i+0].twin==null?ret[i*2+0]:edges[i+0].twin.next.vert;
+					ret[i*2+2]=edges[i+0].vert;
+					ret[i*2+3]=edges[i+1].twin==null?ret[i*2+1]:edges[i+1].twin.next.vert;					
+					ret[i*2+4]=edges[i+1].vert;
+					ret[i*2+5]=edges[i+2].twin==null?ret[i*2+2]:edges[i+2].twin.next.vert;
+				}
+			}
+			else{
+				for(var i=0;i<faceCount;i+=3){
+					ret[i*2+0]=edges[i+2].vert;
+					ret[i*2+1]=edges[i+0].twin.next.vert;
+					ret[i*2+2]=edges[i+0].vert;
+					ret[i*2+3]=edges[i+1].twin.next.vert;					
+					ret[i*2+4]=edges[i+1].vert;
+					ret[i*2+5]=edges[i+2].twin.next.vert;
+				} 
+			}
+			
+			return ret;
+		};
+		
+		//geoGroup.adjFaceArray = computeAdjacency(faceArray,faceArray.length,offset);
+        
+        var material = new $3Dmol.MeshDoubleLambertMaterial();
         material.vertexColors = $3Dmol.FaceColors;
-        material.side = $3Dmol.DoubleSide;
+        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
+            material.transparent = true;
+            material.opacity = opacity;
+        }
         var mesh = new $3Dmol.Mesh(geo, material);
         group.add(mesh);     
     };
@@ -614,7 +723,7 @@ $3Dmol.drawCartoon = (function() {
                 if (next.atom === "CA" || next.atom === "P")
                 {
                     // determine cylinder color
-                    if (gradientScheme)
+                    if (gradientScheme && cartoon.color === 'spectrum')
                         nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
                     else
                         nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
@@ -625,6 +734,8 @@ $3Dmol.drawCartoon = (function() {
                         thickness = cartoon.thickness;
                     else
                         thickness = defaultThickness;
+
+                    
 
                     /* do not draw connections between different chains, but ignore
                        differences in reschain to properly support CA-only files */
@@ -646,6 +757,21 @@ $3Dmol.drawCartoon = (function() {
                             $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, next, thickness, color2, false, true);
                         } // note that an atom object can be duck-typed as a 3-vector in this case
                     }
+
+                    if (curr && traceGeo && (curr.style.cartoon && curr.style.cartoon.style != "trace"
+                        || curr.chain != next.chain))
+                    {
+                        var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
+                        traceMaterial.vertexColors = $3Dmol.FaceColors;
+                        if ( typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
+                            traceMaterial.transparent = true;
+                            traceMaterial.opacity = traceGeo.opacity;
+                            delete traceGeo.opacity;
+                        }
+                        var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
+                        group.add(traceMesh);
+                        traceGeo = null;
+                    } else traceGeo.opacity = parseFloat(cartoon.opacity) || 1;
 
                     curr = next;
                     currColor = nextColor;
@@ -680,9 +806,9 @@ $3Dmol.drawCartoon = (function() {
 
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
-                            drawSmoothCurve(group, points[i], 1, colors, div);
+                            drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
                         if (fill)
-                            drawStrip(group, points, colors, div, thickness);
+                            drawStrip(group, points, colors, div, thickness, points.opacity);
 
                         // clear arrays for points and colors
                         points = [];
@@ -698,15 +824,16 @@ $3Dmol.drawCartoon = (function() {
                         {
                             // start the cylinder at the midpoint between consecutive backbone atoms
                             baseStartPt = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
-                            var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.02);
+                            var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.02); //TODO: apply this as function of thickness
                             baseStartPt.add(startFix);
+
                             $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
                             baseStartPt = null;
                             baseEndPt = null;   
                         }
 
                         // determine color and thickness of the next strand segment
-                        if (gradientScheme)
+                        if (gradientScheme && cartoon.color === 'spectrum')
                             nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
                         else
                             nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
@@ -749,8 +876,8 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // atoms used for drawing the NA base cylinders (diff for purines and pyramidines)
-                else if ((next.atom === "N1" && $.inArray(next.resn, purResns) != -1) ||
-                         (next.atom === "N3" && $.inArray(next.resn, pyrResns) != -1))
+                else if ((next.atom === "N1" && $.inArray(next.resn.trim(), purResns) != -1) ||
+                         (next.atom === "N3" && $.inArray(next.resn.trim(), pyrResns) != -1))
                 {
                     baseEndPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     baseEndPt.color = $3Dmol.getColorFromStyle(next, cartoon).getHex();
@@ -766,7 +893,7 @@ $3Dmol.drawCartoon = (function() {
                     colors.push(nextColor);
                     if (arrow) colors.push(nextColor);
                 }
-            }  
+            }
         }
 
         if (baseEndPt) // draw last NA base if needed
@@ -784,15 +911,19 @@ $3Dmol.drawCartoon = (function() {
 
         // for default style, draw the last strand
         for (i = 0; !thickness && i < num; i++)
-            drawSmoothCurve(group, points[i], 1, colors, div);
+            drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
         if (fill)
-            drawStrip(group, points, colors, div, thickness);
+            drawStrip(group, points, colors, div, thickness, points.opacity);
 
-        if (traceGeo) // generate mesh for trace geometry
+        if (traceGeo != null) // generate last mesh for trace geometry
         {
-            var traceMaterial = new $3Dmol.MeshLambertMaterial();
+            var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             traceMaterial.vertexColors = $3Dmol.FaceColors;
-            traceMaterial.side = $3Dmol.DoubleSide;
+            if (typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
+                traceMaterial.transparent = true;
+                traceMaterial.opacity = traceGeo.opacity;
+                delete traceGeo.opacity;
+            }
             var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
             group.add(traceMesh);
         }
@@ -800,7 +931,7 @@ $3Dmol.drawCartoon = (function() {
 
     var addBackbonePoints = function(points, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom, atomList, atomi)
     {
-        var widthScalar, i, delta, v, addArrowPoints;
+        var widthScalar, i, delta, v, addArrowPoints, testOpacity;
         
         // kind of hacky...
         var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10, ILE:8, LEU: 8, LYS: 9, MET:8, PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
@@ -808,7 +939,7 @@ $3Dmol.drawCartoon = (function() {
         nextBBAtom = atomList[parseInt(atomi) + resSize[backboneAtom.resn]];
         if (nextBBAtom) nextnextBBAtom = atomList[parseInt(atomi) + resSize[backboneAtom.resn] + resSize[nextBBAtom.resn]];
 
-        // the orientation vector is the difference from backbone atom to orientation atom
+        // the orientation vector is the normed difference from backbone atom to orientation atom
         orientPt.sub(backbonePt);
         orientPt.normalize();
 
@@ -878,15 +1009,28 @@ $3Dmol.drawCartoon = (function() {
                 points[i].push(v);
             }
         }
-        if (backboneAtom.ss === "arrowtip") backboneAtom.ss = "s"
+
+        // make sure chain is all the same opacity
+        testOpacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
+        if (points.opacity)
+        {
+            if (points.opacity != testOpacity)
+            {
+                console.log("Warning: default cartoon opacity is ambiguous");
+                points.opacity = 1;
+            }
+
+        } else points.opacity = testOpacity;
+
+        if (backboneAtom.ss === "arrowtip") backboneAtom.ss = "s";
         return addArrowPoints;
     }
 
     // actual function call
-    var drawCartoon = function(group, atomlist, geo, gradientscheme) {
-       
+    var drawCartoon = function(group, atomlist, laddergeo, gradientscheme) {
                                                        //fill  doNotSmoothen
-        drawStrand(group, atomlist, geo, gradientscheme, true, false);
+        drawStrand(group, atomlist, laddergeo, gradientscheme, true, false);        
+
     };
 
     return drawCartoon;

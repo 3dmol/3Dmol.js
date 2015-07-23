@@ -65,7 +65,7 @@ $3Dmol.GLModel = (function() {
         "resi", // Residue number 
         "icode",
         "rescode",
-        "serial", // Atom's serial id number
+        "serial", // Atom's serial id numbermodels
         "atom", // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds", // Array of atom ids this atom is bonded to
         "ss", // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
@@ -112,15 +112,13 @@ $3Dmol.GLModel = (function() {
         // private variables
         var atoms = [];
         var id = mid;
+        var hidden = false;
         var molObj = null;
         var renderedMolObj = null;
         var lastColors = null;
-        var copyMatrices = []; //transformation + rot matrices
+        var modelData = {};
         var idMatrix = new $3Dmol.Matrix4();
-        idMatrix.identity();
-        var noAssembly;
         var dontDuplicateAtoms;
-        var idList = [];
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
@@ -157,8 +155,8 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} hidden - do not show 
          * @prop {number} linewidth 
          * @prop {number} radius 
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         /**
@@ -310,8 +308,8 @@ $3Dmol.GLModel = (function() {
         /**@typedef LineStyleSpec
          * @prop {boolean} hidden - do not show line
          * @prop {number} linewidth 
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         // bonds - both atoms must match bond style
@@ -336,7 +334,7 @@ $3Dmol.GLModel = (function() {
             if (!geos[linewidth])
                 geos[linewidth] = new $3Dmol.Geometry();
             /** @type {geometryGroup} */
-            var geoGroup = geos[linewidth].updateGeoGroup(2*atom.bonds.length);
+            var geoGroup = geos[linewidth].updateGeoGroup(6*atom.bonds.length); //reserve enough space even for triple bonds
             
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
@@ -476,8 +474,8 @@ $3Dmol.GLModel = (function() {
         /**@typedef SphereStyleSpec
          * @prop {boolean} hidden - do not show atom
          * @prop {number} radius - override van der waals radius
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         //sphere drawing
@@ -583,8 +581,8 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} hidden - do not show 
          * @prop {number} radius 
          * @prop {boolean} singleBonds - draw all bonds as single bonds if set
-         * @prop {string} colorscheme - element based coloring
-         * @prop {string} color - fixed coloring, overrides colorscheme
+         * @prop {ColorschemeSpec} colorscheme - element based coloring
+         * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
         
         // draws cylinders and small spheres (at bond radius)
@@ -850,7 +848,6 @@ $3Dmol.GLModel = (function() {
         /** param {AtomSpec[]} atoms */
         var createMolObj = function(atoms) {
 
-            //console.log("creating for "+id);
             var ret = new $3Dmol.Object3D();
             var cartoonAtoms = [];
             var lineGeometries = {};
@@ -859,33 +856,59 @@ $3Dmol.GLModel = (function() {
             var imposterGeometry = new $3Dmol.Geometry(true);                                                         
             var stickGeometry = new $3Dmol.Geometry(true);
             var cartoonGeometry = new $3Dmol.Geometry(true);
-            var i, n;
+            var i, j, n, testOpacities;
+            var opacities = {};
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
             for (i = 0, n = atoms.length; i < n; i++) {
                 var atom = atoms[i];
                 // recreate gl info for each atom as necessary
                 // set up appropriate intersection spheres for clickable atoms
+
                 if (atom && atom.style) {
+
                     if (atom.clickable && atom.intersectionShape === undefined)
-                        atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};                    
+                        atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};
+
+                    testOpacities = {line:undefined, cross:undefined, stick:undefined, sphere:undefined};
+                    for (j in testOpacities)
+                    {
+                        if (atom.style[j])
+                        {
+                            if (atom.style[j].opacity)
+                                testOpacities[j] = parseFloat(atom.style[j].opacity);
+                            else
+                                testOpacities[j] = 1;
+
+                        } else testOpacities[j] = undefined;
+
+                        if (opacities[j])
+                        {
+                            if (testOpacities[j] != undefined && opacities[j] != testOpacities[j])
+                            {
+                                console.log("Warning: " + j + " opacity is ambiguous");
+                                opacities[j] = 1;
+                            }
+
+                        } else opacities[j] = testOpacities[j];
+                    }
+                    
                     drawAtomSphere(atom, sphereGeometry);
                     drawAtomImposter(atom, imposterGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
+
                     if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                         //gradient color scheme range
-                        if (atom.style.cartoon.color === 'spectrum' && typeof(atom.resi) === "number") {                            
+                        if (atom.style.cartoon.color === "spectrum" && typeof(atom.resi) === "number") {                            
                             if (atom.resi < range[0])
                                 range[0] = atom.resi;
                             if (atom.resi > range[1])
                                 range[1] = atom.resi;
                         }
-                        
-                        cartoonAtoms.push(atom);
-                    }
-                    
 
+                        cartoonAtoms.push(atom);
+                    }                   
                 }
             }
             // create cartoon if needed - this is a whole model analysis
@@ -896,10 +919,7 @@ $3Dmol.GLModel = (function() {
                     gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
 
                 $3Dmol.drawCartoon(ret, cartoonAtoms, cartoonGeometry, gradientscheme);
-                
-                for (i = 0; i < ret.children.length; i++){
-                    var geo = ret.children[i].geometry;
-                }
+
             }
 
             // add sphere geometry
@@ -909,6 +929,11 @@ $3Dmol.GLModel = (function() {
                     vertexColors : true,
                     reflectivity : 0,
                 });
+                if (opacities.sphere < 1 && opacities.sphere >= 0)
+                {
+                    sphereMaterial.transparent = true;
+                    sphereMaterial.opacity = opacities.sphere;
+                }
                 
                 //Initialize buffers in geometry                
                 sphereGeometry.initTypedArrays();
@@ -916,7 +941,7 @@ $3Dmol.GLModel = (function() {
                 var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
                 ret.add(sphere);
             }
-            
+
             // add imposter geometry
             if (imposterGeometry.vertices > 0) {
                 var imposterMaterial = new $3Dmol.ImposterMaterial({
@@ -929,8 +954,7 @@ $3Dmol.GLModel = (function() {
                 imposterGeometry.initTypedArrays();
                 
                 var spherei = new $3Dmol.Mesh(imposterGeometry, imposterMaterial);
-                console
-                        .log("spherei geometry " + imposterGeometry.vertices.length);
+                console.log("spherei geometry " + imposterGeometry.vertices.length);
 
                 ret.add(spherei);
             }
@@ -942,6 +966,11 @@ $3Dmol.GLModel = (function() {
                     ambient : 0x000000,
                     reflectivity : 0
                 });
+                if (opacities.stick < 1 && opacities.stick >= 0)
+                {
+                    cylinderMaterial.transparent = true;
+                    cylinderMaterial.opacity = opacities.stick;
+                }
 
                 //Initialize buffers in geometry                
                 stickGeometry.initTypedArrays();
@@ -954,7 +983,7 @@ $3Dmol.GLModel = (function() {
             }
 
             // This is only for DNA ladder rendering right now
-            if (cartoonGeometry.vertices > 0) {
+            if (cartoonGeometry.vertices > 0 && false) { // TODO: move ladder drawing to glcartoon.js
                 var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
                     vertexColors : true,
                     ambient : 0x000000,
@@ -979,6 +1008,11 @@ $3Dmol.GLModel = (function() {
                         linewidth : linewidth,
                         vertexColors : true
                     });
+                    if (opacities.line < 1 && opacities.line >= 0)
+                    {
+                        lineMaterial.transparent = true;
+                        lineMaterial.opacity = opacities.line;
+                    }
                     
                     lineGeometries[i].initTypedArrays();
                     
@@ -997,6 +1031,11 @@ $3Dmol.GLModel = (function() {
                         linewidth : linewidth,
                         vertexColors : true
                     });
+                    if (opacities.cross < 1 && opacities.cross >= 0)
+                    {
+                        crossMaterial.transparent = true;
+                        crossMaterial.opacity = opacities.cross;
+                    }
 
                     crossGeometries[i].initTypedArrays();
                     
@@ -1008,13 +1047,13 @@ $3Dmol.GLModel = (function() {
             }
             
             //for BIOMT assembly
-            if (dontDuplicateAtoms && !noAssembly) {
+            if (dontDuplicateAtoms && modelData.symmetries && modelData.symmetries.length > 0) {
                 var finalRet = new $3Dmol.Object3D();
                 var t;
-                for (t = 0; t < copyMatrices.length; t++) {
+                for (t = 0; t < modelData.symmetries.length; t++) {
                     var transformedRet = new $3Dmol.Object3D();
                     transformedRet = ret.clone();
-                    transformedRet.matrix.copy(copyMatrices[t]);
+                    transformedRet.matrix.copy(modelData.symmetries[t]);
                     transformedRet.matrixAutoUpdate = false;
                     finalRet.add(transformedRet);
                 }
@@ -1023,6 +1062,16 @@ $3Dmol.GLModel = (function() {
 
             return ret;
         };
+        
+        
+        this.getCrystData = function() {
+            if (modelData.cryst) {
+                return modelData.cryst;
+            }
+            else {
+                return null;
+            }
+        }
         
         /**
          * Returns list of rotational/translational matrices if there is BIOMT data
@@ -1033,13 +1082,11 @@ $3Dmol.GLModel = (function() {
          *
          */
         this.getSymmetries = function() {
-            if (copyMatrices.length > 1) {
-                return copyMatrices; //returns copyMatrices, which has ID matrix as 1st entry
+            
+            if (typeof(modelData.symmetries) == 'undefined') {
+                modelData.symmetries = [idMatrix];
             }
-            else {
-                    
-                return idList;
-            }
+            return modelData.symmetries; 
         };
         
         /**
@@ -1051,11 +1098,10 @@ $3Dmol.GLModel = (function() {
          */
         this.setSymmetries = function(list) {
             if (typeof(list) == "undefined") { //delete sym data
-                idList = [idMatrix];
-                copyMatrices = idList;
+                modelData.symmetries = [idMatrix];
             }
             else {
-                copyMatrices = list;
+                modelData.symmetries = list;
             }
         };
 
@@ -1093,6 +1139,8 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             format = format || "";
+            dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
+            
             if (!data)
                 return; //leave an empty model
             
@@ -1109,14 +1157,14 @@ $3Dmol.GLModel = (function() {
             if(typeof($3Dmol.Parsers[format]) == "undefined") {
             	//let someone provide a file name and get format from extension
             	format = format.split('.').pop();
-            	if(typeof($3Dmol.Parsers[format] == "undefined")) {            	
+            	if(typeof($3Dmol.Parsers[format]) == "undefined") {            	
 	                console.log("Unknown format: "+format);
 	                //try to guess correct format from data contents
-	                if(data.match(/^@<TRIPOS>MOLECULE/)) {
+	                if(data.match(/^@<TRIPOS>MOLECULE/gm)) {
 	                    format = "mol2";
-	                } else if(data.match(/^HETATM/) || data.match(/^ATOM/)) {
+	                } else if(data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
 	                    format = "pdb";
-	                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/)){
+	                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
 	                    format = "sdf"; //could look at line 3
 	                } else {
 	                    format = "xyz";
@@ -1125,9 +1173,7 @@ $3Dmol.GLModel = (function() {
             	}
             }
             var parse = $3Dmol.Parsers[format];
-            parse(atoms, data, options, copyMatrices)
-            noAssembly = !options.doAssembly; //for BIOMT uses
-            dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
+            parse(atoms, data, options, modelData)
             setAtomDefaults(atoms, id);
         };
         
@@ -1202,6 +1248,7 @@ $3Dmol.GLModel = (function() {
          */
         this.selectedAtoms = function(sel, from) {
             var ret = [];
+            sel = sel || {};
             if (!from) from = atoms;
             var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
@@ -1310,8 +1357,10 @@ $3Dmol.GLModel = (function() {
          **/
         var expandAtomList = function(atomList, amt) {
 
-            var pb = $3Dmol.getExtent(atomList);
-            var nb = [[],[],[]];
+            if (amt <= 0) return atomList;
+
+            var pb = $3Dmol.getExtent(atomList); // previous bounding box
+            var nb = [[], [], []]; // expanded bounding box
 
             for (var i = 0; i < 3; i++)
             {
@@ -1328,11 +1377,9 @@ $3Dmol.GLModel = (function() {
                 var y = atoms[i].y;
                 var z = atoms[i].z;
 
-                if (x >= nb[0][0] && x < pb[0][0] || x > pb[1][0] && x <= nb[1][0]) {
-                    if (y >= nb[0][1] && y < pb[0][1] || y > pb[1][1] && y <= nb[1][1]) {
-                        if (z >= nb[0][2] && z < pb[0][2] || z > pb[1][2] && z <= nb[1][2]) {
-                            expand.push(atoms[i]);
-                        }
+                if (x >= nb[0][0] && x <= nb[1][0] && y >= nb[0][1] && y <= nb[1][1] && z >= nb[0][2] && z <= nb[1][2]) {
+                    if (!(x >= pb[0][0] && x <= pb[1][0] && y >= pb[0][1] && y <= pb[1][1] && z >= pb[0][2] && z <= pb[1][2])) {
+                        expand.push(atoms[i]);
                     }
                 }
             }
@@ -1428,8 +1475,6 @@ $3Dmol.GLModel = (function() {
                 }
             }
 
-            // do a copy to enforce style changes through this function
-            var mystyle = $.extend(true, {}, style);
             var changedAtoms = false;
             // somethings we only calculate if there is a change in a certain
             // style, although these checks will only catch cases where both
@@ -1445,10 +1490,14 @@ $3Dmol.GLModel = (function() {
                 if (selected[i].clickable) 
                     selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
+
                 if(!add) selected[i].style = {};
-                for(s in mystyle) {
-                    if(mystyle.hasOwnProperty(s)) {
-                        selected[i].style[s] = mystyle[s];
+                for(s in style) {
+                    if(style.hasOwnProperty(s)) {
+						selected[i].style[s]=selected[i].style[s]||{}; //create distinct object for each atom
+						for(var prop in style[s]){
+							selected[i].style[s][prop]=style[s][prop];
+						}
                     }
                 }
             }
@@ -1486,7 +1535,7 @@ $3Dmol.GLModel = (function() {
          * @param {type} prop
          * @param {type} scheme
          */
-        this.setColorByProperty = function(sel, prop, scheme) {
+        this.setColorByProperty = function(sel, prop, scheme, range) {
             var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
@@ -1494,21 +1543,20 @@ $3Dmol.GLModel = (function() {
             var min =  Number.POSITIVE_INFINITY;
             var max =  Number.NEGATIVE_INFINITY;
             var i, a;
-            // compute the range            
-            for (i = 0; i < atoms.length; i++) {
-                a = atoms[i];
-                if(a.properties && typeof(a.properties[prop]) !== undefined) {
-                    var p = parseFloat(a.properties[prop]);
-                    if(p < min) min = p;
-                    if(p > max) max = p;
-                }                    
+            
+            if(!range) { //no explicit range, get from scheme
+                range = scheme.range();
+            }
+            
+            if(!range) { //no range in scheme, compute the range for this model
+                range = $3Dmol.getPropertyRange(atoms, prop);
             }
             // now apply colors using scheme
             for (i = 0; i < atoms.length; i++) {
                 a = atoms[i];
-                if(a.properties && typeof(a.properties[prop]) !== undefined) {
-                    var c = scheme.valueToHex(parseFloat(a.properties[prop]), [min,max]);
-                    a.color = c;
+                var val = $3Dmol.getAtomProperty(a, prop);
+                if(val != null) {
+                    a.color = scheme.valueToHex(parseFloat(a.properties[prop]), [range[0],range[1]]);
                 }                    
             }
         };
@@ -1530,7 +1578,11 @@ $3Dmol.GLModel = (function() {
                     renderedMolObj = null;
                 }
                 renderedMolObj = molObj.clone();
-                group.add(renderedMolObj);
+                if(hidden) {
+                    renderedMolObj.setVisible(false);
+                    molObj.setVisible(false);
+                }
+                group.add(renderedMolObj);              
             }
         };
         
@@ -1549,6 +1601,23 @@ $3Dmol.GLModel = (function() {
             }
             molObj = null;
         };
+        
+        /** Don't show this model is future renderings.  Keep all styles and state
+         * so it can be efficiencly shown again.
+         * 
+         * @function $3Dmol.GLModel#hide
+         */
+        this.hide = function() {
+            hidden = true;
+            if(renderedMolObj) renderedMolObj.setVisible(false);
+            if(molObj) molObj.setVisible(false);
+        }
+        
+        this.show = function() {
+            hidden = false;
+            if(renderedMolObj) renderedMolObj.setVisible(true);
+            if(molObj) molObj.setVisible(true);
+        }
         
         /** Create labels for residues of selected atoms.
          * Will create a single label at the center of mass of all atoms

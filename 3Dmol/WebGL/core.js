@@ -274,6 +274,14 @@ $3Dmol.Object3D.prototype = {
         
         return object;
         
+    },
+    
+    setVisible: function(val) { //recursively set visibility
+        this.visible = val;
+        for (var i = 0; i < this.children.length; i++) {
+            var child = this.children[i];
+            child.setVisible(val);
+        }
     }
     
 };
@@ -624,7 +632,6 @@ $3Dmol.Raycaster = (function() {
         
         if ((clickable.clickable !== true) || (clickable.intersectionShape === undefined))
             return intersects;
-        
         var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
         precision *= group.matrixWorld.getMaxScaleOnAxis();
@@ -634,12 +641,10 @@ $3Dmol.Raycaster = (function() {
         if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof $3Dmol.Sphere) {
             sphere.copy(clickable.boundingSphere);
             sphere.applyMatrix4(group.matrixWorld);
-            
             if (!raycaster.ray.isIntersectionSphere(sphere)) {
-                return intersects;
+               return intersects;
             }
         }
-        
         //Iterate through intersection objects
         var i, il,
             norm, normProj, cylProj, rayProj,
@@ -695,7 +700,7 @@ $3Dmol.Raycaster = (function() {
                                      distance : distance});  
             }
         }
-        
+
         //cylinders
         for (i = 0, il = intersectionShape.cylinder.length; i < il; i++) {
             
@@ -761,7 +766,7 @@ $3Dmol.Raycaster = (function() {
             }
             
         }
-         
+
         //lines
         for (i = 0, il = intersectionShape.line.length; i < il; i += 2) {
             
@@ -833,6 +838,7 @@ $3Dmol.Raycaster = (function() {
     
                     intersects.push({clickable : clickable, 
                                      distance : distance});
+
                     return intersects;
                 }
             }        
@@ -849,8 +855,7 @@ $3Dmol.Raycaster = (function() {
           
     };
     
-    Raycaster.prototype.intersectObjects = function(group, objects) {
-        
+    Raycaster.prototype.intersectObjects = function(group, objects) {     
         var intersects = [];
         
         for (var i = 0, l = objects.length; i < l; i++)            

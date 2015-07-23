@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Simulation Example</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+        <script src="../build/3Dmol.js"></script>
+        <style>
+        	* {margin:0; padding:0}
+        </style>
+
+        <script>
+            var glviewer = null;
+
+
+            $(document).ready(function() {
+                
+                try {
+                    
+                    glviewer = $3Dmol.createViewer("gldiv");                    
+                    glviewer.setBackgroundColor(0xffffff);
+                    
+                    $.get('test_structs/ubiqsim.pdb', function(data) {
+                        var frames = data.split('END\n');
+                        var models = [];
+                        var m = glviewer.addModel(frames[0],"pdb");
+                        m.setStyle({},{cartoon:{color:"spectrum"}});
+                        models.push(m);
+                        glviewer.zoomTo();
+                        glviewer.render();
+                            
+                        for(var i = 1; i < frames.length; i++) {
+                            var m = glviewer.addModel(frames[i],"pdb");
+                            m.setStyle({},{cartoon:{color:"spectrum"}});
+                            m.hide();
+                            models.push(m);
+                        }
+                        
+                        var currmol = 0;
+                        var display = function() {
+                            models[currmol].hide();
+                            currmol = (currmol+1) % models.length;
+                            models[currmol].show();
+                            glviewer.render();
+                        };
+                        setInterval(display, 100);
+                        glviewer.render();
+                    });
+                                        
+                    
+                    
+                }
+                
+                catch (e) {
+                    console.error("Could not instantiate viewer from supplied url: '" + e + "'");
+                }
+
+                
+            });
+        </script>
+    </head>    
+    <body>
+         <div id='gldiv' style="width: 100%; height: 100vh;"></div>       
+
+    </body>    
+</html>

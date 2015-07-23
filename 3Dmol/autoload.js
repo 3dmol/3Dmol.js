@@ -19,7 +19,7 @@ $(document).ready(function() {
             
             var type = null;
             if (viewerdiv.data("pdb")) {
-                datauri = "http://www.pdb.org/pdb/files/" + viewerdiv.data("pdb") + ".pdb";
+                datauri = "http://www.rcsb.org/pdb/files/" + viewerdiv.data("pdb") + ".pdb";
                 type = "pdb";
             } else if(viewerdiv.data("cid")) {
                 //this doesn't actually work since pubchem does have CORS enabled
@@ -30,7 +30,7 @@ $(document).ready(function() {
             else if (viewerdiv.data("href"))
                 datauri = viewerdiv.data("href");
                 
-            var bgcolor = Number(viewerdiv.data("backgroundcolor")) || 0x000000;
+            var bgcolor = $3Dmol.CC.color(viewerdiv.data("backgroundcolor"));
             var style = {line:{}};
             if(viewerdiv.data("style")) style = $3Dmol.specStringToObject(viewerdiv.data("style"));
             var select = {};
@@ -77,15 +77,38 @@ $(document).ready(function() {
                 }
             }
             
+            //apply all the selections/styles parsed out above to the passed viewer
+            var applyStyles = function(glviewer) {
+                glviewer.setStyle(select,style);
+                for(var i = 0; i < selectstylelist.length; i++) {
+                    var sel = selectstylelist[i][0] || {};
+                    var sty = selectstylelist[i][1] || {"line":{}}
+                    glviewer.setStyle(sel, sty);
+                }
+                for(var i = 0; i < surfaces.length; i++) {
+                    var sel = surfaces[i][0] || {};
+                    var sty = surfaces[i][1] || {}
+                    glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                }
+                for(var i = 0; i < labels.length; i++) {
+                    var sel = labels[i][0] || {};
+                    var sty = labels[i][1] || {}
+                    glviewer.addResLabels(sel, sty);
+                }               
+                
+                glviewer.zoomTo();
+                glviewer.render();             
+            }
+            
+            
+            var glviewer = null;
             try {
-                var glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors, callback: function(viewer) {            
-                    viewer.setBackgroundColor(bgcolor);            
-                }});
+                glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors});
+                glviewer.setBackgroundColor(bgcolor);                            
             } catch ( error ) {
                 //for autoload, provide a useful error message
                 window.location = "http://get.webgl.org";                    
-            }
-            
+            }           
             
             if (datauri) {  
                 
@@ -96,31 +119,10 @@ $(document).ready(function() {
                                 
                 $.get(datauri, function(ret) {
                     glviewer.addModel(ret, type);
-                    glviewer.setStyle(select,style);
-                    for(var i = 0; i < selectstylelist.length; i++) {
-                        var sel = selectstylelist[i][0] || {};
-                        var sty = selectstylelist[i][1] || {"line":{}}
-                        glviewer.setStyle(sel, sty);
-                    }
-                    for(var i = 0; i < surfaces.length; i++) {
-                        var sel = surfaces[i][0] || {};
-                        var sty = surfaces[i][1] || {}
-                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
-                    }
-                    for(var i = 0; i < labels.length; i++) {
-                        var sel = labels[i][0] || {};
-                        var sty = labels[i][1] || {}
-                        glviewer.addResLabels(sel, sty);
-                    }
-                    // Allowing us to fire callback after viewer has added model
+                    applyStyles(glviewer);       
                     if (callback) 
-                        callback(glviewer);                    
-                    
-                    glviewer.zoomTo();
-                    glviewer.render();          
-                    
-                }, 'text');
-           
+                        callback(glviewer);
+                }, 'text');         
             }
             
             else {
@@ -137,21 +139,12 @@ $(document).ready(function() {
                         type = 'pdb';
                     }
 
-                    glviewer.addModel(moldata, type);
-                    glviewer.setStyle(select, style);
-                    for(var i = 0; i < selectstylelist.length; i++) {
-                        var sel = selectstylelist[i][0] || {};
-                        var sty = selectstylelist[i][1] || {"line":{}}
-                        glviewer.setStyle(sel, sty);
-                    }                
+                    glviewer.addModel(moldata, type);        
                 }
 
-
+                applyStyles(glviewer);                
                 if (callback) 
                     callback(glviewer);
-                
-                glviewer.zoomTo();
-                glviewer.render();
             }
             
         });              
