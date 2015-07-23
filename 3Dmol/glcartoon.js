@@ -534,6 +534,8 @@ $3Dmol.drawCartoon = (function() {
                     else
                         thickness = defaultThickness;
 
+                    
+
                     /* do not draw connections between different chains, but ignore
                        differences in reschain to properly support CA-only files */
                     if (curr && curr.chain === next.chain && curr.resi + 1 === next.resi)
@@ -554,6 +556,21 @@ $3Dmol.drawCartoon = (function() {
                             $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, next, thickness, color2, false, true);
                         } // note that an atom object can be duck-typed as a 3-vector in this case
                     }
+
+                    if (curr && traceGeo && (curr.style.cartoon && curr.style.cartoon.style != "trace"
+                        || curr.chain != next.chain))
+                    {
+                        var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
+                        traceMaterial.vertexColors = $3Dmol.FaceColors;
+                        if ( typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
+                            traceMaterial.transparent = true;
+                            traceMaterial.opacity = traceGeo.opacity;
+                            delete traceGeo.opacity;
+                        }
+                        var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
+                        group.add(traceMesh);
+                        traceGeo = null;
+                    } else traceGeo.opacity = parseFloat(cartoon.opacity) || 1;
 
                     curr = next;
                     currColor = nextColor;
@@ -587,9 +604,9 @@ $3Dmol.drawCartoon = (function() {
 
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
-                            drawSmoothCurve(group, points[i], 1, colors, div, curr.style.cartoon.opacity);
+                            drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
                         if (fill)
-                            drawStrip(group, points[0], points[num - 1], colors, div, thickness, curr.style.cartoon.opacity);
+                            drawStrip(group, points[0], points[num - 1], colors, div, thickness, points.opacity);
 
                         // clear arrays for points and colors
                         points = [];
@@ -605,7 +622,7 @@ $3Dmol.drawCartoon = (function() {
                         {
                             // start the cylinder at the midpoint between consecutive backbone atoms
                             baseStartPt = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
-                            //var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.04);
+                            //var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.04); //TODO: apply this as function of thickness
                             //baseStartPt.add(startFix);
                             $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
                             baseStartPt = null;
@@ -669,7 +686,7 @@ $3Dmol.drawCartoon = (function() {
                     backbonePt = null;
                     orientPt = null;
                 }
-            }  
+            }
         }
 
         if (baseEndPt) // draw last NA base if needed
@@ -686,20 +703,26 @@ $3Dmol.drawCartoon = (function() {
 
         // for default style, draw the last strand
         for (i = 0; !thickness && i < num; i++)
-            drawSmoothCurve(group, points[i], 1, colors, div, curr.style.cartoon.opacity);
+            drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
         if (fill)
-            drawStrip(group, points[0], points[num - 1], colors, div, thickness, curr.style.cartoon.opacity);
+            drawStrip(group, points[0], points[num - 1], colors, div, thickness, points.opacity);
+        delete points.opacity;
 
-        if (traceGeo) // generate mesh for trace geometry
+        if (traceGeo != null) // generate last mesh for trace geometry
         {
             var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             traceMaterial.vertexColors = $3Dmol.FaceColors;
+            if (typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
+                traceMaterial.transparent = true;
+                traceMaterial.opacity = traceGeo.opacity;
+                delete traceGeo.opacity;
+            }
             var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
             group.add(traceMesh);
         }
     };
 
-    //TODO document me
+    //TODO: document me
     var addBackbonePoints = function(pointsArray, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom)
     {
         var widthScalar, i, delta, v;
@@ -731,13 +754,25 @@ $3Dmol.drawCartoon = (function() {
                 v.smoothen = true;
             pointsArray[i].push(v);
         }
+
+        // make sure chain is all the same opacity
+        testOpacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
+        if (pointsArray.opacity)
+        {
+            if (pointsArray.opacity != testOpacity)
+            {
+                console.log("Warning: default cartoon opacity is ambiguous");
+                pointsArray.opacity = 1;
+            }
+
+        } else pointsArray.opacity = testOpacity;
     }
 
     // actual function call
-    var drawCartoon = function(group, atomlist, geo, gradientscheme) {
+    var drawCartoon = function(group, atomlist, laddergeo, gradientscheme) {
         
         drawStrand(group, atomlist, 2, undefined, true, coilWidth, helixSheetWidth,
-                false, gradientscheme, geo);
+                false, gradientscheme, laddergeo);
     };
 
     return drawCartoon;
