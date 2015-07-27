@@ -31,7 +31,7 @@
                    var viewer = $3Dmol.createViewer($("#test29"));
                    $3Dmol.download("pdb:4ZD3",viewer,{},function(){
 		           viewer.setBackgroundColor(0xffffffff);
-		           viewer.enableOutline();
+		           viewer.setViewStyle({style:"outline"});
 		           viewer.setStyle({},{cartoon:{}});
 		           viewer.render();
 		        });

@@ -480,8 +480,13 @@ $3Dmol.GLViewer = (function() {
          * 
          */
          
-         this.enableOutline = function(){
-			 renderer.enableOutline ();
+         this.setViewStyle = function(parameters){
+			 if(parameters["style"]==="outline") {
+				 renderer.enableOutline ();
+			 }
+			 else {
+			     renderer.disableOutline();
+			 }
 		 }
 
         /**
