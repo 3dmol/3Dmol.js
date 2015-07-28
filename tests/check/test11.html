@@ -31,7 +31,7 @@
                    var viewer = $3Dmol.createViewer($("#test11"));
                    $3Dmol.download("pdb:2ABJ",viewer,{},function(){
 		           viewer.setBackgroundColor(0xffffffff);
-		           viewer.enableOutline();
+		           //viewer.enableOutline();
 		           viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
 		           viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
 		           viewer.setStyle({chain:'G'},{sphere:{colorscheme:'greenCarbon'}});					                         
