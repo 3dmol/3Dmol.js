@@ -70,7 +70,17 @@ head, body {
 
 		}
 	};
-
+var readText = function(input,func) {
+			if(input.files.length > 0) {
+				var file = input.files[0];
+				var reader = new FileReader();
+			    reader.onload = function(evt) {
+			    	func(evt.target.result,file.name);
+			    };
+			    reader.readAsText(file);
+			    $(input).val('');
+			}
+		};
 	$(document).ready(function() {
 
 		moldata = data = $("#moldata_pdb_large").val();
@@ -131,7 +141,7 @@ head, body {
 	<button
 		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer, {doAssembly:true});">Download</button>
 	<br>
-
+	<input type="file" onchange="readText(this, function(data, name) {glviewer.clear(); m= glviewer.addModel(data,name); glviewer.zoomTo(); glviewer.render();} );">
 
 	<textarea style="display: none;" id="moldata_pdb_large">           
 HEADER    COMPLEX (ONCOGENE PROTEIN/PEPTIDE)      30-SEP-96   1YCR              

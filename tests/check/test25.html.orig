@@ -22,13 +22,13 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>27 pqr partialCharge<code> don't know if the gray surface is correct</code></td>  
+            <th colspan=2 height=200px>25 pqr b-factor<code> isoval color alpha smoothness opacity wireframe linewidth clickable callback</code></td>  
           </tr>
           <tr>
-            <td width="50%"><div id="test27" style="width: 400px; height: 400px; position: relative;"></td>
+            <td width="50%"><div id="test25" style="width: 400px; height: 400px; position: relative;"></td>
               <script>
                 (function() {
-                   var viewer = $3Dmol.createViewer($("#test27"));
+                   var viewer = $3Dmol.createViewer($("#test25"));
                    viewer.setBackgroundColor(0xffffffff);
                    
 
@@ -36,14 +36,14 @@
                     viewer.addModel(data, "pqr"); 
                          $.get("volData/1fas.cube",function(volumedata){
 					     viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), 
-							                                        volscheme: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))},{});
+							                                        volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'charge'))},{});
 				   });           
                    viewer.zoomTo();
                    viewer.render();
                 });
               })();
              </script>
-          <td width="50%"><img src="imgs/test27.png"</td>
+          <td width="50%"><img src="imgs/test24.png"</td>
           </tr>
 		</table>
 

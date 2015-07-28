@@ -254,6 +254,69 @@ $3Dmol.ShaderLib = {
         }
 
     },
+ 
+//for outline
+     'outline' : { 
+        fragmentShader : [
+
+"uniform mat4 viewMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform float opacity;",
+
+"uniform vec3 fogColor;",
+"uniform float fogNear;",
+"uniform float fogFar;",
+
+"void main() {",
+    
+"    gl_FragColor = vec4(0.0,0.0,0.0,1.0);",
+"}"
+
+
+].join("\n"),
+       
+       vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform mat4 viewMatrix;",
+"uniform mat3 normalMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform vec3 ambient;",
+"uniform vec3 diffuse;",
+"uniform vec3 emissive;",
+"uniform vec3 ambientLightColor;",
+"uniform vec3 directionalLightColor[ 1 ];",
+"uniform vec3 directionalLightDirection[ 1 ];",
+
+"attribute vec3 position;",
+"attribute vec3 normal;",
+"attribute vec3 color;",
+
+"void main() {",
+    
+"    vec3 objectNormal = normal;",  
+"    vec4 transformedNormal = modelViewMatrix * vec4(objectNormal,0.0);",    
+"    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    gl_Position = projectionMatrix * mvPosition;",
+"    vec2 offset=transformedNormal.xy*0.1;",
+"    gl_Position.xy+=offset;",
+"    gl_Position.z+=gl_Position.w*0.005;",
+"}"
+           
+].join("\n"),
+
+        uniforms : {
+            opacity: { type: 'f', value: 1.0 },
+            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogNear: { type: 'f', value: 1.0 },
+            fogFar: { type: 'f', value: 2000},           
+            outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
+            relativePixelSize: { type: 'fv', value: [] }
+        }
+
+    },
     
     //for double sided lighting
     'lambertdouble' : { 

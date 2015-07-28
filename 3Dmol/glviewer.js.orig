@@ -14,7 +14,7 @@
 $3Dmol.GLViewer = (function() {
     // private class variables
     var numWorkers = 4; // number of threads for surface generation
-    var maxVolume = 64000; // how much to break up surface calculations
+    var maxVolume = 56000; // how much to break up surface calculations
 
     // private class helper functions
 
@@ -27,7 +27,6 @@ $3Dmol.GLViewer = (function() {
             defaultcolors = $3Dmol.elementColors.defaultColors;
     	var nomouse = config.nomouse;
     	var bgColor = 0;
-    	var outline =false;
     	
     	if(typeof(config.backgroundColor) != undefined) {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
@@ -57,8 +56,7 @@ $3Dmol.GLViewer = (function() {
         var renderer = new $3Dmol.Renderer({
             antialias : true,
             preserveDrawingBuffer: true, //so we can export images
-            premultipliedAlpha : false,/* more traditional compositing with background */
-            outline: outline
+            premultipliedAlpha : false /* more traditional compositing with background */
         });
 
         renderer.domElement.style.width = "100%";
@@ -206,6 +204,7 @@ $3Dmol.GLViewer = (function() {
             var intersects = [];
 
             intersects = raycaster.intersectObjects(modelGroup, clickables);
+console.log("intersects.length:"+intersects.length);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined
@@ -265,7 +264,7 @@ $3Dmol.GLViewer = (function() {
                 var x = xy[0];
                 var y = xy[1];
                 if(x == mouseStartX && y == mouseStartY) {
-                    var offset = $('canvas',container).offset();
+                    var offset = $(container).offset();
                     var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
 
@@ -470,24 +469,6 @@ $3Dmol.GLViewer = (function() {
             renderer.setClearColorHex(c.getHex(), a);
             show();
         };
-        
-        /**
-         * Enable outline 
-         * @function $eDmol.GLViewer#outline
-         * 
-         * @example
-         * myviewer.outline()
-         * 
-         */
-         
-         this.setViewStyle = function(parameters){
-			 if(parameters["style"]==="outline") {
-				 renderer.enableOutline ();
-			 }
-			 else {
-			     renderer.disableOutline();
-			 }
-		 }
 
         /**
          * Set viewer width
@@ -2004,16 +1985,10 @@ $3Dmol.GLViewer = (function() {
                     var cnt = 0;
 
                     var rfunction = function(event) {
-                        var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
-							                           faceArr:event.data.faces});
-					    for(var i=0,vl=VandFs.length;i<vl;i++){
-                            var VandF={vertices:VandFs[i].vertexArr,
-								       faces:VandFs[i].faceArr};
-                            var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                            $3Dmol.mergeGeos(surfobj.geo, mesh);
-                            _viewer.render();
-						}
-
+                        var VandF = event.data;
+                        var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                        $3Dmol.mergeGeos(surfobj.geo, mesh);
+                        _viewer.render();
                     //    console.log("async mesh generation " + (+new Date() - time) + "ms");
                         cnt++;
                         if (cnt == extents.length)

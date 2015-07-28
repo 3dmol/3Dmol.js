@@ -22,7 +22,7 @@
         
 		<table width="100%">
           <tr>
-            <th colspan=2 height=200px>11 Programmatic Sphere <code>hidden radius colorscheme color</code></td>  
+            <th colspan=2 height=200px>11 Programmatic Sphere <code>hidden radius colorscheme color outline</code></td>  
           </tr>
           <tr>
             <td width="50%"><div id="test11" style="width: 400px; height: 400px; position: relative;"></td>
@@ -31,6 +31,7 @@
                    var viewer = $3Dmol.createViewer($("#test11"));
                    $3Dmol.download("pdb:2ABJ",viewer,{},function(){
 		           viewer.setBackgroundColor(0xffffffff);
+		           viewer.enableOutline();
 		           viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
 		           viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
 		           viewer.setStyle({chain:'G'},{sphere:{colorscheme:'greenCarbon'}});					                         

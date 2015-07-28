@@ -18,6 +18,7 @@ $3Dmol.Renderer = function ( parameters ) {
 
     _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color( parameters.clearColor ) : new $3Dmol.Color( 0x000000 ),
     _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0;
+    _outline = parameters.outline !== undefined ? parameters.outline : false;
     
     this.domElement = _canvas;
     this.context = null;
@@ -165,6 +166,14 @@ $3Dmol.Renderer = function ( parameters ) {
             _gl.clearColor( _clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha );
 
     };
+    
+    this.enableOutline = function (){
+		_outline = true;
+	}
+	
+	this.disableOutline = function (){
+		_outline = false;
+	}
 
     this.setSize = function ( width, height ) {
 
@@ -737,6 +746,10 @@ $3Dmol.Renderer = function ( parameters ) {
                 m_uniforms.emissive.value = material.emissive;
 
             }
+            else if( material.shaderID === "outline"){
+                m_uniforms.relativePixelSize.value=new Float32Array([1.0/_viewportWidth,1.0/_viewportHeight]);
+                m_uniforms.outlineColor=new $3Dmol.Color(0.0,0.0,0.0);
+			}
             else if( material.shaderID === "sphereimposter") {
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
                 _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false, object._normalMatrix.elements);
@@ -852,7 +865,6 @@ $3Dmol.Renderer = function ( parameters ) {
 
                 if (updateBuffers)
                     _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer );
-                
                 _gl.drawElements( _gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0 );
                 
             }
@@ -904,19 +916,29 @@ $3Dmol.Renderer = function ( parameters ) {
                 buffer = webglObject.buffer;
                 material = webglObject[materialType];
 
+                
+
                 if ( ! material )
                     continue;
-
+                    
                 if (useBlending)
                     _this.setBlending(true);
-
+                
                 _this.setDepthTest(material.depthTest);
                 _this.setDepthWrite(material.depthWrite);
                 setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
 
                 _this.setMaterialFaces(material);
-
-                _this.renderBuffer(camera, lights, fog, material, buffer, object);
+                        
+                
+                                      
+                if(_outline && !material.wireframe && material.shaderID!=='basic' && material.opacity!==0.0 ){
+					console.log("drawing outline");
+                    outline =new $3Dmol.MeshOutlineMaterial();
+                    _this.renderBuffer(camera, lights, fog, outline, buffer, object);
+			    }
+			    _this.renderBuffer(camera, lights, fog, material, buffer, object);
+			    
             }
         }
 
@@ -1149,9 +1171,13 @@ $3Dmol.Renderer = function ( parameters ) {
 
                         geometry.verticesNeedUpdate = true;
                         geometry.colorsNeedUpdate = true;
-                    }      
+
+                    }
+                        
                 }
+                
             }
+        
         }
         
         if ( ! object.__webglActive ) {
@@ -1243,19 +1269,20 @@ $3Dmol.Renderer = function ( parameters ) {
         var object = globject.object;
         var material = object.material;
 
-        if ( material.transparent) {                    
+        if ( material.transparent ) {                    
             globject.opaque = null;
             globject.transparent = material;
             if(!material.wireframe){
-                var blankMaterial = material.clone();
+				var blankMaterial = material.clone();
                 blankMaterial.opacity = 0.0;
                 globject.blank = blankMaterial;
-            }
+			}
         }
 
         else {
             globject.opaque = material;
             globject.transparent = null;
+
         }
 
     }

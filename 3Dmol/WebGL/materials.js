@@ -18,6 +18,8 @@ $3Dmol.Material = function () {
 
     this.depthTest = true;
     this.depthWrite = true;
+    
+    this.stencilTest = true;
 
     this.polygonOffset = false;
     this.polygonOffsetFactor = 0;
@@ -88,6 +90,7 @@ $3Dmol.Material.prototype.clone = function ( material ) {
 
     material.depthTest = this.depthTest;
     material.depthWrite = this.depthWrite;
+    material.stencilTest = this.stencilTest;
 
     material.polygonOffset = this.polygonOffset;
     material.polygonOffsetFactor = this.polygonOffsetFactor;
@@ -139,7 +142,7 @@ $3Dmol.LineBasicMaterial.prototype.clone = function() {
     
     $3Dmol.Material.prototype.clone.call(this, material);
     
-    material.color.copy();
+    material.color.copy(this.color);
     return material;
 };
 
@@ -245,6 +248,27 @@ $3Dmol.MeshDoubleLambertMaterial.prototype.clone = function() {
         
     return material;
     
+};
+
+//Outlined Mesh Lamert material
+/** @constructor */
+$3Dmol.MeshOutlineMaterial = function(parameters) {
+    $3Dmol.Material.call(this);
+    this.fog = true;
+    this.shaderID = "outline";
+    this.wireframe=false;
+    
+};
+
+$3Dmol.MeshOutlineMaterial.prototype = Object.create($3Dmol.Material.prototype);
+
+$3Dmol.MeshOutlineMaterial.prototype.clone = function(material) {
+    if ( typeof material === "undefined" ) material = new $3Dmol.MeshOutlineMaterial();
+    $3Dmol.Material.prototype.clone.call(this, material);
+    material.fog = this.fog;
+    material.shaderID = this.shaderID;
+    material.wireframe = this.wireframe;
+    return material;
 };
 
 

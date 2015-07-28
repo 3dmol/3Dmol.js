@@ -65,7 +65,7 @@ $3Dmol.GLModel = (function() {
         "resi", // Residue number 
         "icode",
         "rescode",
-        "serial", // Atom's serial id number
+        "serial", // Atom's serial id numbermodels
         "atom", // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds", // Array of atom ids this atom is bonded to
         "ss", // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
@@ -118,7 +118,6 @@ $3Dmol.GLModel = (function() {
         var lastColors = null;
         var modelData = {};
         var idMatrix = new $3Dmol.Matrix4();
-        var noAssembly;
         var dontDuplicateAtoms;
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
@@ -849,7 +848,6 @@ $3Dmol.GLModel = (function() {
         /** param {AtomSpec[]} atoms */
         var createMolObj = function(atoms) {
 
-            //console.log("creating for "+id);
             var ret = new $3Dmol.Object3D();
             var cartoonAtoms = [];
             var lineGeometries = {};
@@ -858,29 +856,57 @@ $3Dmol.GLModel = (function() {
             var imposterGeometry = new $3Dmol.Geometry(true);                                                         
             var stickGeometry = new $3Dmol.Geometry(true);
             var cartoonGeometry = new $3Dmol.Geometry(true);
-            var i, n;
+            var i, j, n, testOpacities;
+            var opacities = {};
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
             for (i = 0, n = atoms.length; i < n; i++) {
                 var atom = atoms[i];
                 // recreate gl info for each atom as necessary
                 // set up appropriate intersection spheres for clickable atoms
+
                 if (atom && atom.style) {
+
                     if (atom.clickable && atom.intersectionShape === undefined)
-                        atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};                    
+                        atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};
+
+                    testOpacities = {line:undefined, cross:undefined, stick:undefined, sphere:undefined};
+                    for (j in testOpacities)
+                    {
+                        if (atom.style[j])
+                        {
+                            if (atom.style[j].opacity)
+                                testOpacities[j] = parseFloat(atom.style[j].opacity);
+                            else
+                                testOpacities[j] = 1;
+
+                        } else testOpacities[j] = undefined;
+
+                        if (opacities[j])
+                        {
+                            if (testOpacities[j] != undefined && opacities[j] != testOpacities[j])
+                            {
+                                console.log("Warning: " + j + " opacity is ambiguous");
+                                opacities[j] = 1;
+                            }
+
+                        } else opacities[j] = testOpacities[j];
+                    }
+                    
                     drawAtomSphere(atom, sphereGeometry);
                     drawAtomImposter(atom, imposterGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
+
                     if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                         //gradient color scheme range
-                        if (atom.style.cartoon.color === 'spectrum' && typeof(atom.resi) === "number") {                            
+                        if (atom.style.cartoon.color === "spectrum" && typeof(atom.resi) === "number") {                            
                             if (atom.resi < range[0])
                                 range[0] = atom.resi;
                             if (atom.resi > range[1])
                                 range[1] = atom.resi;
                         }
-                        
+
                         cartoonAtoms.push(atom);
                     }                   
                 }
@@ -893,7 +919,7 @@ $3Dmol.GLModel = (function() {
                     gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
 
                 $3Dmol.drawCartoon(ret, cartoonAtoms, cartoonGeometry, gradientscheme);
-                
+
             }
 
             // add sphere geometry
@@ -903,14 +929,19 @@ $3Dmol.GLModel = (function() {
                     vertexColors : true,
                     reflectivity : 0,
                 });
+                if (opacities.sphere < 1 && opacities.sphere >= 0)
+                {
+                    sphereMaterial.transparent = true;
+                    sphereMaterial.opacity = opacities.sphere;
+                }
                 
                 //Initialize buffers in geometry                
-                sphereGeometry.initTypedArrays();
-                
+                sphereGeometry.initTypedArrays();   
+				
                 var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
                 ret.add(sphere);
             }
-            
+
             // add imposter geometry
             if (imposterGeometry.vertices > 0) {
                 var imposterMaterial = new $3Dmol.ImposterMaterial({
@@ -923,8 +954,7 @@ $3Dmol.GLModel = (function() {
                 imposterGeometry.initTypedArrays();
                 
                 var spherei = new $3Dmol.Mesh(imposterGeometry, imposterMaterial);
-                console
-                        .log("spherei geometry " + imposterGeometry.vertices.length);
+                console.log("spherei geometry " + imposterGeometry.vertices.length);
 
                 ret.add(spherei);
             }
@@ -936,19 +966,24 @@ $3Dmol.GLModel = (function() {
                     ambient : 0x000000,
                     reflectivity : 0
                 });
+                if (opacities.stick < 1 && opacities.stick >= 0)
+                {
+                    cylinderMaterial.transparent = true;
+                    cylinderMaterial.opacity = opacities.stick;
+                }
 
                 //Initialize buffers in geometry                
                 stickGeometry.initTypedArrays();
                 
                 if (cylinderMaterial.wireframe)
                     stickGeometry.setUpWireframe();
-                
+            
                 var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
             }
 
             // This is only for DNA ladder rendering right now
-            if (cartoonGeometry.vertices > 0) {
+            if (cartoonGeometry.vertices > 0 && false) { // TODO: move ladder drawing to glcartoon.js
                 var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
                     vertexColors : true,
                     ambient : 0x000000,
@@ -973,6 +1008,11 @@ $3Dmol.GLModel = (function() {
                         linewidth : linewidth,
                         vertexColors : true
                     });
+                    if (opacities.line < 1 && opacities.line >= 0)
+                    {
+                        lineMaterial.transparent = true;
+                        lineMaterial.opacity = opacities.line;
+                    }
                     
                     lineGeometries[i].initTypedArrays();
                     
@@ -991,6 +1031,11 @@ $3Dmol.GLModel = (function() {
                         linewidth : linewidth,
                         vertexColors : true
                     });
+                    if (opacities.cross < 1 && opacities.cross >= 0)
+                    {
+                        crossMaterial.transparent = true;
+                        crossMaterial.opacity = opacities.cross;
+                    }
 
                     crossGeometries[i].initTypedArrays();
                     
@@ -1002,7 +1047,7 @@ $3Dmol.GLModel = (function() {
             }
             
             //for BIOMT assembly
-            if (dontDuplicateAtoms && !noAssembly) {
+            if (dontDuplicateAtoms && modelData.symmetries && modelData.symmetries.length > 0) {
                 var finalRet = new $3Dmol.Object3D();
                 var t;
                 for (t = 0; t < modelData.symmetries.length; t++) {
@@ -1094,7 +1139,6 @@ $3Dmol.GLModel = (function() {
         this.addMolData = function(data, format, options) {
             options = options || {}; 
             format = format || "";
-            noAssembly = !options.doAssembly; //for BIOMT uses
             dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
             
             if (!data)
@@ -1113,7 +1157,7 @@ $3Dmol.GLModel = (function() {
             if(typeof($3Dmol.Parsers[format]) == "undefined") {
             	//let someone provide a file name and get format from extension
             	format = format.split('.').pop();
-            	if(typeof($3Dmol.Parsers[format] == "undefined")) {            	
+            	if(typeof($3Dmol.Parsers[format]) == "undefined") {            	
 	                console.log("Unknown format: "+format);
 	                //try to guess correct format from data contents
 	                if(data.match(/^@<TRIPOS>MOLECULE/gm)) {
