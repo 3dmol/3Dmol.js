@@ -274,14 +274,6 @@ $3Dmol.Object3D.prototype = {
         
         return object;
         
-    },
-    
-    setVisible: function(val) { //recursively set visibility
-        this.visible = val;
-        for (var i = 0; i < this.children.length; i++) {
-            var child = this.children[i];
-            child.setVisible(val);
-        }
     }
     
 };
@@ -303,6 +295,7 @@ $3Dmol.Geometry = (function() {
         this.colorArray = null;
         this.normalArray = null;
         this.faceArray = null;
+        //this.adjFaceArray=null;
         this.lineArray = null;
         this.vertices = 0;
         this.faceidx = 0;
@@ -422,7 +415,7 @@ $3Dmol.Geometry = (function() {
         if (mesh) {
             this.normalArray = normalArr.subarray(0,this.vertices*3);
             this.faceArray = faceArr.subarray(0,this.faceidx); 
-
+            
             if(this.lineidx > 0) //not always set so reclaim memory
                 this.lineArray = lineArr.subarray(0,this.lineidx); 
             else
@@ -631,7 +624,7 @@ $3Dmol.Raycaster = (function() {
         matrixPosition.getPositionFromMatrix(group.matrixWorld);
         
         if ((clickable.clickable !== true) || (clickable.intersectionShape === undefined))
-            return intersects;
+            return intersects;       
         var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
         precision *= group.matrixWorld.getMaxScaleOnAxis();
@@ -640,11 +633,11 @@ $3Dmol.Raycaster = (function() {
         //Check for intersection with clickable's bounding sphere, if it exists
         if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof $3Dmol.Sphere) {
             sphere.copy(clickable.boundingSphere);
-            sphere.applyMatrix4(group.matrixWorld);
-            if (!raycaster.ray.isIntersectionSphere(sphere)) {
-               return intersects;
+            sphere.applyMatrix4(group.matrixWorld);          
+            if (!raycaster.ray.isIntersectionSphere(sphere)) {             
+				return intersects;
             }
-        }
+        }      
         //Iterate through intersection objects
         var i, il,
             norm, normProj, cylProj, rayProj,
@@ -695,12 +688,12 @@ $3Dmol.Raycaster = (function() {
                 if ( (s < 0 || s > 1) || s + t > 1)
                     continue;
                     
-                else
+                else{
                     intersects.push({clickable : clickable,
-                                     distance : distance});  
+                                     distance : distance});
+				}  
             }
-        }
-
+        }    
         //cylinders
         for (i = 0, il = intersectionShape.cylinder.length; i < il; i++) {
             
@@ -765,8 +758,7 @@ $3Dmol.Raycaster = (function() {
                 
             }
             
-        }
-
+        }       
         //lines
         for (i = 0, il = intersectionShape.line.length; i < il; i += 2) {
             
@@ -805,7 +797,6 @@ $3Dmol.Raycaster = (function() {
                                 });
             
         }
-
         for (i = 0, il = intersectionShape.sphere.length; i < il; i++) {
             //sphere
             if (intersectionShape.sphere[i] instanceof $3Dmol.Sphere) {
@@ -838,7 +829,6 @@ $3Dmol.Raycaster = (function() {
     
                     intersects.push({clickable : clickable, 
                                      distance : distance});
-
                     return intersects;
                 }
             }        

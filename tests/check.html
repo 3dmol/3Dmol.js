@@ -5,22 +5,40 @@
         <title>3Dmol.js Tests</title>
         <script src="../build/3Dmol.js"></script> 
         <script>
-			testNum=1;
+			var testNum=1;
 			const totalTest=30;
-            function next(){
-				testNum++;
-				if(testNum>totalTest) testNum-=totalTest;
+			
+			function setTest(num) {
+			    testNum = num;
+				if(testNum>totalTest) testNum = 1;
+				if(testNum < 1) testNum = totalTest;
 				var testCase="check/test"+testNum.toString()+".html";
 				document.getElementById('check').src=testCase;
+				$('#current').val(testNum);
+			}
+			function next(){
+				testNum++;
+				setTest(testNum);
 			}
 			
 			function prev(){
 				testNum--;
-				if(testNum<1) testNum+=totalTest;
-				var testCase="check/test"+testNum.toString()+".html";
-				document.getElementById('check').src=testCase;
-	
+				setTest(testNum);
+			}        	
+        
+			function changetest(e) {
+			    if(e.keyCode === 13){ //enter
+				    var t = $('#current').val();
+				    if($.isNumeric(t)) {
+				        setTest(t);
+				    }
+			    }
+			    return false; //prevent propagation
 			}
+        	$(document).ready(function() {
+				$('#total').text(totalTest.toString());
+				setTest(1);
+        	});
         </script>
    
         <style>
@@ -38,6 +56,7 @@
 			<tr>
 			  <div align="center">
 				  <button type="button" onclick="prev()">prev</button>
+				  <input type="text" name="current" id="current" size="2" onkeypress='changetest(event)'> / <span id="total"></span>
 				  <button type="button" onclick="next()">next</button>
 			  </div>
 			</tr>

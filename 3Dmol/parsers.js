@@ -414,7 +414,10 @@ $3Dmol.Parsers = (function() {
     parsers.cdj = parsers.jso = // Hack because the file format is truncated
                                 // at the moment
     parsers.cdjson = parsers.json = function(atoms, str, options, modelData) {
-        var molecules = str.m;  // Str is automatically parsed by JQuery
+        if (typeof str === "string") { // Str is usually automatically parsed by JQuery
+            str = JSON.parse(str);
+        }
+        var molecules = str.m;
         var atomsInFile = molecules[0].a; // Assumes there is at least one
         var bondsInFile = molecules[0].b; // molecule and ignores any more
                                           // Ignores any shapes
@@ -434,6 +437,7 @@ $3Dmol.Parsers = (function() {
             atom.bondOrder = [];
             
             var elem = currentAtom.l || 'C';
+            atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
             atoms.push(atom);
         }
         for (var i = 0; i < bondsInFile.length; i++) {
