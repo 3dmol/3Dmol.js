@@ -27,6 +27,7 @@ $3Dmol.GLViewer = (function() {
             defaultcolors = $3Dmol.elementColors.defaultColors;
     	var nomouse = config.nomouse;
     	var bgColor = 0;
+    	var outline =false;
     	
     	if(typeof(config.backgroundColor) != undefined) {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
@@ -56,7 +57,8 @@ $3Dmol.GLViewer = (function() {
         var renderer = new $3Dmol.Renderer({
             antialias : true,
             preserveDrawingBuffer: true, //so we can export images
-            premultipliedAlpha : false /* more traditional compositing with background */
+            premultipliedAlpha : false,/* more traditional compositing with background */
+            outline: outline
         });
 
         renderer.domElement.style.width = "100%";
@@ -468,6 +470,24 @@ $3Dmol.GLViewer = (function() {
             renderer.setClearColorHex(c.getHex(), a);
             show();
         };
+        
+        /**
+         * Enable outline 
+         * @function $eDmol.GLViewer#outline
+         * 
+         * @example
+         * myviewer.outline()
+         * 
+         */
+         
+         this.setViewStyle = function(parameters){
+			 if(parameters["style"]==="outline") {
+				 renderer.enableOutline ();
+			 }
+			 else {
+			     renderer.disableOutline();
+			 }
+		 }
 
         /**
          * Set viewer width

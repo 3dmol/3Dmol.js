@@ -936,8 +936,8 @@ $3Dmol.GLModel = (function() {
                 }
                 
                 //Initialize buffers in geometry                
-                sphereGeometry.initTypedArrays();
-                
+                sphereGeometry.initTypedArrays();   
+				
                 var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
                 ret.add(sphere);
             }
@@ -977,7 +977,7 @@ $3Dmol.GLModel = (function() {
                 
                 if (cylinderMaterial.wireframe)
                     stickGeometry.setUpWireframe();
-                
+            
                 var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
             }

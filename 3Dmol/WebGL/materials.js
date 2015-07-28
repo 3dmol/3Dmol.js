@@ -18,6 +18,8 @@ $3Dmol.Material = function () {
 
     this.depthTest = true;
     this.depthWrite = true;
+    
+    this.stencilTest = true;
 
     this.polygonOffset = false;
     this.polygonOffsetFactor = 0;
@@ -88,6 +90,7 @@ $3Dmol.Material.prototype.clone = function ( material ) {
 
     material.depthTest = this.depthTest;
     material.depthWrite = this.depthWrite;
+    material.stencilTest = this.stencilTest;
 
     material.polygonOffset = this.polygonOffset;
     material.polygonOffsetFactor = this.polygonOffsetFactor;
@@ -253,6 +256,7 @@ $3Dmol.MeshOutlineMaterial = function(parameters) {
     $3Dmol.Material.call(this);
     this.fog = true;
     this.shaderID = "outline";
+    this.wireframe=false;
     
 };
 
@@ -263,6 +267,7 @@ $3Dmol.MeshOutlineMaterial.prototype.clone = function(material) {
     $3Dmol.Material.prototype.clone.call(this, material);
     material.fog = this.fog;
     material.shaderID = this.shaderID;
+    material.wireframe = this.wireframe;
     return material;
 };
 
