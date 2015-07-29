@@ -149,8 +149,7 @@ $3Dmol.drawCartoon = (function() {
         group.add(mesh);
     };
 
-    //  really drawShapeStrip(), should combine this with the old drawRectStrip() at some point
-    var drawStrip = function(group, points, colors, div, thickness, opacity) {
+    var drawShapeStrip = function(group, points, colors, div, thickness, opacity, shape) {
 
         // points is a 2D array, dimensionality given by [num = cross-sectional resolution][len = length of strip]
         var i, j, num, len;
@@ -207,7 +206,7 @@ $3Dmol.drawCartoon = (function() {
         
         for (i = 0; i < len; i++) {
         
-            color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]); //TODO there's something wrong with this
+            color = $3Dmol.CC.color(colors[Math.round(colors.length*i/len)]);
             
             cs_bottom = [];
             cs_top = [];
@@ -215,12 +214,11 @@ $3Dmol.drawCartoon = (function() {
 
             if (points[0][i].atom !== undefined) // TODO better edge case handling
             {
-                var currentAtom = points[0][i].atom;
-                if (currentAtom.style.cartoon.shape === "oval")
+                if (shape === "oval")
                     cs_shape = cs_ellipse;
-                else if (currentAtom.style.cartoon.shape === "rectangle")
+                else if (shape === "rectangle")
                     cs_shape = cs_rectangle;
-                else if (currentAtom.style.cartoon.shape === "parabola")
+                else if (shape === "parabola")
                     cs_shape = cs_parabola;
             }
             if (!cs_shape) cs_shape = cs_rectangle;
@@ -356,7 +354,7 @@ $3Dmol.drawCartoon = (function() {
         }
         
         geo.initTypedArrays();
-        geo.setUpNormals(); // TODO modify this to control "shine"
+        geo.setUpNormals();
         
         var material = new $3Dmol.MeshDoubleLambertMaterial();
         material.vertexColors = $3Dmol.FaceColors;
@@ -365,10 +363,10 @@ $3Dmol.drawCartoon = (function() {
             material.opacity = opacity;
         }
         var mesh = new $3Dmol.Mesh(geo, material);
-        group.add(mesh);     
+        group.add(mesh);
     };
 
-    var drawRectStrip = function(group, points, colors, div, thickness) {
+    var drawPlainStrip = function(group, points, colors, div, thickness) {
         if ((points.length) < 2)
             return;
 
@@ -402,7 +400,7 @@ $3Dmol.drawCartoon = (function() {
         
         for (i = 0, lim = p1.length; i < lim; i++) {
         
-            color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]);
+            color = $3Dmol.CC.color(colors[Math.round(colors.length*i/lim)]);
             
             vs.push(p1v = p1[i]); // 0
             vs.push(p1v);         // 1
@@ -679,7 +677,7 @@ $3Dmol.drawCartoon = (function() {
             material.opacity = opacity;
         }
         var mesh = new $3Dmol.Mesh(geo, material);
-        group.add(mesh);     
+        group.add(mesh);   
     };
 
     //TODO: Need to update this (will we ever use this?)
@@ -706,6 +704,14 @@ $3Dmol.drawCartoon = (function() {
         line.type = $3Dmol.LineStrip;
         group.add(line);
     };
+
+    var drawStrip = function(group, points, colors, div, thickness, opacity, shape)
+    {
+        if (!shape || shape === "default")
+            drawPlainStrip(group, points, colors, div, thickness, opacity);
+        else
+            drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
+    }
 
     var drawStrand = function(group, atomList, geo, gradientScheme, fill, doNotSmoothen, num, div)
     {
@@ -757,8 +763,6 @@ $3Dmol.drawCartoon = (function() {
                     else
                         thickness = defaultThickness;
 
-                    
-
                     /* do not draw connections between different chains, but ignore
                        differences in reschain to properly support CA-only files */
                     if (curr && curr.chain === next.chain && curr.resi + 1 === next.resi)
@@ -806,8 +810,8 @@ $3Dmol.drawCartoon = (function() {
                 if (next.atom === "CA" || next.atom === "P" || next.atom === "O5'")
                 {
                     // end of a chain of connected residues
-                    if (curr != undefined && (curr.chain != next.chain || !(curr.resi === next.resi || curr.resi + 1 === next.resi)
-                        || curr.reschain != next.reschain))
+                    if (curr && (curr.chain != next.chain || !(curr.resi === next.resi || curr.resi + 1 === next.resi)
+                        || curr.reschain != next.reschain || curr.style.cartoon.style !== next.style.cartoon.style))
                     { 
 
                         if (baseEndPt) // draw the last base if it's a NA chain
@@ -830,7 +834,7 @@ $3Dmol.drawCartoon = (function() {
                         for (i = 0; !thickness && i < num; i++)
                             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
                         if (fill)
-                            drawStrip(group, points, colors, div, thickness, points.opacity);
+                            drawStrip(group, points, colors, div, thickness, points.opacity, curr.style.cartoon.style);
 
                         // clear arrays for points and colors
                         points = [];
@@ -935,7 +939,7 @@ $3Dmol.drawCartoon = (function() {
         for (i = 0; !thickness && i < num; i++)
             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
         if (fill)
-            drawStrip(group, points, colors, div, thickness, points.opacity);
+            drawStrip(group, points, colors, div, thickness, points.opacity, curr.style.cartoon.style);
 
         if (traceGeo != null) // generate last mesh for trace geometry
         {
