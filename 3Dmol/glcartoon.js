@@ -119,9 +119,8 @@ $3Dmol.drawCartoon = (function() {
             vertexArray[vertoffset+4] = p2[i].y;
             vertexArray[vertoffset+5] = p2[i].z;
             
-            for (var j = 0; j < 6; ++j) {                
+            for (var j = 0; j < 6; ++j)
                 colorArray[vertoffset+3*j] = color.r; colorArray[vertoffset+1+3*j] = color.g; colorArray[vertoffset+2+3*j] = color.b;
-            }            
            
             if (i > 0) {
                 var faces = [offset, offset + 1, offset - 1, offset - 2];
@@ -150,58 +149,73 @@ $3Dmol.drawCartoon = (function() {
         group.add(mesh);
     };
 
-    //  drawShapeStrip()
+    //  really drawShapeStrip(), should combine this with the old drawRectStrip() at some point
     var drawStrip = function(group, points, colors, div, thickness, opacity) {
 
-		// points[num = cross-sectional resolution][len = length of strip]
+        // points is a 2D array, dimensionality given by [num = cross-sectional resolution][len = length of strip]
         var i, j, num, len;
         num = points.length;
-		if (num < 2 || points[0].length < 2) return;
+        if (num < 2 || points[0].length < 2) return;
 
         div = div || axisDIV;
-        for (i = 0; i < num; i++) {
+        for (i = 0; i < num; i++) { // spline to generate greater length-wise resolution
             points[i] = subdivide(points[i], div)
         }
         len = points[0].length;
 
-        if (!thickness)
+        if (!thickness) // if thickness is 0, we can use a smaller geometry than this function generates
             return drawThinStrip(group, points[0], points[num-1], colors, div);
 
+
         var geo = new $3Dmol.Geometry(true);
-        //var vs = geo.vertices, fs = geo.faces; // geo is always empty
-        var vs = [], fs = [], cs_ellipse = [], cs_rectangle = [], cs_parabola = [];
         var axis, cs_shape, cs_bottom, cs_top;
+
+        // cache the available cross-sectional shapes
+        var cs_ellipse = [], cs_rectangle = [], cs_parabola = [];
         for (j=0; j < num; j++) {
-            cs_ellipse.push(0.25 + 1.5 * Math.sqrt((num-1)*j - Math.pow(j, 2))/(num-1));
+            cs_ellipse.push(0.25 + 1.5*Math.sqrt((num-1)*j - Math.pow(j, 2))/(num-1));
             cs_rectangle.push(0.5);
             cs_parabola.push(2*(Math.pow(j/num, 2) - j/num) + 0.6);
         }
 
-		var faces = [];
-		for (j = 0; j < num*2-1; j++) {
-			faces[j] = [j, j+1, j+1-2*num, j-2*num];
-		}
-        // last face is different
-        faces[num*2-1] = [j, j+1-2*num, j+1-4*num, j-2*num];
+        /* face_refs array is used to generate faces from vertexArray iteratively.
+           As we move through each cross-sectional segment of points, we draw lateral
+           faces backwards to the previous cross-sectional segment.
+
+           To correctly identify the points needed to make each face we use this
+           array as a lookup table for the relative indices of each needed point
+           in the vertices array.
+
+           4 points are used to create 2 faces.
+        */
+
+        var face_refs = [];
+        for (j = 0; j < num*2-1; j++) {
+            /* [curr vertex in curr cross-section,
+                next vertex in curr cross-section,
+                next vertex in prev cross-section,
+                curr vertex in prev cross-section] */
+            face_refs[j] = [j, j+1, j+1-2*num, j-2*num];
+        }
+        // last face is different. easier to conceptualize this by drawing a diagram
+        face_refs[num*2-1] = [j, j+1-2*num, j+1-4*num, j-2*num];
 
                 
-        var offset, vertoffset, faceoffset;
+        var v_offset, va_offset, f_offset;
         var color;
-        var currentAtom, lastAtom;
-        var face1, face2, face3;
-        var geoGroup;
+        var geoGroup = geo.updateGeoGroup(2*num*len); // ensure vertex capacity
         
         for (i = 0; i < len; i++) {
         
-            color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]);
+            color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]); //TODO there's something wrong with this
             
             cs_bottom = [];
             cs_top = [];
             axis = [];
 
-            if (points[0][i].atom !== undefined) // TODO better error handling
+            if (points[0][i].atom !== undefined) // TODO better edge case handling
             {
-                currentAtom = points[0][i].atom;
+                var currentAtom = points[0][i].atom;
                 if (currentAtom.style.cartoon.shape === "oval")
                     cs_shape = cs_ellipse;
                 else if (currentAtom.style.cartoon.shape === "rectangle")
@@ -212,129 +226,137 @@ $3Dmol.drawCartoon = (function() {
             if (!cs_shape) cs_shape = cs_rectangle;
 
             
-
+            // calculate thickness at each width point, from cross-sectional shape
             var toNext, toSide;
-            for (j = 0; j < num; j++) // determine thickness at each width point, from cross-sectional shape
+            for (j = 0; j < num; j++)
             {
-                if (i < len-1) toNext = points[j][i+1].clone().sub(points[j][i]);
-                else toNext = points[j][i-1].clone().sub(points[j][i]).negate();
-                if (j < num-1) toSide = points[j+1][i].clone().sub(points[j][i]);
-                else toSide = points[j-1][i].clone().sub(points[j][i]).negate();
+                if (i < len-1)
+                    toNext = points[j][i+1].clone().sub(points[j][i]);
+                else
+                    toNext = points[j][i-1].clone().sub(points[j][i]).negate();
+
+                if (j < num-1)
+                    toSide = points[j+1][i].clone().sub(points[j][i]);
+                else
+                    toSide = points[j-1][i].clone().sub(points[j][i]).negate();
+
                 axis[j] = toSide.cross(toNext).normalize().multiplyScalar(thickness*cs_shape[j]);
             }
 
+            // generate vertices by applying cross-sectional shape thickness to input points
             for (j = 0; j < num; j++)
-            {
                 cs_bottom[j] = points[j][i].clone().add(axis[j].clone().negate());
-                vs.push(cs_bottom[j]);
-            }
-
             for (j = 0; j < num; j++)
-            {
                 cs_top[j] = points[j][i].clone().add(axis[j]);
-                vs.push(cs_top[j]);
-            }
             
-            geoGroup = geo.updateGeoGroup(2*num);
+
+            /* Until this point the vertices have been dealt with as $3Dmol.Vector3() objects,
+               but we need to serialize them into the geoGroup.vertexArray, where every three
+               indices represents the next vertex. The colorArray is analogous.
+
+               In the following for-loops, j iterates through VERTICES so we need to index
+               them in vertexArray by 3*j + either 0, 1, or 2 for xyz or rgb component.
+            */
+
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             var faceArray = geoGroup.faceArray;
-            offset = geoGroup.vertices; vertoffset = offset*3;
+            v_offset = geoGroup.vertices; va_offset = v_offset*3; // in case geoGroup already contains vertices
 
-			for (j = 0; j < num; j++) { // bottom edge of cross-section, points 0 -> num-1
-				vertexArray[vertoffset+3*j+0] = cs_bottom[j].x;
-				vertexArray[vertoffset+3*j+1] = cs_bottom[j].y;
-				vertexArray[vertoffset+3*j+2] = cs_bottom[j].z;
-			}
+            // bottom edge of cross-section, vertices [0, num)
+            for (j = 0; j < num; j++) {
+                vertexArray[va_offset + 3*j + 0] = cs_bottom[j].x;
+                vertexArray[va_offset + 3*j + 1] = cs_bottom[j].y;
+                vertexArray[va_offset + 3*j + 2] = cs_bottom[j].z;
+            }
 
-			for (j = 0; j < num; j++) { // top edge of cross-section, points num -> 2*num-1
-				vertexArray[vertoffset+3*j+0+3*num] = cs_top[num-1-j].x;
-				vertexArray[vertoffset+3*j+1+3*num] = cs_top[num-1-j].y;
-				vertexArray[vertoffset+3*j+2+3*num] = cs_top[num-1-j].z;
-
-			}
+            // top edge of cross-section, vertices [num, 2*num)
+            // add these backwards, so that each cross-section's vertices are added sequentially to vertexArray
+            for (j = 0; j < num; j++) {
+                vertexArray[va_offset + 3*j + 0 + 3*num] = cs_top[num-1-j].x;
+                vertexArray[va_offset + 3*j + 1 + 3*num] = cs_top[num-1-j].y;
+                vertexArray[va_offset + 3*j + 2 + 3*num] = cs_top[num-1-j].z;
+            }
             
             for (j = 0; j < 2*num; ++j) {
-                colorArray[vertoffset+3*j+0] = color.r;
-				colorArray[vertoffset+3*j+1] = color.g;
-				colorArray[vertoffset+3*j+2] = color.b;
+                colorArray[va_offset + 3*j + 0] = color.r;
+                colorArray[va_offset + 3*j + 1] = color.g;
+                colorArray[va_offset + 3*j + 2] = color.b;
             }
             
             if (i > 0) {
              
-                // both points have distinct atoms
-                var diffAtoms = ((lastAtom !== undefined && currentAtom !== undefined) && lastAtom.serial !== currentAtom.serial);
+                for (j = 0; j < num*2; j++) {
                 
-                for (j = 0; j < num*2; j++ ) {
-                
-					// indices of the 4 points of a rectangular face
-                    var face = [offset + faces[j][0], offset + faces[j][1], offset + faces[j][2], offset + faces[j][3]];
+                    // get VERTEX indices of the 4 points of a rectangular face (as opposed to literal vertexArray indices)
+                    var face = [v_offset + face_refs[j][0],
+                                v_offset + face_refs[j][1],
+                                v_offset + face_refs[j][2],
+                                v_offset + face_refs[j][3]];
                     
-                    faceoffset = geoGroup.faceidx;    
+                    f_offset = geoGroup.faceidx;    
                     
-					// need 2 triangles to draw a face between 4 points
-                    faceArray[faceoffset]   = face[0];
-					faceArray[faceoffset+1] = face[1]; 
-					faceArray[faceoffset+2] = face[3];
+                    // need 2 triangles to draw a face between 4 points
+                    faceArray[f_offset]   = face[0];
+                    faceArray[f_offset+1] = face[1]; 
+                    faceArray[f_offset+2] = face[3];
 
-                    faceArray[faceoffset+3] = face[1];
-					faceArray[faceoffset+4] = face[2];
-					faceArray[faceoffset+5] = face[3];
+                    faceArray[f_offset+3] = face[1];
+                    faceArray[f_offset+4] = face[2];
+                    faceArray[f_offset+5] = face[3];
                     
                     geoGroup.faceidx += 6;
                     
-                    // TODO clickable
-                    
+                    // TODO implement clickable
                 }
 
             }
             
             geoGroup.vertices += 2*num;
-            lastAtom = currentAtom;
         }
-        // WORK BELOW
 
-        var vsize = vs.length - 8; // Cap
-        
-        /*
-        geoGroup = geo.updateGeoGroup(8);
+        // for terminal faces
         var vertexArray = geoGroup.vertexArray;
         var colorArray = geoGroup.colorArray;
         var faceArray = geoGroup.faceArray;
-        offset = geoGroup.vertices; vertoffset = offset*3; faceoffset = geoGroup.faceidx;
-        
-        for (i = 0; i < 4; i++) {
-            vs.push(vs[i * 2]);
-            vs.push(vs[vsize + i * 2]);
-            
-            var v1 = vs[i * 2], v2 = vs[vsize + i * 2];
-            
-            vertexArray[vertoffset+6*i] = v1.x; vertexArray[vertoffset+1+6*i] = v1.y; vertexArray[vertoffset+2+6*i] = v1.z;
-            vertexArray[vertoffset+3+6*i] = v2.x; vertexArray[vertoffset+4+6*i] = v2.y; vertexArray[vertoffset+5+6*i] = v2.z;
-            
-            colorArray[vertoffset+6*i] = color.r; colorArray[vertoffset+1+6*i] = color.g; colorArray[vertoffset+2+6*i] = color.b;
-            colorArray[vertoffset+3+6*i] = color.r; colorArray[vertoffset+4+6*i] = color.g; colorArray[vertoffset+5+6*i] = color.b;
+        v_offset = geoGroup.vertices; va_offset = v_offset*3; f_offset = geoGroup.faceidx;
 
+        for (i = 0; i<num-1; i++) // "bottom" face
+        {
+            var face = [i, i+1, 2*num-2-i, 2*num-1-i];
+
+            f_offset = geoGroup.faceidx;
+
+            faceArray[f_offset]   = face[0];
+            faceArray[f_offset+1] = face[1]; 
+            faceArray[f_offset+2] = face[3];
+
+            faceArray[f_offset+3] = face[1];
+            faceArray[f_offset+4] = face[2];
+            faceArray[f_offset+5] = face[3];
+
+            geoGroup.faceidx += 6;
+        }
+
+        for (i = 0; i<num-1; i++) // "top" face
+        {
+            var face = [v_offset-1-i, v_offset-2-i, v_offset-2*num+i+1, v_offset-2*num+i];
+
+            f_offset = geoGroup.faceidx;
+
+            faceArray[f_offset]   = face[0];
+            faceArray[f_offset+1] = face[1]; 
+            faceArray[f_offset+2] = face[3];
+
+            faceArray[f_offset+3] = face[1];
+            faceArray[f_offset+4] = face[2];
+            faceArray[f_offset+5] = face[3];
+
+            geoGroup.faceidx += 6;
         }
         
-        vsize += 8;
-                
-        face1 = [offset, offset + 2, offset + 6, offset + 4];
-        face2 = [offset + 1, offset + 5, offset + 7, offset + 3];
-        
-        faceArray[faceoffset] = face1[0]; faceArray[faceoffset+1] = face1[1]; faceArray[faceoffset+2] = face1[3];
-        faceArray[faceoffset+3] = face1[1]; faceArray[faceoffset+4] = face1[2]; faceArray[faceoffset+5] = face1[3];
-        faceArray[faceoffset+6] = face2[0]; faceArray[faceoffset+7] = face2[1]; faceArray[faceoffset+8] = face2[3];
-        faceArray[faceoffset+9] = face2[1]; faceArray[faceoffset+10] = face2[2]; faceArray[faceoffset+11] = face2[3];
-        
-        geoGroup.faceidx += 12;
-        geoGroup.vertices += 8;
-        
-        //TODO: Add intersection planes for caps
-        */
-        
         geo.initTypedArrays();
-        geo.setUpNormals();
+        geo.setUpNormals(); // TODO modify this to control "shine"
         
         var material = new $3Dmol.MeshDoubleLambertMaterial();
         material.vertexColors = $3Dmol.FaceColors;
@@ -557,21 +579,21 @@ $3Dmol.drawCartoon = (function() {
             this.vert=vertIdx; // Vertex index at the end of this half-edge
             this.twin=null;    // Oppositely oriented adjacent half-edge
             this.next=null;    //Next half-edge around the face
-		};
-		
-		var computeAdjacency=function(faces,faceCount,vertCount){
-			console.log("computeAdjacency");
-			//all pieces of the half-edge data structure
-			edges=[];
-			
-			// a hash table to hold the adjaceney info
-			// - Keys are pairs of vertex indices
-			// - Values are pointers to half-edge
-			var edgeTable={};
-			var len=0;
-			
-			//Plow through faces and fill all half-edge info except twin pointers:
-			for(var i=0;i<faceCount;i+=3){
+        };
+        
+        var computeAdjacency=function(faces,faceCount,vertCount){
+            console.log("computeAdjacency");
+            //all pieces of the half-edge data structure
+            edges=[];
+            
+            // a hash table to hold the adjaceney info
+            // - Keys are pairs of vertex indices
+            // - Values are pointers to half-edge
+            var edgeTable={};
+            var len=0;
+            
+            //Plow through faces and fill all half-edge info except twin pointers:
+            for(var i=0;i<faceCount;i+=3){
                 var A=faces[i];
                 var B=faces[i+1];
                 var C=faces[i+2];
@@ -598,57 +620,57 @@ $3Dmol.drawCartoon = (function() {
             
             //varify that the mesh is clean
             for(var key in edgeTable){
-				if(edgeTable.hasOwnProperty(key)){
-					len++;
-				}
-			}
-			if(len!=faceCount*3){
-				console.warn("Bad mesh: duplicated edges or inconsistent winding.len="+len+" faceCount="+faceCount+" vertCount="+vertCount);
-			}
-			
-			//Populate the twin pointers by iterating over the hash table
-			var boundaryCount=0;
-			for(var key in edgeTable){
-				if(edgeTable.hasOwnProperty(key)){
-					var twinKey=((key&0xffff)<<16)|(key>>16);
-					if(edgeTable.hasOwnProperty(twinKey)){
-						edgeTable[key].twin=edgeTable[twinKey];
-						edgeTable[twinKey].twin=edgeTable[key];
-					}else{
-						boundaryCount+=1;
-					}
-				}
-			}
-			
-			var ret=new Uint16Array(faceCount*6);
-			// Now that we have a half-edge structure, it's easy to create adjacency info for WebGL
-			if(boundaryCount>0){
-				console.log("Mesh is not watertight. Contains "+boundaryCount +" edges");
-				
-				for(var i=0;i<faceCount;i+=3){
-					ret[i*2+0]=edges[i+2].vert;
-					ret[i*2+1]=edges[i+0].twin==null?ret[i*2+0]:edges[i+0].twin.next.vert;
-					ret[i*2+2]=edges[i+0].vert;
-					ret[i*2+3]=edges[i+1].twin==null?ret[i*2+1]:edges[i+1].twin.next.vert;					
-					ret[i*2+4]=edges[i+1].vert;
-					ret[i*2+5]=edges[i+2].twin==null?ret[i*2+2]:edges[i+2].twin.next.vert;
-				}
-			}
-			else{
-				for(var i=0;i<faceCount;i+=3){
-					ret[i*2+0]=edges[i+2].vert;
-					ret[i*2+1]=edges[i+0].twin.next.vert;
-					ret[i*2+2]=edges[i+0].vert;
-					ret[i*2+3]=edges[i+1].twin.next.vert;					
-					ret[i*2+4]=edges[i+1].vert;
-					ret[i*2+5]=edges[i+2].twin.next.vert;
-				} 
-			}
-			
-			return ret;
-		};
-		
-		//geoGroup.adjFaceArray = computeAdjacency(faceArray,faceArray.length,offset);
+                if(edgeTable.hasOwnProperty(key)){
+                    len++;
+                }
+            }
+            if(len!=faceCount*3){
+                console.warn("Bad mesh: duplicated edges or inconsistent winding.len="+len+" faceCount="+faceCount+" vertCount="+vertCount);
+            }
+            
+            //Populate the twin pointers by iterating over the hash table
+            var boundaryCount=0;
+            for(var key in edgeTable){
+                if(edgeTable.hasOwnProperty(key)){
+                    var twinKey=((key&0xffff)<<16)|(key>>16);
+                    if(edgeTable.hasOwnProperty(twinKey)){
+                        edgeTable[key].twin=edgeTable[twinKey];
+                        edgeTable[twinKey].twin=edgeTable[key];
+                    }else{
+                        boundaryCount+=1;
+                    }
+                }
+            }
+            
+            var ret=new Uint16Array(faceCount*6);
+            // Now that we have a half-edge structure, it's easy to create adjacency info for WebGL
+            if(boundaryCount>0){
+                console.log("Mesh is not watertight. Contains "+boundaryCount +" edges");
+                
+                for(var i=0;i<faceCount;i+=3){
+                    ret[i*2+0]=edges[i+2].vert;
+                    ret[i*2+1]=edges[i+0].twin==null?ret[i*2+0]:edges[i+0].twin.next.vert;
+                    ret[i*2+2]=edges[i+0].vert;
+                    ret[i*2+3]=edges[i+1].twin==null?ret[i*2+1]:edges[i+1].twin.next.vert;                  
+                    ret[i*2+4]=edges[i+1].vert;
+                    ret[i*2+5]=edges[i+2].twin==null?ret[i*2+2]:edges[i+2].twin.next.vert;
+                }
+            }
+            else{
+                for(var i=0;i<faceCount;i+=3){
+                    ret[i*2+0]=edges[i+2].vert;
+                    ret[i*2+1]=edges[i+0].twin.next.vert;
+                    ret[i*2+2]=edges[i+0].vert;
+                    ret[i*2+3]=edges[i+1].twin.next.vert;                   
+                    ret[i*2+4]=edges[i+1].vert;
+                    ret[i*2+5]=edges[i+2].twin.next.vert;
+                } 
+            }
+            
+            return ret;
+        };
+        
+        //geoGroup.adjFaceArray = computeAdjacency(faceArray,faceArray.length,offset);
         
         var material = new $3Dmol.MeshDoubleLambertMaterial();
         material.vertexColors = $3Dmol.FaceColors;
@@ -843,7 +865,7 @@ $3Dmol.drawCartoon = (function() {
                         else
                             thickness = defaultThickness;
 
-						
+                        
                         curr = next; // advance backbone
                         //nextResAtom = atomList[parseInt(i) + resSize[curr.resn]];
                         backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
@@ -953,7 +975,7 @@ $3Dmol.drawCartoon = (function() {
                 else
                     widthScalar = coilWidth;
             } else if (backboneAtom.ss === "arrowtip")
-            	widthScalar = 0.3;
+                widthScalar = 0.3;
             else
                 widthScalar = helixSheetWidth;
         }
@@ -962,15 +984,15 @@ $3Dmol.drawCartoon = (function() {
         // if 2 residues up is no longer a beta-sheet, this is where the arrowhead goes
         if (backboneAtom.ss === "s" && backboneAtom.style.cartoon.arrows && nextnextBBAtom && nextnextBBAtom.ss != "s")
         {
-        	addArrowPoints = true;
+            addArrowPoints = true;
 
-        	for (i = atomi; i < atomList.length; i++)
-        	{
-        		if (atomList[i].resi === nextBBAtom.resi && atomList[i].atom === "CA")
-        		{
-        			atomList[i].ss = "arrowtip"
-        		}
-        	}
+            for (i = atomi; i < atomList.length; i++)
+            {
+                if (atomList[i].resi === nextBBAtom.resi && atomList[i].atom === "CA")
+                {
+                    atomList[i].ss = "arrowtip"
+                }
+            }
         }     
 
         // if the angle between the previous orientation vector and current is greater than 90 degrees,
