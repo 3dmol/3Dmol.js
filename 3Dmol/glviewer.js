@@ -2124,6 +2124,9 @@ $3Dmol.GLViewer = (function() {
                 }
             }
             delete surfaces[surf];
+            while(surfaces.length > 0 && typeof(surfaces[surfaces.length-1]) == 'undefined') {
+                surfaces.pop();
+            }
             show();
         };
         
@@ -2143,6 +2146,7 @@ $3Dmol.GLViewer = (function() {
                 }
                 delete surfaces[n];
             }
+            surfaces = [];
             show();
             
         };
