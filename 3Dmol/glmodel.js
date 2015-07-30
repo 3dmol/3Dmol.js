@@ -1263,6 +1263,7 @@ $3Dmol.GLModel = (function() {
             if (sel.hasOwnProperty("expand")) {
 
                 // get atoms in expanded bounding box
+
                 var expand = expandAtomList(ret, parseFloat(sel.expand));
                 var retlen = ret.length;
                 for (var i = 0; i < expand.length; i++) {
