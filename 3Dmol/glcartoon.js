@@ -366,7 +366,7 @@ $3Dmol.drawCartoon = (function() {
         group.add(mesh);
     };
 
-    var drawPlainStrip = function(group, points, colors, div, thickness) {
+    var drawPlainStrip = function(group, points, colors, div, thickness, opacity) {
         if ((points.length) < 2)
             return;
 
@@ -707,6 +707,7 @@ $3Dmol.drawCartoon = (function() {
 
     var drawStrip = function(group, points, colors, div, thickness, opacity, shape)
     {
+        console.log(shape);
         if (!shape || shape === "default")
             drawPlainStrip(group, points, colors, div, thickness, opacity);
         else
@@ -781,7 +782,7 @@ $3Dmol.drawCartoon = (function() {
                             var color2 = $3Dmol.CC.color(nextColor);
                             $3Dmol.GLDraw.drawCylinder(traceGeo, curr, midpoint, thickness, color1, true, false);
                             $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, next, thickness, color2, false, true);
-                        } // note that an atom object can be duck-typed as a 3-vector in this case
+                        } // note that an atom object can be duck-typed as a $3Dmol.Vector3 in this case
                     }
 
                     if (curr && traceGeo && (curr.style.cartoon && curr.style.cartoon.style != "trace"
@@ -797,7 +798,18 @@ $3Dmol.drawCartoon = (function() {
                         var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
                         group.add(traceMesh);
                         traceGeo = null;
-                    } else traceGeo.opacity = parseFloat(cartoon.opacity) || 1;
+                    } else if (curr) // make sure whole chain is same opacity
+                    {
+                        if (traceGeo.opacity)
+                        {
+                            if (traceGeo.opacity != curr.style.cartoon.opacity)
+                            {
+                                console.log("Warning: a cartoon-style chain's opacity is ambiguous");
+                                traceGeo.opacity = 1;
+                            }
+                        }
+                        else traceGeo.opacity = parseFloat(curr.style.cartoon.opacity) || 1;
+                    }
 
                     curr = next;
                     currColor = nextColor;
@@ -1042,7 +1054,7 @@ $3Dmol.drawCartoon = (function() {
         {
             if (points.opacity != testOpacity)
             {
-                console.log("Warning: default cartoon opacity is ambiguous");
+                console.log("Warning: a cartoon-style chain's opacity is ambiguous");
                 points.opacity = 1;
             }
 
