@@ -975,8 +975,8 @@ $3Dmol.splitMesh = function(mesh) {
 	    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
     //peel off 64k vertices rsvh into their own mesh
     //duplicating vertices and normals as necessary to preserve faces and lines
-    
-        if(mesh.vertexArr < MAXVERT) return [mesh]; //typical case
+	
+        if(mesh.vertexArr.length < MAXVERT) return [mesh]; //typical case
         
         var nverts = mesh.vertexArr.length;
         var slices = [{vertexArr: [], normalArr: [], faceArr: []}];

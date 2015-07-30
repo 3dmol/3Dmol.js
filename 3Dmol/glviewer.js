@@ -37,7 +37,8 @@ $3Dmol.GLViewer = (function() {
         var id = container.id;
 
         var models = []; // atomistic molecular models
-        var surfaces = [];
+        var surfaces = {};
+        var nextSurfID = 0;
         var shapes = []; // Generic shapes
         var labels = [];
         var clickables = []; //things you can click on
@@ -645,7 +646,8 @@ $3Dmol.GLViewer = (function() {
                 }
             }
             
-            for (i in surfaces) { // this is an array with possible holes
+            for (i in surfaces) { // this is an object with possible holes
+                if(!surfaces.hasOwnProperty(i)) continue;
                 var surfArr = surfaces[i];
                 for (n = 0; n < surfArr.length; n++) {
                     if (surfArr.hasOwnProperty(n)) {
@@ -1826,7 +1828,7 @@ $3Dmol.GLViewer = (function() {
                 done : true,
                 finished : false //the rendered finishes surfaces when they are done
             };
-            var surfid = surfaces.length;
+            var surfid = nextSurfID++;
             surfaces[surfid] = surfobj;
             return surfid;
         }
@@ -2083,7 +2085,7 @@ $3Dmol.GLViewer = (function() {
                 });
                 addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
             } 
-            var surfid = surfaces.length;
+            var surfid = nextSurfID++;
             surfaces[surfid] = surfobj;
             
             return surfid;
@@ -2124,9 +2126,6 @@ $3Dmol.GLViewer = (function() {
                 }
             }
             delete surfaces[surf];
-            while(surfaces.length > 0 && typeof(surfaces[surfaces.length-1]) == 'undefined') {
-                surfaces.pop();
-            }
             show();
         };
         
@@ -2146,7 +2145,6 @@ $3Dmol.GLViewer = (function() {
                 }
                 delete surfaces[n];
             }
-            surfaces = [];
             show();
             
         };
