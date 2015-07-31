@@ -1149,7 +1149,11 @@ $3Dmol.Parsers = (function() {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
             var startChain, startResi, endChain, endResi;
-            if (recordName == 'ATOM  ' || recordName == 'HETATM') {
+            
+            if(recordName.indexOf("END") == 0) {
+                break;
+            }
+            else if (recordName == 'ATOM  ' || recordName == 'HETATM') {
                 var resn, chain, resi, icode, x, y, z, hetflag, elem, serial, altLoc, b;
                 altLoc = line.substr(16, 1);
                 if (altLoc != ' ' && altLoc != 'A')
