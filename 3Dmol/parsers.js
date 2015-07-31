@@ -814,7 +814,7 @@ $3Dmol.Parsers = (function() {
         }
         if (mmCIF._symmetry_equiv_pos_as_xyz !== undefined) {
             for (var sym = 0; sym < mmCIF._symmetry_equiv_pos_as_xyz.length; sym++) {
-                var transform = mmCIF._symmetry_equiv_pos_as_xyz[sym];
+                var transform = mmCIF._symmetry_equiv_pos_as_xyz[sym].replace(/["' ]/g,"");
                 var componentStrings = transform.split(',').map(
                     function(val){
                         return val.replace(/-/g,"+-");
@@ -825,6 +825,8 @@ $3Dmol.Parsers = (function() {
                     var constant = 0, xTerm = 0, yTerm = 0, zTerm = 0;
                     for (var t = 0; t < terms.length; t++) {
                         var term = terms[t];
+                        if (term === "")
+                            continue;
                         var coefficient = parseTerm(term);
                         if (term.match('x')) {
                             matrix.elements[coord + 0] = coefficient;
