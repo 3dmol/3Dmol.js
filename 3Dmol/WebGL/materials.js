@@ -254,9 +254,11 @@ $3Dmol.MeshDoubleLambertMaterial.prototype.clone = function() {
 /** @constructor */
 $3Dmol.MeshOutlineMaterial = function(parameters) {
     $3Dmol.Material.call(this);
+    parameters = parameters || {};
     this.fog = true;
     this.shaderID = "outline";
     this.wireframe=false;
+    this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
     
 };
 

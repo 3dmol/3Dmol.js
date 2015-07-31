@@ -480,15 +480,16 @@ $3Dmol.GLViewer = (function() {
          * myviewer.outline()
          * 
          */
-         
-         this.setViewStyle = function(parameters){
-			 if(parameters["style"]==="outline") {
-				 renderer.enableOutline ();
-			 }
-			 else {
-			     renderer.disableOutline();
-			 }
-		 }
+         this.setViewStyle = function(parameters) {
+            if (parameters["style"] === "outline") {
+                var params = {};
+                if(parameters.color) params.color =  $3Dmol.CC.color(parameters.color);
+                if(parameters.width) params.width = parameters.width;
+                renderer.enableOutline(params);
+            } else {
+                renderer.disableOutline();
+            }
+        }
 
         /**
          * Set viewer width
@@ -2132,7 +2133,8 @@ $3Dmol.GLViewer = (function() {
         /** Remove all surfaces.
          * @function $3Dmol.GLViewer#removeAllSurfaces */
         this.removeAllSurfaces = function() {
-            for (var n = 0; n < surfaces.length; n++) {
+            for (n in  surfaces) {
+                if(!surfaces.hasOwnProperty(n)) continue;
                 var surfArr = surfaces[n];
                 for(var i = 0; i < surfArr.length; i++) {
                     if (surfArr[i] && surfArr[i].lastGL) {
