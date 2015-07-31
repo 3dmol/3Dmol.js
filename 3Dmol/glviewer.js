@@ -27,7 +27,6 @@ $3Dmol.GLViewer = (function() {
             defaultcolors = $3Dmol.elementColors.defaultColors;
     	var nomouse = config.nomouse;
     	var bgColor = 0;
-    	var outline =false;
     	
     	if(typeof(config.backgroundColor) != undefined) {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
@@ -58,8 +57,7 @@ $3Dmol.GLViewer = (function() {
         var renderer = new $3Dmol.Renderer({
             antialias : true,
             preserveDrawingBuffer: true, //so we can export images
-            premultipliedAlpha : false,/* more traditional compositing with background */
-            outline: outline
+            premultipliedAlpha : false/* more traditional compositing with background */
         });
 
         renderer.domElement.style.width = "100%";

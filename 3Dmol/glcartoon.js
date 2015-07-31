@@ -582,7 +582,6 @@ $3Dmol.drawCartoon = (function() {
         };
         
         var computeAdjacency=function(faces,faceCount,vertCount){
-            console.log("computeAdjacency");
             //all pieces of the half-edge data structure
             edges=[];
             
@@ -709,7 +708,6 @@ $3Dmol.drawCartoon = (function() {
 
     var drawStrip = function(group, points, colors, div, thickness, opacity, shape)
     {
-        console.log(shape);
         if (!shape || shape === "default")
             drawPlainStrip(group, points, colors, div, thickness, opacity);
         else

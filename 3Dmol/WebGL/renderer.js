@@ -18,11 +18,9 @@ $3Dmol.Renderer = function(parameters) {
             : true, _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
             : false,
 
-    _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(
-            parameters.clearColor) : new $3Dmol.Color(0x000000), _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha
-            : 0, _outlineMaterial = parameters.outline !== undefined ? new $3Dmol.MeshOutlineMaterial(
-            parameters.outline)
-            : null;
+    _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(parameters.clearColor) : new $3Dmol.Color(0x000000), 
+    _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0, 
+    _outlineMaterial = parameters.outline !== undefined ? new $3Dmol.MeshOutlineMaterial(parameters.outline) : null;
 
     this.domElement = _canvas;
     this.context = null;
