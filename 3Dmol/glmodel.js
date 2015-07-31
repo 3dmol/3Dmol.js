@@ -1561,6 +1561,42 @@ $3Dmol.GLModel = (function() {
             }
         };
 
+        /** Convert the model into an object with the CDJSON format
+         *
+         * @function $3Dmol.GLModel#toCDObject
+         */
+        this.toCDObject = function() {
+            var out =
+                {m:[
+                    {a:[],
+                     b:[]}
+                ]};
+            for (var i = 0; i < atoms.length; i++) {
+                var atomJSON = {};
+                var atom = atoms[i];
+                atomJSON.x = atom.x;
+                atomJSON.y = atom.y;
+                atomJSON.z = atom.z;
+                atomJSON.l = atom.elem;
+                out.m[0].a.push(atomJSON);
+
+                for (var b = 0; b < atom.bonds.length; b++) {
+                    var firstAtom = i;
+                    var secondAtom = atom.bonds[b];
+                    if (firstAtom >= secondAtom)
+                        continue;
+                    var bondOrder =  atom.bondOrder[b];
+                    var bond = {
+                        b: firstAtom,
+                        e: secondAtom,
+                        o: bondOrder
+                    };
+                    out.m[0].b.push(bond);
+                }
+            }
+            return out;
+        }
+
 
         /** manage the globj for this model in the possed modelGroup - if it has to be regenerated, remove and add
          * 
