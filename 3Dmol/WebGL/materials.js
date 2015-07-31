@@ -259,6 +259,8 @@ $3Dmol.MeshOutlineMaterial = function(parameters) {
     this.shaderID = "outline";
     this.wireframe=false;
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
+    this.outlineWidth= parameters.width || 0.1;
+    this.outlinePushback= parameters.pushback || 1.0;
     
 };
 

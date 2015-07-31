@@ -65,6 +65,7 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.padding = "0";
         renderer.domElement.style.position = "absolute"; //TODO: get rid of this
         renderer.domElement.style.top = "0px";
+        renderer.domElement.style.left = "0px";
         renderer.domElement.style.zIndex = "0";
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
@@ -488,6 +489,10 @@ $3Dmol.GLViewer = (function() {
                 renderer.disableOutline();
             }
         }
+         
+         if(config.style) { //enable setting style in constructor
+             this.setViewStyle(config.style);
+         }
 
         /**
          * Set viewer width

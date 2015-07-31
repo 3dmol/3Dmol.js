@@ -11,13 +11,11 @@ $3Dmol.Renderer = function(parameters) {
 
     _precision = parameters.precision !== undefined ? parameters.precision
             : 'highp',
-
-    _alpha = parameters.alpha !== undefined ? parameters.alpha : true, _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha
-            : true, _antialias = parameters.antialias !== undefined ? parameters.antialias
-            : false, _stencil = parameters.stencil !== undefined ? parameters.stencil
-            : true, _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
-            : false,
-
+    _alpha = parameters.alpha !== undefined ? parameters.alpha : true, 
+    _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha : true, 
+    _antialias = parameters.antialias !== undefined ? parameters.antialias : false,
+    _stencil = parameters.stencil !== undefined ? parameters.stencil : true, 
+    _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false,
     _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(parameters.clearColor) : new $3Dmol.Color(0x000000), 
     _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0, 
     _outlineMaterial = parameters.outline !== undefined ? new $3Dmol.MeshOutlineMaterial(parameters.outline) : null;
@@ -766,9 +764,9 @@ $3Dmol.Renderer = function(parameters) {
                 m_uniforms.emissive.value = material.emissive;
 
             } else if (material.shaderID === "outline") {
-                m_uniforms.relativePixelSize.value = new Float32Array([
-                        1.0 / _viewportWidth, 1.0 / _viewportHeight ]);
                 m_uniforms.outlineColor.value = material.outlineColor;
+                m_uniforms.outlineWidth.value = material.outlineWidth;
+                m_uniforms.outlinePushback.value = material.outlinePushback;
             } else if (material.shaderID === "sphereimposter") {
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false,
                         camera.matrixWorldInverse.elements);

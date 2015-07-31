@@ -277,6 +277,8 @@ $3Dmol.ShaderLib = {
 
 "uniform mat4 modelViewMatrix;",
 "uniform mat4 projectionMatrix;",
+"uniform float outlineWidth;",
+"uniform float outlinePushback;",
 
 "attribute vec3 position;",
 "attribute vec3 normal;",
@@ -284,15 +286,13 @@ $3Dmol.ShaderLib = {
 
 "void main() {",
 
-"    vec3 scaledNormal = normalize(normal)*0.1;",
-"    vec3 newpos = position+scaledNormal;",
-
-"    vec4 mvPosition = modelViewMatrix * vec4( newpos, 1.0 );",
-"    float s = 0.05;",
-
+"    vec4 norm = modelViewMatrix*vec4(normalize(normal),0.0);",
+"    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    mvPosition.xy += norm.xy*outlineWidth;",
 "    gl_Position = projectionMatrix * mvPosition;",
-"    gl_Position.z += s*gl_Position.w;",
-"    gl_Position.z = min(gl_Position.z, gl_Position.w);", //prevent clipping
+"    mvPosition.z -= outlinePushback;", //go backwards in model space
+"    vec4 pushpos = projectionMatrix*mvPosition;", //project to get z in projection space, I'm probably missing some simple math to do the same thing..
+"    gl_Position.z = gl_Position.w*pushpos.z/pushpos.w;",
 "}"
            
 ].join("\n"),
@@ -304,7 +304,8 @@ $3Dmol.ShaderLib = {
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},           
-            relativePixelSize: { type: 'fv', value: [] }
+            outlineWidth: { type: 'f', value: 0.1 },
+            outlinePushback: { type: 'f', value: 1.0 },
         }
 
     },
