@@ -1884,10 +1884,12 @@ $3Dmol.GLViewer = (function() {
             var symmetries = false;
             var n;
             for (n = 0; n < models.length; n++) { 
-                var symMatrices = models[n].getSymmetries();
-                if (symMatrices.length > 1 || (symMatrices.length == 1 && !(symMatrices[0].isIdentity()))) {
-                    symmetries = true;
-                    break;
+                if(models[n]) {
+                    var symMatrices = models[n].getSymmetries();
+                    if (symMatrices.length > 1 || (symMatrices.length == 1 && !(symMatrices[0].isIdentity()))) {
+                        symmetries = true;
+                        break;
+                    }
                 }
             }
 
