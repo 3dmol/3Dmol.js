@@ -1407,6 +1407,24 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
+         * Export one or all of the loaded models into ChemDoodle compatible JSON.
+         * @function $3Dmol.GLViewer#exportJSON
+         * @param {number} modelID - Optional parameter for which model to export. If left out, export all of them.
+         * @return {string}
+         */
+        this.exportJSON = function(modelID) {
+            var object = {};
+            if (modelID === undefined) {
+                object.m = models.map(function(model) {
+                    return model.toCDObject();
+                });
+            } else {
+                object.m = [ model[modelID].toCDObject() ];
+            }
+            return JSON.stringify(object);
+        }
+
+        /**
          * Create a new model from atoms specified by sel.
          * If extract, removes selected atoms from existing models 
          * 

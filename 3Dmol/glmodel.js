@@ -1561,37 +1561,38 @@ $3Dmol.GLModel = (function() {
             }
         };
 
-        /** Convert the model into an object with the CDJSON format
+        /** Convert the model into an object in the format of a ChemDoodle JSON model.
          *
          * @function $3Dmol.GLModel#toCDObject
+         * @return {Object}
          */
         this.toCDObject = function() {
-            var out =
-                {m:[
-                    {a:[],
-                     b:[]}
-                ]};
+            var out = { a:[], b:[] };
             for (var i = 0; i < atoms.length; i++) {
                 var atomJSON = {};
                 var atom = atoms[i];
                 atomJSON.x = atom.x;
                 atomJSON.y = atom.y;
                 atomJSON.z = atom.z;
-                atomJSON.l = atom.elem;
-                out.m[0].a.push(atomJSON);
+                if (atom.elem != "C") {
+                    atomJSON.l = atom.elem;
+                }
+                out.a.push(atomJSON);
 
                 for (var b = 0; b < atom.bonds.length; b++) {
                     var firstAtom = i;
                     var secondAtom = atom.bonds[b];
                     if (firstAtom >= secondAtom)
                         continue;
-                    var bondOrder =  atom.bondOrder[b];
                     var bond = {
                         b: firstAtom,
-                        e: secondAtom,
-                        o: bondOrder
+                        e: secondAtom
                     };
-                    out.m[0].b.push(bond);
+                    var bondOrder =  atom.bondOrder[b];
+                    if (bondOrder != 1) {
+                        bond.o = bondOrder;
+                    }
+                    out.b.push(bond);
                 }
             }
             return out;
