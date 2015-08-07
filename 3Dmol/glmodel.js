@@ -900,7 +900,7 @@ $3Dmol.GLModel = (function() {
 
                     if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                         //gradient color scheme range
-                        if (atom.style.cartoon.color === "spectrum" && typeof(atom.resi) === "number") {                            
+                        if (atom.style.cartoon.color === "spectrum" && typeof(atom.resi) === "number" && !atom.hetflag) {                            
                             if (atom.resi < range[0])
                                 range[0] = atom.resi;
                             if (atom.resi > range[1])
