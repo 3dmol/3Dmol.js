@@ -438,6 +438,8 @@ $3Dmol.Parsers = (function() {
             
             var elem = currentAtom.l || 'C';
             atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+
+            atom.serial = atoms.length;
             atoms.push(atom);
         }
         for (var i = 0; i < bondsInFile.length; i++) {

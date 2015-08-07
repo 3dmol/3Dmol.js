@@ -1561,6 +1561,43 @@ $3Dmol.GLModel = (function() {
             }
         };
 
+        /** Convert the model into an object in the format of a ChemDoodle JSON model.
+         *
+         * @function $3Dmol.GLModel#toCDObject
+         * @return {Object}
+         */
+        this.toCDObject = function() {
+            var out = { a:[], b:[] };
+            for (var i = 0; i < atoms.length; i++) {
+                var atomJSON = {};
+                var atom = atoms[i];
+                atomJSON.x = atom.x;
+                atomJSON.y = atom.y;
+                atomJSON.z = atom.z;
+                if (atom.elem != "C") {
+                    atomJSON.l = atom.elem;
+                }
+                out.a.push(atomJSON);
+
+                for (var b = 0; b < atom.bonds.length; b++) {
+                    var firstAtom = i;
+                    var secondAtom = atom.bonds[b];
+                    if (firstAtom >= secondAtom)
+                        continue;
+                    var bond = {
+                        b: firstAtom,
+                        e: secondAtom
+                    };
+                    var bondOrder =  atom.bondOrder[b];
+                    if (bondOrder != 1) {
+                        bond.o = bondOrder;
+                    }
+                    out.b.push(bond);
+                }
+            }
+            return out;
+        }
+
 
         /** manage the globj for this model in the possed modelGroup - if it has to be regenerated, remove and add
          * 
