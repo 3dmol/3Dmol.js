@@ -873,6 +873,11 @@ $3Dmol.GLShape = (function() {
          */  
         this.globj = function(group) {
 
+            if (renderedShapeObj) {
+                group.remove(renderedShapeObj);
+                renderedShapeObj = null;
+            }
+            
             if(this.hidden)
                 return;
             geo.initTypedArrays();
@@ -911,10 +916,6 @@ $3Dmol.GLShape = (function() {
                     $3Dmol.LinePieces);
             shapeObj.add(line);
 
-            if (renderedShapeObj) {
-                group.remove(renderedShapeObj);
-                renderedShapeObj = null;
-            }
             renderedShapeObj = shapeObj.clone();
             group.add(renderedShapeObj);
 
