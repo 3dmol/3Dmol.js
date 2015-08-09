@@ -570,6 +570,7 @@ $3Dmol.GLShape = (function() {
         shape.clickable = stylespec.clickable ? true : false;
         shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
                 : null;
+        shape.hidden = stylespec.hidden;
     };
 
     /**
@@ -872,6 +873,8 @@ $3Dmol.GLShape = (function() {
          */  
         this.globj = function(group) {
 
+            if(this.hidden)
+                return;
             geo.initTypedArrays();
 
             updateColor(geo, this.color);
