@@ -1278,7 +1278,7 @@ $3Dmol.Parsers = (function() {
         // starttime));
         
         if (!noAssembly) {
-            processSymmetries("pdb", modelData.symmetries, copyMatrix, atoms);
+            processSymmetries(modelData.symmetries, copyMatrix, atoms);
         }
 
         if (computeStruct || !hasStruct) {
