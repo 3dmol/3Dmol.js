@@ -411,8 +411,6 @@ $3Dmol.Parsers = (function() {
     // for the json file extension, other chemical json file formats exist that
     // this can not parse. Check which one you have and do not assume that
     // .json can be parsed
-    parsers.cdj = parsers.jso = // Hack because the file format is truncated
-                                // at the moment
     parsers.cdjson = parsers.json = function(atoms, str, options, modelData) {
         if (typeof str === "string") { // Str is usually automatically parsed by JQuery
             str = JSON.parse(str);
@@ -421,6 +419,9 @@ $3Dmol.Parsers = (function() {
         var atomsInFile = molecules[0].a; // Assumes there is at least one
         var bondsInFile = molecules[0].b; // molecule and ignores any more
                                           // Ignores any shapes
+        var styles = molecules[0].s;
+        var parseStyle = options !== undefined && options.parseStyle !== undefined ? options.parseStyle : styles !== undefined;
+        
         var offset = atoms.length; // When adding atoms their index will be
                                    // Offset by the number of existing atoms
         
@@ -440,6 +441,9 @@ $3Dmol.Parsers = (function() {
             atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
 
             atom.serial = atoms.length;
+            if (parseStyle) {
+                atom.style = styles[currentAtom.s || 0];
+            }
             atoms.push(atom);
         }
         for (var i = 0; i < bondsInFile.length; i++) {
