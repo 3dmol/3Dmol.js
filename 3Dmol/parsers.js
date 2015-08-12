@@ -796,7 +796,7 @@ $3Dmol.Parsers = (function() {
                         matrix31, matrix32, matrix33, vector3);
                 modelData.symmetries.push(matrix);
             }
-            processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
+            processSymmetries(modelData.symmetries, copyMatrix, atoms);
         }
         function parseTerm(term){
             var negative = term.match('-');
@@ -857,7 +857,7 @@ $3Dmol.Parsers = (function() {
                 matrix = (new $3Dmol.Matrix4()).multiplyMatrices(conversionMatrix4, matrix);
                 modelData.symmetries.push(matrix);
             }
-            processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
+            processSymmetries(modelData.symmetries, copyMatrix, atoms);
         }
     }
 
@@ -1037,7 +1037,7 @@ $3Dmol.Parsers = (function() {
     };
 
     //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
-    var processSymmetries = function(format, copyMatrices, copyMatrix, atoms) {
+    var processSymmetries = function(copyMatrices, copyMatrix, atoms) {
         var end = atoms.length;
         var offset = end;
         var t, l, n;
@@ -1052,51 +1052,15 @@ $3Dmol.Parsers = (function() {
                         }
                         xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
                         xyz.applyMatrix4(copyMatrices[t]);
-                        if (format == "pdb") {
-                            atoms.push({
-                                'resn' : atoms[n].resn,
-                                'x' : xyz.x,
-                                'y' : xyz.y,
-                                'z' : xyz.z,
-                                'elem' : atoms[n].elem,
-                                'hetflag' : atoms[n].hetflag,
-                                'chain' : atoms[n].chain,
-                                'resi' : atoms[n].resi,
-                                'icode' : atoms[n].icode,
-                                'rescode' : atoms[n].rescode,
-                                'serial' : atoms[n].serial,
-                                'atom' : atoms[n].atom,
-                                'bonds' : bondsArr,
-                                'ss' : atoms[n].ss,
-                                'bondOrder' : atoms[n].bondOrder,
-                                'properties' : atoms[n].properties,
-                                'b' : atoms[n].b,
-                                'pdbline' : atoms[n].pdbline,
-                            });
+                        var newAtom = {};
+                        for (var i in atoms[n]) {
+                            newAtom[i] = atoms[n][i];
                         }
-                        else if (format == "mcif") {
-                            atoms.push({
-                                'resn' : atoms[n].resn,
-                                'x' : xyz.x,
-                                'y' : xyz.y,
-                                'z' : xyz.z,
-                                'elem' : atoms[n].elem,
-                                'hetflag' : atoms[n].hetflag,
-                                'chain' : atoms[n].chain,
-                                'resi' : atoms[n].resi,
-                                'serial' : atoms[n].serial,
-                                'atom' : atoms[n].atom,
-                                'bonds' : bondsArr,
-                                'ss' : atoms[n].ss,
-                                'bondOrder' : atoms[n].bondOrder,
-                                'properties' : atoms[n].properties,
-                                'hbondDistanceSq' : atoms[n].hbondDistanceSq,
-                                'hbondOther' : atoms[n].hbondOther,
-                                'ssbegin' : atoms[n].ssbegin,
-                                'id' : atoms[n].id,
-                                'index' : atoms[n].index
-                            });
-                        }
+                        newAtom.x = xyz.x;
+                        newAtom.y = xyz.y;
+                        newAtom.z = xyz.z;
+                        newAtom.bonds = bondsArr;
+                        atoms.push(newAtom);
                     }
                     offset = atoms.length;
                 }
