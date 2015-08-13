@@ -38,6 +38,7 @@ $3Dmol.drawCartoon = (function() {
     var coilWidth = 0.5;
     var helixSheetWidth = 1.3;
     var nucleicAcidWidth = 0.8;
+    var arrowTipWidth = 0.1;
     var defaultThickness = 0.4; 
 
     // helper functions
@@ -724,8 +725,9 @@ $3Dmol.drawCartoon = (function() {
         var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
         var purResns = ["DA", "DG", "A", "G"];
         var pyrResns = ["DT", "DC", "U", "C"];
+        var naResns  =  purResns.concat(pyrResns);
 
-        var cartoon, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
+        var cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
         var traceGeo = null;
         var colors = [];
@@ -733,6 +735,33 @@ $3Dmol.drawCartoon = (function() {
         for (var i = 0; i < num; i++)
             points[i] = [];
 
+        // first determine where beta sheet arrows belong
+        var inSheet = false;
+        i = 0;
+        for (i in atomList)
+        {
+            next = atomList[i];
+            if (next.atom === 'CA')
+            {
+                if (curr && curr.chain === next.chain && curr.reschain === next.reschain &&
+                    (curr.resi === next.resi || curr.resi === next.resi-1) && next.ss === 's')
+                {
+                    inSheet = true;
+                }
+                else if (inSheet && curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows)
+                {
+                    console.log("arrow");
+                    curr.ss = "arrow end";
+                    prev.ss = "arrow start";
+                    inSheet = false; 
+                }
+                prev = curr;
+                curr = next;
+            }
+        }
+
+        // then accumulate points
+        curr = undefined;
         for (i in atomList)
         {
             next = atomList[i];
@@ -818,8 +847,11 @@ $3Dmol.drawCartoon = (function() {
 
             else // draw default-style cartoons based on secondary structure
             {
+                var inNA = ($.inArray(next.resn.trim(), naResns) != -1)
+
                 // draw backbone through these atoms
-                if (next.atom === "CA" || next.atom === "P" || next.atom === "O5'")
+                if (next.atom === "CA" ||
+                    inNA && (next.atom === "P" || next.atom === "O5'"))
                 {
                     // end of a chain of connected residues
                     if (curr && (curr.chain != next.chain || !(curr.resi === next.resi || curr.resi + 1 === next.resi)
@@ -893,13 +925,12 @@ $3Dmol.drawCartoon = (function() {
                     if (next.clickable === true &&
                         (next.intersectionShape === undefined || next.intersectionShape.triangle === undefined)) 
                         next.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
-
                 }
 
                 // atoms used to orient the backbone strand
                 else if (next.atom === "O"  && curr.atom === "CA"
-                      || next.atom === "OP2" && curr.atom === "P"
-                      || next.atom === "C5'" && curr.atom === "O5'")
+                      || inNA && next.atom === "OP2" && curr.atom === "P"
+                      || inNA && next.atom === "C5'" && curr.atom === "O5'")
                 {
                     orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.resi = next.resi;
@@ -908,7 +939,7 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // NA 3' terminus is an edge case, need a vector for most recent O3'
-                else if (next.atom === "O3'")
+                else if (inNA && next.atom === "O3'")
                 {
                     terminalPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
@@ -972,10 +1003,8 @@ $3Dmol.drawCartoon = (function() {
         var widthScalar, i, delta, v, addArrowPoints, testOpacity;
         
         // kind of hacky...
-        var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10, ILE:8, LEU: 8, LYS: 9, MET:8, PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
-        var nextBBAtom, nextnextBBAtom;
-        nextBBAtom = atomList[parseInt(atomi) + resSize[backboneAtom.resn]];
-        if (nextBBAtom) nextnextBBAtom = atomList[parseInt(atomi) + resSize[backboneAtom.resn] + resSize[nextBBAtom.resn]];
+        var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10, ILE:8, LEU: 8, LYS: 9, MET:8,
+            PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
 
         // the orientation vector is the normed difference from backbone atom to orientation atom
         orientPt.sub(backbonePt);
@@ -990,26 +1019,21 @@ $3Dmol.drawCartoon = (function() {
                     widthScalar = nucleicAcidWidth;
                 else
                     widthScalar = coilWidth;
-            } else if (backboneAtom.ss === "arrowtip")
-                widthScalar = 0.3;
+            } else if (backboneAtom.ss === "arrow start")
+            {
+                widthScalar = helixSheetWidth;
+                addArrowPoints = true;
+                backboneAtom.ss = "s";
+
+            } else if (backboneAtom.ss === "arrow end")
+            {
+                widthScalar = coilWidth;
+                backboneAtom.ss = "s";
+            }
             else
                 widthScalar = helixSheetWidth;
         }
-        else widthScalar = backboneAtom.style.cartoon.width;
-
-        // if 2 residues up is no longer a beta-sheet, this is where the arrowhead goes
-        if (backboneAtom.ss === "s" && backboneAtom.style.cartoon.arrows && nextnextBBAtom && nextnextBBAtom.ss != "s")
-        {
-            addArrowPoints = true;
-
-            for (i = atomi; i < atomList.length; i++)
-            {
-                if (atomList[i].resi === nextBBAtom.resi && atomList[i].atom === "CA")
-                {
-                    atomList[i].ss = "arrowtip"
-                }
-            }
-        }     
+        else widthScalar = backboneAtom.style.cartoon.width;  
 
         // if the angle between the previous orientation vector and current is greater than 90 degrees,
         if (prevOrientPt != null && orientPt.dot(prevOrientPt) < 0)
@@ -1018,7 +1042,7 @@ $3Dmol.drawCartoon = (function() {
         }
         // this ensures that the strand never twists more than 90 degrees between consecutive backbone atoms
 
-        orientPt.multiplyScalar(widthScalar);        
+        orientPt.multiplyScalar(widthScalar);
         for (i = 0; i < num; i++)
         {
             // produces NUM incremental points from backbone atom minus orientation vector
@@ -1034,18 +1058,16 @@ $3Dmol.drawCartoon = (function() {
                                // along the backbone offset by some constant pertaining to its cell in the outer array
         }
 
-        if (addArrowPoints)
+        orientPt.multiplyScalar(2);
+        for (i = 0; i < num && addArrowPoints; i++)
         {
-            orientPt.multiplyScalar(2);
-            for (i = 0; addArrowPoints && i < num; i++)
-            {
-                delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
-                v = new $3Dmol.Vector3(backbonePt.x + delta * orientPt.x,
-                                       backbonePt.y + delta * orientPt.y,
-                                       backbonePt.z + delta * orientPt.z);
-                v.atom = backboneAtom;
-                points[i].push(v);
-            }
+            delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
+            v = new $3Dmol.Vector3(backbonePt.x + delta * orientPt.x,
+                                   backbonePt.y + delta * orientPt.y,
+                                   backbonePt.z + delta * orientPt.z);
+            v.atom = backboneAtom;
+            v.smoothen = false;
+            points[i].push(v);
         }
 
         // make sure chain is all the same opacity
@@ -1060,13 +1082,12 @@ $3Dmol.drawCartoon = (function() {
 
         } else points.opacity = testOpacity;
 
-        if (backboneAtom.ss === "arrowtip") backboneAtom.ss = "s";
         return addArrowPoints;
     }
 
     // actual function call
     var drawCartoon = function(group, atomlist, laddergeo, gradientscheme) {
-                                                       //fill  doNotSmoothen
+                                                             //fill  doNotSmoothen
         drawStrand(group, atomlist, laddergeo, gradientscheme, true, false);        
 
     };

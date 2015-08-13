@@ -74,14 +74,15 @@ $3Dmol.viewers = {};
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
  * 
  * @function $3Dmol.download
- * @param {string} query String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
  * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @param {Object} options - Specify additional options such as file format to download, if multiple are available
  * @example
  * var myviewer = $3Dmol.createViewer(gldiv);
  * 
  * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
  * // Note that m will not contain the atomic data until after the network request is completed
- * var m = $3Dmol.download('pdb: 2POR', myviewer);
+ * var m = $3Dmol.download('pdb: 2POR', myviewer, {format:'cif'});
  * 
  * @return {$3Dmol.GLModel} GLModel
  */ 
@@ -90,12 +91,16 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var type = "";
     var m = viewer.addModel();
     if (query.substr(0, 4) === 'pdb:') {
-        type = "pdb";
+        type = options && options.format ? options.format : "pdb";
         query = query.substr(4).toUpperCase();
         if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
            alert("Wrong PDB ID"); return;
         }
-        uri = "http://www.rcsb.org/pdb/files/" + query + ".pdb";
+        if (options && options.format)
+            uri = "http://www.rcsb.org/pdb/files/" + query + "." + options.format;
+        else
+            uri = "http://www.rcsb.org/pdb/files/" + query + ".pdb"; 
+
     } else if (query.substr(0, 4) == 'cid:') {
         type = "sdf";
         query = query.substr(4);
