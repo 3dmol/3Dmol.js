@@ -725,6 +725,7 @@ $3Dmol.drawCartoon = (function() {
         var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
         var purResns = ["DA", "DG", "A", "G"];
         var pyrResns = ["DT", "DC", "U", "C"];
+        var naResns  =  purResns.concat(pyrResns);
 
         var cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
@@ -846,8 +847,11 @@ $3Dmol.drawCartoon = (function() {
 
             else // draw default-style cartoons based on secondary structure
             {
+                var inNA = ($.inArray(next.resn.trim(), naResns) != -1)
+
                 // draw backbone through these atoms
-                if (next.atom === "CA" || next.atom === "P" || next.atom === "O5'")
+                if (next.atom === "CA" ||
+                    inNA && (next.atom === "P" || next.atom === "O5'"))
                 {
                     // end of a chain of connected residues
                     if (curr && (curr.chain != next.chain || !(curr.resi === next.resi || curr.resi + 1 === next.resi)
@@ -921,13 +925,12 @@ $3Dmol.drawCartoon = (function() {
                     if (next.clickable === true &&
                         (next.intersectionShape === undefined || next.intersectionShape.triangle === undefined)) 
                         next.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
-
                 }
 
                 // atoms used to orient the backbone strand
                 else if (next.atom === "O"  && curr.atom === "CA"
-                      || next.atom === "OP2" && curr.atom === "P"
-                      || next.atom === "C5'" && curr.atom === "O5'")
+                      || inNA && next.atom === "OP2" && curr.atom === "P"
+                      || inNA && next.atom === "C5'" && curr.atom === "O5'")
                 {
                     orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.resi = next.resi;
@@ -936,7 +939,7 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // NA 3' terminus is an edge case, need a vector for most recent O3'
-                else if (next.atom === "O3'")
+                else if (inNA && next.atom === "O3'")
                 {
                     terminalPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
