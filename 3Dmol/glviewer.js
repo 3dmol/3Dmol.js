@@ -1409,14 +1409,15 @@ $3Dmol.GLViewer = (function() {
         /**
          * Export one or all of the loaded models into ChemDoodle compatible JSON.
          * @function $3Dmol.GLViewer#exportJSON
+         * @param {boolean} includeStyles - Whether or not to include style information.
          * @param {number} modelID - Optional parameter for which model to export. If left out, export all of them.
          * @return {string}
          */
-        this.exportJSON = function(modelID) {
+        this.exportJSON = function(includeStyles, modelID) {
             var object = {};
             if (modelID === undefined) {
                 object.m = models.map(function(model) {
-                    return model.toCDObject();
+                    return model.toCDObject(includeStyles);
                 });
             } else {
                 object.m = [ model[modelID].toCDObject() ];

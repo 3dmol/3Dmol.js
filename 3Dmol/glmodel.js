@@ -1564,10 +1564,14 @@ $3Dmol.GLModel = (function() {
         /** Convert the model into an object in the format of a ChemDoodle JSON model.
          *
          * @function $3Dmol.GLModel#toCDObject
+         * @param {boolean} whether or not to include style information. Defaults to false.
          * @return {Object}
          */
-        this.toCDObject = function() {
+        this.toCDObject = function(includeStyles) {
             var out = { a:[], b:[] };
+            if (includeStyles) {
+                out.s = [];
+            }
             for (var i = 0; i < atoms.length; i++) {
                 var atomJSON = {};
                 var atom = atoms[i];
@@ -1577,6 +1581,20 @@ $3Dmol.GLModel = (function() {
                 if (atom.elem != "C") {
                     atomJSON.l = atom.elem;
                 }
+                if (includeStyles) {
+                    var s = 0;
+                    while (s < out.s.length &&
+                          (JSON.stringify(atom.style) !== JSON.stringify(out.s[s]))) {
+                        s++;
+                    }
+                    if (s === out.s.length) {
+                        out.s.push(atom.style);
+                    }
+                    if (s !== 0) {
+                        atomJSON.s = s;
+                    }
+                }
+                
                 out.a.push(atomJSON);
 
                 for (var b = 0; b < atom.bonds.length; b++) {

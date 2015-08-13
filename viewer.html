@@ -153,9 +153,8 @@
                                 data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
                                         + data + "/SDF?record_type=3d";
                             } else { //url
-                                //try to extract 3 character extension
-                                type = data.substr(data.lastIndexOf('.') + 1)
-                                        .substring(0, 3);
+                                //try to extract extension
+                                type = data.substr(data.lastIndexOf('.') + 1);
                             }
                             if (cmds[0] && cmds[0].indexOf('type=') == 0) {
                                 type = cmds[0].split('=')[1];

@@ -411,8 +411,6 @@ $3Dmol.Parsers = (function() {
     // for the json file extension, other chemical json file formats exist that
     // this can not parse. Check which one you have and do not assume that
     // .json can be parsed
-    parsers.cdj = parsers.jso = // Hack because the file format is truncated
-                                // at the moment
     parsers.cdjson = parsers.json = function(atoms, str, options, modelData) {
         if (typeof str === "string") { // Str is usually automatically parsed by JQuery
             str = JSON.parse(str);
@@ -421,6 +419,9 @@ $3Dmol.Parsers = (function() {
         var atomsInFile = molecules[0].a; // Assumes there is at least one
         var bondsInFile = molecules[0].b; // molecule and ignores any more
                                           // Ignores any shapes
+        var styles = molecules[0].s;
+        var parseStyle = options !== undefined && options.parseStyle !== undefined ? options.parseStyle : styles !== undefined;
+        
         var offset = atoms.length; // When adding atoms their index will be
                                    // Offset by the number of existing atoms
         
@@ -440,6 +441,9 @@ $3Dmol.Parsers = (function() {
             atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
 
             atom.serial = atoms.length;
+            if (parseStyle) {
+                atom.style = styles[currentAtom.s || 0];
+            }
             atoms.push(atom);
         }
         for (var i = 0; i < bondsInFile.length; i++) {
@@ -792,7 +796,7 @@ $3Dmol.Parsers = (function() {
                         matrix31, matrix32, matrix33, vector3);
                 modelData.symmetries.push(matrix);
             }
-            processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
+            processSymmetries(modelData.symmetries, copyMatrix, atoms);
         }
         function parseTerm(term){
             var negative = term.match('-');
@@ -853,7 +857,7 @@ $3Dmol.Parsers = (function() {
                 matrix = (new $3Dmol.Matrix4()).multiplyMatrices(conversionMatrix4, matrix);
                 modelData.symmetries.push(matrix);
             }
-            processSymmetries("mcif", modelData.symmetries, copyMatrix, atoms);
+            processSymmetries(modelData.symmetries, copyMatrix, atoms);
         }
     }
 
@@ -1033,7 +1037,7 @@ $3Dmol.Parsers = (function() {
     };
 
     //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
-    var processSymmetries = function(format, copyMatrices, copyMatrix, atoms) {
+    var processSymmetries = function(copyMatrices, copyMatrix, atoms) {
         var end = atoms.length;
         var offset = end;
         var t, l, n;
@@ -1048,51 +1052,15 @@ $3Dmol.Parsers = (function() {
                         }
                         xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
                         xyz.applyMatrix4(copyMatrices[t]);
-                        if (format == "pdb") {
-                            atoms.push({
-                                'resn' : atoms[n].resn,
-                                'x' : xyz.x,
-                                'y' : xyz.y,
-                                'z' : xyz.z,
-                                'elem' : atoms[n].elem,
-                                'hetflag' : atoms[n].hetflag,
-                                'chain' : atoms[n].chain,
-                                'resi' : atoms[n].resi,
-                                'icode' : atoms[n].icode,
-                                'rescode' : atoms[n].rescode,
-                                'serial' : atoms[n].serial,
-                                'atom' : atoms[n].atom,
-                                'bonds' : bondsArr,
-                                'ss' : atoms[n].ss,
-                                'bondOrder' : atoms[n].bondOrder,
-                                'properties' : atoms[n].properties,
-                                'b' : atoms[n].b,
-                                'pdbline' : atoms[n].pdbline,
-                            });
+                        var newAtom = {};
+                        for (var i in atoms[n]) {
+                            newAtom[i] = atoms[n][i];
                         }
-                        else if (format == "mcif") {
-                            atoms.push({
-                                'resn' : atoms[n].resn,
-                                'x' : xyz.x,
-                                'y' : xyz.y,
-                                'z' : xyz.z,
-                                'elem' : atoms[n].elem,
-                                'hetflag' : atoms[n].hetflag,
-                                'chain' : atoms[n].chain,
-                                'resi' : atoms[n].resi,
-                                'serial' : atoms[n].serial,
-                                'atom' : atoms[n].atom,
-                                'bonds' : bondsArr,
-                                'ss' : atoms[n].ss,
-                                'bondOrder' : atoms[n].bondOrder,
-                                'properties' : atoms[n].properties,
-                                'hbondDistanceSq' : atoms[n].hbondDistanceSq,
-                                'hbondOther' : atoms[n].hbondOther,
-                                'ssbegin' : atoms[n].ssbegin,
-                                'id' : atoms[n].id,
-                                'index' : atoms[n].index
-                            });
-                        }
+                        newAtom.x = xyz.x;
+                        newAtom.y = xyz.y;
+                        newAtom.z = xyz.z;
+                        newAtom.bonds = bondsArr;
+                        atoms.push(newAtom);
                     }
                     offset = atoms.length;
                 }
@@ -1310,7 +1278,7 @@ $3Dmol.Parsers = (function() {
         // starttime));
         
         if (!noAssembly) {
-            processSymmetries("pdb", modelData.symmetries, copyMatrix, atoms);
+            processSymmetries(modelData.symmetries, copyMatrix, atoms);
         }
 
         if (computeStruct || !hasStruct) {
