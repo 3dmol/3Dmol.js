@@ -70,6 +70,7 @@ $3Dmol.drawCartoon = (function() {
             p3 = points[(i === size - 3) ? size - 1 : i + 3];
             v0 = new $3Dmol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
             v1 = new $3Dmol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
+            if (p2.skip) continue;
 
             for ( var j = 0; j < DIV; j++) {
                 var t = 1.0 / DIV * j;
@@ -750,7 +751,6 @@ $3Dmol.drawCartoon = (function() {
                 }
                 else if (inSheet && curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows)
                 {
-                    console.log("arrow");
                     curr.ss = "arrow end";
                     prev.ss = "arrow start";
                     inSheet = false; 
@@ -1010,6 +1010,17 @@ $3Dmol.drawCartoon = (function() {
         orientPt.sub(backbonePt);
         orientPt.normalize();
 
+        // adjustment for proper beta arrow appearance
+        if (backboneAtom.ss === "arrow start")
+        {
+            var adjustPt = atomList[parseInt(atomi) + resSize[backboneAtom.resn]]; // CA in next residue, ideally
+            adjustPt = adjustPt ? new $3Dmol.Vector3(adjustPt.x, adjustPt.y, adjustPt.z) : new $3Dmol.Vector3(0, 0, 0);
+            adjustPt.sub(backbonePt);
+            adjustPt.multiplyScalar(0.3);
+            adjustPt.cross(orientPt); // adjust perpendicularly to strand face
+            backbonePt.add(adjustPt);
+        }
+
         // depending on secondary structure, multiply the orientation vector by some scalar
         if (!backboneAtom.style.cartoon.width)
         {
@@ -1023,12 +1034,10 @@ $3Dmol.drawCartoon = (function() {
             {
                 widthScalar = helixSheetWidth;
                 addArrowPoints = true;
-                backboneAtom.ss = "s";
 
             } else if (backboneAtom.ss === "arrow end")
             {
                 widthScalar = coilWidth;
-                backboneAtom.ss = "s";
             }
             else
                 widthScalar = helixSheetWidth;
@@ -1067,6 +1076,7 @@ $3Dmol.drawCartoon = (function() {
                                    backbonePt.z + delta * orientPt.z);
             v.atom = backboneAtom;
             v.smoothen = false;
+            v.skip = true;
             points[i].push(v);
         }
 
@@ -1081,6 +1091,9 @@ $3Dmol.drawCartoon = (function() {
             }
 
         } else points.opacity = testOpacity;
+
+        if (backboneAtom.ss === "arrow start" || backboneAtom.ss === "arrow end")
+            backboneAtom.ss = "s";
 
         return addArrowPoints;
     }
