@@ -667,7 +667,7 @@ $3Dmol.Parsers = (function() {
             atom.resi = mmCIF._atom_site_auth_seq_id ? parseInt(mmCIF._atom_site_auth_seq_id[i]) : undefined;
             atom.resn = mmCIF._atom_site_auth_comp_id ? mmCIF._atom_site_auth_comp_id[i].trim() : undefined;
             atom.atom = mmCIF._atom_site_auth_atom_id ? mmCIF._atom_site_auth_atom_id[i].replace(/"/gm,'')  : undefined; //"primed" names are in quotes
-            atom.hetflag = mmCIF._atom_site_group_pdb ? mmCIF._atom_site_group_pdb[i] === "HETA" : true;
+            atom.hetflag = !mmCIF._atom_site_group_pdb || mmCIF._atom_site_group_pdb[i] === "HETA" || mmCIF._atom_site_group_pdb[i] === "HETATM";
             var elem = mmCIF._atom_site_type_symbol[i];
             atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
             atom.bonds = [];
