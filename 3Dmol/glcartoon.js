@@ -171,7 +171,7 @@ $3Dmol.drawCartoon = (function() {
 
 
         var geo = new $3Dmol.Geometry(true);
-        var axis, cs_shape, cs_bottom, cs_top;
+        var axis, cs_shape, cs_bottom, cs_top, last_cs_bottom, last_cs_top;
 
         // cache the available cross-sectional shapes
         var cs_ellipse = [], cs_rectangle = [], cs_parabola = [];
@@ -213,6 +213,8 @@ $3Dmol.drawCartoon = (function() {
         
             color = $3Dmol.CC.color(colors[Math.round(colors.length*i/len)]);
             
+            last_cs_bottom = cs_bottom;
+            last_cs_top = cs_top;
             cs_bottom = [];
             cs_top = [];
             axis = [];
@@ -310,8 +312,32 @@ $3Dmol.drawCartoon = (function() {
                     faceArray[f_offset+5] = face[3];
                     
                     geoGroup.faceidx += 6;
+
+                    // TODO implement clickable the right way. midpoints of strand between consecutive atoms
+                }
                     
-                    // TODO implement clickable
+                if (currentAtom.clickable)
+                {
+                    var face1 = new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[0], cs_bottom[num-1]);
+                    var face2 = new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[num-1], last_cs_bottom[num-1]);
+
+                    var face3 = new $3Dmol.Triangle(last_cs_bottom[num-1], cs_bottom[num-1], cs_top[num-1]);
+                    var face4 = new $3Dmol.Triangle(last_cs_bottom[num-1], cs_top[num-1], last_cs_top[num-1]);
+
+                    var face5 = new $3Dmol.Triangle(last_cs_top[num-1], last_cs_top[0], cs_top[0]);
+                    var face6 = new $3Dmol.Triangle(last_cs_top[num-1], cs_top[0], cs_top[num-1]);
+
+                    var face7 = new $3Dmol.Triangle(last_cs_top[0], last_cs_bottom[0], cs_bottom[0]);
+                    var face8 = new $3Dmol.Triangle(last_cs_top[0], cs_bottom[0], cs_top[0]);
+
+                    currentAtom.intersectionShape.triangle.push(face1);
+                    currentAtom.intersectionShape.triangle.push(face2);
+                    currentAtom.intersectionShape.triangle.push(face3);
+                    currentAtom.intersectionShape.triangle.push(face4);
+                    currentAtom.intersectionShape.triangle.push(face5);
+                    currentAtom.intersectionShape.triangle.push(face6);
+                    currentAtom.intersectionShape.triangle.push(face7);
+                    currentAtom.intersectionShape.triangle.push(face8);
                 }
 
             }
