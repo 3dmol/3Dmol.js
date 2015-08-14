@@ -205,6 +205,7 @@ $3Dmol.drawCartoon = (function() {
 
                 
         var v_offset, va_offset, f_offset;
+        var currentAtom, lastAtom
         var color;
         var geoGroup = geo.updateGeoGroup(2*num*len); // ensure vertex capacity
         
@@ -218,6 +219,7 @@ $3Dmol.drawCartoon = (function() {
 
             if (points[0][i].atom !== undefined) // TODO better edge case handling
             {
+                currentAtom = points[0][i].atom;
                 if (shape === "oval")
                     cs_shape = cs_ellipse;
                 else if (shape === "rectangle")
@@ -315,6 +317,7 @@ $3Dmol.drawCartoon = (function() {
             }
             
             geoGroup.vertices += 2*num;
+            lastAtom = currentAtom;
         }
 
         // for terminal faces
@@ -323,7 +326,7 @@ $3Dmol.drawCartoon = (function() {
         var faceArray = geoGroup.faceArray;
         v_offset = geoGroup.vertices; va_offset = v_offset*3; f_offset = geoGroup.faceidx;
 
-        for (i = 0; i<num-1; i++) // "bottom" face
+        for (i = 0; i<num-1; i++) // "rear" face
         {
             var face = [i, i+1, 2*num-2-i, 2*num-1-i];
 
@@ -340,7 +343,7 @@ $3Dmol.drawCartoon = (function() {
             geoGroup.faceidx += 6;
         }
 
-        for (i = 0; i<num-1; i++) // "top" face
+        for (i = 0; i<num-1; i++) // "front" face
         {
             var face = [v_offset-1-i, v_offset-2-i, v_offset-2*num+i+1, v_offset-2*num+i];
 
@@ -742,7 +745,7 @@ $3Dmol.drawCartoon = (function() {
         for (i in atomList)
         {
             next = atomList[i];
-            if (next.atom === 'CA')
+            if (next.elem === 'C' && next.atom === 'CA')
             {
                 if (curr && curr.chain === next.chain && curr.reschain === next.reschain &&
                     (curr.resi === next.resi || curr.resi === next.resi-1) && next.ss === 's')
@@ -769,6 +772,8 @@ $3Dmol.drawCartoon = (function() {
             if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1 || next.hetflag)
                 continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
 
+            var inNA = ($.inArray(next.resn.trim(), naResns) != -1)
+
             // determine cartoon style
             cartoon = next.style.cartoon;
             if (cartoon.style === "trace") // draw cylinders connecting consecutive 'backbone' atoms
@@ -778,7 +783,7 @@ $3Dmol.drawCartoon = (function() {
 
                 if (!traceGeo) traceGeo = new $3Dmol.Geometry(true);
 
-                if (next.atom === "CA" || next.atom === "P")
+                if (next.elem === 'C' && next.atom === 'CA' || inNA && next.atom === "P")
                 {
                     // determine cylinder color
                     if (gradientScheme && cartoon.color === 'spectrum')
@@ -847,10 +852,8 @@ $3Dmol.drawCartoon = (function() {
 
             else // draw default-style cartoons based on secondary structure
             {
-                var inNA = ($.inArray(next.resn.trim(), naResns) != -1)
-
                 // draw backbone through these atoms
-                if (next.atom === "CA" ||
+                if (next.elem === "C" && next.atom === "CA" ||
                     inNA && (next.atom === "P" || next.atom === "O5'"))
                 {
                     // end of a chain of connected residues
@@ -928,7 +931,7 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // atoms used to orient the backbone strand
-                else if (next.atom === "O"  && curr.atom === "CA"
+                else if (next.atom === "O" && curr.elem === "C" && curr.atom === "CA"
                       || inNA && next.atom === "OP2" && curr.atom === "P"
                       || inNA && next.atom === "C5'" && curr.atom === "O5'")
                 {
