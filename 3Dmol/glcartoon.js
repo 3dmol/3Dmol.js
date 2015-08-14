@@ -70,6 +70,7 @@ $3Dmol.drawCartoon = (function() {
             p3 = points[(i === size - 3) ? size - 1 : i + 3];
             v0 = new $3Dmol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
             v1 = new $3Dmol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
+            if (p2.skip) continue;
 
             for ( var j = 0; j < DIV; j++) {
                 var t = 1.0 / DIV * j;
@@ -170,7 +171,7 @@ $3Dmol.drawCartoon = (function() {
 
 
         var geo = new $3Dmol.Geometry(true);
-        var axis, cs_shape, cs_bottom, cs_top;
+        var axis, cs_shape, cs_bottom, cs_top, last_cs_bottom, last_cs_top;
 
         // cache the available cross-sectional shapes
         var cs_ellipse = [], cs_rectangle = [], cs_parabola = [];
@@ -204,6 +205,7 @@ $3Dmol.drawCartoon = (function() {
 
                 
         var v_offset, va_offset, f_offset;
+        var currentAtom, lastAtom
         var color;
         var geoGroup = geo.updateGeoGroup(2*num*len); // ensure vertex capacity
         
@@ -211,12 +213,15 @@ $3Dmol.drawCartoon = (function() {
         
             color = $3Dmol.CC.color(colors[Math.round(colors.length*i/len)]);
             
+            last_cs_bottom = cs_bottom;
+            last_cs_top = cs_top;
             cs_bottom = [];
             cs_top = [];
             axis = [];
 
             if (points[0][i].atom !== undefined) // TODO better edge case handling
             {
+                currentAtom = points[0][i].atom;
                 if (shape === "oval")
                     cs_shape = cs_ellipse;
                 else if (shape === "rectangle")
@@ -307,13 +312,38 @@ $3Dmol.drawCartoon = (function() {
                     faceArray[f_offset+5] = face[3];
                     
                     geoGroup.faceidx += 6;
+
+                    // TODO implement clickable the right way. midpoints of strand between consecutive atoms
+                }
                     
-                    // TODO implement clickable
+                if (currentAtom.clickable)
+                {
+                    var face1 = new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[0], cs_bottom[num-1]);
+                    var face2 = new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[num-1], last_cs_bottom[num-1]);
+
+                    var face3 = new $3Dmol.Triangle(last_cs_bottom[num-1], cs_bottom[num-1], cs_top[num-1]);
+                    var face4 = new $3Dmol.Triangle(last_cs_bottom[num-1], cs_top[num-1], last_cs_top[num-1]);
+
+                    var face5 = new $3Dmol.Triangle(last_cs_top[num-1], last_cs_top[0], cs_top[0]);
+                    var face6 = new $3Dmol.Triangle(last_cs_top[num-1], cs_top[0], cs_top[num-1]);
+
+                    var face7 = new $3Dmol.Triangle(last_cs_top[0], last_cs_bottom[0], cs_bottom[0]);
+                    var face8 = new $3Dmol.Triangle(last_cs_top[0], cs_bottom[0], cs_top[0]);
+
+                    currentAtom.intersectionShape.triangle.push(face1);
+                    currentAtom.intersectionShape.triangle.push(face2);
+                    currentAtom.intersectionShape.triangle.push(face3);
+                    currentAtom.intersectionShape.triangle.push(face4);
+                    currentAtom.intersectionShape.triangle.push(face5);
+                    currentAtom.intersectionShape.triangle.push(face6);
+                    currentAtom.intersectionShape.triangle.push(face7);
+                    currentAtom.intersectionShape.triangle.push(face8);
                 }
 
             }
             
             geoGroup.vertices += 2*num;
+            lastAtom = currentAtom;
         }
 
         // for terminal faces
@@ -322,7 +352,7 @@ $3Dmol.drawCartoon = (function() {
         var faceArray = geoGroup.faceArray;
         v_offset = geoGroup.vertices; va_offset = v_offset*3; f_offset = geoGroup.faceidx;
 
-        for (i = 0; i<num-1; i++) // "bottom" face
+        for (i = 0; i<num-1; i++) // "rear" face
         {
             var face = [i, i+1, 2*num-2-i, 2*num-1-i];
 
@@ -339,7 +369,7 @@ $3Dmol.drawCartoon = (function() {
             geoGroup.faceidx += 6;
         }
 
-        for (i = 0; i<num-1; i++) // "top" face
+        for (i = 0; i<num-1; i++) // "front" face
         {
             var face = [v_offset-1-i, v_offset-2-i, v_offset-2*num+i+1, v_offset-2*num+i];
 
@@ -741,7 +771,7 @@ $3Dmol.drawCartoon = (function() {
         for (i in atomList)
         {
             next = atomList[i];
-            if (next.atom === 'CA')
+            if (next.elem === 'C' && next.atom === 'CA')
             {
                 if (curr && curr.chain === next.chain && curr.reschain === next.reschain &&
                     (curr.resi === next.resi || curr.resi === next.resi-1) && next.ss === 's')
@@ -750,7 +780,6 @@ $3Dmol.drawCartoon = (function() {
                 }
                 else if (inSheet && curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows)
                 {
-                    console.log("arrow");
                     curr.ss = "arrow end";
                     prev.ss = "arrow start";
                     inSheet = false; 
@@ -769,6 +798,8 @@ $3Dmol.drawCartoon = (function() {
             if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1 || next.hetflag)
                 continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
 
+            var inNA = ($.inArray(next.resn.trim(), naResns) != -1)
+
             // determine cartoon style
             cartoon = next.style.cartoon;
             if (cartoon.style === "trace") // draw cylinders connecting consecutive 'backbone' atoms
@@ -778,7 +809,7 @@ $3Dmol.drawCartoon = (function() {
 
                 if (!traceGeo) traceGeo = new $3Dmol.Geometry(true);
 
-                if (next.atom === "CA" || next.atom === "P")
+                if (next.elem === 'C' && next.atom === 'CA' || inNA && next.atom === "P")
                 {
                     // determine cylinder color
                     if (gradientScheme && cartoon.color === 'spectrum')
@@ -847,10 +878,8 @@ $3Dmol.drawCartoon = (function() {
 
             else // draw default-style cartoons based on secondary structure
             {
-                var inNA = ($.inArray(next.resn.trim(), naResns) != -1)
-
                 // draw backbone through these atoms
-                if (next.atom === "CA" ||
+                if (next.elem === "C" && next.atom === "CA" ||
                     inNA && (next.atom === "P" || next.atom === "O5'"))
                 {
                     // end of a chain of connected residues
@@ -928,7 +957,7 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // atoms used to orient the backbone strand
-                else if (next.atom === "O"  && curr.atom === "CA"
+                else if (next.atom === "O" && curr.elem === "C" && curr.atom === "CA"
                       || inNA && next.atom === "OP2" && curr.atom === "P"
                       || inNA && next.atom === "C5'" && curr.atom === "O5'")
                 {
@@ -1010,6 +1039,17 @@ $3Dmol.drawCartoon = (function() {
         orientPt.sub(backbonePt);
         orientPt.normalize();
 
+        // adjustment for proper beta arrow appearance
+        if (backboneAtom.ss === "arrow start")
+        {
+            var adjustPt = atomList[parseInt(atomi) + resSize[backboneAtom.resn]]; // CA in next residue, ideally
+            adjustPt = adjustPt ? new $3Dmol.Vector3(adjustPt.x, adjustPt.y, adjustPt.z) : new $3Dmol.Vector3(0, 0, 0);
+            adjustPt.sub(backbonePt);
+            adjustPt.multiplyScalar(0.3);
+            adjustPt.cross(orientPt); // adjust perpendicularly to strand face
+            backbonePt.add(adjustPt);
+        }
+
         // depending on secondary structure, multiply the orientation vector by some scalar
         if (!backboneAtom.style.cartoon.width)
         {
@@ -1023,12 +1063,10 @@ $3Dmol.drawCartoon = (function() {
             {
                 widthScalar = helixSheetWidth;
                 addArrowPoints = true;
-                backboneAtom.ss = "s";
 
             } else if (backboneAtom.ss === "arrow end")
             {
                 widthScalar = coilWidth;
-                backboneAtom.ss = "s";
             }
             else
                 widthScalar = helixSheetWidth;
@@ -1067,6 +1105,7 @@ $3Dmol.drawCartoon = (function() {
                                    backbonePt.z + delta * orientPt.z);
             v.atom = backboneAtom;
             v.smoothen = false;
+            v.skip = true;
             points[i].push(v);
         }
 
@@ -1081,6 +1120,9 @@ $3Dmol.drawCartoon = (function() {
             }
 
         } else points.opacity = testOpacity;
+
+        if (backboneAtom.ss === "arrow start" || backboneAtom.ss === "arrow end")
+            backboneAtom.ss = "s";
 
         return addArrowPoints;
     }

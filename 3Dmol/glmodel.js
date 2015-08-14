@@ -983,13 +983,12 @@ $3Dmol.GLModel = (function() {
             }
 
             // This is only for DNA ladder rendering right now
-            if (cartoonGeometry.vertices > 0 && false) { // TODO: move ladder drawing to glcartoon.js
+            if (cartoonGeometry.vertices > 0) { // TODO: move ladder drawing to glcartoon.js
                 var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
                     vertexColors : true,
                     ambient : 0x000000,
                     reflectivity : 0
                 });
-
                 cartoonGeometry.initTypedArrays();
 
                 if (cylinderMaterial.wireframe)
