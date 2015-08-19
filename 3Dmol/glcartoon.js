@@ -318,26 +318,25 @@ $3Dmol.drawCartoon = (function() {
                     
                 if (currentAtom.clickable)
                 {
-                    var face1 = new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[0], cs_bottom[num-1]);
-                    var face2 = new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[num-1], last_cs_bottom[num-1]);
+                    var faces = [];
 
-                    var face3 = new $3Dmol.Triangle(last_cs_bottom[num-1], cs_bottom[num-1], cs_top[num-1]);
-                    var face4 = new $3Dmol.Triangle(last_cs_bottom[num-1], cs_top[num-1], last_cs_top[num-1]);
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[0], cs_bottom[num-1]));
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[num-1], last_cs_bottom[num-1]));
 
-                    var face5 = new $3Dmol.Triangle(last_cs_top[num-1], last_cs_top[0], cs_top[0]);
-                    var face6 = new $3Dmol.Triangle(last_cs_top[num-1], cs_top[0], cs_top[num-1]);
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[num-1], cs_bottom[num-1], cs_top[num-1]));
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[num-1], cs_top[num-1], last_cs_top[num-1]));
 
-                    var face7 = new $3Dmol.Triangle(last_cs_top[0], last_cs_bottom[0], cs_bottom[0]);
-                    var face8 = new $3Dmol.Triangle(last_cs_top[0], cs_bottom[0], cs_top[0]);
+                    faces.push(new $3Dmol.Triangle(cs_top[0], last_cs_top[0], last_cs_top[num-1]));
+                    faces.push(new $3Dmol.Triangle(cs_top[num-1], cs_top[0], last_cs_top[num-1]));
 
-                    currentAtom.intersectionShape.triangle.push(face1);
-                    currentAtom.intersectionShape.triangle.push(face2);
-                    currentAtom.intersectionShape.triangle.push(face3);
-                    currentAtom.intersectionShape.triangle.push(face4);
-                    currentAtom.intersectionShape.triangle.push(face5);
-                    currentAtom.intersectionShape.triangle.push(face6);
-                    currentAtom.intersectionShape.triangle.push(face7);
-                    currentAtom.intersectionShape.triangle.push(face8);
+                    faces.push(new $3Dmol.Triangle(cs_bottom[0], last_cs_bottom[0], last_cs_top[0]));
+                    faces.push(new $3Dmol.Triangle(cs_top[0], cs_bottom[0], last_cs_top[0]));
+
+                    for (j in faces)
+                    {
+                        currentAtom.intersectionShape.triangle.push(faces[j]);
+                        
+                    }
                 }
 
             }
