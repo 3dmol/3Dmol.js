@@ -10,6 +10,7 @@ var $3Dmol = $3Dmol || {};
 /**@typedef CartoonStyleSpec
  * @prop {ColorSpec} color - solid color, may specify as 'spectrum'
  * @prop {string} style - style of cartoon rendering (default, trace, oval, rectangle, parabola)
+ * @prop {boolean} arrows - whether to add arrows showing beta-sheet directionality
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
  * @prop {number} width - cartoon strand width, default is secondary structure-dependent
  * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain with a warning outputted in the event of ambiguity
@@ -98,7 +99,7 @@ $3Dmol.drawCartoon = (function() {
         return ret;
     };
 
-    var drawThinStrip = function(group, p1, p2, colors, div) {
+    var drawThinStrip = function(group, p1, p2, colors, div, opacity) {
     
         var geo = new $3Dmol.Geometry(true);       
         var offset, vertoffset;
@@ -171,7 +172,7 @@ $3Dmol.drawCartoon = (function() {
         len = points[0].length;
 
         if (!thickness) // if thickness is 0, we can use a smaller geometry than this function generates
-            return drawThinStrip(group, points[0], points[num-1], colors, div);
+            return drawThinStrip(group, points[0], points[num-1], colors, div, opacity);
 
 
         var geo = new $3Dmol.Geometry(true);
@@ -414,7 +415,7 @@ $3Dmol.drawCartoon = (function() {
         p1 = subdivide(p1, div);
         p2 = subdivide(p2, div);
         if (!thickness)
-            return drawThinStrip(group, p1, p2, colors, div);
+            return drawThinStrip(group, p1, p2, colors, div, opacity);
 
         var geo = new $3Dmol.Geometry(true);
         
