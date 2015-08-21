@@ -1505,6 +1505,46 @@ $3Dmol.GLModel = (function() {
                 molObj = null; //force rebuild
             
         };
+
+        /** Set clickable and callback of selected atoms
+         * 
+         * @function $3Dmol.GLModel#setClickable
+         * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
+         * @param {boolean} clickable - whether click-handling is enabled for the selection
+         * @param {function} callback - function called when an atom in the selection is clicked
+         */
+        this.setClickable = function(sel, clickable, callback) {           
+
+            // report to console if this is not a valid selector
+            var s;
+            for (s in sel) {
+                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure clickable is a boolean
+            clickable = !!clickable;
+
+            // report to console if callback is not a valid function
+            if (callback && typeof callback != "function") {
+                console.log("Callback is not a function");
+                return;
+            }
+
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].clickable = clickable;
+                if (callback) selected[i].callback = callback;
+
+            }
+
+            molObj = null; // force rebuild to get correct intersection shapes         
+        };
         
         /** given a mapping from element to color, set atom colors
          * 

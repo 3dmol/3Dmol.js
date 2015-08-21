@@ -1480,7 +1480,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example
          * viewer.setStyle({}, {stick:{}}); //set all atoms to stick
-         * viewer.setStyle({chain: 'B'}, {carton: {color: spectrum}}); //set chain B to rainbow cartoon
+         * viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'}}); //set chain B to rainbow cartoon
          */
         this.setStyle = function(sel, style) {
             applyToModels("setStyle", sel, style, false);
@@ -1495,6 +1495,22 @@ $3Dmol.GLViewer = (function() {
          */
         this.addStyle = function(sel, style) {
             applyToModels("setStyle", sel, style, true);
+        };
+
+        /**
+         * Set click-handling properties to all selected atoms
+         * 
+         * @function $3Dmol.GLViewer#setClickable
+         * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
+         * @param {boolean} clickable - whether click-handling is enabled for the selection
+         * @param {function} callback - function called when an atom in the selection is clicked
+         * 
+         * @example
+         * viewer.setClickable({}, false); // disable click-handling for entire viewer
+         * viewer.setClickable({chain: 'B'}, true, function(){ console.log(this.elem); }); // chain B prints the clicked element to console
+         */
+        this.setClickable = function(sel, clickable, callback) {
+            applyToModels("setClickable", sel, clickable, callback);
         };
 
         /**
