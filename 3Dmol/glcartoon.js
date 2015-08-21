@@ -107,7 +107,7 @@ $3Dmol.drawCartoon = (function() {
         
         for ( var i = 0, lim = p1.length; i < lim; i++) {
             
-            color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]);
+            color = $3Dmol.CC.color(colors[Math.round(colors.length*i/lim)]);
            
             geoGroup = geo.updateGeoGroup(2);
             var vertexArray = geoGroup.vertexArray;
@@ -124,7 +124,11 @@ $3Dmol.drawCartoon = (function() {
             vertexArray[vertoffset+5] = p2[i].z;
             
             for (var j = 0; j < 6; ++j)
-                colorArray[vertoffset+3*j] = color.r; colorArray[vertoffset+1+3*j] = color.g; colorArray[vertoffset+2+3*j] = color.b;
+            {
+                colorArray[vertoffset+3*j] = color.r;
+                colorArray[vertoffset+1+3*j] = color.g;
+                colorArray[vertoffset+2+3*j] = color.b;
+            }
            
             if (i > 0) {
                 var faces = [offset, offset + 1, offset - 1, offset - 2];
