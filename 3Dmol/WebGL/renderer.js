@@ -225,10 +225,11 @@ $3Dmol.Renderer = function(parameters) {
 
     };
 
-    this.setMaterialFaces = function(material) {
+    this.setMaterialFaces = function(material, reflected) {
 
         var doubleSided = material.side === $3Dmol.DoubleSide;
         var flipSided = material.side === $3Dmol.BackSide;
+        flipSided = reflected ? !flipSided : flipSided;
 
         if (_oldDoubleSided !== doubleSided) {
 
@@ -958,7 +959,9 @@ $3Dmol.Renderer = function(parameters) {
                         material.polygonOffsetFactor,
                         material.polygonOffsetUnits);
 
-                _this.setMaterialFaces(material);
+                var reflected = object._modelViewMatrix.isReflected();
+
+                _this.setMaterialFaces(material, reflected);
 
                 _this.renderBuffer(camera, lights, fog, material, buffer,
                         object);
