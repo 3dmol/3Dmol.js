@@ -749,12 +749,14 @@ $3Dmol.drawCartoon = (function() {
             drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
     }
 
+    // check if given atom is an alpha carbon
     var isAlphaCarbon = function(atom)
     {
-        return atom && atom.elem === "C" && atom.atom === "CA";
+        return atom && atom.elem === "C" && atom.atom === "CA"; // note that calcium is also CA
     }
 
-    var inConnectedSequence = function(a, b)
+    // check whether two atoms are members of the same residue or subsequent, connected residues (a before b)
+    var inConnectedResidues = function(a, b)
     {
         return a && b && a.chain === b.chain && a.reschain === b.reschain &&
                 (a.resi === b.resi || a.resi === b.resi-1)
@@ -790,7 +792,10 @@ $3Dmol.drawCartoon = (function() {
             next = atomList[i];
             if (next.elem === 'C' && next.atom === 'CA')
             {
-                if (inConnectedSequence(curr, next) && next.ss === "s")
+                var connected = inConnectedResidues(curr, next);
+
+                // last two residues in a beta sheet become arrowhead
+                if (connected && next.ss === "s")
                 {
                     inSheet = true;
                 }
@@ -804,7 +809,8 @@ $3Dmol.drawCartoon = (function() {
                     inSheet = false; 
                 }
 
-                if (inConnectedSequence(curr, next) && next.ss === "h")
+                // first and last residues in a helix are used to draw tube
+                if (connected && next.ss === "h")
                 {
                     if (!inHelix && next.style.cartoon.tubes) next.ss = "tube start";
                     inHelix = true;
@@ -922,11 +928,11 @@ $3Dmol.drawCartoon = (function() {
                             $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(curr.color), false, false);
 
                         }
-                        else continue;
+                        else continue; // don't accumulate strand points while in the middle of drawing a tube
                     }
 
                     // end of a chain of connected residues (of same style)
-                    if (curr && (!inConnectedSequence(curr, next) || curr.style.cartoon.style !== next.style.cartoon.style ||
+                    if (curr && (!inConnectedResidues(curr, next) || curr.style.cartoon.style !== next.style.cartoon.style ||
                         curr.ss === "tube start"))
                     { 
                         if (curr.ss === "tube start")
