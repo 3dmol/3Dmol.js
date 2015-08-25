@@ -749,6 +749,17 @@ $3Dmol.drawCartoon = (function() {
             drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
     }
 
+    var isAlphaCarbon = function(atom)
+    {
+        return atom && atom.elem === "C" && atom.atom === "CA";
+    }
+
+    var inConnectedSequence = function(a, b)
+    {
+        return a && b && a.chain === b.chain && a.reschain === b.reschain &&
+                (a.resi === b.resi || a.resi === b.resi-1)
+    }
+
     var drawStrand = function(group, atomList, geo, gradientScheme, fill, doNotSmoothen, num, div)
     {
         var num = num || defaultNum;
@@ -763,30 +774,45 @@ $3Dmol.drawCartoon = (function() {
 
         var cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
+        var tubeStart, tubeEnd, drawingTube;
         var traceGeo = null;
         var colors = [];
         var points = [];
         for (var i = 0; i < num; i++)
             points[i] = [];
 
-        // first determine where beta sheet arrows belong
+        // first determine where beta sheet arrows and alpha helix tubes belong
         var inSheet = false;
+        var inHelix = false;
         i = 0;
         for (i in atomList)
         {
             next = atomList[i];
             if (next.elem === 'C' && next.atom === 'CA')
             {
-                if (curr && curr.chain === next.chain && curr.reschain === next.reschain &&
-                    (curr.resi === next.resi || curr.resi === next.resi-1) && next.ss === 's')
+                if (inConnectedSequence(curr, next) && next.ss === "s")
                 {
                     inSheet = true;
                 }
-                else if (inSheet && curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows)
-                {
-                    curr.ss = "arrow end";
-                    prev.ss = "arrow start";
+                else if (inSheet)
+                {   
+                    if (curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows)
+                    {
+                        curr.ss = "arrow end";
+                        prev.ss = "arrow start";
+                    }
                     inSheet = false; 
+                }
+
+                if (inConnectedSequence(curr, next) && next.ss === "h")
+                {
+                    if (!inHelix && next.style.cartoon.tubes) next.ss = "tube start";
+                    inHelix = true;
+                }
+                else if (inHelix)
+                {
+                    if (curr && curr.style.cartoon.tubes) curr.ss = "tube end";
+                    inHelix = false;
                 }
                 prev = curr;
                 curr = next;
@@ -802,7 +828,7 @@ $3Dmol.drawCartoon = (function() {
             if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1 || next.hetflag)
                 continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
 
-            var inNA = ($.inArray(next.resn.trim(), naResns) != -1)
+            var inNucleicAcid = ($.inArray(next.resn.trim(), naResns) != -1)
 
             // determine cartoon style
             cartoon = next.style.cartoon;
@@ -883,13 +909,32 @@ $3Dmol.drawCartoon = (function() {
             else // draw default-style cartoons based on secondary structure
             {
                 // draw backbone through these atoms
-                if (next.elem === "C" && next.atom === "CA" ||
-                    inNA && (next.atom === "P" || next.atom === "O5'"))
+                if (isAlphaCarbon(next) ||
+                    inNucleicAcid && (next.atom === "P" || next.atom === "O5'"))
                 {
-                    // end of a chain of connected residues
-                    if (curr && (curr.chain != next.chain || !(curr.resi === next.resi || curr.resi + 1 === next.resi)
-                        || curr.reschain != next.reschain || curr.style.cartoon.style !== next.style.cartoon.style))
+                    if (drawingTube)
+                    {
+                        if (next.ss === "tube end")
+                        {
+                            drawingTube = false;
+                            next.ss = "h";
+                            tubeEnd = new $3Dmol.Vector3(next.x, next.y, next.z);
+                            $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(curr.color), false, false);
+
+                        }
+                        else continue;
+                    }
+
+                    // end of a chain of connected residues (of same style)
+                    if (curr && (!inConnectedSequence(curr, next) || curr.style.cartoon.style !== next.style.cartoon.style ||
+                        curr.ss === "tube start"))
                     { 
+                        if (curr.ss === "tube start")
+                        {
+                            drawingTube = true;
+                            curr.ss = "h";
+                            tubeStart = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+                        }
 
                         if (baseEndPt) // draw the last base if it's a NA chain
                         {
@@ -920,7 +965,7 @@ $3Dmol.drawCartoon = (function() {
                         colors = [];
                     }
 
-                    // reached next residue
+                    // reached next residue (potentially the first residue)
                     if (curr === undefined || curr.resi != next.resi)
                     {
                         if (baseEndPt) // draw last NA residue's base
@@ -961,9 +1006,9 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // atoms used to orient the backbone strand
-                else if (next.atom === "O" && curr.elem === "C" && curr.atom === "CA"
-                      || inNA && next.atom === "OP2" && curr.atom === "P"
-                      || inNA && next.atom === "C5'" && curr.atom === "O5'")
+                else if (isAlphaCarbon(curr) && next.atom === "O"
+                      || inNucleicAcid && curr.atom === "P" && next.atom === "OP2"
+                      || inNucleicAcid && curr.atom === "O5'" && next.atom === "C5'")
                 {
                     orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.resi = next.resi;
@@ -972,7 +1017,7 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // NA 3' terminus is an edge case, need a vector for most recent O3'
-                else if (inNA && next.atom === "O3'")
+                else if (inNucleicAcid && next.atom === "O3'")
                 {
                     terminalPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
