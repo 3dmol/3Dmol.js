@@ -1543,7 +1543,7 @@ $3Dmol.GLModel = (function() {
 
             }
 
-            molObj = null; // force rebuild to get correct intersection shapes         
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
         
         /** given a mapping from element to color, set atom colors
