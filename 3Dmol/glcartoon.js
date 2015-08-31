@@ -745,7 +745,11 @@ $3Dmol.drawCartoon = (function() {
     {
         if (!shape || shape === "default")
             drawPlainStrip(group, points, colors, div, thickness, opacity);
-        else
+        else if (shape === "flat")
+            drawPlainStrip(group, points, colors, div, 0, opacity);
+        else if (shape === "ribbon")
+            drawShapeStrip(group, points, colors, div, thickness, opacity, "oval");
+        else if (shape === "rectangle" || shape === "oval" || shape === "parabola")
             drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
     }
 
@@ -845,7 +849,7 @@ $3Dmol.drawCartoon = (function() {
 
                 if (!traceGeo) traceGeo = new $3Dmol.Geometry(true);
 
-                if (next.elem === 'C' && next.atom === 'CA' || inNA && next.atom === "P")
+                if (next.elem === 'C' && next.atom === 'CA' || inNucleicAcid && next.atom === "P")
                 {
                     // determine cylinder color
                     if (gradientScheme && cartoon.color === 'spectrum')
@@ -925,7 +929,7 @@ $3Dmol.drawCartoon = (function() {
                             drawingTube = false;
                             next.ss = "h";
                             tubeEnd = new $3Dmol.Vector3(next.x, next.y, next.z);
-                            $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(curr.color), false, false);
+                            $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(currColor), true, true);
 
                         }
                         else continue; // don't accumulate strand points while in the middle of drawing a tube
@@ -1105,28 +1109,35 @@ $3Dmol.drawCartoon = (function() {
             backbonePt.add(adjustPt);
         }
 
-        // depending on secondary structure, multiply the orientation vector by some scalar
-        if (!backboneAtom.style.cartoon.width)
+        // ribbon shape should have same width as thickness
+        if (backboneAtom.style.cartoon.style === "ribbon")
         {
-            if (backboneAtom.ss === "c")
-            {
-                if (backboneAtom.atom === "P")
-                    widthScalar = nucleicAcidWidth;
-                else
-                    widthScalar = coilWidth;
-            } else if (backboneAtom.ss === "arrow start")
-            {
-                widthScalar = helixSheetWidth;
-                addArrowPoints = true;
+            widthScalar = backboneAtom.style.cartoon.thickness || defaultThickness;
 
-            } else if (backboneAtom.ss === "arrow end")
+        } else // depending on secondary structure, multiply the orientation vector by some scalar
+        {
+            if (!backboneAtom.style.cartoon.width)
             {
-                widthScalar = coilWidth;
+                if (backboneAtom.ss === "c")
+                {
+                    if (backboneAtom.atom === "P")
+                        widthScalar = nucleicAcidWidth;
+                    else
+                        widthScalar = coilWidth;
+                } else if (backboneAtom.ss === "arrow start")
+                {
+                    widthScalar = helixSheetWidth;
+                    addArrowPoints = true;
+
+                } else if (backboneAtom.ss === "arrow end")
+                {
+                    widthScalar = coilWidth;
+                }
+                else
+                    widthScalar = helixSheetWidth;
             }
-            else
-                widthScalar = helixSheetWidth;
+            else widthScalar = backboneAtom.style.cartoon.width;  
         }
-        else widthScalar = backboneAtom.style.cartoon.width;  
 
         // if the angle between the previous orientation vector and current is greater than 90 degrees,
         if (prevOrientPt != null && orientPt.dot(prevOrientPt) < 0)
