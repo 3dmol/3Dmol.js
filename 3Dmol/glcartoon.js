@@ -8,11 +8,12 @@ var $3Dmol = $3Dmol || {};
 
 
 /**@typedef CartoonStyleSpec
- * @prop {ColorSpec} color - solid color, may specify as 'spectrum'
- * @prop {string} style - style of cartoon rendering (default, trace, oval, rectangle, parabola)
- * @prop {boolean} arrows - whether to add arrows showing beta-sheet directionality
+ * @prop {ColorSpec} color - strand color, may specify as 'spectrum'
+ * @prop {string} style - style of cartoon rendering (default, trace, oval, rectangle, parabola, flat, ribbon)
+ * @prop {boolean} arrows - whether to add arrows showing beta-sheet directionality; does not apply to ribbon and trace
+ * @prop {boolean} tubes - whether to display alpha helices as simple cylinders; does not apply to trace
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
- * @prop {number} width - cartoon strand width, default is secondary structure-dependent
+ * @prop {number} width - cartoon strand width, default is secondary structure-dependent; does not apply to ribbon and trace
  * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain with a warning outputted in the event of ambiguity
  * @prop {}
  * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
