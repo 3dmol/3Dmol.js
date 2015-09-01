@@ -9,11 +9,12 @@ var $3Dmol = $3Dmol || {};
 
 /**@typedef CartoonStyleSpec
  * @prop {ColorSpec} color - strand color, may specify as 'spectrum'
- * @prop {string} style - style of cartoon rendering (default, trace, oval, rectangle, parabola, flat, ribbon)
- * @prop {boolean} arrows - whether to add arrows showing beta-sheet directionality; does not apply to ribbon and trace
+ * @prop {string} style - style of cartoon rendering (default, trace, oval, rectangle, parabola)
+ * @prop {boolean} ribbon - whether to use constant strand width, disregarding secondary structure; use thickness to adjust radius
+ * @prop {boolean} arrows - whether to add arrows showing beta-sheet directionality; does not apply to trace or ribbon
  * @prop {boolean} tubes - whether to display alpha helices as simple cylinders; does not apply to trace
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
- * @prop {number} width - cartoon strand width, default is secondary structure-dependent; does not apply to ribbon and trace
+ * @prop {number} width - cartoon strand width, default is secondary structure-dependent; does not apply to trace or ribbon
  * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain with a warning outputted in the event of ambiguity
  * @prop {}
  * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
@@ -743,13 +744,9 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var drawStrip = function(group, points, colors, div, thickness, opacity, shape)
-    {
+    {    
         if (!shape || shape === "default")
             drawPlainStrip(group, points, colors, div, thickness, opacity);
-        else if (shape === "flat")
-            drawPlainStrip(group, points, colors, div, 0, opacity);
-        else if (shape === "ribbon")
-            drawShapeStrip(group, points, colors, div, thickness, opacity, "oval");
         else if (shape === "rectangle" || shape === "oval" || shape === "parabola")
             drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
     }
@@ -901,11 +898,11 @@ $3Dmol.drawCartoon = (function() {
                         traceGeo = null;
                     } else if (curr) // make sure whole chain is same opacity
                     {
-                        if (traceGeo.opacity)
+                        if (traceGeo.opacity && curr.style.cartoon.opacity)
                         {
                             if (traceGeo.opacity != curr.style.cartoon.opacity)
                             {
-                                console.log("Warning: a cartoon-style chain's opacity is ambiguous");
+                                console.log("Warning: a trace-style chain's opacity is ambiguous");
                                 traceGeo.opacity = 1;
                             }
                         }
@@ -1111,7 +1108,7 @@ $3Dmol.drawCartoon = (function() {
         }
 
         // ribbon shape should have same width as thickness
-        if (backboneAtom.style.cartoon.style === "ribbon")
+        if (backboneAtom.style.cartoon.ribbon)
         {
             widthScalar = backboneAtom.style.cartoon.thickness || defaultThickness;
 
