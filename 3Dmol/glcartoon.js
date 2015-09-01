@@ -768,10 +768,6 @@ $3Dmol.drawCartoon = (function() {
     {
         num = num || defaultNum;
         div = div || defaultDiv;
-        if (fill === undefined) fill = true;
-        else fill = !!fill;
-        if (doNotSmoothen === undefined) doNotSmoothen = false;
-        else doNotSmoothen = !!doNotSmoothen;
 
                         //  proteins    na backbone  na terminus                  nucleobases
         var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
@@ -1220,5 +1216,11 @@ $3Dmol.drawCartoon = (function() {
         return addArrowPoints;
     };
 
-    return drawCartoon;
+    var defaultDrawCartoon = function(group, atomList, gradientScheme, quality)
+    {
+        quality = parseInt(parseFloat(quality)*5) || 5;
+        drawCartoon(group, atomList, gradientScheme, fill=true, doNotSmoothen=false, num=quality, div=quality);
+    }
+
+    return defaultDrawCartoon;
 })();
