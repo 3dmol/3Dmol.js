@@ -764,11 +764,14 @@ $3Dmol.drawCartoon = (function() {
                 (a.resi === b.resi || a.resi === b.resi-1)
     }
 
-    var drawStrand = function(group, atomList, geo, gradientScheme, fill, doNotSmoothen, num, div)
+    var drawCartoon = function(group, atomList, gradientScheme, fill, doNotSmoothen, num, div)
     {
-        var num = num || defaultNum;
-        var div = div || defaultDiv;
-        doNotSmoothen = !!(doNotSmoothen);
+        num = num || defaultNum;
+        div = div || defaultDiv;
+        if (fill === undefined) fill = true;
+        else fill = !!fill;
+        if (doNotSmoothen === undefined) doNotSmoothen = false;
+        else doNotSmoothen = !!doNotSmoothen;
 
                         //  proteins    na backbone  na terminus                  nucleobases
         var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
@@ -776,7 +779,7 @@ $3Dmol.drawCartoon = (function() {
         var pyrResns = ["DT", "DC", "U", "C"];
         var naResns  =  purResns.concat(pyrResns);
 
-        var cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
+        var geo, cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
         var tubeStart, tubeEnd, drawingTube;
         var traceGeo = null;
@@ -916,6 +919,8 @@ $3Dmol.drawCartoon = (function() {
 
             else // draw default-style cartoons based on secondary structure
             {
+                if (!geo) geo = new $3Dmol.Geometry(true);
+
                 // draw backbone through these atoms
                 if (isAlphaCarbon(next) ||
                     inNucleicAcid && (next.atom === "P" || next.atom === "O5'"))
@@ -965,6 +970,18 @@ $3Dmol.drawCartoon = (function() {
                             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
                         if (fill)
                             drawStrip(group, points, colors, div, thickness, points.opacity, curr.style.cartoon.style);
+                        if (geo != null && geo.vertices > 0)
+                        {
+                            var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
+                            cartoonMaterial.vertexColors = $3Dmol.FaceColors;
+                            if (typeof(points.opacity) === "number" && points.opacity >= 0 && points.opacity < 1) {
+                                cartoonMaterial.transparent = true;
+                                cartoonMaterial.opacity = points.opacity;
+                            }
+                            var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
+                            group.add(cartoonMesh);
+                            geo = null;
+                        }
 
                         // clear arrays for points and colors
                         points = [];
@@ -1069,8 +1086,20 @@ $3Dmol.drawCartoon = (function() {
             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
         if (fill)
             drawStrip(group, points, colors, div, thickness, points.opacity, curr.style.cartoon.style);
+        if (geo != null && geo.vertices > 0)
+        {
+            var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
+            cartoonMaterial.vertexColors = $3Dmol.FaceColors;
+            if (typeof(points.opacity) === "number" && points.opacity >= 0 && points.opacity < 1) {
+                cartoonMaterial.transparent = true;
+                cartoonMaterial.opacity = points.opacity;
+            }
+            var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
+            group.add(cartoonMesh);
+            geo = null;
+        }
 
-        if (traceGeo != null) // generate last mesh for trace geometry
+        if (traceGeo != null && traceGeo.vertices > 0) // generate last mesh for trace geometry
         {
             var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             traceMaterial.vertexColors = $3Dmol.FaceColors;
@@ -1189,13 +1218,6 @@ $3Dmol.drawCartoon = (function() {
             backboneAtom.ss = "s";
 
         return addArrowPoints;
-    }
-
-    // actual function call
-    var drawCartoon = function(group, atomlist, laddergeo, gradientscheme) {
-                                                             //fill  doNotSmoothen
-        drawStrand(group, atomlist, laddergeo, gradientscheme, true, false);        
-
     };
 
     return drawCartoon;
