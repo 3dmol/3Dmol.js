@@ -244,7 +244,7 @@ $3Dmol.Parsers = (function() {
         var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
 
         if (lines.length < 6)
-            return;
+            return [];
 
         var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(
                 " ");
@@ -295,7 +295,7 @@ $3Dmol.Parsers = (function() {
 
         assignBonds(atoms);
 
-        return true;
+        return [atoms];
     };
 
     // read an XYZ file from str and put the result in atoms
@@ -309,12 +309,12 @@ $3Dmol.Parsers = (function() {
 
         var lines = str.split(/\r?\n/);
         if (lines.length < 3)
-            return;
+            return [];
         var atomCount = parseInt(lines[0].substr(0, 3));
         if (isNaN(atomCount) || atomCount <= 0)
-            return;
+            return [];
         if (lines.length < atomCount + 2)
-            return;
+            return [];
         var offset = 2;
         var start = atoms.length;
         var end = start + atomCount;
@@ -337,7 +337,7 @@ $3Dmol.Parsers = (function() {
         }
         assignBonds(atoms);
 
-        return true;
+        return [atoms];
     };
 
     // put atoms specified in sdf fromat in str into atoms
@@ -355,14 +355,14 @@ $3Dmol.Parsers = (function() {
             noH = !options.keepH;
         var lines = str.split(/\r?\n/);
         if (lines.length < 4)
-            return;
+            return [];
         var atomCount = parseInt(lines[3].substr(0, 3));
         if (isNaN(atomCount) || atomCount <= 0)
-            return;
+            return [];
         var bondCount = parseInt(lines[3].substr(3, 3));
         var offset = 4;
         if (lines.length < 4 + atomCount + bondCount)
-            return;
+            return [];
 
         // serial is atom's index in file; index is atoms index in 'atoms'
         var serialToIndex = [];
@@ -404,7 +404,7 @@ $3Dmol.Parsers = (function() {
             }
         }
 
-        return true;
+        return [atoms];
     };
 
     // This parses the ChemDoodle json file format. Although this is registered
@@ -460,6 +460,7 @@ $3Dmol.Parsers = (function() {
             secondAtom.bonds.push(beginIndex);
             secondAtom.bondOrder.push(bondOrder);
         }
+        return [atoms];
     }
 
     // puts atoms specified in mmCIF fromat in str into atoms
@@ -859,6 +860,7 @@ $3Dmol.Parsers = (function() {
             }
             processSymmetries(modelData.symmetries, copyMatrix, atoms);
         }
+        return [atoms];
     }
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
@@ -885,7 +887,7 @@ $3Dmol.Parsers = (function() {
 
         // Assuming both Molecule and Atom sections exist
         if (mol_pos == -1 || atom_pos == -1)
-            return;
+            return [];
 
         // serial is atom's index in file; index is atoms index in 'atoms'
         var serialToIndex = [];
@@ -987,7 +989,7 @@ $3Dmol.Parsers = (function() {
             }
         }
 
-        return true;
+        return [atoms];
 
     };
 
@@ -1105,7 +1107,8 @@ $3Dmol.Parsers = (function() {
         var noAssembly = !options.doAssembly; // don't assemble by default
         var copyMatrix = !options.duplicateAssemblyAtoms; //default true
         modelData.symmetries = [];
-    
+        
+        var parsedAtomList = [];
         var start = atoms.length;
         var atom;
         var protein = {
@@ -1122,8 +1125,18 @@ $3Dmol.Parsers = (function() {
             var recordName = line.substr(0, 6);
             var startChain, startResi, endChain, endResi;
             
-            if(recordName.indexOf("END") == 0) {
-                break;
+            if(recordName.indexOf("END") == 0 && !options.oneMolecule) { //add & not options.oneMolecule
+                if (options.allModels) {
+                    if (atoms.length > 0) {
+                        parsedAtomList.push(atoms);
+                    }
+                    atoms = [];
+                    continue;
+                }
+                else {
+                    parsedAtomList = atoms;
+                    break;
+                }
             }
             else if (recordName == 'ATOM  ' || recordName == 'HETATM') {
                 var resn, chain, resi, icode, x, y, z, hetflag, elem, serial, altLoc, b;
@@ -1323,7 +1336,12 @@ $3Dmol.Parsers = (function() {
                     atom.ssend = true;
             }
         }
-        return true;
+
+        if (parsedAtomList.length == 0) {
+            parsedAtomList = atoms;
+        }
+        
+        return parsedAtomList;
     };
 
     /**
@@ -1426,7 +1444,7 @@ $3Dmol.Parsers = (function() {
         if (computeStruct)
             computeSecondaryStructure(atoms);
 
-        return true;
+        return [atoms];
     };
 
     return parsers;

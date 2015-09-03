@@ -1359,6 +1359,71 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
+         * Animate model from frames
+         * @function $3Dmol.GLViewer#animate
+         * @param {Object} options -
+         *      interval - speed of animation (100 by default)
+         *      loop - forward, backward, or backAndForth (forward by default)
+         *      reps - how many repetitions (0 by default, indicates infinite reps)
+         */
+        this.animate = function(options) {
+            var interval = 100;
+            var loop = "forward";
+            var reps = 0;
+            options = options || {};
+            if (options.interval) {
+                interval = options.interval;
+            }
+            if (options.loop) {
+                loop = options.loop;
+            }
+            if (options.reps) {
+                reps = options.reps;
+            }
+                
+            var mostFrames = 0;
+            var modelNum = 0;
+            for (var i = 0; i < models.length; i++) {
+                if (models[i].getFrames().length > mostFrames) {
+                    modelNum = i;
+                    mostFrames = models[i].getFrames().length;
+                }
+            }
+
+            var that = this;
+            var currFrame = 0;
+            var inc = 1;
+            var displayCount = 0;
+            var displayMax = mostFrames * reps;
+            var display = function(direction) {
+                if (direction == "forward") {
+                    for (var i = 0; i < models.length; i++) {
+                        models[i].setFrame(currFrame);
+                    }
+                    currFrame = (currFrame + inc) % mostFrames;
+                }
+                else if (direction == "backward") {
+                    for (var i = 0; i < models.length; i++) {
+                        models[i].setFrame((mostFrames-1) - currFrame);
+                    }
+                    currFrame = (currFrame + inc) % mostFrames;
+                }
+                else { //back and forth
+                    for (var i = 0; i < models.length; i++) {
+                        models[i].setFrame(currFrame);
+                    }
+                    currFrame += inc;
+                    inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
+                }
+                that.render();
+                if (++displayCount == displayMax) { //never true when reps 0 bc preincrement
+                    clearInterval(intervalID);
+                }
+            };
+            var intervalID = setInterval( function() { display(loop); }, interval);
+        };
+
+        /**
          * Create and add model to viewer, given molecular data and its format 
          * (pdb, sdf, xyz, or mol2)
          * 
@@ -1373,6 +1438,70 @@ $3Dmol.GLViewer = (function() {
             m.addMolData(data, format, options);
             models.push(m);
 
+            return m;
+        };
+        
+        /**
+         * Create and add models to viewer, given multimodel file and its format 
+         * (pdb, sdf, xyz, or mol2)
+         * 
+         * @function $3Dmol.GLViewer#addModels
+         * @param {string} data - Input data
+         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @return {Array<$3Dmol.GLModel>}
+         */
+        this.addModels = function(data, format, options) {
+
+            var m = this.addModelsAsFrames(data, format, options);
+            var modelAtoms = m.getFrames();
+            this.removeModel(m);
+            for (var i = 0; i < modelAtoms.length; i++) {
+                var newModel = new $3Dmol.GLModel(models.length, defaultcolors);
+                newModel.addAtoms(modelAtoms[i]);
+                models.push(newModel);
+            }
+            
+            return models;
+        };
+        
+        /**
+         * Create and add model to viewer. Given multimodel file and its format,
+         * models are stored in a list of frames
+         * (pdb, sdf, xyz, or mol2)
+         * 
+         * @function $3Dmol.GLViewer#addModelsAsFrames
+         * @param {string} data - Input data
+         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @return {$3Dmol.GLModel}
+         */
+        this.addModelsAsFrames = function(data, format, options) {
+            
+            options = options || {};
+            options.allModels = true;
+            options.frames = true;
+            var m = new $3Dmol.GLModel(models.length, defaultcolors);
+            m.addMolData(data, format, options);
+            models.push(m);
+
+            return m;
+        };
+        
+        /**
+         * Create and add model to viewer. Given multimodel file and its format,
+         * all atoms are added to one model
+         * (pdb, sdf, xyz, or mol2)
+         * 
+         * @function $3Dmol.GLViewer#addAsOneMolecule
+         * @param {string} data - Input data
+         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @return {$3Dmol.GLModel}
+         */
+        this.addAsOneMolecule = function(data, format, options) {
+            options = options || {};
+            options.oneMolecule = true;
+            
+            var m = this.addModel(data, format, options);
+            
             return m;
         };
 
