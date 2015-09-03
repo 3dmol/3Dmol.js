@@ -526,6 +526,24 @@ $3Dmol.Matrix3.prototype = {
 
         return this;
     },
+
+    //https://en.wikipedia.org/wiki/Determinant
+    getDeterminant: function() {
+        var m = this.elements;
+
+        /*|a b c|
+          |d e f|
+          |g h i|*/
+
+        var determinant
+            = m[0] * m[4] * m[8] //+aei
+            + m[1] * m[5] * m[6] //+bfg
+            + m[2] * m[3] * m[7] //+cdh
+            - m[2] * m[4] * m[6] //-ceg
+            - m[1] * m[3] * m[8] //-bdi
+            - m[0] * m[5] * m[7];//-afh
+        return determinant;
+    },
     
     transpose: function () {
         var tmp, m = this.elements;
@@ -605,6 +623,11 @@ $3Dmol.Matrix4.prototype = {
         );
 
         return this;
+    },
+
+    matrix3FromTopLeft: function () {
+        var te = this.elements;
+        return new $3Dmol.Matrix3(te[0],te[4],te[8],te[1],te[5],te[9],te[2],te[6],te[10]);
     },
 
     setRotationFromEuler: function ( v, order ) {
@@ -841,6 +864,10 @@ $3Dmol.Matrix4.prototype = {
         this.multiplyScalar( 1 / det );
 
         return this;
+    },
+
+    isReflected: function() {
+        return this.matrix3FromTopLeft().getDeterminant() < 0;
     },
 
     compose: function() {
