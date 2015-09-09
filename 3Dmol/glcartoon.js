@@ -105,12 +105,13 @@ $3Dmol.drawCartoon = (function() {
     
         var geo = new $3Dmol.Geometry(true);       
         var offset, vertoffset;
-        var color;
+        var color, colori;
 
         
         for ( var i = 0, lim = p1.length; i < lim; i++) {
             
-            color = $3Dmol.CC.color(colors[Math.round(colors.length*i/lim)]);
+            colori = Math.round(i*(colors.length-1)/lim);
+            color = $3Dmol.CC.color(colors[colori]);
            
             geoGroup = geo.updateGeoGroup(2);
             var vertexArray = geoGroup.vertexArray;
@@ -213,12 +214,13 @@ $3Dmol.drawCartoon = (function() {
                 
         var v_offset, va_offset, f_offset;
         var currentAtom, lastAtom
-        var color;
+        var color, colori;
         var geoGroup = geo.updateGeoGroup(2*num*len); // ensure vertex capacity
         
         for (i = 0; i < len; i++) {
         
-            color = $3Dmol.CC.color(colors[Math.round(colors.length*i/len)]);
+            colori = Math.round(i*(colors.length-1)/len);
+            color = $3Dmol.CC.color(colors[colori]);
             
             last_cs_bottom = cs_bottom;
             last_cs_top = cs_top;
@@ -431,7 +433,7 @@ $3Dmol.drawCartoon = (function() {
                       [ -3, 5, 1, -7 ] ];
                 
         var offset, vertoffset, faceoffset;
-        var color;
+        var color, colori;
         var currentAtom, lastAtom;
         var i, lim, j;
         var face1, face2, face3;
@@ -439,7 +441,8 @@ $3Dmol.drawCartoon = (function() {
         
         for (i = 0, lim = p1.length; i < lim; i++) {
         
-            color = $3Dmol.CC.color(colors[Math.round(colors.length*i/lim)]);
+            colori = Math.round(i*(colors.length-1)/lim);
+            color = $3Dmol.CC.color(colors[colori]);
             
             vs.push(p1v = p1[i]); // 0
             vs.push(p1v);         // 1
@@ -654,7 +657,7 @@ $3Dmol.drawCartoon = (function() {
                 edgeTable[B|(C<<16)]=BC;
             }
             
-            //varify that the mesh is clean
+            //verify that the mesh is clean
             for(var key in edgeTable){
                 if(edgeTable.hasOwnProperty(key)){
                     len++;
@@ -1017,7 +1020,7 @@ $3Dmol.drawCartoon = (function() {
                         //nextResAtom = atomList[parseInt(i) + resSize[curr.resn]];
                         backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                         backbonePt.resi = curr.resi;
-                        currColor = nextColor; // used for NA bases
+                        currColor = nextColor;
                     }
 
                     // click handling
@@ -1113,25 +1116,30 @@ $3Dmol.drawCartoon = (function() {
     {
         var widthScalar, i, delta, v, addArrowPoints, testOpacity;
         
-        // kind of hacky...
-        var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10, ILE:8, LEU: 8, LYS: 9, MET:8,
-            PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
+        // dictionary of standard amino acid sizes, in number of atoms
+        var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10,
+            ILE:8, LEU: 8, LYS: 9, MET:8, PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
 
-        // the orientation vector is the normed difference from backbone atom to orientation atom
-        orientPt.sub(backbonePt);
-        orientPt.normalize();
+        // the side vector points along the axis from backbone atom to orientation atom (eg. CA to O, in peptides)
+        var sideVec = orientPt.sub(backbonePt);
+        sideVec.normalize();
 
-        // adjustment for proper beta arrow appearance
+        // the forward vector points along the axis from backbone atom to next backbone atom
+        var forwardVec = atomList[parseInt(atomi) + resSize[backboneAtom.resn]];
+        forwardVec = forwardVec ? new $3Dmol.Vector3(forwardVec.x, forwardVec.y, forwardVec.z) : new $3Dmol.Vector3(0, 0, 0);
+        forwardVec.sub(backbonePt);
+
+        // adjustments for proper beta arrow appearance
         if (backboneAtom.ss === "arrow start")
         {
-            var adjustPt = atomList[parseInt(atomi) + resSize[backboneAtom.resn]]; // CA in next residue, ideally
-            adjustPt = adjustPt ? new $3Dmol.Vector3(adjustPt.x, adjustPt.y, adjustPt.z) : new $3Dmol.Vector3(0, 0, 0);
-            adjustPt.sub(backbonePt);
-            adjustPt.multiplyScalar(0.3);
-            adjustPt.cross(orientPt); // adjust perpendicularly to strand face
-            backbonePt.add(adjustPt);
+            var adjustment = forwardVec.clone().multiplyScalar(0.3).cross(orientPt); // adjust perpendicularly to strand face
+            backbonePt.add(adjustment);
+
+            var upVec = forwardVec.clone().cross(sideVec).normalize();
+            sideVec.rotateAboutVector(upVec, 0.43);
         }
 
+        // determine from cartoon style or secondary structure how wide the strand should be here
         // ribbon shape should have same width as thickness
         if (backboneAtom.style.cartoon.ribbon)
         {
@@ -1162,22 +1170,20 @@ $3Dmol.drawCartoon = (function() {
             else widthScalar = backboneAtom.style.cartoon.width;  
         }
 
-        // if the angle between the previous orientation vector and current is greater than 90 degrees,
-        if (prevOrientPt != null && orientPt.dot(prevOrientPt) < 0)
-        {
-            orientPt.negate(); // negate the orientation vector (ie. add 180 degrees)
-        }
-        // this ensures that the strand never twists more than 90 degrees between consecutive backbone atoms
+        // make sure the strand orientation doesn't twist more than 90 degrees
+        if (prevOrientPt != null && sideVec.dot(prevOrientPt) < 0)
+            sideVec.negate();
 
-        orientPt.multiplyScalar(widthScalar);
+
+        sideVec.multiplyScalar(widthScalar);
         for (i = 0; i < num; i++)
         {
             // produces NUM incremental points from backbone atom minus orientation vector
             //  to backbone atom plus orientation vector
             delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
-            v = new $3Dmol.Vector3(backbonePt.x + delta * orientPt.x,
-                                   backbonePt.y + delta * orientPt.y,
-                                   backbonePt.z + delta * orientPt.z);
+            v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
+                                   backbonePt.y + delta * sideVec.y,
+                                   backbonePt.z + delta * sideVec.z);
             v.atom = backboneAtom;
             if (smoothen && backboneAtom.ss === "s") 
                 v.smoothen = true;
@@ -1185,20 +1191,24 @@ $3Dmol.drawCartoon = (function() {
                                // along the backbone offset by some constant pertaining to its cell in the outer array
         }
 
-        orientPt.multiplyScalar(2);
-        for (i = 0; i < num && addArrowPoints; i++)
+        if (addArrowPoints)
         {
-            delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
-            v = new $3Dmol.Vector3(backbonePt.x + delta * orientPt.x,
-                                   backbonePt.y + delta * orientPt.y,
-                                   backbonePt.z + delta * orientPt.z);
-            v.atom = backboneAtom;
-            v.smoothen = false;
-            v.skip = true;
-            points[i].push(v);
+
+            sideVec.multiplyScalar(2);
+            for (i = 0; i < num; i++)
+            {
+                delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
+                v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
+                                       backbonePt.y + delta * sideVec.y,
+                                       backbonePt.z + delta * sideVec.z);
+                v.atom = backboneAtom;
+                v.smoothen = false;
+                v.skip = true;
+                points[i].push(v);
+            }
         }
 
-        // make sure chain is all the same opacity
+        // make sure the strand is all the same opacity
         testOpacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
         if (points.opacity)
         {
@@ -1210,6 +1220,7 @@ $3Dmol.drawCartoon = (function() {
 
         } else points.opacity = testOpacity;
 
+        // revert ss keywords used for arrow rendering back to original value
         if (backboneAtom.ss === "arrow start" || backboneAtom.ss === "arrow end")
             backboneAtom.ss = "s";
 
