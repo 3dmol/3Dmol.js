@@ -1499,11 +1499,11 @@ $3Dmol.GLViewer = (function() {
         this.addAsOneMolecule = function(data, format, options) {
             options = options || {};
             options.oneMolecule = true;
-            
             var m = this.addModel(data, format, options);
             
             return m;
         };
+        
 
         /**
          * Delete specified model from viewer

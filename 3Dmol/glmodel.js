@@ -1136,7 +1136,7 @@ $3Dmol.GLModel = (function() {
             if (frames.length == 0) {
                 return;
             }
-            if ((frame > 0) && (frame < frames.length)) {
+            if ((frame >= 0) && (frame < frames.length)) {
                 atoms = frames[frame];
             }
             else {
@@ -1144,7 +1144,48 @@ $3Dmol.GLModel = (function() {
             }
             molObj = null;
         };
-
+        
+        
+        /**
+         * Populates model's frame property 
+         * Model can then be animated
+         * 
+         * @function $3Dmol.GLModel#vibrate
+         * @param {number} numFrames
+         * @param {number} amplitude
+         */
+        this.vibrate = function(numFrames, amplitude) {
+            var vectors = [];
+            var amplitude = amplitude || 1;
+            var numFrames = numFrames || 10; 
+            for (var i = 0; i < atoms.length; i++) {
+                var vector = new $3Dmol.Vector3(atoms[i].dx, atoms[i].dy, atoms[i].dz);
+                vectors.push(vector);
+            }
+            numFrames--;
+            for (var i = 1; i <= numFrames; i++) {
+                var newAtoms = [];
+                for (var j = 0; j < atoms.length; j++) {
+                    var newVector = new $3Dmol.Vector3(atoms[j].dx, atoms[j].dy, atoms[j].dz);
+                    var starting = new $3Dmol.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
+                    newVector.sub(starting);
+                    newVector.multiplyScalar((i*amplitude)/numFrames);
+                    starting.add(newVector);
+                    var newAtom = {};
+                    for (var k in atoms[j]) {
+                        newAtom[k] = atoms[j][k];
+                    }
+                    newAtom.x = starting.x;
+                    newAtom.y = starting.y;
+                    newAtom.z = starting.z;
+                    newAtoms.push(newAtom);
+                }
+                frames.push(newAtoms);
+            }
+            frames.unshift(atoms); //add 1st frame
+        };
+        
+        
         // set default style and colors for atoms
         var setAtomDefaults = function(atoms, id) {
             for ( var i = 0; i < atoms.length; i++) {
@@ -1206,7 +1247,7 @@ $3Dmol.GLModel = (function() {
             var parsedAtomList = parse(atoms, data, options, modelData);
             if (options.frames) {
                 frames = parsedAtomList;
-                for (var i = 0; i < frames.length; i ++) {
+                for (var i = 0; i < frames.length; i++) {
                     setAtomDefaults(frames[i], id);
                 }
             }
