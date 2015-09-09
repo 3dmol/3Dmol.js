@@ -334,6 +334,11 @@ $3Dmol.Parsers = (function() {
             atom.bondOrder = [];
             atom.properties = {};
             atoms[i] = atom;
+            if (tokens.length >= 7) {
+                atom.dx = parseFloat(tokens[4]);
+                atom.dy = parseFloat(tokens[5]);
+                atom.dz = parseFloat(tokens[6]);
+            }
         }
         assignBonds(atoms);
 
@@ -1125,7 +1130,7 @@ $3Dmol.Parsers = (function() {
             var recordName = line.substr(0, 6);
             var startChain, startResi, endChain, endResi;
             
-            if(recordName.indexOf("END") == 0 && !options.oneMolecule) { //add & not options.oneMolecule
+            if(recordName.indexOf("END") == 0 && !options.oneMolecule) {
                 if (options.allModels) {
                     if (atoms.length > 0) {
                         parsedAtomList.push(atoms);
