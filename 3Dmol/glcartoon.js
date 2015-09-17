@@ -814,14 +814,14 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // first and last residues in a helix are used to draw tube
-                if (connected && next.ss === "h")
+                if (connected && curr.ss === "h")
                 {
                     if (!inHelix && next.style.cartoon.tubes) next.ss = "tube start";
                     inHelix = true;
                 }
-                else if (inHelix)
+                else if (inHelix && curr.ss !== "tube start")
                 {
-                    if (curr && curr.style.cartoon.tubes) curr.ss = "tube end";
+                    if (prev && prev.style.cartoon.tubes) prev.ss = "tube end";
                     inHelix = false;
                 }
                 prev = curr;
@@ -872,7 +872,7 @@ $3Dmol.drawCartoon = (function() {
                         if (nextColor == currColor)
                         {
                             var color = $3Dmol.CC.color(nextColor);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, next, thickness, color, true, true);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, next, thickness, color, 2, 2);
                         }
 
                         else // otherwise draw cylinders for each color (split down the middle)
@@ -880,8 +880,8 @@ $3Dmol.drawCartoon = (function() {
                             var midpoint = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
                             var color1 = $3Dmol.CC.color(currColor);
                             var color2 = $3Dmol.CC.color(nextColor);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, midpoint, thickness, color1, true, false);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, next, thickness, color2, false, true);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, midpoint, thickness, color1, 2, 0);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, next, thickness, color2, 0, 2);
                         } // note that an atom object can be duck-typed as a $3Dmol.Vector3 in this case
                     }
 
@@ -929,9 +929,9 @@ $3Dmol.drawCartoon = (function() {
                         if (next.ss === "tube end")
                         {
                             drawingTube = false;
-                            next.ss = "h";
                             tubeEnd = new $3Dmol.Vector3(next.x, next.y, next.z);
-                            $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(currColor), true, true);
+                            $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(currColor), 1, 1);
+                            next.ss = "h";
 
                         }
                         else continue; // don't accumulate strand points while in the middle of drawing a tube
@@ -944,8 +944,8 @@ $3Dmol.drawCartoon = (function() {
                         if (curr.ss === "tube start")
                         {
                             drawingTube = true;
-                            curr.ss = "h";
                             tubeStart = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+                            curr.ss = "h";
                         }
 
                         if (baseEndPt) // draw the last base if it's a NA chain
@@ -955,7 +955,7 @@ $3Dmol.drawCartoon = (function() {
                             else
                                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
+                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
                             arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
                             colors.push(nextColor);
                             if (arrow) colors.push(nextColor);
@@ -999,7 +999,7 @@ $3Dmol.drawCartoon = (function() {
                             var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.02); //TODO: apply this as function of thickness
                             baseStartPt.add(startFix);
 
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
+                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
                             baseStartPt = null;
                             baseEndPt = null;   
                         }
@@ -1074,7 +1074,7 @@ $3Dmol.drawCartoon = (function() {
             else
                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
-            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
+            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
             arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
             colors.push(nextColor);
             if (arrow) colors.push(nextColor);
@@ -1161,9 +1161,11 @@ $3Dmol.drawCartoon = (function() {
                     addArrowPoints = true;
 
                 } else if (backboneAtom.ss === "arrow end")
-                {
                     widthScalar = coilWidth;
-                }
+                
+                else if (backboneAtom.ss === "h" && backboneAtom.style.cartoon.tubes || backboneAtom.ss === "tube start")
+                    widthScalar = coilWidth;
+
                 else
                     widthScalar = helixSheetWidth;
             }

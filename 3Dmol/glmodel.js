@@ -597,14 +597,14 @@ $3Dmol.GLModel = (function() {
             var atomBondR = style.radius || defaultStickRadius;
             var bondR = atomBondR;
             var atomSingleBond = style.singleBonds || false;
-            var fromCap = false, toCap = false;
+            var fromCap = 0, toCap = 0;
 
             var C1 = $3Dmol.getColorFromStyle(atom, style);
 
             var mp, mp1, mp2;
             
             if (!atom.capDrawn && atom.bonds.length < 4)
-                fromCap = true;              
+                fromCap = 2;              
                 
             for (var i = 0; i < atom.bonds.length; i++) {
                 var j = atom.bonds[i]; // our neighbor
@@ -644,13 +644,13 @@ $3Dmol.GLModel = (function() {
                     if (atom.bondOrder[i] === 1 || singleBond) {
 
                         if (!atom2.capDrawn && atom2.bonds.length < 4)
-                            toCap = true;       
+                            toCap = 2;       
                                                 
                         if (C1 != C2) {
                             mp = new $3Dmol.Vector3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
-                            $3Dmol.GLDraw.drawCylinder(geo, p1, mp, bondR, C1, fromCap, false);
-                            $3Dmol.GLDraw.drawCylinder(geo, mp, p2, bondR, C2, false, toCap);
+                            $3Dmol.GLDraw.drawCylinder(geo, p1, mp, bondR, C1, fromCap, 0);
+                            $3Dmol.GLDraw.drawCylinder(geo, mp, p2, bondR, C2, 0, toCap);
                         } else {
                             $3Dmol.GLDraw.drawCylinder(geo, p1, p2, bondR, C1, fromCap, toCap);
                         }
@@ -675,12 +675,12 @@ $3Dmol.GLModel = (function() {
                     } 
                     
                     else if (atom.bondOrder[i] > 1) {
-                        var mfromCap = false; mtoCap = false; //multi bond caps
+                        var mfromCap = 0; mtoCap = 0; //multi bond caps
                         
                         if(bondR != atomBondR) {
                             //assume jmol style multiple bonds - the radius doesn't fit within atom sphere
-                            mfromCap = true;
-                            mtoCap = true;
+                            mfromCap = 2;
+                            mtoCap = 2;
                         }
                         
                         var dir = p2.clone();
@@ -711,10 +711,10 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, false, mtoCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, false, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, 0, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, 0, mtoCap);
                             } else {
                                 $3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
                                 $3Dmol.GLDraw.drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
@@ -761,12 +761,12 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp3 = new $3Dmol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, false, mtoCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1, mp3, r, C1, fromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp3, p2, r, C2, false, toCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, false, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, 0, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1, mp3, r, C1, fromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp3, p2, r, C2, 0, toCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, 0, mtoCap);
                             } else {
                                 $3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
                                 $3Dmol.GLDraw.drawCylinder(geo, p1, p2, r, C1, fromCap, toCap);
