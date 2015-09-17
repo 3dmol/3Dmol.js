@@ -111,6 +111,7 @@ $3Dmol.GLModel = (function() {
     function GLModel(mid, defaultcolors) {
         // private variables
         var atoms = [];
+        var frames = [];
         var id = mid;
         var hidden = false;
         var molObj = null;
@@ -1096,7 +1097,78 @@ $3Dmol.GLModel = (function() {
         this.getID = function() {
             return id;
         };
-
+        
+        /**
+         * Returns model's frames (if multimodel)
+         * 
+         * @function $3Dmol.GLModel#getFrames
+         * @return {Array.<Object>} frames
+         */
+        this.getFrames = function() {
+            return frames;
+        };
+        
+        /**
+         * Sets model's atomlist to specified frame.
+         * Sets to last frame if invalid frame number given
+         * 
+         * @function $3Dmol.GLModel#setFrame
+         * @param {number} frame
+         */
+        this.setFrame = function(frame) {
+            if (frames.length == 0) {
+                return;
+            }
+            if ((frame >= 0) && (frame < frames.length)) {
+                atoms = frames[frame];
+            }
+            else {
+                atoms = frames[frames.length-1];
+            }
+            molObj = null;
+        };
+        
+        
+        /**
+         * Populates model's frame property 
+         * Model can then be animated
+         * 
+         * @function $3Dmol.GLModel#vibrate
+         * @param {number} numFrames
+         * @param {number} amplitude
+         */
+        this.vibrate = function(numFrames, amplitude) {
+            var vectors = [];
+            var amplitude = amplitude || 1;
+            var numFrames = numFrames || 10; 
+            for (var i = 0; i < atoms.length; i++) {
+                var vector = new $3Dmol.Vector3(atoms[i].dx, atoms[i].dy, atoms[i].dz);
+                vectors.push(vector);
+            }
+            numFrames--;
+            for (var i = 1; i <= numFrames; i++) {
+                var newAtoms = [];
+                for (var j = 0; j < atoms.length; j++) {
+                    var newVector = new $3Dmol.Vector3(atoms[j].dx, atoms[j].dy, atoms[j].dz);
+                    var starting = new $3Dmol.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
+                    newVector.sub(starting);
+                    newVector.multiplyScalar((i*amplitude)/numFrames);
+                    starting.add(newVector);
+                    var newAtom = {};
+                    for (var k in atoms[j]) {
+                        newAtom[k] = atoms[j][k];
+                    }
+                    newAtom.x = starting.x;
+                    newAtom.y = starting.y;
+                    newAtom.z = starting.z;
+                    newAtoms.push(newAtom);
+                }
+                frames.push(newAtoms);
+            }
+            frames.unshift(atoms); //add 1st frame
+        };
+        
+        
         // set default style and colors for atoms
         var setAtomDefaults = function(atoms, id) {
             for ( var i = 0; i < atoms.length; i++) {
@@ -1155,7 +1227,13 @@ $3Dmol.GLModel = (function() {
             	}
             }
             var parse = $3Dmol.Parsers[format];
-            parse(atoms, data, options, modelData)
+            var parsedAtomList = parse(atoms, data, options, modelData);
+            if (options.frames) {
+                frames = parsedAtomList;
+                for (var i = 0; i < frames.length; i++) {
+                    setAtomDefaults(frames[i], id);
+                }
+            }
             setAtomDefaults(atoms, id);
         };
         
@@ -1441,8 +1519,8 @@ $3Dmol.GLModel = (function() {
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
          */
-        this.setStyle = function(sel, style, add) {           
-
+        this.setStyle = function(sel, style, add) {
+            
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
@@ -1461,27 +1539,35 @@ $3Dmol.GLModel = (function() {
             // somethings we only calculate if there is a change in a certain
             // style, although these checks will only catch cases where both
             // are either null or undefined
-
-            var selected = this.selectedAtoms(sel, atoms);
-            for ( var i = 0; i < atoms.length; i++) {
-                if(atoms[i]) atoms[i].capDrawn = false; //reset for proper stick render
-            }
-
-            for ( var i = 0; i < selected.length; i++) {                
-                changedAtoms = true;
-                if (selected[i].clickable) 
-                    selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
+            
+            var setStyleHelper = function(atomArr) {
+                var selected = that.selectedAtoms(sel, atomArr);
+                for (var i = 0; i < atomArr.length; i++) {
+                    if (atomArr[i]) atomArr[i].capDrawn = false; //reset for proper stick render
+                }
+            
+                for ( var i = 0; i < selected.length; i++) {                
+                    changedAtoms = true;
+                    if (selected[i].clickable) 
+                        selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
 
-                if(!add) selected[i].style = {};
-                for(s in style) {
-                    if(style.hasOwnProperty(s)) {
-						selected[i].style[s]=selected[i].style[s]||{}; //create distinct object for each atom
-						for(var prop in style[s]){
-							selected[i].style[s][prop]=style[s][prop];
-						}
+                    if(!add) selected[i].style = {};
+                    for(s in style) {
+                        if(style.hasOwnProperty(s)) {
+                            selected[i].style[s]=selected[i].style[s]||{}; //create distinct object for each atom
+                            for(var prop in style[s]){
+                                selected[i].style[s][prop]=style[s][prop];
+                            }
+                        }
                     }
                 }
+            }
+            
+            var that = this;
+            setStyleHelper(atoms);
+            for (var i = 0; i < frames.length; i++) {
+                setStyleHelper(frames[i]);
             }
             
             if (changedAtoms)
