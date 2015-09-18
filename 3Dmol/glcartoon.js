@@ -967,8 +967,9 @@ $3Dmol.drawCartoon = (function() {
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
                             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
-                        if (fill)
-                            drawStrip(group, points, colors, div, thickness, points.opacity, curr.style.cartoon.style);
+                        if (fill) 
+                            drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
+                        
                         if (geo != null && geo.vertices > 0)
                         {
                             var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
@@ -1084,7 +1085,9 @@ $3Dmol.drawCartoon = (function() {
         for (i = 0; !thickness && i < num; i++)
             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
         if (fill)
-            drawStrip(group, points, colors, div, thickness, points.opacity, curr.style.cartoon.style);
+        {
+            drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
+        }
         if (geo != null && geo.vertices > 0)
         {
             var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
@@ -1114,7 +1117,7 @@ $3Dmol.drawCartoon = (function() {
 
     var addBackbonePoints = function(points, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom, atomList, atomi)
     {
-        var widthScalar, i, delta, v, addArrowPoints, testOpacity;
+        var widthScalar, i, delta, v, addArrowPoints, testOpacity, testStyle;
         
         // dictionary of standard amino acid sizes, in number of atoms
         var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10,
@@ -1210,7 +1213,7 @@ $3Dmol.drawCartoon = (function() {
             }
         }
 
-        // make sure the strand is all the same opacity
+        // make sure the strand is all the same opacity and style
         testOpacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
         if (points.opacity)
         {
@@ -1221,6 +1224,17 @@ $3Dmol.drawCartoon = (function() {
             }
 
         } else points.opacity = testOpacity;
+
+        testStyle = backboneAtom.style.cartoon.style || 'default';
+        if (points.style)
+        {
+            if (points.style != testStyle)
+            {
+                console.log("Warning: a cartoon chain's strand-style is ambiguous");
+                points.style = 'default';
+            }
+
+        } else points.style = testStyle;
 
         // revert ss keywords used for arrow rendering back to original value
         if (backboneAtom.ss === "arrow start" || backboneAtom.ss === "arrow end")
