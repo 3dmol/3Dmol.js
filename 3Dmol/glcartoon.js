@@ -967,7 +967,7 @@ $3Dmol.drawCartoon = (function() {
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
                             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
-                        if (fill) 
+                        if (fill && points[0].length > 0) 
                             drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
                         
                         if (geo != null && geo.vertices > 0)
@@ -1084,7 +1084,7 @@ $3Dmol.drawCartoon = (function() {
         // for default style, draw the last strand
         for (i = 0; !thickness && i < num; i++)
             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
-        if (fill)
+        if (fill && points[0].length > 0)
         {
             drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
         }
