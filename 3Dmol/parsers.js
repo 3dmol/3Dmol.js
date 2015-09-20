@@ -1439,7 +1439,18 @@ $3Dmol.Parsers = (function() {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
             var startChain, startResi, endChain, endResi;
-            if (recordName == 'ATOM  ' || recordName == 'HETATM') {
+            
+            if (recordName.indexOf("END") == 0) {
+                if (options.multimodel) {
+                    if (!options.onemol)
+                        atoms.push([]);
+                    continue;
+                }
+                else {
+                    break;
+                }
+            }
+            else if (recordName == 'ATOM  ' || recordName == 'HETATM') {
                 // I would have liked to split based solely on whitespace, but
                 // it seems that there is no guarantee that all the fields will
                 // be filled out (e.g. the chain) so this doesn't work
@@ -1514,6 +1525,7 @@ $3Dmol.Parsers = (function() {
             if (computeStruct)
                 computeSecondaryStructure(atoms[i]);
         }
+        
         return atoms;
     };
 
