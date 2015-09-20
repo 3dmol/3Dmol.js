@@ -1136,13 +1136,23 @@ $3Dmol.GLModel = (function() {
             if (frames.length == 0) {
                 return;
             }
-            if ((frame > 0) && (frame < frames.length)) {
+            if (frame >= 0 && frame < frames.length) {
                 atoms = frames[frame];
             }
             else {
                 atoms = frames[frames.length-1];
             }
             molObj = null;
+        };
+        
+        /**
+         * Add to model's frame property
+         * 
+         * @function $3Dmol.GLModel#addFrame
+         * @param {type} atoms
+         */
+        this.addFrame = function(atoms) {
+            frames.push(atoms);
         };
 
         // set default style and colors for atoms
@@ -1203,14 +1213,27 @@ $3Dmol.GLModel = (function() {
             	}
             }
             var parse = $3Dmol.Parsers[format];
-            var parsedAtomList = parse(atoms, data, options, modelData);
-            if (options.frames) {
-                frames = parsedAtomList;
-                for (var i = 0; i < frames.length; i ++) {
-                    setAtomDefaults(frames[i], id);
+            var parsedAtoms = parse(data, options, modelData);
+
+            if (frames.length == 0) { //first call
+                for (var i = 0; i < parsedAtoms.length; i++) {
+                    if (parsedAtoms[i].length != 0)
+                        frames.push(parsedAtoms[i]);
+                }
+                atoms = frames[0];
+            }
+            
+            else { //subsequent calls
+                for (var i = 0; i < parsedAtoms.length; i++) {
+                    this.addAtoms(parsedAtoms[i]); //add atoms to current frame
                 }
             }
-            setAtomDefaults(atoms, id);
+            
+            for (var i = 0; i < frames.length; i++) {
+                setAtomDefaults(frames[i], id);
+            }
+            
+
         };
         
         /** given a selection specification, return true if atom is selected

@@ -1433,7 +1433,6 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLModel}
          */
         this.addModel = function(data, format, options) {
-
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
             models.push(m);
@@ -1451,13 +1450,19 @@ $3Dmol.GLViewer = (function() {
          * @return {Array<$3Dmol.GLModel>}
          */
         this.addModels = function(data, format, options) {
+            options = options || {};
+            options.multimodel = true;
+            options.frames = true;
 
-            var m = this.addModelsAsFrames(data, format, options);
-            var modelAtoms = m.getFrames();
+            var m = new $3Dmol.GLModel(models.length, defaultcolors);
+            m.addMolData(data, format, options);
+            var modelatoms = m.getFrames();
             this.removeModel(m);
-            for (var i = 0; i < modelAtoms.length; i++) {
+            
+            for (var i = 0; i < modelatoms.length; i++) {
                 var newModel = new $3Dmol.GLModel(models.length, defaultcolors);
-                newModel.addAtoms(modelAtoms[i]);
+                newModel.addFrame(modelatoms[i]);
+                newModel.setFrame(0);
                 models.push(newModel);
             }
             
@@ -1475,9 +1480,8 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLModel}
          */
         this.addModelsAsFrames = function(data, format, options) {
-            
             options = options || {};
-            options.allModels = true;
+            options.multimodel = true;
             options.frames = true;
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
@@ -1498,9 +1502,11 @@ $3Dmol.GLViewer = (function() {
          */
         this.addAsOneMolecule = function(data, format, options) {
             options = options || {};
-            options.oneMolecule = true;
-            
-            var m = this.addModel(data, format, options);
+            options.multimodel = true;
+            options.onemol = true;
+            var m = new $3Dmol.GLModel(models.length, defaultcolors);
+            m.addMolData(data, format, options);
+            models.push(m);
             
             return m;
         };
