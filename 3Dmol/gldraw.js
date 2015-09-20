@@ -125,12 +125,13 @@ $3Dmol.GLDraw = (function() {
     // memoize capped cylinder for given radius
     var cylVertexCache = {
 
-        cache : {},
+        // memoize both rounded and flat caps (hemisphere and circle)
+        cache : {false:{}, true:{}},
 
-        getVerticesForRadius : function(radius) {
+        getVerticesForRadius : function(radius, flat) {
 
-            if (this.cache[radius] !== undefined)
-                return this.cache[radius];
+            if (this.cache[flat][radius] !== undefined)
+                return this.cache[flat][radius];
 
             var dir = new $3Dmol.Vector3(0, 1, 0);
             var w = basisVectors.length;
@@ -207,8 +208,7 @@ $3Dmol.GLDraw = (function() {
                             vertex.x = -radius
                                     * Math.cos(phiStart + u * phiLength)
                                     * Math.sin(thetaStart + v * thetaLength);
-                            vertex.y = radius
-                                    * Math.cos(thetaStart + v * thetaLength);
+                            vertex.y = flat ? 0 : radius * Math.cos(thetaStart + v * thetaLength);
                             vertex.z = radius
                                     * Math.sin(phiStart + u * phiLength)
                                     * Math.sin(thetaStart + v * thetaLength);
@@ -220,8 +220,14 @@ $3Dmol.GLDraw = (function() {
                             if (Math.abs(vertex.z) < 1e-5)
                                 vertex.z = 0;
 
-                            n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
-                            n.normalize();
+                            if (flat) {
+                                n = new $3Dmol.Vector3(0, Math.cos(thetaStart + v * thetaLength), 0);
+                                n.normalize();
+                            }
+                            else {
+                                n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
+                                n.normalize();
+                            }
 
                             nvecs.push(vertex);
                             norms.push(n);
@@ -258,7 +264,7 @@ $3Dmol.GLDraw = (function() {
                 h : heightSegments
             };
 
-            this.cache[radius] = obj;
+            this.cache[flat][radius] = obj;
 
             return obj;
 
@@ -280,8 +286,8 @@ $3Dmol.GLDraw = (function() {
      *            radius
      * @param {$3Dmol.Color}
      *            color
-     * @param {boolean} fromCap
-     * @param {boolean} toCap
+     * @param {integer} fromCap - 0 for none, 1 for flat, 2 for round
+     * @param {integer} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
     draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
@@ -290,6 +296,11 @@ $3Dmol.GLDraw = (function() {
         drawnC++;
         // vertices
         var drawcaps = fromCap || toCap;
+
+        if (fromCap == 1 && toCap == 1) // 0 is none, 1 is flat, 2 is round
+          	var flat = true;
+        else var flat = false;
+
         color = color || {r:0, g:0, b:0};
 
         /** @type {Array.<number>} */
@@ -301,7 +312,7 @@ $3Dmol.GLDraw = (function() {
         var e = getRotationMatrix(dir);
         // get orthonormal vectors from cache
         // TODO: Will have orient with model view matrix according to direction
-        var vobj = cylVertexCache.getVerticesForRadius(radius);
+        var vobj = cylVertexCache.getVerticesForRadius(radius, flat);
 
         // w (n) corresponds to the number of orthonormal vectors for cylinder
         // (default 16)

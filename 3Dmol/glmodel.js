@@ -597,14 +597,14 @@ $3Dmol.GLModel = (function() {
             var atomBondR = style.radius || defaultStickRadius;
             var bondR = atomBondR;
             var atomSingleBond = style.singleBonds || false;
-            var fromCap = false, toCap = false;
+            var fromCap = 0, toCap = 0;
 
             var C1 = $3Dmol.getColorFromStyle(atom, style);
 
             var mp, mp1, mp2;
             
             if (!atom.capDrawn && atom.bonds.length < 4)
-                fromCap = true;              
+                fromCap = 2;              
                 
             for (var i = 0; i < atom.bonds.length; i++) {
                 var j = atom.bonds[i]; // our neighbor
@@ -644,13 +644,13 @@ $3Dmol.GLModel = (function() {
                     if (atom.bondOrder[i] === 1 || singleBond) {
 
                         if (!atom2.capDrawn && atom2.bonds.length < 4)
-                            toCap = true;       
+                            toCap = 2;       
                                                 
                         if (C1 != C2) {
                             mp = new $3Dmol.Vector3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
-                            $3Dmol.GLDraw.drawCylinder(geo, p1, mp, bondR, C1, fromCap, false);
-                            $3Dmol.GLDraw.drawCylinder(geo, mp, p2, bondR, C2, false, toCap);
+                            $3Dmol.GLDraw.drawCylinder(geo, p1, mp, bondR, C1, fromCap, 0);
+                            $3Dmol.GLDraw.drawCylinder(geo, mp, p2, bondR, C2, 0, toCap);
                         } else {
                             $3Dmol.GLDraw.drawCylinder(geo, p1, p2, bondR, C1, fromCap, toCap);
                         }
@@ -675,12 +675,12 @@ $3Dmol.GLModel = (function() {
                     } 
                     
                     else if (atom.bondOrder[i] > 1) {
-                        var mfromCap = false; mtoCap = false; //multi bond caps
+                        var mfromCap = 0; mtoCap = 0; //multi bond caps
                         
                         if(bondR != atomBondR) {
                             //assume jmol style multiple bonds - the radius doesn't fit within atom sphere
-                            mfromCap = true;
-                            mtoCap = true;
+                            mfromCap = 2;
+                            mtoCap = 2;
                         }
                         
                         var dir = p2.clone();
@@ -711,10 +711,10 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, false, mtoCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, false, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, 0, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, 0, mtoCap);
                             } else {
                                 $3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
                                 $3Dmol.GLDraw.drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
@@ -761,12 +761,12 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp3 = new $3Dmol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, false, mtoCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1, mp3, r, C1, fromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp3, p2, r, C2, false, toCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, false);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, false, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, 0, mtoCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1, mp3, r, C1, fromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp3, p2, r, C2, 0, toCap);
+                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, 0);
+                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, 0, mtoCap);
                             } else {
                                 $3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
                                 $3Dmol.GLDraw.drawCylinder(geo, p1, p2, r, C1, fromCap, toCap);
@@ -856,7 +856,6 @@ $3Dmol.GLModel = (function() {
             var sphereGeometry = new $3Dmol.Geometry(true);                                                         
             var imposterGeometry = new $3Dmol.Geometry(true);                                                         
             var stickGeometry = new $3Dmol.Geometry(true);
-            var cartoonGeometry = new $3Dmol.Geometry(true);
             var i, j, n, testOpacities;
             var opacities = {};
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
@@ -919,7 +918,7 @@ $3Dmol.GLModel = (function() {
                 if (range[0] < range[1])
                     gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
 
-                $3Dmol.drawCartoon(ret, cartoonAtoms, cartoonGeometry, gradientscheme);
+                $3Dmol.drawCartoon(ret, cartoonAtoms, gradientscheme);
 
             }
 
@@ -981,22 +980,6 @@ $3Dmol.GLModel = (function() {
             
                 var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
                 ret.add(sticks);
-            }
-
-            // This is only for DNA ladder rendering right now
-            if (cartoonGeometry.vertices > 0) { // TODO: move ladder drawing to glcartoon.js
-                var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
-                    vertexColors : true,
-                    ambient : 0x000000,
-                    reflectivity : 0
-                });
-                cartoonGeometry.initTypedArrays();
-
-                if (cylinderMaterial.wireframe)
-                    cartoonGeometry.setUpWireframe();
-
-                var ladder = new $3Dmol.Mesh(cartoonGeometry, cylinderMaterial);
-                ret.add(ladder);
             }
             
             //var linewidth;
@@ -1590,6 +1573,46 @@ $3Dmol.GLModel = (function() {
             if (changedAtoms)
                 molObj = null; //force rebuild
             
+        };
+
+        /** Set clickable and callback of selected atoms
+         * 
+         * @function $3Dmol.GLModel#setClickable
+         * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
+         * @param {boolean} clickable - whether click-handling is enabled for the selection
+         * @param {function} callback - function called when an atom in the selection is clicked
+         */
+        this.setClickable = function(sel, clickable, callback) {           
+
+            // report to console if this is not a valid selector
+            var s;
+            for (s in sel) {
+                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure clickable is a boolean
+            clickable = !!clickable;
+
+            // report to console if callback is not a valid function
+            if (callback && typeof callback != "function") {
+                console.log("Callback is not a function");
+                return;
+            }
+
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].clickable = clickable;
+                if (callback) selected[i].callback = callback;
+
+            }
+
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
         
         /** given a mapping from element to color, set atom colors
