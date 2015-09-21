@@ -415,6 +415,26 @@ $3Dmol.Vector3.prototype =  {
         return this;
 
     },
+
+    rotateAboutVector : function(axis, ang) {
+
+        axis.normalize();
+        var cosang = Math.cos(ang);
+        var sinang = Math.sin(ang); 
+        // Rodrigues' rotation formula, from wikipedia
+
+        var term1 = this.clone().multiplyScalar(cosang);
+        var term2 = (axis.clone().cross(this)).multiplyScalar(sinang)
+        var term3 = axis.clone().multiplyScalar(axis.clone().dot(this)).multiplyScalar(1-cosang);
+
+        var rot = term1.add(term2).add(term3);
+    
+        this.x = rot.x;
+        this.y = rot.y;
+        this.z = rot.z;
+
+        return this;
+    },
     
     clone : function() {
         return new $3Dmol.Vector3(this.x, this.y, this.z);
