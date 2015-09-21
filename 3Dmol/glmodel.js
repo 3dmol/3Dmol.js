@@ -156,6 +156,7 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} hidden - do not show 
          * @prop {number} linewidth 
          * @prop {number} radius 
+         * @prop {number} scale - scale radius by specified amount
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
@@ -475,6 +476,7 @@ $3Dmol.GLModel = (function() {
         /**@typedef SphereStyleSpec
          * @prop {boolean} hidden - do not show atom
          * @prop {number} radius - override van der waals radius
+         * @prop {number} scale - scale radius by specified amount
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
