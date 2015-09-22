@@ -1247,8 +1247,15 @@ $3Dmol.GLModel = (function() {
             }
             
             else { //subsequent calls
-                for (var i = 0; i < parsedAtoms.length; i++) {
-                    this.addAtoms(parsedAtoms[i]); //add atoms to current frame
+                if (options.frames) { //add to new frame
+                    for (var i = 0; i < parsedAtoms.length; i++) {
+                        frames.push(parsedAtoms[i]);
+                    }
+                }
+                else { //add atoms to current frame
+                    for (var i = 0; i < parsedAtoms.length; i++) {
+                        this.addAtoms(parsedAtoms[i]); 
+                    }
                 }
             }
             
