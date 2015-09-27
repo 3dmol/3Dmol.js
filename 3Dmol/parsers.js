@@ -1,6 +1,7 @@
 /**
- * $3Dmol.Parsers stores functions for parsing molecular data. The all take an
- * atom list (which gets filled out) and a string.
+ * $3Dmol.Parsers stores functions for parsing molecular data. They all take a string of molecular data
+ * and options. The default behavior is to only read the first model in the case of multimodel files, and
+ * all parsers return a list of atom list(s)
  * 
  * $3Dmol.Parsers.<ext> corresponds to the parsers for files with extension ext
  */
@@ -235,10 +236,10 @@ $3Dmol.Parsers = (function() {
     };
 
     /**
-     * @param {AtomSpec[]}
-     *            atoms
      * @param {string}
      *            str
+     * @param {Object}
+     *            options
      */
     parsers.cube = parsers.CUBE = function(str, options) {
         var atoms = [[]];
@@ -299,12 +300,12 @@ $3Dmol.Parsers = (function() {
         return atoms;
     };
 
-    // read an XYZ file from str and put the result in atoms
+    // read an XYZ file from str and return result
     /**
-     * @param {AtomSpec[]}
-     *            atoms
      * @param {string}
      *            str
+     * @param {Object}
+     *            options
      */
     parsers.xyz = parsers.XYZ = function(str, options) {
         
@@ -381,10 +382,10 @@ $3Dmol.Parsers = (function() {
     // put atoms specified in sdf fromat in str into atoms
     // adds to atoms, does not replace
     /**
-     * @param {AtomSpec[]}
-     *            atoms
      * @param {string}
      *            str
+     * @param {Object}
+     *            options
      */
     parsers.sdf = parsers.SDF = function(str, options) {
 
@@ -519,10 +520,10 @@ $3Dmol.Parsers = (function() {
 
     // puts atoms specified in mmCIF fromat in str into atoms
     /**
-     * @param {AtomSpec[]}
-     *            atoms
      * @param {string}
      *            str
+     * @param {Object}
+     *            options
      */
     parsers.mcif = parsers.cif = function(str, options, modelData) {
         
@@ -926,14 +927,11 @@ $3Dmol.Parsers = (function() {
 
     // parse SYBYL mol2 file from string - assumed to only contain one molecule
     // tag
-    // TODO: Figure out how to handle multi molecule files (for SDF, too)
     /**
-     * @param {AtomSpec[]}
-     *            atoms
      * @param {string}
      *            str
      * @param {Object}
-     *            options - keepH (do not strip hydrogens)
+     *            options
      */
     parsers.mol2 = parsers.MOL2 = function(str, options) {
 
@@ -1165,8 +1163,6 @@ $3Dmol.Parsers = (function() {
     // analysis,
     // otherwise only do analysis of SHEET/HELIX comments are missing
     /**
-     * @param {AtomSpec[]}
-     *            atoms
      * @param {string}
      *            str
      * @param {Object}
@@ -1415,10 +1411,7 @@ $3Dmol.Parsers = (function() {
     /**
      * Parse a pqr file from str and create atoms. A pqr file is assumed to be a
      * whitespace delimited PDB with charge and radius fields.
-     * 
-     * 
-     * @param {AtomSpec[]}
-     *            atoms
+     *
      * @param {string}
      *            str
      * @param {Object}

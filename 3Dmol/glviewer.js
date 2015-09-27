@@ -1359,12 +1359,14 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Animate model from frames
+         * Animate all models in viewer from their respective frames
          * @function $3Dmol.GLViewer#animate
-         * @param {Object} options -
-         *      interval - speed of animation (100 by default)
-         *      loop - forward, backward, or backAndForth (forward by default)
-         *      reps - how many repetitions (0 by default, indicates infinite reps)
+         * @param {Object} options - can specify interval (speed of animation), loop (direction
+         * of looping, 'backward', 'forward' or 'backAndForth') and reps (numer of repetitions, 0 indicates infinite loop)
+         *      
+         * @example
+         * viewer.addModelAsFrames(data, "pdb");
+         * viewer.animate({interval: 75, loop: "backward", reps: 30});
          */
         this.animate = function(options) {
             var interval = 100;
@@ -1441,8 +1443,8 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Create and add models to viewer, given multimodel file and its format 
-         * (pdb, sdf, xyz, or mol2)
+         * Given multimodel file and its format, add atom data to the viewer as separate models
+         * and return list of these models
          * 
          * @function $3Dmol.GLViewer#addModels
          * @param {string} data - Input data
@@ -1470,9 +1472,9 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Create and add model to viewer. Given multimodel file and its format,
-         * models are stored in a list of frames
-         * (pdb, sdf, xyz, or mol2)
+         * Create and add model to viewer. Given multimodel file and its format, 
+         * different atomlists are stored in model's frame
+         * property and model's atoms are set to the 0th frame
          * 
          * @function $3Dmol.GLViewer#addModelsAsFrames
          * @param {string} data - Input data
@@ -1493,7 +1495,6 @@ $3Dmol.GLViewer = (function() {
         /**
          * Create and add model to viewer. Given multimodel file and its format,
          * all atoms are added to one model
-         * (pdb, sdf, xyz, or mol2)
          * 
          * @function $3Dmol.GLViewer#addAsOneMolecule
          * @param {string} data - Input data
