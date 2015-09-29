@@ -1093,7 +1093,7 @@ $3Dmol.GLModel = (function() {
         /**
          * Returns model id number
          * 
-         * @function $3Dmol.GLMode#getID
+         * @function $3Dmol.GLModel#getID
          * @return {number} Model ID
          */
         this.getID = function() {
@@ -1101,28 +1101,28 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
-         * Returns model's frames (if multimodel)
+         * Returns model's frames property, a list of atom lists
          * 
          * @function $3Dmol.GLModel#getFrames
-         * @return {Array.<Object>} frames
+         * @return {Array.<Object>}
          */
         this.getFrames = function() {
             return frames;
         };
         
         /**
-         * Sets model's atomlist to specified frame.
-         * Sets to last frame if invalid frame number given
+         * Sets model's atomlist to specified frame
+         * Sets to last frame if framenum out of range
          * 
          * @function $3Dmol.GLModel#setFrame
-         * @param {number} frame
+         * @param {number} framenum - model's atoms are set to this index in frames list
          */
-        this.setFrame = function(frame) {
+        this.setFrame = function(framenum) {
             if (frames.length == 0) {
                 return;
             }
-            if ((frame >= 0) && (frame < frames.length)) {
-                atoms = frames[frame];
+            if (framenum >= 0 && framenum < frames.length) {
+                atoms = frames[framenum];
             }
             else {
                 atoms = frames[frames.length-1];
@@ -1130,14 +1130,24 @@ $3Dmol.GLModel = (function() {
             molObj = null;
         };
         
+        /**
+         * Add atoms as frames of model
+         * 
+         * @function $3Dmol.GLModel#addFrame
+         * @param {AtomSpec} atom - atoms to be added
+         */
+        this.addFrame = function(atoms) {
+            frames.push(atoms);
+        };
+
         
         /**
-         * Populates model's frame property 
+         * If model atoms have dx, dy, dz properties (in some xyz files), vibrate populates the model's frame property based on parameters.
          * Model can then be animated
          * 
          * @function $3Dmol.GLModel#vibrate
-         * @param {number} numFrames
-         * @param {number} amplitude
+         * @param {number} numFrames - number of frames to be created, default to 10
+         * @param {number} amplitude - amplitude of distortion, default to 1 (full)
          */
         this.vibrate = function(numFrames, amplitude) {
             var vectors = [];
@@ -1169,7 +1179,6 @@ $3Dmol.GLModel = (function() {
             }
             frames.unshift(atoms); //add 1st frame
         };
-        
         
         // set default style and colors for atoms
         var setAtomDefaults = function(atoms, id) {
@@ -1229,14 +1238,33 @@ $3Dmol.GLModel = (function() {
             	}
             }
             var parse = $3Dmol.Parsers[format];
-            var parsedAtomList = parse(atoms, data, options, modelData);
-            if (options.frames) {
-                frames = parsedAtomList;
-                for (var i = 0; i < frames.length; i++) {
-                    setAtomDefaults(frames[i], id);
+            var parsedAtoms = parse(data, options, modelData);
+
+            if (frames.length == 0) { //first call
+                for (var i = 0; i < parsedAtoms.length; i++) {
+                    if (parsedAtoms[i].length != 0)
+                        frames.push(parsedAtoms[i]);
+                }
+                atoms = frames[0];
+            }
+            
+            else { //subsequent calls
+                if (options.frames) { //add to new frame
+                    for (var i = 0; i < parsedAtoms.length; i++) {
+                        frames.push(parsedAtoms[i]);
+                    }
+                }
+                else { //add atoms to current frame
+                    for (var i = 0; i < parsedAtoms.length; i++) {
+                        this.addAtoms(parsedAtoms[i]); 
+                    }
                 }
             }
-            setAtomDefaults(atoms, id);
+            
+            for (var i = 0; i < frames.length; i++) {
+                setAtomDefaults(frames[i], id);
+            }
+
         };
         
         /** given a selection specification, return true if atom is selected
