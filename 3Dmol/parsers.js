@@ -683,9 +683,12 @@ $3Dmol.Parsers = (function() {
             var a = cell_a = parseFloat(mmCIF._cell_length_a);
             var b = cell_b = parseFloat(mmCIF._cell_length_b);
             var c = cell_c = parseFloat(mmCIF._cell_length_c);
-            var alpha = cell_alpha = parseFloat(mmCIF._cell_angle_alpha) * Math.PI / 180 || Math.PI / 2;
-            var beta = cell_beta = parseFloat(mmCIF._cell_angle_beta) * Math.PI / 180 || Math.PI / 2;
-            var gamma = cell_gamma = parseFloat(mmCIF._cell_angle_gamma) * Math.PI / 180 || Math.PI / 2;
+            var alpha_deg = parseFloat(mmCIF._cell_angle_alpha) || 90;
+            var beta_deg = parseFloat(mmCIF._cell_angle_beta) || 90;
+            var gamma_deg = parseFloat(mmCIF._cell_angle_gamma) || 90;
+            var alpha = cell_alpha = alpha_deg * Math.PI / 180;
+            var beta = cell_beta = beta_deg * Math.PI / 180;
+            var gamma = cell_gamma = gamma_deg * Math.PI / 180;
             var cos_alpha = Math.cos(alpha);
             var cos_beta = Math.cos(beta);
             var cos_gamma = Math.cos(gamma);
@@ -695,6 +698,7 @@ $3Dmol.Parsers = (function() {
                 [0, b*sin_gamma, c*(cos_alpha-cos_beta*cos_gamma)/sin_gamma],
                 [0, 0, c*Math.sqrt(1-sqr(cos_alpha)-sqr(cos_beta)-sqr(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma)/sin_gamma]
             ];
+            modelData.cryst = {'a' : a, 'b' : b, 'c' : c, 'alpha' : alpha_deg, 'beta' : beta_deg, 'gamma' : gamma_deg};
         }
         function fractionalToCartesian(a, b, c) {
             var x = conversionMatrix[0][0]*a + conversionMatrix[0][1]*b + conversionMatrix[0][2]*c;
