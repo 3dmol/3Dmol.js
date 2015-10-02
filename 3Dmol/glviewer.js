@@ -1358,6 +1358,38 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
+        
+        /**
+         * Sets the atomlists of all models in the viewer to specified frame
+         * Sets to last frame if framenum out of range
+         * 
+         * @function $3Dmol.GLViewer#setFrame
+         * @param {number} framenum - each model in viewer has their atoms set to this index in frames list
+         */
+        this.setFrame = function(framenum) {
+            for (var i = 0; i < models.length; i++) {
+                models[i].setFrame(framenum);
+            }
+        };
+        
+        /**
+         * Returns the number of frames that the model with the most frames in the viewer has
+         * 
+         * @function $3Dmol.GLViewer#getFrames
+         * @return {number}
+         */
+        this.getFrames = function() {
+            var mostFrames = 0;
+            var modelNum = 0;
+            for (var i = 0; i < models.length; i++) {
+                if (models[i].getFrames().length > mostFrames) {
+                    modelNum = i;
+                    mostFrames = models[i].getFrames().length;
+                }
+            }
+            return mostFrames;
+        };
+        
 
         /**
          * Animate all models in viewer from their respective frames
@@ -1384,16 +1416,7 @@ $3Dmol.GLViewer = (function() {
             if (options.reps) {
                 reps = options.reps;
             }
-                
-            var mostFrames = 0;
-            var modelNum = 0;
-            for (var i = 0; i < models.length; i++) {
-                if (models[i].getFrames().length > mostFrames) {
-                    modelNum = i;
-                    mostFrames = models[i].getFrames().length;
-                }
-            }
-
+            var mostFrames = this.getFrames();
             var that = this;
             var currFrame = 0;
             var inc = 1;
@@ -1401,21 +1424,15 @@ $3Dmol.GLViewer = (function() {
             var displayMax = mostFrames * reps;
             var display = function(direction) {
                 if (direction == "forward") {
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame(currFrame);
-                    }
+                    that.setFrame(currFrame);
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else if (direction == "backward") {
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame((mostFrames-1) - currFrame);
-                    }
+                    that.setFrame((mostFrames-1) - currFrame);
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else { //back and forth
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame(currFrame);
-                    }
+                    that.setFrame(currFrame);
                     currFrame += inc;
                     inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
                 }
