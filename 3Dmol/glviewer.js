@@ -89,6 +89,7 @@ $3Dmol.GLViewer = (function() {
         // UI variables
         var cq = new $3Dmol.Quaternion(0, 0, 0, 1);
         var dq = new $3Dmol.Quaternion(0, 0, 0, 1);
+        var animated = false;
         var isDragging = false;
         var mouseStartX = 0;
         var mouseStartY = 0;
@@ -1357,6 +1358,38 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
+        
+        /**
+         * Sets the atomlists of all models in the viewer to specified frame
+         * Sets to last frame if framenum out of range
+         * 
+         * @function $3Dmol.GLViewer#setFrame
+         * @param {number} framenum - each model in viewer has their atoms set to this index in frames list
+         */
+        this.setFrame = function(framenum) {
+            for (var i = 0; i < models.length; i++) {
+                models[i].setFrame(framenum);
+            }
+        };
+        
+        /**
+         * Returns the number of frames that the model with the most frames in the viewer has
+         * 
+         * @function $3Dmol.GLViewer#getFrames
+         * @return {number}
+         */
+        this.getFrames = function() {
+            var mostFrames = 0;
+            var modelNum = 0;
+            for (var i = 0; i < models.length; i++) {
+                if (models[i].getFrames().length > mostFrames) {
+                    modelNum = i;
+                    mostFrames = models[i].getFrames().length;
+                }
+            }
+            return mostFrames;
+        };
+        
 
         /**
          * Animate all models in viewer from their respective frames
@@ -1369,6 +1402,7 @@ $3Dmol.GLViewer = (function() {
          * viewer.animate({interval: 75, loop: "backward", reps: 30});
          */
         this.animate = function(options) {
+            animated = true;
             var interval = 100;
             var loop = "forward";
             var reps = 0;
@@ -1382,16 +1416,7 @@ $3Dmol.GLViewer = (function() {
             if (options.reps) {
                 reps = options.reps;
             }
-                
-            var mostFrames = 0;
-            var modelNum = 0;
-            for (var i = 0; i < models.length; i++) {
-                if (models[i].getFrames().length > mostFrames) {
-                    modelNum = i;
-                    mostFrames = models[i].getFrames().length;
-                }
-            }
-
+            var mostFrames = this.getFrames();
             var that = this;
             var currFrame = 0;
             var inc = 1;
@@ -1399,31 +1424,43 @@ $3Dmol.GLViewer = (function() {
             var displayMax = mostFrames * reps;
             var display = function(direction) {
                 if (direction == "forward") {
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame(currFrame);
-                    }
+                    that.setFrame(currFrame);
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else if (direction == "backward") {
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame((mostFrames-1) - currFrame);
-                    }
+                    that.setFrame((mostFrames-1) - currFrame);
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else { //back and forth
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame(currFrame);
-                    }
+                    that.setFrame(currFrame);
                     currFrame += inc;
                     inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
                 }
                 that.render();
-                if (++displayCount == displayMax) { //never true when reps 0 bc preincrement
+                if (++displayCount == displayMax || !that.isAnimated()) {
                     clearInterval(intervalID);
                 }
             };
             var intervalID = setInterval( function() { display(loop); }, interval);
         };
+        
+        /**
+         * Stop animation of all models in viewer
+         * @function $3Dmol.GLViewer#stopAnimate
+         */
+        this.stopAnimate = function() {
+            animated = false;
+        };
+        
+        /**
+         * Return true if viewer is currently being animated, false otherwise
+         * @function $3Dmol.GLViewer#isAnimated
+         * @return {boolean}
+         */
+        this.isAnimated = function() {
+            return animated;
+        };
+        
 
         /**
          * Create and add model to viewer, given molecular data and its format 
