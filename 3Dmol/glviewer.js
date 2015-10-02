@@ -89,6 +89,7 @@ $3Dmol.GLViewer = (function() {
         // UI variables
         var cq = new $3Dmol.Quaternion(0, 0, 0, 1);
         var dq = new $3Dmol.Quaternion(0, 0, 0, 1);
+        var animated = false;
         var isDragging = false;
         var mouseStartX = 0;
         var mouseStartY = 0;
@@ -1369,6 +1370,7 @@ $3Dmol.GLViewer = (function() {
          * viewer.animate({interval: 75, loop: "backward", reps: 30});
          */
         this.animate = function(options) {
+            animated = true;
             var interval = 100;
             var loop = "forward";
             var reps = 0;
@@ -1418,12 +1420,30 @@ $3Dmol.GLViewer = (function() {
                     inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
                 }
                 that.render();
-                if (++displayCount == displayMax) { //never true when reps 0 bc preincrement
+                if (++displayCount == displayMax || !that.isAnimated()) {
                     clearInterval(intervalID);
                 }
             };
             var intervalID = setInterval( function() { display(loop); }, interval);
         };
+        
+        /**
+         * Stop animation of all models in viewer
+         * @function $3Dmol.GLViewer#stopAnimate
+         */
+        this.stopAnimate = function() {
+            animated = false;
+        };
+        
+        /**
+         * Return true if viewer is currently being animated, false otherwise
+         * @function $3Dmol.GLViewer#isAnimated
+         * @return {boolean}
+         */
+        this.isAnimated = function() {
+            return animated;
+        };
+        
 
         /**
          * Create and add model to viewer, given molecular data and its format 
