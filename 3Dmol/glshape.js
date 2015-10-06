@@ -401,15 +401,26 @@ $3Dmol.GLShape = (function() {
         var offset, v, a, b, c, i, il;
         var vertexArray = geoGroup.vertexArray;
         var colorArray = geoGroup.colorArray;
-        var r = color.r;
-        var g = color.g;
-        var b = color.b;
+        
+        if(! (color.constructor === Array)) {
+            var r = color.r;
+            var g = color.g;
+            var b = color.b;
+        }
         for (i = 0, il = geoGroup.vertices; i < il; ++i) {
             offset = i * 3;
             v = vertexArr[i];
             vertexArray[offset] = v.x;
             vertexArray[offset + 1] = v.y;
             vertexArray[offset + 2] = v.z;
+            
+            if( color.constructor === Array) {
+                var c = color[i];
+                var r = c.r;
+                var g = c.g;
+                var b = c.b;
+            }
+            
             colorArray[offset] = r;
             colorArray[offset + 1] = g;
             colorArray[offset + 2] = b;
@@ -497,7 +508,7 @@ $3Dmol.GLShape = (function() {
         //var firstgeo = geo.geometryGroups.length;
         var splits = $3Dmol.splitMesh(mesh);
         for(var i = 0, n = splits.length; i < n; i++) {
-            addCustomGeo(shape, geo, splits[i], color, customSpec.clickable);
+            addCustomGeo(shape, geo, splits[i], splits[i].colorArr ? splits[i].colorArr : color, customSpec.clickable);
         } 
     }; 
 
@@ -621,6 +632,7 @@ $3Dmol.GLShape = (function() {
 
         /**
          * Creates a custom shape from supplied vertex and face arrays
+         * @function $3Dmol.GLShape#addCustom
          * @param {CustomSpec} customSpec
          * @return {$3Dmol.GLShape}
          */
@@ -637,6 +649,7 @@ $3Dmol.GLShape = (function() {
 
         /**
          * Creates a sphere shape
+         * @function $3Dmol.GLShape#addSphere
          * @param {SphereSpec} sphereSpec
          * @return {$3Dmol.GLShape}
          */
@@ -672,6 +685,7 @@ $3Dmol.GLShape = (function() {
 
         /**
          * Creates a cylinder shape
+         * @function $3Dmol.GLShape#addCylinder
          * @param {CylinderSpec} cylinderSpec
          * @return {$3Dmol.GLShape}
          */
@@ -709,6 +723,7 @@ $3Dmol.GLShape = (function() {
 
         /**
          * Creates a line shape
+         * @function $3Dmol.GLShape#addLine         
          * @param {LineSpec} lineSpec
          * @return {$3Dmol.GLShape}
          */
@@ -748,6 +763,7 @@ $3Dmol.GLShape = (function() {
         }
         /**
          * Creates an arrow shape
+         * @function $3Dmol.GLShape#addArrow        
          * @param {ArrowSpec} arrowSpec
          * @return {$3Dmol.GLShape}
          */
@@ -798,6 +814,7 @@ $3Dmol.GLShape = (function() {
         
         /**
          * Create isosurface from voluemetric data.
+         * @function $3Dmol.GLShape#addIsosurface         
          * @param {$3Dmol.VolumeData} data - volumetric input data
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
          */
@@ -984,6 +1001,7 @@ $3Dmol.splitMesh = function(mesh) {
         
         var nverts = mesh.vertexArr.length;
         var slices = [{vertexArr: [], normalArr: [], faceArr: []}];
+        if(mesh.colorArr) slices.colorArr = [];
         var vertSlice = []; //indexed by original vertex to get current slice
         var vertIndex =[]; //indexed by original vertex to get index within slice
         var currentSlice = 0;
@@ -1002,6 +1020,7 @@ $3Dmol.splitMesh = function(mesh) {
                     vertIndex[v] = slice.vertexArr.length;
                     slice.vertexArr.push(mesh.vertexArr[v]);
                     if(mesh.normalArr && mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
+                    if(mesh.colorArr && mesh.colorArr[v]) slice.colorArr.push(mesh.colorArr[v]);
                 }
                 slice.faceArr.push(vertIndex[v]);
             }
@@ -1009,6 +1028,7 @@ $3Dmol.splitMesh = function(mesh) {
             if(slice.vertexArr.length >= MAXVERT) {
                 //new slice
                 slices.push({vertexArr: [], normalArr: [], faceArr: []});
+                if(mesh.colorArr) slices.colorArr = [];
                 currentSlice++;
             }
         }
