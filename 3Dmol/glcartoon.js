@@ -9,7 +9,7 @@ var $3Dmol = $3Dmol || {};
 
 /**@typedef CartoonStyleSpec
  * @prop {ColorSpec} color - strand color, may specify as 'spectrum'
- * @prop {string} style - style of cartoon rendering (default, trace, oval, rectangle, parabola)
+ * @prop {string} style - style of cartoon rendering (trace, oval, rectangle (default), parabola, edged)
  * @prop {boolean} ribbon - whether to use constant strand width, disregarding secondary structure; use thickness to adjust radius
  * @prop {boolean} arrows - whether to add arrows showing beta-sheet directionality; does not apply to trace or ribbon
  * @prop {boolean} tubes - whether to display alpha helices as simple cylinders; does not apply to trace
@@ -749,6 +749,8 @@ $3Dmol.drawCartoon = (function() {
     var drawStrip = function(group, points, colors, div, thickness, opacity, shape)
     {    
         if (!shape || shape === "default")
+            shape = "rectangle";
+        if(shape === 'edged')
             drawPlainStrip(group, points, colors, div, thickness, opacity);
         else if (shape === "rectangle" || shape === "oval" || shape === "parabola")
             drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
