@@ -69,6 +69,12 @@ $3Dmol.Color.prototype = {
 
             else if (typeof val === 'number')
                 this.setHex(val);
+            
+            else if (typeof val === 'object' && "r" in val && "g" in val && "b" in val) {
+                this.r = val.r;
+                this.g = val.g;
+                this.b = val.b;
+            }
     },
     
     setHex: function(hex) {

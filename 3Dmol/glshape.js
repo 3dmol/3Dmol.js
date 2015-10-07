@@ -22,16 +22,32 @@ $3Dmol.GLShape = (function() {
 
         var C = color || $3Dmol.CC.color(color);
         geo.colorsNeedUpdate = true;
+        
+        var r,g,b;
+        if(! (color.constructor === Array)) {
+            r = color.r;
+            g = color.g;
+            b = color.b;
+        }
 
-        for ( var g in geo.geometryGroups) {
 
-            var geoGroup = geo.geometryGroups[g];
+        for ( var gg in geo.geometryGroups) {
+
+            var geoGroup = geo.geometryGroups[gg];
             var colorArr = geoGroup.colorArray;
 
             for (var i = 0, il = geoGroup.vertices; i < il; ++i) {
-                colorArr[i * 3] = C.r;
-                colorArr[i * 3 + 1] = C.g;
-                colorArr[i * 3 + 2] = C.b;
+            
+                if( color.constructor === Array) {
+                    var c = color[i];
+                    r = c.r;
+                    g = c.g;
+                    b = c.b;
+                }
+
+                colorArr[i * 3] = r;
+                colorArr[i * 3 + 1] = g;
+                colorArr[i * 3 + 2] = b;
             }
         }
 
