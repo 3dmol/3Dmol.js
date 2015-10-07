@@ -278,7 +278,7 @@ $3Dmol.GLModel = (function() {
             
             return v;
             
-            v.multiplyScalar(r * 1.5);
+            //v.multiplyScalar(r * 1.5);
 
         }
         

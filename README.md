@@ -16,6 +16,12 @@ With 3Dmol.js, you can add beautifully rendered molecular visualizations to your
 See the [documentation](http://3dmol.csb.pitt.edu/doc/index.html) to learn how to use 3Dmol.js as a hosted viewer, embeddable viewer, or as a 
 component of a larger application.
 
+##Building
+
+The code can be built using [grunt](http://gruntjs.com/).
+
+    grunt build
+
 ##Contact
 
 Please address any questions or concerns to [dkoes@pitt.edu](mailto:dkoes+3dmol@pitt.edu).  
