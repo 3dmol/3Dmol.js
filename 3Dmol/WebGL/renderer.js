@@ -141,6 +141,7 @@ $3Dmol.Renderer = function(parameters) {
     // initialize
 
     var _gl;
+    var _ext;
 
     initGL();
 
@@ -599,6 +600,7 @@ $3Dmol.Renderer = function(parameters) {
         var prefix_vertex = [ prefix ].join("\n");
 
         var prefix_fragment = [
+                parameters.fragdepth ? "#extension GL_EXT_frag_depth: enable" : "",
                 parameters.wireframe ? "#define WIREFRAME 1" : "", prefix ]
                 .join("\n");
 
@@ -685,7 +687,8 @@ $3Dmol.Renderer = function(parameters) {
         }
 
         parameters = {
-            wireframe : material.wireframe
+            wireframe : material.wireframe,
+            fragdepth : material.imposter
         };
 
         material.program = buildProgram(material.fragmentShader,
@@ -733,7 +736,7 @@ $3Dmol.Renderer = function(parameters) {
                 object._modelViewMatrix.elements);
         _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false,
                 object._normalMatrix.elements);
-
+        
         // Send projection matrix to uniform variable in shader
         if (refreshMaterial) {
 
@@ -1620,7 +1623,7 @@ $3Dmol.Renderer = function(parameters) {
 
             console.error(error);
         }
-        var ext = _gl.getExtension('EXT_frag_depth');
+        _ext = _gl.getExtension("EXT_frag_depth");
     }
 
     function setDefaultGLState() {

@@ -549,19 +549,19 @@ $3Dmol.GLModel = (function() {
             }
             
             normalArray[start+0] = -radius;
-            normalArray[start+1] = -radius;
+            normalArray[start+1] = radius;
             normalArray[start+2] = 0;
             
             normalArray[start+3] = -radius;
-            normalArray[start+4] = radius;
+            normalArray[start+4] = -radius;
             normalArray[start+5] = 0;
             
             normalArray[start+6] = radius;
-            normalArray[start+7] = radius;
+            normalArray[start+7] = -radius;
             normalArray[start+8] = 0;
             
             normalArray[start+9] = radius;
-            normalArray[start+10] = -radius;
+            normalArray[start+10] = radius;
             normalArray[start+11] = 0;
             
             geoGroup.vertices += 4;
