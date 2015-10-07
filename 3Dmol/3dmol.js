@@ -247,7 +247,6 @@ return ret;
 
 
 /**
- * @function $3Dmol.getExtent
  * computes the bounding box around the provided atoms
  * @param {AtomSpec[]} atomlist
  * @return {Array}

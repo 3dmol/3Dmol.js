@@ -66,19 +66,29 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 // in an attempt to reduce memory overhead, cache all $3Dmol.Colors
 // this makes things a little faster
 $3Dmol.CC = {
-    cache : {},
-    color : function(hex) {
-
+    cache : {0:new $3Dmol.Color(0)},
+    color : function color_(hex) {
+        // Undefined values default to black
+        if(!hex)
+            return this.cache[0];
+        // cache hits
         if(typeof(this.cache[hex]) !== "undefined") {
             return this.cache[hex];
         }
-        else if(hex instanceof $3Dmol.Color) {
-            return hex;
-        } else {
-            hex = this.getHex(hex);
+        // arrays
+        else if(hex && hex.constructor === Array) {
+            // parse elements recursively
+            return hex.map(color_,this);
+        }
+        // numbers and hex strings
+        hex = this.getHex(hex);
+        if(typeof hex === 'number') {
             var c = new $3Dmol.Color(hex);
             this.cache[hex] = c;
             return c;
+        } else {
+            // pass through $3Dmol.Color & other objects
+            return hex;
         }
     },
  
