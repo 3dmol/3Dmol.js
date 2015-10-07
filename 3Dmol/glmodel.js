@@ -1245,7 +1245,8 @@ $3Dmol.GLModel = (function() {
                     if (parsedAtoms[i].length != 0)
                         frames.push(parsedAtoms[i]);
                 }
-                atoms = frames[0];
+                if(frames[0])
+                    atoms = frames[0];
             }
             
             else { //subsequent calls

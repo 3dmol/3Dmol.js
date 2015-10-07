@@ -411,9 +411,8 @@ $3Dmol.Parsers = (function() {
             var start = atoms[atoms.length-1].length;
             var end = start + atomCount;
             var i, line;
-            for (i = start; i < end; i++) {
+            for (i = start; i < end; i++,offset++) {
                 line = lines[offset];
-                offset++;
                 var atom = {};
                 var elem = line.substr(31, 3).replace(/ /g, "");
                 atom.atom = atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
@@ -433,9 +432,8 @@ $3Dmol.Parsers = (function() {
                 }
             }
 
-            for (i = 0; i < bondCount; i++) {
+            for (i = 0; i < bondCount; i++,offset++) {
                 line = lines[offset];
-                offset++;
                 var from = serialToIndex[parseInt(line.substr(0, 3)) - 1 + start];
                 var to = serialToIndex[parseInt(line.substr(3, 3)) - 1 + start];
                 var order = parseInt(line.substr(6, 3));

@@ -29,22 +29,22 @@
                     var sdfs = $('#docked').val().split('$$$$\n');
                     var sdfmodels = [];
                     for(var i = 0; i < sdfs.length; i++) {
-						if(sdfs[i].length > 0) {
-							var m = glviewer.addModel(sdfs[i],"sdf");
-							m.setStyle({},{stick:{colorscheme:"greenCarbon"}});
-							m.hide();
-							sdfmodels.push(m);
-						}
-					}
-					
-					var currmol = 0;
-					var display = function() {
-						sdfmodels[currmol].hide();
-						currmol = (currmol+1) % sdfmodels.length;
-						sdfmodels[currmol].show();
-						glviewer.render();
-					};
-					setInterval(display, 500);
+                        if(sdfs[i].length > 0) {
+                            var m = glviewer.addModel(sdfs[i],"sdf");
+                            m.setStyle({},{stick:{colorscheme:"greenCarbon"}});
+                            m.hide();
+                            sdfmodels.push(m);
+                        }
+                    }
+                    
+                    var currmol = 0;
+                    var display = function() {
+                        sdfmodels[currmol].hide();
+                        currmol = (currmol+1) % sdfmodels.length;
+                        sdfmodels[currmol].show();
+                        glviewer.render();
+                    };
+                    setInterval(display, 500);
                     glviewer.render();
                     
                     
@@ -60,7 +60,7 @@
     </head>    
     <body>
          <div id='gldiv' style="width: 100%; height: 100vh;"></div>       
-<textarea style="display: none;" id="docked">
+<textarea style="display: none;" id="docked">dummy
  OpenBabel11041414293D
 
  43 45  0  0  0  0  0  0  0  0999 V2000
