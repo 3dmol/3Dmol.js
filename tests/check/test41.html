@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <script src="../../build/3Dmol.js"></script>
+    <style>
+      table td { text-align: center; }
+      table th {padding-top: 1em;}
+    </style>
+  </head>
+
+  <body>
+    <script>
+      $(document).ready(function() {
+          //install a right-click handler on every canvas to export png
+          $('canvas').bind('contextmenu',function(e) {
+              var dt = e.currentTarget.toDataURL('image/png');
+              window.location = dt;
+          });
+        });
+        
+    </script>
+
+    <table width="100%">
+      <tr>
+        <td colspan=2 height=200px>
+          41 Tests manually adding minimal atom objects to a model
+        </td>
+      </tr>
+      <tr>
+        <td width="50%">
+<div id="test40" style="width: 400px; height: 400px; position: relative;"></div>
+        </td>
+        <script>
+            var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
+            var viewer = $3Dmol.createViewer($("#test40"));
+            viewer.setBackgroundColor(0xffffffff);
+            m = viewer.addModel();
+            m.addAtoms(atoms);
+            m.setStyle({},{stick:{}});
+            viewer.zoomTo();
+            viewer.render();
+        </script>
+        <td width="50%"><img src="imgs/test41.png"></td>
+      </tr>
+    </table>
+
+  </body>
+</html>

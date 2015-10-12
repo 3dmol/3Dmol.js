@@ -1489,6 +1489,10 @@ $3Dmol.GLModel = (function() {
             // mapping from old index to new index
             var i;
             for(i = 0; i < newatoms.length; i++) {
+                if(typeof(newatoms[i].index) == "undefined")
+                    newatoms[i].index = i;
+                if(typeof(newatoms[i].serial) == "undefined")
+                    newatoms[i].serial = i;
                 indexmap[newatoms[i].index] = start+i;
             }
             
@@ -1500,13 +1504,18 @@ $3Dmol.GLModel = (function() {
                 a.index = nindex;
                 a.bonds = [];
                 a.bondOrder = [];
+                a.model = id;
+                a.style = a.style || defaultAtomStyle;
+                if(typeof(a.color) == "undefined")
+                    a.color = ElementColors[a.elem] || defaultColor;                
                 // copy over all bonds contained in selection,
                 // updating indices appropriately
-                for(var j = 0; j < olda.bonds.length; j++) {
+                var nbonds = olda.bonds ? olda.bonds.length : 0;
+                for(var j = 0; j < nbonds; j++) {
                     var neigh = indexmap[olda.bonds[j]];
                     if(typeof(neigh) != "undefined") {
                         a.bonds.push(neigh);
-                        a.bondOrder.push(olda.bondOrder[j]);
+                        a.bondOrder.push(olda.bondOrder ? olda.bondOrder[j] : 1);
                     }                
                 }
                 atoms.push(a);
@@ -1551,6 +1560,12 @@ $3Dmol.GLModel = (function() {
          * @param {boolean} add - if true, add to current style, don't replace
          */
         this.setStyle = function(sel, style, add) {
+            
+            if(typeof(style) === 'undefined' && typeof(add) == 'undefined') {
+                //if a single argument is provided, assume it is a style and select all
+                style = sel;
+                sel = {};
+            }
             
             // report to console if this is not a valid selector
             var s;
