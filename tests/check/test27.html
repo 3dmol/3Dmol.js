@@ -23,7 +23,7 @@
     <table width="100%">
       <tr>
         <td colspan=2 height=200px>
-          27 pqr partialCharge
+          27 pqr partialCharge with reversed colormap
         </td>
       </tr>
       <tr>
@@ -38,10 +38,11 @@
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
                   $.get("volData/1fas.cube",function(volumedata){
+                      var range = $3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge');
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {
                           opacity:0.85,
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"),
-                          volscheme: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))
+                          volscheme: new $3Dmol.Gradient.ROYGB(range[1],range[0]) //reverse color order
                       },{});
                   });
                   viewer.zoomTo();
