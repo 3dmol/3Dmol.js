@@ -243,7 +243,7 @@ $3Dmol.Parsers = (function() {
      */
     parsers.cube = parsers.CUBE = function(str, options) {
         var atoms = [[]];
-        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
+        var lines = str.replace(/^\s+/, "").split(/[\n\r|\r]+/);
 
         if (lines.length < 6)
             return atoms;
@@ -310,7 +310,7 @@ $3Dmol.Parsers = (function() {
     parsers.xyz = parsers.XYZ = function(str, options) {
         
         var atoms = [[]];
-        var lines = str.split(/\r?\n/);
+        var lines = str.split(/\r?\n|\r/);
         while (lines.length > 0) {
             if (lines.length < 3)
                 break;
@@ -393,7 +393,7 @@ $3Dmol.Parsers = (function() {
         var noH = false;
         if (typeof options.keepH !== "undefined")
             noH = !options.keepH;
-        var lines = str.split(/\r?\n/);
+        var lines = str.split(/\r?\n|\r/);
         
         while(lines.length > 0) { 
             if (lines.length < 4)
@@ -563,7 +563,7 @@ $3Dmol.Parsers = (function() {
         }
 
 
-        var lines = str.split(/\r?\n/);
+        var lines = str.split(/\r?\n|\r/);
         // Filter text to remove comments, trailing spaces, and empty lines
         var linesFiltered = [];
         var trimDisabled = false;
@@ -945,7 +945,7 @@ $3Dmol.Parsers = (function() {
         // assert (mol_pos < atom_pos), "Unexpected formatting of mol2 file
         // (expected 'molecule' section before 'atom' section)";
 
-        var lines = str.substr(mol_pos, str.length).split(/\r?\n/);
+        var lines = str.substr(mol_pos, str.length).split(/\r?\n|\r/);
         
         while(lines.length > 0) { 
         
@@ -1190,7 +1190,7 @@ $3Dmol.Parsers = (function() {
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
-        var lines = str.split(/\r?\n/);
+        var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
@@ -1428,7 +1428,7 @@ $3Dmol.Parsers = (function() {
         var computeStruct = !options.noSecondaryStructure;
 
         var serialToIndex = []; // map from pdb serial to index in atoms
-        var lines = str.split(/\r?\n/);
+        var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
