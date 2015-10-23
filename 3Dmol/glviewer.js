@@ -20,17 +20,22 @@ $3Dmol.GLViewer = (function() {
 
     function GLViewer(element, config) { 
         // set variables
-    	config = config || {};
-    	var callback = config.callback;
-    	var defaultcolors = config.defaultcolors;    	
-        if(!defaultcolors)
-            defaultcolors = $3Dmol.elementColors.defaultColors;
-    	var nomouse = config.nomouse;
-    	var bgColor = 0;
+	    	config = config || {};
+	    	var callback = config.callback;
+	    	var defaultcolors = config.defaultcolors;    	
+	        if(!defaultcolors)
+	            defaultcolors = $3Dmol.elementColors.defaultColors;
+	    	var nomouse = config.nomouse;
+	    	var bgColor = 0;
+	    	
+	    	if(typeof(config.backgroundColor) != undefined) {
+	            bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
+	    	}
     	
-    	if(typeof(config.backgroundColor) != undefined) {
-            bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
-    	}
+	    	var camerax = 0;
+	    	if(typeof(config.camerax) != undefined) {
+	    		camerax = parseFloat(config.camerax);
+	    	}
         var _viewer = this;
         var container = element;
         var id = container.id;
@@ -69,7 +74,7 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.zIndex = "0";
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
-        camera.position = new $3Dmol.Vector3(0, 0, CAMERA_Z);
+        camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
         var lookingAt = new $3Dmol.Vector3();
         camera.lookAt(lookingAt);
 
