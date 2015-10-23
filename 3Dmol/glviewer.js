@@ -1498,15 +1498,15 @@ $3Dmol.GLViewer = (function() {
             options.multimodel = true;
             options.frames = true;
 
-            var m = new $3Dmol.GLModel(models.length, defaultcolors);
-            m.addMolData(data, format, options);
-            var modelatoms = m.getFrames();
-            this.removeModel(m);
-            
+            var modelatoms = $3Dmol.GLModel.parseMolData(data, format, options);
+
             for (var i = 0; i < modelatoms.length; i++) {
                 var newModel = new $3Dmol.GLModel(models.length, defaultcolors);
+                newModel.setAtomDefaults(modelatoms[i]);
                 newModel.addFrame(modelatoms[i]);
                 newModel.setFrame(0);
+                newModel.setModelData(modelatoms.modelData[i]);
+                newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
                 models.push(newModel);
             }
             
