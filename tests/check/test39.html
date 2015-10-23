@@ -17,40 +17,35 @@
               var dt = e.currentTarget.toDataURL('image/png');
               window.location = dt;
           });
-      });
+        });
     </script>
 
     <table width="100%">
       <tr>
         <td colspan=2 height=200px>
-          27 pqr partialCharge with reversed colormap
+          39 Animate viewer (should be moving) <code>2 models with different number of frames</code>
         </td>
       </tr>
       <tr>
         <td width="50%">
-          <div id="test27" style="width: 400px; height: 400px; position: relative;"></div>
+<div id="test39" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
           (function() {
-              var viewer = $3Dmol.createViewer($("#test27"));
+              var viewer = $3Dmol.createViewer($("#test39"));
               viewer.setBackgroundColor(0xffffffff);
-
-              $.get('volData/1fas.pqr', function(data){
-                  viewer.addModel(data, "pqr");
-                  $.get("volData/1fas.cube",function(volumedata){
-                      var range = $3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge');
-                      viewer.addSurface($3Dmol.SurfaceType.VDW, {
-                          opacity:0.85,
-                          voldata: new $3Dmol.VolumeData(volumedata, "cube"),
-                          volscheme: new $3Dmol.Gradient.ROYGB(range[1],range[0]) //reverse color order
-                      },{});
-                  });
-                  viewer.zoomTo();
+              var m1 = $3Dmol.download("pdb:2V0E",viewer,{multimodel:true, frames:true},function(){
+                var m2 = $3Dmol.download("pdb:2MA0",viewer,{multimodel:true, frames:true},function(){
+                  
+                  m1.setStyle({}, {stick:{color:"red"}});
+                  m2.setStyle({}, {cartoon:{color:"blue"}});
+                  viewer.animate({loop:"forward"});
                   viewer.render();
+                });
               });
           })();
         </script>
-        <td width="50%"><img src="imgs/test27.png"></td>
+        <td width="50%"><img src="imgs/test39.png"></td>
       </tr>
     </table>
 

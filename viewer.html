@@ -155,6 +155,10 @@
                             } else { //url
                                 //try to extract extension
                                 type = data.substr(data.lastIndexOf('.') + 1);
+                                if(type == 'gz') {
+                                    var base = data.substr(0,data.lastIndexOf('.'));
+                                    type = base.substr(base.lastIndexOf('.')) + '.gz';
+                                }
                             }
                             if (cmds[0] && cmds[0].indexOf('type=') == 0) {
                                 type = cmds[0].split('=')[1];

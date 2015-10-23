@@ -94,6 +94,7 @@ $3Dmol.GLViewer = (function() {
         // UI variables
         var cq = new $3Dmol.Quaternion(0, 0, 0, 1);
         var dq = new $3Dmol.Quaternion(0, 0, 0, 1);
+        var animated = false;
         var isDragging = false;
         var mouseStartX = 0;
         var mouseStartY = 0;
@@ -1362,16 +1363,51 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
+        
+        /**
+         * Sets the atomlists of all models in the viewer to specified frame
+         * Sets to last frame if framenum out of range
+         * 
+         * @function $3Dmol.GLViewer#setFrame
+         * @param {number} framenum - each model in viewer has their atoms set to this index in frames list
+         */
+        this.setFrame = function(framenum) {
+            for (var i = 0; i < models.length; i++) {
+                models[i].setFrame(framenum);
+            }
+        };
+        
+        /**
+         * Returns the number of frames that the model with the most frames in the viewer has
+         * 
+         * @function $3Dmol.GLViewer#getFrames
+         * @return {number}
+         */
+        this.getFrames = function() {
+            var mostFrames = 0;
+            var modelNum = 0;
+            for (var i = 0; i < models.length; i++) {
+                if (models[i].getFrames().length > mostFrames) {
+                    modelNum = i;
+                    mostFrames = models[i].getFrames().length;
+                }
+            }
+            return mostFrames;
+        };
+        
 
         /**
-         * Animate model from frames
+         * Animate all models in viewer from their respective frames
          * @function $3Dmol.GLViewer#animate
-         * @param {Object} options -
-         *      interval - speed of animation (100 by default)
-         *      loop - forward, backward, or backAndForth (forward by default)
-         *      reps - how many repetitions (0 by default, indicates infinite reps)
+         * @param {Object} options - can specify interval (speed of animation), loop (direction
+         * of looping, 'backward', 'forward' or 'backAndForth') and reps (numer of repetitions, 0 indicates infinite loop)
+         *      
+         * @example
+         * viewer.addModelAsFrames(data, "pdb");
+         * viewer.animate({interval: 75, loop: "backward", reps: 30});
          */
         this.animate = function(options) {
+            animated = true;
             var interval = 100;
             var loop = "forward";
             var reps = 0;
@@ -1385,16 +1421,7 @@ $3Dmol.GLViewer = (function() {
             if (options.reps) {
                 reps = options.reps;
             }
-                
-            var mostFrames = 0;
-            var modelNum = 0;
-            for (var i = 0; i < models.length; i++) {
-                if (models[i].getFrames().length > mostFrames) {
-                    modelNum = i;
-                    mostFrames = models[i].getFrames().length;
-                }
-            }
-
+            var mostFrames = this.getFrames();
             var that = this;
             var currFrame = 0;
             var inc = 1;
@@ -1402,31 +1429,43 @@ $3Dmol.GLViewer = (function() {
             var displayMax = mostFrames * reps;
             var display = function(direction) {
                 if (direction == "forward") {
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame(currFrame);
-                    }
+                    that.setFrame(currFrame);
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else if (direction == "backward") {
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame((mostFrames-1) - currFrame);
-                    }
+                    that.setFrame((mostFrames-1) - currFrame);
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else { //back and forth
-                    for (var i = 0; i < models.length; i++) {
-                        models[i].setFrame(currFrame);
-                    }
+                    that.setFrame(currFrame);
                     currFrame += inc;
                     inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
                 }
                 that.render();
-                if (++displayCount == displayMax) { //never true when reps 0 bc preincrement
+                if (++displayCount == displayMax || !that.isAnimated()) {
                     clearInterval(intervalID);
                 }
             };
             var intervalID = setInterval( function() { display(loop); }, interval);
         };
+        
+        /**
+         * Stop animation of all models in viewer
+         * @function $3Dmol.GLViewer#stopAnimate
+         */
+        this.stopAnimate = function() {
+            animated = false;
+        };
+        
+        /**
+         * Return true if viewer is currently being animated, false otherwise
+         * @function $3Dmol.GLViewer#isAnimated
+         * @return {boolean}
+         */
+        this.isAnimated = function() {
+            return animated;
+        };
+        
 
         /**
          * Create and add model to viewer, given molecular data and its format 
@@ -1438,7 +1477,6 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLModel}
          */
         this.addModel = function(data, format, options) {
-
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
             models.push(m);
@@ -1447,8 +1485,8 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Create and add models to viewer, given multimodel file and its format 
-         * (pdb, sdf, xyz, or mol2)
+         * Given multimodel file and its format, add atom data to the viewer as separate models
+         * and return list of these models
          * 
          * @function $3Dmol.GLViewer#addModels
          * @param {string} data - Input data
@@ -1456,13 +1494,19 @@ $3Dmol.GLViewer = (function() {
          * @return {Array<$3Dmol.GLModel>}
          */
         this.addModels = function(data, format, options) {
+            options = options || {};
+            options.multimodel = true;
+            options.frames = true;
 
-            var m = this.addModelsAsFrames(data, format, options);
-            var modelAtoms = m.getFrames();
+            var m = new $3Dmol.GLModel(models.length, defaultcolors);
+            m.addMolData(data, format, options);
+            var modelatoms = m.getFrames();
             this.removeModel(m);
-            for (var i = 0; i < modelAtoms.length; i++) {
+            
+            for (var i = 0; i < modelatoms.length; i++) {
                 var newModel = new $3Dmol.GLModel(models.length, defaultcolors);
-                newModel.addAtoms(modelAtoms[i]);
+                newModel.addFrame(modelatoms[i]);
+                newModel.setFrame(0);
                 models.push(newModel);
             }
             
@@ -1470,9 +1514,9 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Create and add model to viewer. Given multimodel file and its format,
-         * models are stored in a list of frames
-         * (pdb, sdf, xyz, or mol2)
+         * Create and add model to viewer. Given multimodel file and its format, 
+         * different atomlists are stored in model's frame
+         * property and model's atoms are set to the 0th frame
          * 
          * @function $3Dmol.GLViewer#addModelsAsFrames
          * @param {string} data - Input data
@@ -1480,9 +1524,8 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLModel}
          */
         this.addModelsAsFrames = function(data, format, options) {
-            
             options = options || {};
-            options.allModels = true;
+            options.multimodel = true;
             options.frames = true;
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
@@ -1494,7 +1537,6 @@ $3Dmol.GLViewer = (function() {
         /**
          * Create and add model to viewer. Given multimodel file and its format,
          * all atoms are added to one model
-         * (pdb, sdf, xyz, or mol2)
          * 
          * @function $3Dmol.GLViewer#addAsOneMolecule
          * @param {string} data - Input data
@@ -1503,8 +1545,11 @@ $3Dmol.GLViewer = (function() {
          */
         this.addAsOneMolecule = function(data, format, options) {
             options = options || {};
-            options.oneMolecule = true;
-            var m = this.addModel(data, format, options);
+            options.multimodel = true;
+            options.onemol = true;
+            var m = new $3Dmol.GLModel(models.length, defaultcolors);
+            m.addMolData(data, format, options);
+            models.push(m);
             
             return m;
         };
@@ -1614,7 +1659,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example
          * viewer.setStyle({}, {stick:{}}); //set all atoms to stick
-         * viewer.setStyle({chain: 'B'}, {carton: {color: spectrum}}); //set chain B to rainbow cartoon
+         * viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'}}); //set chain B to rainbow cartoon
          */
         this.setStyle = function(sel, style) {
             applyToModels("setStyle", sel, style, false);
@@ -1629,6 +1674,22 @@ $3Dmol.GLViewer = (function() {
          */
         this.addStyle = function(sel, style) {
             applyToModels("setStyle", sel, style, true);
+        };
+
+        /**
+         * Set click-handling properties to all selected atoms
+         * 
+         * @function $3Dmol.GLViewer#setClickable
+         * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
+         * @param {boolean} clickable - whether click-handling is enabled for the selection
+         * @param {function} callback - function called when an atom in the selection is clicked
+         * 
+         * @example
+         * viewer.setClickable({}, false); // disable click-handling for entire viewer
+         * viewer.setClickable({chain: 'B'}, true, function(){ console.log(this.elem); }); // chain B prints the clicked element to console
+         */
+        this.setClickable = function(sel, clickable, callback) {
+            applyToModels("setClickable", sel, clickable, callback);
         };
 
         /**

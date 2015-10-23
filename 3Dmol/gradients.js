@@ -25,16 +25,23 @@ $3Dmol.Gradient.range = function() {};
  * @constructor
  * @implements {$3Dmol.Gradient}
  */
-$3Dmol.Gradient.RWB = function(min, max) {
-    
+$3Dmol.Gradient.RWB = function(min, max,mid) {
+    var mult = 1.0;
     if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
         //we were passed a single range
         max = min[1];
         min = min[0];
     }
+    if(max < min) { //reverse the order
+        mult = -1.0;
+        min *= -1.0;
+        max *= -1.0;
+    }
+        
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
         var lo, hi;
+        val = mult*val; //reverse if necessary
         if(range) {
             lo = range[0];
             hi = range[1];
@@ -51,6 +58,8 @@ $3Dmol.Gradient.RWB = function(min, max) {
         if(val > hi) val = hi;
         
         var middle = (hi+lo)/2;
+        if(typeof(mid) != 'undefined')
+            middle = mid; //allow user to specify midpoint
         var scale, color;
         
         //scale bottom from red to white
@@ -83,14 +92,22 @@ $3Dmol.Gradient.RWB = function(min, max) {
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.ROYGB = function(min, max) {
+    var mult = 1.0;
     if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
         //we were passed a single range
         max = min[1];
         min = min[0];
     }
+    if(max < min) { //reverse the order
+        mult = -1.0;
+        min *= -1.0;
+        max *= -1.0;
+    }
+    
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
         var lo, hi;
+        val = mult*val;
         if(range) {
             lo = range[0];
             hi = range[1];
@@ -151,14 +168,21 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.Sinebow = function(min, max) {
+    var mult = 1.0;
     if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
         //we were passed a single range
         max = min[1];
         min = min[0];
     }
+    if(max < min) { //reverse the order
+        mult = -1.0;
+        min *= -1.0;
+        max *= -1.0;
+    }
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
         var lo, hi;
+        val = mult*val;
         if(range) {
             lo = range[0];
             hi = range[1];

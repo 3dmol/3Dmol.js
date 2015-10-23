@@ -33,7 +33,7 @@ $3Dmol.ShaderUtils = {
 
 $3Dmol.ShaderLib = { 
     'basic' : {
-        fragmentShader : [
+        fragmentShader : [                    
 "uniform mat4 viewMatrix;",
 "uniform vec3 cameraPosition;",
 "uniform vec3 diffuse;",
@@ -102,19 +102,25 @@ $3Dmol.ShaderLib = {
 "uniform vec3 fogColor;",
 "uniform float fogNear;",
 "uniform float fogFar;",
+"uniform float uDepth;",
 
 "varying vec3 vColor;",
 "varying vec2 mapping;",
+"varying float rval;",
 
 "void main() {",
 "    float lensqr = dot(mapping,mapping);",
-"    if(lensqr > 2.0)",
+"    float rsqr = rval*rval;",
+"    if(lensqr > rsqr)",
 "       discard;",
-"    float w = sqrt(2.0 - lensqr);",
-"    float z = sqrt(sqrt(2.0)-lensqr);",
-"    gl_FragDepthEXT = -.1*z;",
-"    gl_FragColor = vec4( w*vColor, 1 );",
-    
+"    float z = sqrt(rsqr-lensqr);",
+"    float zscale = z/rval;",
+"    gl_FragColor = vec4(zscale*vColor, 1 );", //TODO: directional lighting
+"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
+"    gl_FragDepthEXT = gl_FragCoord.z-z/depth;",
+"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
+
+"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
 
 "}"
@@ -135,14 +141,16 @@ $3Dmol.ShaderLib = {
 
 "varying vec2 mapping;",
 "varying vec3 vColor;",
+"varying float rval;",
 
 "void main() {",
 
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
-"    vec4 adjust = projectionMatrix*vec4(normal, 1.0);  adjust.y *= -1.0; adjust.z = 0.0; adjust.w = 0.0;",
+"    vec4 adjust = projectionMatrix* vec4(normal,0.0); adjust.z = 0.0; adjust.w = 0.0;",
 "    mapping = normal.xy;",
+"    rval = abs(normal.x);",
 "    gl_Position = projPosition+adjust;",
 
 "}"
@@ -154,7 +162,7 @@ $3Dmol.ShaderLib = {
             diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
-            fogFar: { type: 'f', value: 2000}
+            fogFar: { type: 'f', value: 2000},
         }
 
     },

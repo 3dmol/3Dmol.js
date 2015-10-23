@@ -125,9 +125,13 @@
 
 
 /**
- * Specification for adding custom shape
+ * Specification for adding custom shape. Extends {@link ShapeSpec}.
  * @typedef CustomShapeSpec
  * @augments ShapeSpec
+ * @prop {Array.<$3Dmol.Vector3>} vertexArr - List of vertex positions
+ * @prop {Array.<$3Dmol.Vector3>} normalArr - List of normal vectors for each vertex
+ * @prop {Array.<number>} faceArr - List of triangles to build the custom shape. Each triangle is defined by the indices of 3 vertices in vertexArr, so the array length should be 3 times the number of faces.
+ * @prop {ColorSpec | Array.<ColorSpec>} color - Either a single color for the whole object or an array specifying the color at each vertex.
  */
 
 /**

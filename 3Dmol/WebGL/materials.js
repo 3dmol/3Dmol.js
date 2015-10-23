@@ -285,6 +285,7 @@ $3Dmol.ImposterMaterial = function(parameters) {
   this.color = new $3Dmol.Color(0xffffff);
   this.ambient = new $3Dmol.Color(0xfffff);
   this.emissive = new $3Dmol.Color(0x000000);
+  this.imposter = true;
   
   //TODO: Which of these instance variables do I really need?
   this.wrapAround = false;

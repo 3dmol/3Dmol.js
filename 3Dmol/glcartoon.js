@@ -8,10 +8,13 @@ var $3Dmol = $3Dmol || {};
 
 
 /**@typedef CartoonStyleSpec
- * @prop {ColorSpec} color - solid color, may specify as 'spectrum'
- * @prop {string} style - style of cartoon rendering (default, trace, oval, rectangle, parabola)
+ * @prop {ColorSpec} color - strand color, may specify as 'spectrum'
+ * @prop {string} style - style of cartoon rendering (trace, oval, rectangle (default), parabola, edged)
+ * @prop {boolean} ribbon - whether to use constant strand width, disregarding secondary structure; use thickness to adjust radius
+ * @prop {boolean} arrows - whether to add arrows showing beta-sheet directionality; does not apply to trace or ribbon
+ * @prop {boolean} tubes - whether to display alpha helices as simple cylinders; does not apply to trace
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
- * @prop {number} width - cartoon strand width, default is secondary structure-dependent
+ * @prop {number} width - cartoon strand width, default is secondary structure-dependent; does not apply to trace or ribbon
  * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain with a warning outputted in the event of ambiguity
  * @prop {}
  * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
@@ -98,16 +101,17 @@ $3Dmol.drawCartoon = (function() {
         return ret;
     };
 
-    var drawThinStrip = function(group, p1, p2, colors, div) {
+    var drawThinStrip = function(group, p1, p2, colors, div, opacity) {
     
         var geo = new $3Dmol.Geometry(true);       
         var offset, vertoffset;
-        var color;
+        var color, colori;
 
         
         for ( var i = 0, lim = p1.length; i < lim; i++) {
             
-            color = $3Dmol.CC.color(colors[Math.round((i - 1) / div)]);
+            colori = Math.round(i*(colors.length-1)/lim);
+            color = $3Dmol.CC.color(colors[colori]);
            
             geoGroup = geo.updateGeoGroup(2);
             var vertexArray = geoGroup.vertexArray;
@@ -124,7 +128,11 @@ $3Dmol.drawCartoon = (function() {
             vertexArray[vertoffset+5] = p2[i].z;
             
             for (var j = 0; j < 6; ++j)
-                colorArray[vertoffset+3*j] = color.r; colorArray[vertoffset+1+3*j] = color.g; colorArray[vertoffset+2+3*j] = color.b;
+            {
+                colorArray[vertoffset+3*j] = color.r;
+                colorArray[vertoffset+1+3*j] = color.g;
+                colorArray[vertoffset+2+3*j] = color.b;
+            }
            
             if (i > 0) {
                 var faces = [offset, offset + 1, offset - 1, offset - 2];
@@ -167,7 +175,7 @@ $3Dmol.drawCartoon = (function() {
         len = points[0].length;
 
         if (!thickness) // if thickness is 0, we can use a smaller geometry than this function generates
-            return drawThinStrip(group, points[0], points[num-1], colors, div);
+            return drawThinStrip(group, points[0], points[num-1], colors, div, opacity);
 
 
         var geo = new $3Dmol.Geometry(true);
@@ -206,12 +214,13 @@ $3Dmol.drawCartoon = (function() {
                 
         var v_offset, va_offset, f_offset;
         var currentAtom, lastAtom
-        var color;
+        var color, colori;
         var geoGroup = geo.updateGeoGroup(2*num*len); // ensure vertex capacity
         
         for (i = 0; i < len; i++) {
         
-            color = $3Dmol.CC.color(colors[Math.round(colors.length*i/len)]);
+            colori = Math.round(i*(colors.length-1)/len);
+            color = $3Dmol.CC.color(colors[colori]);
             
             last_cs_bottom = cs_bottom;
             last_cs_top = cs_top;
@@ -318,26 +327,25 @@ $3Dmol.drawCartoon = (function() {
                     
                 if (currentAtom.clickable)
                 {
-                    var face1 = new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[0], cs_bottom[num-1]);
-                    var face2 = new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[num-1], last_cs_bottom[num-1]);
+                    var faces = [];
 
-                    var face3 = new $3Dmol.Triangle(last_cs_bottom[num-1], cs_bottom[num-1], cs_top[num-1]);
-                    var face4 = new $3Dmol.Triangle(last_cs_bottom[num-1], cs_top[num-1], last_cs_top[num-1]);
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[0], cs_bottom[num-1]));
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[num-1], last_cs_bottom[num-1]));
 
-                    var face5 = new $3Dmol.Triangle(last_cs_top[num-1], last_cs_top[0], cs_top[0]);
-                    var face6 = new $3Dmol.Triangle(last_cs_top[num-1], cs_top[0], cs_top[num-1]);
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[num-1], cs_bottom[num-1], cs_top[num-1]));
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[num-1], cs_top[num-1], last_cs_top[num-1]));
 
-                    var face7 = new $3Dmol.Triangle(last_cs_top[0], last_cs_bottom[0], cs_bottom[0]);
-                    var face8 = new $3Dmol.Triangle(last_cs_top[0], cs_bottom[0], cs_top[0]);
+                    faces.push(new $3Dmol.Triangle(cs_top[0], last_cs_top[0], last_cs_top[num-1]));
+                    faces.push(new $3Dmol.Triangle(cs_top[num-1], cs_top[0], last_cs_top[num-1]));
 
-                    currentAtom.intersectionShape.triangle.push(face1);
-                    currentAtom.intersectionShape.triangle.push(face2);
-                    currentAtom.intersectionShape.triangle.push(face3);
-                    currentAtom.intersectionShape.triangle.push(face4);
-                    currentAtom.intersectionShape.triangle.push(face5);
-                    currentAtom.intersectionShape.triangle.push(face6);
-                    currentAtom.intersectionShape.triangle.push(face7);
-                    currentAtom.intersectionShape.triangle.push(face8);
+                    faces.push(new $3Dmol.Triangle(cs_bottom[0], last_cs_bottom[0], last_cs_top[0]));
+                    faces.push(new $3Dmol.Triangle(cs_top[0], cs_bottom[0], last_cs_top[0]));
+
+                    for (j in faces)
+                    {
+                        currentAtom.intersectionShape.triangle.push(faces[j]);
+                        
+                    }
                 }
 
             }
@@ -411,7 +419,7 @@ $3Dmol.drawCartoon = (function() {
         p1 = subdivide(p1, div);
         p2 = subdivide(p2, div);
         if (!thickness)
-            return drawThinStrip(group, p1, p2, colors, div);
+            return drawThinStrip(group, p1, p2, colors, div, opacity);
 
         var geo = new $3Dmol.Geometry(true);
         
@@ -425,7 +433,7 @@ $3Dmol.drawCartoon = (function() {
                       [ -3, 5, 1, -7 ] ];
                 
         var offset, vertoffset, faceoffset;
-        var color;
+        var color, colori;
         var currentAtom, lastAtom;
         var i, lim, j;
         var face1, face2, face3;
@@ -433,7 +441,8 @@ $3Dmol.drawCartoon = (function() {
         
         for (i = 0, lim = p1.length; i < lim; i++) {
         
-            color = $3Dmol.CC.color(colors[Math.round(colors.length*i/lim)]);
+            colori = Math.round(i*(colors.length-1)/lim);
+            color = $3Dmol.CC.color(colors[colori]);
             
             vs.push(p1v = p1[i]); // 0
             vs.push(p1v);         // 1
@@ -648,7 +657,7 @@ $3Dmol.drawCartoon = (function() {
                 edgeTable[B|(C<<16)]=BC;
             }
             
-            //varify that the mesh is clean
+            //verify that the mesh is clean
             for(var key in edgeTable){
                 if(edgeTable.hasOwnProperty(key)){
                     len++;
@@ -738,18 +747,32 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var drawStrip = function(group, points, colors, div, thickness, opacity, shape)
-    {
+    {    
         if (!shape || shape === "default")
+            shape = "rectangle";
+        if(shape === 'edged')
             drawPlainStrip(group, points, colors, div, thickness, opacity);
-        else
+        else if (shape === "rectangle" || shape === "oval" || shape === "parabola")
             drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
     }
 
-    var drawStrand = function(group, atomList, geo, gradientScheme, fill, doNotSmoothen, num, div)
+    // check if given atom is an alpha carbon
+    var isAlphaCarbon = function(atom)
     {
-        var num = num || defaultNum;
-        var div = div || defaultDiv;
-        doNotSmoothen = !!(doNotSmoothen);
+        return atom && atom.elem === "C" && atom.atom === "CA"; // note that calcium is also CA
+    }
+
+    // check whether two atoms are members of the same residue or subsequent, connected residues (a before b)
+    var inConnectedResidues = function(a, b)
+    {
+        return a && b && a.chain === b.chain && a.reschain === b.reschain &&
+                (a.resi === b.resi || a.resi === b.resi-1)
+    }
+
+    var drawCartoon = function(group, atomList, gradientScheme, fill, doNotSmoothen, num, div)
+    {
+        num = num || defaultNum;
+        div = div || defaultDiv;
 
                         //  proteins    na backbone  na terminus                  nucleobases
         var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
@@ -757,32 +780,51 @@ $3Dmol.drawCartoon = (function() {
         var pyrResns = ["DT", "DC", "U", "C"];
         var naResns  =  purResns.concat(pyrResns);
 
-        var cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
+        var geo, cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
+        var tubeStart, tubeEnd, drawingTube;
         var traceGeo = null;
         var colors = [];
         var points = [];
         for (var i = 0; i < num; i++)
             points[i] = [];
 
-        // first determine where beta sheet arrows belong
+        // first determine where beta sheet arrows and alpha helix tubes belong
         var inSheet = false;
+        var inHelix = false;
         i = 0;
         for (i in atomList)
         {
             next = atomList[i];
             if (next.elem === 'C' && next.atom === 'CA')
             {
-                if (curr && curr.chain === next.chain && curr.reschain === next.reschain &&
-                    (curr.resi === next.resi || curr.resi === next.resi-1) && next.ss === 's')
+                var connected = inConnectedResidues(curr, next);
+
+                // last two residues in a beta sheet become arrowhead
+                if (connected && next.ss === "s")
                 {
                     inSheet = true;
                 }
-                else if (inSheet && curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows)
-                {
-                    curr.ss = "arrow end";
-                    prev.ss = "arrow start";
+                else if (inSheet)
+                {   
+                    if (curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows)
+                    {
+                        curr.ss = "arrow end";
+                        prev.ss = "arrow start";
+                    }
                     inSheet = false; 
+                }
+
+                // first and last residues in a helix are used to draw tube
+                if (connected && curr.ss === "h")
+                {
+                    if (!inHelix && next.style.cartoon.tubes) next.ss = "tube start";
+                    inHelix = true;
+                }
+                else if (inHelix && curr.ss !== "tube start")
+                {
+                    if (prev && prev.style.cartoon.tubes) prev.ss = "tube end";
+                    inHelix = false;
                 }
                 prev = curr;
                 curr = next;
@@ -798,7 +840,7 @@ $3Dmol.drawCartoon = (function() {
             if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1 || next.hetflag)
                 continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
 
-            var inNA = ($.inArray(next.resn.trim(), naResns) != -1)
+            var inNucleicAcid = ($.inArray(next.resn.trim(), naResns) != -1)
 
             // determine cartoon style
             cartoon = next.style.cartoon;
@@ -809,7 +851,7 @@ $3Dmol.drawCartoon = (function() {
 
                 if (!traceGeo) traceGeo = new $3Dmol.Geometry(true);
 
-                if (next.elem === 'C' && next.atom === 'CA' || inNA && next.atom === "P")
+                if (next.elem === 'C' && next.atom === 'CA' || inNucleicAcid && next.atom === "P")
                 {
                     // determine cylinder color
                     if (gradientScheme && cartoon.color === 'spectrum')
@@ -832,7 +874,7 @@ $3Dmol.drawCartoon = (function() {
                         if (nextColor == currColor)
                         {
                             var color = $3Dmol.CC.color(nextColor);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, next, thickness, color, true, true);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, next, thickness, color, 2, 2);
                         }
 
                         else // otherwise draw cylinders for each color (split down the middle)
@@ -840,8 +882,8 @@ $3Dmol.drawCartoon = (function() {
                             var midpoint = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
                             var color1 = $3Dmol.CC.color(currColor);
                             var color2 = $3Dmol.CC.color(nextColor);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, midpoint, thickness, color1, true, false);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, next, thickness, color2, false, true);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, midpoint, thickness, color1, 2, 0);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, next, thickness, color2, 0, 2);
                         } // note that an atom object can be duck-typed as a $3Dmol.Vector3 in this case
                     }
 
@@ -860,11 +902,11 @@ $3Dmol.drawCartoon = (function() {
                         traceGeo = null;
                     } else if (curr) // make sure whole chain is same opacity
                     {
-                        if (traceGeo.opacity)
+                        if (traceGeo.opacity && curr.style.cartoon.opacity)
                         {
                             if (traceGeo.opacity != curr.style.cartoon.opacity)
                             {
-                                console.log("Warning: a cartoon-style chain's opacity is ambiguous");
+                                console.log("Warning: a trace-style chain's opacity is ambiguous");
                                 traceGeo.opacity = 1;
                             }
                         }
@@ -878,14 +920,35 @@ $3Dmol.drawCartoon = (function() {
 
             else // draw default-style cartoons based on secondary structure
             {
+                if (!geo) geo = new $3Dmol.Geometry(true);
+
                 // draw backbone through these atoms
-                if (next.elem === "C" && next.atom === "CA" ||
-                    inNA && (next.atom === "P" || next.atom === "O5'"))
+                if (isAlphaCarbon(next) ||
+                    inNucleicAcid && (next.atom === "P" || next.atom === "O5'"))
                 {
-                    // end of a chain of connected residues
-                    if (curr && (curr.chain != next.chain || !(curr.resi === next.resi || curr.resi + 1 === next.resi)
-                        || curr.reschain != next.reschain || curr.style.cartoon.style !== next.style.cartoon.style))
+                    if (drawingTube)
+                    {
+                        if (next.ss === "tube end")
+                        {
+                            drawingTube = false;
+                            tubeEnd = new $3Dmol.Vector3(next.x, next.y, next.z);
+                            $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(currColor), 1, 1);
+                            next.ss = "h";
+
+                        }
+                        else continue; // don't accumulate strand points while in the middle of drawing a tube
+                    }
+
+                    // end of a chain of connected residues (of same style)
+                    if (curr && (!inConnectedResidues(curr, next) || curr.style.cartoon.style !== next.style.cartoon.style ||
+                        curr.ss === "tube start"))
                     { 
+                        if (curr.ss === "tube start")
+                        {
+                            drawingTube = true;
+                            tubeStart = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+                            curr.ss = "h";
+                        }
 
                         if (baseEndPt) // draw the last base if it's a NA chain
                         {
@@ -894,7 +957,7 @@ $3Dmol.drawCartoon = (function() {
                             else
                                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
+                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
                             arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
                             colors.push(nextColor);
                             if (arrow) colors.push(nextColor);
@@ -906,8 +969,21 @@ $3Dmol.drawCartoon = (function() {
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
                             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
-                        if (fill)
-                            drawStrip(group, points, colors, div, thickness, points.opacity, curr.style.cartoon.style);
+                        if (fill && points[0].length > 0) 
+                            drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
+                        
+                        if (geo != null && geo.vertices > 0)
+                        {
+                            var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
+                            cartoonMaterial.vertexColors = $3Dmol.FaceColors;
+                            if (typeof(points.opacity) === "number" && points.opacity >= 0 && points.opacity < 1) {
+                                cartoonMaterial.transparent = true;
+                                cartoonMaterial.opacity = points.opacity;
+                            }
+                            var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
+                            group.add(cartoonMesh);
+                            geo = null;
+                        }
 
                         // clear arrays for points and colors
                         points = [];
@@ -916,7 +992,7 @@ $3Dmol.drawCartoon = (function() {
                         colors = [];
                     }
 
-                    // reached next residue
+                    // reached next residue (potentially the first residue)
                     if (curr === undefined || curr.resi != next.resi)
                     {
                         if (baseEndPt) // draw last NA residue's base
@@ -926,7 +1002,7 @@ $3Dmol.drawCartoon = (function() {
                             var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.02); //TODO: apply this as function of thickness
                             baseStartPt.add(startFix);
 
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
+                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
                             baseStartPt = null;
                             baseEndPt = null;   
                         }
@@ -947,7 +1023,7 @@ $3Dmol.drawCartoon = (function() {
                         //nextResAtom = atomList[parseInt(i) + resSize[curr.resn]];
                         backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                         backbonePt.resi = curr.resi;
-                        currColor = nextColor; // used for NA bases
+                        currColor = nextColor;
                     }
 
                     // click handling
@@ -957,9 +1033,9 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // atoms used to orient the backbone strand
-                else if (next.atom === "O" && curr.elem === "C" && curr.atom === "CA"
-                      || inNA && next.atom === "OP2" && curr.atom === "P"
-                      || inNA && next.atom === "C5'" && curr.atom === "O5'")
+                else if (isAlphaCarbon(curr) && next.atom === "O"
+                      || inNucleicAcid && curr.atom === "P" && next.atom === "OP2"
+                      || inNucleicAcid && curr.atom === "O5'" && next.atom === "C5'")
                 {
                     orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.resi = next.resi;
@@ -968,7 +1044,7 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // NA 3' terminus is an edge case, need a vector for most recent O3'
-                else if (inNA && next.atom === "O3'")
+                else if (inNucleicAcid && next.atom === "O3'")
                 {
                     terminalPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
@@ -1001,7 +1077,7 @@ $3Dmol.drawCartoon = (function() {
             else
                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
-            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), false, true);
+            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
             arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
             colors.push(nextColor);
             if (arrow) colors.push(nextColor);
@@ -1010,10 +1086,24 @@ $3Dmol.drawCartoon = (function() {
         // for default style, draw the last strand
         for (i = 0; !thickness && i < num; i++)
             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
-        if (fill)
-            drawStrip(group, points, colors, div, thickness, points.opacity, curr.style.cartoon.style);
+        if (fill && points[0].length > 0)
+        {
+            drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
+        }
+        if (geo != null && geo.vertices > 0)
+        {
+            var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
+            cartoonMaterial.vertexColors = $3Dmol.FaceColors;
+            if (typeof(points.opacity) === "number" && points.opacity >= 0 && points.opacity < 1) {
+                cartoonMaterial.transparent = true;
+                cartoonMaterial.opacity = points.opacity;
+            }
+            var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
+            group.add(cartoonMesh);
+            geo = null;
+        }
 
-        if (traceGeo != null) // generate last mesh for trace geometry
+        if (traceGeo != null && traceGeo.vertices > 0) // generate last mesh for trace geometry
         {
             var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             traceMaterial.vertexColors = $3Dmol.FaceColors;
@@ -1029,66 +1119,78 @@ $3Dmol.drawCartoon = (function() {
 
     var addBackbonePoints = function(points, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom, atomList, atomi)
     {
-        var widthScalar, i, delta, v, addArrowPoints, testOpacity;
+        var widthScalar, i, delta, v, addArrowPoints, testOpacity, testStyle;
         
-        // kind of hacky...
-        var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10, ILE:8, LEU: 8, LYS: 9, MET:8,
-            PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
+        // dictionary of standard amino acid sizes, in number of atoms
+        var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10,
+            ILE:8, LEU: 8, LYS: 9, MET:8, PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
 
-        // the orientation vector is the normed difference from backbone atom to orientation atom
-        orientPt.sub(backbonePt);
-        orientPt.normalize();
+        // the side vector points along the axis from backbone atom to orientation atom (eg. CA to O, in peptides)
+        var sideVec = orientPt.sub(backbonePt);
+        sideVec.normalize();
 
-        // adjustment for proper beta arrow appearance
+        // the forward vector points along the axis from backbone atom to next backbone atom
+        var forwardVec = atomList[parseInt(atomi) + resSize[backboneAtom.resn]];
+        forwardVec = forwardVec ? new $3Dmol.Vector3(forwardVec.x, forwardVec.y, forwardVec.z) : new $3Dmol.Vector3(0, 0, 0);
+        forwardVec.sub(backbonePt);
+
+        // adjustments for proper beta arrow appearance
         if (backboneAtom.ss === "arrow start")
         {
-            var adjustPt = atomList[parseInt(atomi) + resSize[backboneAtom.resn]]; // CA in next residue, ideally
-            adjustPt = adjustPt ? new $3Dmol.Vector3(adjustPt.x, adjustPt.y, adjustPt.z) : new $3Dmol.Vector3(0, 0, 0);
-            adjustPt.sub(backbonePt);
-            adjustPt.multiplyScalar(0.3);
-            adjustPt.cross(orientPt); // adjust perpendicularly to strand face
-            backbonePt.add(adjustPt);
+            var adjustment = forwardVec.clone().multiplyScalar(0.3).cross(orientPt); // adjust perpendicularly to strand face
+            backbonePt.add(adjustment);
+
+            var upVec = forwardVec.clone().cross(sideVec).normalize();
+            sideVec.rotateAboutVector(upVec, 0.43);
         }
 
-        // depending on secondary structure, multiply the orientation vector by some scalar
-        if (!backboneAtom.style.cartoon.width)
+        // determine from cartoon style or secondary structure how wide the strand should be here
+        // ribbon shape should have same width as thickness
+        if (backboneAtom.style.cartoon.ribbon)
         {
-            if (backboneAtom.ss === "c")
+            widthScalar = backboneAtom.style.cartoon.thickness || defaultThickness;
+
+        } else // depending on secondary structure, multiply the orientation vector by some scalar
+        {
+            if (!backboneAtom.style.cartoon.width)
             {
-                if (backboneAtom.atom === "P")
-                    widthScalar = nucleicAcidWidth;
-                else
+                if (backboneAtom.ss === "c")
+                {
+                    if (backboneAtom.atom === "P")
+                        widthScalar = nucleicAcidWidth;
+                    else
+                        widthScalar = coilWidth;
+                } else if (backboneAtom.ss === "arrow start")
+                {
+                    widthScalar = helixSheetWidth;
+                    addArrowPoints = true;
+
+                } else if (backboneAtom.ss === "arrow end")
                     widthScalar = coilWidth;
-            } else if (backboneAtom.ss === "arrow start")
-            {
-                widthScalar = helixSheetWidth;
-                addArrowPoints = true;
+                
+                else if (backboneAtom.ss === "h" && backboneAtom.style.cartoon.tubes || backboneAtom.ss === "tube start")
+                    widthScalar = coilWidth;
 
-            } else if (backboneAtom.ss === "arrow end")
-            {
-                widthScalar = coilWidth;
+                else
+                    widthScalar = helixSheetWidth;
             }
-            else
-                widthScalar = helixSheetWidth;
+            else widthScalar = backboneAtom.style.cartoon.width;  
         }
-        else widthScalar = backboneAtom.style.cartoon.width;  
 
-        // if the angle between the previous orientation vector and current is greater than 90 degrees,
-        if (prevOrientPt != null && orientPt.dot(prevOrientPt) < 0)
-        {
-            orientPt.negate(); // negate the orientation vector (ie. add 180 degrees)
-        }
-        // this ensures that the strand never twists more than 90 degrees between consecutive backbone atoms
+        // make sure the strand orientation doesn't twist more than 90 degrees
+        if (prevOrientPt != null && sideVec.dot(prevOrientPt) < 0)
+            sideVec.negate();
 
-        orientPt.multiplyScalar(widthScalar);
+
+        sideVec.multiplyScalar(widthScalar);
         for (i = 0; i < num; i++)
         {
             // produces NUM incremental points from backbone atom minus orientation vector
             //  to backbone atom plus orientation vector
             delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
-            v = new $3Dmol.Vector3(backbonePt.x + delta * orientPt.x,
-                                   backbonePt.y + delta * orientPt.y,
-                                   backbonePt.z + delta * orientPt.z);
+            v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
+                                   backbonePt.y + delta * sideVec.y,
+                                   backbonePt.z + delta * sideVec.z);
             v.atom = backboneAtom;
             if (smoothen && backboneAtom.ss === "s") 
                 v.smoothen = true;
@@ -1096,20 +1198,24 @@ $3Dmol.drawCartoon = (function() {
                                // along the backbone offset by some constant pertaining to its cell in the outer array
         }
 
-        orientPt.multiplyScalar(2);
-        for (i = 0; i < num && addArrowPoints; i++)
+        if (addArrowPoints)
         {
-            delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
-            v = new $3Dmol.Vector3(backbonePt.x + delta * orientPt.x,
-                                   backbonePt.y + delta * orientPt.y,
-                                   backbonePt.z + delta * orientPt.z);
-            v.atom = backboneAtom;
-            v.smoothen = false;
-            v.skip = true;
-            points[i].push(v);
+
+            sideVec.multiplyScalar(2);
+            for (i = 0; i < num; i++)
+            {
+                delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
+                v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
+                                       backbonePt.y + delta * sideVec.y,
+                                       backbonePt.z + delta * sideVec.z);
+                v.atom = backboneAtom;
+                v.smoothen = false;
+                v.skip = true;
+                points[i].push(v);
+            }
         }
 
-        // make sure chain is all the same opacity
+        // make sure the strand is all the same opacity and style
         testOpacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
         if (points.opacity)
         {
@@ -1121,18 +1227,29 @@ $3Dmol.drawCartoon = (function() {
 
         } else points.opacity = testOpacity;
 
+        testStyle = backboneAtom.style.cartoon.style || 'default';
+        if (points.style)
+        {
+            if (points.style != testStyle)
+            {
+                console.log("Warning: a cartoon chain's strand-style is ambiguous");
+                points.style = 'default';
+            }
+
+        } else points.style = testStyle;
+
+        // revert ss keywords used for arrow rendering back to original value
         if (backboneAtom.ss === "arrow start" || backboneAtom.ss === "arrow end")
             backboneAtom.ss = "s";
 
         return addArrowPoints;
-    }
-
-    // actual function call
-    var drawCartoon = function(group, atomlist, laddergeo, gradientscheme) {
-                                                             //fill  doNotSmoothen
-        drawStrand(group, atomlist, laddergeo, gradientscheme, true, false);        
-
     };
 
-    return drawCartoon;
+    var defaultDrawCartoon = function(group, atomList, gradientScheme, quality)
+    {
+        quality = parseInt(parseFloat(quality)*5) || 5;
+        drawCartoon(group, atomList, gradientScheme, fill=true, doNotSmoothen=false, num=quality, div=quality);
+    }
+
+    return defaultDrawCartoon;
 })();
