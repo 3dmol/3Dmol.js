@@ -20,32 +20,33 @@ $3Dmol.GLViewer = (function() {
 
     function GLViewer(element, config) { 
         // set variables
-	    	config = config || {};
-	    	var callback = config.callback;
-	    	var defaultcolors = config.defaultcolors;    	
-	        if(!defaultcolors)
-	            defaultcolors = $3Dmol.elementColors.defaultColors;
-	    	var nomouse = config.nomouse;
-	    	var bgColor = 0;
-	    	
-	    	if(typeof(config.backgroundColor) != undefined) {
-	            bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
-	    	}
-    	
-	    	var camerax = 0;
-	    	if(typeof(config.camerax) != undefined) {
-	    		camerax = parseFloat(config.camerax);
-	    	}
+        config = config || {};
+        var callback = config.callback;
+        var defaultcolors = config.defaultcolors;    	
+        if(!defaultcolors)
+            defaultcolors = $3Dmol.elementColors.defaultColors;
+        var nomouse = config.nomouse;
+        var bgColor = 0;
+
+        if(typeof(config.backgroundColor) != undefined) {
+            bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
+        }
+
+        var camerax = 0;
+        if(typeof(config.camerax) != undefined) {
+            camerax = parseFloat(config.camerax);
+        }
         var _viewer = this;
         var container = element;
         var id = container.id;
+        var glDOM = null;
 
         var models = []; // atomistic molecular models
         var surfaces = {};
-        var nextSurfID = 0;
         var shapes = []; // Generic shapes
         var labels = [];
         var clickables = []; //things you can click on
+        
         var WIDTH = container.width();
         var HEIGHT = container.height();
 
@@ -58,6 +59,7 @@ $3Dmol.GLViewer = (function() {
         var CAMERA_Z = 150;
         var fov = 20;
 
+        var linkedViewers = [];
 
         var renderer = new $3Dmol.Renderer({
             antialias : true,
@@ -102,7 +104,18 @@ $3Dmol.GLViewer = (function() {
         var currentModelPos = 0;
         var cz = 0;
         var cslabNear = 0;
-        var cslabFar = 0;
+        var cslabFar = 0;      
+        
+        var nextSurfID = function() {
+            //compute the next highest surface id directly from surfaces
+            //this is necessary to support linking of model data
+            var max = 0;
+            for (i in surfaces) { // this is an object with possible holes
+                if(!surfaces.hasOwnProperty(i)) continue;
+                if(i > max) max = i;
+            }
+            return max+1;
+        };
 
         var setSlabAndFog = function() {
             var center = camera.position.z - rotationGroup.position.z;
@@ -130,7 +143,8 @@ $3Dmol.GLViewer = (function() {
         };
 
         // display scene
-        var show = function() {
+        //if nolink is set/true, don't propagate changes to linked viewers
+        var show = function(nolink) {
             if (!scene)
                 return;
 
@@ -138,6 +152,14 @@ $3Dmol.GLViewer = (function() {
             setSlabAndFog();
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
+            
+            if(!nolink && linkedViewers.length > 0) {
+                var view = _viewer.getView();
+                for(var i = 0; i < linkedViewers.length; i++) {
+                    var other = linkedViewers[i];
+                    other.setView(view, true);
+                }
+            }
         };
 
         var initializeScene = function() {
@@ -167,13 +189,12 @@ $3Dmol.GLViewer = (function() {
         scene.fog.color = $3Dmol.CC.color(bgColor);
 
         var clickedAtom = null;
-        var glDOM = null;
 
         // enable mouse support
 
         //regenerate the list of clickables
         var updateClickables = function() {
-            clickables = [];
+            clickables.splice(0,clickables.length);
             var i, il;
 
             for (i = 0, il = models.length; i < il; i++) {
@@ -182,7 +203,7 @@ $3Dmol.GLViewer = (function() {
                     var atoms = model.selectedAtoms({
                         clickable : true
                     });
-                    clickables = clickables.concat(atoms);
+                    Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
                 }
             }
 
@@ -283,6 +304,117 @@ $3Dmol.GLViewer = (function() {
 
         });
         
+        var _handleMouseDown = this._handleMouseDown = function(ev) {
+            ev.preventDefault();
+            if (!scene)
+                return;
+            var xy = getXY(ev);
+            var x = xy[0];
+            var y = xy[1];
+            
+            if (x === undefined)
+                return;
+            isDragging = true;
+            clickedAtom = null;
+            mouseButton = ev.which;
+            mouseStartX = x;
+            mouseStartY = y;
+            touchDistanceStart = 0;
+            if (ev.originalEvent.targetTouches
+                    && ev.originalEvent.targetTouches.length == 2) {
+                touchDistanceStart = calcTouchDistance(ev);
+            }
+            cq = rotationGroup.quaternion;
+            cz = rotationGroup.position.z;
+            currentModelPos = modelGroup.position.clone();
+            cslabNear = slabNear;
+            cslabFar = slabFar;
+
+        };
+        
+        var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
+            ev.preventDefault();
+            if (!scene)
+                return;
+            var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+            if (ev.originalEvent.detail) { // Webkit
+                rotationGroup.position.z += scaleFactor
+                        * ev.originalEvent.detail / 10;
+            } else if (ev.originalEvent.wheelDelta) { // Firefox
+                rotationGroup.position.z -= scaleFactor
+                        * ev.originalEvent.wheelDelta / 400;
+            }
+            if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+
+            show();
+        };
+        
+        var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
+            WIDTH = container.width();
+            HEIGHT = container.height();
+            ev.preventDefault();
+            if (!scene)
+                return;
+            if (!isDragging)
+                return;
+            var mode = 0;
+
+            var xy = getXY(ev);
+            var x = xy[0];
+            var y = xy[1];
+            if (x === undefined)
+                return;
+            var dx = (x - mouseStartX) / WIDTH;
+            var dy = (y - mouseStartY) / HEIGHT;
+            // check for pinch
+            if (touchDistanceStart != 0
+                    && ev.originalEvent.targetTouches
+                    && ev.originalEvent.targetTouches.length == 2) {
+                var newdist = calcTouchDistance(ev);
+                // change to zoom
+                mode = 2;
+                dy = (touchDistanceStart - newdist) * 2
+                        / (WIDTH + HEIGHT);
+            } else if (ev.originalEvent.targetTouches
+                    && ev.originalEvent.targetTouches.length == 3) {
+                // translate
+                mode = 1;
+            }
+
+            var r = Math.sqrt(dx * dx + dy * dy);
+            var scaleFactor;
+            if (mode == 3
+                    || (mouseButton == 3 && ev.ctrlKey)) { // Slab
+                slabNear = cslabNear + dx * 100;
+                slabFar = cslabFar + dy * 100;
+            } else if (mode == 2 || mouseButton == 3
+                    || ev.shiftKey) { // Zoom
+                scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+                if (scaleFactor < 80)
+                    scaleFactor = 80;
+                rotationGroup.position.z = cz - dy
+                        * scaleFactor;
+                if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+            } else if (mode == 1 || mouseButton == 2
+                    || ev.ctrlKey) { // Translate
+                var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+                modelGroup.position.addVectors(currentModelPos,t);
+                
+            } else if ((mode === 0 || mouseButton == 1)
+                    && r !== 0) { // Rotate
+                var rs = Math.sin(r * Math.PI) / r;
+                dq.x = Math.cos(r * Math.PI);
+                dq.y = 0;
+                dq.z = rs * dx;
+                dq.w = -rs * dy;
+                rotationGroup.quaternion = new $3Dmol.Quaternion(
+                        1, 0, 0, 0);
+                rotationGroup.quaternion.multiply(dq);
+                rotationGroup.quaternion.multiply(cq);
+            }
+            show();
+        };
+        
         var initContainer = function(element) {
             container = element;
             WIDTH = container.width();
@@ -294,117 +426,12 @@ $3Dmol.GLViewer = (function() {
 
             if (!nomouse) {
                 // user can request that the mouse handlers not be installed
-                glDOM.bind('mousedown touchstart', function(ev) {
-                    ev.preventDefault();
-                    if (!scene)
-                        return;
-                    var xy = getXY(ev);
-                    var x = xy[0];
-                    var y = xy[1];
-                    
-                    if (x === undefined)
-                        return;
-                    isDragging = true;
-                    clickedAtom = null;
-                    mouseButton = ev.which;
-                    mouseStartX = x;
-                    mouseStartY = y;
-                    touchDistanceStart = 0;
-                    if (ev.originalEvent.targetTouches
-                            && ev.originalEvent.targetTouches.length == 2) {
-                        touchDistanceStart = calcTouchDistance(ev);
-                    }
-                    cq = rotationGroup.quaternion;
-                    cz = rotationGroup.position.z;
-                    currentModelPos = modelGroup.position.clone();
-                    cslabNear = slabNear;
-                    cslabFar = slabFar;
-
-                });
-
-                glDOM.bind('DOMMouseScroll mousewheel', function(ev) { // Zoom
-                    ev.preventDefault();
-                    if (!scene)
-                        return;
-                    var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-                    if (ev.originalEvent.detail) { // Webkit
-                        rotationGroup.position.z += scaleFactor
-                                * ev.originalEvent.detail / 10;
-                    } else if (ev.originalEvent.wheelDelta) { // Firefox
-                        rotationGroup.position.z -= scaleFactor
-                                * ev.originalEvent.wheelDelta / 400;
-                    }
-                    if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
-
-                    show();
-                });
-
+                glDOM.bind('mousedown touchstart', _handleMouseDown);
+                glDOM.bind('DOMMouseScroll mousewheel', _handleMouseScroll);
+                glDOM.bind('mousemove touchmove', _handleMouseMove);
+                
                 glDOM.bind("contextmenu", function(ev) {
                     ev.preventDefault();
-                });
-
-                glDOM.bind('mousemove touchmove', function(ev) { // touchmove
-                    ev.preventDefault();
-                    if (!scene)
-                        return;
-                    if (!isDragging)
-                        return;
-                    var mode = 0;
-
-                    var xy = getXY(ev);
-                    var x = xy[0];
-                    var y = xy[1];
-                    if (x === undefined)
-                        return;
-                    var dx = (x - mouseStartX) / WIDTH;
-                    var dy = (y - mouseStartY) / HEIGHT;
-                    // check for pinch
-                    if (touchDistanceStart != 0
-                            && ev.originalEvent.targetTouches
-                            && ev.originalEvent.targetTouches.length == 2) {
-                        var newdist = calcTouchDistance(ev);
-                        // change to zoom
-                        mode = 2;
-                        dy = (touchDistanceStart - newdist) * 2
-                                / (WIDTH + HEIGHT);
-                    } else if (ev.originalEvent.targetTouches
-                            && ev.originalEvent.targetTouches.length == 3) {
-                        // translate
-                        mode = 1;
-                    }
-
-                    var r = Math.sqrt(dx * dx + dy * dy);
-                    var scaleFactor;
-                    if (mode == 3
-                            || (mouseButton == 3 && ev.ctrlKey)) { // Slab
-                        slabNear = cslabNear + dx * 100;
-                        slabFar = cslabFar + dy * 100;
-                    } else if (mode == 2 || mouseButton == 3
-                            || ev.shiftKey) { // Zoom
-                        scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
-                        if (scaleFactor < 80)
-                            scaleFactor = 80;
-                        rotationGroup.position.z = cz - dy
-                                * scaleFactor;
-                        if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
-                    } else if (mode == 1 || mouseButton == 2
-                            || ev.ctrlKey) { // Translate
-                        var t = screenXY2model(x-mouseStartX, y-mouseStartY);
-                        modelGroup.position.addVectors(currentModelPos,t);
-                        
-                    } else if ((mode === 0 || mouseButton == 1)
-                            && r !== 0) { // Rotate
-                        var rs = Math.sin(r * Math.PI) / r;
-                        dq.x = Math.cos(r * Math.PI);
-                        dq.y = 0;
-                        dq.z = rs * dx;
-                        dq.w = -rs * dy;
-                        rotationGroup.quaternion = new $3Dmol.Quaternion(
-                                1, 0, 0, 0);
-                        rotationGroup.quaternion.multiply(dq);
-                        rotationGroup.quaternion.multiply(cq);
-                    }
-                    show();
                 });
             }
         };
@@ -607,7 +634,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#setView
          * @param {Array.<number>} arg Array formatted identically to the return value of getView */
-        this.setView = function(arg) {
+        this.setView = function(arg, nolink) {
 
             if (arg === undefined
                     || !(arg instanceof Array || arg.length !== 8))
@@ -627,7 +654,7 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.x = arg[8];
                 rotationGroup.position.y = arg[9];
             }
-            show();
+            show(nolink);
         };
 
         // apply styles, models, etc in viewer
@@ -1021,7 +1048,7 @@ $3Dmol.GLViewer = (function() {
             for (var i = 0; i < labels.length; i++) {
                 modelGroup.remove(labels[i].sprite);
             }
-            labels = [];
+            labels.splice(0,labels.length); //don't overwrite in case linked
         };
         
         // Modify label style
@@ -1112,7 +1139,7 @@ $3Dmol.GLViewer = (function() {
                 var shape = shapes[i];
                 shape.removegl(modelGroup);
             }
-            shapes = [];
+            shapes.splice(0,shapes.length);
         }
 
         /**
@@ -1582,7 +1609,7 @@ $3Dmol.GLViewer = (function() {
                 model.removegl(modelGroup);
 
             }
-            models = [];
+            models.splice(0,models.length); //don't simply overwrite array in case linked
         };
 
         /**
@@ -1662,6 +1689,12 @@ $3Dmol.GLViewer = (function() {
          * viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'}}); //set chain B to rainbow cartoon
          */
         this.setStyle = function(sel, style) {
+            if(typeof(style) === 'undefined') {
+                //if a single argument is provided, assume it is a style and select all
+                style = sel;
+                sel = {};
+            }
+            
             applyToModels("setStyle", sel, style, false);
         };
 
@@ -1673,6 +1706,11 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomStyleSpec} style - style spec to add to specified atoms
          */
         this.addStyle = function(sel, style) {
+            if(typeof(style) === 'undefined') {
+                //if a single argument is provided, assume it is a style and select all
+                style = sel;
+                sel = {};
+            }
             applyToModels("setStyle", sel, style, true);
         };
 
@@ -2046,7 +2084,7 @@ $3Dmol.GLViewer = (function() {
                 done : true,
                 finished : false //the rendered finishes surfaces when they are done
             };
-            var surfid = nextSurfID++;
+            var surfid = nextSurfID();
             surfaces[surfid] = surfobj;
             return surfid;
         }
@@ -2305,7 +2343,7 @@ $3Dmol.GLViewer = (function() {
                 });
                 addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
             } 
-            var surfid = nextSurfID++;
+            var surfid = nextSurfID();
             surfaces[surfid] = surfobj;
             
             return surfid;
@@ -2441,9 +2479,17 @@ $3Dmol.GLViewer = (function() {
             }
         };
 
-        var getModelGroup = function() {
-            return modelGroup;
+        /**
+         * @function $3Dmol.GLViewer#linkViewer
+         * Synchronize this view matrix of this viewer to the passed viewer.
+         * When the viewpoint of this viewer changes, the other viewer will
+         * be set to this viewer's view.
+         * @function $3Dmol.GLViewer#linkViewer
+         */
+        this.linkViewer = function(otherviewer) {
+           linkedViewers.push(otherviewer);
         };
+        
 
         try {
             if (typeof (callback) === "function")
