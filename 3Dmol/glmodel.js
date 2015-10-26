@@ -1181,7 +1181,7 @@ $3Dmol.GLModel = (function() {
         };
         
         // set default style and colors for atoms
-        var setAtomDefaults = function(atoms, id) {
+        this.setAtomDefaults = function(atoms) {
             for ( var i = 0; i < atoms.length; i++) {
                 var atom = atoms[i];
                 if (atom) {
@@ -1202,43 +1202,17 @@ $3Dmol.GLModel = (function() {
          * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
          */
         this.addMolData = function(data, format, options) {
-            options = options || {}; 
-            format = format || "";
+            options = options || {};
+            var parsedAtoms = $3Dmol.GLModel.parseMolData(data, format, options);
             dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
-            
-            if (!data)
-                return; //leave an empty model
-            
-            if(/\.gz$/.test(format)) {
-                //unzip gzipped files
-                format = format.replace(/\.gz$/,'');
-                try {
-                    data = pako.inflate(data, {to: 'string'});
-                } catch(err) {
-                    console.log(err);
+            var mData = parsedAtoms.modelData;
+            if (mData) {
+                if (Array.isArray(mData)) {
+                    modelData = mData[0];
+                } else {
+                    modelData = mData;
                 }
             }
-            
-            if(typeof($3Dmol.Parsers[format]) == "undefined") {
-            	//let someone provide a file name and get format from extension
-            	format = format.split('.').pop();
-            	if(typeof($3Dmol.Parsers[format]) == "undefined") {            	
-	                console.log("Unknown format: "+format);
-	                //try to guess correct format from data contents
-	                if(data.match(/^@<TRIPOS>MOLECULE/gm)) {
-	                    format = "mol2";
-	                } else if(data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
-	                    format = "pdb";
-	                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
-	                    format = "sdf"; //could look at line 3
-	                } else {
-	                    format = "xyz";
-	                }
-	                console.log("Best guess: "+format);
-            	}
-            }
-            var parse = $3Dmol.Parsers[format];
-            var parsedAtoms = parse(data, options, modelData);
 
             if (frames.length == 0) { //first call
                 for (var i = 0; i < parsedAtoms.length; i++) {
@@ -1263,10 +1237,18 @@ $3Dmol.GLModel = (function() {
             }
             
             for (var i = 0; i < frames.length; i++) {
-                setAtomDefaults(frames[i], id);
+                this.setAtomDefaults(frames[i], id);
             }
 
         };
+
+        this.setDontDuplicateAtoms = function(dup) {
+            dontDuplicateAtoms = dup;
+        }
+
+        this.setModelData = function(mData) {
+            modelData = mData;
+        }
         
         /** given a selection specification, return true if atom is selected
          * 
@@ -1876,6 +1858,61 @@ $3Dmol.GLModel = (function() {
         }
 
     }
+
+    GLModel.parseMolData = function(data, format, options) {
+        format = format || "";
+
+        if (!data)
+            return []; //leave an empty model
+
+        if(/\.gz$/.test(format)) {
+            //unzip gzipped files
+            format = format.replace(/\.gz$/,'');
+            try {
+                data = pako.inflate(data, {to: 'string'});
+            } catch(err) {
+                console.log(err);
+            }
+        }
+
+        if(typeof($3Dmol.Parsers[format]) == "undefined") {
+            //let someone provide a file name and get format from extension
+            format = format.split('.').pop();
+            if(typeof($3Dmol.Parsers[format]) == "undefined") {
+                console.log("Unknown format: "+format);
+                //try to guess correct format from data contents
+                if(data.match(/^@<TRIPOS>MOLECULE/gm)) {
+                    format = "mol2";
+                } else if(data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
+                    format = "pdb";
+                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
+                    format = "sdf"; //could look at line 3
+                } else {
+                    format = "xyz";
+                }
+                console.log("Best guess: "+format);
+            }
+        }
+        var parse = $3Dmol.Parsers[format];
+        var parsedAtoms = parse(data, options);
+
+        return parsedAtoms;
+    };
+
+
+    // set default style and colors for atoms
+    GLModel.setAtomDefaults = function(atoms, id) {
+        for ( var i = 0; i < atoms.length; i++) {
+            var atom = atoms[i];
+            if (atom) {
+                atom.style = atom.style || defaultAtomStyle;
+                atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
+                atom.model = id;
+                if (atom.clickable)
+                    atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+            }
+        }
+    };
 
     return GLModel;
     
