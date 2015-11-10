@@ -89,17 +89,19 @@ $3Dmol.viewers = {};
 $3Dmol.download = function(query, viewer, options, callback) {
     var baseURL = '';
     var type = "";
+    var pdbUri = "";
     var m = viewer.addModel();
     if (query.substr(0, 4) === 'pdb:') {
+        pdbUri = options && options.pdbUri ? options.pdbUri : "http://www.rcsb.org/pdb/files/";
         type = options && options.format ? options.format : "pdb";
         query = query.substr(4).toUpperCase();
         if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
            alert("Wrong PDB ID"); return;
         }
         if (options && options.format)
-            uri = "http://www.rcsb.org/pdb/files/" + query + "." + options.format;
+            uri = pdbUri + query + "." + options.format;
         else
-            uri = "http://www.rcsb.org/pdb/files/" + query + ".pdb"; 
+            uri = pdbUri + query + ".pdb";
 
     } else if (query.substr(0, 4) == 'cid:') {
         type = "sdf";
