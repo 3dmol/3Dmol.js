@@ -76,7 +76,10 @@ $3Dmol.viewers = {};
  * @function $3Dmol.download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
  * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
- * @param {Object} options - Specify additional options such as file format to download, if multiple are available
+ * @param {Object} options - Specify additional options
+ *                           format: file format to download, if multiple are available, default format is pdb
+ *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
+ *
  * @example
  * var myviewer = $3Dmol.createViewer(gldiv);
  * 
