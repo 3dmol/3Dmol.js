@@ -163,7 +163,12 @@ $3Dmol.getColorFromStyle = function(atom, style) {
                 color = scheme.valueToHex(val, range);
             }
         }
+    } 
+    else if(typeof(style.colorfunc) != "undefined") {
+    	//this is a user provided function for turning an atom into a color
+    	color = style.colorfunc(atom);
     }
+    
     var C = $3Dmol.CC.color(color);
     return C;
 }
