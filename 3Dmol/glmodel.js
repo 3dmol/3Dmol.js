@@ -1269,7 +1269,18 @@ $3Dmol.GLModel = (function() {
                         break;
                     }
                 }
-
+                else if(key == "properties" && atom[key]) {
+                    for (var propkey in sel.properties) {
+                        if(typeof(atom.properties[propkey]) === 'undefined') {
+                            ret = false;
+                            break
+                        }
+                        if(atom.properties[propkey] != sel.properties[propkey]) {
+                            ret = false;
+                            break;
+                        }
+                    }
+                }
                 else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
 
                     // if something is in sel, atom must have it                    
