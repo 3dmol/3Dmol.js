@@ -677,24 +677,24 @@ $3Dmol.Parsers = (function() {
             modelData.push({symmetries:[]});
 
             // Pulls atom information out of the data
-            var atomsPreBonds = [];
+            atoms.push([]);
             var currentIndex = 0;
             var atomCount = mmCIF._atom_site_id !== undefined ? mmCIF._atom_site_id.length
                 : mmCIF._atom_site_label.length;
             function sqr(n) {
                 return n*n;
             }
-            var cell_a, cell_b, cell_c, cell_alpha, cell_beta, cell_gamma, conversionMatrix;
+            var conversionMatrix;
             if (mmCIF._cell_length_a !== undefined) {
-                var a = cell_a = parseFloat(mmCIF._cell_length_a);
-                var b = cell_b = parseFloat(mmCIF._cell_length_b);
-                var c = cell_c = parseFloat(mmCIF._cell_length_c);
+                var a = parseFloat(mmCIF._cell_length_a);
+                var b = parseFloat(mmCIF._cell_length_b);
+                var c = parseFloat(mmCIF._cell_length_c);
                 var alpha_deg = parseFloat(mmCIF._cell_angle_alpha) || 90;
                 var beta_deg = parseFloat(mmCIF._cell_angle_beta) || 90;
                 var gamma_deg = parseFloat(mmCIF._cell_angle_gamma) || 90;
-                var alpha = cell_alpha = alpha_deg * Math.PI / 180;
-                var beta = cell_beta = beta_deg * Math.PI / 180;
-                var gamma = cell_gamma = gamma_deg * Math.PI / 180;
+                var alpha = alpha_deg * Math.PI / 180;
+                var beta = beta_deg * Math.PI / 180;
+                var gamma = gamma_deg * Math.PI / 180;
                 var cos_alpha = Math.cos(alpha);
                 var cos_beta = Math.cos(beta);
                 var cos_gamma = Math.cos(gamma);
@@ -742,103 +742,7 @@ $3Dmol.Parsers = (function() {
                 atom.serial = i;
                 atom.bondOrder = [];
                 atom.properties = {};
-                atom.index = currentIndex++;
-                atomsPreBonds[atom.index] = atom;
-            }
-
-            // create a hash table of the atoms using label and sequence as keys
-            var atomHashTable = {};
-            for (var i = 0; i < atomCount; i++) {
-                var label_alt = (mmCIF._atom_site_label_alt_id || [])[i];
-                if (label_alt === undefined) {
-                    label_alt = '.';
-                }
-                var label_asym = (mmCIF._atom_site_label_asym_id || [])[i];
-                if (label_asym === undefined) {
-                    label_asym = '.';
-                }
-                var label_atom = (mmCIF._atom_site_label_atom_id || [])[i];
-                if (label_atom === undefined) {
-                    label_atom = '.';
-                }
-                var label_seq = (mmCIF._atom_site_label_seq_id || [])[i];
-                if (label_seq === undefined) {
-                    label_seq = '.';
-                }
-
-                if (atomHashTable[label_alt] === undefined) {
-                atomHashTable[label_alt] = {};
-                }
-                if (atomHashTable[label_alt][label_asym] === undefined) {
-                    atomHashTable[label_alt][label_asym] = {};
-                }
-                if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
-                    atomHashTable[label_alt][label_asym][label_atom] = {};
-                }
-
-                atomHashTable[label_alt][label_asym][label_atom][label_seq] = i;
-            }
-
-            if (false && mmCIF._struct_conn && mmCIF._struct_conn_id) {
-                for (var i = 0; i < mmCIF._struct_conn_id.length; i++) {
-                    var offset = atoms[atoms.length-1].length;
-
-                    var alt = (mmCIF._struct_conn_ptnr1_label_alt_id || [])[i];
-                    if (alt === undefined) {
-                        alt = ".";
-                    }
-                    var asym = (mmCIF._struct_conn_ptnr1_label_asym_id || [])[i];
-                    if (asym === undefined) {
-                        asym = ".";
-                    }
-                    var atom = (mmCIF._struct_conn_ptnr1_label_atom_id || [])[i];
-                    if (atom === undefined) {
-                        atom = ".";
-                    }
-                    var seq = (mmCIF._struct_conn_ptnr1_label_seq_id || [])[i];
-                    if (seq === undefined) {
-                        seq = ".";
-                    }
-
-                    var id1 = atomHashTable[alt][asym][atom][seq];
-                    // if (atomsPreBonds[id1] === undefined) continue;
-                    var index1 = atomsPreBonds[id1].index;
-
-                    var alt = (mmCIF._struct_conn_ptnr2_label_alt_id || [])[i];
-                    if (alt === undefined) {
-                        alt = ".";
-                    }
-                    var asym = (mmCIF._struct_conn_ptnr2_label_asym_id || [])[i];
-                    if (asym === undefined) {
-                        asym = ".";
-                    }
-                    var atom = (mmCIF._struct_conn_ptnr2_label_atom_id || [])[i];
-                    if (atom === undefined) {
-                        atom = ".";
-                    }
-                    var seq = (mmCIF._struct_conn_ptnr2_label_seq_id || [])[i];
-                    if (seq === undefined) {
-                        seq = ".";
-                    }
-
-                    var id2 = atomHashTable[alt][asym][atom][seq];
-                    if (atomsPreBonds[id2] === undefined)
-                        continue;
-                    var index2 = atomsPreBonds[id2].index;
-
-                    atomsPreBonds[id1].bonds.push(index2 + offset);
-                    atomsPreBonds[id1].bondOrder.push(1);
-                    atomsPreBonds[id2].bonds.push(index1 + offset);
-                    atomsPreBonds[id2].bondOrder.push(1);
-                    console.log("connected " + index1 + " and " + index2);
-                }
-            }
-
-            atoms.push([]);
-            // atoms = atoms.concat(atomsPreBonds);
-            for (var i = 0; i < atomsPreBonds.length; i++) {
-                delete atomsPreBonds[i].index;
-                atoms[atoms.length-1].push(atomsPreBonds[i]);
+                atoms[atoms.length-1].push(atom);
             }
 
             if (mmCIF._pdbx_struct_oper_list_id !== undefined && !noAssembly) {
