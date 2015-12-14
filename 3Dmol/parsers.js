@@ -12,36 +12,97 @@ $3Dmol.Parsers = (function() {
      * @param {AtomSpec[]}
      *            atomsarray
      */
-    var assignBonds = function(atomsarray) {
+    var assignBonds = function(atoms) {
         // assign bonds - yuck, can't count on connect records
-        var atoms = atomsarray.slice(0);
-        var i, j, n;
-        for (i = 0, n = atomsarray.length; i < n; i++) {
+
+        for (var i = 0, n = atoms.length; i < n; i++) {
             // Don't reindex if atoms are already indexed
-            if (!atomsarray[i].index)
-                atomsarray[i].index = i;
+            if (!atoms[i].index)
+                atoms[i].index = i;
         }
 
-        atoms.sort(function(a, b) {
-            return a.z - b.z;
-        });
-        for (i = 0, n = atoms.length; i < n; i++) {
-            var ai = atoms[i];
+        var grid = {};
+        var MAX_BOND_LENGTH = 4.95; // (largest bond length, Cs) 2.25 * 2 * 1.1 (fudge factor)
 
-            for (j = i + 1; j < n; j++) {
-                var aj = atoms[j];
-                if (aj.z - ai.z > 4.725) // can't be connected
-                    break;
-                else if (Math.abs(aj.x - ai.x) > 4.725 || Math.abs(aj.y - ai.y) > 4.725) { // can't be connected either
-                    continue;
+        for (var index = 0; index < atoms.length; index++) {
+            var atom = atoms[index];
+            var x = Math.floor(atom.x / MAX_BOND_LENGTH);
+            var y = Math.floor(atom.y / MAX_BOND_LENGTH);
+            var z = Math.floor(atom.z / MAX_BOND_LENGTH);
+            if (!grid[x]) {
+                grid[x] = {};
+            }
+            if (!grid[x][y]) {
+                grid[x][y] = {};
+            }
+            if (!grid[x][y][z]) {
+                grid[x][y][z] = [];
+            }
+
+            grid[x][y][z].push(atom);
+        }
+
+        var findConnections = function(points, otherPoints) {
+            for (var i = 0; i < points.length; i++) {
+                var atom1 = points[i];
+                for (var j = 0; j < otherPoints.length; j++) {
+                    var atom2 = otherPoints[j];
+
+                    if (areConnected(atom1, atom2)) {
+                        atom1.bonds.push(atom2.index);
+                        atom1.bondOrder.push(1);
+                        atom2.bonds.push(atom1.index);
+                        atom2.bondOrder.push(1);
+                    }
                 }
-                else if (areConnected(ai, aj)) {
-                    if (ai.bonds.indexOf(aj.index) == -1) {
-                        // only add if not already there
-                        ai.bonds.push(aj.index);
-                        ai.bondOrder.push(1);
-                        aj.bonds.push(ai.index);
-                        aj.bondOrder.push(1);
+            }
+        }
+
+
+        /*const*/ var OFFSETS = [
+            {x: 0, y: 0, z: 1},
+            {x: 0, y: 1, z:-1},
+            {x: 0, y: 1, z: 0},
+            {x: 0, y: 1, z: 1},
+            {x: 1, y:-1, z:-1},
+            {x: 1, y:-1, z: 0},
+            {x: 1, y:-1, z: 1},
+            {x: 1, y: 0, z:-1},
+            {x: 1, y: 0, z: 0},
+            {x: 1, y: 0, z: 1},
+            {x: 1, y: 1, z:-1},
+            {x: 1, y: 1, z: 0},
+            {x: 1, y: 1, z: 1}
+        ];
+        for (var x in grid) {
+            x = parseInt(x);
+            for (var y in grid[x]) {
+                y = parseInt(y);
+                for (var z in grid[x][y]) {
+                    z = parseInt(z);
+                    var points = grid[x][y][z];
+
+                    for (var i = 0; i < points.length; i++) {
+                        var atom1 = points[i];
+                        for (var j = i + 1; j < points.length; j++) {
+                            var atom2 = points[j];
+                            if (areConnected(atom1, atom2)) {
+                                atom1.bonds.push(atom2.index);
+                                atom1.bondOrder.push(1);
+                                atom2.bonds.push(atom1.index);
+                                atom2.bondOrder.push(1);
+                            }
+                        }
+                    }
+
+                    for (var o = 0; o < OFFSETS.length; o++) {
+                        var offset = OFFSETS[o];
+                        if (!grid[x+offset.x]
+                            || !grid[x+offset.x][y+offset.y]
+                            || !grid[x+offset.x][y+offset.y][z+offset.z]) continue;
+
+                        var otherPoints = grid[x + offset.x][y + offset.y][z + offset.z];
+                        findConnections(points, otherPoints);
                     }
                 }
             }
@@ -677,24 +738,24 @@ $3Dmol.Parsers = (function() {
             modelData.push({symmetries:[]});
 
             // Pulls atom information out of the data
-            var atomsPreBonds = [];
+            atoms.push([]);
             var currentIndex = 0;
             var atomCount = mmCIF._atom_site_id !== undefined ? mmCIF._atom_site_id.length
                 : mmCIF._atom_site_label.length;
             function sqr(n) {
                 return n*n;
             }
-            var cell_a, cell_b, cell_c, cell_alpha, cell_beta, cell_gamma, conversionMatrix;
+            var conversionMatrix;
             if (mmCIF._cell_length_a !== undefined) {
-                var a = cell_a = parseFloat(mmCIF._cell_length_a);
-                var b = cell_b = parseFloat(mmCIF._cell_length_b);
-                var c = cell_c = parseFloat(mmCIF._cell_length_c);
+                var a = parseFloat(mmCIF._cell_length_a);
+                var b = parseFloat(mmCIF._cell_length_b);
+                var c = parseFloat(mmCIF._cell_length_c);
                 var alpha_deg = parseFloat(mmCIF._cell_angle_alpha) || 90;
                 var beta_deg = parseFloat(mmCIF._cell_angle_beta) || 90;
                 var gamma_deg = parseFloat(mmCIF._cell_angle_gamma) || 90;
-                var alpha = cell_alpha = alpha_deg * Math.PI / 180;
-                var beta = cell_beta = beta_deg * Math.PI / 180;
-                var gamma = cell_gamma = gamma_deg * Math.PI / 180;
+                var alpha = alpha_deg * Math.PI / 180;
+                var beta = beta_deg * Math.PI / 180;
+                var gamma = gamma_deg * Math.PI / 180;
                 var cos_alpha = Math.cos(alpha);
                 var cos_beta = Math.cos(beta);
                 var cos_gamma = Math.cos(gamma);
@@ -742,103 +803,7 @@ $3Dmol.Parsers = (function() {
                 atom.serial = i;
                 atom.bondOrder = [];
                 atom.properties = {};
-                atom.index = currentIndex++;
-                atomsPreBonds[atom.index] = atom;
-            }
-
-            // create a hash table of the atoms using label and sequence as keys
-            var atomHashTable = {};
-            for (var i = 0; i < atomCount; i++) {
-                var label_alt = (mmCIF._atom_site_label_alt_id || [])[i];
-                if (label_alt === undefined) {
-                    label_alt = '.';
-                }
-                var label_asym = (mmCIF._atom_site_label_asym_id || [])[i];
-                if (label_asym === undefined) {
-                    label_asym = '.';
-                }
-                var label_atom = (mmCIF._atom_site_label_atom_id || [])[i];
-                if (label_atom === undefined) {
-                    label_atom = '.';
-                }
-                var label_seq = (mmCIF._atom_site_label_seq_id || [])[i];
-                if (label_seq === undefined) {
-                    label_seq = '.';
-                }
-
-                if (atomHashTable[label_alt] === undefined) {
-                atomHashTable[label_alt] = {};
-                }
-                if (atomHashTable[label_alt][label_asym] === undefined) {
-                    atomHashTable[label_alt][label_asym] = {};
-                }
-                if (atomHashTable[label_alt][label_asym][label_atom] === undefined) {
-                    atomHashTable[label_alt][label_asym][label_atom] = {};
-                }
-
-                atomHashTable[label_alt][label_asym][label_atom][label_seq] = i;
-            }
-
-            if (false && mmCIF._struct_conn && mmCIF._struct_conn_id) {
-                for (var i = 0; i < mmCIF._struct_conn_id.length; i++) {
-                    var offset = atoms[atoms.length-1].length;
-
-                    var alt = (mmCIF._struct_conn_ptnr1_label_alt_id || [])[i];
-                    if (alt === undefined) {
-                        alt = ".";
-                    }
-                    var asym = (mmCIF._struct_conn_ptnr1_label_asym_id || [])[i];
-                    if (asym === undefined) {
-                        asym = ".";
-                    }
-                    var atom = (mmCIF._struct_conn_ptnr1_label_atom_id || [])[i];
-                    if (atom === undefined) {
-                        atom = ".";
-                    }
-                    var seq = (mmCIF._struct_conn_ptnr1_label_seq_id || [])[i];
-                    if (seq === undefined) {
-                        seq = ".";
-                    }
-
-                    var id1 = atomHashTable[alt][asym][atom][seq];
-                    // if (atomsPreBonds[id1] === undefined) continue;
-                    var index1 = atomsPreBonds[id1].index;
-
-                    var alt = (mmCIF._struct_conn_ptnr2_label_alt_id || [])[i];
-                    if (alt === undefined) {
-                        alt = ".";
-                    }
-                    var asym = (mmCIF._struct_conn_ptnr2_label_asym_id || [])[i];
-                    if (asym === undefined) {
-                        asym = ".";
-                    }
-                    var atom = (mmCIF._struct_conn_ptnr2_label_atom_id || [])[i];
-                    if (atom === undefined) {
-                        atom = ".";
-                    }
-                    var seq = (mmCIF._struct_conn_ptnr2_label_seq_id || [])[i];
-                    if (seq === undefined) {
-                        seq = ".";
-                    }
-
-                    var id2 = atomHashTable[alt][asym][atom][seq];
-                    if (atomsPreBonds[id2] === undefined)
-                        continue;
-                    var index2 = atomsPreBonds[id2].index;
-
-                    atomsPreBonds[id1].bonds.push(index2 + offset);
-                    atomsPreBonds[id1].bondOrder.push(1);
-                    atomsPreBonds[id2].bonds.push(index1 + offset);
-                    atomsPreBonds[id2].bondOrder.push(1);
-                    console.log("connected " + index1 + " and " + index2);
-                }
-            }
-
-            atoms.push([]);
-            // atoms = atoms.concat(atomsPreBonds);
-            for (var i = 0; i < atomsPreBonds.length; i++) {
-                delete atomsPreBonds[i].index;
-                atoms[atoms.length-1].push(atomsPreBonds[i]);
+                atoms[atoms.length-1].push(atom);
             }
 
             if (mmCIF._pdbx_struct_oper_list_id !== undefined && !noAssembly) {
