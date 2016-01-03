@@ -1190,7 +1190,7 @@ $3Dmol.Parsers = (function() {
                     continue; // FIXME: ad hoc
                 serial = parseInt(line.substr(6, 5));
                 atom = line.substr(12, 4).replace(/ /g, "");
-                resn = line.substr(17, 3);
+                resn = line.substr(17, 3).replace(/ /g, "");
                 chain = line.substr(21, 1);
                 resi = parseInt(line.substr(22, 4));
                 icode = line.substr(26, 1);
@@ -1206,12 +1206,12 @@ $3Dmol.Parsers = (function() {
                     }
                     if(elem.length > 1) {
                         elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();   
-						if(typeof(bondTable[elem]) === 'undefined') {
-							//not a known element, probably should just use first letter
-							elem = elem[0];
-						} else if(line[0] == 'A' && elem == 'Ca') { //alpha carbon, not calcium
-							elem = "C";
-						}
+                        if(typeof(bondTable[elem]) === 'undefined') {
+                            //not a known element, probably should just use first letter
+                            elem = elem[0];
+                        } else if(line[0] == 'A' && elem == 'Ca') { //alpha carbon, not calcium
+                            elem = "C";
+                        }
                     }
                 } else {
                     elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();                    
