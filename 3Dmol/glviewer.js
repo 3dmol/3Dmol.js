@@ -1198,7 +1198,7 @@ $3Dmol.GLViewer = (function() {
          * Create and add line shape
          * 
          * @function $3Dmol.GLViewer#addLine
-         * @param {LineSpec} spec - Style specification
+         * @param {LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
          * @return {$3Dmol.GLShape}
          */
         this.addLine = function(spec) {
