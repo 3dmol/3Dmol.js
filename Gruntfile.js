@@ -53,11 +53,11 @@ module.exports = function(grunt) {
             },
             
             closure : {
-                src : ['build/jquery-1.11.3-min-pre.js','build/3Dmol-min-pre.js'],
+                src : ['build/jquery-1.11.3-min-pre.js','build/pako_inflate-min-pre.js','build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-min.js'
             },
             closurenojquery: {
-                src : ['build/3Dmol-min-pre.js'],
+                src : ['build/pako_inflate-min-pre.js','build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-nojquery-min.js'
             }, 
             append : {
@@ -77,7 +77,11 @@ module.exports = function(grunt) {
             jquery : {
                 src : ['js/jquery-1.11.3.js'],
                 dest : 'build/jquery-1.11.3-min-pre.js'
-            }
+            },
+	    pako : {
+		src : ['js/pako_inflate.js'],
+                dest : 'build/pako_inflate-min-pre.js'
+           }
         },
         
         'closure-compiler' : {
@@ -104,7 +108,18 @@ module.exports = function(grunt) {
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5'
                 }
-            }            
+            },
+            pako : {
+                closurePath : 'lib/closure_compiler',
+                js : ['js/pako_inflate.js'],
+                jsOutputFile : 'build/pako_inflate-min-pre.js',
+                noreport : true,
+                options : {
+                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
+                    'warning_level': 'DEFAULT',
+                    'language_in': 'ECMASCRIPT5'
+                }
+            },            
         },
         
         shell : {

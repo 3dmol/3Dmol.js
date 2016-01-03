@@ -473,6 +473,7 @@ $3Dmol.GLViewer = (function() {
                 element = container
             };
             initContainer(element);
+            return this;
         };
         
         /**
@@ -502,6 +503,7 @@ $3Dmol.GLViewer = (function() {
             bgColor = c.getHex();
             renderer.setClearColorHex(c.getHex(), a);
             show();
+            return this;
         };
         
         /**
@@ -521,11 +523,12 @@ $3Dmol.GLViewer = (function() {
             } else {
                 renderer.disableOutline();
             }
+            return this;
         }
          
-         if(config.style) { //enable setting style in constructor
+        if(config.style) { //enable setting style in constructor
              this.setViewStyle(config.style);
-         }
+        }
 
         /**
          * Set viewer width
@@ -537,6 +540,7 @@ $3Dmol.GLViewer = (function() {
         this.setWidth = function(w) {
             WIDTH = w || WIDTH;
             renderer.setSize(WIDTH, HEIGHT);
+            return this;
         };
 
         /**
@@ -549,6 +553,7 @@ $3Dmol.GLViewer = (function() {
         this.setHeight = function(h) {
             HEIGHT = h || HEIGHT;
             renderer.setSize(WIDTH, HEIGHT);
+            return this;
         };
 
         /**
@@ -564,6 +569,7 @@ $3Dmol.GLViewer = (function() {
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
             show();
+            return this;
         };
 
         $(window).resize(this.resize);
@@ -614,6 +620,7 @@ $3Dmol.GLViewer = (function() {
             var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
             rotationGroup.quaternion.multiply(q);
             show();
+            return this;
         };
 
         /** Returns an array representing the current viewpoint.
@@ -638,10 +645,10 @@ $3Dmol.GLViewer = (function() {
 
             if (arg === undefined
                     || !(arg instanceof Array || arg.length !== 8))
-                return;
+                return this;
 
             if (!modelGroup || !rotationGroup)
-                return;
+                return this;
             modelGroup.position.x = arg[0];
             modelGroup.position.y = arg[1];
             modelGroup.position.z = arg[2];
@@ -655,6 +662,7 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.y = arg[9];
             }
             show(nolink);
+            return this;
         };
 
         // apply styles, models, etc in viewer
@@ -751,6 +759,7 @@ $3Dmol.GLViewer = (function() {
             this.setView(view); // Calls show() => renderer render
             var time2 = new Date();
             //console.log("render time: " + (time2 - time1));
+            return this;
         };
 
         /**
@@ -860,6 +869,7 @@ $3Dmol.GLViewer = (function() {
             var scale = (CAMERA_Z - rotationGroup.position.z) / factor;
             rotationGroup.position.z = CAMERA_Z - scale;
             show();
+            return this;
         };
         
         /**
@@ -885,6 +895,7 @@ $3Dmol.GLViewer = (function() {
             lookingAt.add(v);
             camera.lookAt(lookingAt);
             show();
+            return this;
         };
         
 
@@ -962,6 +973,8 @@ $3Dmol.GLViewer = (function() {
             rotationGroup.position.z = -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
             show();
+            
+            return this;
         };
         /**
          * Add label to viewer
@@ -1010,6 +1023,7 @@ $3Dmol.GLViewer = (function() {
          */
         this.addResLabels = function(sel, style) {
             applyToModels("addResLabels", sel, this, style);
+            return this;
         }
 
         /**
@@ -1036,7 +1050,7 @@ $3Dmol.GLViewer = (function() {
                     break;
                 }
             }
-
+            return this;
         };
 
         /**
@@ -1049,6 +1063,7 @@ $3Dmol.GLViewer = (function() {
                 modelGroup.remove(labels[i].sprite);
             }
             labels.splice(0,labels.length); //don't overwrite in case linked
+            return this;
         };
         
         // Modify label style
@@ -1121,13 +1136,14 @@ $3Dmol.GLViewer = (function() {
          */
         this.removeShape = function(shape) {
             if (!shape)
-                return;
+                return this;
             shape.removegl(modelGroup);
             delete shapes[shape.shapePosition];
             // clear off back of model array
             while (shapes.length > 0
                     && typeof (shapes[shapes.length - 1]) === "undefined")
                 shapes.pop();
+            return this;
         };
         
         /**
@@ -1140,6 +1156,7 @@ $3Dmol.GLViewer = (function() {
                 shape.removegl(modelGroup);
             }
             shapes.splice(0,shapes.length);
+            return this;
         }
 
         /**
@@ -1402,6 +1419,7 @@ $3Dmol.GLViewer = (function() {
             for (var i = 0; i < models.length; i++) {
                 models[i].setFrame(framenum);
             }
+            return this;
         };
         
         /**
@@ -1474,6 +1492,7 @@ $3Dmol.GLViewer = (function() {
                 }
             };
             var intervalID = setInterval( function() { display(loop); }, interval);
+            return this;
         };
         
         /**
@@ -1482,6 +1501,7 @@ $3Dmol.GLViewer = (function() {
          */
         this.stopAnimate = function() {
             animated = false;
+            return this;
         };
         
         /**
@@ -1597,6 +1617,7 @@ $3Dmol.GLViewer = (function() {
             while (models.length > 0
                     && typeof (models[models.length - 1]) === "undefined")
                 models.pop();
+            return this;
         };
 
         /** 
@@ -1610,6 +1631,7 @@ $3Dmol.GLViewer = (function() {
 
             }
             models.splice(0,models.length); //don't simply overwrite array in case linked
+            return this;
         };
 
         /**
@@ -1696,6 +1718,7 @@ $3Dmol.GLViewer = (function() {
             }
             
             applyToModels("setStyle", sel, style, false);
+            return this;
         };
 
         /**
@@ -1712,6 +1735,7 @@ $3Dmol.GLViewer = (function() {
                 sel = {};
             }
             applyToModels("setStyle", sel, style, true);
+            return this;
         };
 
         /**
@@ -1728,6 +1752,7 @@ $3Dmol.GLViewer = (function() {
          */
         this.setClickable = function(sel, clickable, callback) {
             applyToModels("setClickable", sel, clickable, callback);
+            return this;
         };
 
         /**
@@ -1738,6 +1763,7 @@ $3Dmol.GLViewer = (function() {
          */
         this.setColorByProperty = function(sel, prop, scheme) {
             applyToModels("setColorByProperty", sel, prop, scheme);
+            return this;
         };
 
         /**
@@ -1747,6 +1773,7 @@ $3Dmol.GLViewer = (function() {
          */
         this.setColorByElement = function(sel, colors) {
             applyToModels("setColorByElement", sel, colors);
+            return this;
         };
 
         /**
@@ -2365,6 +2392,7 @@ $3Dmol.GLViewer = (function() {
                     surfArr[i].finished = false; // trigger redraw
                 }
             }
+            return this;
         };
 
         /**
@@ -2385,6 +2413,7 @@ $3Dmol.GLViewer = (function() {
             }
             delete surfaces[surf];
             show();
+            return this;
         };
         
         /** Remove all surfaces.
@@ -2405,7 +2434,7 @@ $3Dmol.GLViewer = (function() {
                 delete surfaces[n];
             }
             show();
-            
+            return this;
         };
 
         /** return Jmol moveto command to position this scene */
@@ -2436,6 +2465,7 @@ $3Dmol.GLViewer = (function() {
             this.removeAllLabels();
             this.removeAllShapes();
             show();
+            return this;
         };
 
         // props is a list of objects that select certain atoms and enumerate
@@ -2477,6 +2507,7 @@ $3Dmol.GLViewer = (function() {
                     }
                 }
             }
+            return this;
         };
 
         /**
@@ -2488,6 +2519,7 @@ $3Dmol.GLViewer = (function() {
          */
         this.linkViewer = function(otherviewer) {
            linkedViewers.push(otherviewer);
+           return this;
         };
         
 
