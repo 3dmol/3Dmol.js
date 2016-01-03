@@ -245,6 +245,7 @@ $3Dmol.Parsers = (function() {
         var i, il, c, r;
         var atom, val;
 
+        //identify helices first
         for (i = 0, il = atomsarray.length; i < il; i++) {
             atom = atomsarray[i];
 
@@ -257,11 +258,36 @@ $3Dmol.Parsers = (function() {
                     // helix
                     chres[atom.chain][atom.resi] = 'h';
                 } else { // otherwise assume sheet
-                    chres[atom.chain][atom.resi] = 's';
+                    chres[atom.chain][atom.resi] = 'maybesheet';
                 }
             }
         }
+        
+        //now potential sheets - but only if not part of helix
+        for (i = 0, il = atomsarray.length; i < il; i++) {
+            atom = atomsarray[i];
 
+            if (isFinite(atom.hbondDistanceSq) && chres[atom.chain][atom.resi] != 'h' && atom.ss != 'h') {
+                chres[atom.chain][atom.resi] = 'maybesheet';
+            }
+        }
+        
+        
+        //sheets must bond to other sheets
+        for (i = 0, il = atomsarray.length; i < il; i++) {
+            atom = atomsarray[i];
+
+            if (isFinite(atom.hbondDistanceSq) && chres[atom.chain][atom.resi] == 'maybesheet') {
+                var other = atom.hbondOther;
+                var otherval = chres[other.chain][other.resi];
+                if (otherval == 'maybesheet' || otherval == 's') {
+                    // true sheet
+                    chres[atom.chain][atom.resi] = 's';
+                    chres[other.chain][other.resi] = 's';
+                }
+            }
+        }
+        
         // plug gaps and remove singletons
         for (c in chres) {
             for (r = 1; r < chres[c].length - 1; r++) {
@@ -281,12 +307,13 @@ $3Dmol.Parsers = (function() {
             }
         }
 
+        
         // assign to all atoms in residue, keep track of start
         var curres = null;
         for (i = 0, il = atomsarray.length; i < il; i++) {
             atom = atomsarray[i];
             val = chres[atom.chain][atom.resi];
-            if (typeof (val) == "undefined")
+            if (typeof (val) == "undefined" || val == 'maybesheet')
                 continue;
             atom.ss = val;
             if (chres[atom.chain][atom.resi - 1] != val)
@@ -1041,16 +1068,16 @@ $3Dmol.Parsers = (function() {
 
     };
 
-	var bondTable = {
-		H :0.37,                                                                                                                                He:0.32,
-		Li:1.34,Be:0.90,                                                                                B :0.82,C :0.77,N :0.75,O :0.73,F :0.71,Ne:0.69,
-		Na:1.54,Mg:1.30,                                                                                Al:1.18,Si:1.11,P :1.06,S :1.02,Cl:0.99,Ar:0.97,
-		K :1.96,Ca:1.74,Sc:1.44,Ti:1.56,V :1.25,/* Cr */Mn:1.39,Fe:1.25,Co:1.26,Ni:1.21,Cu:1.38,Zn:1.31,Ga:1.26,Ge:1.22,/* As */Se:1.16,Br:1.14,Kr:1.10,
-		Rb:2.11,Sr:1.92,Y :1.62,Zr:1.48,Nb:1.37,Mo:1.45,Tc:1.56,Ru:1.26,Rh:1.35,Pd:1.31,Ag:1.53,Cd:1.48,In:1.44,Sn:1.41,Sb:1.38,Te:1.35,I :1.33,Xe:1.30,
-		Cs:2.25,Ba:1.98,Lu:1.60,Hf:1.50,Ta:1.38,W :1.46,Re:1.59,Os:1.44,Ir:1.37,Pt:1.28,Au:1.44,Hg:1.49,Tl:1.48,Pb:1.47,Bi:1.46,/* Po *//* At */Rn:1.45,
+    var bondTable = {
+            H :0.37,                                                                                                                                He:0.32,
+            Li:1.34,Be:0.90,                                                                                B :0.82,C :0.77,N :0.75,O :0.73,F :0.71,Ne:0.69,
+            Na:1.54,Mg:1.30,                                                                                Al:1.18,Si:1.11,P :1.06,S :1.02,Cl:0.99,Ar:0.97,
+            K :1.96,Ca:1.74,Sc:1.44,Ti:1.56,V :1.25,/* Cr */Mn:1.39,Fe:1.25,Co:1.26,Ni:1.21,Cu:1.38,Zn:1.31,Ga:1.26,Ge:1.22,/* As */Se:1.16,Br:1.14,Kr:1.10,
+            Rb:2.11,Sr:1.92,Y :1.62,Zr:1.48,Nb:1.37,Mo:1.45,Tc:1.56,Ru:1.26,Rh:1.35,Pd:1.31,Ag:1.53,Cd:1.48,In:1.44,Sn:1.41,Sb:1.38,Te:1.35,I :1.33,Xe:1.30,
+            Cs:2.25,Ba:1.98,Lu:1.60,Hf:1.50,Ta:1.38,W :1.46,Re:1.59,Os:1.44,Ir:1.37,Pt:1.28,Au:1.44,Hg:1.49,Tl:1.48,Pb:1.47,Bi:1.46,/* Po *//* At */Rn:1.45,
 
-		// None of the boottom row or any of the Lanthanides have bond lengths
-	}
+            // None of the boottom row or any of the Lanthanides have bond lengths
+    }
     var bondLength = function(elem) {
         return bondTable[elem] || 1.6;
     }
@@ -1199,7 +1226,7 @@ $3Dmol.Parsers = (function() {
                 z = parseFloat(line.substr(46, 8));
                 b = parseFloat(line.substr(60, 8));
                 elem = line.substr(76, 2).replace(/ /g, "");
-                if (elem === '') { // for some incorrect PDB files
+                if (elem === '' || typeof(bondTable[elem]) === 'undefined') { // for some incorrect PDB files
                     elem = line.substr(12, 2).replace(/ /g, "");
                     if(elem.length > 0 && elem[0] == 'H' && elem != 'Hg') {
                         elem = 'H'; //workaround weird hydrogen names from MD, note mercury must use lowercase
