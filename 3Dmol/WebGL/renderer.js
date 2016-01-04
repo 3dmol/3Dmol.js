@@ -149,7 +149,13 @@ $3Dmol.Renderer = function(parameters) {
 
     this.context = _gl;
 
+    var _extInstanced = _gl.getExtension("ANGLE_instanced_arrays");
+
     // API
+
+    this.supportsAIA = function() {
+        return Boolean(_extInstanced);
+    }
 
     this.getContext = function() {
 
@@ -840,8 +846,6 @@ $3Dmol.Renderer = function(parameters) {
             updateBuffers = true;
         }
 
-        var ext = _gl.getExtension("ANGLE_instanced_arrays");
-
         // rebind shader attributes to appropriate (and already initialized) gl
         // buffers
         if (updateBuffers) {
@@ -921,15 +925,15 @@ $3Dmol.Renderer = function(parameters) {
 
                 faceCount = sphereGeometryGroup.faceidx;
 
-                ext.vertexAttribDivisorANGLE(attributes.offset, 1);
-                ext.vertexAttribDivisorANGLE(attributes.radius, 1);
-                ext.vertexAttribDivisorANGLE(attributes.color, 1);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.offset, 1);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.radius, 1);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.color, 1);
 
-                ext.drawElementsInstancedANGLE(_gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0, geometryGroup.radiusArray.length);
+                _extInstanced.drawElementsInstancedANGLE(_gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0, geometryGroup.radiusArray.length);
 
-                ext.vertexAttribDivisorANGLE(attributes.offset, 0);
-                ext.vertexAttribDivisorANGLE(attributes.radius, 0);
-                ext.vertexAttribDivisorANGLE(attributes.color, 0);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.offset, 0);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.radius, 0);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.color, 0);
 
             }
 
