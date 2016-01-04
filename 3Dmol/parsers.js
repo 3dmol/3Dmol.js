@@ -251,19 +251,32 @@ $3Dmol.Parsers = (function() {
 
             if (typeof (chres[atom.chain]) === "undefined")
                 chres[atom.chain] = [];
-
+            
             if (isFinite(atom.hbondDistanceSq)) {
                 var other = atom.hbondOther;
+                if (typeof (chres[other.chain]) === "undefined")
+                    chres[other.chain] = [];
+                
                 if (Math.abs(other.resi - atom.resi) === 4) {
                     // helix
                     chres[atom.chain][atom.resi] = 'h';
-                } else { // otherwise assume sheet
-                    chres[atom.chain][atom.resi] = 'maybesheet';
+                } 
+            }
+        }
+        
+        // plug gaps in helices
+        for (c in chres) {
+            for (r = 1; r < chres[c].length - 1; r++) {
+                var valbefore = chres[c][r - 1];
+                var valafter = chres[c][r + 1];
+                val = chres[c][r];
+                if (valbefore == 'h' && valbefore == valafter && val != valbefore) {
+                    chres[c][r] = valbefore;
                 }
             }
         }
         
-        //now potential sheets - but only if not part of helix
+        //now potential sheets - but only if mate not part of helix
         for (i = 0, il = atomsarray.length; i < il; i++) {
             atom = atomsarray[i];
 
@@ -288,13 +301,13 @@ $3Dmol.Parsers = (function() {
             }
         }
         
-        // plug gaps and remove singletons
+        // plug gaps in sheets and remove singletons
         for (c in chres) {
             for (r = 1; r < chres[c].length - 1; r++) {
                 var valbefore = chres[c][r - 1];
                 var valafter = chres[c][r + 1];
                 val = chres[c][r];
-                if (valbefore == valafter && val != valbefore) {
+                if (valbefore == 's' && valbefore == valafter && val != valbefore) {
                     chres[c][r] = valbefore;
                 }
             }

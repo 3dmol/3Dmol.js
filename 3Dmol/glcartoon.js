@@ -1004,7 +1004,7 @@ $3Dmol.drawCartoon = (function() {
                     }
 
                     // reached next residue (potentially the first residue)
-                    if (curr === undefined || curr.rescode != next.rescode)
+                    if (curr === undefined || curr.rescode != next.rescode || curr.resi != next.resi)
                     {
                         if (baseEndPt) // draw last NA residue's base
                         {
