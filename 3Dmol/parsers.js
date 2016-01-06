@@ -1098,7 +1098,7 @@ $3Dmol.Parsers = (function() {
     // based on distance alone
     var areConnected = function(atom1, atom2) {
         var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
-        maxsq += 0.25;// fudge factor, especially important for md frames
+        maxsq += 0.25;// fudge factor, especially important for md frames, also see 1i3d
         maxsq *= maxsq;
 
         var xdiff = atom1.x - atom2.x;
@@ -1205,6 +1205,7 @@ $3Dmol.Parsers = (function() {
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
+        var seenbonds = {}; //sometimes connect records are duplicated
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
@@ -1307,10 +1308,13 @@ $3Dmol.Parsers = (function() {
                     if (fromAtom !== undefined && toAtom !== undefined) {
                         // minimal cleanup here - pymol likes to output
                         // duplicated conect records
-                        var toindex = serialToIndex[to];
-                        if (fromAtom.bonds[fromAtom.bonds.length - 1] != toindex) {
-                            fromAtom.bonds.push(toindex);
-                            fromAtom.bondOrder.push(1);
+                        if(!seenbonds[ [fromAtom,toAtom] ]) {
+                            seenbonds[ [fromAtom,toAtom] ] = 1;
+                            var toindex = serialToIndex[to];
+                            if (fromAtom.bonds[fromAtom.bonds.length - 1] != toindex) {
+                                fromAtom.bonds.push(toindex);
+                                fromAtom.bondOrder.push(1);
+                            }
                         }
                     }
                 }
