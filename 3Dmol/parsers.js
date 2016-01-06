@@ -49,10 +49,12 @@ $3Dmol.Parsers = (function() {
                     var atom2 = otherPoints[j];
 
                     if (areConnected(atom1, atom2)) {
-                        atom1.bonds.push(atom2.index);
-                        atom1.bondOrder.push(1);
-                        atom2.bonds.push(atom1.index);
-                        atom2.bondOrder.push(1);
+                        if (atom1.bonds.indexOf(atom2.index) == -1) {
+                            atom1.bonds.push(atom2.index);
+                            atom1.bondOrder.push(1);
+                            atom2.bonds.push(atom1.index);
+                            atom2.bondOrder.push(1);
+                        }
                     }
                 }
             }
@@ -87,10 +89,12 @@ $3Dmol.Parsers = (function() {
                         for (var j = i + 1; j < points.length; j++) {
                             var atom2 = points[j];
                             if (areConnected(atom1, atom2)) {
-                                atom1.bonds.push(atom2.index);
-                                atom1.bondOrder.push(1);
-                                atom2.bonds.push(atom1.index);
-                                atom2.bondOrder.push(1);
+                                if (atom1.bonds.indexOf(atom2.index) == -1) {
+                                    atom1.bonds.push(atom2.index);
+                                    atom1.bondOrder.push(1);
+                                    atom2.bonds.push(atom1.index);
+                                    atom2.bondOrder.push(1);
+                                }
                             }
                         }
                     }
@@ -1205,7 +1209,7 @@ $3Dmol.Parsers = (function() {
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
-        var seenbonds = {}; //sometimes connect records are duplicated
+        var seenbonds = {}; //sometimes connect records are duplicated as an unofficial means of relaying bond orders
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
@@ -1301,19 +1305,32 @@ $3Dmol.Parsers = (function() {
                 // also
                 // described in CONECT. But what about 2JYT???
                 var from = parseInt(line.substr(6, 5));
-                var fromAtom = atoms[atoms.length-1][serialToIndex[from]];
+                var fromindex = serialToIndex[from];
+                var fromAtom = atoms[atoms.length-1][fromindex];
                 for (j = 0; j < 4; j++) {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
-                    var toAtom = atoms[atoms.length-1][serialToIndex[to]];
+                    var toindex = serialToIndex[to];
+                    var toAtom = atoms[atoms.length-1][toindex];
                     if (fromAtom !== undefined && toAtom !== undefined) {
-                        // minimal cleanup here - pymol likes to output
-                        // duplicated conect records
-                        if(!seenbonds[ [fromAtom,toAtom] ]) {
-                            seenbonds[ [fromAtom,toAtom] ] = 1;
-                            var toindex = serialToIndex[to];
-                            if (fromAtom.bonds[fromAtom.bonds.length - 1] != toindex) {
+                        // duplicated conect records indicate bond order
+                        if(!seenbonds[ [fromindex,toindex] ]) {
+                            seenbonds[ [fromindex,toindex] ] = 1;
+                            if (fromAtom.bonds.length == 0 || fromAtom.bonds[fromAtom.bonds.length - 1] != toindex) {
                                 fromAtom.bonds.push(toindex);
                                 fromAtom.bondOrder.push(1);
+                            }
+                        } else { //update bond order
+                            seenbonds[ [fromindex,toindex] ] += 1;
+                            
+                            for(var bi = 0; bi < fromAtom.bonds.length; bi++) {
+                                if(fromAtom.bonds[bi] == toindex) {
+                                    var newbo = seenbonds[ [fromindex,toindex] ];
+                                    if(newbo >= 4) { //aromatic
+                                        fromAtom.bondOrder[bi] = 1;
+                                    } else {
+                                        fromAtom.bondOrder[bi] = newbo;
+                                    }
+                                }
                             }
                         }
                     }
