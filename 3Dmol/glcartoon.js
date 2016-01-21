@@ -850,7 +850,7 @@ $3Dmol.drawCartoon = (function() {
         {
             next = atomList[i];
             
-            if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1 || next.hetflag)
+            if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1)
                 continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
 
             var inNucleicAcid = ($.inArray(next.resn.trim(), naResns) != -1)
