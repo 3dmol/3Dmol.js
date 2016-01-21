@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <script src="../../build/3Dmol.js"></script>
+    <style>
+      table td { text-align: center; }
+      table th {padding-top: 1em;}
+    </style>
+  </head>
+
+  <body>
+    <script>
+      $(document).ready(function() {
+          //install a right-click handler on every canvas to export png
+          $('canvas').bind('contextmenu',function(e) {
+              var dt = e.currentTarget.toDataURL('image/png');
+              window.location = dt;
+          });
+        });
+        
+    </script>
+
+    <table width="100%">
+      <tr>
+        <td colspan=2 height=200px>
+          42 Tests selecting by a user provided property
+        </td>
+      </tr>
+      <tr>
+        <td width="50%">
+<div id="test42" style="width: 400px; height: 400px; position: relative;"></div>
+        </td>
+        <script>
+              var viewer = $3Dmol.createViewer($("#test42"));
+              $3Dmol.download("pdb:4UB9",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  
+                  var atoms = viewer.selectedAtoms();
+                  for(var i = 0; i < atoms.length; i++) {
+                    var a = atoms[i];
+                    a.properties.structured = (a.ss == 'h' || a.ss == 's');                    
+                  }
+                  
+                  viewer.setStyle({properties: {structured: true}}, {cartoon: {}});
+                  viewer.render();
+              });
+        </script>
+        <td width="50%"><img src="imgs/test42.png"></td>
+      </tr>
+    </table>
+
+  </body>
+</html>

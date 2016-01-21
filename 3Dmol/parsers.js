@@ -49,10 +49,12 @@ $3Dmol.Parsers = (function() {
                     var atom2 = otherPoints[j];
 
                     if (areConnected(atom1, atom2)) {
-                        atom1.bonds.push(atom2.index);
-                        atom1.bondOrder.push(1);
-                        atom2.bonds.push(atom1.index);
-                        atom2.bondOrder.push(1);
+                        if (atom1.bonds.indexOf(atom2.index) == -1) {
+                            atom1.bonds.push(atom2.index);
+                            atom1.bondOrder.push(1);
+                            atom2.bonds.push(atom1.index);
+                            atom2.bondOrder.push(1);
+                        }
                     }
                 }
             }
@@ -87,10 +89,12 @@ $3Dmol.Parsers = (function() {
                         for (var j = i + 1; j < points.length; j++) {
                             var atom2 = points[j];
                             if (areConnected(atom1, atom2)) {
-                                atom1.bonds.push(atom2.index);
-                                atom1.bondOrder.push(1);
-                                atom2.bonds.push(atom1.index);
-                                atom2.bondOrder.push(1);
+                                if (atom1.bonds.indexOf(atom2.index) == -1) {
+                                    atom1.bonds.push(atom2.index);
+                                    atom1.bondOrder.push(1);
+                                    atom2.bonds.push(atom1.index);
+                                    atom2.bondOrder.push(1);
+                                }
                             }
                         }
                     }
@@ -251,19 +255,32 @@ $3Dmol.Parsers = (function() {
 
             if (typeof (chres[atom.chain]) === "undefined")
                 chres[atom.chain] = [];
-
+            
             if (isFinite(atom.hbondDistanceSq)) {
                 var other = atom.hbondOther;
+                if (typeof (chres[other.chain]) === "undefined")
+                    chres[other.chain] = [];
+                
                 if (Math.abs(other.resi - atom.resi) === 4) {
                     // helix
                     chres[atom.chain][atom.resi] = 'h';
-                } else { // otherwise assume sheet
-                    chres[atom.chain][atom.resi] = 'maybesheet';
+                } 
+            }
+        }
+        
+        // plug gaps in helices
+        for (c in chres) {
+            for (r = 1; r < chres[c].length - 1; r++) {
+                var valbefore = chres[c][r - 1];
+                var valafter = chres[c][r + 1];
+                val = chres[c][r];
+                if (valbefore == 'h' && valbefore == valafter && val != valbefore) {
+                    chres[c][r] = valbefore;
                 }
             }
         }
         
-        //now potential sheets - but only if not part of helix
+        //now potential sheets - but only if mate not part of helix
         for (i = 0, il = atomsarray.length; i < il; i++) {
             atom = atomsarray[i];
 
@@ -288,13 +305,13 @@ $3Dmol.Parsers = (function() {
             }
         }
         
-        // plug gaps and remove singletons
+        // plug gaps in sheets and remove singletons
         for (c in chres) {
             for (r = 1; r < chres[c].length - 1; r++) {
                 var valbefore = chres[c][r - 1];
                 var valafter = chres[c][r + 1];
                 val = chres[c][r];
-                if (valbefore == valafter && val != valbefore) {
+                if (valbefore == 's' && valbefore == valafter && val != valbefore) {
                     chres[c][r] = valbefore;
                 }
             }
@@ -1085,8 +1102,8 @@ $3Dmol.Parsers = (function() {
     // based on distance alone
     var areConnected = function(atom1, atom2) {
         var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
+        maxsq += 0.25;// fudge factor, especially important for md frames, also see 1i3d
         maxsq *= maxsq;
-        maxsq *= 1.1; // fudge factor, especially important for md frames
 
         var xdiff = atom1.x - atom2.x;
         xdiff *= xdiff;
@@ -1192,6 +1209,7 @@ $3Dmol.Parsers = (function() {
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
+        var seenbonds = {}; //sometimes connect records are duplicated as an unofficial means of relaying bond orders
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
@@ -1287,17 +1305,33 @@ $3Dmol.Parsers = (function() {
                 // also
                 // described in CONECT. But what about 2JYT???
                 var from = parseInt(line.substr(6, 5));
-                var fromAtom = atoms[atoms.length-1][serialToIndex[from]];
+                var fromindex = serialToIndex[from];
+                var fromAtom = atoms[atoms.length-1][fromindex];
                 for (j = 0; j < 4; j++) {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
-                    var toAtom = atoms[atoms.length-1][serialToIndex[to]];
+                    var toindex = serialToIndex[to];
+                    var toAtom = atoms[atoms.length-1][toindex];
                     if (fromAtom !== undefined && toAtom !== undefined) {
-                        // minimal cleanup here - pymol likes to output
-                        // duplicated conect records
-                        var toindex = serialToIndex[to];
-                        if (fromAtom.bonds[fromAtom.bonds.length - 1] != toindex) {
-                            fromAtom.bonds.push(toindex);
-                            fromAtom.bondOrder.push(1);
+                        // duplicated conect records indicate bond order
+                        if(!seenbonds[ [fromindex,toindex] ]) {
+                            seenbonds[ [fromindex,toindex] ] = 1;
+                            if (fromAtom.bonds.length == 0 || fromAtom.bonds[fromAtom.bonds.length - 1] != toindex) {
+                                fromAtom.bonds.push(toindex);
+                                fromAtom.bondOrder.push(1);
+                            }
+                        } else { //update bond order
+                            seenbonds[ [fromindex,toindex] ] += 1;
+                            
+                            for(var bi = 0; bi < fromAtom.bonds.length; bi++) {
+                                if(fromAtom.bonds[bi] == toindex) {
+                                    var newbo = seenbonds[ [fromindex,toindex] ];
+                                    if(newbo >= 4) { //aromatic
+                                        fromAtom.bondOrder[bi] = 1;
+                                    } else {
+                                        fromAtom.bondOrder[bi] = newbo;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
