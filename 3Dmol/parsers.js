@@ -419,7 +419,7 @@ $3Dmol.Parsers = (function() {
         while (lines.length > 0) {
             if (lines.length < 3)
                 break;
-            var atomCount = parseInt(lines[0].substr(0, 3));
+            var atomCount = parseInt(lines[0]);
             if (isNaN(atomCount) || atomCount <= 0)
                 break;
             if (lines.length < atomCount + 2)
