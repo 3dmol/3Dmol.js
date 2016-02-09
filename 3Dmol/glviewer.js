@@ -392,8 +392,7 @@ $3Dmol.GLViewer = (function() {
                 scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
                 if (scaleFactor < 80)
                     scaleFactor = 80;
-                rotationGroup.position.z = cz - dy
-                        * scaleFactor;
+                rotationGroup.position.z = cz + dy * scaleFactor;
                 if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
             } else if (mode == 1 || mouseButton == 2
                     || ev.ctrlKey) { // Translate
@@ -1215,7 +1214,7 @@ $3Dmol.GLViewer = (function() {
          * Create and add line shape
          * 
          * @function $3Dmol.GLViewer#addLine
-         * @param {LineSpec} spec - Style specification
+         * @param {LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
          * @return {$3Dmol.GLShape}
          */
         this.addLine = function(spec) {

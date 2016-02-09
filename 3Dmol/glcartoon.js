@@ -765,8 +765,21 @@ $3Dmol.drawCartoon = (function() {
     // check whether two atoms are members of the same residue or subsequent, connected residues (a before b)
     var inConnectedResidues = function(a, b)
     {
-        return a && b && a.chain === b.chain && a.reschain === b.reschain &&
-                (a.resi === b.resi || a.resi === b.resi-1)
+        if(a && b && a.chain === b.chain) {
+            if((a.reschain === b.reschain) && (a.resi === b.resi || a.resi === b.resi-1))
+                return true;
+            if(a.resi < b.resi) {
+                //some PDBs have gaps in the numbering but the residues are still connected
+                //assume if within 4A they are connected
+                var av = new $3Dmol.Vector3(a.x, a.y, a.z);
+                var bv = new $3Dmol.Vector3(b.x, b.y, b.z);
+                var dist = av.distanceToSquared(bv);
+                if(dist < 16.0) return true; //calpha dist
+            }
+        }
+
+        return false;
+
     }
 
     var drawCartoon = function(group, atomList, gradientScheme, fill, doNotSmoothen, num, div)
@@ -775,9 +788,9 @@ $3Dmol.drawCartoon = (function() {
         div = div || defaultDiv;
 
                         //  proteins    na backbone  na terminus                  nucleobases
-        var cartoonAtoms = ["CA", "O",  "P", "OP2",  "O5'", "O3'", "C5'", "C2'",  "N1", "N3"];
+        var cartoonAtoms = ["CA", "O",  "P", "OP2", "O2P", "O5'", "O3'", "C5'", "C2'","O5*", "O3*", "C5*", "C2*", "N1", "N3"];
         var purResns = ["DA", "DG", "A", "G"];
-        var pyrResns = ["DT", "DC", "U", "C"];
+        var pyrResns = ["DT", "DC", "U", "C", "T"];
         var naResns  =  purResns.concat(pyrResns);
 
         var geo, cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
@@ -837,7 +850,7 @@ $3Dmol.drawCartoon = (function() {
         {
             next = atomList[i];
             
-            if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1 || next.hetflag)
+            if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1)
                 continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
 
             var inNucleicAcid = ($.inArray(next.resn.trim(), naResns) != -1)
@@ -866,9 +879,7 @@ $3Dmol.drawCartoon = (function() {
                     else
                         thickness = defaultThickness;
 
-                    /* do not draw connections between different chains, but ignore
-                       differences in reschain to properly support CA-only files */
-                    if (curr && curr.chain === next.chain && curr.resi + 1 === next.resi)
+                    if (inConnectedResidues(curr, next))
                     {
                         // if both atoms are same color, draw single cylinder
                         if (nextColor == currColor)
@@ -924,7 +935,7 @@ $3Dmol.drawCartoon = (function() {
 
                 // draw backbone through these atoms
                 if (isAlphaCarbon(next) ||
-                    inNucleicAcid && (next.atom === "P" || next.atom === "O5'"))
+                    inNucleicAcid && (next.atom === "P" || next.atom.indexOf('O5') == 0))
                 {
                     if (drawingTube)
                     {
@@ -993,7 +1004,7 @@ $3Dmol.drawCartoon = (function() {
                     }
 
                     // reached next residue (potentially the first residue)
-                    if (curr === undefined || curr.resi != next.resi)
+                    if (curr === undefined || curr.rescode != next.rescode || curr.resi != next.resi)
                     {
                         if (baseEndPt) // draw last NA residue's base
                         {
@@ -1034,17 +1045,17 @@ $3Dmol.drawCartoon = (function() {
 
                 // atoms used to orient the backbone strand
                 else if (isAlphaCarbon(curr) && next.atom === "O"
-                      || inNucleicAcid && curr.atom === "P" && next.atom === "OP2"
-                      || inNucleicAcid && curr.atom === "O5'" && next.atom === "C5'")
+                      || inNucleicAcid && curr.atom === "P" && (next.atom === "OP2" || next.atom === "O2P")
+                      || inNucleicAcid && curr.atom.indexOf("O5") == 0 && next.atom.indexOf("C5") == 0)
                 {
                     orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.resi = next.resi;
-                    if (next.atom === "OP2") // for NA 3' terminus
+                    if (next.atom === "OP2" || next.atom === "O2P") // for NA 3' terminus
                         termOrientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
 
                 // NA 3' terminus is an edge case, need a vector for most recent O3'
-                else if (inNucleicAcid && next.atom === "O3'")
+                else if (inNucleicAcid && next.atom.indexOf("O3") == 0)
                 {
                     terminalPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
@@ -1124,7 +1135,10 @@ $3Dmol.drawCartoon = (function() {
         // dictionary of standard amino acid sizes, in number of atoms
         var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10,
             ILE:8, LEU: 8, LYS: 9, MET:8, PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
-
+        
+        if(!backbonePt || !orientPt || !backboneAtom)
+            return;
+        
         // the side vector points along the axis from backbone atom to orientation atom (eg. CA to O, in peptides)
         var sideVec = orientPt.sub(backbonePt);
         sideVec.normalize();

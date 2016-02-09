@@ -1707,6 +1707,24 @@ $3Dmol.GLModel = (function() {
                 }                    
             }
         };
+        
+        /**
+         * @function $3Dmol.GLModel.setColorByFunction
+         * @param {type} sel
+         * @param {type} func
+         */
+        this.setColorByFunction = function(sel, colorfun) {
+            var atoms = this.selectedAtoms(sel, atoms);
+            lastColors = null; // don't bother memoizing
+            if(atoms.length > 0)
+                molObj = null; // force rebuild
+            
+            // now apply colorfun
+            for (i = 0; i < atoms.length; i++) {
+                a = atoms[i];
+                a.color = colorfun(a);
+            }
+        };
 
         /** Convert the model into an object in the format of a ChemDoodle JSON model.
          *

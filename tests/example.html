@@ -36,6 +36,17 @@ head, body {
 			labels.push(atom);
 		}
 	};
+	
+	var colorSS = function(viewer) {
+		//color by secondary structure
+		var m = viewer.getModel();
+		m.setColorByFunction({}, function(atom) {
+			if(atom.ss == 'h') return "magenta";
+			else if(atom.ss == 's') return "orange";
+			else return "white";
+		});
+		viewer.render();
+	}
 
 	var atomcallback = function(atom, viewer) {
 		if (atom.clickLabel === undefined
@@ -122,9 +133,11 @@ var readText = function(input,func) {
 	<input type="button" value="Sphere"
 		onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
 	<input type="button" value="Cartoon"
-		onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
+		onclick="glviewer.setStyle({hetflag:false},{cartoon:{}}); glviewer.render();"></input>
 	<input type="button" value="Label alpha C's"
 		onclick="addLabels(glviewer); glviewer.render();"></input>
+	<input type="button" value="Color SS"
+		onclick="colorSS(glviewer);"></input>
 	<br>
 	<input type="button" value="Surface1"
 		onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false,chain:'A'},{hetflag:false,chain:'A'});"></input>
@@ -137,7 +150,7 @@ var readText = function(input,func) {
 	<br>
 	<input id="pdbid" value="1UBQ" size=4>
 	<button
-		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer, {doAssembly:true});">Download</button>
+		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer, {doAssembly:true, noSecondaryStructure: false});">Download</button>
 	<br>
 	<input type="file" onchange="readText(this, function(data, name) {glviewer.clear(); m= glviewer.addModel(data,name); glviewer.zoomTo(); glviewer.render();} );">
 
