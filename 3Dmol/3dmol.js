@@ -111,7 +111,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
     } else if (query.substr(0, 4) == 'cid:') {
         type = "sdf";
         query = query.substr(4);
-        if (!query.match(/^[1-9]+$/)) {
+        if (!query.match(/^[0-9]+$/)) {
            alert("Wrong Compound ID"); return;
         }
         uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
