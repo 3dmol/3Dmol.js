@@ -509,7 +509,41 @@ $3Dmol.GLModel = (function() {
             $3Dmol.GLDraw.drawSphere(geo, atom, radius, C);    
             
         };
-        
+
+        var drawAtomInstanced = function(atom, geo) {
+
+            if (!atom.style.sphere)
+                return;
+            var style = atom.style.sphere;
+            if (style.hidden)
+                return;
+
+            var radius = getRadiusFromStyle(atom, style);
+            var C = $3Dmol.getColorFromStyle(atom, style);
+
+            var geoGroup = geo.updateGeoGroup(1);
+            var startv =  geoGroup.vertices;
+            var start = startv*3;
+            var vertexArray = geoGroup.vertexArray;
+            var colorArray = geoGroup.colorArray;
+            var radiusArray = geoGroup.radiusArray;
+
+            vertexArray[start] = atom.x;
+            vertexArray[start+1] = atom.y ;
+            vertexArray[start+2] = atom.z;
+
+            var normalArray = geoGroup.normalArray;
+            var colorArray = geoGroup.colorArray;
+            colorArray[start] = C.r;
+            colorArray[start+1] = C.g;
+            colorArray[start+2] = C.b;
+
+            radiusArray[startv] = radius;
+
+            geoGroup.vertices += 1;
+
+        };
+
         //dkoes - test code for sphere imposters
         var drawAtomImposter = function(atom, geo) {
             
@@ -849,14 +883,19 @@ $3Dmol.GLModel = (function() {
         // at some point we should optimize this to avoid unnecessary
         // recalculation
         /** param {AtomSpec[]} atoms */
-        var createMolObj = function(atoms) {
+        var createMolObj = function(atoms, options) {
+
+            options = options || {};
 
             var ret = new $3Dmol.Object3D();
             var cartoonAtoms = [];
             var lineGeometries = {};
             var crossGeometries = {};
-            var sphereGeometry = new $3Dmol.Geometry(true);                                                         
-            var imposterGeometry = new $3Dmol.Geometry(true);                                                         
+            if (options.supportsAIA)
+                var instancedGeometry = new $3Dmol.Geometry(false, true);
+            else
+                var sphereGeometry = new $3Dmol.Geometry(true);
+            var imposterGeometry = new $3Dmol.Geometry(true);
             var stickGeometry = new $3Dmol.Geometry(true);
             var i, j, n, testOpacities;
             var opacities = {};
@@ -893,8 +932,11 @@ $3Dmol.GLModel = (function() {
 
                         } else opacities[j] = testOpacities[j];
                     }
-                    
-                    drawAtomSphere(atom, sphereGeometry);
+
+                    if (options.supportsAIA)
+                        drawAtomInstanced(atom, instancedGeometry);
+                    else
+                        drawAtomSphere(atom, sphereGeometry);
                     drawAtomImposter(atom, imposterGeometry);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
@@ -925,7 +967,7 @@ $3Dmol.GLModel = (function() {
             }
 
             // add sphere geometry
-            if (sphereGeometry.vertices > 0) {
+            if (sphereGeometry && sphereGeometry.vertices > 0) {
                 var sphereMaterial = new $3Dmol.MeshLambertMaterial({
                     ambient : 0x000000,
                     vertexColors : true,
@@ -942,6 +984,28 @@ $3Dmol.GLModel = (function() {
 				
                 var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
                 ret.add(sphere);
+            }
+
+            // add ANGLE instanced sphere geometry
+            if (instancedGeometry && instancedGeometry.vertices > 0) {
+                var sphere = new $3Dmol.Geometry(true);
+                $3Dmol.GLDraw.drawSphere(sphere, {x:0, y:0, z:0}, 1, new $3Dmol.Color(0.5, 0.5, 0.5));
+                sphere.initTypedArrays();
+                var instancedMaterial = new $3Dmol.InstancedMaterial({
+                    sphereMaterial : new $3Dmol.MeshLambertMaterial({
+                        ambient : 0x000000,
+                        vertexColors : true,
+                        reflectivity : 0,
+                    }),
+                    sphere : sphere
+                });
+                if (opacities.instancedSphere < 1 && opacities.instancedSphere >= 0) {
+                    instancedMaterial.sphereMaterial.transparent = true;
+                    instancedMaterial.sphereMaterial.opacity = opacities.sphere;
+                }
+                instancedGeometry.initTypedArrays();
+
+                ret.add(new $3Dmol.Mesh(instancedGeometry, instancedMaterial));
             }
 
             // add imposter geometry
@@ -1786,11 +1850,12 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#globj
          * @param {$3Dmol.Object3D} group
+         * @param Object options
          */
-        this.globj = function(group) {
+        this.globj = function(group, options) {
             var time = new Date();
             if(molObj === null) { // have to regenerate
-                molObj = createMolObj(atoms);
+                molObj = createMolObj(atoms, options);
                 var time2 = new Date();
                 //console.log("object creation time: " + (time2 - time));
                 if(renderedMolObj) { // previously rendered, remove

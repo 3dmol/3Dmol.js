@@ -253,7 +253,105 @@ $3Dmol.ShaderLib = {
             diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
-            fogFar: { type: 'f', value: 2000},           
+            fogFar: { type: 'f', value: 2000},
+            ambient: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            emissive: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            ambientLightColor: { type: 'fv', value: [] },
+            directionalLightColor: { type: 'fv', value: [] },
+            directionalLightDirection: { type: 'fv', value: [] }
+        }
+
+    },
+
+
+    'instanced' : {
+        fragmentShader : [
+
+"uniform mat4 viewMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform float opacity;",
+
+"uniform vec3 fogColor;",
+"uniform float fogNear;",
+"uniform float fogFar;",
+
+"varying vec3 vLightFront;",
+"varying vec3 vColor;",
+
+"void main() {",
+
+"    gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
+
+"    #ifndef WIREFRAME",
+"    gl_FragColor.xyz *= vLightFront;",
+"    #endif",
+
+"    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
+"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
+
+"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
+
+"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+
+"}"
+
+
+].join("\n"),
+
+       vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform mat4 viewMatrix;",
+"uniform mat3 normalMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform vec3 ambient;",
+"uniform vec3 diffuse;",
+"uniform vec3 emissive;",
+"uniform vec3 ambientLightColor;",
+"uniform vec3 directionalLightColor[ 1 ];",
+"uniform vec3 directionalLightDirection[ 1 ];",
+
+"attribute vec3 offset;",
+"attribute vec3 position;",
+"attribute vec3 normal;",
+"attribute vec3 color;",
+"attribute float radius;",
+
+"varying vec3 vColor;",
+"varying vec3 vLightFront;",
+
+"void main() {",
+
+"    vColor = color;",
+
+"    vec3 objectNormal = normal;",
+"    vec3 transformedNormal = normalMatrix * objectNormal;",
+"    vec4 mvPosition = modelViewMatrix * vec4( position * radius + offset, 1.0 );",
+
+"    vLightFront = vec3( 0.0 );",
+
+"    transformedNormal = normalize( transformedNormal );",
+
+"    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
+"    vec3 dirVector = normalize( lDirection.xyz );",
+"    float dotProduct = dot( transformedNormal, dirVector );",
+"    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
+
+"    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
+"    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
+
+"    gl_Position = projectionMatrix * mvPosition;",
+"}"
+
+].join("\n"),
+
+        uniforms : {
+            opacity: { type: 'f', value: 1.0 },
+            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogNear: { type: 'f', value: 1.0 },
+            fogFar: { type: 'f', value: 2000},
             ambient: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             emissive: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             ambientLightColor: { type: 'fv', value: [] },

@@ -358,6 +358,89 @@ $3Dmol.ImposterMaterial.prototype.clone = function() {
   
 };
 
+$3Dmol.InstancedMaterial = function(parameters) {
+
+    $3Dmol.Material.call(this);
+
+    this.color = new $3Dmol.Color(0xffffff);
+    this.ambient = new $3Dmol.Color(0xfffff);
+    this.emissive = new $3Dmol.Color(0x000000);
+
+    //TODO: Which of these instance variables do I really need?
+    this.wrapAround = false;
+    this.wrapRGB = new $3Dmol.Vector3(1,1,1);
+
+    this.map = null;
+
+    this.lightMap = null;
+
+    this.specularMap = null;
+
+    this.envMap = null;
+    this.reflectivity = 1;
+    this.refractionRatio = 0.98;
+
+    this.fog = true;
+
+    this.wireframe = false;
+    this.wireframeLinewidth = 1;
+    this.wireframeLinecap = 'round';
+    this.wireframeLinejoin = 'round';
+
+    this.shading = $3Dmol.SmoothShading;
+    this.shaderID = "instanced";
+    this.vertexColors = $3Dmol.NoColors;
+
+    this.skinning = false;
+
+    this.sphere = null;
+
+    this.setValues(parameters);
+
+};
+
+$3Dmol.InstancedMaterial.prototype = Object.create($3Dmol.Material.prototype);
+
+$3Dmol.InstancedMaterial.prototype.clone = function() {
+
+    var material = new $3Dmol.InstancedMaterial();
+
+    $3Dmol.Material.prototype.clone.call(this, material);
+
+    material.color.copy(this.color);
+    material.ambient.copy(this.ambient);
+    material.emissive.copy(this.emissive);
+
+    material.wrapAround = this.wrapAround;
+    material.wrapRGB.copy(this.wrapRGB);
+
+    material.map = this.map;
+
+    material.lightMap = this.lightMap;
+
+    material.specularMap = this.specularMap;
+
+    material.envMap = this.envMap;
+    material.combine = this.combine;
+    material.reflectivity = this.reflectivity;
+    material.refractionRatio = this.refractionRatio;
+
+    material.fog = this.fog;
+
+    material.shading = this.shading;
+    material.shaderID = this.shaderID;
+    material.vertexColors = this.vertexColors;
+
+    material.skinning = this.skinning;
+    material.morphTargets = this.morphTargets;
+    material.morphNormals = this.morphNormals;
+
+    material.sphere = this.sphere;
+
+  return material;
+
+};
+
 
 //Sprite material
 /** @constructor */

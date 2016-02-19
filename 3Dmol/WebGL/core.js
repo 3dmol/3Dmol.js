@@ -308,6 +308,7 @@ $3Dmol.Geometry = (function() {
         this.colorArray = null;
         this.normalArray = null;
         this.faceArray = null;
+        this.radiusArray = null;
         //this.adjFaceArray=null;
         this.lineArray = null;
         this.vertices = 0;
@@ -419,7 +420,8 @@ $3Dmol.Geometry = (function() {
             colorArr = this.colorArray,
             normalArr = this.normalArray,
             faceArr = this.faceArray,
-            lineArr = this.lineArray;
+            lineArr = this.lineArray,
+            radiusArr = this.radiusArray;
 
         //subarray to avoid copying and reallocating memory
         this.vertexArray = vertexArr.subarray(0,this.vertices*3);
@@ -434,6 +436,9 @@ $3Dmol.Geometry = (function() {
             else
                 this.lineArray = new Uint16Array();
         }
+        else if (radiusArr) {
+            this.radiusArray = radiusArr.subarray(0, this.vertices);
+        }
         else {
             this.normalArray = new Float32Array(); 
             this.faceArray = new Uint16Array(); 
@@ -447,7 +452,7 @@ $3Dmol.Geometry = (function() {
             if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
             if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
             if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
-            
+            if(this.radiusArray) this.radiusArray = new Float32Array(this.radiusArray);
         }
         this.__inittedArrays = true;        
         
@@ -470,12 +475,15 @@ $3Dmol.Geometry = (function() {
             ret.faceArray = new Uint16Array(BUFFERSIZE*6);
             ret.lineArray = new Uint16Array(BUFFERSIZE*6);
         }
+        else if (geo.radii) {
+            ret.radiusArray = new Float32Array(BUFFERSIZE);
+        }
         
         
         return ret;
     };
     /** @constructor */
-    var Geometry = function(mesh) {
+    var Geometry = function(mesh, radii) {
         
         $3Dmol.EventDispatcher.call(this);
         
@@ -487,6 +495,7 @@ $3Dmol.Geometry = (function() {
     
         this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
         this.mesh = (mesh === true) ? true : false; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
+        this.radii = radii || false;
         // update flags
     
         this.verticesNeedUpdate = false;

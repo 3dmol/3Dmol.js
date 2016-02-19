@@ -149,7 +149,13 @@ $3Dmol.Renderer = function(parameters) {
 
     this.context = _gl;
 
+    var _extInstanced = _gl.getExtension("ANGLE_instanced_arrays");
+
     // API
+
+    this.supportsAIA = function() {
+        return Boolean(_extInstanced);
+    }
 
     this.getContext = function() {
 
@@ -640,7 +646,7 @@ $3Dmol.Renderer = function(parameters) {
         }
 
         // attributes
-        identifiers = [ 'position', 'normal', 'color', 'lineDistance' ];
+        identifiers = [ 'position', 'normal', 'color', 'lineDistance' , 'offset', 'radius' ];
 
         /*
          * for (a in attributes) identifiers.push(a);
@@ -748,7 +754,7 @@ $3Dmol.Renderer = function(parameters) {
             m_uniforms.fogFar.value = fog.far;
 
             // Set up lights for lambert shader
-            if (material.shaderID.lastIndexOf("lambert", 0) === 0) {
+            if (material.shaderID.startsWith("lambert") || material.shaderID === "instanced") {
 
                 // load view and normal matrices for directional and object
                 // lighting
@@ -864,7 +870,7 @@ $3Dmol.Renderer = function(parameters) {
                         0, 0);
             }
 
-            // Normals (lambert shader only)
+            // Normals
             if (attributes.normal >= 0) {
                 _gl.bindBuffer(_gl.ARRAY_BUFFER,
                         geometryGroup.__webglNormalBuffer);
@@ -872,6 +878,25 @@ $3Dmol.Renderer = function(parameters) {
                 _gl.vertexAttribPointer(attributes.normal, 3, _gl.FLOAT, false,
                         0, 0);
             }
+
+            // Offsets (Instanced only)
+            if (attributes.offset >= 0) {
+                _gl.bindBuffer(_gl.ARRAY_BUFFER,
+                        geometryGroup.__webglOffsetBuffer);
+                enableAttribute(attributes.offset);
+                _gl.vertexAttribPointer(attributes.offset, 3, _gl.FLOAT, false,
+                        0, 0);
+            }
+
+            // Radii (Instanced only)
+            if (attributes.radius >= 0) {
+                _gl.bindBuffer(_gl.ARRAY_BUFFER,
+                        geometryGroup.__webglRadiusBuffer);
+                enableAttribute(attributes.radius);
+                _gl.vertexAttribPointer(attributes.radius, 1, _gl.FLOAT, false,
+                        0, 0);
+            }
+
 
         }
 
@@ -881,7 +906,38 @@ $3Dmol.Renderer = function(parameters) {
         // TODO: make sure geometryGroup's face count is setup correctly
         if (object instanceof $3Dmol.Mesh) {
 
-            if (material.wireframe) {
+            if (material.shaderID === "instanced") {
+                var sphereGeometryGroup = material.sphere.geometryGroups[0];
+                if (updateBuffers) {
+                    _gl.bindBuffer(_gl.ARRAY_BUFFER,
+                                   geometryGroup.__webglVertexBuffer);
+                    _gl.bufferData(_gl.ARRAY_BUFFER, sphereGeometryGroup.vertexArray,
+                                   _gl.STATIC_DRAW);
+                    _gl.bindBuffer(_gl.ARRAY_BUFFER,
+                                   geometryGroup.__webglNormalBuffer);
+                    _gl.bufferData(_gl.ARRAY_BUFFER, sphereGeometryGroup.normalArray,
+                                   _gl.STATIC_DRAW);
+                    _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER,
+                                   geometryGroup.__webglFaceBuffer);
+                    _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, sphereGeometryGroup.faceArray,
+                                   _gl.STATIC_DRAW);
+                }
+
+                faceCount = sphereGeometryGroup.faceidx;
+
+                _extInstanced.vertexAttribDivisorANGLE(attributes.offset, 1);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.radius, 1);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.color, 1);
+
+                _extInstanced.drawElementsInstancedANGLE(_gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0, geometryGroup.radiusArray.length);
+
+                _extInstanced.vertexAttribDivisorANGLE(attributes.offset, 0);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.radius, 0);
+                _extInstanced.vertexAttribDivisorANGLE(attributes.color, 0);
+
+            }
+
+            else if (material.wireframe) {
                 lineCount = geometryGroup.lineidx;
                 setLineWidth(material.wireframeLinewidth);
 
@@ -1338,15 +1394,17 @@ $3Dmol.Renderer = function(parameters) {
         var colorArray = geometryGroup.colorArray;
 
         // vertex buffers
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
-        _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
+        if (!geometryGroup.radiusArray) {
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
+            _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
+        }
 
         // color buffers
         _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
         _gl.bufferData(_gl.ARRAY_BUFFER, colorArray, hint);
 
         // normal buffers
-        if (geometryGroup.normalArray !== undefined
+        if (geometryGroup.normalArray
                 && geometryGroup.__webglNormalBuffer !== undefined) {
             var normalArray = geometryGroup.normalArray;
             _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer);
@@ -1354,8 +1412,20 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
+        // offset buffers
+        if (geometryGroup.__webglOffsetBuffer !== undefined) {
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglOffsetBuffer);
+            _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
+        }
+
+        // radius buffers
+        if (geometryGroup.radiusArray && geometryGroup.__webglRadiusBuffer !== undefined) {
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglRadiusBuffer);
+            _gl.bufferData(_gl.ARRAY_BUFFER, geometryGroup.radiusArray, hint);
+        }
+
         // face (index) buffers
-        if (geometryGroup.faceArray !== undefined
+        if (geometryGroup.faceArray
                 && geometryGroup.__webglFaceBuffer !== undefined) {
             var faceArray = geometryGroup.faceArray;
             _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER,
@@ -1365,7 +1435,7 @@ $3Dmol.Renderer = function(parameters) {
         }
 
         // line (index) buffers (for wireframe)
-        if (geometryGroup.lineArray !== undefined
+        if (geometryGroup.lineArray
                 && geometryGroup.__webglLineBuffer !== undefined) {
             var lineArray = geometryGroup.lineArray;
             _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER,
@@ -1379,6 +1449,11 @@ $3Dmol.Renderer = function(parameters) {
     // TODO: do we need line buffer for mesh objects?
     // Also, can we integrate this with createLineBuffers?
     function createMeshBuffers(geometryGroup) {
+
+        if (geometryGroup.radiusArray) {
+            geometryGroup.__webglOffsetBuffer = _gl.createBuffer();
+            geometryGroup.__webglRadiusBuffer = _gl.createBuffer();
+        }
 
         geometryGroup.__webglVertexBuffer = _gl.createBuffer();
         geometryGroup.__webglNormalBuffer = _gl.createBuffer();
