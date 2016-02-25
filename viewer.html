@@ -145,7 +145,7 @@
                                     alert("Wrong PDB ID");
                                     return;
                                 }
-                                data = "http://www.pdb.org/pdb/files/" + data
+                                data = "http://www.rcsb.org/pdb/files/" + data
                                         + ".pdb";
                                 type = "pdb";
                             } else if (src == 'cid') {
@@ -201,12 +201,26 @@
                                     $.post("echo.cgi", {
                                         'url' : data
                                     }, function(ret, txt, response) {
+                                        if(ret.search("We're sorry, but the requested")) {
+                                            //really large files aren't available in pdb format
+                                            type = 'cif';
+                                            data = data.replace(/pdb$/,'cif');
+                                            $.post("echo.cgi",{
+                                                'url' : data
+                                            }, function(ret, txt, response) {
 
-                                        glviewer.addModel(ret, type);
-                                        runcmds(cmds, glviewer);
-                                        glviewer.render();
-                                        glviewer.zoomTo();
-                                    })
+                                                glviewer.addModel(ret, type);
+                                                runcmds(cmds, glviewer);
+                                                glviewer.render();
+                                                glviewer.zoomTo();
+                                            })
+                                        } else {
+                                        	glviewer.addModel(ret, type);
+                                        	runcmds(cmds, glviewer);
+                                        	glviewer.render();
+                                        	glviewer.zoomTo();
+                                        }
+                                    });
                                 });
                             }
                         }
