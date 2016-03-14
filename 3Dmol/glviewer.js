@@ -373,7 +373,7 @@ $3Dmol.GLViewer = (function() {
                 var newdist = calcTouchDistance(ev);
                 // change to zoom
                 mode = 2;
-                dy = (touchDistanceStart - newdist) * 2
+                dy = (newdist - touchDistanceStart) * 2
                         / (WIDTH + HEIGHT);
             } else if (ev.originalEvent.targetTouches
                     && ev.originalEvent.targetTouches.length == 3) {
