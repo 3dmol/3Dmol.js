@@ -81,7 +81,8 @@ $3Dmol.viewers = {};
  * @param {Object} options - Specify additional options
  *                           format: file format to download, if multiple are available, default format is pdb
  *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
- *
+ * @param {Function} callback - Function to call with model as argument after data is loaded.
+
  * @example
  * var myviewer = $3Dmol.createViewer(gldiv);
  * 
