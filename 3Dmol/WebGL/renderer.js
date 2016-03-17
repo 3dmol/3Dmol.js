@@ -783,7 +783,6 @@ $3Dmol.Renderer = function(parameters) {
 
             // opacity, diffuse, emissive, etc
             m_uniforms.opacity.value = material.opacity;
-            m_uniforms.diffuse.value = material.color;
 
             // Load any other material specific uniform variables to gl shaders
             loadMaterialUniforms(p_uniforms, m_uniforms);

@@ -36,7 +36,6 @@ $3Dmol.ShaderLib = {
         fragmentShader : [                    
 "uniform mat4 viewMatrix;",
 "uniform vec3 cameraPosition;",
-"uniform vec3 diffuse;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -47,8 +46,7 @@ $3Dmol.ShaderLib = {
 
 "void main() {",
     
-"    gl_FragColor = vec4( diffuse, opacity );",
-"    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
+"    gl_FragColor = vec4( vColor, opacity );",
     
 "    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
 "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
@@ -84,7 +82,6 @@ $3Dmol.ShaderLib = {
     
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000}
@@ -96,7 +93,6 @@ $3Dmol.ShaderLib = {
         fragmentShader : [
 "uniform mat4 viewMatrix;",
 "uniform vec3 cameraPosition;",
-"uniform vec3 diffuse;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -159,7 +155,6 @@ $3Dmol.ShaderLib = {
     
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
@@ -209,7 +204,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
 "uniform vec3 cameraPosition;",
-"uniform vec3 diffuse;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -238,7 +232,7 @@ $3Dmol.ShaderLib = {
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
     
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    vLightFront = vLightFront * diffuse;",
+"    vLightFront = vLightFront * color;",
     
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -247,7 +241,6 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
@@ -299,7 +292,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
 "uniform vec3 cameraPosition;",
-"uniform vec3 diffuse;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -330,7 +322,7 @@ $3Dmol.ShaderLib = {
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
 
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    vLightFront = vLightFront * diffuse;",
+"    vLightFront = vLightFront * color;",
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -339,7 +331,6 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
@@ -393,7 +384,6 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
@@ -451,7 +441,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
 "uniform vec3 cameraPosition;",
-"uniform vec3 diffuse;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -485,8 +474,8 @@ $3Dmol.ShaderLib = {
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
 "    vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
 
-"    vLightFront = vLightFront * diffuse;",
-"    vLightBack = vLightBack * diffuse;",
+"    vLightFront = vLightFront * color;",
+"    vLightBack = vLightBack * color;",
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -495,7 +484,6 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},           
