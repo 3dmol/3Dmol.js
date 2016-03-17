@@ -779,6 +779,8 @@ $3Dmol.Renderer = function(parameters) {
                         camera.matrixWorldInverse.elements);
                 _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false,
                         object._normalMatrix.elements);
+                m_uniforms.directionalLightColor.value = _lights.directional.colors;
+                m_uniforms.directionalLightDirection.value = _lights.directional.positions;
             }
 
             // opacity, diffuse, emissive, etc

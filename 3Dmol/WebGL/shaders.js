@@ -99,10 +99,13 @@ $3Dmol.ShaderLib = {
 "uniform float fogNear;",
 "uniform float fogFar;",
 "uniform float uDepth;",
+"uniform vec3 directionalLightColor[ 1 ];",
 
 "varying vec3 vColor;",
 "varying vec2 mapping;",
 "varying float rval;",
+"varying vec3 vLight;",
+
 
 "void main() {",
 "    float lensqr = dot(mapping,mapping);",
@@ -111,7 +114,11 @@ $3Dmol.ShaderLib = {
 "       discard;",
 "    float z = sqrt(rsqr-lensqr);",
 "    float zscale = z/rval;",
-"    gl_FragColor = vec4(zscale*vColor, 1 );", //TODO: directional lighting
+"    vec3 norm = normalize(vec3(mapping.x,mapping.y,z));",
+"    float dotProduct = dot( norm, vLight );",
+"    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
+"    vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;",
+"    gl_FragColor = vec4(vLight*vColor, opacity*opacity );", 
 "    float depth = gl_FragCoord.z / gl_FragCoord.w;",
 "    gl_FragDepthEXT = gl_FragCoord.z-z/depth;",
 "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
@@ -130,6 +137,8 @@ $3Dmol.ShaderLib = {
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
 "uniform vec3 cameraPosition;",
+"uniform vec3 directionalLightColor[ 1 ];",
+"uniform vec3 directionalLightDirection[ 1 ];",
 
 "attribute vec3 position;",
 "attribute vec3 normal;",
@@ -138,6 +147,7 @@ $3Dmol.ShaderLib = {
 "varying vec2 mapping;",
 "varying vec3 vColor;",
 "varying float rval;",
+"varying vec3 vLight;",
 
 "void main() {",
 
@@ -145,6 +155,8 @@ $3Dmol.ShaderLib = {
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
 "    vec4 adjust = projectionMatrix* vec4(normal,0.0); adjust.z = 0.0; adjust.w = 0.0;",
+"    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
+"    vLight = normalize( lDirection.xyz );",
 "    mapping = normal.xy;",
 "    rval = abs(normal.x);",
 "    gl_Position = projPosition+adjust;",
@@ -158,6 +170,8 @@ $3Dmol.ShaderLib = {
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
+            directionalLightColor: { type: 'fv', value: [] },
+            directionalLightDirection: { type: 'fv', value: [] }
         }
 
     },
@@ -232,7 +246,6 @@ $3Dmol.ShaderLib = {
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
     
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    vLightFront = vLightFront * color;",
     
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -322,7 +335,6 @@ $3Dmol.ShaderLib = {
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
 
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    vLightFront = vLightFront * color;",
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -473,9 +485,6 @@ $3Dmol.ShaderLib = {
 
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
 "    vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
-
-"    vLightFront = vLightFront * color;",
-"    vLightBack = vLightBack * color;",
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
