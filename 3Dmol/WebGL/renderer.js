@@ -767,11 +767,8 @@ $3Dmol.Renderer = function(parameters) {
                 }
 
                 // Set up correct light uniform var vals
-                m_uniforms.ambientLightColor.value = _lights.ambient;
                 m_uniforms.directionalLightColor.value = _lights.directional.colors;
                 m_uniforms.directionalLightDirection.value = _lights.directional.positions;
-                m_uniforms.ambient.value = material.ambient;
-                m_uniforms.emissive.value = material.emissive;
 
             } else if (material.shaderID === "outline") {
                 m_uniforms.outlineColor.value = material.outlineColor;
@@ -782,11 +779,12 @@ $3Dmol.Renderer = function(parameters) {
                         camera.matrixWorldInverse.elements);
                 _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false,
                         object._normalMatrix.elements);
+                m_uniforms.directionalLightColor.value = _lights.directional.colors;
+                m_uniforms.directionalLightDirection.value = _lights.directional.positions;
             }
 
             // opacity, diffuse, emissive, etc
             m_uniforms.opacity.value = material.opacity;
-            m_uniforms.diffuse.value = material.color;
 
             // Load any other material specific uniform variables to gl shaders
             loadMaterialUniforms(p_uniforms, m_uniforms);
