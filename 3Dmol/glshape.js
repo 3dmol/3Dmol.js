@@ -589,9 +589,11 @@ $3Dmol.GLShape = (function() {
      * @returns {undefined}
      */
     var updateFromStyle = function(shape, stylespec) {
-        shape.color = stylespec.color || new $3Dmol.Color();
-        if(! (stylespec.color instanceof $3Dmol.Color))
-            shape.color = $3Dmol.CC.color(stylespec.color);
+        if(typeof(stylespec.color) != 'undefined') {
+            shape.color = stylespec.color || new $3Dmol.Color();
+            if(! (stylespec.color instanceof $3Dmol.Color))
+                shape.color = $3Dmol.CC.color(stylespec.color);
+        }
         shape.wireframe = stylespec.wireframe ? true : false;
         //opacity is the preferred nomenclature, support alpha for backwards compat
         shape.opacity = stylespec.alpha ? $3Dmol.Math.clamp(stylespec.alpha, 0.0,
@@ -914,7 +916,8 @@ $3Dmol.GLShape = (function() {
             finalizeGeo(geo);
             geo.initTypedArrays();
 
-            updateColor(geo, this.color);
+            if(typeof(this.color) != 'undefined')
+                updateColor(geo, this.color);
 
             shapeObj = new $3Dmol.Object3D();
             var material = null;
