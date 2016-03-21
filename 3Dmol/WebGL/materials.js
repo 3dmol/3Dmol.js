@@ -358,6 +358,23 @@ $3Dmol.ImposterMaterial.prototype.clone = function() {
   
 };
 
+$3Dmol.SphereImposterOutlineMaterial = function(parameters) {
+    
+    $3Dmol.ImposterMaterial.call(this);
+
+    this.shaderID = "sphereimposteroutline";
+    this.wireframe=false;
+    this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
+    this.outlineWidth= parameters.width || 0.1;
+    this.outlinePushback= parameters.pushback || 1.0;
+    
+    this.setValues(parameters);
+    
+};
+
+$3Dmol.SphereImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
+
+
 $3Dmol.InstancedMaterial = function(parameters) {
 
     $3Dmol.Material.call(this);

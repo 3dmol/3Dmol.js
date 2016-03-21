@@ -405,7 +405,73 @@ $3Dmol.ShaderLib = {
         }
 
     },
-    
+//for outlining sphere imposter
+    'sphereimposteroutline' : { 
+       fragmentShader : [
+
+"uniform float opacity;",
+"uniform vec3 outlineColor;",
+"uniform vec3 fogColor;",
+"uniform float fogNear;",
+"uniform float fogFar;",
+"varying vec2 mapping;",
+"varying float rval;",
+"uniform float outlinePushback;",
+
+
+"void main() {",
+"    float lensqr = dot(mapping,mapping);",
+"    float rsqr = rval*rval;",
+"    if(lensqr > rsqr)",
+"       discard;",
+"    float z = sqrt(rsqr-lensqr);",
+"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
+"    gl_FragDepthEXT = gl_FragCoord.z-(z-outlinePushback)/depth;",
+"    gl_FragColor = vec4(outlineColor, 1 );",
+"}"
+
+
+].join("\n"),
+      
+      vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform float outlineWidth;",
+"uniform float outlinePushback;",
+
+"attribute vec3 position;",
+"attribute vec3 normal;",
+"attribute vec3 color;",
+
+"varying vec2 mapping;",
+"varying float rval;",
+
+"void main() {",
+
+"    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    vec4 projPosition = projectionMatrix * mvPosition;",
+"    vec2 norm = normal.xy + vec2(sign(normal.x)*outlineWidth,sign(normal.y)*outlineWidth);", 
+"    vec4 adjust = projectionMatrix* vec4(norm,normal.z,0.0); adjust.z = 0.0; adjust.w = 0.0;",
+"    mapping = norm.xy;",
+"    rval = abs(norm.x);",
+"    gl_Position = projPosition+adjust;",
+"}"
+          
+].join("\n"),
+
+       uniforms : {
+           opacity: { type: 'f', value: 1.0 },
+           outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
+           fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+           fogNear: { type: 'f', value: 1.0 },
+           fogFar: { type: 'f', value: 2000},           
+           outlineWidth: { type: 'f', value: 0.1 },
+           outlinePushback: { type: 'f', value: 1.0 },
+       }
+
+   },
+       
     //for double sided lighting
     'lambertdouble' : { 
         fragmentShader : [

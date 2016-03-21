@@ -678,16 +678,16 @@ $3Dmol.GLViewer = (function() {
             var view = this.getView();
             
             var i, n;
-            var options = { supportsAIA: renderer.supportsAIA() };
+            var exts = renderer.supportedExtensions();
             for (i = 0; i < models.length; i++) {
                 if (models[i]) {
-                    models[i].globj(modelGroup, options);
+                    models[i].globj(modelGroup, exts);
                 }
             }
 
             for (i = 0; i < shapes.length; i++) {
                 if (shapes[i]) {
-                    shapes[i].globj(modelGroup, options);
+                    shapes[i].globj(modelGroup, exts);
                 }
             }
             

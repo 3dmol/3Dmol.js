@@ -29,6 +29,19 @@
             glviewer.render();
             lastsurfstyle = !(lastsurfstyle);
         };  
+
+        var isoutlined = false;
+        var toggleOutline = function() {
+            
+            if(isoutlined) {
+            	glviewer.setViewStyle({});
+            	isoutlined = false;
+            } else {                            
+            	glviewer.setViewStyle({style: 'outline',color:'black',width:0.1});
+            	isoutlined = true;
+            }
+			glviewer.render();
+        };          
         
         var addLabels = function() {
             var atoms = glviewer.getModel().selectedAtoms({atom : "CA"});
@@ -128,7 +141,6 @@
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
         <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
-        <input type="button" value="SphereI" onclick="glviewer.setStyle({},{spherei:{}}); glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
         <input type="button" value="Trace" onclick="glviewer.setStyle({},{cartoon:{style: 'trace',color: 'spectrum',thickness: 0.3}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
@@ -138,6 +150,7 @@
        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2), lastsurfstyle = 1;"></input>
         <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>
+        <input type="button" value="Outline" onclick="toggleOutline();"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
                 <br>

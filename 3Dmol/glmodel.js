@@ -547,9 +547,9 @@ $3Dmol.GLModel = (function() {
         //dkoes - test code for sphere imposters
         var drawAtomImposter = function(atom, geo) {
             
-            if (!atom.style.spherei)
+            if (!atom.style.sphere)
                 return;
-            var style = atom.style.spherei;
+            var style = atom.style.sphere;
             if (style.hidden)
                 return;
             
@@ -891,11 +891,22 @@ $3Dmol.GLModel = (function() {
             var cartoonAtoms = [];
             var lineGeometries = {};
             var crossGeometries = {};
-            if (options.supportsAIA)
-                var instancedGeometry = new $3Dmol.Geometry(false, true);
-            else
-                var sphereGeometry = new $3Dmol.Geometry(true);
-            var imposterGeometry = new $3Dmol.Geometry(true);
+            
+            var drawSphereFunc = drawAtomSphere;
+            var sphereGeometry = null;
+            if (options.supportsImposters) {
+                drawSphereFunc = drawAtomImposter;
+                sphereGeometry = new $3Dmol.Geometry(true);
+                sphereGeometry.imposter = true;
+            }
+            else if (options.supportsAIA) {
+                drawSphereFunc = drawAtomInstanced;
+                sphereGeometry = new $3Dmol.Geometry(false, true);
+                sphereGeometry.instanced = true;
+            }  else {
+                sphereGeometry = new $3Dmol.Geometry(true);
+            }
+            
             var stickGeometry = new $3Dmol.Geometry(true);
             var i, j, n, testOpacities;
             var opacities = {};
@@ -933,11 +944,8 @@ $3Dmol.GLModel = (function() {
                         } else opacities[j] = testOpacities[j];
                     }
 
-                    if (options.supportsAIA)
-                        drawAtomInstanced(atom, instancedGeometry);
-                    else
-                        drawAtomSphere(atom, sphereGeometry);
-                    drawAtomImposter(atom, imposterGeometry);
+                    drawSphereFunc(atom, sphereGeometry);
+                   
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
@@ -968,61 +976,58 @@ $3Dmol.GLModel = (function() {
 
             // add sphere geometry
             if (sphereGeometry && sphereGeometry.vertices > 0) {
-                var sphereMaterial = new $3Dmol.MeshLambertMaterial({
-                    ambient : 0x000000,
-                    vertexColors : true,
-                    reflectivity : 0,
-                });
-                if (opacities.sphere < 1 && opacities.sphere >= 0)
-                {
-                    sphereMaterial.transparent = true;
-                    sphereMaterial.opacity = opacities.sphere;
-                }
                 
-                //Initialize buffers in geometry                
-                sphereGeometry.initTypedArrays();   
-				
-                var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
-                ret.add(sphere);
-            }
+                if(sphereGeometry.imposter) {
+                    var imposterMaterial = new $3Dmol.ImposterMaterial({
+                        ambient : 0x000000,
+                        vertexColors : true,
+                        reflectivity : 0
+                    });
+                    
+                    //Initialize buffers in geometry                
+                    sphereGeometry.initTypedArrays();
+                    
+                    var spherei = new $3Dmol.Mesh(sphereGeometry, imposterMaterial);
+                    ret.add(spherei);                    
+                }
+                else if(sphereGeometry.instanced) {
+                    var sphere = new $3Dmol.Geometry(true);
+                    $3Dmol.GLDraw.drawSphere(sphere, {x:0, y:0, z:0}, 1, new $3Dmol.Color(0.5, 0.5, 0.5));
+                    sphere.initTypedArrays();
+                    var instancedMaterial = new $3Dmol.InstancedMaterial({
+                        sphereMaterial : new $3Dmol.MeshLambertMaterial({
+                            ambient : 0x000000,
+                            vertexColors : true,
+                            reflectivity : 0,
+                        }),
+                        sphere : sphere
+                    });
+                    if (opacities.instancedSphere < 1 && opacities.instancedSphere >= 0) {
+                        instancedMaterial.sphereMaterial.transparent = true;
+                        instancedMaterial.sphereMaterial.opacity = opacities.sphere;
+                    }
+                    sphereGeometry.initTypedArrays();
 
-            // add ANGLE instanced sphere geometry
-            if (instancedGeometry && instancedGeometry.vertices > 0) {
-                var sphere = new $3Dmol.Geometry(true);
-                $3Dmol.GLDraw.drawSphere(sphere, {x:0, y:0, z:0}, 1, new $3Dmol.Color(0.5, 0.5, 0.5));
-                sphere.initTypedArrays();
-                var instancedMaterial = new $3Dmol.InstancedMaterial({
-                    sphereMaterial : new $3Dmol.MeshLambertMaterial({
+                    ret.add(new $3Dmol.Mesh(sphereGeometry, instancedMaterial));                    
+                }
+                else { //regular mesh
+                    var sphereMaterial = new $3Dmol.MeshLambertMaterial({
                         ambient : 0x000000,
                         vertexColors : true,
                         reflectivity : 0,
-                    }),
-                    sphere : sphere
-                });
-                if (opacities.instancedSphere < 1 && opacities.instancedSphere >= 0) {
-                    instancedMaterial.sphereMaterial.transparent = true;
-                    instancedMaterial.sphereMaterial.opacity = opacities.sphere;
+                    });
+                    if (opacities.sphere < 1 && opacities.sphere >= 0)
+                    {
+                        sphereMaterial.transparent = true;
+                        sphereMaterial.opacity = opacities.sphere;
+                    }
+                    
+                    //Initialize buffers in geometry                
+                    sphereGeometry.initTypedArrays();   
+    				
+                    var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
+                    ret.add(sphere);
                 }
-                instancedGeometry.initTypedArrays();
-
-                ret.add(new $3Dmol.Mesh(instancedGeometry, instancedMaterial));
-            }
-
-            // add imposter geometry
-            if (imposterGeometry.vertices > 0) {
-                var imposterMaterial = new $3Dmol.ImposterMaterial({
-                    ambient : 0x000000,
-                    vertexColors : true,
-                    reflectivity : 0
-                });
-                
-                //Initialize buffers in geometry                
-                imposterGeometry.initTypedArrays();
-                
-                var spherei = new $3Dmol.Mesh(imposterGeometry, imposterMaterial);
-                console.log("spherei geometry " + imposterGeometry.vertices.length);
-
-                ret.add(spherei);
             }
             
             // add stick geometry
