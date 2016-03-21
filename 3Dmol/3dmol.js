@@ -219,6 +219,13 @@ $3Dmol.specStringToObject = function(str) {
                return parseInt(val);
            }
         }
+        //boolean conversions
+        else if(val === 'true') {
+            return true;
+        }
+        else if(val === 'false') {
+            return false;
+        }
         return val;
     }
     
