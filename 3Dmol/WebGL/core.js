@@ -522,7 +522,7 @@ $3Dmol.Geometry = (function() {
             
             var retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
             
-            if (!retGroup || retGroup.vertices + addVertices > BUFFERSIZE) 
+            if (!retGroup || retGroup.vertices + addVertices > retGroup.vertexArray.length/3) 
                 retGroup = addGroup(this);
                 
             return retGroup;

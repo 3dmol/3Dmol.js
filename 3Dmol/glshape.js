@@ -11,6 +11,17 @@ $3Dmol.GLShape = (function() {
     // Marching cube, to match with protein surface generation
     var ISDONE = 2;
 
+    
+    var finalizeGeo = function(geo) {
+        //to avoid creating a bunch of geometries, we leave geoGroup untruncated
+        //until render is called, at which point we truncate; 
+        //successive called up updateGeo will return a new geometry
+        var geoGroup = geo.updateGeoGroup(0);
+        if(geoGroup.vertices > 0) {
+            geoGroup.truncateArrayBuffers(true, true);
+        }
+    };
+    
     /**
      * 
      * @param {$3Dmol.Geometry}
@@ -62,12 +73,14 @@ $3Dmol.GLShape = (function() {
      * @param {ArrowSpec}
      *            spec
      */
-    var drawArrow = function(shape, geoGroup, spec) {
+    var drawArrow = function(shape, geo, spec) {
 
         var from = spec.start, end = spec.end, radius = spec.radius, radiusRatio = spec.radiusRatio, mid = spec.mid;
 
         if (!(from && end))
             return;
+
+        var geoGroup = geo.updateGeoGroup(51);
 
         // vertices
 
@@ -115,7 +128,6 @@ $3Dmol.GLShape = (function() {
         nvecs[13] = nvecs[12].clone().add(nvecs[14]).normalize();
         nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
 
-        // var start = geo.vertices.length;
         var start = geoGroup.vertices;
         var vertexArray = geoGroup.vertexArray;
         var colorArray = geoGroup.colorArray;
@@ -441,8 +453,6 @@ $3Dmol.GLShape = (function() {
             colorArray[offset + 1] = g;
             colorArray[offset + 2] = b;
         }
-        geoGroup.truncateArrayBuffers(true, true);
-
         
         if(clickable) {
             for (i = 0, il = geoGroup.faceidx / 3; i < il; ++i) {
@@ -683,18 +693,15 @@ $3Dmol.GLShape = (function() {
             this.intersectionShape.sphere.push(new $3Dmol.Sphere(
                     sphereSpec.center, sphereSpec.radius));
 
-            var geoGroup = geo.addGeoGroup();
             $3Dmol.GLDraw.drawSphere(geo, sphereSpec.center,
                     sphereSpec.radius, sphereSpec.color);
-            geoGroup.truncateArrayBuffers(true, true);
 
             components.push({
-                id : geoGroup.id,
-                geoGroup : geoGroup, // has to be last group added
                 centroid : new $3Dmol.Vector3(sphereSpec.center.x,
                         sphereSpec.center.y, sphereSpec.center.z)
             });
-
+            var geoGroup = geo.updateGeoGroup(0);
+            
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray);
         };
@@ -721,17 +728,13 @@ $3Dmol.GLShape = (function() {
             
             this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(start, end, radius));
 
-            var geoGroup = geo.addGeoGroup();
             $3Dmol.GLDraw.drawCylinder(geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);            
-            geoGroup.truncateArrayBuffers(true, true);
             
             var centroid = new $3Dmol.Vector3();
             components.push({
-                id : geoGroup.id,
-                geoGroup : geoGroup,
                 centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
             });
-
+            var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray);
 
@@ -744,16 +747,16 @@ $3Dmol.GLShape = (function() {
          * @return {$3Dmol.GLShape}
          */
         this.addLine = function(lineSpec) {
-        	lineSpec.start = lineSpec.start || {};
-        	lineSpec.end = lineSpec.end || {};
+            lineSpec.start = lineSpec.start || {};
+            lineSpec.end = lineSpec.end || {};
 
-        	var start = new $3Dmol.Vector3(lineSpec.start.x || 0,
-        			lineSpec.start.y || 0, lineSpec.start.z || 0);
-        	var end = new $3Dmol.Vector3(lineSpec.end.x,
-        			lineSpec.end.y || 0, lineSpec.end.z || 0);            
-        	if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
-    
-            var geoGroup = geo.addGeoGroup();
+            var start = new $3Dmol.Vector3(lineSpec.start.x || 0,
+                    lineSpec.start.y || 0, lineSpec.start.z || 0);
+            var end = new $3Dmol.Vector3(lineSpec.end.x,
+                    lineSpec.end.y || 0, lineSpec.end.z || 0);            
+            if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
+
+            var geoGroup = geo.updateGeoGroup(2);
 
             //make line from start to end
             //for consistency with rest of shapes, uses vertices and lines rather
@@ -775,7 +778,6 @@ $3Dmol.GLShape = (function() {
             lineArray[li+1] = vstart+1;
             geoGroup.lineidx += 2;
             
-            geoGroup.truncateArrayBuffers(true, true);
         }
         /**
          * Creates an arrow shape
@@ -810,19 +812,15 @@ $3Dmol.GLShape = (function() {
             arrowSpec.mid = (0 < arrowSpec.mid && arrowSpec.mid < 1) ? arrowSpec.mid
                     : 0.618034;
 
-            var geoGroup = geo.addGeoGroup();
 
-            drawArrow(this, geoGroup, arrowSpec);
-            geoGroup.truncateArrayBuffers(true, true);
+            drawArrow(this, geo, arrowSpec);
 
             var centroid = new $3Dmol.Vector3();
             components.push({
-                id : geoGroup.id,
-                geoGroup : geoGroup,
                 centroid : centroid.addVectors(arrowSpec.start, arrowSpec.end)
                         .multiplyScalar(0.5)
             });
-
+            var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray);
 
@@ -913,6 +911,7 @@ $3Dmol.GLShape = (function() {
             
             if(this.hidden)
                 return;
+            finalizeGeo(geo);
             geo.initTypedArrays();
 
             updateColor(geo, this.color);
