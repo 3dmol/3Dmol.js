@@ -94,6 +94,7 @@ $3Dmol.ShaderLib = {
 "uniform mat4 viewMatrix;",
 "uniform vec3 cameraPosition;",
 "uniform float opacity;",
+"uniform mat4 projectionMatrix;",
 
 "uniform vec3 fogColor;",
 "uniform float fogNear;",
@@ -105,6 +106,7 @@ $3Dmol.ShaderLib = {
 "varying vec2 mapping;",
 "varying float rval;",
 "varying vec3 vLight;",
+"varying vec3 center;",
 
 
 "void main() {",
@@ -113,16 +115,16 @@ $3Dmol.ShaderLib = {
 "    if(lensqr > rsqr)",
 "       discard;",
 "    float z = sqrt(rsqr-lensqr);",
-"    float zscale = z/rval;",
+"    vec3 cameraPos = center+ vec3(mapping.x,mapping.y,z);",
+"    vec4 clipPos = projectionMatrix * vec4(cameraPos, 1.0);",
+"    float ndcDepth = clipPos.z / clipPos.w;",
+"    gl_FragDepthEXT = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
 "    vec3 norm = normalize(vec3(mapping.x,mapping.y,z));",
 "    float dotProduct = dot( norm, vLight );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
 "    vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;",
 "    gl_FragColor = vec4(vLight*vColor, opacity*opacity );", 
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
-"    gl_FragDepthEXT = gl_FragCoord.z-z/depth;",
-"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-
+"    float fogFactor = smoothstep( fogNear, fogFar, gl_FragDepthEXT/gl_FragCoord.w );",
 "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
 
@@ -148,11 +150,13 @@ $3Dmol.ShaderLib = {
 "varying vec3 vColor;",
 "varying float rval;",
 "varying vec3 vLight;",
+"varying vec3 center;",
 
 "void main() {",
 
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    center = mvPosition.xyz;",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
 "    vec4 adjust = projectionMatrix* vec4(normal,0.0); adjust.z = 0.0; adjust.w = 0.0;",
 "    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
