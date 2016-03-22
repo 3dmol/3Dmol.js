@@ -418,8 +418,11 @@ $3Dmol.ShaderLib = {
 "uniform vec3 fogColor;",
 "uniform float fogNear;",
 "uniform float fogFar;",
+"uniform mat4 projectionMatrix;",
 "varying vec2 mapping;",
 "varying float rval;",
+"varying vec3 center;",
+
 "uniform float outlinePushback;",
 
 
@@ -429,8 +432,10 @@ $3Dmol.ShaderLib = {
 "    if(lensqr > rsqr)",
 "       discard;",
 "    float z = sqrt(rsqr-lensqr);",
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
-"    gl_FragDepthEXT = gl_FragCoord.z-(z-outlinePushback)/depth;",
+"    vec3 cameraPos = center+ vec3(mapping.x,mapping.y,z-outlinePushback);",
+"    vec4 clipPos = projectionMatrix * vec4(cameraPos, 1.0);",
+"    float ndcDepth = clipPos.z / clipPos.w;",
+"    gl_FragDepthEXT = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
 "    gl_FragColor = vec4(outlineColor, 1 );",
 "}"
 
@@ -450,10 +455,12 @@ $3Dmol.ShaderLib = {
 
 "varying vec2 mapping;",
 "varying float rval;",
+"varying vec3 center;",
 
 "void main() {",
 
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    center = mvPosition.xyz;",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
 "    vec2 norm = normal.xy + vec2(sign(normal.x)*outlineWidth,sign(normal.y)*outlineWidth);", 
 "    vec4 adjust = projectionMatrix* vec4(norm,normal.z,0.0); adjust.z = 0.0; adjust.w = 0.0;",
