@@ -24,6 +24,23 @@ $3Dmol = (function(window) {
 if('https:' != document.location.protocol) { //not willing to pay for ssl cert
     $.get("http://3dmol.csb.pitt.edu/track/report.cgi");
 }
+
+/* shims for IE */
+/*
+IE Doesn't have a .startsWith 
+*/
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function (str){
+        return this.lastIndexOf(str, 0) === 0;
+    };
+}
+
+// or endsWith
+if (!String.prototype.endsWith) {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
     
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
