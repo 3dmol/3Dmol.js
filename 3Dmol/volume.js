@@ -118,7 +118,7 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
 };
 
 //parse cp4 files
-c$3Dmol.VolumeData.prototype.ccp4 = function(bin) {
+$3Dmol.VolumeData.prototype.ccp4 = function(bin) {
 
     // http://www.ccp4.ac.uk/html/maplib.html#description
         
