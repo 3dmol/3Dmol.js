@@ -116,3 +116,104 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
     this.data = new Float32Array(raw);
 
 };
+
+//parse cp4 files
+c$3Dmol.VolumeData.prototype.ccp4 = function(bin) {
+
+    // http://www.ccp4.ac.uk/html/maplib.html#description
+        
+        var header = {};
+
+        var intView = new Int32Array( bin, 0, 56 );
+        var floatView = new Float32Array( bin, 0, 56 );
+
+        for (var i = 0; i < intView.length; i++) {
+            console.log(intView[i]);
+        }
+
+           //# of columns (fastest changing),rows, sections (slowest changing)
+        header.NX = intView[ 0 ];
+        header.NY = intView[ 1 ];
+        header.NZ = intView[ 2 ];
+
+        // mode
+        //  0 image : signed 8-bit bytes range -128 to 127
+        //  1 image : 16-bit halfwords
+        //  2 image : 32-bit reals
+        //  3 transform : complex 16-bit integers
+        //  4 transform : complex 32-bit reals
+        //  6 image : unsigned 16-bit range 0 to 65535
+        // 16 image: unsigned char * 3 (for rgb data, non-standard)
+        header.MODE = intView[ 3 ];
+
+        //position of first column, first row, and first section (voxel grid units)
+        header.NCSTART = intView[ 4 ];
+        header.NRSTART = intView[ 5 ];
+        header.NSSTART = intView[ 6 ];
+
+        //intervals per unit cell repeat along X,Y Z
+        header.MX = Math.abs(intView[ 7 ]);
+        header.MY = Math.abs(intView[ 8 ]);
+        header.MZ = Math.abs(intView[ 9 ]);
+
+       //Map lengths along X,Y,Z in Ångstroms
+        header.xlen =  floatView[ 10 ]; 
+        header.ylen = floatView[ 11 ];  
+        header.zlen = floatView[ 12 ];  
+
+        //single voxel lengths
+        xVox = header.xlen / header.NX; 
+        yVox = header.ylen / header.NY; 
+        zVox = header.zlen / header.NZ;
+
+        // cell angle
+        header.alpha = floatView[ 13 ];
+        header.beta  = floatView[ 14 ];
+        header.gamma = floatView[ 15 ];
+
+        //relationship of X,Y,Z axes to columns, rows, sections
+        header.MAPC = intView[ 16 ];
+        switch (header.MAPC){
+            case 1: header.NXSTART = header.NCSTART; header.NYSTART = 0; header.NZSTART = 0; break;
+            case 2: header.NYSTART = header.NCSTART; header.NXSTART = 0; header.NZSTART = 0; break;
+            case 3: header.NZSTART = header.NCSTART; header.NXSTART = 0; header.NYSTART = 0; break;
+        }
+        header.MAPR = intView[ 17 ];
+        switch (header.MAPR){
+            case 1: header.NXSTART = header.NRSTART; header.NYSTART = 0; header.NZSTART = 0; break;
+            case 2: header.NYSTART = header.NRSTART; header.NXSTART = 0; header.NZSTART = 0; break;
+            case 3: header.NZSTART = header.NRSTART; header.NXSTART = 0; header.NYSTART = 0; break;
+        }
+        header.MAPS = intView[ 18 ];
+         switch (header.MAPS){
+            case 1: header.NXSTART = header.NSSTART; header.NYSTART = 0; header.NZSTART = 0; break;
+            case 2: header.NYSTART = header.NSSTART; header.NXSTART = 0; header.NZSTART = 0; break;
+            case 3: header.NZSTART = header.NSSTART; header.NXSTART = 0; header.NYSTART = 0; break;
+        }
+
+        //Origin Position
+        this.origin = new $3Dmol.Vector3(header.NXSTART, header.NYSTART, header.NZSTART);
+
+        //Minimum, maximum, average density
+        header.DMIN  = intView[ 19 ];
+        header.DMAX  = intView[ 20 ];
+        header.DMEAN = intView[ 21 ];
+
+        // space group number 0 or 1 (default=0)
+        header.ISPG = intView[ 22 ];
+
+        // number of bytes used for symmetry data (0 or 80)
+        header.NSYMBT = intView[23];
+
+        // machine stamp
+        header.ARMS = floatView[54];
+
+         this.size = {x:header.MX, y:header.MY, z:header.MZ};
+         this.unit = new $3Dmol.Vector3(xVox, yVox, zVox ); 
+
+        this.data = new Float32Array(bin, 
+        256 * 4 + header.NSYMBT ,
+        header.NX * header.NY * header.NZ
+        );
+          
+};
