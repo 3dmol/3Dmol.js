@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-    <script src="../build/3Dmol.js"></script>
+    <script src="../../build/3Dmol.js"></script>
     <style>
       table td { text-align: center; }
       table th {padding-top: 1em;}
@@ -25,15 +25,15 @@
     <table width="100%">
       <tr>
         <td colspan=2 height=200px>
-          44 Isosurface<code> ccp4 format implementation isoval color alpha smoothness opacitye linewidth clickable callback</code>
+          45 Isosurface<code> ccp4 format implementation isoval color alpha smoothness opacitye linewidth clickable callback</code>
         </td>
       </tr>
       <tr>
-        <td width="50%"><div id="test44" style="width: 400px; height: 400px; position: relative;"></div>
+        <td width="50%"><div id="test45" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
      <script>
         (function() {
-    var viewer = $3Dmol.createViewer($("#test44"));
+    var viewer = $3Dmol.createViewer($("#test45"));
     viewer.setBackgroundColor(0xffffffff);
     function load_ccp4_map (viewer, url) {
     var req = new XMLHttpRequest();
@@ -67,11 +67,11 @@
     };
     req.send(null);
   }
-     load_ccp4_map (viewer,"check/volData/map.ccp4");  
+     load_ccp4_map (viewer,"volData/map.ccp4");  
      viewer.render();
   })();
     </script>
-        <td width="50%"><img src="check/imgs/test44.png"></td>
+        <td width="50%"><img src="imgs/test45.png"></td>
       </tr>
     </table>
 

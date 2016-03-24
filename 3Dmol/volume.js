@@ -127,10 +127,6 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
         var intView = new Int32Array( bin, 0, 56 );
         var floatView = new Float32Array( bin, 0, 56 );
 
-        for (var i = 0; i < intView.length; i++) {
-            console.log(intView[i]);
-        }
-
            //# of columns (fastest changing),rows, sections (slowest changing)
         header.NX = intView[ 0 ];
         header.NY = intView[ 1 ];

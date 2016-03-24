@@ -923,7 +923,19 @@ $3Dmol.GLViewer = (function() {
                 //TODO: figure out a good way to specify shapes as part of a selection
                 $.each(shapes, function(i, shape) {
                 	if(shape && shape.boundingSphere && shape.boundingSphere.center)
-                		atoms.push(shape.boundingSphere.center);
+                	    var c = shape.boundingSphere.center;
+                	    var r = shape.boundingSphere.radius;
+                	    if(r > 0) {
+                	        //make sure full shape is visible
+                            atoms.push(new $3Dmol.Vector3(c.x+r,c.y,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x-r,c.y,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y+r,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y-r,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z+r));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z-r));
+                	    } else {
+                            atoms.push(c);
+                	    }
                 });
                 tmp = $3Dmol.getExtent(atoms);
                 allatoms = atoms;
