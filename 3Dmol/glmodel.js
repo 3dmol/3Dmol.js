@@ -640,7 +640,10 @@ $3Dmol.GLModel = (function() {
             var mp, mp1, mp2;
             
             if (!atom.capDrawn && atom.bonds.length < 4)
-                fromCap = 2;              
+                fromCap = 2;
+            
+            var drawCyl = $3Dmol.GLDraw.drawCylinder; //mesh cylinder
+
                 
             for (var i = 0; i < atom.bonds.length; i++) {
                 var j = atom.bonds[i]; // our neighbor
@@ -685,10 +688,10 @@ $3Dmol.GLModel = (function() {
                         if (C1 != C2) {
                             mp = new $3Dmol.Vector3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
-                            $3Dmol.GLDraw.drawCylinder(geo, p1, mp, bondR, C1, fromCap, 0);
-                            $3Dmol.GLDraw.drawCylinder(geo, mp, p2, bondR, C2, 0, toCap);
+                            drawCyl(geo, p1, mp, bondR, C1, fromCap, 0);
+                            drawCyl(geo, mp, p2, bondR, C2, 0, toCap);
                         } else {
-                            $3Dmol.GLDraw.drawCylinder(geo, p1, p2, bondR, C1, fromCap, toCap);
+                            drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap);
                         }
                         
                         if (atom.clickable || atom2.clickable) {
@@ -747,13 +750,13 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, 0);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, 0, mtoCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, 0);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, 0, mtoCap);
+                                drawCyl(geo, p1a, mp, r, C1, mfromCap, 0);
+                                drawCyl(geo, mp, p2a, r, C2, 0, mtoCap);
+                                drawCyl(geo, p1b, mp2, r, C1, mfromCap, 0);
+                                drawCyl(geo, mp2, p2b, r, C2, 0, mtoCap);
                             } else {
-                                $3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
+                                drawCyl(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
+                                drawCyl(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
                             }
                             if (atom.clickable || atom2.clickable){
                                 mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
@@ -797,16 +800,16 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp3 = new $3Dmol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1a, mp, r, C1, mfromCap, 0);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp, p2a, r, C2, 0, mtoCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1, mp3, r, C1, fromCap, 0);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp3, p2, r, C2, 0, toCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1b, mp2, r, C1, mfromCap, 0);
-                                $3Dmol.GLDraw.drawCylinder(geo, mp2, p2b, r, C2, 0, mtoCap);
+                                drawCyl(geo, p1a, mp, r, C1, mfromCap, 0);
+                                drawCyl(geo, mp, p2a, r, C2, 0, mtoCap);
+                                drawCyl(geo, p1, mp3, r, C1, fromCap, 0);
+                                drawCyl(geo, mp3, p2, r, C2, 0, toCap);
+                                drawCyl(geo, p1b, mp2, r, C1, mfromCap, 0);
+                                drawCyl(geo, mp2, p2b, r, C2, 0, mtoCap);
                             } else {
-                                $3Dmol.GLDraw.drawCylinder(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1, p2, r, C1, fromCap, toCap);
-                                $3Dmol.GLDraw.drawCylinder(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
+                                drawCyl(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
+                                drawCyl(geo, p1, p2, r, C1, fromCap, toCap);
+                                drawCyl(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
 
                             }
                             if (atom.clickable || atom2.clickable) {
@@ -876,6 +879,8 @@ $3Dmol.GLModel = (function() {
             }
             
         };
+        
+        
 
         // go through all the atoms and regenerate their geometries
         // we try to have one geometry for each style since this is much much
@@ -894,20 +899,24 @@ $3Dmol.GLModel = (function() {
             
             var drawSphereFunc = drawAtomSphere;
             var sphereGeometry = null;
+            var stickGeometry = null;
             if (options.supportsImposters) {
                 drawSphereFunc = drawAtomImposter;
                 sphereGeometry = new $3Dmol.Geometry(true);
                 sphereGeometry.imposter = true;
+                stickGeometry = new $3Dmol.Geometry(true);
+               // stickGeometry.imposter = true;
             }
             else if (options.supportsAIA) {
                 drawSphereFunc = drawAtomInstanced;
                 sphereGeometry = new $3Dmol.Geometry(false, true);
                 sphereGeometry.instanced = true;
+                stickGeometry = new $3Dmol.Geometry(true); //don't actually have instanced sticks
             }  else {
                 sphereGeometry = new $3Dmol.Geometry(true);
+                stickGeometry = new $3Dmol.Geometry(true);
             }
             
-            var stickGeometry = new $3Dmol.Geometry(true);
             var i, j, n, testOpacities;
             var opacities = {};
             var range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
@@ -976,39 +985,30 @@ $3Dmol.GLModel = (function() {
 
             // add sphere geometry
             if (sphereGeometry && sphereGeometry.vertices > 0) {
+                //Initialize buffers in geometry                
+                sphereGeometry.initTypedArrays();                
+                var sphereMaterial = null;
                 
+                //create appropriate material
                 if(sphereGeometry.imposter) {
-                    var imposterMaterial = new $3Dmol.ImposterMaterial({
+                    sphereMaterial = new $3Dmol.ImposterMaterial({
                         ambient : 0x000000,
                         vertexColors : true,
                         reflectivity : 0
-                    });
-                    
-                    //Initialize buffers in geometry                
-                    sphereGeometry.initTypedArrays();
-                    
-                    var spherei = new $3Dmol.Mesh(sphereGeometry, imposterMaterial);
-                    ret.add(spherei);                    
+                    });                 
                 }
                 else if(sphereGeometry.instanced) {
                     var sphere = new $3Dmol.Geometry(true);
                     $3Dmol.GLDraw.drawSphere(sphere, {x:0, y:0, z:0}, 1, new $3Dmol.Color(0.5, 0.5, 0.5));
                     sphere.initTypedArrays();
-                    var instancedMaterial = new $3Dmol.InstancedMaterial({
+                    sphereMaterial = new $3Dmol.InstancedMaterial({
                         sphereMaterial : new $3Dmol.MeshLambertMaterial({
                             ambient : 0x000000,
                             vertexColors : true,
                             reflectivity : 0,
                         }),
                         sphere : sphere
-                    });
-                    if (opacities.instancedSphere < 1 && opacities.instancedSphere >= 0) {
-                        instancedMaterial.sphereMaterial.transparent = true;
-                        instancedMaterial.sphereMaterial.opacity = opacities.sphere;
-                    }
-                    sphereGeometry.initTypedArrays();
-
-                    ret.add(new $3Dmol.Mesh(sphereGeometry, instancedMaterial));                    
+                    });                
                 }
                 else { //regular mesh
                     var sphereMaterial = new $3Dmol.MeshLambertMaterial({
@@ -1016,41 +1016,54 @@ $3Dmol.GLModel = (function() {
                         vertexColors : true,
                         reflectivity : 0,
                     });
-                    if (opacities.sphere < 1 && opacities.sphere >= 0)
-                    {
-                        sphereMaterial.transparent = true;
-                        sphereMaterial.opacity = opacities.sphere;
-                    }
-                    
-                    //Initialize buffers in geometry                
-                    sphereGeometry.initTypedArrays();   
-    				
-                    var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
-                    ret.add(sphere);
                 }
+                
+                if (opacities.sphere < 1 && opacities.sphere >= 0)
+                {
+                    sphereMaterial.transparent = true;
+                    sphereMaterial.opacity = opacities.sphere;
+                }
+                
+                var sphere = new $3Dmol.Mesh(sphereGeometry, sphereMaterial);
+                ret.add(sphere);
             }
             
             // add stick geometry
             if (stickGeometry.vertices > 0) {
-                var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
-                    vertexColors : true,
-                    ambient : 0x000000,
-                    reflectivity : 0
-                });
-                if (opacities.stick < 1 && opacities.stick >= 0)
-                {
-                    cylinderMaterial.transparent = true;
-                    cylinderMaterial.opacity = opacities.stick;
-                }
-
-                //Initialize buffers in geometry                
-                stickGeometry.initTypedArrays();
                 
-                if (cylinderMaterial.wireframe)
-                    stickGeometry.setUpWireframe();
-            
-                var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
-                ret.add(sticks);
+                if(stickGeometry.imposter) {
+                    var imposterMaterial = new $3Dmol.ImposterMaterial({
+                        ambient : 0x000000,
+                        vertexColors : true,
+                        reflectivity : 0
+                    });
+                    
+                    //Initialize buffers in geometry                
+                    stickGeometry.initTypedArrays();
+                    
+                    var sticks = new $3Dmol.Mesh(stickGeometry, imposterMaterial);
+                    ret.add(sticks);                    
+                } else {                
+                    var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
+                        vertexColors : true,
+                        ambient : 0x000000,
+                        reflectivity : 0
+                    });
+                    if (opacities.stick < 1 && opacities.stick >= 0)
+                    {
+                        cylinderMaterial.transparent = true;
+                        cylinderMaterial.opacity = opacities.stick;
+                    }
+    
+                    //Initialize buffers in geometry                
+                    stickGeometry.initTypedArrays();
+                    
+                    if (cylinderMaterial.wireframe)
+                        stickGeometry.setUpWireframe();
+                
+                    var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
+                    ret.add(sticks);
+                }
             }
             
             //var linewidth;
