@@ -482,7 +482,94 @@ $3Dmol.ShaderLib = {
        }
 
    },
-       
+   //for double sided lighting
+   'stickimposter' : { 
+       fragmentShader : [
+
+"uniform mat4 viewMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform float opacity;",
+
+"uniform vec3 fogColor;",
+"uniform float fogNear;",
+"uniform float fogFar;",
+
+"varying vec3 vLightFront;",
+"varying vec3 vLightBack;",
+"varying vec3 cposition;",
+"varying vec3 cnormal;",
+"varying vec3 vColor;",
+"varying float currR;",
+"varying float radius;",
+
+"void main() {",   
+   
+"    float mult = sqrt(radius*radius-currR*currR)/radius;",
+"    float vLight = dot(normalize(cnormal),vec3(0,0,1));",
+"    gl_FragColor = vec4( vColor, opacity );",
+"    gl_FragColor.xyz *= vLight;",
+"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
+   
+"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
+   
+"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+
+"}"
+
+
+].join("\n"),
+      
+      vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform mat4 viewMatrix;",
+"uniform mat3 normalMatrix;",
+"uniform vec3 cameraPosition;",
+"uniform vec3 directionalLightColor[ 1 ];",
+"uniform vec3 directionalLightDirection[ 1 ];",
+
+"attribute vec3 position;",
+"attribute vec3 normal;",
+"attribute vec3 color;",
+
+"varying vec3 vColor;",
+"varying vec3 vLightFront;",
+"varying vec3 vLightBack;",
+"varying vec3 cposition;",
+"varying vec3 cnormal;",
+"varying float currR;",
+"varying float radius;",
+
+"void main() {",
+   
+"    vColor = color;",
+"    radius = length(normal);",
+"    vec3 projpt = position+normal;",
+"    vec3 transformedNormal = normalMatrix * normal;",    
+"    vec3 zray = vec3(0.0,0.0,1.0);",
+"    vec3 cr = cross(zray,transformedNormal);",
+"    vec3 adjust = normalize(cr) * radius;",
+"    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 )+vec4(adjust,0.0);",
+"    vec4 position = projectionMatrix * mvPosition;",
+"    currR = (cr.x < 0.0) ? -radius : radius;",
+"    cnormal = transformedNormal;",
+"    gl_Position = position;",
+"}"
+          
+].join("\n"),
+
+       uniforms : {
+           opacity: { type: 'f', value: 1.0 },
+           fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+           fogNear: { type: 'f', value: 1.0 },
+           fogFar: { type: 'f', value: 2000},           
+           directionalLightColor: { type: 'fv', value: [] },
+           directionalLightDirection: { type: 'fv', value: [] }
+       }
+
+   },
+   
     //for double sided lighting
     'lambertdouble' : { 
         fragmentShader : [

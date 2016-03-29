@@ -613,7 +613,73 @@ $3Dmol.GLModel = (function() {
             
         };
                 
-           
+          
+        var drawCylinderImposter =  function(geo, from, to, radius, color, fromCap, toCap) {
+           //we need the four corners - two have from coord, two have to coord, the normal
+            //is the direction of the cylinder scaled by the radius, one positive one negative
+            
+            var geoGroup = geo.updateGeoGroup(4);
+            var startv =  geoGroup.vertices;
+            var start = startv*3;
+            var vertexArray = geoGroup.vertexArray;
+            var colorArray = geoGroup.colorArray;
+            
+            //from for first two
+            for(var i = 0; i < 2; i++) {
+                vertexArray[start+3*i] = from.x;
+                vertexArray[start+3*i+1] = from.y ;
+                vertexArray[start+3*i+2] = from.z;                           
+            }
+            //to for last two
+            for(var i = 2; i < 4; i++) {
+                vertexArray[start+3*i] = to.x;
+                vertexArray[start+3*i+1] = to.y ;
+                vertexArray[start+3*i+2] = to.z;                           
+            }                        
+
+            //same colors for all 4 vertices
+            var normalArray = geoGroup.normalArray;
+            var colorArray = geoGroup.colorArray;
+            for(var i = 0; i < 4; i++) {
+                colorArray[start+3*i] = color.r;
+                colorArray[start+3*i+1] = color.g;
+                colorArray[start+3*i+2] = color.b;
+                
+            }
+            
+            //compute cylinder direction, scale by radius
+            var dir = new $3Dmol.Vector3(to.x-from.x,to.y-from.y,to.z-from.z).normalize().multiplyScalar(radius);
+              
+            normalArray[start+0] = dir.x;
+            normalArray[start+1] = dir.y;
+            normalArray[start+2] = dir.z;
+            
+            normalArray[start+3] = -dir.x;
+            normalArray[start+4] = -dir.y;
+            normalArray[start+5] = -dir.z;
+            
+            normalArray[start+6] = -dir.x;
+            normalArray[start+7] = -dir.y;
+            normalArray[start+8] = -dir.z;
+            
+            normalArray[start+9] = dir.x;
+            normalArray[start+10] = dir.y;
+            normalArray[start+11] = dir.z;
+            
+            geoGroup.vertices += 4;
+            
+            //two faces
+            var faceArray = geoGroup.faceArray;
+            var faceoffset = geoGroup.faceidx; //not number faces, but index
+            faceArray[faceoffset+0] = startv;
+            faceArray[faceoffset+1] = startv+1;
+            faceArray[faceoffset+2] = startv+2;
+            faceArray[faceoffset+3] = startv+2;
+            faceArray[faceoffset+4] = startv+3;
+            faceArray[faceoffset+5] = startv;
+            geoGroup.faceidx += 6;
+        };
+        
         /**@typedef StickStyleSpec
          * @prop {boolean} hidden - do not show 
          * @prop {number} radius 
@@ -643,6 +709,8 @@ $3Dmol.GLModel = (function() {
                 fromCap = 2;
             
             var drawCyl = $3Dmol.GLDraw.drawCylinder; //mesh cylinder
+            if(geo.imposter) 
+                drawCyl = drawCylinderImposter;
 
                 
             for (var i = 0; i < atom.bonds.length; i++) {
@@ -905,7 +973,7 @@ $3Dmol.GLModel = (function() {
                 sphereGeometry = new $3Dmol.Geometry(true);
                 sphereGeometry.imposter = true;
                 stickGeometry = new $3Dmol.Geometry(true);
-               // stickGeometry.imposter = true;
+                stickGeometry.imposter = true;
             }
             else if (options.supportsAIA) {
                 drawSphereFunc = drawAtomInstanced;
@@ -991,7 +1059,7 @@ $3Dmol.GLModel = (function() {
                 
                 //create appropriate material
                 if(sphereGeometry.imposter) {
-                    sphereMaterial = new $3Dmol.ImposterMaterial({
+                    sphereMaterial = new $3Dmol.SphereImposterMaterial({
                         ambient : 0x000000,
                         vertexColors : true,
                         reflectivity : 0
@@ -1032,7 +1100,7 @@ $3Dmol.GLModel = (function() {
             if (stickGeometry.vertices > 0) {
                 
                 if(stickGeometry.imposter) {
-                    var imposterMaterial = new $3Dmol.ImposterMaterial({
+                    var imposterMaterial = new $3Dmol.StickImposterMaterial({
                         ambient : 0x000000,
                         vertexColors : true,
                         reflectivity : 0

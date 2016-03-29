@@ -309,7 +309,7 @@ $3Dmol.ImposterMaterial = function(parameters) {
   this.wireframeLinejoin = 'round';
   
   this.shading = $3Dmol.SmoothShading;
-  this.shaderID = "sphereimposter";
+  this.shaderID = null;
   this.vertexColors = $3Dmol.NoColors;
   
   this.skinning = false;
@@ -358,12 +358,31 @@ $3Dmol.ImposterMaterial.prototype.clone = function() {
   
 };
 
+
+$3Dmol.SphereImposterMaterial = function(parameters) {
+    
+    $3Dmol.ImposterMaterial.call(this);
+
+    this.shaderID = "sphereimposter";    
+    this.setValues(parameters);
+    
+};
+
+$3Dmol.SphereImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
+
+$3Dmol.SphereImposterMaterial.prototype.clone = function() {
+
+    var material = new $3Dmol.SphereImposterMaterial();
+    $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
+    return material;
+};
+
+
 $3Dmol.SphereImposterOutlineMaterial = function(parameters) {
     
     $3Dmol.ImposterMaterial.call(this);
 
     this.shaderID = "sphereimposteroutline";
-    this.wireframe=false;
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
     this.outlineWidth= parameters.width || 0.1;
     this.outlinePushback= parameters.pushback || 1.0;
@@ -373,6 +392,61 @@ $3Dmol.SphereImposterOutlineMaterial = function(parameters) {
 };
 
 $3Dmol.SphereImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
+
+$3Dmol.SphereImposterOutlineMaterial.prototype.clone = function() {
+
+    var material = new $3Dmol.SphereImposterOutlineMaterial();
+    $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
+    material.outlineColor = this.outlineColor;
+    material.outlineWidth = this.outlineWidth;
+    material.outlinePushback = this.outlinePushback;
+    return material;
+};
+
+
+$3Dmol.StickImposterMaterial = function(parameters) {
+    
+    $3Dmol.ImposterMaterial.call(this);
+
+    this.shaderID = "stickimposter";    
+    this.setValues(parameters);
+    
+};
+
+$3Dmol.StickImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
+
+$3Dmol.StickImposterMaterial.prototype.clone = function() {
+
+    var material = new $3Dmol.StickImposterOutlineMaterial();
+    $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
+    return material;
+};
+
+
+$3Dmol.StickImposterOutlineMaterial = function(parameters) {
+    
+    $3Dmol.ImposterMaterial.call(this);
+
+    this.shaderID = "stickimposteroutline";
+    this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
+    this.outlineWidth= parameters.width || 0.1;
+    this.outlinePushback= parameters.pushback || 1.0;
+    
+    this.setValues(parameters);
+    
+};
+
+$3Dmol.StickImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
+
+$3Dmol.StickImposterOutlineMaterial.prototype.clone = function() {
+
+    var material = new $3Dmol.StickImposterOutlineMaterial();
+    $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
+    material.outlineColor = this.outlineColor;
+    material.outlineWidth = this.outlineWidth;
+    material.outlinePushback = this.outlinePushback;
+    return material;
+};
 
 
 $3Dmol.InstancedMaterial = function(parameters) {
