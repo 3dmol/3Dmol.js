@@ -508,7 +508,7 @@ $3Dmol.ShaderLib = {
 "void main() {",   
 //"   gl_FragColor = vec4(vColor,1.0); return;",   
 "    vec3 p = cposition;", //ray point
-"    vec3 v = vec3(0,0,1);", //ray normal
+"    vec3 v = normalize(cameraPosition-cposition);", //ray normal
 "    vec3 pa = p1;", //cyl start
 "    vec3 va = normalize(p2-p1);", //cyl norm
 "    vec3 tmp1 = v-dot(v,va)*va;",
