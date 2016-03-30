@@ -489,31 +489,57 @@ $3Dmol.ShaderLib = {
 "uniform mat4 viewMatrix;",
 "uniform vec3 cameraPosition;",
 "uniform float opacity;",
+"uniform mat4 projectionMatrix;",
 
 "uniform vec3 fogColor;",
 "uniform float fogNear;",
 "uniform float fogFar;",
+"uniform vec3 directionalLightColor[ 1 ];",
 
-"varying vec3 vLightFront;",
-"varying vec3 vLightBack;",
-"varying vec3 cposition;",
-"varying vec3 cnormal;",
+
+"varying vec3 vLight;",
 "varying vec3 vColor;",
-"varying float currR;",
-"varying float radius;",
-
+"varying vec3 cposition;",
+"varying vec3 p1;",
+"varying vec3 p2;",
+"varying float r;",
+//cylinder-ray intersection testing taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf
+//also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
 "void main() {",   
-   
-"    float mult = sqrt(radius*radius-currR*currR)/radius;",
-"    float vLight = dot(normalize(-cnormal),vec3(0,0,1));",
-"    gl_FragColor = vec4( vColor, opacity );",
-"    gl_FragColor.xyz *= vLight;",
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
-   
-"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-   
-"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+//"   gl_FragColor = vec4(vColor,1.0); return;",   
+"    vec3 p = cposition;", //ray point
+"    vec3 v = vec3(0,0,1);", //ray normal
+"    vec3 pa = p1;", //cyl start
+"    vec3 va = normalize(p2-p1);", //cyl norm
+"    vec3 tmp1 = v-dot(v,va)*va;",
+"    vec3 deltap = p-pa;",
+"    float A = dot(tmp1,tmp1);",
+"    if(A == 0.0) discard;",
+"    vec3 tmp2 = deltap-(dot(deltap,va)*va);",
+"    float B = dot(2.0*tmp1, tmp2);",
+"    float C = dot(tmp2,tmp2)-r*r;",
+//quadratic equation!
+"    float det = (B*B) - (4.0*A*C);",
+"    if(det < 0.0) discard;",
+"    float sqrtDet = sqrt(det);",
+"    float posT = (-B+sqrtDet/(2.0*A));",
+"    float negT = (-B-sqrtDet/(2.0*A));",
+"    float intersectionT = max(posT,negT);",
+"    vec3 qi = p+v*intersectionT;",
+"    float dotp1 = dot(va,qi-p1);",
+"    if( dotp1 < 0.0 || dot(va,qi-p2) > 0.0) discard;",
+"    vec3 norm = normalize(qi-(dotp1*va + p1));",
+"    float dotProduct = dot( norm, vLight );",
+"    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
+"    vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;",
+"    gl_FragColor = vec4(vLight*vColor, opacity*opacity );", 
 
+"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
+"    float fogFactor = smoothstep( fogNear, fogFar, depth );",   
+"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+"    vec4 clipPos = projectionMatrix * vec4(qi, 1.0);",
+"    float ndcDepth = clipPos.z / clipPos.w;",
+"    gl_FragDepthEXT = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
 "}"
 
 
@@ -532,29 +558,36 @@ $3Dmol.ShaderLib = {
 "attribute vec3 position;",
 "attribute vec3 normal;",
 "attribute vec3 color;",
+"attribute float radius;",
 
 "varying vec3 vColor;",
-"varying vec3 vLightFront;",
-"varying vec3 vLightBack;",
+"varying vec3 vLight;",
 "varying vec3 cposition;",
-"varying vec3 cnormal;",
-"varying float currR;",
-"varying float radius;",
+"varying vec3 p1;",
+"varying vec3 p2;",
+"varying float r;",
 
 "void main() {",
    
 "    vColor = color;",
-"    radius = length(normal);",
-"    vec3 projpt = position+normal;",
-"    vec3 transformedNormal = normalMatrix * normal;",    
+"    r = abs(radius);",
+"    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
+"    vec4 pt = modelViewMatrix*vec4(position, 1.0);",
+"    vec3 norm = to.xyz-pt.xyz;",
 "    vec3 zray = vec3(0.0,0.0,1.0);",
-"    vec3 cr = cross(zray,transformedNormal);",
-"    vec3 adjust = normalize(cr) * radius;",
-"    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 )+vec4(adjust,0.0);",
-"    vec4 position = projectionMatrix * mvPosition;",
-"    currR = (cr.x < 0.0) ? -radius : radius;",
-"    cnormal = (transformedNormal.z < 0.0) ? transformedNormal : -transformedNormal;",
-"    gl_Position = position;",
+"    vec3 cr = cross(zray,norm);",
+"    vec3 adjust = normalize(cr) * -radius;",
+"    vec3 adjust2 = norm * -abs(4.0*radius);",
+"    vec4 mvPosition = pt+vec4(adjust,0.0)+vec4(adjust2,0.0);",
+"    cposition = mvPosition.xyz;",
+"    if(pt.z < to.z || (pt.z == to.z && pt.x < to.x) || (pt.z == to.z && pt.x == to.x && pt.y < to.y)) {",
+"       p1 = pt.xyz; p2 = to.xyz;",
+"    } else {",
+"       p1 = to.xyz; p2 = pt.xyz;",
+"    }",
+"    gl_Position = projectionMatrix * mvPosition;",
+"    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
+"    vLight = normalize( lDirection.xyz );",
 "}"
           
 ].join("\n"),

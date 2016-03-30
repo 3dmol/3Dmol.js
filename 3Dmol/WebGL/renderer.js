@@ -1379,12 +1379,16 @@ $3Dmol.Renderer = function(parameters) {
         var vertexArray = geometryGroup.vertexArray;
         var colorArray = geometryGroup.colorArray;
 
-        // vertex buffers
-        if (!geometryGroup.radiusArray) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
+        // offset buffers
+        if (geometryGroup.__webglOffsetBuffer !== undefined ) {
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglOffsetBuffer);
             _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
         }
-
+        else {
+            //normal, non-instanced case
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
+            _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);            
+        }
         // color buffers
         _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
         _gl.bufferData(_gl.ARRAY_BUFFER, colorArray, hint);
@@ -1398,11 +1402,7 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
-        // offset buffers
-        if (geometryGroup.__webglOffsetBuffer !== undefined) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglOffsetBuffer);
-            _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
-        }
+
 
         // radius buffers
         if (geometryGroup.radiusArray
@@ -1438,10 +1438,11 @@ $3Dmol.Renderer = function(parameters) {
     function createMeshBuffers(geometryGroup) {
 
         if (geometryGroup.radiusArray) {
-            geometryGroup.__webglOffsetBuffer = _gl.createBuffer();
             geometryGroup.__webglRadiusBuffer = _gl.createBuffer();
         }
-
+        if(geometryGroup.useOffset) {
+            geometryGroup.__webglOffsetBuffer = _gl.createBuffer();
+        }
         geometryGroup.__webglVertexBuffer = _gl.createBuffer();
         geometryGroup.__webglNormalBuffer = _gl.createBuffer();
         geometryGroup.__webglColorBuffer = _gl.createBuffer();

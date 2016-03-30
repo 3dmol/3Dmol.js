@@ -544,20 +544,8 @@ $3Dmol.GLModel = (function() {
 
         };
 
-        //dkoes - test code for sphere imposters
-        var drawAtomImposter = function(atom, geo) {
-            
-            if (!atom.style.sphere)
-                return;
-            var style = atom.style.sphere;
-            if (style.hidden)
-                return;
-            
-            var radius = getRadiusFromStyle(atom, style);
-            var C = $3Dmol.getColorFromStyle(atom, style);
-            
-            //create flat square                       
-            
+        var drawSphereImposter = function(geo, center, radius, C) {
+            //create flat square                                   
             var geoGroup = geo.updateGeoGroup(4);
             var startv =  geoGroup.vertices;
             var start = startv*3;
@@ -566,9 +554,9 @@ $3Dmol.GLModel = (function() {
             
             //use center point for each vertex
             for(var i = 0; i < 4; i++) {
-                vertexArray[start+3*i] = atom.x;
-                vertexArray[start+3*i+1] = atom.y ;
-                vertexArray[start+3*i+2] = atom.z;                           
+                vertexArray[start+3*i] = center.x;
+                vertexArray[start+3*i+1] = center.y ;
+                vertexArray[start+3*i+2] = center.z;                           
             }
             
 
@@ -578,8 +566,7 @@ $3Dmol.GLModel = (function() {
             for(var i = 0; i < 4; i++) {
                 colorArray[start+3*i] = C.r;
                 colorArray[start+3*i+1] = C.g;
-                colorArray[start+3*i+2] = C.b;
-                
+                colorArray[start+3*i+2] = C.b;                
             }
             
             normalArray[start+0] = -radius;
@@ -610,64 +597,74 @@ $3Dmol.GLModel = (function() {
             faceArray[faceoffset+4] = startv+3;
             faceArray[faceoffset+5] = startv;
             geoGroup.faceidx += 6;
+        };
+        
+        //dkoes -  code for sphere imposters
+        var drawAtomImposter = function(atom, geo) {
             
+            if (!atom.style.sphere)
+                return;
+            var style = atom.style.sphere;
+            if (style.hidden)
+                return;
+            
+            var radius = getRadiusFromStyle(atom, style);
+            var C = $3Dmol.getColorFromStyle(atom, style);
+            
+            drawSphereImposter(geo, atom, radius, C);            
         };
                 
           
         var drawStickImposter =  function(geo, from, to, radius, color, fromCap, toCap) {
            //we need the four corners - two have from coord, two have to coord, the normal
-            //is the direction of the cylinder scaled by the radius, one positive one negative
-            //since we know we are drawing a stick with spheres at the end, don't have to worry about cpas
+            //is the opposing point, from which we can get the normal and length
+            //also need the radius
             var geoGroup = geo.updateGeoGroup(4);
             var startv =  geoGroup.vertices;
             var start = startv*3;
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
+            var radiusArray = geoGroup.radiusArray;
+            var normalArray = geoGroup.normalArray;
             
             //from for first two
+            var pos = start;
             for(var i = 0; i < 2; i++) {
-                vertexArray[start+3*i] = from.x;
-                vertexArray[start+3*i+1] = from.y ;
-                vertexArray[start+3*i+2] = from.z;                           
+                vertexArray[pos] = from.x;
+                normalArray[pos] = to.x;
+                colorArray[pos] = color.r;
+                pos++;
+                vertexArray[pos] = from.y;
+                normalArray[pos] = to.y;
+                colorArray[pos] = color.g;
+                pos++;
+                vertexArray[pos] = from.z;
+                normalArray[pos] = to.z;
+                colorArray[pos] = color.b;
+                pos++;
             }
             //to for last two
-            for(var i = 2; i < 4; i++) {
-                vertexArray[start+3*i] = to.x;
-                vertexArray[start+3*i+1] = to.y ;
-                vertexArray[start+3*i+2] = to.z;                           
+            for(var i = 0; i < 2; i++) {
+                vertexArray[pos] = to.x;
+                normalArray[pos] = from.x;
+                colorArray[pos] = color.r;                
+                pos++;
+                vertexArray[pos] = to.y;
+                normalArray[pos] = from.y;
+                colorArray[pos] = color.g;
+                pos++;
+                vertexArray[pos] = to.z;
+                normalArray[pos] = from.z;
+                colorArray[pos] = color.b;
+                pos++;                  
             }                        
-
-            //same colors for all 4 vertices
-            var normalArray = geoGroup.normalArray;
-            var colorArray = geoGroup.colorArray;
-            for(var i = 0; i < 4; i++) {
-                colorArray[start+3*i] = color.r;
-                colorArray[start+3*i+1] = color.g;
-                colorArray[start+3*i+2] = color.b;
-                
-            }
-            
-            //compute cylinder direction, scale by radius
-            var dir = new $3Dmol.Vector3(to.x-from.x,to.y-from.y,to.z-from.z).normalize().multiplyScalar(radius);
-              
-            normalArray[start+0] = dir.x;
-            normalArray[start+1] = dir.y;
-            normalArray[start+2] = dir.z;
-            
-            normalArray[start+3] = -dir.x;
-            normalArray[start+4] = -dir.y;
-            normalArray[start+5] = -dir.z;
-            
-            normalArray[start+6] = -dir.x;
-            normalArray[start+7] = -dir.y;
-            normalArray[start+8] = -dir.z;
-            
-            normalArray[start+9] = dir.x;
-            normalArray[start+10] = dir.y;
-            normalArray[start+11] = dir.z;
-            
             geoGroup.vertices += 4;
-            
+
+            radiusArray[startv] = -radius;
+            radiusArray[startv+1] = radius;
+            radiusArray[startv+2] = -radius;
+            radiusArray[startv+3] = radius;      
+                        
             //two faces
             var faceArray = geoGroup.faceArray;
             var faceoffset = geoGroup.faceidx; //not number faces, but index
@@ -678,6 +675,21 @@ $3Dmol.GLModel = (function() {
             faceArray[faceoffset+4] = startv+3;
             faceArray[faceoffset+5] = startv;
             geoGroup.faceidx += 6;
+            
+            if(fromCap) {
+                var pt = from.x+','+from.y+','+from.z+','+radius;
+                if(typeof(geo.drawnCaps[pt]) == 'undefined') {
+                    geo.drawnCaps[pt] = 1;
+                    drawSphereImposter(geo.sphereGeometry, from, radius, color);
+                }
+            }
+            if(toCap) {
+                var pt = to.x+','+to.y+','+to.z+','+radius;
+                if(typeof(geo.drawnCaps[pt]) == 'undefined') {
+                    geo.drawnCaps[pt] = 1;                
+                    drawSphereImposter(geo.sphereGeometry, to, radius, color);
+                }
+            }
         };
         
         /**@typedef StickStyleSpec
@@ -943,7 +955,12 @@ $3Dmol.GLModel = (function() {
                 bondR = atomBondR;
                 //do not use bond style as this can be variable, particularly
                 //with jmol export of double/triple bonds
-                $3Dmol.GLDraw.drawSphere(geo, atom, bondR, C1);    
+                if(geo.imposter) {
+                    drawSphereImposter(geo.sphereGeometry, atom, bondR, C1);
+                }
+                else {
+                    $3Dmol.GLDraw.drawSphere(geo, atom, bondR, C1);
+                }
             }
             
         };
@@ -972,8 +989,10 @@ $3Dmol.GLModel = (function() {
                 drawSphereFunc = drawAtomImposter;
                 sphereGeometry = new $3Dmol.Geometry(true);
                 sphereGeometry.imposter = true;
-                stickGeometry = new $3Dmol.Geometry(true);
+                stickGeometry = new $3Dmol.Geometry(true, true);
                 stickGeometry.imposter = true;
+                stickGeometry.sphereGeometry = sphereGeometry; //for caps
+                stickGeometry.drawnCaps = {};
             }
             else if (options.supportsAIA) {
                 drawSphereFunc = drawAtomInstanced;
@@ -1063,7 +1082,8 @@ $3Dmol.GLModel = (function() {
                         ambient : 0x000000,
                         vertexColors : true,
                         reflectivity : 0
-                    });                 
+                    });            
+                    console.log("sphere vertices: "+sphereGeometry.vertices);
                 }
                 else if(sphereGeometry.instanced) {
                     var sphere = new $3Dmol.Geometry(true);
