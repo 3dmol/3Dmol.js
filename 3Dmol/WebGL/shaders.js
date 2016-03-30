@@ -505,7 +505,7 @@ $3Dmol.ShaderLib = {
 "void main() {",   
    
 "    float mult = sqrt(radius*radius-currR*currR)/radius;",
-"    float vLight = dot(normalize(cnormal),vec3(0,0,1));",
+"    float vLight = dot(normalize(-cnormal),vec3(0,0,1));",
 "    gl_FragColor = vec4( vColor, opacity );",
 "    gl_FragColor.xyz *= vLight;",
 "    float depth = gl_FragCoord.z / gl_FragCoord.w;",
@@ -553,7 +553,7 @@ $3Dmol.ShaderLib = {
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 )+vec4(adjust,0.0);",
 "    vec4 position = projectionMatrix * mvPosition;",
 "    currR = (cr.x < 0.0) ? -radius : radius;",
-"    cnormal = transformedNormal;",
+"    cnormal = (transformedNormal.z < 0.0) ? transformedNormal : -transformedNormal;",
 "    gl_Position = position;",
 "}"
           

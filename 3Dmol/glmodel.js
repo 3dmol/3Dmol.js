@@ -614,10 +614,10 @@ $3Dmol.GLModel = (function() {
         };
                 
           
-        var drawCylinderImposter =  function(geo, from, to, radius, color, fromCap, toCap) {
+        var drawStickImposter =  function(geo, from, to, radius, color, fromCap, toCap) {
            //we need the four corners - two have from coord, two have to coord, the normal
             //is the direction of the cylinder scaled by the radius, one positive one negative
-            
+            //since we know we are drawing a stick with spheres at the end, don't have to worry about cpas
             var geoGroup = geo.updateGeoGroup(4);
             var startv =  geoGroup.vertices;
             var start = startv*3;
@@ -710,7 +710,7 @@ $3Dmol.GLModel = (function() {
             
             var drawCyl = $3Dmol.GLDraw.drawCylinder; //mesh cylinder
             if(geo.imposter) 
-                drawCyl = drawCylinderImposter;
+                drawCyl = drawStickImposter;
 
                 
             for (var i = 0; i < atom.bonds.length; i++) {
