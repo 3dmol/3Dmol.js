@@ -107,10 +107,8 @@
         
         $(document).ready(function() {
                         
-            $.get("test_structs/multiple.xyz", function(data){
-                
                 var viewer = glviewer = $3Dmol.createViewer("gldiv");
-                viewer.addModel(data, null, {keepH: true});
+                viewer.addModel($('#moldata_sdf').val(), null, {keepH: true});
                 viewer.setBackgroundColor("white");        
                 glviewer.setStyle({},{stick:{}});            
                 
@@ -124,8 +122,7 @@
                     m.setStyle({bonds: 0}, {sphere:{radius:0.5}});
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
-                });*/
-         });       
+                });*/   
                  
                            
         });
@@ -273,16 +270,10 @@ USER_CHARGES
 
      RDKit          3D
 
-  5  4  0  0  0  0  0  0  0  0999 V2000
+  2  1  0  0  0  0  0  0  0  0999 V2000
     2.5838   -0.0054   -0.1837 C   0  0  0  0  0  0  0  0  0  0  0  0
     1.2815   -0.0027   -0.2004 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.0000    0.0000   -0.2168 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -1.2815    0.0027   -0.2331 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -2.5838    0.0054   -0.2498 C   0  0  0  0  0  0  0  0  0  0  0  0
-  1  2  2  0
-  2  3  3  3
-  3  4  3  3
-  4  5  2  0
+  1  2  1  0
 M  END
 $$$$
 </textarea>

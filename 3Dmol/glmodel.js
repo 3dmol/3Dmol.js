@@ -1105,7 +1105,6 @@ $3Dmol.GLModel = (function() {
                         reflectivity : 0,
                     });
                 }
-                
                 if (opacities.sphere < 1 && opacities.sphere >= 0)
                 {
                     sphereMaterial.transparent = true;

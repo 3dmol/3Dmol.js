@@ -525,7 +525,7 @@ $3Dmol.ShaderLib = {
 "    float posT = (-B+sqrtDet/(2.0*A));",
 "    float negT = (-B-sqrtDet/(2.0*A));",
 "    float intersectionT = max(posT,negT);",
-"    vec3 qi = p+v*intersectionT;",
+"    vec3 qi = p+v*intersectionT;", 
 "    float dotp1 = dot(va,qi-p1);",
 "    if( dotp1 < 0.0 || dot(va,qi-p2) > 0.0) discard;",
 "    vec3 norm = normalize(qi-(dotp1*va + p1));",
@@ -574,11 +574,20 @@ $3Dmol.ShaderLib = {
 "    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
 "    vec4 pt = modelViewMatrix*vec4(position, 1.0);",
 "    vec3 norm = to.xyz-pt.xyz;",
-"    vec3 zray = vec3(0.0,0.0,1.0);",
-"    vec3 cr = cross(cameraPosition-pt.xyz,norm);",
+"    vec3 zray = cameraPosition-pt.xyz;",
+"    vec3 cr = cross(zray,norm);",
+"    vec3 doublecr = normalize(cross(cr,zray))*abs(radius);",
+"    vec3 extpt = pt.xyz-doublecr;",
+"    vec3 extray = normalize(cameraPosition-extpt);",
+//I can't help feel this calculation of the extension could be simpler
+"    vec3 planeN = normalize(cross(norm,cr));", //plane of our "billboard"
+//intersect extray with the plane
+"    float t = dot((pt.xyz-extpt),planeN)/dot(extray,planeN);",
+"    extpt = extpt+extray*t;",
+"    float len = length(extpt-pt.xyz);",
 "    vec3 adjust = normalize(cr) * -1.0*radius;",
-"    vec3 adjust2 = norm * -abs(40.0*radius);",
-"    vec4 mvPosition = pt+vec4(adjust,0.0)+vec4(adjust2,0.0);",
+"    vec3 adjust2 = norm * -2.0*abs(len);", //shouldn't need the two
+"    vec4 mvPosition =  pt+vec4(adjust,0.0)+vec4(adjust2,0.0);",
 "    cposition = mvPosition.xyz;",
 "    if(pt.z < to.z || (pt.z == to.z && pt.x < to.x) || (pt.z == to.z && pt.x == to.x && pt.y < to.y)) {",
 "       p1 = pt.xyz; p2 = to.xyz;",
