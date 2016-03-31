@@ -989,8 +989,8 @@ $3Dmol.Matrix4.prototype = {
     },
 
     makeFrustum: function ( left, right, bottom, top, near, far ) {
-        var te = this.elements;        
-        
+        var te = this.elements;
+              
         var x = 2 * near / ( right - left );
         var y = 2 * near / ( top - bottom );
 

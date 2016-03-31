@@ -747,6 +747,9 @@ $3Dmol.Renderer = function(parameters) {
                     _lightsNeedUpdate = false;
                 }
 
+                if(material.shaderID === 'stickimposter') {
+                    _gl.uniform3f(p_uniforms.cameraPosition, camera.position.x, camera.position.y, camera.position.z);
+                }
                 // Set up correct light uniform var vals
                 m_uniforms.directionalLightColor.value = _lights.directional.colors;
                 m_uniforms.directionalLightDirection.value = _lights.directional.positions;
@@ -797,6 +800,9 @@ $3Dmol.Renderer = function(parameters) {
             else if (type === 'c')
                 _gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g,
                         uniformVal.b);
+            else if (type === 'f4')
+                _gl.uniform4f(uniformLoc, uniformVal[0], uniformVal[1],
+                        uniformVal[2],uniformVal[3]);
 
         }
 

@@ -26,7 +26,7 @@
 			<arguments>
 				<dictionary>
 					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/gruntagain.launch</value>
+					<value>&lt;project&gt;/.externalToolBuilders/grunt.launch</value>
 				</dictionary>
 			</arguments>
 		</buildCommand>

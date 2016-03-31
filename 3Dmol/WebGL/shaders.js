@@ -35,7 +35,6 @@ $3Dmol.ShaderLib = {
     'basic' : {
         fragmentShader : [                    
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -63,7 +62,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
 
 "attribute vec3 position;",
 "attribute vec3 color;",
@@ -92,7 +90,6 @@ $3Dmol.ShaderLib = {
  'sphereimposter' : {
         fragmentShader : [
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 "uniform mat4 projectionMatrix;",
 
@@ -138,7 +135,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -185,7 +181,6 @@ $3Dmol.ShaderLib = {
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -221,7 +216,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -272,7 +266,6 @@ $3Dmol.ShaderLib = {
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -308,7 +301,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -485,8 +477,6 @@ $3Dmol.ShaderLib = {
    //for double sided lighting
    'stickimposter' : { 
        fragmentShader : [
-
-"uniform mat4 viewMatrix;",
 "uniform vec3 cameraPosition;",
 "uniform float opacity;",
 "uniform mat4 projectionMatrix;",
@@ -495,7 +485,7 @@ $3Dmol.ShaderLib = {
 "uniform float fogNear;",
 "uniform float fogFar;",
 "uniform vec3 directionalLightColor[ 1 ];",
-
+"uniform vec4 viewport;",
 
 "varying vec3 vLight;",
 "varying vec3 vColor;",
@@ -507,39 +497,39 @@ $3Dmol.ShaderLib = {
 //also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
 "void main() {",   
 //"   gl_FragColor = vec4(vColor,1.0); return;",   
-"    vec3 p = cposition;", //ray point
-"    vec3 v = normalize(cameraPosition-cposition);", //ray normal
+"    vec3 pos = cposition;",
+"    vec3 p = pos;", //ray point
+"    vec3 v = -normalize(cameraPosition-pos);", //ray normal
 "    vec3 pa = p1;", //cyl start
 "    vec3 va = normalize(p2-p1);", //cyl norm
-"    vec3 tmp1 = v-dot(v,va)*va;",
+"    vec3 tmp1 = v-(dot(v,va)*va);",
 "    vec3 deltap = p-pa;",
 "    float A = dot(tmp1,tmp1);",
 "    if(A == 0.0) discard;",
 "    vec3 tmp2 = deltap-(dot(deltap,va)*va);",
-"    float B = dot(2.0*tmp1, tmp2);",
+"    float B = 2.0*dot(tmp1, tmp2);",
 "    float C = dot(tmp2,tmp2)-r*r;",
 //quadratic equation!
 "    float det = (B*B) - (4.0*A*C);",
 "    if(det < 0.0) discard;",
 "    float sqrtDet = sqrt(det);",
-"    float posT = (-B+sqrtDet/(2.0*A));",
-"    float negT = (-B-sqrtDet/(2.0*A));",
-"    float intersectionT = max(posT,negT);",
+"    float posT = (-B+sqrtDet)/(2.0*A);",
+"    float negT = (-B-sqrtDet)/(2.0*A);",
+"    float intersectionT = min(posT,negT);",
 "    vec3 qi = p+v*intersectionT;", 
 "    float dotp1 = dot(va,qi-p1);",
 "    if( dotp1 < 0.0 || dot(va,qi-p2) > 0.0) discard;",
 "    vec3 norm = normalize(qi-(dotp1*va + p1));",
 "    float dotProduct = dot( norm, vLight );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
-"    vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    gl_FragColor = vec4(vLight*vColor, opacity*opacity );", 
-
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
-"    float fogFactor = smoothstep( fogNear, fogFar, depth );",   
-"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+"    vec3 light = directionalLightColor[ 0 ] * directionalLightWeighting;",
+"    gl_FragColor = vec4(light*vColor, opacity*opacity );", 
 "    vec4 clipPos = projectionMatrix * vec4(qi, 1.0);",
 "    float ndcDepth = clipPos.z / clipPos.w;",
-"    gl_FragDepthEXT = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
+"    float depth = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
+"    gl_FragDepthEXT = depth;",
+"    float fogFactor = smoothstep( fogNear, fogFar, depth );",   
+"    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 "}"
 
 
@@ -586,14 +576,20 @@ $3Dmol.ShaderLib = {
 "    extpt = extpt+extray*t;",
 "    float len = length(extpt-pt.xyz);",
 "    vec3 adjust = normalize(cr) * -1.0*radius;",
-"    vec3 adjust2 = norm * -2.0*abs(len);", //shouldn't need the two
+"    vec3 adjust2 = norm * -2.0*len;", //shouldn't need the two
 "    vec4 mvPosition =  pt+vec4(adjust,0.0)+vec4(adjust2,0.0);",
-"    cposition = mvPosition.xyz;",
+//"    mvPosition = (pt+to)/2.0;",
+//"    float l = radius*10.0;",
 "    if(pt.z < to.z || (pt.z == to.z && pt.x < to.x) || (pt.z == to.z && pt.x == to.x && pt.y < to.y)) {",
 "       p1 = pt.xyz; p2 = to.xyz;",
+//"       mvPosition.y -= l;",
+//"       mvPosition.x -= abs(l);",
 "    } else {",
 "       p1 = to.xyz; p2 = pt.xyz;",
+//"       mvPosition.y += l;",
+//"       mvPosition.x += abs(l);",
 "    }",
+"    cposition = mvPosition.xyz;",
 "    gl_Position = projectionMatrix * mvPosition;",
 "    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
 "    vLight = normalize( lDirection.xyz );",
@@ -605,7 +601,7 @@ $3Dmol.ShaderLib = {
            opacity: { type: 'f', value: 1.0 },
            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
            fogNear: { type: 'f', value: 1.0 },
-           fogFar: { type: 'f', value: 2000},           
+           fogFar: { type: 'f', value: 2000},         
            directionalLightColor: { type: 'fv', value: [] },
            directionalLightDirection: { type: 'fv', value: [] }
        }
@@ -617,7 +613,6 @@ $3Dmol.ShaderLib = {
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -658,7 +653,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 

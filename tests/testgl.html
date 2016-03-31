@@ -108,12 +108,13 @@
         $(document).ready(function() {
                         
                 var viewer = glviewer = $3Dmol.createViewer("gldiv");
-                viewer.addModel($('#moldata_sdf').val(), null, {keepH: true});
+                viewer.addModel($('#moldata_test').val(), null, {keepH: true});
                 viewer.setBackgroundColor("white");        
                 glviewer.setStyle({},{stick:{}});            
                 
     
                 glviewer.zoomTo();
+              //  glviewer.rotate(10);
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
                 
@@ -271,8 +272,8 @@ USER_CHARGES
      RDKit          3D
 
   2  1  0  0  0  0  0  0  0  0999 V2000
-    2.5838   -0.0054   -0.1837 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.2815   -0.0027   -0.2004 C   0  0  0  0  0  0  0  0  0  0  0  0
+    -1.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
   1  2  1  0
 M  END
 $$$$
