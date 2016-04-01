@@ -477,7 +477,6 @@ $3Dmol.ShaderLib = {
    //for double sided lighting
    'stickimposter' : { 
        fragmentShader : [
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 "uniform mat4 projectionMatrix;",
 
@@ -493,13 +492,16 @@ $3Dmol.ShaderLib = {
 "varying vec3 p1;",
 "varying vec3 p2;",
 "varying float r;",
+
+
 //cylinder-ray intersection testing taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf
 //also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
 "void main() {",   
-//"   gl_FragColor = vec4(vColor,1.0); return;",   
+"    vec3 color = abs(vColor);",
+//"   gl_FragColor = vec4(color,1.0); ",   
 "    vec3 pos = cposition;",
 "    vec3 p = pos;", //ray point
-"    vec3 v = -normalize(cameraPosition-pos);", //ray normal
+"    vec3 v = normalize(pos);", //ray normal
 "    vec3 pa = p1;", //cyl start
 "    vec3 va = normalize(p2-p1);", //cyl norm
 "    vec3 tmp1 = v-(dot(v,va)*va);",
@@ -518,12 +520,36 @@ $3Dmol.ShaderLib = {
 "    float intersectionT = min(posT,negT);",
 "    vec3 qi = p+v*intersectionT;", 
 "    float dotp1 = dot(va,qi-p1);",
-"    if( dotp1 < 0.0 || dot(va,qi-p2) > 0.0) discard;",
-"    vec3 norm = normalize(qi-(dotp1*va + p1));",
+"    float dotp2 = dot(va,qi-p2);",
+"    vec3 norm;",
+"    if( dotp1 < 0.0 || dotp2 > 0.0) {", //(p-c)^2 + 2(p-c)vt +v^2+t^2 - r^2 = 0
+"       vec3 cp;",
+"       if( dotp1 < 0.0) {" +
+"        if(vColor.x >= 0.0 ) discard;", //color sign bit indicates if we should cap or not
+"        cp = p1;",
+"       } else {",
+"          if(vColor.y >= 0.0 ) discard;",
+"          cp = p2;",
+"       }",
+"       vec3 diff = p-cp;",
+"       A = dot(v,v);",
+"       B = dot(diff,v)*2.0;",
+"       C = dot(diff,diff)-r*r;",
+"       det = (B*B) - (4.0*C);",
+"       if(det < 0.0) discard;",
+"       sqrtDet = sqrt(det);",
+"       posT = (-B+sqrtDet)/(2.0);",
+"       negT = (-B-sqrtDet)/(2.0);",
+"       float t = min(posT,negT);",
+"       qi = p+v*t;",
+"       norm = normalize(qi-cp);",
+"    } else {",
+"       norm = normalize(qi-(dotp1*va + p1));",
+"    }",
 "    float dotProduct = dot( norm, vLight );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
 "    vec3 light = directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    gl_FragColor = vec4(light*vColor, opacity*opacity );", 
+"    gl_FragColor = vec4(light*color, opacity*opacity );", 
 "    vec4 clipPos = projectionMatrix * vec4(qi, 1.0);",
 "    float ndcDepth = clipPos.z / clipPos.w;",
 "    float depth = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
@@ -541,7 +567,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -559,35 +584,21 @@ $3Dmol.ShaderLib = {
 
 "void main() {",
    
-"    vColor = color;",
+"    vColor = color; vColor.z = abs(vColor.z);", //z indicates which vertex and so would vary
 "    r = abs(radius);",
 "    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
 "    vec4 pt = modelViewMatrix*vec4(position, 1.0);",
+"    vec4 mvPosition = (pt+to)/2.0;",
+"    p1 = pt.xyz; p2 = to.xyz;",
 "    vec3 norm = to.xyz-pt.xyz;",
-"    vec3 zray = cameraPosition-pt.xyz;",
-"    vec3 cr = cross(zray,norm);",
-"    vec3 doublecr = normalize(cross(cr,zray))*abs(radius);",
-"    vec3 extpt = pt.xyz-doublecr;",
-"    vec3 extray = normalize(cameraPosition-extpt);",
-//I can't help feel this calculation of the extension could be simpler
-"    vec3 planeN = normalize(cross(norm,cr));", //plane of our "billboard"
-//intersect extray with the plane
-"    float t = dot((pt.xyz-extpt),planeN)/dot(extray,planeN);",
-"    extpt = extpt+extray*t;",
-"    float len = length(extpt-pt.xyz);",
-"    vec3 adjust = normalize(cr) * -1.0*radius;",
-"    vec3 adjust2 = norm * -2.0*len;", //shouldn't need the two
-"    vec4 mvPosition =  pt+vec4(adjust,0.0)+vec4(adjust2,0.0);",
-"    mvPosition = (pt+to)/2.0;",
-"    float l = radius*10.0;",
-"    if(pt.z < to.z || (pt.z == to.z && pt.x < to.x) || (pt.z == to.z && pt.x == to.x && pt.y < to.y)) {",
-"       p1 = pt.xyz; p2 = to.xyz;",
-"       mvPosition.y -= l;",
-"       mvPosition.x -= abs(l);",
+"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius*1.5;", //slop to account for perspective
+"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius*1.5;", //hope it is enough
+"    if(color.z >= 0.0) {",
+"       mvPosition.xy = p1.xy;",
+"       mvPosition.xy += cr.xy + doublecr.xy;",
 "    } else {",
-"       p1 = to.xyz; p2 = pt.xyz;",
-"       mvPosition.y += l;",
-"       mvPosition.x += abs(l);",
+"       mvPosition.xy = p2.xy;",
+"       mvPosition.xy -= cr.xy + doublecr.xy;",
 "    }",
 "    cposition = mvPosition.xyz;",
 "    gl_Position = projectionMatrix * mvPosition;",

@@ -626,38 +626,45 @@ $3Dmol.GLModel = (function() {
             var colorArray = geoGroup.colorArray;
             var radiusArray = geoGroup.radiusArray;
             var normalArray = geoGroup.normalArray;
+            //encode extra bits of information in the color
+            var r = color.r;
+            var g = color.g;
+            var b = color.b;
             
-            //from for first two
+            var negateColor = function(c) {
+                //set sign bit
+                var n = -c;
+                if(n == 0) n = -0.0001;
+                return n;
+            };
+            
+            if(fromCap) {
+                r = negateColor(r);
+            }
+            if(toCap) {
+                g = negateColor(g);
+            }
+            
+            //4 vertices, distinguish between p1 and p2 with neg blue
             var pos = start;
-            for(var i = 0; i < 2; i++) {
+            for(var i = 0; i < 4; i++) {
                 vertexArray[pos] = from.x;
                 normalArray[pos] = to.x;
-                colorArray[pos] = color.r;
+                colorArray[pos] = r;
                 pos++;
                 vertexArray[pos] = from.y;
                 normalArray[pos] = to.y;
-                colorArray[pos] = color.g;
+                colorArray[pos] = g;
                 pos++;
                 vertexArray[pos] = from.z;
                 normalArray[pos] = to.z;
-                colorArray[pos] = color.b;
+                if(i < 2)
+                    colorArray[pos] = b;
+                else
+                    colorArray[pos] = negateColor(b);
                 pos++;
             }
-            //to for last two
-            for(var i = 0; i < 2; i++) {
-                vertexArray[pos] = to.x;
-                normalArray[pos] = from.x;
-                colorArray[pos] = color.r;                
-                pos++;
-                vertexArray[pos] = to.y;
-                normalArray[pos] = from.y;
-                colorArray[pos] = color.g;
-                pos++;
-                vertexArray[pos] = to.z;
-                normalArray[pos] = from.z;
-                colorArray[pos] = color.b;
-                pos++;                  
-            }                        
+
             geoGroup.vertices += 4;
 
             radiusArray[startv] = -radius;
@@ -674,22 +681,7 @@ $3Dmol.GLModel = (function() {
             faceArray[faceoffset+3] = startv+2;
             faceArray[faceoffset+4] = startv+3;
             faceArray[faceoffset+5] = startv;
-            geoGroup.faceidx += 6;
-            
-            if(fromCap) {
-                var pt = from.x+','+from.y+','+from.z+','+radius;
-                if(typeof(geo.drawnCaps[pt]) == 'undefined') {
-                    geo.drawnCaps[pt] = 1;
-                    drawSphereImposter(geo.sphereGeometry, from, radius, color);
-                }
-            }
-            if(toCap) {
-                var pt = to.x+','+to.y+','+to.z+','+radius;
-                if(typeof(geo.drawnCaps[pt]) == 'undefined') {
-                    geo.drawnCaps[pt] = 1;                
-                    drawSphereImposter(geo.sphereGeometry, to, radius, color);
-                }
-            }
+            geoGroup.faceidx += 6;          
         };
         
         /**@typedef StickStyleSpec
@@ -1105,7 +1097,6 @@ $3Dmol.GLModel = (function() {
                         reflectivity : 0,
                     });
                 }
-
                 if (opacities.sphere < 1 && opacities.sphere >= 0)
                 {
                     sphereMaterial.transparent = true;

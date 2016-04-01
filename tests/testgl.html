@@ -108,13 +108,14 @@
         $(document).ready(function() {
                         
                 var viewer = glviewer = $3Dmol.createViewer("gldiv");
-                viewer.addModel($('#moldata_test').val(), null, {keepH: true});
+                viewer.addModel($('#moldata_sdf').val(), null, {keepH: true});
                 viewer.setBackgroundColor("white");        
                 glviewer.setStyle({},{stick:{}});            
                 
     
                 glviewer.zoomTo();
               //  glviewer.rotate(10);
+            //    glviewer.setView( [ -0.70571196630422, -0.08642080488535384, -1.1210436919922406, 143.4922239837171, 0.8389489343427959, 0.16313988838727783, 0.44500849748828974, 0.2674275594348649 ]);
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
                 
@@ -273,7 +274,7 @@ USER_CHARGES
 
   2  1  0  0  0  0  0  0  0  0999 V2000
     -1.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0000    0.0000    0.0000  O   0  0  0  0  0  0  0  0  0  0  0  0
   1  2  1  0
 M  END
 $$$$
