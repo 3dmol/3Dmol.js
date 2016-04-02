@@ -884,6 +884,25 @@ $3Dmol.GLShape = (function() {
             });
            
             this.updateStyle(volSpec);
+            
+            //computing bounding sphere from vertices
+            var origin = new $3Dmol.Vector3(data.origin.x, data.origin.y, data.origin.z);
+            var size = new $3Dmol.Vector3(data.size.x*data.unit.x, data.size.y*data.unit.y, data.size.z*data.unit.z);            
+
+            var total = new $3Dmol.Vector3(0,0,0);
+            var maxv = origin.clone();
+            var minv = origin.clone().add(size);
+            for(var i = 0; i < verts.length; i++) {
+                total.add(verts[i]);
+                maxv.max(verts[i]);
+                minv.min(verts[i]);
+            }
+            total.divideScalar(verts.length);
+            var len1 = total.distanceTo(minv);
+            var len2 = total.distanceTo(maxv);
+            this.boundingSphere.center = total;
+            this.boundingSphere.radius = Math.max(len1,len2);
+           
         };
         
         /** 

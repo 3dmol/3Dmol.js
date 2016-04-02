@@ -251,7 +251,25 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-
+    //accumulate maximum
+    max : function(s) {
+        
+        this.x = Math.max(this.x,s.x);
+        this.y = Math.max(this.y,s.y);
+        this.z = Math.max(this.z,s.z);
+        
+        return this;
+    },
+    
+    //accumulate min
+    min : function(s) {
+        
+        this.x = Math.min(this.x,s.x);
+        this.y = Math.min(this.y,s.y);
+        this.z = Math.min(this.z,s.z);
+        
+        return this;
+    },
     distanceTo: function(v) {
         return Math.sqrt(this.distanceToSquared(v));
     },
