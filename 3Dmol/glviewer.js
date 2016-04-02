@@ -988,6 +988,30 @@ $3Dmol.GLViewer = (function() {
             
             return this;
         };
+        
+        /**
+         * Set slab of view (contents outside of slab are clipped). M
+         * Must call render to update.
+         * 
+         * @function $3Dmol.GLViewer#setSlab
+         * @param {near}
+         * @param {far}
+         */
+        this.setSlab = function(near, far) {
+            slabNear = near;
+            slabFar = far;
+        };
+        
+        /**
+         * Get slab of view (contents outside of slab are clipped).
+         * 
+         * @function $3Dmol.GLViewer#setSlab
+         * @return {Object} near/far
+         */
+        this.getSlab = function(sel) {
+            return {near: slabNear, far: slabFar};
+        };
+                
         /**
          * Add label to viewer
          * 
