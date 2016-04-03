@@ -498,7 +498,7 @@ $3Dmol.ShaderLib = {
 //also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
 "void main() {",   
 "    vec3 color = abs(vColor);",
-//"   gl_FragColor = vec4(color,1.0); ",   
+"   gl_FragColor = vec4(color,1.0); ",   
 "    vec3 pos = cposition;",
 "    vec3 p = pos;", //ray point
 "    vec3 v = normalize(pos);", //ray normal
@@ -588,18 +588,28 @@ $3Dmol.ShaderLib = {
 "    r = abs(radius);",
 "    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
 "    vec4 pt = modelViewMatrix*vec4(position, 1.0);",
-"    vec4 mvPosition = (pt+to)/2.0;",
+"    vec4 mvPosition = pt;",
 "    p1 = pt.xyz; p2 = to.xyz;",
-"    vec3 norm = to.xyz-pt.xyz;",
-"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius*1.5;", //slop to account for perspective
-"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius*1.5;", //hope it is enough
-"    if(color.z >= 0.0) {",
-"       mvPosition.xy = p1.xy;",
-"       mvPosition.xy += cr.xy + doublecr.xy;",
-"    } else {",
-"       mvPosition.xy = p2.xy;",
-"       mvPosition.xy -= cr.xy + doublecr.xy;",
+"    vec3 norm = to.xyz-pt.xyz;","" +
+"    float mult = 1.1;", //slop to account for perspective of sphere
+"    if(length(p1) > length(p2)) {", //billboard at level of closest point
+"       mvPosition = to;",
 "    }",
+"    vec3 n = normalize(mvPosition.xyz);",
+//intersect with the plane defined by the camera looking at the billboard point
+"    if(color.z >= 0.0) {", //p1
+"       vec3 pnorm = normalize(p1);",
+"       float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
+"       mvPosition.xyz = p1+t*pnorm;",
+"    } else {",
+"       vec3 pnorm = normalize(p2);",
+"       float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);",
+"       mvPosition.xyz = p2+t*pnorm;",
+"       mult *= -1.0;",
+"    }",
+"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius;", 
+"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius;", 
+"    mvPosition.xy +=  mult*(cr + doublecr).xy;",
 "    cposition = mvPosition.xyz;",
 "    gl_Position = projectionMatrix * mvPosition;",
 "    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",

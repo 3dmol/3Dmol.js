@@ -108,14 +108,14 @@
         $(document).ready(function() {
                         
                 var viewer = glviewer = $3Dmol.createViewer("gldiv");
-                viewer.addModel($('#moldata_sdf').val(), null, {keepH: true});
+                viewer.addModel($('#moldata_test').val(), null, {keepH: true});
                 viewer.setBackgroundColor("white");        
                 glviewer.setStyle({},{stick:{}});            
                 
     
                 glviewer.zoomTo();
               //  glviewer.rotate(10);
-            //    glviewer.setView( [ -0.70571196630422, -0.08642080488535384, -1.1210436919922406, 143.4922239837171, 0.8389489343427959, 0.16313988838727783, 0.44500849748828974, 0.2674275594348649 ]);
+                //glviewer.setView([ -4.5, -0, -0, 131.0067105441296, -0.024549708693956798, -0.7053212242625087, 0.02109860663993842, -0.7081483821952366 ]);
                 glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
                 
@@ -125,6 +125,24 @@
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
                 });*/   
+                $.get('./test_structs/4v99.cif', function(data) {
+                   glviewer.clear();
+                   glviewer.addModel(data, 'cif');
+                   glviewer.zoomTo();
+                   var time = new Date();
+                   glviewer.setStyle({stick:{}});
+                   glviewer.render();
+                   console.log("Create: "+(new Date() - time));
+                   
+                   for(var i = 0; i < 10; i++) 
+                   {
+                       time = new Date();
+                       glviewer.rotate(10);
+                       glviewer.render();
+                       console.log("Rotate: "+(new Date() - time));
+
+                   }
+                });
                  
                            
         });
@@ -274,7 +292,7 @@ USER_CHARGES
 
   2  1  0  0  0  0  0  0  0  0999 V2000
     -1.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.0000    0.0000    0.0000  O   0  0  0  0  0  0  0  0  0  0  0  0
+     1.0000    0.0000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
   1  2  1  0
 M  END
 $$$$

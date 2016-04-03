@@ -1075,7 +1075,6 @@ $3Dmol.GLModel = (function() {
                         vertexColors : true,
                         reflectivity : 0
                     });            
-                    console.log("sphere vertices: "+sphereGeometry.vertices);
                 }
                 else if(sphereGeometry.instanced) {
                     var sphere = new $3Dmol.Geometry(true);

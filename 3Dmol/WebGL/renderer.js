@@ -608,8 +608,8 @@ $3Dmol.Renderer = function(parameters) {
         var identifiers, u, a, i;
 
         // uniform vars
-        identifiers = [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix',
-                'normalMatrix', 'modelMatrix', 'cameraPosition' ];
+        identifiers = [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix', 
+                'normalMatrix'];
 
         // custom uniform vars
         for (u in uniforms)
@@ -747,9 +747,6 @@ $3Dmol.Renderer = function(parameters) {
                     _lightsNeedUpdate = false;
                 }
 
-                if(material.shaderID === 'stickimposter') {
-                    _gl.uniform3f(p_uniforms.cameraPosition, camera.position.x, camera.position.y, camera.position.z);
-                }
                 // Set up correct light uniform var vals
                 m_uniforms.directionalLightColor.value = _lights.directional.colors;
                 m_uniforms.directionalLightDirection.value = _lights.directional.positions;
