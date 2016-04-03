@@ -158,11 +158,13 @@ $3Dmol.Renderer = function(parameters) {
     this.enableOutline = function(parameters) {
         _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters);
         _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters);
+        _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters);
     };
 
     this.disableOutline = function() {
         _outlineMaterial = null;
         _outlineSphereImposterMaterial = null;
+        _outlineStickImposterMaterial = null;
     };
 
     this.setSize = function(width, height) {
@@ -751,7 +753,7 @@ $3Dmol.Renderer = function(parameters) {
                 m_uniforms.directionalLightColor.value = _lights.directional.colors;
                 m_uniforms.directionalLightDirection.value = _lights.directional.positions;
 
-            } else if (material.shaderID === "outline" || material.shaderID === "sphereimposteroutline") {
+            } else if (material.shaderID.endsWith("outline")) {
                 m_uniforms.outlineColor.value = material.outlineColor;
                 m_uniforms.outlineWidth.value = material.outlineWidth;
                 m_uniforms.outlinePushback.value = material.outlinePushback;
@@ -1010,6 +1012,10 @@ $3Dmol.Renderer = function(parameters) {
                 if (_outlineMaterial) {                  
                     if(material.shaderID == 'sphereimposter') {
                         _this.renderBuffer(camera, lights, fog, _outlineSphereImposterMaterial,
+                                buffer, object);                        
+                    }
+                    else if(material.shaderID == 'stickimposter') {
+                        _this.renderBuffer(camera, lights, fog, _outlineStickImposterMaterial,
                                 buffer, object);                        
                     }
                     else if(!material.wireframe                

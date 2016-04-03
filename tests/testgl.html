@@ -37,7 +37,7 @@
             	glviewer.setViewStyle({});
             	isoutlined = false;
             } else {                            
-            	glviewer.setViewStyle({style: 'outline',color:'black',width:0.1});
+            	glviewer.setViewStyle({style: 'outline',color:'blue',width:0.1});
             	isoutlined = true;
             }
 			glviewer.render();
@@ -126,6 +126,7 @@
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
                 });*/   
                 
+                /*
                 $.get('./test_structs/4v99.cif', function(data) {
                    glviewer.clear();
                    glviewer.addModel(data, 'cif');
@@ -144,7 +145,7 @@
 
                    }
                 });
-                
+                */
                  
                            
         });
