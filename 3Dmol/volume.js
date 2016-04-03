@@ -191,9 +191,9 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
         this.origin = new $3Dmol.Vector3(header.NXSTART, header.NYSTART, header.NZSTART);
 
         //Minimum, maximum, average density
-        header.DMIN  = intView[ 19 ];
-        header.DMAX  = intView[ 20 ];
-        header.DMEAN = intView[ 21 ];
+        header.DMIN  = floatView[ 19 ];
+        header.DMAX  = floatView[ 20 ];
+        header.DMEAN = floatView[ 21 ];
 
         // space group number 0 or 1 (default=0)
         header.ISPG = intView[ 22 ];
@@ -204,12 +204,9 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
         // machine stamp
         header.ARMS = floatView[54];
 
-         this.size = {x:header.MX, y:header.MY, z:header.MZ};
-         this.unit = new $3Dmol.Vector3(xVox, yVox, zVox ); 
-
-        this.data = new Float32Array(bin, 
-        256 * 4 + header.NSYMBT ,
-        header.NX * header.NY * header.NZ
-        );
+        this.size = {x:header.MX, y:header.MY, z:header.MZ};
+        this.unit = new $3Dmol.Vector3(xVox, yVox, zVox ); 
+        var byteData = new Int8Array(bin); 
+        this.data = new Float32Array(bin, 1024 + header.NSYMBT);
           
 };

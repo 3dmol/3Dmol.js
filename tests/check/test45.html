@@ -43,7 +43,7 @@
     
     var map_data = new Int32Array(req.response);
       var voldata = new $3Dmol.VolumeData(req.response, "ccp4");
-                  viewer.addIsosurface(voldata, {isoval: 0.5,
+                  viewer.addIsosurface(voldata, {isoval: 0.005,
                                                  color: "blue",
                                                  alpha: 0.5,
                                                  smoothness: 10});
@@ -51,7 +51,7 @@
                   viewer.addIsosurface(voldata, {isoval: -1,
                                                  color: "red",
                                                  smoothness: 20,
-                                                 linewidth:0.5,
+                                                 linewidth:0.005,
                                                  clickable:true,
                                                  callback:
                                                  function() {
