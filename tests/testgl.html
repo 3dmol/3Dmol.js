@@ -108,7 +108,7 @@
         $(document).ready(function() {
                         
                 var viewer = glviewer = $3Dmol.createViewer("gldiv");
-                viewer.addModel($('#moldata_test').val(), null, {keepH: true});
+                viewer.addModel($('#moldata_sdf').val(), null, {keepH: true});
                 viewer.setBackgroundColor("white");        
                 glviewer.setStyle({},{stick:{}});            
                 
@@ -125,6 +125,7 @@
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
                 });*/   
+                
                 $.get('./test_structs/4v99.cif', function(data) {
                    glviewer.clear();
                    glviewer.addModel(data, 'cif');
@@ -143,6 +144,7 @@
 
                    }
                 });
+                
                  
                            
         });

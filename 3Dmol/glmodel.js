@@ -638,12 +638,7 @@ $3Dmol.GLModel = (function() {
                 return n;
             };
             
-            if(fromCap) {
-                r = negateColor(r);
-            }
-            if(toCap) {
-                g = negateColor(g);
-            }
+            /* for sticks, always draw caps, but we could in theory set caps in color */
             
             //4 vertices, distinguish between p1 and p2 with neg blue
             var pos = start;
@@ -988,7 +983,7 @@ $3Dmol.GLModel = (function() {
             }
             else if (options.supportsAIA) {
                 drawSphereFunc = drawAtomInstanced;
-                sphereGeometry = new $3Dmol.Geometry(false, true);
+                sphereGeometry = new $3Dmol.Geometry(false, true,true);
                 sphereGeometry.instanced = true;
                 stickGeometry = new $3Dmol.Geometry(true); //don't actually have instanced sticks
             }  else {

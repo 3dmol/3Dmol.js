@@ -498,7 +498,7 @@ $3Dmol.ShaderLib = {
 //also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
 "void main() {",   
 "    vec3 color = abs(vColor);",
-"   gl_FragColor = vec4(color,1.0); ",   
+//"   gl_FragColor = vec4(color,1.0); ",   
 "    vec3 pos = cposition;",
 "    vec3 p = pos;", //ray point
 "    vec3 v = normalize(pos);", //ray normal
@@ -525,10 +525,10 @@ $3Dmol.ShaderLib = {
 "    if( dotp1 < 0.0 || dotp2 > 0.0) {", //(p-c)^2 + 2(p-c)vt +v^2+t^2 - r^2 = 0
 "       vec3 cp;",
 "       if( dotp1 < 0.0) {" +
-"        if(vColor.x >= 0.0 ) discard;", //color sign bit indicates if we should cap or not
+"        if(vColor.x < 0.0 ) discard;", //color sign bit indicates if we should cap or not
 "        cp = p1;",
 "       } else {",
-"          if(vColor.y >= 0.0 ) discard;",
+"          if(vColor.y < 0.0 ) discard;",
 "          cp = p2;",
 "       }",
 "       vec3 diff = p-cp;",
