@@ -126,8 +126,9 @@
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
                 });*/   
                 
-                /*
+                
                 $.get('./test_structs/4v99.cif', function(data) {
+                    console.profile("label for profile");
                    glviewer.clear();
                    glviewer.addModel(data, 'cif');
                    glviewer.zoomTo();
@@ -144,8 +145,10 @@
                        console.log("Rotate: "+(new Date() - time));
 
                    }
+                        console.profileEnd();
+
                 });
-                */
+                
                  
                            
         });
