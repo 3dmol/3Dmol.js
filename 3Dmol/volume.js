@@ -145,15 +145,24 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
     this.unit = new $3Dmol.Vector3(xVec.x, yVec.y, zVec.z);
     
     if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
-            || zVec.y != 0)
-        console
-                .log("Warning: Cube file is not axis aligned.  This isn't going to look right.");   
+            || zVec.y != 0) {
+        //need a transformation matrix
+        this.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
+        //include translation in matrix
+        this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+                new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
+        //all translation and scaling done by matrix, so reset origin and unit
+        this.origin = new $3Dmol.Vector3(0,0,0);
+        this.unit = new $3Dmol.Vector3(1,1,1);
+    }
+    
     var headerlines = 6;
     if(atomsnum < 0) headerlines++; //see: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
     var raw = lines.splice(natoms + headerlines).join(" ");
     raw = raw.replace(/^\s+/,'');
     raw = raw.split(/[\s\r]+/);
     this.data = new Float32Array(raw);
+    
 
 };
 
