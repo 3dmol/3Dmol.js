@@ -868,6 +868,7 @@ $3Dmol.GLShape = (function() {
                 voxel : voxel,
                 unitCube : data.unit,
                 origin : data.origin,
+                matrix: data.matrix,
                 nX : nX,
                 nY : nY,
                 nZ : nZ

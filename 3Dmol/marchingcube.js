@@ -23,6 +23,7 @@ $3Dmol.MarchingCubeInitializer = function() {
         var fulltable = !!(spec.fulltable);
         var origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
         var voxel = !!(spec.voxel);
+        var transform = spec.matrix; //if this is set, it overrides origin and unitCube
         
         var nX = spec.nX || 0;
         var nY = spec.nY || 0;
@@ -48,7 +49,7 @@ $3Dmol.MarchingCubeInitializer = function() {
         // the edge (p1,p2)
         
         var getVertex = function(i, j, k, code, p1, p2) {
-            var pt = {x: origin.x, y: origin.y, z: origin.z};
+            var pt = {x:0,y:0,z:0};
             var val1 = !!(code & (1 << p1));
             var val2 = !!(code & (1 << p2));
              
@@ -64,11 +65,17 @@ $3Dmol.MarchingCubeInitializer = function() {
                 j++;
             if (p & 4)
                 i++;
-    
-            pt.x += unitCube.x*i;
-            pt.y += unitCube.y*j;
-            pt.z += unitCube.z*k;
-    
+
+            if(transform) {
+                pt = new $3Dmol.Vector3(i,j,k);
+                pt = pt.applyMatrix4(transform);
+                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
+            } else {
+                pt.x = origin.x+unitCube.x*i;
+                pt.y = origin.y+unitCube.y*j;
+                pt.z = origin.z+unitCube.z*k;
+            }
+            
             var index = ((nY * i) + j) * nZ + k;
             
             //Have to add option to do voxels

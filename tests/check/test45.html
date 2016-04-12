@@ -42,13 +42,13 @@
     req.onload = function (aEvt) {
     
     var map_data = new Int32Array(req.response);
-      var voldata = new $3Dmol.VolumeData(req.response, "ccp4");
-                  viewer.addIsosurface(voldata, {isoval: 0.005,
+      var voldata = new $3Dmol.VolumeData(req.response, "ccp4.gz");
+              /*    viewer.addIsosurface(voldata, {isoval: 0.005,
                                                  color: "blue",
                                                  alpha: 0.5,
                                                  smoothness: 10});
-
-                  viewer.addIsosurface(voldata, {isoval: -1,
+*/
+                  viewer.addIsosurface(voldata, {isoval: 0.2,
                                                  color: "red",
                                                  smoothness: 20,
                                                  linewidth:0.005,
@@ -67,7 +67,8 @@
     };
     req.send(null);
   }
-     load_ccp4_map (viewer,"volData/map.ccp4");  
+     load_ccp4_map (viewer,"volData/4ysj.ccp4.gz");  
+     $3Dmol.download('pdb:4ysj',viewer,{},function() { viewer.setStyle({'stick':{}}); viewer.render(); });
      viewer.render();
   })();
     </script>
