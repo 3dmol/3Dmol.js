@@ -79,7 +79,7 @@ $3Dmol.Renderer = function(parameters) {
     _oldPolygonOffset = null, _oldPolygonOffsetFactor = null, _oldPolygonOffsetUnits = null,
     _oldLineWidth = null,
 
-    _viewportX = 0, _viewportY = 0, _viewportWidth = 0, _viewportHeight = 0, _currentWidth = 0, _currentHeight = 0,
+    _viewportWidth = 0, _viewportHeight = 0, _currentWidth = 0, _currentHeight = 0,
     _enabledAttributes = {},
 
     // camera matrices cache
@@ -174,21 +174,11 @@ $3Dmol.Renderer = function(parameters) {
 
         _canvas.style.width = width + 'px';
         _canvas.style.height = height + 'px';
+        
+        _viewportWidth = width !== undefined ? width : _canvas.clientWidth;
+        _viewportHeight = height !== undefined ? height : _canvas.clientHeight;
 
-        this.setViewport(0, 0, _canvas.width, _canvas.height);
-
-    };
-
-    this.setViewport = function(x, y, width, height) {
-
-        _viewportX = x !== undefined ? x : 0;
-        _viewportY = y !== undefined ? y : 0;
-
-        _viewportWidth = width !== undefined ? width : _canvas.width;
-        _viewportHeight = height !== undefined ? height : _canvas.height;
-
-        _gl.viewport(_viewportX, _viewportY, _viewportWidth, _viewportHeight);
-
+        _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
     };
 
     this.clear = function(color, depth, stencil) {
