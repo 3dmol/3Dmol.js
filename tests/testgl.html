@@ -157,23 +157,23 @@
         req.onload = function (aEvt) {
         
         var map_data = new Int8Array(req.response);
-          var voldata = new $3Dmol.VolumeData(req.response, "ccp4");
+          var voldata = new $3Dmol.VolumeData(req.response, "ccp4.gz");
                    /*   viewer.addIsosurface(voldata, {isoval: 25,
                                                      color: "blue",
                                                      alpha: 0.5,
                                                      smoothness: 0});
     */
-                      viewer.addIsosurface(voldata, {isoval: 0.15,
+                      viewer.addIsosurface(voldata, {isoval: 0.3,
                                                      color: "red",
-                                                     wireframe: true,
                                                      linewidth:0.005,
+                                                     wireframe: true,
                                                      smoothness: 0,
-                                                     alpha: 0.5,
                                                      callback:
                                                      function() {
+                                                         this.opacity = 0.0;
                                                          viewer.render();
                                                      }});
-                      //viewer.setStyle({}, {stick:{}});
+                      viewer.setStyle({}, {stick:{}});
                       viewer.zoomTo();
                       viewer.render(); 
         
@@ -182,12 +182,11 @@
         };
         req.send(null);
     }
-    load_ccp4_map (viewer,"check/volData/3pqr.ccp4");  
-    $.get('check/volData/3PQR.cif', function(data) {
-        viewer.addModel(data,'cif');
-        viewer.setStyle({'cartoon':{},'stick':{}});
-        viewer.render();
-    });                 
+    load_ccp4_map (viewer,"check/volData/4ysj.ccp4.gz");  
+
+    $3Dmol.download('pdb:4ysj',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
+     viewer.render();
+                 
                            
         });
         
