@@ -874,7 +874,7 @@ $3Dmol.GLShape = (function() {
                 nZ : nZ
             });
 
-            if (!voxel)
+            if (!voxel && smoothness > 0)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
 
             drawCustom(this, geo, {
