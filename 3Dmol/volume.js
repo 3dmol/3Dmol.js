@@ -97,6 +97,111 @@ $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     return this.data[x*this.size.y*this.size.z + y*this.size.z + z];
 };
 
+/*
+ * parse vasp data
+ * Essentially this parser converts the CHGCAR data into
+ * cube data. It has been adapted from 'chg2cube.pl' found in
+ * http://theory.cm.utexas.edu/vtsttools/
+ */
+$3Dmol.VolumeData.prototype.vasp = function(str) {
+
+    var lines = str.replace(/^\s+/, "").split(/[\n\r]/);
+
+    var atomicData = $3Dmol.Parsers.vasp(str)[0];
+    var natoms = atomicData.length;
+
+    if (natoms == 0) {
+      console.log("No good formating of CHG or CHGCAR file, not atomic information provided in the file.");
+      this.data = [];
+      return;
+    }
+
+
+
+    // Assume atomic units 
+    var unittype = "bohr/hartree";
+    var l_units = 1.889725992;
+    var e_units = 0.036749309;
+
+    // copied from $3Dmol.Parsers.vasp
+    var convFactor = parseFloat(lines[1]);
+    // This is how Vasp reads in the basis We need the l_units in order to
+    // compute the volume of the cell. Afterwards to obtain the axis for the
+    // voxels we have to remove this unit and divide by the number of voxels in
+    // each dimension
+    var v;
+    v=lines[2].replace(/^\s+/, "").split(/\s+/);
+    var xVec = new $3Dmol.Vector3(parseFloat(v[0]),parseFloat(v[1]),parseFloat(v[2])).multiplyScalar(convFactor*l_units);
+    v=lines[3].replace(/^\s+/, "").split(/\s+/);
+    var yVec = new $3Dmol.Vector3(parseFloat(v[0]),parseFloat(v[1]),parseFloat(v[2])).multiplyScalar(convFactor*l_units);
+    v=lines[4].replace(/^\s+/, "").split(/\s+/);
+    var zVec = new $3Dmol.Vector3(parseFloat(v[0]),parseFloat(v[1]),parseFloat(v[2])).multiplyScalar(convFactor*l_units);
+
+    // correct volume for non-orthognal box (expansion by minors)
+    var vol = xVec.x*(yVec.y*zVec.z - zVec.y*yVec.z) - yVec.x*(xVec.y*zVec.z - zVec.y*xVec.z) + zVec.x*(xVec.y*yVec.z - yVec.y*xVec.z);
+
+    vol = Math.abs(vol)/(Math.pow(l_units,3));
+    var vol_scale = 1.0/(vol); //This Only for CHGCAR files
+
+    // We splice the structure information
+    // 2 (header) + 3 (vectors) + 2 (atoms) + 1 (vaspMode) + natoms (coords) + 1 (blank line) 
+    lines.splice(0,2+3+2+1+natoms+1);
+
+
+    var lineArr = lines[0].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+
+    var nX = Math.abs(lineArr[0]);
+    var nY = Math.abs(lineArr[1]);
+    var nZ = Math.abs(lineArr[2]);
+
+    var origin = this.origin = new $3Dmol.Vector3(0,0,0);
+
+    this.size = {x:nX, y:nY, z:nZ};
+    this.unit = new $3Dmol.Vector3(xVec.x, yVec.y, zVec.z);
+
+    // resize the vectors accordingly
+    xVec = xVec.multiplyScalar(1/(l_units*nX));
+    yVec = yVec.multiplyScalar(1/(l_units*nY));
+    zVec = zVec.multiplyScalar(1/(l_units*nZ));
+
+    if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
+            || zVec.y != 0) {
+        //need a transformation matrix
+        this.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
+        //include translation in matrix
+        this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+                new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
+        //all translation and scaling done by matrix, so reset origin and unit
+        this.origin = new $3Dmol.Vector3(0,0,0);
+        this.unit = new $3Dmol.Vector3(1,1,1);
+    }
+
+
+    lines.splice(0,1); //Remove the dimension line 
+    var raw = lines.join(" ");
+
+    raw = raw.replace(/^\s+/,'');
+    raw = raw.split(/[\s\r]+/);
+    raw.splice(nX*nY*nZ+1);
+
+    var preConvertedData = new Float32Array(raw); //We still have to format it to get the density
+
+    for (var i = 0; i< preConvertedData.length; i++){
+      preConvertedData[i] = preConvertedData[i]*vol_scale*e_units;
+    }
+
+    this.data = preConvertedData;
+
+    //console.log(xVec);
+    //console.log(yVec);
+    //console.log(zVec);
+    //console.log(this.unit);
+    //console.log(this.origin);
+    //console.log(this.matrix);
+    //console.log(this.data);
+
+};
+
 // parse cube data
 $3Dmol.VolumeData.prototype.cube = function(str) {
     var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
@@ -162,7 +267,6 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
     raw = raw.replace(/^\s+/,'');
     raw = raw.split(/[\s\r]+/);
     this.data = new Float32Array(raw);
-    
 
 };
 

@@ -373,7 +373,7 @@ $3Dmol.Parsers = (function() {
       lattice.zVec = new Float32Array(lines[4].replace(/^\s+/, "").split(/\s+/));
 
 
-      var atomSymbols=lines[5].replace(/\s+/, "").split(/\s+/);
+      var atomSymbols=lines[5].replace(/\s+/, "").replace(/\s+$/,"").split(/\s+/);
       var atomSpeciesNumber=new Int16Array(lines[6].replace(/^\s+/, "").split(/\s+/));
       var vaspMode=lines[7].replace(/\s+/, "");
 
