@@ -25,51 +25,44 @@
     <table width="100%">
       <tr>
         <td colspan=2 height=200px>
-          45 Isosurface<code> ccp4 format implementation isoval color alpha smoothness opacitye linewidth clickable callback</code>
+          45 Isosurface<code> ccp4 format implementation two isovals with mesh and translucency</code>
         </td>
       </tr>
       <tr>
         <td width="50%"><div id="test45" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
      <script>
-        (function() {
     var viewer = $3Dmol.createViewer($("#test45"));
     viewer.setBackgroundColor(0xffffffff);
-    function load_ccp4_map (viewer, url) {
+    
+    $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render();
+    });
+    
+    //can't use jquery with binary data
     var req = new XMLHttpRequest();
-    req.open('GET', url, true);
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
     req.responseType = "arraybuffer";
-    req.onload = function (aEvt) {
-    
-    var map_data = new Int32Array(req.response);
-      var voldata = new $3Dmol.VolumeData(req.response, "ccp4");
-                  viewer.addIsosurface(voldata, {isoval: 0.005,
-                                                 color: "blue",
-                                                 alpha: 0.5,
-                                                 smoothness: 10});
-
-                  viewer.addIsosurface(voldata, {isoval: -1,
-                                                 color: "red",
-                                                 smoothness: 20,
-                                                 linewidth:0.005,
-                                                 clickable:true,
-                                                 callback:
-                                                 function() {
-                                                     this.opacity = 0.0;
-                                                     viewer.render();
-                                                 }});
-                  viewer.setStyle({}, {stick:{}});
-                  viewer.zoomTo();
-                  viewer.render(); 
-    
-       
-    
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+      viewer.addIsosurface(voldata, {isoval: 0.25,
+                                       color: "blue",
+                                       opacity: 0.5,
+                                       linewidth:0.005,                                      
+                                    });
+      viewer.addIsosurface(voldata, {isoval: 0.15,
+                                       color: "cyan",
+                                       wireframe: true,
+                                       linewidth:0.005,                                      
+                                    });                                    
+      viewer.render();
     };
     req.send(null);
-  }
-     load_ccp4_map (viewer,"volData/map.ccp4");  
-     viewer.render();
-  })();
+
+
     </script>
         <td width="50%"><img src="imgs/test45.png"></td>
       </tr>

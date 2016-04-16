@@ -108,15 +108,15 @@
         $(document).ready(function() {
                         
                 var viewer = glviewer = $3Dmol.createViewer("gldiv");
-                viewer.addModel($('#moldata_sdf').val(), null, {keepH: true});
-                viewer.setBackgroundColor("white");        
-                glviewer.setStyle({},{stick:{}});            
+             //  viewer.addModel($('#moldata_sdf').val(), null, {keepH: true});
+               // viewer.setBackgroundColor("white");        
+                //glviewer.setStyle({},{stick:{}});            
                 
     
-                glviewer.zoomTo();
+                //glviewer.zoomTo();
               //  glviewer.rotate(10);
                 //glviewer.setView([ -4.5, -0, -0, 131.0067105441296, -0.024549708693956798, -0.7053212242625087, 0.02109860663993842, -0.7081483821952366 ]);
-                glviewer.render();
+                //glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
                 
                 //m.setStyle({resi:[34,35]},{sphere:{}});
@@ -126,7 +126,7 @@
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
                 });*/   
                 
-                
+/*                
                 $.get('./test_structs/4v99.cif', function(data) {
                     console.profile("label for profile");
                    glviewer.clear();
@@ -148,7 +148,44 @@
                         console.profileEnd();
 
                 });
-                
+                */
+    viewer.setBackgroundColor(0xffffffff);
+    function load_ccp4_map (viewer, url) {
+        var req = new XMLHttpRequest();
+        req.open('GET', url, true);
+        req.responseType = "arraybuffer";
+        req.onload = function (aEvt) {
+        
+        var map_data = new Int8Array(req.response);
+          var voldata = new $3Dmol.VolumeData(req.response, "ccp4.gz");
+                   /*   viewer.addIsosurface(voldata, {isoval: 25,
+                                                     color: "blue",
+                                                     alpha: 0.5,
+                                                     smoothness: 0});
+    */
+                      viewer.addIsosurface(voldata, {isoval: 0.3,
+                                                     color: "red",
+                                                     linewidth:0.005,
+                                                     wireframe: true,
+                                                     smoothness: 0,
+                                                     callback:
+                                                     function() {
+                                                         this.opacity = 0.0;
+                                                         viewer.render();
+                                                     }});
+                      viewer.setStyle({}, {stick:{}});
+                      viewer.zoomTo();
+                      viewer.render(); 
+        
+           
+        
+        };
+        req.send(null);
+    }
+    load_ccp4_map (viewer,"check/volData/4ysj.ccp4.gz");  
+
+    $3Dmol.download('pdb:4ysj',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
+     viewer.render();
                  
                            
         });
