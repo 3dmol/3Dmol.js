@@ -247,6 +247,7 @@ $3Dmol.specStringToObject = function(str) {
     }
     
     var ret = {};
+    if(str === 'all') return ret;
     var fields = str.split(';');
     for(var i = 0; i < fields.length; i++) {
         var fv = fields[i].split(':');
