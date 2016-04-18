@@ -169,14 +169,11 @@ $3Dmol.Renderer = function(parameters) {
 
     this.setSize = function(width, height) {
 
-        _canvas.width = width * this.devicePixelRatio;
-        _canvas.height = height * this.devicePixelRatio;
+        _viewportWidth = _canvas.width = width * this.devicePixelRatio;
+        _viewportHeight =  _canvas.height = height * this.devicePixelRatio;
 
         _canvas.style.width = width + 'px';
         _canvas.style.height = height + 'px';
-        
-        _viewportWidth = width !== undefined ? width : _canvas.clientWidth;
-        _viewportHeight = height !== undefined ? height : _canvas.clientHeight;
 
         _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
     };
