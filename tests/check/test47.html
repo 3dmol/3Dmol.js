@@ -29,30 +29,21 @@
         </td>
       </tr>
       <tr>
-        <td width="50%"><div id="test47" style="width: 1200px; height: 900px; position: relative;"></div>
+        <td width="50%"><div id="test47" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
      <script>
     var viewer = $3Dmol.createViewer($("#test47"));
     viewer.setBackgroundColor(0xffffffff);
 
-    //have to use XML directly to deal with binary data
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://mmtf.rcsb.org/full/4udv.mmtf', true);
-    xhr.responseType = 'arraybuffer';
-     
-    xhr.onload = function(e) {
-      // response is unsigned 8 bit integer
-      var mmtf = new Uint8Array(this.response); 
-      viewer.addModel(mmtf,'mmtf');
-      viewer.setStyle({'cartoon':{}});
-      viewer.zoomTo();
-      viewer.render();
-    };
-     
-    xhr.send();
+    $3Dmol.download('mmtf:1mo8',viewer,{},function(m) {
+       m.setStyle({'cartoon':{color:'spectrum'}});
+       viewer.zoomTo();
+       viewer.render();
+    });
+
 
     </script>
-        <td width="50%"><img src="imgs/test46.png"></td>
+        <td width="50%"><img src="imgs/test47.png"></td>
       </tr>
     </table>
 

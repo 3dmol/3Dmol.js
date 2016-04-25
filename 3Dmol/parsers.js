@@ -1026,7 +1026,7 @@ $3Dmol.Parsers = (function() {
         for (var i = 0; i < atoms.length; i++) {
             assignBonds(atoms[i]);
             computeSecondaryStructure(atoms[i]);
-            processSymmetries(modelData[modelData.length-1].symmetries, copyMatrix, atoms[i]);
+            processSymmetries(modelData[i].symmetries, copyMatrix, atoms[i]);
         }
 
         return atoms;
@@ -1485,7 +1485,7 @@ $3Dmol.Parsers = (function() {
             // starttime));
         
             if (!noAssembly)
-                processSymmetries(modelData[modelData.length-1].symmetries, copyMatrix, atoms[n]);
+                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
 
             if (computeStruct || !hasStruct) {
                 starttime = (new Date()).getTime();
@@ -1550,7 +1550,10 @@ $3Dmol.Parsers = (function() {
         var start = atoms[atoms.length-1].length;
         var atom;
         var computeStruct = !options.noSecondaryStructure;
-
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var modelData = atoms.modelData = [{symmetries:[]}];
+        
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
@@ -1666,8 +1669,8 @@ $3Dmol.Parsers = (function() {
         var noH = !options.keepH; // suppress hydrogens by default
 
         var mmtfData = MMTF.decode( bindata );
-        console.log( mmtfData.numAtoms );
         var atoms = [[]];
+        var modelData = atoms.modelData = [];
         
         // setup index counters
         var modelIndex = 0;
@@ -1690,7 +1693,22 @@ $3Dmol.Parsers = (function() {
         if (numModels == 0) return atoms;
         if (!options.multimodel) numModels = 1; //first only
         // hoisted loop variables
-        var i, j, k, kl, m;
+        var i, j, k, kl, m, n;
+        
+        //extract symmetries - only take first assembly, apply to all models (ignoring changes for now)
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
+        
+        var symmetries = [];
+        if(mmtfData.bioAssemblyList && mmtfData.bioAssemblyList.length > 0) {
+            var transforms = mmtfData.bioAssemblyList[assemblyIndex].transformList;
+            for(i = 0, n = transforms.length; i < n; i++) {
+                var matrix = new $3Dmol.Matrix4(transforms[i].matrix);
+                matrix.transpose();
+                symmetries.push(matrix);
+            }
+        }
 
         var bondAtomListStart = 0; //for current model
         //loop over models, 
@@ -1699,6 +1717,7 @@ $3Dmol.Parsers = (function() {
             var matoms = atoms[atoms.length-1];
             var serialToIndex = []; // map to matoms index, needed for noh
 
+            modelData.push({symmetries:symmetries});
             for( i = 0; i < modelChainCount; ++i ){
 
                 var chainGroupCount = mmtfData.groupsPerChain[ chainIndex ];
@@ -1727,7 +1746,7 @@ $3Dmol.Parsers = (function() {
                     var groupId = mmtfData.groupIdList[ groupIndex ];
                     var groupName = groupData.groupName;
                     var startAtom = atomIndex;
-                    console.log(groupName+groupId+" "+secStruct);
+
                     for( k = 0; k < groupAtomCount; ++k ){
 
                         var element = groupData.elementList[ k ];
@@ -1849,6 +1868,12 @@ $3Dmol.Parsers = (function() {
             modelIndex += 1;
         } 
                 
+        
+        for (var n = 0; n < atoms.length; n++) {        
+            if (!noAssembly)
+                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
+        }
+        
         return atoms;
     };
     
