@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <script src="../../build/3Dmol.js"></script>
+    <style>
+      table td { text-align: center; }
+      table th {padding-top: 1em;}
+    </style>
+  </head>
+
+  <body>
+    <script>
+
+      $(document).ready(function() {
+
+          //install a right-click handler on every canvas to export png
+          $('canvas').bind('contextmenu',function(e) {
+              var dt = e.currentTarget.toDataURL('image/png');
+              window.location = dt;
+          });
+      });
+        </script>
+
+    <table width="100%">
+      <tr>
+        <td colspan=2 height=200px>
+          47  <code> MMTF format</code>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%"><div id="test47" style="width: 1200px; height: 900px; position: relative;"></div>
+      </td>
+     <script>
+    var viewer = $3Dmol.createViewer($("#test47"));
+    viewer.setBackgroundColor(0xffffffff);
+
+    //have to use XML directly to deal with binary data
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://mmtf.rcsb.org/full/4udv.mmtf', true);
+    xhr.responseType = 'arraybuffer';
+     
+    xhr.onload = function(e) {
+      // response is unsigned 8 bit integer
+      var mmtf = new Uint8Array(this.response); 
+      viewer.addModel(mmtf,'mmtf');
+      viewer.setStyle({'cartoon':{}});
+      viewer.zoomTo();
+      viewer.render();
+    };
+     
+    xhr.send();
+
+    </script>
+        <td width="50%"><img src="imgs/test46.png"></td>
+      </tr>
+    </table>
+
+  </body>
+</html>
