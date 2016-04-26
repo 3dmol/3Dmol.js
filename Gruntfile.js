@@ -43,21 +43,21 @@ module.exports = function(grunt) {
             },            
             
             big : {
-                src : ['js/jquery-1.11.3.js','js/pako_inflate.js','build/3Dmol-pre.js'],
+                src : ['js/jquery-1.11.3.js','js/mmtf.js','js/pako_inflate.js','build/3Dmol-pre.js'],
                 dest : 'build/3Dmol.js'
             },
             
             bignojquery : {
-                src : ['js/pako_inflate.js', 'build/3Dmol-pre.js'],
+                src : ['js/mmtf.js','js/pako_inflate.js', 'build/3Dmol-pre.js'],
                 dest : 'build/3Dmol-nojquery.js'
             },
             
             closure : {
-                src : ['build/jquery-1.11.3-min-pre.js','build/pako_inflate-min-pre.js','build/3Dmol-min-pre.js'],
+                src : ['build/jquery-1.11.3-min-pre.js','build/mmtf-min-pre.js','build/pako_inflate-min-pre.js','build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-min.js'
             },
             closurenojquery: {
-                src : ['build/pako_inflate-min-pre.js','build/3Dmol-min-pre.js'],
+                src : ['build/mmtf-min-pre.js','build/pako_inflate-min-pre.js','build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-nojquery-min.js'
             }, 
             append : {
@@ -77,6 +77,10 @@ module.exports = function(grunt) {
             jquery : {
                 src : ['js/jquery-1.11.3.js'],
                 dest : 'build/jquery-1.11.3-min-pre.js'
+            },
+            mmtf : {
+                src : ['js/mmtf.js'],
+                dest : 'build/mmtf-min-pre.js'
             },
 	    pako : {
 		src : ['js/pako_inflate.js'],
@@ -102,6 +106,17 @@ module.exports = function(grunt) {
                 closurePath : 'lib/closure_compiler',
                 js : ['js/jquery-1.11.3.js'],
                 jsOutputFile : 'build/jquery-1.11.3-min-pre.js',
+                noreport : true,
+                options : {
+                    'compilation_level': 'SIMPLE_OPTIMIZATIONS',
+                    'warning_level': 'DEFAULT',
+                    'language_in': 'ECMASCRIPT5'
+                }
+            },
+            mmtf : {
+                closurePath : 'lib/closure_compiler',
+                js : ['js/mmtf.js'],
+                jsOutputFile : 'build/mmtf-min-pre.js',
                 noreport : true,
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',

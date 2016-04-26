@@ -1026,7 +1026,7 @@ $3Dmol.Parsers = (function() {
         for (var i = 0; i < atoms.length; i++) {
             assignBonds(atoms[i]);
             computeSecondaryStructure(atoms[i]);
-            processSymmetries(modelData[modelData.length-1].symmetries, copyMatrix, atoms[i]);
+            processSymmetries(modelData[i].symmetries, copyMatrix, atoms[i]);
         }
 
         return atoms;
@@ -1485,7 +1485,7 @@ $3Dmol.Parsers = (function() {
             // starttime));
         
             if (!noAssembly)
-                processSymmetries(modelData[modelData.length-1].symmetries, copyMatrix, atoms[n]);
+                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
 
             if (computeStruct || !hasStruct) {
                 starttime = (new Date()).getTime();
@@ -1550,7 +1550,10 @@ $3Dmol.Parsers = (function() {
         var start = atoms[atoms.length-1].length;
         var atom;
         var computeStruct = !options.noSecondaryStructure;
-
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var modelData = atoms.modelData = [{symmetries:[]}];
+        
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
@@ -1647,6 +1650,232 @@ $3Dmol.Parsers = (function() {
         
         return atoms;
     };
+    
+    var fromCharCode = function( charCodeArray ){
+        return String.fromCharCode.apply( null, charCodeArray ).replace(/\0/g, '');
+    };
+    
+    var convertSS = function(val) {
+      //convert mmtf code to 3dmol code
+        if(val == 2) return 'h';
+        if(val == 3) return 's';
+        return 'c';
+    };
 
+    
+    //mmtf shoul be passed as a binary UInt8Array buffer
+    parsers.mmtf = parsers.MMTF = function(bindata, options) {
+        
+        var noH = !options.keepH; // suppress hydrogens by default
+
+        var mmtfData = MMTF.decode( bindata );
+        var atoms = [[]];
+        var modelData = atoms.modelData = [];
+        
+        // setup index counters
+        var modelIndex = 0;
+        var chainIndex = 0;
+        var groupIndex = 0;
+        var atomIndex = 0;
+
+        // setup optional fields
+        var chainNameList = mmtfData.chainNameList;
+        var secStructList = mmtfData.secStructList;
+        var insCodeList = mmtfData.insCodeList;
+        var sequenceIndexList = mmtfData.sequenceIndexList;
+        var bFactorList = mmtfData.bFactorList;
+        var altLocList = mmtfData.altLocList;
+        var occupancyList = mmtfData.occupancyList;
+        var bondAtomList = mmtfData.bondAtomList;
+        var bondOrderList = mmtfData.bondOrderList;
+        
+        var numModels = mmtfData.numModels;
+        if (numModels == 0) return atoms;
+        if (!options.multimodel) numModels = 1; //first only
+        // hoisted loop variables
+        var i, j, k, kl, m, n;
+        
+        //extract symmetries - only take first assembly, apply to all models (ignoring changes for now)
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
+        
+        var symmetries = [];
+        if(mmtfData.bioAssemblyList && mmtfData.bioAssemblyList.length > 0) {
+            var transforms = mmtfData.bioAssemblyList[assemblyIndex].transformList;
+            for(i = 0, n = transforms.length; i < n; i++) {
+                var matrix = new $3Dmol.Matrix4(transforms[i].matrix);
+                matrix.transpose();
+                symmetries.push(matrix);
+            }
+        }
+
+        var bondAtomListStart = 0; //for current model
+        //loop over models, 
+        for (m = 0; m < numModels; m++ ) {
+            var modelChainCount = mmtfData.chainsPerModel[m];
+            var matoms = atoms[atoms.length-1];
+            var serialToIndex = []; // map to matoms index, needed for noh
+
+            modelData.push({symmetries:symmetries});
+            for( i = 0; i < modelChainCount; ++i ){
+
+                var chainGroupCount = mmtfData.groupsPerChain[ chainIndex ];
+                var chainId = fromCharCode(
+                    mmtfData.chainIdList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
+                );
+
+                var startGroup = groupIndex;
+                for( j = 0; j < chainGroupCount; ++j ){ //over residues (groups)
+
+                    var groupData = mmtfData.groupList[ mmtfData.groupTypeList[ groupIndex ] ];
+                    var groupAtomCount = groupData.atomNameList.length;
+                    var secStruct = 0;
+                    if( secStructList ){
+                        secStruct = secStructList[ groupIndex ];
+                    }
+                    var insCode = null;
+                    if( mmtfData.insCodeList ){
+                        insCode = String.fromCharCode( insCodeList[ groupIndex ] );
+                    }
+                    var sequenceIndex = null;
+                    if( sequenceIndexList ){
+                        sequenceIndex = sequenceIndexList[ groupIndex ];
+                    }
+
+                    var groupId = mmtfData.groupIdList[ groupIndex ];
+                    var groupName = groupData.groupName;
+                    var startAtom = atomIndex;
+
+                    for( k = 0; k < groupAtomCount; ++k ){
+
+                        var element = groupData.elementList[ k ];
+                        if(noH && element == 'H') {
+                            atomIndex += 1;
+                            continue;
+                        }
+                        
+                        var bFactor = '';
+                        if( bFactorList ){
+                            bFactor = bFactorList[ atomIndex ];
+                        }
+                        var altLoc = ' ';
+                        if( altLocList ){
+                            altLoc = String.fromCharCode( altLocList[ atomIndex ] );
+                        }
+                        var occupancy = '';
+                        if( occupancyList ){
+                            occupancy = occupancyList[ atomIndex ];
+                        }
+
+                        var atomId = mmtfData.atomIdList[ atomIndex ];
+                        var atomName = groupData.atomNameList[ k ];
+                        var atomCharge = groupData.atomChargeList[ k ];
+                        var xCoord = mmtfData.xCoordList[ atomIndex ];
+                        var yCoord = mmtfData.yCoordList[ atomIndex ];
+                        var zCoord = mmtfData.zCoordList[ atomIndex ];
+                            
+                        serialToIndex[atomIndex] = matoms.length;
+                        matoms.push({
+                            'resn' : groupName,
+                            'x' : xCoord,
+                            'y' : yCoord,
+                            'z' : zCoord,
+                            'elem' : element,
+                            'hetflag' : secStruct < 0,
+                            'chain' : chainId,
+                            'resi' : groupId,
+                            'icode' : altLoc,
+                            'rescode' : groupId + (altLoc != ' ' ? "^" + altLoc : ""), // combo
+                            // resi
+                            // and
+                            // icode
+                            'serial' : atomId,
+                            'atom' : atomName,
+                            'bonds' : [],
+                            'ss' : convertSS(secStruct),
+                            'bondOrder' : [],
+                            'properties' : {charge: atomCharge, occupancy:occupancy},
+                            'b' : bFactor,
+                        });
+
+                        atomIndex += 1;
+                    }
+                    
+                    // intra group bonds
+                    var groupBondAtomList = groupData.bondAtomList;
+                    for( k = 0, kl = groupData.bondOrderList.length; k < kl; ++k ){
+                        var atomIndex1 = startAtom + groupBondAtomList[ k * 2 ];
+                        var atomIndex2 = startAtom + groupBondAtomList[ k * 2 + 1 ];
+                        var bondOrder = groupData.bondOrderList[ k ];
+                        
+                        //I assume bonds are only recorded once
+                        var i1 = serialToIndex[atomIndex1];
+                        var i2 = serialToIndex[atomIndex2];
+                        var a1 = matoms[i1];
+                        var a2 = matoms[i2];
+                        if(a1 && a2) {
+                            a1.bonds.push(i2)
+                            a1.bondOrder.push(bondOrder);
+                            a2.bonds.push(i1);
+                            a2.bondOrder.push(bondOrder);         
+                        }
+                    }
+                    
+                    groupIndex += 1;
+                }
+                
+                //reset for bonds
+                groupIndex = startGroup;
+                for( j = 0; j < chainGroupCount; ++j ){ //over residues (groups)
+                    
+                    groupIndex += 1;
+
+                }
+
+                chainIndex += 1;
+            }
+
+            
+            // inter group bonds
+            if( bondAtomList ){
+                for( k = bondAtomListStart, kl = bondAtomList.length; k < kl; k += 2 ){
+                     var atomIndex1 = bondAtomList[ k ];
+                     var atomIndex2 = bondAtomList[ k + 1 ];
+                     var bondOrder = bondOrderList ? bondOrderList[ k / 2 ] : 1;
+                     
+                     if(atomIndex1 >= atomIndex) {
+                         bondAtomListStart = k;
+                         break; //on next model
+                     }
+                     //I assume bonds are only recorded once
+                     var i1 = serialToIndex[atomIndex1];
+                     var i2 = serialToIndex[atomIndex2];
+                     var a1 = matoms[i1];
+                     var a2 = matoms[i2];
+                     if(a1 && a2) {
+                         a1.bonds.push(i2)
+                         a1.bondOrder.push(bondOrder);
+                         a2.bonds.push(i1);
+                         a2.bondOrder.push(bondOrder);   
+                     }
+                }
+            }
+            
+            if (options.multimodel) {
+                if (!options.onemol) atoms.push([]);
+            }
+            modelIndex += 1;
+        } 
+                
+        
+        for (var n = 0; n < atoms.length; n++) {        
+            if (!noAssembly)
+                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
+        }
+        
+        return atoms;
+    };
+    
     return parsers;
 })();
