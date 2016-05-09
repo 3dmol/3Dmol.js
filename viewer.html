@@ -90,9 +90,18 @@
                                     alert("Wrong PDB ID");
                                     return;
                                 }
-                                data = "http://www.rcsb.org/pdb/files/" + data
+                                data = "http://files.rcsb.org/view/" + data
                                         + ".pdb";
                                 type = "pdb";
+                            } if (src == 'cif') {
+                                data = data.toUpperCase();
+                                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                                    alert("Wrong PDB ID");
+                                    return;
+                                }
+                                data = "http://files.rcsb.org/view/" + data
+                                        + ".cif";
+                                type = "cif";
                             } else if (src == 'cid') {
                                 type = "sdf";
                                 data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
@@ -113,6 +122,8 @@
                                 type = cmds[0].split('=')[1];
                             }
 
+                            var start = new Date();
+
                             if (/\.gz$/.test(data) || type == 'mmtf') { //binary data
                                 $.ajax({url:data, 
                                     type: "GET",
@@ -120,10 +131,17 @@
                                     responseType: "arraybuffer",
                                     processData: false,
                                     success: function(ret, txt, response) {
-                                    glviewer.addModel(ret, type);
-                                    runcmds(cmds, glviewer);
-                                    glviewer.render();
-                                    glviewer.zoomTo();
+	                                    console.log("mtf fetch " + (+new Date() - start) + "ms");
+                                        var time = new Date();
+					     console.profile("load");
+
+	                                    glviewer.addModel(ret, type);
+	                                    runcmds(cmds, glviewer);
+	                                    glviewer.render();
+	                                    glviewer.zoomTo();
+	                                    console.log("mtf load " + (+new Date() - time) + "ms");
+					         console.profileEnd();
+
                                 }}).fail(function() {
                                     //if couldn't get url natively, go through echo server
                                     $.ajax({ url:"echo.cgi", 
@@ -141,10 +159,14 @@
                                 });
                             } else {
                                 $.get(data, function(ret, txt, response) {
+                                    console.log("alt fetch " + (+new Date() - start) + "ms");
+                                    var time = new Date();
                                     glviewer.addModel(ret, type);
                                     runcmds(cmds, glviewer);
                                     glviewer.render();
                                     glviewer.zoomTo();
+                                    console.log("alt load " + (+new Date() - time) + "ms");
+
                                 }).fail(function() {
                                     //if couldn't get url natively, go through echo server
                                     $.post("echo.cgi", {
