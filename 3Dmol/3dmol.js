@@ -455,3 +455,8 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
     return [ min, max ];
 }
 
+//hackish way to work with requirejs
+if( typeof(define) === 'function' && define.amd) {
+    define($3Dmol);
+}
+
