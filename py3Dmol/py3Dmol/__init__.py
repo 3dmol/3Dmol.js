@@ -17,7 +17,7 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.csb.pitt.edu/doc/$3Dmol.GLViewer.html
     '''
-    def __init__(self,width=640,height=480,query='',options=dict(),js='3dmol.csb.pitt.edu/build/3Dmol-min.js'):
+    def __init__(self,width=640,height=480,query='',options=dict(),js='http://3dmol.csb.pitt.edu/build/3Dmol.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
@@ -30,10 +30,11 @@ class view(object):
         self.startjs += '<script>\n'
         self.endjs = '</script>';
         
-        #load 3dmol with requirejs
-        self.startjs += "requirejs.config({\n\tpaths: {\n\t'$3Dmol': ['//%s'],},\n});\n" % js.rstrip('.js')
-        self.startjs += "require(['$3Dmol'], function(mol) {\n";    
-        self.endjs = "return {};});\n" + self.endjs;
+        #load 3dmol, but only once
+        self.startjs += "if(typeof $3Dmolpromise === 'undefined') $3Dmolpromise = $.when($.getScript('%s'))\n" % js
+        
+        self.startjs += "$3Dmolpromise.done(function() {\n";
+        self.endjs = "});\n" + self.endjs
         
         self.startjs += 'var viewer = $3Dmol.createViewer($("#%s"),{backgroundColor:"white"});\n' % divid
         if query:
