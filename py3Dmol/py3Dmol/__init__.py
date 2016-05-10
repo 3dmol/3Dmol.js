@@ -62,4 +62,6 @@ class view(object):
             cmd = cmd.rstrip(',')
             cmd += ');\n';
             self.startjs += cmd
+            return self
+            
         return makejs
