@@ -13,6 +13,7 @@ If you experience problems, please file
 an [issue](https://github.com/3dmol/3Dmol.js/issues).
 
 
+[An example notebook](http://nbviewer.jupyter.org/github/3dmol/3Dmol.js/blob/master/py3Dmol/examples.ipynb)
 
 Installation
 ------------

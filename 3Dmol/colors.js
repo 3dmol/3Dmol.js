@@ -162,6 +162,14 @@ $3Dmol.getColorFromStyle = function(atom, style) {
             if(val != null) {
                 color = scheme.valueToHex(val, range);
             }
+        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
+                typeof(style.colorscheme.map) != 'undefined') {         
+            //apply a discrete property mapping
+            var prop = style.colorscheme.prop;
+            var val = $3Dmol.getAtomProperty(atom, prop);
+            if( typeof style.colorscheme.map[val] != 'undefined' ) {
+                color = style.colorscheme.map[val];
+            }
         }
     } 
     else if(typeof(style.colorfunc) != "undefined") {
@@ -171,7 +179,15 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     
     var C = $3Dmol.CC.color(color);
     return C;
-}
+};
+
+/** Preset secondary structure color scheme 
+ * @struct
+ */
+$3Dmol.ssColors = $3Dmol.ssColors || {};
+//names are in helix-sheet-coil order
+$3Dmol.ssColors.pyMOL = {'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00};
+$3Dmol.ssColors.Jmol = {'h': 0xff0080, 's': 0xffc800, 'c': 0xffffff};
 
 /** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
