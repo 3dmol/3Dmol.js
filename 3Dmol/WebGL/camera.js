@@ -42,7 +42,7 @@ $3Dmol.Camera.prototype.lookAt = function(vector){
 $3Dmol.Camera.prototype.updateProjectionMatrix = function () {
 
     this.projectionMatrix.makePerspective( this.fov, this.aspect, this.near, this.far );
-
+    this.projectionMatrixInverse.getInverse(this.projectionMatrix);
 };
 
 

@@ -435,14 +435,15 @@ $3Dmol.Geometry = (function() {
                 this.lineArray = lineArr.subarray(0,this.lineidx); 
             else
                 this.lineArray = new Uint16Array();
-        }
-        else if (radiusArr) {
-            this.radiusArray = radiusArr.subarray(0, this.vertices);
-        }
+                        
+        }        
         else {
             this.normalArray = new Float32Array(); 
             this.faceArray = new Uint16Array(); 
             this.lineArray = new Uint16Array(); 
+        }
+        if (radiusArr) {
+            this.radiusArray = radiusArr.subarray(0, this.vertices);
         }
         
         if(reallocatemem) { 
@@ -475,15 +476,16 @@ $3Dmol.Geometry = (function() {
             ret.faceArray = new Uint16Array(BUFFERSIZE*6);
             ret.lineArray = new Uint16Array(BUFFERSIZE*6);
         }
-        else if (geo.radii) {
+        if (geo.radii) {
             ret.radiusArray = new Float32Array(BUFFERSIZE);
         }
+        ret.useOffset = geo.offset;
         
         
         return ret;
     };
     /** @constructor */
-    var Geometry = function(mesh, radii) {
+    var Geometry = function(mesh, radii,offset) {
         
         $3Dmol.EventDispatcher.call(this);
         
@@ -496,6 +498,7 @@ $3Dmol.Geometry = (function() {
         this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
         this.mesh = (mesh === true) ? true : false; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
         this.radii = radii || false;
+        this.offset = offset || false; //offset buffer used for instancing
         // update flags
     
         this.verticesNeedUpdate = false;
@@ -522,7 +525,7 @@ $3Dmol.Geometry = (function() {
             
             var retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
             
-            if (!retGroup || retGroup.vertices + addVertices > BUFFERSIZE) 
+            if (!retGroup || retGroup.vertices + addVertices > retGroup.vertexArray.length/3) 
                 retGroup = addGroup(this);
                 
             return retGroup;

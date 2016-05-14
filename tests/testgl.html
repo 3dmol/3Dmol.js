@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>3Dmol.js Test</title>
-        <script src="../build/3Dmol-min.js"></script> 
+        <script src="../build/3Dmol.js"></script> 
             
         <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
         <script>
@@ -29,6 +29,19 @@
             glviewer.render();
             lastsurfstyle = !(lastsurfstyle);
         };  
+
+        var isoutlined = false;
+        var toggleOutline = function() {
+            
+            if(isoutlined) {
+            	glviewer.setViewStyle({});
+            	isoutlined = false;
+            } else {                            
+            	glviewer.setViewStyle({style: 'outline',color:'blue',width:0.1});
+            	isoutlined = true;
+            }
+			glviewer.render();
+        };          
         
         var addLabels = function() {
             var atoms = glviewer.getModel().selectedAtoms({atom : "CA"});
@@ -94,16 +107,16 @@
         
         $(document).ready(function() {
                         
-            $.get("test_structs/multiple.xyz", function(data){
-                
                 var viewer = glviewer = $3Dmol.createViewer("gldiv");
-                viewer.addModel(data, null, {keepH: true});
-                viewer.setBackgroundColor("white");        
-                glviewer.setStyle({},{sphere:{}});            
+             //  viewer.addModel($('#moldata_sdf').val(), null, {keepH: true});
+               // viewer.setBackgroundColor("white");        
+                //glviewer.setStyle({},{stick:{}});            
                 
     
-                glviewer.zoomTo();
-                glviewer.render();
+                //glviewer.zoomTo();
+              //  glviewer.rotate(10);
+                //glviewer.setView([ -4.5, -0, -0, 131.0067105441296, -0.024549708693956798, -0.7053212242625087, 0.02109860663993842, -0.7081483821952366 ]);
+                //glviewer.render();
                 //atoms = m.selectedAtoms({ }); 
                 
                 //m.setStyle({resi:[34,35]},{sphere:{}});
@@ -111,8 +124,68 @@
                     m.setStyle({bonds: 0}, {sphere:{radius:0.5}});
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {colorscheme: 'rasmol'}, {bonds: 0, invert: true});
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {color: 'white', opacity: 0.75}, {bonds: 0, invert: true});
-                });*/
-         });       
+                });*/   
+                
+/*                
+                $.get('./test_structs/4v99.cif', function(data) {
+                    console.profile("label for profile");
+                   glviewer.clear();
+                   glviewer.addModel(data, 'cif');
+                   glviewer.zoomTo();
+                   var time = new Date();
+                   glviewer.setStyle({stick:{}});
+                   glviewer.render();
+                   console.log("Create: "+(new Date() - time));
+                   
+                   for(var i = 0; i < 10; i++) 
+                   {
+                       time = new Date();
+                       glviewer.rotate(10);
+                       glviewer.render();
+                       console.log("Rotate: "+(new Date() - time));
+
+                   }
+                        console.profileEnd();
+
+                });
+                */
+    viewer.setBackgroundColor(0xffffffff);
+    function load_ccp4_map (viewer, url) {
+        var req = new XMLHttpRequest();
+        req.open('GET', url, true);
+        req.responseType = "arraybuffer";
+        req.onload = function (aEvt) {
+        
+        var map_data = new Int8Array(req.response);
+          var voldata = new $3Dmol.VolumeData(req.response, "ccp4.gz");
+                   /*   viewer.addIsosurface(voldata, {isoval: 25,
+                                                     color: "blue",
+                                                     alpha: 0.5,
+                                                     smoothness: 0});
+    */
+                      viewer.addIsosurface(voldata, {isoval: 0.3,
+                                                     color: "red",
+                                                     linewidth:0.005,
+                                                     wireframe: true,
+                                                     smoothness: 0,
+                                                     callback:
+                                                     function() {
+                                                         this.opacity = 0.0;
+                                                         viewer.render();
+                                                     }});
+                      viewer.setStyle({}, {stick:{}});
+                      viewer.zoomTo();
+                      viewer.render(); 
+        
+           
+        
+        };
+        req.send(null);
+    }
+    load_ccp4_map (viewer,"check/volData/4ysj.ccp4.gz");  
+
+    $3Dmol.download('pdb:4ysj',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
+     viewer.render();
                  
                            
         });
@@ -128,7 +201,6 @@
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
         <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
-        <input type="button" value="SphereI" onclick="glviewer.setStyle({},{spherei:{}}); glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
         <input type="button" value="Trace" onclick="glviewer.setStyle({},{cartoon:{style: 'trace',color: 'spectrum',thickness: 0.3}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
@@ -138,6 +210,7 @@
        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2), lastsurfstyle = 1;"></input>
         <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>
+        <input type="button" value="Outline" onclick="toggleOutline();"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
                 <br>
@@ -260,16 +333,10 @@ USER_CHARGES
 
      RDKit          3D
 
-  5  4  0  0  0  0  0  0  0  0999 V2000
-    2.5838   -0.0054   -0.1837 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.2815   -0.0027   -0.2004 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.0000    0.0000   -0.2168 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -1.2815    0.0027   -0.2331 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -2.5838    0.0054   -0.2498 C   0  0  0  0  0  0  0  0  0  0  0  0
-  1  2  2  0
-  2  3  3  3
-  3  4  3  3
-  4  5  2  0
+  2  1  0  0  0  0  0  0  0  0999 V2000
+    -1.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+     1.0000    0.0000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0
 M  END
 $$$$
 </textarea>

@@ -10,15 +10,17 @@ $3Dmol.Renderer = function(parameters) {
             : document.createElement('canvas'),
 
     _precision = parameters.precision !== undefined ? parameters.precision
-            : 'highp',
-    _alpha = parameters.alpha !== undefined ? parameters.alpha : true, 
-    _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha : true, 
-    _antialias = parameters.antialias !== undefined ? parameters.antialias : false,
-    _stencil = parameters.stencil !== undefined ? parameters.stencil : true, 
-    _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false,
-    _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(parameters.clearColor) : new $3Dmol.Color(0x000000), 
-    _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0, 
-    _outlineMaterial = parameters.outline !== undefined ? new $3Dmol.MeshOutlineMaterial(parameters.outline) : null;
+            : 'highp', _alpha = parameters.alpha !== undefined ? parameters.alpha
+            : true, _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha
+            : true, _antialias = parameters.antialias !== undefined ? parameters.antialias
+            : false, _stencil = parameters.stencil !== undefined ? parameters.stencil
+            : true, _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
+            : false, _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(
+            parameters.clearColor)
+            : new $3Dmol.Color(0x000000), _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha
+            : 0, _outlineMaterial = parameters.outline !== undefined ? new $3Dmol.MeshOutlineMaterial(
+            parameters.outline)
+            : null;
 
     this.domElement = _canvas;
     this.context = null;
@@ -44,7 +46,6 @@ $3Dmol.Renderer = function(parameters) {
     // info
 
     this.info = {
-
         memory : {
 
             programs : 0,
@@ -52,7 +53,6 @@ $3Dmol.Renderer = function(parameters) {
             textures : 0
 
         },
-
         render : {
 
             calls : 0,
@@ -61,53 +61,36 @@ $3Dmol.Renderer = function(parameters) {
             points : 0
 
         }
-
     };
 
     // internal properties
-
     var _this = this,
-
     _programs = [], _programs_counter = 0,
-
+    
     // internal state cache
-
     _currentProgram = null, _currentFramebuffer = null, _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
-
     _usedTextureUnits = 0,
 
     // GL state cache
-
     _oldDoubleSided = -1, _oldFlipSided = -1,
-
     _oldBlending = -1,
-
     _oldBlendEquation = -1, _oldBlendSrc = -1, _oldBlendDst = -1,
-
     _oldDepthTest = -1, _oldDepthWrite = -1,
-
     _oldPolygonOffset = null, _oldPolygonOffsetFactor = null, _oldPolygonOffsetUnits = null,
-
     _oldLineWidth = null,
 
-    _viewportX = 0, _viewportY = 0, _viewportWidth = 0, _viewportHeight = 0, _currentWidth = 0, _currentHeight = 0,
-
+    _viewportWidth = 0, _viewportHeight = 0, _currentWidth = 0, _currentHeight = 0,
     _enabledAttributes = {},
 
     // camera matrices cache
-
     _projScreenMatrix = new $3Dmol.Matrix4(),
-
     _vector3 = new $3Dmol.Vector3(),
 
     // light arrays cache
-
     _direction = new $3Dmol.Vector3(),
-
     _lightsNeedUpdate = true,
 
     _lights = {
-
         ambient : [ 0, 0, 0 ],
         directional : {
             length : 0,
@@ -139,77 +122,60 @@ $3Dmol.Renderer = function(parameters) {
     };
 
     // initialize
-
     var _gl;
-    var _ext;
 
     initGL();
-
     setDefaultGLState();
 
     this.context = _gl;
-
     var _extInstanced = _gl.getExtension("ANGLE_instanced_arrays");
+    var _extFragDepth = _gl.getExtension("EXT_frag_depth");
 
     // API
-
-    this.supportsAIA = function() {
-        return Boolean(_extInstanced);
-    }
-
+    
+    this.supportedExtensions = function() {
+        return {supportsAIA: Boolean(_extInstanced),
+            supportsImposters:  Boolean(_extFragDepth)
+            };
+    };
+    
     this.getContext = function() {
-
         return _gl;
-
     };
 
     this.getPrecision = function() {
-
         return _precision;
-
     };
 
     this.setClearColorHex = function(hex, alpha) {
-
         _clearColor.setHex(hex);
         _clearAlpha = alpha;
 
-        _gl
-                .clearColor(_clearColor.r, _clearColor.g, _clearColor.b,
+        _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b,
                         _clearAlpha);
-
     };
 
     this.enableOutline = function(parameters) {
         _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters);
-    }
+        _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters);
+        _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters);
+    };
 
     this.disableOutline = function() {
         _outlineMaterial = null;
-    }
+        _outlineSphereImposterMaterial = null;
+        _outlineStickImposterMaterial = null;
+    };
 
     this.setSize = function(width, height) {
 
-        _canvas.width = width * this.devicePixelRatio;
-        _canvas.height = height * this.devicePixelRatio;
+        _viewportWidth = _canvas.width = width * this.devicePixelRatio;
+        _viewportHeight =  _canvas.height = height * this.devicePixelRatio;
 
         _canvas.style.width = width + 'px';
         _canvas.style.height = height + 'px';
 
-        this.setViewport(0, 0, _canvas.width, _canvas.height);
-
-    };
-
-    this.setViewport = function(x, y, width, height) {
-
-        _viewportX = x !== undefined ? x : 0;
-        _viewportY = y !== undefined ? y : 0;
-
-        _viewportWidth = width !== undefined ? width : _canvas.width;
-        _viewportHeight = height !== undefined ? height : _canvas.height;
-
-        _gl.viewport(_viewportX, _viewportY, _viewportWidth, _viewportHeight);
-
+        _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
     };
 
     this.clear = function(color, depth, stencil) {
@@ -606,7 +572,8 @@ $3Dmol.Renderer = function(parameters) {
         var prefix_vertex = [ prefix ].join("\n");
 
         var prefix_fragment = [
-                parameters.fragdepth ? "#extension GL_EXT_frag_depth: enable" : "",
+                parameters.fragdepth ? "#extension GL_EXT_frag_depth: enable"
+                        : "",
                 parameters.wireframe ? "#define WIREFRAME 1" : "", prefix ]
                 .join("\n");
 
@@ -630,8 +597,8 @@ $3Dmol.Renderer = function(parameters) {
         var identifiers, u, a, i;
 
         // uniform vars
-        identifiers = [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix',
-                'normalMatrix', 'modelMatrix', 'cameraPosition' ];
+        identifiers = [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix', 
+                'normalMatrix'];
 
         // custom uniform vars
         for (u in uniforms)
@@ -646,7 +613,8 @@ $3Dmol.Renderer = function(parameters) {
         }
 
         // attributes
-        identifiers = [ 'position', 'normal', 'color', 'lineDistance' , 'offset', 'radius' ];
+        identifiers = [ 'position', 'normal', 'color', 'lineDistance',
+                'offset', 'radius' ];
 
         /*
          * for (a in attributes) identifiers.push(a);
@@ -742,7 +710,7 @@ $3Dmol.Renderer = function(parameters) {
                 object._modelViewMatrix.elements);
         _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false,
                 object._normalMatrix.elements);
-        
+
         // Send projection matrix to uniform variable in shader
         if (refreshMaterial) {
 
@@ -754,7 +722,9 @@ $3Dmol.Renderer = function(parameters) {
             m_uniforms.fogFar.value = fog.far;
 
             // Set up lights for lambert shader
-            if (material.shaderID.startsWith("lambert") || material.shaderID === "instanced") {
+            if (material.shaderID.startsWith("lambert")
+                    || material.shaderID === "instanced"
+                    || material.shaderID.endsWith("imposter")) {
 
                 // load view and normal matrices for directional and object
                 // lighting
@@ -767,13 +737,10 @@ $3Dmol.Renderer = function(parameters) {
                 }
 
                 // Set up correct light uniform var vals
-                m_uniforms.ambientLightColor.value = _lights.ambient;
                 m_uniforms.directionalLightColor.value = _lights.directional.colors;
                 m_uniforms.directionalLightDirection.value = _lights.directional.positions;
-                m_uniforms.ambient.value = material.ambient;
-                m_uniforms.emissive.value = material.emissive;
 
-            } else if (material.shaderID === "outline") {
+            } else if (material.shaderID.endsWith("outline")) {
                 m_uniforms.outlineColor.value = material.outlineColor;
                 m_uniforms.outlineWidth.value = material.outlineWidth;
                 m_uniforms.outlinePushback.value = material.outlinePushback;
@@ -782,11 +749,12 @@ $3Dmol.Renderer = function(parameters) {
                         camera.matrixWorldInverse.elements);
                 _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false,
                         object._normalMatrix.elements);
+                m_uniforms.directionalLightColor.value = _lights.directional.colors;
+                m_uniforms.directionalLightDirection.value = _lights.directional.positions;
             }
 
             // opacity, diffuse, emissive, etc
             m_uniforms.opacity.value = material.opacity;
-            m_uniforms.diffuse.value = material.color;
 
             // Load any other material specific uniform variables to gl shaders
             loadMaterialUniforms(p_uniforms, m_uniforms);
@@ -818,6 +786,9 @@ $3Dmol.Renderer = function(parameters) {
             else if (type === 'c')
                 _gl.uniform3f(uniformLoc, uniformVal.r, uniformVal.g,
                         uniformVal.b);
+            else if (type === 'f4')
+                _gl.uniform4f(uniformLoc, uniformVal[0], uniformVal[1],
+                        uniformVal[2],uniformVal[3]);
 
         }
 
@@ -897,7 +868,6 @@ $3Dmol.Renderer = function(parameters) {
                         0, 0);
             }
 
-
         }
 
         // Render
@@ -910,17 +880,17 @@ $3Dmol.Renderer = function(parameters) {
                 var sphereGeometryGroup = material.sphere.geometryGroups[0];
                 if (updateBuffers) {
                     _gl.bindBuffer(_gl.ARRAY_BUFFER,
-                                   geometryGroup.__webglVertexBuffer);
-                    _gl.bufferData(_gl.ARRAY_BUFFER, sphereGeometryGroup.vertexArray,
-                                   _gl.STATIC_DRAW);
+                            geometryGroup.__webglVertexBuffer);
+                    _gl.bufferData(_gl.ARRAY_BUFFER,
+                            sphereGeometryGroup.vertexArray, _gl.STATIC_DRAW);
                     _gl.bindBuffer(_gl.ARRAY_BUFFER,
-                                   geometryGroup.__webglNormalBuffer);
-                    _gl.bufferData(_gl.ARRAY_BUFFER, sphereGeometryGroup.normalArray,
-                                   _gl.STATIC_DRAW);
+                            geometryGroup.__webglNormalBuffer);
+                    _gl.bufferData(_gl.ARRAY_BUFFER,
+                            sphereGeometryGroup.normalArray, _gl.STATIC_DRAW);
                     _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER,
-                                   geometryGroup.__webglFaceBuffer);
-                    _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, sphereGeometryGroup.faceArray,
-                                   _gl.STATIC_DRAW);
+                            geometryGroup.__webglFaceBuffer);
+                    _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER,
+                            sphereGeometryGroup.faceArray, _gl.STATIC_DRAW);
                 }
 
                 faceCount = sphereGeometryGroup.faceidx;
@@ -929,7 +899,9 @@ $3Dmol.Renderer = function(parameters) {
                 _extInstanced.vertexAttribDivisorANGLE(attributes.radius, 1);
                 _extInstanced.vertexAttribDivisorANGLE(attributes.color, 1);
 
-                _extInstanced.drawElementsInstancedANGLE(_gl.TRIANGLES, faceCount, _gl.UNSIGNED_SHORT, 0, geometryGroup.radiusArray.length);
+                _extInstanced.drawElementsInstancedANGLE(_gl.TRIANGLES,
+                        faceCount, _gl.UNSIGNED_SHORT, 0,
+                        geometryGroup.radiusArray.length);
 
                 _extInstanced.vertexAttribDivisorANGLE(attributes.offset, 0);
                 _extInstanced.vertexAttribDivisorANGLE(attributes.radius, 0);
@@ -1024,11 +996,21 @@ $3Dmol.Renderer = function(parameters) {
 
                 _this.renderBuffer(camera, lights, fog, material, buffer,
                         object);
-                if (_outlineMaterial && !material.wireframe
+                if (_outlineMaterial) {                  
+                    if(material.shaderID == 'sphereimposter') {
+                        _this.renderBuffer(camera, lights, fog, _outlineSphereImposterMaterial,
+                                buffer, object);                        
+                    }
+                    else if(material.shaderID == 'stickimposter') {
+                        _this.renderBuffer(camera, lights, fog, _outlineStickImposterMaterial,
+                                buffer, object);                        
+                    }
+                    else if(!material.wireframe                
                         && material.shaderID !== 'basic'
                         && material.opacity !== 0.0) {
-                    _this.renderBuffer(camera, lights, fog, _outlineMaterial,
+                        _this.renderBuffer(camera, lights, fog, _outlineMaterial,
                             buffer, object);
+                    }
                 }
             }
         }
@@ -1393,12 +1375,16 @@ $3Dmol.Renderer = function(parameters) {
         var vertexArray = geometryGroup.vertexArray;
         var colorArray = geometryGroup.colorArray;
 
-        // vertex buffers
-        if (!geometryGroup.radiusArray) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
+        // offset buffers
+        if (geometryGroup.__webglOffsetBuffer !== undefined ) {
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglOffsetBuffer);
             _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
         }
-
+        else {
+            //normal, non-instanced case
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
+            _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);            
+        }
         // color buffers
         _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
         _gl.bufferData(_gl.ARRAY_BUFFER, colorArray, hint);
@@ -1412,14 +1398,11 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
-        // offset buffers
-        if (geometryGroup.__webglOffsetBuffer !== undefined) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglOffsetBuffer);
-            _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
-        }
+
 
         // radius buffers
-        if (geometryGroup.radiusArray && geometryGroup.__webglRadiusBuffer !== undefined) {
+        if (geometryGroup.radiusArray
+                && geometryGroup.__webglRadiusBuffer !== undefined) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglRadiusBuffer);
             _gl.bufferData(_gl.ARRAY_BUFFER, geometryGroup.radiusArray, hint);
         }
@@ -1451,10 +1434,11 @@ $3Dmol.Renderer = function(parameters) {
     function createMeshBuffers(geometryGroup) {
 
         if (geometryGroup.radiusArray) {
-            geometryGroup.__webglOffsetBuffer = _gl.createBuffer();
             geometryGroup.__webglRadiusBuffer = _gl.createBuffer();
         }
-
+        if(geometryGroup.useOffset) {
+            geometryGroup.__webglOffsetBuffer = _gl.createBuffer();
+        }
         geometryGroup.__webglVertexBuffer = _gl.createBuffer();
         geometryGroup.__webglNormalBuffer = _gl.createBuffer();
         geometryGroup.__webglColorBuffer = _gl.createBuffer();
@@ -1698,7 +1682,6 @@ $3Dmol.Renderer = function(parameters) {
 
             console.error(error);
         }
-        _ext = _gl.getExtension("EXT_frag_depth");
     }
 
     function setDefaultGLState() {
@@ -1718,11 +1701,8 @@ $3Dmol.Renderer = function(parameters) {
         _gl.blendEquation(_gl.FUNC_ADD);
         _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
 
-        _gl
-                .clearColor(_clearColor.r, _clearColor.g, _clearColor.b,
+        _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b,
                         _clearAlpha);
-        var ext = _gl.getExtension('EXT_frag_depth');
-
     }
 
     this.addPostPlugin(new $3Dmol.SpritePlugin());

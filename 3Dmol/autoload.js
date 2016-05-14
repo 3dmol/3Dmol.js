@@ -12,7 +12,10 @@ $(document).ready(function() {
         $(".viewer_3Dmoljs").each( function() {
             var viewerdiv = $(this);
             var datauri = null;
-            
+            if(viewerdiv.css('position') == 'static') {
+                //slight hack - canvas needs this element to be positioned
+                viewerdiv.css('position','relative');
+            }
         
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;

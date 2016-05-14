@@ -1,8 +1,4 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 
 $3Dmol.ShaderUtils = {
     
@@ -28,15 +24,87 @@ $3Dmol.ShaderUtils = {
         }
         
         return uniforms_clone;
-    }
+    },
+    //fragment shader reused by outline shader
+    stickimposterFragmentShader: [
+     "uniform float opacity;",
+     "uniform mat4 projectionMatrix;",
+
+     "uniform vec3 fogColor;",
+     "uniform float fogNear;",
+     "uniform float fogFar;",
+
+     "varying vec3 vLight;",
+     "varying vec3 vColor;",
+     "varying vec3 cposition;",
+     "varying vec3 p1;",
+     "varying vec3 p2;",
+     "varying float r;",
+
+
+     //cylinder-ray intersection testing taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf
+     //also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
+     //with a bit more care (caps) this could be a general cylinder imposter (see also outline)
+     "void main() {",   
+     "    vec3 color = abs(vColor);",
+     "    vec3 pos = cposition;",
+     "    vec3 p = pos;", //ray point
+     "    vec3 v = normalize(pos);", //ray normal
+     "    vec3 pa = p1;", //cyl start
+     "    vec3 va = normalize(p2-p1);", //cyl norm
+     "    vec3 tmp1 = v-(dot(v,va)*va);",
+     "    vec3 deltap = p-pa;",
+     "    float A = dot(tmp1,tmp1);",
+     "    if(A == 0.0) discard;",
+     "    vec3 tmp2 = deltap-(dot(deltap,va)*va);",
+     "    float B = 2.0*dot(tmp1, tmp2);",
+     "    float C = dot(tmp2,tmp2)-r*r;",
+     //quadratic equation!
+     "    float det = (B*B) - (4.0*A*C);",
+     "    if(det < 0.0) discard;",
+     "    float sqrtDet = sqrt(det);",
+     "    float posT = (-B+sqrtDet)/(2.0*A);",
+     "    float negT = (-B-sqrtDet)/(2.0*A);",
+     "    float intersectionT = min(posT,negT);",
+     "    vec3 qi = p+v*intersectionT;", 
+     "    float dotp1 = dot(va,qi-p1);",
+     "    float dotp2 = dot(va,qi-p2);",
+     "    vec3 norm;",
+     "    if( dotp1 < 0.0 || dotp2 > 0.0) {", //(p-c)^2 + 2(p-c)vt +v^2+t^2 - r^2 = 0
+     "       vec3 cp;",
+     "       if( dotp1 < 0.0) {" +
+     //"        if(vColor.x < 0.0 ) discard;", //color sign bit indicates if we should cap or not
+     "        cp = p1;",
+     "       } else {",
+     //"          if(vColor.y < 0.0 ) discard;",
+     "          cp = p2;",
+     "       }",
+     "       vec3 diff = p-cp;",
+     "       A = dot(v,v);",
+     "       B = dot(diff,v)*2.0;",
+     "       C = dot(diff,diff)-r*r;",
+     "       det = (B*B) - (4.0*C);",
+     "       if(det < 0.0) discard;",
+     "       sqrtDet = sqrt(det);",
+     "       posT = (-B+sqrtDet)/(2.0);",
+     "       negT = (-B-sqrtDet)/(2.0);",
+     "       float t = min(posT,negT);",
+     "       qi = p+v*t;",
+     "       norm = normalize(qi-cp);",
+     "    } else {",
+     "       norm = normalize(qi-(dotp1*va + p1));",
+     "    }",
+     "    vec4 clipPos = projectionMatrix * vec4(qi, 1.0);",
+     "    float ndcDepth = clipPos.z / clipPos.w;",
+     "    float depth = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
+     "    gl_FragDepthEXT = depth;",
+    ].join("\n")  
 };
 
 $3Dmol.ShaderLib = { 
     'basic' : {
         fragmentShader : [                    
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
-"uniform vec3 diffuse;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -47,8 +115,7 @@ $3Dmol.ShaderLib = {
 
 "void main() {",
     
-"    gl_FragColor = vec4( diffuse, opacity );",
-"    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
+"    gl_FragColor = vec4( vColor, opacity );",
     
 "    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
 "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
@@ -65,7 +132,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
 
 "attribute vec3 position;",
 "attribute vec3 color;",
@@ -84,7 +150,6 @@ $3Dmol.ShaderLib = {
     
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000}
@@ -95,18 +160,21 @@ $3Dmol.ShaderLib = {
  'sphereimposter' : {
         fragmentShader : [
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
-"uniform vec3 diffuse;",
 "uniform float opacity;",
+"uniform mat4 projectionMatrix;",
 
 "uniform vec3 fogColor;",
 "uniform float fogNear;",
 "uniform float fogFar;",
 "uniform float uDepth;",
+"uniform vec3 directionalLightColor[ 1 ];",
 
 "varying vec3 vColor;",
 "varying vec2 mapping;",
 "varying float rval;",
+"varying vec3 vLight;",
+"varying vec3 center;",
+
 
 "void main() {",
 "    float lensqr = dot(mapping,mapping);",
@@ -114,12 +182,16 @@ $3Dmol.ShaderLib = {
 "    if(lensqr > rsqr)",
 "       discard;",
 "    float z = sqrt(rsqr-lensqr);",
-"    float zscale = z/rval;",
-"    gl_FragColor = vec4(zscale*vColor, 1 );", //TODO: directional lighting
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
-"    gl_FragDepthEXT = gl_FragCoord.z-z/depth;",
-"    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-
+"    vec3 cameraPos = center+ vec3(mapping.x,mapping.y,z);",
+"    vec4 clipPos = projectionMatrix * vec4(cameraPos, 1.0);",
+"    float ndcDepth = clipPos.z / clipPos.w;",
+"    gl_FragDepthEXT = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
+"    vec3 norm = normalize(vec3(mapping.x,mapping.y,z));",
+"    float dotProduct = dot( norm, vLight );",
+"    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
+"    vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;",
+"    gl_FragColor = vec4(vLight*vColor, opacity*opacity );", 
+"    float fogFactor = smoothstep( fogNear, fogFar, gl_FragDepthEXT/gl_FragCoord.w );",
 "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
 
@@ -133,7 +205,8 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
+"uniform vec3 directionalLightColor[ 1 ];",
+"uniform vec3 directionalLightDirection[ 1 ];",
 
 "attribute vec3 position;",
 "attribute vec3 normal;",
@@ -142,13 +215,18 @@ $3Dmol.ShaderLib = {
 "varying vec2 mapping;",
 "varying vec3 vColor;",
 "varying float rval;",
+"varying vec3 vLight;",
+"varying vec3 center;",
 
 "void main() {",
 
 "    vColor = color;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    center = mvPosition.xyz;",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
 "    vec4 adjust = projectionMatrix* vec4(normal,0.0); adjust.z = 0.0; adjust.w = 0.0;",
+"    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
+"    vLight = normalize( lDirection.xyz );",
 "    mapping = normal.xy;",
 "    rval = abs(normal.x);",
 "    gl_Position = projPosition+adjust;",
@@ -159,10 +237,11 @@ $3Dmol.ShaderLib = {
     
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
+            directionalLightColor: { type: 'fv', value: [] },
+            directionalLightDirection: { type: 'fv', value: [] }
         }
 
     },
@@ -172,7 +251,6 @@ $3Dmol.ShaderLib = {
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -208,11 +286,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
-"uniform vec3 ambient;",
-"uniform vec3 diffuse;",
-"uniform vec3 emissive;",
-"uniform vec3 ambientLightColor;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -241,7 +314,6 @@ $3Dmol.ShaderLib = {
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
     
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
     
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -250,13 +322,9 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
-            ambient: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
-            emissive: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
-            ambientLightColor: { type: 'fv', value: [] },
             directionalLightColor: { type: 'fv', value: [] },
             directionalLightDirection: { type: 'fv', value: [] }
         }
@@ -268,7 +336,6 @@ $3Dmol.ShaderLib = {
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -304,11 +371,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
-"uniform vec3 ambient;",
-"uniform vec3 diffuse;",
-"uniform vec3 emissive;",
-"uniform vec3 ambientLightColor;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -339,7 +401,6 @@ $3Dmol.ShaderLib = {
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
 
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
@@ -348,13 +409,9 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
-            ambient: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
-            emissive: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
-            ambientLightColor: { type: 'fv', value: [] },
             directionalLightColor: { type: 'fv', value: [] },
             directionalLightDirection: { type: 'fv', value: [] }
         }
@@ -405,7 +462,6 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
@@ -415,13 +471,239 @@ $3Dmol.ShaderLib = {
         }
 
     },
-    
+//for outlining sphere imposter
+    'sphereimposteroutline' : { 
+       fragmentShader : [
+
+"uniform float opacity;",
+"uniform vec3 outlineColor;",
+"uniform vec3 fogColor;",
+"uniform float fogNear;",
+"uniform float fogFar;",
+"uniform mat4 projectionMatrix;",
+"varying vec2 mapping;",
+"varying float rval;",
+"varying vec3 center;",
+
+"uniform float outlinePushback;",
+
+
+"void main() {",
+"    float lensqr = dot(mapping,mapping);",
+"    float rsqr = rval*rval;",
+"    if(lensqr > rsqr)",
+"       discard;",
+"    float z = sqrt(rsqr-lensqr);",
+"    vec3 cameraPos = center+ vec3(mapping.x,mapping.y,z-outlinePushback);",
+"    vec4 clipPos = projectionMatrix * vec4(cameraPos, 1.0);",
+"    float ndcDepth = clipPos.z / clipPos.w;",
+"    gl_FragDepthEXT = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
+"    gl_FragColor = vec4(outlineColor, 1 );",
+"}"
+
+
+].join("\n"),
+      
+      vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform float outlineWidth;",
+"uniform float outlinePushback;",
+
+"attribute vec3 position;",
+"attribute vec3 normal;",
+"attribute vec3 color;",
+
+"varying vec2 mapping;",
+"varying float rval;",
+"varying vec3 center;",
+
+"void main() {",
+
+"    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"    center = mvPosition.xyz;",
+"    vec4 projPosition = projectionMatrix * mvPosition;",
+"    vec2 norm = normal.xy + vec2(sign(normal.x)*outlineWidth,sign(normal.y)*outlineWidth);", 
+"    vec4 adjust = projectionMatrix* vec4(norm,normal.z,0.0); adjust.z = 0.0; adjust.w = 0.0;",
+"    mapping = norm.xy;",
+"    rval = abs(norm.x);",
+"    gl_Position = projPosition+adjust;",
+"}"
+          
+].join("\n"),
+
+       uniforms : {
+           opacity: { type: 'f', value: 1.0 },
+           outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
+           fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+           fogNear: { type: 'f', value: 1.0 },
+           fogFar: { type: 'f', value: 2000},           
+           outlineWidth: { type: 'f', value: 0.1 },
+           outlinePushback: { type: 'f', value: 1.0 },
+       }
+
+   },
+   //stick imposters
+   'stickimposter' : { 
+      fragmentShader : [$3Dmol.ShaderUtils.stickimposterFragmentShader,
+    "    float dotProduct = dot( norm, vLight );",
+    "    vec3 light = vec3( max( dotProduct, 0.0 ) );",    
+    "    gl_FragColor = vec4(light*color, opacity*opacity );", 
+    "    float fogFactor = smoothstep( fogNear, fogFar, depth );",   
+    "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
+    "}"].join("\n"),
+      vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform mat4 viewMatrix;",
+"uniform mat3 normalMatrix;",
+"uniform vec3 directionalLightColor[ 1 ];",
+"uniform vec3 directionalLightDirection[ 1 ];",
+
+"attribute vec3 position;",
+"attribute vec3 normal;",
+"attribute vec3 color;",
+"attribute float radius;",
+
+"varying vec3 vColor;",
+"varying vec3 vLight;",
+"varying vec3 cposition;",
+"varying vec3 p1;",
+"varying vec3 p2;",
+"varying float r;",
+
+"void main() {",
+   
+"    vColor = color; vColor.z = abs(vColor.z);", //z indicates which vertex and so would vary
+"    r = abs(radius);",
+"    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
+"    vec4 pt = modelViewMatrix*vec4(position, 1.0);",
+"    vec4 mvPosition = pt;",
+"    p1 = pt.xyz; p2 = to.xyz;",
+"    vec3 norm = to.xyz-pt.xyz;","" +
+"    float mult = 1.1;", //slop to account for perspective of sphere
+"    if(length(p1) > length(p2)) {", //billboard at level of closest point
+"       mvPosition = to;",
+"    }",
+"    vec3 n = normalize(mvPosition.xyz);",
+//intersect with the plane defined by the camera looking at the billboard point
+"    if(color.z >= 0.0) {", //p1
+"       vec3 pnorm = normalize(p1);",
+"       float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
+"       mvPosition.xyz = p1+t*pnorm;",
+"    } else {",
+"       vec3 pnorm = normalize(p2);",
+"       float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);",
+"       mvPosition.xyz = p2+t*pnorm;",
+"       mult *= -1.0;",
+"    }",
+"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius;", 
+"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius;", 
+"    mvPosition.xy +=  mult*(cr + doublecr).xy;",
+"    cposition = mvPosition.xyz;",
+"    gl_Position = projectionMatrix * mvPosition;",
+"    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
+"    vLight = normalize( lDirection.xyz )*directionalLightColor[0];", //not really sure this is right, but color is always white so..
+"}"
+          
+].join("\n"),
+
+       uniforms : {
+           opacity: { type: 'f', value: 1.0 },
+           fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+           fogNear: { type: 'f', value: 1.0 },
+           fogFar: { type: 'f', value: 2000},         
+           directionalLightColor: { type: 'fv', value: [] },
+           directionalLightDirection: { type: 'fv', value: [] }
+       }
+
+   },
+   //stick imposter outlines
+   'stickimposteroutline' : { 
+      fragmentShader : $3Dmol.ShaderUtils.stickimposterFragmentShader + 'gl_FragColor = vec4(color,1.0);}',   
+      vertexShader : [
+
+"uniform mat4 modelViewMatrix;",
+"uniform mat4 projectionMatrix;",
+"uniform mat4 viewMatrix;",
+"uniform mat3 normalMatrix;",
+"uniform vec3 directionalLightColor[ 1 ];",
+"uniform vec3 directionalLightDirection[ 1 ];",
+"uniform vec3 outlineColor;",
+"uniform float outlineWidth;",
+"uniform float outlinePushback;",
+
+
+"attribute vec3 position;",
+"attribute vec3 normal;",
+"attribute vec3 color;",
+"attribute float radius;",
+
+"varying vec3 vColor;",
+"varying vec3 vLight;",
+"varying vec3 cposition;",
+"varying vec3 p1;",
+"varying vec3 p2;",
+"varying float r;",
+
+"void main() {",
+   
+"    vColor = outlineColor;",
+"    float rad = radius+sign(radius)*outlineWidth;",
+"    r = abs(rad);",
+"    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
+"    vec4 pt = modelViewMatrix*vec4(position, 1.0);",
+//pushback
+"    to.xyz += normalize(to.xyz)*outlinePushback;",
+"    pt.xyz += normalize(pt.xyz)*outlinePushback;",
+
+"    vec4 mvPosition = pt;",
+"    p1 = pt.xyz; p2 = to.xyz;",
+"    vec3 norm = to.xyz-pt.xyz;","" +
+"    float mult = 1.1;", //slop to account for perspective of sphere
+"    if(length(p1) > length(p2)) {", //billboard at level of closest point
+"       mvPosition = to;",
+"    }",
+"    vec3 n = normalize(mvPosition.xyz);",
+//intersect with the plane defined by the camera looking at the billboard point
+"    if(color.z >= 0.0) {", //p1
+"       vec3 pnorm = normalize(p1);",
+"       float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
+"       mvPosition.xyz = p1+t*pnorm;",
+"    } else {",
+"       vec3 pnorm = normalize(p2);",
+"       float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);",
+"       mvPosition.xyz = p2+t*pnorm;",
+"       mult *= -1.0;",
+"    }",
+"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*rad;", 
+"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*rad;", 
+"    mvPosition.xy +=  mult*(cr + doublecr).xy;",
+"    cposition = mvPosition.xyz;",
+"    gl_Position = projectionMatrix * mvPosition;",
+"    vLight = vec3(1.0,1.0,1.0);",
+"}"
+          
+].join("\n"),
+
+       uniforms : {
+           opacity: { type: 'f', value: 1.0 },
+           fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+           fogNear: { type: 'f', value: 1.0 },
+           fogFar: { type: 'f', value: 2000},         
+           outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },         
+           outlineWidth: { type: 'f', value: 0.1 },
+           outlinePushback: { type: 'f', value: 1.0 },         
+       }
+
+   },
     //for double sided lighting
     'lambertdouble' : { 
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
-"uniform vec3 cameraPosition;",
 "uniform float opacity;",
 
 "uniform vec3 fogColor;",
@@ -462,11 +744,6 @@ $3Dmol.ShaderLib = {
 "uniform mat4 projectionMatrix;",
 "uniform mat4 viewMatrix;",
 "uniform mat3 normalMatrix;",
-"uniform vec3 cameraPosition;",
-"uniform vec3 ambient;",
-"uniform vec3 diffuse;",
-"uniform vec3 emissive;",
-"uniform vec3 ambientLightColor;",
 "uniform vec3 directionalLightColor[ 1 ];",
 "uniform vec3 directionalLightDirection[ 1 ];",
 
@@ -500,9 +777,6 @@ $3Dmol.ShaderLib = {
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
 "    vLightBack += directionalLightColor[ 0 ] * directionalLightWeightingBack;",
 
-"    vLightFront = vLightFront * diffuse + ambient * ambientLightColor + emissive;",
-"    vLightBack = vLightBack * diffuse + ambient * ambientLightColor + emissive;",
-
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
            
@@ -510,13 +784,9 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            diffuse: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},           
-            ambient: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
-            emissive: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
-            ambientLightColor: { type: 'fv', value: [] },
             directionalLightColor: { type: 'fv', value: [] },
             directionalLightDirection: { type: 'fv', value: [] }
         }

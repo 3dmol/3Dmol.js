@@ -112,7 +112,7 @@ a:hover{
 #title3Dmol {
 	    display: table-cell;
     font-size: 70px;
-	font-weight:800;
+	font-weight:700;
 	color:#006;
 	padding-left: 28px;
 	vertical-align: top;
@@ -175,7 +175,7 @@ a:hover{
 }
 
 .titletext:hover {
-	font-weight: 800;
+	font-weight: 700;
 }
 
 #view {
@@ -188,6 +188,10 @@ a:hover{
 }
 
 #develop {
+	width: 5em;
+}
+
+#issues {
 	width: 5em;
 }
 

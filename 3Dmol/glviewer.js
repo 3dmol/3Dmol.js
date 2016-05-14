@@ -373,7 +373,7 @@ $3Dmol.GLViewer = (function() {
                 var newdist = calcTouchDistance(ev);
                 // change to zoom
                 mode = 2;
-                dy = (touchDistanceStart - newdist) * 2
+                dy = (newdist - touchDistanceStart) * 2
                         / (WIDTH + HEIGHT);
             } else if (ev.originalEvent.targetTouches
                     && ev.originalEvent.targetTouches.length == 3) {
@@ -678,16 +678,16 @@ $3Dmol.GLViewer = (function() {
             var view = this.getView();
             
             var i, n;
-            var options = { supportsAIA: renderer.supportsAIA() };
+            var exts = renderer.supportedExtensions();
             for (i = 0; i < models.length; i++) {
                 if (models[i]) {
-                    models[i].globj(modelGroup, options);
+                    models[i].globj(modelGroup, exts);
                 }
             }
 
             for (i = 0; i < shapes.length; i++) {
                 if (shapes[i]) {
-                    shapes[i].globj(modelGroup, options);
+                    shapes[i].globj(modelGroup, exts);
                 }
             }
             
@@ -923,7 +923,19 @@ $3Dmol.GLViewer = (function() {
                 //TODO: figure out a good way to specify shapes as part of a selection
                 $.each(shapes, function(i, shape) {
                 	if(shape && shape.boundingSphere && shape.boundingSphere.center)
-                		atoms.push(shape.boundingSphere.center);
+                	    var c = shape.boundingSphere.center;
+                	    var r = shape.boundingSphere.radius;
+                	    if(r > 0) {
+                	        //make sure full shape is visible
+                            atoms.push(new $3Dmol.Vector3(c.x+r,c.y,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x-r,c.y,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y+r,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y-r,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z+r));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z-r));
+                	    } else {
+                            atoms.push(c);
+                	    }
                 });
                 tmp = $3Dmol.getExtent(atoms);
                 allatoms = atoms;
@@ -976,6 +988,30 @@ $3Dmol.GLViewer = (function() {
             
             return this;
         };
+        
+        /**
+         * Set slab of view (contents outside of slab are clipped). M
+         * Must call render to update.
+         * 
+         * @function $3Dmol.GLViewer#setSlab
+         * @param {near}
+         * @param {far}
+         */
+        this.setSlab = function(near, far) {
+            slabNear = near;
+            slabFar = far;
+        };
+        
+        /**
+         * Get slab of view (contents outside of slab are clipped).
+         * 
+         * @function $3Dmol.GLViewer#setSlab
+         * @return {Object} near/far
+         */
+        this.getSlab = function(sel) {
+            return {near: slabNear, far: slabFar};
+        };
+                
         /**
          * Add label to viewer
          * 

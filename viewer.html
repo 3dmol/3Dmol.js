@@ -26,61 +26,6 @@
     ga('send', 'pageview');
 </script>
 <script>
-    /**
-     *
-     * jquery.binarytransport.js
-     *
-     * @description. jQuery ajax transport for making binary data type requests.
-     * @version 1.0 
-     * @author Henry Algus <henryalgus@gmail.com>
-     *
-     */
-
-    // use this transport for "binary" data type
-    $.ajaxTransport(
-                    "+binary",
-                    function(options, originalOptions, jqXHR) {
-                        // check for conditions and support for blob / arraybuffer response type
-                        if (window.FormData
-                                && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob))))) {
-                            return {
-                                // create new XMLHttpRequest
-                                send : function(headers, callback) {
-                                    // setup all variables
-                                    var xhr = new XMLHttpRequest(), url = options.url, type = options.type, async = options.async || true,
-                                    // blob or arraybuffer. Default is blob
-                                    dataType = options.responseType || "blob", data = options.data
-                                            || null, username = options.username
-                                            || null, password = options.password
-                                            || null;
-
-                                    xhr.addEventListener('load', function() {
-                                        var data = {};
-                                        data[options.dataType] = xhr.response;
-                                        // make callback and send data
-                                        callback(xhr.status, xhr.statusText,
-                                                data,
-                                                xhr.getAllResponseHeaders());
-                                    });
-
-                                    xhr.open(type, url, async, username,
-                                            password);
-
-                                    // setup custom headers
-                                    for ( var i in headers) {
-                                        xhr.setRequestHeader(i, headers[i]);
-                                    }
-
-                                    xhr.responseType = dataType;
-                                    xhr.send(data);
-                                },
-                                abort : function() {
-                                    jqXHR.abort();
-                                }
-                            };
-                        }
-                    });
-
     var glviewer = null;
     //http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
 
@@ -145,13 +90,26 @@
                                     alert("Wrong PDB ID");
                                     return;
                                 }
-                                data = "http://www.rcsb.org/pdb/files/" + data
+                                data = "http://files.rcsb.org/view/" + data
                                         + ".pdb";
                                 type = "pdb";
+                            } if (src == 'cif') {
+                                data = data.toUpperCase();
+                                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                                    alert("Wrong PDB ID");
+                                    return;
+                                }
+                                data = "http://files.rcsb.org/view/" + data
+                                        + ".cif";
+                                type = "cif";
                             } else if (src == 'cid') {
                                 type = "sdf";
                                 data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
                                         + data + "/SDF?record_type=3d";
+                            } else if (src == 'mmtf') {
+                                data = data.toUpperCase();
+                                data = 'http://mmtf.rcsb.org/full/' + data + '.mmtf';
+                                type = 'mmtf';
                             } else { //url
                                 //try to extract extension
                                 type = data.substr(data.lastIndexOf('.') + 1);
@@ -164,17 +122,26 @@
                                 type = cmds[0].split('=')[1];
                             }
 
-                            if (/\.gz$/.test(data)) { //binary data
+                            var start = new Date();
+
+                            if (/\.gz$/.test(data) || type == 'mmtf') { //binary data
                                 $.ajax({url:data, 
                                     type: "GET",
                                     dataType: "binary",
                                     responseType: "arraybuffer",
                                     processData: false,
                                     success: function(ret, txt, response) {
-                                    glviewer.addModel(ret, type);
-                                    runcmds(cmds, glviewer);
-                                    glviewer.render();
-                                    glviewer.zoomTo();
+	                                    console.log("mtf fetch " + (+new Date() - start) + "ms");
+                                        var time = new Date();
+					     console.profile("load");
+
+	                                    glviewer.addModel(ret, type);
+	                                    runcmds(cmds, glviewer);
+	                                    glviewer.render();
+	                                    glviewer.zoomTo();
+	                                    console.log("mtf load " + (+new Date() - time) + "ms");
+					         console.profileEnd();
+
                                 }}).fail(function() {
                                     //if couldn't get url natively, go through echo server
                                     $.ajax({ url:"echo.cgi", 
@@ -192,10 +159,14 @@
                                 });
                             } else {
                                 $.get(data, function(ret, txt, response) {
+                                    console.log("alt fetch " + (+new Date() - start) + "ms");
+                                    var time = new Date();
                                     glviewer.addModel(ret, type);
                                     runcmds(cmds, glviewer);
                                     glviewer.render();
                                     glviewer.zoomTo();
+                                    console.log("alt load " + (+new Date() - time) + "ms");
+
                                 }).fail(function() {
                                     //if couldn't get url natively, go through echo server
                                     $.post("echo.cgi", {
