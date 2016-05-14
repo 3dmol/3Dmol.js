@@ -860,7 +860,57 @@ $3Dmol.Parsers = (function() {
                     var matrix22 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[2][2]'][i]);
                     var matrix23 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[2][3]'][i]);
                     var vector2 = parseFloat(mmCIF['_pdbx_struct_oper_list_vector[2]'][i]);
-                    var matrix31 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][1]'][i]);
+          /**
+m pd
+     * Parse a pqr file from str and create atoms. A pqr file is assumed to be a
+     * whitespace delimited PDB with charge and radius fields.
+     *
+     * @param {string}
+     *            str
+     * @param {Object}
+     *            options - noSecondaryStructure (do not compute ss)
+     */
+    parsers.pqr = parsers.PQR = function(str, options) {
+
+        var atoms = [[]];
+        var atoms_cnt = 0;
+        var start = atoms[atoms.length-1].length;
+        var atom;
+        var computeStruct = !options.noSecondaryStructure;
+
+        var serialToIndex = []; // map from pdb serial to index in atoms
+        var lines = str.split(/\r?\n|\r/);
+        var i, j, k, line;
+        for (i = 0; i < lines.length; i++) {
+            line = lines[i].replace(/^\s*/, ''); // remove indent
+            var recordName = line.substr(0, 6);
+            var startChain, startResi, endChain, endResi;
+            
+            if (recordName.indexOf("END") == 0) {
+                if (options.multimodel) {
+                    if (!options.onemol)
+                        atoms.push([]);
+                    continue;
+                }
+                else {
+                    break;
+                }
+            }
+            else if (recordName == 'ATOM  ' || recordName == 'HETATM') {
+                // I would have liked to split based solely on whitespace, but
+                // it seems that there is no guarantee that all the fields will
+                // be filled out (e.g. the chain) so this doesn't work
+                var serial = parseInt(line.substr(6, 5));
+                var atom = line.substr(12, 4).replace(/ /g, "");
+                var resn = line.substr(17, 3);
+                var chain = line.substr(21, 1);
+                var resi = parseInt(line.substr(22, 4));
+                // however let's split the coordinates, charge and radius by
+                // whitespace
+                // to support extra precision
+                var vals = line.substr(30).trim().split(/\s+/);
+                var x = parseFloat(vals[0]);
+                var y = parseFloat(vals[1]);              var matrix31 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][1]'][i]);
                     var matrix32 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][2]'][i]);
                     var matrix33 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][3]'][i]);
                     var vector3 = parseFloat(mmCIF['_pdbx_struct_oper_list_vector[3]'][i]);
@@ -1559,6 +1609,100 @@ $3Dmol.Parsers = (function() {
         
         return atoms;
     };
+
+    /**
+     * Parse a prmtop file from str and create atoms.
+     *
+     * @param {string}
+     *            str
+     * @param {Object}
+     *            options - noSecondaryStructure (do not compute ss)
+     */
+    parsers.prmtop = parsers.PRMTOP = function(str, options) {
+
+        var atoms = [];
+	var atom = {};
+	var properties = {};
+        var lines = str.split(/\r?\n|\r/);
+	if(lines > 0){
+	    if(!lines[0].includes("VERSION"))
+		break;
+            if (lines.length < atomCount + 13)
+                break;	
+	    var sectionList = lines.filter(function (line){	//store the relevant section lists
+		return line.includes("POINTERS") || line.includes("ATOM_NAME") ||
+		line.includes("CHARGE") || line.includes("RADII");
+	    });
+	    var index = getIndex("POINTERS");
+	    var col = getColEleSize(index);
+	    var atomCount = parseInt(lines[index].slice(0,col[1]));
+            if (isNaN(atomCount) || atomCount <= 0)
+                break;
+	    index = getIndex("ATOM_NAME");
+	    col = getColEleSize(index);
+	    for (i = 0; i < atomCount/col[0]; i++){
+		for(j=0; j < col[0]; j++){
+		    atom.serial = i;
+		    atom.x = 0;
+		    atom.y = 0;
+		    atom.z = 0;
+		    atom.elem = atom.atom = lines[index].slice(col[1]*j, col[1]*(j+1));
+		    atoms.push(atom);
+		}
+		index++;
+	    }
+	    for (i = 0; i < atomCount % col[0]; i++){
+		atom.elem = atom.atom = lines[index].slice(col[1]*i, col[1]*(i+1));
+		atoms.push(atom);
+	    }
+	    index = getIndex("CHARGE");
+	    col = getColEleSize(index);
+	    var temp = 0;
+	    for (i = 0; i < atomCount/col[0]; i++){
+		for(j=0; j < col[0]; j++){
+		    atoms[temp].properties.charge = lines[index].slice(col[1]*j, col[1]*(j+1));
+		    temp++;
+		}
+		index++;
+	    }
+	    for (i = 0; i < atomCount % col[0]; i++){
+		atoms[temp].properties.charge = lines[index].slice(col[1]*i, col[1]*(i+1));
+		temp++;
+	    }
+	    index = getIndex("RADII");
+	    col = getColEleSize(index);
+	    temp = 0;
+	    for (i = 0; i < atomCount/col[0]; i++){
+		for(j=0; j < col[0]; j++){
+		    atoms[temp].properties.radii = lines[index].slice(col[1]*j, col[1]*(j+1));
+		    temp++;
+		}
+		index++;
+	    }
+	    for (i = 0; i < atomCount % col[0]; i++){
+		atoms[temp].properties.radii = lines[index].slice(col[1]*i, col[1]*(i+1));
+		temp++;
+	    }
+	}
+	function getIndex(section){
+	    var index = lines.indexOf(sectionList.filter(function (line){
+		return line.includes(section);
+	    })[0]);	//returns the index of the line containing FLAG POINTERS
+	    if(isNaN(index) || index <= 0)
+		break;
+	    while(!lines(index).includes("FORMAT"))  //doing this so as to take comments into consideration
+		index++;
+	    return index + 1;
+	}
+	function getColEleSize(i){
+	    var colEleSize = [];
+	    colEleSize[0] = lines(i).match(/\((\d*)\S*/); // stores the number of columns
+	    colEleSize[1] = lines(i).match(/[a-zA-Z](\d*)\)\s*|[a-zA-Z](\d*)\.\d*\)\s*/); //stores the element size
+	    return colEleSize;	
+	}       
+        return atoms;
+    };
+
 
     return parsers;
 })();
