@@ -1880,16 +1880,11 @@ $3Dmol.Parsers = (function() {
      * Parse a prmtop file from str and create atoms
      */
     parsers.prmtop = parsers.PRMTOP = function(str, options) {
-
         var atoms = [];
 	var atom = {};
 	var properties = {};
         var lines = str.split(/\r?\n|\r/);
-	if(lines > 0){
-	    if(!lines[0].includes("VERSION"))
-		break;
-            if (lines.length < atomCount + 13)
-                break;	
+	if(lines > 0 && lines[0].includes("VERSION")){
 	    var sectionList = lines.filter(function (line){	//store the relevant section lists
 		return line.includes("POINTERS") || line.includes("ATOM_NAME") ||
 		line.includes("CHARGE") || line.includes("RADII");
@@ -1898,8 +1893,10 @@ $3Dmol.Parsers = (function() {
 	    var col = getColEleSize(index);
 	    var atomCount = parseInt(lines[index].slice(0,col[1]));
             if (isNaN(atomCount) || atomCount <= 0)
-                break;
+                return [];
 	    index = getIndex("ATOM_NAME");
+	    if (isNaN(index) || index <= 0)
+		return [];
 	    col = getColEleSize(index);
 	    for (i = 0; i < atomCount/col[0]; i++){
 		for(j=0; j < col[0]; j++){
@@ -1913,44 +1910,50 @@ $3Dmol.Parsers = (function() {
 		index++;
 	    }
 	    for (i = 0; i < atomCount % col[0]; i++){
+		atom.serial = atomCount/col[0]*col[0] + i;
+		atom.x = 0;
+		atom.y = 0;
+		atom.z = 0;
 		atom.elem = atom.atom = lines[index].slice(col[1]*i, col[1]*(i+1));
 		atoms.push(atom);
 	    }
 	    index = getIndex("CHARGE");
-	    col = getColEleSize(index);
-	    var temp = 0;
-	    for (i = 0; i < atomCount/col[0]; i++){
-		for(j=0; j < col[0]; j++){
-		    atoms[temp].properties.charge = lines[index].slice(col[1]*j, col[1]*(j+1));
+	    if (Number.isInteger(index) && index > 0){
+	        col = getColEleSize(index);
+	        var temp = 0;
+	        for (i = 0; i < atomCount/col[0]; i++){
+		    for(j=0; j < col[0]; j++){
+		        atoms[temp].properties.charge = lines[index].slice(col[1]*j, col[1]*(j+1));
+		        temp++;
+		    }
+		    index++;
+	        }
+	        for (i = 0; i < atomCount % col[0]; i++){
+		    atoms[temp].properties.charge = lines[index].slice(col[1]*i, col[1]*(i+1));
 		    temp++;
-		}
-		index++;
-	    }
-	    for (i = 0; i < atomCount % col[0]; i++){
-		atoms[temp].properties.charge = lines[index].slice(col[1]*i, col[1]*(i+1));
-		temp++;
+	        }
 	    }
 	    index = getIndex("RADII");
-	    col = getColEleSize(index);
-	    temp = 0;
-	    for (i = 0; i < atomCount/col[0]; i++){
-		for(j=0; j < col[0]; j++){
-		    atoms[temp].properties.radii = lines[index].slice(col[1]*j, col[1]*(j+1));
-		    temp++;
+	    if (Number.isInteger(index) && index > 0){
+		col = getColEleSize(index);
+		temp = 0;
+		for (i = 0; i < atomCount/col[0]; i++){
+		    for(j=0; j < col[0]; j++){
+			atoms[temp].properties.radii = lines[index].slice(col[1]*j, col[1]*(j+1));
+			temp++;
+		    }
+		    index++;
 		}
-		index++;
-	    }
-	    for (i = 0; i < atomCount % col[0]; i++){
-		atoms[temp].properties.radii = lines[index].slice(col[1]*i, col[1]*(i+1));
-		temp++;
+		for (i = 0; i < atomCount % col[0]; i++){
+		    atoms[temp].properties.radii = lines[index].slice(col[1]*i, col[1]*(i+1));
+		    temp++;
+	        }
 	    }
 	}
 	function getIndex(section){
 	    var index = lines.indexOf(sectionList.filter(function (line){
 		return line.includes(section);
 	    })[0]);	//returns the index of the line containing FLAG POINTERS
-	    if(isNaN(index) || index <= 0)
-		break;
 	    while(!lines(index).includes("FORMAT"))  //doing this so as to take comments into consideration
 		index++;
 	    return index + 1;

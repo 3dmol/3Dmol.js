@@ -2077,7 +2077,9 @@ $3Dmol.GLModel = (function() {
                     format = "pdb";
                 } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
                     format = "sdf"; //could look at line 3
-                } else {
+                } else if(data.match(/^%VERSION\s+\VERSION_STAMP/gm)){
+ 		    format = "prmtop";
+		} else {
                     format = "xyz";
                 }
                 console.log("Best guess: "+format);
