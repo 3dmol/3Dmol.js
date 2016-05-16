@@ -337,11 +337,15 @@ $3Dmol.GLViewer = (function() {
             if (!scene)
                 return;
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+            var mult = 1.0;
+            if(ev.originalEvent.ctrlKey) {
+                mult = -1.0; //this is a pinch event turned into a wheel event (or they're just holding down the ctrl)
+            }
             if (ev.originalEvent.detail) { // Webkit
-                rotationGroup.position.z += scaleFactor
+                rotationGroup.position.z += mult * scaleFactor
                         * ev.originalEvent.detail / 10;
             } else if (ev.originalEvent.wheelDelta) { // Firefox
-                rotationGroup.position.z -= scaleFactor
+                rotationGroup.position.z -= mult * scaleFactor
                         * ev.originalEvent.wheelDelta / 400;
             }
             if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
@@ -375,6 +379,7 @@ $3Dmol.GLViewer = (function() {
                 mode = 2;
                 dy = (newdist - touchDistanceStart) * 2
                         / (WIDTH + HEIGHT);
+                console.log("pinch "+touchDistanceStart+" dy "+dy);
             } else if (ev.originalEvent.targetTouches
                     && ev.originalEvent.targetTouches.length == 3) {
                 // translate
