@@ -3,7 +3,7 @@
  */
 
 /** @constructor */
-$3Dmol.Camera = function(fov, aspect, near, far) {
+$3Dmol.Camera = function(fov, aspect, near, far, ortho) {
     
     $3Dmol.Object3D.call(this);
     
@@ -15,6 +15,14 @@ $3Dmol.Camera = function(fov, aspect, near, far) {
     this.projectionMatrix = new $3Dmol.Matrix4();
     this.projectionMatrixInverse = new $3Dmol.Matrix4();
     this.matrixWorldInverse = new $3Dmol.Matrix4();
+    
+    var center = this.position.z;
+    this.right = center * Math.tan(Math.PI / 180 * fov);
+    this.left = -this.right;
+    this.top = this.right / this.aspect;
+    this.bottom = -this.top;
+    
+    this.ortho = !!ortho;
     
     this.updateProjectionMatrix();
         
@@ -41,7 +49,12 @@ $3Dmol.Camera.prototype.lookAt = function(vector){
 
 $3Dmol.Camera.prototype.updateProjectionMatrix = function () {
 
-    this.projectionMatrix.makePerspective( this.fov, this.aspect, this.near, this.far );
+    if(this.ortho) {
+        this.projectionMatrix.makeOrthographic( this.left, this.right, this.top, this.bottom, this.near, this.far );
+    } else {
+        this.projectionMatrix.makePerspective( this.fov, this.aspect, this.near, this.far );
+    }
+    
     this.projectionMatrixInverse.getInverse(this.projectionMatrix);
 };
 

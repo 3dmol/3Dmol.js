@@ -1053,6 +1053,27 @@ $3Dmol.Matrix4.prototype = {
         return this.makeFrustum( xmin, xmax, ymin, ymax, near, far );
     },
     
+
+    makeOrthographic: function ( left, right, top, bottom, near, far ) {
+
+        var te = this.elements;
+        var w = 1.0 / ( right - left );
+        var h = 1.0 / ( top - bottom );
+        var p = 1.0 / ( far - near );
+
+        var x = ( right + left ) * w;
+        var y = ( top + bottom ) * h;
+        var z = ( far + near ) * p;
+
+        te[ 0 ] = 2 * w;    te[ 4 ] = 0;    te[ 8 ] = 0;    te[ 12 ] = - x;
+        te[ 1 ] = 0;    te[ 5 ] = 2 * h;    te[ 9 ] = 0;    te[ 13 ] = - y;
+        te[ 2 ] = 0;    te[ 6 ] = 0;    te[ 10 ] = - 2 * p; te[ 14 ] = - z;
+        te[ 3 ] = 0;    te[ 7 ] = 0;    te[ 11 ] = 0;   te[ 15 ] = 1;
+
+        return this;
+
+    },
+    
     isEqual : function (m) {
         var me = m.elements;
         var te = this.elements;
