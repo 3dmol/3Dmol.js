@@ -182,13 +182,13 @@
         };
         req.send(null);
     }
-    load_ccp4_map (viewer,"check/volData/4ysj.ccp4.gz");  
+    //load_ccp4_map (viewer,"check/volData/4ysj.ccp4.gz");  
 
-    $3Dmol.download('pdb:4ysj',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
-     viewer.render();
+//    $3Dmol.download('pdb:4ysj',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
+    $3Dmol.download('pdb:1bna',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
                  
                            
-        });
+  });
         
         </script>
     </head>
@@ -213,6 +213,8 @@
         <input type="button" value="Outline" onclick="toggleOutline();"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
+        <input type="button" value="Orthographic" onclick="glviewer.setProjection('orthographic'); glviewer.render();"></input>
+        <input type="button" value="Perspective" onclick="glviewer.setProjection('perspective'); glviewer.render();"></input>
                 <br>
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
  

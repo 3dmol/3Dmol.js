@@ -75,7 +75,7 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.left = "0px";
         renderer.domElement.style.zIndex = "0";
 
-        var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
+        var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
         camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
         var lookingAt = new $3Dmol.Vector3();
         camera.lookAt(lookingAt);
@@ -127,14 +127,13 @@ $3Dmol.GLViewer = (function() {
             camera.far = center + slabFar;
             if (camera.near + 1 > camera.far)
                 camera.far = camera.near + 1;
-            if (camera instanceof $3Dmol.Camera) {
-                camera.fov = fov;
-            } else {
-                camera.right = center * Math.tan(Math.PI / 180 * fov);
-                camera.left = -camera.right;
-                camera.top = camera.right / ASPECT;
-                camera.bottom = -camera.top;
-            }
+
+            camera.fov = fov;
+            camera.right = center * Math.tan(Math.PI / 180 * fov);
+            camera.left = -camera.right;
+            camera.top = camera.right / ASPECT;
+            camera.bottom = -camera.top;
+            
             camera.updateProjectionMatrix();
             scene.fog.near = camera.near + fogStart
                     * (camera.far - camera.near);
@@ -329,7 +328,6 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
-
         };
         
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
@@ -511,11 +509,27 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Enable outline 
-         * @function $eDmol.GLViewer#outline
+         * Set view projection scheme.  Either orthographic or perspective.  
+         * Default is perspective.  Orthographic can also be enabled on viewer creation
+         * by setting orthographic to true in the config object.
+         * 
+         * @function $3Dmol.GLViewer#setProjection
          * 
          * @example
-         * myviewer.outline()
+         * myviewer.setProjection("orthographic");
+         * 
+         */
+        this.setProjection = function(proj) {
+            camera.ortho = (proj === "orthographic");
+            setSlabAndFog();            
+        };
+        
+        /**
+         * Set global view styles.  
+         * @function $3Dmol.GLViewer#setViewStyle
+         * 
+         * @example
+         * myviewer.setViewStyle({style:"outline", color:"black", width:0.1})
          * 
          */
          this.setViewStyle = function(parameters) {
@@ -526,12 +540,12 @@ $3Dmol.GLViewer = (function() {
                 renderer.enableOutline(params);
             } else {
                 renderer.disableOutline();
-            }
+            }           
             return this;
         }
          
         if(config.style) { //enable setting style in constructor
-             this.setViewStyle(config.style);
+             this.setViewStyle(config);
         }
 
         /**
