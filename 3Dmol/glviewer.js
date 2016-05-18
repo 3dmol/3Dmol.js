@@ -2152,7 +2152,7 @@ $3Dmol.GLViewer = (function() {
         
         /**
          * Adds an explicit mesh as a surface object.
-         * 
+         * @function $3Dmol.GLViewer#addMesh
          * @param {$3Dmol.Mesh}
          *            mesh
          * @param {Object}
@@ -2434,7 +2434,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set the surface material to something else, must render change
-         * 
+        *  @function $3Dmol.GLViewer#setSurfaceMaterialStyle
          * @param {number} surf - Surface ID to apply changes to
          * @param {matSpec} style - new material style specification
          */ 
@@ -2452,7 +2452,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Remove surface with given ID
-         * 
+         * @function $3Dmol.GLViewer#removeSurface
          * @param {number} surf - surface id
          */
         this.removeSurface = function(surf) {
