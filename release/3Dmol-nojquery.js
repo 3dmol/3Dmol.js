@@ -1,4 +1,4 @@
-/* pako 0.2.7 nodeca/pako */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pako = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(r,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t(r.MMTF=r.MMTF||{})}(this,function(r){"use strict";function t(r){function t(r){for(var t={},e=0;r>e;e++){var n=a();t[n]=a()}return t}function e(t){var e=r.subarray(i,i+t);return i+=t,e}function n(t){var e=r.subarray(i,i+t);i+=t;var n=65535;if(t>n){for(var o=[],a=0;a<e.length;a+=n)o.push(String.fromCharCode.apply(null,e.subarray(a,a+n)));return o.join("")}return String.fromCharCode.apply(null,e)}function o(r){for(var t=new Array(r),e=0;r>e;e++)t[e]=a();return t}function a(){var a,s,c,d=r[i];if(0===(128&d))return i++,d;if(128===(240&d))return s=15&d,i++,t(s);if(144===(240&d))return s=15&d,i++,o(s);if(160===(224&d))return s=31&d,i++,n(s);if(224===(224&d))return a=u.getInt8(i),i++,a;switch(d){case 192:return i++,null;case 194:return i++,!1;case 195:return i++,!0;case 196:return s=u.getUint8(i+1),i+=2,e(s);case 197:return s=u.getUint16(i+1),i+=3,e(s);case 198:return s=u.getUint32(i+1),i+=5,e(s);case 199:return s=u.getUint8(i+1),c=u.getUint8(i+2),i+=3,[c,e(s)];case 200:return s=u.getUint16(i+1),c=u.getUint8(i+3),i+=4,[c,e(s)];case 201:return s=u.getUint32(i+1),c=u.getUint8(i+5),i+=6,[c,e(s)];case 202:return a=u.getFloat32(i+1),i+=5,a;case 203:return a=u.getFloat64(i+1),i+=9,a;case 204:return a=r[i+1],i+=2,a;case 205:return a=u.getUint16(i+1),i+=3,a;case 206:return a=u.getUint32(i+1),i+=5,a;case 207:return i+=9,0;case 208:return a=u.getInt8(i+1),i+=2,a;case 209:return a=u.getInt16(i+1),i+=3,a;case 210:return a=u.getInt32(i+1),i+=5,a;case 211:return i+=9,0;case 212:return c=u.getUint8(i+1),i+=2,[c,e(1)];case 213:return c=u.getUint8(i+1),i+=2,[c,e(2)];case 214:return c=u.getUint8(i+1),i+=2,[c,e(4)];case 215:return c=u.getUint8(i+1),i+=2,[c,e(8)];case 216:return c=u.getUint8(i+1),i+=2,[c,e(16)];case 217:return s=u.getUint8(i+1),i+=2,n(s);case 218:return s=u.getUint16(i+1),i+=3,n(s);case 219:return s=u.getUint32(i+1),i+=5,n(s);case 220:return s=u.getUint16(i+1),i+=3,o(s);case 221:return s=u.getUint32(i+1),i+=5,o(s);case 222:return s=u.getUint16(i+1),i+=3,t(s);case 223:return s=u.getUint32(i+1),i+=5,t(s)}throw new Error("Unknown type 0x"+d.toString(16))}var i=0,u=new DataView(r.buffer);return a()}function e(r){return new Uint8Array(r.buffer,r.byteOffset,r.byteLength)}function n(r){return new Int8Array(r.buffer,r.byteOffset,r.byteLength)}function o(r,t){var e,n,o,a=(r.byteOffset,r.byteLength);for(t||(t=new Int16Array(a/2)),e=0,n=0,o=a/2;o>e;++e,n+=2)t[e]=r[n]<<8^r[n+1]<<0;return t}function a(r,t){var e,n,o,a=(r.byteOffset,r.byteLength);for(t||(t=new Int32Array(a/4)),e=0,n=0,o=a/4;o>e;++e,n+=4)t[e]=r[n]<<24^r[n+1]<<16^r[n+2]<<8^r[n+3]<<0;return t}function i(r){return new Int32Array(r.buffer,r.byteOffset,r.byteLength/4)}function u(r,t,e){var n=r.length,o=1/t;e||(e=new Float32Array(n));for(var a=0;n>a;++a)e[a]=r[a]*o;return e}function s(r,t){var e,n;if(!t){var o=0;for(e=0,n=r.length;n>e;e+=2)o+=r[e+1];t=new r.constructor(o)}var a=0;for(e=0,n=r.length;n>e;e+=2)for(var i=r[e],u=r[e+1],s=0;u>s;++s)t[a]=i,a+=1;return t}function c(r){for(var t=1,e=r.length;e>t;++t)r[t]+=r[t-1];return r}function d(r,t,e){var n=r.length/2+t.length;e||(e=new Int32Array(n));for(var o=0,a=0,i=0,u=r.length;u>i;i+=2){var s=r[i],c=r[i+1];e[o]=s,0!==i&&(e[o]+=e[o-1]),o+=1;for(var d=0;c>d;++d)e[o]=e[o-1]+t[a],o+=1,a+=1}return e}function f(r,t,e,n){var s=r.length/4/2+t.length/2;n||(n=new Float32Array(s));var c=i(n),f=d(a(r),o(t),c);return u(f,e,n)}function g(r,t,e){var n=e?i(e):void 0,o=s(a(r),n);return u(o,t,e)}function l(r,t){function o(r){return i?-1===i.indexOf(r):!0}t=t||{};var i=t.ignoreFields,u=(r.numBonds||0,r.numAtoms||0),d=r.groupTypeList.length/4,l=r.chainIdList.length/4,m=r.chainsPerModel.length,L={numGroups:d,numChains:l,numModels:m};["mmtfVersion","mmtfProducer","unitCell","spaceGroup","structureId","title","depositionDate","releaseDate","experimentalMethods","resolution","rFree","rWork","bioAssemblyList","entityList","groupList","numBonds","numAtoms","groupsPerChain","chainsPerModel"].forEach(function(t){void 0!==r[t]&&(L[t]=r[t])});var h="bondAtomList";r[h]&&o(h)&&(L[h]=a(r[h]));var y="bondOrderList";r[y]&&o(y)&&(L[y]=e(r[y])),L.xCoordList=f(r.xCoordBig,r.xCoordSmall,1e3),L.yCoordList=f(r.yCoordBig,r.yCoordSmall,1e3),L.zCoordList=f(r.zCoordBig,r.zCoordSmall,1e3);var p="bFactorList",v="bFactorBig",C="bFactorSmall";r[v]&&r[C]&&o(p)&&(L[p]=f(r[v],r[C],100));var I="atomIdList";r[I]&&o(I)&&(L[I]=c(s(a(r[I]))));var b="altLocList";r[b]&&o(b)&&(L[b]=s(a(r[b]),new Uint8Array(u)));var U="occupancyList";r[U]&&o(U)&&(L[U]=g(r[U],100)),L.groupIdList=c(s(a(r.groupIdList))),L.groupTypeList=a(r.groupTypeList);var x="secStructList";r[x]&&o(x)&&(L[x]=n(r[x]));var A="insCodeList";r[A]&&o(A)&&(L[A]=s(a(r[A]),new Uint8Array(d)));var w="sequenceIndexList";r[w]&&o(w)&&(L[w]=c(s(a(r[w])))),L.chainIdList=e(r.chainIdList);var F="chainNameList";return r[F]&&o(F)&&(L[F]=e(r[F])),L}function m(r){return String.fromCharCode.apply(null,r).replace(/\0/g,"")}function L(r,t){var e,n,o,a,i=t.onModel,u=t.onChain,s=t.onGroup,c=t.onAtom,d=t.onBond,f=0,g=0,l=0,L=0,h=r.chainNameList,y=r.secStructList,p=r.insCodeList,v=r.sequenceIndexList,C=r.bFactorList,I=r.altLocList,b=r.occupancyList,U=r.bondAtomList,x=r.bondOrderList;if(r.chainsPerModel.forEach(function(t){for(i&&i({chainCount:t,modelIndex:f}),e=0;t>e;++e){var U=r.groupsPerChain[g];if(u){var x=m(r.chainIdList.subarray(4*g,4*g+4)),A=null;h&&(A=m(h.subarray(4*g,4*g+4))),u({groupCount:U,chainIndex:g,modelIndex:f,chainId:x,chainName:A})}for(n=0;U>n;++n){var w=r.groupList[r.groupTypeList[l]],F=w.atomNameList.length;if(s){var S=null;y&&(S=y[l]);var O=null;r.insCodeList&&(O=String.fromCharCode(p[l]));var M=null;v&&(M=v[l]),s({atomCount:F,groupIndex:l,chainIndex:g,modelIndex:f,groupId:r.groupIdList[l],groupType:r.groupTypeList[l],groupName:w.groupName,singleLetterCode:w.singleLetterCode,chemCompType:w.chemCompType,secStruct:S,insCode:O,sequenceIndex:M})}if(d){var T=w.bondAtomList;for(o=0,a=w.bondOrderList.length;a>o;++o)d({atomIndex1:L+T[2*o],atomIndex2:L+T[2*o+1],bondOrder:w.bondOrderList[o]})}for(o=0;F>o;++o){if(c){var B=null;C&&(B=C[L]);var N=null;I&&(N=String.fromCharCode(I[L]));var P=null;b&&(P=b[L]),c({atomIndex:L,groupIndex:l,chainIndex:g,modelIndex:f,atomId:r.atomIdList[L],element:w.elementList[o],atomName:w.atomNameList[o],atomCharge:w.atomChargeList[o],xCoord:r.xCoordList[L],yCoord:r.yCoordList[L],zCoord:r.zCoordList[L],bFactor:B,altLoc:N,occupancy:P})}L+=1}l+=1}g+=1}f+=1}),d&&U)for(o=0,a=U.length;a>o;o+=2)d({atomIndex1:U[o],atomIndex2:U[o+1],bondOrder:x?x[o/2]:null})}function h(r,e){r instanceof ArrayBuffer&&(r=new Uint8Array(r));var n;return n=r instanceof Uint8Array?t(r):r,l(n,e)}var y=L;r.decode=h,r.traverse=y});/* pako 0.2.7 nodeca/pako */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pako = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -3089,6 +3089,62 @@ if (!String.prototype.endsWith) {
         return this.indexOf(suffix, this.length - suffix.length) !== -1;
     };
 }
+
+/**
+*
+* jquery.binarytransport.js
+*
+* @description. jQuery ajax transport for making binary data type requests.
+* @version 1.0 
+* @author Henry Algus <henryalgus@gmail.com>
+*
+*/
+
+// use this transport for "binary" data type
+$.ajaxTransport(
+               "+binary",
+               function(options, originalOptions, jqXHR) {
+                   // check for conditions and support for blob / arraybuffer response type
+                   if (window.FormData
+                           && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob))))) {
+                       return {
+                           // create new XMLHttpRequest
+                           send : function(headers, callback) {
+                               // setup all variables
+                               var xhr = new XMLHttpRequest(), url = options.url, type = options.type, async = options.async || true,
+                               // blob or arraybuffer. Default is blob
+                               dataType = options.responseType || "blob", data = options.data
+                                       || null, username = options.username
+                                       || null, password = options.password
+                                       || null;
+
+                               xhr.addEventListener('load', function() {
+                                   var data = {};
+                                   data[options.dataType] = xhr.response;
+                                   // make callback and send data
+                                   callback(xhr.status, xhr.statusText,
+                                           data,
+                                           xhr.getAllResponseHeaders());
+                               });
+
+                               xhr.open(type, url, async, username,
+                                       password);
+
+                               // setup custom headers
+                               for ( var i in headers) {
+                                   xhr.setRequestHeader(i, headers[i]);
+                               }
+
+                               xhr.responseType = dataType;
+                               xhr.send(data);
+                           },
+                           abort : function() {
+                               jqXHR.abort();
+                           }
+                       };
+                   }
+               });
+
     
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
@@ -3162,35 +3218,57 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var type = "";
     var pdbUri = "";
     var m = viewer.addModel();
-    if (query.substr(0, 4) === 'pdb:') {
-        pdbUri = options && options.pdbUri ? options.pdbUri : "http://www.rcsb.org/pdb/files/";
-        type = options && options.format ? options.format : "pdb";
-        query = query.substr(4).toUpperCase();
-        if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
-           alert("Wrong PDB ID"); return;
-        }
-        if (options && options.format)
-            uri = pdbUri + query + "." + options.format;
-        else
-            uri = pdbUri + query + ".pdb";
-
-    } else if (query.substr(0, 4) == 'cid:') {
-        type = "sdf";
-        query = query.substr(4);
-        if (!query.match(/^[0-9]+$/)) {
-           alert("Wrong Compound ID"); return;
-        }
-        uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
-          "/SDF?record_type=3d";
+    
+    if (query.substr(0, 5) === 'mmtf:') {
+        pdbUri = options && options.pdbUri ? options.pdbUri : "http://mmtf.rcsb.org/full/";
+        query = query.substr(5).toUpperCase();
+        var uri = pdbUri + query + ".mmtf";        
+        
+        $.ajax({url:uri, 
+            type: "GET",
+            dataType: "binary",
+            responseType: "arraybuffer",
+            processData: false}).done(
+                function(ret, txt, response) {
+                    m.addMolData(ret, 'mmtf');
+                    viewer.zoomTo();
+                    viewer.render();
+                    if(callback) callback(m);
+                }).fail(function(e,txt) { 
+                    console.log(txt);
+                    });
     }
-
-   $.get(uri, function(ret) {
-      m.addMolData(ret, type, options);
-      viewer.zoomTo();
-      viewer.render();
-      if(callback) callback(m);
-
-   });
+    else {
+        if (query.substr(0, 4) === 'pdb:') {
+            pdbUri = options && options.pdbUri ? options.pdbUri : "http://www.rcsb.org/pdb/files/";
+            type = options && options.format ? options.format : "pdb";
+            query = query.substr(4).toUpperCase();
+            if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+               alert("Wrong PDB ID"); return;
+            }
+            if (options && options.format)
+                uri = pdbUri + query + "." + options.format;
+            else
+                uri = pdbUri + query + ".pdb";
+    
+        } else if (query.substr(0, 4) == 'cid:') {
+            type = "sdf";
+            query = query.substr(4);
+            if (!query.match(/^[0-9]+$/)) {
+               alert("Wrong Compound ID"); return;
+            }
+            uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+              "/SDF?record_type=3d";
+        }
+    
+       $.get(uri, function(ret) {
+          m.addMolData(ret, type, options);
+          viewer.zoomTo();
+          viewer.render();
+          if(callback) callback(m);
+    
+       });
+   }
    
    return m;
 };
@@ -3295,6 +3373,7 @@ $3Dmol.specStringToObject = function(str) {
     }
     
     var ret = {};
+    if(str === 'all') return ret;
     var fields = str.split(';');
     for(var i = 0; i < fields.length; i++) {
         var fv = fields[i].split(':');
@@ -3422,6 +3501,12 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
         max = min;
 
     return [ min, max ];
+}
+
+//hackish way to work with requirejs - doesn't actually work yet
+//since we doing use the require optimizer to combine modules
+if( typeof(define) === 'function' && define.amd) {
+    define('$3Dmol',$3Dmol);
 }
 
 /*
@@ -4037,13 +4122,17 @@ $3Dmol.Matrix3.prototype = {
 /** @constructor */
 $3Dmol.Matrix4 = function(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44) {
 
-    var te = this.elements = new Float32Array( 16 );
-    
-    te[0] = ( n11 !== undefined ) ? n11 : 1; te[4] = n12 || 0; te[8] = n13 || 0; te[12] = n14 || 0;
-    te[1] = n21 || 0; te[5] = ( n22 !== undefined ) ? n22 : 1; te[9] = n23 || 0; te[13] = n24 || 0;
-    te[2] = n31 || 0; te[6] = n32 || 0; te[10] = ( n33 !== undefined ) ? n33 : 1; te[14] = n34 || 0;
-    te[3] = n41 || 0; te[7] = n42 || 0; te[11] = n43 || 0; te[15] = ( n44 !== undefined ) ? n44 : 1;
-
+    if(typeof(n12) === 'undefined' && typeof(n11) !== 'undefined') {
+        //passing list like initialization
+        this.elements = new Float32Array(n11);
+    } else {
+        var te = this.elements = new Float32Array( 16 );
+        
+        te[0] = ( n11 !== undefined ) ? n11 : 1; te[4] = n12 || 0; te[8] = n13 || 0; te[12] = n14 || 0;
+        te[1] = n21 || 0; te[5] = ( n22 !== undefined ) ? n22 : 1; te[9] = n23 || 0; te[13] = n24 || 0;
+        te[2] = n31 || 0; te[6] = n32 || 0; te[10] = ( n33 !== undefined ) ? n33 : 1; te[14] = n34 || 0;
+        te[3] = n41 || 0; te[7] = n42 || 0; te[11] = n43 || 0; te[15] = ( n44 !== undefined ) ? n44 : 1;
+    }
 };
 
 $3Dmol.Matrix4.prototype = {
@@ -4237,6 +4326,21 @@ $3Dmol.Matrix4.prototype = {
         te[3] *= s; te[7] *= s; te[11] *= s; te[15] *= s;
     
         return this;
+    },
+    
+    makeTranslation: function ( x, y, z ) {
+
+        this.set(
+
+            1, 0, 0, x,
+            0, 1, 0, y,
+            0, 0, 1, z,
+            0, 0, 0, 1
+
+        );
+
+        return this;
+
     },
     
     transpose: function () {
@@ -4458,6 +4562,27 @@ $3Dmol.Matrix4.prototype = {
         var xmax = ymax * aspect;
 
         return this.makeFrustum( xmin, xmax, ymin, ymax, near, far );
+    },
+    
+
+    makeOrthographic: function ( left, right, top, bottom, near, far ) {
+
+        var te = this.elements;
+        var w = 1.0 / ( right - left );
+        var h = 1.0 / ( top - bottom );
+        var p = 1.0 / ( far - near );
+
+        var x = ( right + left ) * w;
+        var y = ( top + bottom ) * h;
+        var z = ( far + near ) * p;
+
+        te[ 0 ] = 2 * w;    te[ 4 ] = 0;    te[ 8 ] = 0;    te[ 12 ] = - x;
+        te[ 1 ] = 0;    te[ 5 ] = 2 * h;    te[ 9 ] = 0;    te[ 13 ] = - y;
+        te[ 2 ] = 0;    te[ 6 ] = 0;    te[ 10 ] = - 2 * p; te[ 14 ] = - z;
+        te[ 3 ] = 0;    te[ 7 ] = 0;    te[ 11 ] = 0;   te[ 15 ] = 1;
+
+        return this;
+
     },
     
     isEqual : function (m) {
@@ -5769,7 +5894,7 @@ $3Dmol.Projector = function () {
  */
 
 /** @constructor */
-$3Dmol.Camera = function(fov, aspect, near, far) {
+$3Dmol.Camera = function(fov, aspect, near, far, ortho) {
     
     $3Dmol.Object3D.call(this);
     
@@ -5781,6 +5906,14 @@ $3Dmol.Camera = function(fov, aspect, near, far) {
     this.projectionMatrix = new $3Dmol.Matrix4();
     this.projectionMatrixInverse = new $3Dmol.Matrix4();
     this.matrixWorldInverse = new $3Dmol.Matrix4();
+    
+    var center = this.position.z;
+    this.right = center * Math.tan(Math.PI / 180 * fov);
+    this.left = -this.right;
+    this.top = this.right / this.aspect;
+    this.bottom = -this.top;
+    
+    this.ortho = !!ortho;
     
     this.updateProjectionMatrix();
         
@@ -5807,7 +5940,12 @@ $3Dmol.Camera.prototype.lookAt = function(vector){
 
 $3Dmol.Camera.prototype.updateProjectionMatrix = function () {
 
-    this.projectionMatrix.makePerspective( this.fov, this.aspect, this.near, this.far );
+    if(this.ortho) {
+        this.projectionMatrix.makeOrthographic( this.left, this.right, this.top, this.bottom, this.near, this.far );
+    } else {
+        this.projectionMatrix.makePerspective( this.fov, this.aspect, this.near, this.far );
+    }
+    
     this.projectionMatrixInverse.getInverse(this.projectionMatrix);
 };
 
@@ -7040,7 +7178,7 @@ $3Dmol.Renderer = function(parameters) {
     _oldPolygonOffset = null, _oldPolygonOffsetFactor = null, _oldPolygonOffsetUnits = null,
     _oldLineWidth = null,
 
-    _viewportX = 0, _viewportY = 0, _viewportWidth = 0, _viewportHeight = 0, _currentWidth = 0, _currentHeight = 0,
+    _viewportWidth = 0, _viewportHeight = 0, _currentWidth = 0, _currentHeight = 0,
     _enabledAttributes = {},
 
     // camera matrices cache
@@ -7130,26 +7268,13 @@ $3Dmol.Renderer = function(parameters) {
 
     this.setSize = function(width, height) {
 
-        _canvas.width = width * this.devicePixelRatio;
-        _canvas.height = height * this.devicePixelRatio;
+        _viewportWidth = _canvas.width = width * this.devicePixelRatio;
+        _viewportHeight =  _canvas.height = height * this.devicePixelRatio;
 
         _canvas.style.width = width + 'px';
         _canvas.style.height = height + 'px';
 
-        this.setViewport(0, 0, _canvas.width, _canvas.height);
-
-    };
-
-    this.setViewport = function(x, y, width, height) {
-
-        _viewportX = x !== undefined ? x : 0;
-        _viewportY = y !== undefined ? y : 0;
-
-        _viewportWidth = width !== undefined ? width : _canvas.width;
-        _viewportHeight = height !== undefined ? height : _canvas.height;
-
-        _gl.viewport(_viewportX, _viewportY, _viewportWidth, _viewportHeight);
-
+        _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
     };
 
     this.clear = function(color, depth, stencil) {
@@ -10570,7 +10695,10 @@ $(document).ready(function() {
         $(".viewer_3Dmoljs").each( function() {
             var viewerdiv = $(this);
             var datauri = null;
-            
+            if(viewerdiv.css('position') == 'static') {
+                //slight hack - canvas needs this element to be positioned
+                viewerdiv.css('position','relative');
+            }
         
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
@@ -10873,6 +11001,14 @@ $3Dmol.getColorFromStyle = function(atom, style) {
             if(val != null) {
                 color = scheme.valueToHex(val, range);
             }
+        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
+                typeof(style.colorscheme.map) != 'undefined') {         
+            //apply a discrete property mapping
+            var prop = style.colorscheme.prop;
+            var val = $3Dmol.getAtomProperty(atom, prop);
+            if( typeof style.colorscheme.map[val] != 'undefined' ) {
+                color = style.colorscheme.map[val];
+            }
         }
     } 
     else if(typeof(style.colorfunc) != "undefined") {
@@ -10882,7 +11018,15 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     
     var C = $3Dmol.CC.color(color);
     return C;
-}
+};
+
+/** Preset secondary structure color scheme 
+ * @struct
+ */
+$3Dmol.ssColors = $3Dmol.ssColors || {};
+//names are in helix-sheet-coil order
+$3Dmol.ssColors.pyMOL = {'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00};
+$3Dmol.ssColors.Jmol = {'h': 0xff0080, 's': 0xffc800, 'c': 0xffffff};
 
 /** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
@@ -14630,6 +14774,11 @@ $3Dmol.GLModel = (function() {
             for (var i = 0; i < frames.length; i++) {
                 this.setAtomDefaults(frames[i], id);
             }
+            
+            if(options.vibrate && options.vibrate.frames && options.vibrate.amplitude) {
+                //fill in vibrational modes
+                this.vibrate(options.vibrate.frames, options.vibrate.amplitude);
+            }
 
         };
 
@@ -16208,12 +16357,13 @@ $3Dmol.GLShape = (function() {
                 voxel : voxel,
                 unitCube : data.unit,
                 origin : data.origin,
+                matrix: data.matrix,
                 nX : nX,
                 nY : nY,
                 nZ : nZ
             });
 
-            if (!voxel)
+            if (!voxel && smoothness > 0)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
 
             drawCustom(this, geo, {
@@ -16488,7 +16638,7 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.left = "0px";
         renderer.domElement.style.zIndex = "0";
 
-        var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR);
+        var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
         camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
         var lookingAt = new $3Dmol.Vector3();
         camera.lookAt(lookingAt);
@@ -16540,14 +16690,13 @@ $3Dmol.GLViewer = (function() {
             camera.far = center + slabFar;
             if (camera.near + 1 > camera.far)
                 camera.far = camera.near + 1;
-            if (camera instanceof $3Dmol.Camera) {
-                camera.fov = fov;
-            } else {
-                camera.right = center * Math.tan(Math.PI / 180 * fov);
-                camera.left = -camera.right;
-                camera.top = camera.right / ASPECT;
-                camera.bottom = -camera.top;
-            }
+
+            camera.fov = fov;
+            camera.right = center * Math.tan(Math.PI / 180 * fov);
+            camera.left = -camera.right;
+            camera.top = camera.right / ASPECT;
+            camera.bottom = -camera.top;
+            
             camera.updateProjectionMatrix();
             scene.fog.near = camera.near + fogStart
                     * (camera.far - camera.near);
@@ -16742,7 +16891,6 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
-
         };
         
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
@@ -16750,11 +16898,15 @@ $3Dmol.GLViewer = (function() {
             if (!scene)
                 return;
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
+            var mult = 1.0;
+            if(ev.originalEvent.ctrlKey) {
+                mult = -1.0; //this is a pinch event turned into a wheel event (or they're just holding down the ctrl)
+            }
             if (ev.originalEvent.detail) { // Webkit
-                rotationGroup.position.z += scaleFactor
+                rotationGroup.position.z += mult * scaleFactor
                         * ev.originalEvent.detail / 10;
             } else if (ev.originalEvent.wheelDelta) { // Firefox
-                rotationGroup.position.z -= scaleFactor
+                rotationGroup.position.z -= mult * scaleFactor
                         * ev.originalEvent.wheelDelta / 400;
             }
             if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
@@ -16788,6 +16940,7 @@ $3Dmol.GLViewer = (function() {
                 mode = 2;
                 dy = (newdist - touchDistanceStart) * 2
                         / (WIDTH + HEIGHT);
+                console.log("pinch "+touchDistanceStart+" dy "+dy);
             } else if (ev.originalEvent.targetTouches
                     && ev.originalEvent.targetTouches.length == 3) {
                 // translate
@@ -16919,11 +17072,27 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Enable outline 
-         * @function $eDmol.GLViewer#outline
+         * Set view projection scheme.  Either orthographic or perspective.  
+         * Default is perspective.  Orthographic can also be enabled on viewer creation
+         * by setting orthographic to true in the config object.
+         * 
+         * @function $3Dmol.GLViewer#setProjection
          * 
          * @example
-         * myviewer.outline()
+         * myviewer.setProjection("orthographic");
+         * 
+         */
+        this.setProjection = function(proj) {
+            camera.ortho = (proj === "orthographic");
+            setSlabAndFog();            
+        };
+        
+        /**
+         * Set global view styles.  
+         * @function $3Dmol.GLViewer#setViewStyle
+         * 
+         * @example
+         * myviewer.setViewStyle({style:"outline", color:"black", width:0.1})
          * 
          */
          this.setViewStyle = function(parameters) {
@@ -16934,12 +17103,12 @@ $3Dmol.GLViewer = (function() {
                 renderer.enableOutline(params);
             } else {
                 renderer.disableOutline();
-            }
+            }           
             return this;
         }
          
         if(config.style) { //enable setting style in constructor
-             this.setViewStyle(config.style);
+             this.setViewStyle(config);
         }
 
         /**
@@ -18546,7 +18715,7 @@ $3Dmol.GLViewer = (function() {
         
         /**
          * Adds an explicit mesh as a surface object.
-         * 
+         * @function $3Dmol.GLViewer#addMesh
          * @param {$3Dmol.Mesh}
          *            mesh
          * @param {Object}
@@ -18828,7 +18997,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set the surface material to something else, must render change
-         * 
+        *  @function $3Dmol.GLViewer#setSurfaceMaterialStyle
          * @param {number} surf - Surface ID to apply changes to
          * @param {matSpec} style - new material style specification
          */ 
@@ -18846,7 +19015,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Remove surface with given ID
-         * 
+         * @function $3Dmol.GLViewer#removeSurface
          * @param {number} surf - surface id
          */
         this.removeSurface = function(surf) {
@@ -19456,6 +19625,7 @@ $3Dmol.MarchingCubeInitializer = function() {
         var fulltable = !!(spec.fulltable);
         var origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
         var voxel = !!(spec.voxel);
+        var transform = spec.matrix; //if this is set, it overrides origin and unitCube
         
         var nX = spec.nX || 0;
         var nY = spec.nY || 0;
@@ -19481,7 +19651,7 @@ $3Dmol.MarchingCubeInitializer = function() {
         // the edge (p1,p2)
         
         var getVertex = function(i, j, k, code, p1, p2) {
-            var pt = {x: origin.x, y: origin.y, z: origin.z};
+            var pt = {x:0,y:0,z:0};
             var val1 = !!(code & (1 << p1));
             var val2 = !!(code & (1 << p2));
              
@@ -19497,11 +19667,17 @@ $3Dmol.MarchingCubeInitializer = function() {
                 j++;
             if (p & 4)
                 i++;
-    
-            pt.x += unitCube.x*i;
-            pt.y += unitCube.y*j;
-            pt.z += unitCube.z*k;
-    
+
+            if(transform) {
+                pt = new $3Dmol.Vector3(i,j,k);
+                pt = pt.applyMatrix4(transform);
+                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
+            } else {
+                pt.x = origin.x+unitCube.x*i;
+                pt.y = origin.y+unitCube.y*j;
+                pt.z = origin.z+unitCube.z*k;
+            }
+            
             var index = ((nY * i) + j) * nZ + k;
             
             //Have to add option to do voxels
@@ -20404,6 +20580,94 @@ $3Dmol.Parsers = (function() {
      * @param {Object}
      *            options
      */
+    parsers.vasp = parsers.VASP = function (str, options) {
+      var atoms = [[]];
+      var lattice = {};
+
+      var lines = str.replace(/^\s+/, "").split(/[\n\r]/);
+
+      if (lines.length < 3){
+        return atoms;
+      }
+
+      if (lines[1].match(/\d+/)) {
+        lattice.length = parseFloat(lines[1]);
+      } else {
+        console.log("Warning: second line of the vasp structure file must be a number");
+        return atoms;
+      }
+
+      if (lattice.length<0) {
+        console.log("Warning: Vasp implementation for negative lattice lengths is not yet available");
+        return atoms;
+      }
+
+      lattice.xVec = new Float32Array(lines[2].replace(/^\s+/, "").split(/\s+/));
+      lattice.yVec = new Float32Array(lines[3].replace(/^\s+/, "").split(/\s+/));
+      lattice.zVec = new Float32Array(lines[4].replace(/^\s+/, "").split(/\s+/));
+
+
+      var atomSymbols=lines[5].replace(/\s+/, "").replace(/\s+$/,"").split(/\s+/);
+      var atomSpeciesNumber=new Int16Array(lines[6].replace(/^\s+/, "").split(/\s+/));
+      var vaspMode=lines[7].replace(/\s+/, "");
+
+
+      if (vaspMode.match(/C/)) {
+        vaspMode = "cartesian";
+      }else if (vaspMode.match(/D/)){
+        vaspMode="direct";
+      } else {
+        console.log("Warning: Unknown vasp mode in POSCAR file: mode must be either C(artesian) or D(irect)");
+        return atoms;
+      }
+
+      if (atomSymbols.length != atomSpeciesNumber.length) {
+        console.log("Warning: declaration of atomary species wrong:");
+        console.log(atomSymbols);
+        console.log(atomSpeciesNumber);
+        return atoms;
+      }
+
+      lines.splice(0,8);
+
+      var atomCounter = 0;
+
+      for (var i = 0, len = atomSymbols.length; i < len; i++) {
+        var atomSymbol = atomSymbols[i];
+       for (var j = 0, atomLen = atomSpeciesNumber[i]; j < atomLen; j++) {
+
+        var coords = new Float32Array(lines[atomCounter + j].replace(/^\s+/, "").split(/\s+/));
+
+        atom={};
+        atom.elem = atomSymbol;
+        if (vaspMode == "cartesian") {
+          atom.x = lattice.length*coords[0];
+          atom.y = lattice.length*coords[1];
+          atom.z = lattice.length*coords[2];
+        } else {
+          atom.x = lattice.length*(coords[0]*lattice.xVec[0] + coords[1]*lattice.yVec[0] + coords[2]*lattice.zVec[0]);
+          atom.y = lattice.length*(coords[0]*lattice.xVec[1] + coords[1]*lattice.yVec[1] + coords[2]*lattice.zVec[1]);
+          atom.z = lattice.length*(coords[0]*lattice.xVec[2] + coords[1]*lattice.yVec[2] + coords[2]*lattice.zVec[2]);
+        }
+
+        atom.bonds=[];
+
+        atoms[0].push(atom);
+       }
+        atomCounter += atomSpeciesNumber[i];
+      }
+
+      return atoms;
+
+
+    }
+
+    /**
+     * @param {string}
+     *            str
+     * @param {Object}
+     *            options
+     */
     parsers.cube = parsers.CUBE = function(str, options) {
         var atoms = [[]];
         var lines = str.replace(/^\s+/, "").split(/\n\r|\r+/);
@@ -20996,7 +21260,7 @@ $3Dmol.Parsers = (function() {
         for (var i = 0; i < atoms.length; i++) {
             assignBonds(atoms[i]);
             computeSecondaryStructure(atoms[i]);
-            processSymmetries(modelData[modelData.length-1].symmetries, copyMatrix, atoms[i]);
+            processSymmetries(modelData[i].symmetries, copyMatrix, atoms[i]);
         }
 
         return atoms;
@@ -21455,7 +21719,7 @@ $3Dmol.Parsers = (function() {
             // starttime));
         
             if (!noAssembly)
-                processSymmetries(modelData[modelData.length-1].symmetries, copyMatrix, atoms[n]);
+                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
 
             if (computeStruct || !hasStruct) {
                 starttime = (new Date()).getTime();
@@ -21520,7 +21784,10 @@ $3Dmol.Parsers = (function() {
         var start = atoms[atoms.length-1].length;
         var atom;
         var computeStruct = !options.noSecondaryStructure;
-
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var modelData = atoms.modelData = [{symmetries:[]}];
+        
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
@@ -21617,7 +21884,233 @@ $3Dmol.Parsers = (function() {
         
         return atoms;
     };
+    
+    var fromCharCode = function( charCodeArray ){
+        return String.fromCharCode.apply( null, charCodeArray ).replace(/\0/g, '');
+    };
+    
+    var convertSS = function(val) {
+      //convert mmtf code to 3dmol code
+        if(val == 2) return 'h';
+        if(val == 3) return 's';
+        return 'c';
+    };
 
+    
+    //mmtf shoul be passed as a binary UInt8Array buffer
+    parsers.mmtf = parsers.MMTF = function(bindata, options) {
+        
+        var noH = !options.keepH; // suppress hydrogens by default
+
+        var mmtfData = MMTF.decode( bindata );
+        var atoms = [[]];
+        var modelData = atoms.modelData = [];
+        
+        // setup index counters
+        var modelIndex = 0;
+        var chainIndex = 0;
+        var groupIndex = 0;
+        var atomIndex = 0;
+
+        // setup optional fields
+        var chainNameList = mmtfData.chainNameList;
+        var secStructList = mmtfData.secStructList;
+        var insCodeList = mmtfData.insCodeList;
+        var sequenceIndexList = mmtfData.sequenceIndexList;
+        var bFactorList = mmtfData.bFactorList;
+        var altLocList = mmtfData.altLocList;
+        var occupancyList = mmtfData.occupancyList;
+        var bondAtomList = mmtfData.bondAtomList;
+        var bondOrderList = mmtfData.bondOrderList;
+        
+        var numModels = mmtfData.numModels;
+        if (numModels == 0) return atoms;
+        if (!options.multimodel) numModels = 1; //first only
+        // hoisted loop variables
+        var i, j, k, kl, m, n;
+        
+        //extract symmetries - only take first assembly, apply to all models (ignoring changes for now)
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
+        
+        var symmetries = [];
+        if(mmtfData.bioAssemblyList && mmtfData.bioAssemblyList.length > 0) {
+            var transforms = mmtfData.bioAssemblyList[assemblyIndex].transformList;
+            for(i = 0, n = transforms.length; i < n; i++) {
+                var matrix = new $3Dmol.Matrix4(transforms[i].matrix);
+                matrix.transpose();
+                symmetries.push(matrix);
+            }
+        }
+
+        var bondAtomListStart = 0; //for current model
+        //loop over models, 
+        for (m = 0; m < numModels; m++ ) {
+            var modelChainCount = mmtfData.chainsPerModel[m];
+            var matoms = atoms[atoms.length-1];
+            var serialToIndex = []; // map to matoms index, needed for noh
+
+            modelData.push({symmetries:symmetries});
+            for( i = 0; i < modelChainCount; ++i ){
+
+                var chainGroupCount = mmtfData.groupsPerChain[ chainIndex ];
+                var chainId = fromCharCode(
+                    mmtfData.chainIdList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
+                );
+
+                var startGroup = groupIndex;
+                for( j = 0; j < chainGroupCount; ++j ){ //over residues (groups)
+
+                    var groupData = mmtfData.groupList[ mmtfData.groupTypeList[ groupIndex ] ];
+                    var groupAtomCount = groupData.atomNameList.length;
+                    var secStruct = 0;
+                    if( secStructList ){
+                        secStruct = secStructList[ groupIndex ];
+                    }
+                    var insCode = null;
+                    if( mmtfData.insCodeList ){
+                        insCode = String.fromCharCode( insCodeList[ groupIndex ] );
+                    }
+                    var sequenceIndex = null;
+                    if( sequenceIndexList ){
+                        sequenceIndex = sequenceIndexList[ groupIndex ];
+                    }
+
+                    var groupId = mmtfData.groupIdList[ groupIndex ];
+                    var groupName = groupData.groupName;
+                    var startAtom = atomIndex;
+
+                    for( k = 0; k < groupAtomCount; ++k ){
+
+                        var element = groupData.elementList[ k ];
+                        if(noH && element == 'H') {
+                            atomIndex += 1;
+                            continue;
+                        }
+                        
+                        var bFactor = '';
+                        if( bFactorList ){
+                            bFactor = bFactorList[ atomIndex ];
+                        }
+                        var altLoc = ' ';
+                        if( altLocList ){
+                            altLoc = String.fromCharCode( altLocList[ atomIndex ] );
+                        }
+                        var occupancy = '';
+                        if( occupancyList ){
+                            occupancy = occupancyList[ atomIndex ];
+                        }
+
+                        var atomId = mmtfData.atomIdList[ atomIndex ];
+                        var atomName = groupData.atomNameList[ k ];
+                        var atomCharge = groupData.atomChargeList[ k ];
+                        var xCoord = mmtfData.xCoordList[ atomIndex ];
+                        var yCoord = mmtfData.yCoordList[ atomIndex ];
+                        var zCoord = mmtfData.zCoordList[ atomIndex ];
+                            
+                        serialToIndex[atomIndex] = matoms.length;
+                        matoms.push({
+                            'resn' : groupName,
+                            'x' : xCoord,
+                            'y' : yCoord,
+                            'z' : zCoord,
+                            'elem' : element,
+                            'hetflag' : secStruct < 0,
+                            'chain' : chainId,
+                            'resi' : groupId,
+                            'icode' : altLoc,
+                            'rescode' : groupId + (altLoc != ' ' ? "^" + altLoc : ""), // combo
+                            // resi
+                            // and
+                            // icode
+                            'serial' : atomId,
+                            'atom' : atomName,
+                            'bonds' : [],
+                            'ss' : convertSS(secStruct),
+                            'bondOrder' : [],
+                            'properties' : {charge: atomCharge, occupancy:occupancy},
+                            'b' : bFactor,
+                        });
+
+                        atomIndex += 1;
+                    }
+                    
+                    // intra group bonds
+                    var groupBondAtomList = groupData.bondAtomList;
+                    for( k = 0, kl = groupData.bondOrderList.length; k < kl; ++k ){
+                        var atomIndex1 = startAtom + groupBondAtomList[ k * 2 ];
+                        var atomIndex2 = startAtom + groupBondAtomList[ k * 2 + 1 ];
+                        var bondOrder = groupData.bondOrderList[ k ];
+                        
+                        //I assume bonds are only recorded once
+                        var i1 = serialToIndex[atomIndex1];
+                        var i2 = serialToIndex[atomIndex2];
+                        var a1 = matoms[i1];
+                        var a2 = matoms[i2];
+                        if(a1 && a2) {
+                            a1.bonds.push(i2)
+                            a1.bondOrder.push(bondOrder);
+                            a2.bonds.push(i1);
+                            a2.bondOrder.push(bondOrder);         
+                        }
+                    }
+                    
+                    groupIndex += 1;
+                }
+                
+                //reset for bonds
+                groupIndex = startGroup;
+                for( j = 0; j < chainGroupCount; ++j ){ //over residues (groups)
+                    
+                    groupIndex += 1;
+
+                }
+
+                chainIndex += 1;
+            }
+
+            
+            // inter group bonds
+            if( bondAtomList ){
+                for( k = bondAtomListStart, kl = bondAtomList.length; k < kl; k += 2 ){
+                     var atomIndex1 = bondAtomList[ k ];
+                     var atomIndex2 = bondAtomList[ k + 1 ];
+                     var bondOrder = bondOrderList ? bondOrderList[ k / 2 ] : 1;
+                     
+                     if(atomIndex1 >= atomIndex) {
+                         bondAtomListStart = k;
+                         break; //on next model
+                     }
+                     //I assume bonds are only recorded once
+                     var i1 = serialToIndex[atomIndex1];
+                     var i2 = serialToIndex[atomIndex2];
+                     var a1 = matoms[i1];
+                     var a2 = matoms[i2];
+                     if(a1 && a2) {
+                         a1.bonds.push(i2)
+                         a1.bondOrder.push(bondOrder);
+                         a2.bonds.push(i1);
+                         a2.bondOrder.push(bondOrder);   
+                     }
+                }
+            }
+            
+            if (options.multimodel) {
+                if (!options.onemol) atoms.push([]);
+            }
+            modelIndex += 1;
+        } 
+                
+        
+        for (var n = 0; n < atoms.length; n++) {        
+            if (!noAssembly)
+                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
+        }
+        
+        return atoms;
+    };
+    
     return parsers;
 })();
 var $3Dmol = $3Dmol || {};
@@ -21985,8 +22478,9 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * @class
  * @param {string} str - volumetric data
  * @param {string} format - format of supplied data (cube)
+ * @param {Object} options - normalize (zero mean, unit variance), negate
  */
-$3Dmol.VolumeData = function(str, format) {
+$3Dmol.VolumeData = function(str, format, options) {
 
     this.unit = {
         x : 1,
@@ -22006,9 +22500,48 @@ $3Dmol.VolumeData = function(str, format) {
     this.data = new Float32Array([]); // actual floating point data, arranged
                                         // x->y->z
 
+    this.matrix = null; //if set must transform data
     format = format.toLowerCase();
+    
+    if(/\.gz$/.test(format)) {
+        //unzip gzipped files
+        format = format.replace(/\.gz$/,'');
+        try {
+            str = pako.inflate(str);
+        } catch(err) {
+            console.log(err);
+        }
+    }
+    
     if (this[format]) {
         this[format](str);
+    }
+    
+    if(options) {
+        if(options.negate) {
+            for(var i = 0, n = this.data.length; i < n; i++) {
+                this.data[i] = -this.data[i];
+            }
+        }
+        if(options.normalize) {
+            var total = 0.0;
+            for(var i = 0, n = this.data.length; i < n; i++) {
+                total += this.data[i];
+            }
+            var mean = total/this.data.length;
+            console.log("computed mean: "+mean);
+            total = 0;
+            for(var i = 0, n = this.data.length; i < n; i++) {
+                var diff = this.data[i]-mean;
+                total += diff*diff; //variance is ave of squared difference with mean
+            }
+            var variance = total/this.data.length;
+            console.log("Computed variance: "+variance);
+            //now normalize
+            for(var i = 0, n = this.data.length; i < n; i++) {
+                this.data[i] = (this.data[i]-mean)/variance;
+            }
+        }
     }
 };
 
@@ -22035,6 +22568,111 @@ $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     if(z < 0 || z >= this.size.z) return 0;
     
     return this.data[x*this.size.y*this.size.z + y*this.size.z + z];
+};
+
+/*
+ * parse vasp data
+ * Essentially this parser converts the CHGCAR data into
+ * cube data. It has been adapted from 'chg2cube.pl' found in
+ * http://theory.cm.utexas.edu/vtsttools/
+ */
+$3Dmol.VolumeData.prototype.vasp = function(str) {
+
+    var lines = str.replace(/^\s+/, "").split(/[\n\r]/);
+
+    var atomicData = $3Dmol.Parsers.vasp(str)[0];
+    var natoms = atomicData.length;
+
+    if (natoms == 0) {
+      console.log("No good formating of CHG or CHGCAR file, not atomic information provided in the file.");
+      this.data = [];
+      return;
+    }
+
+
+
+    // Assume atomic units 
+    var unittype = "bohr/hartree";
+    var l_units = 1.889725992;
+    var e_units = 0.036749309;
+
+    // copied from $3Dmol.Parsers.vasp
+    var convFactor = parseFloat(lines[1]);
+    // This is how Vasp reads in the basis We need the l_units in order to
+    // compute the volume of the cell. Afterwards to obtain the axis for the
+    // voxels we have to remove this unit and divide by the number of voxels in
+    // each dimension
+    var v;
+    v=lines[2].replace(/^\s+/, "").split(/\s+/);
+    var xVec = new $3Dmol.Vector3(parseFloat(v[0]),parseFloat(v[1]),parseFloat(v[2])).multiplyScalar(convFactor*l_units);
+    v=lines[3].replace(/^\s+/, "").split(/\s+/);
+    var yVec = new $3Dmol.Vector3(parseFloat(v[0]),parseFloat(v[1]),parseFloat(v[2])).multiplyScalar(convFactor*l_units);
+    v=lines[4].replace(/^\s+/, "").split(/\s+/);
+    var zVec = new $3Dmol.Vector3(parseFloat(v[0]),parseFloat(v[1]),parseFloat(v[2])).multiplyScalar(convFactor*l_units);
+
+    // correct volume for non-orthognal box (expansion by minors)
+    var vol = xVec.x*(yVec.y*zVec.z - zVec.y*yVec.z) - yVec.x*(xVec.y*zVec.z - zVec.y*xVec.z) + zVec.x*(xVec.y*yVec.z - yVec.y*xVec.z);
+
+    vol = Math.abs(vol)/(Math.pow(l_units,3));
+    var vol_scale = 1.0/(vol); //This Only for CHGCAR files
+
+    // We splice the structure information
+    // 2 (header) + 3 (vectors) + 2 (atoms) + 1 (vaspMode) + natoms (coords) + 1 (blank line) 
+    lines.splice(0,2+3+2+1+natoms+1);
+
+
+    var lineArr = lines[0].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+
+    var nX = Math.abs(lineArr[0]);
+    var nY = Math.abs(lineArr[1]);
+    var nZ = Math.abs(lineArr[2]);
+
+    var origin = this.origin = new $3Dmol.Vector3(0,0,0);
+
+    this.size = {x:nX, y:nY, z:nZ};
+    this.unit = new $3Dmol.Vector3(xVec.x, yVec.y, zVec.z);
+
+    // resize the vectors accordingly
+    xVec = xVec.multiplyScalar(1/(l_units*nX));
+    yVec = yVec.multiplyScalar(1/(l_units*nY));
+    zVec = zVec.multiplyScalar(1/(l_units*nZ));
+
+    if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
+            || zVec.y != 0) {
+        //need a transformation matrix
+        this.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
+        //include translation in matrix
+        this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+                new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
+        //all translation and scaling done by matrix, so reset origin and unit
+        this.origin = new $3Dmol.Vector3(0,0,0);
+        this.unit = new $3Dmol.Vector3(1,1,1);
+    }
+
+
+    lines.splice(0,1); //Remove the dimension line 
+    var raw = lines.join(" ");
+
+    raw = raw.replace(/^\s+/,'');
+    raw = raw.split(/[\s\r]+/);
+    raw.splice(nX*nY*nZ+1);
+
+    var preConvertedData = new Float32Array(raw); //We still have to format it to get the density
+
+    for (var i = 0; i< preConvertedData.length; i++){
+      preConvertedData[i] = preConvertedData[i]*vol_scale*e_units;
+    }
+
+    this.data = preConvertedData;
+
+    //console.log(xVec);
+    //console.log(yVec);
+    //console.log(zVec);
+    //console.log(this.unit);
+    //console.log(this.origin);
+    //console.log(this.matrix);
+    //console.log(this.data);
+
 };
 
 // parse cube data
@@ -22085,9 +22723,17 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
     this.unit = new $3Dmol.Vector3(xVec.x, yVec.y, zVec.z);
     
     if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
-            || zVec.y != 0)
-        console
-                .log("Warning: Cube file is not axis aligned.  This isn't going to look right.");   
+            || zVec.y != 0) {
+        //need a transformation matrix
+        this.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
+        //include translation in matrix
+        this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+                new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
+        //all translation and scaling done by matrix, so reset origin and unit
+        this.origin = new $3Dmol.Vector3(0,0,0);
+        this.unit = new $3Dmol.Vector3(1,1,1);
+    }
+    
     var headerlines = 6;
     if(atomsnum < 0) headerlines++; //see: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
     var raw = lines.splice(natoms + headerlines).join(" ");
@@ -22101,94 +22747,197 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
 $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
 
     // http://www.ccp4.ac.uk/html/maplib.html#description
-        
-        var header = {};
+    //code from ngl: https://github.com/arose/ngl/blob/master/js/ngl/parser.js
+    var header = {};
+    bin = new Int8Array(bin);
+    var intView = new Int32Array( bin.buffer, 0, 56 );
+    var floatView = new Float32Array( bin.buffer, 0, 56 );
+    var dv = new DataView( bin.buffer );
+    
 
-        var intView = new Int32Array( bin, 0, 56 );
-        var floatView = new Float32Array( bin, 0, 56 );
+    // 53  MAP         Character string 'MAP ' to identify file type
+    header.MAP = String.fromCharCode(
+        dv.getUint8( 52 * 4 ), dv.getUint8( 52 * 4 + 1 ),
+        dv.getUint8( 52 * 4 + 2 ), dv.getUint8( 52 * 4 + 3 )
+    );
 
-           //# of columns (fastest changing),rows, sections (slowest changing)
-        header.NX = intView[ 0 ];
-        header.NY = intView[ 1 ];
-        header.NZ = intView[ 2 ];
+    // 54  MACHST      Machine stamp indicating machine type which wrote file
+    //                 17 and 17 for big-endian or 68 and 65 for little-endian
+    header.MACHST = [ dv.getUint8( 53 * 4 ), dv.getUint8( 53 * 4 + 1 ) ];
 
-        // mode
-        //  0 image : signed 8-bit bytes range -128 to 127
-        //  1 image : 16-bit halfwords
-        //  2 image : 32-bit reals
-        //  3 transform : complex 16-bit integers
-        //  4 transform : complex 32-bit reals
-        //  6 image : unsigned 16-bit range 0 to 65535
-        // 16 image: unsigned char * 3 (for rgb data, non-standard)
-        header.MODE = intView[ 3 ];
-
-        //position of first column, first row, and first section (voxel grid units)
-        header.NCSTART = intView[ 4 ];
-        header.NRSTART = intView[ 5 ];
-        header.NSSTART = intView[ 6 ];
-
-        //intervals per unit cell repeat along X,Y Z
-        header.MX = Math.abs(intView[ 7 ]);
-        header.MY = Math.abs(intView[ 8 ]);
-        header.MZ = Math.abs(intView[ 9 ]);
-
-       //Map lengths along X,Y,Z in Ångstroms
-        header.xlen =  floatView[ 10 ]; 
-        header.ylen = floatView[ 11 ];  
-        header.zlen = floatView[ 12 ];  
-
-        //single voxel lengths
-        xVox = header.xlen / header.NX; 
-        yVox = header.ylen / header.NY; 
-        zVox = header.zlen / header.NZ;
-
-        // cell angle
-        header.alpha = floatView[ 13 ];
-        header.beta  = floatView[ 14 ];
-        header.gamma = floatView[ 15 ];
-
-        //relationship of X,Y,Z axes to columns, rows, sections
-        header.MAPC = intView[ 16 ];
-        switch (header.MAPC){
-            case 1: header.NXSTART = header.NCSTART; header.NYSTART = 0; header.NZSTART = 0; break;
-            case 2: header.NYSTART = header.NCSTART; header.NXSTART = 0; header.NZSTART = 0; break;
-            case 3: header.NZSTART = header.NCSTART; header.NXSTART = 0; header.NYSTART = 0; break;
+    // swap byte order when big endian
+    if( header.MACHST[ 0 ] === 17 && header.MACHST[ 1 ] === 17 ){
+        var n = bin.byteLength;
+        for( var i = 0; i < n; i+=4 ){
+            dv.setFloat32( i, dv.getFloat32( i ), true );
         }
-        header.MAPR = intView[ 17 ];
-        switch (header.MAPR){
-            case 1: header.NXSTART = header.NRSTART; header.NYSTART = 0; header.NZSTART = 0; break;
-            case 2: header.NYSTART = header.NRSTART; header.NXSTART = 0; header.NZSTART = 0; break;
-            case 3: header.NZSTART = header.NRSTART; header.NXSTART = 0; header.NYSTART = 0; break;
-        }
-        header.MAPS = intView[ 18 ];
-         switch (header.MAPS){
-            case 1: header.NXSTART = header.NSSTART; header.NYSTART = 0; header.NZSTART = 0; break;
-            case 2: header.NYSTART = header.NSSTART; header.NXSTART = 0; header.NZSTART = 0; break;
-            case 3: header.NZSTART = header.NSSTART; header.NXSTART = 0; header.NYSTART = 0; break;
-        }
+    }
 
-        //Origin Position
-        this.origin = new $3Dmol.Vector3(header.NXSTART, header.NYSTART, header.NZSTART);
+    header.NX = intView[ 0 ];  // NC - columns (fastest changing)
+    header.NY = intView[ 1 ];  // NR - rows
+    header.NZ = intView[ 2 ];  // NS - sections (slowest changing)
 
-        //Minimum, maximum, average density
-        header.DMIN  = floatView[ 19 ];
-        header.DMAX  = floatView[ 20 ];
-        header.DMEAN = floatView[ 21 ];
+    // mode
+    //  0 image : signed 8-bit bytes range -128 to 127
+    //  1 image : 16-bit halfwords
+    //  2 image : 32-bit reals
+    //  3 transform : complex 16-bit integers
+    //  4 transform : complex 32-bit reals
+    //  6 image : unsigned 16-bit range 0 to 65535
+    // 16 image: unsigned char * 3 (for rgb data, non-standard)
+    //
+    // Note: Mode 2 is the normal mode used in the CCP4 programs.
+    //       Other modes than 2 and 0 may NOT WORK
+    header.MODE = intView[ 3 ];
 
-        // space group number 0 or 1 (default=0)
-        header.ISPG = intView[ 22 ];
+    // start
+    header.NXSTART = intView[ 4 ];  // NCSTART - first column
+    header.NYSTART = intView[ 5 ];  // NRSTART - first row
+    header.NZSTART = intView[ 6 ];  // NSSTART - first section
 
-        // number of bytes used for symmetry data (0 or 80)
-        header.NSYMBT = intView[23];
+    // intervals
+    header.MX = intView[ 7 ];  // intervals along x
+    header.MY = intView[ 8 ];  // intervals along y
+    header.MZ = intView[ 9 ];  // intervals along z
 
-        // machine stamp
-        header.ARMS = floatView[54];
+    // cell length (Angstroms in CCP4)
+    header.xlen = floatView[ 10 ];
+    header.ylen = floatView[ 11 ];
+    header.zlen = floatView[ 12 ];
 
-        this.size = {x:header.MX, y:header.MY, z:header.MZ};
-        this.unit = new $3Dmol.Vector3(xVox, yVox, zVox ); 
-        var byteData = new Int8Array(bin); 
-        this.data = new Float32Array(bin, 1024 + header.NSYMBT);
-          
+    // cell angle (Degrees)
+    header.alpha = floatView[ 13 ];
+    header.beta  = floatView[ 14 ];
+    header.gamma = floatView[ 15 ];
+
+    // axis correspondence (1,2,3 for X,Y,Z)
+    header.MAPC = intView[ 16 ];  // column
+    header.MAPR = intView[ 17 ];  // row
+    header.MAPS = intView[ 18 ];  // section
+
+    // density statistics
+    header.DMIN  = floatView[ 19 ];
+    header.DMAX  = floatView[ 20 ];
+    header.DMEAN = floatView[ 21 ];
+
+    // space group number 0 or 1 (default=0)
+    header.ISPG = intView[ 22 ];
+
+    // number of bytes used for symmetry data (0 or 80)
+    header.NSYMBT = intView[ 23 ];
+
+    // Flag for skew transformation, =0 none, =1 if foll
+    header.LSKFLG = intView[ 24 ];
+
+    // 26-34  SKWMAT  Skew matrix S (in order S11, S12, S13, S21 etc) if
+    //                LSKFLG .ne. 0.
+    // 35-37  SKWTRN  Skew translation t if LSKFLG != 0.
+    //                Skew transformation is from standard orthogonal
+    //                coordinate frame (as used for atoms) to orthogonal
+    //                map frame, as Xo(map) = S * (Xo(atoms) - t)
+
+    // 38      future use       (some of these are used by the MSUBSX routines
+    //  .          "              in MAPBRICK, MAPCONT and FRODO)
+    //  .          "   (all set to zero by default)
+    //  .          "
+    // 52          "
+
+    // 50-52 origin in X,Y,Z used for transforms
+    header.originX = floatView[ 49 ];
+    header.originY = floatView[ 50 ];
+    header.originZ = floatView[ 51 ];
+
+    // 53  MAP         Character string 'MAP ' to identify file type
+    // => see top of this parser
+
+    // 54  MACHST      Machine stamp indicating machine type which wrote file
+    // => see top of this parser
+
+    // Rms deviation of map from mean density
+    header.ARMS = floatView[ 54 ];
+
+    // 56      NLABL           Number of labels being used
+    // 57-256  LABEL(20,10)    10  80 character text labels (ie. A4 format)
+    console.log("Map has min,mean,average,rmsddv: "+header.DMIN+","+header.DMAX+","+header.DMEAN+","+header.ARMS);
+
+    //create transformation matrix, code mostly copied from ngl
+    var h = header;
+    var basisX = [
+          h.xlen,
+          0,
+          0
+      ];
+
+      var basisY = [
+          h.ylen * Math.cos( Math.PI / 180.0 * h.gamma ),
+          h.ylen * Math.sin( Math.PI / 180.0 * h.gamma ),
+          0
+      ];
+
+      var basisZ = [
+          h.zlen * Math.cos( Math.PI / 180.0 * h.beta ),
+          h.zlen * (
+                  Math.cos( Math.PI / 180.0 * h.alpha )
+                  - Math.cos( Math.PI / 180.0 * h.gamma )
+                  * Math.cos( Math.PI / 180.0 * h.beta )
+              ) / Math.sin( Math.PI / 180.0 * h.gamma ),
+          0
+      ];
+      basisZ[ 2 ] = Math.sqrt(
+          h.zlen * h.zlen * Math.sin( Math.PI / 180.0 * h.beta ) *
+          Math.sin( Math.PI / 180.0 * h.beta ) - basisZ[ 1 ] * basisZ[ 1 ]
+      );
+
+      var basis = [ 0, basisX, basisY, basisZ ];
+      var nxyz = [ 0, h.MX, h.MY, h.MZ ];
+      var mapcrs = [ 0, h.MAPC, h.MAPR, h.MAPS ];
+
+      this.matrix = new $3Dmol.Matrix4();
+
+      this.matrix.set(
+
+          basis[ mapcrs[1] ][0] / nxyz[ mapcrs[1] ],
+          basis[ mapcrs[2] ][0] / nxyz[ mapcrs[2] ],
+          basis[ mapcrs[3] ][0] / nxyz[ mapcrs[3] ],
+          0,
+
+          basis[ mapcrs[1] ][1] / nxyz[ mapcrs[1] ],
+          basis[ mapcrs[2] ][1] / nxyz[ mapcrs[2] ],
+          basis[ mapcrs[3] ][1] / nxyz[ mapcrs[3] ],
+          0,
+
+          basis[ mapcrs[1] ][2] / nxyz[ mapcrs[1] ],
+          basis[ mapcrs[2] ][2] / nxyz[ mapcrs[2] ],
+          basis[ mapcrs[3] ][2] / nxyz[ mapcrs[3] ],
+          0,
+
+          0, 0, 0, 1
+
+      );
+      //include translation in matrix
+      this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+              new $3Dmol.Matrix4().makeTranslation(
+                      h.NXSTART + h.originX,
+                      h.NYSTART + h.originY,
+                      h.NZSTART + h.originZ));
+      //all translation and scaling done by matrix, so reset origin and unit
+      this.origin = new $3Dmol.Vector3(0,0,0);
+      this.unit = new $3Dmol.Vector3(1,1,1); 
+      this.size = {x:header.NX, y:header.NY, z:header.NZ};
+      var data = new Float32Array(bin.buffer, 1024 + header.NSYMBT);
+      //data must by (slowest changing) x,y,z (fastest changing)
+
+      var NX = header.NX, NY = header.NY, NZ = header.NZ;
+      this.data = new Float32Array(NX*NY*NZ);
+      for(var i = 0; i < NX; i++) {
+          for(var j = 0; j < NY; j++) {
+              for(var k = 0; k < NZ; k++) {
+                  //should I be concerned that I'm not using mapc?
+                  this.data[((i*NY)+j)*NZ+k] = data[((k*NY)+j)*NX+i];
+              }
+          }
+      }
+
 };
 //Hackish way to create webworker (independent of $3Dmol namespace) within minified file
 $3Dmol.workerString = function(){
