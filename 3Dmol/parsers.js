@@ -1959,10 +1959,10 @@ $3Dmol.Parsers = (function() {
 		for (i = 0; i < atomCount/col[0]; i++){
 		    for (j = 0; j < col[0]; j++){
 			if (count%3 == 0){
-			    atomIndex = lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1;
+			    atomIndex = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 			if (count%3 == 1){
-			    atoms[atomIndex].bonds = lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1;
+			    atoms[atomIndex].bonds = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 		    count++;
 		    }
@@ -1970,10 +1970,10 @@ $3Dmol.Parsers = (function() {
 		}
 		for (i = 0; i < atomCount % col[0]; i++){
 		    if (count%3 == 0){
-			atomIndex = lines[index].slice(col[1]*i, col[1]*(i+1))/3 + 1;
+			atomIndex = parseInt(lines[index].slice(col[1]*i, col[1]*(i+1))/3 + 1);
 		    }
 		    if (count%3 == 1){
-			atoms[atomIndex].bonds = lines[index].slice(col[1]*i, col[1]*(i+1))/3 + 1;	
+			atoms[atomIndex].bonds = parseInt(lines[index].slice(col[1]*i, col[1]*(i+1))/3 + 1);	
 		    }
 		count++;
 		}
@@ -1986,10 +1986,10 @@ $3Dmol.Parsers = (function() {
 		for (i = 0; i < atomCount/col[0]; i++){
 		    for (j = 0; j < col[0]; j++){
 			if (count%3 == 0){
-			    atomIndex = lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1;
+			    atomIndex = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 			if (count%3 == 1){
-			    atoms[atomIndex].bonds = lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1;
+			    atoms[atomIndex].bonds = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 		    count++;
 		    }
@@ -2023,5 +2023,31 @@ $3Dmol.Parsers = (function() {
         return atoms;
     };
 
+    /**
+     * Parse a inpcrd file from str and get the coordinates for the prmtop file
+     */
+    parsers.inpcrd = parsers.inpcrd = function(str, options) {
+	var atoms = [];
+	var atom = {};
+	var lines = str.split(/\r?\n|\r/);
+	var atomCount = parseInt(lines[1].slice(0, 15));
+	var count = 0;
+	for (i=2; i < atomCount/2 + 2; i++){
+	    atom.serial = count;
+	    atom.x = parseInt(lines[i].slice(0,12));
+	    atom.y = parseInt(lines[i].slice(12,24));
+	    atom.z = parseInt(lines[i].slice(24,36));
+	    atoms.push(atom);
+	    count++;
+	    
+	    atom.serial = count;
+	    atom.x = parseInt(lines[i].slice(36,48));
+	    atom.y = parseInt(lines[i].slice(48,60));
+	    atom.z = parseInt(lines[i].slice(60,72));
+	    atoms.push(atom);
+	    count++; 
+	}
+	return atoms;
+    } 
     return parsers;
 })();
