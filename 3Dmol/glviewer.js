@@ -46,7 +46,10 @@ $3Dmol.GLViewer = (function() {
         var shapes = []; // Generic shapes
         var labels = [];
         var clickables = []; //things you can click on
-        
+        var hoverables = []; //things you can hover over
+
+        var current_hover = null;
+
         var WIDTH = container.width();
         var HEIGHT = container.height();
 
@@ -152,8 +155,7 @@ $3Dmol.GLViewer = (function() {
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
-            if(!nolink && linkedViewers.length > 0) {
-                var view = _viewer.getView();
+            if(!nolink && linkedViewers.length > 0) {                var view = _viewer.getView();
                 for(var i = 0; i < linkedViewers.length; i++) {
                     var other = linkedViewers[i];
                     other.setView(view, true);
@@ -192,31 +194,42 @@ $3Dmol.GLViewer = (function() {
         // enable mouse support
 
         //regenerate the list of clickables
+        //also updates hoverables
         var updateClickables = function() {
             clickables.splice(0,clickables.length);
+            hoverables.splice(0,hoverables.length);
             var i, il;
-
+            
             for (i = 0, il = models.length; i < il; i++) {
                 var model = models[i];
                 if(model) {
                     var atoms = model.selectedAtoms({
                         clickable : true
                     });
+                    
+                    var hoverable_atoms = model.selectedAtoms({
+                        hoverable : true
+                    });
+                    Array.prototype.push.apply(hoverables,hoverable_atoms);
+
                     Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
+                    
                 }
             }
-
             for (i = 0, il = shapes.length; i < il; i++) {
 
                 var shape = shapes[i];
                 if (shape && shape.clickable) {
                     clickables.push(shape);
                 }
+                if( shape && shape.hoverable){
+                    hoverables.push(shape);
+                }
             }
         };
-        
         // Checks for selection intersects on mousedown
         var handleClickSelection = function(mouseX, mouseY, event) {
+
             if(clickables.length == 0) return;
             var mouse = {
                 x : mouseX,
@@ -240,7 +253,61 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
+        //checks for selection intersects on hover
+        var handleHoverSelection = function(mouseX, mouseY, event){
+            if(hoverables.length == 0) return;
+            var mouse = {
+                x : mouseX,
+                y : mouseY,
+                z : -1.0
+            };
+            mouseVector.set(mouse.x, mouse.y, mouse.z);
+            projector.unprojectVector(mouseVector, camera);
+            mouseVector.sub(camera.position).normalize();
 
+            raycaster.set(camera.position, mouseVector);
+
+            var intersects = [];
+            intersects = raycaster.intersectObjects(modelGroup, hoverables);
+            if (intersects.length) {
+                var selected = intersects[0].clickable;
+                current_hover=selected;
+                if (selected.hover_callback !== undefined
+                        && typeof (selected.hover_callback) === "function") {
+                    selected.hover_callback(selected, _viewer, event, container);
+                }
+            }
+            else{
+                current_hover=null;
+            }
+        }
+        //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
+        var handleHoverContinue = function(mouseX,mouseY,event){
+            console.log("continue");
+            var mouse = {
+                x : mouseX,
+                y : mouseY,
+                z : -1.0
+            };
+
+            mouseVector.set(mouse.x, mouse.y, mouse.z);
+            projector.unprojectVector(mouseVector, camera);
+            mouseVector.sub(camera.position).normalize();
+
+            raycaster.set(camera.position, mouseVector);
+
+            var intersects = [];
+            intersects = raycaster.intersectObjects(modelGroup, hoverables);
+            if(intersects[0] === undefined){                
+                current_hover.unhover_callback(current_hover, _viewer, event, container);
+                current_hover=null;
+            }
+            if(intersects[0]!== undefined)
+            if(intersects[0].clickable !== current_hover){
+                current_hover.unhover_callback(current_hover, _viewer, event, container);
+                current_hover=null;
+            }
+        }
         var calcTouchDistance = function(ev) { // distance between first two
                                                 // fingers
             var xdiff = ev.originalEvent.targetTouches[0].pageX
@@ -294,7 +361,6 @@ $3Dmol.GLViewer = (function() {
                     var offset = $('canvas',container).offset();
                     var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
-
                     handleClickSelection(mouseX, mouseY, ev, container);
                 }
             }
@@ -310,7 +376,6 @@ $3Dmol.GLViewer = (function() {
             var xy = getXY(ev);
             var x = xy[0];
             var y = xy[1];
-            
             if (x === undefined)
                 return;
             isDragging = true;
@@ -350,8 +415,23 @@ $3Dmol.GLViewer = (function() {
 
             show();
         };
-        
+        var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
+
+            clearTimeout(hoverTimeout);
+
+            
+            var offset = $('canvas',container).offset();
+            var mouseX = ((getXY(ev)[0] - offset.left) / WIDTH) * 2 - 1;
+            var mouseY = -((getXY(ev)[1] - offset.top) / HEIGHT) * 2 + 1;
+            if(current_hover !== null)
+                handleHoverContinue(mouseX,mouseY,ev);
+            hoverTimeout=setTimeout(
+                function(){
+                    handleHoverSelection(mouseX,mouseY,ev);
+                }
+                ,500);
+
             WIDTH = container.width();
             HEIGHT = container.height();
             ev.preventDefault();
@@ -366,6 +446,8 @@ $3Dmol.GLViewer = (function() {
             var y = xy[1];
             if (x === undefined)
                 return;
+            //hover timeout
+
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
             // check for pinch
@@ -448,7 +530,6 @@ $3Dmol.GLViewer = (function() {
          *
          * @param {Object | string} element
          *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
-
          * @example
          * // Assume there exist HTML divs with ids "gldiv", "gldiv2"
          * var element = $("#gldiv"), element2 = $("#gldiv2");
@@ -1056,7 +1137,6 @@ $3Dmol.GLViewer = (function() {
          * atom.x, y: atom.y, z: atom.z});
          * 
          * labels.push(l); }
-
          *  // Render labels glviewer.render();
          */
         this.addLabel = function(text, data) {
@@ -2592,3 +2672,4 @@ $3Dmol.GLViewer = (function() {
 })();
 
 $3Dmol['glmolViewer'] = $3Dmol.GLViewer;
+
