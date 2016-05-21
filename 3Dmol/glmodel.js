@@ -1824,6 +1824,42 @@ $3Dmol.GLModel = (function() {
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
         
+        this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
+            var s;
+            for (s in sel) {
+                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure hoverable is a boolean
+            hoverable = !!hoverable;
+
+            // report to console if hover_callback is not a valid function
+            if (hover_callback && typeof hover_callback != "function") {
+                console.log("Hover_callback is not a function");
+                return;
+            }
+            // report to console if unhover_callback is not a valid function
+            if (unhover_callback && typeof unhover_callback != "function") {
+                console.log("Unhover_callback is not a function");
+                return;
+            }
+
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].hoverable= hoverable;
+                if (hover_callback) selected[i].hover_callback = hover_callback;
+                if (unhover_callback) selected[i].unhover_callback = unhover_callback;
+
+            }
+
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
+        }
         /** given a mapping from element to color, set atom colors
          * 
          * @function $3Dmol.GLModel#setColorByElement
