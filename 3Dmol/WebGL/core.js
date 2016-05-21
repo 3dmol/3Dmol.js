@@ -648,7 +648,7 @@ $3Dmol.Raycaster = (function() {
         
         matrixPosition.getPositionFromMatrix(group.matrixWorld);
         
-        if ((clickable.clickable !== true && clickable.hoverable!== true) || (clickable.intersectionShape === undefined))
+        if (clickable.intersectionShape === undefined)
             return intersects;       
         var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
