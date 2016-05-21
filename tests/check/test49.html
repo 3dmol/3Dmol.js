@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <script src="../../build/3Dmol.js"></script>
+    <style>
+      table td { text-align: center; }
+      table th {padding-top: 1em;}
+    </style>
+  </head>
+
+  <body>
+    <script>
+
+      $(document).ready(function() {
+
+          //install a right-click handler on every canvas to export png
+          $('canvas').bind('contextmenu',function(e) {
+              var dt = e.currentTarget.toDataURL('image/png');
+              window.location = dt;
+          });
+      });
+        </script>
+
+    <table width="100%">
+      <tr>
+        <td colspan=2 height=200px>
+          49  <code> MMTF format</code>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%"><div id="test49" style="width: 400px; height: 400px; position: relative;"></div>
+      </td>
+     <script>
+    var viewer = $3Dmol.createViewer($("#test49"));
+    viewer.setBackgroundColor(0xffffffff);
+    var label = new $3Dmol.Label("Hover Label",{position: {x:(10.0-0.0)/2+0.0, y:(0.0-0.0)/2+0.0, z:(0.0)}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  hover_callback: function(){ viewer.addLabel("Hover Label",{position: {x:(10.0-0.0)/2+0.0, y:(0.0-0.0)/2+0.0, z:(0.0)}, backgroundColor: 0x800080, backgroundOpacity: 0.8});viewer.render();},
+                                  unhover_callback: function(){ viewer.removeAllLabels();viewer.render();}
+                                 });
+
+      viewer.render();
+    </script>
+        <td width="50%"><img src="#"></td>
+      </tr>
+    </table>
+
+  </body>
+</html>
