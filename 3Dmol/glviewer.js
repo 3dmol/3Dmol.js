@@ -1896,6 +1896,10 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
+        this.setHoverable = function(sel,hoverable,hover_callback,unhover_callback){
+            applyToModels("setHoverable", sel,hoverable, hover_callback,unhover_callback);
+            return this;
+        }
         /**
          * @function $3Dmol.GLViewer#setColorByProperty
          * @param {AtomSelectionSpec} sel
