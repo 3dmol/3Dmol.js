@@ -47,7 +47,7 @@ $3Dmol.GLViewer = (function() {
         var labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
-
+        var popups = [];
         var current_hover = null;
 
         var WIDTH = container.width();
@@ -308,6 +308,8 @@ $3Dmol.GLViewer = (function() {
                 current_hover=null;
             }
         }
+
+
         var calcTouchDistance = function(ev) { // distance between first two
                                                 // fingers
             var xdiff = ev.originalEvent.targetTouches[0].pageX
@@ -1148,6 +1150,8 @@ $3Dmol.GLViewer = (function() {
             return label;
         };
         
+
+
         /** Add residue labels.  This will generate one label per a
          * residue within the selected atoms.  The label will be at the
          * centroid of the atoms and styled according to the passed style.
@@ -1187,6 +1191,8 @@ $3Dmol.GLViewer = (function() {
             }
             return this;
         };
+
+
 
         /**
          * Remove all labels from viewer
