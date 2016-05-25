@@ -1880,89 +1880,99 @@ $3Dmol.Parsers = (function() {
      * Parse a prmtop file from str and create atoms
      */
     parsers.prmtop = parsers.PRMTOP = function(str, options) {
-        var atoms = [];
-	var atom = {};
-	var properties = {};
+	var atoms = [];
 	var count = 0;
         var lines = str.split(/\r?\n|\r/);
-	if(lines > 0 && lines[0].includes("VERSION")){
+	if(lines.length > 0 && lines[0].includes("VERSION")){
 	    var sectionList = lines.filter(function (line){	//store the relevant section lists
 		return line.includes("POINTERS") || line.includes("ATOM_NAME") ||
 		line.includes("CHARGE") || line.includes("RADII") || line.includes("BONDS_INC_HYDROGEN") ||
 		line.includes("BONDS_WITHOUT_HYDROGEN");
 	    });
 	    var index = getIndex("POINTERS");
+	    if (index == -1)
+		return [];
 	    var col = getColEleSize(index);
-	    var atomCount = parseInt(lines[index].slice(0,col[1]));
+	    var atomCount = parseInt(lines[index+1].slice(0,col[1]));
             if (isNaN(atomCount) || atomCount <= 0)
                 return [];
 	    index = getIndex("ATOM_NAME");
-	    if (isNaN(index) || index <= 0)
+	    if (index == -1)
 		return [];
 	    col = getColEleSize(index);
-	    for (i = 0; i < atomCount/col[0]; i++){
+	    for (i = 0; i < parseInt(atomCount/col[0]); i++){
 		for(j=0; j < col[0]; j++){
-		    atom.serial = i;
+		    var atom = {};
+		    var properties = {"charge":"", "radii":""};
+	    	    atom.serial = count;
 		    atom.x = 0;
 		    atom.y = 0;
 		    atom.z = 0;
-		    atom.elem = atom.atom = lines[index].slice(col[1]*j, col[1]*(j+1));
+		    atom.atom = lines[index+1].slice(col[1]*j, col[1]*(j+1));
+		    atom.elem = lines[index+1].slice(col[1]*j, col[1]*j+1);
+		    atom.properties = properties;
 		    atoms.push(atom);
+		    count++;
 		}
 		index++;
 	    }
 	    for (i = 0; i < atomCount % col[0]; i++){
-		atom.serial = atomCount/col[0]*col[0] + i;
+		var atom = {};
+		var properties = {"charge":"", "radii":""};
+		atom.serial = count;
 		atom.x = 0;
 		atom.y = 0;
 		atom.z = 0;
-		atom.elem = atom.atom = lines[index].slice(col[1]*i, col[1]*(i+1));
+		atom.atom = lines[index+1].slice(col[1]*i, col[1]*(i+1));
+		atom.elem = lines[index+1].slice(col[1]*i, col[1]*i+1);
+		atom.properties = properties;
 		atoms.push(atom);
+		count++;
 	    }
 	    index = getIndex("CHARGE");
-	    if (Number.isInteger(index) && index > 0){
+	    if (index != -1){
 	        col = getColEleSize(index);
 	        count = 0;
-	        for (i = 0; i < atomCount/col[0]; i++){
+	        for (i = 0; i < parseInt(atomCount/col[0]); i++){
 		    for(j=0; j < col[0]; j++){
-		        atoms[count].properties.charge = lines[index].slice(col[1]*j, col[1]*(j+1));
+		       atoms[count].properties["charge"] = lines[index+1].slice(col[1]*j, col[1]*(j+1));	
 		        count++;
 		    }
 		    index++;
 	        }
 	        for (i = 0; i < atomCount % col[0]; i++){
-		    atoms[count].properties.charge = lines[index].slice(col[1]*i, col[1]*(i+1));
+		    atoms[count].properties["charge"] = lines[index+1].slice(col[1]*i, col[1]*(i+1));
 		    count++;
 	        }
 	    }
 	    index = getIndex("RADII");
-	    if (Number.isInteger(index) && index > 0){
+	    if (index != -1){
 		col = getColEleSize(index);
 		count = 0;
-		for (i = 0; i < atomCount/col[0]; i++){
+		for (i = 0; i < parseInt(atomCount/col[0]); i++){
 		    for(j = 0; j < col[0]; j++){
-			atoms[count].properties.radii = lines[index].slice(col[1]*j, col[1]*(j+1));
+			atoms[count].properties.radii = lines[index+1].slice(col[1]*j, col[1]*(j+1));
 			count++;
 		    }
 		    index++;
 		}
 		for (i = 0; i < atomCount % col[0]; i++){
-		    atoms[count].properties.radii = lines[index].slice(col[1]*i, col[1]*(i+1));
+		    atoms[count].properties.radii = lines[index+1].slice(col[1]*i, col[1]*(i+1));
 		    count++;
 	        }
 	    }
 	    index = getIndex("BONDS_WITHOUT_HYDROGEN");
-	    if (Number.isInteger(index) && index > 0){
+	    if (index != -1){
 		col = getColEleSize(index);
 		count = 0;
 		var atomIndex;
-		for (i = 0; i < atomCount/col[0]; i++){
+		for (i = 0; i < parseInt(atomCount/col[0]); i++){
 		    for (j = 0; j < col[0]; j++){
 			if (count%3 == 0){
-			    atomIndex = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			    atomIndex = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 			if (count%3 == 1){
-			    atoms[atomIndex].bonds = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			    atoms[atomIndex].bonds = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 		    count++;
 		    }
@@ -1970,26 +1980,26 @@ $3Dmol.Parsers = (function() {
 		}
 		for (i = 0; i < atomCount % col[0]; i++){
 		    if (count%3 == 0){
-			atomIndex = parseInt(lines[index].slice(col[1]*i, col[1]*(i+1))/3 + 1);
+			atomIndex = parseInt(lines[index+1].slice(col[1]*i, col[1]*(i+1))/3 + 1);
 		    }
 		    if (count%3 == 1){
-			atoms[atomIndex].bonds = parseInt(lines[index].slice(col[1]*i, col[1]*(i+1))/3 + 1);	
+			atoms[atomIndex].bonds = parseInt(lines[index+1].slice(col[1]*i, col[1]*(i+1))/3 + 1);	
 		    }
 		count++;
 		}
 	    }
-	    index = getIndex("BONDS_INCLUDING_HYDROGEN");
-	    if (Number.isInteger(index) && index > 0){
+	    index = getIndex("BONDS_INC_HYDROGEN");
+	    if (index != -1){
 		col = getColEleSize(index);
 		count = 0;
 		var atomIndex;
-		for (i = 0; i < atomCount/col[0]; i++){
+		for (i = 0; i < parseInt(atomCount/col[0]); i++){
 		    for (j = 0; j < col[0]; j++){
 			if (count%3 == 0){
-			    atomIndex = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			    atomIndex = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 			if (count%3 == 1){
-			    atoms[atomIndex].bonds = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			    atoms[atomIndex].bonds = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 		    count++;
 		    }
@@ -1997,28 +2007,38 @@ $3Dmol.Parsers = (function() {
 		}
 		for (i = 0; i < atomCount % col[0]; i++){
 		    if (count%3 == 0){
-			atomIndex = lines[index].slice(col[1]*i, col[1]*(i+1))/3 + 1;
+			atomIndex = lines[index+1].slice(col[1]*i, col[1]*(i+1))/3 + 1;
 		    }
 		    if (count%3 == 1){
-			atoms[atomIndex].bonds = lines[index].slice(col[1]*i, col[1]*(i+1))/3 + 1;		
+			atoms[atomIndex].bonds = lines[index+1].slice(col[1]*i, col[1]*(i+1))/3 + 1;		
 		    }
 		count++;
 		}
 	    }
+	}
+	else{
+	    return [];
 	}
 	function getIndex(section){
 	    var index = lines.indexOf(sectionList.filter(function (line){
 		return line.includes(section);
 	    })[0]);	//returns the index of the line containing FLAG POINTERS
-	    while(!lines(index).includes("FORMAT"))  //doing this so as to take comments into consideration
-		index++;
-	    return index + 1;
+	    if (Number.isInteger(index) && index > 0){
+		while(!lines[index].includes("FORMAT"))  //doing this so as to take comments into consideration
+		    index++;
+	    	return index;
+	    }
+	    else{
+		return -1;
+	    }
 	}
 	function getColEleSize(i){
-	    var colEleSize = [];
-	    colEleSize[0] = lines(i).match(/\((\d*)\S*/); // stores the number of columns
-	    colEleSize[1] = lines(i).match(/[a-zA-Z](\d*)\)\s*|[a-zA-Z](\d*)\.\d*\)\s*/); //stores the element size
-	    return colEleSize;	
+	    var numberOfCol = lines[i].match(/\((\d*)\S*/); // stores the number of columns
+	    var elementSize = lines[i].match(/[a-zA-Z](\d*)\)\s*/);
+	    if(elementSize == null){
+		elementSize = lines[i].match(/[a-zA-Z](\d*)\.\d*\)\s*/); //stores the element size
+	    }
+	    return [numberOfCol[1], elementSize[1]];	
 	}       
         return atoms;
     };
