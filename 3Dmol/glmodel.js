@@ -2063,14 +2063,14 @@ $3Dmol.GLModel = (function() {
 	        if (lines.length >= atomCount/2 + 2){
         	    var count = 0;
 		    for (i=2; i < atomCount/2 + 2; i++){
-	                atoms[count].x = parseInt(lines[i].slice(0,12));
-	                atoms[count].y = parseInt(lines[i].slice(12,24));
-	                atoms[count].z = parseInt(lines[i].slice(24,36));
+	                atoms[count].x = parseFloat(lines[i].slice(0,12));
+	                atoms[count].y = parseFloat(lines[i].slice(12,24));
+	                atoms[count].z = parseFloat(lines[i].slice(24,36));
 	                count++;
 	    
-	                atoms[count].x = parseInt(lines[i].slice(36,48));
-	                atoms[count].y = parseInt(lines[i].slice(48,60));
-	                atoms[count].z = parseInt(lines[i].slice(60,72));
+	                atoms[count].x = parseFloat(lines[i].slice(36,48));
+	                atoms[count].y = parseFloat(lines[i].slice(48,60));
+	                atoms[count].z = parseFloat(lines[i].slice(60,72));
 	                count++;
 		    } 
 		}
