@@ -25,23 +25,24 @@
     <table width="100%">
       <tr>
         <td colspan=2 height=200px>
-          49  <code> prmtop and inpcrd implementation</code>
+          50  <code> prmtop and inpcrd implementation</code>
         </td>
       </tr>
       <tr>
-        <td width="50%"><div id="test49" style="width: 400px; height: 400px; position: relative;"></div>
+        <td width="50%"><div id="test50" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
      <script>
-    var viewer = $3Dmol.createViewer($("#test49"));
+    var viewer = $3Dmol.createViewer($("#test50"), {
+		defaultcolors : $3Dmol.rasmolElementColors
+		});
     viewer.setBackgroundColor(0xffffffff);
-    var m;
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/TRPcage.prmtop", false);
     rawFile.onreadystatechange = function (){
         if(rawFile.readyState === 4){
             if(rawFile.status === 200 || rawFile.status == 0){
                 var data = rawFile.responseText;
-		m = viewer.addModel(data, "prmtop");	
+		var m = viewer.addModel(data, "prmtop");	
                 var File = new XMLHttpRequest();
    		File.open("GET", "volData/TRPcage.inpcrd", false);
     		File.onreadystatechange = function(){
@@ -49,6 +50,7 @@
 	    		if(File.status === 200 || File.status == 0){
 			    var coordinatesData = File.responseText;
 			    m.setCoordinates(coordinatesData, "inpcrd");
+			    viewer.setStyle({},{sphere:{}});
 			    viewer.zoomTo();
 			    viewer.render();
 			}
@@ -61,7 +63,7 @@
     rawFile.send(null);    
 
     </script>
-        <td width="50%"><img src="imgs/test49.png"></td>
+        <td width="50%"><img src="imgs/test50.png"></td>
       </tr>
     </table>
 

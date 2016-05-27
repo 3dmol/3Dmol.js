@@ -1900,8 +1900,11 @@ $3Dmol.Parsers = (function() {
 	    if (index == -1)
 		return [];
 	    col = getColEleSize(index);
-	    for (i = 0; i < parseInt(atomCount/col[0]); i++){
-		for(j=0; j < col[0]; j++){
+	    var noOfCol = col[0];
+	    for (i = 0; i < atomCount/col[0]; i++){
+		if (i == parseInt(atomCount/col[0]))
+		    noOfCol = atomCount % col[0]; 
+		for(j=0; j < noOfCol; j++){
 		    var atom = {};
 		    var properties = {"charge":"", "radii":""};
 	    	    atom.serial = count;
@@ -1911,108 +1914,83 @@ $3Dmol.Parsers = (function() {
 		    atom.atom = lines[index+1].slice(col[1]*j, col[1]*(j+1));
 		    atom.elem = lines[index+1].slice(col[1]*j, col[1]*j+1);
 		    atom.properties = properties;
+		    atom.bonds = [];
+		    atom.bondOrder = [];
 		    atoms.push(atom);
 		    count++;
 		}
 		index++;
 	    }
-	    for (i = 0; i < atomCount % col[0]; i++){
-		var atom = {};
-		var properties = {"charge":"", "radii":""};
-		atom.serial = count;
-		atom.x = 0;
-		atom.y = 0;
-		atom.z = 0;
-		atom.atom = lines[index+1].slice(col[1]*i, col[1]*(i+1));
-		atom.elem = lines[index+1].slice(col[1]*i, col[1]*i+1);
-		atom.properties = properties;
-		atoms.push(atom);
-		count++;
-	    }
 	    index = getIndex("CHARGE");
 	    if (index != -1){
 	        col = getColEleSize(index);
 	        count = 0;
-	        for (i = 0; i < parseInt(atomCount/col[0]); i++){
-		    for(j=0; j < col[0]; j++){
+		noOfCol = col[0];
+	        for (i = 0; i < atomCount/col[0]; i++){
+		    if (i == parseInt(atomCount/col[0]))
+			noOfCol = atomCount % col[0];
+		    for(j = 0; j < noOfCol; j++){
 		       atoms[count].properties["charge"] = lines[index+1].slice(col[1]*j, col[1]*(j+1));	
 		        count++;
 		    }
 		    index++;
-	        }
-	        for (i = 0; i < atomCount % col[0]; i++){
-		    atoms[count].properties["charge"] = lines[index+1].slice(col[1]*i, col[1]*(i+1));
-		    count++;
 	        }
 	    }
 	    index = getIndex("RADII");
 	    if (index != -1){
 		col = getColEleSize(index);
 		count = 0;
-		for (i = 0; i < parseInt(atomCount/col[0]); i++){
-		    for(j = 0; j < col[0]; j++){
+		noOfCol = col[0];
+		for (i = 0; i < atomCount/col[0]; i++){
+		    if (i == parseInt(atomCount/col[0]))
+			noOfCol = atomCount % col[0];
+		    for(j = 0; j < noOfCol; j++){
 			atoms[count].properties.radii = lines[index+1].slice(col[1]*j, col[1]*(j+1));
 			count++;
 		    }
 		    index++;
 		}
-		for (i = 0; i < atomCount % col[0]; i++){
-		    atoms[count].properties.radii = lines[index+1].slice(col[1]*i, col[1]*(i+1));
-		    count++;
-	        }
 	    }
 	    index = getIndex("BONDS_WITHOUT_HYDROGEN");
 	    if (index != -1){
 		col = getColEleSize(index);
 		count = 0;
+		noOfCol = col[0];
 		var atomIndex;
-		for (i = 0; i < parseInt(atomCount/col[0]); i++){
-		    for (j = 0; j < col[0]; j++){
+		for (i = 0; i < atomCount/col[0]; i++){
+		    if (i == parseInt(atomCount/col[0]))
+			noOfCol = atomCount % col[0];	
+		    for (j = 0; j < noOfCol; j++){
 			if (count%3 == 0){
 			    atomIndex = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 			if (count%3 == 1){
-			    atoms[atomIndex].bonds = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			    atoms[atomIndex].bonds.push(parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1));
 			}
 		    count++;
 		    }
 		index++;
-		}
-		for (i = 0; i < atomCount % col[0]; i++){
-		    if (count%3 == 0){
-			atomIndex = parseInt(lines[index+1].slice(col[1]*i, col[1]*(i+1))/3 + 1);
-		    }
-		    if (count%3 == 1){
-			atoms[atomIndex].bonds = parseInt(lines[index+1].slice(col[1]*i, col[1]*(i+1))/3 + 1);	
-		    }
-		count++;
 		}
 	    }
 	    index = getIndex("BONDS_INC_HYDROGEN");
 	    if (index != -1){
 		col = getColEleSize(index);
 		count = 0;
+		noOfCol = col[0];
 		var atomIndex;
-		for (i = 0; i < parseInt(atomCount/col[0]); i++){
-		    for (j = 0; j < col[0]; j++){
+		for (i = 0; i < atomCount/col[0]; i++){
+		    if (i == parseInt(atomCount/col[0]))
+			noOfCol = atomCount % col[0];	
+		    for (j = 0; j < noOfCol; j++){
 			if (count%3 == 0){
 			    atomIndex = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
 			}
 			if (count%3 == 1){
-			    atoms[atomIndex].bonds = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			    atoms[atomIndex].bonds.push(parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1));
 			}
 		    count++;
 		    }
 		index++;
-		}
-		for (i = 0; i < atomCount % col[0]; i++){
-		    if (count%3 == 0){
-			atomIndex = lines[index+1].slice(col[1]*i, col[1]*(i+1))/3 + 1;
-		    }
-		    if (count%3 == 1){
-			atoms[atomIndex].bonds = lines[index+1].slice(col[1]*i, col[1]*(i+1))/3 + 1;		
-		    }
-		count++;
 		}
 	    }
 	}
@@ -2040,7 +2018,7 @@ $3Dmol.Parsers = (function() {
 	    }
 	    return [numberOfCol[1], elementSize[1]];	
 	}       
-        return atoms;
+        return [atoms];
     };
 
     return parsers;
