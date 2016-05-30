@@ -101,9 +101,8 @@ $3Dmol.drawCartoon = (function() {
         return ret;
     };
 
-    var drawThinStrip = function(group, p1, p2, colors, div, opacity) {
+    var drawThinStrip = function(geo, p1, p2, colors, div, opacity) {
     
-        var geo = new $3Dmol.Geometry(true);       
         var offset, vertoffset;
         var color, colori;
 
@@ -147,21 +146,9 @@ $3Dmol.drawCartoon = (function() {
             geoGroup.vertices += 2;
         }
         
-        geo.initTypedArrays();
-        geo.setUpNormals();
-        
-        var material = new $3Dmol.MeshDoubleLambertMaterial();
-        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
-            material.transparent = true;
-            material.opacity = opacity;
-        }
-        material.vertexColors = $3Dmol.FaceColors;
-        var mesh = new $3Dmol.Mesh(geo, material);
-
-        group.add(mesh);
     };
 
-    var drawShapeStrip = function(group, points, colors, div, thickness, opacity, shape) {
+    var drawShapeStrip = function(geo, points, colors, div, thickness, opacity, shape) {
 
         // points is a 2D array, dimensionality given by [num = cross-sectional resolution][len = length of strip]
         var i, j, num, len;
@@ -175,10 +162,8 @@ $3Dmol.drawCartoon = (function() {
         len = points[0].length;
 
         if (!thickness) // if thickness is 0, we can use a smaller geometry than this function generates
-            return drawThinStrip(group, points[0], points[num-1], colors, div, opacity);
+            return drawThinStrip(geo, points[0], points[num-1], colors, div, opacity);
 
-
-        var geo = new $3Dmol.Geometry(true);
         var axis, cs_shape, cs_bottom, cs_top, last_cs_bottom, last_cs_top;
 
         // cache the available cross-sectional shapes
@@ -394,20 +379,9 @@ $3Dmol.drawCartoon = (function() {
             geoGroup.faceidx += 6;
         }
         
-        geo.initTypedArrays();
-        geo.setUpNormals();
-        
-        var material = new $3Dmol.MeshDoubleLambertMaterial();
-        material.vertexColors = $3Dmol.FaceColors;
-        if (typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
-            material.transparent = true;
-            material.opacity = opacity;
-        }
-        var mesh = new $3Dmol.Mesh(geo, material);
-        group.add(mesh);
     };
 
-    var drawPlainStrip = function(group, points, colors, div, thickness, opacity) {
+    var drawPlainStrip = function(geo, points, colors, div, thickness, opacity) {
         if ((points.length) < 2)
             return;
 
@@ -419,9 +393,7 @@ $3Dmol.drawCartoon = (function() {
         p1 = subdivide(p1, div);
         p2 = subdivide(p2, div);
         if (!thickness)
-            return drawThinStrip(group, p1, p2, colors, div, opacity);
-
-        var geo = new $3Dmol.Geometry(true);
+            return drawThinStrip(geo, p1, p2, colors, div, opacity);
         
         //var vs = geo.vertices, fs = geo.faces;
         var vs = [], fs = [];
@@ -611,8 +583,6 @@ $3Dmol.drawCartoon = (function() {
         
         //TODO: Add intersection planes for caps
         
-        geo.initTypedArrays();
-        geo.setUpNormals();
         
                 // HalfEdgeRec used to store adjacency info of mesh
         var HalfEdge=function(vertIdx){
@@ -711,14 +681,6 @@ $3Dmol.drawCartoon = (function() {
         
         //geoGroup.adjFaceArray = computeAdjacency(faceArray,faceArray.length,offset);
         
-        var material = new $3Dmol.MeshDoubleLambertMaterial();
-        material.vertexColors = $3Dmol.FaceColors;
-        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
-            material.transparent = true;
-            material.opacity = opacity;
-        }
-        var mesh = new $3Dmol.Mesh(geo, material);
-        group.add(mesh);   
     };
 
     //TODO: Need to update this (will we ever use this?)
@@ -746,14 +708,14 @@ $3Dmol.drawCartoon = (function() {
         group.add(line);
     };
 
-    var drawStrip = function(group, points, colors, div, thickness, opacity, shape)
+    var drawStrip = function(geo, points, colors, div, thickness, opacity, shape)
     {    
         if (!shape || shape === "default")
             shape = "rectangle";
         if(shape === 'edged')
-            drawPlainStrip(group, points, colors, div, thickness, opacity);
+            drawPlainStrip(geo, points, colors, div, thickness, opacity);
         else if (shape === "rectangle" || shape === "oval" || shape === "parabola")
-            drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
+            drawShapeStrip(geo, points, colors, div, thickness, opacity, shape);
     }
 
     // check if given atom is an alpha carbon
@@ -771,9 +733,10 @@ $3Dmol.drawCartoon = (function() {
             if(a.resi < b.resi) {
                 //some PDBs have gaps in the numbering but the residues are still connected
                 //assume if within 4A they are connected
-                var av = new $3Dmol.Vector3(a.x, a.y, a.z);
-                var bv = new $3Dmol.Vector3(b.x, b.y, b.z);
-                var dist = av.distanceToSquared(bv);
+                var dx = a.x-b.x;
+                var dy = a.y-b.y;
+                var dz = a.z-b.z;
+                var dist = dx*dx+dy*dy+dz*dz;
                 if(dist < 16.0) return true; //calpha dist
             }
         }
@@ -793,10 +756,12 @@ $3Dmol.drawCartoon = (function() {
         var pyrResns = ["DT", "DC", "U", "C", "T"];
         var naResns  =  purResns.concat(pyrResns);
 
-        var geo, cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
+        var cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
         var tubeStart, tubeEnd, drawingTube;
-        var traceGeo = null;
+        var traceGeo = null; //for shapes that don't need normals computed
+        var geo = null;
+        var shapeGeo = null;
         var colors = [];
         var points = [];
         for (var i = 0; i < num; i++)
@@ -932,6 +897,7 @@ $3Dmol.drawCartoon = (function() {
             else // draw default-style cartoons based on secondary structure
             {
                 if (!geo) geo = new $3Dmol.Geometry(true);
+                if (!traceGeo) traceGeo = new $3Dmol.Geometry(true);
 
                 // draw backbone through these atoms
                 if (isAlphaCarbon(next) ||
@@ -943,7 +909,7 @@ $3Dmol.drawCartoon = (function() {
                         {
                             drawingTube = false;
                             tubeEnd = new $3Dmol.Vector3(next.x, next.y, next.z);
-                            $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(currColor), 1, 1);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(currColor), 1, 1);
                             next.ss = "h";
 
                         }
@@ -968,7 +934,7 @@ $3Dmol.drawCartoon = (function() {
                             else
                                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
                             arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
                             colors.push(nextColor);
                             if (arrow) colors.push(nextColor);
@@ -981,20 +947,8 @@ $3Dmol.drawCartoon = (function() {
                         for (i = 0; !thickness && i < num; i++)
                             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
                         if (fill && points[0].length > 0) 
-                            drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
-                        
-                        if (geo != null && geo.vertices > 0)
-                        {
-                            var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
-                            cartoonMaterial.vertexColors = $3Dmol.FaceColors;
-                            if (typeof(points.opacity) === "number" && points.opacity >= 0 && points.opacity < 1) {
-                                cartoonMaterial.transparent = true;
-                                cartoonMaterial.opacity = points.opacity;
-                            }
-                            var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
-                            group.add(cartoonMesh);
-                            geo = null;
-                        }
+                            drawStrip(geo, points, colors, div, thickness, points.opacity, points.style);
+                    
 
                         // clear arrays for points and colors
                         points = [];
@@ -1013,7 +967,7 @@ $3Dmol.drawCartoon = (function() {
                             var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.02); //TODO: apply this as function of thickness
                             baseStartPt.add(startFix);
 
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
+                            $3Dmol.GLDraw.drawCylinder(traceGeo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
                             baseStartPt = null;
                             baseEndPt = null;   
                         }
@@ -1088,7 +1042,7 @@ $3Dmol.drawCartoon = (function() {
             else
                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
-            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
+            $3Dmol.GLDraw.drawCylinder(traceGeo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
             arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
             colors.push(nextColor);
             if (arrow) colors.push(nextColor);
@@ -1099,10 +1053,13 @@ $3Dmol.drawCartoon = (function() {
             drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
         if (fill && points[0].length > 0)
         {
-            drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
+            drawStrip(geo, points, colors, div, thickness, points.opacity, points.style);
         }
         if (geo != null && geo.vertices > 0)
         {
+            geo.initTypedArrays();
+-           geo.setUpNormals();
+
             var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
             cartoonMaterial.vertexColors = $3Dmol.FaceColors;
             if (typeof(points.opacity) === "number" && points.opacity >= 0 && points.opacity < 1) {
