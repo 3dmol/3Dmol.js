@@ -1266,7 +1266,7 @@ $3Dmol.Parsers = (function() {
 
 
     //return one model worth of pdb, returns atoms, modelData, and remaining lines
-    var getSinglePDB = function(lines, options) {
+    var getSinglePDB = function(lines, options, sslookup) {
         var atoms = [];
         var noH = !options.keepH; // suppress hydrogens by default
         var computeStruct = !options.noSecondaryStructure;
@@ -1275,7 +1275,6 @@ $3Dmol.Parsers = (function() {
         var modelData  = {symmetries:[]};
         var atom;
         var remainingLines = [];
-        var sslookup = {};
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
@@ -1289,6 +1288,14 @@ $3Dmol.Parsers = (function() {
             
             if(recordName.indexOf("END") == 0) {
                 remainingLines = lines.slice(i+1);
+                if(recordName == "END") { //ass opposed to ENDMDL
+                    //reset secondary structure
+                    for (var prop in sslookup) {
+                        if (sslookup.hasOwnProperty(prop)) {
+                            delete sslookup[prop];
+                        }
+                    }
+                }
                 break;
             }
             else if (recordName == 'ATOM  ' || recordName == 'HETATM') {
@@ -1470,34 +1477,36 @@ $3Dmol.Parsers = (function() {
         
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
-        console.log("bond connecting " + ((new Date()).getTime() -starttime));
+       // console.log("bond connecting " + ((new Date()).getTime() -starttime));
 
         if (!noAssembly)
             processSymmetries(modelData.symmetries, copyMatrix, atoms);
 
-        if (computeStruct || !hasStruct) {
+        if (computeStruct) {
             starttime = (new Date()).getTime();
             computeSecondaryStructure(atoms);
-            console.log("secondary structure " + ((new Date()).getTime() - starttime));
+           // console.log("secondary structure " + ((new Date()).getTime() - starttime));
         }
         starttime = (new Date()).getTime();
 
         // Assign secondary structures from pdb file
-        for (i = 0; i < atoms.length; i++) {
-            atom = atoms[i];
-            if (atom === undefined)
-                continue;
-            if(atom.chain in sslookup &&
-                atom.resi in sslookup[atom.chain]) {
-                var code = sslookup[atom.chain][atom.resi];
-                atom.ss = code[0];
-                if(code.length > 1) {
-                    if(code[1] == '1') atom.ssbegin = true;
-                    else if(code[1] == '2') atom.ssend = true;
+        if(hasStruct) {
+            for (i = 0; i < atoms.length; i++) {
+                atom = atoms[i];
+                if (atom === undefined)
+                    continue;
+                if(atom.chain in sslookup &&
+                    atom.resi in sslookup[atom.chain]) {
+                    var code = sslookup[atom.chain][atom.resi];
+                    atom.ss = code[0];
+                    if(code.length > 1) {
+                        if(code[1] == '1') atom.ssbegin = true;
+                        else if(code[1] == '2') atom.ssend = true;
+                    }
                 }
             }
         }
-    console.log("assign structure " + ((new Date()).getTime() - starttime));
+    //console.log("assign structure " + ((new Date()).getTime() - starttime));
         
         return [atoms,modelData,remainingLines];
     };
@@ -1517,10 +1526,11 @@ $3Dmol.Parsers = (function() {
     parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(str, options) {
 
         var atoms = []; //a separate list for each model
+        var sslookup = {}; //stores SHEET and HELIX info, which is shared across models
         atoms.modelData = [];
         var lines = str.split(/\r?\n|\r/);
         while(lines.length > 0) {
-            pdbinfo = getSinglePDB(lines, options);
+            pdbinfo = getSinglePDB(lines, options, sslookup);
             var modelatoms = pdbinfo[0];
             var modelData = pdbinfo[1];
             lines = pdbinfo[2];
@@ -1545,7 +1555,7 @@ $3Dmol.Parsers = (function() {
                 atoms.push(modelatoms);
             }
             
-            if(options.onemol) {
+            if(!options.multimodel) {
                 break;
             }
         }
