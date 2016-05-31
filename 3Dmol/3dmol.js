@@ -194,6 +194,10 @@ $3Dmol.download = function(query, viewer, options, callback) {
         if (query.substr(0, 4) === 'pdb:') {
             pdbUri = options && options.pdbUri ? options.pdbUri : "http://www.rcsb.org/pdb/files/";
             type = options && options.format ? options.format : "pdb";
+            if(typeof options.noComputeSecondaryStructure === 'undefined') {
+                //when fetch directly from pdb, trust structure annotations
+                options.noComputeSecondaryStructure = true;
+            }
             query = query.substr(4).toUpperCase();
             if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                alert("Wrong PDB ID"); return;

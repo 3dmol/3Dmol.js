@@ -1281,7 +1281,8 @@ $3Dmol.Parsers = (function() {
         var atoms = [[]];
         var atoms_cnt = 0;
         var noH = !options.keepH; // suppress hydrogens by default
-        var computeStruct = !options.noSecondaryStructure;
+        var ignoreStruct = !!options.noSecondaryStructure; 
+        var computeStruct = !options.noComputeSecondaryStructure;
         var noAssembly = !options.doAssembly; // don't assemble by default
         var copyMatrix = !options.duplicateAssemblyAtoms; //default true
         var modelData = atoms.modelData = [{symmetries:[]}];
@@ -1487,7 +1488,7 @@ $3Dmol.Parsers = (function() {
             if (!noAssembly)
                 processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
 
-            if (computeStruct || !hasStruct) {
+            if (computeStruct && !ignoreStruct) {
                 starttime = (new Date()).getTime();
                 computeSecondaryStructure(atoms[n]);
                 // console.log("secondary structure " + ((new Date()).getTime() -

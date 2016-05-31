@@ -860,7 +860,7 @@ $3Dmol.GLViewer = (function() {
             
             this.setView(view); // Calls show() => renderer render
             var time2 = new Date();
-            //console.log("render time: " + (time2 - time1));
+            console.log("render time: " + (time2 - time1));
             return this;
         };
 
