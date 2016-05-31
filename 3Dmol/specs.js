@@ -108,6 +108,9 @@
  * @prop {boolean} wireframe - draw as wireframe, not surface
  * @prop {number} linewidth - width of line for wireframe rendering
  * @prop {number} smoothness - amount to smooth surface (default 1)
+ * @prop {AtomSelectionSpec} sel - selection around which to show data
+ * @prop {list} coords - coordinates around which to include data
+ * @prop {number} seldist - distance around selection/coords to include data [default = 2.0]
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click 
  */

@@ -1264,12 +1264,20 @@ $3Dmol.Parsers = (function() {
         }
     }
 
+    var isEmpty = function( obj ) {
+        var name;
+        for ( name in obj ) {
+            return false;
+        }
+        return true;
+    };
 
     //return one model worth of pdb, returns atoms, modelData, and remaining lines
     var getSinglePDB = function(lines, options, sslookup) {
         var atoms = [];
         var noH = !options.keepH; // suppress hydrogens by default
-        var computeStruct = !options.noSecondaryStructure;
+        var ignoreStruct = !!options.noSecondaryStructure; 
+        var computeStruct = !options.noComputeSecondaryStructure;
         var noAssembly = !options.doAssembly; // don't assemble by default
         var copyMatrix = !options.duplicateAssemblyAtoms; //default true
         var modelData  = {symmetries:[]};
@@ -1482,7 +1490,7 @@ $3Dmol.Parsers = (function() {
         if (!noAssembly)
             processSymmetries(modelData.symmetries, copyMatrix, atoms);
 
-        if (computeStruct) {
+        if (computeStruct  && !ignoreStruct) {
             starttime = (new Date()).getTime();
             computeSecondaryStructure(atoms);
            // console.log("secondary structure " + ((new Date()).getTime() - starttime));
@@ -1490,7 +1498,7 @@ $3Dmol.Parsers = (function() {
         starttime = (new Date()).getTime();
 
         // Assign secondary structures from pdb file
-        if(hasStruct) {
+        if(!isEmpty(sslookup)) {
             for (i = 0; i < atoms.length; i++) {
                 atom = atoms[i];
                 if (atom === undefined)
