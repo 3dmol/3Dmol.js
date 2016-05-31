@@ -213,7 +213,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
             if (!query.match(/^[0-9]+$/)) {
                alert("Wrong Compound ID"); return;
             }
-            uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+            uri = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
               "/SDF?record_type=3d";
         }
     
@@ -223,6 +223,8 @@ $3Dmol.download = function(query, viewer, options, callback) {
           viewer.render();
           if(callback) callback(m);
     
+       }).fail(function(e) {
+        console.log("fetch of "+uri+" failed: "+e.statusText);
        });
    }
    
