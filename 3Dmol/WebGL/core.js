@@ -648,7 +648,7 @@ $3Dmol.Raycaster = (function() {
         
         matrixPosition.getPositionFromMatrix(group.matrixWorld);
         
-        if ((clickable.clickable !== true) || (clickable.intersectionShape === undefined))
+        if (clickable.intersectionShape === undefined)
             return intersects;       
         var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
@@ -662,7 +662,9 @@ $3Dmol.Raycaster = (function() {
             if (!raycaster.ray.isIntersectionSphere(sphere)) {             
 				return intersects;
             }
-        }      
+        }     
+
+
         //Iterate through intersection objects
         var i, il,
             norm, normProj, cylProj, rayProj,

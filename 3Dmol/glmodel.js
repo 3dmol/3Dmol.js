@@ -183,7 +183,7 @@ $3Dmol.GLModel = (function() {
             var points = [ [ delta, 0, 0 ], [ -delta, 0, 0 ], [ 0, delta, 0 ],
                     [ 0, -delta, 0 ], [ 0, 0, delta ], [ 0, 0, -delta ] ];
 
-            var clickable = atom.clickable;
+            var clickable = atom.clickable || atom.hoverable;
             if (clickable && atom.intersectionShape === undefined)
                 atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
@@ -355,7 +355,7 @@ $3Dmol.GLModel = (function() {
                 var mp = p1.clone().add(p2).multiplyScalar(0.5);
                 var singleBond = false;               
                 
-                if (atom.clickable){
+                if (atom.clickable || atom.hoverable){
                     if (atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                     atom.intersectionShape.line.push(p1);
@@ -501,7 +501,7 @@ $3Dmol.GLModel = (function() {
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
             
-            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)) {
+            if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
                 var center = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                 atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
             }
@@ -540,6 +540,11 @@ $3Dmol.GLModel = (function() {
 
             radiusArray[startv] = radius;
 
+            if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
+                var center = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
+            }
+            
             geoGroup.vertices += 1;
 
         };
@@ -610,6 +615,11 @@ $3Dmol.GLModel = (function() {
             
             var radius = getRadiusFromStyle(atom, style);
             var C = $3Dmol.getColorFromStyle(atom, style);
+            
+            if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
+                var center = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
+            }
             
             drawSphereImposter(geo, atom, radius, C);            
         };
@@ -763,13 +773,13 @@ $3Dmol.GLModel = (function() {
                         
                         if (atom.clickable || atom2.clickable) {
                             mp = new $3Dmol.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-                            if (atom.clickable){
+                            if (atom.clickable || atom.hoverable){
                                 var cylinder1 = new $3Dmol.Cylinder(p1 , mp , bondR);
                                 var sphere1 = new $3Dmol.Sphere(p1 , bondR);
                                 atom.intersectionShape.cylinder.push(cylinder1);   
                                 atom.intersectionShape.sphere.push(sphere1);                             
                             }
-                            if (atom2.clickable){
+                            if (atom2.clickable || atom2.hoverable){
                                 var cylinder2 = new $3Dmol.Cylinder(p2 , mp , bondR);
                                 var sphere2 = new $3Dmol.Sphere(p2 , bondR);
                                 atom2.intersectionShape.cylinder.push(cylinder2);
@@ -830,13 +840,13 @@ $3Dmol.GLModel = (function() {
                                                .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
-                                if (atom.clickable) {
+                                if (atom.clickable || atom.hoverable) {
                                     cylinder1a = new $3Dmol.Cylinder(p1a , mp , r);
                                     cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                 }
-                                if (atom2.clickable) {
+                                if (atom2.clickable || atom2.hoverable) {
                                     cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
                                     cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
@@ -887,7 +897,7 @@ $3Dmol.GLModel = (function() {
                                 mp3 = new $3Dmol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
                                                                 
-                                if (atom.clickable) {
+                                if (atom.clickable || atom.hoverable) {
                                     cylinder1a = new $3Dmol.Cylinder(p1a.clone(), mp.clone(), r);
                                     cylinder1b = new $3Dmol.Cylinder(p1b.clone(), mp2.clone(), r);
                                     cylinder1c = new $3Dmol.Cylinder(p1.clone(), mp3.clone(), r);
@@ -895,7 +905,7 @@ $3Dmol.GLModel = (function() {
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                     atom.intersectionShape.cylinder.push(cylinder1c);
                                 } 
-                                if (atom2.clickable) {                               
+                                if (atom2.clickable || atom2.hoverable) {                               
                                     cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
                                     cylinder2b = new $3Dmol.Cylinder(p2b.clone(), mp2.clone(), r);
                                     cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
@@ -1001,7 +1011,7 @@ $3Dmol.GLModel = (function() {
 
                 if (atom && atom.style) {
 
-                    if (atom.clickable && atom.intersectionShape === undefined)
+                    if ((atom.clickable || atom.hoverable) && atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};
 
                     testOpacities = {line:undefined, cross:undefined, stick:undefined, sphere:undefined};
@@ -1343,7 +1353,7 @@ $3Dmol.GLModel = (function() {
                     atom.style = atom.style || defaultAtomStyle;
                     atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
                     atom.model = id;
-                    if (atom.clickable)
+                    if (atom.clickable || atom.hoverable)
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                 }
             }
@@ -1747,7 +1757,7 @@ $3Dmol.GLModel = (function() {
             
                 for ( var i = 0; i < selected.length; i++) {                
                     changedAtoms = true;
-                    if (selected[i].clickable) 
+                    if (selected[i].clickable || selected[i].hoverable) 
                         selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
 
@@ -1814,6 +1824,42 @@ $3Dmol.GLModel = (function() {
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
         
+        this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
+            var s;
+            for (s in sel) {
+                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure hoverable is a boolean
+            hoverable = !!hoverable;
+
+            // report to console if hover_callback is not a valid function
+            if (hover_callback && typeof hover_callback != "function") {
+                console.log("Hover_callback is not a function");
+                return;
+            }
+            // report to console if unhover_callback is not a valid function
+            if (unhover_callback && typeof unhover_callback != "function") {
+                console.log("Unhover_callback is not a function");
+                return;
+            }
+
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].hoverable= hoverable;
+                if (hover_callback) selected[i].hover_callback = hover_callback;
+                if (unhover_callback) selected[i].unhover_callback = unhover_callback;
+
+            }
+
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
+        }
         /** given a mapping from element to color, set atom colors
          * 
          * @function $3Dmol.GLModel#setColorByElement
@@ -2047,6 +2093,36 @@ $3Dmol.GLModel = (function() {
             }
         }
 
+        /**
+	* Set coordinates for the atoms parsed from the prmtop file. 
+	* @function $3Dmol.GLModel#setCoordinates
+	* @param {string} str - contains the data of the file
+	* @param {string} format - contains the format of the file
+	* @param {function} callback - function called when a inpcrd file is uploaded
+ 	*/
+
+	this.setCoordinates = function(str, format) {
+	    format = format || "";
+	    if (format == "inpcrd"){
+	       	var lines = str.split(/\r?\n|\r/);
+	        var atomCount = parseInt(lines[1].slice(0, 15));
+	        if (lines.length >= atomCount/2 + 2){
+        	    var count = 0;
+		    for (i=2; i < atomCount/2 + 2; i++){
+	                atoms[count].x = parseFloat(lines[i].slice(0,12));
+	                atoms[count].y = parseFloat(lines[i].slice(12,24));
+	                atoms[count].z = parseFloat(lines[i].slice(24,36));
+	                count++;
+	    
+	                atoms[count].x = parseFloat(lines[i].slice(36,48));
+	                atoms[count].y = parseFloat(lines[i].slice(48,60));
+	                atoms[count].z = parseFloat(lines[i].slice(60,72));
+	                count++;
+		    } 
+		}
+	    }
+	    return atoms;
+	} 
     }
 
     GLModel.parseMolData = function(data, format, options) {
@@ -2077,7 +2153,9 @@ $3Dmol.GLModel = (function() {
                     format = "pdb";
                 } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
                     format = "sdf"; //could look at line 3
-                } else {
+                } else if(data.match(/^%VERSION\s+\VERSION_STAMP/gm)){
+ 		    format = "prmtop";
+		} else{
                     format = "xyz";
                 }
                 console.log("Best guess: "+format);
@@ -2098,7 +2176,7 @@ $3Dmol.GLModel = (function() {
                 atom.style = atom.style || defaultAtomStyle;
                 atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
                 atom.model = id;
-                if (atom.clickable)
+                if (atom.clickable || atom.hoverable)
                     atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
             }
         }

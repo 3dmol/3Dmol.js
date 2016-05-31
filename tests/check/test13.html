@@ -23,7 +23,7 @@
     <table width="100%">
       <tr>
         <td colspan=2 height=200px>
-          13 Cylinder(clickable)<code>radius fromCap toCap color</code>
+          13 Cylinder(clickable and hoverable)<code>radius fromCap toCap color</code>
         </td>
       </tr>
       <tr>
@@ -40,11 +40,11 @@
                                   fromCap:1,
                                   toCap:2,
                                   color:'red',
+                                  hoverable:true,
                                   clickable:true,
-                                  callback:function(){
-                                      this.color.setHex(0x00FFFF00);
-                                      viewer.render();
-                                  }
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},
@@ -55,6 +55,9 @@
               viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
                                   end:{x:20.0,y:0.0,z:0.0},
                                   radius:1.0,
+                                  color:'purple',
+                                  hoverable:true,
+                                  hover_callback: function() { this.color.setHex(0x0000ff); viewer.render();},
                                   fromCap:false,
                                   toCap:false});
               viewer.render();

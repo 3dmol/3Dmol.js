@@ -1,5 +1,5 @@
 3Dmol.js incorporates code from GLmol, Three.js, and jQuery and
-is licensed under a BSD style license.
+is licensed under a BSD-3-Clause license.
 
 * 3Dmol.js
 	Copyright (c) 2014, University of Pittsburgh and contributors

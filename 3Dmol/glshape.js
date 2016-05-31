@@ -609,6 +609,14 @@ $3Dmol.GLShape = (function() {
         shape.clickable = stylespec.clickable ? true : false;
         shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
                 : null;
+
+        shape.hoverable = stylespec.hoverable ? true : false;
+        shape.hover_callback = typeof (stylespec.hover_callback) === "function" ? stylespec.hover_callback
+                : null;
+
+	shape.unhover_callback = typeof (stylespec.unhover_callback) === "function" ? stylespec.unhover_callback
+                : null;
+
         shape.hidden = stylespec.hidden;
     };
 
@@ -881,7 +889,8 @@ $3Dmol.GLShape = (function() {
                 vertexArr : verts,
                 faceArr : faces,
                 normalArr : [],
-                clickable : volSpec.clickable
+                clickable : volSpec.clickable,
+                hoverable : volSpec.hoverable
             });
            
             this.updateStyle(volSpec);
