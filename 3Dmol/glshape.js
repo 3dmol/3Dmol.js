@@ -853,14 +853,34 @@ $3Dmol.GLShape = (function() {
             var nZ = data.size.z;
             var vertnums = new Int16Array(nX * nY * nZ);
             var vals = data.data;
+            var vals_clone;
+            if(volSpec.selectedRegion!==undefined){
+                vals_clone=vals.slice();
+                for(var i=0; i <nX;i++){
+                    for(var j=0;j<nY;j++){
+                        for(var k=0;k<nZ;k++){
+
+                            var coordinate= this.convert(i,j,k,data);
+                            if(!this.inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset)){
+                                var gridindex= (i*nX+j)*nY + k;
+                                vals_clone[gridindex]=0;
+                            }
+                        }
+                    }
+                   
+                }
+            }
+            vals=vals_clone;
+
+
             var i, il;
 
             for (i = 0, il = vertnums.length; i < il; ++i)
                 vertnums[i] = -1;
 
-            //mark locations partitioned by isoval
             var bitdata = new Uint8Array(nX * nY * nZ);
-
+           
+            //mark locations partitioned by isoval
             for (i = 0, il = vals.length; i < il; ++i) {
                 var val = (isoval >= 0) ? vals[i] - isoval : isoval - vals[i];
 
@@ -868,7 +888,9 @@ $3Dmol.GLShape = (function() {
                     bitdata[i] |= ISDONE;
 
             }
-
+        
+            
+               
             var verts = [], faces = [];
 
             $3Dmol.MarchingCube.march(bitdata, verts, faces, {
@@ -914,7 +936,41 @@ $3Dmol.GLShape = (function() {
             this.boundingSphere.radius = Math.max(len1,len2);
            
         };
+
+        this.inSelectedRegion=function(coordinate,selectedRegion,offset){
+            for(var i=0;i<selectedRegion.length;i++){
+                var r=-2.0+offset;
+                if(selectedRegion[i].x<coordinate.x-r || selectedRegion[i].x>coordinate.x+r){
+                    continue
+                }
+                if(selectedRegion[i].y<coordinate.y-r || selectedRegion[i].y>coordinate.y+r){
+                    continue
+                }
+                if(selectedRegion[i].z<coordinate.z-r || selectedRegion[i].z>coordinate.z+r){
+                    continue
+                }
+            console.log("true that");
+            return true;
+            }
+            console.log("false");
+            return false;
+        }
         
+        this.convert=function(i,j,k,data){
+            var pt;
+            if(data.matrix) {
+                pt = new $3Dmol.Vector3(i,j,k);
+                pt = pt.applyMatrix4(data.matrix);
+                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
+
+            } else {
+                pt.x = data.origin.x+data.unit.x*i;
+                pt.y = data.origin.y+data.unit.y*j;
+                pt.z = data.origin.z+data.unit.z*k;
+            }
+            //console.log(pt.x+","+pt.y+","+pt.z);
+            return pt;
+        }
         /** 
          * @deprecated Use addIsosurface instead
          * Creates custom shape from volumetric data 

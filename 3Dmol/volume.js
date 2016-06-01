@@ -97,7 +97,7 @@ $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     return this.data[x*this.size.y*this.size.z + y*this.size.z + z];
 };
 
-$3Dmol.VolumeData.prototype.getCoordinates = function(index,data){
+$3Dmol.VolumeData.prototype.getCoordinates = function(index){
     
     var x = index/(this.size.y*this.size.z);
     var y = index % (this.size.y*this.size.z);
