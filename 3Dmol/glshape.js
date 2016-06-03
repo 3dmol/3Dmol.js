@@ -843,6 +843,7 @@ $3Dmol.GLShape = (function() {
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
          */
         this.addIsosurface = function(data, volSpec) {
+           
             var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
                     : 0.0;
             var voxel = (volSpec.voxel) ? true : false;
@@ -853,25 +854,20 @@ $3Dmol.GLShape = (function() {
             var nZ = data.size.z;
             var vertnums = new Int16Array(nX * nY * nZ);
             var vals = data.data;
-            var vals_clone;
             if(volSpec.selectedRegion!==undefined){
-                vals_clone=vals.slice();
                 for(var i=0; i <nX;i++){
                     for(var j=0;j<nY;j++){
                         for(var k=0;k<nZ;k++){
-
-                            var coordinate= this.convert(i,j,k,data);
-                            if(!this.inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset)){
-                                var gridindex= (i*nX+j)*nY + k;
-                                vals_clone[gridindex]=0;
-                            }
+                            var coordinate = convert(i,j,k,data);
+                            //console.log(coordinate.x+","+coordinate.y+","+coordinate.z);
+                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset)){
+                                var gridindex = ((i*nY)+j)*nZ+k;
+                                vals[gridindex]=0;
+                            }    
                         }
-                    }
-                   
+                    }     
                 }
             }
-            vals=vals_clone;
-
 
             var i, il;
 
@@ -937,26 +933,22 @@ $3Dmol.GLShape = (function() {
            
         };
 
-        this.inSelectedRegion=function(coordinate,selectedRegion,offset){
+        var inSelectedRegion=function(coordinate,selectedRegion,offset){
+            
+            //takes up most of the time
             for(var i=0;i<selectedRegion.length;i++){
-                var r=-2.0+offset;
-                if(selectedRegion[i].x<coordinate.x-r || selectedRegion[i].x>coordinate.x+r){
-                    continue
-                }
-                if(selectedRegion[i].y<coordinate.y-r || selectedRegion[i].y>coordinate.y+r){
-                    continue
-                }
-                if(selectedRegion[i].z<coordinate.z-r || selectedRegion[i].z>coordinate.z+r){
-                    continue
-                }
-            console.log("true that");
-            return true;
+                var r=1.0;
+                if(distance_from(selectedRegion[i],coordinate)<=r)
+                    return true;
             }
-            console.log("false");
             return false;
         }
+
+        var distance_from= function(c1,c2){
+            return Math.sqrt(Math.pow((c1.x-c2.x),2)+Math.pow((c1.y-c2.y),2)+Math.pow((c1.z-c2.z),2));
+        }
         
-        this.convert=function(i,j,k,data){
+        var convert=function(i,j,k,data){
             var pt;
             if(data.matrix) {
                 pt = new $3Dmol.Vector3(i,j,k);
