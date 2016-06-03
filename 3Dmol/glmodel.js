@@ -1404,7 +1404,7 @@ $3Dmol.GLModel = (function() {
             for (var i = 0; i < frames.length; i++) {
                 this.setAtomDefaults(frames[i], id);
             }
-            
+
             if(options.vibrate && options.vibrate.frames && options.vibrate.amplitude) {
                 //fill in vibrational modes
                 this.vibrate(options.vibrate.frames, options.vibrate.amplitude);
@@ -2098,12 +2098,21 @@ $3Dmol.GLModel = (function() {
 	* @function $3Dmol.GLModel#setCoordinates
 	* @param {string} str - contains the data of the file
 	* @param {string} format - contains the format of the file
-	* @param {function} callback - function called when a inpcrd file is uploaded
+	* @param {function} callback - function called when a inpcrd or a mdcrd file is uploaded
  	*/
 
 	this.setCoordinates = function(str, format) {
 	    format = format || "";
-	    if (format == "inpcrd"){
+	    if(/\.gz$/.test(format)) {
+            	//unzip gzipped files
+                format = format.replace(/\.gz$/,'');
+                try {
+                    str = pako.inflate(str, {to: 'string'});
+            	} catch(err) {
+                    console.log(err);
+                }
+            }
+    	    if (format == "inpcrd"){
 	       	var lines = str.split(/\r?\n|\r/);
 	        var atomCount = parseInt(lines[1].slice(0, 15));
 	        if (lines.length >= atomCount/2 + 2){
@@ -2120,8 +2129,33 @@ $3Dmol.GLModel = (function() {
 	                count++;
 		    } 
 		}
+		frames = atoms;
 	    }
-	    return atoms;
+	    else if (format == "mdcrd"){
+       		var lines = str.split(/\r?\n|\r/);
+		var atomCount = atoms.length;
+		while (lines.length > atomCount*3/10){
+		    var temp = atoms;
+		    var count = 0;
+		    var noOfCol = 10;
+		    for (i=0; i<atomCount*3/10; i++){
+			if (i == parseInt(atomCount*3/10))
+			    noOfCol = atomCount*3%10;
+			for (j=0; j<noOfCol; j++){
+			    if (count % 3 == 0)
+				temp[count/3].x = parseFloat(lines[i+1].slice(8*j, 8*(j+1)));
+			    else if (count % 3 == 1)
+				temp[parseInt(count/3)].y = parseFloat(lines[i+1].slice(8*j, 8*(j+1)));
+			    else
+				temp[parseInt(count/3)].z = parseFloat(lines[i+1].slice(8*j, 8*(j+1)));
+			    count++;
+			}
+		    }
+		    frames.push(temp);
+		    lines.slice(Math.ceil(atomCount*3/10));
+		}
+	    }
+	    return frames;
 	} 
     }
 
