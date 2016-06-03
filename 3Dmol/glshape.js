@@ -876,7 +876,7 @@ $3Dmol.GLShape = (function() {
                     for(var j=0;j<nY;j++){
                         for(var k=0;k<nZ;k++){
                             var coordinate = convert(i,j,k,data);
-                            //console.log(coordinate.x+","+coordinate.y+","+coordinate.z);
+                            //sortSelectedRegion(volSpec.selectedRegion);
                             if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset,volSpec.radius)){
                                 var gridindex = ((i*nY)+j)*nZ+k;
                                 bitdata[gridindex]=0;
@@ -936,13 +936,30 @@ $3Dmol.GLShape = (function() {
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
             
             //takes up most of the time
+            
             for(var i=0;i<selectedRegion.length;i++){
                 if(distance_from(selectedRegion[i],coordinate)<=radius)
                     return true;
             }
             return false;
-        }
+            
 
+        }
+        /*
+        var sortSelectedRegion= function(selectedRegion){//sorts by x value
+            for(var i=1; i<selectedRegion.length;i++){
+                var currentValue= selectedRegion[i].x;
+                var position=i;
+
+                while(position >0 && selectedRegion[position-1].x>currentValue){
+                    selectedRegion[position].x=selectedRegion[position-1].x;
+                    position=position-1;
+
+                }
+                selectedRegion[position].x=currentValue
+            }
+        }
+        */
         var distance_from= function(c1,c2){
             return Math.sqrt(Math.pow((c1.x-c2.x),2)+Math.pow((c1.y-c2.y),2)+Math.pow((c1.z-c2.z),2));
         }
