@@ -854,20 +854,6 @@ $3Dmol.GLShape = (function() {
             var nZ = data.size.z;
             var vertnums = new Int16Array(nX * nY * nZ);
             var vals = data.data;
-            if(volSpec.selectedRegion!==undefined){
-                for(var i=0; i <nX;i++){
-                    for(var j=0;j<nY;j++){
-                        for(var k=0;k<nZ;k++){
-                            var coordinate = convert(i,j,k,data);
-                            //console.log(coordinate.x+","+coordinate.y+","+coordinate.z);
-                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset)){
-                                var gridindex = ((i*nY)+j)*nZ+k;
-                                vals[gridindex]=0;
-                            }    
-                        }
-                    }     
-                }
-            }
 
             var i, il;
 
@@ -884,7 +870,21 @@ $3Dmol.GLShape = (function() {
                     bitdata[i] |= ISDONE;
 
             }
-        
+            
+            if(volSpec.selectedRegion!==undefined){
+                for(var i=0; i <nX;i++){
+                    for(var j=0;j<nY;j++){
+                        for(var k=0;k<nZ;k++){
+                            var coordinate = convert(i,j,k,data);
+                            //console.log(coordinate.x+","+coordinate.y+","+coordinate.z);
+                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset)){
+                                var gridindex = ((i*nY)+j)*nZ+k;
+                                bitdata[gridindex]=0;
+                            }    
+                        }
+                    }     
+                }
+            }
             
                
             var verts = [], faces = [];
