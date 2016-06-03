@@ -877,7 +877,7 @@ $3Dmol.GLShape = (function() {
                         for(var k=0;k<nZ;k++){
                             var coordinate = convert(i,j,k,data);
                             //console.log(coordinate.x+","+coordinate.y+","+coordinate.z);
-                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset)){
+                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset,volSpec.radius)){
                                 var gridindex = ((i*nY)+j)*nZ+k;
                                 bitdata[gridindex]=0;
                             }    
@@ -933,12 +933,11 @@ $3Dmol.GLShape = (function() {
            
         };
 
-        var inSelectedRegion=function(coordinate,selectedRegion,offset){
+        var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
             
             //takes up most of the time
             for(var i=0;i<selectedRegion.length;i++){
-                var r=1.0;
-                if(distance_from(selectedRegion[i],coordinate)<=r)
+                if(distance_from(selectedRegion[i],coordinate)<=radius)
                     return true;
             }
             return false;
