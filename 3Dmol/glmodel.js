@@ -2102,6 +2102,7 @@ $3Dmol.GLModel = (function() {
  	*/
 
 	this.setCoordinates = function(str, format) {
+	    frames = [];
 	    format = format || "";
 	    if(/\.gz$/.test(format)) {
             	//unzip gzipped files
@@ -2135,7 +2136,7 @@ $3Dmol.GLModel = (function() {
        		var lines = str.split(/\r?\n|\r/);
 		var atomCount = atoms.length;
 		while (lines.length > atomCount*3/10){
-		    var temp = atoms;
+		    var temp = JSON.parse(JSON.stringify(atoms));
 		    var count = 0;
 		    var noOfCol = 10;
 		    for (i=0; i<atomCount*3/10; i++){
@@ -2152,7 +2153,7 @@ $3Dmol.GLModel = (function() {
 			}
 		    }
 		    frames.push(temp);
-		    lines.slice(Math.ceil(atomCount*3/10));
+		    lines = lines.slice(Math.ceil(atomCount*3/10));
 		}
 	    }
 	    return frames;
