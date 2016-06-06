@@ -172,7 +172,7 @@
                                     $.post("echo.cgi", {
                                         'url' : data
                                     }, function(ret, txt, response) {
-                                        if(ret.search("We're sorry, but the requested") >= 0) {
+                                        if(src == 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret == "")) {
                                             //really large files aren't available in pdb format
                                             type = 'cif';
                                             data = data.replace(/pdb$/,'cif');
