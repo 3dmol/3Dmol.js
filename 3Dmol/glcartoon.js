@@ -862,7 +862,7 @@ $3Dmol.drawCartoon = (function() {
 	}
 
 	// add geo to the group
-	var setGeo = function(group, geo, opacity, setNormals) {
+	var setGeo = function(group, geo, opacity, outline, setNormals) {
 
 		if(geo == null || geo.vertices == 0) return;
 		if (setNormals) {
@@ -876,6 +876,7 @@ $3Dmol.drawCartoon = (function() {
 			cartoonMaterial.transparent = true;
 			cartoonMaterial.opacity = opacity;
 		}
+		cartoonMaterial.outline = outline;
 		var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
 		group.add(cartoonMesh);
 	};
@@ -902,6 +903,9 @@ $3Dmol.drawCartoon = (function() {
 		var geo = new $3Dmol.Geometry(true);
 		var colors = [];
 		var points = [];
+		var opacity = 1;
+		var outline = false;
+
 		for (var i = 0; i < num; i++)
 			points[i] = [];
 
@@ -958,8 +962,8 @@ $3Dmol.drawCartoon = (function() {
 				points[i] = [];
 			colors = [];
 			
-			setGeo(group, geo, opacity, true);
-			setGeo(group, shapeGeo, opacity, false);
+			setGeo(group, geo, opacity, outline, true);
+			setGeo(group, shapeGeo, opacity, outline, false);
 			geo = new $3Dmol.Geometry(true);
 			shapeGeo = new $3Dmol.Geometry(true);
 		};
@@ -971,11 +975,13 @@ $3Dmol.drawCartoon = (function() {
 
 			var nextresn = next.resn.trim();
 			var inNucleicAcid = nextresn in naResns;
-			var opacity = 1;
+			opacity = 1;
 			// determine cartoon style
 			cartoon = next.style.cartoon;
 			if(curr && curr.style.cartoon)
 				opacity = curr.style.cartoon.opacity;
+			if(curr && curr.style.cartoon && curr.style.cartoon.outline)
+				outline = curr.style.cartoon.outline;
 			
 			// create a new geometry when opacity changes
 			//the should work fine if opacity is set by chain, but will

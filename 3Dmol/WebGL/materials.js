@@ -381,6 +381,7 @@ $3Dmol.SphereImposterMaterial.prototype.clone = function() {
 $3Dmol.SphereImposterOutlineMaterial = function(parameters) {
     
     $3Dmol.ImposterMaterial.call(this);
+    parameters = parameters || {};
 
     this.shaderID = "sphereimposteroutline";
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
@@ -426,6 +427,7 @@ $3Dmol.StickImposterMaterial.prototype.clone = function() {
 $3Dmol.StickImposterOutlineMaterial = function(parameters) {
     
     $3Dmol.ImposterMaterial.call(this);
+    parameters = parameters || {};
 
     this.shaderID = "stickimposteroutline";
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);

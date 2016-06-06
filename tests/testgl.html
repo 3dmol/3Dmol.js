@@ -187,7 +187,7 @@
 //    $3Dmol.download('pdb:4ysj',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
 //    $3Dmol.download('pdb:1bna',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
     $3Dmol.download('pdb:1ycr',viewer,{},function() { 
-        viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); 
+        viewer.setStyle({'cartoon':{'outline':true},'stick':{}}); viewer.render(); 
         viewer.mapAtomProperties($3Dmol.applyPartialCharges);
         });
                  
