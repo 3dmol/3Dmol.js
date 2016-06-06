@@ -49,15 +49,23 @@
     req.onload = function (aEvt) {      
        var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
       viewer.addIsosurface(voldata, {isoval: 0.25,
-                                       color: "blue",
-                                       opacity: 0.5,
-                                       linewidth:0.005,                                      
+                                       color: "red",
+                                       wireframe: true,
+                                       linewidth:0.005,
+                                       selectedRegion: viewer.selectedAtoms({resn: 'STI'}),
+                                       selectedOffset: 3,
+                                       radius: 3.0                                   
                                     });
+      
       viewer.addIsosurface(voldata, {isoval: 0.15,
                                        color: "cyan",
                                        wireframe: true,
-                                       linewidth:0.005,                                      
-                                    });                                    
+                                       linewidth:0.005,
+                                       selectedRegion: viewer.selectedAtoms({}), 
+                                       selectedOffset: 3,
+                                       radius:3.0                 
+                                    });            
+                                                     
       viewer.render();
     };
     req.send(null);

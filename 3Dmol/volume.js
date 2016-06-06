@@ -97,6 +97,29 @@ $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     return this.data[x*this.size.y*this.size.z + y*this.size.z + z];
 };
 
+$3Dmol.VolumeData.prototype.getCoordinates = function(index){
+    
+    var x = index/(this.size.y*this.size.z);
+    var y = index % (this.size.y*this.size.z);
+    var z = index % this.size.z;
+
+    x *= this.unit.x;
+    y *= this.unit.y;
+    z *= this.unit.z;
+
+    x += this.origin.x;
+    y += this.origin.y;
+    z += this.origin.z;
+    //console.log("getCoordinates : "+x+" , "+y+" , "+z);
+    //console.log("val : "+data.getVal(x,y,z));
+    //console.log("actual : "+data.data[index]);
+    return {x:x,y:y,z:z};
+    /*
+    Y = (int)(index / Width)
+    X = index - (Y * Width)
+    */
+}
+
 /*
  * parse vasp data
  * Essentially this parser converts the CHGCAR data into

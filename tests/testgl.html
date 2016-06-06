@@ -185,7 +185,11 @@
     //load_ccp4_map (viewer,"check/volData/4ysj.ccp4.gz");  
 
 //    $3Dmol.download('pdb:4ysj',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
-    $3Dmol.download('pdb:1bna',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
+//    $3Dmol.download('pdb:1bna',viewer,{},function() { viewer.setStyle({'cartoon':{},'stick':{}}); viewer.render(); });
+    $3Dmol.download('pdb:1ycr',viewer,{},function() { 
+        viewer.setStyle({'cartoon':{'outline':true},'stick':{}}); viewer.render(); 
+        viewer.mapAtomProperties($3Dmol.applyPartialCharges);
+        });
                  
                            
   });
@@ -205,8 +209,8 @@
         <input type="button" value="Trace" onclick="glviewer.setStyle({},{cartoon:{style: 'trace',color: 'spectrum',thickness: 0.3}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
-        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
-        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'},true);"></input>
+        <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {chain:'A'});"></input>
+        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.MS,{map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:1}, {chain:'B'},{});"></input>
        <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
         <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2), lastsurfstyle = 1;"></input>
         <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>

@@ -1942,7 +1942,7 @@ $3Dmol.GLViewer = (function() {
                     continue;
                 if (atom.z < extent[0][2] || atom.z > extent[1][2])
                     continue;
-                ret.push(i);
+                ret.push(atom);
             }
             return ret;
         };
@@ -1971,6 +1971,20 @@ $3Dmol.GLViewer = (function() {
         var carveUpExtent = function(extent, atomlist, atomstoshow) {
             var ret = [];
 
+            var index2atomlist = {}; //map from atom.index to position in atomlist
+            for(var i = 0, n = atomlist.length; i < n; i++) {
+                index2atomlist[atomlist[i].index] = i;
+            }
+            
+            var atomsToListIndex = function(atoms) {
+            //return a list of indices into atomlist
+                var ret = [];
+                for(var i = 0, n = atoms.length; i < n; i++) {
+                    if(atoms[i].index in index2atomlist)
+                        ret.push(index2atomlist[atoms[i].index])
+                }
+                return ret;
+            }
             var copyExtent = function(extent) {
                 // copy just the dimensions
                 var ret = [];
@@ -2032,8 +2046,8 @@ $3Dmol.GLViewer = (function() {
                 // ultimately, divide up by atom for best meshing
                 ret.push({
                     extent : splits[i],
-                    atoms : atoms,
-                    toshow : toshow
+                    atoms : atomsToListIndex(atoms),
+                    toshow : atomsToListIndex(toshow)
                 });
             }
 
@@ -2196,7 +2210,7 @@ $3Dmol.GLViewer = (function() {
 
             ps.buildboundary();
 
-            if (type == $3Dmol.SurfaceType.SES) {
+            if (type == $3Dmol.SurfaceType.SES || type == $3Dmol.SurfaceType.MS) {
                 ps.fastdistancemap();
                 ps.boundingatom(false);
                 ps.fillvoxelswaals(atoms, extendedAtoms);
@@ -2437,14 +2451,14 @@ $3Dmol.GLViewer = (function() {
 
                     var rfunction = function(event) {
                         var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
-							                           faceArr:event.data.faces});
-					    for(var i=0,vl=VandFs.length;i<vl;i++){
+                                                       faceArr:event.data.faces});
+                        for(var i=0,vl=VandFs.length;i<vl;i++){
                             var VandF={vertices:VandFs[i].vertexArr,
-								       faces:VandFs[i].faceArr};
+                                       faces:VandFs[i].faceArr};
                             var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                             $3Dmol.mergeGeos(surfobj.geo, mesh);
                             _viewer.render();
-						}
+                        }
 
                     //    console.log("async mesh generation " + (+new Date() - time) + "ms");
                         cnt++;
