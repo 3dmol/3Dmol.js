@@ -16,11 +16,13 @@ $3Dmol.Renderer = function(parameters) {
             : false, _stencil = parameters.stencil !== undefined ? parameters.stencil
             : true, _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
             : false, _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(
-            parameters.clearColor)
-            : new $3Dmol.Color(0x000000), _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha
-            : 0, _outlineMaterial = parameters.outline !== undefined ? new $3Dmol.MeshOutlineMaterial(
-            parameters.outline)
-            : null;
+            parameters.clearColor) : new $3Dmol.Color(0x000000),
+             _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0, 
+            _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters.outline),
+            _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters.outline),
+            _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters.outline),
+            _outlineEnabled = !!parameters.outline
+            ;
 
     this.domElement = _canvas;
     this.context = null;
@@ -159,12 +161,11 @@ $3Dmol.Renderer = function(parameters) {
         _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters);
         _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters);
         _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters);
+        _outlineEnabled = true;
     };
 
     this.disableOutline = function() {
-        _outlineMaterial = null;
-        _outlineSphereImposterMaterial = null;
-        _outlineStickImposterMaterial = null;
+        _outlineEnabled = false;
     };
 
     this.setSize = function(width, height) {
@@ -996,7 +997,7 @@ $3Dmol.Renderer = function(parameters) {
 
                 _this.renderBuffer(camera, lights, fog, material, buffer,
                         object);
-                if (_outlineMaterial) {                  
+                if (_outlineEnabled || material.outline) {                  
                     if(material.shaderID == 'sphereimposter') {
                         _this.renderBuffer(camera, lights, fog, _outlineSphereImposterMaterial,
                                 buffer, object);                        

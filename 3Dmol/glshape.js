@@ -843,6 +843,7 @@ $3Dmol.GLShape = (function() {
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
          */
         this.addIsosurface = function(data, volSpec) {
+           
             var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
                     : 0.0;
             var voxel = (volSpec.voxel) ? true : false;
@@ -853,14 +854,15 @@ $3Dmol.GLShape = (function() {
             var nZ = data.size.z;
             var vertnums = new Int16Array(nX * nY * nZ);
             var vals = data.data;
+
             var i, il;
 
             for (i = 0, il = vertnums.length; i < il; ++i)
                 vertnums[i] = -1;
 
-            //mark locations partitioned by isoval
             var bitdata = new Uint8Array(nX * nY * nZ);
-
+           
+            //mark locations partitioned by isoval
             for (i = 0, il = vals.length; i < il; ++i) {
                 var val = (isoval >= 0) ? vals[i] - isoval : isoval - vals[i];
 
@@ -868,7 +870,23 @@ $3Dmol.GLShape = (function() {
                     bitdata[i] |= ISDONE;
 
             }
-
+            
+            if(volSpec.selectedRegion!==undefined){
+                for(var i=0; i <nX;i++){
+                    for(var j=0;j<nY;j++){
+                        for(var k=0;k<nZ;k++){
+                            var coordinate = convert(i,j,k,data);
+                            //sortSelectedRegion(volSpec.selectedRegion);
+                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset,volSpec.radius)){
+                                var gridindex = ((i*nY)+j)*nZ+k;
+                                bitdata[gridindex]=0;
+                            }    
+                        }
+                    }     
+                }
+            }
+            
+               
             var verts = [], faces = [];
 
             $3Dmol.MarchingCube.march(bitdata, verts, faces, {
@@ -914,7 +932,53 @@ $3Dmol.GLShape = (function() {
             this.boundingSphere.radius = Math.max(len1,len2);
            
         };
+
+        var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
+            
+            //takes up most of the time
+            
+            for(var i=0;i<selectedRegion.length;i++){
+                if(distance_from(selectedRegion[i],coordinate)<=radius)
+                    return true;
+            }
+            return false;
+            
+
+        }
+        /*
+        var sortSelectedRegion= function(selectedRegion){//sorts by x value
+            for(var i=1; i<selectedRegion.length;i++){
+                var currentValue= selectedRegion[i].x;
+                var position=i;
+
+                while(position >0 && selectedRegion[position-1].x>currentValue){
+                    selectedRegion[position].x=selectedRegion[position-1].x;
+                    position=position-1;
+
+                }
+                selectedRegion[position].x=currentValue
+            }
+        }
+        */
+        var distance_from= function(c1,c2){
+            return Math.sqrt(Math.pow((c1.x-c2.x),2)+Math.pow((c1.y-c2.y),2)+Math.pow((c1.z-c2.z),2));
+        }
         
+        var convert=function(i,j,k,data){
+            var pt;
+            if(data.matrix) {
+                pt = new $3Dmol.Vector3(i,j,k);
+                pt = pt.applyMatrix4(data.matrix);
+                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
+
+            } else {
+                pt.x = data.origin.x+data.unit.x*i;
+                pt.y = data.origin.y+data.unit.y*j;
+                pt.z = data.origin.z+data.unit.z*k;
+            }
+            //console.log(pt.x+","+pt.y+","+pt.z);
+            return pt;
+        }
         /** 
          * @deprecated Use addIsosurface instead
          * Creates custom shape from volumetric data 

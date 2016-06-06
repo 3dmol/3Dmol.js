@@ -1824,6 +1824,42 @@ $3Dmol.GLModel = (function() {
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
         
+        this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
+            var s;
+            for (s in sel) {
+                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure hoverable is a boolean
+            hoverable = !!hoverable;
+
+            // report to console if hover_callback is not a valid function
+            if (hover_callback && typeof hover_callback != "function") {
+                console.log("Hover_callback is not a function");
+                return;
+            }
+            // report to console if unhover_callback is not a valid function
+            if (unhover_callback && typeof unhover_callback != "function") {
+                console.log("Unhover_callback is not a function");
+                return;
+            }
+
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].hoverable= hoverable;
+                if (hover_callback) selected[i].hover_callback = hover_callback;
+                if (unhover_callback) selected[i].unhover_callback = unhover_callback;
+
+            }
+
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
+        }
         /** given a mapping from element to color, set atom colors
          * 
          * @function $3Dmol.GLModel#setColorByElement
@@ -2057,6 +2093,36 @@ $3Dmol.GLModel = (function() {
             }
         }
 
+        /**
+	* Set coordinates for the atoms parsed from the prmtop file. 
+	* @function $3Dmol.GLModel#setCoordinates
+	* @param {string} str - contains the data of the file
+	* @param {string} format - contains the format of the file
+	* @param {function} callback - function called when a inpcrd file is uploaded
+ 	*/
+
+	this.setCoordinates = function(str, format) {
+	    format = format || "";
+	    if (format == "inpcrd"){
+	       	var lines = str.split(/\r?\n|\r/);
+	        var atomCount = parseInt(lines[1].slice(0, 15));
+	        if (lines.length >= atomCount/2 + 2){
+        	    var count = 0;
+		    for (i=2; i < atomCount/2 + 2; i++){
+	                atoms[count].x = parseFloat(lines[i].slice(0,12));
+	                atoms[count].y = parseFloat(lines[i].slice(12,24));
+	                atoms[count].z = parseFloat(lines[i].slice(24,36));
+	                count++;
+	    
+	                atoms[count].x = parseFloat(lines[i].slice(36,48));
+	                atoms[count].y = parseFloat(lines[i].slice(48,60));
+	                atoms[count].z = parseFloat(lines[i].slice(60,72));
+	                count++;
+		    } 
+		}
+	    }
+	    return atoms;
+	} 
     }
 
     GLModel.parseMolData = function(data, format, options) {
@@ -2087,7 +2153,9 @@ $3Dmol.GLModel = (function() {
                     format = "pdb";
                 } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
                     format = "sdf"; //could look at line 3
-                } else {
+                } else if(data.match(/^%VERSION\s+\VERSION_STAMP/gm)){
+ 		    format = "prmtop";
+		} else{
                     format = "xyz";
                 }
                 console.log("Best guess: "+format);

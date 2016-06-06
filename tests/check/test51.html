@@ -11,30 +11,36 @@
 
   <body>
     <script>
+
       $(document).ready(function() {
+
           //install a right-click handler on every canvas to export png
           $('canvas').bind('contextmenu',function(e) {
               var dt = e.currentTarget.toDataURL('image/png');
               window.location = dt;
           });
       });
-    </script>
+        </script>
 
     <table width="100%">
       <tr>
-        <th colspan=2 height=200px>
-          3 Embedded Cross <code>hidden lineWidth colorscheme color</code>
-        </th>  <!-- descriptive title of what is being tested -->
+        <td colspan=2 height=200px>
+          51  <code> multimodel pdb</code>
+        </td>
       </tr>
       <tr>
-        <td width="50%">
-          <div style="width: 400px; height: 400px; position: relative;"
-               class='viewer_3Dmoljs'
-               data-href='https://www.dropbox.com/s/ba5pxrgl8y21t7e/1bj4.pdb?dl=0'
-               data-backgroundcolor='0xffffff'
-</div>
-        </td>
-        <td width="50%"><img src="imgs/test3.png"></td>
+        <td width="50%"><div id="test51" style="width: 400px; height: 400px; position: relative;"></div>
+      </td>
+     <script>
+    var viewer = $3Dmol.createViewer($("#test51"));
+    viewer.setBackgroundColor(0xffffffff);
+       $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
+        m.setStyle({'cartoon':{colorscheme:{prop:'ss',map:$3Dmol.ssColors.Jmol}}});
+       viewer.zoomTo();
+       viewer.render();
+    });
+    </script>
+        <td width="50%"><img src="imgs/test51.png"></td>
       </tr>
     </table>
 

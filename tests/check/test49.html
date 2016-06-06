@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -15,28 +16,24 @@
       $(document).ready(function() {
 
           //install a right-click handler on every canvas to export png
-          $('canvas').bind('contextmenu',function(e) {
-              var dt = e.currentTarget.toDataURL('image/png');
-              window.location = dt;
-          });
           
             var viewer = $3Dmol.createViewer($("#test49"));
             viewer.setBackgroundColor(0xffffffff);
             var rec = viewer.addModel($('#rec').val(),'pdb');
-            atoms = rec.selectedAtoms();
-                    
-            for (var i in atoms) {
-                var atom = atoms[i];
-                atom.hoverable = true;
-                atom.hover_callback = function(atom){ 
-                  viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});
-                  viewer.render();},
-                atom.unhover_callback = function(){ viewer.removeAllLabels();viewer.render();}
-            }
+            rec.setHoverable({},true, function(atom){  //hover
+                viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                viewer.render();},
+              	function(){ viewer.removeAllLabels();viewer.render();}); //unhover
+       
             rec.setStyle({sphere:{}});
 
             viewer.zoomTo();
             viewer.render();
+            
+            $('canvas').bind('contextmenu',function(e) {
+                var dt = e.currentTarget.toDataURL('image/png');
+                window.location = dt;
+            });
       });
         </script>
 
@@ -50,10 +47,11 @@
         <td width="50%"><div id="test49" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
 
-        <td width="50%"><img src="#"></td>
+        <td width="50%"><img src="imgs/test49.png"></td>
       </tr>
     </table>
-<textarea style="display: none;" id="rec">ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
+<textarea style="display: none;" id="rec">
+ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
 ATOM      2  CA  LYS A   1       2.459  10.365   9.364  1.00 28.03           C  
 ATOM      3  C   LYS A   1       2.458  11.880   9.149  1.00 21.93           C  
 ATOM      4  O   LYS A   1       2.481  12.672  10.100  1.00 14.10           O  
