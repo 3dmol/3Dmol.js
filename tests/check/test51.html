@@ -55,23 +55,9 @@
 			    fr = m.setCoordinates(coordinatesData, "mdcrd");
 			    console.log(fr);
 			    viewer.setStyle({},{sphere:{}});
-			    current = 0;
-			    var display = function(){
-				var atoms = m.selectedAtoms({});
-				var index = 0;
-				for (atom in atoms){
-				    atom.x = fr[current][index].x;
-				    atom.y = fr[current][index].y;
-				    atom.z = fr[current][index].z;
-				    index++;
-				}
-				current++;
-				if (current == 200)
-				    current = 0;
-				viewer.zoomTo();
-				viewer.render();
-			    }
-			    setInterval(display, 3000);
+			    viewer.zoomTo();
+			    viewer.animate({loop:"forward"});
+			    viewer.render();
 			}
 		    }
 		}
