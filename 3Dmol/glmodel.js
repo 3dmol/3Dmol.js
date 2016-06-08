@@ -2103,6 +2103,19 @@ $3Dmol.GLModel = (function() {
 
 	this.setCoordinates = function(str, format) {
 	    format = format || "";
+	    if (!str)
+        	return []; //leave an empty model
+
+            if(/\.gz$/.test(format)) {
+		//unzip gzipped files
+            	format = format.replace(/\.gz$/,'');
+           	try {
+            	    str = pako.inflate(str, {to: 'string'});
+            	} catch(err) {
+                    console.log(err);
+            	}
+            }
+
 	    if (format == "mdcrd" || format == "inpcrd"){
 		frames = [];
 	        var atomCount = atoms.length;

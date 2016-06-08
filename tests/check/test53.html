@@ -44,21 +44,17 @@
             if(rawFile.status === 200 || rawFile.status == 0){
                 var data = rawFile.responseText;
 		m = viewer.addModel(data, "prmtop");	
-                var File = new XMLHttpRequest();
-   		File.open("GET", "volData/heat1.mdcrd", false);
-    		File.onreadystatechange = function(){
-		    if(File.readyState === 4){
-	    		if(File.status === 200 || File.status == 0){
-			    var coordinatesData = File.responseText;
-			    m.setCoordinates(coordinatesData, "mdcrd");
-			    viewer.setStyle({},{sphere:{}});
-			    viewer.zoomTo();
-			    viewer.animate({loop:"forward"});
-			    viewer.render();
-			}
-		    }
-		}
-		File.send(null);
+                var req = new XMLHttpRequest();
+   		req.open("GET", "volData/heat1.mdcrd", true);
+		req.responseType = "arrayBuffer";
+    		req.onload = function(aEvt){
+		    m.setCoordinates(req.response, "mdcrd");
+		    viewer.setStyle({},{sphere:{}});
+		    viewer.zoomTo();
+		    viewer.animate({loop:"forward"});
+		    viewer.render();
+		};
+		req.send(null);
 	    }	
         }
     }
