@@ -2103,19 +2103,11 @@ $3Dmol.GLModel = (function() {
 
 	this.setCoordinates = function(str, format) {
 	    format = format || "";
-	    var atomCount = atoms.length;
-	    var values = GLModel.parseCrd(str, format);
-	    var count = 0;
-	    if (format == "inpcrd"){
-		for (i=0; i<atomCount; i++){
-		    atoms[i].x = values[count++];
-		    atoms[i].y = values[count++];
-		    atoms[i].z = values[count++];
-		}
-		return atoms;
-	    }
-	    else if (format == "mdcrd"){
+	    if (format == "mdcrd" || format == "inpcrd"){
 		frames = [];
+	        var atomCount = atoms.length;
+	        var values = GLModel.parseCrd(str, format);
+	        var count = 0;
 		while (count < values.length){
 	   	    var temp = JSON.parse(JSON.stringify(atoms));
 		    for (i=0; i<atomCount; i++){
@@ -2128,6 +2120,7 @@ $3Dmol.GLModel = (function() {
 		atoms = frames[0];
 		return frames;
 	    }
+	    return [];
 	} 
     }
 
@@ -2143,7 +2136,7 @@ $3Dmol.GLModel = (function() {
 	}
 	index = 0;
 	var counter = 0;
-	while (index < data.length - valueLength -1){
+	while (index < data.length - valueLength){
 	    if (data[index] == "\n")
 		index++;
 	    if (data[index] != "\n"){
