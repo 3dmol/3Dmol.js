@@ -871,20 +871,7 @@ $3Dmol.GLShape = (function() {
 
             }
             
-            if(volSpec.selectedRegion!==undefined){
-                for(var i=0; i <nX;i++){
-                    for(var j=0;j<nY;j++){
-                        for(var k=0;k<nZ;k++){
-                            var coordinate = convert(i,j,k,data);
-                            //sortSelectedRegion(volSpec.selectedRegion);
-                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset,volSpec.radius)){
-                                var gridindex = ((i*nY)+j)*nZ+k;
-                                bitdata[gridindex]=0;
-                            }    
-                        }
-                    }     
-                }
-            }
+            
             
                
             var verts = [], faces = [];
@@ -899,10 +886,64 @@ $3Dmol.GLShape = (function() {
                 nY : nY,
                 nZ : nZ
             });
+            /*
+var vertexmapping = IntArray size of vertices
+var newvertices = vertex array
+for each vertex v
+ if v is within selected region
+  add v to newvertices
+  vertexmapping[v] = newv position
+else
+ vertexmapping[v] = -1
 
+for each face
+if all vertices are good (vertexmapping[v] != -1)
+  create new face with new vertex indices from vertexmapping
+
+
+
+            */
             if (!voxel && smoothness > 0)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
 
+            if(volSpec.selectedRegion!==undefined){
+            var vertexmapping= [];
+            var newvertices= [];
+            var newfaces=[];
+
+            for(var i=0;i<verts.length; i+=3){
+                if(inSelectedRegion(convert(verts[i],verts[i+1],verts[i+2],data),volSpec.selectedRegion, volSpec.selectedOffset, volSpec.radius)){
+                    newvertices.push(verts[i]);//x
+                    newvertices.push(verts[i+1]);//y
+                    newvertices.push(verts[i+2]);//z
+                    vertexmapping.push(i);
+
+                }else{
+                    vertexmapping.push(-1);
+                }
+            }
+            for(var i=0; i<faces.length; i+=3){
+                if(vertexmapping[i]!=-1){
+                    newfaces.push(i);
+                }
+            } 
+            /*
+              for(var i=0; i <nX;i++){
+                    for(var j=0;j<nY;j++){
+                        for(var k=0;k<nZ;k++){
+                            var coordinate = convert(i,j,k,data);
+                            //sortSelectedRegion(volSpec.selectedRegion);
+                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset,volSpec.radius)){
+                                var gridindex = ((i*nY)+j)*nZ+k;
+                                bitdata[gridindex]=0;
+                            }    
+                        }
+                    }     
+                }
+            */
+            verts=newvertices;
+            faces=newfaces;
+            }
             drawCustom(this, geo, {
                 vertexArr : verts,
                 faceArr : faces,
@@ -910,7 +951,7 @@ $3Dmol.GLShape = (function() {
                 clickable : volSpec.clickable,
                 hoverable : volSpec.hoverable
             });
-           
+            
             this.updateStyle(volSpec);
             
             //computing bounding sphere from vertices
