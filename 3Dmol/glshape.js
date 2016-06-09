@@ -865,14 +865,11 @@ $3Dmol.GLShape = (function() {
             //mark locations partitioned by isoval
             for (i = 0, il = vals.length; i < il; ++i) {
                 var val = (isoval >= 0) ? vals[i] - isoval : isoval - vals[i];
-
+                val = (val > isoval) ? 0 : val;
                 if (val > 0)
                     bitdata[i] |= ISDONE;
 
             }
-            
-            
-            
                
             var verts = [], faces = [];
 
@@ -886,49 +883,19 @@ $3Dmol.GLShape = (function() {
                 nY : nY,
                 nZ : nZ
             });
-            /*
-var vertexmapping = IntArray size of vertices
-var newvertices = vertex array
-for each vertex v
- if v is within selected region
-  add v to newvertices
-  vertexmapping[v] = newv position
-else
- vertexmapping[v] = -1
-
-for each face
-if all vertices are good (vertexmapping[v] != -1)
-  create new face with new vertex indices from vertexmapping
-
-
-
-            */
+            
             if (!voxel && smoothness > 0)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
 
-            if(volSpec.selectedRegion!==undefined){
+                 /* for(var i=0;i<faces.length;i++){
+                console.log(faces[i]);
+              }*/
             var vertexmapping= [];
             var newvertices= [];
             var newfaces=[];
-
-            for(var i=0;i<verts.length; i+=3){
-                if(inSelectedRegion(convert(verts[i],verts[i+1],verts[i+2],data),volSpec.selectedRegion, volSpec.selectedOffset, volSpec.radius)){
-                    newvertices.push(verts[i]);//x
-                    newvertices.push(verts[i+1]);//y
-                    newvertices.push(verts[i+2]);//z
-                    vertexmapping.push(i);
-
-                }else{
-                    vertexmapping.push(-1);
-                }
-            }
-            for(var i=0; i<faces.length; i+=3){
-                if(vertexmapping[i]!=-1){
-                    newfaces.push(i);
-                }
-            } 
-            /*
-              for(var i=0; i <nX;i++){
+            if(volSpec.selectedRegion!==undefined){
+                /*
+                for(var i=0; i <nX;i++){
                     for(var j=0;j<nY;j++){
                         for(var k=0;k<nZ;k++){
                             var coordinate = convert(i,j,k,data);
@@ -940,10 +907,50 @@ if all vertices are good (vertexmapping[v] != -1)
                         }
                     }     
                 }
-            */
-            verts=newvertices;
-            faces=newfaces;
+                */
+
+            for(var i=0;i<verts.length; i++){
+                if(inSelectedRegion(verts[i],volSpec.selectedRegion, volSpec.selectedOffset, volSpec.radius)){
+                    vertexmapping.push(newvertices.length);
+                    newvertices.push(verts[i]);
+
+                }else{
+                    vertexmapping.push(-1);
+                }
             }
+            /*
+                for i in vertexmapping
+                if not-1
+                    newfaces add (faces[i]-(i-vertexmapping[i]))
+
+            */
+            /*
+            for(var i=0; i+2<faces.length; i+=3){
+                if(vertexmapping[faces[i]]!==-1 && vertexmapping[faces[i+1]]!==-1 && vertexmapping[faces[i+2]]!==-1){
+                    newfaces.push(faces[i]);
+                    newfaces.push(faces[i+1]);
+                    newfaces.push(faces[i+2]);
+                }
+            } 
+            */
+            for(var i=0; i+2<faces.length; i+=3){
+                 if(vertexmapping[faces[i]]!==-1 && vertexmapping[faces[i+1]]!==-1 && vertexmapping[faces[i+2]]!==-1){
+                    newfaces.push(faces[i]-(faces[i]-vertexmapping[faces[i]]));
+                    newfaces.push(faces[i+1]-(faces[i+1]-vertexmapping[faces[i+1]]));
+                    newfaces.push(faces[i+2]-(faces[i+2]-vertexmapping[faces[i+2]]));
+                }
+            }
+
+            }
+
+            console.log(newvertices.length);
+            verts=newvertices!==[] ? newvertices:verts;
+            faces=newfaces!==[] ? newfaces:faces;
+            console.log(verts.length);
+            /*
+            for(var i=0;i<faces.length;i++){
+                console.log(faces[i]);
+            }*/
             drawCustom(this, geo, {
                 vertexArr : verts,
                 faceArr : faces,
@@ -983,8 +990,6 @@ if all vertices are good (vertexmapping[v] != -1)
                     return true;
             }
             return false;
-            
-
         }
         /*
         var sortSelectedRegion= function(selectedRegion){//sorts by x value
