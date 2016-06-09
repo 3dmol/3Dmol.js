@@ -1806,7 +1806,8 @@ $3Dmol.Parsers = (function() {
 
                         var atomId = mmtfData.atomIdList[ atomIndex ];
                         var atomName = groupData.atomNameList[ k ];
-                        var atomCharge = groupData.atomChargeList[ k ];
+                        var atomCharge = 0;
+                        if(groupData.atomChargeList) atomCharge = groupData.atomChargeList[ k ];
                         var xCoord = mmtfData.xCoordList[ atomIndex ];
                         var yCoord = mmtfData.yCoordList[ atomIndex ];
                         var zCoord = mmtfData.zCoordList[ atomIndex ];

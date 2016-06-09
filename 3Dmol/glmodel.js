@@ -1404,7 +1404,7 @@ $3Dmol.GLModel = (function() {
             for (var i = 0; i < frames.length; i++) {
                 this.setAtomDefaults(frames[i], id);
             }
-            
+
             if(options.vibrate && options.vibrate.frames && options.vibrate.amplitude) {
                 //fill in vibrational modes
                 this.vibrate(options.vibrate.frames, options.vibrate.amplitude);
@@ -2098,31 +2098,67 @@ $3Dmol.GLModel = (function() {
 	* @function $3Dmol.GLModel#setCoordinates
 	* @param {string} str - contains the data of the file
 	* @param {string} format - contains the format of the file
-	* @param {function} callback - function called when a inpcrd file is uploaded
+	* @param {function} callback - function called when a inpcrd or a mdcrd file is uploaded
  	*/
 
 	this.setCoordinates = function(str, format) {
 	    format = format || "";
-	    if (format == "inpcrd"){
-	       	var lines = str.split(/\r?\n|\r/);
-	        var atomCount = parseInt(lines[1].slice(0, 15));
-	        if (lines.length >= atomCount/2 + 2){
-        	    var count = 0;
-		    for (i=2; i < atomCount/2 + 2; i++){
-	                atoms[count].x = parseFloat(lines[i].slice(0,12));
-	                atoms[count].y = parseFloat(lines[i].slice(12,24));
-	                atoms[count].z = parseFloat(lines[i].slice(24,36));
-	                count++;
-	    
-	                atoms[count].x = parseFloat(lines[i].slice(36,48));
-	                atoms[count].y = parseFloat(lines[i].slice(48,60));
-	                atoms[count].z = parseFloat(lines[i].slice(60,72));
-	                count++;
-		    } 
+	    if (!str)
+        	return []; //leave an empty model
+
+            if(/\.gz$/.test(format)) {
+		//unzip gzipped files
+            	format = format.replace(/\.gz$/,'');
+           	try {
+            	    str = pako.inflate(str, {to: 'string'});
+            	} catch(err) {
+                    console.log(err);
+            	}
+            }
+
+	    if (format == "mdcrd" || format == "inpcrd"){
+		frames = [];
+	        var atomCount = atoms.length;
+	        var values = GLModel.parseCrd(str, format);
+	        var count = 0;
+		while (count < values.length){
+	   	    var temp = JSON.parse(JSON.stringify(atoms));
+		    for (i=0; i<atomCount; i++){
+			temp[i].x = values[count++];
+			temp[i].y = values[count++];
+			temp[i].z = values[count++];
+		    }
+		    frames.push(temp);
 		}
+		atoms = frames[0];
+		return frames;
 	    }
-	    return atoms;
+	    return [];
 	} 
+    }
+
+    GLModel.parseCrd = function(data, format) {
+	var values = []; //this will contain the all the float values in the file.
+	var valueLength = 8;
+	var index = data.indexOf("\n");
+	data = data.slice(index+1);//remove the first line containing title.
+	if (format == "inpcrd"){
+	    index = data.indexOf("\n");
+	    data = data.slice(index+1);//remove the second line containing number of atoms.
+	    valueLength = 12;
+	}
+	index = 0;
+	var counter = 0;
+	while (index < data.length - valueLength){
+	    if (data[index] == "\n")
+		index++;
+	    if (data[index] != "\n"){
+		values[counter] = parseFloat(data.slice(index, index+valueLength));
+		index = index+valueLength;
+		counter++; 
+	    }
+	}
+	return values;
     }
 
     GLModel.parseMolData = function(data, format, options) {
