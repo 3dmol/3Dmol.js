@@ -22,7 +22,7 @@ $(document).ready(function() {
             
             var type = null;
             if (viewerdiv.data("pdb")) {
-                datauri = "http://files.rcsb.org/" + viewerdiv.data("pdb") + ".pdb";
+                datauri = "http://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb";
                 type = "pdb";
             } else if(viewerdiv.data("cid")) {
                 //this doesn't actually work since pubchem does have CORS enabled
