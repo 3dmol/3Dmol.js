@@ -2059,5 +2059,49 @@ $3Dmol.Parsers = (function() {
         return [atoms];
     };
 
+    /**
+     * Parse a gro file from str and create atoms
+     */
+    parsers.gro = parsers.GRO = function(str, options) {
+	var atoms = [[]];
+        var lines = str.split(/\r?\n|\r/);
+        while (lines.length > 0) {
+            if (lines.length < 3)
+                break;
+            var atomCount = parseInt(lines[1]);
+            if (isNaN(atomCount) || atomCount <= 0)
+                break;
+            if (lines.length < atomCount + 3)
+                break;
+            var offset = 2;
+            var start = atoms[atoms.length-1].length;
+            var end = start + atomCount;
+            for (var i = start; i < end; i++) {
+                var line = lines[offset++];
+                var atom = {};
+                atom.serial = i;
+                atom.atom = atom.elem = line.slice(10,15);
+                atom.x = parseFloat(line.slice(20,28));
+                atom.y = parseFloat(line.slice(28,36));
+                atom.z = parseFloat(line.slice(36,44));
+		atom.resi = line.slice(5,10);
+                atom.bonds = [];
+                atom.bondOrder = [];
+                atom.properties = {};
+                atom.dx = parseFloat(line.slice(44,52));
+                atom.dy = parseFloat(line.slice(52,60));
+                atom.dz = parseFloat(line.slice(60,68));
+                atoms[atoms.length-1][i] = atom;
+           }
+            if (options.multimodel) {
+                atoms.push([]);
+                lines.splice(0, ++offset);
+            }
+            else {
+                break;
+            }
+        }
+        return atoms;
+    }
     return parsers;
 })();
