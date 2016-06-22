@@ -2080,7 +2080,8 @@ $3Dmol.Parsers = (function() {
                 var line = lines[offset++];
                 var atom = {};
                 atom.serial = i;
-                atom.atom = atom.elem = line.slice(10,15);
+                atom.atom = line.slice(10,15);
+		atom.elem = atom.atom[2];
                 atom.x = parseFloat(line.slice(20,28));
                 atom.y = parseFloat(line.slice(28,36));
                 atom.z = parseFloat(line.slice(36,44));
@@ -2088,9 +2089,11 @@ $3Dmol.Parsers = (function() {
                 atom.bonds = [];
                 atom.bondOrder = [];
                 atom.properties = {};
-                atom.dx = parseFloat(line.slice(44,52));
-                atom.dy = parseFloat(line.slice(52,60));
-                atom.dz = parseFloat(line.slice(60,68));
+		if (line.length > 44){
+                    atom.dx = parseFloat(line.slice(44,52));
+                    atom.dy = parseFloat(line.slice(52,60));
+                    atom.dz = parseFloat(line.slice(60,68));
+		}
                 atoms[atoms.length-1][i] = atom;
            }
             if (options.multimodel) {
@@ -2101,6 +2104,7 @@ $3Dmol.Parsers = (function() {
                 break;
             }
         }
+	console.log(atoms);
         return atoms;
     }
     return parsers;
