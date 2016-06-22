@@ -21,9 +21,7 @@ $3Dmol = (function(window) {
    leave this code in if you would like to increase the 
    likelihood of 3Dmol.js remaining supported.
 */
-if('https:' != document.location.protocol) { //not willing to pay for ssl cert
-    $.get("http://3dmol.csb.pitt.edu/track/report.cgi");
-}
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
 
 /* shims for IE */
 /*
