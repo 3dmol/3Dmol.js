@@ -2104,7 +2104,6 @@ $3Dmol.Parsers = (function() {
                 break;
             }
         }
-	console.log(atoms);
         return atoms;
     }
     return parsers;
