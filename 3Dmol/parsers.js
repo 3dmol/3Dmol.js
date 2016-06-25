@@ -2063,7 +2063,7 @@ $3Dmol.Parsers = (function() {
      * Parse a gro file from str and create atoms
      */
     parsers.gro = parsers.GRO = function(str, options) {
-	var atoms = [[]];
+	var atoms = [];
         var lines = str.split(/\r?\n|\r/);
         while (lines.length > 0) {
             if (lines.length < 3)
@@ -2073,6 +2073,7 @@ $3Dmol.Parsers = (function() {
                 break;
             if (lines.length < atomCount + 3)
                 break;
+	    atoms.push([]);
             var offset = 2;
             var start = atoms[atoms.length-1].length;
             var end = start + atomCount;
@@ -2080,8 +2081,11 @@ $3Dmol.Parsers = (function() {
                 var line = lines[offset++];
                 var atom = {};
                 atom.serial = i;
-                atom.atom = line.slice(10,15);
-		atom.elem = atom.atom[2];
+                atom.atom = line.slice(10,15).trim();
+		if(atom.atom.charCodeAt(1) >= 97 && atom.atom.charCodeAt(1) <= 122)
+		    atom.elem = atom.atom.slice(0,2);
+		else
+		    atom.elem = atom.atom[0];
                 atom.x = parseFloat(line.slice(20,28));
                 atom.y = parseFloat(line.slice(28,36));
                 atom.z = parseFloat(line.slice(36,44));
@@ -2095,15 +2099,12 @@ $3Dmol.Parsers = (function() {
                     atom.dz = parseFloat(line.slice(60,68));
 		}
                 atoms[atoms.length-1][i] = atom;
-           }
-            if (options.multimodel) {
-                atoms.push([]);
-                lines.splice(0, ++offset);
             }
-            else {
-                break;
-            }
+	    lines.splice(0, ++offset);
         }
+	for (var i=0; i<atoms.length; i++){
+	    assignBonds(atoms[i]);
+	}
         return atoms;
     }
     return parsers;
