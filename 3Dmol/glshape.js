@@ -891,8 +891,10 @@ $3Dmol.GLShape = (function() {
                 find the 6 max/min points then createa a rectangle out of them
             loop through verts
                 ommit the points that are not in that range
-
+    1.33 with
+    1.75 without
             */
+            
             var xmax=volSpec.selectedRegion[0],ymax=volSpec.selectedRegion[0],zmax=volSpec.selectedRegion[0],xmin=volSpec.selectedRegion[0],ymin=volSpec.selectedRegion[0],zmin=volSpec.selectedRegion[0];
             for(var i=0;i<volSpec.selectedRegion.length;i++){
                 if(volSpec.selectedRegion[i].x>xmax.x)
@@ -908,17 +910,19 @@ $3Dmol.GLShape = (function() {
                 else if(volSpec.selectedRegion[i].z<zmin.z)
                     zmin=volSpec.selectedRegion[i];
             }
+            //accounts for radius 
             var rverts=[];
+            var rad=volSpec.radius;
             for(var i=0;i<verts.length;i++){
-                if(verts[i].x>xmin.x && verts[i].x<xmax.x
-                    && verts[i].y> ymin.y && verts[i].y<ymax.y
-                    && verts[i].z>zmin.z && verts[i].z<zmax.z)
+                if(verts[i].x>xmin.x-rad && verts[i].x<xmax.x+rad
+                    && verts[i].y> ymin.y-rad && verts[i].y<ymax.y+rad
+                    && verts[i].z>zmin.z-rad && verts[i].z<zmax.z+rad)
                     rverts.push(1);
                 else
                     rverts.push(-1);
 
             }
-
+    
             var vertexmapping= [];
             var newvertices= [];
             var newfaces=[];
@@ -926,7 +930,7 @@ $3Dmol.GLShape = (function() {
 
             for(var i=0;i<verts.length; i++){
                 if(rverts[i]===-1)
-                    vertexmapping.push(-1);
+                  vertexmapping.push(-1);
                 else{
                 if(inSelectedRegion(verts[i],volSpec.selectedRegion, volSpec.selectedOffset, volSpec.radius)){
                     vertexmapping.push(newvertices.length);
