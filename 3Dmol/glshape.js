@@ -886,30 +886,48 @@ $3Dmol.GLShape = (function() {
             
             if (!voxel && smoothness > 0)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
+            /*
+            loop through selected area 
+                find the 6 max/min points then createa a rectangle out of them
+            loop through verts
+                ommit the points that are not in that range
 
-                 /* for(var i=0;i<faces.length;i++){
-                console.log(faces[i]);
-              }*/
+            */
+            var xmax=volSpec.selectedRegion[0],ymax=volSpec.selectedRegion[0],zmax=volSpec.selectedRegion[0],xmin=volSpec.selectedRegion[0],ymin=volSpec.selectedRegion[0],zmin=volSpec.selectedRegion[0];
+            for(var i=0;i<volSpec.selectedRegion.length;i++){
+                if(volSpec.selectedRegion[i].x>xmax.x)
+                    xmax=volSpec.selectedRegion[i];
+                else if(volSpec.selectedRegion[i].x<xmin.x)
+                    xmin=volSpec.selectedRegion[i];
+                if(volSpec.selectedRegion[i].y>ymax.y)
+                    ymax=volSpec.selectedRegion[i];
+                else if(volSpec.selectedRegion[i].y<ymin.y)
+                    ymin=volSpec.selectedRegion[i];
+                if(volSpec.selectedRegion[i].z>zmax.z)
+                    zmax=volSpec.selectedRegion[i];
+                else if(volSpec.selectedRegion[i].z<zmin.z)
+                    zmin=volSpec.selectedRegion[i];
+            }
+            var rverts=[];
+            for(var i=0;i<verts.length;i++){
+                if(verts[i].x>xmin.x && verts[i].x<xmax.x
+                    && verts[i].y> ymin.y && verts[i].y<ymax.y
+                    && verts[i].z>zmin.z && verts[i].z<zmax.z)
+                    rverts.push(1);
+                else
+                    rverts.push(-1);
+
+            }
+
             var vertexmapping= [];
             var newvertices= [];
             var newfaces=[];
             if(volSpec.selectedRegion!==undefined){
-                /*
-                for(var i=0; i <nX;i++){
-                    for(var j=0;j<nY;j++){
-                        for(var k=0;k<nZ;k++){
-                            var coordinate = convert(i,j,k,data);
-                            //sortSelectedRegion(volSpec.selectedRegion);
-                            if(!inSelectedRegion(coordinate,volSpec.selectedRegion,volSpec.selectedOffset,volSpec.radius)){
-                                var gridindex = ((i*nY)+j)*nZ+k;
-                                bitdata[gridindex]=0;
-                            }    
-                        }
-                    }     
-                }
-                */
 
             for(var i=0;i<verts.length; i++){
+                if(rverts[i]===-1)
+                    vertexmapping.push(-1);
+                else{
                 if(inSelectedRegion(verts[i],volSpec.selectedRegion, volSpec.selectedOffset, volSpec.radius)){
                     vertexmapping.push(newvertices.length);
                     newvertices.push(verts[i]);
@@ -918,21 +936,7 @@ $3Dmol.GLShape = (function() {
                     vertexmapping.push(-1);
                 }
             }
-            /*
-                for i in vertexmapping
-                if not-1
-                    newfaces add (faces[i]-(i-vertexmapping[i]))
-
-            */
-            /*
-            for(var i=0; i+2<faces.length; i+=3){
-                if(vertexmapping[faces[i]]!==-1 && vertexmapping[faces[i+1]]!==-1 && vertexmapping[faces[i+2]]!==-1){
-                    newfaces.push(faces[i]);
-                    newfaces.push(faces[i+1]);
-                    newfaces.push(faces[i+2]);
-                }
-            } 
-            */
+            }
             for(var i=0; i+2<faces.length; i+=3){
                  if(vertexmapping[faces[i]]!==-1 && vertexmapping[faces[i+1]]!==-1 && vertexmapping[faces[i+2]]!==-1){
                     newfaces.push(faces[i]-(faces[i]-vertexmapping[faces[i]]));
@@ -943,14 +947,9 @@ $3Dmol.GLShape = (function() {
 
             }
 
-            console.log(newvertices.length);
             verts=newvertices!==[] ? newvertices:verts;
             faces=newfaces!==[] ? newfaces:faces;
-            console.log(verts.length);
-            /*
-            for(var i=0;i<faces.length;i++){
-                console.log(faces[i]);
-            }*/
+
             drawCustom(this, geo, {
                 vertexArr : verts,
                 faceArr : faces,
@@ -983,33 +982,19 @@ $3Dmol.GLShape = (function() {
 
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
             
-            //takes up most of the time
-            
             for(var i=0;i<selectedRegion.length;i++){
                 if(distance_from(selectedRegion[i],coordinate)<=radius)
                     return true;
             }
             return false;
         }
-        /*
-        var sortSelectedRegion= function(selectedRegion){//sorts by x value
-            for(var i=1; i<selectedRegion.length;i++){
-                var currentValue= selectedRegion[i].x;
-                var position=i;
-
-                while(position >0 && selectedRegion[position-1].x>currentValue){
-                    selectedRegion[position].x=selectedRegion[position-1].x;
-                    position=position-1;
-
-                }
-                selectedRegion[position].x=currentValue
-            }
-        }
-        */
         var distance_from= function(c1,c2){
             return Math.sqrt(Math.pow((c1.x-c2.x),2)+Math.pow((c1.y-c2.y),2)+Math.pow((c1.z-c2.z),2));
         }
-        
+        /**
+         * @deprecated unnecesary
+
+        */
         var convert=function(i,j,k,data){
             var pt;
             if(data.matrix) {
@@ -1022,7 +1007,6 @@ $3Dmol.GLShape = (function() {
                 pt.y = data.origin.y+data.unit.y*j;
                 pt.z = data.origin.z+data.unit.z*k;
             }
-            //console.log(pt.x+","+pt.y+","+pt.z);
             return pt;
         }
         /** 
