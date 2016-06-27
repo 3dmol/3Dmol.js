@@ -911,13 +911,21 @@ $3Dmol.GLShape = (function() {
                 else if(volSpec.selectedRegion[i].z<zmin.z)
                     zmin=volSpec.selectedRegion[i];
             }
+            
+            var rad=volSpec.radius;
+            xmax.x=xmax.x+rad;
+            xmin.x=xmin.x-rad;
+            ymin.y=ymin.y-rad;
+            ymax.y=ymax.y+rad;
+            zmin.z=zmin.z-rad;
+            zmax.z=zmax.z+rad;
+            
             //accounts for radius 
             var rverts=[];
-            var rad=volSpec.radius;
             for(var i=0;i<verts.length;i++){
-                if(verts[i].x>xmin.x-rad && verts[i].x<xmax.x+rad
-                    && verts[i].y> ymin.y-rad && verts[i].y<ymax.y+rad
-                    && verts[i].z>zmin.z-rad && verts[i].z<zmax.z+rad)
+                if(verts[i].x>xmin.x && verts[i].x<xmax.x
+                    && verts[i].y > ymin.y && verts[i].y<ymax.y
+                    && verts[i].z > zmin.z && verts[i].z<zmax.z)
                     rverts.push(1);
                 else
                     rverts.push(-1);
