@@ -921,34 +921,24 @@ $3Dmol.GLShape = (function() {
             zmax.z=zmax.z+rad;
             
             //accounts for radius 
-            var rverts=[];
-            for(var i=0;i<verts.length;i++){
-                if(verts[i].x>xmin.x && verts[i].x<xmax.x
-                    && verts[i].y > ymin.y && verts[i].y<ymax.y
-                    && verts[i].z > zmin.z && verts[i].z<zmax.z)
-                    rverts.push(1);
-                else
-                    rverts.push(-1);
-
-            }
-    
+           
             var vertexmapping= [];
             var newvertices= [];
             var newfaces=[];
             if(volSpec.selectedRegion!==undefined){
 
             for(var i=0;i<verts.length; i++){
-                if(rverts[i]===-1)
-                  vertexmapping.push(-1);
-                else{
-                if(inSelectedRegion(verts[i],volSpec.selectedRegion, volSpec.selectedOffset, volSpec.radius)){
+                if(verts[i].x>xmin.x && verts[i].x<xmax.x
+                    && verts[i].y > ymin.y && verts[i].y<ymax.y
+                    && verts[i].z > zmin.z && verts[i].z<zmax.z 
+                    && inSelectedRegion(verts[i],volSpec.selectedRegion, volSpec.selectedOffset, volSpec.radius)){
                     vertexmapping.push(newvertices.length);
                     newvertices.push(verts[i]);
 
                 }else{
                     vertexmapping.push(-1);
                 }
-            }
+            
             }
             for(var i=0; i+2<faces.length; i+=3){
                  if(vertexmapping[faces[i]]!==-1 && vertexmapping[faces[i+1]]!==-1 && vertexmapping[faces[i+2]]!==-1){
