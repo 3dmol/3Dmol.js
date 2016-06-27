@@ -896,6 +896,7 @@ $3Dmol.GLShape = (function() {
             */
             
             var xmax=volSpec.selectedRegion[0],ymax=volSpec.selectedRegion[0],zmax=volSpec.selectedRegion[0],xmin=volSpec.selectedRegion[0],ymin=volSpec.selectedRegion[0],zmin=volSpec.selectedRegion[0];
+            
             for(var i=0;i<volSpec.selectedRegion.length;i++){
                 if(volSpec.selectedRegion[i].x>xmax.x)
                     xmax=volSpec.selectedRegion[i];
@@ -981,7 +982,7 @@ $3Dmol.GLShape = (function() {
             var len2 = total.distanceTo(maxv);
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
-           
+            console.log(verts.length);
         };
 
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
