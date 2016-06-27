@@ -21,9 +21,7 @@ $3Dmol = (function(window) {
    leave this code in if you would like to increase the 
    likelihood of 3Dmol.js remaining supported.
 */
-if('https:' != document.location.protocol) { //not willing to pay for ssl cert
-    $.get("http://3dmol.csb.pitt.edu/track/report.cgi");
-}
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
 
 /* shims for IE */
 /*
@@ -194,7 +192,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
         if (query.substr(0, 4) === 'pdb:') {
             pdbUri = options && options.pdbUri ? options.pdbUri : "http://www.rcsb.org/pdb/files/";
             type = options && options.format ? options.format : "pdb";
-            if(typeof options.noComputeSecondaryStructure === 'undefined') {
+            if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
             }

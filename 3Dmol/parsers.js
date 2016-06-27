@@ -1806,7 +1806,8 @@ $3Dmol.Parsers = (function() {
 
                         var atomId = mmtfData.atomIdList[ atomIndex ];
                         var atomName = groupData.atomNameList[ k ];
-                        var atomCharge = groupData.atomChargeList[ k ];
+                        var atomCharge = 0;
+                        if(groupData.atomChargeList) atomCharge = groupData.atomChargeList[ k ];
                         var xCoord = mmtfData.xCoordList[ atomIndex ];
                         var yCoord = mmtfData.yCoordList[ atomIndex ];
                         var zCoord = mmtfData.zCoordList[ atomIndex ];
@@ -2058,5 +2059,53 @@ $3Dmol.Parsers = (function() {
         return [atoms];
     };
 
+    /**
+     * Parse a gro file from str and create atoms
+     */
+    parsers.gro = parsers.GRO = function(str, options) {
+	var atoms = [];
+        var lines = str.split(/\r?\n|\r/);
+        while (lines.length > 0) {
+            if (lines.length < 3)
+                break;
+            var atomCount = parseInt(lines[1]);
+            if (isNaN(atomCount) || atomCount <= 0)
+                break;
+            if (lines.length < atomCount + 3)
+                break;
+	    atoms.push([]);
+            var offset = 2;
+            var start = atoms[atoms.length-1].length;
+            var end = start + atomCount;
+            for (var i = start; i < end; i++) {
+                var line = lines[offset++];
+                var atom = {};
+                atom.serial = i;
+                atom.atom = line.slice(10,15).trim();
+		if(atom.atom.charCodeAt(1) >= 97 && atom.atom.charCodeAt(1) <= 122)
+		    atom.elem = atom.atom.slice(0,2);
+		else
+		    atom.elem = atom.atom[0];
+                atom.x = parseFloat(line.slice(20,28));
+                atom.y = parseFloat(line.slice(28,36));
+                atom.z = parseFloat(line.slice(36,44));
+		atom.resi = line.slice(5,10);
+                atom.bonds = [];
+                atom.bondOrder = [];
+                atom.properties = {};
+		if (line.length > 44){
+                    atom.dx = parseFloat(line.slice(44,52));
+                    atom.dy = parseFloat(line.slice(52,60));
+                    atom.dz = parseFloat(line.slice(60,68));
+		}
+                atoms[atoms.length-1][i] = atom;
+            }
+	    lines.splice(0, ++offset);
+        }
+	for (var i=0; i<atoms.length; i++){
+	    assignBonds(atoms[i]);
+	}
+        return atoms;
+    }
     return parsers;
 })();
