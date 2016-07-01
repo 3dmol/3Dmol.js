@@ -6,6 +6,9 @@
  * @param {number} sid - Unique identifier
  * @param {ShapeSpec} stylespec - shape style specification
  */
+
+ 
+
 $3Dmol.GLShape = (function() {
 
     // Marching cube, to match with protein surface generation
@@ -886,6 +889,12 @@ $3Dmol.GLShape = (function() {
             
             if (!voxel && smoothness > 0)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
+            var vertexmapping= [];
+            var newvertices= [];
+            var newfaces=[];
+            if(volSpec.selectedRegion!==undefined){
+
+            }
             /*
             loop through selected area 
                 find the 6 max/min points then createa a rectangle out of them
@@ -949,10 +958,10 @@ $3Dmol.GLShape = (function() {
             }
 
             }
-
+    
             verts=newvertices!==[] ? newvertices:verts;
             faces=newfaces!==[] ? newfaces:faces;
-
+           
             drawCustom(this, geo, {
                 vertexArr : verts,
                 faceArr : faces,
@@ -981,6 +990,7 @@ $3Dmol.GLShape = (function() {
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
             console.log(verts.length);
+            
         };
 
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
@@ -1178,3 +1188,4 @@ $3Dmol.splitMesh = function(mesh) {
         }
         return slices;
     }
+

@@ -1000,7 +1000,19 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         
+        var getMidpoint= function(point1, point2){
+            return ({x:(point1.x+point2.x)/2,y:(point1.y+point2.y)/2,z:(point1.z+point2.z)/2});
+        };
 
+        var getPoints=function(point1,point2,splits){
+            var points =[];
+
+            for(var i=0;i<splits;i++){
+
+            }
+
+            return points;
+        };
         /**
          * Zoom to center of atom selection
          * 
@@ -1014,7 +1026,9 @@ $3Dmol.GLViewer = (function() {
          *  // Focus on centroid of all atoms of all models in this
          * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
          */
-        this.zoomTo = function(sel) {
+        this.zoomTo = function(sel, animationDuration) {
+            console.log(animationDuration);
+            animationDuration=animationDuration!==undefined ? animationDuration : 0;
             var allatoms, alltmp;
             sel = sel || {};
             var atoms = getAtomsFromSel(sel);
@@ -1051,7 +1065,13 @@ $3Dmol.GLViewer = (function() {
 
             // use selection for center
             var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
-            modelGroup.position = center.clone().multiplyScalar(-1);
+            console.log(center.clone().multiplyScalar(-1));
+            if(animationDuration>0){
+                
+            }
+            else{
+                modelGroup.position = center.clone().multiplyScalar(-1);
+            }
             // but all for bounding box
             var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
                     - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
@@ -1089,6 +1109,7 @@ $3Dmol.GLViewer = (function() {
             show();
             
             return this;
+        
         };
         
         /**

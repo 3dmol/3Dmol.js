@@ -2,6 +2,8 @@
 <html>
   <head>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+    <!--<script src="../../js/require.js"></script>-->
     <script src="../../build/3Dmol.js"></script>
     <style>
       table td { text-align: center; }
@@ -52,18 +54,11 @@
                                        color: "blue",
                                        wireframe: true,
                                        linewidth:0.005,
-                                       selectedRegion: viewer.selectedAtoms({resn: 'STI'}),
+                                       selectedRegion: viewer.selectedAtoms({}),
                                        selectedOffset: 3,
                                        radius: 3.0                                   
                                     });
-     viewer.addIsosurface(voldata, {isoval: 0.15,
--                                       color: "cyan",
--                                       wireframe: true,
--                                       linewidth:0.005,
--                                       selectedRegion: viewer.selectedAtoms({}), 
--                                       selectedOffset: 3,
--                                       radius:3.0                 
--                                    });     
+
                                                      
       viewer.render();
     };
