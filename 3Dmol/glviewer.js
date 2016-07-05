@@ -1033,20 +1033,7 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         
-        var getMidpoint= function(point1, point2){
-            return ({x:(point1.x+point2.x)/2,y:(point1.y+point2.y)/2,z:(point1.z+point2.z)/2});
-        };
-
-        var getPoints=function(point1,point2,splits){
-            var points =[];
-            
-            if(splits===1){
-                points.unshift(getMidpoint(point1,point2));
-            }
-            else{
-                
-            }
-        };
+       
         /**
          * Zoom to center of atom selection
          * 
