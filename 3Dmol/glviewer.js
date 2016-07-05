@@ -1024,6 +1024,7 @@ $3Dmol.GLViewer = (function() {
          * @param {number} y
          * 
          */
+         var transIndex=0;
         this.translate = function(x, y, animationDuration) {
             var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var dx = x/WIDTH;
@@ -1031,8 +1032,6 @@ $3Dmol.GLViewer = (function() {
             var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
 
             var original_position=lookingAt.clone();
-
-            console.log("orig x:"+original_position.x+",y:"+original_position.y+",z:"+original_position.z);
 
             var wait_time=20;
 
@@ -1043,37 +1042,32 @@ $3Dmol.GLViewer = (function() {
             v.z = 0;            
             lookingAt.add(v);
 
+            var currentPosition=original_position;
+
             var final_position=lookingAt;
             if(animationDuration>0){
                 var step=new $3Dmol.Vector3((final_position.x-original_position.x)/(animationDuration/wait_time),
                                             (final_position.y-original_position.y)/(animationDuration/wait_time),
                                             0);
-                console.log("x:"+step.x+",y:"+step.y+",z:"+step.z);
-                console.log("orig x:"+original_position.x+",y:"+original_position.y+",z:"+original_position.z);
-                console.log("x:"+final_position.x+",y:"+final_position.y+",z:"+final_position.z);
                 var inc_done = false;
 
-                var inc_x = step.x<0 ? less_than_equal : greater_than_equal;
-                var inc_y = step.y<0 ? less_than_equal : greater_than_equal;
-                var inc_z = step.z<0 ? less_than_equal : greater_than_equal;
+                var steps= new Array((animationDuration/wait_time));
+
+                for(var i=0;i<steps.length;i++){
+                    currentPosition=new $3Dmol.Vector3(currentPosition.x+step.x,currentPosition.y+step.y,currentPosition.z+step.z);
+                    steps[i]=currentPosition;
+                }
 
                 var increment = function(){
-                    if(inc_x(v.x,final_position.x) && inc_y(v.y,final_position.y) && inc_z(v.z,final_position.z)){
+                    if(transIndex===steps.length){
                         inc_done = true;  
                         show();
                         return;
                     }
-                    if(inc_x(v.x,final_position.x))
-                        step.x=0;
-                    if(inc_y(v.y,final_position.y))
-                        step.y=0;
-                    if(inc_z(v.z,final_position.z))
-                        step.z=0;
-                    v.x += step.x;
-                    v.y += step.y;
-                    v.z += step.z;
-                    lookingAt.add(v);
+
+                    lookingAt.add(steps[transIndex]);
                     camera.lookAt(lookingAt);
+                    transIndex+=1;
                     show();
                 };
 
