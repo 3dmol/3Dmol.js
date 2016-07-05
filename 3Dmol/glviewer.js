@@ -966,9 +966,42 @@ $3Dmol.GLViewer = (function() {
          *            will zoom in, less than one will zoom out. Default 2.
          * 
          */
-        this.zoom = function(factor) {
+        this.zoom = function(factor,animationDuration) {
             var factor = factor || 2;
+            var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var scale = (CAMERA_Z - rotationGroup.position.z) / factor;
+
+            if(animationDuration>0){
+                var original_z = rotationGroup.position.z;
+                var final_z = CAMERA_Z - scale;
+                var wait_time = 20;
+                var step = (final_z-original_z)/(animationDuration/wait_time);
+
+                var inc_z_eval = step<0 ? less_than_equal : greater_than_equal;
+
+                console.log(step);
+                var inc_z_done = false;
+
+                var increment_z = function(){
+                    if(inc_z_done){
+                        clearInterval();
+                        return;
+                    }
+                    if(inc_z_eval(rotationGroup.position.z,final_z)){
+                        inc_z_done = true;
+                        show();
+                        return;
+                    }
+                    rotationGroup.position.z+=step;
+                    show();
+                
+                };
+
+                setInterval(increment_z,wait_time);
+               
+
+                return this;
+            }
             rotationGroup.position.z = CAMERA_Z - scale;
             show();
             return this;

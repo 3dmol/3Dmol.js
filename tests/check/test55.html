@@ -45,11 +45,12 @@
     req.responseType = "arraybuffer";
     req.onload = function (aEvt) {      
        var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
-                                  
+                          
+      viewer.zoom(3,1000);         
       viewer.render();
     };
     req.send(null);
-    viewer.zoomTo({res: 'STI'},1000);
+
 
         </script>
         <td width="50%"><img src="imgs/test55.png"></td>
