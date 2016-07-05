@@ -966,6 +966,7 @@ $3Dmol.GLViewer = (function() {
          *            will zoom in, less than one will zoom out. Default 2.
          * 
          */
+         var zoomIndex=0;
         this.zoom = function(factor,animationDuration) {
             var factor = factor || 2;
             var animationDuration = animationDuration!==undefined ? animationDuration : 0;
@@ -977,9 +978,15 @@ $3Dmol.GLViewer = (function() {
                 var wait_time = 20;
                 var step = (final_z-original_z)/(animationDuration/wait_time);
 
-                var inc_z_eval = step<0 ? less_than_equal : greater_than_equal;
+                var current_z=original_z;
 
-                console.log(step);
+                var steps=new Array((animationDuration/wait_time));
+
+                for(var i=0;i<steps.length;i++){
+                    current_z+=step;
+                    steps[i]=current_z;
+                }
+
                 var inc_z_done = false;
 
                 var increment_z = function(){
@@ -987,13 +994,14 @@ $3Dmol.GLViewer = (function() {
                         clearInterval();
                         return;
                     }
-                    if(inc_z_eval(rotationGroup.position.z,final_z)){
+                    if(zoomIndex===steps.length){
                         inc_z_done = true;
                         show();
                         return;
                     }
-                    rotationGroup.position.z+=step;
+                    rotationGroup.position.z=steps[zoomIndex];
                     show();
+                    zoomIndex+=1;
                 
                 };
 
@@ -1016,11 +1024,17 @@ $3Dmol.GLViewer = (function() {
          * @param {number} y
          * 
          */
-        this.translate = function(x, y) {
-            
+        this.translate = function(x, y, animationDuration) {
+            var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
             var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
+
+            var original_position=lookingAt.clone();
+
+            console.log("orig x:"+original_position.x+",y:"+original_position.y+",z:"+original_position.z);
+
+            var wait_time=20;
 
             projector.projectVector(v, camera);
             v.x -= dx;
@@ -1028,6 +1042,49 @@ $3Dmol.GLViewer = (function() {
             projector.unprojectVector(v, camera);
             v.z = 0;            
             lookingAt.add(v);
+
+            var final_position=lookingAt;
+            if(animationDuration>0){
+                var step=new $3Dmol.Vector3((final_position.x-original_position.x)/(animationDuration/wait_time),
+                                            (final_position.y-original_position.y)/(animationDuration/wait_time),
+                                            0);
+                console.log("x:"+step.x+",y:"+step.y+",z:"+step.z);
+                console.log("orig x:"+original_position.x+",y:"+original_position.y+",z:"+original_position.z);
+                console.log("x:"+final_position.x+",y:"+final_position.y+",z:"+final_position.z);
+                var inc_done = false;
+
+                var inc_x = step.x<0 ? less_than_equal : greater_than_equal;
+                var inc_y = step.y<0 ? less_than_equal : greater_than_equal;
+                var inc_z = step.z<0 ? less_than_equal : greater_than_equal;
+
+                var increment = function(){
+                    if(inc_x(v.x,final_position.x) && inc_y(v.y,final_position.y) && inc_z(v.z,final_position.z)){
+                        inc_done = true;  
+                        show();
+                        return;
+                    }
+                    if(inc_x(v.x,final_position.x))
+                        step.x=0;
+                    if(inc_y(v.y,final_position.y))
+                        step.y=0;
+                    if(inc_z(v.z,final_position.z))
+                        step.z=0;
+                    v.x += step.x;
+                    v.y += step.y;
+                    v.z += step.z;
+                    lookingAt.add(v);
+                    camera.lookAt(lookingAt);
+                    show();
+                };
+
+                if(!inc_done)
+                    setInterval(increment,wait_time);
+                else
+                    clearInterval();
+
+                return this;
+            }
+            
             camera.lookAt(lookingAt);
             show();
             return this;
@@ -1176,8 +1233,6 @@ $3Dmol.GLViewer = (function() {
                     if(!inc_rot_done){
                         increment_rot();
                     }
-
-
                 };
 
                 if(!inc_z_done || !inc_rot_done)

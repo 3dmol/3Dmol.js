@@ -1364,7 +1364,7 @@ $3Dmol.GLShape = (function() {
                 var tree = new kdTree(volSpec.selectedRegion,distance_from,["x","y","z"]);
 
                 for(var i = 0; i < verts.length;i++){
-                    var nearest = tree.nearest(verts[i],verts.length,[volSpec.radius]);
+                    var nearest = tree.nearest(verts[i],1,[volSpec.radius]);
                     if(nearest.length>0){
                         vertexmapping.push(newvertices.length);
                         newvertices.push(verts[i]);
