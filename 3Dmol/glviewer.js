@@ -1104,6 +1104,8 @@ $3Dmol.GLViewer = (function() {
          *  // Focus on centroid of all atoms of all models in this
          * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
          */
+        var rot_index=0;
+        var z_index=0;
         this.zoomTo = function(sel, animationDuration) {
             console.log(animationDuration);
             animationDuration=animationDuration!==undefined ? animationDuration : 0;
@@ -1199,30 +1201,48 @@ $3Dmol.GLViewer = (function() {
                 var inc_z_done=false;
                 var inc_rot_done= false;
 
-                var inc_z_eval = step<0 ? less_than_equal : greater_than_equal;
+                var z_steps=new Array(animationDuration/wait_time);
+
+                var current_z=original_z;
+
+                for(var i=0;i<z_steps.length;i++){
+                    current_z+=step;
+                    z_steps[i]=current_z;
+                }
+
+                var current_rot_x=original_rot_x;
+                var current_rot_y=original_rot_y;
+                var current_rot_z=original_rot_z;
+
+                var steps=new Array(animationDuration/wait_time);
+
+                for(var i=0;i<steps.length;i++){
+                    current_rot_x+=xstep;
+                    current_rot_y+=ystep;
+                    current_rot_z+=zstep;
+
+                    steps[i]=new $3Dmol.Vector3(current_rot_x,current_rot_y,current_rot_z);
+                }
 
                 var increment_z = function(){
-                    if(inc_z_eval(rotationGroup.position.z,final_z)){
+                    if(z_index===z_steps.length){
                         inc_z_done = true;
                         show();
                         return;
                     }
-                    rotationGroup.position.z+=step;
+                    rotationGroup.position.z=z_steps[z_index];
+                    z_index+=1;
                     show();
                 };
-                var inc_x = xstep<0 ? less_than_equal : greater_than_equal;
-                var inc_y = ystep<0 ? less_than_equal : greater_than_equal;
-                var inc_z = zstep<0 ? less_than_equal : greater_than_equal;
 
                 var increment_rot = function(){
-                    if(inc_x(modelGroup.position.x,final_rot_x) || inc_y(modelGroup.position.y,final_rot_y) || inc_z(modelGroup.position.z,final_rot_z)){
+                    if(rot_index===steps.length){
                         inc_rot_done = true;  
                         show();
                         return;
                     } 
-                    modelGroup.position.x+=xstep;
-                    modelGroup.position.y+=ystep;
-                    modelGroup.position.z+=zstep;
+                    modelGroup=steps[rot_index];
+                    rot_index+=1;
                     show();
                 };
 
@@ -1252,13 +1272,6 @@ $3Dmol.GLViewer = (function() {
         
         };
 
-        var greater_than_equal= function(a,b){
-            return a>=b;
-        }
-        var less_than_equal = function(a,b){
-            return a<=b;
-        }
-        
         /**
          * Set slab of view (contents outside of slab are clipped). M
          * Must call render to update.
