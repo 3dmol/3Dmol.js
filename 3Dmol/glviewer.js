@@ -1067,12 +1067,8 @@ $3Dmol.GLViewer = (function() {
             // use selection for center
             var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
             console.log(center.clone().multiplyScalar(-1));
-            if(animationDuration>0){
-                 modelGroup.position = center.clone().multiplyScalar(-1);
-            }
-            else{
-                modelGroup.position = center.clone().multiplyScalar(-1);
-            }
+
+            
             // but all for bounding box
             var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
                     - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
@@ -1105,43 +1101,88 @@ $3Dmol.GLViewer = (function() {
             
             var maxD = Math.sqrt(maxDsq)*2;
             if(animationDuration>0){
-                var original_z=rotationGroup.position.z;
-                var final_z=-(maxD * 0.5
-                    / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
-                var wait=20;
-                var speed=(Math.abs(original_z-final_z)/(animationDuration/wait));
-                var cleared=false;
-                var increment =function(){
-                    //milleseconds
-                    if(!cleared){
-                    if(rotationGroup.position.z>=final_z){
-                        clearInterval();
-                        cleared=true;
+                var original_z = rotationGroup.position.z;
+                var final_z = -(maxD * 0.5
+                        / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
+                var wait_time = 20;
+                var step = (final_z-original_z)/(animationDuration/wait_time);
+
+                var original_rot_x = modelGroup.position.x;
+                var original_rot_y = modelGroup.position.y;
+                var original_rot_z = modelGroup.position.z;
+
+                var final_rot_x = center.clone().multiplyScalar(-1).x;
+                var final_rot_y = center.clone().multiplyScalar(-1).y;
+                var final_rot_z = center.clone().multiplyScalar(-1).z;
+
+                var xstep = (final_rot_x-original_rot_x)/(animationDuration/wait_time);
+                var ystep = (final_rot_y-original_rot_y)/(animationDuration/wait_time);
+                var zstep = (final_rot_z-original_rot_z)/(animationDuration/wait_time);
+
+                var inc_z_done=false;
+                var inc_rot_done= false;
+
+                var inc_z_eval = step<0 ? less_than_equal : greater_than_equal;
+
+                var increment_z = function(){
+                    if(inc_z_eval(rotationGroup.position.z,final_z)){
+                        inc_z_done = true;
+                        show();
                         return;
                     }
-                    rotationGroup.position.z=rotationGroup.position.z+speed;
+                    rotationGroup.position.z+=step;
                     show();
-                    console.log(rotationGroup.position.z);
+                };
+                var inc_x = xstep<0 ? less_than_equal : greater_than_equal;
+                var inc_y = ystep<0 ? less_than_equal : greater_than_equal;
+                var inc_z = zstep<0 ? less_than_equal : greater_than_equal;
 
-                }
-                else{
+                var increment_rot = function(){
+                    if(inc_x(modelGroup.position.x,final_rot_x) || inc_y(modelGroup.position.y,final_rot_y) || inc_z(modelGroup.position.z,final_rot_z)){
+                        inc_rot_done = true;  
+                        show();
+                        return;
+                    } 
+                    modelGroup.position.x+=xstep;
+                    modelGroup.position.y+=ystep;
+                    modelGroup.position.z+=zstep;
+                    show();
+                };
+
+                var increment = function(){
+                    if(!inc_z_done){
+                        increment_z();
+                    }
+                    if(!inc_rot_done){
+                        increment_rot();
+                    }
+
+
+                };
+
+                if(!inc_z_done || !inc_rot_done)
+                    setInterval(increment,wait_time);
+                else
                     clearInterval();
-                }
+                return this;
             }
-            if(!cleared){
-                setInterval(increment,wait);
-            }
-                console.log(rotationGroup.position.z+"  "+final_z);
-            }else{
+
+            modelGroup.position = center.clone().multiplyScalar(-1);
+
             rotationGroup.position.z = -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
             show();
-            }
-            cleatInterval();
-            console.log("finish");
+            
             return this;
         
         };
+
+        var greater_than_equal= function(a,b){
+            return a>=b;
+        }
+        var less_than_equal = function(a,b){
+            return a<=b;
+        }
         
         /**
          * Set slab of view (contents outside of slab are clipped). M
