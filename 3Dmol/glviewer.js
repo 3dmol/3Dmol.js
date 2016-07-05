@@ -1006,12 +1006,13 @@ $3Dmol.GLViewer = (function() {
 
         var getPoints=function(point1,point2,splits){
             var points =[];
-
-            for(var i=0;i<splits;i++){
-
+            
+            if(splits===1){
+                points.unshift(getMidpoint(point1,point2));
             }
-
-            return points;
+            else{
+                
+            }
         };
         /**
          * Zoom to center of atom selection
@@ -1067,7 +1068,7 @@ $3Dmol.GLViewer = (function() {
             var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
             console.log(center.clone().multiplyScalar(-1));
             if(animationDuration>0){
-                
+                 modelGroup.position = center.clone().multiplyScalar(-1);
             }
             else{
                 modelGroup.position = center.clone().multiplyScalar(-1);
@@ -1103,11 +1104,41 @@ $3Dmol.GLViewer = (function() {
             }
             
             var maxD = Math.sqrt(maxDsq)*2;
+            if(animationDuration>0){
+                var original_z=rotationGroup.position.z;
+                var final_z=-(maxD * 0.5
+                    / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
+                var wait=20;
+                var speed=(Math.abs(original_z-final_z)/(animationDuration/wait));
+                var cleared=false;
+                var increment =function(){
+                    //milleseconds
+                    if(!cleared){
+                    if(rotationGroup.position.z>=final_z){
+                        clearInterval();
+                        cleared=true;
+                        return;
+                    }
+                    rotationGroup.position.z=rotationGroup.position.z+speed;
+                    show();
+                    console.log(rotationGroup.position.z);
 
+                }
+                else{
+                    clearInterval();
+                }
+            }
+            if(!cleared){
+                setInterval(increment,wait);
+            }
+                console.log(rotationGroup.position.z+"  "+final_z);
+            }else{
             rotationGroup.position.z = -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
             show();
-            
+            }
+            cleatInterval();
+            console.log("finish");
             return this;
         
         };
