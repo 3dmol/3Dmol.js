@@ -1312,6 +1312,16 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addIsosurface         
          * @param {$3Dmol.VolumeData} data - volumetric input data
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
+         * @example //the user can specify a selected region for the isosurface 
+         * viewer.addIsosurface(voldata, {isoval: 0.25,
+                                       color: "blue",
+                                       wireframe: true,
+                                       linewidth:0.005,
+                                       selectedRegion: viewer.selectedAtoms({}),
+                                       selectedOffset: 3,
+                                       radius: 3.0                                   
+                                    });
+         this specific example selects every atom in the model witha  radius of 3
          */
         this.addIsosurface = function(data, volSpec) {
            
