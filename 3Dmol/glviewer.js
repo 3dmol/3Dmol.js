@@ -701,7 +701,13 @@ $3Dmol.GLViewer = (function() {
          * @param {string}
          *            [angle] - Axis ("x", "y", or "z") to rotate around.
          *            Default "y"
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @example //if the user were to pass a value for animationDuration like
+         *            so glviewer.rotate(90,"y",1000); then over the course of 1 second
+         *            (1000 milleseconds) the program would rotate.
+         *  
          */
         this.rotate = function(angle, axis, animationDuration) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
