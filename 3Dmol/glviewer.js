@@ -709,39 +709,13 @@ $3Dmol.GLViewer = (function() {
          *            (1000 milleseconds) the program would rotate.
          *  
          */
+        var rotate_index=0;
         this.rotate = function(angle, axis, animationDuration) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
 
             if (typeof (axis) === "undefined") {
                 axis = "y";
             }
-            /*
-            if(animationDuration>0){
-                var wait_time=20;
-                
-                var step = angle/(animationDuration/wait_time);
-                var step_num=angle/step;
-                var current_angle=0;
-                for(var i=0; i<step_num;i++){
-                    current_angle+=step;
-                    var i = 0, j = 0, k = 0;
-                var rangle = Math.PI * current_angle / 180.0;
-                var s = Math.sin(rangle / 2.0);
-                var c = Math.cos(rangle / 2.0);
-                if (axis == "x")
-                    i = s;
-                if (axis == "y")
-                    j = s;
-                if (axis == "z")
-                    k = s;
-
-                var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
-                rotationGroup.quaternion.multiply(q);
-                show();
-                }
-                return this;
-            }
-            */
             var i = 0, j = 0, k = 0;
             var rangle = Math.PI * angle / 180.0;
             var s = Math.sin(rangle / 2.0);
@@ -754,7 +728,55 @@ $3Dmol.GLViewer = (function() {
                 k = s;
 
             var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
+            if(animationDuration>0){
+                var wait_time = 20;
 
+                var original = rotationGroup.quaternion;//quaternion
+                var final = q;//quaternion
+
+                var xstep = (final.x-original.x)/(animationDuration/wait_time);
+                var ystep = (final.y-original.y)/(animationDuration/wait_time);
+                var zstep = (final.z-original.z)/(animationDuration/wait_time);
+                var wstep = (final.w-original.w)/(animationDuration/wait_time);
+                
+                var rotation_done=false;
+
+                var current_q=original;
+
+                var steps=new Array(animationDuration/wait_time);
+                for(var i=0;i<steps.length;i++){
+                    current_q=new $3Dmol.Quaternion(current_q.x+xstep,current_q.y+ystep,current_q.z+zstep,current_q.w+wstep).normalize();
+                    steps[i] = current_q;
+                }
+                
+                 var increment = function(){
+                    if(transIndex===steps.length){
+                        inc_done = true;  
+                        show();
+                        rotate_index=0;
+                        return;
+                    }
+                    rotationGroup.quaternion.multiply(steps[rotate_index]);
+                    rotate_index+=1;
+                    show();
+                };
+
+                if(!rotation_done)
+                    setInterval(increment,wait_time);
+                else{
+                    clearInterval();
+                     rotate_index=0;
+                }
+
+                return this;
+            }
+            
+            
+
+            
+            console.log(rotationGroup.quaternion);
+            console.log(q);
+            // this line completes the animation
             rotationGroup.quaternion.multiply(q);
             show();
             return this;
@@ -1034,6 +1056,7 @@ $3Dmol.GLViewer = (function() {
                 var increment_z = function(){
                     if(inc_z_done){
                         clearInterval();
+                        zoomIndex=0;
                         return;
                     }
                     if(zoomIndex===steps.length){
@@ -1109,6 +1132,7 @@ $3Dmol.GLViewer = (function() {
                     if(transIndex===steps.length){
                         inc_done = true;  
                         show();
+                        transIndex=0;
                         return;
                     }
 
@@ -1120,8 +1144,10 @@ $3Dmol.GLViewer = (function() {
 
                 if(!inc_done)
                     setInterval(increment,wait_time);
-                else
+                else{
                     clearInterval();
+                     transIndex=0;
+                }
 
                 return this;
             }
@@ -1305,8 +1331,11 @@ $3Dmol.GLViewer = (function() {
 
                 if(!inc_z_done || !inc_rot_done)
                     setInterval(increment,wait_time);
-                else
+                else{
                     clearInterval();
+                    rot_index=0;
+                    z_index=0;
+                }
                 return this;
             }
 
