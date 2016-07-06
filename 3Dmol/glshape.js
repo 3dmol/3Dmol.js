@@ -854,7 +854,7 @@ $3Dmol.GLShape = (function() {
                                        selectedOffset: 3,
                                        radius: 3.0                                   
                                     });
-         this specific example selects every atom in the model witha  radius of 3
+         this specific example selects every atom in the
          */
         this.addIsosurface = function(data, volSpec) {
            
@@ -903,36 +903,9 @@ $3Dmol.GLShape = (function() {
             var vertexmapping= [];
             var newvertices= [];
             var newfaces=[];
-            if(volSpec.selectedRegion!==undefined){
-                var tree = new kdTree(volSpec.selectedRegion,distance_from,["x","y","z"]);
 
-                for(var i = 0; i < verts.length;i++){
-                    var nearest = tree.nearest(verts[i],1,[volSpec.radius]);
-                    if(nearest.length>0){
-                        vertexmapping.push(newvertices.length);
-                        newvertices.push(verts[i]);
-                    }
-                    else{
-                        vertexmapping.push(-1);
-                    }
-                    console.log("loop "+verts.length);
-                }
-                for(var i=0; i+2<faces.length; i+=3){
-                 if(vertexmapping[faces[i]]!==-1 && vertexmapping[faces[i+1]]!==-1 && vertexmapping[faces[i+2]]!==-1){
-                    newfaces.push(faces[i]-(faces[i]-vertexmapping[faces[i]]));
-                    newfaces.push(faces[i+1]-(faces[i+1]-vertexmapping[faces[i+1]]));
-                    newfaces.push(faces[i+2]-(faces[i+2]-vertexmapping[faces[i+2]]));
-                }
-            }
-            }
-            /*
-            loop through selected area 
-                find the 6 max/min points then createa a rectangle out of them
-            loop through verts
-                ommit the points that are not in that range
-    1.33 with
-    1.75 without
-            */
+            if(volSpec.selectedRegion!==undefined){
+                
             
             var xmax=volSpec.selectedRegion[0],ymax=volSpec.selectedRegion[0],zmax=volSpec.selectedRegion[0],xmin=volSpec.selectedRegion[0],ymin=volSpec.selectedRegion[0],zmin=volSpec.selectedRegion[0];
             
@@ -960,12 +933,6 @@ $3Dmol.GLShape = (function() {
             zmax.z=zmax.z+rad;
             
             //accounts for radius 
-           
-            var vertexmapping= [];
-            var newvertices= [];
-            var newfaces=[];
-            if(volSpec.selectedRegion!==undefined){
-
             for(var i=0;i<verts.length; i++){
                 if(verts[i].x>xmin.x && verts[i].x<xmax.x
                     && verts[i].y > ymin.y && verts[i].y<ymax.y
@@ -987,9 +954,8 @@ $3Dmol.GLShape = (function() {
                 }
             }
 
-            }
-        */
-            verts=newvertices!==[] ? newvertices:verts;
+            }    
+      verts=newvertices!==[] ? newvertices:verts;
             faces=newfaces!==[] ? newfaces:faces;
            
             drawCustom(this, geo, {
@@ -1020,9 +986,7 @@ $3Dmol.GLShape = (function() {
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
             console.log(verts.length);
-            
-        };
-
+          }
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
             
             for(var i=0;i<selectedRegion.length;i++){
