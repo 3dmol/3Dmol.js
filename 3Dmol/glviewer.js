@@ -703,10 +703,39 @@ $3Dmol.GLViewer = (function() {
          *            Default "y"
          * 
          */
-        this.rotate = function(angle, axis) {
+        this.rotate = function(angle, axis, animationDuration) {
+            animationDuration = animationDuration!==undefined ? animationDuration : 0;
+
             if (typeof (axis) === "undefined") {
                 axis = "y";
             }
+            /*
+            if(animationDuration>0){
+                var wait_time=20;
+                
+                var step = angle/(animationDuration/wait_time);
+                var step_num=angle/step;
+                var current_angle=0;
+                for(var i=0; i<step_num;i++){
+                    current_angle+=step;
+                    var i = 0, j = 0, k = 0;
+                var rangle = Math.PI * current_angle / 180.0;
+                var s = Math.sin(rangle / 2.0);
+                var c = Math.cos(rangle / 2.0);
+                if (axis == "x")
+                    i = s;
+                if (axis == "y")
+                    j = s;
+                if (axis == "z")
+                    k = s;
+
+                var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
+                rotationGroup.quaternion.multiply(q);
+                show();
+                }
+                return this;
+            }
+            */
             var i = 0, j = 0, k = 0;
             var rangle = Math.PI * angle / 180.0;
             var s = Math.sin(rangle / 2.0);
@@ -719,9 +748,11 @@ $3Dmol.GLViewer = (function() {
                 k = s;
 
             var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
+
             rotationGroup.quaternion.multiply(q);
             show();
             return this;
+
         };
 
         /** Returns an array representing the current viewpoint.
@@ -964,7 +995,12 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [factor] - Magnification factor. Values greater than 1
          *            will zoom in, less than one will zoom out. Default 2.
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @example //if the suer were to pass a value for the animationDuration like
+         *            so glviewer.zoom(3,1000); the program would zoom by a factor of 
+         *            3 for 1 second(1000 milleseconds) 
          */
          var zoomIndex=0;
         this.zoom = function(factor,animationDuration) {
@@ -1022,7 +1058,12 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#translate
          * @param {number} x
          * @param {number} y
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @example //if the user were to pass animationDuration to the function 
+         *            like so glviewer.translate(10,10,1000); then the program would
+         *            perform a translation over the course of 1 second(1000 milleseconds)
          */
          var transIndex=0;
         this.translate = function(x, y, animationDuration) {
@@ -1092,9 +1133,16 @@ $3Dmol.GLViewer = (function() {
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
          *            properties to select. Default: all atoms in viewer
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
          * @example // Assuming we have created a model of a protein with
          *          multiple chains (e.g. from a PDB file), focus on atoms in
          *          chain B glviewer.zoomTo({chain: 'B'});
+         * @example // if the user were to pass the animationDuration value to 
+         *            the function like so viewer.zoomTo({resn:'STI'},1000);
+         *            the program would zoom into resn 'STI' over the course 
+         *            of 1 second(1000 milleseconds).
          *  // Focus on centroid of all atoms of all models in this
          * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
          */
