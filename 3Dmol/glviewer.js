@@ -701,9 +701,18 @@ $3Dmol.GLViewer = (function() {
          * @param {string}
          *            [angle] - Axis ("x", "y", or "z") to rotate around.
          *            Default "y"
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @example //if the user were to pass a value for animationDuration like
+         *            so glviewer.rotate(90,"y",1000); then over the course of 1 second
+         *            (1000 milleseconds) the program would rotate.
+         *  
          */
-        this.rotate = function(angle, axis) {
+        var rotate_index=0;
+        this.rotate = function(angle, axis, animationDuration) {
+            animationDuration = animationDuration!==undefined ? animationDuration : 0;
+
             if (typeof (axis) === "undefined") {
                 axis = "y";
             }
@@ -719,9 +728,59 @@ $3Dmol.GLViewer = (function() {
                 k = s;
 
             var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
+            if(animationDuration>0){
+                var wait_time = 20;
+
+                var original = rotationGroup.quaternion;//quaternion
+                var final = q;//quaternion
+
+                var xstep = (final.x-original.x)/(animationDuration/wait_time);
+                var ystep = (final.y-original.y)/(animationDuration/wait_time);
+                var zstep = (final.z-original.z)/(animationDuration/wait_time);
+                var wstep = (final.w-original.w)/(animationDuration/wait_time);
+                
+                var rotation_done=false;
+
+                var current_q=original;
+
+                var steps=new Array(animationDuration/wait_time);
+                for(var i=0;i<steps.length;i++){
+                    current_q=new $3Dmol.Quaternion(current_q.x+xstep,current_q.y+ystep,current_q.z+zstep,current_q.w+wstep).normalize();
+                    steps[i] = current_q;
+                }
+                
+                 var increment = function(){
+                    if(transIndex===steps.length){
+                        inc_done = true;  
+                        show();
+                        rotate_index=0;
+                        return;
+                    }
+                    rotationGroup.quaternion.multiply(steps[rotate_index]);
+                    rotate_index+=1;
+                    show();
+                };
+
+                if(!rotation_done)
+                    setInterval(increment,wait_time);
+                else{
+                    clearInterval();
+                     rotate_index=0;
+                }
+
+                return this;
+            }
+            
+            
+
+            
+            console.log(rotationGroup.quaternion);
+            console.log(q);
+            // this line completes the animation
             rotationGroup.quaternion.multiply(q);
             show();
             return this;
+
         };
 
         /** Returns an array representing the current viewpoint.
@@ -964,11 +1023,58 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [factor] - Magnification factor. Values greater than 1
          *            will zoom in, less than one will zoom out. Default 2.
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @example //if the suer were to pass a value for the animationDuration like
+         *            so glviewer.zoom(3,1000); the program would zoom by a factor of 
+         *            3 for 1 second(1000 milleseconds) 
          */
-        this.zoom = function(factor) {
+         var zoomIndex=0;
+        this.zoom = function(factor,animationDuration) {
             var factor = factor || 2;
+            var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var scale = (CAMERA_Z - rotationGroup.position.z) / factor;
+
+            if(animationDuration>0){
+                var original_z = rotationGroup.position.z;
+                var final_z = CAMERA_Z - scale;
+                var wait_time = 20;
+                var step = (final_z-original_z)/(animationDuration/wait_time);
+
+                var current_z=original_z;
+
+                var steps=new Array((animationDuration/wait_time));
+
+                for(var i=0;i<steps.length;i++){
+                    current_z+=step;
+                    steps[i]=current_z;
+                }
+
+                var inc_z_done = false;
+
+                var increment_z = function(){
+                    if(inc_z_done){
+                        clearInterval();
+                        zoomIndex=0;
+                        return;
+                    }
+                    if(zoomIndex===steps.length){
+                        inc_z_done = true;
+                        show();
+                        return;
+                    }
+                    rotationGroup.position.z=steps[zoomIndex];
+                    show();
+                    zoomIndex+=1;
+                
+                };
+
+                setInterval(increment_z,wait_time);
+               
+
+                return this;
+            }
             rotationGroup.position.z = CAMERA_Z - scale;
             show();
             return this;
@@ -981,13 +1087,23 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#translate
          * @param {number} x
          * @param {number} y
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @example //if the user were to pass animationDuration to the function 
+         *            like so glviewer.translate(10,10,1000); then the program would
+         *            perform a translation over the course of 1 second(1000 milleseconds)
          */
-        this.translate = function(x, y) {
-            
+         var transIndex=0;
+        this.translate = function(x, y, animationDuration) {
+            var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
             var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
+
+            var original_position=lookingAt.clone();
+
+            var wait_time=20;
 
             projector.projectVector(v, camera);
             v.x -= dx;
@@ -995,12 +1111,53 @@ $3Dmol.GLViewer = (function() {
             projector.unprojectVector(v, camera);
             v.z = 0;            
             lookingAt.add(v);
+
+            var currentPosition=original_position;
+
+            var final_position=lookingAt;
+            if(animationDuration>0){
+                var step=new $3Dmol.Vector3((final_position.x-original_position.x)/(animationDuration/wait_time),
+                                            (final_position.y-original_position.y)/(animationDuration/wait_time),
+                                            0);
+                var inc_done = false;
+
+                var steps= new Array((animationDuration/wait_time));
+
+                for(var i=0;i<steps.length;i++){
+                    currentPosition=new $3Dmol.Vector3(currentPosition.x+step.x,currentPosition.y+step.y,currentPosition.z+step.z);
+                    steps[i]=currentPosition;
+                }
+
+                var increment = function(){
+                    if(transIndex===steps.length){
+                        inc_done = true;  
+                        show();
+                        transIndex=0;
+                        return;
+                    }
+
+                    lookingAt.add(steps[transIndex]);
+                    camera.lookAt(lookingAt);
+                    transIndex+=1;
+                    show();
+                };
+
+                if(!inc_done)
+                    setInterval(increment,wait_time);
+                else{
+                    clearInterval();
+                     transIndex=0;
+                }
+
+                return this;
+            }
+            
             camera.lookAt(lookingAt);
             show();
             return this;
         };
         
-
+       
         /**
          * Zoom to center of atom selection
          * 
@@ -1008,13 +1165,24 @@ $3Dmol.GLViewer = (function() {
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
          *            properties to select. Default: all atoms in viewer
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
          * @example // Assuming we have created a model of a protein with
          *          multiple chains (e.g. from a PDB file), focus on atoms in
          *          chain B glviewer.zoomTo({chain: 'B'});
+         * @example // if the user were to pass the animationDuration value to 
+         *            the function like so viewer.zoomTo({resn:'STI'},1000);
+         *            the program would zoom into resn 'STI' over the course 
+         *            of 1 second(1000 milleseconds).
          *  // Focus on centroid of all atoms of all models in this
          * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
          */
-        this.zoomTo = function(sel) {
+        var rot_index=0;
+        var z_index=0;
+        this.zoomTo = function(sel, animationDuration) {
+            console.log(animationDuration);
+            animationDuration=animationDuration!==undefined ? animationDuration : 0;
             var allatoms, alltmp;
             sel = sel || {};
             var atoms = getAtomsFromSel(sel);
@@ -1051,7 +1219,9 @@ $3Dmol.GLViewer = (function() {
 
             // use selection for center
             var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
-            modelGroup.position = center.clone().multiplyScalar(-1);
+            console.log(center.clone().multiplyScalar(-1));
+
+            
             // but all for bounding box
             var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
                     - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
@@ -1083,14 +1253,102 @@ $3Dmol.GLViewer = (function() {
             }
             
             var maxD = Math.sqrt(maxDsq)*2;
+            if(animationDuration>0){
+                var original_z = rotationGroup.position.z;
+                var final_z = -(maxD * 0.5
+                        / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
+                var wait_time = 20;
+                var step = (final_z-original_z)/(animationDuration/wait_time);
+
+                var original_rot_x = modelGroup.position.x;
+                var original_rot_y = modelGroup.position.y;
+                var original_rot_z = modelGroup.position.z;
+
+                var final_rot_x = center.clone().multiplyScalar(-1).x;
+                var final_rot_y = center.clone().multiplyScalar(-1).y;
+                var final_rot_z = center.clone().multiplyScalar(-1).z;
+
+                var xstep = (final_rot_x-original_rot_x)/(animationDuration/wait_time);
+                var ystep = (final_rot_y-original_rot_y)/(animationDuration/wait_time);
+                var zstep = (final_rot_z-original_rot_z)/(animationDuration/wait_time);
+
+                var inc_z_done=false;
+                var inc_rot_done= false;
+
+                var z_steps=new Array(animationDuration/wait_time);
+
+                var current_z=original_z;
+
+                for(var i=0;i<z_steps.length;i++){
+                    current_z+=step;
+                    z_steps[i]=current_z;
+                }
+
+                var current_rot_x=original_rot_x;
+                var current_rot_y=original_rot_y;
+                var current_rot_z=original_rot_z;
+
+                var steps=new Array(animationDuration/wait_time);
+
+                for(var i=0;i<steps.length;i++){
+                    current_rot_x+=xstep;
+                    current_rot_y+=ystep;
+                    current_rot_z+=zstep;
+
+                    steps[i]=new $3Dmol.Vector3(current_rot_x,current_rot_y,current_rot_z);
+                }
+
+                var increment_z = function(){
+                    if(z_index===z_steps.length){
+                        inc_z_done = true;
+                        show();
+                        return;
+                    }
+                    rotationGroup.position.z=z_steps[z_index];
+                    z_index+=1;
+                    show();
+                };
+
+                var increment_rot = function(){
+                    if(rot_index===steps.length){
+                        inc_rot_done = true;  
+                        show();
+                        return;
+                    } 
+                    modelGroup=steps[rot_index];
+                    rot_index+=1;
+                    show();
+                };
+
+                var increment = function(){
+                    if(!inc_z_done){
+                        increment_z();
+                    }
+                    if(!inc_rot_done){
+                        increment_rot();
+                    }
+                };
+
+                if(!inc_z_done || !inc_rot_done)
+                    setInterval(increment,wait_time);
+                else{
+                    clearInterval();
+                    rot_index=0;
+                    z_index=0;
+                }
+                return this;
+            }
+
+            modelGroup.position = center.clone().multiplyScalar(-1);
 
             rotationGroup.position.z = -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
             show();
             
             return this;
-        };
         
+        };
+
         /**
          * Set slab of view (contents outside of slab are clipped). M
          * Must call render to update.
