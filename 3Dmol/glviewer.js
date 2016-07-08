@@ -45,6 +45,7 @@ $3Dmol.GLViewer = (function() {
         var surfaces = {};
         var shapes = []; // Generic shapes
         var labels = [];
+        var fixed_labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
         var popups = [];
@@ -1403,6 +1404,8 @@ $3Dmol.GLViewer = (function() {
             var label = new $3Dmol.Label(text, data);
             label.setContext();
             modelGroup.add(label.sprite);
+            if(data.fixed)
+                fixed_labels.push(labels.length);
             labels.push(label);
             show();
             return label;
@@ -1508,6 +1511,10 @@ $3Dmol.GLViewer = (function() {
             return label;
 
         };
+
+        var scale_labels= function(factor){
+
+        }
 
         /**
          * Add shape object to viewer 

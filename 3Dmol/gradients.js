@@ -32,12 +32,13 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
         max = min[1];
         min = min[0];
     }
+    /*
     if(max < min) { //reverse the order
         mult = -1.0;
         min *= -1.0;
         max *= -1.0;
     }
-        
+      */  
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
         var lo, hi;
@@ -63,6 +64,7 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
         var scale, color;
         
         //scale bottom from red to white
+        if(min<max){
         if(val <= middle) {
             scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
             color = 0xff0000 + 0x100*scale + scale;
@@ -72,6 +74,20 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
             scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
             color =  0x10000*scale+0x100*scale+0xff;
             return color;
+        }
+        }
+        else if(max<min){
+
+        if(val>mid){ //form white to blue
+            scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
+            color =  0x10000*scale+0x100*scale+0xff;
+            return color;
+        }
+        else{
+            scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
+            color = 0xff0000 + 0x100*scale + scale;
+            return color;
+        }
         }
     };
     

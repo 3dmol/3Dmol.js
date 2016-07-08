@@ -955,7 +955,7 @@ $3Dmol.GLShape = (function() {
             }
 
             }    
-      verts=newvertices!==[] ? newvertices:verts;
+            verts=newvertices!==[] ? newvertices:verts;
             faces=newfaces!==[] ? newfaces:faces;
            
             drawCustom(this, geo, {
