@@ -6,6 +6,9 @@
  * @param {number} sid - Unique identifier
  * @param {ShapeSpec} stylespec - shape style specification
  */
+
+ 
+
 $3Dmol.GLShape = (function() {
 
     // Marching cube, to match with protein surface generation
@@ -835,12 +838,23 @@ $3Dmol.GLShape = (function() {
                     geoGroup.vertexArray);
 
         };
+
         
         /**
          * Create isosurface from voluemetric data.
          * @function $3Dmol.GLShape#addIsosurface         
          * @param {$3Dmol.VolumeData} data - volumetric input data
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
+         * @example //the user can specify a selected region for the isosurface 
+         * viewer.addIsosurface(voldata, {isoval: 0.25,
+                                       color: "blue",
+                                       wireframe: true,
+                                       linewidth:0.005,
+                                       selectedRegion: viewer.selectedAtoms({}),
+                                       selectedOffset: 3,
+                                       radius: 3.0                                   
+                                    });
+         this specific example selects every atom in the
          */
         this.addIsosurface = function(data, volSpec) {
            
@@ -886,14 +900,12 @@ $3Dmol.GLShape = (function() {
             
             if (!voxel && smoothness > 0)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
-            /*
-            loop through selected area 
-                find the 6 max/min points then createa a rectangle out of them
-            loop through verts
-                ommit the points that are not in that range
-    1.33 with
-    1.75 without
-            */
+            var vertexmapping= [];
+            var newvertices= [];
+            var newfaces=[];
+
+            if(volSpec.selectedRegion!==undefined){
+                
             
             var xmax=volSpec.selectedRegion[0],ymax=volSpec.selectedRegion[0],zmax=volSpec.selectedRegion[0],xmin=volSpec.selectedRegion[0],ymin=volSpec.selectedRegion[0],zmin=volSpec.selectedRegion[0];
             
@@ -921,12 +933,6 @@ $3Dmol.GLShape = (function() {
             zmax.z=zmax.z+rad;
             
             //accounts for radius 
-           
-            var vertexmapping= [];
-            var newvertices= [];
-            var newfaces=[];
-            if(volSpec.selectedRegion!==undefined){
-
             for(var i=0;i<verts.length; i++){
                 if(verts[i].x>xmin.x && verts[i].x<xmax.x
                     && verts[i].y > ymin.y && verts[i].y<ymax.y
@@ -948,11 +954,10 @@ $3Dmol.GLShape = (function() {
                 }
             }
 
-            }
-
-            verts=newvertices!==[] ? newvertices:verts;
+            }    
+      verts=newvertices!==[] ? newvertices:verts;
             faces=newfaces!==[] ? newfaces:faces;
-
+           
             drawCustom(this, geo, {
                 vertexArr : verts,
                 faceArr : faces,
@@ -981,8 +986,7 @@ $3Dmol.GLShape = (function() {
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
             console.log(verts.length);
-        };
-
+          }
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
             
             for(var i=0;i<selectedRegion.length;i++){
@@ -1178,3 +1182,4 @@ $3Dmol.splitMesh = function(mesh) {
         }
         return slices;
     }
+
