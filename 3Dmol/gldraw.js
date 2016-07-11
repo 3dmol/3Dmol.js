@@ -126,12 +126,13 @@ $3Dmol.GLDraw = (function() {
     var cylVertexCache = {
 
         // memoize both rounded and flat caps (hemisphere and circle)
-        cache : {false:{}, true:{}},
+        cache :{} ,
 
-        getVerticesForRadius : function(radius, flat) {
-
-            if (this.cache[flat][radius] !== undefined)
-                return this.cache[flat][radius];
+        getVerticesForRadius : function(radius, cap) {
+            console.log(this.cache);
+            if(typeof(this.chache) !== undefined && this.cache[radius] !== undefined)
+                if(this.cache[radius][cap] !== undefined)
+                    return this.cache[radius][cap];
 
             var dir = new $3Dmol.Vector3(0, 1, 0);
             var w = basisVectors.length;
@@ -208,7 +209,11 @@ $3Dmol.GLDraw = (function() {
                             vertex.x = -radius
                                     * Math.cos(phiStart + u * phiLength)
                                     * Math.sin(thetaStart + v * thetaLength);
-                            vertex.y = flat ? 0 : radius * Math.cos(thetaStart + v * thetaLength);
+                            if(cap==1)
+                                vertex.y=0;
+                            else
+                                vertex.y=radius * Math.cos(thetaStart + v * thetaLength);
+
                             vertex.z = radius
                                     * Math.sin(phiStart + u * phiLength)
                                     * Math.sin(thetaStart + v * thetaLength);
@@ -220,7 +225,7 @@ $3Dmol.GLDraw = (function() {
                             if (Math.abs(vertex.z) < 1e-5)
                                 vertex.z = 0;
 
-                            if (flat) {
+                            if (cap === 1) {
                                 n = new $3Dmol.Vector3(0, Math.cos(thetaStart + v * thetaLength), 0);
                                 n.normalize();
                             }
@@ -263,14 +268,18 @@ $3Dmol.GLDraw = (function() {
                 w : widthSegments,
                 h : heightSegments
             };
-
-            this.cache[flat][radius] = obj;
+            this.cache[radius]={};
+            this.cache[radius][cap] = obj;
 
             return obj;
 
         }
     };
-
+    this.caps = {
+        NONE : 0,
+        FLAT : 1,
+        ROUND : 2
+        };
     // creates a cylinder
     var drawnC = 0;
     
@@ -298,11 +307,10 @@ $3Dmol.GLDraw = (function() {
         var drawcaps = fromCap || toCap;
         console.log(drawcaps)
 
-        var flat = false;
-        if (fromCap == 1 && toCap == 1) // 0 is none, 1 is flat, 2 is round
-          	flat = true;
-
+        console.log(color);
         color = color || {r:0, g:0, b:0};
+        
+        console.log(color);
 
         /** @type {Array.<number>} */
         var dir = [ to.x, to.y, to.z ];
@@ -313,8 +321,7 @@ $3Dmol.GLDraw = (function() {
         var e = getRotationMatrix(dir);
         // get orthonormal vectors from cache
         // TODO: Will have orient with model view matrix according to direction
-        var vobj = cylVertexCache.getVerticesForRadius(radius, flat);
-
+        var vobj = cylVertexCache.getVerticesForRadius(radius, fromCap);
         // w (n) corresponds to the number of orthonormal vectors for cylinder
         // (default 16)
         var n = vobj.w, h = vobj.h;

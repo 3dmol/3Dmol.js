@@ -730,6 +730,7 @@ $3Dmol.GLShape = (function() {
             cylinderSpec.start = cylinderSpec.start || {};
             cylinderSpec.end = cylinderSpec.end || {};
 
+
             var start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
                     cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
             var end = new $3Dmol.Vector3(cylinderSpec.end.x,
@@ -742,7 +743,7 @@ $3Dmol.GLShape = (function() {
             this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(start, end, radius));
 
             $3Dmol.GLDraw.drawCylinder(geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);            
-            
+           
             var centroid = new $3Dmol.Vector3();
             components.push({
                 centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
