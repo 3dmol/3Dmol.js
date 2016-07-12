@@ -133,14 +133,11 @@
                                     success: function(ret, txt, response) {
 	                                    console.log("mtf fetch " + (+new Date() - start) + "ms");
                                         var time = new Date();
-					     console.profile("load");
-
 	                                    glviewer.addModel(ret, type);
 	                                    runcmds(cmds, glviewer);
 	                                    glviewer.render();
 	                                    glviewer.zoomTo();
 	                                    console.log("mtf load " + (+new Date() - time) + "ms");
-					         console.profileEnd();
 
                                 }}).fail(function() {
                                     //if couldn't get url natively, go through echo server
