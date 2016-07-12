@@ -2110,10 +2110,13 @@ $3Dmol.GLModel = (function() {
             	}
             }
 
-	    if (format == "mdcrd" || format == "inpcrd"){
+	    if (format == "mdcrd" || format == "inpcrd" || format == "pdb"){
 		frames = [];
 	        var atomCount = atoms.length;
-	        var values = GLModel.parseCrd(str, format);
+		if (format == "pdb")
+		    var values = GLModel.parsePdb(str, format);
+		else
+		    var values = GLModel.parseCrd(str, format);
 	        var count = 0;
 		while (count < values.length){
 	   	    var temp = JSON.parse(JSON.stringify(atoms));
@@ -2151,6 +2154,19 @@ $3Dmol.GLModel = (function() {
 		index = index+valueLength;
 		counter++; 
 	    }
+	}
+	return values;
+    }
+
+    GLModel.parsePdb = function(data, format) {
+	var values = [];
+	var counter = 0;
+	var index = data.indexOf("ATOM");
+	while(data.slice(index,index) == "ATOM") {
+	    values[count++] = parseFloat(data.slice(index+31, index+39));
+	    values[count++] = parseFloat(data.slice(index+39, index+47));
+	    values[count++] = parseFloat(data.slice(index+47, index+55));
+	    index = data.indexOf("\n",index+54) + 1;
 	}
 	return values;
     }
