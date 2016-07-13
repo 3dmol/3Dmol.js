@@ -880,7 +880,6 @@ $3Dmol.GLShape = (function() {
             //mark locations partitioned by isoval
             for (i = 0, il = vals.length; i < il; ++i) {
                 var val = (isoval >= 0) ? vals[i] - isoval : isoval - vals[i];
-                val = (val > isoval) ? 0 : val;
                 if (val > 0)
                     bitdata[i] |= ISDONE;
 
@@ -905,59 +904,67 @@ $3Dmol.GLShape = (function() {
             var newvertices= [];
             var newfaces=[];
 
-            if(volSpec.selectedRegion!==undefined){
-                
-            
-            var xmax=volSpec.selectedRegion[0],ymax=volSpec.selectedRegion[0],zmax=volSpec.selectedRegion[0],xmin=volSpec.selectedRegion[0],ymin=volSpec.selectedRegion[0],zmin=volSpec.selectedRegion[0];
-            
-            for(var i=0;i<volSpec.selectedRegion.length;i++){
-                if(volSpec.selectedRegion[i].x>xmax.x)
-                    xmax=volSpec.selectedRegion[i];
-                else if(volSpec.selectedRegion[i].x<xmin.x)
-                    xmin=volSpec.selectedRegion[i];
-                if(volSpec.selectedRegion[i].y>ymax.y)
-                    ymax=volSpec.selectedRegion[i];
-                else if(volSpec.selectedRegion[i].y<ymin.y)
-                    ymin=volSpec.selectedRegion[i];
-                if(volSpec.selectedRegion[i].z>zmax.z)
-                    zmax=volSpec.selectedRegion[i];
-                else if(volSpec.selectedRegion[i].z<zmin.z)
-                    zmin=volSpec.selectedRegion[i];
-            }
-            
-            var rad=volSpec.radius;
-            xmax.x=xmax.x+rad;
-            xmin.x=xmin.x-rad;
-            ymin.y=ymin.y-rad;
-            ymax.y=ymax.y+rad;
-            zmin.z=zmin.z-rad;
-            zmax.z=zmax.z+rad;
-            
-            //accounts for radius 
-            for(var i=0;i<verts.length; i++){
-                if(verts[i].x>xmin.x && verts[i].x<xmax.x
-                    && verts[i].y > ymin.y && verts[i].y<ymax.y
-                    && verts[i].z > zmin.z && verts[i].z<zmax.z 
-                    && inSelectedRegion(verts[i],volSpec.selectedRegion, volSpec.selectedOffset, volSpec.radius)){
-                    vertexmapping.push(newvertices.length);
-                    newvertices.push(verts[i]);
+            if (volSpec.selectedRegion !== undefined) {
 
-                }else{
-                    vertexmapping.push(-1);
-                }
-            
-            }
-            for(var i=0; i+2<faces.length; i+=3){
-                 if(vertexmapping[faces[i]]!==-1 && vertexmapping[faces[i+1]]!==-1 && vertexmapping[faces[i+2]]!==-1){
-                    newfaces.push(faces[i]-(faces[i]-vertexmapping[faces[i]]));
-                    newfaces.push(faces[i+1]-(faces[i+1]-vertexmapping[faces[i+1]]));
-                    newfaces.push(faces[i+2]-(faces[i+2]-vertexmapping[faces[i+2]]));
-                }
-            }
+                var xmax = volSpec.selectedRegion[0], ymax = volSpec.selectedRegion[0], zmax = volSpec.selectedRegion[0], xmin = volSpec.selectedRegion[0], ymin = volSpec.selectedRegion[0], zmin = volSpec.selectedRegion[0];
 
-            }    
-            verts=newvertices!==[] ? newvertices:verts;
-            faces=newfaces!==[] ? newfaces:faces;
+                for (var i = 0; i < volSpec.selectedRegion.length; i++) {
+                    if (volSpec.selectedRegion[i].x > xmax.x)
+                        xmax = volSpec.selectedRegion[i];
+                    else if (volSpec.selectedRegion[i].x < xmin.x)
+                        xmin = volSpec.selectedRegion[i];
+                    if (volSpec.selectedRegion[i].y > ymax.y)
+                        ymax = volSpec.selectedRegion[i];
+                    else if (volSpec.selectedRegion[i].y < ymin.y)
+                        ymin = volSpec.selectedRegion[i];
+                    if (volSpec.selectedRegion[i].z > zmax.z)
+                        zmax = volSpec.selectedRegion[i];
+                    else if (volSpec.selectedRegion[i].z < zmin.z)
+                        zmin = volSpec.selectedRegion[i];
+                }
+
+                var rad = volSpec.radius;
+                xmax.x = xmax.x + rad;
+                xmin.x = xmin.x - rad;
+                ymin.y = ymin.y - rad;
+                ymax.y = ymax.y + rad;
+                zmin.z = zmin.z - rad;
+                zmax.z = zmax.z + rad;
+
+                // accounts for radius
+                for (var i = 0; i < verts.length; i++) {
+                    if (verts[i].x > xmin.x
+                            && verts[i].x < xmax.x
+                            && verts[i].y > ymin.y
+                            && verts[i].y < ymax.y
+                            && verts[i].z > zmin.z
+                            && verts[i].z < zmax.z
+                            && inSelectedRegion(verts[i],
+                                    volSpec.selectedRegion,
+                                    volSpec.selectedOffset, volSpec.radius)) {
+                        vertexmapping.push(newvertices.length);
+                        newvertices.push(verts[i]);
+
+                    } else {
+                        vertexmapping.push(-1);
+                    }
+
+                }
+                for (var i = 0; i + 2 < faces.length; i += 3) {
+                    if (vertexmapping[faces[i]] !== -1
+                            && vertexmapping[faces[i + 1]] !== -1
+                            && vertexmapping[faces[i + 2]] !== -1) {
+                        newfaces.push(faces[i]
+                                - (faces[i] - vertexmapping[faces[i]]));
+                        newfaces.push(faces[i + 1]
+                                - (faces[i + 1] - vertexmapping[faces[i + 1]]));
+                        newfaces.push(faces[i + 2]
+                                - (faces[i + 2] - vertexmapping[faces[i + 2]]));
+                    }
+                }
+                verts = newvertices;
+                faces = newfaces;
+            }
            
             drawCustom(this, geo, {
                 vertexArr : verts,
