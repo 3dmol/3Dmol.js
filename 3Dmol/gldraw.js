@@ -128,11 +128,11 @@ $3Dmol.GLDraw = (function() {
         // memoize both rounded and flat caps (hemisphere and circle)
         cache :{} ,
 
-        getVerticesForRadius : function(radius, cap) {
+        getVerticesForRadius : function(radius, cap, capType) {
             console.log(this.cache);
             if(typeof(this.chache) !== undefined && this.cache[radius] !== undefined)
-                if(this.cache[radius][cap] !== undefined)
-                    return this.cache[radius][cap];
+                if(this.cache[radius][cap+capType] !== undefined)                                                      
+                    return this.cache[radius][cap+capType];
 
             var dir = new $3Dmol.Vector3(0, 1, 0);
             var w = basisVectors.length;
@@ -269,7 +269,7 @@ $3Dmol.GLDraw = (function() {
                 h : heightSegments
             };
             this.cache[radius]={};
-            this.cache[radius][cap] = obj;
+            this.cache[radius][cap+capType] = obj;
 
             return obj;
 
@@ -305,12 +305,7 @@ $3Dmol.GLDraw = (function() {
         drawnC++;
         // vertices
         var drawcaps = fromCap || toCap;
-        console.log(drawcaps)
-
-        console.log(color);
         color = color || {r:0, g:0, b:0};
-        
-        console.log(color);
 
         /** @type {Array.<number>} */
         var dir = [ to.x, to.y, to.z ];
@@ -321,7 +316,8 @@ $3Dmol.GLDraw = (function() {
         var e = getRotationMatrix(dir);
         // get orthonormal vectors from cache
         // TODO: Will have orient with model view matrix according to direction
-        var vobj = cylVertexCache.getVerticesForRadius(radius, fromCap);
+
+        var vobj = cylVertexCache.getVerticesForRadius(radius, toCap, "to");
         // w (n) corresponds to the number of orthonormal vectors for cylinder
         // (default 16)
         var n = vobj.w, h = vobj.h;
@@ -404,7 +400,6 @@ $3Dmol.GLDraw = (function() {
             // h - sphere rows, verticesRows.length - 2
             var ystart = (toCap) ? 0 : h / 2;
             var yend = (fromCap) ? h + 1 : h / 2 + 1;
-
             var v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4, v1offset, v2offset, v3offset, v4offset;
 
             for (y = ystart; y < yend; y++) {
@@ -505,6 +500,7 @@ $3Dmol.GLDraw = (function() {
                     nz4 = e[5] * normals[v4].y + e[8] * normals[v4].z;
 
                     // if (Math.abs(vobj.sphereVertices[v1].y) === radius) {
+
                     if (y === 0) {
                         // face = [v1, v3, v4];
                         // norm = [n1, n3, n4];

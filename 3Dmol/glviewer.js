@@ -2372,6 +2372,7 @@ $3Dmol.GLViewer = (function() {
                 var range = scheme.range() || [-1,1];
                 for (i = 0, il = v.length; i < il; i++) {
                     var val = voldata.getVal(v[i].x,v[i].y,v[i].z);
+                    console.log(val);
                     var col =  $3Dmol.CC.color(scheme.valueToHex(val, range));
                     var offset = i * 3;
                     colorArray[offset] = col.r;
