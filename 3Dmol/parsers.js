@@ -1482,12 +1482,13 @@ $3Dmol.Parsers = (function() {
                 var serial = parseInt(line.substr(6, 5));
                 var anisouAtomIndex = serialToIndex[serial];
                 var anisouAtom = atoms[anisouAtomIndex];
-
-                var vals = line.substr(30).trim().split(/\s+/);
-                var uMat = {u11:parseInt(vals[0]), u22:parseInt(vals[1]), u33:parseInt(vals[2]), 
-                    u12:parseInt(vals[3]), u13:parseInt(vals[4]), u23:parseInt(vals[5])};
-
-                anisouAtom["uMat"] = uMat;
+                if(anisouAtom) {
+                    var vals = line.substr(30).trim().split(/\s+/);
+                    var uMat = {u11:parseInt(vals[0]), u22:parseInt(vals[1]), u33:parseInt(vals[2]), 
+                        u12:parseInt(vals[3]), u13:parseInt(vals[4]), u23:parseInt(vals[5])};
+    
+                    anisouAtom["uMat"] = uMat;
+                }
 	    }
         }
 
