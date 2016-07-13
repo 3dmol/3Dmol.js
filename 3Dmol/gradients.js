@@ -115,11 +115,6 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         max = min[1];
         min = min[0];
     }
-    if(max < min) { //reverse the order
-        mult = -1.0;
-        min *= -1.0;
-        max *= -1.0;
-    }
     
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
@@ -151,7 +146,7 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         var q3 = (mid+hi)/2;
         
         var scale, color;
-        
+        if(min<max){
         if(val < q1) { //scale green up, red up, blue down
             scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
             color = 0xff0000 + 0x100*scale + 0;
@@ -172,6 +167,29 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
             color =  0x000000+0x0100*scale+0xff;
             return color;
         }        
+    }
+    else if(max<min){
+         if(val < q1) { //scale green up, red up, blue down
+            scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+            color =  0x000000+0x0100*scale+0xff;
+            return color;
+        }
+        else if(val < mid) { //scale red down, green up, blue down
+            scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+            color = 0x000000 + 0xff00 + 0x1*scale;
+            return color;
+        }
+        else if(val < q3) { //scale blue up, red down, green up\
+            scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+            color =  0x010000*scale+0xff00+0x0;
+            return color;
+        }
+        else { //scale green down, blue up, red down
+            scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+            color = 0xff0000 + 0x100*scale + 0;
+            return color;
+        }     
+    }
     };
    
 
