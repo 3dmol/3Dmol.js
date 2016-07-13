@@ -235,10 +235,14 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
     
         if(typeof(val) == "undefined")
             return 0xffffff;
-        
+        if(max>min){
         if(val < lo) val = lo;
         if(val > hi) val = hi;
-        
+        }
+        else{
+        if(val>lo) val=lo;
+        if(val < hi) val = hi;
+        }
         var scale = (val-lo)/(hi-lo);
         var h = (5*scale/6.0+0.5);
         var r = Math.sin(Math.PI*h);
@@ -249,6 +253,7 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
         b *= b*255;
         
         return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
+        
     };
     
 
