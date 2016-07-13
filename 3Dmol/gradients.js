@@ -137,8 +137,14 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         if(typeof(val) == "undefined")
             return 0xffffff;
         
+        if(max>min){
         if(val < lo) val = lo;
         if(val > hi) val = hi;
+        }
+        else{
+        if(val>lo) val=lo;
+        if(val < hi) val = hi;
+        }
         
         var mid = (lo+hi)/2;
         var q1 = (lo+mid)/2;
