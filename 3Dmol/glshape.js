@@ -672,7 +672,7 @@ $3Dmol.GLShape = (function() {
         /**
          * Creates a custom shape from supplied vertex and face arrays
          * @function $3Dmol.GLShape#addCustom
-         * @param {CustomSpec} customSpec
+         * @param {CustomShapeSpec} customSpec
          * @return {$3Dmol.GLShape}
          */
         this.addCustom = function(customSpec) {
