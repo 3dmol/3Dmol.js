@@ -1315,20 +1315,14 @@ $3Dmol.GLModel = (function() {
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
          */
         this.vibrate = function(numFrames, amplitude) {
-            var vectors = [];
             var amplitude = amplitude || 1;
             var numFrames = numFrames || 10; 
-            for (var i = 0; i < atoms.length; i++) {
-                var vector = new $3Dmol.Vector3(atoms[i].dx, atoms[i].dy, atoms[i].dz);
-                vectors.push(vector);
-            }
             numFrames--;
             for (var i = 1; i <= numFrames; i++) {
                 var newAtoms = [];
                 for (var j = 0; j < atoms.length; j++) {
                     var newVector = new $3Dmol.Vector3(atoms[j].dx, atoms[j].dy, atoms[j].dz);
                     var starting = new $3Dmol.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
-                    newVector.sub(starting);
                     newVector.multiplyScalar((i*amplitude)/numFrames);
                     starting.add(newVector);
                     var newAtom = {};

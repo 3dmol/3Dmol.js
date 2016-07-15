@@ -22,6 +22,7 @@ $3Dmol.Gradient.range = function() {};
 
 /**
  * Color scheme red to white to blue, for charges
+ * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
  * @implements {$3Dmol.Gradient}
  */
@@ -105,6 +106,7 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
 
 /**
  * rainbow gradient, but without purple to match jmol
+ * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
  * @implements {$3Dmol.Gradient}
  */
@@ -205,6 +207,7 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
 
 /**
  * rainbow gradient with constant saturation, all the way to purple!
+ * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
  * @implements {$3Dmol.Gradient}
  */
