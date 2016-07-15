@@ -129,7 +129,6 @@ $3Dmol.GLDraw = (function() {
         cache :{} ,
 
         getVerticesForRadius : function(radius, cap, capType) {
-            console.log(this.cache);
             if(typeof(this.chache) !== undefined && this.cache[radius] !== undefined)
                 if(this.cache[radius][cap+capType] !== undefined)                                                      
                     return this.cache[radius][cap+capType];
