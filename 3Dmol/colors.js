@@ -50,6 +50,7 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 
  /**
  * Color scheme representation. 
+ * @example viewer.setStyle({chain:'G'},{sphere:{colorscheme:'greenCarbon'}});
  * @typedef ColorschemeSpec
  * @prop {string} greenCarbon   - 0x00FF00
  * @prop {string} cyanCarbon    - 0x00FFFF
@@ -59,6 +60,15 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
  * @prop {string} orangeCarbon  - 0xFF6600
  * @prop {string} purpleCarbon  - 0x100080
  * @prop {string} blueCarbon    - 0x0000FF
+ * @prop {string} ssPyMOL - PyMol secondary colorscheme
+ * @prop {string} ssJmol - Jmol secondary colorscheme
+ * @prop {string} Jmol - Jmol primary colorscheme
+ * @prop {string} default - default colorscheme
+ * @prop {string} amino - amino acid colorscheme
+ * @prop {string} shapely - shapely protien colorscheme
+ * @prop {string} nucleic - nucleic acid colorscheme
+ * @prop {string} chain - standard chain colorscheme
+ * @prop {string} chainHetatm - chain Hetatm colorscheme
  */
  
 });
