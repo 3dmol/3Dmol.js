@@ -420,26 +420,7 @@ $3Dmol.chains.hetatm = {
 };
 
 /** @property built in color schemes 
-* The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme :
-        'ssPyMOL' : {'prop':'ss', map:$3Dmol.ssColors.pyMOL},
-        'ssJmol' :{'prop':'ss', map:$3Dmol.ssColors.Jmol},
-        'Jmol' :{'prop':'elem', map:$3Dmol.elementColors.Jmol},
-        'default' : {'prop': 'elem', map:$3Dmol.elementColors.defaultColors},
-        'greenCarbon' : {'prop':'elem', map:$3Dmol.elementColors.greenCarbon},
-        'cyanCarbon' : {'prop':'elem', map:$3Dmol.elementColors.cyanCarbon},
-        'magentaCarbon' : {'prop':'elem', map:$3Dmol.elementColors.magentaCarbon},
-        'yellowCarbon' : {'prop':'elem', map:$3Dmol.elementColors.yellowCarbon},
-        'whiteCarbon' : {'prop':'elem', map:$3Dmol.elementColors.whiteCarbon},
-        'orangeCarbon' : {'prop':'elem', map:$3Dmol.elementColors.orangeCarbon},
-        'purpleCarbon' : {'prop':'elem', map:$3Dmol.elementColors.purpleCarbon},
-        'blueCarbon' : {'prop':'elem', map:$3Dmol.elementColors.blueCarbon},
-        'amino' : {'prop':'resAmino', map:$3Dmol.residues.amino},
-        'shapely' :{'prop':'resShapely', map:$3Dmol.residues.shapely},
-        'nucleic' :{'prop':'resNucleic', map:$3Dmol.residues.nucleic},
-        'chain' :{'prop':'chain', map:$3Dmol.chains.atom},
-        'chainHetatm' :{'prop':'chain', map:$3Dmol.chains.hetatm},
-
-*/
+* The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme */
 $3Dmol.builtinColorSchemes = {
         'ssPyMOL' : {'prop':'ss', map:$3Dmol.ssColors.pyMOL},
         'ssJmol' :{'prop':'ss', map:$3Dmol.ssColors.Jmol},
