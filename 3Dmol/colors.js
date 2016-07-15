@@ -308,7 +308,7 @@ $3Dmol.residues.amino ={
 };
 
 $3Dmol.residues.shapely ={
-'Ala' : 0x8CFF8C,        
+'Ala' : 0x8CFF8C,         
 'Arg' : 0x00007C,              
 'Asn' : 0xFF7C70,              
 'Asp' : 0xA00042,             
@@ -430,14 +430,22 @@ $3Dmol.builtinColorSchemes = {
  * @param {AtomStyle} style
  * @return {$3Dmol.Color}
  */
+ 
 $3Dmol.getColorFromStyle = function(atom, style) {
     var color = atom.color;
     if (typeof (style.color) != "undefined" && style.color != "spectrum")
         color = style.color;
-    if(typeof(style.colorscheme) === "string") {
+    if(typeof(style.colorscheme) != "undefined") {
         if(typeof($3Dmol.builtinColorSchemes[style.colorscheme]) != "undefined") {
             //name of builtin colorscheme
             var scheme = $3Dmol.builtinColorSchemes[style.colorscheme].map;
+            if(typeof(scheme[atom.elem]) != "undefined") {
+                color = scheme[atom.elem];
+            }
+        } 
+        else if(typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+            //name of builtin colorscheme
+            var scheme = $3Dmol.elementColors[style.colorscheme];
             if(typeof(scheme[atom.elem]) != "undefined") {
                 color = scheme[atom.elem];
             }
@@ -472,3 +480,47 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     var C = $3Dmol.CC.color(color);
     return C;
 };
+/*
+$3Dmol.getColorFromStyle = function(atom, style) {
+    var color = atom.color;
+    if (typeof (style.color) != "undefined" && style.color != "spectrum")
+        color = style.color;
+    if(typeof(style.colorscheme) != "undefined") {
+        if(typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+            //name of builtin colorscheme
+            var scheme = $3Dmol.elementColors[style.colorscheme];
+            if(typeof(scheme[atom.elem]) != "undefined") {
+                color = scheme[atom.elem];
+            }
+        } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+            //actual color scheme provided
+            color = style.colorscheme[atom.elem];
+        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
+                typeof(style.colorscheme.gradient) != 'undefined') {         
+            //apply a property mapping
+            var prop = style.colorscheme.prop;
+            var scheme = style.colorscheme.gradient;
+            var range = scheme.range() || [-1,1]; //sensible default
+            var val = $3Dmol.getAtomProperty(atom, prop);
+            if(val != null) {
+                color = scheme.valueToHex(val, range);
+            }
+        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
+                typeof(style.colorscheme.map) != 'undefined') {         
+            //apply a discrete property mapping
+            var prop = style.colorscheme.prop;
+            var val = $3Dmol.getAtomProperty(atom, prop);
+            if( typeof style.colorscheme.map[val] != 'undefined' ) {
+                color = style.colorscheme.map[val];
+            }
+        }
+    } 
+    else if(typeof(style.colorfunc) != "undefined") {
+        //this is a user provided function for turning an atom into a color
+        color = style.colorfunc(atom);
+    }
+    
+    var C = $3Dmol.CC.color(color);
+    return C;
+};
+*/
