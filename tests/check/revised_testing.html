@@ -3,20 +3,7 @@
     <head>
 		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
         <title>3Dmol.js Tests</title>
-        <script src="../../build/3Dmol.js"></script> 
-        <script>
-        const test_count = 60;
-        var current_test=1;
-
-     	$(document).ready(function() {
-          //install a right-click handler on every canvas to export png
-          $('canvas').bind('contextmenu',function(e) {
-              var dt = e.currentTarget.toDataURL('image/png');
-              window.location = dt;
-          });
-        });
-
-        </script>
+        
 
         <style>
         body{
@@ -48,15 +35,20 @@
         </style>
     </head>
     <body>
+
+        <script src="../../build/3Dmol.js"></script> 
     	<table width=100% height=100%><tr><td width=50%>
 			<div id="left">
-              	
+              	<script id="script"></script>
+              	<div id="test" style="width: 400px; height: 400px; position: relative;">
         	</div>
         	</td><td width=50%>
         		<div id="right">
         		</div>
         	</td></tr></table>
          <script>
+         var test_count=60;
+         var previous_script="test";
          var right = document.getElementById("right");
          for(var i=1;i<=test_count;i++){
          	//creates the list element
@@ -81,13 +73,31 @@
          	li.appendChild(img);
 
          	li.addEventListener("click",function(e){
-         		var id=e.currentTarget.childNodes[1].id
-         		console.log("id : "+id);
+
+         		var script="";
+				$("#divId").load(e.currentTarget.childNodes[1].id+".html");
+				var scripts=$("#divId script");
+
+				for(var i=0;i<scripts.length;i++){
+					script+=scripts[i].text;
+				}
+
+				var new_script= document.getElementById("script");
+
+				new_script.innerHTML=script;
+
+				document.getElementById(previous_script).id=e.currentTarget.childNodes[1].id;
+
+         		previous_script=e.currentTarget.childNodes[1].id;
+
+
          	});
          	right.appendChild(li);
+				
          }
          
 
          </script>
+        <div id="divId" style="display:none;"></div>
     </body>
 </html>
