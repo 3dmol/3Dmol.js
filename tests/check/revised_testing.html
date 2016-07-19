@@ -68,14 +68,14 @@
          	li.appendChild(title)
          	//loads the image
          	var img = document.createElement("img");
-         	img.id = "test"+i;
+         	img.class = "test"+i;
          	img.src = "imgs/test"+i+".png";
          	img.ondragstart = function() { return false;}
          	li.appendChild(img);
 
          	li.addEventListener("click",function(e){
 
-				$("#divId").load(e.currentTarget.childNodes[1].id+".html");
+				$("#divId").load(e.currentTarget.childNodes[1].class+".html");
 				var scripts=$("#divId script");
                 if(scripts.length>2){
                     //sets the script to be the new script
@@ -93,23 +93,34 @@
                     document.getElementById(previous_script).parentNode.removeChild(document.getElementById(previous_script));
                     document.getElementById("left").appendChild(new_div);
                     //changes the id of the div to the proper value and changes the previous id to its proper value
-                    console.log("value"+e.currentTarget.childNodes[1].id);
-                    document.getElementById(previous_script).id=e.currentTarget.childNodes[1].id;
-                    previous_script=e.currentTarget.childNodes[1].id;
+                    document.getElementById(previous_script).id=e.currentTarget.childNodes[1].class;
+                    previous_script=e.currentTarget.childNodes[1].class;
+
                 }
                 else{
-                    /*
-                    var new_script = document.getElementById("script");
+                    //reset the div 
+                    var new_div=document.createElement("div");
+                    new_div.id=previous_script;
+                    new_div.style.width="400px";
+                    new_div.style.height="400px";
+                    new_div.style.position="relative";
+                    document.getElementById(previous_script).parentNode.removeChild(document.getElementById(previous_script));
+                    document.getElementById("left").appendChild(new_div);
+                    //set the correct id
+                     document.getElementById(previous_script).id=e.currentTarget.childNodes[1].class;
+                    previous_script=e.currentTarget.childNodes[1].class;
+                    //remove the inside of script
+                    var script_element=document.getElementById("script");
+                    script_element.innerHTML="";
+                    //set the correct attributes for the div
+                    var new_div=document.getElementsByClassName("viewer_3Dmoljs")[0].cloneNode(true);
 
-                    new_script.innerHTML = "";
-
-                    var elem=document.getElementById(previous_script);
-                    elem=document.getElementById("placeholder");
-
-                    var div= document.getElementsByClassName("viewer_3Dmoljs")[0];
-                    document.getElementById(previous_script)=div.cloneNode(true);          
-                    */     
+                    document.getElementById(previous_script).parentNode.removeChild(document.getElementById(previous_script));
+                    document.getElementById("left").appendChild(new_div);
+                    document.getElementsByClassName("viewer_3Dmoljs")[0].id=previous_script;
                 }
+                //deletes divID insides
+                document.getElementById("divId").innerHTML="";
          	});
          	right.appendChild(li);
 				
