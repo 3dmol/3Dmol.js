@@ -1182,7 +1182,6 @@ $3Dmol.GLViewer = (function() {
         var rot_index=0;
         var z_index=0;
         this.zoomTo = function(sel, animationDuration) {
-            console.log(animationDuration);
             animationDuration=animationDuration!==undefined ? animationDuration : 0;
             var allatoms, alltmp;
             sel = sel || {};
