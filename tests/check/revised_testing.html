@@ -35,7 +35,7 @@
         </style>
     </head>
     <body>
-
+       
         <script src="../../build/3Dmol.js"></script> 
     	<table width=100% height=100%><tr><td width=50%>
 			<div id="left">
@@ -49,6 +49,7 @@
          <script>
          var test_count=60;
          var previous_script="test";
+         var old_div_style=document.getElementById("test").style;
          var right = document.getElementById("right");
          for(var i=1;i<=test_count;i++){
          	//creates the list element
@@ -74,23 +75,41 @@
 
          	li.addEventListener("click",function(e){
 
-         		var script="";
 				$("#divId").load(e.currentTarget.childNodes[1].id+".html");
 				var scripts=$("#divId script");
+                if(scripts.length>2){
+                    //sets the script to be the new script
+                    var script="";
+                    for(var i=2;i<scripts.length;i++){
+                        script=script + scripts[i].text;
+                    }
+                    document.getElementById("script").innerHTML=script;
+                    //reset the div 
+                    var new_div=document.createElement("div");
+                    new_div.id=previous_script;
+                    new_div.style.width="400px";
+                    new_div.style.height="400px";
+                    new_div.style.position="relative";
+                    document.getElementById(previous_script).parentNode.removeChild(document.getElementById(previous_script));
+                    document.getElementById("left").appendChild(new_div);
+                    //changes the id of the div to the proper value and changes the previous id to its proper value
+                    console.log("value"+e.currentTarget.childNodes[1].id);
+                    document.getElementById(previous_script).id=e.currentTarget.childNodes[1].id;
+                    previous_script=e.currentTarget.childNodes[1].id;
+                }
+                else{
+                    /*
+                    var new_script = document.getElementById("script");
 
-				for(var i=0;i<scripts.length;i++){
-					script+=scripts[i].text;
-				}
+                    new_script.innerHTML = "";
 
-				var new_script= document.getElementById("script");
+                    var elem=document.getElementById(previous_script);
+                    elem=document.getElementById("placeholder");
 
-				new_script.innerHTML=script;
-
-				document.getElementById(previous_script).id=e.currentTarget.childNodes[1].id;
-
-         		previous_script=e.currentTarget.childNodes[1].id;
-
-
+                    var div= document.getElementsByClassName("viewer_3Dmoljs")[0];
+                    document.getElementById(previous_script)=div.cloneNode(true);          
+                    */     
+                }
          	});
          	right.appendChild(li);
 				
