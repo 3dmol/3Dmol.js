@@ -8,6 +8,29 @@
 	margin: 0;
 	padding: 0
 }
+
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px !important;
+    margin-left: 50px;
+}
+
 </style>
 <script>
     (function(i, s, o, g, r, a, m) {
@@ -202,9 +225,25 @@
                         }
 
                     });
+
+
+function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+}
+
+function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+}
 </script>
 </head>
 <body>
-	<div id='gldiv' style="width: 100%; height: 100vh;"></div>
+
+<span style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav()">☰</span>
+<div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+
+</div>
+
+    <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>

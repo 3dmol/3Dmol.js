@@ -393,12 +393,12 @@ $3Dmol.GLDraw = (function() {
         }
 
         // SPHERE CAPS
-
         if (drawcaps) {
-
             // h - sphere rows, verticesRows.length - 2
+            
             var ystart = (toCap) ? 0 : h / 2;
             var yend = (fromCap) ? h + 1 : h / 2 + 1;
+            
             var v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4, v1offset, v2offset, v3offset, v4offset;
 
             for (y = ystart; y < yend; y++) {
