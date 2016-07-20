@@ -17,7 +17,7 @@
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #111;
+    background-color: rgba(0,0,0,.5);
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
@@ -29,6 +29,8 @@
     right: 25px;
     font-size: 36px !important;
     margin-left: 50px;
+    color:black;
+    
 }
 
 </style>
@@ -229,19 +231,21 @@
 
 function openNav() {
     document.getElementById("mySidenav").style.width = "250px";
+    document.getElementById("menu").style.visibility="hidden";
 }
 
 function closeNav() {
+    document.getElementById("menu").style.visibility="visible";
     document.getElementById("mySidenav").style.width = "0";
+
 }
 </script>
 </head>
 <body>
 
-<span style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav()">☰</span>
+<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav()">☰</span>
 <div id="mySidenav" class="sidenav">
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-
 </div>
 
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>

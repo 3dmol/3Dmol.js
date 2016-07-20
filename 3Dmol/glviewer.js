@@ -1125,7 +1125,7 @@ $3Dmol.GLViewer = (function() {
                 var steps= new Array((animationDuration/wait_time));
 
                 for(var i=0;i<steps.length;i++){
-                    currentPosition=new $3Dmol.Vector3(currentPosition.x+step.x,currentPosition.y+step.y,currentPosition.z+step.z);
+                    currentPosition=new $3Dmol.Vector3(currentPosition.x+step.x,currentPosition.y+step.y,currentPosition.z);
                     steps[i]=currentPosition;
                 }
 
