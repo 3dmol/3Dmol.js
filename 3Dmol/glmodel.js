@@ -2115,22 +2115,18 @@ $3Dmol.GLModel = (function() {
 		var values = GLModel.parseCrd(str, format);
 	        var count = 0;
 		while (count < values.length){
-		    var seen = [];
-	   	    /*JSON.stringify(atoms, function(key, value){
-			if (typeof value === 'object' && value != null){
-			    if (seen.indexOf(value) >= 0){
-				return;
-			    }
-			    seen.push(value);
-			}
-			return value;
-		    });
-		    var temp = JSON.parse(JSON.stringify(seen));*/
-		    var temp = JSON.parse(JSON.stringify(atoms));
-			for(i=0;i<atomCount;i++){
-			    temp[i].x = values[count++];
-			    temp[i].y = values[count++];
-			    temp[i].z = values[count++];
+		    if (format != "pdb")
+			var temp = JSON.parse(JSON.stringify(atoms));
+		    else{
+			var temp = [];
+			for (i=0; i<atomCount; i++){
+			    temp[i] = atoms[i];
+		        }
+		    }
+		    for (i=0; i<atomCount; i++){
+			temp[i].x = values[count++];
+			temp[i].y = values[count++];
+			temp[i].z = values[count++];
 		    }
 		    frames.push(temp);
 		}
@@ -2146,11 +2142,16 @@ $3Dmol.GLModel = (function() {
 	var counter = 0;
 	if (format == "pdb"){
 	    var index = data.indexOf("\nATOM");
-	    while(index != -1) {
-		values[counter++] = parseFloat(data.slice(index+31, index+39));
-		values[counter++] = parseFloat(data.slice(index+39, index+47));
-		values[counter++] = parseFloat(data.slice(index+47, index+55));
-		index = data.indexOf("\nATOM", index+54);
+	    while (index != -1){
+		while (data.slice(index, index+5) == "\nATOM" || data.slice(index, index+7) == "\nHETATM"){
+		    values[counter++] = parseFloat(data.slice(index+31, index+39));
+		    values[counter++] = parseFloat(data.slice(index+39, index+47));
+		    values[counter++] = parseFloat(data.slice(index+47, index+55));
+		    index = data.indexOf("\n", index+54);	    
+		    if (data.slice(index, index+4) == "\nTER")
+			index = data.indexOf("\n", index+5);
+		}
+		index = data.indexOf("\nATOM", index);
 	    }
 	    return values;
 	}
