@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+    <!--<script src="../../js/require.js"></script>-->
+    <script src="../../build/3Dmol.js"></script>
+    <style>
+      table td { text-align: center; }
+      table th {padding-top: 1em;}
+    </style>
+  </head>
+
+  <body>
+    <script>
+
+      $(document).ready(function() {
+
+          //install a right-click handler on every canvas to export png
+          $('canvas').bind('contextmenu',function(e) {
+              var dt = e.currentTarget.toDataURL('image/png');
+              window.location = dt;
+          });
+      });
+        </script>
+
+    <table width="100%">
+      <tr>
+        <td colspan=2 height=200px>
+          56 Cylinders<code> Tests to see if cylinders can be drawn with different caps</code>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%"><div id="test56" style="width: 400px; height: 400px; position: relative;"></div>
+      </td>
+     <script>
+    var viewer = $3Dmol.createViewer($("#test56"));
+    viewer.setBackgroundColor(0xffffffff);
+    viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'teal'});
+    viewer.render();
+
+
+    </script>
+        <td width="50%"></td>
+      </tr>
+    </table>
+
+  </body>
+</html>

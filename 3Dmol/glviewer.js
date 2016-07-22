@@ -45,6 +45,7 @@ $3Dmol.GLViewer = (function() {
         var surfaces = {};
         var shapes = []; // Generic shapes
         var labels = [];
+        var fixed_labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
         var popups = [];
@@ -1181,7 +1182,6 @@ $3Dmol.GLViewer = (function() {
         var rot_index=0;
         var z_index=0;
         this.zoomTo = function(sel, animationDuration) {
-            console.log(animationDuration);
             animationDuration=animationDuration!==undefined ? animationDuration : 0;
             var allatoms, alltmp;
             sel = sel || {};
@@ -1403,6 +1403,8 @@ $3Dmol.GLViewer = (function() {
             var label = new $3Dmol.Label(text, data);
             label.setContext();
             modelGroup.add(label.sprite);
+            if(data.fixed)
+                fixed_labels.push(labels.length);
             labels.push(label);
             show();
             return label;
@@ -1508,6 +1510,10 @@ $3Dmol.GLViewer = (function() {
             return label;
 
         };
+
+        var scale_labels= function(factor){
+
+        }
 
         /**
          * Add shape object to viewer 
@@ -2365,6 +2371,7 @@ $3Dmol.GLViewer = (function() {
                 var range = scheme.range() || [-1,1];
                 for (i = 0, il = v.length; i < il; i++) {
                     var val = voldata.getVal(v[i].x,v[i].y,v[i].z);
+                    console.log(val);
                     var col =  $3Dmol.CC.color(scheme.valueToHex(val, range));
                     var offset = i * 3;
                     colorArray[offset] = col.r;
