@@ -2109,14 +2109,20 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
             	}
             }
-
-	    if (format == "mdcrd" || format == "inpcrd"){
+	    if (format == "mdcrd" || format == "inpcrd" || format == "pdb"){
 		frames = [];
 	        var atomCount = atoms.length;
-	        var values = GLModel.parseCrd(str, format);
+		var values = GLModel.parseCrd(str, format);
 	        var count = 0;
 		while (count < values.length){
-	   	    var temp = JSON.parse(JSON.stringify(atoms));
+		    if (format != "pdb")
+			var temp = JSON.parse(JSON.stringify(atoms));
+		    else{
+			var temp = [];
+			for (i=0; i<atomCount; i++){
+			    temp[i] = atoms[i];
+		        }
+		    }
 		    for (i=0; i<atomCount; i++){
 			temp[i].x = values[count++];
 			temp[i].y = values[count++];
@@ -2133,26 +2139,43 @@ $3Dmol.GLModel = (function() {
 
     GLModel.parseCrd = function(data, format) {
 	var values = []; //this will contain the all the float values in the file.
-	var valueLength = 8;
-	var index = data.indexOf("\n");
-	data = data.slice(index+1);//remove the first line containing title.
-	if (format == "inpcrd"){
-	    index = data.indexOf("\n");
-	    data = data.slice(index+1);//remove the second line containing number of atoms.
-	    valueLength = 12;
-	}
-	index = 0;
 	var counter = 0;
-	while (index < data.length - valueLength){
-	    if (data[index] == "\n")
-		index++;
-	    if (data[index] != "\n"){
-		values[counter] = parseFloat(data.slice(index, index+valueLength));
-		index = index+valueLength;
-		counter++; 
+	if (format == "pdb"){
+	    var index = data.indexOf("\nATOM");
+	    while (index != -1){
+		while (data.slice(index, index+5) == "\nATOM" || data.slice(index, index+7) == "\nHETATM"){
+		    values[counter++] = parseFloat(data.slice(index+31, index+39));
+		    values[counter++] = parseFloat(data.slice(index+39, index+47));
+		    values[counter++] = parseFloat(data.slice(index+47, index+55));
+		    index = data.indexOf("\n", index+54);	    
+		    if (data.slice(index, index+4) == "\nTER")
+			index = data.indexOf("\n", index+5);
+		}
+		index = data.indexOf("\nATOM", index);
 	    }
+	    return values;
 	}
-	return values;
+	else{
+	    var valueLength = 8;
+	    var index = data.indexOf("\n");
+	    data = data.slice(index+1);//remove the first line containing title.
+	    if (format == "inpcrd"){
+		index = data.indexOf("\n");
+		data = data.slice(index+1);//remove the second line containing number of atoms.
+		valueLength = 12;
+	    }
+	    index = 0;
+	    while (index < data.length - valueLength){
+		if (data[index] == "\n")
+		    index++;
+		if (data[index] != "\n"){
+		    values[counter] = parseFloat(data.slice(index, index+valueLength));
+		    index = index+valueLength;
+		    counter++; 
+		}
+	    }
+	    return values;
+	}
     }
 
     GLModel.parseMolData = function(data, format, options) {
