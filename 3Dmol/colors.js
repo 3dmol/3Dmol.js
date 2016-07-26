@@ -449,47 +449,46 @@ $3Dmol.builtinColorSchemes = {
  */
  
 $3Dmol.getColorFromStyle = function(atom, style) {
+    var scheme = style.colorscheme;  
+    if(typeof($3Dmol.builtinColorSchemes[scheme]) != "undefined") {
+        scheme = $3Dmol.builtinColorSchemes[scheme];
+    }
     var color = atom.color;
     if (typeof (style.color) != "undefined" && style.color != "spectrum")
         color = style.color;
-    if(typeof(style.colorscheme) != "undefined") {
-        if(typeof($3Dmol.builtinColorSchemes[style.colorscheme]) != "undefined") {
+    if(typeof(scheme) != "undefined") {
+        if(typeof($3Dmol.builtinColorSchemes[scheme]) != "undefined") {
             //name of builtin colorscheme
-            var scheme = $3Dmol.builtinColorSchemes[style.colorscheme].map;
-            console.log("scheme :"+atom.ss);
-            if(typeof(scheme[atom.elem]) != "undefined") {
-                color = scheme[atom.elem];
-            }
-            else if(typeof(scheme[atom.ss]!=="undefined")){
-                color=scheme[atom.ss];
+            if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
+                color = scheme.map[atom[scheme.prop]];
             }
         } 
-        else if(typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
+        else if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
             //name of builtin colorscheme
-            var scheme = $3Dmol.elementColors[style.colorscheme];
-            if(typeof(scheme[atom.elem]) != "undefined") {
-                color = scheme[atom.elem];
+            var scheme = $3Dmol.elementColors[scheme];
+            if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
+                color = scheme.map[atom[scheme.prop]];
             }
-        } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+        } else if(typeof(scheme[atom[scheme.prop]]) != 'undefined') {
             //actual color scheme provided
-            color = style.colorscheme[atom.elem];
-        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
-                typeof(style.colorscheme.gradient) != 'undefined') {         
+            color = scheme.map[atom[scheme.prop]];
+        } else if(typeof(scheme.prop) != 'undefined' &&
+                typeof(scheme.gradient) != 'undefined') {         
             //apply a property mapping
-            var prop = style.colorscheme.prop;
-            var scheme = style.colorscheme.gradient;
+            var prop = scheme.prop;
+            var scheme = scheme.gradient;
             var range = scheme.range() || [-1,1]; //sensible default
             var val = $3Dmol.getAtomProperty(atom, prop);
             if(val != null) {
                 color = scheme.valueToHex(val, range);
             }
-        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
-                typeof(style.colorscheme.map) != 'undefined') {         
+        } else if(typeof(scheme.prop) != 'undefined' &&
+                typeof(scheme.map) != 'undefined') {         
             //apply a discrete property mapping
-            var prop = style.colorscheme.prop;
+            var prop = scheme.prop;
             var val = $3Dmol.getAtomProperty(atom, prop);
-            if( typeof style.colorscheme.map[val] != 'undefined' ) {
-                color = style.colorscheme.map[val];
+            if( typeof scheme.map[val] != 'undefined' ) {
+                color = scheme.map[val];
             }
         }
     } 
