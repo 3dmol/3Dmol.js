@@ -149,7 +149,7 @@ $3Dmol['CC']['color'] = $3Dmol.CC.color;
  */
 $3Dmol.ssColors = $3Dmol.ssColors || {};
 //names are in helix-sheet-coil order
-$3Dmol.ssColors.pyMOL = {'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00};
+$3Dmol.ssColors.pyMol = {'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00};
 $3Dmol.ssColors.Jmol = {'h': 0xff0080, 's': 0xffc800, 'c': 0xffffff};
 
 
@@ -422,7 +422,7 @@ $3Dmol.chains.hetatm = {
 /** @property built in color schemes 
 * The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme */
 $3Dmol.builtinColorSchemes = {
-        'ssPyMOL' : {'prop':'ss', map:$3Dmol.ssColors.pyMOL},
+        'ssPyMol' : {'prop':'ss', map:$3Dmol.ssColors.pyMol},
         'ssJmol' :{'prop':'ss', map:$3Dmol.ssColors.Jmol},
         'Jmol' :{'prop':'elem', map:$3Dmol.elementColors.Jmol},
         'default' : {'prop': 'elem', map:$3Dmol.elementColors.defaultColors},
@@ -456,8 +456,12 @@ $3Dmol.getColorFromStyle = function(atom, style) {
         if(typeof($3Dmol.builtinColorSchemes[style.colorscheme]) != "undefined") {
             //name of builtin colorscheme
             var scheme = $3Dmol.builtinColorSchemes[style.colorscheme].map;
+            console.log("scheme :"+atom.ss);
             if(typeof(scheme[atom.elem]) != "undefined") {
                 color = scheme[atom.elem];
+            }
+            else if(typeof(scheme[atom.ss]!=="undefined")){
+                color=scheme[atom.ss];
             }
         } 
         else if(typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {

@@ -6,7 +6,8 @@
 <style>
 * {
 	margin: 0;
-	padding: 0
+	padding: 0;
+    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
 }
 
 
@@ -33,6 +34,9 @@
     
 }
 
+#header{
+    position : relative;
+}
 </style>
 <script>
     (function(i, s, o, g, r, a, m) {
@@ -234,7 +238,9 @@ function processAjaxData(urlPath){
 function openNav() {
     document.getElementById("mySidenav").style.width = "300px";
     document.getElementById("menu").style.visibility="hidden";
-    processAjaxData("hello");
+    processAjaxData("viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.5&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick&labelres=backgroundOpacity:0.8;fontSize:14");
+    glviewer.setStyle({chain:'A'},{stick:{radius:0.5}});
+    glviewer.render();
 }
 
 function closeNav() {
@@ -250,9 +256,49 @@ function closeNav() {
 
 <span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav();">☰</span>
 <div id="mySidenav" class="sidenav">
+  <h1 id="header">3Dmol Viewer</h1>
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+  <br>
+  <h3>URL</h3>
+  <input type="text">
+  <br>
+  <h3>File/PDB/URL</h3>
+  <input type="text">
+  <br>
+  <h3>Select</h3>
+  <input type="text">
+  <br>
+  <h3>Style</h3>
+  <input type="text">
+  <br>
+  <h3>Labels</h3>
+  <input type="text">
+  <br>
+  <h3>Surface</h3>
+  <input type="text">
+  <br>
+  <button type="button">Render</button>
 </div>
 
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>
+<!--
+pdb=1YCR
+&
+select=chain:A
+&
+style=cartoon;stick:radius~0.1
+&
+surface=opacity:0.8;colorscheme:whiteCarbon
+&
+select=chain:B
+&
+style=cartoon;line
+&
+select=resi:19,23,26;chain:B
+&
+style=cartoon;stick
+&
+labelres=backgroundOpacity:0.8;fontSize:14
+-->
