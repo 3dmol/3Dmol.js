@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <title>3Dmol.js Tests</title>
+        
+
+        <style>
+            #left,#right{
+                width:50%;
+                padding:0;
+                margin:0;
+
+            }
+            #left li,#right li{
+                list-style:none;
+
+            }
+            #left img,#right img{
+
+                width:400px;
+                height:400px;
+
+                margin: 0 auto;
+            }
+            #left{
+                float:left;
+            }
+            #right{
+                float:right;
+            }
+        </style>
+    </head>
+    <body>
+       
+        <script src="../../build/3Dmol.js"></script> 
+			<div id="left">
+              	<script id="script"></script>
+        	</div>
+        	<div id="right">
+
+        	</div>
+        	
+         <script>
+         var test_count=5;
+         var right=document.getElementById("right");
+         var left=document.getElementById("left");
+
+         for(var i=1;i<=test_count;i++){
+         	//creates the list element
+         	var li = document.createElement("li");
+
+
+         	//loads the title
+         	var title = document.createElement("h4");
+
+         	title.align="center";
+
+         	var text= document.createTextNode("Test "+i);
+
+         	title.appendChild(text);
+
+         	li.appendChild(title)
+         	//loads the image
+         	var img = document.createElement("img");
+         	img.class = "test"+i;
+         	img.src = "imgs/test"+i+".png";
+         	img.ondragstart = function() { return false;}
+         	li.appendChild(img);
+
+         	right.appendChild(li);
+				
+         }
+         for(var i=1;i<=test_count;i++){
+            //creates the list element
+            var li = document.createElement("li");
+
+
+            //loads the title
+            var title = document.createElement("h4");
+
+            title.align="center";
+
+            var text= document.createTextNode("Test "+i);
+
+            title.appendChild(text);
+
+            li.appendChild(title);
+
+            var ifr = document.createElement('iframe')
+            ifr.src = 'test'+i+".html";
+            ifr.style.visibility="hidden";
+            ifr.id="iframe";
+            document.body.appendChild(ifr);
+
+            var ifr=document.getElementById("iframe");
+            var img=ifr.contentWindow.document.getElementById("test"+i).childNodes[0].toDataURL('image/png');
+            li.append(img);
+
+            left.appendChild(li);
+         }
+
+         </script>
+        <div id="divId" style="display:none;"></div>
+    </body>
+</html>
