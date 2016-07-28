@@ -434,13 +434,13 @@ $3Dmol.Geometry = (function() {
             if(this.lineidx > 0) //not always set so reclaim memory
                 this.lineArray = lineArr.subarray(0,this.lineidx); 
             else
-                this.lineArray = new Uint16Array();
+                this.lineArray = new Uint16Array(0);
                         
         }        
         else {
-            this.normalArray = new Float32Array(); 
-            this.faceArray = new Uint16Array(); 
-            this.lineArray = new Uint16Array(); 
+            this.normalArray = new Float32Array(0);
+            this.faceArray = new Uint16Array(0);
+            this.lineArray = new Uint16Array(0);
         }
         if (radiusArr) {
             this.radiusArray = radiusArr.subarray(0, this.vertices);
