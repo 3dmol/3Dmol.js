@@ -25,6 +25,12 @@
     padding:0;
     text-align:center;
 }
+li{
+    height:5%;
+}
+li:hover{
+    background-color:#ffffe6;
+}
 h1,h3{
     text-align:left;
 
@@ -54,13 +60,18 @@ h3{
 
 #header{
     position : relative;
+
+    margin:8px;
+    margin-left:16px;
 }
 #render{
     bottom: 0;
 }
-#header{
-    margin:8px;
-    margin-left:16px;
+.container{
+    display:none;
+}
+ul{
+    height:100%;
 }
 </style>
 <script>
@@ -256,7 +267,6 @@ h3{
                         }
 
                     });
-
 function handleInputs(){
     //handles all of the input fields
     setURL(document.getElementById("url"));
@@ -267,12 +277,15 @@ function setURL(urlPath){
 function openNav() {
     document.getElementById("mySidenav").style.width = "300px";
     document.getElementById("menu").style.visibility="hidden";
-    document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
-
-           document.getElementById("mySidenav").style.pointerEvents="none";
+    //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
+    document.getElementById("mySidenav").style.pointerEvents="none";
+    
     glviewer.zoomTo();
     $("canvas").mousedown(function(){
-            document.getElementsByClassName("option").style.pointerEvents="none";
+             var elements=document.getElementsByClassName("option");
+            for(var i=0;i<elements.length;i++){
+                elements[i].style.pointerEvents="none";
+            }
         }); 
     $("canvas").mouseup(function(){
             var elements=document.getElementsByClassName("option");
@@ -288,8 +301,21 @@ function closeNav() {
     document.getElementById("mySidenav").style.width = "0";
 
 }
+var previousElement=null;
+function expandLi(element){
+    console.log(element.style.height);
+    if(previousElement!==null && element!==previousElement){
+        $(previousElement).animate({height:"5%"},500);
+        previousElement.getElementsByClassName("container")[0].style.display="none";
+    }
+    if(element.style.height!=="20%"){
+        $(element).animate({height:"20%"},500);
+        element.getElementsByClassName("container")[0].style.display="inline";
+        previousElement=element;
+    }
+    
 
-
+}
 </script>
 </head>
 <body>
@@ -300,33 +326,48 @@ function closeNav() {
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
   <br>
   <ul>
-    <li class="option">
-        <h3>URL</h3>
-        <input id="url" type="text">
-        <br>
-    </li>
-    <li class="option">
+    <li class="option" onclick="expandLi(this);" style="pointer-events:auto;">
         <h3>File/PDB/URL</h3>
-        <input id="model" type="text">
+        <div class="container">
+            <p>
+            lsdkfasdlf
+            </p>
+        </div>
         <br>
-    <li class="option">
+    <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
         <h3>Select</h3>
-        <input id="select" type="text">
+        <div class="container">
+            <p>
+                
+            </p>
+        </div>
         <br>
     </li>
-    <li class="option">
+    <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
         <h3>Style</h3>
-        <input id="style" type="text">
+        <div class="container">
+            <p>
+                
+            </p>
+        </div>
         <br>
     </li>
-    <li class="option">
+    <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
         <h3>Labels</h3>
-        <input id="labels" type="text">
+        <div class="container">
+            <p>
+                
+            </p>
+        </div>
         <br>
     </li>
-    <li class="option">
+   <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
         <h3>Surface</h3>
-        <input id="surface" type="text">
+        <div class="container">
+            <p>
+                
+            </p>
+        </div>
         <br>
     </li>
   <button id="render" onclick="handleInputs();" type="button">Render</button>
