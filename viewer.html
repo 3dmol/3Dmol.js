@@ -69,6 +69,8 @@ h3{
 }
 .container{
     display:none;
+    text-align:left;
+    padding:10px;
 }
 ul{
     height:100%;
@@ -130,10 +132,7 @@ ul{
         }
 
     };
-
-    $(document)
-            .ready(
-                    function() {
+    function run() {
 
                         try {
                             var url = window.location.search.substr(1);
@@ -196,13 +195,13 @@ ul{
                                     responseType: "arraybuffer",
                                     processData: false,
                                     success: function(ret, txt, response) {
-	                                    console.log("mtf fetch " + (+new Date() - start) + "ms");
+                                        console.log("mtf fetch " + (+new Date() - start) + "ms");
                                         var time = new Date();
-	                                    glviewer.addModel(ret, type);
-	                                    runcmds(cmds, glviewer);
-	                                    glviewer.render();
-	                                    glviewer.zoomTo();
-	                                    console.log("mtf load " + (+new Date() - time) + "ms");
+                                        glviewer.addModel(ret, type);
+                                        runcmds(cmds, glviewer);
+                                        glviewer.render();
+                                        glviewer.zoomTo();
+                                        console.log("mtf load " + (+new Date() - time) + "ms");
 
                                 }}).fail(function() {
                                     //if couldn't get url natively, go through echo server
@@ -248,10 +247,10 @@ ul{
                                                 glviewer.zoomTo();
                                             })
                                         } else {
-                                        	glviewer.addModel(ret, type);
-                                        	runcmds(cmds, glviewer);
-                                        	glviewer.render();
-                                        	glviewer.zoomTo();
+                                            glviewer.addModel(ret, type);
+                                            runcmds(cmds, glviewer);
+                                            glviewer.render();
+                                            glviewer.zoomTo();
                                         }
                                     });
                                 });
@@ -265,21 +264,36 @@ ul{
                             window.location = "http://get.webgl.org";
 
                         }
+                    }
 
-                    });
+    $(document).ready(function(){run();});               
+                   
 function handleInputs(){
     //handles all of the input fields
-    setURL(document.getElementById("url"));
+    var page_url=window.location.href.substring(window.location.href.indexOf("?")+1);
+    page_url=page_url.split("&");
+    var model_input=document.getElementById("model_input").value;
+    var new_url="";
+    page_url[0]=page_url[0].substring(0,page_url[0].indexOf("=")+1)+model_input;
+    for(var i=0;i<page_url.length;i++){
+        new_url+=page_url[i];
+        if(i!==page_url.length-1)
+            new_url+="&";
+    }
+    setURL("viewer.html?"+new_url);
+    run();
 }
 function setURL(urlPath){
      window.history.pushState({"html":"test","pageTitle":"test"},"", urlPath);
  }
 function openNav() {
+    var page_url=window.location.href;
     document.getElementById("mySidenav").style.width = "300px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
     document.getElementById("mySidenav").style.pointerEvents="none";
-    
+    document.getElementById("model_input").value=page_url.indexOf("pdb")!==-1 ? page_url.substring(page_url.indexOf("pdb")+4,page_url.indexOf("&")) : page_url.substring(page_url.indexOf("url")+4,page_url.indexOf("&"));
+
     glviewer.zoomTo();
     $("canvas").mousedown(function(){
              var elements=document.getElementsByClassName("option");
@@ -293,6 +307,7 @@ function openNav() {
                 elements[i].style.pointerEvents="auto";
             }
         });
+
 }
 
 
@@ -303,18 +318,17 @@ function closeNav() {
 }
 var previousElement=null;
 function expandLi(element){
-    console.log(element.style.height);
     if(previousElement!==null && element!==previousElement){
         $(previousElement).animate({height:"5%"},500);
         previousElement.getElementsByClassName("container")[0].style.display="none";
+        previousElement.style.backgroundColor="transparent";
     }
     if(element.style.height!=="20%"){
         $(element).animate({height:"20%"},500);
         element.getElementsByClassName("container")[0].style.display="inline";
         previousElement=element;
+        previousElement.style.backgroundColor="#ffffe6";
     }
-    
-
 }
 </script>
 </head>
@@ -330,8 +344,9 @@ function expandLi(element){
         <h3>File/PDB/URL</h3>
         <div class="container">
             <p>
-            lsdkfasdlf
+                Choose a model through the Protien Data Bank, File, or URL.
             </p>
+            <input id="model_input"></input>
         </div>
         <br>
     <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
@@ -370,8 +385,8 @@ function expandLi(element){
         </div>
         <br>
     </li>
-  <button id="render" onclick="handleInputs();" type="button">Render</button>
-  <button id="center" onclick="glviewer.zoomTo();">Center</button>
+  <button id="render" class="option" onclick="handleInputs();" style="pointer-events:auto" type="button">Render</button>
+  <button id="center" class="option" onclick="glviewer.zoomTo();" style="pointer-events:auto">Center</button>
 </div>
 
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
