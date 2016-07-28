@@ -33,26 +33,29 @@
     </head>
     <body>
        
+        <div id="divId" style="display:none;" ></div>
         <script src="../../build/3Dmol.js"></script> 
 			<div id="left">
-              	<script id="script"></script>
+
         	</div>
         	<div id="right">
 
         	</div>
         	
          <script>
-         var test_count=5;
+
+         var test_count=1;
          var right=document.getElementById("right");
          var left=document.getElementById("left");
-
+        
          for(var i=1;i<=test_count;i++){
          	//creates the list element
          	var li = document.createElement("li");
 
-
          	//loads the title
          	var title = document.createElement("h4");
+            title.style.position="absolute";
+            title.style.margin="0 auto";
 
          	title.align="center";
 
@@ -72,35 +75,31 @@
 				
          }
          for(var i=1;i<=test_count;i++){
-            //creates the list element
-            var li = document.createElement("li");
+            var img= new Image();
 
+            var li= document.createElement('li');
+            li.id=i;
+            li.appendChild(img);
 
-            //loads the title
-            var title = document.createElement("h4");
-
-            title.align="center";
-
-            var text= document.createTextNode("Test "+i);
-
-            title.appendChild(text);
-
-            li.appendChild(title);
-
-            var ifr = document.createElement('iframe')
-            ifr.src = 'test'+i+".html";
-            ifr.style.visibility="hidden";
-            ifr.id="iframe";
-            document.body.appendChild(ifr);
-
-            var ifr=document.getElementById("iframe");
-            var img=ifr.contentWindow.document.getElementById("test"+i).childNodes[0].toDataURL('image/png');
-            li.append(img);
+            var iframe=document.createElement('iframe');
+            iframe.id="id"+i;
+            iframe.src = "test"+i+".html";
+            document.getElementById('divId').appendChild(iframe);
 
             left.appendChild(li);
-         }
 
+            iframe.onload = function(){
+               var canvas=iframe.contentDocument.getElementById('test'+iframe.id.substring(2)).childNodes[0];
+               var src=canvas.toDataURL('image/png');
+
+               img.value=src;
+
+               console.log(src);
+               iframe.parentNode.removeChild(iframe);
+              
+            };
+
+         }
          </script>
-        <div id="divId" style="display:none;"></div>
     </body>
 </html>
