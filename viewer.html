@@ -198,6 +198,8 @@
                         }
                     }
     var width=350;
+    var width_change=0;
+    var start_width=350;
     $(document).ready(function(){
         run();
         var page_url=window.location.href;        
@@ -208,7 +210,10 @@
             helper: "ui-resizable-helper",
             minWidth: 300,
             maxWidth: 800,
-            stop:function(event,ui) {
+            start:function(event,ui){
+                start_width=$("#sidenav").outerWidth();
+            },
+            stop:function(event,ui){
                 clearTimeout(doit);
                 doit = setTimeout(resizedw,1500);
             },
@@ -224,7 +229,7 @@
         $( "ul, li" ).disableSelection();
         function resizedw(event,ui){
             width=$("#sidenav").outerWidth();
-            alert(width);
+            glviewer.translate((width-start_width)/2,0);
         }
     });       
 
@@ -251,7 +256,7 @@ function openNav() {
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
-    glviewer.translate(300,0);
+    glviewer.translate(width/2,0);
     glviewer.zoomTo();
     glviewer.render();
 }
@@ -261,7 +266,7 @@ function closeNav() {
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
 
-    glviewer.translate(-300,0);
+    glviewer.translate(-width/2,0);
 }
 
 </script>
