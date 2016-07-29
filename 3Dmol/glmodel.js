@@ -2087,72 +2087,101 @@ $3Dmol.GLModel = (function() {
             }
         }
 
-        /**
-	* Set coordinates for the atoms parsed from the prmtop file. 
-	* @function $3Dmol.GLModel#setCoordinates
-	* @param {string} str - contains the data of the file
-	* @param {string} format - contains the format of the file
-	* @param {function} callback - function called when a inpcrd or a mdcrd file is uploaded
- 	*/
+    /**
+    * Set coordinates for the atoms parsed from the prmtop file. 
+    * @function $3Dmol.GLModel#setCoordinates
+    * @param {string} str - contains the data of the file
+    * @param {string} format - contains the format of the file
+    * @param {function} callback - function called when a inpcrd or a mdcrd file is uploaded
+    */
 
-	this.setCoordinates = function(str, format) {
-	    format = format || "";
-	    if (!str)
-        	return []; //leave an empty model
+        this.setCoordinates = function(str, format) {
+            format = format || "";
+            if (!str)
+                return []; // leave an empty model
 
-            if(/\.gz$/.test(format)) {
-		//unzip gzipped files
-            	format = format.replace(/\.gz$/,'');
-           	try {
-            	    str = pako.inflate(str, {to: 'string'});
-            	} catch(err) {
+            if (/\.gz$/.test(format)) {
+                // unzip gzipped files
+                format = format.replace(/\.gz$/, '');
+                try {
+                    str = pako.inflate(str, {
+                        to : 'string'
+                    });
+                } catch (err) {
                     console.log(err);
-            	}
+                }
             }
-
-	    if (format == "mdcrd" || format == "inpcrd"){
-		frames = [];
-	        var atomCount = atoms.length;
-	        var values = GLModel.parseCrd(str, format);
-	        var count = 0;
-		while (count < values.length){
-	   	    var temp = JSON.parse(JSON.stringify(atoms));
-		    for (i=0; i<atomCount; i++){
-			temp[i].x = values[count++];
-			temp[i].y = values[count++];
-			temp[i].z = values[count++];
-		    }
-		    frames.push(temp);
-		}
-		atoms = frames[0];
-		return frames;
-	    }
-	    return [];
-	} 
+            if (format == "mdcrd" || format == "inpcrd" || format == "pdb") {
+                frames = [];
+                var atomCount = atoms.length;
+                var values = GLModel.parseCrd(str, format);
+                var count = 0;
+                while (count < values.length) {
+                    var temp = [];
+                    for (i = 0; i < atomCount; i++) {
+                        temp[i] = atoms[i];
+                    }
+                
+                    for (i = 0; i < atomCount; i++) {
+                        temp[i].x = values[count++];
+                        temp[i].y = values[count++];
+                        temp[i].z = values[count++];
+                    }
+                    frames.push(temp);
+                }
+                atoms = frames[0];
+                return frames;
+            }
+            return [];
+        }
     }
 
     GLModel.parseCrd = function(data, format) {
-	var values = []; //this will contain the all the float values in the file.
-	var valueLength = 8;
-	var index = data.indexOf("\n");
-	data = data.slice(index+1);//remove the first line containing title.
-	if (format == "inpcrd"){
-	    index = data.indexOf("\n");
-	    data = data.slice(index+1);//remove the second line containing number of atoms.
-	    valueLength = 12;
-	}
-	index = 0;
-	var counter = 0;
-	while (index < data.length - valueLength){
-	    if (data[index] == "\n")
-		index++;
-	    if (data[index] != "\n"){
-		values[counter] = parseFloat(data.slice(index, index+valueLength));
-		index = index+valueLength;
-		counter++; 
-	    }
-	}
-	return values;
+        var values = []; // this will contain the all the float values in the
+                            // file.
+        var counter = 0;
+        if (format == "pdb") {
+            var index = data.indexOf("\nATOM");
+            while (index != -1) {
+                while (data.slice(index, index + 5) == "\nATOM"
+                        || data.slice(index, index + 7) == "\nHETATM") {
+                    values[counter++] = parseFloat(data.slice(index + 31,
+                            index + 39));
+                    values[counter++] = parseFloat(data.slice(index + 39,
+                            index + 47));
+                    values[counter++] = parseFloat(data.slice(index + 47,
+                            index + 55));
+                    index = data.indexOf("\n", index + 54);
+                    if (data.slice(index, index + 4) == "\nTER")
+                        index = data.indexOf("\n", index + 5);
+                }
+                index = data.indexOf("\nATOM", index);
+            }
+            return values;
+        } else {
+            var valueLength = 8;
+            var index = data.indexOf("\n");
+            data = data.slice(index + 1);// remove the first line containing
+                                            // title.
+            if (format == "inpcrd") {
+                index = data.indexOf("\n");
+                data = data.slice(index + 1);// remove the second line
+                                                // containing number of atoms.
+                valueLength = 12;
+            }
+            index = 0;
+            while (index < data.length - valueLength) {
+                if (data[index] == "\n")
+                    index++;
+                if (data[index] != "\n") {
+                    values[counter] = parseFloat(data.slice(index, index
+                            + valueLength));
+                    index = index + valueLength;
+                    counter++;
+                }
+            }
+            return values;
+        }
     }
 
     GLModel.parseMolData = function(data, format, options) {
@@ -2171,24 +2200,24 @@ $3Dmol.GLModel = (function() {
             }
         }
 
-        if(typeof($3Dmol.Parsers[format]) == "undefined") {
-            //let someone provide a file name and get format from extension
+        if (typeof ($3Dmol.Parsers[format]) == "undefined") {
+            // let someone provide a file name and get format from extension
             format = format.split('.').pop();
-            if(typeof($3Dmol.Parsers[format]) == "undefined") {
-                console.log("Unknown format: "+format);
-                //try to guess correct format from data contents
-                if(data.match(/^@<TRIPOS>MOLECULE/gm)) {
+            if (typeof ($3Dmol.Parsers[format]) == "undefined") {
+                console.log("Unknown format: " + format);
+                // try to guess correct format from data contents
+                if (data.match(/^@<TRIPOS>MOLECULE/gm)) {
                     format = "mol2";
-                } else if(data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
+                } else if (data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
                     format = "pdb";
-                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
-                    format = "sdf"; //could look at line 3
-                } else if(data.match(/^%VERSION\s+\VERSION_STAMP/gm)){
- 		    format = "prmtop";
-		} else{
+                } else if (data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
+                    format = "sdf"; // could look at line 3
+                } else if (data.match(/^%VERSION\s+\VERSION_STAMP/gm)) {
+                    format = "prmtop";
+                } else {
                     format = "xyz";
                 }
-                console.log("Best guess: "+format);
+                console.log("Best guess: " + format);
             }
         }
         var parse = $3Dmol.Parsers[format];

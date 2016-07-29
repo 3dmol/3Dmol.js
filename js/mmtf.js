@@ -607,7 +607,7 @@
   }
 
   function encodeRun( array ){
-      if( array.length === 0 ) return new Int32Array();
+      if( array.length === 0 ) return new Int32Array(0);
       var i, il;
       // calculate output size
       var fullLength = 2;
