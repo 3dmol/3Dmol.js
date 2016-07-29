@@ -28,9 +28,9 @@ li{
 #selections{
     height:67%;
 }
+
 h1,h3{
     text-align:left;
-
 }
 h3{
     background-color:rgba(0,0,102,.5);
@@ -54,10 +54,17 @@ h3{
     right: 25px;
     font-size: 36px !important;
     margin-left: 50px;
-    color:black;
     
 }
+#selection_list{
+    list-style: none;
+}
+#selection_list li{
+    border-radius:0px;
 
+    background-color:rgba(0,0,102,.9);
+    color:white;
+}
 #header{
     position : relative;
     color:white;

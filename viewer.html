@@ -197,17 +197,35 @@
 
                         }
                     }
-
+    var width=350;
     $(document).ready(function(){
         run();
         var page_url=window.location.href;        
         document.getElementById("model_input").value=page_url.indexOf("pdb")!==-1 ? page_url.substring(page_url.indexOf("pdb")+4,page_url.indexOf("&")) : page_url.substring(page_url.indexOf("url")+4,page_url.indexOf("&"));        
+        var doit;
         $("#sidenav").resizable({
             handles: 'e',
             helper: "ui-resizable-helper",
             minWidth: 300,
             maxWidth: 800,
+            stop:function(event,ui) {
+                clearTimeout(doit);
+                doit = setTimeout(resizedw,1500);
+            },
         });
+        $( "#selection_list" ).sortable({
+            revert: true
+        });
+        $( "#draggable" ).draggable({
+            connectToSortable: "#selection_list",
+            helper: "clone",
+            revert: "invalid"
+         });
+        $( "ul, li" ).disableSelection();
+        function resizedw(event,ui){
+            width=$("#sidenav").outerWidth();
+            alert(width);
+        }
     });       
 
    function handleInputs(){
@@ -230,7 +248,7 @@ function setURL(urlPath){
  }
 function openNav() {
     var page_url=window.location.href;
-    document.getElementById("sidenav").style.width = "350px";
+    document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
     glviewer.translate(300,0);
@@ -276,8 +294,18 @@ function closeNav() {
         <h3>Selections</h3>
         <div class="container">
             <p>
-                
+                Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
             </p>
+            <ul id="selection_list">
+                <li class="ui-state-default">Selection 1</li>
+                <li class="ui-state-default">Selection 2</li>
+                <li class="ui-state-default">Selection 3</li>
+                <li class="ui-state-default">Selection 4</li>
+                <li class="ui-state-default">Selection 5</li>
+                <li class="ui-state-default">Selection 6</li>
+                <li class="ui-state-default">Selection 7</li>
+                <li class="ui-state-default">Selection 8</li>
+            </ul>
         </div>
         <br>
     </li>
