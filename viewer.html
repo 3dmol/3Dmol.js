@@ -3,79 +3,11 @@
 <head>
 <title>3Dmol.js Viewer</title>
 <script src="build/3Dmol.js"></script>
-<style>
-* {
-	margin: 0;
-	padding: 0;
-    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
-}
 
-
-.sidenav {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: rgba(0,0,0,.5);
-    overflow-x: hidden;
-    transition: 0.5s;
-    padding-top: 60px;
-    padding:0;
-    text-align:center;
-}
-li{
-    height:5%;
-}
-li:hover{
-    background-color:#ffffe6;
-}
-h1,h3{
-    text-align:left;
-
-}
-h3{
-    background-color:rgba(0,0,102,.5);
-    margin:5px;
-    padding-left:10px;
-    color:white;
-    border-radius: 15px 50px
-
-}
-.sidenav input{
-    width:80%;
-    margin: 0 auto;
-}
-
-.closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px !important;
-    margin-left: 50px;
-    color:black;
-    
-}
-
-#header{
-    position : relative;
-
-    margin:8px;
-    margin-left:16px;
-}
-#render{
-    bottom: 0;
-}
-.container{
-    display:none;
-    text-align:left;
-    padding:10px;
-}
-ul{
-    height:100%;
-}
-</style>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="viewer.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script>
     (function(i, s, o, g, r, a, m) {
         i['GoogleAnalyticsObject'] = r;
@@ -266,9 +198,19 @@ ul{
                         }
                     }
 
-    $(document).ready(function(){run();});               
-                   
-function handleInputs(){
+    $(document).ready(function(){
+        run();
+        var page_url=window.location.href;        
+        document.getElementById("model_input").value=page_url.indexOf("pdb")!==-1 ? page_url.substring(page_url.indexOf("pdb")+4,page_url.indexOf("&")) : page_url.substring(page_url.indexOf("url")+4,page_url.indexOf("&"));        
+        $("#sidenav").resizable({
+            handles: 'e',
+            helper: "ui-resizable-helper",
+            minWidth: 300,
+            maxWidth: 800,
+        });
+    });       
+
+   function handleInputs(){
     //handles all of the input fields
     var page_url=window.location.href.substring(window.location.href.indexOf("?")+1);
     page_url=page_url.split("&");
@@ -288,69 +230,50 @@ function setURL(urlPath){
  }
 function openNav() {
     var page_url=window.location.href;
-    document.getElementById("mySidenav").style.width = "300px";
+    document.getElementById("sidenav").style.width = "350px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
-    document.getElementById("mySidenav").style.pointerEvents="none";
-    document.getElementById("model_input").value=page_url.indexOf("pdb")!==-1 ? page_url.substring(page_url.indexOf("pdb")+4,page_url.indexOf("&")) : page_url.substring(page_url.indexOf("url")+4,page_url.indexOf("&"));
-
+    glviewer.translate(300,0);
     glviewer.zoomTo();
-    $("canvas").mousedown(function(){
-             var elements=document.getElementsByClassName("option");
-            for(var i=0;i<elements.length;i++){
-                elements[i].style.pointerEvents="none";
-            }
-        }); 
-    $("canvas").mouseup(function(){
-            var elements=document.getElementsByClassName("option");
-            for(var i=0;i<elements.length;i++){
-                elements[i].style.pointerEvents="auto";
-            }
-        });
-
+    glviewer.render();
 }
 
 
 function closeNav() {
     document.getElementById("menu").style.visibility="visible";
-    document.getElementById("mySidenav").style.width = "0";
+    document.getElementById("sidenav").style.width = "0";
 
+    glviewer.translate(-300,0);
 }
-var previousElement=null;
-function expandLi(element){
-    if(previousElement!==null && element!==previousElement){
-        $(previousElement).animate({height:"5%"},500);
-        previousElement.getElementsByClassName("container")[0].style.display="none";
-        previousElement.style.backgroundColor="transparent";
-    }
-    if(element.style.height!=="20%"){
-        $(element).animate({height:"20%"},500);
-        element.getElementsByClassName("container")[0].style.display="inline";
-        previousElement=element;
-        previousElement.style.backgroundColor="#ffffe6";
-    }
-}
+
 </script>
 </head>
 <body>
 
 <span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav();">☰</span>
-<div id="mySidenav" class="sidenav">
-  <h1 id="header">3Dmol Viewer</h1>
+<div id="sidenav" class="ui-widget-content">
+  <h1 id="header" >3Dmol Viewer</h1>
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
   <br>
   <ul>
-    <li class="option" onclick="expandLi(this);" style="pointer-events:auto;">
+    <li class="option"  style="pointer-events:auto;">
         <h3>File/PDB/URL</h3>
         <div class="container">
             <p>
-                Choose a model through the Protien Data Bank, File, or URL.
+                Choose a model through Protien Data Bank, File, or URL.
             </p>
-            <input id="model_input"></input>
+            <label>Model Type: </label>
+            <select id="model_type">
+                <option value="pdb">PDB</option>
+                <option value="url">URL</option>
+                <option value="file">File</option>
+            </select>
+            <br>
+            <span><label>Query: </label><input id="model_input"></input></span>
         </div>
         <br>
-    <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
-        <h3>Select</h3>
+    <li id="selections" class="option" style="pointer-events:auto">
+        <h3>Selections</h3>
         <div class="container">
             <p>
                 
@@ -358,35 +281,10 @@ function expandLi(element){
         </div>
         <br>
     </li>
-    <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
-        <h3>Style</h3>
-        <div class="container">
-            <p>
-                
-            </p>
-        </div>
-        <br>
-    </li>
-    <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
-        <h3>Labels</h3>
-        <div class="container">
-            <p>
-                
-            </p>
-        </div>
-        <br>
-    </li>
-   <li class="option" onclick="expandLi(this);" style="pointer-events:auto">
-        <h3>Surface</h3>
-        <div class="container">
-            <p>
-                
-            </p>
-        </div>
-        <br>
-    </li>
-  <button id="render" class="option" onclick="handleInputs();" style="pointer-events:auto" type="button">Render</button>
-  <button id="center" class="option" onclick="glviewer.zoomTo();" style="pointer-events:auto">Center</button>
+    <div class="fixed">
+        <button id="render" class="option" onclick="handleInputs();" style="pointer-events:auto" type="button">Render</button>
+        <button id="center" class="option" onclick="glviewer.zoomTo();" style="pointer-events:auto">Center</button>
+    </div>
 </div>
 
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
