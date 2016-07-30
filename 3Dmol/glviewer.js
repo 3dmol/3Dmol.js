@@ -1158,7 +1158,7 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         
-        this.center = function(sel, animationDuration){
+        this.center = function(sel){
             var allatoms, alltmp;
             sel = sel || {};
             var atoms = getAtomsFromSel(sel);
@@ -1229,12 +1229,10 @@ $3Dmol.GLViewer = (function() {
             }
             
             var maxD = Math.sqrt(maxDsq)*2;
-            
+           
 
             modelGroup.position = center.clone().multiplyScalar(-1);
 
-            rotationGroup.position.z = -(maxD * 0.5
-                    / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
             show();
             
             return this;
