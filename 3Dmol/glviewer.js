@@ -771,13 +771,6 @@ $3Dmol.GLViewer = (function() {
 
                 return this;
             }
-            
-            
-
-            
-            console.log(rotationGroup.quaternion);
-            console.log(q);
-            // this line completes the animation
             rotationGroup.quaternion.multiply(q);
             show();
             return this;
@@ -1158,7 +1151,9 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         
-        this.center = function(sel){
+        var rotation_index=0;
+        this.center = function(sel,animationDuration){
+             animationDuration=animationDuration!==undefined ? animationDuration : 0;
             var allatoms, alltmp;
             sel = sel || {};
             var atoms = getAtomsFromSel(sel);
@@ -1195,7 +1190,6 @@ $3Dmol.GLViewer = (function() {
 
             // use selection for center
             var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
-            console.log(center.clone().multiplyScalar(-1));
 
             
             // but all for bounding box
@@ -1229,10 +1223,52 @@ $3Dmol.GLViewer = (function() {
             }
             
             var maxD = Math.sqrt(maxDsq)*2;
-           
+            if(animationDuration>0){
+                var wait_time=20;
+
+                var original_rot=modelGroup.position;
+                var final_rot=center.clone().multiplyScalar(-1);
+
+                var rot_steps=new Array(animationDuration/wait_time);
+
+                var current_rot=original_rot;
+
+                var xstep = (final_rot.x-original_rot.x)/(animationDuration/wait_time);
+                var ystep = (final_rot.y-original_rot.y)/(animationDuration/wait_time);
+                var zstep = (final_rot.z-original_rot.z)/(animationDuration/wait_time);
+
+
+                var inc_rot_done= false;
+
+                for(var i=0;i<rot_steps.length;i++){
+                    current_rot=new $3Dmol.Vector3(current_rot.x+xstep,current_rot.y+ystep,current_rot.z+zstep);
+                    
+                    rot_steps[i] = current_rot;
+                }
+
+                var increment_rot = function(){
+                    if(rotation_index===rot_steps.length){
+                        inc_rot_done = true;  
+                        show();
+                        return;
+                    }
+                    console.log(rot_steps[0]);
+                    modelGroup.position=rot_steps[rotation_index];
+                    rotation_index+=1;
+                    show();
+                };
+
+
+                if(!inc_rot_done)
+                    setInterval(increment_rot,wait_time);
+                else{
+                    clearInterval();
+                    rotation_index=0;
+                }
+                return this;
+            }
 
             modelGroup.position = center.clone().multiplyScalar(-1);
-
             show();
             
             return this;
@@ -1297,7 +1333,6 @@ $3Dmol.GLViewer = (function() {
 
             // use selection for center
             var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
-            console.log(center.clone().multiplyScalar(-1));
 
             
             // but all for bounding box
@@ -1332,60 +1367,58 @@ $3Dmol.GLViewer = (function() {
             
             var maxD = Math.sqrt(maxDsq)*2;
             if(animationDuration>0){
-                var original_z = rotationGroup.position.z;
-                var final_z = -(maxD * 0.5
+                var wait_time=20;
+                var original_z=rotationGroup.position.z;
+                var final_z=-(maxD * 0.5
                         / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
-                var wait_time = 20;
+
+                var original_rot=modelGroup.position;
+                var final_rot=center.clone().multiplyScalar(-1);
+
+                var rot_steps=new Array(animationDuration/wait_time);
+                var zoom_steps=new Array(animationDuration/wait_time);
+
+                var current_z=original_z;
+                var current_rot=original_rot;
+
+                var xstep = (final_rot.x-original_rot.x)/(animationDuration/wait_time);
+                var ystep = (final_rot.y-original_rot.y)/(animationDuration/wait_time);
+                var zstep = (final_rot.z-original_rot.z)/(animationDuration/wait_time);
+
                 var step = (final_z-original_z)/(animationDuration/wait_time);
-
-
-                var original = rotationGroup.quaternion;//quaternion
-                var final = rotationGroup.quaternion;//quaternion
-            
-
-                var xstep = (final.x-original.x)/(animationDuration/wait_time);
-                var ystep = (final.y-original.y)/(animationDuration/wait_time);
-                var zstep = (final.z-original.z)/(animationDuration/wait_time);
-                var wstep = (final.w-original.w)/(animationDuration/wait_time);
 
                 var inc_z_done=false;
                 var inc_rot_done= false;
 
-                var z_steps=new Array(animationDuration/wait_time);
-
-                var current_z=original_z;
-                
-                var current_q=original;
-    
-                var steps=new Array(animationDuration/wait_time);
-                for(var i=0;i<steps.length;i++){
-                    current_q=new $3Dmol.Quaternion(current_q.x+xstep,current_q.y+ystep,current_q.z+zstep,current_q.w+wstep).normalize();
-                    steps[i] = current_q;
+                for(var i=0;i<rot_steps.length;i++){
+                    current_rot=new $3Dmol.Vector3(current_rot.x+xstep,current_rot.y+ystep,current_rot.z+zstep);
+                    
+                    rot_steps[i] = current_rot;
                 }
-                
-                for(var i=0;i<z_steps.length;i++){
+                for(var i=0;i<zoom_steps.length;i++){
                     current_z+=step;
-                    z_steps[i]=current_z;
+                    zoom_steps[i]=current_z;
                 }
 
-                var increment_z = function(){
-                    if(z_index===z_steps.length){
+              var increment_z = function(){
+                    if(z_index===zoom_steps.length){
                         inc_z_done = true;
                         show();
                         return;
                     }
-                    rotationGroup.position.z=z_steps[z_index];
+                    rotationGroup.position.z=zoom_steps[z_index];
                     z_index+=1;
                     show();
                 };
 
                 var increment_rot = function(){
-                    if(rot_index===steps.length){
+                    if(rot_index===rot_steps.length){
                         inc_rot_done = true;  
                         show();
                         return;
-                    } 
-                    rotationGroup.quaternion.multiply(steps[rot_index]);
+                    }
+                    console.log(rot_steps[0]);
+                    modelGroup.position=rot_steps[rot_index];
                     rot_index+=1;
                     show();
                 };
@@ -1410,7 +1443,6 @@ $3Dmol.GLViewer = (function() {
             }
 
             modelGroup.position = center.clone().multiplyScalar(-1);
-
             rotationGroup.position.z = -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
             show();
