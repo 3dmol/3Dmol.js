@@ -83,10 +83,7 @@
 
             left.appendChild(li);
 
-            $('#divId').load("test"+i+".html",function(){
-                viewer.render();
-                img.src=document.getElementsByTagName('canvas')[0].toDataURL('image/png');
-            });
+            $('#divId').load("test"+i+".html");
 
          }
          </script>
