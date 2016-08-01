@@ -9,7 +9,7 @@
 }
 
 .align-center {
-  width: 500px;
+  width: 600px;
   margin: 20px auto 10px;
   text-align: center;
 }
@@ -55,7 +55,7 @@ To make sure everything works, we are going to add a sphere, set the camera, ren
 <script>
 $(function() {
   let element = $('#container-01');
-  let config = { backgroundColor: '#ff9900' };
+  let config = { backgroundColor: 'orange' };
   let viewer = $3Dmol.createViewer( element, config );
   viewer.addSphere({ radius: 10, color: 'green' });
   viewer.zoomTo();
