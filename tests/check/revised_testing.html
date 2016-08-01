@@ -110,8 +110,7 @@
                      document.getElementById(previous_script).id=e.currentTarget.childNodes[1].class;
                     previous_script=e.currentTarget.childNodes[1].class;
                     //remove the inside of script
-                    var script_element=document.getElementById("script");
-                    script_element.innerHTML="";
+                    document.getElementById("script").innerHTML="";
                     //set the correct attributes for the div
                     var new_div=document.getElementsByClassName("viewer_3Dmoljs")[0].cloneNode(true);
 
@@ -122,6 +121,8 @@
                     document.getElementById(previous_script).style.width="100%";
                     document.getElementById(previous_script).style.height="100%";
                     document.getElementById(previous_script).style.position="relative";
+
+                    
                 }
                 //deletes divID insides
                 document.getElementById("divId").innerHTML="";

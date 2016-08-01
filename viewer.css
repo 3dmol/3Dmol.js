@@ -1,0 +1,92 @@
+* {
+	margin: 0;
+	padding: 0;
+    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+}
+
+
+.ui-widget-content {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: rgba(0,0,0,.5);
+    overflow: hidden;
+    transition: 0.5s;
+    padding:0;
+    text-align:center;
+}
+li{
+    height:20%;
+    margin:10px;
+    padding:4px;
+    background-color:#f2f2f2;
+    border-radius: 15px;
+}
+#selections{
+    height:67%;
+}
+
+h1,h3{
+    text-align:left;
+}
+h3{
+    background-color:rgba(0,0,102,.5);
+    margin:5px;
+    padding-left:10px;
+    color:white;
+    border-radius: 15px 50px
+
+}
+.ui-widget-content input{
+    width:80%;
+    margin: 0 auto;
+
+    resize:horizontal;
+    overflow:auto;
+}
+
+.closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px !important;
+    margin-left: 50px;
+     
+}
+#selection_list{
+    list-style: none;
+}
+#selection_list li{
+    border-radius:0px;
+
+    background-color:rgba(0,0,102,.9);
+    color:white;
+}
+#header{
+    position : relative;
+    color:white;
+    background-color:rgba(0,0,102,.5);
+    margin:8px;
+    margin-bottom:-20px;
+    padding-left:20px;
+    border-radius: 15px 50px;
+}
+.container{
+    text-align:left;
+    padding:10px;
+}
+ul{
+    height:100%;
+}
+.fixed{
+    position: relative;
+    bottom:0%;
+    width:100%;
+}
+.fixed button{
+    width:45%;
+    height:25px;
+}
