@@ -3,12 +3,11 @@
 <head>
 <title>3Dmol.js Viewer</title>
 <script src="build/3Dmol.js"></script>
-<style>
-* {
-	margin: 0;
-	padding: 0
-}
-</style>
+
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="viewer.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script>
     (function(i, s, o, g, r, a, m) {
         i['GoogleAnalyticsObject'] = r;
@@ -65,10 +64,7 @@
         }
 
     };
-
-    $(document)
-            .ready(
-                    function() {
+    function run() {
 
                         try {
                             var url = window.location.search.substr(1);
@@ -131,13 +127,13 @@
                                     responseType: "arraybuffer",
                                     processData: false,
                                     success: function(ret, txt, response) {
-	                                    console.log("mtf fetch " + (+new Date() - start) + "ms");
+                                        console.log("mtf fetch " + (+new Date() - start) + "ms");
                                         var time = new Date();
-	                                    glviewer.addModel(ret, type);
-	                                    runcmds(cmds, glviewer);
-	                                    glviewer.render();
-	                                    glviewer.zoomTo();
-	                                    console.log("mtf load " + (+new Date() - time) + "ms");
+                                        glviewer.addModel(ret, type);
+                                        runcmds(cmds, glviewer);
+                                        glviewer.render();
+                                        glviewer.zoomTo();
+                                        console.log("mtf load " + (+new Date() - time) + "ms");
 
                                 }}).fail(function() {
                                     //if couldn't get url natively, go through echo server
@@ -183,10 +179,10 @@
                                                 glviewer.zoomTo();
                                             })
                                         } else {
-                                        	glviewer.addModel(ret, type);
-                                        	runcmds(cmds, glviewer);
-                                        	glviewer.render();
-                                        	glviewer.zoomTo();
+                                            glviewer.addModel(ret, type);
+                                            runcmds(cmds, glviewer);
+                                            glviewer.render();
+                                            glviewer.zoomTo();
                                         }
                                     });
                                 });
@@ -200,11 +196,191 @@
                             window.location = "http://get.webgl.org";
 
                         }
+                    }
+    var width=350;
+    var width_change=0;
+    var start_width=350;
+    $(document).ready(function(){
+        run();
+        var page_url=window.location.href;        
+        document.getElementById("model_input").value=page_url.indexOf("pdb")!==-1 ? page_url.substring(page_url.indexOf("pdb")+4,page_url.indexOf("&")) : page_url.substring(page_url.indexOf("url")+4,page_url.indexOf("&"));        
+        var doit;
+        $("#sidenav").resizable({
+            handles: 'e',
+            helper: "ui-resizable-helper",
+            minWidth: 300,
+            maxWidth: 800,
+            start:function(event,ui){
+                start_width=$("#sidenav").outerWidth();
+            },
+            stop:function(event,ui){
+                clearTimeout(doit);
+                doit = setTimeout(resizedw,1500);
+            },
+        });
+        $( "#selection_list" ).sortable({
+            revert: true
+        });
+        $( "#draggable" ).draggable({
+            connectToSortable: "#selection_list",
+            helper: "clone",
+            revert: "invalid"
+         });
+        $( "ul, li" ).disableSelection();
+        function resizedw(event,ui){
+            width=$("#sidenav").outerWidth();
+            glviewer.translate((width-start_width)/2,0);
+        }
 
-                    });
+
+
+        parseURL();
+        initNav();
+
+    });       
+
+var url_object={};
+
+function setURL(urlPath){
+     window.history.pushState({"html":"test","pageTitle":"test"},"", urlPath);
+}
+function initNav(){
+    for(var key in url_object){
+        if(url_object[key] instanceof Selection){
+            console.log("selection");
+            var selection = document.createElement('li');
+            selection.innerHTML=url_object[key].selection;
+            document.getElementById("selection_list").appendChild(selection);
+        }
+    }
+
+}
+function openNav() {
+    var page_url=window.location.href;
+    document.getElementById("sidenav").style.width = width+"px";
+    document.getElementById("menu").style.visibility="hidden";
+    //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
+    glviewer.translate(width/2,0);
+    glviewer.zoomTo();
+    glviewer.render();
+}
+
+function closeNav() {
+    document.getElementById("menu").style.visibility="visible";
+    document.getElementById("sidenav").style.width = "0";
+
+    glviewer.translate(-width/2,0);
+}
+function handleInputs(){
+     //handles all of the input fields
+       
+    run();
+}
+
+function parseURL(){
+    //generates the selection objects from the url
+    var page_url=window.location.href.substring(window.location.href.indexOf(".html")+6);
+    var split_url=page_url.split("&");
+    //splits each section of the url by their = sign
+    var select_indexes=[];
+    var selection="";
+    var selection_modifier="";
+    for(var i=0;i<split_url.length;i++){
+        var split_element=split_url[i].split("=");
+        if(split_element[0]==="select")
+            select_indexes.push(i);
+        if(split_element[0]==="pdb"||split_element[0]==="url"){
+            var modelFile=new ModelFile(split_element[0],split_element[1]);
+            url_object[modelFile]=modelFile;
+        }
+    }   
+    for(var i=0;i<select_indexes.length;i++){
+        var split_element=split_url[select_indexes[i]].split("=");
+        selection=split_element[1];
+        var j=select_indexes[i]+1;
+        var limit=0;
+
+        if(i!==select_indexes.length-1)
+            limit=select_indexes[i+1];
+        else
+            limit=split_url.length;
+
+        while(j<limit){
+            if(j!==limit-1){
+                console.log(j+" : "+split_url[j]);
+                selection_modifier+=split_url[j]+"&";
+            }
+            else
+                selection_modifier+=split_url[j];
+            j++;
+        }
+
+        url_object["select"+i]=new Selection(selection,selection_modifier);
+        selection="";
+        selection_modifier="";
+    }
+
+    console.log(url_object);
+    //console.log(url_object);
+    //pdb or url
+
+}
+
+function Selection(selection,modifier){
+    this.selection=selection;
+    this.modifier=modifier;
+
+
+}
+
+function ModelFile(fileType,fileValue){
+    this.fileType=fileType;
+    this.fileValue=fileValue;
+    this.string=this.fileType+"="+fileValue;
+}
 </script>
 </head>
 <body>
-	<div id='gldiv' style="width: 100%; height: 100vh;"></div>
+
+<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;visibility:hidden" onclick="openNav();">☰</span>
+<div id="sidenav" class="ui-widget-content">
+  <h1 id="header" >3Dmol Viewer</h1>
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+  <br>
+  <ul>
+    <li class="option"  style="pointer-events:auto;">
+        <h3>File/PDB/URL</h3>
+        <div class="container">
+            <p>
+                Choose a model through Protien Data Bank, File, or URL.
+            </p>
+            <label>Model Type: </label>
+            <select id="model_type">
+                <option value="pdb">PDB</option>
+                <option value="url">URL</option>
+                <option value="file">File</option>
+            </select>
+            <br>
+            <span><label>Query: </label><input id="model_input"></input></span>
+        </div>
+        <br>
+    <li id="selections" class="option" style="pointer-events:auto">
+        <h3>Selections</h3>
+        <div class="container">
+            <p>
+                Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
+            </p>
+            <ul id="selection_list">
+            </ul>
+        </div>
+        <br>
+    </li>
+    <div class="fixed">
+        <button id="render" class="option" onclick="handleInputs();" style="pointer-events:auto" type="button">Render</button>
+        <button id="center" class="option" onclick="glviewer.zoomTo();" style="pointer-events:auto">Center</button>
+    </div>
+</div>
+
+    <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>

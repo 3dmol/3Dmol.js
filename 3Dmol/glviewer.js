@@ -1125,7 +1125,7 @@ $3Dmol.GLViewer = (function() {
                 var steps= new Array((animationDuration/wait_time));
 
                 for(var i=0;i<steps.length;i++){
-                    currentPosition=new $3Dmol.Vector3(currentPosition.x+step.x,currentPosition.y+step.y,currentPosition.z+step.z);
+                    currentPosition=new $3Dmol.Vector3(currentPosition.x+step.x,currentPosition.y+step.y,currentPosition.z);
                     steps[i]=currentPosition;
                 }
 
@@ -1158,7 +1158,85 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         
-       
+        this.center = function(sel){
+            var allatoms, alltmp;
+            sel = sel || {};
+            var atoms = getAtomsFromSel(sel);
+            var tmp = $3Dmol.getExtent(atoms);
+
+            if($.isEmptyObject(sel)) {
+                //include shapes when zooming to full scene
+                //TODO: figure out a good way to specify shapes as part of a selection
+                $.each(shapes, function(i, shape) {
+                    if(shape && shape.boundingSphere && shape.boundingSphere.center)
+                        var c = shape.boundingSphere.center;
+                        var r = shape.boundingSphere.radius;
+                        if(r > 0) {
+                            //make sure full shape is visible
+                            atoms.push(new $3Dmol.Vector3(c.x+r,c.y,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x-r,c.y,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y+r,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y-r,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z+r));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z-r));
+                        } else {
+                            atoms.push(c);
+                        }
+                });
+                tmp = $3Dmol.getExtent(atoms);
+                allatoms = atoms;
+                alltmp = tmp;
+
+            }
+            else {
+                allatoms = getAtomsFromSel({});
+                alltmp = $3Dmol.getExtent(allatoms);
+            }
+
+            // use selection for center
+            var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
+            console.log(center.clone().multiplyScalar(-1));
+
+            
+            // but all for bounding box
+            var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
+                    - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
+
+            var maxD = Math.sqrt(x * x + y * y + z * z);
+            if (maxD < 5)
+                maxD = 5;
+
+            // use full bounding box for slab/fog
+            slabNear = -maxD / 1.9;
+            slabFar = maxD / 2;
+
+            // for zoom, use selection box
+            x = tmp[1][0] - tmp[0][0];
+            y = tmp[1][1] - tmp[0][1];
+            z = tmp[1][2] - tmp[0][2];
+            maxD = Math.sqrt(x * x + y * y + z * z);
+            if (maxD < 5)
+                maxD = 5;
+            
+            //find the farthest atom from center to get max distance needed for view
+            var maxDsq = 25;
+            for (var i = 0; i < atoms.length; i++) {
+                if(atoms[i]) {
+                    var dsq = center.distanceToSquared(atoms[i]);
+                    if(dsq > maxDsq)
+                        maxDsq = dsq;
+                }
+            }
+            
+            var maxD = Math.sqrt(maxDsq)*2;
+           
+
+            modelGroup.position = center.clone().multiplyScalar(-1);
+
+            show();
+            
+            return this;
+        }
         /**
          * Zoom to center of atom selection
          * 
@@ -1260,17 +1338,15 @@ $3Dmol.GLViewer = (function() {
                 var wait_time = 20;
                 var step = (final_z-original_z)/(animationDuration/wait_time);
 
-                var original_rot_x = modelGroup.position.x;
-                var original_rot_y = modelGroup.position.y;
-                var original_rot_z = modelGroup.position.z;
 
-                var final_rot_x = center.clone().multiplyScalar(-1).x;
-                var final_rot_y = center.clone().multiplyScalar(-1).y;
-                var final_rot_z = center.clone().multiplyScalar(-1).z;
+                var original = rotationGroup.quaternion;//quaternion
+                var final = rotationGroup.quaternion;//quaternion
+            
 
-                var xstep = (final_rot_x-original_rot_x)/(animationDuration/wait_time);
-                var ystep = (final_rot_y-original_rot_y)/(animationDuration/wait_time);
-                var zstep = (final_rot_z-original_rot_z)/(animationDuration/wait_time);
+                var xstep = (final.x-original.x)/(animationDuration/wait_time);
+                var ystep = (final.y-original.y)/(animationDuration/wait_time);
+                var zstep = (final.z-original.z)/(animationDuration/wait_time);
+                var wstep = (final.w-original.w)/(animationDuration/wait_time);
 
                 var inc_z_done=false;
                 var inc_rot_done= false;
@@ -1278,24 +1354,18 @@ $3Dmol.GLViewer = (function() {
                 var z_steps=new Array(animationDuration/wait_time);
 
                 var current_z=original_z;
-
+                
+                var current_q=original;
+    
+                var steps=new Array(animationDuration/wait_time);
+                for(var i=0;i<steps.length;i++){
+                    current_q=new $3Dmol.Quaternion(current_q.x+xstep,current_q.y+ystep,current_q.z+zstep,current_q.w+wstep).normalize();
+                    steps[i] = current_q;
+                }
+                
                 for(var i=0;i<z_steps.length;i++){
                     current_z+=step;
                     z_steps[i]=current_z;
-                }
-
-                var current_rot_x=original_rot_x;
-                var current_rot_y=original_rot_y;
-                var current_rot_z=original_rot_z;
-
-                var steps=new Array(animationDuration/wait_time);
-
-                for(var i=0;i<steps.length;i++){
-                    current_rot_x+=xstep;
-                    current_rot_y+=ystep;
-                    current_rot_z+=zstep;
-
-                    steps[i]=new $3Dmol.Vector3(current_rot_x,current_rot_y,current_rot_z);
                 }
 
                 var increment_z = function(){
@@ -1315,7 +1385,7 @@ $3Dmol.GLViewer = (function() {
                         show();
                         return;
                     } 
-                    modelGroup=steps[rot_index];
+                    rotationGroup.quaternion.multiply(steps[rot_index]);
                     rot_index+=1;
                     show();
                 };

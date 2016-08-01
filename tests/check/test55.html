@@ -47,9 +47,9 @@
        var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
                           
       //viewer.translate(10,10,1000);         
-      //viewer.zoomTo({resn:'STI'},1000);
+      viewer.zoomTo({resn:'STI'},1000);
       //viewer.zoom(10,1000);
-      viewer.rotate(90,"y",1000);
+      //viewer.rotate(90,"y",1000);
       viewer.render();
     };
     req.send(null);
