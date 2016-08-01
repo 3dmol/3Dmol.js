@@ -233,24 +233,11 @@
         }
     });       
 
-   function handleInputs(){
-    //handles all of the input fields
-    var page_url=window.location.href.substring(window.location.href.indexOf("?")+1);
-    page_url=page_url.split("&");
-    var model_input=document.getElementById("model_input").value;
-    var new_url="";
-    page_url[0]=page_url[0].substring(0,page_url[0].indexOf("=")+1)+model_input;
-    for(var i=0;i<page_url.length;i++){
-        new_url+=page_url[i];
-        if(i!==page_url.length-1)
-            new_url+="&";
-    }
-    setURL("viewer.html?"+new_url);
-    run();
-}
+var url_object={};
+
 function setURL(urlPath){
      window.history.pushState({"html":"test","pageTitle":"test"},"", urlPath);
- }
+}
 function openNav() {
     var page_url=window.location.href;
     document.getElementById("sidenav").style.width = width+"px";
@@ -261,23 +248,80 @@ function openNav() {
     glviewer.render();
 }
 
-
 function closeNav() {
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
 
     glviewer.translate(-width/2,0);
 }
+function handleInputs(){
+     //handles all of the input fields
+       
+    run();
+}
 
-function generateSelections(url){
+function parseURL(url){
     //generates the selection objects from the url
+    var page_url=window.location.href.substring(window.location.href.indexOf(".html")+6);
+    var split_url=page_url.split("&");
+    //splits each section of the url by their = sign
+    var select_indexes=[];
+    var selection="";
+    var selection_modifier="";
+    for(var i=0;i<split_url.length;i++){
+        var split_element=split_url[i].split("=");
+        if(split_element[0]==="select")
+            select_indexes.push(i);
+        if(split_element[0]==="pdb"||split_element[0]==="url"){
+            var modelFile=new ModelFile(split_element[0],split_element[1]);
+            url_object[modelFile]=modelFile;
+        }
+    }   
+    for(var i=0;i<select_indexes.length;i++){
+        var split_element=split_url[select_indexes[i]].split("=");
+        selection=split_element[1];
+        var j=select_indexes[i]+1;
+        var limit=0;
+
+        if(i!==select_indexes.length-1)
+            limit=select_indexes[i+1];
+        else
+            limit=split_url.length;
+
+        while(j<limit){
+            if(j!==limit-1){
+                console.log(j+" : "+split_url[j]);
+                selection_modifier+=split_url[j]+"&";
+            }
+            else
+                selection_modifier+=split_url[j];
+            j++;
+        }
+
+        url_object["select"+i]=new Selection(selection,selection_modifier);
+        selection="";
+        selection_modifier="";
+    }
+
+    console.log(url_object);
+    //console.log(url_object);
+    //pdb or url
+
 }
 
-function Selection(){
-    
+function Selection(selection,modifier){
+    this.selection=selection;
+    this.modifier=modifier;
 
 
 }
+
+function ModelFile(fileType,fileValue){
+    this.fileType=fileType;
+    this.fileValue=fileValue;
+    this.string=this.fileType+"="+fileValue;
+}
+parseURL();
 
 </script>
 </head>
@@ -333,3 +377,22 @@ function Selection(){
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>
+
+pdb=1YCT&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick&labelres=backgroundOpacity:0.8;fontSize:14
+pdb=1YCT
+&
+select=chain:A
+&
+style=cartoon;stick:radius~0.1
+&
+surface=opacity:0.8;colorscheme:whiteCarbon
+&
+select=chain:B
+&
+style=cartoon;line
+&
+select=resi:19,23,26;chain:B
+&
+style=cartoon;stick
+&
+labelres=backgroundOpacity:0.8;fontSize:14

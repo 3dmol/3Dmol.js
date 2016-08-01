@@ -81,23 +81,12 @@
             li.id=i;
             li.appendChild(img);
 
-            var iframe=document.createElement('iframe');
-            iframe.id="id"+i;
-            iframe.src = "test"+i+".html";
-            document.getElementById('divId').appendChild(iframe);
-
             left.appendChild(li);
 
-            iframe.onload = function(){
-               var canvas=iframe.contentDocument.getElementById('test'+iframe.id.substring(2)).childNodes[0];
-               var src=canvas.toDataURL('image/png');
-
-               img.value=src;
-
-               console.log(src);
-               iframe.parentNode.removeChild(iframe);
-              
-            };
+            $('#divId').load("test"+i+".html",function(){
+                viewer.render();
+                img.src=document.getElementsByTagName('canvas')[0].toDataURL('image/png');
+            });
 
          }
          </script>
