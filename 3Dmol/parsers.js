@@ -1214,6 +1214,8 @@ $3Dmol.Parsers = (function() {
             return false; // maybe duplicate position.
         else if (distSquared > maxsq)
             return false;
+        else if(atom1.altLoc != atom2.altLoc && atom1.altLoc != ' ' && atom2.altLoc != ' ')
+            return false; // don't connect across alternate locations
         else
             return true;
     };
@@ -1280,6 +1282,7 @@ $3Dmol.Parsers = (function() {
         var computeStruct = !options.noComputeSecondaryStructure;
         var noAssembly = !options.doAssembly; // don't assemble by default
         var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var selAltLoc = options.altLoc ? options.altLoc : 'A'; //default alternate location to select if present
         var modelData  = {symmetries:[]};
         var atom;
         var remainingLines = [];
@@ -1309,8 +1312,8 @@ $3Dmol.Parsers = (function() {
             else if (recordName == 'ATOM  ' || recordName == 'HETATM') {
                 var resn, chain, resi, icode, x, y, z, hetflag, elem, serial, altLoc, b;
                 altLoc = line.substr(16, 1);
-                if (altLoc != ' ' && altLoc != 'A')
-                    continue; // FIXME: ad hoc
+                if (altLoc != ' ' && altLoc != selAltLoc && selAltLoc != '*')
+                    continue; 
                 serial = parseInt(line.substr(6, 5));
                 atom = line.substr(12, 4).replace(/ /g, "");
                 resn = line.substr(17, 3).replace(/ /g, "");
@@ -1354,6 +1357,7 @@ $3Dmol.Parsers = (function() {
                     'z' : z,
                     'elem' : elem,
                     'hetflag' : hetflag,
+                    'altLoc' : altLoc,
                     'chain' : chain,
                     'resi' : resi,
                     'icode' : icode,
@@ -1540,7 +1544,7 @@ $3Dmol.Parsers = (function() {
      *            str
      * @param {Object}
      *            options - keepH (do not strip hydrogens), noSecondaryStructure
-     *            (do not compute ss)
+     *            (do not compute ss), altLoc (which alternate location to select, if present; '*' to load all)
      */
     parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(str, options) {
 
