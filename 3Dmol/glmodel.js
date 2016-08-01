@@ -94,7 +94,8 @@ $3Dmol.GLModel = (function() {
         "cross", // draw atoms as crossed lines (aka stars)
         "stick", // draw bonds as capped cylinders
         "sphere", // draw atoms as spheres
-        "cartoon" // draw cartoon representation of secondary structure
+        "cartoon", // draw cartoon representation of secondary structure
+        "colorfunc",
     ];
 
     // class functions
@@ -1195,6 +1196,7 @@ $3Dmol.GLModel = (function() {
                     ret.add(cross);
                 }
             }
+
             
             //for BIOMT assembly
             if (dontDuplicateAtoms && modelData.symmetries && modelData.symmetries.length > 0) {
