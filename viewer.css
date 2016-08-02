@@ -93,3 +93,13 @@ ul{
 #model_type{
     width:65%;
 }
+.selection_delete{
+    text-decoration: none;
+    display:inline;
+    float:right;
+    margin-right:10px;
+}
+.selection_delete p{
+    color:white;
+     display:inline;
+}

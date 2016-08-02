@@ -214,6 +214,13 @@ function initNav(){
         if(url_object[key] instanceof Selection){
             var selection = document.createElement('li');
             selection.innerHTML=url_object[key].selection;
+            selection.id=url_object[key].selection;
+            var anchor =document.createElement('a');
+            anchor.href="javascript:void(0)";
+            anchor.setAttribute('onclick',"removeSelection(this);");
+            anchor.innerHTML='<p>x</p>';
+            anchor.setAttribute('class',"selection_delete");
+            selection.appendChild(anchor);
             document.getElementById("selection_list").appendChild(selection);
         }
     }
@@ -327,7 +334,18 @@ function Selection(selection,modifier){
     this.selection=selection;
     this.modifier=modifier;
 
+}
+//removes selection from everything
+function removeSelection(selection){
+    
+    var pnode=selection.parentNode;
+    for(var key in url_object){
+        if(url_object[key].selection===pnode.id){
+            delete url_object[key];
+        }
+    }
 
+    pnode.parentNode.removeChild(pnode);
 }
 //model file object which contains the filetyep and file value of the model
 function ModelFile(fileType,fileValue){
