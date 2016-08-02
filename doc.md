@@ -120,6 +120,14 @@ An example of a viewer that manipulates the styles of the embedded objects is sh
 
 <iframe width=800, height=800 src="../tests/example.html"></iframe> 
 
+### Citing 3Dmol
+
+If this software is useful in your work, please use the following citation:
+
+> Nicholas Rego and David Koes   
+> 3Dmol.js: molecular visualization with WebGL   
+> Bioinformatics (2015) 31 (8): 1322-1324 [doi:10.1093/bioinformatics/btu829](http://doi.org/10.1093/bioinformatics/btu829)
+
 ##FAQ
 
 **What are your future plans for 3Dmol.js?**
