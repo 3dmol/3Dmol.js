@@ -791,7 +791,9 @@ $3Dmol.GLModel = (function() {
                     } 
                     
                     else if (atom.bondOrder[i] > 1) {
-                        var mfromCap = 0; mtoCap = 0; //multi bond caps
+                        //multi bond caps
+                        var mfromCap = 0;
+                        var mtoCap = 0;
                         
                         if(bondR != atomBondR) {
                             //assume jmol style multiple bonds - the radius doesn't fit within atom sphere
