@@ -33,7 +33,7 @@
     </head>
     <body>
        
-        <div id="divId" style="display:none;" ></div>
+        <div id="divId" style="" ></div>
         <script src="../../build/3Dmol.js"></script> 
 			<div id="left">
 
@@ -47,6 +47,12 @@
          var test_count=1;
          var right=document.getElementById("right");
          var left=document.getElementById("left");
+
+         function convertCanvasToImage(canvas) {
+            var image = new Image();
+            image.src = canvas.toDataURL("image/png");
+            return image;
+        }
         
          for(var i=1;i<=test_count;i++){
          	//creates the list element
@@ -77,13 +83,19 @@
          for(var i=1;i<=test_count;i++){
             var img= new Image();
 
+            $('#divId').load("test"+i+".html",function(){
+                var divid=document.getElementById("#divId");
+                divid.getElementsByTagName("script");
+            });
+
+
+
             var li= document.createElement('li');
             li.id=i;
             li.appendChild(img);
 
             left.appendChild(li);
 
-            $('#divId').load("test"+i+".html");
 
          }
          </script>
