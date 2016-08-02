@@ -120,7 +120,7 @@ An example of a viewer that manipulates the styles of the embedded objects is sh
 
 <iframe width=800, height=800 src="../tests/example.html"></iframe> 
 
-### Citing 3Dmol
+### Citing 3Dmol.js
 
 If this software is useful in your work, please use the following citation:
 
