@@ -499,7 +499,12 @@ $3Dmol.getColorFromStyle = function(atom, style) {
             if( typeof scheme.map[val] != 'undefined' ) {
                 color = scheme.map[val];
             }
-        }
+        } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+            //actual color scheme provided
+            color = style.colorscheme[atom.elem];
+        } else {
+            console.log("Could not interpret colorscheme "+scheme);
+        } 
     } 
     else if(typeof(style.colorfunc) != "undefined") {
         //this is a user provided function for turning an atom into a color
