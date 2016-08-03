@@ -371,7 +371,8 @@ $3Dmol.GLViewer = (function() {
             isDragging = false;
 
         });
-        
+
+        var mouseButton;
         var _handleMouseDown = this._handleMouseDown = function(ev) {
             ev.preventDefault();
             if (!scene)
