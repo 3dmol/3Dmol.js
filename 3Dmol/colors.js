@@ -126,11 +126,20 @@ $3Dmol.CC = {
     },    
     getHex : function(hex) {
         if (!isNaN(parseInt(hex)))
-            return parseInt(hex);
-        
+            return parseInt(hex);        
         else if (typeof(hex) === 'string') {
+            hex = hex.trim();
             
-            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
+            if(hex.length == 4 && hex[0] == '#') {
+                hex = '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3]; //expand to full hex number
+            }
+            
+            if(hex.length == 7 && hex[0] == '#') {
+                return parseInt(hex.substring(1),16);
+            } 
+            else {
+                return this.colorTab[hex.toLowerCase()] || 0x000000;
+            }
         }
         return hex;
     }
@@ -490,7 +499,12 @@ $3Dmol.getColorFromStyle = function(atom, style) {
             if( typeof scheme.map[val] != 'undefined' ) {
                 color = scheme.map[val];
             }
-        }
+        } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+            //actual color scheme provided
+            color = style.colorscheme[atom.elem];
+        } else {
+            console.log("Could not interpret colorscheme "+scheme);
+        } 
     } 
     else if(typeof(style.colorfunc) != "undefined") {
         //this is a user provided function for turning an atom into a color
