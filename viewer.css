@@ -19,7 +19,7 @@
     text-align:center;
 }
 li{
-    height:20%;
+    
     margin:10px;
     padding:4px;
     background-color:#f2f2f2;
@@ -27,6 +27,10 @@ li{
 }
 #selections{
     height:67%;
+}
+
+ul{
+    height:100%;
 }
 
 h1,h3{
@@ -58,12 +62,18 @@ h3{
 }
 #selection_list{
     list-style: none;
+    overflow:hidden; 
+    overflow-y:scroll;
+    height:75%;
 }
 #selection_list li{
     border-radius:0px;
-
+    height:4%;
     background-color:rgba(0,0,102,.9);
     color:white;
+}
+#selection_list li:hover{
+    background-color:rgba(0,0,102,.5);
 }
 #header{
     position : relative;
@@ -77,8 +87,6 @@ h3{
 .container{
     text-align:left;
     padding:10px;
-}
-ul{
     height:100%;
 }
 .fixed{
@@ -102,4 +110,30 @@ ul{
 .selection_delete p{
     color:white;
      display:inline;
+}
+
+#add_selection{
+    bottom:12%;
+    position:absolute;
+    width:85%;
+}
+
+.selectionSpan{
+    background-color:#9999ff;
+    width:90%;
+    height:20%;
+    margin-top:4px;
+}
+
+.edit{
+    width:20%;
+    float:right;
+    height:65%;
+    margin:6px;
+
+    margin-right:10px;
+
+}
+input{
+    width:80%;
 }

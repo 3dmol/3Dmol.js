@@ -212,16 +212,7 @@ function setURL(urlPath){
 function initNav(){
     for(var key in url_object){
         if(url_object[key] instanceof Selection){
-            var selection = document.createElement('li');
-            selection.innerHTML=url_object[key].selection;
-            selection.id=url_object[key].selection;
-            var anchor =document.createElement('a');
-            anchor.href="javascript:void(0)";
-            anchor.setAttribute('onclick',"removeSelection(this);");
-            anchor.innerHTML='<p>x</p>';
-            anchor.setAttribute('class',"selection_delete");
-            selection.appendChild(anchor);
-            document.getElementById("selection_list").appendChild(selection);
+            addSelection(url_object[key].selection);
         }
     }
 
@@ -263,22 +254,18 @@ function handleInputs(){
 }
 //function that constructs the url from the url_object
 function constructURL(){
-    console.log(url_object);
     var url="";
     var modelFile=url_object.ModelFile;
     var selections=[];
     for (var key in url_object) {
-        console.log(key+" : "+url_object[key]);
         if(url_object[key] instanceof Selection)
             selections.push(url_object[key]);
         
     }
-    console.log(selections);
     url+=modelFile.fileType+"="+modelFile.fileValue+"&";
     for(var i=0;i<selections.length;i++){
         url+="select="+selections[i].selection+"&"+selections[i].modifier+"&";
     }
-    console.log(url);
     return(url);
 
 }
@@ -288,6 +275,7 @@ function parseURL(){
     var page_url=window.location.href.substring(window.location.href.indexOf(".html")+6);
     var split_url=page_url.split("&");
     //splits each section of the url by their = sign
+    url_object.ModelFile= new ModelFile("pdb","");
     var select_indexes=[];
     var selection="";
     var selection_modifier="";
@@ -337,7 +325,7 @@ function Selection(selection,modifier){
 }
 //removes selection from everything
 function removeSelection(selection){
-    
+
     var pnode=selection.parentNode;
     for(var key in url_object){
         if(url_object[key].selection===pnode.id){
@@ -346,6 +334,80 @@ function removeSelection(selection){
     }
 
     pnode.parentNode.removeChild(pnode);
+}
+var previousPress=null;
+//handles Selection Click events
+
+function handleSelectionPress(selection){
+  selection.style="height:30%";
+  selection.getElementsByTagName('p')[0].innerHTML="";
+  selection.getElementsByClassName('selection_container')[0].style.visibility="visible";
+  if(previousPress!==null && previousPress!==selection)
+    minimizeSelection(previousPress);
+  previousPress=selection;
+
+}
+//returns a selection back to its initial state
+function minimizeSelection(selection){
+ selection.style="height:4%";
+  selection.getElementsByClassName('selection_container')[0].style.visibility="hidden";
+  selection.getElementsByTagName('p')[0].innerHTML=selection.getAttribute("data-selector");
+}
+
+function openEditPane(elem){
+    var className=elem.parentNode.className;
+    elem.parentNode.style.height="50%";
+}
+
+function addSelection(selector){
+    var selection = document.createElement('li');
+    selection.setAttribute("data-selector",selector);
+    var paragraph = document.createElement('p');
+    paragraph.innerHTML=selector;
+    paragraph.style.display="inline";
+    selection.appendChild(paragraph);
+    selection.setAttribute("onmousedown","handleSelectionPress(this);");
+    document.getElementById("selection_list").appendChild(selection);
+
+    var div= document.createElement('div');
+    div.style.visibility="hidden";
+    div.style.height="100%";
+    div.style.width="100%";
+
+    var edit=document.createElement('button');
+    edit.className="edit";
+    edit.innerHTML="Edit";
+    edit.setAttribute("onclick","openEditPane(this);");
+
+    div.className="selection_container";
+    var selector_input = document.createElement('input');
+    selector_input.value=selector;
+    selector_input.style.width="80%";
+    var style = document.createElement('div');
+    style.className="selectionSpan style";
+    style.innerHTML="Style";
+    style.appendChild(edit.cloneNode(true));
+    var surface = document.createElement('div');
+    surface.className="selectionSpan surface";
+    surface.innerHTML="Surface";
+    surface.appendChild(edit.cloneNode(true));
+    var labelres = document.createElement('div');
+    labelres.className="selectionSpan labelres";
+    labelres.innerHTML="Label Residue";
+    labelres.appendChild(edit.cloneNode(true));
+
+    selector_input.style.width="89%";
+
+    div.appendChild(selector_input);
+    //div.appendChild(document.createElement('br'));
+    div.appendChild(style);
+    //div.appendChild(document.createElement('br'));
+    div.appendChild(surface);
+    //div.appendChild(document.createElement('br'));
+    div.appendChild(labelres);
+    //div.appendChild(document.createElement('br'));
+    selection.appendChild(div);
+    //handleSelectionClick(selection);
 }
 //model file object which contains the filetyep and file value of the model
 function ModelFile(fileType,fileValue){
@@ -356,7 +418,9 @@ function ModelFile(fileType,fileValue){
     $(document).ready(function(){
         run();
         var page_url=window.location.href;        
-        document.getElementById("model_input").value=page_url.indexOf("pdb")!==-1 ? page_url.substring(page_url.indexOf("pdb")+4,page_url.indexOf("&")) : page_url.substring(page_url.indexOf("url")+4,page_url.indexOf("&"));        
+        document.getElementById("model_input").value=page_url.indexOf("pdb")!==-1 ? page_url.substring(page_url.indexOf("pdb")+4,page_url.indexOf("&")) : page_url.substring(page_url.indexOf("url")+4,page_url.indexOf("&"));
+        if(document.getElementById("model_input").value==="htt")
+            document.getElementById("model_input").value="";        
         var doit;
         $("#sidenav").resizable({
             handles: 'e',
@@ -384,10 +448,12 @@ function ModelFile(fileType,fileValue){
             width=$("#sidenav").outerWidth();
             glviewer.translate((width-start_width)/2,0);
         }
+
         parseURL();
         initNav();
 
     }); 
+
 </script>
 </head>
 <body>
@@ -408,7 +474,7 @@ function ModelFile(fileType,fileValue){
             <select id="model_type">
                 <option value="pdb">PDB</option>
                 <option value="url">URL</option>
-                <option value="file">File</option>
+                <option value="cid">CID</option>
             </select>
             <br>
             <span><label>Query: </label><input id="model_input"></input></span>
@@ -421,7 +487,11 @@ function ModelFile(fileType,fileValue){
                 Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
             </p>
             <ul id="selection_list">
+
+
             </ul>
+
+            <button id="add_selection" onclick="addSelection('selection');">Add</button>
         </div>
         <br>
     </li>
