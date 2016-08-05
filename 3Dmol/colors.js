@@ -49,8 +49,68 @@ $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
 $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 
  /**
- * Color scheme representation. 
- * @example viewer.setStyle({chain:'G'},{sphere:{colorscheme:'greenCarbon'}});
+ * Built in colorschemes
+ *
+ * @example <caption>Using one of the build in colorshemes listed above. This example specifically uses ssPyMol, but any of the other colorshemes are interchangeable</caption> 
+ * viewer.setStyle({'cartoon':{colorscheme:'ssPyMol'}});
+ * @example <caption>Defining your own colorshemes. First define a map that links instances of a certain property (in this case 'elem') to color values. </caption> 
+ * var elementColors = {
+        'H': 0xFFFFFF,
+        'He': 0xFFC0CB,
+        'HE': 0xFFC0CB,
+        'Li': 0xB22222,
+        'LI': 0xB22222,
+        'B': 0x00FF00,
+        'C': 0xC8C8C8,
+        'N': 0x8F8FFF,
+        'O': 0xF00000,
+        'F': 0xDAA520,
+        'Na': 0x0000FF,
+        'NA': 0x0000FF,
+        'Mg': 0x228B22,
+        'MG': 0x228B22,
+        'Al': 0x808090,
+        'AL': 0x808090,
+        'Si': 0xDAA520,
+        'SI': 0xDAA520,
+        'P': 0xFFA500,
+        'S': 0xFFC832,
+        'Cl': 0x00FF00,
+        'CL': 0x00FF00,
+        'Ca': 0x808090,
+        'CA': 0x808090,
+        'Ti': 0x808090,
+        'TI': 0x808090,
+        'Cr': 0x808090,
+        'CR': 0x808090,
+        'Mn': 0x808090,
+        'MN': 0x808090,
+        'Fe': 0xFFA500,
+        'FE': 0xFFA500,
+        'Ni': 0xA52A2A,
+        'NI': 0xA52A2A,
+        'Cu': 0xA52A2A,
+        'CU': 0xA52A2A,
+        'Zn': 0xA52A2A,
+        'ZN': 0xA52A2A,
+        'Br': 0xA52A2A,
+        'BR': 0xA52A2A,
+        'Ag': 0x808090,
+        'AG': 0x808090,
+        'I': 0xA020F0,
+        'Ba': 0xFFA500,
+        'BA': 0xFFA500,
+        'Au': 0xDAA520,
+        'AU': 0xDAA520    
+  };
+   viewer.setStyle({'cartoon':{colorscheme:{prop:'elem',map:elementColors}}});
+ * @example <caption>Using a gradient with colorscheme. </caption>
+ * viewer.setStyle({chain:'A'},{cartoon:{opacity:0.5,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow(0,10)}}}); 
+ * @example <caption>Using a function in order to define the colors.</caption> 
+   let colorAsSnake = function(atom) {
+      return atom.resi % 2 ? 'white': 'green'
+   };
+   viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
  * @typedef ColorschemeSpec
  * @prop {string} greenCarbon   - 0x00FF00
  * @prop {string} cyanCarbon    - 0x00FFFF
@@ -69,6 +129,10 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
  * @prop {string} nucleic - nucleic acid colorscheme
  * @prop {string} chain - standard chain colorscheme
  * @prop {string} chainHetatm - chain Hetatm colorscheme
+ * @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
+ * @prop {Gradient} gradient - Allows the user to provide a gradient to the colorsheme. See example #3.
+ * @prop {object} map - map of a certain AtomSpec propery to a color.: {}} elementMap - Allows the user to provide a mapping of elements to colors to the colorscheme. This is shown in example #2 and it should be noted that this can be done with any properties, and not just 'elem'.
+ * @prop {function} colorfunc - Allows the user to provide a function for setting the colorshemes.See example #4.
  */
  
 });
