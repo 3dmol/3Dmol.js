@@ -31,14 +31,16 @@
 <div id="test22" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-        let colorAsSnake = function(atom) {
-           return atom.resi % 2 ? 'white': 'green';
-        };
           (function() {
               var viewer = $3Dmol.createViewer($("#test22"));
               $3Dmol.download("pdb:4UAA",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
-                  viewer.setStyle({chain:'A'},{colorfunc:colorAsSnake,cartoon:{opacity:0.5,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  let colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
                   viewer.render();
               });
           })();

@@ -4,88 +4,84 @@
 		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
         <title>3Dmol.js Tests</title>
         
-
+        
         <style>
-            #left,#right{
-                width:50%;
-                padding:0;
-                margin:0;
-
-            }
-            #left li,#right li{
-                list-style:none;
-
-            }
-            #left img,#right img{
-
-                width:400px;
-                height:400px;
-
-                margin: 0 auto;
-            }
             #left{
-                float:left;
+                float: left;
+                width:50%;
             }
             #right{
                 float:right;
+                width:50%;
+            }
+            #right ul,#left ul{
+                list-style:none;
+            }
+            .header{
+                width:50%;
+                position:absolute;
+                margin: 0 auto;
             }
         </style>
     </head>
     <body>
-       
-        <div id="divId" style="display:none;" ></div>
+
         <script src="../../build/3Dmol.js"></script> 
 			<div id="left">
-
+                <ul></ul>
         	</div>
         	<div id="right">
-
+                <ul></ul>
         	</div>
         	
          <script>
+            var test_count=64;
+            function loadImages(){
+         
+                for(var i=1;i<test_count;i++){
+                    var url="test"+i+".png";
 
-         var test_count=1;
-         var right=document.getElementById("right");
-         var left=document.getElementById("left");
-        
-         for(var i=1;i<=test_count;i++){
-         	//creates the list element
-         	var li = document.createElement("li");
+                    var li= document.createElement('li');
 
-         	//loads the title
-         	var title = document.createElement("h4");
-            title.style.position="absolute";
-            title.style.margin="0 auto";
 
-         	title.align="center";
+                    var img=document.createElement('img');
 
-         	var text= document.createTextNode("Test "+i);
+                    img.src="imgs/"+url;
 
-         	title.appendChild(text);
+                    li.appendChild(img);
 
-         	li.appendChild(title)
-         	//loads the image
-         	var img = document.createElement("img");
-         	img.class = "test"+i;
-         	img.src = "imgs/test"+i+".png";
-         	img.ondragstart = function() { return false;}
-         	li.appendChild(img);
+                    var header= document.createElement('h3');
 
-         	right.appendChild(li);
-				
-         }
-         for(var i=1;i<=test_count;i++){
-            var img= new Image();
+                    header.className="header";
 
-            var li= document.createElement('li');
-            li.id=i;
-            li.appendChild(img);
+                    header.innerHTML="Test "+i;
 
-            left.appendChild(li);
+                    li.appendChild(header);
+
+                    document.getElementById("right").firstElementChild.appendChild(li);
+                }
+            }
+           
+            loadImages();
+
+            function loadScriptImages(){
+
+                for(var i=1;i<test_count;i++){
+                    var url="test"+i+".html";
+                    var iframe=document.createElement('iframe');
+
+
+                    iframe.src=url;
 
             $('#divId').load("test"+i+".html");
+          iframe.id=url;
 
-         }
+
+                    document.getElementById("#externalPage").appendChild(iframe);
+                }
+            }
          </script>
+
+         <div id="externalPage"></div>
     </body>
 </html>
