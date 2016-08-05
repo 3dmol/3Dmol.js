@@ -17,5 +17,5 @@ cursor.close()
 conn.close()
 
 print "Content-Type: text/html"     # HTML is following
-print "Access-Control-Allow-Origin: *" # allow cross-site scripting
+#print "Access-Control-Allow-Origin: *" # allow cross-site scripting - disabled since enabled on server
 print                               # blank line, end of headers
