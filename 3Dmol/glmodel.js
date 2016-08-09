@@ -841,14 +841,14 @@ $3Dmol.GLModel = (function() {
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
                                 if (atom.clickable || atom.hoverable) {
-                                    cylinder1a = new $3Dmol.Cylinder(p1a , mp , r);
-                                    cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
+                                    var cylinder1a = new $3Dmol.Cylinder(p1a , mp , r);
+                                    var cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                 }
                                 if (atom2.clickable || atom2.hoverable) {
-                                    cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
-                                    cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
+                                    var cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
+                                    var cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);                               
                                 }
@@ -898,17 +898,17 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                                                 
                                 if (atom.clickable || atom.hoverable) {
-                                    cylinder1a = new $3Dmol.Cylinder(p1a.clone(), mp.clone(), r);
-                                    cylinder1b = new $3Dmol.Cylinder(p1b.clone(), mp2.clone(), r);
-                                    cylinder1c = new $3Dmol.Cylinder(p1.clone(), mp3.clone(), r);
+                                    var cylinder1a = new $3Dmol.Cylinder(p1a.clone(), mp.clone(), r);
+                                    var cylinder1b = new $3Dmol.Cylinder(p1b.clone(), mp2.clone(), r);
+                                    var cylinder1c = new $3Dmol.Cylinder(p1.clone(), mp3.clone(), r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                     atom.intersectionShape.cylinder.push(cylinder1c);
                                 } 
                                 if (atom2.clickable || atom2.hoverable) {                               
-                                    cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
-                                    cylinder2b = new $3Dmol.Cylinder(p2b.clone(), mp2.clone(), r);
-                                    cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
+                                    var cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
+                                    var cylinder2b = new $3Dmol.Cylinder(p2b.clone(), mp2.clone(), r);
+                                    var cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);
                                     atom2.intersectionShape.cylinder.push(cylinder2c);                                
