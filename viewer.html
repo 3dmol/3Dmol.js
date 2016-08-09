@@ -313,12 +313,7 @@ function parseURL(){
         selection_modifier="";
     }
 }
-//selection object for displaying
-function Selection(selection,modifier){
-    this.selection=selection;
-    this.modifier=modifier;
 
-}
 //removes selection from everything
 function removeSelection(selection){
     if(confirm("Are you sure you want to delete that selection?")){
@@ -329,6 +324,29 @@ function removeSelection(selection){
         }
         selection.parentNode.removeChild(selection);
     }
+}
+
+function createInternalSelectionList(div){
+    var selection=div.getAttribute("data-selector");
+    for(var key in url_object){
+        if(url_object[key].selection===selection){
+            selection=url_object[key];
+            break;
+        }
+    }
+    var string= selection.modifier;
+    var list=string.split("&");
+    //turn list into list of respective objects
+    for(var i=0;i<list.length;i++){
+        var splitAtEquals=list[i].split("=");
+        if(splitAtEquals[0]==="style")
+            list[i]=new Style(selection.selection,splitAtEquals[1]);
+        else if(splitAtEquals[0]==="labelres")
+            list[i]=new LabelRes(selection.selection,splitAtEquals[1]);
+        else if(splitAtEquals[0]==="surface")
+            list[i]=new Surface(selection.selection,splitAtEquals[1]);
+    }
+    return list;
 }
 
 //adds a selection object to the list
@@ -360,20 +378,33 @@ function addSelection(selector){
     div.style.visibility="hidden";
     div.className="selection_pane";
     var ul = document.createElement('ul');
-
+    var mykey=null;
+     for(var key in url_object){
+        if(url_object[key] instanceof Selection){
+            if(url_object[key].selection===selector)
+                mykey=key;
+        }
+    }
+    var selection_list=createInternalSelectionList(div);
+    url_object[mykey].list=selection_list;
+    
+    for(var i=0;i<selection_list.length;i++){
+        var li=document.createElement('li');
+        li.innerHTML=typeof selection_list[i];
+        ul.appendChild(li);
+    }
+    div.appendChild(ul);
     var selector_label=document.createElement('label');
     var selector_input=document.createElement('input');
     selector_label.innerHTML="Selector";
 
      for(var key in url_object){
         if(url_object[key] instanceof Selection){
-            if(url_object[key].selection==selector)
+            if(url_object[key].selection===selector)
                 selector_input.value=selector;
         }
     }
-
     document.getElementById("sidenav").appendChild(div);
-
 
     document.getElementById("selection_list").appendChild(selection);
 }
@@ -399,6 +430,27 @@ function selectionGoBack(){
 function ModelFile(fileType,fileValue){
     this.fileType=fileType;
     this.fileValue=fileValue;
+    this.list=[];
+}
+//style object for styling the selected model portion
+function Style(selector,modifier){
+    this.selector=selector;
+    this.modifier=modifier;
+}
+//labelres object for labeling residues
+function LabelRes(selector,modifier){
+    this.selector=selector;
+    this.modifier=modifier;
+}
+//surface object for surfaces
+function Surface(selector,modifier){
+    this.selector=selector;
+    this.modifier=modifier;
+}
+//selection object for displaying
+function Selection(selection,modifier){
+    this.selection=selection;
+    this.modifier=modifier;
 }
 
     $(document).ready(function(){
@@ -439,6 +491,7 @@ function ModelFile(fileType,fileValue){
         initNav();
 
     }); 
+
 
 </script>
 </head>
