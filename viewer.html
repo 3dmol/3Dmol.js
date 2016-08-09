@@ -199,9 +199,9 @@
                     }
     
 
-    var width=350;
-    var width_change=0;
-    var start_width=350; 
+var width=350;
+var width_change=0;
+var start_width=350; 
 
 var url_object={};
 //function that sets the url of the page
@@ -312,10 +312,6 @@ function parseURL(){
         selection="";
         selection_modifier="";
     }
-
-    //console.log(url_object);
-    //pdb or url
-
 }
 //selection object for displaying
 function Selection(selection,modifier){
@@ -325,89 +321,79 @@ function Selection(selection,modifier){
 }
 //removes selection from everything
 function removeSelection(selection){
-
-    var pnode=selection.parentNode;
-    for(var key in url_object){
-        if(url_object[key].selection===pnode.id){
-            delete url_object[key];
+    if(confirm("Are you sure you want to delete that selection?")){
+        for(var key in url_object){
+            if(url_object[key].selection===selection.parentNode.id){
+                delete url_object[key];
+            }
         }
+        selection.parentNode.removeChild(selection);
     }
-
-    pnode.parentNode.removeChild(pnode);
-}
-var previousPress=null;
-//handles Selection Click events
-
-function handleSelectionPress(selection){
-  selection.style="height:30%";
-  selection.getElementsByTagName('p')[0].innerHTML="";
-  selection.getElementsByClassName('selection_container')[0].style.visibility="visible";
-  if(previousPress!==null && previousPress!==selection)
-    minimizeSelection(previousPress);
-  previousPress=selection;
-
-}
-//returns a selection back to its initial state
-function minimizeSelection(selection){
- selection.style="height:4%";
-  selection.getElementsByClassName('selection_container')[0].style.visibility="hidden";
-  selection.getElementsByTagName('p')[0].innerHTML=selection.getAttribute("data-selector");
 }
 
-function openEditPane(elem){
-    var className=elem.parentNode.className;
-    elem.parentNode.style.height="50%";
-}
-
+//adds a selection object to the list
 function addSelection(selector){
     var selection = document.createElement('li');
     selection.setAttribute("data-selector",selector);
+    selection.innerHTML=selector;
+    selection.setAttribute("onclick","handleSelectionClick(this);");
+    var delete_button=document.createElement('a');
+    delete_button.className="delete_button";
+    delete_button.innerHTML="&#x2715;";
+    $(delete_button).click(function(event){
+        event.stopPropagation();
+        removeSelection(selection);
+    });
+    delete_button.style.float="right";
+    delete_button.style.color="white";
+    selection.appendChild(delete_button);
     var paragraph = document.createElement('p');
     paragraph.innerHTML=selector;
     paragraph.style.display="inline";
-    selection.appendChild(paragraph);
-    selection.setAttribute("onmousedown","handleSelectionPress(this);");
-    document.getElementById("selection_list").appendChild(selection);
+    
 
-    var div= document.createElement('div');
+    //add the inside of the selection to the bottom of the page
+
+
+    var div = document.createElement('div');
+    div.setAttribute("data-selector",selector);
     div.style.visibility="hidden";
-    div.style.height="100%";
-    div.style.width="100%";
+    div.className="selection_pane";
+    var ul = document.createElement('ul');
 
-    var edit=document.createElement('button');
-    edit.className="edit";
-    edit.innerHTML="Edit";
-    edit.setAttribute("onclick","openEditPane(this);");
+    var selector_label=document.createElement('label');
+    var selector_input=document.createElement('input');
+    selector_label.innerHTML="Selector";
 
-    div.className="selection_container";
-    var selector_input = document.createElement('input');
-    selector_input.value=selector;
-    selector_input.style.width="80%";
-    var style = document.createElement('div');
-    style.className="selectionSpan style";
-    style.innerHTML="Style";
-    style.appendChild(edit.cloneNode(true));
-    var surface = document.createElement('div');
-    surface.className="selectionSpan surface";
-    surface.innerHTML="Surface";
-    surface.appendChild(edit.cloneNode(true));
-    var labelres = document.createElement('div');
-    labelres.className="selectionSpan labelres";
-    labelres.innerHTML="Label Residue";
-    labelres.appendChild(edit.cloneNode(true));
+     for(var key in url_object){
+        if(url_object[key] instanceof Selection){
+            if(url_object[key].selection==selector)
+                selector_input.value=selector;
+        }
+    }
 
-    selector_input.style.width="89%";
+    document.getElementById("sidenav").appendChild(div);
 
-    div.appendChild(selector_input);
-    //div.appendChild(document.createElement('br'));
-    div.appendChild(style);
-    //div.appendChild(document.createElement('br'));
-    div.appendChild(surface);
-    //div.appendChild(document.createElement('br'));
-    div.appendChild(labelres);
-    //div.appendChild(document.createElement('br'));
-    selection.appendChild(div);
-    //handleSelectionClick(selection);
+
+    document.getElementById("selection_list").appendChild(selection);
+}
+var current_selection=null;
+function handleSelectionClick(selection){
+    //open up the selection
+    var list=document.getElementById("selection_list");
+
+    list.style.visibility="hidden";
+
+    var divs=document.getElementsByClassName("selection_pane");
+    for(var i=0;i<divs.length;i++){
+        console.log(selection.getAttribute('data-selector')+":"+divs[i].getAttribute('data-selector'));
+        if(selection.getAttribute('data-selector')===divs[i].getAttribute('data-selector'))
+            divs[i].visibility="visible";
+    }
+
+}
+function selectionGoBack(){
+    //first save the state then go back to the main page
 }
 //model file object which contains the filetyep and file value of the model
 function ModelFile(fileType,fileValue){
@@ -458,10 +444,10 @@ function ModelFile(fileType,fileValue){
 </head>
 <body>
 
-<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;visibility:hidden;" onclick="openNav();">☰</span>
+<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav();">&#9776;</span>
 <div id="sidenav" class="ui-widget-content">
   <h1 id="header" >3Dmol Viewer</h1>
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&#x2715;</a>
   <br>
   <ul>
     <li class="option"  style="pointer-events:auto;">
@@ -504,3 +490,24 @@ function ModelFile(fileType,fileValue){
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>
+<!--
+
+pdb=1YCR
+&
+select=chain:A
+&
+style=cartoon;stick:radius~0.1
+&
+surface=opacity:0.8;colorscheme:whiteCarbon
+&
+select=chain:B
+&
+style=cartoon;line
+&
+select=resi:19,23,26;chain:B
+&
+style=cartoon;stick
+&
+labelres=backgroundOpacity:0.8;fontSize:14
+
+-->
