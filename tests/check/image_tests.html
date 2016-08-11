@@ -2,9 +2,10 @@
 <html>
     <head>
 		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+    <script src="../../build/3Dmol.js"></script>
         <title>3Dmol.js Tests</title>
-        
-        
         <style>
             #left{
                 float: left;
@@ -25,13 +26,15 @@
         </style>
     </head>
     <body>
-			<div id="left">
-                <ul></ul>
-        	</div>
-        	<div id="right">
-                <ul></ul>
-        	</div>
-        	
+		<div id="left">
+            <ul></ul>
+        </div>
+        <div id="right">
+            <ul></ul>
+        </div>
+        
+
+         <div id="externalPage"></div>
          <script>
             var test_count=64;
             function loadImages(){
@@ -41,47 +44,38 @@
 
                     var li= document.createElement('li');
 
-
-                    var img=document.createElement('img');
-
-                    img.src="imgs/"+url;
-
-                    li.appendChild(img);
-
                     var header= document.createElement('h3');
 
                     header.className="header";
 
                     header.innerHTML="Test "+i;
 
-
                     li.appendChild(header);
+                    var img=document.createElement('img');
+
+                    img.src="imgs/"+url;
+
+                    li.appendChild(img);
 
                     document.getElementById("right").firstElementChild.appendChild(li);
                 }
             }
-           
+           var image_src="";
             loadImages();
 
-            function loadScriptImages(){
-
-                for(var i=1;i<test_count;i++){
-                    var url="test"+i+".html";
-                    var iframe=document.createElement('iframe');
-
-
-                    iframe.src=url;
-
-
-            $('#divId').load("test"+i+".html");
-          iframe.id=url;
-
-
-                    document.getElementById("#externalPage").appendChild(iframe);
-                }
-            }
+            function loadIframeImages(){
+                var iframe=document.createElement('iframe');
+                iframe.id="iframe";
+                document.getElementById("externalPage").appendChild(iframe);
+                iframe.src="test"+1+".html";
+                console.log("first");
+                iframe.onload=function(){
+                    
+                    iframe.contentWindow.viewer.render();
+                };
+            }                
+            loadIframeImages();
          </script>
 
-         <div id="externalPage"></div>
     </body>
 </html>

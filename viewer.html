@@ -369,18 +369,52 @@ function addSelection(selector){
     var paragraph = document.createElement('p');
     paragraph.innerHTML=selector;
     paragraph.style.display="inline";
+
+    //add the inside of the selection
+
+    var div = getSelectionInside(selector);
+    document.getElementById("selection_list").appendChild(selection);
+    dividers.push(div);
     
 
-    //add the inside of the selection to the bottom of the page
+}
+var current_selection=null;
+function handleSelectionClick(selection){
+    //open up the selection
+    var list=document.getElementById("selection_list");
 
+    list.style.visibility="hidden";
+    document.getElementById("add_selection").style.visibility="hidden";
+    for(var i=0;i<dividers.length;i++){
+        console.log(selection.getAttribute('data-selector')+":"+dividers[i].getAttribute('data-selector'));
+        if(selection.getAttribute('data-selector')===dividers[i].getAttribute('data-selector')){
+            dividers[i].style.visibility="visible";
+            document.getElementById("container").appendChild(dividers[i]);
+            document.getElementById("selection_list").style.height="0px";
+        }
+    }
 
-    var div = document.createElement('div');
+}
+function getSelectionInside(selector){
+    var div=document.createElement('div');
+
+    var internal_div=(function(){
+        var internal_div=document.createElement('div');
+        var selector=document.createElement('label');
+        selector.innerHTML="Selector : ";
+        internal_div.appendChild(selector);
+        var input=document.createElement('input');
+        input.style.width="60%";
+        internal_div.appendChild(input);
+        return internal_div;
+    })();
+    div.appendChild(internal_div);
     div.setAttribute("data-selector",selector);
     div.style.visibility="hidden";
     div.className="fixed";
     var ul = document.createElement('ul');
     var mykey=null;
-     for(var key in url_object){
+    for(var key in url_object){
         if(url_object[key] instanceof Selection){
             if(url_object[key].selection===selector)
                 mykey=key;
@@ -388,8 +422,17 @@ function addSelection(selector){
     }
     var selection_list=createInternalSelectionList(div);
     url_object[mykey].list=selection_list;
-    ul.id="sort";
-    console.log("sort");
+    ul.className="sort";
+
+    $(ul ).sortable({
+        revert: true
+    });
+    $( "#draggable" ).draggable({
+        connectToSortable: ul,
+        helper: "clone",
+        revert: "invalid"
+    });
+
     for(var i=0;i<selection_list.length;i++){
         var li=document.createElement('li');
         li.innerHTML=selection_list[i].type;
@@ -410,34 +453,10 @@ function addSelection(selector){
     div.style.height="0px";
     div.style.margin="0px";
     div.style.padding="0px";
-    document.getElementById("selection_list").appendChild(selection);
-    dividers.push(div);
-    
-    $( "#sort" ).sortable({
-        revert: true
-    });
-    $( "#draggable" ).draggable({
-        connectToSortable: "#sort",
-        helper: "clone",
-        revert: "invalid"
-    });
-}
-var current_selection=null;
-function handleSelectionClick(selection){
-    //open up the selection
-    var list=document.getElementById("selection_list");
 
-    list.style.visibility="hidden";
-
-    for(var i=0;i<dividers.length;i++){
-        console.log(selection.getAttribute('data-selector')+":"+dividers[i].getAttribute('data-selector'));
-        if(selection.getAttribute('data-selector')===dividers[i].getAttribute('data-selector')){
-            dividers[i].style.visibility="visible";
-            document.getElementById("container").appendChild(dividers[i]);
-            document.getElementById("selection_list").style.height="0px";
-        }
-    }
-
+    var save=document.createElement('button');
+    var goBack=document.createElement('button');
+    return div;
 }
 function selectionGoBack(){
     //first save the state then go back to the main page

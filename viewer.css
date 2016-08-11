@@ -143,3 +143,16 @@ h3{
 input{
     width:80%;
 }
+
+.sort{
+   list-style: none;
+}
+.sort li{
+    background-color:rgba(0,0,102,.9);
+    color:white;
+
+    border-radius:0px;
+}
+.sort li:hover{
+    background-color:rgba(0,0,102,.5);
+}

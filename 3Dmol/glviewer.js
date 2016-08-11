@@ -827,7 +827,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#render
          */
-        this.render = function() {
+        this.render = function(callback) {
             var time1 = new Date();
 
             updateClickables(); //must render for clickable styles to take effect
@@ -915,6 +915,8 @@ $3Dmol.GLViewer = (function() {
             this.setView(view); // Calls show() => renderer render
             var time2 = new Date();
             //console.log("render time: " + (time2 - time1));
+            if(typeof callback!== 'undefined')
+                callback();
             return this;
         };
 
