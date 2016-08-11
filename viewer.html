@@ -206,7 +206,7 @@ var start_width=350;
 var url_object={};
 //function that sets the url of the page
 function setURL(urlPath){
-     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
+    window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
 //function that initializes the nav bar
 function initNav(){
@@ -241,8 +241,8 @@ function closeNav() {
  * then reloading the model
  */
 function handleInputs(){
-     //handles all of the input fields
-     var model_type= document.getElementById("model_type");
+    //handles all of the input fields
+    var model_type= document.getElementById("model_type");
     url_object.ModelFile.fileType=model_type.value;
     url_object.ModelFile.fileValue=document.getElementById("model_input").value;
 
@@ -348,7 +348,8 @@ function createInternalSelectionList(div){
     }
     return list;
 }
-
+var dividers=[];
+var selection_list;
 //adds a selection object to the list
 function addSelection(selector){
     var selection = document.createElement('li');
@@ -376,7 +377,7 @@ function addSelection(selector){
     var div = document.createElement('div');
     div.setAttribute("data-selector",selector);
     div.style.visibility="hidden";
-    div.className="selection_pane";
+    div.className="fixed";
     var ul = document.createElement('ul');
     var mykey=null;
      for(var key in url_object){
@@ -387,10 +388,11 @@ function addSelection(selector){
     }
     var selection_list=createInternalSelectionList(div);
     url_object[mykey].list=selection_list;
-    
+    ul.id="sort";
+    console.log("sort");
     for(var i=0;i<selection_list.length;i++){
         var li=document.createElement('li');
-        li.innerHTML=typeof selection_list[i];
+        li.innerHTML=selection_list[i].type;
         ul.appendChild(li);
     }
     div.appendChild(ul);
@@ -404,9 +406,21 @@ function addSelection(selector){
                 selector_input.value=selector;
         }
     }
-    document.getElementById("sidenav").appendChild(div);
-
+    var selections=document.getElementById("selections");
+    div.style.height="0px";
+    div.style.margin="0px";
+    div.style.padding="0px";
     document.getElementById("selection_list").appendChild(selection);
+    dividers.push(div);
+    
+    $( "#sort" ).sortable({
+        revert: true
+    });
+    $( "#draggable" ).draggable({
+        connectToSortable: "#sort",
+        helper: "clone",
+        revert: "invalid"
+    });
 }
 var current_selection=null;
 function handleSelectionClick(selection){
@@ -415,11 +429,13 @@ function handleSelectionClick(selection){
 
     list.style.visibility="hidden";
 
-    var divs=document.getElementsByClassName("selection_pane");
-    for(var i=0;i<divs.length;i++){
-        console.log(selection.getAttribute('data-selector')+":"+divs[i].getAttribute('data-selector'));
-        if(selection.getAttribute('data-selector')===divs[i].getAttribute('data-selector'))
-            divs[i].visibility="visible";
+    for(var i=0;i<dividers.length;i++){
+        console.log(selection.getAttribute('data-selector')+":"+dividers[i].getAttribute('data-selector'));
+        if(selection.getAttribute('data-selector')===dividers[i].getAttribute('data-selector')){
+            dividers[i].style.visibility="visible";
+            document.getElementById("container").appendChild(dividers[i]);
+            document.getElementById("selection_list").style.height="0px";
+        }
     }
 
 }
@@ -436,21 +452,25 @@ function ModelFile(fileType,fileValue){
 function Style(selector,modifier){
     this.selector=selector;
     this.modifier=modifier;
+    this.type="Style";
 }
 //labelres object for labeling residues
 function LabelRes(selector,modifier){
     this.selector=selector;
     this.modifier=modifier;
+    this.type="LabelRes";
 }
 //surface object for surfaces
 function Surface(selector,modifier){
     this.selector=selector;
     this.modifier=modifier;
+    this.type="Surface";
 }
 //selection object for displaying
 function Selection(selection,modifier){
     this.selection=selection;
     this.modifier=modifier;
+    this.type="Selection";
 }
 
     $(document).ready(function(){
@@ -481,6 +501,7 @@ function Selection(selection,modifier){
             helper: "clone",
             revert: "invalid"
          });
+       
         $( "ul, li" ).disableSelection();
         function resizedw(event,ui){
             width=$("#sidenav").outerWidth();
@@ -521,12 +542,12 @@ function Selection(selection,modifier){
         <br>
     <li id="selections" class="option" style="pointer-events:auto">
         <h3>Selections</h3>
-        <div class="container">
-            <p>
+        <div id="container">
+           
+            <ul id="selection_list">
+                 <p>
                 Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
             </p>
-            <ul id="selection_list">
-
 
             </ul>
 
