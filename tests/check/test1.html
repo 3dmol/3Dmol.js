@@ -30,12 +30,14 @@
         </td>
         <script>
           var viewer = $3Dmol.createViewer($("#test1"));
-          function test() {
+          function test(callback) {
               
               $3Dmol.download("pdb:4UND",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.render();
               });
+              if(typeof callback ==="function")
+                callback();
           }
           test();
         </script>

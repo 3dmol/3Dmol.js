@@ -60,21 +60,56 @@
                     document.getElementById("right").firstElementChild.appendChild(li);
                 }
             }
-           var image_src="";
+            var image_src=[];
             loadImages();
-
-            function loadIframeImages(){
+            var i=1;
+            function getImage(i){
+                    var url="test"+i+".html";
+                    console.log('first');
+                    loadIframe(url,function(){
+                        renderCanvas(url,function(){
+                            getImageSrc(url);
+                        });
+                    });
+                }
+            
+            function loadIframe(url,callback){
                 var iframe=document.createElement('iframe');
-                iframe.id="iframe";
-                document.getElementById("externalPage").appendChild(iframe);
-                iframe.src="test"+1+".html";
-                console.log("first");
+                iframe.id=url;
+                iframe.src=url;
+
+                document.body.appendChild(iframe);
+                console.log('second');
+
                 iframe.onload=function(){
-                    
-                    iframe.contentWindow.viewer.render();
+                    callback();
                 };
-            }                
-            loadIframeImages();
+            }
+            function renderCanvas(url,callback){
+                var iframe=document.getElementById(url);
+                var viewer=iframe.contentWindow.viewer;
+                console.log('third');
+                setTimeout(function(){
+                    callback();
+                },1000);
+            }
+            function getImageSrc(url){
+                console.log('fourth');
+                var iframe=document.getElementById(url);
+                var canvas=iframe.contentWindow.document.getElementsByTagName('canvas')[0];
+                var img= document.createElement('img');
+                img.src=canvas.toDataURL('image/png');
+                var li=document.createElement('li');
+                img.style.width="400px";
+                img.style.height="400px"
+                li.appendChild(img);
+                document.getElementById("left").firstElementChild.appendChild(li);
+
+                iframe.parentElement.removeChild(iframe);
+                getImage(++i);
+            }
+
+            getImage(i);
          </script>
 
     </body>
