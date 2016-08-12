@@ -2024,11 +2024,10 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Create and add model to viewer, given molecular data and its format 
-         * (pdb, sdf, xyz, or mol2)
          * 
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
          */
         this.addModel = function(data, format, options) {
@@ -2045,7 +2044,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addModels
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format (see {@link FileFormats})
          * @return {Array<$3Dmol.GLModel>}
          */
         this.addModels = function(data, format, options) {
@@ -2075,7 +2074,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addModelsAsFrames
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
          */
         this.addModelsAsFrames = function(data, format, options) {
@@ -2095,7 +2094,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addAsOneMolecule
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
          */
         this.addAsOneMolecule = function(data, format, options) {
