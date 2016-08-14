@@ -7,7 +7,7 @@
     <script src="../../build/3Dmol.js"></script>
         <title>3Dmol.js Tests</title>
         <style>
-            #left{
+             #left{
                 float: left;
                 width:50%;
             }
@@ -20,26 +20,28 @@
             }
             .header{
                 width:50%;
-                position:absolute;
+                position:relative;
                 margin: 0 auto;
             }
         </style>
     </head>
     <body>
-		<div id="left">
-            <ul></ul>
-        </div>
-        <div id="right">
-            <ul></ul>
-        </div>
-        
+            <div id="left">
+                <ul></ul>
+            </div>
+            <div id="right">
+                <ul></ul>
+            </div>
 
          <div id="externalPage"></div>
          <script>
+            var exemptions=[35];
             var test_count=64;
             function loadImages(){
          
                 for(var i=1;i<test_count;i++){
+                    if(exemptions.includes(i))
+                        continue;
                     var url="test"+i+".png";
 
                     var li= document.createElement('li');
@@ -52,15 +54,17 @@
 
                     li.appendChild(header);
                     var img=document.createElement('img');
-
                     img.src="imgs/"+url;
-
+                    img.id=i;
+                    
+                img.style.width="400px";
+                img.style.height="400px";
                     li.appendChild(img);
-
-                    document.getElementById("right").firstElementChild.appendChild(li);
+                     document.getElementById("right").firstElementChild.appendChild(li);
                 }
             }
             var image_src=[];
+
             loadImages();
             var i=1;
             function getImage(i){
@@ -71,13 +75,13 @@
                             getImageSrc(url);
                         });
                     });
-                }
+            }
             
             function loadIframe(url,callback){
                 var iframe=document.createElement('iframe');
                 iframe.id=url;
                 iframe.src=url;
-
+                iframe.style.visibility="hidden";
                 document.body.appendChild(iframe);
                 console.log('second');
 
@@ -101,12 +105,27 @@
                 img.src=canvas.toDataURL('image/png');
                 var li=document.createElement('li');
                 img.style.width="400px";
-                img.style.height="400px"
+                img.style.height="400px";
+                 var header= document.createElement('h3');
+
+                    header.className="header";
+
+                    header.innerHTML="Test "+i;
+
+                    li.appendChild(header);
                 li.appendChild(img);
                 document.getElementById("left").firstElementChild.appendChild(li);
 
+
                 iframe.parentElement.removeChild(iframe);
-                getImage(++i);
+                
+                
+                if(i<test_count){
+                    i++;
+                    if(exemptions.includes(i))
+                        i++;
+                    getImage(i);
+                }
             }
 
             getImage(i);

@@ -22,36 +22,30 @@
 
     <table width="100%">
       <tr>
-        <td colspan=2 height=200px>29 Programmatic Cartoon <code>outline</code></td>
+        <td colspan=2 height=200px>
+          30 Functions as <code>colorscheme map</code>
+        </td>
       </tr>
       <tr>
         <td width="50%">
-          <div id="test30" style="width: 400px; height: 400px; position: relative;"></div>
+<div id="test30" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
           (function() {
               var viewer = $3Dmol.createViewer($("#test30"));
-              $3Dmol.download("pdb:4ZD3",viewer,{},function(){
+              $3Dmol.download("pdb:4UAA",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
-                  viewer.setViewStyle({style:"outline"});
-                  viewer.setStyle({},{cartoon:{}});
+                  let colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
                   viewer.render();
               });
           })();
         </script>
-        <td width="50%">
-          <div id="test31" style="width: 400px; height: 400px; position: relative;"></div>
-        </td>
-        <script>
-          (function() {
-              var viewer1 = $3Dmol.createViewer($("#test31"));
-              $3Dmol.download("pdb:4ZD3",viewer1,{},function(){
-                  viewer1.setBackgroundColor(0xffffffff);
-                  viewer1.setStyle({},{cartoon:{}});
-                  viewer1.render();
-              });
-          })();
-        </script>
+        <td width="50%"><img src="imgs/test30.png"></td>
       </tr>
     </table>
 
