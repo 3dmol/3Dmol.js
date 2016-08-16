@@ -915,8 +915,10 @@ $3Dmol.GLViewer = (function() {
             this.setView(view); // Calls show() => renderer render
             var time2 = new Date();
             //console.log("render time: " + (time2 - time1));
-            if(typeof callback!== 'undefined')
+            if(typeof callback ==='function'){
                 callback();
+                console.log("render time: " + (time2 - time1));
+            }
             return this;
         };
 
@@ -2476,7 +2478,6 @@ $3Dmol.GLViewer = (function() {
                 var range = scheme.range() || [-1,1];
                 for (i = 0, il = v.length; i < il; i++) {
                     var val = voldata.getVal(v[i].x,v[i].y,v[i].z);
-                    console.log(val);
                     var col =  $3Dmol.CC.color(scheme.valueToHex(val, range));
                     var offset = i * 3;
                     colorArray[offset] = col.r;

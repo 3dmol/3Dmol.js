@@ -35,16 +35,16 @@
         
           var viewer = $3Dmol.createViewer($("#test38"));
           
-          (function() {
+          function test(callback) {
               
               $3Dmol.download("pdb:1MO8",viewer,{multimodel:true, frames:true},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setStyle({}, {cartoon:{color:"spectrum"}});
                   viewer.animate({loop:"backward"});
-                  viewer.render();  
+                  viewer.render(callback);  
                   
               });
-          })();
+          }
           
           function toggleAnimation() {
                 var button = document.getElementById("button");
@@ -56,7 +56,7 @@
                     viewer.animate({loop:"backward"});
                 }
            }
-          
+          test();
         </script>
         <td width="50%"><img src="imgs/test38.png"></td>
       </tr>

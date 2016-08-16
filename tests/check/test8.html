@@ -31,8 +31,9 @@
           <div id="test8" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-          (function() {
-              var viewer = $3Dmol.createViewer($("#test8"));
+
+          var viewer = $3Dmol.createViewer($("#test8"));
+          function test(callback) {
               $3Dmol.download("pdb:4DM7",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.addArrow({
@@ -57,9 +58,10 @@
                   viewer.setStyle({chain:'D'},{line:{hidden:false,
                                                      linewidth:1.0,
                                                      color:'black'}});
-                  viewer.render();
+                  viewer.render(callback);
               });
-          })();
+          }
+          test();
         </script>
         <td width="50%"><img src="imgs/test8.png"></td>
       </tr>

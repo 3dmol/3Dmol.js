@@ -34,6 +34,7 @@
         <td width="50%"><div id="test56" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
      <script>
+     function test(callback){
     var viewer = $3Dmol.createViewer($("#test56"));
     viewer.setBackgroundColor(0xffffffff);
     viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
@@ -42,7 +43,9 @@
                                   fromCap:1,
                                   toCap:2,
                                   color:'teal'});
-    viewer.render();
+    viewer.render(callback);
+  }
+  test();
 
 
     </script>

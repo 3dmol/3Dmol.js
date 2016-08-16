@@ -31,8 +31,9 @@
 <div id="test30" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-          (function() {
-              var viewer = $3Dmol.createViewer($("#test30"));
+
+          var viewer = $3Dmol.createViewer($("#test30"));
+          function test(callback) {
               $3Dmol.download("pdb:4UAA",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   let colorAsSnake = function(atom) {
@@ -41,9 +42,10 @@
 
                   viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
 
-                  viewer.render();
+                  viewer.render(callback);
               });
-          })();
+          }
+          test();
         </script>
         <td width="50%"><img src="imgs/test30.png"></td>
       </tr>

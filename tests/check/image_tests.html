@@ -69,7 +69,6 @@
             var i=1;
             function getImage(i){
                     var url="test"+i+".html";
-                    console.log('first');
                     loadIframe(url,function(){
                         renderCanvas(url,function(){
                             getImageSrc(url);
@@ -83,22 +82,23 @@
                 iframe.src=url;
                 iframe.style.visibility="hidden";
                 document.body.appendChild(iframe);
-                console.log('second');
-
                 iframe.onload=function(){
                     callback();
                 };
             }
             function renderCanvas(url,callback){
                 var iframe=document.getElementById(url);
-                var viewer=iframe.contentWindow.viewer;
-                console.log('third');
+                var test=iframe.contentWindow.test;
+                if(typeof test== 'function')
+                    test(callback);
+                else{
                 setTimeout(function(){
                     callback();
                 },1000);
+                }
+
             }
             function getImageSrc(url){
-                console.log('fourth');
                 var iframe=document.getElementById(url);
                 var canvas=iframe.contentWindow.document.getElementsByTagName('canvas')[0];
                 var img= document.createElement('img');

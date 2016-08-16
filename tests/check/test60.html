@@ -32,15 +32,17 @@
         <td width="50%"><div id="test60" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
      <script>
+     function test(callback){
     var viewer = $3Dmol.createViewer($("#test60"));
     viewer.setBackgroundColor(0xffffffff);
 
     $3Dmol.download('pdb:1pfl',viewer,{},function(m) {
         m.setStyle({'cartoon':{colorscheme:'ssPyMol'}});
        viewer.zoomTo();
-       viewer.render();
+       viewer.render(callback);
     });
-
+}
+test();
 
     </script>
         

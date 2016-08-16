@@ -35,6 +35,7 @@
       </td>
      <script>
     var viewer = $3Dmol.createViewer($("#test45"));
+    function test(callback){
     viewer.setBackgroundColor(0xffffffff);
     
     $.get('volData/4csv.pdb', function(data) {
@@ -60,9 +61,11 @@
                                     });
 
                                                      
-      viewer.render();
+      viewer.render(callback);
     };
     req.send(null);
+  }
+  test();
 
 
     </script>

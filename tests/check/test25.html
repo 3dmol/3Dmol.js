@@ -31,8 +31,9 @@
           <div id="test25" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-          (function() {
-              var viewer = $3Dmol.createViewer($("#test25"));
+
+          var viewer = $3Dmol.createViewer($("#test25"));
+          function test(callback) {
               viewer.setBackgroundColor(0xffffffff);
 
               $.get('volData/1fas.pqr', function(data){
@@ -45,9 +46,11 @@
                       },{});
                   });
                   viewer.zoomTo();
-                  viewer.render();
+                  viewer.render(callback);
               });
-          })();
+          }
+          test();
+
         </script>
         <td width="50%"><img src="imgs/test25.png"></td>
       </tr>

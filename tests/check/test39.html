@@ -31,7 +31,7 @@
         <div id="test39" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-          (function() {
+          function test(callback) {
               var viewer = $3Dmol.createViewer($("#test39"));
               viewer.setBackgroundColor(0xffffffff);
               var m1 = $3Dmol.download("pdb:2V0E",viewer,{multimodel:true, frames:true},function(){
@@ -40,10 +40,11 @@
                   m1.setStyle({}, {stick:{color:"red"}});
                   m2.setStyle({}, {cartoon:{color:"blue"}});
                   viewer.animate({loop:"forward"});
-                  viewer.render();
+                  viewer.render(callback);
                 });
               });
-          })();
+          }
+          test();
         </script>
         <td width="50%"><img src="imgs/test39.png"></td>
       </tr>

@@ -30,8 +30,9 @@
         <td width="50%"><div id="test14" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-          (function() {
-              var viewer = $3Dmol.createViewer($("#test14"));
+
+          var viewer = $3Dmol.createViewer($("#test14"));
+          function test(callback) {
               viewer.setBackgroundColor(0xffffffff);
 
 
@@ -58,8 +59,9 @@
                   viewer.render();
               }, 'text');
 
-              viewer.render();
-          })();
+              viewer.render(callback);
+          }
+          test();
         </script>
         <td width="50%"><img src="imgs/test14.png"></td>
       </tr>
