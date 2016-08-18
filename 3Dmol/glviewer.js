@@ -1910,13 +1910,12 @@ $3Dmol.GLViewer = (function() {
          * viewer.addIsosurface(data, {isoval: 0.01, color: "blue", opacity: 0.95});              
          * viewer.addIsosurface(data, {isoval: -0.01, color: "red", opacity: 0.95}); 
          */
-        this.addIsosurface = function(data,  spec) {
+        this.addIsosurface = function(data,  spec,callback) {
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
-            s.addIsosurface(data, spec);
+            s.addIsosurface(data, spec, callback);
             shapes.push(s);
-
             return s;
         };
         
@@ -2033,6 +2032,8 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
          * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {ModelSpec} options - format dependent options. Attributes depend on the input file format.
+         *  
          * @return {$3Dmol.GLModel}
          */
         this.addModel = function(data, format, options) {
@@ -2859,6 +2860,7 @@ $3Dmol.GLViewer = (function() {
                 // NOTE: This is misleading if 'async' mesh generation - returns
                 // immediately
                 //console.log("full mesh generation " + (+new Date() - time) + "ms");
+                
             }
             
             style = style || {};

@@ -36,6 +36,7 @@
          <div id="externalPage"></div>
          <script>
             var exemptions=[35];
+            var surfaces = [19,24,25,26,27,57,58,59];
             var test_count=64;
             function loadImages(){
          
@@ -89,9 +90,16 @@
             function renderCanvas(url,callback){
                 var iframe=document.getElementById(url);
                 var test=iframe.contentWindow.test;
-                if(typeof test== 'function')
+                if(typeof test== 'function' && surfaces.indexOf(i)===-1)
                     test(callback);
+                else if(surfaces.indexOf(i)!==-1){
+
+                setTimeout(function(){
+                    callback();
+                },2000);
+                }
                 else{
+
                 setTimeout(function(){
                     callback();
                 },1000);

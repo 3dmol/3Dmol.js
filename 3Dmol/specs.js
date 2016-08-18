@@ -38,6 +38,21 @@
  * @prop {boolean} invert - for selection, inverts the meaning of the selection
  */
 
+ /**
+  * Model specification. Used to specify the options of a GLModel.  Depending on the input file format, not all fields may be defined.
+  * @typedef ModelSpec
+  * @prop {boolean} duplicateAssemblyAtoms- Set to true if you wish to diplicate assembly atoms otherwise false.
+  * @prop {number} frames - true if you want to add to a new frame and false otherwise
+  * @prop {boolean} vibrate - set to true if you want to vibrate otherwise false.
+  * @prop {number} vibrate.frames - number of frames to be created, default to 10
+  * @prop {number} vibrate.amplitude -amplitude of distortion, default to 1 (full)
+  * @prop multimodel - xyz,sdf,mol2
+  onemol -xyz,sdf,mol2
+  keepH - sdf,mol2
+  parseStyle - cdjson
+  doAssembly - mcif
+  */
+
 
 /**
  * Atom selection object. Used to specify what atoms should be selected.  Can include

@@ -1362,7 +1362,7 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#addMolData
          * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
          * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
-         * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
+         * @param {ModelSpec} options - format dependent options. Attributes depend on the input format
          */
         this.addMolData = function(data, format, options) {
             options = options || {};
