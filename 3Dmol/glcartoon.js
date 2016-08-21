@@ -1354,8 +1354,8 @@ $3Dmol.drawCartoon = (function() {
 
 	var defaultDrawCartoon = function(group, atomList, gradientScheme, quality) {
 		quality = parseInt(parseFloat(quality) * 5) || 5;
-		drawCartoon(group, atomList, gradientScheme, fill = true,
-				doNotSmoothen = false, num = quality, div = quality);
+		drawCartoon(group, atomList, gradientScheme, true,
+				false, quality, quality);
 	}
 
 	return defaultDrawCartoon;

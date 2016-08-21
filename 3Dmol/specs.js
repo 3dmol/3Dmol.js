@@ -195,5 +195,21 @@
  */
 
 
+/**
+* File formats supported by 3Dmol.js
+* @typedef FileFormats
+* @prop cdjson,json  Chemical JSON format
+* @prop cube Gaussian cube format
+* @prop gro  Gromacs topology format, need to add coordinates to resulting model.
+* @prop mcif,cif Crystallographic Information File, the successor to PDB that makes you miss the PDB file format
+* @prop mmtf Macromolecular Transmission Format, the successor to PDB that is totally awesome
+* @prop mol2 Sybyl Mol2 format 
+* @prop pdb The venerable Protein Data Bank format
+* @prop pqr Like PDB but with partial charges which are read into the partialcharge atom property
+* @prop prmtop Amber topology file, must add coordinates
+* @prop sdf MDL MOL format, supports muliple models and meta data
+* @prop vasp VASP format (CONTCAR, POSCAR)
+* @prop xyz XYZ cartesian coordinates format
+*/
 	
 });
