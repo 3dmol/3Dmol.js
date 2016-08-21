@@ -2032,9 +2032,9 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
          * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
-         * @param {ModelSpec} options - format dependent options. Attributes depend on the input file format.
+         * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
          *  
-         * @return {$3Dmol.GLModel}
+         * @return {$3Dmol.GLModel} 
          */
         this.addModel = function(data, format, options) {
             var m = new $3Dmol.GLModel(models.length, defaultcolors);

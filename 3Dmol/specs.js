@@ -27,7 +27,7 @@
  * @prop {number} serial - Atom's serial id number
  * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
  * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
- * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
+ * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix) 
  * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
  * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
  * @prop {Object} properties - Optional mapping of additional properties
@@ -39,18 +39,22 @@
  */
 
  /**
-  * Model specification. Used to specify the options of a GLModel.  Depending on the input file format, not all fields may be defined.
-  * @typedef ModelSpec
-  * @prop {boolean} duplicateAssemblyAtoms- Set to true if you wish to diplicate assembly atoms otherwise false.
-  * @prop {number} frames - true if you want to add to a new frame and false otherwise
-  * @prop {boolean} vibrate - set to true if you want to vibrate otherwise false.
-  * @prop {number} vibrate.frames - number of frames to be created, default to 10
-  * @prop {number} vibrate.amplitude -amplitude of distortion, default to 1 (full)
-  * @prop multimodel - xyz,sdf,mol2
-  onemol -xyz,sdf,mol2
-  keepH - sdf,mol2
-  parseStyle - cdjson
-  doAssembly - mcif
+  * Parser options specification. Used to specify the options of a GLModel.  Depending on the input file format, not all fields may be defined.
+  * @typedef ParserOptionsSpec
+  * @prop {boolean} duplicateAssemblyAtoms- Set to true if you wish to diplicate assembly atoms otherwise false ; supported by all
+  * @prop {boolean} frames - true if you want to add to a new frame and false otherwise ; supported by all
+  * @prop {object} vibrate - object specifying the vibration behavior ; supported by all
+  * @prop {number} vibrate.frames - number of frames to be created, default to 10 ; supported by all
+  * @prop {number} vibrate.amplitude -amplitude of distortion, default to 1 (full) ; supported by all
+  * @prop {boolean} multimodel - specifies weather or not multiple models are being defined ; supported by xyz,sdf, or mol2
+  * @prop {boolean} onemol -specifies weather or not the model is of one molecule ; Supported by xyz , sdf , mol2
+  * @prop {boolean} keepH - do not strip hydrogens ; supported by sdf,mol2
+  * @prop {object} parseStyle - used to define ChemDoodle styles ; upported by cdjson
+  * @prop {boolean} doAssembly - boolean dictating weather or not to do assembly ; supported by mcif
+  * @prop {boolean} noSecondaryStructure - boolean dictating the presence of a secondary structure ; supported by pdb
+  * @prob {boolean} noComputeSecondaryStructure - do not compute ss ; supported by pdb
+  * @prob {string} altLoc -which alternate location to select, if present; '*' to load all ; supported by pdb
+  * @prob {number} assemblyIndex - index of the assembly in symmetry ; supported by mmtf
   */
 
 
