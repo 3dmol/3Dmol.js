@@ -31,16 +31,17 @@
           <div id="test37" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-          (function() {
+          function test(callback) {
               var viewer = $3Dmol.createViewer($("#test37"));
               viewer.setBackgroundColor(0xffffffff);
 
               $.get('../test_structs/multiple.sdf', function(data){
                   viewer.addAsOneMolecule(data, "sdf");
                   viewer.zoomTo();
-                  viewer.render();
+                  viewer.render(callback);
               });
-          })();
+          }
+          test();
         </script>
         <td width="50%"><img src="imgs/test37.png"></td>
       </tr>

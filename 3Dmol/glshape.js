@@ -858,7 +858,7 @@ $3Dmol.GLShape = (function() {
                                     });
          this specific example selects every atom in the
          */
-        this.addIsosurface = function(data, volSpec) {
+        this.addIsosurface = function(data, volSpec, callback) {//may want to cache the arrays geneerated when selectedRegion ==true
            
             var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
                     : 0.0;
@@ -995,6 +995,8 @@ $3Dmol.GLShape = (function() {
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
             console.log(verts.length);
+            if(typeof callback =="function")
+                callback();
           }
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
             

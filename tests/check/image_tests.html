@@ -2,11 +2,12 @@
 <html>
     <head>
 		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+    <script src="../../build/3Dmol.js"></script>
         <title>3Dmol.js Tests</title>
-        
-        
         <style>
-            #left{
+             #left{
                 float: left;
                 width:50%;
             }
@@ -19,34 +20,32 @@
             }
             .header{
                 width:50%;
-                position:absolute;
+                position:relative;
                 margin: 0 auto;
             }
         </style>
     </head>
     <body>
-			<div id="left">
+            <div id="left">
                 <ul></ul>
-        	</div>
-        	<div id="right">
+            </div>
+            <div id="right">
                 <ul></ul>
-        	</div>
-        	
+            </div>
+
+         <div id="externalPage"></div>
          <script>
+            var exemptions=[35];
+            var surfaces = [19,24,25,26,27,57,58,59];
             var test_count=64;
             function loadImages(){
          
                 for(var i=1;i<test_count;i++){
+                    if(exemptions.includes(i))
+                        continue;
                     var url="test"+i+".png";
 
                     var li= document.createElement('li');
-
-
-                    var img=document.createElement('img');
-
-                    img.src="imgs/"+url;
-
-                    li.appendChild(img);
 
                     var header= document.createElement('h3');
 
@@ -54,34 +53,91 @@
 
                     header.innerHTML="Test "+i;
 
+                    li.appendChild(header);
+                    var img=document.createElement('img');
+                    img.src="imgs/"+url;
+                    img.id=i;
+                    
+                img.style.width="400px";
+                img.style.height="400px";
+                    li.appendChild(img);
+                     document.getElementById("right").firstElementChild.appendChild(li);
+                }
+            }
+            var image_src=[];
+
+            loadImages();
+            var i=1;
+            function getImage(i){
+                    var url="test"+i+".html";
+                    loadIframe(url,function(){
+                        renderCanvas(url,function(){
+                            getImageSrc(url);
+                        });
+                    });
+            }
+            
+            function loadIframe(url,callback){
+                var iframe=document.createElement('iframe');
+                iframe.id=url;
+                iframe.src=url;
+                iframe.style.visibility="hidden";
+                document.body.appendChild(iframe);
+                iframe.onload=function(){
+                    callback();
+                };
+            }
+            function renderCanvas(url,callback){
+                var iframe=document.getElementById(url);
+                var test=iframe.contentWindow.test;
+                if(typeof test== 'function' && surfaces.indexOf(i)===-1)
+                    test(callback);
+                else if(surfaces.indexOf(i)!==-1){
+
+                setTimeout(function(){
+                    callback();
+                },2000);
+                }
+                else{
+
+                setTimeout(function(){
+                    callback();
+                },1000);
+                }
+
+            }
+            function getImageSrc(url){
+                var iframe=document.getElementById(url);
+                var canvas=iframe.contentWindow.document.getElementsByTagName('canvas')[0];
+                var img= document.createElement('img');
+                img.src=canvas.toDataURL('image/png');
+                var li=document.createElement('li');
+                img.style.width="400px";
+                img.style.height="400px";
+                 var header= document.createElement('h3');
+
+                    header.className="header";
+
+                    header.innerHTML="Test "+i;
 
                     li.appendChild(header);
+                li.appendChild(img);
+                document.getElementById("left").firstElementChild.appendChild(li);
 
-                    document.getElementById("right").firstElementChild.appendChild(li);
+
+                iframe.parentElement.removeChild(iframe);
+                
+                
+                if(i<test_count){
+                    i++;
+                    if(exemptions.includes(i))
+                        i++;
+                    getImage(i);
                 }
             }
-           
-            loadImages();
 
-            function loadScriptImages(){
-
-                for(var i=1;i<test_count;i++){
-                    var url="test"+i+".html";
-                    var iframe=document.createElement('iframe');
-
-
-                    iframe.src=url;
-
-
-            $('#divId').load("test"+i+".html");
-          iframe.id=url;
-
-
-                    document.getElementById("#externalPage").appendChild(iframe);
-                }
-            }
+            getImage(i);
          </script>
 
-         <div id="externalPage"></div>
     </body>
 </html>

@@ -343,7 +343,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.vasp = parsers.VASP = function (str, options) {
@@ -431,7 +431,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.cube = parsers.CUBE = function(str, options) {
@@ -497,7 +497,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.xyz = parsers.XYZ = function(str, options) {
@@ -577,7 +577,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.sdf = parsers.SDF = function(str, options) {
@@ -713,7 +713,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.mcif = parsers.cif = function(str, options) {
@@ -1037,7 +1037,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.mol2 = parsers.MOL2 = function(str, options) {
@@ -1542,7 +1542,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options - keepH (do not strip hydrogens), noSecondaryStructure
      *            (do not compute ss), altLoc (which alternate location to select, if present; '*' to load all)
      */
@@ -1592,7 +1592,7 @@ $3Dmol.Parsers = (function() {
      *
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options - noSecondaryStructure (do not compute ss)
      */
     parsers.pqr = parsers.PQR = function(str, options) {

@@ -31,15 +31,16 @@
           <div id="test34" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-          (function() {
+          function test(callback) {
               var viewer = $3Dmol.createViewer($("#test34"));
               $3Dmol.download("pdb:1DC9", viewer, {}, function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setViewStyle({style:"outline", color:"black", width:0.1});
                   viewer.setStyle({}, {cartoon:{arrows:true, tubes:true, style:"oval", color:'white'}});
-                  viewer.render();
+                  viewer.render(callback);
               });
-          })();
+          }
+          test();
         </script>
         <td width="50%"><img src="imgs/test34.png"></td>
       </tr>

@@ -31,8 +31,9 @@
           <div id="test9" style="width: 400px; height: 400px; position: relative;">
         </td>
         <script>
-          (function() {
-              var viewer = $3Dmol.createViewer($("#test9"),{nomouse:true});
+        var viewer = $3Dmol.createViewer($("#test9"),{nomouse:true});
+          function test(callback) {
+              
               $3Dmol.download("pdb:2EJ0",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
@@ -51,9 +52,12 @@
                   viewer.setStyle({chain:'E'},{cross:{hidden:false,
                                                       linewidth:1.0,
                                                       color:'black'}});
-                  viewer.render();
+                  
+                  viewer.render(callback);
+
               });
-          })();
+          }
+          test();
         </script>
         <td width="50%"><img src="imgs/test9.png"></td>
       </tr>

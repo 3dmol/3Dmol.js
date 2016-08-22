@@ -12,4 +12,5 @@ script.map
 my_pdbs/
 build
 doc
+doc/scripts/toc.js
 .DS_Store

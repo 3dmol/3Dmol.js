@@ -32,13 +32,16 @@
         <td width="50%"><div id="test51" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
      <script>
+     function test(callback){
     var viewer = $3Dmol.createViewer($("#test51"));
     viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
         m.setStyle({'cartoon':{colorscheme:{prop:'ss',map:$3Dmol.ssColors.Jmol}}});
        viewer.zoomTo();
-       viewer.render();
+       viewer.render(callback);
     });
+     }
+     test();
     </script>
         <td width="50%"><img src="imgs/test51.png"></td>
       </tr>

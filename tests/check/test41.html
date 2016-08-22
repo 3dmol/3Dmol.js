@@ -32,6 +32,7 @@
 <div id="test40" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
+        function test(callback){
             var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
             var viewer = $3Dmol.createViewer($("#test40"));
             viewer.setBackgroundColor(0xffffffff);
@@ -39,7 +40,9 @@
             m.addAtoms(atoms);
             m.setStyle({},{stick:{}});
             viewer.zoomTo();
-            viewer.render();
+            viewer.render(callback);
+          }
+          test();
         </script>
         <td width="50%"><img src="imgs/test41.png"></td>
       </tr>

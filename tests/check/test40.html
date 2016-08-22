@@ -102,12 +102,15 @@ function cylinder(viewer) {
 <div id="test40" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
+        function test(callback){
             var viewer = $3Dmol.createViewer($("#test40"));
             viewer.setBackgroundColor(0xffffffff);
 
             triangle(viewer);
             cylinder(viewer);
-            viewer.render();
+            viewer.render(callback);
+        }
+        test();
         </script>
         <td width="50%"><img src="imgs/test40.png"></td>
       </tr>

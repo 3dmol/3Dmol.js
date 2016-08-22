@@ -40,7 +40,8 @@ H    -0.465979   -0.364991   -0.807088    0.392764    0.342436    0.764260
 </textarea>
         </td>
         <script>
-          (function() {
+
+          function test(callback) {
             var viewer = $3Dmol.createViewer($("#test36"));
             var data = $("#test").val();
             viewer.setBackgroundColor(0xffffff);    
@@ -49,8 +50,9 @@ H    -0.465979   -0.364991   -0.807088    0.392764    0.342436    0.764260
             m.vibrate(10, 1);
             viewer.animate({loop: "backAndForth"});
             viewer.zoomTo();
-            viewer.render();
-          })();
+            viewer.render(callback);
+          }
+          test();
         </script>
 
         <td width="50%"><img src="imgs/test36.png"></td>
