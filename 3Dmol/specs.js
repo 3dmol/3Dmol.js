@@ -70,6 +70,7 @@
  *
  * @typedef WithinSelectionSpec
  * @prop {number} distance - the distance in angstroms away from the atom selection to include atoms in the parent selection
+*  @prop {boolean} invert - if set, selects atoms not within distance range for intersection
  * @prop {AtomSelectionSpec} sel - the selection of atoms against which to measure the distance from the parent atom selection
  */
 

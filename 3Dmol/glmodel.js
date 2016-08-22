@@ -1535,18 +1535,28 @@ $3Dmol.GLModel = (function() {
 
                 // get atoms in second selection
                 var sel2 = this.selectedAtoms(sel.within.sel, atoms);
-                var within = [];
+                var within = {};
                 for (var i = 0; i < sel2.length; i++) {
                     for (var j = 0; j < ret.length; j++) {
 
                         var dist = squaredDistance(sel2[i], ret[j]);
                         var thresh = Math.pow(parseFloat(sel.within.distance), 2);
                         if (dist < thresh && dist > 0) {
-                            within.push(ret[j]);
+                          within[j] = 1;
                         }
-                    }
+                  }
                 }
-                ret = within;
+                var newret = [];
+                if(sel.within.invert) {
+                  for (var j = 0; j < ret.length; j++) {
+                    if(!within[j]) newret.push(ret[j]);
+                  }
+                } else {
+                  for(j in within) {
+                    newret.push(ret[j]);
+                  }
+                }
+                ret = newret;
             }
 
             // byres selection flag
