@@ -32,6 +32,7 @@
         <td width="50%"><div id="test61" style="width: 400px; height: 400px; position: relative;"></div>
       </td>
      <script>
+     function test(callback){
     var viewer = $3Dmol.createViewer($("#test61"), {
 		defaultcolors : $3Dmol.rasmolElementColors
 		});
@@ -49,13 +50,15 @@
     		req.onload = function(aEvt){
 		    m.setCoordinates(req.response, "pdb");
 		    viewer.zoomTo();
-		    viewer.render();
+		    viewer.render(callback);
 		};
 		req.send(null);
 	    }	
         }
     }
     rawFile.send(null);    
+  }
+  test();
 
     </script>
         <td width="50%"><img src="imgs/test61.png"></td>

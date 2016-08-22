@@ -29,6 +29,7 @@
         <td width="50%"><div id="test55" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
+        function test(callback){
     var viewer = $3Dmol.createViewer($("#test55"));
     viewer.setBackgroundColor(0xffffffff);
     
@@ -50,11 +51,12 @@
       viewer.zoomTo({resn:'STI'},1000);
       //viewer.zoom(10,1000);
       //viewer.rotate(90,"y",1000);
-      viewer.render();
+      viewer.render(callback);
     };
     req.send(null);
+  }
 
-
+test();
         </script>
         <td width="50%"><img src="imgs/test55.png"></td>
       </tr>

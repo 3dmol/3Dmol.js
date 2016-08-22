@@ -827,7 +827,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#render
          */
-        this.render = function() {
+        this.render = function(callback) {
             var time1 = new Date();
 
             updateClickables(); //must render for clickable styles to take effect
@@ -915,6 +915,10 @@ $3Dmol.GLViewer = (function() {
             this.setView(view); // Calls show() => renderer render
             var time2 = new Date();
             //console.log("render time: " + (time2 - time1));
+            if(typeof callback ==='function'){
+                callback();
+                console.log("render time: " + (time2 - time1));
+            }
             return this;
         };
 
@@ -1906,13 +1910,12 @@ $3Dmol.GLViewer = (function() {
          * viewer.addIsosurface(data, {isoval: 0.01, color: "blue", opacity: 0.95});              
          * viewer.addIsosurface(data, {isoval: -0.01, color: "red", opacity: 0.95}); 
          */
-        this.addIsosurface = function(data,  spec) {
+        this.addIsosurface = function(data,  spec,callback) {
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
-            s.addIsosurface(data, spec);
+            s.addIsosurface(data, spec, callback);
             shapes.push(s);
-
             return s;
         };
         
@@ -2027,8 +2030,10 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
-         * @param {string} format - Input format (see {@link FileFormats})
-         * @return {$3Dmol.GLModel}
+         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
+         *  
+         * @return {$3Dmol.GLModel} 
          */
         this.addModel = function(data, format, options) {
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
@@ -2473,7 +2478,6 @@ $3Dmol.GLViewer = (function() {
                 var range = scheme.range() || [-1,1];
                 for (i = 0, il = v.length; i < il; i++) {
                     var val = voldata.getVal(v[i].x,v[i].y,v[i].z);
-                    console.log(val);
                     var col =  $3Dmol.CC.color(scheme.valueToHex(val, range));
                     var offset = i * 3;
                     colorArray[offset] = col.r;
@@ -2855,6 +2859,7 @@ $3Dmol.GLViewer = (function() {
                 // NOTE: This is misleading if 'async' mesh generation - returns
                 // immediately
                 //console.log("full mesh generation " + (+new Date() - time) + "ms");
+                
             }
             
             style = style || {};

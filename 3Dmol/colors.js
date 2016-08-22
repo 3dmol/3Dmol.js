@@ -257,7 +257,7 @@ $3Dmol.elementColors.Jmol = {
         'S': 0xFFFF30,
         'Cl': 0x1FF01F,
         'CL': 0x1FF01F,
-        'Ca': 0x3DFF00,
+        'Ca': 0x3DFF00, 
         'CA': 0x3DFF00,
         'Ti': 0xBFC2C7,
         'TI': 0xBFC2C7,

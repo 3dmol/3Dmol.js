@@ -199,14 +199,14 @@
                     }
     
 
-    var width=350;
-    var width_change=0;
-    var start_width=350; 
+var width=350;
+var width_change=0;
+var start_width=350; 
 
 var url_object={};
 //function that sets the url of the page
 function setURL(urlPath){
-     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
+    window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
 //function that initializes the nav bar
 function initNav(){
@@ -241,8 +241,8 @@ function closeNav() {
  * then reloading the model
  */
 function handleInputs(){
-     //handles all of the input fields
-     var model_type= document.getElementById("model_type");
+    //handles all of the input fields
+    var model_type= document.getElementById("model_type");
     url_object.ModelFile.fileType=model_type.value;
     url_object.ModelFile.fileValue=document.getElementById("model_input").value;
 
@@ -312,107 +312,184 @@ function parseURL(){
         selection="";
         selection_modifier="";
     }
-
-    //console.log(url_object);
-    //pdb or url
-
 }
-//selection object for displaying
-function Selection(selection,modifier){
-    this.selection=selection;
-    this.modifier=modifier;
 
-}
 //removes selection from everything
 function removeSelection(selection){
+    if(confirm("Are you sure you want to delete that selection?")){
+        for(var key in url_object){
+            if(url_object[key].selection===selection.parentNode.id){
+                delete url_object[key];
+            }
+        }
+        selection.parentNode.removeChild(selection);
+    }
+}
 
-    var pnode=selection.parentNode;
+function createInternalSelectionList(div){
+    var selection=div.getAttribute("data-selector");
     for(var key in url_object){
-        if(url_object[key].selection===pnode.id){
-            delete url_object[key];
+        if(url_object[key].selection===selection){
+            selection=url_object[key];
+            break;
         }
     }
-
-    pnode.parentNode.removeChild(pnode);
+    var string= selection.modifier;
+    var list=string.split("&");
+    //turn list into list of respective objects
+    for(var i=0;i<list.length;i++){
+        var splitAtEquals=list[i].split("=");
+        if(splitAtEquals[0]==="style")
+            list[i]=new Style(selection.selection,splitAtEquals[1]);
+        else if(splitAtEquals[0]==="labelres")
+            list[i]=new LabelRes(selection.selection,splitAtEquals[1]);
+        else if(splitAtEquals[0]==="surface")
+            list[i]=new Surface(selection.selection,splitAtEquals[1]);
+    }
+    return list;
 }
-var previousPress=null;
-//handles Selection Click events
-
-function handleSelectionPress(selection){
-  selection.style="height:30%";
-  selection.getElementsByTagName('p')[0].innerHTML="";
-  selection.getElementsByClassName('selection_container')[0].style.visibility="visible";
-  if(previousPress!==null && previousPress!==selection)
-    minimizeSelection(previousPress);
-  previousPress=selection;
-
-}
-//returns a selection back to its initial state
-function minimizeSelection(selection){
- selection.style="height:4%";
-  selection.getElementsByClassName('selection_container')[0].style.visibility="hidden";
-  selection.getElementsByTagName('p')[0].innerHTML=selection.getAttribute("data-selector");
-}
-
-function openEditPane(elem){
-    var className=elem.parentNode.className;
-    elem.parentNode.style.height="50%";
-}
-
+var dividers=[];
+var selection_list;
+//adds a selection object to the list
 function addSelection(selector){
     var selection = document.createElement('li');
     selection.setAttribute("data-selector",selector);
+    selection.innerHTML=selector;
+    selection.setAttribute("onclick","handleSelectionClick(this);");
+    var delete_button=document.createElement('a');
+    delete_button.className="delete_button";
+    delete_button.innerHTML="&#x2715;";
+    $(delete_button).click(function(event){
+        event.stopPropagation();
+        removeSelection(selection);
+    });
+    delete_button.style.float="right";
+    delete_button.style.color="white";
+    selection.appendChild(delete_button);
     var paragraph = document.createElement('p');
     paragraph.innerHTML=selector;
     paragraph.style.display="inline";
-    selection.appendChild(paragraph);
-    selection.setAttribute("onmousedown","handleSelectionPress(this);");
+
+    //add the inside of the selection
+
+    var div = getSelectionInside(selector);
     document.getElementById("selection_list").appendChild(selection);
+    dividers.push(div);
+    
 
-    var div= document.createElement('div');
+}
+var current_selection=null;
+function handleSelectionClick(selection){
+    //open up the selection
+    var list=document.getElementById("selection_list");
+
+    list.style.visibility="hidden";
+    document.getElementById("add_selection").style.visibility="hidden";
+    for(var i=0;i<dividers.length;i++){
+        console.log(selection.getAttribute('data-selector')+":"+dividers[i].getAttribute('data-selector'));
+        if(selection.getAttribute('data-selector')===dividers[i].getAttribute('data-selector')){
+            dividers[i].style.visibility="visible";
+            document.getElementById("container").appendChild(dividers[i]);
+            document.getElementById("selection_list").style.height="0px";
+        }
+    }
+
+}
+function getSelectionInside(selector){
+    var div=document.createElement('div');
+
+    var internal_div=(function(){
+        var internal_div=document.createElement('div');
+        var selector=document.createElement('label');
+        selector.innerHTML="Selector : ";
+        internal_div.appendChild(selector);
+        var input=document.createElement('input');
+        input.style.width="60%";
+        internal_div.appendChild(input);
+        return internal_div;
+    })();
+    div.appendChild(internal_div);
+    div.setAttribute("data-selector",selector);
     div.style.visibility="hidden";
-    div.style.height="100%";
-    div.style.width="100%";
+    div.className="fixed";
+    var ul = document.createElement('ul');
+    var mykey=null;
+    for(var key in url_object){
+        if(url_object[key] instanceof Selection){
+            if(url_object[key].selection===selector)
+                mykey=key;
+        }
+    }
+    var selection_list=createInternalSelectionList(div);
+    url_object[mykey].list=selection_list;
+    ul.className="sort";
 
-    var edit=document.createElement('button');
-    edit.className="edit";
-    edit.innerHTML="Edit";
-    edit.setAttribute("onclick","openEditPane(this);");
+    $(ul ).sortable({
+        revert: true
+    });
+    $( "#draggable" ).draggable({
+        connectToSortable: ul,
+        helper: "clone",
+        revert: "invalid"
+    });
 
-    div.className="selection_container";
-    var selector_input = document.createElement('input');
-    selector_input.value=selector;
-    selector_input.style.width="80%";
-    var style = document.createElement('div');
-    style.className="selectionSpan style";
-    style.innerHTML="Style";
-    style.appendChild(edit.cloneNode(true));
-    var surface = document.createElement('div');
-    surface.className="selectionSpan surface";
-    surface.innerHTML="Surface";
-    surface.appendChild(edit.cloneNode(true));
-    var labelres = document.createElement('div');
-    labelres.className="selectionSpan labelres";
-    labelres.innerHTML="Label Residue";
-    labelres.appendChild(edit.cloneNode(true));
+    for(var i=0;i<selection_list.length;i++){
+        var li=document.createElement('li');
+        li.innerHTML=selection_list[i].type;
+        ul.appendChild(li);
+    }
+    div.appendChild(ul);
+    var selector_label=document.createElement('label');
+    var selector_input=document.createElement('input');
+    selector_label.innerHTML="Selector";
 
-    selector_input.style.width="89%";
+     for(var key in url_object){
+        if(url_object[key] instanceof Selection){
+            if(url_object[key].selection===selector)
+                selector_input.value=selector;
+        }
+    }
+    var selections=document.getElementById("selections");
+    div.style.height="0px";
+    div.style.margin="0px";
+    div.style.padding="0px";
 
-    div.appendChild(selector_input);
-    //div.appendChild(document.createElement('br'));
-    div.appendChild(style);
-    //div.appendChild(document.createElement('br'));
-    div.appendChild(surface);
-    //div.appendChild(document.createElement('br'));
-    div.appendChild(labelres);
-    //div.appendChild(document.createElement('br'));
-    selection.appendChild(div);
-    //handleSelectionClick(selection);
+    var save=document.createElement('button');
+    var goBack=document.createElement('button');
+    return div;
+}
+function selectionGoBack(){
+    //first save the state then go back to the main page
 }
 //model file object which contains the filetyep and file value of the model
 function ModelFile(fileType,fileValue){
     this.fileType=fileType;
     this.fileValue=fileValue;
+    this.list=[];
+}
+//style object for styling the selected model portion
+function Style(selector,modifier){
+    this.selector=selector;
+    this.modifier=modifier;
+    this.type="Style";
+}
+//labelres object for labeling residues
+function LabelRes(selector,modifier){
+    this.selector=selector;
+    this.modifier=modifier;
+    this.type="LabelRes";
+}
+//surface object for surfaces
+function Surface(selector,modifier){
+    this.selector=selector;
+    this.modifier=modifier;
+    this.type="Surface";
+}
+//selection object for displaying
+function Selection(selection,modifier){
+    this.selection=selection;
+    this.modifier=modifier;
+    this.type="Selection";
 }
 
     $(document).ready(function(){
@@ -443,6 +520,7 @@ function ModelFile(fileType,fileValue){
             helper: "clone",
             revert: "invalid"
          });
+       
         $( "ul, li" ).disableSelection();
         function resizedw(event,ui){
             width=$("#sidenav").outerWidth();
@@ -454,14 +532,15 @@ function ModelFile(fileType,fileValue){
 
     }); 
 
+
 </script>
 </head>
 <body>
 
-<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;visibility:hidden;" onclick="openNav();">☰</span>
+<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav();">&#9776;</span>
 <div id="sidenav" class="ui-widget-content">
   <h1 id="header" >3Dmol Viewer</h1>
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&#x2715;</a>
   <br>
   <ul>
     <li class="option"  style="pointer-events:auto;">
@@ -482,12 +561,12 @@ function ModelFile(fileType,fileValue){
         <br>
     <li id="selections" class="option" style="pointer-events:auto">
         <h3>Selections</h3>
-        <div class="container">
-            <p>
+        <div id="container">
+           
+            <ul id="selection_list">
+                 <p>
                 Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
             </p>
-            <ul id="selection_list">
-
 
             </ul>
 
@@ -504,3 +583,24 @@ function ModelFile(fileType,fileValue){
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>
+<!--
+
+pdb=1YCR
+&
+select=chain:A
+&
+style=cartoon;stick:radius~0.1
+&
+surface=opacity:0.8;colorscheme:whiteCarbon
+&
+select=chain:B
+&
+style=cartoon;line
+&
+select=resi:19,23,26;chain:B
+&
+style=cartoon;stick
+&
+labelres=backgroundOpacity:0.8;fontSize:14
+
+-->

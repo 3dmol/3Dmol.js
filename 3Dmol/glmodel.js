@@ -1362,7 +1362,7 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#addMolData
          * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
          * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
-         * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
+         * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input format
          */
         this.addMolData = function(data, format, options) {
             options = options || {};
@@ -1378,7 +1378,7 @@ $3Dmol.GLModel = (function() {
             }
 
             if (frames.length == 0) { //first call
-                for (var i = 0; i < parsedAtoms.length; i++) {
+                for (var i = 0; i < parsedAtoms.length; i++) {  
                     if (parsedAtoms[i].length != 0)
                         frames.push(parsedAtoms[i]);
                 }
@@ -2215,7 +2215,7 @@ $3Dmol.GLModel = (function() {
                 } else if (data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
                     format = "pdb";
                 } else if (data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
-                    format = "sdf"; // could look at line 3
+                    format = "sdf"; // could look at line 3 
                 } else if (data.match(/^%VERSION\s+\VERSION_STAMP/gm)) {
                     format = "prmtop";
                 } else {
