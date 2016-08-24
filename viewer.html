@@ -397,14 +397,16 @@ function handleSelectionClick(selection){
 }
 function getSelectionInside(selector){
     var div=document.createElement('div');
-
+    var selector_text=selector;
     var internal_div=(function(){
         var internal_div=document.createElement('div');
         var selector=document.createElement('label');
         selector.innerHTML="Selector : ";
         internal_div.appendChild(selector);
         var input=document.createElement('input');
+        input.className="selector_input";
         input.style.width="60%";
+        input.value=selector_text;
         internal_div.appendChild(input);
         return internal_div;
     })();
@@ -583,24 +585,3 @@ function Selection(selection,modifier){
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>
-<!--
-
-pdb=1YCR
-&
-select=chain:A
-&
-style=cartoon;stick:radius~0.1
-&
-surface=opacity:0.8;colorscheme:whiteCarbon
-&
-select=chain:B
-&
-style=cartoon;line
-&
-select=resi:19,23,26;chain:B
-&
-style=cartoon;stick
-&
-labelres=backgroundOpacity:0.8;fontSize:14
-
--->
