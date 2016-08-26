@@ -31,9 +31,10 @@
           <div id="test29" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
+          function test(callback) {
+            
         
               var viewer = $3Dmol.createViewer($("#test29"));
-          function test(callback) {
               $3Dmol.download("pdb:4ZD3",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setViewStyle({style:"outline"});

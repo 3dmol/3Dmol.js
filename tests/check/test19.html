@@ -33,8 +33,9 @@
         </td>
         <script>
 
-              var viewer = $3Dmol.createViewer($("#test19"));
           function test(callback) {
+            
+              var viewer = $3Dmol.createViewer($("#test19"));
               var setStyles = function(volumedata){
                     var data = new $3Dmol.VolumeData(volumedata, "cube");
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85, voldata: data, volscheme: new $3Dmol.Gradient.RWB(-10,10)},{chain:'A'},callback);

@@ -5,7 +5,7 @@
 <script src="build/3Dmol.js"></script>
 
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="viewer.css">
+<link rel="stylesheet" href="new_viewer.css">
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script>
@@ -30,7 +30,7 @@
 
     //Process commands, in order, and run on viewer (array of strings split on '&')
     var runcmds = function(cmds, viewer) {
-
+ 
         var currentsel = {};
 
         for (var i = 0; i < cmds.length; i++) {
@@ -202,7 +202,7 @@ var width=350;
 function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "new_viewer.html?"+urlPath);
 }
-    function openNav() {
+function openNav() {
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
@@ -210,7 +210,10 @@ function setURL(urlPath){
     glviewer.zoomTo();
     glviewer.render();
 }
-    
+
+function initNav(){
+
+}
 
 //function that closes the nav bar
 function closeNav() {
@@ -223,61 +226,59 @@ function closeNav() {
 function buildURLObject(){
 
 }
+//creates new url object
 function render(){
 
 }
 
 function addSelection(selector){
+    var list=document.getElementById("selection_list");
+    var li= document.createElement('li');
+    
 
+    li.innerHTML=selector;
+
+    list.appendChild(li);
 }
+$( document ).ready(function() {
+  // Handler for .ready() called.
 
+addSelection("chain");
+});
 </script>
 </head>
 <body>
 
 <span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav();">&#9776;</span>
 <div id="sidenav" class="ui-widget-content">
-  <h1 id="header" >3Dmol Viewer</h1>
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&#x2715;</a>
-  <br>
-  <ul>
-    <li class="option"  style="pointer-events:auto;">
+    <h1 id="header" >3Dmol Viewer</h1>
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&#x2715;</a>
+    <div id="file" class="option">
         <h3>File/PDB/URL</h3>
-        <div class="container">
-            <p>
-                Choose a model through Protien Data Bank, File, or URL.
-            </p>
-            <label>Model Type: </label>
+        <p>Choose a model through Protien Data Bank, File, or URL.</p>
+        <label>Model Type: </label>
             <select id="model_type">
                 <option value="pdb">PDB</option>
                 <option value="url">URL</option>
                 <option value="cid">CID</option>
             </select>
-            <br>
-            <span><label>Query: </label><input id="model_input"></input></span>
-        </div>
         <br>
-    <li id="selections" class="option" style="pointer-events:auto">
+        <span><label>Query: </label><input id="model_input"></input></span>
+    </div>
+    <div id="selections" class="option" style="pointer-events:auto">
         <h3>Selections</h3>
-        <div id="container">
-           
-            <ul id="selection_list">
-                 <p>
-                Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
-            </p>
+        <ul id="selection_list">
+            <p>Add, Remove, and/or Edit selections in order to modify the look and feel of the model.</p>
+        </ul>
+        <button id="add_selection" onclick="addSelection('selection');">Add</button>
+    </div>
+    <br>
 
-            </ul>
-
-            <button id="add_selection" onclick="addSelection('selection');">Add</button>
-        </div>
-        <br>
-    </li>
     <div class="fixed">
-        <button id="render" class="option" onclick="render();" style="pointer-events:auto" type="button">Render</button>
-        <button id="center" class="option" onclick="glviewer.zoomTo();" style="pointer-events:auto">Center</button>
+        <button id="render" class="fixed_button" onclick="render();" style="pointer-events:auto" type="button">Render</button>
+        <button id="center" class="fixed_button" onclick="glviewer.zoomTo();" style="pointer-events:auto">Center</button>
     </div>
 </div>
-
-    <div id='gldiv' style="width: 100%; height: 100vh;"></div>
+<div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>

@@ -32,8 +32,9 @@
         </td>
         <script>
 
-          var viewer = $3Dmol.createViewer($("#test25"));
           function test(callback) {
+            
+          var viewer = $3Dmol.createViewer($("#test25"));
               viewer.setBackgroundColor(0xffffffff);
 
               $.get('volData/1fas.pqr', function(data){

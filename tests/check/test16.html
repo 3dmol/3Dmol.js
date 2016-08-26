@@ -39,9 +39,9 @@
           <div id="test16" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-
-              var viewer = $3Dmol.createViewer($("#test16"));
           function test(callback) {
+          
+              var viewer = $3Dmol.createViewer($("#test16"));
               $3Dmol.download("pdb:2YBB",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setStyle({chain:'A'},{stick:{hidden:true}});

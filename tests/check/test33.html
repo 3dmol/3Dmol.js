@@ -32,8 +32,9 @@
         </td>
         <script>
         
-              var viewer = $3Dmol.createViewer($("#test33"));
           function test(callback) {
+            
+              var viewer = $3Dmol.createViewer($("#test33"));
               $3Dmol.download("pdb:4YGY", viewer, {}, function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setStyle({chain:'A'}, {cartoon:{arrows:true, opacity:0.8, color:'spectrum'}});

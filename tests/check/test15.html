@@ -32,8 +32,9 @@
         </td>
         <script>
 
-              var viewer = $3Dmol.createViewer($("#test15"));
           function test(callback) {
+            
+              var viewer = $3Dmol.createViewer($("#test15"));
               $3Dmol.download("pdb:4DM7",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
 
