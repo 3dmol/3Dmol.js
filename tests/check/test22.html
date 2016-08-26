@@ -32,8 +32,9 @@
         </td>
         <script>
           
-              var viewer = $3Dmol.createViewer($("#test22"));
           function test(callback) {
+            
+              var viewer = $3Dmol.createViewer($("#test22"));
               $3Dmol.download("pdb:4UAA",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setStyle({chain:'A'},{cartoon:{opacity:0.5,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});

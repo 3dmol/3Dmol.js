@@ -1,0 +1,120 @@
+* {
+	margin: 0;
+	padding: 0;
+    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+}
+
+
+.ui-widget-content {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: rgba(0,0,0,.5);
+    overflow: hidden;
+    transition: 0.5s;
+    padding:0;
+}
+
+#selections{
+    height:67%;
+}
+
+.option{
+
+    margin:10px;
+    padding:4px;
+    background-color:#f2f2f2;
+    border-radius: 15px;
+}
+
+
+h3{
+    background-color:rgba(0,0,102,.5);
+    margin:5px;
+    padding-left:10px;
+    color:white;
+    border-radius: 15px 50px
+
+}
+.ui-widget-content input{
+    width:80%;
+    margin: 0 auto;
+
+    resize:horizontal;
+    overflow:auto;
+}
+
+.closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px !important;
+    margin-left: 50px;
+     
+}
+#selection_list{
+    list-style: none;
+    overflow:hidden; 
+    overflow-y:scroll;
+    height:75%;
+}
+#selection_list li{
+    border-radius:0px;
+    height:4%;
+    background-color:rgba(0,0,102,.9);
+    color:white;
+}
+#selection_list li:hover{
+    background-color:rgba(0,0,102,.5);
+}
+#header{
+    position : relative;
+    color:white;
+    background-color:rgba(0,0,102,.5);
+    margin:8px;
+    padding-left:20px;
+    border-radius: 15px 50px;
+}
+.fixed{
+    position: relative;
+    bottom:0%;
+    width:100%;
+}
+.fixed button{
+    width:45%;
+    height:25px;
+}
+#model_type{
+    width:65%;
+}
+.selection_delete{
+    text-decoration: none;
+    display:inline;
+    float:right;
+    margin-right:10px;
+}
+.selection_delete p{
+    color:white;
+     display:inline;
+}
+
+#add_selection{
+    bottom:12%;
+    position:absolute;
+    width:85%;
+}
+
+.selectionSpan{
+    background-color:#9999ff;
+    width:90%;
+    height:20%;
+    margin-top:4px;
+}
+
+
+input{
+    width:80%;
+}

@@ -29,9 +29,9 @@
           <div id="test1" style="width: 400px; height: 400px; position: relative;"></div>
         </td>
         <script>
-          var viewer = $3Dmol.createViewer($("#test1"));
-          function tes(callback) {
+          function test(callback) {
               
+          var viewer = $3Dmol.createViewer($("#test1"));
               $3Dmol.download("pdb:4UND",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.render(callback);

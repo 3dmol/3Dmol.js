@@ -32,8 +32,9 @@
         </td>
         <script>
 
-              var viewer = $3Dmol.createViewer($("#test32"));
+
           function test(callback) {
+                          var viewer = $3Dmol.createViewer($("#test32"));
               $3Dmol.download("pdb:1YCR", viewer, {}, function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setStyle({}, {cartoon:{tubes:true, style:"rectangle"}});
