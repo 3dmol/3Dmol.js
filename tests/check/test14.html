@@ -42,7 +42,7 @@
                   viewer.addIsosurface(voldata, {isoval: 0.01,
                                                  color: "blue",
                                                  alpha: 0.5,
-                                                 smoothness: 10},callback);
+                                                 smoothness: 10});
                   viewer.addIsosurface(voldata, {isoval: -0.01,
                                                  color: "red",
                                                  smoothness: 5,
@@ -54,13 +54,13 @@
                                                  function() {
                                                      this.opacity = 0.0;
                                                      viewer.render();
-                                                 }},callback);
+                                                 }});
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();
-                  viewer.render();
+                  viewer.render(callback);
               }, 'text');
 
-              viewer.render();
+              viewer.render(callback);
           }
           test();
         </script>

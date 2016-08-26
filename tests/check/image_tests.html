@@ -44,6 +44,9 @@
                     if(exemptions.includes(i))
                         continue;
                     var url="test"+i+".png";
+                    var div=document.createElement('div');
+                    div.innerHTML="....";
+                    div.style.color="rgb(255,255,255)";
 
                     var li= document.createElement('li');
 
@@ -52,7 +55,7 @@
                     header.className="header";
 
                     header.innerHTML="Test "+i;
-
+                    li.appendChild(div);
                     li.appendChild(header);
                     var img=document.createElement('img');
                     img.src="imgs/"+url;
@@ -68,7 +71,10 @@
 
             loadImages();
             var i=1;
+            var timein=null;
+            var timeout=null;
             function getImage(i){
+                timein=new Date().getTime();
                     var url="test"+i+".html";
                     loadIframe(url,function(){
                         renderCanvas(url,function(){
@@ -114,19 +120,25 @@
                 var li=document.createElement('li');
                 img.style.width="400px";
                 img.style.height="400px";
-                 var header= document.createElement('h3');
+                var timestamp=document.createElement('div');
 
-                    header.className="header";
+                var header= document.createElement('h3');
 
-                    header.innerHTML="Test "+i;
+                header.className="header";
 
-                    li.appendChild(header);
-                li.appendChild(img);
+                header.innerHTML="Test "+i;
+
+                li.appendChild(header);
                 document.getElementById("left").firstElementChild.appendChild(li);
-
 
                 iframe.parentElement.removeChild(iframe);
                 
+                timestamp.className="timestamp";
+                li.appendChild(timestamp);
+
+                li.appendChild(img);
+                timeout=new Date().getTime();
+                timestamp.innerHTML=(timeout-timein)+" ms";
                 
                 if(i<test_count){
                     i++;
