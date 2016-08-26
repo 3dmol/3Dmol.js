@@ -166,9 +166,8 @@
                     header.className="header";
 
                     header.innerHTML="Test "+i;
-                    li.appendChild(header);
-                    
                     li.appendChild(div);
+                    li.appendChild(header);
                     var img=document.createElement('img');
                     img.src="imgs/"+url;
                     img.id=i;
@@ -186,8 +185,6 @@
             var timein=null;
             var timeout=null;
             var percent=0;
-
-            var current_i=1;
             function getImage(i){
                 timein=new Date().getTime();
                     var url="test"+i+".html";
@@ -277,30 +274,7 @@
                     getImage(i);
                 }
             }
-            setInterval(function(){
 
-                if(i===current_i){
-                var img=document.createElement('img');
-                img.style.width="400px";
-                img.style.height="400px";
-                var li = document.createElement('li');
-                 var header= document.createElement('h3');
-
-                header.className="header";
-
-                header.innerHTML="Test "+i;
-                var div=document.createElement('div');
-                div.innerHTML="error";
-                li.appendChild(header);
-
-                li.appendChild(div);
-                li.appendChild(img);
-                document.getElementById("left").firstElementChild.appendChild(li);
-                i++;
-                getImage(i);
-            }
-            current_i=i;
-            },12000);
             getImage(i);
          </script>
 
