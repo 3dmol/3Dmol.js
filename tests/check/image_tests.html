@@ -167,7 +167,7 @@
 
                     header.innerHTML="Test "+i;
                     li.appendChild(header);
-                    
+
                     li.appendChild(div);
                     var img=document.createElement('img');
                     img.src="imgs/"+url;
@@ -278,7 +278,10 @@
                 }
             }
             setInterval(function(){
-
+                if(i>test_count){
+                    clearInterval();
+                    return;
+                }
                 if(i===current_i){
                 var img=document.createElement('img');
                 img.style.width="400px";
