@@ -800,7 +800,7 @@ $3Dmol.Raycaster = (function() {
             
             w_0.subVectors(v1, raycaster.ray.origin);
             
-            lineProj = w_0.dot(v3);
+            var lineProj = w_0.dot(v3);
             rayProj = w_0.dot(raycaster.ray.direction);
             
             normProj = clamp(raycaster.ray.direction.dot(v3));

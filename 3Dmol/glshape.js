@@ -657,6 +657,7 @@ $3Dmol.GLShape = (function() {
         var linegeo = new $3Dmol.Geometry(true);
 
         /** Update shape with new style specification
+	 * @function $3Dmol.GLShape#updateStyle
          * @param {ShapeSpec} newspec
          * @return {$3Dmol.GLShape}
          */

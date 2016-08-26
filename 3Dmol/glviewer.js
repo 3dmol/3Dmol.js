@@ -2912,7 +2912,7 @@ $3Dmol.GLViewer = (function() {
          * Set the surface material to something else, must render change
         *  @function $3Dmol.GLViewer#setSurfaceMaterialStyle
          * @param {number} surf - Surface ID to apply changes to
-         * @param {matSpec} style - new material style specification
+         * @param {SurfaceStyleSpec} style - new material style specification
          */ 
         this.setSurfaceMaterialStyle = function(surf, style) {
             if (surfaces[surf]) {
