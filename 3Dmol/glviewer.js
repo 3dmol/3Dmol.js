@@ -2656,10 +2656,18 @@ $3Dmol.GLViewer = (function() {
             });
             return ret;
         }
+
+        var surfaceTypeMap={
+            "VDW":$3Dmol.SurfaceType.VDW,
+            "MS":$3Dmol.SurfaceType.MS,
+            "SAS":$3Dmol.SurfaceType.SAS,
+            "SES":$3Dmol.SurfaceType.SES
+        }
+
         /**
          * Add surface representation to atoms
          *  @function $3Dmol.GLViewer#addSurface
-         * @param {$3Dmol.SurfaceType} type - Surface type
+         * @param {$3Dmol.SurfaceType|string} type - Surface type
          * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
@@ -2678,6 +2686,17 @@ $3Dmol.GLViewer = (function() {
             // surfaces
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
+            
+            if(typeof type =="string"){
+                if(surfaceTypeMap[type]!== undefined)
+                    type = surfaceTypeMap[type];
+                else{
+                    console.log("Surface type : " + type + " is not recognized");
+                } 
+            }
+            else if(type===undefined){
+                    console.log("Surface type : " + type + " is not recognized");
+            }
             // atoms specified by this selection
             var atomlist = null, focusSele = null;
             //TODO: currently generating a shallow copy to avoid problems when atoms are chagned
