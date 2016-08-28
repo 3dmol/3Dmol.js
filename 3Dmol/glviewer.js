@@ -2686,12 +2686,16 @@ $3Dmol.GLViewer = (function() {
             // surfaces
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
+            
             if(typeof type =="string"){
                 if(surfaceTypeMap[type]!== undefined)
                     type = surfaceTypeMap[type];
                 else{
-                    console.log("Surface type :" + type + " is not recognized");
+                    console.log("Surface type : " + type + " is not recognized");
                 } 
+            }
+            else if(type===undefined){
+                    console.log("Surface type : " + type + " is not recognized");
             }
             // atoms specified by this selection
             var atomlist = null, focusSele = null;
