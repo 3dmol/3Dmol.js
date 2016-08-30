@@ -190,7 +190,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
     }
     else {
         if (query.substr(0, 4) === 'pdb:') {
-            pdbUri = options && options.pdbUri ? options.pdbUri : "http://www.rcsb.org/pdb/files/";
+            pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
             type = options && options.format ? options.format : "pdb";
             if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
                 //when fetch directly from pdb, trust structure annotations
