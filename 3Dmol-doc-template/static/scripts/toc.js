@@ -14,9 +14,16 @@ $.fn.toc = function(options) {
       var elScrollTo = $(e.target).attr('href');
       var $el = $(elScrollTo);
 
-      $('body,html').animate({ scrollTop: $el.offset().top }, 400, 'swing', function() {
-        location.hash = elScrollTo;
-      });
+      if($el.hasClass("toc-shim")){
+$('body,html').animate({ scrollTop: $el.offset().top }, 400, 'swing', function() {
+location.hash = elScrollTo;
+});
+}
+else{
+$('body,html').animate({ scrollTop: $el.offset().top -$('.navbar-inner').height()-5}, 400, 'swing', function() {
+location.hash = elScrollTo;
+});
+}
     }
     $('li', self).removeClass(activeClassName);
     $(e.target).parent().addClass(activeClassName);
