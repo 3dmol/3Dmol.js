@@ -170,9 +170,9 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var m = viewer.addModel();
     
     if (query.substr(0, 5) === 'mmtf:') {
-        pdbUri = options && options.pdbUri ? options.pdbUri : "http://mmtf.rcsb.org/full/";
+        pdbUri = options && options.pdbUri ? options.pdbUri : "http://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
-        var uri = pdbUri + query + ".mmtf";        
+        var uri = pdbUri + query;        
         
         $.ajax({url:uri, 
             type: "GET",
