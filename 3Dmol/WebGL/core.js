@@ -398,11 +398,11 @@ $3Dmol.Geometry = (function() {
                     
         var faceArr = this.faceArray, lineArr = this.lineArray = new Uint16Array(this.faceidx*2);      
         this.lineidx = this.faceidx*2;         
-        var faceoffset;
             
         for (var i = 0; i < this.faceidx / 3; ++i) {
             
-            faceoffset = i*3; lineoffset = faceoffset*2;          
+            var faceoffset = i*3;
+            var lineoffset = faceoffset*2;
             var a = faceArr[faceoffset], b = faceArr[faceoffset+1], c = faceArr[faceoffset+2];
             
             lineArr[lineoffset] = a; lineArr[lineoffset+1] = b;
