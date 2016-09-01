@@ -1775,6 +1775,11 @@ $3Dmol.Parsers = (function() {
                 var chainId = fromCharCode(
                     mmtfData.chainIdList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
                 );
+                if(mmtfData.chainNameList) {
+                    chainId = fromCharCode(
+                            mmtfData.chainNameList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
+                    );
+                }
 
                 var startGroup = groupIndex;
                 for( j = 0; j < chainGroupCount; ++j ){ //over residues (groups)

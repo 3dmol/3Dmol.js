@@ -192,28 +192,12 @@
         }); */
            
                           $3Dmol.download("pdb:1t46", viewer, {}, function() {
-                                          viewer.setStyle({
-                                                          "resn": "STI"
-                                                          
-                                                          
-                                                          }, {
-                                                          "stick": {
-                                                          "colorscheme": "blueCarbon"
+                                          viewer.setStyle( {
+                                                          "cartoon": {
+                                                          'colorscheme':{prop:'resi',gradient: new $3Dmol.Gradient.Sinebow(931,500)} 
                                                           }
                                                           });
-                                          viewer.setStyle({
-                                                          "within": {
-                                                          "distance": 5,
-
-                                                          "sel": {
-                                                          "resn": "STI"
-                                                          }
-                                                          }
-                                                          }, {
-                                                          "stick": {
-                                                          "colorscheme": "greenCarbon"
-                                                          }
-                                                          });
+  
 
                                           viewer.render();
                                           })

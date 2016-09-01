@@ -170,17 +170,21 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var m = viewer.addModel();
     
     if (query.substr(0, 5) === 'mmtf:') {
-        pdbUri = options && options.pdbUri ? options.pdbUri : "http://mmtf.rcsb.org/v1.0/full/";
+        pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
         var uri = pdbUri + query;        
-        
+        if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
+                //when fetch directly from pdb, trust structure annotations
+                options.noComputeSecondaryStructure = true;
+        }
+            
         $.ajax({url:uri, 
             type: "GET",
             dataType: "binary",
             responseType: "arraybuffer",
             processData: false}).done(
                 function(ret, txt, response) {
-                    m.addMolData(ret, 'mmtf');
+                    m.addMolData(ret, 'mmtf',options);
                     viewer.zoomTo();
                     viewer.render();
                     if(callback) callback(m);
@@ -190,8 +194,11 @@ $3Dmol.download = function(query, viewer, options, callback) {
     }
     else {
         if (query.substr(0, 4) === 'pdb:') {
-            pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
-            type = options && options.format ? options.format : "pdb";
+            type = 'mmtf';
+            if(options && options.format) {
+                type = options.format; //can override and require pdb
+            }
+            
             if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
@@ -200,10 +207,14 @@ $3Dmol.download = function(query, viewer, options, callback) {
             if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                alert("Wrong PDB ID"); return;
             }
-            if (options && options.format)
-                uri = pdbUri + query + "." + options.format;
-            else
-                uri = pdbUri + query + ".pdb";
+            if(type == 'mmtf') {
+                mmtfUri = options && options.mmtfUri ? options.mmtfUri : 'https://mmtf.rcsb.org/v1.0/full/';
+                uri = mmtfUri + query.toUpperCase();
+            }
+            else  {
+                pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
+                uri = pdbUri + query + "." + type;
+            }
     
         } else if (query.substr(0, 4) == 'cid:') {
             type = "sdf";
@@ -215,15 +226,27 @@ $3Dmol.download = function(query, viewer, options, callback) {
               "/SDF?record_type=3d";
         }
     
-       $.get(uri, function(ret) {
+        var handler = function(ret) {
           m.addMolData(ret, type, options);
           viewer.zoomTo();
           viewer.render();
           if(callback) callback(m);
-    
-       }).fail(function(e) {
-        console.log("fetch of "+uri+" failed: "+e.statusText);
-       });
+        };
+        
+        if(type == 'mmtf') { //binary data
+            $.ajax({url:uri, 
+            type: "GET",
+            dataType: "binary",
+            responseType: "arraybuffer",
+            processData: false}).done(handler).fail(function(e,txt) { 
+                    console.log(txt);
+            });
+        }
+        else {        
+           $.get(uri, handler).fail(function(e) {
+            console.log("fetch of "+uri+" failed: "+e.statusText);
+           });
+        }
    }
    
    return m;
