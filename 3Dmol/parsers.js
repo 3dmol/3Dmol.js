@@ -1719,6 +1719,14 @@ $3Dmol.Parsers = (function() {
     parsers.mmtf = parsers.MMTF = function(bindata, options) {
         
         var noH = !options.keepH; // suppress hydrogens by default
+        var selAltLoc = options.altLoc ? options.altLoc : 'A'; //default alternate location to select if present
+        var ignoreStruct = !!options.noSecondaryStructure; 
+        var computeStruct = !options.noComputeSecondaryStructure;
+        //extract symmetries - only take first assembly, apply to all models (ignoring changes for now)
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
+        
         var mmtfData = MMTF.decode( bindata );
         var atoms = [[]];
         var modelData = atoms.modelData = [];
@@ -1746,13 +1754,10 @@ $3Dmol.Parsers = (function() {
         // hoisted loop variables
         var i, j, k, kl, m, n;
         
-        //extract symmetries - only take first assembly, apply to all models (ignoring changes for now)
-        var noAssembly = !options.doAssembly; // don't assemble by default
-        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
-        var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
+
         
         var symmetries = [];
-        if(mmtfData.bioAssemblyList && mmtfData.bioAssemblyList.length > 0) {
+        if(!noAssembly && mmtfData.bioAssemblyList && mmtfData.bioAssemblyList.length > 0) {
             var transforms = mmtfData.bioAssemblyList[assemblyIndex].transformList;
             for(i = 0, n = transforms.length; i < n; i++) {
                 var matrix = new $3Dmol.Matrix4(transforms[i].matrix);
@@ -1782,13 +1787,26 @@ $3Dmol.Parsers = (function() {
                 }
 
                 var startGroup = groupIndex;
+                var prevSS = '';
                 for( j = 0; j < chainGroupCount; ++j ){ //over residues (groups)
 
                     var groupData = mmtfData.groupList[ mmtfData.groupTypeList[ groupIndex ] ];
                     var groupAtomCount = groupData.atomNameList.length;
                     var secStruct = 0;
+                    var secStructBegin = false;
+                    var secStructEnd = false;
+                    
                     if( secStructList ){
                         secStruct = secStructList[ groupIndex ];
+                        var sscode = convertSS(secStruct)
+                        if(groupIndex  == 0 || sscode != prevSS) {
+                            secStructBegin = true;
+                        }
+                        prevSS = sscode;
+                        var nextgroup = groupIndex+1;
+                        if(nextgroup >= secStructList.length || convertSS(secStructList[nextgroup] != sscode)) {
+                            secStructEnd = true;
+                        }
                     }
                     var insCode = null;
                     if( mmtfData.insCodeList ){
@@ -1802,7 +1820,7 @@ $3Dmol.Parsers = (function() {
                     var groupId = mmtfData.groupIdList[ groupIndex ];
                     var groupName = groupData.groupName;
                     var startAtom = atomIndex;
-
+                    
                     for( k = 0; k < groupAtomCount; ++k ){
 
                         var element = groupData.elementList[ k ];
@@ -1815,8 +1833,8 @@ $3Dmol.Parsers = (function() {
                         if( bFactorList ){
                             bFactor = bFactorList[ atomIndex ];
                         }
-                        var altLoc = ' ';
-                        if( altLocList ){
+                        var altLoc = '';
+                        if( altLocList && altLocList[ atomIndex ]){ //not zero
                             altLoc = String.fromCharCode( altLocList[ atomIndex ] );
                         }
                         var occupancy = '';
@@ -1824,6 +1842,11 @@ $3Dmol.Parsers = (function() {
                             occupancy = occupancyList[ atomIndex ];
                         }
 
+                        if (altLoc != '' && altLoc != selAltLoc && selAltLoc != '*') {
+                            atomIndex += 1;
+                            continue; 
+                        }
+                        
                         var atomId = mmtfData.atomIdList[ atomIndex ];
                         var atomName = groupData.atomNameList[ k ];
                         var atomCharge = 0;
@@ -1848,9 +1871,13 @@ $3Dmol.Parsers = (function() {
                             // and
                             // icode
                             'serial' : atomId,
+                            'altLoc' : altLoc,
+                            'index' : atomIndex,
                             'atom' : atomName,
                             'bonds' : [],
                             'ss' : convertSS(secStruct),
+                            'ssbegin' : secStructBegin,
+                            'ssend' : secStructEnd,
                             'bondOrder' : [],
                             'properties' : {charge: atomCharge, occupancy:occupancy},
                             'b' : bFactor,
@@ -1922,14 +1949,19 @@ $3Dmol.Parsers = (function() {
             if (options.multimodel) {
                 if (!options.onemol) atoms.push([]);
             }
+
+            if(!noAssembly) {
+                for (var n = 0; n < atoms.length; n++) {        
+                        processSymmetries(modelData[modelIndex].symmetries, copyMatrix, atoms[n]);
+                }
+            }
             modelIndex += 1;
         } 
                 
         
-        for (var n = 0; n < atoms.length; n++) {        
-            if (!noAssembly)
-                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
-        }
+        if (computeStruct  && !ignoreStruct) {
+            computeSecondaryStructure(atoms);
+        }       
         
         return atoms;
     };
