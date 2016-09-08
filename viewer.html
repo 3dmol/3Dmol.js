@@ -540,11 +540,21 @@ function setURL(urlPath){
 }
 
 //initializes the sidebar based on the given url
-var initSide= function(url){
+var initSide = function(url){
 
     urlObject=parseURL(url);
     console.log(urlObject);
 
+    //model type value
+    document.getElementById("model_type").value=urlObject.file.fileType;
+    //query value
+    document.getElementById("model_input").value=urlObject.file.fileValue;
+
+    var list=document.getElementById("selection_list");
+
+    for(var i=0;i<urlObject["selections"].length;i++){
+        list.appendChild(createSelection(urlObject["selections"][i]));
+    }
 }
 
 var parseURL = function(url){
@@ -571,7 +581,6 @@ var parseURL = function(url){
                 continue;
             }
             var split_equals=select[j].split("=");
-            console.log(split_equals);
             //test for select
             if(split_equals[0]==="select"){
                 selection=new Selection(split_equals[1]);
@@ -588,8 +597,6 @@ var parseURL = function(url){
             else if(split_equals[0]==="labelres"){
                 selection.list.push(new LabelRes(split_equals[1]));
             }
-
-
         }
 
         selections[i]=select;
@@ -602,20 +609,92 @@ var parseURL = function(url){
 }
 
 var createSelection = function(selection_object){
+    var li=document.createElement('li');
 
+    li.className="selection";
+
+    var delete_button=document.createElement('a');
+    delete_button.className="delete_button";
+    delete_button.innerHTML="&#x2715;";
+    $(delete_button).click(function(event){
+        removeSelection(selection);
+    });
+    delete_button.style.float="right";
+    delete_button.style.color="white";
+
+    li.innerHTML=selection_object.selection;
+
+    li.appendChild(delete_button);
+
+    //sub selections(list of the style,surface, or labelres)
+    var div=document.createElement('div');
+    div.className="subSelection";
+
+    var sublist=document.createElement('ul');
+
+    sublist.style.visibility="hidden";
+
+    for(var i=0;i<selection_object.list.length;i++){
+        var lst=createSubSelection(selection_object.list[i]);
+
+        sublist.appendChild(lst);
+    }
+
+    div.appendChild(sublist);
+
+    li.appendChild(div);
+
+    //sub sub selections
+
+    var list=document.createElement('ul');
+
+
+    for(var i=0;i<selection_object.list.length;i++){
+        var sublist_object=createSubSelection(selection_object.list[i]);
+        list.appendChild(sublist_object);
+    }
+
+    list.style.visibility="hidden";
+
+    li.appendChild(list);
+
+    return li;
 }
 
-var createStyle = function(style_object){
+var createSubSelection = function(object){
+    console.log(object);
+    var li=document.createElement('li');
 
+    li.innerHTML=object.type;
+
+    var ul=document.createElement('ul');
+
+    for(var i=0;i<object.list.length;i++){
+        var list_element=document.createElement('li');
+        if(object.list.length==1){
+            var input=document.createElement('input');
+
+            input.value=object.list[i];
+
+            list_element.appendChild(input);
+        }
+        else{
+            var input_left=document.createElement('input');
+            var input_right=document.createElement('input');
+
+            input_left.value=object.list[i][0];
+
+            input_right.value=object.list[i][1];
+
+            list_element.appendChild(input_left);
+            list_element.appendChild(input_right);
+        }
+        ul.appendChild(list_element);
+    }
+
+    return li;
 }
 
-var createSurface = function(surface_object){
-
-}
-
-var createLabelRes= function(label_object){
-
-}
 
 //opens up the side bar
 var openSide= function(){
@@ -634,10 +713,6 @@ var closeSide= function(){
     document.getElementById("sidenav").style.width = "0";
 
     glviewer.translate(-width/2,0);
-}
-//handles all clicks
-var handleClick = function(click){
-
 }
 
 
@@ -663,7 +738,7 @@ function Style(modifier){
 function LabelRes(modifier){
     this.type="LabelRes";
     this.list=[];
-    
+
     var split_sc=modifier.split(";");
     for(var i=0;i<split_sc.length;i++){
         if(split_sc[i].indexOf(":")!==-1){
@@ -697,7 +772,24 @@ $(document).ready(function(){
     var url=window.location.href.substring(window.location.href.indexOf("?")+1);
     initSide(url);
 
+    $("#sidenav").resizable({
+            handles: 'e',
+            minWidth: 300,
+            maxWidth: 800,
+    });
+
+     $( "#selection_list" ).sortable({
+            revert: true
+        });
+    $( "#draggable" ).draggable({
+        connectToSortable: "#selection_list",
+        helper: "clone",
+        revert: "invalid"
+    });
+
+
 });
+
 </script>
 </head>
 <body>
@@ -727,11 +819,11 @@ $(document).ready(function(){
     <li id="selections" class="option" style="pointer-events:auto">
         <h3>Selections</h3>
         <div id="container">
-           
-            <ul id="selection_list">
-                 <p>
+            <p>
                     Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
                 </p>
+            <ul id="selection_list">
+                
 
             </ul>
 
