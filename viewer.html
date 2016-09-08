@@ -621,11 +621,14 @@ var createSelection = function(selection_object){
     });
     delete_button.style.float="right";
     delete_button.style.color="white";
+    var selection_div=document.createElement('div');
 
-    li.innerHTML=selection_object.selection;
+    selection_div.innerHTML=selection_object.selection;
 
-    li.appendChild(delete_button);
+    selection_div.className="selection_div";
+    selection_div.appendChild(delete_button);
 
+    li.appendChild(selection_div);
     //sub selections(list of the style,surface, or labelres)
     var div=document.createElement('div');
     div.className="subSelection";
@@ -784,7 +787,21 @@ $(document).ready(function(){
     $( "#draggable" ).draggable({
         connectToSortable: "#selection_list",
         helper: "clone",
-        revert: "invalid"
+        revert: "invalid",
+        start: function(event){
+             if(event.target.className!=="selection ui-sortable-handle"){
+            
+        }
+        }
+    });
+
+    $("#sidenav").click(function(event){
+
+        if(event.target.className==="selection ui-sortable-handle"){
+           //open up the sub navigation
+           console.log("passed");
+           event.target.getElementsByClassName('subSelection')[0].style.visibility="auto";
+        }
     });
 
 

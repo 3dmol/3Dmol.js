@@ -75,7 +75,7 @@ p{
     -ms-user-select: none;
     user-select: none;
 }
-#selection_list li{
+#selection_list li .selection_div{
     border-radius:0px;
     height:4%;
     background-color:rgba(0,0,102,.9);
@@ -90,7 +90,7 @@ p{
     -ms-user-select: none;
     user-select: none;
 }
-#selection_list li:hover{
+#selection_list li .selection_div:hover{
     background-color:rgba(0,0,102,.5);
 }
 #header{
