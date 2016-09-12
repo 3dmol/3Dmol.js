@@ -675,6 +675,32 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addCustom
          * @param {CustomShapeSpec} customSpec
          * @return {$3Dmol.GLShape}
+         @example
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+         var vertices = [];
+    var normals = [];
+    var colors = [];
+    var r = 20;
+    //triangle
+    vertices.push(new $3Dmol.Vector3(0,0,0));
+    vertices.push(new $3Dmol.Vector3(r,0,0));
+    vertices.push(new $3Dmol.Vector3(0,r,0));
+    
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    
+    colors.push({r:1,g:0,b:0});
+    colors.push({r:0,g:1,b:0});
+    colors.push({r:0,g:0,b:1});
+
+    var faces = [ 0,1,2 ];
+    
+    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    viewer.addCustom(spec);
+
+    viewer.render();
          */
         this.addCustom = function(customSpec) {
 
@@ -692,6 +718,13 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addSphere
          * @param {SphereSpec} sphereSpec
          * @return {$3Dmol.GLShape}
+         @example 
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+         
+         viewer.addSphere({center:{x:0,y:0,z:0},radius:10});
+         
+         viewer.render();
          */
         this.addSphere = function(sphereSpec) {
 
@@ -725,6 +758,16 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addCylinder
          * @param {CylinderSpec} cylinderSpec
          * @return {$3Dmol.GLShape}
+         @example
+         var element = $('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.addCylinder = function(cylinderSpec) {
 
@@ -760,6 +803,16 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addLine         
          * @param {LineSpec} lineSpec
          * @return {$3Dmol.GLShape}
+         @example
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+
+              $3Dmol.download("pdb:2ABJ",viewer,{},function(){
+                  viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
+                  viewer.render();
+              });
+          }
+
          */
         this.addLine = function(lineSpec) {
             lineSpec.start = lineSpec.start || {};
@@ -799,6 +852,25 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addArrow        
          * @param {ArrowSpec} arrowSpec
          * @return {$3Dmol.GLShape}
+         @example
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+         $3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.addArrow({
+                      start: {x:-10.0, y:0.0, z:0.0},
+                      end: {x:0.0, y:-10.0, z:0.0},
+                      radius: 1.0,
+                      radiusRadio:1.0,
+                      mid:1.0,
+                      clickable:true,
+                      callback:function(){
+                          this.color.setHex(0xFF0000FF);
+                          viewer.render();
+                      }
+                  });
+                  
+                  viewer.render();
+              });
          */
         this.addArrow = function(arrowSpec) {
 
@@ -848,6 +920,8 @@ $3Dmol.GLShape = (function() {
          * @param {$3Dmol.VolumeData} data - volumetric input data
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
          * @example //the user can specify a selected region for the isosurface 
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
          * viewer.addIsosurface(voldata, {isoval: 0.25,
                                        color: "blue",
                                        wireframe: true,
@@ -856,7 +930,8 @@ $3Dmol.GLShape = (function() {
                                        selectedOffset: 3,
                                        radius: 3.0                                   
                                     });
-         this specific example selects every atom in the
+            viewer.render();
+         //this specific example selects every atom in the
          */
         this.addIsosurface = function(data, volSpec, callback) {//may want to cache the arrays geneerated when selectedRegion ==true
            

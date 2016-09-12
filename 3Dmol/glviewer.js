@@ -1695,6 +1695,25 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addArrow
          * @param {ArrowSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
+         @example
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+         $3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.addArrow({
+                      start: {x:-10.0, y:0.0, z:0.0},
+                      end: {x:0.0, y:-10.0, z:0.0},
+                      radius: 1.0,
+                      radiusRadio:1.0,
+                      mid:1.0,
+                      clickable:true,
+                      callback:function(){
+                          this.color.setHex(0xFF0000FF);
+                          viewer.render();
+                      }
+                  });
+                  
+                  viewer.render();
+              });
          */
         this.addArrow = function(spec) {
             spec = spec || {};
@@ -1712,6 +1731,17 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addCylinder
          * @param {CylinderSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
+
+          @example
+         var element = $('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.addCylinder = function(spec) {
             spec = spec || {};
@@ -1729,6 +1759,16 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addLine
          * @param {LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
          * @return {$3Dmol.GLShape}
+         @example
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+
+              $3Dmol.download("pdb:2ABJ",viewer,{},function(){
+                  viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
+                  viewer.render();
+              });
+          }
+
          */
         this.addLine = function(spec) {
             spec = spec || {};
@@ -1864,6 +1904,32 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addCustom
          * @param {CustomSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
+         @example
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+         var vertices = [];
+    var normals = [];
+    var colors = [];
+    var r = 20;
+    //triangle
+    vertices.push(new $3Dmol.Vector3(0,0,0));
+    vertices.push(new $3Dmol.Vector3(r,0,0));
+    vertices.push(new $3Dmol.Vector3(0,r,0));
+    
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    
+    colors.push({r:1,g:0,b:0});
+    colors.push({r:0,g:1,b:0});
+    colors.push({r:0,g:0,b:1});
+
+    var faces = [ 0,1,2 ];
+    
+    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    viewer.addCustom(spec);
+
+    viewer.render();
          */
         this.addCustom = function(spec) {
             spec = spec || {};
@@ -1905,10 +1971,13 @@ $3Dmol.GLViewer = (function() {
          * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
          * 
-         * @example
+         @example 
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+         
          * var data = new $3Dmol.VolumeData(str,"cube");
-         * viewer.addIsosurface(data, {isoval: 0.01, color: "blue", opacity: 0.95});              
-         * viewer.addIsosurface(data, {isoval: -0.01, color: "red", opacity: 0.95}); 
+         * viewer.addIsosurface(data, {isoval: 0.01, color: "blue", opacity: 0.95});  
+           viewer.render(); 
          */
         this.addIsosurface = function(data,  spec,callback) {
             spec = spec || {};
@@ -1958,10 +2027,13 @@ $3Dmol.GLViewer = (function() {
          * @param {Object} options - can specify interval (speed of animation), loop (direction
          * of looping, 'backward', 'forward' or 'backAndForth') and reps (numer of repetitions, 0 indicates infinite loop)
          *      
-         * @example
-         * viewer.addModelAsFrames(data, "pdb");
-         * viewer.animate({interval: 75, loop: "backward", reps: 30});
+         @example
+         var element=$('#gldiv');
+         var myviewer = $3Dmol.createViewer(element);
+            m = myviewer.addModel();
+            myviewer.render();
          */
+         
         this.animate = function(options) {
             animated = true;
             var interval = 100;
@@ -2032,7 +2104,12 @@ $3Dmol.GLViewer = (function() {
          * @param {string} data - Input data
          * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
          * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
-         *  
+         *  @example
+         var element=$('#gldiv');
+         var myviewer = $3Dmol.createViewer(element);
+            m = myviewer.addModel();
+            myviewer.render();
+         *
          * @return {$3Dmol.GLModel} 
          */
         this.addModel = function(data, format, options) {
@@ -2101,6 +2178,13 @@ $3Dmol.GLViewer = (function() {
          * @param {string} data - Input data
          * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
+         @example
+          var element=$('#gldiv');
+          var viewer = $3Dmol.createViewer(element);
+              $.get('../test_structs/multiple.sdf', function(data){
+                  viewer.addAsOneMolecule(data, "sdf");
+                  viewer.render();
+              });
          */
         this.addAsOneMolecule = function(data, format, options) {
             options = options || {};

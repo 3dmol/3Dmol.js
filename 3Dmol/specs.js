@@ -57,6 +57,14 @@
   * @prob {number} assemblyIndex - index of the assembly in symmetry ; supported by mmtf
   */
 
+/**
+*3 dimensional vector 
+*@typedef Vector3
+*@prop {number} x - x coordinate
+*@prop {number} y - y coordinate
+*@prop {number} z - z coordinate
+*
+*/
 
 /**
  * Atom selection object. Used to specify what atoms should be selected.  Can include

@@ -155,7 +155,8 @@ $3Dmol.viewers = {};
  * @param {Function} callback - Function to call with model as argument after data is loaded.
 
  * @example
- * var myviewer = $3Dmol.createViewer(gldiv);
+ * var element = $("#gldiv");
+ * var myviewer = $3Dmol.createViewer(element);
  * 
  * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
  * // Note that m will not contain the atomic data until after the network request is completed

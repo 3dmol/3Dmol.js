@@ -1497,6 +1497,20 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#selectedAtoms
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
+         * @example
+         *var element=$('#gldiv');
+         var myviewer = $3Dmol.createViewer(element);
+              $3Dmol.download("pdb:4UB9",myviewer,{},function(){
+
+                  var atoms = myviewer.selectedAtoms();
+                  for(var i = 0; i < atoms.length; i++) {
+                    var a = atoms[i];
+                    a.properties.structured = (a.ss == 'h' || a.ss == 's');                    
+                  }
+                  
+                  myviewer.setStyle({properties: {structured: true}}, {cartoon: {}});
+                  myviewer.render();
+              });
          */
         this.selectedAtoms = function(sel, from) {
             var ret = [];
@@ -1652,6 +1666,13 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#addAtoms
          * @param {type} newatoms
+         * @example
+         *var element=$('#gldiv');
+         *var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
+            var myviewer = $3Dmol.createViewer(element);
+            m = myviewer.addModel();
+            m.addAtoms(atoms);
+            myviewer.render();
          */        
         this.addAtoms = function(newatoms) {
             molObj = null;
@@ -1729,6 +1750,14 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
+         @example
+         var element=$("#gldiv");
+         var myviewer=$3Dmol.createViewer(element);
+         $3Dmol.download("pdb:3VOV",myviewer,{},function(){
+            
+            myviewer.setStyle({chain:'A'}, {stick:{}});
+            myviewer.render();
+         }
          */
         this.setStyle = function(sel, style, add) {
             
@@ -1798,6 +1827,14 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
+         * @example
+         var element=$('#gldiv');
+         var myviewer = $3Dmol.createViewer(element);
+            m = myviewer.addModel();
+            m.setClickable({},true,function(){
+                console.log("model Clicked");
+            });
+            myviewer.render();
          */
         this.setClickable = function(sel, clickable, callback) {           
 
@@ -1831,7 +1868,25 @@ $3Dmol.GLModel = (function() {
 
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
-        
+         /** Set hoverable and callback of selected atoms
+         * 
+         * @function $3Dmol.GLModel#setHoverable
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} hoverable - whether hover-handling is enabled for the selection
+         * @param {function} hover_callback - function called when an atom in the selection is hovered over
+         * @param {function} unhover_callback - function called when the mouse moves out of the hover area
+         * @example
+         var element=$('#gldiv');
+         var myviewer = $3Dmol.createViewer(element);
+            m = myviewer.addModel();
+            m.setHoverable({},true,function(){
+                console.log("model hovered");
+            },
+            function(){
+                console.log("model unhovered");
+            });
+            myviewer.render();
+         */
         this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
             var s;
             for (s in sel) {
@@ -1924,8 +1979,10 @@ $3Dmol.GLModel = (function() {
         
         /**
          * @function $3Dmol.GLModel.setColorByFunction
+         * @deprecated use setStyle and colorfunc attribute
          * @param {type} sel
          * @param {type} func
+         
          */
         this.setColorByFunction = function(sel, colorfun) {
             var atoms = this.selectedAtoms(sel, atoms);
@@ -2039,7 +2096,13 @@ $3Dmol.GLModel = (function() {
         
         /** Don't show this model is future renderings.  Keep all styles and state
          * so it can be efficiencly shown again.
-         * 
+         * @example
+         var element=$('#gldiv');
+         var myviewer = $3Dmol.createViewer(element);
+            m = myviewer.addModel();
+            m.hide();
+            myviewer.render(callback);
+
          * @function $3Dmol.GLModel#hide
          */
         this.hide = function() {
