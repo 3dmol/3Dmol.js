@@ -198,7 +198,7 @@
                         }
                     }
     
-
+/*
 var width=350;
 var width_change=0;
 var start_width=350; 
@@ -228,10 +228,6 @@ function openNav() {
 }
 //function that closes the nav bar
 function closeNav() {
-    document.getElementById("menu").style.visibility="visible";
-    document.getElementById("sidenav").style.width = "0";
-
-    glviewer.translate(-width/2,0);
 }
 
 /* 
@@ -240,6 +236,7 @@ function closeNav() {
  * and sends the url object thorugh a process turnign it back into a string 
  * then reloading the model
  */
+ /*
 function handleInputs(){
     //handles all of the input fields
     var model_type= document.getElementById("model_type");
@@ -534,15 +531,290 @@ function Selection(selection,modifier){
 
     }); 
 
+*/
+
+var width=300;
+var urlObject={};
+function setURL(urlPath){
+    window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
+}
+
+//initializes the sidebar based on the given url
+var initSide = function(url){
+
+    urlObject=parseURL(url);
+    console.log(urlObject);
+
+    //model type value
+    document.getElementById("model_type").value=urlObject.file.fileType;
+    //query value
+    document.getElementById("model_input").value=urlObject.file.fileValue;
+
+    var list=document.getElementById("selection_list");
+
+    for(var i=0;i<urlObject["selections"].length;i++){
+        list.appendChild(createSelection(urlObject["selections"][i]));
+    }
+}
+
+var parseURL = function(url){
+    var ret={
+        "file":{},
+        "selections":[]
+    };
+    var selections=url.split("select=");
+    for(var i=0;i<selections.length;i++){
+        var selection={};
+        var select=selections[i].split("&");
+        if(select[0].indexOf("pdb")===0 || select[0].indexOf("url")===0 || select[0].indexOf("cid")===0){
+            var split_equals=select[0].split("=");
+            ret["file"]=new ModelFile(split_equals[0],split_equals[1]);
+            continue;
+        }
+        else{
+            select[0]="select="+select[0];
+        }
+
+        for(var j=0;j<select.length;j++){
+            if(select[j]==""){
+                select.splice(j,1);
+                continue;
+            }
+            var split_equals=select[j].split("=");
+            //test for select
+            if(split_equals[0]==="select"){
+                selection=new Selection(split_equals[1]);
+            }
+            //test for surface
+            else if(split_equals[0]==="surface"){
+                selection.list.push(new Surface(split_equals[1]));
+            }
+            //test for style
+            else if(split_equals[0]==="style"){
+                selection.list.push(new Style(split_equals[1]));
+            }
+            //test for labelres
+            else if(split_equals[0]==="labelres"){
+                selection.list.push(new LabelRes(split_equals[1]));
+            }
+        }
+
+        selections[i]=select;
+        ret["selections"].push(selection);
+    }
+
+    //console.log(selections);
+    //create the list of selections
+    return ret;
+}
+
+var createSelection = function(selection_object){
+    var li=document.createElement('li');
+
+    li.className="selection";
+
+    var delete_button=document.createElement('a');
+    delete_button.className="delete_button";
+    delete_button.innerHTML="&#x2715;";
+    $(delete_button).click(function(event){
+        removeSelection(selection);
+    });
+    delete_button.style.float="right";
+    delete_button.style.color="white";
+    var selection_div=document.createElement('div');
+
+    selection_div.innerHTML=selection_object.selection;
+
+    selection_div.className="selection_div";
+    selection_div.appendChild(delete_button);
+
+    li.appendChild(selection_div);
+    //sub selections(list of the style,surface, or labelres)
+    var div=document.createElement('div');
+    div.className="subSelection";
+
+    var sublist=document.createElement('ul');
+
+    sublist.style.visibility="hidden";
+
+    for(var i=0;i<selection_object.list.length;i++){
+        var lst=createSubSelection(selection_object.list[i]);
+
+        sublist.appendChild(lst);
+    }
+
+    div.appendChild(sublist);
+
+    li.appendChild(div);
+
+    //sub sub selections
+
+    var list=document.createElement('ul');
+
+
+    for(var i=0;i<selection_object.list.length;i++){
+        var sublist_object=createSubSelection(selection_object.list[i]);
+        list.appendChild(sublist_object);
+    }
+
+    list.style.visibility="hidden";
+
+    li.appendChild(list);
+
+    return li;
+}
+
+var createSubSelection = function(object){
+    console.log(object);
+    var li=document.createElement('li');
+
+    li.innerHTML=object.type;
+
+    var ul=document.createElement('ul');
+
+    for(var i=0;i<object.list.length;i++){
+        var list_element=document.createElement('li');
+        if(object.list.length==1){
+            var input=document.createElement('input');
+
+            input.value=object.list[i];
+
+            list_element.appendChild(input);
+        }
+        else{
+            var input_left=document.createElement('input');
+            var input_right=document.createElement('input');
+
+            input_left.value=object.list[i][0];
+
+            input_right.value=object.list[i][1];
+
+            list_element.appendChild(input_left);
+            list_element.appendChild(input_right);
+        }
+        ul.appendChild(list_element);
+    }
+
+    return li;
+}
+
+
+//opens up the side bar
+var openSide= function(){
+
+    document.getElementById("sidenav").style.width = width+"px";
+    document.getElementById("menu").style.visibility="hidden";
+    //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
+    glviewer.translate(width/2,0);
+    glviewer.zoomTo();
+    glviewer.render();
+}
+//closes the side bar
+var closeSide= function(){
+
+    document.getElementById("menu").style.visibility="visible";
+    document.getElementById("sidenav").style.width = "0";
+
+    glviewer.translate(-width/2,0);
+}
+
+
+//model file object which contains the filetyep and file value of the model
+function ModelFile(fileType,fileValue){
+    this.fileType=fileType;
+    this.fileValue=fileValue;
+}
+//style object for styling the selected model portion
+function Style(modifier){
+    this.type="Style";
+    this.list=[];
+    var split_sc=modifier.split(";");
+    for(var i=0;i<split_sc.length;i++){
+        if(split_sc[i].indexOf(":")!==-1){
+            split_sc[i]=split_sc[i].split(":");
+        }
+    }
+    this.list=split_sc;
+
+}
+//labelres object for labeling residues
+function LabelRes(modifier){
+    this.type="LabelRes";
+    this.list=[];
+
+    var split_sc=modifier.split(";");
+    for(var i=0;i<split_sc.length;i++){
+        if(split_sc[i].indexOf(":")!==-1){
+            split_sc[i]=split_sc[i].split(":");
+        }
+    }
+    this.list=split_sc;
+}
+//surface object for surfaces
+function Surface(modifier){
+    this.type="Surface";
+    this.list=[];
+    var split_sc=modifier.split(";");
+    for(var i=0;i<split_sc.length;i++){
+        if(split_sc[i].indexOf(":")!==-1){
+            split_sc[i]=split_sc[i].split(":");
+        }
+    }
+    this.list=split_sc;
+}
+//selection object for displaying
+function Selection(selection){
+    this.selection=selection;
+    this.type="Selection";
+    this.list=[];
+}
+
+
+$(document).ready(function(){
+    run();
+    var url=window.location.href.substring(window.location.href.indexOf("?")+1);
+    initSide(url);
+
+    $("#sidenav").resizable({
+            handles: 'e',
+            minWidth: 300,
+            maxWidth: 800,
+    });
+
+     $( "#selection_list" ).sortable({
+            revert: true
+        });
+    $( "#draggable" ).draggable({
+        connectToSortable: "#selection_list",
+        helper: "clone",
+        revert: "invalid",
+        start: function(event){
+             if(event.target.className!=="selection ui-sortable-handle"){
+            
+        }
+        }
+    });
+
+    $("#sidenav").click(function(event){
+
+        if(event.target.className==="selection ui-sortable-handle"){
+           //open up the sub navigation
+           console.log("passed");
+           event.target.getElementsByClassName('subSelection')[0].style.visibility="auto";
+        }
+    });
+
+
+});
 
 </script>
 </head>
 <body>
 
-<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openNav();">&#9776;</span>
+<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openSide();">&#9776;</span>
 <div id="sidenav" class="ui-widget-content">
   <h1 id="header" >3Dmol Viewer</h1>
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&#x2715;</a>
+  <a href="javascript:void(0)" class="closebtn" onclick="closeSide()">&#x2715;</a>
   <br>
   <ul>
     <li class="option"  style="pointer-events:auto;">
@@ -564,22 +836,20 @@ function Selection(selection,modifier){
     <li id="selections" class="option" style="pointer-events:auto">
         <h3>Selections</h3>
         <div id="container">
-           
+            <p>
+                    Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
+                </p>
             <ul id="selection_list">
-                 <p>
-                Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
-            </p>
+                
 
             </ul>
 
             <button id="add_selection" onclick="addSelection('selection');">Add</button>
         </div>
         <br>
-    </li>
-    <div class="fixed">
         <button id="render" class="option" onclick="handleInputs();" style="pointer-events:auto" type="button">Render</button>
         <button id="center" class="option" onclick="glviewer.zoomTo();" style="pointer-events:auto">Center</button>
-    </div>
+    </li>
 </div>
 
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
