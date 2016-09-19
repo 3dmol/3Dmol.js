@@ -1,5 +1,4 @@
 
-
 #this program will parse through all of the tests as well as all of the examples and create an html page from that
 #the page will have referance images on the right corresponding to the canvas snapshots on the left
 #when you clock on the images they will create a webgl instance
@@ -31,26 +30,29 @@ beggining="""<!DOCTYPE html>
 					"""
 end="""</body>
 		 </html>"""
-
+class Example():
+	def __init__(self,name,text):
+		self.name=name
+		self.text=text
 
 
 class File():
 	def __init__(self,filename,filetype,contents):
 		self.filename=filename
 		self.filetype=filetype
-		self.contents=contents
-		self.examples=[]
-		if(self.filetype=="builtin"):
-			self.functions=self.getExamples()
-		elif(self.filetype=="generated"):
-			self.test=self.contents
+		self.contents=Example(filename[4:-3],contents)
+		self.examples=None
+		if(self.filetype=="generated"):
+			self.examples=self.getExamples()
 
 	def getExamples(self):
-
+		nearests=[]
 		filename=self.filename
 		file=open(filename,'r')
 		text=file.read()
 		example_indices=find_all(text,"@example")
+		typedef_decorators=find_all(text,"@typedef")
+		function_decorators=find_all(text,"@function")
 		examples=[]
 		#name of nearest function or typdef
 		name=""
@@ -69,18 +71,42 @@ class File():
 					smallest_next=at
 					break
 			#at this point smallest next should be correct
+			nearest_dec=-1
+			for dec in function_decorators:
+				if dec<i and dec>nearest_dec:
+					nearest_dec=dec
+			for dec in typedef_decorators:
+				if dec<i and dec>nearest_dec:
+					nearest_dec=dec
+			nearests.append(nearest_dec)
+			endline=text[nearest_dec:].find("\n")
+			if(nearest_dec!=-1):
+				name=text[nearest_dec+9:endline+nearest_dec]
+				name=name[name.find("#")+1:]
+			else:
+				name=""
+			print name
+
 			exmp=text[i+8:smallest_next]
 			exmp=exmp.replace('*','')
+			exmp=Example(name,exmp)
 			examples.append(exmp)
 			file.close()
-		
+		count=0
+		for i,example in enumerate(examples):
+			if(i==0):
+				continue
+			if(nearests[i]==nearests[i-1]):
+				count+=1
+				examples[i].name=name+str(count)
+			else:
+				count=0
 
 		return examples
 
 
 class TestSystem():
 	def __init__(self):
-		self.files=[]
 		self.files=self.declareFiles()
 
 	def declareFiles(self):
@@ -102,6 +128,7 @@ class TestSystem():
 		for filename in os.listdir(manual_tests_path):
 			file=open(manual_tests_path+filename,"r")
 			files.append(File(manual_tests_path+filename,"builtin",file.read()))
+		
 		return files
 
 test=TestSystem()
@@ -111,9 +138,12 @@ f.write("")
 f.close()
 with open("one_page.html","a") as f:
 	for file in test.files:
-		if(len(file.examples)>0):
+		if(type(file.examples)!=type(None) and len(file.examples)>0):
 			for example in file.examples:
-		else
+				f.write("<script> function "+example.name+"(){"+example.text+"}</script>\n")
+		elif(type(file.examples)==type(None)):
+			f.write("<script> function "+file.contents.name+"(){"+file.contents.text+"}</script>\n")
+
 
 
 
