@@ -1,4 +1,148 @@
-<script> function selectedAtoms(){
+<!DOCTYPE html>
+				<html>
+					<head>
+						<title></title>
+						<script src="test.js"></script>
+            <script src="../build/3Dmol.js"></script>
+            <style>
+             #left{
+                float: left;
+                width:50%;
+            }
+            #right{
+                float:right;
+                width:50%;
+            }
+            #right ul,#left ul{
+                list-style:none;
+            }
+            .header{
+                width:50%;
+                position:relative;
+                margin: 0 auto;
+            }
+
+              #progress {
+        position: fixed;
+        z-index: 2147483647;
+        top: 0;
+        left: -6px;
+        width: 0%;
+        height: 2px;
+        background: #b91f1f;
+        -moz-border-radius: 1px;
+        -webkit-border-radius: 1px;
+        border-radius: 1px;
+        -moz-transition: width 500ms ease-out,opacity 400ms linear;
+        -ms-transition: width 500ms ease-out,opacity 400ms linear;
+        -o-transition: width 500ms ease-out,opacity 400ms linear;
+        -webkit-transition: width 500ms ease-out,opacity 400ms linear;
+        transition: width 500ms ease-out,opacity 400ms linear
+    }
+    #progress.done {
+        opacity: 0
+    }
+    #progress dd,#progress dt {
+        position: absolute;
+        top: 0;
+        height: 2px;
+        -moz-box-shadow: #b91f1f 1px 0 6px 1px;
+        -ms-box-shadow: #b91f1f 1px 0 6px 1px;
+        -webkit-box-shadow: #b91f1f 1px 0 6px 1px;
+        box-shadow: #b91f1f 1px 0 6px 1px;
+        -moz-border-radius: 100%;
+        -webkit-border-radius: 100%;
+        border-radius: 100%
+    }
+    #progress dd {
+        opacity: 1;
+        width: 20px;
+        right: 0;
+        clip: rect(-6px,22px,14px,10px)
+    }
+    #progress dt {
+        opacity: 1;
+        width: 180px;
+        right: -80px;
+        clip: rect(-6px,90px,14px,-6px)
+    }
+    @-moz-keyframes pulse {
+        30% {
+            opacity: 1
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: 1
+        }
+    }
+    @-ms-keyframes pulse {
+        30% {
+            opacity: .6
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: .6
+        }
+    }
+    @-o-keyframes pulse {
+        30% {
+            opacity: 1
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: 1
+        }
+    }
+    @-webkit-keyframes pulse {
+        30% {
+            opacity: .6
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: .6
+        }
+    }
+    @keyframes pulse {
+        30% {
+            opacity: 1
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: 1
+        }
+    }
+    #progress.waiting dd,#progress.waiting dt {
+        -moz-animation: pulse 2s ease-out 0s infinite;
+        -ms-animation: pulse 2s ease-out 0s infinite;
+        -o-animation: pulse 2s ease-out 0s infinite;
+        -webkit-animation: pulse 2s ease-out 0s infinite;
+        animation: pulse 2s ease-out 0s infinite
+    }
+        </style>
+					</head>
+					<body>
+          <div id="progress" class="waiting">
+    <dt></dt>
+    <dd></dd>
+    </div>
+            <div id="left">
+                <ul></ul>
+            </div>
+            <div id="right">
+                <ul></ul>
+            </div>
+
+					<script> function selectedAtoms(){
          var element=$('#gldiv');
          var myviewer = $3Dmol.createViewer(element);
               $3Dmol.download("pdb:4UB9",myviewer,{},function(){
@@ -28,7 +172,7 @@
             
             myviewer.setStyle({chain:'A'}, {stick:{}});
             myviewer.render();
-         }
+         });
          }</script>
 <script> function setClickable(){
          var element=$('#gldiv');
@@ -86,7 +230,7 @@
   myviewer.render();                        
                          
  }</script>
-<script> function  $3Dmol.download(){
+<script> function  download(){
   var element = $("#gldiv");
   var myviewer = $3Dmol.createViewer(element);
   
@@ -133,21 +277,25 @@
                    glviewer.getModel(0);
          }</script>
 <script> function rotate(){ //if the user were to pass a value for animationDuration like
-                     so glviewer.rotate(90,"y",1000); then over the course of 1 second
-                     (1000 milleseconds) the program would rotate.
+                     //so glviewer.rotate(90,"y",1000); then over the course of 1 second
+                     //(1000 milleseconds) the program would rotate.
+         glviewer.rotate(90,"y",1000);
            
          }</script>
 <script> function zoom(){ //if the suer were to pass a value for the animationDuration like
-                     so glviewer.zoom(3,1000); the program would zoom by a factor of 
-                     3 for 1 second(1000 milleseconds) 
+                   // so glviewer.zoom(3,1000); the program would zoom by a factor of 
+                   //  3 for 1 second(1000 milleseconds) 
+         glviewer.zoom(3,1000);
          }</script>
 <script> function translate(){ //if the user were to pass animationDuration to the function 
-                     like so glviewer.translate(10,10,1000); then the program would
-                     perform a translation over the course of 1 second(1000 milleseconds)
+                    // like so glviewer.translate(10,10,1000); then the program would
+                    // perform a translation over the course of 1 second(1000 milleseconds)
+         glviewer.translate(10,10,1000);
          }</script>
 <script> function zoomTo(){ // Assuming we have created a model of a protein with
-                   multiple chains (e.g. from a PDB file), focus on atoms in
-                   chain B glviewer.zoomTo({chain: 'B'});
+                   //multiple chains (e.g. from a PDB file), focus on atoms in
+                   //chain B 
+            glviewer.zoomTo({chain: 'B'});
           }</script>
 <script> function setClickable1(){ // if the user were to pass the animationDuration value to 
                    //the function like so viewer.zoomTo({resn:'STI'},1000);
@@ -158,22 +306,28 @@
          }</script>
 <script> function addLabel(){
            // Assuming glviewer contains a model representing a protein, label
-          all alpha carbons with their residue name
+          //all alpha carbons with their residue name
            // Select all alpha carbons (have property atom : "CA") from last
-          model added var atoms =
-          glviewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
+           //model added 
+         var atoms = glviewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
           
           for (var a in atoms) { var atom = atoms[a];
            // Create label at alpha carbon's position displaying atom's residue
-          and residue number var labelText = atom.resname + " " + atom.resi;
+          //and residue number 
+         var labelText = atom.resname + " " + atom.resi;
           
-          var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:
-          atom.x, y: atom.y, z: atom.z});
-          
-          labels.push(l); }
-           // Render labels glviewer.render();
+          var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:atom.x, y: atom.y, z: atom.z}}); labels.push(l); }
+           // Render labels 
+         glviewer.render();
          }</script>
-<script> function removeLabel(){ // Remove labels created in [addLabel example]{}</script>
+<script> function removeLabel(){ // Remove labels created in [
+         
+          
+          for (var i = 0; i < labels.length; i++) {
+          glviewer.removeLabel(label); }
+          
+          glviewer.render();
+         }</script>
 <script> function addArrow(){
          var element=$('#gldiv');
          var viewer=$3Dmol.createViewer(element);
@@ -213,7 +367,7 @@
                   viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
                   viewer.render();
               });
-          }
+          
 
          }</script>
 <script> function addCustom(){
@@ -402,7 +556,7 @@
                   viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
                   viewer.render();
               });
-          }
+          
 
          }</script>
 <script> function addArrow        (){
@@ -449,3 +603,5 @@
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.render(callback);
               });}</script>
+</body>
+		 </html>

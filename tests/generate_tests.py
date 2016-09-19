@@ -24,11 +24,149 @@ beggining="""<!DOCTYPE html>
 				<html>
 					<head>
 						<title></title>
+
+            <script src="../build/3Dmol.js"></script>
+            <style>
+             #left{
+                float: left;
+                width:50%;
+            }
+            #right{
+                float:right;
+                width:50%;
+            }
+            #right ul,#left ul{
+                list-style:none;
+            }
+            .header{
+                width:50%;
+                position:relative;
+                margin: 0 auto;
+            }
+
+              #progress {
+        position: fixed;
+        z-index: 2147483647;
+        top: 0;
+        left: -6px;
+        width: 0%;
+        height: 2px;
+        background: #b91f1f;
+        -moz-border-radius: 1px;
+        -webkit-border-radius: 1px;
+        border-radius: 1px;
+        -moz-transition: width 500ms ease-out,opacity 400ms linear;
+        -ms-transition: width 500ms ease-out,opacity 400ms linear;
+        -o-transition: width 500ms ease-out,opacity 400ms linear;
+        -webkit-transition: width 500ms ease-out,opacity 400ms linear;
+        transition: width 500ms ease-out,opacity 400ms linear
+    }
+    #progress.done {
+        opacity: 0
+    }
+    #progress dd,#progress dt {
+        position: absolute;
+        top: 0;
+        height: 2px;
+        -moz-box-shadow: #b91f1f 1px 0 6px 1px;
+        -ms-box-shadow: #b91f1f 1px 0 6px 1px;
+        -webkit-box-shadow: #b91f1f 1px 0 6px 1px;
+        box-shadow: #b91f1f 1px 0 6px 1px;
+        -moz-border-radius: 100%;
+        -webkit-border-radius: 100%;
+        border-radius: 100%
+    }
+    #progress dd {
+        opacity: 1;
+        width: 20px;
+        right: 0;
+        clip: rect(-6px,22px,14px,10px)
+    }
+    #progress dt {
+        opacity: 1;
+        width: 180px;
+        right: -80px;
+        clip: rect(-6px,90px,14px,-6px)
+    }
+    @-moz-keyframes pulse {
+        30% {
+            opacity: 1
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: 1
+        }
+    }
+    @-ms-keyframes pulse {
+        30% {
+            opacity: .6
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: .6
+        }
+    }
+    @-o-keyframes pulse {
+        30% {
+            opacity: 1
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: 1
+        }
+    }
+    @-webkit-keyframes pulse {
+        30% {
+            opacity: .6
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: .6
+        }
+    }
+    @keyframes pulse {
+        30% {
+            opacity: 1
+        }
+        60% {
+            opacity: 0
+        }
+        100% {
+            opacity: 1
+        }
+    }
+    #progress.waiting dd,#progress.waiting dt {
+        -moz-animation: pulse 2s ease-out 0s infinite;
+        -ms-animation: pulse 2s ease-out 0s infinite;
+        -o-animation: pulse 2s ease-out 0s infinite;
+        -webkit-animation: pulse 2s ease-out 0s infinite;
+        animation: pulse 2s ease-out 0s infinite
+    }
+        </style>
 					</head>
 					<body>
+          <div id="progress" class="waiting">
+    <dt></dt>
+    <dd></dd>
+    </div>
+            <div id="left">
+                <ul></ul>
+            </div>
+            <div id="right">
+                <ul></ul>
+            </div>
 
 					"""
-end="""</body>
+end="""<script src="test.js"></script>
+	</body>
 		 </html>"""
 class Example():
 	def __init__(self,name,text):
@@ -137,13 +275,14 @@ f=open("one_page.html","w")
 f.write("")
 f.close()
 with open("one_page.html","a") as f:
+	f.write(beggining)
 	for file in test.files:
 		if(type(file.examples)!=type(None) and len(file.examples)>0):
 			for example in file.examples:
 				f.write("<script> function "+example.name+"(){"+example.text+"}</script>\n")
 		elif(type(file.examples)==type(None)):
 			f.write("<script> function "+file.contents.name+"(){"+file.contents.text+"}</script>\n")
-
+	f.write(end)
 
 
 
