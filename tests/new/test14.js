@@ -25,3 +25,4 @@ viewer.setBackgroundColor(0xffffffff);
               }, 'text');
 
               viewer.render();
+              

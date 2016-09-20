@@ -51,9 +51,11 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
  /**
  * Built in colorschemes
  *
- * @example <caption>Using one of the build in colorshemes listed above. This example specifically uses ssPyMol, but any of the other colorshemes are interchangeable</caption> 
+ * @example 
+  //Using one of the build in colorshemes listed above. This example specifically uses ssPyMol, but any of the other colorshemes are interchangeable
  * viewer.setStyle({'cartoon':{colorscheme:'ssPyMol'}});
- * @example <caption>Defining your own colorshemes. First define a map that links instances of a certain property (in this case 'elem') to color values. </caption> 
+ * @example 
+ //Defining your own colorshemes. First define a map that links instances of a certain property (in this case 'elem') to color values. 
  * var elementColors = {
         'H': 0xFFFFFF,
         'He': 0xFFC0CB,

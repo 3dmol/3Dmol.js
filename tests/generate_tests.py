@@ -21,7 +21,7 @@ def script_string(typedef,text):
 	return string
 
 beggining="""<!DOCTYPE html>
-				<html>
+				<html> 
 					<head>
 						<title></title>
 
@@ -170,9 +170,46 @@ end="""<script src="test.js"></script>
 	</body>
 		 </html>"""
 class Example():
-	def __init__(self,name,text):
+    def __init__(self,name,text):
 		self.name=name
-		self.text=text
+		self.text=self.parse(text)
+    
+    def parse(self,text):
+        atdata=find_all(text,"@data")
+        closecomment=find_all(text,"*/")
+        atdiv=find_all(text,"@div")
+        if(len(atdata) == 0 and len(atdiv) ==0 ):
+            return text
+        appends=[]
+        for data in atdata:
+            ending=len(text)
+            for com in closecomment:
+                if com > data and com<ending:
+                    ending=com
+            for at in atdiv+atdata:
+                if at>data and at<ending:
+                    ending=at
+            string=text[data:ending]
+            appends.append(["data",data,string])
+
+        for data in atdiv:
+            ending=len(text)
+            for com in closecomment:
+                if com > data and com<ending:
+                    ending=com
+            for at in atdiv+atdata:
+                if at>data and at<ending:
+                    ending=at
+            string=text[data:ending]
+            appends.append(["div",data,string])
+        length=0
+        for append in appends:
+            if(append[0]=="div"):
+                append[1]
+            else:
+                pass
+        return text
+
 
 
 class File():
@@ -224,7 +261,6 @@ class File():
 				name=name[name.find("#")+1:]
 			else:
 				name=""
-			print name
 
 			exmp=text[i+8:smallest_next]
 			exmp=exmp.replace('*','')
@@ -279,7 +315,7 @@ with open("one_page.html","a") as f:
 	f.write(beggining)
 	f.write("<script>system={\n")
 	for file in test.files:
-		if(False and type(file.examples)!=type(None) and len(file.examples)>0):
+		if(type(file.examples)!=type(None) and len(file.examples)>0):
 			for example in file.examples:
 				f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+example.text+"}catch(err){}},\n")
 		elif(type(file.examples)==type(None)):

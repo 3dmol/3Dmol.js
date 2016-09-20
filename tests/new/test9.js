@@ -18,3 +18,6 @@ $3Dmol.download("pdb:2EJ0",viewer,{},function(){
                                                       color:'black'}});
                   
                   viewer.render();
+
+                  
+                });
