@@ -2104,7 +2104,7 @@ $3Dmol.GLViewer = (function() {
          * @param {string} data - Input data
          * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
          * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
-         *  @example
+         * @example
          var element=$('#gldiv');
          var myviewer = $3Dmol.createViewer(element);
             m = myviewer.addModel();
@@ -2303,8 +2303,14 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
          * 
          * @example
-         * viewer.setStyle({}, {stick:{}}); //set all atoms to stick
-         * viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'}}); //set chain B to rainbow cartoon
+         * var element=$('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+
+       $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
+            m.setStyle({chain:'F'},{'cartoon':{arrows:true,color:'white'}});
+       // viewer.addStyle({chain:'B'},{line:{}});
+       viewer.zoomTo();
+       viewer.render();
          */
         this.setStyle = function(sel, style) {
             if(typeof(style) === 'undefined') {
@@ -2323,6 +2329,14 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addStyle
          * @param {AtomSelectionSpec} sel - Atom selection specification
          * @param {AtomStyleSpec} style - style spec to add to specified atoms
+         @example
+         var element=$('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+
+       $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
+       viewer.addStyle({chain:'B'},{line:{}});
+       viewer.zoomTo();
+       viewer.render();
          */
         this.addStyle = function(sel, style) {
             if(typeof(style) === 'undefined') {

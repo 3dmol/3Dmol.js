@@ -11,3 +11,4 @@ viewer.setBackgroundColor(0xffffffff);
                   });
                   viewer.zoomTo();
                   viewer.render();
+                });

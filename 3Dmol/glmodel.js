@@ -1317,6 +1317,18 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#vibrate
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
+         * 
+         *@example
+         var element=$('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+            var data = $("#test").val();
+            viewer.setBackgroundColor(0xffffff);    
+            var m = viewer.addModel(data, "xyz");
+            m.setStyle({},{stick:{}});
+            m.vibrate(10, 1);
+            viewer.animate({loop: "backAndForth"});
+            viewer.zoomTo();
+            viewer.render();
          */
         this.vibrate = function(numFrames, amplitude) {
             var amplitude = amplitude || 1;
@@ -1717,7 +1729,7 @@ $3Dmol.GLModel = (function() {
         /** Remove specified atoms from model
          * 
          * @function $3Dmol.GLModel#removeAtoms
-         * @param {type} badatoms
+         * @param {type} badatoms - list of atoms
          * @return {removeAtoms}
          */
         this.removeAtoms = function(badatoms) {
@@ -1980,9 +1992,20 @@ $3Dmol.GLModel = (function() {
         /**
          * @function $3Dmol.GLModel.setColorByFunction
          * @deprecated use setStyle and colorfunc attribute
-         * @param {type} sel
-         * @param {type} func
-         
+         * @param {type} sel - selection object
+         * @param {type} func - function to be used to set the color
+         @example
+         var element=$("#gldiv");
+          var viewer = $3Dmol.createViewer(element);
+              $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.getModel().setColorByFunction( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });
          */
         this.setColorByFunction = function(sel, colorfun) {
             var atoms = this.selectedAtoms(sel, atoms);

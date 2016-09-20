@@ -270,7 +270,7 @@ class TestSystem():
 		
 		return files
 
-test=TestSystem()
+test=TestSystem() 
 
 f=open("one_page.html","w")
 f.write("")

@@ -1,0 +1,24 @@
+var viewer = $3Dmol.createViewer($("#gldiv"), {
+		defaultcolors : $3Dmol.rasmolElementColors
+		});
+    viewer.setBackgroundColor(0xffffffff);
+    var m;
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", "volData/4csv.pdb", false);
+    rawFile.onreadystatechange = function (){
+        if(rawFile.readyState === 4){
+            if(rawFile.status === 200 || rawFile.status == 0){
+                var data = rawFile.responseText;
+		m = viewer.addModel(data, "pdb");	
+                var req = new XMLHttpRequest();
+   		req.open("GET", "volData/4csv.pdb", false);
+    		req.onload = function(aEvt){
+		    m.setCoordinates(req.response, "pdb");
+		    viewer.zoomTo();
+		    viewer.render(callback);
+		};
+		req.send(null);
+	    }	
+        }
+    }
+    rawFile.send(null);    
