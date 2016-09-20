@@ -153,6 +153,7 @@ beggining="""<!DOCTYPE html>
         </style>
 					</head>
 					<body>
+
           <div id="progress" class="waiting">
     <dt></dt>
     <dd></dd>
@@ -163,7 +164,7 @@ beggining="""<!DOCTYPE html>
             <div id="right">
                 <ul></ul>
             </div>
-
+            <div id="gldiv" style="width: 400px; height: 400px; position: relative;"></div>
 					"""
 end="""<script src="test.js"></script>
 	</body>
@@ -276,12 +277,14 @@ f.write("")
 f.close()
 with open("one_page.html","a") as f:
 	f.write(beggining)
+	f.write("<script>system={\n")
 	for file in test.files:
-		if(type(file.examples)!=type(None) and len(file.examples)>0):
+		if(False and type(file.examples)!=type(None) and len(file.examples)>0):
 			for example in file.examples:
-				f.write("<script> function "+example.name+"(){"+example.text+"}</script>\n")
+				f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+example.text+"}catch(err){}},\n")
 		elif(type(file.examples)==type(None)):
-			f.write("<script> function "+file.contents.name+"(){"+file.contents.text+"}</script>\n")
+			f.write(file.contents.name+": function(callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));"+file.contents.text+"}catch(err){}},\n")
+	f.write("}</script>")
 	f.write(end)
 
 
