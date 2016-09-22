@@ -189,7 +189,9 @@ class Example():
             for at in atdiv+atdata:
                 if at>data and at<ending:
                     ending=at
+
             string=text[data+6+len(self.name):ending]
+            text=text[0:data]+text[ending:]
             string="var objectHTML=$(`"+"<textarea style=\\\"display: none;\\\" id=\\\""+self.name+"\\\">"+string+"</textarea>`);document.appendChild(objectHTML);"
             text=text+string
 
@@ -202,10 +204,10 @@ class Example():
                 if at>data and at<ending:
                     ending=at
             string=text[data+4:ending]
-            string="var objectHTML=$(\\\"`"+string+"`\\\");document.appendChild(objectHTML);"
+            text=text[0:data]+text[ending:]
+            string="var objectHTML=$(`"+string+"`);document.appendChild(objectHTML);"
             text=text+string
         
-            print text
         return text
 
 
@@ -315,9 +317,9 @@ with open("one_page.html","a") as f:
 	for file in test.files:
 		if(type(file.examples)!=type(None) and len(file.examples)>0):
 			for example in file.examples:
-				f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+example.text+"}catch(err){}},\n")
+				f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+example.text+"\n}catch(err){}},\n")
 		elif(type(file.examples)==type(None)):
-			f.write(file.contents.name+": function(callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));"+file.contents.text+"}catch(err){}},\n")
+			f.write(file.contents.name+": function(callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));"+file.contents.text+"\n}catch(err){}},\n")
 	f.write("}</script>")
 	f.write(end)
 
