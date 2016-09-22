@@ -180,7 +180,7 @@ class Example():
         atdiv=find_all(text,"@div")
         if(len(atdata) == 0 and len(atdiv) ==0 ):
             return text
-        appends=[]
+
         for data in atdata:
             ending=len(text)
             for com in closecomment:
@@ -189,8 +189,9 @@ class Example():
             for at in atdiv+atdata:
                 if at>data and at<ending:
                     ending=at
-            string=text[data:ending]
-            appends.append(["data",data,string])
+            string=text[data+6+len(self.name):ending]
+            string="var objectHTML=$(`"+"<textarea style=\\\"display: none;\\\" id=\\\""+self.name+"\\\">"+string+"</textarea>`);document.appendChild(objectHTML);"
+            text=text+string
 
         for data in atdiv:
             ending=len(text)
@@ -200,14 +201,11 @@ class Example():
             for at in atdiv+atdata:
                 if at>data and at<ending:
                     ending=at
-            string=text[data:ending]
-            appends.append(["div",data,string])
-        length=0
-        for append in appends:
-            if(append[0]=="div"):
-                append[1]
-            else:
-                pass
+            string=text[data+4:ending]
+            string="var objectHTML=$(\\\"`"+string+"`\\\");document.appendChild(objectHTML);"
+            text=text+string
+        
+            print text
         return text
 
 
