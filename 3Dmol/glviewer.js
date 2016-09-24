@@ -2899,15 +2899,17 @@ $3Dmol.GLViewer = (function() {
                     modelsAtomsToShow[atomsToShow[n].model].push(atomsToShow[n]);
                 }
                 for (n = 0; n < models.length; n++) {
-                    surfobj.push({
-                        geo : new $3Dmol.Geometry(true),
-                        mat : mat,
-                        done : false,
-                        finished : false,
-                        symmetries : models[n].getSymmetries()
-                    // also webgl initialized
-                    });
-                    addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+					if(modelsAtomsToShow[n].length > 0) {
+						surfobj.push({
+							geo : new $3Dmol.Geometry(true),
+							mat : mat,
+							done : false,
+							finished : false,
+							symmetries : models[n].getSymmetries()
+						// also webgl initialized
+						});
+						addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+					}
                 }
             }
             else {

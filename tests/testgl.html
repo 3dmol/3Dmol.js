@@ -2,8 +2,7 @@
 <html>
     <head>
         <title>3Dmol.js Test</title>
-        <script src="../build/3Dmol.js"></script> 
-            
+           <script src="../build/3Dmol.js"></script>    
         <style> head, body {margin: 0; border: 0; padding: 0; max-height: 100vh}</style>  
         <script>
         var glviewer = null;
@@ -191,16 +190,28 @@
         viewer.mapAtomProperties($3Dmol.applyPartialCharges);
         }); */
            
-                          $3Dmol.download("pdb:1t46", viewer, {}, function() {
-                                          viewer.setStyle( {
-                                                          "cartoon": {
-                                                          'colorscheme':{prop:'resi',gradient: new $3Dmol.Gradient.Sinebow(931,500)} 
-                                                          }
-                                                          });
-  
+                  viewer.setBackgroundColor(0xffffffff);
+                    $3Dmol.download('pdb:4UDV', viewer, {doAssembly:true,format:"pdb"}, function(){    
+                        
+                        var m = viewer.getModel(0);
+                        var m2 = viewer.createModelFrom({},false);
+                        var symm = m.getSymmetries();
+                        var sym1 = []
+                        var sym2 = []
+                            var i;
+                            for (i = 0; i < symm.length; i++) {
+                                    if(i % 2) sym1.push(symm[i]);
+                                    else sym2.push(symm[i]);
+                                }
+                            m.setSymmetries(sym1);
+                            m2.setSymmetries(sym2);
+                            m2.setStyle({cartoon:{color: 'red'}});
 
-                                          viewer.render();
-                                          })
+                            viewer.addSurface($3Dmol.SurfaceType.VDW, {color: 'white', opacity:1}, {model: m});
+                            
+                            viewer.render();
+                    });
+              
                            
   });
         
