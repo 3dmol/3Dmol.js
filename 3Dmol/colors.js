@@ -106,9 +106,9 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
         'AU': 0xDAA520    
   };
    viewer.setStyle({'cartoon':{colorscheme:{prop:'elem',map:elementColors}}});
- * @example <caption>Using a gradient with colorscheme. </caption>
+ * @example //Using a gradient with colorscheme.
  * viewer.setStyle({chain:'A'},{cartoon:{opacity:0.5,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow(0,10)}}}); 
- * @example <caption>Using a function in order to define the colors.</caption> 
+ * @example //Using a function in order to define the colors. 
    let colorAsSnake = function(atom) {
       return atom.resi % 2 ? 'white': 'green'
    };

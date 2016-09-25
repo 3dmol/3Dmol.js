@@ -9,20 +9,34 @@ var getKeys = function(obj){
 }
 imgs="check/imgs";
 var keys=getKeys(system)
-for(var key in keys){
+var i=0;
+/*
+keys=[keys[0]];
+function runTest(i){
+	var key=keys[i];
+	console.log("------------------------------");
 	//first put the reference images up
+	
 	var img=document.createElement('img');
-	img.src=imgs+"/"+keys[key]+".png";
+	img.style.width="400px";
+	img.style.height="400px";
+	img.src=imgs+"/"+key+".png";
 	document.getElementById("right").appendChild(img);
 
 	//then load the other image
 	var image=document.createElement('img');
-
-	system[keys[key]](function(){
-		image.src=document.getElementById("gldiv").firstChild.toDataURL('image/png');
-		document.getElementById("left").appendChild(image);
-		console.log("finished");
-	});
+	console.log(key);
+	try{
+	system[key]();
+	}catch(err){
+		if(i<keys.length){
+			i+=1;
+			runTest(i);
+		}
+	}
 
 }
+runTest(i);
 
+*/
+system[keys[28]]();

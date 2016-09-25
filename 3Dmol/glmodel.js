@@ -1769,7 +1769,7 @@ $3Dmol.GLModel = (function() {
             
             myviewer.setStyle({chain:'A'}, {stick:{}});
             myviewer.render();
-         }
+         });
          */
         this.setStyle = function(sel, style, add) {
             

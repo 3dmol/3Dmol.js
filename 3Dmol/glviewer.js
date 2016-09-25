@@ -27,6 +27,7 @@ $3Dmol.GLViewer = (function() {
             defaultcolors = $3Dmol.elementColors.defaultColors;
         var nomouse = config.nomouse;
         var bgColor = 0;
+        config.backgroundColor="#ffffff";
 
         if(typeof(config.backgroundColor) != undefined) {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
@@ -707,8 +708,8 @@ $3Dmol.GLViewer = (function() {
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
          * @example //if the user were to pass a value for animationDuration like
-         *            so glviewer.rotate(90,"y",1000); then over the course of 1 second
-         *            (1000 milleseconds) the program would rotate.
+         *          //  so glviewer.rotate(90,"y",1000); then over the course of 1 second
+         *          //  (1000 milleseconds) the program would rotate.
          *  
          */
         var rotate_index=0;
@@ -1026,8 +1027,8 @@ $3Dmol.GLViewer = (function() {
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
          * @example //if the suer were to pass a value for the animationDuration like
-         *            so glviewer.zoom(3,1000); the program would zoom by a factor of 
-         *            3 for 1 second(1000 milleseconds) 
+         *          //  so glviewer.zoom(3,1000); the program would zoom by a factor of 
+         *          //  3 for 1 second(1000 milleseconds) 
          */
          var zoomIndex=0;
         this.zoom = function(factor,animationDuration) {
@@ -1090,8 +1091,8 @@ $3Dmol.GLViewer = (function() {
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
          * @example //if the user were to pass animationDuration to the function 
-         *            like so glviewer.translate(10,10,1000); then the program would
-         *            perform a translation over the course of 1 second(1000 milleseconds)
+         *          //  like so glviewer.translate(10,10,1000); then the program would
+         *          //  perform a translation over the course of 1 second(1000 milleseconds)
          */
          var transIndex=0;
         this.translate = function(x, y, animationDuration) {
@@ -1289,14 +1290,14 @@ $3Dmol.GLViewer = (function() {
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
          * @example // Assuming we have created a model of a protein with
-         *          multiple chains (e.g. from a PDB file), focus on atoms in
-         *          chain B glviewer.zoomTo({chain: 'B'});
+         *         // multiple chains (e.g. from a PDB file), focus on atoms in
+         *         // chain B glviewer.zoomTo({chain: 'B'});
          * @example // if the user were to pass the animationDuration value to 
-         *            the function like so viewer.zoomTo({resn:'STI'},1000);
-         *            the program would zoom into resn 'STI' over the course 
-         *            of 1 second(1000 milleseconds).
+         *          //  the function like so viewer.zoomTo({resn:'STI'},1000);
+         *          //  the program would zoom into resn 'STI' over the course 
+         *          //  of 1 second(1000 milleseconds).
          *  // Focus on centroid of all atoms of all models in this
-         * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
+         * viewer.zoomTo(); // (equivalent to viewer.zoomTo({}) )
          */
         var rot_index=0;
         var z_index=0;
@@ -1491,17 +1492,16 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example
          *  // Assuming glviewer contains a model representing a protein, label
-         * all alpha carbons with their residue name
+         * //all alpha carbons with their residue name
          *  // Select all alpha carbons (have property atom : "CA") from last
-         * model added var atoms =
+         * //model added var atoms =
          * glviewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
          * 
          * for (var a in atoms) { var atom = atoms[a];
          *  // Create label at alpha carbon's position displaying atom's residue
-         * and residue number var labelText = atom.resname + " " + atom.resi;
+         * // and residue number var labelText = atom.resname + " " + atom.resi;
          * 
-         * var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:
-         * atom.x, y: atom.y, z: atom.z});
+         * var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:atom.x, y: atom.y, z: atom.z}});
          * 
          * labels.push(l); }
          *  // Render labels glviewer.render();
@@ -1767,7 +1767,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
                   viewer.render();
               });
-          }
+          
 
          */
         this.addLine = function(spec) {
@@ -2311,6 +2311,8 @@ $3Dmol.GLViewer = (function() {
        // viewer.addStyle({chain:'B'},{line:{}});
        viewer.zoomTo();
        viewer.render();
+       });
+
          */
         this.setStyle = function(sel, style) {
             if(typeof(style) === 'undefined') {
@@ -2337,6 +2339,7 @@ $3Dmol.GLViewer = (function() {
        viewer.addStyle({chain:'B'},{line:{}});
        viewer.zoomTo();
        viewer.render();
+       });
          */
         this.addStyle = function(sel, style) {
             if(typeof(style) === 'undefined') {

@@ -1,12 +1,11 @@
- //install a right-click handler on every canvas to export png
-          
+
             var viewer = $3Dmol.createViewer($("#test49"));
             viewer.setBackgroundColor(0xffffffff);
             var rec = viewer.addModel($('#rec').val(),'pdb');
-            rec.setHoverable({},true, function(atom){  //hover
+            rec.setHoverable({},true, {hover_callback:function(atom){  //hover
                 viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                 viewer.render();},
-              	function(){ viewer.removeAllLabels();viewer.render();}); //unhover
+              	function(){ viewer.removeAllLabels();viewer.render();}}); //unhover
        
             rec.setStyle({sphere:{}});
 
@@ -1020,4 +1019,6 @@ END
 
 
 */
+
+
             

@@ -6,7 +6,7 @@
                data-datatype='sdf'
                data-backgroundcolor='0xffffff'
                data-style='cross:radius=1.0'></div>
-        
+
 @data moldata_sdf
 
 v:U4C5Cr:4
@@ -102,6 +102,4 @@ v:U4C5Cr:4
   8 35  2  0  0  0  0
 M  CHG  2  35   1  40  -1
 M  END
-
-
 */

@@ -5,7 +5,6 @@
 #the user should be able to select exactly what tests they wish to run (this can get pretty sophisticated)
 #at some point there will be image comparison
 import os
-
 def find_all(text,sub):
 	examples=[]
 	index=0
@@ -171,7 +170,7 @@ end="""<script src="test.js"></script>
 		 </html>"""
 class Example():
     def __init__(self,name,text):
-		self.name=name
+		self.name=name.replace(".","_")
 		self.text=self.parse(text)
     
     def parse(self,text):
@@ -208,6 +207,7 @@ class Example():
             string="var objectHTML=$(`"+string+"`);document.appendChild(objectHTML);"
             text=text+string
         
+        text=text.replace("viewer.render()","viewer.render(callback)")
         return text
 
 
@@ -279,6 +279,8 @@ class File():
 
 		return examples
 
+manual_tests_path="new/"
+examples_path="../3Dmol/"
 
 class TestSystem():
 	def __init__(self):
