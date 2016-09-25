@@ -191,26 +191,12 @@
         }); */
            
                   viewer.setBackgroundColor(0xffffffff);
-                    $3Dmol.download('pdb:4UDV', viewer, {doAssembly:true,format:"pdb"}, function(){    
-                        
-                        var m = viewer.getModel(0);
-                        var m2 = viewer.createModelFrom({},false);
-                        var symm = m.getSymmetries();
-                        var sym1 = []
-                        var sym2 = []
-                            var i;
-                            for (i = 0; i < symm.length; i++) {
-                                    if(i % 2) sym1.push(symm[i]);
-                                    else sym2.push(symm[i]);
-                                }
-                            m.setSymmetries(sym1);
-                            m2.setSymmetries(sym2);
-                            m2.setStyle({cartoon:{color: 'red'}});
-
-                            viewer.addSurface($3Dmol.SurfaceType.VDW, {color: 'white', opacity:1}, {model: m});
-                            
-                            viewer.render();
-                    });
+                  $.get('test_structs/multiple.sdf', function(data) {
+					  viewer.addModels(data);
+viewer.zoomTo();
+					  viewer.render();
+				});
+                
               
                            
   });

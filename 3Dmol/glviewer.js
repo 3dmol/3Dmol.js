@@ -2064,7 +2064,8 @@ $3Dmol.GLViewer = (function() {
                 newModel.setAtomDefaults(modelatoms[i]);
                 newModel.addFrame(modelatoms[i]);
                 newModel.setFrame(0);
-                newModel.setModelData(modelatoms.modelData[i]);
+                if(modelatoms.modelData)
+                    newModel.setModelData(modelatoms.modelData[i]);
                 newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
                 models.push(newModel);
             }
