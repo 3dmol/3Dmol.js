@@ -166,6 +166,7 @@ beggining="""<!DOCTYPE html>
             <div id="gldiv" style="width: 400px; height: 400px; position: relative;"></div>
 					"""
 end="""<script src="test.js"></script>
+
 	</body>
 		 </html>"""
 class Example():
@@ -177,8 +178,9 @@ class Example():
         atdata=find_all(text,"@data")
         closecomment=find_all(text,"*/")
         atdiv=find_all(text,"@div")
+        text=text.replace("myviewer","viewer")
         if(len(atdata) == 0 and len(atdiv) ==0 ):
-            return text
+            return text+"viewer.render(callback);"
 
         for data in atdata:
             ending=len(text)
@@ -206,8 +208,7 @@ class Example():
             text=text[0:data]+text[ending:]
             string="var objectHTML=$(`"+string+"`);document.appendChild(objectHTML);"
             text=text+string
-        
-        text=text.replace("viewer.render()","viewer.render(callback)")
+        text=text+"viewer.render(callback);"
         return text
 
 
