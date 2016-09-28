@@ -69,9 +69,9 @@ $3Dmol.GLViewer = (function() {
         var renderer = new $3Dmol.Renderer({
             antialias : true,
             preserveDrawingBuffer: true, //so we can export images
-            premultipliedAlpha : false/* more traditional compositing with background */
+            premultipliedAlpha : false,/* more traditional compositing with background */
+            id:config.id
         });
-
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
         renderer.domElement.style.padding = "0";
@@ -688,7 +688,7 @@ $3Dmol.GLViewer = (function() {
          * @return {GLModel}
          * 
          * @example // Retrieve reference to first GLModel added var m =
-         *          glviewer.getModel(0);
+         *          viewer.getModel(0);
          */
         this.getModel = function(id) {
             id = id || models.length - 1;
@@ -1504,7 +1504,8 @@ $3Dmol.GLViewer = (function() {
          * var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:atom.x, y: atom.y, z: atom.z}});
          * 
          * labels.push(l); }
-         *  // Render labels glviewer.render();
+         *  // Render labels 
+         viewer.render();
          */
         this.addLabel = function(text, data) {
             var label = new $3Dmol.Label(text, data);
@@ -1539,12 +1540,12 @@ $3Dmol.GLViewer = (function() {
          * @param {$3Dmol.Label}
          *            label - $3Dmol label
          * 
-         * @example // Remove labels created in [addLabel example]{@link $3Dmol.GLViewer#addLabel}
+         * @example // Remove labels created in 
          * 
          * for (var i = 0; i < labels.length; i++) {
-         * glviewer.removeLabel(label); }
+         * viewer.removeLabel(label); }
          * 
-         * glviewer.render();
+         * viewer.render();
          */
         this.removeLabel = function(label) {
             //todo: don't do the linear search

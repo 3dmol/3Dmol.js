@@ -1990,7 +1990,7 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
-         * @function $3Dmol.GLModel.setColorByFunction
+         * @function setColorByFunction
          * @deprecated use setStyle and colorfunc attribute
          * @param {type} sel - selection object
          * @param {type} func - function to be used to set the color
@@ -2009,6 +2009,8 @@ $3Dmol.GLModel = (function() {
          */
         this.setColorByFunction = function(sel, colorfun) {
             var atoms = this.selectedAtoms(sel, atoms);
+            if(typeof(colorfun)!=='function')
+                return
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild

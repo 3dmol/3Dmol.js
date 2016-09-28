@@ -12,6 +12,7 @@ viewer.setBackgroundColor(0xffffffff);
 
 /*@data rec
 
+
 ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
 ATOM      2  CA  LYS A   1       2.459  10.365   9.364  1.00 28.03           C  
 ATOM      3  C   LYS A   1       2.458  11.880   9.149  1.00 21.93           C  

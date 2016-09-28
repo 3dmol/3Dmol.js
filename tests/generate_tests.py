@@ -6,23 +6,23 @@
 #at some point there will be image comparison
 import os
 def find_all(text,sub):
-	examples=[]
-	index=0
-	while index < len(text):
-		index = text.find(sub, index)
-		if index == -1:
-			break
-		examples.append(index)
-		index += 2
-	return examples
+    examples=[]
+    index=0
+    while index < len(text):
+        index = text.find(sub, index)
+        if index == -1:
+            break
+        examples.append(index)
+        index += 2
+    return examples
 def script_string(typedef,text):
-	string="<script>function "+typedef+"{"+text+"}</script>\n"
-	return string
+    string="<script>function "+typedef+"{"+text+"}</script>\n"
+    return string
 
 beggining="""<!DOCTYPE html>
-				<html> 
-					<head>
-						<title></title>
+                <html> 
+                    <head>
+                        <title></title>
 
             <script src="../build/3Dmol.js"></script>
             <style>
@@ -150,8 +150,8 @@ beggining="""<!DOCTYPE html>
         animation: pulse 2s ease-out 0s infinite
     }
         </style>
-					</head>
-					<body>
+                    </head>
+                    <body>
 
           <div id="progress" class="waiting">
     <dt></dt>
@@ -164,23 +164,26 @@ beggining="""<!DOCTYPE html>
                 <ul></ul>
             </div>
             <div id="gldiv" style="width: 400px; height: 400px; position: relative;"></div>
-					"""
+                    """
 end="""<script src="test.js"></script>
 
-	</body>
-		 </html>"""
+    </body>
+         </html>"""
 class Example():
     def __init__(self,name,text):
-		self.name=name.replace(".","_")
-		self.text=self.parse(text)
+        self.name=name.replace(".","_")
+        self.text=self.parse(text)
     
     def parse(self,text):
         atdata=find_all(text,"@data")
         closecomment=find_all(text,"*/")
         atdiv=find_all(text,"@div")
         text=text.replace("myviewer","viewer")
+        if(find_all(text,"viewer.render()")==[] and find_all(text,"viewer.render(callback)")==[]):
+            text=text+"viewer.render(callback);"
         if(len(atdata) == 0 and len(atdiv) ==0 ):
-            return text+"viewer.render(callback);"
+            text=text.replace("viewer.render()","viewer.render(callback)")
+            return text
 
         for data in atdata:
             ending=len(text)
@@ -208,106 +211,110 @@ class Example():
             text=text[0:data]+text[ending:]
             string="var objectHTML=$(`"+string+"`);document.appendChild(objectHTML);"
             text=text+string
-        text=text+"viewer.render(callback);"
+        text=text.replace("viewer.render()","viewer.render(callback)")
         return text
 
 
 
 class File():
-	def __init__(self,filename,filetype,contents):
-		self.filename=filename
-		self.filetype=filetype
-		self.contents=Example(filename[4:-3],contents)
-		self.examples=None
-		if(self.filetype=="generated"):
-			self.examples=self.getExamples()
+    def __init__(self,filename,filetype,contents):
+        self.filename=filename
+        self.filetype=filetype
+        self.contents=Example(filename[4:-3],contents)
+        self.examples=None
+        if(self.filetype=="generated"):
+            self.examples=self.getExamples()
 
-	def getExamples(self):
-		nearests=[]
-		filename=self.filename
-		file=open(filename,'r')
-		text=file.read()
-		example_indices=find_all(text,"@example")
-		typedef_decorators=find_all(text,"@typedef")
-		function_decorators=find_all(text,"@function")
-		examples=[]
-		#name of nearest function or typdef
-		name=""
-		for i in example_indices:
-			#get the index of the next '*/' or the index of the next '@' symbol
-			comments=find_all(text,"*/")
+    def getExamples(self):
+        nearests=[]
+        filename=self.filename
+        file=open(filename,'r')
+        text=file.read()
+        example_indices=find_all(text,"@example")
+        typedef_decorators=find_all(text,"@typedef")
+        function_decorators=find_all(text,"@function")
+        examples=[]
+        #name of nearest function or typdef
+        name=""
+        for i in example_indices:
+            #get the index of the next '*/' or the index of the next '@' symbol
+            comments=find_all(text,"*/")
 
-			ats=find_all(text,"@")
-			smallest_next=0
-			for comment in comments:
-				if comment>i:
-					smallest_next=comment
-					break
-			for at in ats:
-				if(at>i and at<smallest_next):
-					smallest_next=at
-					break
-			#at this point smallest next should be correct
-			nearest_dec=-1
-			for dec in function_decorators:
-				if dec<i and dec>nearest_dec:
-					nearest_dec=dec
-			for dec in typedef_decorators:
-				if dec<i and dec>nearest_dec:
-					nearest_dec=dec
-			nearests.append(nearest_dec)
-			endline=text[nearest_dec:].find("\n")
-			if(nearest_dec!=-1):
-				name=text[nearest_dec+9:endline+nearest_dec]
-				name=name[name.find("#")+1:]
-			else:
-				name=""
+            ats=find_all(text,"@")
+            smallest_next=0
+            for comment in comments:
+                if comment>i:
+                    smallest_next=comment
+                    break
+            for at in ats:
+                if(at>i and at<smallest_next):
+                    smallest_next=at
+                    break
+            #at this point smallest next should be correct
+            nearest_dec=-1
+            for dec in function_decorators:
+                if dec<i and dec>nearest_dec:
+                    nearest_dec=dec
+            for dec in typedef_decorators:
+                if dec<i and dec>nearest_dec:
+                    nearest_dec=dec
+            nearests.append(nearest_dec)
+            endline=text[nearest_dec:].find("\n")
+            if(nearest_dec!=-1):
+                name=text[nearest_dec+9:endline+nearest_dec]
+                name=name[name.find("#")+1:]
+            else:
+                name=""
+            exmp=text[i+8:smallest_next]
+            exmp=exmp.replace('*','')
+            flname=filename+"_"+name
+            flname=flname.replace("/","_")
+            flname=flname.replace(".._3Dmol_","")
+            flname=flname.replace(" ","")
+            flname=flname.replace("3","_3")
+            exmp=Example(flname,exmp)
+            examples.append(exmp)
+            file.close()
+        count=0
+        for i,example in enumerate(examples):
+            if(i==0):
+                continue
+            if(nearests[i]==nearests[i-1]):
+                count+=1
+                examples[i].name=name+str(count)
+            else:
+                count=0
 
-			exmp=text[i+8:smallest_next]
-			exmp=exmp.replace('*','')
-			exmp=Example(name,exmp)
-			examples.append(exmp)
-			file.close()
-		count=0
-		for i,example in enumerate(examples):
-			if(i==0):
-				continue
-			if(nearests[i]==nearests[i-1]):
-				count+=1
-				examples[i].name=name+str(count)
-			else:
-				count=0
-
-		return examples
+        return examples
 
 manual_tests_path="new/"
 examples_path="../3Dmol/"
 
 class TestSystem():
-	def __init__(self):
-		self.files=self.declareFiles()
+    def __init__(self):
+        self.files=self.declareFiles()
 
-	def declareFiles(self):
-		manual_tests_path="new/"
-		examples_path="../3Dmol/"
-		files=[]
-		#these are the files with examples in them
-		for filename in os.listdir(examples_path):
-			if(filename.endswith(".js")):
-				text=open(examples_path+filename,'r')
-				files.append(File(examples_path+filename,"generated",text.read()))
-			elif(filename =="WebGL"):
-				path=examples_path+"WebGL/"
-				for file in os.listdir(path):
-					#paths for all of the files inside of WebGL
-					parsed=File(path+file,"generated",open(path+file,"r").read())
-					files.append(parsed)
-		#these are the build in tests
-		for filename in os.listdir(manual_tests_path):
-			file=open(manual_tests_path+filename,"r")
-			files.append(File(manual_tests_path+filename,"builtin",file.read()))
-		
-		return files
+    def declareFiles(self):
+        manual_tests_path="new/"
+        examples_path="../3Dmol/"
+        files=[]
+        #these are the files with examples in them
+        for filename in os.listdir(examples_path):
+            if(filename.endswith(".js")):
+                text=open(examples_path+filename,'r')
+                files.append(File(examples_path+filename,"generated",text.read()))
+            elif(filename =="WebGL"):
+                path=examples_path+"WebGL/"
+                for file in os.listdir(path):
+                    #paths for all of the files inside of WebGL
+                    parsed=File(path+file,"generated",open(path+file,"r").read())
+                    files.append(parsed)
+        #these are the build in tests
+        for filename in os.listdir(manual_tests_path):
+            file=open(manual_tests_path+filename,"r")
+            files.append(File(manual_tests_path+filename,"builtin",file.read()))
+        
+        return files
 
 test=TestSystem() 
 
@@ -315,16 +322,16 @@ f=open("one_page.html","w")
 f.write("")
 f.close()
 with open("one_page.html","a") as f:
-	f.write(beggining)
-	f.write("<script>system={\n")
-	for file in test.files:
-		if(type(file.examples)!=type(None) and len(file.examples)>0):
-			for example in file.examples:
-				f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+example.text+"\n}catch(err){}},\n")
-		elif(type(file.examples)==type(None)):
-			f.write(file.contents.name+": function(callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"));"+file.contents.text+"\n}catch(err){}},\n")
-	f.write("}</script>")
-	f.write(end)
+    f.write(beggining)
+    f.write("<script>system={\n")
+    for file in test.files:
+        if(type(file.examples)!=type(None) and len(file.examples)>0):
+            for example in file.examples:
+                f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"),{id:\""+example.name+"\"});\n"+example.text+"\n}catch(err){}},\n")
+        elif(type(file.examples)==type(None)):
+            f.write(file.contents.name+": function(callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"),{id:\""+file.contents.name+"\"});"+file.contents.text+"\n}catch(err){}},\n")
+    f.write("}</script>")
+    f.write(end)
 
 
 
