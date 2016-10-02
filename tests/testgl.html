@@ -191,11 +191,7 @@
         }); */
            
                   viewer.setBackgroundColor(0xffffffff);
-                  $.get('test_structs/multiple.sdf', function(data) {
-					  viewer.addModels(data);
-viewer.zoomTo();
-					  viewer.render();
-				});
+                  $3Dmol.download('pdb:1ycr', viewer);
                 
               
                            

@@ -2938,10 +2938,14 @@ $3Dmol.GLViewer = (function() {
          */ 
         this.setSurfaceMaterialStyle = function(surf, style) {
             if (surfaces[surf]) {
-                surfArr = surfaces[surf];
+                var surfArr = surfaces[surf];
                 for (var i = 0; i < surfArr.length; i++) {
                     surfArr[i].mat = getMatWithStyle(style);
                     surfArr[i].mat.side = $3Dmol.FrontSide;
+                    if(style.color) {
+                        surfArr[i].mat.color = style.color;
+                        surfArr[i].geo.colorsNeedUpdate = true;
+                    }
                     surfArr[i].finished = false; // trigger redraw
                 }
             }
