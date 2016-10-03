@@ -1505,8 +1505,10 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addLabel
          * @param {string}
          *            text - Label text
-         * @param {Object}
-         *            data - Label style specification
+         * @param {LabelSpec}
+         *            options - Label style specification
+          @param {AtomSelection}
+         *            sel - Set position of label to center of this selection
          * @return {$3Dmol.Label}
          * 
          * @example
@@ -1526,11 +1528,16 @@ $3Dmol.GLViewer = (function() {
          * labels.push(l); }
          *  // Render labels glviewer.render();
          */
-        this.addLabel = function(text, data) {
-            var label = new $3Dmol.Label(text, data);
+        this.addLabel = function(text, options, sel) {
+            options = options || {};
+            if(sel) {
+                var extent = $3Dmol.getExtent(getAtomsFromSel(sel));
+                options.position = {x: extent[2][0], y: extent[2][1], z: extent[2][2]};
+            }
+            var label = new $3Dmol.Label(text, options);
             label.setContext();
             modelGroup.add(label.sprite);
-            if(data.fixed)
+            if(options.fixed)
                 fixed_labels.push(labels.length);
             labels.push(label);
             show();
