@@ -24,7 +24,7 @@ beggining="""<!DOCTYPE html>
                     <head>
                         <title></title>
 
-            <script src="../build/3Dmol.js"></script>
+            <script src="../../build/3Dmol.js"></script>
             <style>
              #left{
                 float: left;
@@ -172,6 +172,9 @@ end="""<script src="test.js"></script>
 class Example():
     def __init__(self,name,text):
         self.name=name.replace(".","_")
+        self.name=self.name.replace("/","_")
+        self.name=self.name.replace("Dmol_","")
+        self.name=self.name.replace("___","")
         self.text=self.parse(text)
     
     def parse(self,text):
@@ -220,7 +223,7 @@ class File():
     def __init__(self,filename,filetype,contents):
         self.filename=filename
         self.filetype=filetype
-        self.contents=Example(filename[4:-3],contents)
+        self.contents=Example(filename[7:-3],contents)
         self.examples=None
         if(self.filetype=="generated"):
             self.examples=self.getExamples()
@@ -287,7 +290,7 @@ class File():
 
         return examples
 
-manual_tests_path="./"
+manual_tests_path="../new/"
 examples_path="../../3Dmol/"
 
 class TestSystem():
@@ -295,7 +298,7 @@ class TestSystem():
         self.files=self.declareFiles()
 
     def declareFiles(self):
-        manual_tests_path="./"
+        manual_tests_path="../new/"
         examples_path="../../3Dmol/"
         files=[]
         #these are the files with examples in them
@@ -310,7 +313,10 @@ class TestSystem():
                     parsed=File(path+file,"generated",open(path+file,"r").read())
                     files.append(parsed)
         #these are the build in tests
+        exceptions=["generate_tests.py","one_page.html","test.js","volData","imgs"]
         for filename in os.listdir(manual_tests_path):
+            if(filename in exceptions):
+                continue
             file=open(manual_tests_path+filename,"r")
             files.append(File(manual_tests_path+filename,"builtin",file.read()))
         
@@ -327,9 +333,9 @@ with open("one_page.html","a") as f:
     for file in test.files:
         if(type(file.examples)!=type(None) and len(file.examples)>0):
             for example in file.examples:
-                f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"),{id:\""+example.name+"\"});\n"+example.text+"\n}catch(err){}},\n")
+                f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"),{id:\""+example.name+"\"});\n"+example.text+"\n}catch(err){callback()}},\n")
         elif(type(file.examples)==type(None)):
-            f.write(file.contents.name+": function(callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"),{id:\""+file.contents.name+"\"});"+file.contents.text+"\n}catch(err){}},\n")
+            f.write(file.contents.name+": function(callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"),{id:\""+file.contents.name+"\"});"+file.contents.text+"\n}catch(err){callback()}},\n")
     f.write("}</script>")
     f.write(end)
 

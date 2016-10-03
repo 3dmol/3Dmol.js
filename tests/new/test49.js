@@ -1,5 +1,4 @@
 
-            var viewer = $3Dmol.createViewer($("#test49"));
             viewer.setBackgroundColor(0xffffffff);
             var rec = viewer.addModel($('#rec').val(),'pdb');
             rec.setHoverable({},true, {hover_callback:function(atom){  //hover

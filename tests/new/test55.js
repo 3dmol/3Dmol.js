@@ -20,4 +20,3 @@ viewer.setBackgroundColor(0xffffffff);
       //viewer.rotate(90,"y",1000);
       viewer.render();
     };
-    req.send(null);

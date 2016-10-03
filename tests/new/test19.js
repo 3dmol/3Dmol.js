@@ -11,4 +11,5 @@ var setStyles = function(volumedata){
               $3Dmol.download("pdb:4DLN",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   $.get("volData/1fas.cube",setStyles);
+                  viewer.render();
                 });

@@ -1,5 +1,5 @@
 $(document).ready(function(){
-	console.log(system);
+	
 
 var getKeys = function(obj){
    var keys = [];
@@ -8,14 +8,17 @@ var getKeys = function(obj){
    }
    return keys;
 }
+var canvasCount= function(){
 
-imgs="check/imgs";
+	return $('#gldiv').children().length;
+}
+imgs="imgs";
 var keys=getKeys(system)
+keys.sort();
 var i=0;
-
 function runTest(i){
 	var key=keys[i];
-	console.log("------------------------------");
+	console.log("running test "+key+":");
 	//first put the reference images up
 	
 	var right_head=document.createElement('h4');
@@ -27,7 +30,6 @@ function runTest(i){
 	img.src=imgs+"/"+key+".png";
 	document.getElementById("right").appendChild(img);
 	//then load the other image
-	console.log(key);
 	var div=document.createElement('div');
 	div.id="div_"+key;
 	document.getElementById("left").appendChild(div);
@@ -36,16 +38,17 @@ function runTest(i){
 		left_head.innerHTML=key;
 		var canvas=document.getElementById(key);
 		var image=document.createElement('img');
+		image.style.width="400px";
+		image.style.height="400px";
+
+		image.src=canvas.toDataURL('image/png');
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);
-		console.log(canvas);
-		image.src=canvas.toDataURL('image/png');
 		$("#undefined").remove();
 		$(canvas).remove();
 		//$("#gldiv").children()[0].remove();
-		if(i<keys.length-1){
+		if(i<keys.length-1 ){
 			i+=1;
-			console.log(i);
 			runTest(i);
 		}
 	});

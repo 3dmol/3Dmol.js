@@ -103,18 +103,16 @@ $.ajaxTransport(
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
  * @function createViewer
  * @example
- * // Assume there exists an HTML div with id "gldiv"
- * var element = $("#gldiv");
- * 
- * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors };
- * 
- * // Create GLViewer within 'gldiv' 
- * var myviewer = $3Dmol.createViewer(element, config);
- * //'data' is a string containing molecule data in pdb format  
- * myviewer.addModel(data, "pdb");
- * myviewer.zoomTo();
- * myviewer.render();                        
+   $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });                     
  *                        
  */
 $3Dmol.createViewer = function(element, config)
@@ -155,13 +153,12 @@ $3Dmol.viewers = {};
  * @param {Function} callback - Function to call with model as argument after data is loaded.
 
  * @example
- * var element = $("#gldiv");
- * var myviewer = $3Dmol.createViewer(element);
- * 
- * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
- * // Note that m will not contain the atomic data until after the network request is completed
- * var m = $3Dmol.download('pdb: 2POR', myviewer, {format:'cif'});
- * 
+ viewer.setBackgroundColor(0xffffffff);
+       $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
+        m.setStyle({'cartoon':{colorscheme:{prop:'ss',map:$3Dmol.ssColors.Jmol}}});
+       viewer.zoomTo();
+       viewer.render(callback);
+    });
  * @return {$3Dmol.GLModel} GLModel
  */ 
 $3Dmol.download = function(query, viewer, options, callback) {

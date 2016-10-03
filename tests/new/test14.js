@@ -1,7 +1,4 @@
-viewer.setBackgroundColor(0xffffffff);
-
-
-              $.get('../test_structs/benzene-homo.cube', function(data){
+ $.get('../test_structs/benzene-homo.cube', function(data){
                   var voldata = new $3Dmol.VolumeData(data, "cube");
                   viewer.addIsosurface(voldata, {isoval: 0.01,
                                                  color: "blue",
@@ -17,12 +14,9 @@ viewer.setBackgroundColor(0xffffffff);
                                                  callback:
                                                  function() {
                                                      this.opacity = 0.0;
-                                                     viewer.render();
+                                                     viewer.render(callback);
                                                  }});
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();
-                  viewer.render();
-              }, 'text');
-
-              viewer.render();
-              
+                  viewer.render(callback);
+                });

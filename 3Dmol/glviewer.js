@@ -575,8 +575,9 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example
          * 
-         * //Set 'myviewer' background color to white
-         * myviewer.setBackgroundColor(0xffffff)
+         * viewer.setBackgroundColor(0x00000000);
+
+
          * 
          */
         this.setBackgroundColor = function(hex, a) {
@@ -615,7 +616,15 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setViewStyle
          * 
          * @example
-         * myviewer.setViewStyle({style:"outline", color:"black", width:0.1})
+         *   viewer.setViewStyle({style:"outline"});
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                  });
+                  viewer.zoomTo();
+                  viewer.render(callback);
+              });
          * 
          */
          this.setViewStyle = function(parameters) {
@@ -707,9 +716,26 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @example //if the user were to pass a value for animationDuration like
-         *          //  so glviewer.rotate(90,"y",1000); then over the course of 1 second
-         *          //  (1000 milleseconds) the program would rotate.
+         * @example     $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      //viewer.translate(10,10);         
+      //viewer.zoomTo({resn:'STI'});
+      //viewer.zoom(10);
+      viewer.rotate(90,"y");
+      viewer.render(callback);
+    };
          *  
          */
         var rotate_index=0;
@@ -1026,9 +1052,27 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @example //if the suer were to pass a value for the animationDuration like
-         *          //  so glviewer.zoom(3,1000); the program would zoom by a factor of 
-         *          //  3 for 1 second(1000 milleseconds) 
+         * @example   
+    $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      //viewer.translate(10,10);         
+      //viewer.zoomTo({resn:'STI'});
+      viewer.zoom(10);
+      //viewer.rotate(90,"y");
+      viewer.render(callback);
+    };
          */
          var zoomIndex=0;
         this.zoom = function(factor,animationDuration) {
@@ -1090,9 +1134,26 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @example //if the user were to pass animationDuration to the function 
-         *          //  like so glviewer.translate(10,10,1000); then the program would
-         *          //  perform a translation over the course of 1 second(1000 milleseconds)
+         * @example     $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      viewer.translate(10,10);         
+      //viewer.zoomTo({resn:'STI'});
+      //viewer.zoom(10);
+      //viewer.rotate(90,"y");
+      viewer.render(callback);
+    };
          */
          var transIndex=0;
         this.translate = function(x, y, animationDuration) {
@@ -1296,8 +1357,26 @@ $3Dmol.GLViewer = (function() {
          *          //  the function like so viewer.zoomTo({resn:'STI'},1000);
          *          //  the program would zoom into resn 'STI' over the course 
          *          //  of 1 second(1000 milleseconds).
-         *  // Focus on centroid of all atoms of all models in this
-         * viewer.zoomTo(); // (equivalent to viewer.zoomTo({}) )
+        $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      //viewer.translate(10,10);         
+      viewer.zoomTo({resn:'STI'});
+      //viewer.zoom(10);
+      //viewer.rotate(90,"y");
+      viewer.render(callback);
+    };
          */
         var rot_index=0;
         var z_index=0;
@@ -1495,13 +1574,13 @@ $3Dmol.GLViewer = (function() {
          * //all alpha carbons with their residue name
          *  // Select all alpha carbons (have property atom : "CA") from last
          * //model added var atoms =
-         * glviewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
+         * viewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
          * 
          * for (var a in atoms) { var atom = atoms[a];
          *  // Create label at alpha carbon's position displaying atom's residue
          * // and residue number var labelText = atom.resname + " " + atom.resi;
          * 
-         * var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:atom.x, y: atom.y, z: atom.z}});
+         * var l = viewer.createLabel(labelText, {fontSize: 12, position: {x:atom.x, y: atom.y, z: atom.z}});
          * 
          * labels.push(l); }
          *  // Render labels 
@@ -1546,6 +1625,7 @@ $3Dmol.GLViewer = (function() {
          * viewer.removeLabel(label); }
          * 
          * viewer.render();
+
          */
         this.removeLabel = function(label) {
             //todo: don't do the linear search
@@ -1697,9 +1777,8 @@ $3Dmol.GLViewer = (function() {
          * @param {ArrowSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
          @example
-         var element=$('#gldiv');
-         var viewer=$3Dmol.createViewer(element);
-         $3Dmol.download("pdb:4DM7",viewer,{},function(){
+        $3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
                   viewer.addArrow({
                       start: {x:-10.0, y:0.0, z:0.0},
                       end: {x:0.0, y:-10.0, z:0.0},
@@ -1712,9 +1791,8 @@ $3Dmol.GLViewer = (function() {
                           viewer.render();
                       }
                   });
-                  
                   viewer.render();
-              });
+                });
          */
         this.addArrow = function(spec) {
             spec = spec || {};
@@ -1734,8 +1812,25 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLShape}
 
           @example
-         var element = $('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
+         viewer.setBackgroundColor(0xffffffff);
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
               viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
                                   end:{x:20.0,y:0.0,z:0.0},
                                   radius:1.0,
@@ -2304,16 +2399,18 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
          * 
          * @example
-         * var element=$('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
-
+         viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
-            m.setStyle({chain:'F'},{'cartoon':{arrows:true,color:'white'}});
+        m.setStyle({chain:'A'},{'cartoon':{color:'spectrum'}});
+        m.setStyle({chain:'C'},{'cartoon':{style:'trace',color:'blue'}});
+        m.setStyle({chain:'E'},{'cartoon':{tubes:true,arrows:true,color:'green',opacity:0.75}});
+        m.setStyle({chain:'B'},{'cartoon':{color:'red',opacity:0.5}});
+        m.setStyle({chain:'D'},{'cartoon':{style:'trace',color:'grey',opacity:0.75}});
+        m.setStyle({chain:'F'},{'cartoon':{arrows:true,color:'white'}});
        // viewer.addStyle({chain:'B'},{line:{}});
        viewer.zoomTo();
-       viewer.render();
-       });
-
+       viewer.render(callback);
+    });
          */
         this.setStyle = function(sel, style) {
             if(typeof(style) === 'undefined') {

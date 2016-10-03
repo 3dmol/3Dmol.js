@@ -1510,18 +1510,18 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
          * @example
-         *var element=$('#gldiv');
-         var myviewer = $3Dmol.createViewer(element);
-              $3Dmol.download("pdb:4UB9",myviewer,{},function(){
+         *$3Dmol.download("pdb:4UB9",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
 
-                  var atoms = myviewer.selectedAtoms();
-                  for(var i = 0; i < atoms.length; i++) {
-                    var a = atoms[i];
-                    a.properties.structured = (a.ss == 'h' || a.ss == 's');                    
-                  }
-                  
-                  myviewer.setStyle({properties: {structured: true}}, {cartoon: {}});
-                  myviewer.render();
+                  viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.render();
               });
          */
         this.selectedAtoms = function(sel, from) {
@@ -1679,12 +1679,14 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#addAtoms
          * @param {type} newatoms
          * @example
-         *var element=$('#gldiv');
-         *var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
-            var myviewer = $3Dmol.createViewer(element);
-            m = myviewer.addModel();
+         * var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
+           
+            viewer.setBackgroundColor(0xffffffff);
+            m = viewer.addModel();
             m.addAtoms(atoms);
-            myviewer.render();
+            m.setStyle({},{stick:{}});
+            viewer.zoomTo();
+            viewer.render();
          */        
         this.addAtoms = function(newatoms) {
             molObj = null;
@@ -1763,13 +1765,19 @@ $3Dmol.GLModel = (function() {
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
          @example
-         var element=$("#gldiv");
-         var myviewer=$3Dmol.createViewer(element);
-         $3Dmol.download("pdb:3VOV",myviewer,{},function(){
-            
-            myviewer.setStyle({chain:'A'}, {stick:{}});
-            myviewer.render();
-         });
+        $3Dmol.download("pdb:4UB9",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+
+                  viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.render();
+              });
          */
         this.setStyle = function(sel, style, add) {
             
@@ -1995,17 +2003,17 @@ $3Dmol.GLModel = (function() {
          * @param {type} sel - selection object
          * @param {type} func - function to be used to set the color
          @example
-         var element=$("#gldiv");
-          var viewer = $3Dmol.createViewer(element);
-              $3Dmol.download("pdb:4UAA",viewer,{},function(){
+          $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
                   var colorAsSnake = function(atom) {
                     return atom.resi % 2 ? 'white': 'green'
                   };
 
-                  viewer.getModel().setColorByFunction( {}, { cartoon: {colorfunc: colorAsSnake }});
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
 
                   viewer.render();
               });
+        
          */
         this.setColorByFunction = function(sel, colorfun) {
             var atoms = this.selectedAtoms(sel, atoms);
