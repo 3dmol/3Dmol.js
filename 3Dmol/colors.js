@@ -549,11 +549,15 @@ $3Dmol.getColorFromStyle = function(atom, style) {
                 typeof(scheme.gradient) != 'undefined') {         
             //apply a property mapping
             var prop = scheme.prop;
-            var scheme = scheme.gradient;
-            var range = scheme.range() || [-1,1]; //sensible default
+            var grad = scheme.gradient; //redefining scheme
+            if(typeof($3Dmol.Gradient.builtinGradients[grad]) != "undefined") {
+                grad = new $3Dmol.Gradient.builtinGradients[grad](scheme.min, scheme.max, scheme.mid);
+            }
+            
+            var range = grad.range() || [-1,1]; //sensible default
             var val = $3Dmol.getAtomProperty(atom, prop);
             if(val != null) {
-                color = scheme.valueToHex(val, range);
+                color = grad.valueToHex(val, range);
             }
         } else if(typeof(scheme.prop) != 'undefined' &&
                 typeof(scheme.map) != 'undefined') {         

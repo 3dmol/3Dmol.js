@@ -1325,7 +1325,10 @@ $3Dmol.GLModel = (function() {
             for (var i = 1; i <= numFrames; i++) {
                 var newAtoms = [];
                 for (var j = 0; j < atoms.length; j++) {
-                    var newVector = new $3Dmol.Vector3(atoms[j].dx, atoms[j].dy, atoms[j].dz);
+                    var newVector = new $3Dmol.Vector3(
+                                            $3Dmol.getAtomProperty(atoms[j],'dx'), 
+                                            $3Dmol.getAtomProperty(atoms[j],'dy'), 
+                                            $3Dmol.getAtomProperty(atoms[j],'dz'));
                     var starting = new $3Dmol.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
                     newVector.multiplyScalar((i*amplitude)/numFrames);
                     starting.add(newVector);
@@ -1894,16 +1897,18 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel.setColorByProperty
          * @param {type} sel
          * @param {type} prop
-         * @param {type} scheme
+         * @param {type} gradient
          */
         this.setColorByProperty = function(sel, prop, scheme, range) {
+            var i, a;
             var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
-            var min =  Number.POSITIVE_INFINITY;
-            var max =  Number.NEGATIVE_INFINITY;
-            var i, a;
+
+            if(typeof($3Dmol.Gradient.builtinGradients[scheme]) != "undefined") {
+                scheme = new $3Dmol.Gradient.builtinGradients[scheme]();
+            }
             
             if(!range) { //no explicit range, get from scheme
                 range = scheme.range();
@@ -1917,7 +1922,7 @@ $3Dmol.GLModel = (function() {
                 a = atoms[i];
                 var val = $3Dmol.getAtomProperty(a, prop);
                 if(val != null) {
-                    a.color = scheme.valueToHex(parseFloat(a.properties[prop]), [range[0],range[1]]);
+                    a.color = scheme.valueToHex(parseFloat(a.properties[prop]), range);
                 }                    
             }
         };
