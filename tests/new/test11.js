@@ -1,5 +1,5 @@
 $3Dmol.download("pdb:2ABJ",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setViewStyle({style:"outline"});
                   viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
                   viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});

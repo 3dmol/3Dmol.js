@@ -1,4 +1,4 @@
-viewer.setBackgroundColor(0xffffffff);
+
 
               viewer.setViewStyle({style:"outline"});
               $.get('volData/1fas.pqr', function(data){

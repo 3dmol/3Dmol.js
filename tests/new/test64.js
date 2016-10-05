@@ -1,4 +1,4 @@
-viewer.setBackgroundColor(0xffffffff);
+
             var rec = viewer.addModel($('#rec').val(),'pdb');
        
             rec.setStyle({sphere:{}});

@@ -1,5 +1,5 @@
 
-            viewer.setBackgroundColor(0xffffffff);
+            
             var rec = viewer.addModel($('#rec').val(),'pdb');
             rec.setHoverable({},true, {hover_callback:function(atom){  //hover
                 viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});

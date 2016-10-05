@@ -1,4 +1,4 @@
-viewer.setBackgroundColor(0xffffffff);
+
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
         m.setStyle({chain:'A'},{'cartoon':{color:'spectrum'}});
         m.setStyle({chain:'C'},{'cartoon':{style:'trace',color:'blue'}});

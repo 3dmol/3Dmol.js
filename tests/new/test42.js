@@ -1,6 +1,6 @@
 
               $3Dmol.download("pdb:4UB9",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   
                   var atoms = viewer.selectedAtoms();
                   for(var i = 0; i < atoms.length; i++) {

@@ -144,7 +144,7 @@
             </div>
             <div id="gldiv" style="width: 400px; height: 400px; position: relative;"></div>
                     <script>system={
-glviewer_js_resetContainer: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_resetContainer"});
+_3glviewer_js_resetContainer: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_resetContainer"});
 
           // Assume there exist HTML divs with ids "gldiv", "gldiv2"
           var element = $("#gldiv"), element2 = $("#gldiv2");
@@ -168,7 +168,7 @@ setClickable1: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"
           viewer.setContainer('newdiv')
          viewer.render(callback);
 }catch(err){callback()}},
-glviewer_js_setBackgroundColor: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_setBackgroundColor"});
+_3glviewer_js_setBackgroundColor: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_setBackgroundColor"});
 
           
           viewer.setBackgroundColor(0x00000000);
@@ -177,13 +177,13 @@ glviewer_js_setBackgroundColor: function (callback){try{var viewer=$3Dmol.create
           
          viewer.render(callback);
 }catch(err){callback()}},
-glviewer_js_setProjection: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_setProjection"});
+_3glviewer_js_setProjection: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_setProjection"});
 
           viewer.setProjection("orthographic");
           
          viewer.render(callback);
 }catch(err){callback()}},
-glviewer_js_setViewStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_setViewStyle"});
+_3glviewer_js_setViewStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_setViewStyle"});
 
             viewer.setViewStyle({style:"outline"});
               $.get('volData/1fas.pqr', function(data){
@@ -197,12 +197,12 @@ glviewer_js_setViewStyle: function (callback){try{var viewer=$3Dmol.createViewer
           
          
 }catch(err){callback()}},
-glviewer_js_getModel: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_getModel"});
+_3glviewer_js_getModel: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_getModel"});
  // Retrieve reference to first GLModel added var m =
                    viewer.getModel(0);
          viewer.render(callback);
 }catch(err){callback()}},
-glviewer_js_rotate: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_rotate"});
+_3glviewer_js_rotate: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_rotate"});
      $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
@@ -226,7 +226,7 @@ glviewer_js_rotate: function (callback){try{var viewer=$3Dmol.createViewer($("#g
            
          
 }catch(err){callback()}},
-glviewer_js_zoom: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_zoom"});
+_3glviewer_js_zoom: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_zoom"});
    
     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
@@ -250,7 +250,7 @@ glviewer_js_zoom: function (callback){try{var viewer=$3Dmol.createViewer($("#gld
     };
          
 }catch(err){callback()}},
-glviewer_js_translate: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_translate"});
+_3glviewer_js_translate: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_translate"});
      $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
@@ -273,7 +273,7 @@ glviewer_js_translate: function (callback){try{var viewer=$3Dmol.createViewer($(
     };
          
 }catch(err){callback()}},
-glviewer_js_zoomTo: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_zoomTo"});
+_3glviewer_js_zoomTo: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_zoomTo"});
  // Assuming we have created a model of a protein with
                   // multiple chains (e.g. from a PDB file), focus on atoms in
                   // chain B glviewer.zoomTo({chain: 'B'});
@@ -306,7 +306,7 @@ setClickable1: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"
     };
          
 }catch(err){callback()}},
-glviewer_js_addLabel: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addLabel"});
+_3glviewer_js_addLabel: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addLabel"});
 
            // Assuming glviewer contains a model representing a protein, label
           //all alpha carbons with their residue name
@@ -325,7 +325,7 @@ glviewer_js_addLabel: function (callback){try{var viewer=$3Dmol.createViewer($("
          viewer.render(callback);
          
 }catch(err){callback()}},
-glviewer_js_removeLabel: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_removeLabel"});
+_3glviewer_js_removeLabel: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_removeLabel"});
  // Remove labels created in 
           
           for (var i = 0; i < labels.length; i++) {
@@ -335,7 +335,7 @@ glviewer_js_removeLabel: function (callback){try{var viewer=$3Dmol.createViewer(
 
          
 }catch(err){callback()}},
-glviewer_js_addArrow: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addArrow"});
+_3glviewer_js_addArrow: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addArrow"});
 
         $3Dmol.download("pdb:4DM7",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
@@ -355,7 +355,7 @@ glviewer_js_addArrow: function (callback){try{var viewer=$3Dmol.createViewer($("
                 });
          
 }catch(err){callback()}},
-glviewer_js_addCylinder: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addCylinder"});
+_3glviewer_js_addCylinder: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addCylinder"});
 
          viewer.setBackgroundColor(0xffffffff);
               viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
@@ -385,7 +385,7 @@ glviewer_js_addCylinder: function (callback){try{var viewer=$3Dmol.createViewer(
               viewer.render(callback);
          
 }catch(err){callback()}},
-glviewer_js_addLine: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addLine"});
+_3glviewer_js_addLine: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addLine"});
 
          var element=$('#gldiv');
          var viewer=$3Dmol.createViewer(element);
@@ -398,7 +398,7 @@ glviewer_js_addLine: function (callback){try{var viewer=$3Dmol.createViewer($("#
 
          
 }catch(err){callback()}},
-glviewer_js_addCustom: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addCustom"});
+_3glviewer_js_addCustom: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addCustom"});
 
          var element=$('#gldiv');
          var viewer=$3Dmol.createViewer(element);
@@ -427,13 +427,13 @@ glviewer_js_addCustom: function (callback){try{var viewer=$3Dmol.createViewer($(
     viewer.render(callback);
          
 }catch(err){callback()}},
-glviewer_js_addVolumetricData: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addVolumetricData"});
+_3glviewer_js_addVolumetricData: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addVolumetricData"});
 
           viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", opacity: 0.95});              
           viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
          viewer.render(callback);
 }catch(err){callback()}},
-glviewer_js_addIsosurface: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addIsosurface"});
+_3glviewer_js_addIsosurface: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addIsosurface"});
  
          var element=$('#gldiv');
          var viewer=$3Dmol.createViewer(element);
@@ -443,7 +443,7 @@ glviewer_js_addIsosurface: function (callback){try{var viewer=$3Dmol.createViewe
            viewer.render(callback); 
          
 }catch(err){callback()}},
-glviewer_js_animate: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_animate"});
+_3glviewer_js_animate: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_animate"});
 
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
@@ -451,7 +451,7 @@ glviewer_js_animate: function (callback){try{var viewer=$3Dmol.createViewer($("#
             viewer.render(callback);
          
 }catch(err){callback()}},
-glviewer_js_addModel: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addModel"});
+_3glviewer_js_addModel: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addModel"});
 
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
@@ -460,7 +460,7 @@ glviewer_js_addModel: function (callback){try{var viewer=$3Dmol.createViewer($("
          
           
 }catch(err){callback()}},
-glviewer_js_addAsOneMolecule: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addAsOneMolecule"});
+_3glviewer_js_addAsOneMolecule: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addAsOneMolecule"});
 
           var element=$('#gldiv');
           var viewer = $3Dmol.createViewer(element);
@@ -470,7 +470,7 @@ glviewer_js_addAsOneMolecule: function (callback){try{var viewer=$3Dmol.createVi
               });
          
 }catch(err){callback()}},
-glviewer_js_setStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_setStyle"});
+_3glviewer_js_setStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_setStyle"});
 
          viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
@@ -486,7 +486,7 @@ glviewer_js_setStyle: function (callback){try{var viewer=$3Dmol.createViewer($("
     });
          
 }catch(err){callback()}},
-glviewer_js_addStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_addStyle"});
+_3glviewer_js_addStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_addStyle"});
 
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
@@ -498,13 +498,13 @@ glviewer_js_addStyle: function (callback){try{var viewer=$3Dmol.createViewer($("
        });
          
 }catch(err){callback()}},
-glviewer_js_setClickable: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glviewer_js_setClickable"});
+_3glviewer_js_setClickable: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glviewer_js_setClickable"});
 
           viewer.setClickable({}, false); // disable click-handling for entire viewer
           viewer.setClickable({chain: 'B'}, true, function(){ console.log(this.elem); }); // chain B prints the clicked element to console
          viewer.render(callback);
 }catch(err){callback()}},
-glcartoon_js_CartoonStyleSpec: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glcartoon_js_CartoonStyleSpec"});
+_3glcartoon_js_CartoonStyleSpec: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glcartoon_js_CartoonStyleSpec"});
  $3Dmol.download("pdb:4ZD3",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setViewStyle({style:"outline"});
@@ -513,7 +513,7 @@ glcartoon_js_CartoonStyleSpec: function (callback){try{var viewer=$3Dmol.createV
               });
  
 }catch(err){callback()}},
-_3dmol_js_createViewer: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3dmol_js_createViewer"});
+_3_3dmol_js_createViewer: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3_3dmol_js_createViewer"});
 
    $3Dmol.download("pdb:4UAA",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
@@ -528,7 +528,7 @@ _3dmol_js_createViewer: function (callback){try{var viewer=$3Dmol.createViewer($
                          
  
 }catch(err){callback()}},
-_3dmol_js_download: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3dmol_js_download"});
+_3_3dmol_js_download: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3_3dmol_js_download"});
 
  viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
@@ -538,7 +538,7 @@ _3dmol_js_download: function (callback){try{var viewer=$3Dmol.createViewer($("#g
     });
   
 }catch(err){callback()}},
-colors_js_ColorSpec: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"colors_js_ColorSpec"});
+_3colors_js_ColorSpec: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3colors_js_ColorSpec"});
  
  
               $.get('../test_structs/benzene-homo.cube', function(data){
@@ -595,25 +595,25 @@ ColorSpec2: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{
               });
   
 }catch(err){callback()}},
-specs_js_Vector_3: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"specs_js_Vector_3"});
+_3specs_js_Vector_3: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3specs_js_Vector_3"});
 
   viewer.addResLabels({resi: [1,2,3,4,5], atom: 'CA'}); // will label alpha carbons (CA) of residues 1-5
   
   viewer.render(callback);
 }catch(err){callback()}},
-specs_js_AtomSelectionSpec: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"specs_js_AtomSelectionSpec"});
+_3specs_js_AtomSelectionSpec: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3specs_js_AtomSelectionSpec"});
 
   viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); // stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
  
   viewer.render(callback);
 }catch(err){callback()}},
-specs_js_SurfaceStyleSpec: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"specs_js_SurfaceStyleSpec"});
+_3specs_js_SurfaceStyleSpec: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3specs_js_SurfaceStyleSpec"});
 
   viewer.addSurface($3Dmol.SurfaceType.MS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:0.85});
 
  viewer.render(callback);
 }catch(err){callback()}},
-glmodel_js_vibrate: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glmodel_js_vibrate"});
+_3glmodel_js_vibrate: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glmodel_js_vibrate"});
 
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
@@ -627,7 +627,7 @@ glmodel_js_vibrate: function (callback){try{var viewer=$3Dmol.createViewer($("#g
             viewer.render(callback);
          
 }catch(err){callback()}},
-glmodel_js_selectedAtoms: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glmodel_js_selectedAtoms"});
+_3glmodel_js_selectedAtoms: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glmodel_js_selectedAtoms"});
 
          $3Dmol.download("pdb:4UB9",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
@@ -644,7 +644,7 @@ glmodel_js_selectedAtoms: function (callback){try{var viewer=$3Dmol.createViewer
               });
          
 }catch(err){callback()}},
-glmodel_js_addAtoms: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glmodel_js_addAtoms"});
+_3glmodel_js_addAtoms: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glmodel_js_addAtoms"});
 
           var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
            
@@ -656,7 +656,7 @@ glmodel_js_addAtoms: function (callback){try{var viewer=$3Dmol.createViewer($("#
             viewer.render(callback);
          
 }catch(err){callback()}},
-glmodel_js_setStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glmodel_js_setStyle"});
+_3glmodel_js_setStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glmodel_js_setStyle"});
 
         $3Dmol.download("pdb:4UB9",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
@@ -673,7 +673,7 @@ glmodel_js_setStyle: function (callback){try{var viewer=$3Dmol.createViewer($("#
               });
          
 }catch(err){callback()}},
-glmodel_js_setClickable: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glmodel_js_setClickable"});
+_3glmodel_js_setClickable: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glmodel_js_setClickable"});
 
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
@@ -684,7 +684,7 @@ glmodel_js_setClickable: function (callback){try{var viewer=$3Dmol.createViewer(
             viewer.render(callback);
          
 }catch(err){callback()}},
-glmodel_js_setHoverable: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glmodel_js_setHoverable"});
+_3glmodel_js_setHoverable: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glmodel_js_setHoverable"});
 
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
@@ -698,7 +698,7 @@ glmodel_js_setHoverable: function (callback){try{var viewer=$3Dmol.createViewer(
             viewer.render(callback);
          
 }catch(err){callback()}},
-glmodel_js_setColorByFunction: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glmodel_js_setColorByFunction"});
+_3glmodel_js_setColorByFunction: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glmodel_js_setColorByFunction"});
 
           $3Dmol.download("pdb:4UAA",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
@@ -713,7 +713,7 @@ glmodel_js_setColorByFunction: function (callback){try{var viewer=$3Dmol.createV
         
          
 }catch(err){callback()}},
-glmodel_js_removegl: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glmodel_js_removegl"});
+_3glmodel_js_removegl: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glmodel_js_removegl"});
 
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
@@ -723,12 +723,7 @@ glmodel_js_removegl: function (callback){try{var viewer=$3Dmol.createViewer($("#
 
           
 }catch(err){callback()}},
-glshape_js_addCustom: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glshape_js_addCustom"});
-
-      
-         viewer.render(callback);
-}catch(err){callback()}},
-glshape_js_addSphere: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glshape_js_addSphere"});
+_3glshape_js_addSphere: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glshape_js_addSphere"});
  
          var element=$('#gldiv');
          var viewer=$3Dmol.createViewer(element);
@@ -738,7 +733,7 @@ glshape_js_addSphere: function (callback){try{var viewer=$3Dmol.createViewer($("
          viewer.render(callback);
          
 }catch(err){callback()}},
-glshape_js_addCylinder: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glshape_js_addCylinder"});
+_3glshape_js_addCylinder: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glshape_js_addCylinder"});
 
          viewer.setBackgroundColor(0xffffffff);
               viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
@@ -768,7 +763,7 @@ glshape_js_addCylinder: function (callback){try{var viewer=$3Dmol.createViewer($
               viewer.render(callback);
          
 }catch(err){callback()}},
-glshape_js_addLine: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glshape_js_addLine"});
+_3glshape_js_addLine: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glshape_js_addLine"});
 
          $3Dmol.download("pdb:2ABJ",viewer,{},function(){
                   viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
@@ -777,7 +772,7 @@ glshape_js_addLine: function (callback){try{var viewer=$3Dmol.createViewer($("#g
 
          
 }catch(err){callback()}},
-glshape_js_addArrow: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glshape_js_addArrow"});
+_3glshape_js_addArrow: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glshape_js_addArrow"});
 
           $3Dmol.download("pdb:4DM7",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
@@ -797,7 +792,7 @@ glshape_js_addArrow: function (callback){try{var viewer=$3Dmol.createViewer($("#
                 });
          
 }catch(err){callback()}},
-glshape_js_addIsosurface: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"glshape_js_addIsosurface"});
+_3glshape_js_addIsosurface: function (callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"_3glshape_js_addIsosurface"});
  //the user can specify a selected region for the isosurface 
          $.get('../test_structs/benzene-homo.cube', function(data){
                   var voldata = new $3Dmol.VolumeData(data, "cube");
@@ -825,7 +820,7 @@ glshape_js_addIsosurface: function (callback){try{var viewer=$3Dmol.createViewer
          
 }catch(err){callback()}},
 test11: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test11"});$3Dmol.download("pdb:2ABJ",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setViewStyle({style:"outline"});
                   viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
                   viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
@@ -835,7 +830,7 @@ test11: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                   viewer.render(callback);
               });
 }catch(err){callback()}},
-test48: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test48"});viewer.setBackgroundColor(0xffffffff);
+test48: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test48"});
 
     $3Dmol.download('pdb:1pfl',viewer,{},function(m) {
         m.setStyle({'cartoon':{colorscheme:{prop:'ss',map:$3Dmol.ssColors.Jmol}}});
@@ -846,7 +841,7 @@ test48: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
 test61: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test61"});var viewer = $3Dmol.createViewer($("#gldiv"), {
 		defaultcolors : $3Dmol.rasmolElementColors
 		});
-    viewer.setBackgroundColor(0xffffffff);
+    
     var m;
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/4csv.pdb", false);
@@ -868,7 +863,7 @@ test61: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
     }
     rawFile.send(null);    
 }catch(err){callback()}},
-test55: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test55"});viewer.setBackgroundColor(0xffffffff);
+test55: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test55"});
     
     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
@@ -892,13 +887,13 @@ test55: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
     };
 }catch(err){callback()}},
 test31: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test31"});$3Dmol.download("pdb:1BNA", viewer, {}, function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({}, {cartoon:{style:"oval", ribbon:true}});
                   viewer.render(callback);
               });
 }catch(err){callback()}},
 test49: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test49"});
-            viewer.setBackgroundColor(0xffffffff);
+            
             var rec = viewer.addModel($('#rec').val(),'pdb');
             rec.setHoverable({},true, {hover_callback:function(atom){  //hover
                 viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});
@@ -1918,7 +1913,7 @@ ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
 
 
-</textarea>`);document.appendChild(objectHTML);
+</textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();
 }catch(err){callback()}},
 test19: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test19"});var setStyles = function(volumedata){
                     var data = new $3Dmol.VolumeData(volumedata, "cube");
@@ -1931,7 +1926,7 @@ test19: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
               viewer.render(callback);
               };
               $3Dmol.download("pdb:4DLN",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   $.get("volData/1fas.cube",setStyles);
                   viewer.render(callback);
                 });
@@ -1952,7 +1947,7 @@ test5: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"te
 `);document.appendChild(objectHTML);
 }catch(err){callback()}},
 test15: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test15"});$3Dmol.download("pdb:4DM7",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
 
                   viewer.setStyle({chain:'A',resn:'GLU'},{sphere:{color:'cyan'}});
                   viewer.setStyle({chain:'B',atom:'CG'},{sphere:{color:'teal'}});
@@ -1978,9 +1973,9 @@ H     0.931955   -0.364989    0.000003    1.507100   -0.601158   -0.004108
 H    -0.465975   -0.364992    0.807088    0.283368    0.257996   -0.583024
 H    -0.465979   -0.364991   -0.807088    0.392764    0.342436    0.764260
 
-</textarea>`);document.appendChild(objectHTML);
+</textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();
 }catch(err){callback()}},
-test64: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test64"});viewer.setBackgroundColor(0xffffffff);
+test64: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test64"});
             var rec = viewer.addModel($('#rec').val(),'pdb');
        
             rec.setStyle({sphere:{}});
@@ -2994,9 +2989,9 @@ ATOM    999  CD1 LEU A 129     -13.088  22.029   7.721  1.00 41.00           C
 ATOM   1000  CD2 LEU A 129     -13.441  19.891   8.982  1.00 29.73           C  
 ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
-</textarea>`);document.appendChild(objectHTML);
+</textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();
 }catch(err){callback()}},
-test57: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test57"});viewer.setBackgroundColor(0xffffffff);
+test57: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test57"});
 
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -3013,7 +3008,7 @@ test57: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
 }catch(err){callback()}},
 test42: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test42"});
               $3Dmol.download("pdb:4UB9",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   
                   var atoms = viewer.selectedAtoms();
                   for(var i = 0; i < atoms.length; i++) {
@@ -3026,7 +3021,7 @@ test42: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
               });
 }catch(err){callback()}},
 test62: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test62"});$3Dmol.download("pdb:4DM7",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.addArrow({
                       start: {x:-10.0, y:0.0, z:0.0},
                       end: {x:0.0, y:-10.0, z:0.0},
@@ -3054,7 +3049,7 @@ test62: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                   viewer.render(callback);
                 });
 }catch(err){callback()}},
-test27: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test27"});viewer.setBackgroundColor(0xffffffff);
+test27: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test27"});
 
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -3070,7 +3065,7 @@ test27: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                   viewer.render(callback);
               });
 }catch(err){callback()}},
-test59: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test59"});viewer.setBackgroundColor(0xffffffff);
+test59: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test59"});
 
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -3086,7 +3081,7 @@ test59: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
               });
 }catch(err){callback()}},
 test17: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test17"});$3Dmol.download("pdb:4UND",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
 
                   viewer.setStyle({chain:'A',invert:true},{sphere:{color:'blue',radius:1.0}});
                   viewer.setStyle({chain:'A',resi:669,expand:5.0},{sphere:{color:0xC0C0A902}});
@@ -11162,7 +11157,7 @@ HETATM 4050  C15 ESE B 601      26.225  -5.140  10.561  1.00 21.85           C
 HETATM 4051  C16 ESE B 601      27.205  -4.935   8.241  1.00 18.89           C  
 HETATM 4052  O01 ESE B 601      20.710  -3.420   2.539  1.00 23.25           O  
 HETATM 4053  O02 ESE B 601      27.424  -4.506  10.930  1.00 24.11           O  
-               </textarea>`);document.appendChild(objectHTML);var objectHTML=$(`
+               </textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();var objectHTML=$(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
                data-element='moldata'
@@ -11174,7 +11169,7 @@ HETATM 4053  O02 ESE B 601      27.424  -4.506  10.930  1.00 24.11           O
 `);document.appendChild(objectHTML);
 }catch(err){callback()}},
 test9: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test9"});$3Dmol.download("pdb:2EJ0",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                   viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
                                            borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
@@ -11197,7 +11192,7 @@ test9: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"te
                   
                 });
 }catch(err){callback()}},
-test56: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test56"});viewer.setBackgroundColor(0xffffffff);
+test56: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test56"});
     viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},
                                   radius:0.5,
@@ -11206,7 +11201,7 @@ test56: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                                   color:'teal'});
     viewer.render(callback);
 }catch(err){callback()}},
-test24: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test24"});viewer.setBackgroundColor(0xffffffff);
+test24: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test24"});
 
               viewer.setViewStyle({style:"outline"});
               $.get('volData/1fas.pqr', function(data){
@@ -11221,7 +11216,7 @@ test24: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
 test53: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test53"});var viewer = $3Dmol.createViewer($("#gldiv"), {
 		defaultcolors : $3Dmol.rasmolElementColors
 		});
-    viewer.setBackgroundColor(0xffffffff);
+    
     var m;
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/TC5b.prmtop", false);
@@ -11247,7 +11242,7 @@ test53: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
     rawFile.send(null);    
 }catch(err){callback()}},
 test20: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test20"});$3Dmol.download("pdb:4UB9",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
 
                   viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
                   viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
@@ -11261,12 +11256,12 @@ test20: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
               });
 }catch(err){callback()}},
 test1: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test1"});$3Dmol.download("pdb:4UND",viewer,{},function(){
-    viewer.setBackgroundColor(0xffffffff);
+    
     viewer.render(callback);
 });
 }catch(err){callback()}},
 test29: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test29"});$3Dmol.download("pdb:4ZD3",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setViewStyle({style:"outline"});
                   viewer.setStyle({},{cartoon:{}});
                   viewer.render(callback);
@@ -11275,7 +11270,7 @@ test29: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
 test54: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test54"});var viewer = $3Dmol.createViewer($("#gldiv"), {
 		defaultcolors : $3Dmol.rasmolElementColors
 		});
-    viewer.setBackgroundColor(0xffffffff);
+    
     var m;
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/2water.gro", false);
@@ -11371,7 +11366,7 @@ function cylinder(viewer) {
 }
 
 
-            viewer.setBackgroundColor(0xffffffff);
+            
 
             triangle(viewer);
             cylinder(viewer);
@@ -16208,7 +16203,7 @@ CONECT 3397 3396 3398
 CONECT 3398 3397                                                                
 CONECT 3399 3393                                                                
 MASTER      605    0   12   29    8    0    0    6 3923    2  122   44          
-END        </textarea>`);document.appendChild(objectHTML);var objectHTML=$(`
+END        </textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();var objectHTML=$(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
                data-element='moldata_sdf'
@@ -16218,7 +16213,7 @@ END        </textarea>`);document.appendChild(objectHTML);var objectHTML=$(`
   
   `);document.appendChild(objectHTML);
 }catch(err){callback()}},
-test58: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test58"});viewer.setBackgroundColor(0xffffffff);
+test58: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test58"});
 
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -16257,7 +16252,7 @@ test14: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                 });
 }catch(err){callback()}},
 test16: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test16"}); $3Dmol.download("pdb:2YBB",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({chain:'A'},{stick:{hidden:true}});
                   viewer.setStyle({resi:91},{sphere:{color:'red',radius:5.0}});
                   viewer.setStyle({bonds:0},{sphere:{color:'fuchsia',radius:5.0}});
@@ -16363,7 +16358,7 @@ v:U4C5Cr:4
   8 35  2  0  0  0  0
 M  CHG  2  35   1  40  -1
 M  END
-</textarea>`);document.appendChild(objectHTML);var objectHTML=$(`
+</textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();var objectHTML=$(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
                data-element='moldata_sdf'
@@ -16374,20 +16369,20 @@ M  END
 `);document.appendChild(objectHTML);
 }catch(err){callback()}},
 test32: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test32"});$3Dmol.download("pdb:1YCR", viewer, {}, function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({}, {cartoon:{tubes:true, style:"rectangle"}});
                   viewer.render(callback);
               });
 }catch(err){callback()}},
 test22: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test22"});$3Dmol.download("pdb:4UAA",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({chain:'A'},{cartoon:{opacity:0.5,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
                   viewer.setStyle({chain:'B'},{line:{colorscheme:{prop:'partialCharge',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}});
                   viewer.render(callback);
               });
 }catch(err){callback()}},
 test12: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test12"});$3Dmol.download("pdb:3VOV",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({chain:'A'},{cartoon:{color:'spectrum'}});
                   viewer.setStyle({chain:'B'},{cartoon:{style:'trace'}});
                   viewer.setStyle({chain:'C'},{cartoon:{color:'red'}});
@@ -16396,7 +16391,7 @@ test12: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
               });
 }catch(err){callback()}},
 test33: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test33"});$3Dmol.download("pdb:4YGY", viewer, {}, function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({chain:'A'}, {cartoon:{arrows:true, opacity:0.8, color:'spectrum'}});
                   viewer.setStyle({chain:'B'}, {cartoon:{style:"trace"}});
                   viewer.render(callback);
@@ -16404,7 +16399,7 @@ test33: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
 }catch(err){callback()}},
 test41: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test41"}); var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
            
-            viewer.setBackgroundColor(0xffffffff);
+            
             m = viewer.addModel();
             m.addAtoms(atoms);
             m.setStyle({},{stick:{}});
@@ -16412,12 +16407,12 @@ test41: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
             viewer.render(callback);
 }catch(err){callback()}},
 test10: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test10"});$3Dmol.download("cid:5",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({},{stick:{radius:0.5,singleBonds:true,colorscheme:'greenCarbon',outline:true}});
                   viewer.render(callback);
               });
 }catch(err){callback()}},
-test37: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test37"});viewer.setBackgroundColor(0xffffffff);
+test37: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test37"});
 
               $.get('../test_structs/multiple.sdf', function(data){
                   viewer.addAsOneMolecule(data, "sdf");
@@ -16426,7 +16421,7 @@ test37: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
               });
 }catch(err){callback()}},
 test18: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test18"});$3Dmol.download("pdb:4UND",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
 
                   viewer.setStyle({chain:'A',within:{distance:10.0,sel:{chain:'B'}}},{sphere:{color:'blue',radius:1.0}});
                   viewer.setStyle({chain:'B'},{stick:{color:'red'}});
@@ -16435,7 +16430,7 @@ test18: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
               });
 }catch(err){callback()}},
 test21: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test21"});$3Dmol.download("pdb:4YCV",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
 
                   viewer.setStyle({chain:'A'},{sphere:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
                   viewer.setStyle({chain:'B'},{sphere:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
@@ -16444,7 +16439,7 @@ test21: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                   viewer.render(callback);
               });
 }catch(err){callback()}},
-test51: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test51"});viewer.setBackgroundColor(0xffffffff);
+test51: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test51"});
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
         m.setStyle({'cartoon':{colorscheme:{prop:'ss',map:$3Dmol.ssColors.Jmol}}});
        viewer.zoomTo();
@@ -16454,7 +16449,7 @@ test51: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
 test50: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test50"});var viewer = $3Dmol.createViewer($("#gldiv"), {
 		defaultcolors : $3Dmol.rasmolElementColors
 		});
-    viewer.setBackgroundColor(0xffffffff);
+    
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/TRPcage.prmtop", false);
     rawFile.onreadystatechange = function (){
@@ -16481,7 +16476,7 @@ test50: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
     }
     rawFile.send(null);    
 }catch(err){callback()}},
-test45: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test45"});viewer.setBackgroundColor(0xffffffff);
+test45: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test45"});
     
     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
@@ -16630,7 +16625,7 @@ CONECT   41   18
 CONECT   42   19
 CONECT   43   19
 END
- </textarea>`);document.appendChild(objectHTML);var objectHTML=$(`
+ </textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();var objectHTML=$(`
   <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
                data-element='moldata'
@@ -16639,7 +16634,7 @@ END
  
 `);document.appendChild(objectHTML);
 }catch(err){callback()}},
-test39: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test39"});viewer.setBackgroundColor(0xffffffff);
+test39: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test39"});
               var m1 = $3Dmol.download("pdb:2V0E",viewer,{multimodel:true, frames:true},function(){
                 var m2 = $3Dmol.download("pdb:2MA0",viewer,{multimodel:true, frames:true},function(){
                   
@@ -16652,7 +16647,7 @@ test39: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
 }catch(err){callback()}},
 test38: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test38"});
               $3Dmol.download("pdb:1MO8",viewer,{multimodel:true, frames:true},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({}, {cartoon:{color:"spectrum"}});
                   viewer.animate({loop:"backward"});
                   viewer.render(callback);  
@@ -16671,14 +16666,14 @@ test38: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
            }
 }catch(err){callback()}},
 test63: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test63"});$3Dmol.download("pdb:1ejg",viewer,{altLoc:'*'},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({stick:{}});
                   viewer.setStyle({altLoc:'B'},{stick:{colorscheme:'greenCarbon'}});
                   viewer.setStyle({altLoc:'C'},{stick:{colorscheme:'cyanCarbon'}});
                   viewer.render(callback);
               });
 }catch(err){callback()}},
-test26: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test26"});viewer.setBackgroundColor(0xffffffff);
+test26: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test26"});
 
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -16694,20 +16689,20 @@ test26: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
               });
 }catch(err){callback()}},
 test34: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test34"});$3Dmol.download("pdb:1DC9", viewer, {}, function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setViewStyle({style:"outline", color:"black", width:0.1});
                   viewer.setStyle({}, {cartoon:{arrows:true, tubes:true, style:"oval", color:'white'}});
                   viewer.render(callback);
               });
 }catch(err){callback()}},
 test28: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test28"});$3Dmol.download("cid:5",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setViewStyle({style:"outline",color:"blue",width:0.2});
                   viewer.setStyle({},{stick:{radius:0.5,singleBonds:true,colorscheme:'greenCarbon',outline:true}});
                   viewer.render(callback);
               });
 }catch(err){callback()}},
-test25: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test25"});viewer.setBackgroundColor(0xffffffff);
+test25: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test25"});
 
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -16723,7 +16718,7 @@ test25: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                 });
 }catch(err){callback()}},
 test8: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test8"}); $3Dmol.download("pdb:4DM7",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.addArrow({
                       start: {x:-10.0, y:0.0, z:0.0},
                       end: {x:0.0, y:-10.0, z:0.0},
@@ -16749,7 +16744,7 @@ test8: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"te
                   viewer.render(callback);
               });
 }catch(err){callback()}},
-test13: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test13"});viewer.setBackgroundColor(0xffffffff);
+test13: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test13"});
               viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
                                   end:{x:10.0,y:0.0,z:0.0},
                                   radius:1.0,
@@ -16776,8 +16771,15 @@ test13: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                                   toCap:false});
               viewer.render(callback);
 }catch(err){callback()}},
+pqr_test: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"pqr_test"});
+              $.get('test_structs/multiple.pqr', function(data){
+                  viewer.addModels(data, "pqr");
+                  viewer.zoomTo();
+                  viewer.render(callback);
+              });
+}catch(err){callback()}},
 test30: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test30"});$3Dmol.download("pdb:4UAA",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   var colorAsSnake = function(atom) {
                     return atom.resi % 2 ? 'white': 'green'
                   };
@@ -16798,7 +16800,7 @@ test6: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"te
                data-select4='chain:D' data-style4='sphere:hidden=true'></div>
                `);document.appendChild(objectHTML);
 }catch(err){callback()}},
-test47: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test47"});viewer.setBackgroundColor(0xffffffff);
+test47: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test47"});
 
     $3Dmol.download('mmtf:1mo8',viewer,{},function(m) {
        m.setStyle({'cartoon':{color:'spectrum'}});
@@ -16942,7 +16944,7 @@ test46: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
   $scope.render();viewer.render(callback);
 }catch(err){callback()}},
 test23: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test23"});$3Dmol.download("pdb:5BP0",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({chain:'A'},{sphere:{colorscheme:{prop:'partialCharge',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}});
                   viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'partialCharge',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}});
                   viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'partialCharge',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}});
@@ -16956,7 +16958,7 @@ test23: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
                   viewer.render(callback);
               });
 }catch(err){callback()}},
-test60: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test60"});viewer.setBackgroundColor(0xffffffff);
+test60: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test60"});
 
     $3Dmol.download('pdb:1pfl',viewer,{},function(m) {
         m.setStyle({'cartoon':{colorscheme:'ssPyMol'}});
@@ -16964,7 +16966,7 @@ test60: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"t
        viewer.render(callback);
     });
 }catch(err){callback()}},
-test52: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test52"});viewer.setBackgroundColor(0xffffffff);
+test52: function(callback){try{var viewer=$3Dmol.createViewer($("#gldiv"),{id:"test52"});
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
         m.setStyle({chain:'A'},{'cartoon':{color:'spectrum'}});
         m.setStyle({chain:'C'},{'cartoon':{style:'trace',color:'blue'}});
@@ -27639,7 +27641,7 @@ ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
 
 
-</textarea>`);document.appendChild(objectHTML);
+</textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();
 }catch(err){callback()}},
 }</script><script src="test.js"></script>
 

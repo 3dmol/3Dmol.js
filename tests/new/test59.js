@@ -1,4 +1,4 @@
-viewer.setBackgroundColor(0xffffffff);
+
 
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");

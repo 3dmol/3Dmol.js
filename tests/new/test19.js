@@ -9,7 +9,7 @@ var setStyles = function(volumedata){
               viewer.render();
               };
               $3Dmol.download("pdb:4DLN",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   $.get("volData/1fas.cube",setStyles);
                   viewer.render();
                 });

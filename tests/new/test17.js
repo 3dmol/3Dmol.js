@@ -1,5 +1,5 @@
 $3Dmol.download("pdb:4UND",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
 
                   viewer.setStyle({chain:'A',invert:true},{sphere:{color:'blue',radius:1.0}});
                   viewer.setStyle({chain:'A',resi:669,expand:5.0},{sphere:{color:0xC0C0A902}});

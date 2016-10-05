@@ -1,5 +1,5 @@
  $3Dmol.download("pdb:4DM7",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.addArrow({
                       start: {x:-10.0, y:0.0, z:0.0},
                       end: {x:0.0, y:-10.0, z:0.0},

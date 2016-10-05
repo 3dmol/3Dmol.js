@@ -1,5 +1,5 @@
 $3Dmol.download("pdb:4UB9",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
 
                   viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
                   viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});

@@ -1,5 +1,5 @@
 $3Dmol.download("pdb:3VOV",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
                   viewer.setStyle({chain:'A'},{cartoon:{color:'spectrum'}});
                   viewer.setStyle({chain:'B'},{cartoon:{style:'trace'}});
                   viewer.setStyle({chain:'C'},{cartoon:{color:'red'}});

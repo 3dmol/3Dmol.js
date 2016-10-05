@@ -1,5 +1,5 @@
 $3Dmol.download("pdb:4DM7",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
+                  
 
                   viewer.setStyle({chain:'A',resn:'GLU'},{sphere:{color:'cyan'}});
                   viewer.setStyle({chain:'B',atom:'CG'},{sphere:{color:'teal'}});

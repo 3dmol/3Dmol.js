@@ -66,7 +66,7 @@ function cylinder(viewer) {
 }
 
 
-            viewer.setBackgroundColor(0xffffffff);
+            
 
             triangle(viewer);
             cylinder(viewer);

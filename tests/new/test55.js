@@ -1,4 +1,4 @@
-viewer.setBackgroundColor(0xffffffff);
+
     
     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');

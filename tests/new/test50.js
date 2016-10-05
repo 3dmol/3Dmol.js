@@ -1,7 +1,7 @@
 var viewer = $3Dmol.createViewer($("#gldiv"), {
 		defaultcolors : $3Dmol.rasmolElementColors
 		});
-    viewer.setBackgroundColor(0xffffffff);
+    
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/TRPcage.prmtop", false);
     rawFile.onreadystatechange = function (){

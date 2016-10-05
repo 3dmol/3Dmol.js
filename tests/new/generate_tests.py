@@ -199,7 +199,7 @@ class Example():
 
             string=text[data+6+len(self.name):ending]
             text=text[0:data]+text[ending:]
-            string="var objectHTML=$(`"+"<textarea style=\\\"display: none;\\\" id=\\\""+self.name+"\\\">"+string+"</textarea>`);document.appendChild(objectHTML);"
+            string="var objectHTML=$(`"+"<textarea style=\\\"display: none;\\\" id=\\\""+self.name+"\\\">"+string+"</textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();"
             text=text+string
 
         for data in atdiv:
@@ -223,7 +223,7 @@ class File():
     def __init__(self,filename,filetype,contents):
         self.filename=filename
         self.filetype=filetype
-        self.contents=Example(filename[7:-3],contents)
+        self.contents=Example(filename[10:-3],contents)
         self.examples=None
         if(self.filetype=="generated"):
             self.examples=self.getExamples()
@@ -290,16 +290,16 @@ class File():
 
         return examples
 
-manual_tests_path="../new/"
-examples_path="../../3Dmol/"
+manual_tests_path="tests/new/"
+examples_path="3Dmol"
 
 class TestSystem():
     def __init__(self):
         self.files=self.declareFiles()
 
     def declareFiles(self):
-        manual_tests_path="../new/"
-        examples_path="../../3Dmol/"
+        manual_tests_path="tests/new/"
+        examples_path="3Dmol/"
         files=[]
         #these are the files with examples in them
         for filename in os.listdir(examples_path):
@@ -324,10 +324,10 @@ class TestSystem():
 
 test=TestSystem() 
 
-f=open("one_page.html","w")
+f=open("tests/new/one_page.html","w")
 f.write("")
 f.close()
-with open("one_page.html","a") as f:
+with open("tests/new/one_page.html","a") as f:
     f.write(beggining)
     f.write("<script>system={\n")
     for file in test.files:
