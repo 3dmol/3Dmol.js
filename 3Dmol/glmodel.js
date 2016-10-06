@@ -1852,12 +1852,12 @@ $3Dmol.GLModel = (function() {
          * @param {function} callback - function called when an atom in the selection is clicked
          * @example
          var element=$('#gldiv');
-         var myviewer = $3Dmol.createViewer(element);
-            m = myviewer.addModel();
+         var viewer = $3Dmol.createViewer(element);
+            m = viewer.addModel();
             m.setClickable({},true,function(){
                 console.log("model Clicked");
             });
-            myviewer.render();
+            viewer.render();
          */
         this.setClickable = function(sel, clickable, callback) {           
 
@@ -1900,15 +1900,15 @@ $3Dmol.GLModel = (function() {
          * @param {function} unhover_callback - function called when the mouse moves out of the hover area
          * @example
          var element=$('#gldiv');
-         var myviewer = $3Dmol.createViewer(element);
-            m = myviewer.addModel();
+         var viewer = $3Dmol.createViewer(element);
+            m = viewer.addModel();
             m.setHoverable({},true,function(){
                 console.log("model hovered");
             },
             function(){
                 console.log("model unhovered");
             });
-            myviewer.render();
+            viewer.render();
          */
         this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
             var s;
@@ -2136,10 +2136,10 @@ $3Dmol.GLModel = (function() {
          * so it can be efficiencly shown again.
          * @example
          var element=$('#gldiv');
-         var myviewer = $3Dmol.createViewer(element);
-            m = myviewer.addModel();
+         var viewer = $3Dmol.createViewer(element);
+            m = viewer.addModel();
             m.hide();
-            myviewer.render(callback);
+            viewer.render(callback);
 
          * @function $3Dmol.GLModel#hide
          */

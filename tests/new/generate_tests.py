@@ -199,7 +199,7 @@ class Example():
 
             string=text[data+6+len(self.name):ending]
             text=text[0:data]+text[ending:]
-            string="var objectHTML=$(`"+"<textarea style=\\\"display: none;\\\" id=\\\""+self.name+"\\\">"+string+"</textarea>`);document.appendChild(objectHTML);$3Dmol.autoload();"
+            string="var wrapper=document.createElement('div');\nwrapper.innerHTML=`<textarea style=\\\"display: none;\\\" id=\\\""+self.name+"\\\">"+string+"</textarea>`;\ndocument.appendChild(wrapper.firstChild);\n$3Dmol.autoload();";
             text=text+string
 
         for data in atdiv:

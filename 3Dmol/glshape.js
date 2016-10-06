@@ -697,7 +697,7 @@ $3Dmol.GLShape = (function() {
          var element=$('#gldiv');
          var viewer=$3Dmol.createViewer(element);
          viewer.setBackgroundColor("#00000000");
-         viewer.addSphere({center:{x:0,y:0,z:0},radius:10});
+         viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
          
          viewer.render();
          */

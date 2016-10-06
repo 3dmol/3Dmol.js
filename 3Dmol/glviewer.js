@@ -1786,6 +1786,14 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addSphere
          * @param {SphereSpec} spec - Sphere shape style specification
          * @return {$3Dmol.GLShape}
+         @example
+         
+         var element=$('#gldiv');
+         var viewer=$3Dmol.createViewer(element);
+         viewer.setBackgroundColor("#00000000");
+         viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
+         
+         viewer.render();
          */
         this.addSphere = function(spec) {
             spec = spec || {};

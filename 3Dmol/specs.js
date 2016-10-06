@@ -63,7 +63,80 @@
 *@prop {number} x - x coordinate
 *@prop {number} y - y coordinate
 *@prop {number} z - z coordinate
-*
+*@example
+function triangle(viewer) {
+    var vertices = [];
+    var normals = [];
+    var colors = [];
+    var r = 20;
+    //triangle
+    vertices.push(new $3Dmol.Vector3(0,0,0));
+    vertices.push(new $3Dmol.Vector3(r,0,0));
+    vertices.push(new $3Dmol.Vector3(0,r,0));
+    
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    
+    colors.push({r:1,g:0,b:0});
+    colors.push({r:0,g:1,b:0});
+    colors.push({r:0,g:0,b:1});
+
+    var faces = [ 0,1,2 ];
+    
+    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    viewer.addCustom(spec);
+}
+
+function cylinder(viewer) {
+    var vertices = [];
+    var normals = [];
+    var colors = [];
+    var r = 10;
+
+    // "Cylinder" with 4 points (aka a open box with weird normals)
+    vertices.push(new $3Dmol.Vector3(r,-2*r,0));
+    vertices.push(new $3Dmol.Vector3(0,-2*r,r));
+    vertices.push(new $3Dmol.Vector3(-r,-2*r,0));
+    vertices.push(new $3Dmol.Vector3(0,-2*r,-r));
+    vertices.push(new $3Dmol.Vector3(r,-r,0));
+    vertices.push(new $3Dmol.Vector3(0,-r,r));
+    vertices.push(new $3Dmol.Vector3(-r,-r,0));
+    vertices.push(new $3Dmol.Vector3(0,-r,-r));
+    
+    normals.push(new $3Dmol.Vector3(1,0,0));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(-1,0,0));
+    normals.push(new $3Dmol.Vector3(0,0,-1));
+    normals.push(new $3Dmol.Vector3(1,0,0));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(-1,0,0));
+    normals.push(new $3Dmol.Vector3(0,0,-1));
+
+    colors.push({r:1,g:0,b:0});
+    colors.push({r:1,g:1,b:0});
+    colors.push({r:1,g:1,b:1});
+    colors.push({r:1,g:0,b:1});
+    colors.push({r:.5,g:0,b:0});
+    colors.push({r:.5,g:.5,b:0});
+    colors.push({r:.5,g:.5,b:.5});
+    colors.push({r:.5,g:0,b:.5});
+
+    var faces = [ 0,4,1, 4,5,1,
+            1,5,2, 5,6,2,
+            2,6,3, 6,7,3,
+            3,7,0, 7,4,0 ];
+
+    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    viewer.addCustom(spec);
+}
+
+
+            
+
+            triangle(viewer);
+            cylinder(viewer);
+            viewer.render();
 */
 
 /**
@@ -71,9 +144,6 @@
  * any field from {@link AtomSpec} in which case atoms must equal the specified value.  
  * All fields must match for the selection to hold. If values
  * are provided as a list, then only one value of the list must match.
- * 
- * @example
- * viewer.addResLabels({resi: [1,2,3,4,5], atom: 'CA'}); // will label alpha carbons (CA) of residues 1-5
  * 
  * @typedef AtomSelectionSpec
  * @prop {AtomSpec} ... - any field from {@link AtomSpec}, values may be singletons or lists
@@ -84,6 +154,10 @@
  * @prop {boolean} byres - if set, expands the selection to include all atoms of any residue that has any atom selected
  * @prop {number} expand - expands the selection to include all atoms within a given distance from the selection
  * @prop {WithinSelectionSpec} within - intersects the selection with the set of atoms within a given distance from another selection
+ 
+ * @example
+ * viewer.addResLabels({resi: [1,2,3,4,5], atom: 'CA'}); // will label alpha carbons (CA) of residues 1-5
+ * 
  */
 
 /**
