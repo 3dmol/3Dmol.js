@@ -144,7 +144,13 @@ module.exports = function(grunt) {
                     stdout: true
                 },
                 command: "node node_modules/jsdoc/jsdoc.js 3Dmol/*.js doc.md -c jsdoc.conf.json -t 3Dmol-doc-template -u tutorials/ -d doc/"
-            }
+            },
+             pythonServer: {
+            options: {
+                stdout: true
+            },
+            command: 'python tests/new/generate_tests.py'
+        }
         },
 
         copy : {
@@ -165,7 +171,7 @@ module.exports = function(grunt) {
     grunt.registerTask('test', ['clean:build', 'concat:test', 'closure-compiler:test', 'concat:append']);
     grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'concat:append']);
     
-    grunt.registerTask('build', ['clean:build', 'clean:doc', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'shell:doc', 'clean:tmp']);
+    grunt.registerTask('build', ['clean:build', 'clean:doc', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'shell:doc', 'clean:tmp','shell:pythonServer']);
     grunt.registerTask('build-quick', ['clean:build', 'concat_pre_build', 'concat_post_build', 'clean:tmp']);
     grunt.registerTask('build-noclean', ['concat_pre_build', 'closure-compiler', 'concat_post_build', 'shell:doc', 'clean:tmp']);
 
