@@ -1229,14 +1229,14 @@ $3Dmol.GLViewer = (function() {
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
          * @example // Assuming we have created a model of a protein with
-         *          multiple chains (e.g. from a PDB file), focus on atoms in
-         *          chain B glviewer.center({chain: 'B'});
+         *        //  multiple chains (e.g. from a PDB file), focus on atoms in
+         *         // chain B glviewer.center({chain: 'B'});
          * @example // if the user were to pass the animationDuration value to 
-         *            the function like so viewer.zoomTo({resn:'STI'},1000);
-         *            the program would center on resn 'STI' over the course 
-         *            of 1 second(1000 milleseconds).
+         *           // the function like so viewer.zoomTo({resn:'STI'},1000);
+         *         //   the program would center on resn 'STI' over the course 
+         *         //   of 1 second(1000 milleseconds).
          *  // Reposition to centroid of all atoms of all models in this
-         * viewer glviewer.center(); 
+         * //viewer glviewer.center(); 
          */
         var rotation_index=0;
         this.center = function(sel,animationDuration){
