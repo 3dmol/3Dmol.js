@@ -41,7 +41,6 @@ for(var test=0;test<tests.length;test++){
 keys=new_arr;
 keys=keys.concat(copy);
 
-
 var i=0;
 function runTest(i){
 
@@ -95,7 +94,6 @@ function runTest(i){
 		var p=document.createElement('p');
 		p.innerHTML="timestamp : "+(after-before)+" ms";
 		document.getElementById("div_"+key).appendChild(p);
-		console.log(after-before);
 		if(i<keys.length-1 ){
 			i+=1;
 			runTest(i);
