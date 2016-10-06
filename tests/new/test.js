@@ -77,7 +77,22 @@ function runTest(i){
 		image.src=canvas.toDataURL('image/png');
 		image.onclick=function(){
 			var win = window.open();
-				win.document.write('<iframe width="100%" height="100%"><script>'+system[key].toString()+'</script></iframe>')
+				win.document.write(`<!DOCTYPE html>
+<html>
+  <head>
+    <script src="../../build/3Dmol.js"></script>
+  </head>
+
+  <body>
+
+  
+          <div id="test10" style="width: 400px; height: 400px; position: relative;"></div>
+        <script>
+          var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
+				win.document.write('<div id="gldiv" style="width: 100vw; height: 100vh"></div><script src="'+key+`.js"></script>
+  </body>
+</html>
+`);
 		};
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);

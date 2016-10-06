@@ -1,9 +1,6 @@
 //auto-initialization
 //Create embedded viewer from HTML attributes if true
-
-$(document).ready(function() {
-
-    if ($(".viewer_3Dmoljs")[0] !== undefined)
+$3Dmol.autoload=function(){if ($(".viewer_3Dmoljs")[0] !== undefined)
         $3Dmol.autoinit = true;
         
     if ($3Dmol.autoinit) { 
@@ -151,6 +148,10 @@ $(document).ready(function() {
             }
             
         });              
-    }
+    }}
+$(document).ready(function() {
+    $3Dmol.autoload();
+    
 });
     
+ 

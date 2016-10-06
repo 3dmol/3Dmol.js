@@ -675,8 +675,7 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addCustom
          * @param {CustomShapeSpec} customSpec
          * @return {$3Dmol.GLShape}
-         @example
-      
+         
          */
         this.addCustom = function(customSpec) {
 
