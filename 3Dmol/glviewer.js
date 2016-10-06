@@ -1218,6 +1218,26 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         
+        /**
+         * Re-center the viewer around the provided selection (unlike zoomTo, does not zoom).
+         * 
+         * @function $3Dmol.GLViewer#center
+         * @param {Object}
+         *            [sel] - Selection specification specifying model and atom
+         *            properties to select. Default: all atoms in viewer
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @example // Assuming we have created a model of a protein with
+         *          multiple chains (e.g. from a PDB file), focus on atoms in
+         *          chain B glviewer.center({chain: 'B'});
+         * @example // if the user were to pass the animationDuration value to 
+         *            the function like so viewer.zoomTo({resn:'STI'},1000);
+         *            the program would center on resn 'STI' over the course 
+         *            of 1 second(1000 milleseconds).
+         *  // Reposition to centroid of all atoms of all models in this
+         * viewer glviewer.center(); 
+         */
         var rotation_index=0;
         this.center = function(sel,animationDuration){
              animationDuration=animationDuration!==undefined ? animationDuration : 0;
@@ -1565,8 +1585,10 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addLabel
          * @param {string}
          *            text - Label text
-         * @param {Object}
-         *            data - Label style specification
+         * @param {LabelSpec}
+         *            options - Label style specification
+          @param {AtomSelection}
+         *            sel - Set position of label to center of this selection
          * @return {$3Dmol.Label}
          * 
          * @example
@@ -1586,11 +1608,16 @@ $3Dmol.GLViewer = (function() {
          *  // Render labels 
          viewer.render();
          */
-        this.addLabel = function(text, data) {
-            var label = new $3Dmol.Label(text, data);
+        this.addLabel = function(text, options, sel) {
+            options = options || {};
+            if(sel) {
+                var extent = $3Dmol.getExtent(getAtomsFromSel(sel));
+                options.position = {x: extent[2][0], y: extent[2][1], z: extent[2][2]};
+            }
+            var label = new $3Dmol.Label(text, options);
             label.setContext();
             modelGroup.add(label.sprite);
-            if(data.fixed)
+            if(options.fixed)
                 fixed_labels.push(labels.length);
             labels.push(label);
             show();
@@ -2237,7 +2264,8 @@ $3Dmol.GLViewer = (function() {
                 newModel.setAtomDefaults(modelatoms[i]);
                 newModel.addFrame(modelatoms[i]);
                 newModel.setFrame(0);
-                newModel.setModelData(modelatoms.modelData[i]);
+                if(modelatoms.modelData)
+                    newModel.setModelData(modelatoms.modelData[i]);
                 newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
                 models.push(newModel);
             }
@@ -2368,7 +2396,7 @@ $3Dmol.GLViewer = (function() {
             return m;
         };
 
-        function applyToModels(func, sel, value1, value2) {
+        function applyToModels(func, sel, value1, value2, value3) {
             
             //apply func to all models that are selected by sel with value1 and 2
             var ms = []
@@ -2386,7 +2414,7 @@ $3Dmol.GLViewer = (function() {
             
             for (var i = 0; i < ms.length; i++) {
                 if (ms[i]) {
-                    ms[i][func](sel, value1, value2);
+                    ms[i][func](sel, value1, value2, value3);
                 }
             }
         }
@@ -2450,7 +2478,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Set click-handling properties to all selected atoms
+         * Set click-handling properties to all selected atomsthis.
          * 
          * @function $3Dmol.GLViewer#setClickable
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
@@ -2470,14 +2498,27 @@ $3Dmol.GLViewer = (function() {
             applyToModels("setHoverable", sel,hoverable, hover_callback,unhover_callback);
             return this;
         }
+        
+        /**
+         * If  atoms have dx, dy, dz properties (in some xyz files), vibrate populates each model's frame property based on parameters.
+         * Models can then be animated
+         * 
+         * @function $3Dmol.GLViewer#vibrate
+         * @param {number} numFrames - number of frames to be created, default to 10
+         * @param {number} amplitude - amplitude of distortion, default to 1 (full)
+         */
+        this.vibrate = function(numFrames, amplitude) {
+            applyToModels("vibrate", numFrames, amplitude);
+            return this;
+        }
         /**
          * @function $3Dmol.GLViewer#setColorByProperty
          * @param {AtomSelectionSpec} sel
          * @param {type} prop
          * @param {type} scheme
          */
-        this.setColorByProperty = function(sel, prop, scheme) {
-            applyToModels("setColorByProperty", sel, prop, scheme);
+        this.setColorByProperty = function(sel, prop, scheme, range) {
+            applyToModels("setColorByProperty", sel, prop, scheme, range);
             return this;
         };
 
@@ -3098,15 +3139,17 @@ $3Dmol.GLViewer = (function() {
                     modelsAtomsToShow[atomsToShow[n].model].push(atomsToShow[n]);
                 }
                 for (n = 0; n < models.length; n++) {
-                    surfobj.push({
-                        geo : new $3Dmol.Geometry(true),
-                        mat : mat,
-                        done : false,
-                        finished : false,
-                        symmetries : models[n].getSymmetries()
-                    // also webgl initialized
-                    });
-                    addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+					if(modelsAtomsToShow[n].length > 0) {
+						surfobj.push({
+							geo : new $3Dmol.Geometry(true),
+							mat : mat,
+							done : false,
+							finished : false,
+							symmetries : models[n].getSymmetries()
+						// also webgl initialized
+						});
+						addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+					}
                 }
             }
             else {
@@ -3134,10 +3177,14 @@ $3Dmol.GLViewer = (function() {
          */ 
         this.setSurfaceMaterialStyle = function(surf, style) {
             if (surfaces[surf]) {
-                surfArr = surfaces[surf];
+                var surfArr = surfaces[surf];
                 for (var i = 0; i < surfArr.length; i++) {
                     surfArr[i].mat = getMatWithStyle(style);
                     surfArr[i].mat.side = $3Dmol.FrontSide;
+                    if(style.color) {
+                        surfArr[i].mat.color = style.color;
+                        surfArr[i].geo.colorsNeedUpdate = true;
+                    }
                     surfArr[i].finished = false; // trigger redraw
                 }
             }
@@ -3258,6 +3305,7 @@ $3Dmol.GLViewer = (function() {
             }
             return this;
         };
+
 
         /**
          * @function $3Dmol.GLViewer#linkViewer

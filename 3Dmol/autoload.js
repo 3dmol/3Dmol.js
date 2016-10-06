@@ -30,6 +30,10 @@ $3Dmol.autoload=function(){if ($(".viewer_3Dmoljs")[0] !== undefined)
             else if (viewerdiv.data("href"))
                 datauri = viewerdiv.data("href");
                 
+            var options = {}
+            if(viewerdiv.data("options"))
+                options = $3Dmol.specStringToObject(viewerdiv.data("options"));
+                
             var bgcolor = $3Dmol.CC.color(viewerdiv.data("backgroundcolor"));
             var style = {line:{}};
             if(viewerdiv.data("style")) style = $3Dmol.specStringToObject(viewerdiv.data("style"));
@@ -118,13 +122,12 @@ $3Dmol.autoload=function(){if ($(".viewer_3Dmoljs")[0] !== undefined)
                 }
                                 
                 $.get(datauri, function(ret) {
-                    glviewer.addModel(ret, type);
+                    glviewer.addModel(ret, type, options);
                     applyStyles(glviewer);       
                     if (callback) 
                         callback(glviewer);
                 }, 'text');         
-            }
-            
+            }           
             else {
                 
                 if (viewerdiv.data("element")) {
@@ -139,7 +142,7 @@ $3Dmol.autoload=function(){if ($(".viewer_3Dmoljs")[0] !== undefined)
                         type = 'pdb';
                     }
 
-                    glviewer.addModel(moldata, type);        
+                    glviewer.addModel(moldata, type, options);        
                 }
 
                 applyStyles(glviewer);                

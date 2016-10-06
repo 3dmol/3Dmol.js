@@ -1,7 +1,7 @@
 //color scheme mappings
 var $3Dmol = $3Dmol || {};
 
-/** Color mapping gradiens
+/** Color mapping gradients
  * @interface
  * @param {number} min
  * @param {number} max
@@ -49,21 +49,23 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
     
         if(val === undefined)
             return 0xffffff;
-        if(max>min){
-        if(val < lo) val = lo;
-        if(val > hi) val = hi;
+        if(hi>lo){
+            if(val < lo) val = lo;
+            if(val > hi) val = hi;
         }
         else{
-        if(val>lo) val=lo;
-        if(val < hi) val = hi;
+            if(val>lo) val=lo;
+            if(val < hi) val = hi;
         }
         var middle = (hi+lo)/2;
-        if(typeof(mid) != 'undefined')
+        if(typeof(range[2]) != "undefined")
+            middle = range[2];
+        else if(typeof(mid) != 'undefined')
             middle = mid; //allow user to specify midpoint
         var scale, color;
         
         //scale bottom from red to white
-        if(min<max){
+        if(lo<hi){
             if(val <= middle) {
                 scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
                 color = 0xff0000 + 0x100*scale + scale;
@@ -75,7 +77,7 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
                 return color;
             }
         }
-        else if(min>max){
+        else if(lo>hi){
             //val=min-val;
              if(val <= middle) {
 
@@ -134,13 +136,13 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         if(typeof(val) == "undefined")
             return 0xffffff;
         
-        if(max>min){
-        if(val < lo) val = lo;
-        if(val > hi) val = hi;
+        if(hi>lo){
+            if(val < lo) val = lo;
+            if(val > hi) val = hi;
         }
         else{
-        if(val>lo) val=lo;
-        if(val < hi) val = hi;
+            if(val>lo) val=lo;
+            if(val < hi) val = hi;
         }
         
         var mid = (lo+hi)/2;
@@ -148,50 +150,50 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         var q3 = (mid+hi)/2;
         
         var scale, color;
-        if(min<max){
-        if(val < q1) { //scale green up, red up, blue down
-            scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
-            color = 0xff0000 + 0x100*scale + 0;
-            return color;
+        if(lo<hi){
+            if(val < q1) { //scale green up, red up, blue down
+                scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+                color = 0xff0000 + 0x100*scale + 0;
+                return color;
+            }
+            else if(val < mid) { //scale red down, green up, blue down
+                scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+                color =  0x010000*scale+0xff00+0x0;
+                return color;
+            }
+            else if(val < q3) { //scale blue up, red down, green up
+                scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+                color = 0x000000 + 0xff00 + 0x1*scale;
+                return color;
+            }
+            else { //scale green down, blue up, red down
+                scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+                color =  0x000000+0x0100*scale+0xff;
+                return color;
+            }        
         }
-        else if(val < mid) { //scale red down, green up, blue down
-            scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
-            color =  0x010000*scale+0xff00+0x0;
-            return color;
+        else if(hi<lo){
+             if(val < q1) { //scale green up, red up, blue down
+                scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+                color =  0x000000+0x0100*scale+0xff;
+                return color;
+            }
+            else if(val < mid) { //scale red down, green up, blue down
+                scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+                color = 0x000000 + 0xff00 + 0x1*scale;
+                return color;
+            }
+            else if(val < q3) { //scale blue up, red down, green up\
+                scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+                color =  0x010000*scale+0xff00+0x0;
+                return color;
+            }
+            else { //scale green down, blue up, red down
+                scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+                color = 0xff0000 + 0x100*scale + 0;
+                return color;
+            }     
         }
-        else if(val < q3) { //scale blue up, red down, green up
-            scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
-            color = 0x000000 + 0xff00 + 0x1*scale;
-            return color;
-        }
-        else { //scale green down, blue up, red down
-            scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
-            color =  0x000000+0x0100*scale+0xff;
-            return color;
-        }        
-    }
-    else if(max<min){
-         if(val < q1) { //scale green up, red up, blue down
-            scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
-            color =  0x000000+0x0100*scale+0xff;
-            return color;
-        }
-        else if(val < mid) { //scale red down, green up, blue down
-            scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
-            color = 0x000000 + 0xff00 + 0x1*scale;
-            return color;
-        }
-        else if(val < q3) { //scale blue up, red down, green up\
-            scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
-            color =  0x010000*scale+0xff00+0x0;
-            return color;
-        }
-        else { //scale green down, blue up, red down
-            scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
-            color = 0xff0000 + 0x100*scale + 0;
-            return color;
-        }     
-    }
     };
    
 
@@ -238,13 +240,13 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
     
         if(typeof(val) == "undefined")
             return 0xffffff;
-        if(max>min){
-        if(val < lo) val = lo;
-        if(val > hi) val = hi;
+        if(hi>lo){
+            if(val < lo) val = lo;
+            if(val > hi) val = hi;
         }
         else{
-        if(val>lo) val=lo;
-        if(val < hi) val = hi;
+            if(val>lo) val=lo;
+            if(val < hi) val = hi;
         }
         var scale = (val-lo)/(hi-lo);
         var h = (5*scale/6.0+0.5);
@@ -269,3 +271,10 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
     };
 
 };
+
+//map from names to gradient constructors
+$3Dmol.Gradient.builtinGradients = {
+    'rwb': $3Dmol.Gradient.RWB,
+    'roygb': $3Dmol.Gradient.ROYGB,
+    'sinebow': $3Dmol.Gradient.Sinebow
+}
