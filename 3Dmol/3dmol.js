@@ -165,6 +165,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var baseURL = '';
     var type = "";
     var pdbUri = "";
+    var mmtfUri = "";
     var m = viewer.addModel();
     
     if (query.substr(0, 5) === 'mmtf:') {

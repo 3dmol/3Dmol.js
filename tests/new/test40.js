@@ -18,7 +18,7 @@ function triangle(viewer) {
 
     var faces = [ 0,1,2 ];
     
-    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
     viewer.addCustom(spec);
 }
 
@@ -61,7 +61,7 @@ function cylinder(viewer) {
             2,6,3, 6,7,3,
             3,7,0, 7,4,0 ];
 
-    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
     viewer.addCustom(spec);
 }
 

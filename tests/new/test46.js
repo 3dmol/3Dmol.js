@@ -1,4 +1,4 @@
-$scope = {}
+var $scope = {}
  $scope.volumetricFilesPath="chgcar.list";
 
   $scope.CHGCARS=[];

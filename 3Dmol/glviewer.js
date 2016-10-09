@@ -2057,7 +2057,7 @@ $3Dmol.GLViewer = (function() {
 
     var faces = [ 0,1,2 ];
     
-    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
     viewer.addCustom(spec);
 
     viewer.render();

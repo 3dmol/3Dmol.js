@@ -330,7 +330,7 @@ $3Dmol.GLModel = (function() {
             var style = atom.style.line;
             if (style.hidden)
                 return;
-
+             var p1a, p1b, p2a, p2b;
             // have a separate geometry for each linewidth
             var linewidth = (style.linewidth || defaultlineWidth);
 
@@ -391,7 +391,7 @@ $3Dmol.GLModel = (function() {
                     if(atom.bondOrder[i] == 2) { //double
                         
                         v.multiplyScalar(.1);
-                           p1a = p1.clone();
+                        p1a = p1.clone();
                         p1a.add(v);
                         p1b = p1.clone();
                         p1b.sub(v);
@@ -1685,7 +1685,7 @@ $3Dmol.GLModel = (function() {
          * var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
            
             viewer.setBackgroundColor(0xffffffff);
-            m = viewer.addModel();
+            var m = viewer.addModel();
             m.addAtoms(atoms);
             m.setStyle({},{stick:{}});
             viewer.zoomTo();
@@ -2137,7 +2137,7 @@ $3Dmol.GLModel = (function() {
          * @example
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
-            m = viewer.addModel();
+            var m = viewer.addModel();
             m.hide();
             viewer.render(callback);
 

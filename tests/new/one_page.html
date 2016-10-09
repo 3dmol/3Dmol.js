@@ -180,7 +180,7 @@ glmodel_js_addAtoms: function (viewer,callback){try{
           var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
            
             viewer.setBackgroundColor(0xffffffff);
-            m = viewer.addModel();
+            var m = viewer.addModel();
             m.addAtoms(atoms);
             m.setStyle({},{stick:{}});
             viewer.zoomTo();
@@ -248,7 +248,7 @@ glmodel_js_removegl: function (viewer,callback){try{
 
          var element=$('#gldiv');
          var viewer = $3Dmol.createViewer(element);
-            m = viewer.addModel();
+            var m = viewer.addModel();
             m.hide();
             viewer.render(callback);
 
@@ -600,7 +600,7 @@ glviewer_js_addCustom: function (viewer,callback){try{
 
     var faces = [ 0,1,2 ];
     
-    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
     viewer.addCustom(spec);
 
     viewer.render(callback);
@@ -884,7 +884,7 @@ test41: function(viewer,callback){try{
  var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
            
             
-            m = viewer.addModel();
+            var m = viewer.addModel();
             m.addAtoms(atoms);
             m.setStyle({},{stick:{}});
             viewer.zoomTo();
@@ -911,7 +911,7 @@ function triangle(viewer) {
 
     var faces = [ 0,1,2 ];
     
-    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
     viewer.addCustom(spec);
 }
 
@@ -954,7 +954,7 @@ function cylinder(viewer) {
             2,6,3, 6,7,3,
             3,7,0, 7,4,0 ];
 
-    spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
     viewer.addCustom(spec);
 }
 
@@ -2121,7 +2121,7 @@ $3Dmol.download("pdb:4UAA",viewer,{},function(){
               });
 }catch(err){callback()}},
 test46: function(viewer,callback){try{
-$scope = {}
+var $scope = {}
  $scope.volumetricFilesPath="chgcar.list";
 
   $scope.CHGCARS=[];

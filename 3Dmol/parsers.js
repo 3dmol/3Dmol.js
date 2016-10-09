@@ -1553,7 +1553,7 @@ $3Dmol.Parsers = (function() {
         atoms.modelData = [];
         var lines = str.split(/\r?\n|\r/);
         while(lines.length > 0) {
-            pdbinfo = getSinglePDB(lines, options, sslookup);
+            var pdbinfo = getSinglePDB(lines, options, sslookup);
             var modelatoms = pdbinfo[0];
             var modelData = pdbinfo[1];
             lines = pdbinfo[2];
@@ -1628,6 +1628,7 @@ $3Dmol.Parsers = (function() {
                 // I would have liked to split based solely on whitespace, but
                 // it seems that there is no guarantee that all the fields will
                 // be filled out (e.g. the chain) so this doesn't work
+                var hetflag;
                 var serial = parseInt(line.substr(6, 5));
                 var atom = line.substr(12, 4).replace(/ /g, "");
                 var resn = line.substr(17, 3);

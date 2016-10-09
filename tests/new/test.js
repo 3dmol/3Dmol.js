@@ -60,11 +60,11 @@ for(var test=0;test<tests.length;test++){
 }
 keys=new_arr;
 keys=keys.concat(copy);
-
+var beforeGlobals;
 var i=0;
 function runTest(i){
 
-		var before=Date.now();
+	var before=Date.now();
 	var key=keys[i];
 	console.log("running test "+key+":");
 	//first put the reference images up
@@ -86,7 +86,7 @@ function runTest(i){
 	par.style.visibility="hidden";
 	document.getElementById("right").appendChild(par);
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
-	var beforeGlobals=GlobalTester.before(window);
+	beforeGlobals=GlobalTester.before(window);
 	var afterGlobals;
 	system[key](viewer,function(){
 		var left_head=document.createElement('h4');
