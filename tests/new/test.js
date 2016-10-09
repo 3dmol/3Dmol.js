@@ -12,6 +12,26 @@ var canvasCount= function(){
 
 	return $('#gldiv').children().length;
 }
+
+var GlobalTester = (function(){
+    var fields = {};
+    var before = function(w){
+        for(var field in w){
+            fields[field] = true;
+        };
+    };
+
+    var after = function(w){
+        for(var field in w){
+            if(!fields[field]){
+                 console.log("%c "+field + " has been added","color:#00cc00");
+            }            
+        };
+
+    };
+    return {before: before, after:after};
+}());
+
 imgs="imgs";
 var keys=getKeys(system)
 keys.sort();
@@ -65,7 +85,10 @@ function runTest(i){
 	par.innerHTML="placeholder";
 	par.style.visibility="hidden";
 	document.getElementById("right").appendChild(par);
-	system[key](function(){
+	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
+	var beforeGlobals=GlobalTester.before(window);
+	var afterGlobals;
+	system[key](viewer,function(){
 		var left_head=document.createElement('h4');
 		left_head.innerHTML=key;
 		var canvas=document.getElementById(key);
@@ -84,6 +107,7 @@ function runTest(i){
 			win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
 			win.document.write("<script>var sys={func:"+system[key].toString()+"};sys.func();</script>");
 		}
+
 		};
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);
@@ -96,6 +120,7 @@ function runTest(i){
 		document.getElementById("div_"+key).appendChild(p);
 		if(i<keys.length-1 ){
 			i+=1;
+			afterGlobals=GlobalTester.after(window);
 			runTest(i);
 		}
 

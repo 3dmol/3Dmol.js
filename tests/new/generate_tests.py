@@ -173,7 +173,7 @@ class Example():
     def __init__(self,name,text):
         self.name=name.replace(".","_")
         self.name=self.name.replace("/","_")
-        self.name=self.name.replace("Dmol_","")
+        self.name=self.name.replace("_3Dmol_","")
         self.name=self.name.replace("___","")
         self.text=self.parse(text)
     
@@ -270,10 +270,13 @@ class File():
                 name=""
             exmp=text[i+8:smallest_next]
             exmp=exmp.replace('*','')
+            filename=filename.replace("3Dmol/","")
             flname=filename+"_"+name
+            flname=flname.replace(".","_")
             flname=flname.replace("/","_")
-            flname=flname.replace(".._3Dmol_","")
+            flname=flname.replace("3Dmol_","")
             flname=flname.replace(" ","")
+            flname=flname.replace("3Dmol","")
             flname=flname.replace("3","_3")
             exmp=Example(flname,exmp)
             examples.append(exmp)
@@ -329,13 +332,13 @@ f.write("")
 f.close()
 with open("tests/new/one_page.html","a") as f:
     f.write(beggining)
-    f.write("<script>system={\n")
+    f.write("<script>var system={\n")
     for file in test.files:
         if(type(file.examples)!=type(None) and len(file.examples)>0):
             for example in file.examples:
-                f.write(example.name+": function (callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"),{id:\""+example.name+"\"});\n"+example.text+"\n}catch(err){callback()}},\n")
+                f.write(example.name+": function (viewer,callback){try{\n"+example.text+"\n}catch(err){callback()}},\n")
         elif(type(file.examples)==type(None)):
-            f.write(file.contents.name+": function(callback){try{var viewer=$3Dmol.createViewer($(\"#gldiv\"),{id:\""+file.contents.name+"\"});"+file.contents.text+"\n}catch(err){callback()}},\n")
+            f.write(file.contents.name+": function(viewer,callback){try{\n"+file.contents.text+"\n}catch(err){callback()}},\n")
     f.write("}</script>")
     f.write(end)
 
