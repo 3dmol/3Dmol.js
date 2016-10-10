@@ -12,7 +12,7 @@ var viewer = $3Dmol.createViewer($("#gldiv"), {
 		m = viewer.addModel(data, "gro");	
 		viewer.setStyle({},{sphere:{}});
 		viewer.zoomTo();
-		viewer.render(callback);
+		viewer.render();
 	    }	
         }
     }

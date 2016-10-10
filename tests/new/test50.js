@@ -18,7 +18,7 @@ var viewer = $3Dmol.createViewer($("#gldiv"), {
 			    m.setCoordinates(coordinatesData, "inpcrd");
 			    viewer.setStyle({},{sphere:{}});
 			    viewer.zoomTo();
-			    viewer.render(callback);
+			    viewer.render();
 			}
 		    }
 		}

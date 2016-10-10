@@ -18,5 +18,5 @@
                                                  }});
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();
-                  viewer.render(callback);
+                  viewer.render();
                 });

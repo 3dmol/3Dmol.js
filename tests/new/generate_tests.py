@@ -163,7 +163,7 @@ beggining="""<!DOCTYPE html>
             <div id="right">
                 <ul></ul>
             </div>
-            <div id="gldiv" style="width: 400px; height: 400px; position: relative;"></div>
+            <div id="gldiv" style="width: 400px; height: 400px; position: relative;visability:hidden"></div>
                     """
 end="""<script src="test.js"></script>
 

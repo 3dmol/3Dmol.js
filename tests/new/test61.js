@@ -15,7 +15,7 @@ var viewer = $3Dmol.createViewer($("#gldiv"), {
     		req.onload = function(aEvt){
 		    m.setCoordinates(req.response, "pdb");
 		    viewer.zoomTo();
-		    viewer.render(callback);
+		    viewer.render();
 		};
 		req.send(null);
 	    }	

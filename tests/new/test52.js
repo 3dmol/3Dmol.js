@@ -8,5 +8,5 @@
         m.setStyle({chain:'F'},{'cartoon':{arrows:true,color:'white'}});
        // viewer.addStyle({chain:'B'},{line:{}});
        viewer.zoomTo();
-       viewer.render(callback);
+       viewer.render();
     });

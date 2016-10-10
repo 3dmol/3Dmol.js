@@ -6,7 +6,7 @@
             m.vibrate(10, 1);
             viewer.animate({loop: "backAndForth"});
             viewer.zoomTo();
-            viewer.render(callback);
+            viewer.render();
 /*
 @data test	
 4

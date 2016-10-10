@@ -23,7 +23,7 @@
                                     });
 
                                                      
-      viewer.render(callback);
+      viewer.render();
     };
     req.send(null);
 

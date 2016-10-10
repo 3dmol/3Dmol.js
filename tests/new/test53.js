@@ -18,7 +18,7 @@ var viewer = $3Dmol.createViewer($("#gldiv"), {
 		    viewer.setStyle({},{sphere:{}});
 		    viewer.zoomTo();
 		    viewer.animate({loop:"forward"});
-		    viewer.render(callback);
+		    viewer.render();
 		};
 		req.send(null);
 	    }	

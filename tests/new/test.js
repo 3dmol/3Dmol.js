@@ -88,6 +88,7 @@ function runTest(i){
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
 	beforeGlobals=GlobalTester.before(window);
 	var afterGlobals;
+	
 	system[key](viewer,function(){
 		var left_head=document.createElement('h4');
 		left_head.innerHTML=key;
@@ -107,7 +108,6 @@ function runTest(i){
 			win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
 			win.document.write("<script>var sys={func:"+system[key].toString()+"};sys.func();</script>");
 		}
-
 		};
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);
@@ -123,13 +123,7 @@ function runTest(i){
 			afterGlobals=GlobalTester.after(window);
 			runTest(i);
 		}
-
 	});
-
 }
-
-
-runTest(i);
-//install a right-click handler on every canvas to export png
-        
+runTest(i);        
 });
