@@ -182,10 +182,7 @@ class Example():
         closecomment=find_all(text,"*/")
         atdiv=find_all(text,"@div")
         text=text.replace("myviewer","viewer")
-        if(find_all(text,"viewer.render()")==[] and find_all(text,"viewer.render(callback)")==[]):
-            text=text+"viewer.render(callback);"
         if(len(atdata) == 0 and len(atdiv) ==0 ):
-            text=text.replace("viewer.render()","viewer.render(callback)")
             return text
 
         for data in atdata:
@@ -214,7 +211,6 @@ class Example():
             text=text[0:data]+text[ending:]
             string="var objectHTML=$(`"+string+"`);document.appendChild(objectHTML);"
             text=text+string
-        text=text.replace("viewer.render()","viewer.render(callback)")
         return text
 
 
@@ -336,9 +332,9 @@ with open("tests/new/one_page.html","a") as f:
     for file in test.files:
         if(type(file.examples)!=type(None) and len(file.examples)>0):
             for example in file.examples:
-                f.write(example.name+": function (viewer,callback){try{\n"+example.text+"\n}catch(err){callback()}},\n")
+                f.write(example.name+": function (viewer){try{\n"+example.text+"\n}catch(err){viewer.render_callback()}},\n")
         elif(type(file.examples)==type(None)):
-            f.write(file.contents.name+": function(viewer,callback){try{\n"+file.contents.text+"\n}catch(err){callback()}},\n")
+            f.write(file.contents.name+": function(viewer){try{\n"+file.contents.text+"\n}catch(err){viewer.render_callback()}},\n")
     f.write("}</script>")
     f.write(end)
 

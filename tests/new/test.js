@@ -86,10 +86,7 @@ function runTest(i){
 	par.style.visibility="hidden";
 	document.getElementById("right").appendChild(par);
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
-	beforeGlobals=GlobalTester.before(window);
-	var afterGlobals;
-	
-	system[key](viewer,function(){
+	viewer.render_callback=function(){
 		var left_head=document.createElement('h4');
 		left_head.innerHTML=key;
 		var canvas=document.getElementById(key);
@@ -123,7 +120,11 @@ function runTest(i){
 			afterGlobals=GlobalTester.after(window);
 			runTest(i);
 		}
-	});
+	};
+	beforeGlobals=GlobalTester.before(window);
+	var afterGlobals;
+	
+	system[key](viewer);
 }
 runTest(i);        
 });

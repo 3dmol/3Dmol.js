@@ -942,8 +942,8 @@ $3Dmol.GLViewer = (function() {
             this.setView(view); // Calls show() => renderer render
             var time2 = new Date();
             //console.log("render time: " + (time2 - time1));
-            if(typeof callback ==='function'){
-                callback();
+            if(typeof this.render_callback ==='function'){
+                this.render_callback();
                 console.log("render time: " + (time2 - time1));
             }
             return this;
@@ -2311,10 +2311,9 @@ $3Dmol.GLViewer = (function() {
          * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
          @example
-          var element=$('#gldiv');
-          var viewer = $3Dmol.createViewer(element);
-              $.get('../test_structs/multiple.sdf', function(data){
+                     $.get('../test_structs/multiple.sdf', function(data){
                   viewer.addAsOneMolecule(data, "sdf");
+                  viewer.zoomTo();
                   viewer.render();
               });
          */

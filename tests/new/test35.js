@@ -1,4 +1,4 @@
-try {
+/*try {
                     
                     viewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors});                    
                     viewer.setBackgroundColor(0xffffff);
