@@ -24,7 +24,7 @@ var GlobalTester = (function(){
     var after = function(w){
         for(var field in w){
             if(!fields[field]){
-                 console.log("%c "+field + " has been added","color:#00cc00");
+                 return("global variable "+field + " has been added out of context");
             }            
         };
 
@@ -81,12 +81,28 @@ function runTest(i){
 	var div=document.createElement('div');
 	div.id="div_"+key;
 	document.getElementById("left").appendChild(div);
-	var par=document.createElement('p');
-	par.innerHTML="placeholder";
-	par.style.visibility="hidden";
-	document.getElementById("right").appendChild(par);
+	
+	
+	var textarea=document.createElement('textarea');
+	textarea.style.height="100px";
+	textarea.style.width="80%"
+	textarea.id="right_"+key;
+	textarea.style.visibility="hidden";
+	document.getElementById("right").appendChild(textarea);
+	var texta=document.createElement('textarea');
+	texta.style.height="100px";
+	texta.style.width="80%"
+	texta.id="left_"+key;
+	texta.value="";
+	document.getElementById("left").appendChild(texta);
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
-	viewer.render_callback=function(){
+	beforeGlobals=GlobalTester.before(window);
+	var afterGlobals;
+	
+	system[key](viewer,function(){
+
+		var after=Date.now();
+		var textarea=document.getElementById("left_"+key);
 		var left_head=document.createElement('h4');
 		left_head.innerHTML=key;
 		var canvas=document.getElementById(key);
@@ -103,28 +119,28 @@ function runTest(i){
 		}else{
 			var win = window.open();
 			win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
-			win.document.write("<script>var sys={func:"+system[key].toString()+"};sys.func();</script>");
+			win.document.write("<script>var sys={func:"+system[key].toString()+"};sys.func(viewer,function(){});</script>");
 		}
 		};
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);
 		$("#undefined").remove();
-		$(canvas).remove();
+			$(canvas).remove();
 		//$("#gldiv").children()[0].remove();
-		var after=Date.now();
-		var p=document.createElement('p');
-		p.innerHTML="timestamp : "+(after-before)+" ms";
-		document.getElementById("div_"+key).appendChild(p);
+		afterGlobals=GlobalTester.after(window);
+		textarea.value+="timestamp : "+(after-before)+" ms";
+
+		if(afterGlobals!==undefined){
+			
+			textarea.value+="\n"+afterGlobals;
+			
+		}
+
 		if(i<keys.length-1 ){
 			i+=1;
-			afterGlobals=GlobalTester.after(window);
 			runTest(i);
 		}
-	};
-	beforeGlobals=GlobalTester.before(window);
-	var afterGlobals;
-	
-	system[key](viewer);
+	});
 }
 runTest(i);        
 });
