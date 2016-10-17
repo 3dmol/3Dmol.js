@@ -386,9 +386,9 @@ with open("tests/new/one_page.html","a") as f:
     for file in test.files:
         if(type(file.examples)!=type(None) and len(file.examples)>0):
             for example in file.examples:
-                f.write("<li>"example.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>"')
+                f.write("<li>"+example.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>')
         elif(type(file.examples)==type(None)):
-            f.write("<li>file.contents.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>"')
+            f.write('<li>'+file.contents.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>')
     f.write(middle)
     f.write("<script>var system={\n")
 
