@@ -805,6 +805,16 @@ $3Dmol.GLViewer = (function() {
 
         };
 
+        this.surfacesFinished= function() {
+
+            for(var key in surfaces){
+                if(!surfaces[key].finished)
+                    return false;
+            }
+            return true;
+
+        };
+
         /** Returns an array representing the current viewpoint.
          * Translation, zoom, and rotation quaternion. 
          * @function $3Dmol.GLViewer#getView

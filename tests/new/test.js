@@ -8,6 +8,7 @@ var getKeys = function(obj){
    }
    return keys;
 }
+var getSelections
 var canvasCount= function(){
 
 	return $('#gldiv').children().length;
@@ -125,6 +126,7 @@ function runTest(i){
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);
 		$("#undefined").remove();
+		if(viewer.surfacesFinished())
 			$(canvas).remove();
 		//$("#gldiv").children()[0].remove();
 		afterGlobals=GlobalTester.after(window);

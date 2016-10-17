@@ -142,6 +142,25 @@ beggining="""<!DOCTYPE html>
             opacity: 1
         }
     }
+    #tools{
+    height:100vh;
+    width:100vw;
+
+    }
+    #tools_title{
+        text-align:center;
+    }
+    #errors_title{
+        text-align:center;
+    }
+    #errors{
+        
+        width:50vw;
+        height:32vh;
+        display: block;
+    margin-left: auto;
+    margin-right: auto;
+    }
     #progress.waiting dd,#progress.waiting dt {
         -moz-animation: pulse 2s ease-out 0s infinite;
         -ms-animation: pulse 2s ease-out 0s infinite;
@@ -149,13 +168,44 @@ beggining="""<!DOCTYPE html>
         -webkit-animation: pulse 2s ease-out 0s infinite;
         animation: pulse 2s ease-out 0s infinite
     }
+    #selections{
+
+        width:50vw;
+        height:40vh;
+        display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+    }
+    #scroll_window{
+        overflow-y:scroll;
+        height:80%;
+        width:100%;
+    }
         </style>
                     </head>
                     <body>
 
           <div id="progress" class="waiting">
+    }
+    }
     <dt></dt>
     <dd></dd>
+    </div>
+    <div id="tools">
+        <h1 id="tools_title">3Dmol.js Tests</h1>
+        <h2 id="errors_title">Errors</h2>
+        <textarea id="errors"></textarea>
+        <div id="selections">
+        <h2 id="selections_title">Selections</h2>
+            <input type="radio" name="run_state" value="run_all"> Run All <input type="radio" value="omit_all" name="run_state"> Omit All
+            <div id="scroll_window">
+                <ul>
+"""
+middle="""
+                </ul>
+            </div>
+        </div>
     </div>
             <div id="left">
                 <ul></ul>
@@ -332,7 +382,16 @@ f.write("")
 f.close()
 with open("tests/new/one_page.html","a") as f:
     f.write(beggining)
+
+    for file in test.files:
+        if(type(file.examples)!=type(None) and len(file.examples)>0):
+            for example in file.examples:
+                f.write("<li>"example.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>"')
+        elif(type(file.examples)==type(None)):
+            f.write("<li>file.contents.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>"')
+    f.write(middle)
     f.write("<script>var system={\n")
+
     for file in test.files:
         if(type(file.examples)!=type(None) and len(file.examples)>0):
             for example in file.examples:
