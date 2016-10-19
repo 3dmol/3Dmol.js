@@ -42,7 +42,6 @@ function waitfor(test, expectedValue, msec, count, source, callback) {
         return;
     }
     // Condition finally met. callback() can be executed.
-    console.log(source + ': ' + test() + ', expected: ' + expectedValue + ', ' + count + ' loops.');
     callback();
 }
 imgs="imgs";
@@ -75,6 +74,7 @@ keys=new_arr;
 keys=keys.concat(copy);
 var beforeGlobals;
 var i=0;
+$('#gldiv').hide();
 function runTest(i){
 
 	var before=Date.now();

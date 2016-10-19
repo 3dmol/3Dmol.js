@@ -131,4 +131,3 @@ var $scope = {}
   }
 
   $scope.init();
-  $scope.render();

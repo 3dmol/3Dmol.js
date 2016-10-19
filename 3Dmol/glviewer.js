@@ -808,11 +808,9 @@ $3Dmol.GLViewer = (function() {
         this.surfacesFinished= function() {
               for(var key in surfaces){
                 if(!surfaces[key][0].done){
-                    console.log(surfaces);
                     return false;
                 }
             }
-            console.log("true");
             return true;
 
 
@@ -1390,26 +1388,22 @@ $3Dmol.GLViewer = (function() {
          *          //  the function like so viewer.zoomTo({resn:'STI'},1000);
          *          //  the program would zoom into resn 'STI' over the course 
          *          //  of 1 second(1000 milleseconds).
-        $.get('volData/4csv.pdb', function(data) {
-      viewer.addModel(data,'pdb');
-      viewer.setStyle({cartoon:{},stick:{}});
-      viewer.zoomTo();
-      viewer.render(callback);
-    });
-    
-    //can't use jquery with binary data
-    var req = new XMLHttpRequest();
-    req.open('GET', 'volData/4csv.ccp4.gz', true);
-    req.responseType = "arraybuffer";
-    req.onload = function (aEvt) {      
-       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
-                          
-      //viewer.translate(10,10);         
-      viewer.zoomTo({resn:'STI'});
-      //viewer.zoom(10);
-      //viewer.rotate(90,"y");
-      viewer.render(callback);
-    };
+        @example
+
+
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {
+                          opacity:0.85,
+                          voldata: new $3Dmol.VolumeData(volumedata, "cube"),
+                          volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'charge'))
+                      },{});
+                      
+                  viewer.render();
+                  });
+                  viewer.zoomTo();
+                });
          */
         var rot_index=0;
         var z_index=0;
@@ -1801,9 +1795,6 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLShape}
          @example
          
-         var element=$('#gldiv');
-         var viewer=$3Dmol.createViewer(element);
-         viewer.setBackgroundColor("#00000000");
          viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
          
          viewer.render();
@@ -1904,14 +1895,16 @@ $3Dmol.GLViewer = (function() {
          * @param {LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
          * @return {$3Dmol.GLShape}
          @example
-         var element=$('#gldiv');
-         var viewer=$3Dmol.createViewer(element);
-
-              $3Dmol.download("pdb:2ABJ",viewer,{},function(){
+         $3Dmol.download("pdb:2ABJ",viewer,{},function(){
+                  
+                  viewer.setViewStyle({style:"outline"});
+                  viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
+                  viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
+                  viewer.setStyle({chain:'G'},{sphere:{colorscheme:'greenCarbon'}});
+                  viewer.setStyle({chain:'J'},{sphere:{color:'blue'}});
                   viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
                   viewer.render();
               });
-          
 
          */
         this.addLine = function(spec) {
@@ -2049,31 +2042,7 @@ $3Dmol.GLViewer = (function() {
          * @param {CustomSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
          @example
-         var element=$('#gldiv');
-         var viewer=$3Dmol.createViewer(element);
-         var vertices = [];
-    var normals = [];
-    var colors = [];
-    var r = 20;
-    //triangle
-    vertices.push(new $3Dmol.Vector3(0,0,0));
-    vertices.push(new $3Dmol.Vector3(r,0,0));
-    vertices.push(new $3Dmol.Vector3(0,r,0));
-    
-    normals.push(new $3Dmol.Vector3(0,0,1));
-    normals.push(new $3Dmol.Vector3(0,0,1));
-    normals.push(new $3Dmol.Vector3(0,0,1));
-    
-    colors.push({r:1,g:0,b:0});
-    colors.push({r:0,g:1,b:0});
-    colors.push({r:0,g:0,b:1});
-
-    var faces = [ 0,1,2 ];
-    
-    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
-    viewer.addCustom(spec);
-
-    viewer.render();
+         console.log("addcustom");
          */
         this.addCustom = function(spec) {
             spec = spec || {};
@@ -2116,12 +2085,28 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLShape}
          * 
          @example 
-         var element=$('#gldiv');
-         var viewer=$3Dmol.createViewer(element);
-         
-         * var data = new $3Dmol.VolumeData(str,"cube");
-         * viewer.addIsosurface(data, {isoval: 0.01, color: "blue", opacity: 0.95});  
-           viewer.render(); 
+         $.get('../test_structs/benzene-homo.cube', function(data){
+                  var voldata = new $3Dmol.VolumeData(data, "cube");
+                  viewer.addIsosurface(voldata, {isoval: 0.01,
+                                                 color: "blue",
+                                                 alpha: 0.5,
+                                                 smoothness: 10});
+                  viewer.addIsosurface(voldata, {isoval: -0.01,
+                                                 color: "red",
+                                                 smoothness: 5,
+                                                 opacity:0.5,
+                                                 wireframe:true,
+                                                 linewidth:0.1,
+                                                 clickable:true,
+                                                 callback:
+                                                 function() {
+                                                     this.opacity = 0.0;
+                                                     viewer.render(callback);
+                                                 }});
+                  viewer.setStyle({}, {stick:{}});
+                  viewer.zoomTo();
+                  viewer.render();
+                });
          */
         this.addIsosurface = function(data,  spec,callback) {
             spec = spec || {};
@@ -2249,10 +2234,18 @@ $3Dmol.GLViewer = (function() {
          * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
          * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
          * @example
-         var element=$('#gldiv');
-         var myviewer = $3Dmol.createViewer(element);
-            m = myviewer.addModel();
-            myviewer.render();
+         
+
+              viewer.setViewStyle({style:"outline"});
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                      
+                  viewer.render();
+                  });
+                  viewer.zoomTo();
+              });
          *
          * @return {$3Dmol.GLModel} 
          */
@@ -2328,6 +2321,7 @@ $3Dmol.GLViewer = (function() {
           var viewer = $3Dmol.createViewer(element);
               $.get('../test_structs/multiple.sdf', function(data){
                   viewer.addAsOneMolecule(data, "sdf");
+                  viewer.zoomTo();
                   viewer.render();
               });
          */
@@ -2458,7 +2452,7 @@ $3Dmol.GLViewer = (function() {
         m.setStyle({chain:'F'},{'cartoon':{arrows:true,color:'white'}});
        // viewer.addStyle({chain:'B'},{line:{}});
        viewer.zoomTo();
-       viewer.render(callback);
+       viewer.render();
     });
          */
         this.setStyle = function(sel, style) {
@@ -2479,9 +2473,7 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomSelectionSpec} sel - Atom selection specification
          * @param {AtomStyleSpec} style - style spec to add to specified atoms
          @example
-         var element=$('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
-
+         
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
        viewer.addStyle({chain:'B'},{line:{}});
        viewer.zoomTo();

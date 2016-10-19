@@ -69,24 +69,26 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
                                                  callback:
                                                  function() {
                                                      this.opacity = 0.0;
-                                                     viewer.render(callback);
                                                  }});
+                                                  viewer.render();
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();
-                  viewer.render(callback);
+                 
                 });
 
  * @example //Using a gradient with colorscheme.
      viewer.setViewStyle({style:"outline"});
+             
+
+              viewer.setViewStyle({style:"outline"});
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
                   $.get("volData/1fas.cube",function(volumedata){
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
-                  });
-
-              viewer.setStyle({chain:'A'},{cartoon:{opacity:0.5,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow(0,10)}}}); 
-                  viewer.zoomTo();
+                      
                   viewer.render(callback);
+                  });
+                  viewer.zoomTo();
               });
  * @example //Using a function in order to define the colors. 
   $3Dmol.download("pdb:4UAA",viewer,{},function(){

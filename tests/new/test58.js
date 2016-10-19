@@ -8,7 +8,8 @@
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"),
                           volscheme: new $3Dmol.Gradient.ROYGB(2,0,1)
                       },{});
-                  });
-                  viewer.zoomTo();
+
                   viewer.render();
-              });
+                  });
+                  viewer.zoomTo();              
+                });

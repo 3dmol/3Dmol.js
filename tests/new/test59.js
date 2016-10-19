@@ -8,7 +8,8 @@
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"),
                           volscheme: new $3Dmol.Gradient.Sinebow(2,0,1)
                       },{});
+                      
+                  viewer.render();
                   });
                   viewer.zoomTo();
-                  viewer.render();
               });

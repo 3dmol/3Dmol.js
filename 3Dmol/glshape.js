@@ -694,9 +694,6 @@ $3Dmol.GLShape = (function() {
          * @param {SphereSpec} sphereSpec
          * @return {$3Dmol.GLShape}
          @example 
-         var element=$('#gldiv');
-         var viewer=$3Dmol.createViewer(element);
-         viewer.setBackgroundColor("#00000000");
          viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
          
          viewer.render();
@@ -734,7 +731,6 @@ $3Dmol.GLShape = (function() {
          * @param {CylinderSpec} cylinderSpec
          * @return {$3Dmol.GLShape}
          @example
-         viewer.setBackgroundColor(0xffffffff);
               viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
                                   end:{x:10.0,y:0.0,z:0.0},
                                   radius:1.0,
