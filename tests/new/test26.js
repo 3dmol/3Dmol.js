@@ -8,7 +8,8 @@
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"),
                           volscheme: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))
                       },{});
+                      
+                  viewer.render();
                   });
                   viewer.zoomTo();
-                  viewer.render();
               });

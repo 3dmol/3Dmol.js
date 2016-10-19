@@ -32,7 +32,19 @@ var GlobalTester = (function(){
     };
     return {before: before, after:after};
 }());
-
+function waitfor(test, expectedValue, msec, count, source, callback) {
+    // Check if condition met. If not, re-check later (msec).
+    while (test() !== expectedValue) {
+        count++;
+        setTimeout(function() {
+            waitfor(test, expectedValue, msec, count, source, callback);
+        }, msec);
+        return;
+    }
+    // Condition finally met. callback() can be executed.
+    console.log(source + ': ' + test() + ', expected: ' + expectedValue + ', ' + count + ' loops.');
+    callback();
+}
 imgs="imgs";
 var keys=getKeys(system)
 keys.sort();
@@ -99,10 +111,11 @@ function runTest(i){
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
 	beforeGlobals=GlobalTester.before(window);
 	var afterGlobals;
-	
-	system[key](viewer,function(){
 
+	system[key](viewer,function(){
+		waitfor(viewer.surfacesFinished,true,100,0,"",function(){
 		var after=Date.now();
+		
 		var textarea=document.getElementById("left_"+key);
 		var left_head=document.createElement('h4');
 		left_head.innerHTML=key;
@@ -115,22 +128,22 @@ function runTest(i){
 		image.onclick=function(){
 			if(key.substring(0,4)=="test"){
 				var win = window.open();
-				win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
+				win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body style="overflow-y:hidden;overflow-x:hidden;"><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
 				win.document.write('<script src="'+key+`.js"></script></body></html>`);
 		}else{
 			var win = window.open();
-			win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
+			win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body style="overflow-y:hidden;overflow-x:hidden;"><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
 			win.document.write("<script>var sys={func:"+system[key].toString()+"};sys.func(viewer,function(){});</script>");
 		}
 		};
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);
 		$("#undefined").remove();
-		if(viewer.surfacesFinished())
+
 			$(canvas).remove();
 		//$("#gldiv").children()[0].remove();
 		afterGlobals=GlobalTester.after(window);
-		textarea.value+="timestamp : "+(after-before)+" ms";
+		textarea.value+="timestamp : "+(after-before)+" ms\n";
 
 		if(afterGlobals!==undefined){
 			
@@ -142,7 +155,11 @@ function runTest(i){
 			i+=1;
 			runTest(i);
 		}
-	});
+
+		});
+		
+		});
+		
 }
 runTest(i);        
 });

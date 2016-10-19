@@ -115,7 +115,7 @@ $3Dmol.GLViewer = (function() {
             //compute the next highest surface id directly from surfaces
             //this is necessary to support linking of model data
             var max = 0;
-            for (i in surfaces) { // this is an object with possible holes
+            for (var i in surfaces) { // this is an object with possible holes
                 if(!surfaces.hasOwnProperty(i)) continue;
                 if(i > max) max = i;
             }
@@ -806,12 +806,15 @@ $3Dmol.GLViewer = (function() {
         };
 
         this.surfacesFinished= function() {
-
-            for(var key in surfaces){
-                if(!surfaces[key].finished)
+              for(var key in surfaces){
+                if(!surfaces[key][0].done){
+                    console.log(surfaces);
                     return false;
+                }
             }
+            console.log("true");
             return true;
+
 
         };
 
@@ -3233,7 +3236,7 @@ $3Dmol.GLViewer = (function() {
         /** Remove all surfaces.
          * @function $3Dmol.GLViewer#removeAllSurfaces */
         this.removeAllSurfaces = function() {
-            for (n in  surfaces) {
+            for (var n in  surfaces) {
                 if(!surfaces.hasOwnProperty(n)) continue;
                 var surfArr = surfaces[n];
                 for(var i = 0; i < surfArr.length; i++) {

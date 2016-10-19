@@ -9,7 +9,8 @@
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"),
                           volscheme: new $3Dmol.Gradient.ROYGB(range[1],range[0]) //reverse color order
                       },{});
+                      
+                  viewer.render();
                   });
                   viewer.zoomTo();
-                  viewer.render();
               });

@@ -26,6 +26,9 @@ beggining="""<!DOCTYPE html>
 
             <script src="../../build/3Dmol.js"></script>
             <style>
+            body{
+            overflow-x:hidden;
+            }
              #left{
                 float: left;
                 width:50%;
@@ -395,9 +398,9 @@ with open("tests/new/one_page.html","a") as f:
     for file in test.files:
         if(type(file.examples)!=type(None) and len(file.examples)>0):
             for example in file.examples:
-                f.write(example.name+": function (viewer,callback){try{\n"+example.text+"\n}catch(err){callback()}},\n")
+                f.write(example.name+": function (viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\\n'+err.toString();callback()}},\n")
         elif(type(file.examples)==type(None)):
-            f.write(file.contents.name+": function(viewer,callback){try{\n"+file.contents.text+"\n}catch(err){callback()}},\n")
+            f.write(file.contents.name+": function(viewer,callback,name='"+file.contents.name+"'){try{\n"+file.contents.text+"\n}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\\n'+err.toString();callback()}},\n")
     f.write("}</script>")
     f.write(end)
 
