@@ -117,22 +117,22 @@ function runTest(i){
 		var after=Date.now();
 		
 		var textarea=document.getElementById("left_"+key);
-		var left_head=document.createElement('h4');
+		var left_head=document.createElement("h4");
 		left_head.innerHTML=key;
 		var canvas=document.getElementById(key);
-		var image=document.createElement('img');
+		var image=document.createElement("img");
 		image.style.width="400px";
 		image.style.height="400px";
 
-		image.src=canvas.toDataURL('image/png');
+		image.src=canvas.toDataURL("image/png");
 		image.onclick=function(){
 			if(key.substring(0,4)=="test"){
 				var win = window.open();
-				win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body style="overflow-y:hidden;overflow-x:hidden;"><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
-				win.document.write('<script src="'+key+`.js"></script></body></html>`);
+				win.document.write("<!DOCTYPE html><html><head><script src=\"../../build/3Dmol.js\"></script></head><body style=\"overflow-y:hidden;overflow-x:hidden;\"><div id=\"gldiv\" style=\"width: 100vw; height: 100vh; position: relative;\"></div><script>var viewer = $3Dmol.createViewer($(\"#gldiv\"));</script>");
+				win.document.write("<script src=\""+key+".js\"></script></body></html>");
 		}else{
 			var win = window.open();
-			win.document.write(`<!DOCTYPE html><html><head><script src="../../build/3Dmol.js"></script></head><body style="overflow-y:hidden;overflow-x:hidden;"><div id="gldiv" style="width: 100vw; height: 100vh; position: relative;"></div><script>var viewer = $3Dmol.createViewer($("#gldiv"));</script>`);
+			win.document.write("<!DOCTYPE html><html><head><script src=\"../../build/3Dmol.js\"></script></head><body style=\"overflow-y:hidden;overflow-x:hidden;\"><div id=\"gldiv\" style=\"width: 100vw; height: 100vh; position: relative;\"></div><script>var viewer = $3Dmol.createViewer($(\"#gldiv\"));</script>");
 			win.document.write("<script>var sys={func:"+system[key].toString()+"};sys.func(viewer,function(){});</script>");
 		}
 		};

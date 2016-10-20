@@ -1027,6 +1027,10 @@ $3Dmol.GLViewer = (function() {
         }
 
         
+        this.autoload = function(){
+            $3Dmol.autoload();
+        }
+
         /** return list of atoms selected by sel
          * 
          * @function $3Dmol.GLViewer#selectedAtoms
