@@ -2126,8 +2126,17 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLShape}
          * 
          * @example
-         * viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", opacity: 0.95});              
-         * viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
+
+    
+    $.get('volData/bohr.cube', function(data) {
+      
+      viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render();
+    });
+
+                
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};

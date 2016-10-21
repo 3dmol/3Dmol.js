@@ -49,6 +49,8 @@ $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
 $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 
  /**
+ 
+ * @typedef ColorschemeSpec
  * Built in colorschemes
  *
  * @example 
@@ -101,7 +103,6 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 
                   viewer.render();
               });
- * @typedef ColorschemeSpec
  * @prop {string} greenCarbon   - 0x00FF00
  * @prop {string} cyanCarbon    - 0x00FFFF
  * @prop {string} magentaCarbon - 0xFF00FF
