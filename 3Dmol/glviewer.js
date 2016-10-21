@@ -535,24 +535,7 @@ $3Dmol.GLViewer = (function() {
          *
          * @param {Object | string} element
          *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
-         * @example
-         * // Assume there exist HTML divs with ids "gldiv", "gldiv2"
-         * var element = $("#gldiv"), element2 = $("#gldiv2");
-         * // Create GLViewer within 'gldiv'
-         * var myviewer = $3Dmol.createViewer(element);
-         * // Move the canvas to the other div
-         * myviewer.setContainer(element2)
-         *
-         * @example
-         * // Assume there exists an HTML div with id "gldiv"
-         * var element = $("#gldiv");
-         * // Create GLViewer within 'gldiv'
-         * var myviewer = $3Dmol.createViewer(element);
-         * // Remove the element from the DOM, and add a new element
-         * element.remove()
-         * $('body').prepend("<div id='newdiv'></div>")
-         * // Show the canvas in the new element
-         * myviewer.setContainer('newdiv')
+
          */
         this.setContainer = function(element) {
             if($.type(element) === "string")
@@ -603,7 +586,17 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setProjection
          * 
          * @example
-         * myviewer.setProjection("orthographic");
+         viewer.setViewStyle({style:"outline"});
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                  });
+                  viewer.zoomTo();
+
+                  viewer.setProjection("orthographic");
+                  viewer.render(callback);
+              });
          * 
          */
         this.setProjection = function(proj) {
@@ -697,7 +690,24 @@ $3Dmol.GLViewer = (function() {
          * @return {GLModel}
          * 
          * @example // Retrieve reference to first GLModel added var m =
-         *          viewer.getModel(0);
+         *      $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.getModel(0);
+      viewer.zoomTo();
+      viewer.render(callback);
+
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      viewer.render(callback);
+    };
          */
         this.getModel = function(id) {
             id = id || models.length - 1;
@@ -1027,8 +1037,8 @@ $3Dmol.GLViewer = (function() {
         }
 
         
-        this.autoload = function(){
-            $3Dmol.autoload();
+        this.autoload = function(callback,viewer){
+            $3Dmol.autoload(callback,viewer);
         }
 
         /** return list of atoms selected by sel
@@ -1243,15 +1253,33 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @example // Assuming we have created a model of a protein with
-         *        //  multiple chains (e.g. from a PDB file), focus on atoms in
-         *         // chain B glviewer.center({chain: 'B'});
          * @example // if the user were to pass the animationDuration value to 
          *           // the function like so viewer.zoomTo({resn:'STI'},1000);
          *         //   the program would center on resn 'STI' over the course 
          *         //   of 1 second(1000 milleseconds).
          *  // Reposition to centroid of all atoms of all models in this
-         * //viewer glviewer.center(); 
+         * //viewer glviewer.center();
+    $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      //viewer.translate(10,10);         
+      //viewer.zoomTo({resn:'STI'});
+      //viewer.zoom(10);
+      //viewer.rotate(90,"y");
+      viewer.center();
+      viewer.render(callback);
+    };
          */
         var rotation_index=0;
         this.center = function(sel,animationDuration){
@@ -1385,15 +1413,8 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @example // Assuming we have created a model of a protein with
-         *         // multiple chains (e.g. from a PDB file), focus on atoms in
-         *         // chain B glviewer.zoomTo({chain: 'B'});
-         * @example // if the user were to pass the animationDuration value to 
-         *          //  the function like so viewer.zoomTo({resn:'STI'},1000);
-         *          //  the program would zoom into resn 'STI' over the course 
-         *          //  of 1 second(1000 milleseconds).
-        @example
-
+          * @example   
+    
 
               $.get('volData/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -1603,21 +1624,29 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.Label}
          * 
          * @example
-         *  // Assuming glviewer contains a model representing a protein, label
-         * //all alpha carbons with their residue name
-         *  // Select all alpha carbons (have property atom : "CA") from last
-         * //model added var atoms =
-         * viewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
-         * 
-         * for (var a in atoms) { var atom = atoms[a];
-         *  // Create label at alpha carbon's position displaying atom's residue
-         * // and residue number var labelText = atom.resname + " " + atom.resi;
-         * 
-         * var l = viewer.createLabel(labelText, {fontSize: 12, position: {x:atom.x, y: atom.y, z: atom.z}});
-         * 
-         * labels.push(l); }
-         *  // Render labels 
-         viewer.render();
+         *  $3Dmol.download("pdb:2EJ0",viewer,{},function(){
+                  
+                  viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
+                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+                  viewer.setStyle({chain:'A'},{cross:{hidden:true}});
+                  viewer.setStyle({chain:'B'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      colorscheme:'greenCarbon'}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      radius:0.5}});
+                  viewer.setStyle({chain:'D'},{cross:{hidden:false,
+                                                      linewidth:10.0}});
+                  viewer.setStyle({chain:'E'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      color:'black'}});
+                  
+                  viewer.render();
+
+                  
+                });
          */
         this.addLabel = function(text, options, sel) {
             options = options || {};
@@ -1658,11 +1687,16 @@ $3Dmol.GLViewer = (function() {
          *            label - $3Dmol label
          * 
          * @example // Remove labels created in 
-         * 
-         * for (var i = 0; i < labels.length; i++) {
-         * viewer.removeLabel(label); }
-         * 
-         * viewer.render();
+         $3Dmol.download("pdb:2EJ0",viewer,{},function(){
+         *    viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
+                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+                  viewer.remove
+                  viewer.render();
+
+                  
+                });
 
          */
         this.removeLabel = function(label) {
@@ -2046,7 +2080,31 @@ $3Dmol.GLViewer = (function() {
          * @param {CustomSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
          @example
-         console.log("addcustom");
+         function triangle(viewer) {
+    var vertices = [];
+    var normals = [];
+    var colors = [];
+    var r = 20;
+    //triangle
+    vertices.push(new $3Dmol.Vector3(0,0,0));
+    vertices.push(new $3Dmol.Vector3(r,0,0));
+    vertices.push(new $3Dmol.Vector3(0,r,0));
+    
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    
+    colors.push({r:1,g:0,b:0});
+    colors.push({r:0,g:1,b:0});
+    colors.push({r:0,g:0,b:1});
+
+    var faces = [ 0,1,2 ];
+    
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    viewer.addCustom(spec);
+}
+            triangle(viewer);
+            viewer.render();
          */
         this.addCustom = function(spec) {
             spec = spec || {};
@@ -2321,8 +2379,8 @@ $3Dmol.GLViewer = (function() {
          * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
          @example
-          var element=$('#gldiv');
-          var viewer = $3Dmol.createViewer(element);
+          
+
               $.get('../test_structs/multiple.sdf', function(data){
                   viewer.addAsOneMolecule(data, "sdf");
                   viewer.zoomTo();
@@ -2503,8 +2561,31 @@ $3Dmol.GLViewer = (function() {
          * @param {function} callback - function called when an atom in the selection is clicked
          * 
          * @example
-         * viewer.setClickable({}, false); // disable click-handling for entire viewer
-         * viewer.setClickable({chain: 'B'}, true, function(){ console.log(this.elem); }); // chain B prints the clicked element to console
+         *   viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.setClickable = function(sel, clickable, callback) {
             applyToModels("setClickable", sel, clickable, callback);

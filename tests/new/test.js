@@ -112,7 +112,7 @@ function runTest(i){
 	beforeGlobals=GlobalTester.before(window);
 	var afterGlobals;
 
-	system[key](viewer,function(){
+	system[key](viewer,function(canvasid){
 		waitfor(viewer.surfacesFinished,true,100,0,"",function(){
 		var after=Date.now();
 		
@@ -138,8 +138,8 @@ function runTest(i){
 		};
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);
-		$("#undefined").remove();
-
+		//$("#undefined").remove();
+		$(".viewer_3Dmoljs").remove();
 			$(canvas).remove();
 		//$("#gldiv").children()[0].remove();
 		afterGlobals=GlobalTester.after(window);

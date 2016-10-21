@@ -15,6 +15,16 @@ def find_all(text,sub):
         examples.append(index)
         index += 2
     return examples
+def find_next(text,sub,currenti):
+    index=currenti
+    i=-1
+    while index < len(text):
+        index = text.find(sub, index)
+        if index == -1:
+            break
+        i=index
+        index += 2
+    return i
 def script_string(typedef,text):
     string="<script>function "+typedef+"{"+text+"}</script>\n"
     return string
@@ -235,7 +245,7 @@ class Example():
         closecomment=find_all(text,"*/")
         atdiv=find_all(text,"@div")
         text=text.replace("myviewer","viewer")
-        if(find_all(text,"viewer.render()")==[] and find_all(text,"viewer.render(callback)")==[]):
+        if(find_all(text,"viewer.render()")==[] and find_all(text,"viewer.render(callback)")==[] and find_all(text,"@data")==[] and find_all(text,"@div")==[]):
             text=text+"viewer.render(callback);"
         if(len(atdata) == 0 and len(atdiv) ==0 ):
             text=text.replace("viewer.render()","viewer.render(callback)")
@@ -252,7 +262,7 @@ class Example():
 
             string=text[data+6+len(self.name):ending]
             text=text[0:data]+text[ending:]
-            string="var wrapper=document.createElement('div');\nwrapper.innerHTML=`<textarea style=\\\"display: none;\\\" id=\\\""+self.name+"\\\">"+string+"</textarea>`;\ndocument.appendChild(wrapper.firstChild);\n$3Dmol.autoload();";
+            string="var wrapper=$.parseHTML(`<textarea style=\\\"display: none;\\\" id=\\\""+text[data+5:]+"\\\">"+string+"</textarea>`);\n$('#div_"+self.name+"')\nviewer.autoload();";
             text=text+string
 
         for data in atdiv:
@@ -265,7 +275,7 @@ class Example():
                     ending=at
             string=text[data+4:ending]
             text=text[0:data]+text[ending:]
-            string="var objectHTML=$(`"+string+"`);document.appendChild(objectHTML);"
+            string="var objectHTML=$.parseHTML(`"+string+"`);$(\"#div_"+self.name+"\").append(objectHTML);\nviewer.autoload(function(){viewer.render(callback);},viewer);"
             text=text+string
         text=text.replace("viewer.render()","viewer.render(callback)")
         return text
@@ -369,7 +379,7 @@ class TestSystem():
                     parsed=File(path+file,"generated",open(path+file,"r").read())
                     files.append(parsed)
         #these are the build in tests
-        exceptions=["generate_tests.py","one_page.html","test.js","volData","imgs"]
+        exceptions=["generate_tests.py","one_page.html","test.js","volData","imgs","url.cgi","tests.html"]
         for filename in os.listdir(manual_tests_path):
             if(filename in exceptions):
                 continue

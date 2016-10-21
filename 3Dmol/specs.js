@@ -84,8 +84,29 @@
  * @prop {WithinSelectionSpec} within - intersects the selection with the set of atoms within a given distance from another selection
  
  * @example
- * viewer.addResLabels({resi: [1,2,3,4,5], atom: 'CA'}); // will label alpha carbons (CA) of residues 1-5
- * 
+ * $3Dmol.download("pdb:2EJ0",viewer,{},function(){
+                  
+                  viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
+                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+                  viewer.setStyle({chain:'A'},{cross:{hidden:true}});
+                  viewer.setStyle({chain:'B'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      colorscheme:'greenCarbon'}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      radius:0.5}});
+                  viewer.setStyle({chain:'D'},{cross:{hidden:false,
+                                                      linewidth:10.0}});
+                  viewer.setStyle({chain:'E'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      color:'black'}});
+                  
+                  viewer.render();
+
+                  
+                });
  */
 
 /**
@@ -93,11 +114,23 @@
  * some distance from another atom selection. When added as a field of an {@link AtomSelectionSpec},
  * intersects the set of atoms in that selection with the set of atoms within a given
  * distance from the given {@link AtomSelectionSpec}.
- *
- * @example
- * viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); // stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
- *
+ 
  * @typedef WithinSelectionSpec
+ * @example
+ $3Dmol.download("pdb:2EJ0",viewer,{},function(){
+                  
+                  viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
+                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+            
+ * viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); 
+                  
+                  viewer.render();
+
+                  
+                });// stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
+ *
  * @prop {number} distance - the distance in angstroms away from the atom selection to include atoms in the parent selection
 *  @prop {boolean} invert - if set, selects atoms not within distance range for intersection
  * @prop {AtomSelectionSpec} sel - the selection of atoms against which to measure the distance from the parent atom selection
@@ -124,7 +157,20 @@
  * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead.
  * 
  * @example
- * viewer.addSurface($3Dmol.SurfaceType.MS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:0.85});
+ * var setStyles = function(volumedata){
+                    var data = new $3Dmol.VolumeData(volumedata, "cube");
+                    viewer.addSurface("VDW", {opacity:0.85, voldata: data, volscheme: new $3Dmol.Gradient.RWB(-10,10)},{chain:'A'});
+                    viewer.mapAtomProperties($3Dmol.applyPartialCharges);
+                    viewer.addSurface($3Dmol.SurfaceType.SAS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.05,.05)}, opacity:1.0},{chain:'B'});
+                    viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, color:'red'},{chain:'C'});
+                    viewer.addSurface($3Dmol.SurfaceType.SAS, {opacity:0.85,voldata: data, colorscheme:'greenCarbon'},{chain:'D'});
+                 
+              viewer.render();
+              };
+              $3Dmol.download("pdb:4DLN",viewer,{},function(){
+                  
+                  $.get("volData/1fas.cube",setStyles);
+                });
 
  */
 

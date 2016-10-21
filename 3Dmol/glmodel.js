@@ -1851,13 +1851,32 @@ $3Dmol.GLModel = (function() {
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
          * @example
-         var element=$('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
-            m = viewer.addModel();
-            m.setClickable({},true,function(){
-                console.log("model Clicked");
-            });
-            viewer.render();
+        
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.setClickable = function(sel, clickable, callback) {           
 
@@ -1899,16 +1918,32 @@ $3Dmol.GLModel = (function() {
          * @param {function} hover_callback - function called when an atom in the selection is hovered over
          * @param {function} unhover_callback - function called when the mouse moves out of the hover area
          * @example
-         var element=$('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
-            m = viewer.addModel();
-            m.setHoverable({},true,function(){
-                console.log("model hovered");
-            },
-            function(){
-                console.log("model unhovered");
-            });
-            viewer.render();
+         
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
             var s;
@@ -2132,7 +2167,8 @@ $3Dmol.GLModel = (function() {
             molObj = null;
         };
         
-        /** Don't show this model is future renderings.  Keep all styles and state
+        /**@function hide
+             Don't show this model is future renderings.  Keep all styles and state
          * so it can be efficiencly shown again.
          * @example
          var element=$('#gldiv');
