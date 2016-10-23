@@ -1,14 +1,13 @@
 //auto-initialization
 //Create embedded viewer from HTML attributes if true
-$3Dmol.autoload=function(callback,viewer){
+$3Dmol.autoload=function(viewer){
     if ($(".viewer_3Dmoljs")[0] !== undefined)
         $3Dmol.autoinit = true;
-        
+    
     if ($3Dmol.autoinit) {
         viewer =(viewer!= undefined) ?
             viewer :null;
-        var callback = (callback!=undefined) ? 
-                callback : null;
+        
         $3Dmol.viewers = {};
         var nviewers = 0;
         $(".viewer_3Dmoljs").each( function() {
@@ -18,6 +17,8 @@ $3Dmol.autoload=function(callback,viewer){
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
             }
+            var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
+                    window[viewerdiv.data("callback")] : null;
             var type = null;
             if (viewerdiv.data("pdb")) {
                 datauri = "http://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb";
@@ -112,6 +113,7 @@ $3Dmol.autoload=function(callback,viewer){
                     glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors});
                 glviewer.setBackgroundColor(bgcolor);                            
             } catch ( error ) {
+                console.log(error);
                 //for autoload, provide a useful error message
                 window.location = "http://get.webgl.org";                    
             }           

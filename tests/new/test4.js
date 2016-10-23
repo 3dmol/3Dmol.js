@@ -5,7 +5,8 @@
                data-element='moldata_sdf'
                data-datatype='sdf'
                data-backgroundcolor='0xffffff'
-               data-style='cross:radius=1.0'></div>
+               data-style='cross:radius=1.0'
+               data-callback="div_callback"></div>
 
 @data moldata_sdf
 

@@ -195,7 +195,13 @@
                 <ul></ul>
             </div>
             <div id="gldiv" style="width: 400px; height: 400px; position: relative;visability:hidden"></div>
-                    <script>var system={
+                    <script> var global_viewer=null;
+                    var global_callback=null;
+                    function div_callback(){
+
+                        global_viewer.render(global_callback);
+
+                    }var system={
 glviewer_js_setBackgroundColor: function (viewer,callback,name='glviewer_js_setBackgroundColor'){try{
 
           
@@ -2175,12 +2181,15 @@ test5: function(viewer,callback,name='test5'){try{
                data-select1='chain:A' data-style1='cross:colorscheme=cyanCarbon'
                data-select2='chain:B' data-style2='cross:color=maroon'
                data-select3='chain:C' data-style3='stick:hidden=true'
-               data-select4='chain:D' data-style4='stick:radius=0.1'></div>
+               data-select4='chain:D' data-style4='stick:radius=0.1'
+               data-callback="div_callback"></div>
 
 
 
 `);$("#div_test5").append(objectHTML);
-viewer.autoload(function(){viewer.render(callback);},viewer);
+global_viewer=viewer;
+global_callback=callback;
+viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test15: function(viewer,callback,name='test15'){try{
 $3Dmol.download("pdb:4DM7",viewer,{},function(){
@@ -11422,7 +11431,9 @@ viewer.autoload();var objectHTML=$.parseHTML(`
                data-select1="hetflag:true"
                data-style1="sphere:colorscheme=greenCarbon"></div>
 `);$("#div_test44").append(objectHTML);
-viewer.autoload(function(){viewer.render(callback);},viewer);
+global_viewer=viewer;
+global_callback=callback;
+viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test9: function(viewer,callback,name='test9'){try{
 $3Dmol.download("pdb:2EJ0",viewer,{},function(){
@@ -11559,9 +11570,12 @@ test2: function(viewer,callback,name='test2'){try{
                data-select1='chain:A' data-style1='line:hidden=true'
                data-select2='chain:B' data-style2='line:linewidth=5.0'
                data-select3='chain:C' data-style3='line:colorscheme=greenCarbon'
-               data-select4='chain:D' data-style4='line:color=red'></div>
+               data-select4='chain:D' data-style4='line:color=red'
+               data-callback="div_callback"></div>
 `);$("#div_test2").append(objectHTML);
-viewer.autoload(function(){viewer.render(callback);},viewer);
+global_viewer=viewer;
+global_callback=callback;
+viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test40: function(viewer,callback,name='test40'){try{
 function triangle(viewer) {
@@ -16478,10 +16492,13 @@ viewer.autoload();var objectHTML=$.parseHTML(`
                data-element='moldata_sdf'
                data-backgroundcolor='0xffffff'
                data-select1='chain:A' data-style1='cartoon:style=trace' data-surface1='opacity:.7;color:red'
-               data-select2='chain:B' data-style2='cartoon:thickness=0.1'></div>
+               data-select2='chain:B' data-style2='cartoon:thickness=0.1'
+               data-callback="div_callback"></div>
   
   `);$("#div_test7").append(objectHTML);
-viewer.autoload(function(){viewer.render(callback);},viewer);
+global_viewer=viewer;
+global_callback=callback;
+viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test58: function(viewer,callback,name='test58'){try{
 
@@ -16641,10 +16658,13 @@ viewer.autoload();var objectHTML=$.parseHTML(`
                data-element='moldata_sdf'
                data-datatype='sdf'
                data-backgroundcolor='0xffffff'
-               data-style='cross:radius=1.0'></div>
+               data-style='cross:radius=1.0'
+               data-callback="div_callback"></div>
 
 `);$("#div_test4").append(objectHTML);
-viewer.autoload(function(){viewer.render(callback);},viewer);
+global_viewer=viewer;
+global_callback=callback;
+viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test32: function(viewer,callback,name='test32'){try{
 $3Dmol.download("pdb:1YCR", viewer, {}, function(){
@@ -16926,7 +16946,9 @@ viewer.autoload();var objectHTML=$.parseHTML(`
                data-style='stick' ></div>
  
 `);$("#div_test43").append(objectHTML);
-viewer.autoload(function(){viewer.render(callback);},viewer);
+global_viewer=viewer;
+global_callback=callback;
+viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test39: function(viewer,callback,name='test39'){try{
 
@@ -17097,9 +17119,12 @@ test6: function(viewer,callback,name='test6'){try{
                data-select1='chain:A' data-style1='stick:singleBonds=true'
                data-select2='chain:B' data-style2='stick:colorscheme=greenCarbon,outline=true'
                data-select3='chain:C' data-style3='stick:color=blue'
-               data-select4='chain:D' data-style4='sphere:hidden=true'></div>
+               data-select4='chain:D' data-style4='sphere:hidden=true'
+               data-callback="div_callback"></div>
                `);$("#div_test6").append(objectHTML);
-viewer.autoload(function(){viewer.render(callback);},viewer);
+global_viewer=viewer;
+global_callback=callback;
+viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test47: function(viewer,callback,name='test47'){try{
 
@@ -17290,11 +17315,14 @@ test3: function(viewer,callback,name='test3'){try{
                class='viewer_3Dmoljs'
                data-href='https://dl.dropboxusercontent.com/s/ba5pxrgl8y21t7e/1bj4.pdb?dl=0'
                data-backgroundcolor='0xffffff'
-               data-style='cartoon'></div>
+               data-style='cartoon'
+               data-callback="div_callback"></div>
 
 
 `);$("#div_test3").append(objectHTML);
-viewer.autoload(function(){viewer.render(callback);},viewer);
+global_viewer=viewer;
+global_callback=callback;
+viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 }</script><script src="test.js"></script>
 

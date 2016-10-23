@@ -3,7 +3,8 @@
                class='viewer_3Dmoljs'
                data-href='https://dl.dropboxusercontent.com/s/ba5pxrgl8y21t7e/1bj4.pdb?dl=0'
                data-backgroundcolor='0xffffff'
-               data-style='cartoon'></div>
+               data-style='cartoon'
+               data-callback="div_callback"></div>
 
 
 */

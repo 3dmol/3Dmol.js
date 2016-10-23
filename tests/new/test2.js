@@ -6,5 +6,6 @@
                data-select1='chain:A' data-style1='line:hidden=true'
                data-select2='chain:B' data-style2='line:linewidth=5.0'
                data-select3='chain:C' data-style3='line:colorscheme=greenCarbon'
-               data-select4='chain:D' data-style4='line:color=red'></div>
+               data-select4='chain:D' data-style4='line:color=red'
+               data-callback="div_callback"></div>
 */

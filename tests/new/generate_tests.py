@@ -275,7 +275,7 @@ class Example():
                     ending=at
             string=text[data+4:ending]
             text=text[0:data]+text[ending:]
-            string="var objectHTML=$.parseHTML(`"+string+"`);$(\"#div_"+self.name+"\").append(objectHTML);\nviewer.autoload(function(){viewer.render(callback);},viewer);"
+            string="var objectHTML=$.parseHTML(`"+string+"`);$(\"#div_"+self.name+"\").append(objectHTML);\nglobal_viewer=viewer;\nglobal_callback=callback;\nviewer.autoload(viewer);"
             text=text+string
         text=text.replace("viewer.render()","viewer.render(callback)")
         return text
@@ -403,7 +403,14 @@ with open("tests/new/one_page.html","a") as f:
         elif(type(file.examples)==type(None)):
             f.write('<li>'+file.contents.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>')
     f.write(middle)
-    f.write("<script>var system={\n")
+    f.write("""<script> var global_viewer=null;
+                    var global_callback=null;
+                    function div_callback(){
+
+                        global_viewer.render(global_callback);
+
+                    }""")
+    f.write("var system={\n")
 
     for file in test.files:
         if(type(file.examples)!=type(None) and len(file.examples)>0):
