@@ -1147,7 +1147,8 @@ test49: function(viewer,callback,name='test49'){try{
 /* */
 
 
-            var wrapper=$.parseHTML(`<textarea style=\"display: none;\" id=\"            \">OM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
+            var wrapper=$.parseHTML(`<textarea style="display: none;" id="rec">
+ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
 ATOM      2  CA  LYS A   1       2.459  10.365   9.364  1.00 28.03           C  
 ATOM      3  C   LYS A   1       2.458  11.880   9.149  1.00 21.93           C  
 ATOM      4  O   LYS A   1       2.481  12.672  10.100  1.00 14.10           O  
@@ -2149,10 +2150,10 @@ ATOM    999  CD1 LEU A 129     -13.088  22.029   7.721  1.00 41.00           C
 ATOM   1000  CD2 LEU A 129     -13.441  19.891   8.982  1.00 29.73           C  
 ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
+</textarea>
 
-
-</textarea>`);
-$('#div_test49')
+`);
+$('#div_test49').append(wrapper);
 viewer.autoload();
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test19: function(viewer,callback,name='test19'){try{
@@ -2203,7 +2204,8 @@ $3Dmol.download("pdb:4DM7",viewer,{},function(){
               });
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test36: function(viewer,callback,name='test36'){try{
-
+/*
+*/
             var data = $("#test").val();
             viewer.setBackgroundColor(0xffffff);    
             var m = viewer.addModel(data, "xyz");
@@ -2212,16 +2214,16 @@ test36: function(viewer,callback,name='test36'){try{
             viewer.animate({loop: "backAndForth"});
             viewer.zoomTo();
             viewer.render(callback);
-/*
-*/var wrapper=$.parseHTML(`<textarea style=\"display: none;\" id=\"\">4
+var wrapper=$.parseHTML(`<textarea style="display: none;" id="test">
+4
 * (null), Energy   -1000.0000000
 N     0.000005    0.019779   -0.000003   -0.157114    0.000052   -0.012746
 H     0.931955   -0.364989    0.000003    1.507100   -0.601158   -0.004108
 H    -0.465975   -0.364992    0.807088    0.283368    0.257996   -0.583024
 H    -0.465979   -0.364991   -0.807088    0.392764    0.342436    0.764260
-
-</textarea>`);
-$('#div_test36')
+</textarea>
+`);
+$('#div_test36').append(wrapper);
 viewer.autoload();
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test64: function(viewer,callback,name='test64'){try{
@@ -2237,7 +2239,8 @@ test64: function(viewer,callback,name='test64'){try{
             viewer.zoomTo();
             viewer.render(callback);
 
-/**/var wrapper=$.parseHTML(`<textarea style=\"display: none;\" id=\"\">ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
+/**/var wrapper=$.parseHTML(`<textarea style="display: none;" id="rec">
+ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
 ATOM      2  CA  LYS A   1       2.459  10.365   9.364  1.00 28.03           C  
 ATOM      3  C   LYS A   1       2.458  11.880   9.149  1.00 21.93           C  
 ATOM      4  O   LYS A   1       2.481  12.672  10.100  1.00 14.10           O  
@@ -3239,8 +3242,9 @@ ATOM    999  CD1 LEU A 129     -13.088  22.029   7.721  1.00 41.00           C
 ATOM   1000  CD2 LEU A 129     -13.441  19.891   8.982  1.00 29.73           C  
 ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
-</textarea>`);
-$('#div_test64')
+</textarea>
+`);
+$('#div_test64').append(wrapper);
 viewer.autoload();
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test57: function(viewer,callback,name='test57'){try{
@@ -3352,7 +3356,11 @@ $3Dmol.download("pdb:4UND",viewer,{},function(){
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test44: function(viewer,callback,name='test44'){try{
 
-/**/var wrapper=$.parseHTML(`<textarea style=\"display: none;\" id=\"\">a
+/**/
+
+               /*
+*/var wrapper=$.parseHTML(`
+<textarea style="display: none;" id="moldata">
 ATOM      1  N   SER A 305      -9.274 -19.351  24.621  1.00 87.86           N  
 ANISOU    1  N   SER A 305    11384   9825  12176  -1217  -1389   1115       N  
 ATOM      2  CA  SER A 305      -9.065 -18.784  25.947  1.00 87.34           C  
@@ -11419,8 +11427,9 @@ HETATM 4050  C15 ESE B 601      26.225  -5.140  10.561  1.00 21.85           C
 HETATM 4051  C16 ESE B 601      27.205  -4.935   8.241  1.00 18.89           C  
 HETATM 4052  O01 ESE B 601      20.710  -3.420   2.539  1.00 23.25           O  
 HETATM 4053  O02 ESE B 601      27.424  -4.506  10.930  1.00 24.11           O  
-               </textarea>`);
-$('#div_test44')
+</textarea>
+               `);
+$('#div_test44').append(wrapper);
 viewer.autoload();var objectHTML=$.parseHTML(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
@@ -11429,8 +11438,9 @@ viewer.autoload();var objectHTML=$.parseHTML(`
                data-select='hetflag:false'
                data-style='cartoon'
                data-select1="hetflag:true"
-               data-style1="sphere:colorscheme=greenCarbon"></div>
-`);$("#div_test44").append(objectHTML);
+               data-style1="sphere:colorscheme=greenCarbon"
+			   data-callback="div_callback"></div>
+               `);$("#div_test44").append(objectHTML);
 global_viewer=viewer;
 global_callback=callback;
 viewer.autoload(viewer);
@@ -11653,7 +11663,14 @@ function cylinder(viewer) {
             viewer.render(callback);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test7: function(viewer,callback,name='test7'){try{
-/* */var wrapper=$.parseHTML(`<textarea style=\"display: none;\" id=\"\">ta_sdf
+
+/*
+
+*/
+
+/* 
+
+  */var wrapper=$.parseHTML(`  <textarea style="display: none;" id="moldata_sdf">
 			HEADER    UNKNOWN FUNCTION                        17-SEP-08   3EIT              
 TITLE     THE 2.6 ANGSTROM CRYSTAL STRUCTURE OF CHBP, THE CIF HOMOLOGUE FROM    
 TITLE    2 BURKHOLDERIA PSEUDOMALLEI                                            
@@ -16484,8 +16501,12 @@ CONECT 3397 3396 3398
 CONECT 3398 3397                                                                
 CONECT 3399 3393                                                                
 MASTER      605    0   12   29    8    0    0    6 3923    2  122   44          
-END        </textarea>`);
-$('#div_test7')
+END                                                                             
+
+    </textarea>
+  
+`);
+$('#div_test7').append(wrapper);
 viewer.autoload();var objectHTML=$.parseHTML(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
@@ -16494,8 +16515,8 @@ viewer.autoload();var objectHTML=$.parseHTML(`
                data-select1='chain:A' data-style1='cartoon:style=trace' data-surface1='opacity:.7;color:red'
                data-select2='chain:B' data-style2='cartoon:thickness=0.1'
                data-callback="div_callback"></div>
-  
-  `);$("#div_test7").append(objectHTML);
+
+`);$("#div_test7").append(objectHTML);
 global_viewer=viewer;
 global_callback=callback;
 viewer.autoload(viewer);
@@ -16555,9 +16576,7 @@ test16: function(viewer,callback,name='test16'){try{
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test4: function(viewer,callback,name='test4'){try{
 /*
-*/var wrapper=$.parseHTML(`<textarea style=\"display: none;\" id=\"\">ta_sdf
-
-v:U4C5Cr:4
+*/var wrapper=$.parseHTML(`<textarea style="display: none;" id="moldata_sdf">v:U4C5Cr:4
   -OEChem-12201211493D
 
  43 44  0     1  0  0  0  0  0999 V2000
@@ -16650,8 +16669,9 @@ v:U4C5Cr:4
   8 35  2  0  0  0  0
 M  CHG  2  35   1  40  -1
 M  END
-</textarea>`);
-$('#div_test4')
+</textarea>
+`);
+$('#div_test4').append(wrapper);
 viewer.autoload();var objectHTML=$.parseHTML(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
@@ -16808,10 +16828,10 @@ test45: function(viewer,callback,name='test45'){try{
                                        selectedRegion: viewer.selectedAtoms({}),
                                        selectedOffset: 3,
                                        radius: 3.0                                   
-                                    });
+                                    },function(){viewer.render(callback);});
 
                                                      
-      viewer.render(callback);
+      
     };
     req.send(null);
 
@@ -16819,7 +16839,11 @@ test45: function(viewer,callback,name='test45'){try{
 
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test43: function(viewer,callback,name='test43'){try{
-  /* */var wrapper=$.parseHTML(`<textarea style=\"display: none;\" id=\"\">a
+  /* */
+
+               /*
+ 
+*/var wrapper=$.parseHTML(`<textarea style="display: none;" id="moldata">
 HETATM    1  N   UNK            -1.365  -0.098   0.208  0.00  0.00           N  
 HETATM    2  N   UNK             5.603  -0.475  -0.468  0.00  0.00           N  
 HETATM    3  N   UNK             8.358  -1.608   0.358  0.00  0.00           N  
@@ -16936,16 +16960,17 @@ CONECT   41   18
 CONECT   42   19
 CONECT   43   19
 END
- </textarea>`);
-$('#div_test43')
+</textarea>`);
+$('#div_test43').append(wrapper);
 viewer.autoload();var objectHTML=$.parseHTML(`
   <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
                data-element='moldata'
                data-backgroundcolor='0xffffff'
-               data-style='stick' ></div>
- 
-`);$("#div_test43").append(objectHTML);
+               data-style='stick'
+               data-callback='div_callback' ></div>
+
+               `);$("#div_test43").append(objectHTML);
 global_viewer=viewer;
 global_callback=callback;
 viewer.autoload(viewer);

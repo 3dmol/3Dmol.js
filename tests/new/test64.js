@@ -10,9 +10,8 @@
             viewer.zoomTo();
             viewer.render();
 
-/*@data rec
-
-
+/*@data
+<textarea style="display: none;" id="rec">
 ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
 ATOM      2  CA  LYS A   1       2.459  10.365   9.364  1.00 28.03           C  
 ATOM      3  C   LYS A   1       2.458  11.880   9.149  1.00 21.93           C  
@@ -1015,4 +1014,5 @@ ATOM    999  CD1 LEU A 129     -13.088  22.029   7.721  1.00 41.00           C
 ATOM   1000  CD2 LEU A 129     -13.441  19.891   8.982  1.00 29.73           C  
 ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
+</textarea>
 */

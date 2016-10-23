@@ -3,9 +3,14 @@
                class='viewer_3Dmoljs'
                data-element='moldata'
                data-backgroundcolor='0xffffff'
-               data-style='stick' ></div>
+               data-style='stick'
+               data-callback='div_callback' ></div>
+
+               */
+
+               /*
  
-@data moldata
+@data <textarea style="display: none;" id="moldata">
 HETATM    1  N   UNK            -1.365  -0.098   0.208  0.00  0.00           N  
 HETATM    2  N   UNK             5.603  -0.475  -0.468  0.00  0.00           N  
 HETATM    3  N   UNK             8.358  -1.608   0.358  0.00  0.00           N  
@@ -122,4 +127,4 @@ CONECT   41   18
 CONECT   42   19
 CONECT   43   19
 END
- */
+</textarea>*/

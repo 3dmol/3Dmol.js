@@ -8,9 +8,8 @@
                data-style='cross:radius=1.0'
                data-callback="div_callback"></div>
 
-@data moldata_sdf
-
-v:U4C5Cr:4
+@data
+<textarea style="display: none;" id="moldata_sdf">v:U4C5Cr:4
   -OEChem-12201211493D
 
  43 44  0     1  0  0  0  0  0999 V2000
@@ -103,4 +102,5 @@ v:U4C5Cr:4
   8 35  2  0  0  0  0
 M  CHG  2  35   1  40  -1
 M  END
+</textarea>
 */

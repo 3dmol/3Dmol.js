@@ -1,4 +1,7 @@
-/* @div
+
+/*
+
+@div
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
                data-element='moldata_sdf'
@@ -6,8 +9,12 @@
                data-select1='chain:A' data-style1='cartoon:style=trace' data-surface1='opacity:.7;color:red'
                data-select2='chain:B' data-style2='cartoon:thickness=0.1'
                data-callback="div_callback"></div>
-  
-  @data moldata_sdf
+
+*/
+
+/* 
+
+  @data   <textarea style="display: none;" id="moldata_sdf">
 			HEADER    UNKNOWN FUNCTION                        17-SEP-08   3EIT              
 TITLE     THE 2.6 ANGSTROM CRYSTAL STRUCTURE OF CHBP, THE CIF HOMOLOGUE FROM    
 TITLE    2 BURKHOLDERIA PSEUDOMALLEI                                            
@@ -4838,4 +4845,8 @@ CONECT 3397 3396 3398
 CONECT 3398 3397                                                                
 CONECT 3399 3393                                                                
 MASTER      605    0   12   29    8    0    0    6 3923    2  122   44          
-END        */
+END                                                                             
+
+    </textarea>
+  
+*/

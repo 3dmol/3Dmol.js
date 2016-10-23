@@ -7,8 +7,13 @@
                data-select='hetflag:false'
                data-style='cartoon'
                data-select1="hetflag:true"
-               data-style1="sphere:colorscheme=greenCarbon"></div>
-@data moldata
+               data-style1="sphere:colorscheme=greenCarbon"
+			   data-callback="div_callback"></div>
+               */
+
+               /*
+@data 
+<textarea style="display: none;" id="moldata">
 ATOM      1  N   SER A 305      -9.274 -19.351  24.621  1.00 87.86           N  
 ANISOU    1  N   SER A 305    11384   9825  12176  -1217  -1389   1115       N  
 ATOM      2  CA  SER A 305      -9.065 -18.784  25.947  1.00 87.34           C  
@@ -8075,4 +8080,5 @@ HETATM 4050  C15 ESE B 601      26.225  -5.140  10.561  1.00 21.85           C
 HETATM 4051  C16 ESE B 601      27.205  -4.935   8.241  1.00 18.89           C  
 HETATM 4052  O01 ESE B 601      20.710  -3.420   2.539  1.00 23.25           O  
 HETATM 4053  O02 ESE B 601      27.424  -4.506  10.930  1.00 24.11           O  
+</textarea>
                */

@@ -260,9 +260,9 @@ class Example():
                 if at>data and at<ending:
                     ending=at
 
-            string=text[data+6+len(self.name):ending]
+            string=text[data+6:ending]
             text=text[0:data]+text[ending:]
-            string="var wrapper=$.parseHTML(`<textarea style=\\\"display: none;\\\" id=\\\""+text[data+5:]+"\\\">"+string+"</textarea>`);\n$('#div_"+self.name+"')\nviewer.autoload();";
+            string="var wrapper=$.parseHTML(`"+string+"`);\n$('#div_"+self.name+"').append(wrapper);\nviewer.autoload();";
             text=text+string
 
         for data in atdiv:
