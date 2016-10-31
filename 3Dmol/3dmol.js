@@ -224,6 +224,9 @@ $3Dmol.download = function(query, viewer, options, callback) {
             }
             uri = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
               "/SDF?record_type=3d";
+        } else if (query.substr(0,4) == 'url:') {
+            uri = query.substr(4);
+            type = uri;
         }
     
         var handler = function(ret) {
