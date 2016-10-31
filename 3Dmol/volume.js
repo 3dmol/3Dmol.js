@@ -225,6 +225,74 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
 
 };
 
+// parse dx data - does not support all features of the file format
+$3Dmol.VolumeData.prototype.dx = function(str) {
+    var lines = str.split(/[\n\r]+/);
+    var i, m;
+    var recounts = /gridpositions\s+counts\s+(\d+)\s+(\d+)\s+(\d+)/;
+    var reorig = /^origin\s+(\S+)\s+(\S+)\s+(\S+)/;
+    var redelta = /^delta\s+(\S+)\s+(\S+)\s+(\S+)/;
+    var follows = /data follows/;
+        
+    for(i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if((m = recounts.exec(line)) ) {
+            var nX = parseInt(m[1]);
+            var nY = parseInt(m[2]);
+            var nZ = parseInt(m[3]);
+            this.size = {x:nX, y:nY, z:nZ};
+        }
+        else if((m = redelta.exec(line))) {
+            var xunit = parseFloat(m[1]);
+            if(parseFloat(m[2]) != 0 || parseFloat(m[3]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }
+            i += 1;
+            line = lines[i];
+            m = redelta.exec(line);
+            if(m == null) {
+                console.log("Parse error in dx delta matrix");
+                return;
+            }
+            
+            var yunit = parseFloat(m[2]);
+            if(parseFloat(m[1]) != 0 || parseFloat(m[3]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }
+            
+            i += 1;
+            line = lines[i];
+            m = redelta.exec(line);
+            if(m == null) {
+                console.log("Parse error in dx delta matrix");
+                return;
+            }
+            
+            var zunit = parseFloat(m[3]);
+            if(parseFloat(m[1]) != 0 || parseFloat(m[2]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }    
+            this.unit = new $3Dmol.Vector3(xunit,yunit,zunit);        
+        }
+        else if((m = reorig.exec(line))) {
+            var xorig = parseFloat(m[1]);
+            var yorig = parseFloat(m[2]);
+            var zorig = parseFloat(m[3]);
+            this.origin = new $3Dmol.Vector3(xorig,yorig,zorig);
+        } else if((m = follows.exec(line))) {
+            break;
+        }
+    }
+    i += 1;
+    if(!this.size || !this.origin || !this.unit || !this.size) {
+        console.log("Error parsing dx format");
+        return;
+    }
+    var raw = lines.splice(i).join(" ");
+    raw = raw.split(/[\s\r]+/);
+    this.data = new Float32Array(raw);
+}
+
 // parse cube data
 $3Dmol.VolumeData.prototype.cube = function(str) {
     var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
