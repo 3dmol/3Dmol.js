@@ -1,14 +1,11 @@
-var viewer = $3Dmol.createViewer($("#gldiv"), {
-		defaultcolors : $3Dmol.rasmolElementColors
-		});
-    
+
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/TRPcage.prmtop", false);
     rawFile.onreadystatechange = function (){
         if(rawFile.readyState === 4){
             if(rawFile.status === 200 || rawFile.status == 0){
                 var data = rawFile.responseText;
-		var m = viewer.addModel(data, "prmtop");	
+				var m = viewer.addModel(data, "prmtop");	
                 var File = new XMLHttpRequest();
    		File.open("GET", "volData/TRPcage.inpcrd", false);
     		File.onreadystatechange = function(){

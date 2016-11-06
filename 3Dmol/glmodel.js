@@ -2269,11 +2269,11 @@ $3Dmol.GLModel = (function() {
                 var count = 0;
                 while (count < values.length) {
                     var temp = [];
-                    for (i = 0; i < atomCount; i++) {
+                    for (var i = 0; i < atomCount; i++) {
                         temp[i] = atoms[i];
                     }
                 
-                    for (i = 0; i < atomCount; i++) {
+                    for (var i = 0; i < atomCount; i++) {
                         temp[i].x = values[count++];
                         temp[i].y = values[count++];
                         temp[i].z = values[count++];

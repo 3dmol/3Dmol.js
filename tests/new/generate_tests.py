@@ -35,6 +35,8 @@ beggining="""<!DOCTYPE html>
                         <title></title>
 
             <script src="../../build/3Dmol.js"></script>
+            <script src="test.js"></script>
+
             <style>
             body{
             overflow-x:hidden;
@@ -199,12 +201,7 @@ beggining="""<!DOCTYPE html>
                     </head>
                     <body>
 
-          <div id="progress" class="waiting">
-    }
-    }
-    <dt></dt>
-    <dd></dd>
-    </div>
+         
     <div id="tools">
         <h1 id="tools_title">3Dmol.js Tests</h1>
         <h2 id="errors_title">Errors</h2>
@@ -228,7 +225,7 @@ middle="""
             </div>
             <div id="gldiv" style="width: 400px; height: 400px; position: relative;visability:hidden"></div>
                     """
-end="""<script src="test.js"></script>
+end="""
 
     </body>
          </html>"""
@@ -379,7 +376,7 @@ class TestSystem():
                     parsed=File(path+file,"generated",open(path+file,"r").read())
                     files.append(parsed)
         #these are the build in tests
-        exceptions=["generate_tests.py","one_page.html","test.js","volData","imgs","url.cgi","tests.html"]
+        exceptions=["generate_tests.py","tests.html","test.js","volData","imgs","url.cgi","tests.html"]
         for filename in os.listdir(manual_tests_path):
             if(filename in exceptions):
                 continue
@@ -390,10 +387,10 @@ class TestSystem():
 
 test=TestSystem() 
 
-f=open("tests/new/one_page.html","w")
+f=open("tests/new/tests.html","w")
 f.write("")
 f.close()
-with open("tests/new/one_page.html","a") as f:
+with open("tests/new/tests.html","a") as f:
     f.write(beggining)
 
     for file in test.files:

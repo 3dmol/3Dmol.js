@@ -2230,7 +2230,7 @@ $3Dmol.GLViewer = (function() {
          @example
          var element=$('#gldiv');
          var myviewer = $3Dmol.createViewer(element);
-            m = myviewer.addModel();
+            var m = myviewer.addModel();
             myviewer.render();
          */
          
@@ -3034,6 +3034,7 @@ $3Dmol.GLViewer = (function() {
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
             
+
             if(typeof type =="string"){
                 if(surfaceTypeMap[type]!== undefined)
                     type = surfaceTypeMap[type];

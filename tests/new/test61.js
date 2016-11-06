@@ -1,5 +1,4 @@
 
-    
     var m;
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/4csv.pdb", false);
@@ -7,7 +6,7 @@
         if(rawFile.readyState === 4){
             if(rawFile.status === 200 || rawFile.status == 0){
                 var data = rawFile.responseText;
-		m = viewer.addModel(data, "pdb");	
+		        m = viewer.addModel(data, "pdb");	
                 var req = new XMLHttpRequest();
    		req.open("GET", "volData/4csv.pdb", false);
     		req.onload = function(aEvt){

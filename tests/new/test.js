@@ -8,28 +8,31 @@ var getKeys = function(obj){
    }
    return keys;
 }
-var getSelections
 var canvasCount= function(){
 
 	return $('#gldiv').children().length;
 }
 
 var GlobalTester = (function(){
-    var fields = {};
+	var fields={}
     var before = function(w){
         for(var field in w){
             fields[field] = true;
-        };
-    };
+        }
+        return fields;
+    }
 
     var after = function(w){
+    	var errors={};
         for(var field in w){
             if(!fields[field]){
-                 return("global variable "+field + " has been added out of context");
+            	delete window[field];
+            	errors[field]=window[field];
             }            
-        };
+        }
+        return errors;
 
-    };
+    }
     return {before: before, after:after};
 }());
 function waitfor(test, expectedValue, msec, count, source, callback) {
@@ -75,6 +78,28 @@ keys=keys.concat(copy);
 var beforeGlobals;
 var i=0;
 $('#gldiv').hide();
+beforeGlobals=GlobalTester.before(window);
+
+var getUrl=function(){
+var url=window.location.search.substring(1);
+if(url!==""){
+
+	document.body.innerHTML="";
+	for(var key in keys){
+		if(keys[key]===url){
+			var script=document.createElement('script');
+			document.body.write("<div id=\"gldiv\" style=\"width: 100vw; height: 100vh; position: relative;\"></div>");
+
+			document.body.appendChild(script);
+			}
+		}
+
+}else{
+
+	runTest(i);   
+}
+}
+
 function runTest(i){
 
 	var before=Date.now();
@@ -109,7 +134,6 @@ function runTest(i){
 	texta.value="";
 	document.getElementById("left").appendChild(texta);
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
-	beforeGlobals=GlobalTester.before(window);
 	var afterGlobals;
 
 	system[key](viewer,function(canvasid){
@@ -142,12 +166,16 @@ function runTest(i){
 		$(".viewer_3Dmoljs").remove();
 			$(canvas).remove();
 		//$("#gldiv").children()[0].remove();
-		afterGlobals=GlobalTester.after(window);
-		textarea.value+="timestamp : "+(after-before)+" ms\n";
+		textarea.value+="\ntimestamp : "+(after-before)+" ms\n";
 
+		afterGlobals=GlobalTester.after(window);
+		var str="";
+		for(var field in afterGlobals){
+			str+=field+"\n";
+		}
 		if(afterGlobals!==undefined){
 			
-			textarea.value+="\n"+afterGlobals;
+			textarea.value+="\n"+str;
 			
 		}
 
@@ -160,6 +188,7 @@ function runTest(i){
 		
 		});
 		
-}
-runTest(i);        
+}    
+ 
+getUrl();
 });
