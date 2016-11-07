@@ -202,21 +202,9 @@ beggining="""<!DOCTYPE html>
                     <body>
 
          
-    <div id="tools">
-        <h1 id="tools_title">3Dmol.js Tests</h1>
-        <h2 id="errors_title">Errors</h2>
-        <textarea id="errors"></textarea>
-        <div id="selections">
-        <h2 id="selections_title">Selections</h2>
-            <input type="radio" name="run_state" value="run_all"> Run All <input type="radio" value="omit_all" name="run_state"> Omit All
-            <div id="scroll_window">
-                <ul>
+    
 """
 middle="""
-                </ul>
-            </div>
-        </div>
-    </div>
             <div id="left">
                 <ul></ul>
             </div>
@@ -396,9 +384,9 @@ with open("tests/new/tests.html","a") as f:
     for file in test.files:
         if(type(file.examples)!=type(None) and len(file.examples)>0):
             for example in file.examples:
-                f.write("<li>"+example.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>')
+                pass#f.write("<li>"+example.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>')
         elif(type(file.examples)==type(None)):
-            f.write('<li>'+file.contents.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>')
+            pass#f.write('<li>'+file.contents.name+'<input type="radio" name="run_state" value="run"> Run <input type="radio" name="isolate" value="isolate"> Isolate</li>')
     f.write(middle)
     f.write("""<script> var global_viewer=null;
                     var global_callback=null;

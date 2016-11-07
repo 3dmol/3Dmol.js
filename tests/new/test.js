@@ -87,6 +87,12 @@ if(url!==""){
 document.documentElement.innerHTML = '';
 	for(var key in keys){
 		if(keys[key]===url){
+			var div_test=document.createElement("div");
+			div_test.id="div_"+keys[key];
+			div_test.style="height:0px;width:0px;"
+			document.body.appendChild(div_test);
+
+			document.body.style="overflow:hidden";
 			var div=document.createElement('div');
 			div.id="gldiv";
 			div.style="width: 100vw; height: 100vh; position: relative;";
@@ -95,10 +101,11 @@ document.documentElement.innerHTML = '';
 
 			var script=document.createElement('script');
 			script.innerHTML+=system[keys[key]].toString();
-			script.innerHTML="var callback=function(){};var viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+script.innerHTML.substring(script.innerHTML.indexOf("try{")+4,script.innerHTML.indexOf("}catch(err)"));
+			script.innerHTML="var callback=function(){};\nvar viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+script.innerHTML.substring(script.innerHTML.indexOf("try{")+4,script.innerHTML.indexOf("}catch(err)"));
 			
 			console.log(script.innerHTML);
 			document.body.appendChild(script);
+			
 			}
 		}
 
@@ -158,15 +165,9 @@ function runTest(i){
 
 		image.src=canvas.toDataURL("image/png");
 		image.onclick=function(){
-			if(key.substring(0,4)=="test"){
+			
 				var win = window.open();
-				win.document.write("<!DOCTYPE html><html><head><script src=\"../../build/3Dmol.js\"></script></head><body style=\"overflow-y:hidden;overflow-x:hidden;\"><div id=\"gldiv\" style=\"width: 100vw; height: 100vh; position: relative;\"></div><script>var viewer = $3Dmol.createViewer($(\"#gldiv\"));</script>");
-				win.document.write("<script src=\""+key+".js\"></script></body></html>");
-		}else{
-			var win = window.open();
-			win.document.write("<!DOCTYPE html><html><head><script src=\"../../build/3Dmol.js\"></script></head><body style=\"overflow-y:hidden;overflow-x:hidden;\"><div id=\"gldiv\" style=\"width: 100vw; height: 100vh; position: relative;\"></div><script>var viewer = $3Dmol.createViewer($(\"#gldiv\"));</script>");
-			win.document.write("<script>var sys={func:"+system[key].toString()+"};sys.func(viewer,function(){});</script>");
-		}
+				win.location="tests.html?"+key+".html";
 		};
 		document.getElementById("div_"+key).appendChild(left_head);
 		document.getElementById("div_"+key).appendChild(image);
