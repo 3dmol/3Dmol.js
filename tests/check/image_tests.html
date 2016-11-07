@@ -148,7 +148,7 @@
          <script>
             var exemptions=[35];
             var surfaces = [19,24,25,26,27,57,58,59];
-            var test_count=64;
+            var test_count=6;
             function loadImages(){
          
                 for(var i=1;i<=test_count;i++){
@@ -227,12 +227,32 @@
                 }
 
             }
+            var image_holder=null;
             function getImageSrc(url){
                 var iframe=document.getElementById(url);
                 var canvas=iframe.contentWindow.document.getElementsByTagName('canvas')[0];
                 var img= document.createElement('img');
                 img.src=canvas.toDataURL('image/png');
+                img.id="test"+i;
+
                 var li=document.createElement('li');
+                li.id="li-left-"+i;
+                $(img).click(function(event) {
+                    var canvas;
+                    loadIframe(img.id+".html",function(){
+                        var div=document.createElement('div');
+                        canvas=getCanvas(img.id+".html");
+                        var target=event.target.parentElement;
+                        target.removeChild(img);
+                        div.id=img.id;
+                        img.id="";
+                        div.style="width: 400px; height: 400px; position: relative;";
+                        
+                        target.appendChild(div);
+                        div.appendChild(canvas);
+                    });
+                });
+
                 img.style.width="400px";
                 img.style.height="400px";
                 var timestamp=document.createElement('div');
@@ -250,13 +270,11 @@
                 
                 timestamp.className="timestamp";
                 li.appendChild(timestamp);
-
                 li.appendChild(img);
                 timeout=new Date().getTime();
                 timestamp.innerHTML=(timeout-timein)+" ms";
                 var step=(screen.width/(test_count-exemptions.length))/screen.width;
                 step*=100;
-                console.log(step);
                 percent+=step;
                 $({property: percent-step}).animate({property: percent}, {
                     duration: 1000,
@@ -304,6 +322,13 @@
             }
             current_i=i;
             },12000);
+            function getCanvas(url){
+                var iframe=document.getElementById(url);
+                
+                var canvas=iframe.contentWindow.document.getElementsByTagName('canvas')[0];
+
+                return canvas;
+            }
             getImage(i);
          </script>
 

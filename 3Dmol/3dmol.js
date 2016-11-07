@@ -101,20 +101,18 @@ $.ajaxTransport(
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
- * 
+ * @function createViewer
  * @example
- * // Assume there exists an HTML div with id "gldiv"
- * var element = $("#gldiv");
- * 
- * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors };
- * 
- * // Create GLViewer within 'gldiv' 
- * var myviewer = $3Dmol.createViewer(element, config);
- * //'data' is a string containing molecule data in pdb format  
- * myviewer.addModel(data, "pdb");
- * myviewer.zoomTo();
- * myviewer.render();                        
+   $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });                     
  *                        
  */
 $3Dmol.createViewer = function(element, config)
@@ -146,7 +144,7 @@ $3Dmol.viewers = {};
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
  * 
- * @function $3Dmol.download
+ * @function download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
  * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
  * @param {Object} options - Specify additional options
@@ -155,18 +153,19 @@ $3Dmol.viewers = {};
  * @param {Function} callback - Function to call with model as argument after data is loaded.
 
  * @example
- * var myviewer = $3Dmol.createViewer(gldiv);
- * 
- * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
- * // Note that m will not contain the atomic data until after the network request is completed
- * var m = $3Dmol.download('pdb: 2POR', myviewer, {format:'cif'});
- * 
+ viewer.setBackgroundColor(0xffffffff);
+       $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
+        m.setStyle({'cartoon':{colorscheme:{prop:'ss',map:$3Dmol.ssColors.Jmol}}});
+       viewer.zoomTo();
+       viewer.render(callback);
+    });
  * @return {$3Dmol.GLModel} GLModel
  */ 
 $3Dmol.download = function(query, viewer, options, callback) {
     var baseURL = '';
     var type = "";
     var pdbUri = "";
+    var mmtfUri = "";
     var m = viewer.addModel();
     
     if (query.substr(0, 5) === 'mmtf:') {

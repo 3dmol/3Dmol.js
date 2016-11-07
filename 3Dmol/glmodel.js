@@ -330,7 +330,7 @@ $3Dmol.GLModel = (function() {
             var style = atom.style.line;
             if (style.hidden)
                 return;
-
+             var p1a, p1b, p2a, p2b;
             // have a separate geometry for each linewidth
             var linewidth = (style.linewidth || defaultlineWidth);
 
@@ -391,7 +391,7 @@ $3Dmol.GLModel = (function() {
                     if(atom.bondOrder[i] == 2) { //double
                         
                         v.multiplyScalar(.1);
-                           p1a = p1.clone();
+                        p1a = p1.clone();
                         p1a.add(v);
                         p1b = p1.clone();
                         p1b.sub(v);
@@ -1317,6 +1317,18 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#vibrate
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
+         * 
+         *@example
+         var element=$('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+            var data = $("#test").val();
+            viewer.setBackgroundColor(0xffffff);    
+            var m = viewer.addModel(data, "xyz");
+            m.setStyle({},{stick:{}});
+            m.vibrate(10, 1);
+            viewer.animate({loop: "backAndForth"});
+            viewer.zoomTo();
+            viewer.render();
          */
         this.vibrate = function(numFrames, amplitude) {
             var amplitude = amplitude || 1;
@@ -1500,6 +1512,20 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#selectedAtoms
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
+         * @example
+         *$3Dmol.download("pdb:4UB9",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+
+                  viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.render();
+              });
          */
         this.selectedAtoms = function(sel, from) {
             var ret = [];
@@ -1655,6 +1681,15 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#addAtoms
          * @param {type} newatoms
+         * @example
+         * var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
+           
+            viewer.setBackgroundColor(0xffffffff);
+            var m = viewer.addModel();
+            m.addAtoms(atoms);
+            m.setStyle({},{stick:{}});
+            viewer.zoomTo();
+            viewer.render();
          */        
         this.addAtoms = function(newatoms) {
             molObj = null;
@@ -1699,7 +1734,7 @@ $3Dmol.GLModel = (function() {
         /** Remove specified atoms from model
          * 
          * @function $3Dmol.GLModel#removeAtoms
-         * @param {type} badatoms
+         * @param {type} badatoms - list of atoms
          * @return {removeAtoms}
          */
         this.removeAtoms = function(badatoms) {
@@ -1732,6 +1767,20 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
+         @example
+        $3Dmol.download("pdb:4UB9",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+
+                  viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.render();
+              });
          */
         this.setStyle = function(sel, style, add) {
             
@@ -1801,6 +1850,33 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
+         * @example
+        
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.setClickable = function(sel, clickable, callback) {           
 
@@ -1834,7 +1910,41 @@ $3Dmol.GLModel = (function() {
 
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
-        
+         /** Set hoverable and callback of selected atoms
+         * 
+         * @function $3Dmol.GLModel#setHoverable
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} hoverable - whether hover-handling is enabled for the selection
+         * @param {function} hover_callback - function called when an atom in the selection is hovered over
+         * @param {function} unhover_callback - function called when the mouse moves out of the hover area
+         * @example
+         
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
+         */
         this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
             var s;
             for (s in sel) {
@@ -1928,12 +2038,27 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
-         * @function $3Dmol.GLModel.setColorByFunction
-         * @param {type} sel
-         * @param {type} func
+         * @function setColorByFunction
+         * @deprecated use setStyle and colorfunc attribute
+         * @param {type} sel - selection object
+         * @param {type} func - function to be used to set the color
+         @example
+          $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });
+        
          */
         this.setColorByFunction = function(sel, colorfun) {
             var atoms = this.selectedAtoms(sel, atoms);
+            if(typeof(colorfun)!=='function')
+                return
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
@@ -2042,9 +2167,16 @@ $3Dmol.GLModel = (function() {
             molObj = null;
         };
         
-        /** Don't show this model is future renderings.  Keep all styles and state
+        /**@function hide
+             Don't show this model is future renderings.  Keep all styles and state
          * so it can be efficiencly shown again.
-         * 
+         * @example
+         var element=$('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+            var m = viewer.addModel();
+            m.hide();
+            viewer.render(callback);
+
          * @function $3Dmol.GLModel#hide
          */
         this.hide = function() {
@@ -2137,11 +2269,11 @@ $3Dmol.GLModel = (function() {
                 var count = 0;
                 while (count < values.length) {
                     var temp = [];
-                    for (i = 0; i < atomCount; i++) {
+                    for (var i = 0; i < atomCount; i++) {
                         temp[i] = atoms[i];
                     }
                 
-                    for (i = 0; i < atomCount; i++) {
+                    for (var i = 0; i < atomCount; i++) {
                         temp[i].x = values[count++];
                         temp[i].y = values[count++];
                         temp[i].z = values[count++];

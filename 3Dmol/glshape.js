@@ -675,6 +675,7 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addCustom
          * @param {CustomShapeSpec} customSpec
          * @return {$3Dmol.GLShape}
+         
          */
         this.addCustom = function(customSpec) {
 
@@ -692,6 +693,10 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addSphere
          * @param {SphereSpec} sphereSpec
          * @return {$3Dmol.GLShape}
+         @example 
+         viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
+         
+         viewer.render();
          */
         this.addSphere = function(sphereSpec) {
 
@@ -725,6 +730,32 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addCylinder
          * @param {CylinderSpec} cylinderSpec
          * @return {$3Dmol.GLShape}
+         @example
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.addCylinder = function(cylinderSpec) {
 
@@ -760,6 +791,12 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addLine         
          * @param {LineSpec} lineSpec
          * @return {$3Dmol.GLShape}
+         @example
+         $3Dmol.download("pdb:2ABJ",viewer,{},function(){
+                  viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
+                  viewer.render(callback);
+              });
+
          */
         this.addLine = function(lineSpec) {
             lineSpec.start = lineSpec.start || {};
@@ -799,6 +836,23 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addArrow        
          * @param {ArrowSpec} arrowSpec
          * @return {$3Dmol.GLShape}
+         @example
+          $3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  viewer.addArrow({
+                      start: {x:-10.0, y:0.0, z:0.0},
+                      end: {x:0.0, y:-10.0, z:0.0},
+                      radius: 1.0,
+                      radiusRadio:1.0,
+                      mid:1.0,
+                      clickable:true,
+                      callback:function(){
+                          this.color.setHex(0xFF0000FF);
+                          viewer.render();
+                      }
+                  });
+                  viewer.render();
+                });
          */
         this.addArrow = function(arrowSpec) {
 
@@ -848,15 +902,29 @@ $3Dmol.GLShape = (function() {
          * @param {$3Dmol.VolumeData} data - volumetric input data
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
          * @example //the user can specify a selected region for the isosurface 
-         * viewer.addIsosurface(voldata, {isoval: 0.25,
-                                       color: "blue",
-                                       wireframe: true,
-                                       linewidth:0.005,
-                                       selectedRegion: viewer.selectedAtoms({}),
-                                       selectedOffset: 3,
-                                       radius: 3.0                                   
-                                    });
-         this specific example selects every atom in the
+         $.get('../test_structs/benzene-homo.cube', function(data){
+                  var voldata = new $3Dmol.VolumeData(data, "cube");
+                  viewer.addIsosurface(voldata, {isoval: 0.01,
+                                                 color: "blue",
+                                                 alpha: 0.5,
+                                                 smoothness: 10});
+                  viewer.addIsosurface(voldata, {isoval: -0.01,
+                                                 color: "red",
+                                                 smoothness: 5,
+                                                 opacity:0.5,
+                                                 wireframe:true,
+                                                 linewidth:0.1,
+                                                 clickable:true,
+                                                 callback:
+                                                 function() {
+                                                     this.opacity = 0.0;
+                                                     viewer.render(callback);
+                                                 }});
+                  viewer.setStyle({}, {stick:{}});
+                  viewer.zoomTo();
+                  viewer.render(callback);
+                });
+         //this specific example selects every atom in the
          */
         this.addIsosurface = function(data, volSpec, callback) {//may want to cache the arrays geneerated when selectedRegion ==true
            

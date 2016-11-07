@@ -27,10 +27,12 @@ var $3Dmol = $3Dmol || {};
  *       'A', 'G', 'DA', 'DG') and 'N3' for pyrimidines (resn: 'C', 'U', 'DC',
  *       'DT'). The different nucleobases can therefore be distinguished as
  *       follows:
- * @example viewer.setStyle({resn:'DA', atom:'N1'}, {cartoon:{color:'red'}});
- *          viewer.setStyle({resn:'DG', atom:'N1'}, {cartoon:{color:'green'}});
- *          viewer.setStyle({resn:'DC', atom:'N3'}, {cartoon:{color:'blue'}});
- *          viewer.setStyle({resn:'DT', atom:'N3'}, {cartoon:{color:'yellow'}});
+ * @example $3Dmol.download("pdb:4ZD3",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  viewer.setViewStyle({style:"outline"});
+                  viewer.setStyle({},{cartoon:{}});
+                  viewer.render();
+              });
  */
 
 /**

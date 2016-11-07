@@ -49,69 +49,60 @@ $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
 $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 
  /**
+ 
+ * @typedef ColorschemeSpec
  * Built in colorschemes
  *
- * @example <caption>Using one of the build in colorshemes listed above. This example specifically uses ssPyMol, but any of the other colorshemes are interchangeable</caption> 
- * viewer.setStyle({'cartoon':{colorscheme:'ssPyMol'}});
- * @example <caption>Defining your own colorshemes. First define a map that links instances of a certain property (in this case 'elem') to color values. </caption> 
- * var elementColors = {
-        'H': 0xFFFFFF,
-        'He': 0xFFC0CB,
-        'HE': 0xFFC0CB,
-        'Li': 0xB22222,
-        'LI': 0xB22222,
-        'B': 0x00FF00,
-        'C': 0xC8C8C8,
-        'N': 0x8F8FFF,
-        'O': 0xF00000,
-        'F': 0xDAA520,
-        'Na': 0x0000FF,
-        'NA': 0x0000FF,
-        'Mg': 0x228B22,
-        'MG': 0x228B22,
-        'Al': 0x808090,
-        'AL': 0x808090,
-        'Si': 0xDAA520,
-        'SI': 0xDAA520,
-        'P': 0xFFA500,
-        'S': 0xFFC832,
-        'Cl': 0x00FF00,
-        'CL': 0x00FF00,
-        'Ca': 0x808090,
-        'CA': 0x808090,
-        'Ti': 0x808090,
-        'TI': 0x808090,
-        'Cr': 0x808090,
-        'CR': 0x808090,
-        'Mn': 0x808090,
-        'MN': 0x808090,
-        'Fe': 0xFFA500,
-        'FE': 0xFFA500,
-        'Ni': 0xA52A2A,
-        'NI': 0xA52A2A,
-        'Cu': 0xA52A2A,
-        'CU': 0xA52A2A,
-        'Zn': 0xA52A2A,
-        'ZN': 0xA52A2A,
-        'Br': 0xA52A2A,
-        'BR': 0xA52A2A,
-        'Ag': 0x808090,
-        'AG': 0x808090,
-        'I': 0xA020F0,
-        'Ba': 0xFFA500,
-        'BA': 0xFFA500,
-        'Au': 0xDAA520,
-        'AU': 0xDAA520    
-  };
-   viewer.setStyle({'cartoon':{colorscheme:{prop:'elem',map:elementColors}}});
- * @example <caption>Using a gradient with colorscheme. </caption>
- * viewer.setStyle({chain:'A'},{cartoon:{opacity:0.5,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow(0,10)}}}); 
- * @example <caption>Using a function in order to define the colors.</caption> 
-   let colorAsSnake = function(atom) {
-      return atom.resi % 2 ? 'white': 'green'
-   };
-   viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
- * @typedef ColorschemeSpec
+ * @example 
+ 
+              $.get('../test_structs/benzene-homo.cube', function(data){
+                  var voldata = new $3Dmol.VolumeData(data, "cube");
+                  viewer.addIsosurface(voldata, {isoval: 0.01,
+                                                 color: "blue",
+                                                 alpha: 0.5,
+                                                 smoothness: 10});
+                  viewer.addIsosurface(voldata, {isoval: -0.01,
+                                                 color: "red",
+                                                 smoothness: 5,
+                                                 opacity:0.5,
+                                                 wireframe:true,
+                                                 linewidth:0.1,
+                                                 clickable:true,
+                                                 callback:
+                                                 function() {
+                                                     this.opacity = 0.0;
+                                                 }});
+                                                  viewer.render();
+                  viewer.setStyle({}, {stick:{}});
+                  viewer.zoomTo();
+                 
+                });
+
+ * @example //Using a gradient with colorscheme.
+     viewer.setViewStyle({style:"outline"});
+             
+
+              viewer.setViewStyle({style:"outline"});
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                      
+                  viewer.render(callback);
+                  });
+                  viewer.zoomTo();
+              });
+ * @example //Using a function in order to define the colors. 
+  $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });
  * @prop {string} greenCarbon   - 0x00FF00
  * @prop {string} cyanCarbon    - 0x00FFFF
  * @prop {string} magentaCarbon - 0xFF00FF
