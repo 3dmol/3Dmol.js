@@ -82,14 +82,22 @@ beforeGlobals=GlobalTester.before(window);
 
 var getUrl=function(){
 var url=window.location.search.substring(1);
+url=url.substring(0,url.indexOf(".html"));;
 if(url!==""){
-
-	document.body.innerHTML="";
+document.documentElement.innerHTML = '';
 	for(var key in keys){
 		if(keys[key]===url){
-			var script=document.createElement('script');
-			document.body.write("<div id=\"gldiv\" style=\"width: 100vw; height: 100vh; position: relative;\"></div>");
+			var div=document.createElement('div');
+			div.id="gldiv";
+			div.style="width: 100vw; height: 100vh; position: relative;";
 
+			document.body.appendChild(div);
+
+			var script=document.createElement('script');
+			script.innerHTML+=system[keys[key]].toString();
+			script.innerHTML="var callback=function(){};var viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+script.innerHTML.substring(script.innerHTML.indexOf("try{")+4,script.innerHTML.indexOf("}catch(err)"));
+			
+			console.log(script.innerHTML);
 			document.body.appendChild(script);
 			}
 		}
