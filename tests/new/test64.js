@@ -1,16 +1,6 @@
 
-            var rec = viewer.addModel($('#rec').val(),'pdb');
-       
-            rec.setStyle({sphere:{}});
-            var atoms= viewer.selectedAtoms({});
-            for(var i=0;i<atoms.length;i++){
-          
-            viewer.viewer.getModel(0).addLabel(atoms[i].elem,{position: atoms[i], backgroundColor: 0x800080, backgroundOpacity: 0.8});
-            }
-            viewer.zoomTo();
-            viewer.render();
-
-/*@data
+/*
+@data
 <textarea style="display: none;" id="rec">
 ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
 ATOM      2  CA  LYS A   1       2.459  10.365   9.364  1.00 28.03           C  
@@ -1016,3 +1006,13 @@ ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
 </textarea>
 */
+            var rec = viewer.addModel($('#rec').val(),'pdb');
+       
+            rec.setStyle({sphere:{}});
+            var atoms= viewer.selectedAtoms({});
+            for(var i=0;i<atoms.length;i++){
+          
+            viewer.viewer.getModel(0).addLabel(atoms[i].elem,{position: atoms[i], backgroundColor: 0x800080, backgroundOpacity: 0.8});
+            }
+            viewer.zoomTo();
+            viewer.render();

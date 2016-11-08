@@ -1647,6 +1647,7 @@ $3Dmol.GLViewer = (function() {
 
                   
                 });
+            
          */
         this.addLabel = function(text, options, sel) {
             options = options || {};
@@ -2302,7 +2303,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')
          * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
          * @example
          
@@ -2320,7 +2321,7 @@ $3Dmol.GLViewer = (function() {
          *
          * @return {$3Dmol.GLModel} 
          */
-        this.addModel = function(data, format, options) {
+        this.addModel =  function(data, format, options) {
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
             models.push(m);
@@ -2595,6 +2596,8 @@ $3Dmol.GLViewer = (function() {
                                   fromCap:false,
                                   toCap:false});
               viewer.render();
+
+
          */
         this.setClickable = function(sel, clickable, callback) {
             applyToModels("setClickable", sel, clickable, callback);
