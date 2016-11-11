@@ -1,7 +1,4 @@
-var viewer = $3Dmol.createViewer($("#gldiv"), {
-		defaultcolors : $3Dmol.rasmolElementColors
-		});
-    
+
     var m;
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", "volData/TC5b.prmtop", false);

@@ -1,17 +1,3 @@
-
-            
-            var rec = viewer.addModel($('#rec').val(),'pdb');
-            rec.setHoverable({},true, {hover_callback:function(atom){  //hover
-                viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});
-                viewer.render();},
-              	function(){ viewer.removeAllLabels();viewer.render();}}); //unhover
-       
-            rec.setStyle({sphere:{}});
-
-            viewer.zoomTo();
-            viewer.render();
-
-
 /* @data <textarea style="display: none;" id="rec">
 ATOM      1  N   LYS A   1       3.398   9.981  10.408  1.00 30.48           N  
 ATOM      2  CA  LYS A   1       2.459  10.365   9.364  1.00 28.03           C  
@@ -1021,3 +1007,16 @@ END
 
 
             
+            
+            var rec = viewer.addModel($('#rec').val(),'pdb');
+            rec.setHoverable({},true, {hover_callback:function(atom){  //hover
+                viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                viewer.render();},
+              	function(){ viewer.removeAllLabels();viewer.render();}}); //unhover
+       
+            rec.setStyle({sphere:{}});
+
+            viewer.zoomTo();
+            viewer.render();
+
+
