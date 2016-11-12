@@ -2536,6 +2536,19 @@ test45: function(viewer,callback,name='test45'){try{
 
 
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
+test66: function(viewer,callback,name='test66'){try{
+$3Dmol.download("pdb:4YCV",viewer,{},function(){
+                  
+
+                  viewer.setStyle({chain:'A'},{sphere:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{sphere:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'C'},{cartoon:{style:'trace',colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cartoon:{thickness:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.addStyle({cartoon:{hidden:true}});
+                  viewer.zoomTo();
+                  viewer.render(callback);
+              });
+}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 testAddModelGRO: function(viewer,callback,name='testAddModelGRO'){try{
 
     
