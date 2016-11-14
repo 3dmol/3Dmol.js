@@ -2562,6 +2562,7 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
+
         /**
          * Set click-handling properties to all selected atomsthis.
          * 

@@ -2488,6 +2488,17 @@ test26: function(viewer,callback,name='test26'){try{
                   viewer.zoomTo();
               });
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
+test70: function(viewer,callback,name='test70'){try{
+$3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  
+                  
+                  viewer.setStyle({not:{chain:'A'}},{line:{hidden:false,
+                                                    linewidth:1.0,
+                                                    colorscheme:'magentaCarbon'}});
+
+                 viewer.render(callback);
+                });
+}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test6: function(viewer,callback,name='test6'){try{
 /**/var objectHTML=$.parseHTML(`
 <div style="width: 400px; height: 400px; position: relative;"
@@ -4034,6 +4045,19 @@ $3Dmol.download("pdb:5BP0",viewer,{},function(){
                   viewer.setStyle({chain:'J'},{sphere:{radius:3.0,colorscheme:{prop:'partialCharge',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge'))}}});
                   viewer.render(callback);
               });
+}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
+test68: function(viewer,callback,name='test68'){try{
+$3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  
+                  viewer.setStyle({or:[{chain:'C'},{chain:'D'}]},{line:{hidden:false,
+                                                    linewidth:1.0,
+                                                    colorscheme:'greenCarbon'}});
+                  viewer.setStyle({or:[{chain:'A'},{chain:'B'}]},{line:{hidden:false,
+                                                    linewidth:1.0,
+                                                    colorscheme:'magentaCarbon'}});
+
+                 viewer.render(callback);
+                });
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test2: function(viewer,callback,name='test2'){try{
 /* */var objectHTML=$.parseHTML(` 
@@ -12296,6 +12320,18 @@ $3Dmol.download("pdb:1BNA", viewer, {}, function(){
                   viewer.render(callback);
               });
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
+test67: function(viewer,callback,name='test67'){try{
+
+
+$3Dmol.download("cid:307900",viewer,{},function(){
+                  
+               viewer.setStyle({},{stick:{radius:0.2}});
+                  
+                  viewer.render(callback);
+
+                  
+                });
+}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test28: function(viewer,callback,name='test28'){try{
 $3Dmol.download("cid:5",viewer,{},function(){
                   
@@ -12303,6 +12339,15 @@ $3Dmol.download("cid:5",viewer,{},function(){
                   viewer.setStyle({},{stick:{radius:0.5,singleBonds:true,colorscheme:'greenCarbon',outline:true}});
                   viewer.render(callback);
               });
+}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
+test69: function(viewer,callback,name='test69'){try{
+$3Dmol.download("pdb:4DM7",viewer,{},function(){
+                 //viewer.setStyle({elem:'C'},{line:{hidden:true}});
+                 viewer.setStyle({and:[{chain:'B'},{elem:'C'}]},{line:{hidden:true}});//redundant because "and" is implicit unless it is inside of an "or" object
+                  
+
+                 viewer.render(callback);
+                });
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test8: function(viewer,callback,name='test8'){try{
  $3Dmol.download("pdb:4DM7",viewer,{},function(){

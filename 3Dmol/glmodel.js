@@ -76,7 +76,8 @@ $3Dmol.GLModel = (function() {
         "pdbline", // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
         "clickable", // Set this flag to true to enable click selection handling for this atom
         "callback", // Callback click handler function to be executed on this atom and its parent viewer
-        "invert" // for selection, inverts the meaning of the selection
+        "invert", // for selection, inverts the meaning of the selection
+        "reflectivity" //for describing the reflectivity of a model
     ];
 
     var validAtomSelectionSpecs = validAtomSpecs.concat([  // valid atom specs are ok too
@@ -86,7 +87,10 @@ $3Dmol.GLModel = (function() {
         "invert", // if set, inverts the meaning of the selection
         "byres", // if set, expands the selection to include all atoms of any residue that has any atom selected
         "expand", // expands the selection to include all atoms within a given distance from the selection
-        "within" // intersects the selection with the set of atoms within a given distance from another selection
+        "within", // intersects the selection with the set of atoms within a given distance from another selection
+        "and", // and boolean logic
+        "or", // or boolean logic
+        "not", // not boolean logic
     ]);
 
     var validAtomStyleSpecs = [
@@ -1446,7 +1450,38 @@ $3Dmol.GLModel = (function() {
             var invert = !!sel.invert;
             var ret = true;
             for ( var key in sel) {
-                if(key === 'predicate') { //a user supplied function for evaluating atoms
+                if(key == "and" || key == "or" || key == "not"){//boolean fields
+                    if(key == "not"){
+                        if(this.atomIsSelected(atom,sel[key])){
+                            ret=false;
+                            break;
+                        }
+                    }else{//"or" and "and"
+                        if(key == "and"){
+                            var and=sel[key];//array format
+                            for(var i=0;i<and.length;i++){
+                                if(!this.atomIsSelected(atom,and[i])){
+                                    ret=false;
+                                    break;
+                                }
+                            }
+                        }else if(key =="or"){
+                            var or=sel[key];
+                            var condition=true;
+                            for(var i=0;i<or.length;i++){
+                                if(this.atomIsSelected(atom,or[i])){
+                                    condition=true;
+                                    break;
+                                }
+                                else{
+                                    condition=false;
+                                }
+                            }
+                            ret=condition;
+                        }
+                    }
+
+                }else if(key === 'predicate') { //a user supplied function for evaluating atoms
                     if(!sel['predicate'](atom) ) {
                         ret = false;
                         break;
@@ -1464,7 +1499,7 @@ $3Dmol.GLModel = (function() {
                         }
                     }
                 }
-                else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
+                else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within"  && key != "and" && key != "or" && key != "not") {
 
                     // if something is in sel, atom must have it                    
                     if (typeof (atom[key]) === "undefined") {
@@ -1530,6 +1565,7 @@ $3Dmol.GLModel = (function() {
         this.selectedAtoms = function(sel, from) {
             var ret = [];
             sel = sel || {};
+
             if (!from) from = atoms;
             var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
