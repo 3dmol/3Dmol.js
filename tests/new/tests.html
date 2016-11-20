@@ -1274,7 +1274,7 @@ test3: function(viewer,callback,name='test3'){try{
                class='viewer_3Dmoljs'
                data-href='https://dl.dropboxusercontent.com/s/ba5pxrgl8y21t7e/1bj4.pdb?dl=0'
                data-backgroundcolor='0xffffff'
-               data-style='cartoon'
+               data-style='cartoon:reflectivity:0.5'
                data-callback="div_callback"></div>
 
 
@@ -1293,6 +1293,9 @@ $3Dmol.download("pdb:4DM7",viewer,{},function(){
                   viewer.setStyle({chain:'D',bonds:0},{sphere:{color:'gray'}});
                   viewer.render(callback);
               });
+}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
+tests_: function(viewer,callback,name='tests_'){try{
+viewer.render(callback);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test64: function(viewer,callback,name='test64'){try{
 
@@ -2523,29 +2526,7 @@ test45: function(viewer,callback,name='test45'){try{
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
     });
-    
-    //can't use jquery with binary data
-    var req = new XMLHttpRequest();
-    req.open('GET', 'volData/4csv.ccp4.gz', true);
-    req.responseType = "arraybuffer";
-    req.onload = function (aEvt) {      
-       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
-      viewer.addIsosurface(voldata, {isoval: 0.25,
-                                       color: "blue",
-                                       wireframe: true,
-                                       linewidth:0.005,
-                                       selectedRegion: viewer.selectedAtoms({}),
-                                       selectedOffset: 3,
-                                       radius: 3.0                                   
-                                    },function(){viewer.render(callback);});
-
-                                                     
-      
-    };
-    req.send(null);
-
-
-
+    viewer.render(callback);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test66: function(viewer,callback,name='test66'){try{
 $3Dmol.download("pdb:4YCV",viewer,{},function(){
@@ -2760,10 +2741,19 @@ $3Dmol.download("pdb:1YCR", viewer, {}, function(){
                   viewer.render(callback);
               });
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
+test71: function(viewer,callback,name='test71'){try{
+$3Dmol.download("pdb:4DM7",viewer,{},function(){
+                 //viewer.setStyle({elem:'C'},{line:{hidden:true}});
+                 viewer.setStyle({and:[{or:[{chain:'B'},{chain:'A'}]},{elem:'C'}]},{line:{hidden:true}});//redundant because "and" is implicit unless it is inside of an "or" object
+                  
+
+                 viewer.render(callback);
+                });
+}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test10: function(viewer,callback,name='test10'){try{
 $3Dmol.download("cid:5",viewer,{},function(){
-                  
-                  viewer.setStyle({},{stick:{radius:0.5,singleBonds:true,colorscheme:'greenCarbon',outline:true}});
+                  viewer.setBackgroundColor("#00000000")
+                  viewer.setStyle({},{stick:{radius:0.5,singleBonds:true,colorscheme:'greenCarbon',reflectivity:0,outline:true}});
                   viewer.render(callback);
               });
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
@@ -3945,6 +3935,9 @@ test14: function(viewer,callback,name='test14'){try{
                   viewer.zoomTo();
                   viewer.render(callback);
                 });
+}catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
+cgi_h: function(viewer,callback,name='cgi_h'){try{
+viewer.render(callback);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test47: function(viewer,callback,name='test47'){try{
 
@@ -17395,18 +17388,6 @@ viewer.autoload(viewer);
 }catch(err){var textarea=document.getElementById('left_'+name);textarea.value+='\n'+err.toString();callback()}},
 test13: function(viewer,callback,name='test13'){try{
 
-              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
-                                  end:{x:10.0,y:0.0,z:0.0},
-                                  radius:1.0,
-                                  fromCap:1,
-                                  toCap:2,
-                                  color:'red',
-                                  hoverable:true,
-                                  clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render(callback);},
-                                  hover_callback: function(){ viewer.render(callback);},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render(callback);}
-                                 });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},
                                   radius:0.5,
