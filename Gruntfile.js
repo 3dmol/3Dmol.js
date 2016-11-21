@@ -149,7 +149,7 @@ module.exports = function(grunt) {
             options: {
                 stdout: true
             },
-            command: 'python tests/new/generate_tests.py'
+            command: 'python tests/auto/generate_tests.py'
         }
         },
 
@@ -168,7 +168,7 @@ module.exports = function(grunt) {
     grunt.registerTask('concat_pre_build', ['concat:pre']);
     grunt.registerTask('concat_post_build', ['concat:big', 'concat:bignojquery', 'concat:closure', 'concat:closurenojquery']);
     
-    grunt.registerTask('test', ['clean:build', 'concat:test', 'closure-compiler:test', 'concat:append']);
+    grunt.registerTask('test', ['shell:pythonServer']);
     grunt.registerTask('test_closure', ['clean:build', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'concat:append']);
     
     grunt.registerTask('build', ['clean:build', 'clean:doc', 'concat_pre_build', 'closure-compiler', 'concat_post_build', 'shell:doc', 'clean:tmp','shell:pythonServer']);
