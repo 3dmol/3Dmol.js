@@ -73,7 +73,7 @@ class Example():
                     ending=at
             string=text[data+4:ending]
             text=text[0:data]+text[ending:]
-            string="var objectHTML=$.parseHTML(`"+string+"`);$(\"#div_"+self.name+"\").append(objectHTML);\nglobal_viewer=viewer;\nglobal_callback=callback;\nviewer.autoload(viewer);"
+            string="var objectHTML=$.parseHTML(`"+string+"`);$(\"body\").append(objectHTML);\nglobal_viewer=viewer;\nglobal_callback=callback;\nviewer.autoload(viewer);"
             text=text+string
         text=text.replace("viewer.render()","viewer.render(callback)")
         return text
@@ -185,7 +185,11 @@ class TestSystem():
 test=TestSystem() 
 path="tests/auto/build.js"
 
+f=open(path,"w")
+f.write("")
+
 with open(path,"a") as f:
+
     f.write("""var global_viewer=null;
                var global_callback=null;
                     function div_callback(){

@@ -1,5 +1,4 @@
 $(document).ready(function(){
-	
 
 var getKeys = function(obj){
    var keys = [];
@@ -52,6 +51,36 @@ function waitfor(test, expectedValue, msec, count, source, callback) {
     // Condition finally met. callback() can be executed.
     callback();
 }
+
+function createRow(key){
+
+	var tr=document.createElement('tr');
+		tr.id=key;
+
+	var column1=document.createElement('th');//label
+		column1.className="label";
+			
+	var column2=document.createElement('th');//rendered image
+		column2.className="rendered";
+
+	var column3=document.createElement('th');//reference image
+		column3.className="reference";
+
+	var label=document.createElement('p');
+	label.innerHTML=key;
+	column1.appendChild(label);
+
+	var reference=document.createElement('img');
+	reference.src="imgs/"+key+".png";
+	column3.appendChild(reference);
+
+	tr.appendChild(column1);
+	tr.appendChild(column2);
+	tr.appendChild(column3);
+
+	return tr;
+}
+
 imgs="imgs";
 var keys=getKeys(system)
 keys.sort();
@@ -67,7 +96,6 @@ for(var i=0;i<keys.length;i++){
 for(var i=1;i<tests.length;i++){
 	var j=i;
 	while(j>0 && parseInt(keys[tests[j-1]].substring(4)) > parseInt(keys[tests[j]].substring(4))){
-	
 		var hold=tests[j];
 		tests[j]=tests[j-1];
 		tests[j-1]=hold;
@@ -86,8 +114,6 @@ $('#gldiv').hide();
 beforeGlobals=GlobalTester.before(window);
 
 var getUrl=function(){
-
-	
 var url=window.location.search.substring(1);
 url=url+".html";
 url=url.substring(0,url.indexOf(".html"));
@@ -128,60 +154,49 @@ function runTest(i){
 
 	var before=Date.now();
 	var key=keys[i];
-	console.log("running test "+key+":");
-	//first put the reference images up
-	
-	var right_head=document.createElement('h4');
-	right_head.innerHTML=key;
-	document.getElementById("right").appendChild(right_head);
-	var img=document.createElement('img');
-	img.style.width="400px";
-	img.style.height="400px";
-	img.src=imgs+"/"+key+".png";
-	document.getElementById("right").appendChild(img);
-	//then load the other image
-	var div=document.createElement('div');
-	div.id="div_"+key;
-	document.getElementById("left").appendChild(div);
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
 	var afterGlobals;
 
-	system[key](viewer,function(canvasid){
-		waitfor(viewer.surfacesFinished,true,100,0,"",function(){
-		var after=Date.now();
-		
-		var textarea=document.getElementById("left_"+key);
-		var left_head=document.createElement("h4");
-		left_head.innerHTML=key;
-		var canvas=document.getElementById(key);
-		var image=document.createElement("img");
-		image.style.width="400px";
-		image.style.height="400px";
+	system[key](viewer,function(){
+		waitfor(viewer.surfacesFinished , true , 100 , 0 , "" , function(){
+			var after=Date.now();
+			console.log("ran");
+			//gets the canvas
+			var canvas=document.getElementById(key);
+			//creates an image for the canvas
+			var canvasImage=document.createElement("img");
+				canvasImage.class="referenceImage";
 
-		image.src=canvas.toDataURL("image/png");
-		image.onclick=function(){
+			canvasImage.src=canvas.toDataURL("image/png");
+			//click event for canvas
+			canvasImage.onclick=function(){
 				var win = window.open();
 				win.location="tests.html?"+key+".html";
-		};
-		document.getElementById("div_"+key).appendChild(left_head);
-		document.getElementById("div_"+key).appendChild(image);
-		//$("#undefined").remove();
-		$(".viewer_3Dmoljs").remove();
-		$(canvas).remove();
+			};
+			//create the table row
+			var tableRow=createRow(key);
+			tableRow.getElementsByClassName('rendered')[0].appendChild(canvasImage);
+			document.getElementById("tests").getElementsByTagName('tbody')[0].appendChild(tableRow);
 
-		afterGlobals=GlobalTester.after(window);
-		var str="";
-		for(var field in afterGlobals){
-			str+=field+"\n";
-		}
-		if(i<keys.length-1 ){
-			i+=1;
-			runTest(i);
-		}
+			//remove possible div
+			$(".viewer_3Dmoljs").remove();
+			//remove canvas
+			$(canvas).remove();
+			//compare globals before and after
+			afterGlobals=GlobalTester.after(window);
+			var str="";
+			for(var field in afterGlobals){
+				str+=field+"\n";
+			}
+			if(i<keys.length-1 ){
+				//run the next test
+				i+=1;
+				runTest(i);
+			}
 
 		});
 		
-		});
+	});
 		
 }    
  

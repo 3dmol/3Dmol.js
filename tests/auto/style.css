@@ -1,49 +1,6 @@
 
 body{
     overflow-x:hidden;
+    background-color: lightgray;
 }
-#left{
-    float: left;
-    width:50%;
-}
-#right{
-    float:right;
-    width:50%;
-}
-#right ul,#left ul{
-    list-style:none;
-}
-.header{
-    width:50%;
-    position:relative;
-    margin: 0 auto;
-}            
-#tools{
-    height:100vh;
-    width:100vw;
-}
-#tools_title{
-    text-align:center;
-}
-#errors_title{
-    text-align:center;
-}
-#errors{
-    width:50vw;
-    height:32vh;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-#selections{
-    width:50vw;
-    height:40vh;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-#scroll_window{
-    overflow-y:scroll;
-    height:80%;
-    width:100%;
-}
+
