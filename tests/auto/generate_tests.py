@@ -60,7 +60,7 @@ class Example():
 
             string=text[data+6:ending]
             text=text[0:data]+text[ending:]
-            string="var wrapper=$.parseHTML(`"+string+"`);\n$('#div_"+self.name+"').append(wrapper);\nviewer.autoload();";
+            string="var wrapper=$.parseHTML(`"+string+"`);\n$('body').append(wrapper);\nviewer.autoload();";
             text=text+string
 
         for data in atdiv:

@@ -2,5 +2,25 @@
 body{
     overflow-x:hidden;
     background-color: lightgray;
+    margin:0 auto;
+    padding:0px;
 }
 
+#tests{
+
+    width:100%;
+    table-layout: fixed;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+img{
+    width:400px;
+    height:400px;
+}
+
+#label{
+    width:10%;
+}

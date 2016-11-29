@@ -160,7 +160,6 @@ function runTest(i){
 	system[key](viewer,function(){
 		waitfor(viewer.surfacesFinished , true , 100 , 0 , "" , function(){
 			var after=Date.now();
-			console.log("ran");
 			//gets the canvas
 			var canvas=document.getElementById(key);
 			//creates an image for the canvas
@@ -177,7 +176,25 @@ function runTest(i){
 			var tableRow=createRow(key);
 			tableRow.getElementsByClassName('rendered')[0].appendChild(canvasImage);
 			document.getElementById("tests").getElementsByTagName('tbody')[0].appendChild(tableRow);
+			var percentage=document.createElement('p');
+			var differ=0;
 
+    		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").ignoreColors().onComplete(function(data){
+    			differ=data.rawMisMatchPercentage;//(100-blankDiff);
+    			percentage.innerHTML=differ;
+   				if(differ>5){
+					tableRow.getElementsByClassName("label")[0].style.backgroundColor="red";
+				}else{
+				tableRow.getElementsByClassName("label")[0].style.backgroundColor="green";
+				}
+    			});
+
+				diff.ignoreAntialiasing();
+    		//});
+    		//df.ignoreAntialiasing();
+    		console.log(differ);
+			
+    		tableRow.getElementsByClassName("label")[0].appendChild(percentage);
 			//remove possible div
 			$(".viewer_3Dmoljs").remove();
 			//remove canvas

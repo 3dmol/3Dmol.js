@@ -1969,7 +1969,7 @@ END
 </textarea>
 
 `);
-$('#div_test49').append(wrapper);
+$('body').append(wrapper);
 viewer.autoload();
 }catch(err){callback();}},
 test19: function(viewer,callback,name='test19'){try{
@@ -2058,7 +2058,7 @@ H    -0.465975   -0.364992    0.807088    0.283368    0.257996   -0.583024
 H    -0.465979   -0.364991   -0.807088    0.392764    0.342436    0.764260
 </textarea>
 `);
-$('#div_test36').append(wrapper);
+$('body').append(wrapper);
 viewer.autoload();
 }catch(err){callback();}},
 test64: function(viewer,callback,name='test64'){try{
@@ -3080,7 +3080,7 @@ ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
 </textarea>
 `);
-$('#div_test64').append(wrapper);
+$('body').append(wrapper);
 viewer.autoload();
 }catch(err){callback();}},
 test57: function(viewer,callback,name='test57'){try{
@@ -11265,7 +11265,7 @@ HETATM 4052  O01 ESE B 601      20.710  -3.420   2.539  1.00 23.25           O
 HETATM 4053  O02 ESE B 601      27.424  -4.506  10.930  1.00 24.11           O  
 </textarea>
                `);
-$('#div_test44').append(wrapper);
+$('body').append(wrapper);
 viewer.autoload();var objectHTML=$.parseHTML(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
@@ -16372,7 +16372,7 @@ END
     </textarea>
   
 `);
-$('#div_test7').append(wrapper);
+$('body').append(wrapper);
 viewer.autoload();var objectHTML=$.parseHTML(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
@@ -16551,7 +16551,7 @@ M  CHG  2  35   1  40  -1
 M  END
 </textarea>
 `);
-$('#div_test4').append(wrapper);
+$('body').append(wrapper);
 viewer.autoload();var objectHTML=$.parseHTML(`
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
@@ -16846,7 +16846,7 @@ CONECT   42   19
 CONECT   43   19
 END
 </textarea>`);
-$('#div_test43').append(wrapper);
+$('body').append(wrapper);
 viewer.autoload();var objectHTML=$.parseHTML(`
   <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
