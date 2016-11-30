@@ -1,8 +1,9 @@
+$3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  
+                  viewer.setStyle({and:[{within:{distance:1,sel:{chain:'A'}}},{within:{distance:1,sel:{chain:'B'}}}]}
+                  				  ,{line:{hidden:false,
+                                    linewidth:1.0,
+                                    colorscheme:'greenCarbon'}});
 
-
-viewer.setViewStyle({style:"outline"});
-$.get('volData/example.pse', function(data){
-    viewer.addModel(data, "pse");
-    viewer.render();
-    viewer.zoomTo();
- });
+                 viewer.render();
+                });

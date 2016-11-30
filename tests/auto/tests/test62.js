@@ -23,6 +23,6 @@ $3Dmol.download("pdb:4DM7",viewer,{},function(){
                                                      linewidth:1.0,
                                                      color:'black'}});
 
-                  viewer.center({chain:'B'},1000);
+                  viewer.center({chain:'B'});
                   viewer.render();
                 });

@@ -518,9 +518,10 @@ colors_js_ColorschemeSpec: function(viewer,callback,name='colors_js_ColorschemeS
                                                  function() {
                                                      this.opacity = 0.0;
                                                  }});
-                                                  viewer.render(callback);
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();
+                  
+                                                  viewer.render(callback);
                  
                 });
 
@@ -932,7 +933,7 @@ test55: function(viewer,callback,name='test55'){try{
        var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
                           
       //viewer.translate(10,10,1000);         
-      viewer.zoomTo({resn:'STI'},1000);
+      viewer.zoomTo({resn:'STI'});
       //viewer.zoom(10,1000);
       //viewer.rotate(90,"y",1000);
       viewer.render(callback);
@@ -3141,7 +3142,7 @@ $3Dmol.download("pdb:4DM7",viewer,{},function(){
                                                      linewidth:1.0,
                                                      color:'black'}});
 
-                  viewer.center({chain:'B'},1000);
+                  viewer.center({chain:'B'});
                   viewer.render(callback);
                 });
 }catch(err){callback();}},
@@ -16610,17 +16611,6 @@ $3Dmol.download("pdb:4YGY", viewer, {}, function(){
                   viewer.render(callback);
               });
 }catch(err){callback();}},
-test73: function(viewer,callback,name='test73'){try{
-$3Dmol.download("pdb:4DM7",viewer,{},function(){
-                  
-                  viewer.setStyle({and:[{within:{distance:1,sel:{chain:'A'}}},{within:{distance:1,sel:{chain:'B'}}}]}
-                  				  ,{line:{hidden:false,
-                                    linewidth:1.0,
-                                    colorscheme:'greenCarbon'}});
-
-                 viewer.render(callback);
-                });
-}catch(err){callback();}},
 test41: function(viewer,callback,name='test41'){try{
  var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
            
@@ -16676,14 +16666,15 @@ test51: function(viewer,callback,name='test51'){try{
     });
 }catch(err){callback();}},
 test72: function(viewer,callback,name='test72'){try{
+$3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  
+                  viewer.setStyle({and:[{within:{distance:1,sel:{chain:'A'}}},{within:{distance:1,sel:{chain:'B'}}}]}
+                  				  ,{line:{hidden:false,
+                                    linewidth:1.0,
+                                    colorscheme:'greenCarbon'}});
 
-
-viewer.setViewStyle({style:"outline"});
-$.get('volData/example.pse', function(data){
-    viewer.addModel(data, "pse");
-    viewer.render(callback);
-    viewer.zoomTo();
- });
+                 viewer.render(callback);
+                });
 }catch(err){callback();}},
 test50: function(viewer,callback,name='test50'){try{
 
@@ -16715,13 +16706,33 @@ test50: function(viewer,callback,name='test50'){try{
 }catch(err){callback();}},
 test45: function(viewer,callback,name='test45'){try{
 
-    
     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
+      viewer.render(callback);
     });
-    viewer.render(callback);
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+      viewer.addIsosurface(voldata, {isoval: 0.25,
+                                       color: "blue",
+                                       wireframe: true,
+                                       linewidth:0.005,
+                                       selectedRegion: viewer.selectedAtoms({}),
+                                       selectedOffset: 3,
+                                       radius: 3.0                                   
+                                    });
+
+                                                     
+      viewer.render(callback);
+    };
+    req.send(null);
+
 }catch(err){callback();}},
 test43: function(viewer,callback,name='test43'){try{
   /* */

@@ -66,6 +66,9 @@ function createRow(key){
 	var column3=document.createElement('th');//reference image
 		column3.className="reference";
 
+	var column4=document.createElement('th');//reference image
+		column4.className="difference";
+
 	var label=document.createElement('p');
 	label.innerHTML=key;
 	column1.appendChild(label);
@@ -77,6 +80,7 @@ function createRow(key){
 	tr.appendChild(column1);
 	tr.appendChild(column2);
 	tr.appendChild(column3);
+	tr.appendChild(column4);
 
 	return tr;
 }
@@ -177,15 +181,18 @@ function runTest(i){
 			tableRow.getElementsByClassName('rendered')[0].appendChild(canvasImage);
 			document.getElementById("tests").getElementsByTagName('tbody')[0].appendChild(tableRow);
 			var percentage=document.createElement('p');
+			var differenceImage=document.createElement('img');
 			var differ=0;
 
-    		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").ignoreColors().onComplete(function(data){
+    		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").onComplete(function(data){
     			differ=data.rawMisMatchPercentage;//(100-blankDiff);
     			percentage.innerHTML=differ;
+    			differenceImage.src=data.getImageDataUrl();
+    			tableRow.getElementsByClassName('difference')[0].appendChild(differenceImage);
    				if(differ>5){
 					tableRow.getElementsByClassName("label")[0].style.backgroundColor="red";
 				}else{
-				tableRow.getElementsByClassName("label")[0].style.backgroundColor="green";
+					tableRow.getElementsByClassName("label")[0].style.backgroundColor="green";
 				}
     			});
 
