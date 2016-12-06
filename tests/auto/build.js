@@ -946,6 +946,18 @@ $3Dmol.download("pdb:1BNA", viewer, {}, function(){
                   viewer.render(callback);
               });
 }catch(err){callback();}},
+test74: function(viewer,callback,name='test74'){try{
+
+$3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.setStyle({},{line:{hidden:false,
+                     		                         linewidth:1.0,
+                                                    colorscheme:'greenCarbon'}});
+                  viewer.enableFog(false);
+                  viewer.enableFog(true);
+                  viewer.render(callback);
+                });
+
+}catch(err){callback();}},
 test49: function(viewer,callback,name='test49'){try{
 /* */
 
@@ -16620,7 +16632,6 @@ $3Dmol.download("pdb:4DM7",viewer,{},function(){
                                                     linewidth:1.0,
                                                     colorscheme:'magentaCarbon'}});
                   
-					viewer.enableFog(false);
                   viewer.render(callback);
                 });
 
