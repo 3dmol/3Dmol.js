@@ -19,9 +19,8 @@
                                        selectedRegion: viewer.selectedAtoms({}),
                                        selectedOffset: 3,
                                        radius: 3.0                                   
-                                    });
+                                    },function(){viewer.render(callback)});
 
-                                                     
-      viewer.render();
+      
     };
     req.send(null);

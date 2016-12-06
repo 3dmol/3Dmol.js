@@ -16611,6 +16611,20 @@ $3Dmol.download("pdb:4YGY", viewer, {}, function(){
                   viewer.render(callback);
               });
 }catch(err){callback();}},
+test73: function(viewer,callback,name='test73'){try{
+$3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.setStyle({or:[{chain:'C'},{chain:'D'}]},{line:{hidden:false,
+                     		                         linewidth:1.0,
+                                                    colorscheme:'greenCarbon'}});
+                  viewer.setStyle({or:[{chain:'A'},{chain:'B'}]},{line:{hidden:false,
+                                                    linewidth:1.0,
+                                                    colorscheme:'magentaCarbon'}});
+                  
+					viewer.enableFog(false);
+                  viewer.render(callback);
+                });
+
+}catch(err){callback();}},
 test41: function(viewer,callback,name='test41'){try{
  var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
            
@@ -16726,10 +16740,9 @@ test45: function(viewer,callback,name='test45'){try{
                                        selectedRegion: viewer.selectedAtoms({}),
                                        selectedOffset: 3,
                                        radius: 3.0                                   
-                                    });
+                                    },function(){viewer.render(callback)});
 
-                                                     
-      viewer.render(callback);
+      
     };
     req.send(null);
 
