@@ -30,7 +30,7 @@ $3Dmol.workerString = function(){
 $3Dmol.workerString += "; var ProteinSurface=" + $3Dmol.ProteinSurface.toString().replace(/\$3Dmol.MarchingCube./g, "MarchingCube.");
 $3Dmol.workerString += ",MarchingCube=("+$3Dmol.MarchingCubeInitializer.toString() +")();";
 
-$3Dmol.SurfaceWorker = window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'}));
+$3Dmol.SurfaceWorker = window.URL ? window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'})) : {postMessage:function(){}};
 
 $3Dmol['workerString'] = $3Dmol.workerString;
 $3Dmol['SurfaceWorker'] = $3Dmol.SurfaceWorker;
