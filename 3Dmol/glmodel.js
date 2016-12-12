@@ -2321,19 +2321,23 @@ $3Dmol.GLModel = (function() {
             }
             return [];
         }
-    }
 
-   /**
-    * add atomSpecs to validAtomSelectionSpecs
-    * @function $3Dmol.GLModel#addAtomSpecs
-    * @param {Array} customAtomSpecs - array of strings that can be used as atomSelectionSpecs
-    * this is to prevent the 'Unknown Selector x' message on the console for the strings passed
-    * @example
-    * model.addAtomSpecs(['priority1','priority2','ignore']);
-    */
+       /**
+        * add atomSpecs to validAtomSelectionSpecs
+        * @function $3Dmol.GLModel#addAtomSpecs
+        * @param {Array} customAtomSpecs - array of strings that can be used as atomSelectionSpecs
+        * this is to prevent the 'Unknown Selector x' message on the console for the strings passed
+        * @example
+        * model.addAtomSpecs(['priority1','priority2','ignore']);
+        */
 
-    this.addAtomSpecs = function(customAtomSpecs) {
-        validAtomSelectionSpecs = validAtomSelectionSpecs.concat(customAtomSpecs);
+        this.addAtomSpecs = function(customAtomSpecs) {
+            for (var i = 0; i < customAtomSpecs.length; i++) {
+                if (validAtomSelectionSpecs.indexOf(customAtomSpecs[i]) == -1) {
+                    validAtomSelectionSpecs.push(customAtomSpecs[i]);
+                }
+            }
+        }
     }
 
     GLModel.parseCrd = function(data, format) {
