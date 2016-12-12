@@ -426,6 +426,17 @@ $3Dmol.GLViewer = (function() {
             show();
         };
         var hoverDuration = 500;
+	/**
+         * Set the duration of the hover delay
+         * 
+         * @function $3Dmol.GLViewer#setHoverDuration
+         * @param {number}
+         *            [hoverDuration] - an optional parameter that denotes
+         *            the duration of the hover delay (in milliseconds) before the hover action is called
+         * @example
+         * 
+         * viewer.setHoverDuration(100);
+	 */
         this.setHoverDuration = function(duration) {
             hoverDuration = duration;
         }
