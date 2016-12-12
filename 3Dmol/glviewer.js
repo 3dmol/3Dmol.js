@@ -28,7 +28,7 @@ $3Dmol.GLViewer = (function() {
         var nomouse = config.nomouse;
         var bgColor = 0;
         config.backgroundColor="#ffffff";
-
+       //config.disableFog= config.disableFog || false;
         if(typeof(config.backgroundColor) != undefined) {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
         }
@@ -123,6 +123,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         var setSlabAndFog = function() {
+            
             var center = camera.position.z - rotationGroup.position.z;
             if (center < 1)
                 center = 1;
@@ -140,10 +141,15 @@ $3Dmol.GLViewer = (function() {
             camera.bottom = -camera.top;
             
             camera.updateProjectionMatrix();
+
             scene.fog.near = camera.near + fogStart
                     * (camera.far - camera.near);
             // if (scene.fog.near > center) scene.fog.near = center;
             scene.fog.far = camera.far;
+            
+            if(config.disableFog){
+                scene.fog.near=scene.fog.far;
+            }
         };
 
         // display scene
@@ -151,7 +157,6 @@ $3Dmol.GLViewer = (function() {
         var show = function(nolink) {
             if (!scene)
                 return;
-
             // var time = new Date();
             setSlabAndFog();
             renderer.render(scene, camera);
@@ -1647,6 +1652,7 @@ $3Dmol.GLViewer = (function() {
 
                   
                 });
+            
          */
         this.addLabel = function(text, options, sel) {
             options = options || {};
@@ -2188,6 +2194,16 @@ $3Dmol.GLViewer = (function() {
             return s;
         };
         
+        this.enableFog = function(fog){
+            if(fog){
+                scene.fog=new $3Dmol.Fog(bgColor, 100, 200);
+            }else{
+                config.disableFog=true;
+                show();
+            }
+
+        }
+
         /**
          * Sets the atomlists of all models in the viewer to specified frame
          * Sets to last frame if framenum out of range
@@ -2302,7 +2318,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')
          * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
          * @example
          
@@ -2320,7 +2336,7 @@ $3Dmol.GLViewer = (function() {
          *
          * @return {$3Dmol.GLModel} 
          */
-        this.addModel = function(data, format, options) {
+        this.addModel =  function(data, format, options) {
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
             models.push(m);
@@ -2561,6 +2577,7 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
+
         /**
          * Set click-handling properties to all selected atomsthis.
          * 
@@ -2595,6 +2612,8 @@ $3Dmol.GLViewer = (function() {
                                   fromCap:false,
                                   toCap:false});
               viewer.render();
+
+
          */
         this.setClickable = function(sel, clickable, callback) {
             applyToModels("setClickable", sel, clickable, callback);

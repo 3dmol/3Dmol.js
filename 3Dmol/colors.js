@@ -72,9 +72,10 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
                                                  function() {
                                                      this.opacity = 0.0;
                                                  }});
-                                                  viewer.render();
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();
+                  
+                                                  viewer.render();
                  
                 });
 
