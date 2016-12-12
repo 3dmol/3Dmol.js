@@ -51,7 +51,10 @@ $3Dmol.GLViewer = (function() {
         var hoverables = []; //things you can hover over
         var popups = [];
         var current_hover = null;
-
+        var hoverDuration = 500;
+        if(typeof(config.hoverDuration) != undefined) {
+            hoverDuration = config.hoverDuration;
+        }
         var WIDTH = container.width();
         var HEIGHT = container.height();
 
@@ -425,7 +428,6 @@ $3Dmol.GLViewer = (function() {
 
             show();
         };
-        var hoverDuration = 500;
 	/**
          * Set the duration of the hover delay
          * 
