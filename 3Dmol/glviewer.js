@@ -425,6 +425,10 @@ $3Dmol.GLViewer = (function() {
 
             show();
         };
+        var hoverDuration = 500;
+        this.setHoverDuration = function(duration) {
+            hoverDuration = duration;
+        }
         var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
 
@@ -440,7 +444,7 @@ $3Dmol.GLViewer = (function() {
                 function(){
                     handleHoverSelection(mouseX,mouseY,ev);
                 }
-                ,500);
+                ,hoverDuration);
 
             WIDTH = container.width();
             HEIGHT = container.height();
