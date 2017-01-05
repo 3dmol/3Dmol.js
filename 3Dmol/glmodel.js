@@ -1426,7 +1426,10 @@ $3Dmol.GLModel = (function() {
                 //fill in vibrational modes
                 this.vibrate(options.vibrate.frames, options.vibrate.amplitude);
             }
-
+            
+            if(options.style) {
+                this.setStyle({},options.style);
+            }
         };
 
         this.setDontDuplicateAtoms = function(dup) {
