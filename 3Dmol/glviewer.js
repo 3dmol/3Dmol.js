@@ -51,7 +51,10 @@ $3Dmol.GLViewer = (function() {
         var hoverables = []; //things you can hover over
         var popups = [];
         var current_hover = null;
-
+        var hoverDuration = 500;
+        if(typeof(config.hoverDuration) != undefined) {
+            hoverDuration = config.hoverDuration;
+        }
         var WIDTH = container.width();
         var HEIGHT = container.height();
 
@@ -425,6 +428,20 @@ $3Dmol.GLViewer = (function() {
 
             show();
         };
+	/**
+         * Set the duration of the hover delay
+         * 
+         * @function $3Dmol.GLViewer#setHoverDuration
+         * @param {number}
+         *            [hoverDuration] - an optional parameter that denotes
+         *            the duration of the hover delay (in milliseconds) before the hover action is called
+         * @example
+         * 
+         * viewer.setHoverDuration(100);
+	 */
+        this.setHoverDuration = function(duration) {
+            hoverDuration = duration;
+        }
         var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
 
@@ -440,7 +457,7 @@ $3Dmol.GLViewer = (function() {
                 function(){
                     handleHoverSelection(mouseX,mouseY,ev);
                 }
-                ,500);
+                ,hoverDuration);
 
             WIDTH = container.width();
             HEIGHT = container.height();
