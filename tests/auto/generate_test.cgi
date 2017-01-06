@@ -4,7 +4,6 @@
 
 import generate_tests
 import cgi, cgitb, sys
-from mlab.awmstools import div
 
 cgitb.enable()
 
