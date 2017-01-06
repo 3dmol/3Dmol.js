@@ -70,9 +70,12 @@ $3Dmol.drawCartoon = (function() {
         for (i = 1, lim = _points.length - 1; i < lim; i++) {
             p1 = _points[i];
             p2 = _points[i + 1];
-            if (p1.smoothen)
-                points.push(new $3Dmol.Vector3((p1.x + p2.x) / 2,
-                        (p1.y + p2.y) / 2, (p1.z + p2.z) / 2));
+            if (p1.smoothen) {
+                var np = new $3Dmol.Vector3((p1.x + p2.x) / 2,
+                        (p1.y + p2.y) / 2, (p1.z + p2.z) / 2);
+                np.atom = p1.atom;
+                points.push(np);
+            }
             else
                 points.push(p1);
         }
@@ -101,13 +104,12 @@ $3Dmol.drawCartoon = (function() {
                         * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
 
                 var pt = new $3Dmol.Vector3(x, y, z);
-
-                var atomIndex = Math.floor((ret.length + 2) / DIV);
-
-                if (_points[atomIndex] !== undefined
-                        && _points[atomIndex].atom !== undefined)
-                    pt.atom = _points[atomIndex].atom;
-
+                if(j < DIV/2) {
+                    pt.atom = p1.atom;
+                } else {
+                    pt.atom = p2.atom;
+                }
+                
                 ret.push(pt);
             }
         }
@@ -380,10 +382,8 @@ $3Dmol.drawCartoon = (function() {
 
                     for (j in faces) {
                         currentAtom.intersectionShape.triangle.push(faces[j]);
-
                     }
                 }
-
             }
 
             geoGroup.vertices += 2 * num;
@@ -1084,12 +1084,10 @@ $3Dmol.drawCartoon = (function() {
                             $3Dmol.GLDraw.drawCylinder(shapeGeo, baseStartPt,
                                     baseEndPt, 0.4, $3Dmol.CC
                                             .color(baseEndPt.color), 0, 2);
-                            arrow = addBackbonePoints(points, num,
+                            addBackbonePoints(points, num,
                                     !doNotSmoothen, terminalPt, termOrientPt,
                                     prevOrientPt, curr, atoms, a);
                             colors.push(nextColor);
-                            if (arrow)
-                                colors.push(nextColor);
 
                             baseStartPt = null;
                             baseEndPt = null;
@@ -1194,15 +1192,13 @@ $3Dmol.drawCartoon = (function() {
                 // when we have a backbone point and orientation point in the
                 // same residue, accumulate strand points
                 if (orientPt && backbonePt && orientPt.resi === backbonePt.resi) {
-                    arrow = addBackbonePoints(points, num, !doNotSmoothen,
+                    addBackbonePoints(points, num, !doNotSmoothen,
                             backbonePt, orientPt, prevOrientPt, curr, atoms,
                             a);
                     prevOrientPt = orientPt;
                     backbonePt = null;
                     orientPt = null;
                     colors.push(nextColor);
-                    if (arrow)
-                        colors.push(nextColor);
                 }
             }
             
@@ -1218,11 +1214,9 @@ $3Dmol.drawCartoon = (function() {
 
             $3Dmol.GLDraw.drawCylinder(shapeGeo, baseStartPt, baseEndPt, 0.4,
                     $3Dmol.CC.color(baseEndPt.color), 0, 2);
-            arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt,
+            addBackbonePoints(points, num, !doNotSmoothen, terminalPt,
                     termOrientPt, prevOrientPt, curr, atoms, a);
             colors.push(nextColor);
-            if (arrow)
-                colors.push(nextColor);
         }
 
         // for default style, draw the last strand
