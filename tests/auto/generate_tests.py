@@ -1,10 +1,12 @@
+#!/usr/bin/env python
 
 #this program will parse through all of the tests as well as all of the examples and create an html page from that
 #the page will have referance images on the right corresponding to the canvas snapshots on the left
 #when you clock on the images they will create a webgl instance
 #the user should be able to select exactly what tests they wish to run (this can get pretty sophisticated)
 #at some point there will be image comparison
-import os
+import os, re, glob
+from IPython.core.magics import script
 def find_all(text,sub):
     examples=[]
     index=0
@@ -36,56 +38,42 @@ class Example():
         self.name=self.name.replace("_3Dmol_","")
         self.name=self.name.replace("___","")
         self.name=self.name.replace("_tests_","")
+        if self.name.startswith('3'): self.name = '_'+self.name
         self.text=self.parse(text)
     
     def parse(self,text):
-        atdata=find_all(text,"@data")
-        closecomment=find_all(text,"*/")
-        atdiv=find_all(text,"@div")
-        text=text.replace("myviewer","viewer")
-        if(find_all(text,"viewer.render()")==[] and find_all(text,"viewer.render(callback)")==[] and find_all(text,"@data")==[] and find_all(text,"@div")==[]):
-            text=text+"viewer.render(callback);"
-        if(len(atdata) == 0 and len(atdiv) ==0 ):
-            text=text.replace("viewer.render()","viewer.render(callback)")
-            return text
+        self.script = re.sub(re.compile(r'/\*.*?\*/',re.DOTALL),'',text) #example without comments
+        self.divs = re.findall(re.compile(r'/\*\s*@div\s*(.*?)\*/',re.DOTALL),text) #all div code
+        self.datas = re.findall(re.compile(r'/\*\s*@data\s*(.*?)\*/',re.DOTALL),text) #all data
 
-        for data in atdata:
-            ending=len(text)
-            for com in closecomment:
-                if com > data and com<ending:
-                    ending=com
-            for at in atdiv+atdata:
-                if at>data and at<ending:
-                    ending=at
-
-            string=text[data+6:ending]
-            text=text[0:data]+text[ending:]
-            string="var wrapper=$.parseHTML(`"+string+"`);\n$('body').append(wrapper);\nviewer.autoload();";
-            text=text+string
-
-        for data in atdiv:
-            ending=len(text)
-            for com in closecomment:
-                if com > data and com<ending:
-                    ending=com
-            for at in atdiv+atdata:
-                if at>data and at<ending:
-                    ending=at
-            string=text[data+4:ending]
-            text=text[0:data]+text[ending:]
-            string="var objectHTML=$.parseHTML(`"+string+"`);$(\"body\").append(objectHTML);\nglobal_viewer=viewer;\nglobal_callback=callback;\nviewer.autoload(viewer);"
-            text=text+string
-        text=text.replace("viewer.render()","viewer.render(callback)")
+        #make sure callback is called
+        self.script = self.script.replace('viewer.render()','viewer.render(callback)')
+        if 'viewer.render(callback)' not in self.script and len(self.divs) == 0:
+            self.script += "\nviewer.render(callback);\n";
+        
+        #construct all javascript test    
+        text = ''
+        for data in self.datas:
+            text += "var wrapper=$.parseHTML(`"+data+"`);\n$('body').append(wrapper);\n"
+            
+        for div in self.divs:
+            text += "var objectHTML=$.parseHTML(`"+div+"`);\n$(\"body\").append(objectHTML);\n"
+        if self.divs:
+            text += "global_viewer=viewer;\nglobal_callback=callback;\nviewer.autoload(viewer);\n"
+        
+        #code should happen after data is initialized
+        text += self.script
+        
         return text
         
 class File():
     def __init__(self,filename,filetype,contents):
         self.filename=filename
         self.filetype=filetype
-        self.contents=Example(filename[10:-3],contents)
-        self.examples=None
         if(self.filetype=="generated"):
             self.examples=self.getExamples()
+        else:
+            self.examples = [Example(os.path.basename(filename)[0:-3],contents)]
 
     def getExamples(self):
         nearests=[]
@@ -129,7 +117,7 @@ class File():
                 name=""
             exmp=text[i+8:smallest_next]
             exmp=exmp.replace('*','')
-            filename=filename.replace("3Dmol/","")
+            filename=filename.replace("3Dmol/","").lstrip('.').lstrip('/')
             flname=filename+"_"+name
             flname=flname.replace(".","_")
             flname=flname.replace("/","_")
@@ -154,57 +142,45 @@ class File():
 
 
 class TestSystem():
-    def __init__(self):
-        self.files=self.declareFiles()
+    def __init__(self,d='.'):
+        self.files=self.declareFiles(d)
 
-    def declareFiles(self):
-        manual_tests_path="tests/auto/tests/"
-        examples_path="3Dmol/"
+    def declareFiles(self,d):
+        manual_tests_path=d+"/tests/auto/tests/"
+        examples_path=d+"/3Dmol/"
         files=[]
         #these are the files with examples in them
-        for filename in os.listdir(examples_path):
-            if(filename.endswith(".js")):
-                text=open(examples_path+filename,'r')
-                files.append(File(examples_path+filename,"generated",text.read()))
-            elif(filename =="WebGL"):
-                path=examples_path+"WebGL/"
-                for file in os.listdir(path):
-                    #paths for all of the files inside of WebGL
-                    parsed=File(path+file,"generated",open(path+file,"r").read())
-                    files.append(parsed)
+        for filename in glob.glob(examples_path+'/*.js')+glob.glob(examples_path+'/WebGL/*.js'):
+            text=open(filename,'r')
+            files.append(File(filename,"generated",text.read()))
         #these are the build in tests
-        exceptions=["generate_tests.py","tests.html","test.js","volData","imgs","url.cgi","tests.html"]
-        for filename in os.listdir(manual_tests_path):
-            if(filename in exceptions):
-                continue
-            file=open(manual_tests_path+filename,"r")
-            files.append(File(manual_tests_path+filename,"builtin",file.read()))
+        for filename in glob.glob(manual_tests_path+'/*.js'):
+            file=open(filename,"r")
+            files.append(File(filename,"builtin",file.read()))
         
         return files
 
-test=TestSystem() 
-path="tests/auto/build.js"
-
-f=open(path,"w")
-f.write("")
-
-with open(path,"a") as f:
-
-    f.write("""var global_viewer=null;
-               var global_callback=null;
-                    function div_callback(){
-                        global_viewer.render(global_callback);
-
-                    }""")
-    f.write("var system={\n")
-
-    for file in test.files:
-        if(type(file.examples)!=type(None) and len(file.examples)>0):
+if __name__ == '__main__':
+    test=TestSystem() 
+    path="tests/auto/build.js"
+    
+    f=open(path,"w")
+    f.write("")
+    
+    with open(path,"a") as f:
+    
+        f.write("""var global_viewer=null;
+                   var global_callback=null;
+                        function div_callback(){
+                            global_viewer.render(global_callback);
+    
+                        }""")
+        f.write("var system={\n")
+    
+        for file in test.files:
             for example in file.examples:
                 f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){callback();}},\n")
-        elif(type(file.examples)==type(None)):
-            f.write(file.contents.name+": function(viewer,callback,name='"+file.contents.name+"'){try{\n"+file.contents.text+"\n}catch(err){callback();}},\n")
-    f.write("};")
+        f.write("};")
 
 
 

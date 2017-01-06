@@ -174,7 +174,7 @@ function runTest(i){
 			//click event for canvas
 			canvasImage.onclick=function(){
 				var win = window.open();
-				win.location="tests.html?"+key+".html";
+				win.location="generate_test.cgi?test="+key;
 			};
 			//create the table row
 			var tableRow=createRow(key);
