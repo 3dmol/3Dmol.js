@@ -770,69 +770,60 @@ $3Dmol.GLViewer = (function() {
     };
          *  
          */
-        var rotate_index=0;
         this.rotate = function(angle, axis, animationDuration) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
 
             if (typeof (axis) === "undefined") {
                 axis = "y";
             }
-            var i = 0, j = 0, k = 0;
+            
+            var qFromAngle = function(rangle) {
+                var s = Math.sin(rangle / 2.0);
+                var c = Math.cos(rangle / 2.0);
+                var i = 0, j = 0, k = 0;
+
+                if (axis == "x")
+                    i = s;
+                if (axis == "y")
+                    j = s;
+                if (axis == "z")
+                    k = s;
+
+                return new $3Dmol.Quaternion(i, j, k, c).normalize();
+            }
+            
+
+            var wait_time = 20;
             var rangle = Math.PI * angle / 180.0;
-            var s = Math.sin(rangle / 2.0);
-            var c = Math.cos(rangle / 2.0);
-            if (axis == "x")
-                i = s;
-            if (axis == "y")
-                j = s;
-            if (axis == "z")
-                k = s;
-
-            var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
-            if(animationDuration>0){
-                var wait_time = 20;
-
+            var q = qFromAngle(rangle);
+            
+            if(animationDuration > wait_time){
+                var steps = Math.ceil(animationDuration/wait_time);
+                if(steps < 1) steps = 1 
                 var original = rotationGroup.quaternion;//quaternion
-                var final = q;//quaternion
+                var final = new $3Dmol.Quaternion().copy(original).multiply(q);//final
 
-                var xstep = (final.x-original.x)/(animationDuration/wait_time);
-                var ystep = (final.y-original.y)/(animationDuration/wait_time);
-                var zstep = (final.z-original.z)/(animationDuration/wait_time);
-                var wstep = (final.w-original.w)/(animationDuration/wait_time);
+                var incangle = rangle/steps;
+                var incq = qFromAngle(incangle);
                 
-                var rotation_done=false;
-
-                var current_q=original;
-
-                var steps=new Array(animationDuration/wait_time);
-                for(var i=0;i<steps.length;i++){
-                    current_q=new $3Dmol.Quaternion(current_q.x+xstep,current_q.y+ystep,current_q.z+zstep,current_q.w+wstep).normalize();
-                    steps[i] = current_q;
-                }
-                
-                 var increment = function(){
-                    if(transIndex===steps.length){
-                        inc_done = true;  
-                        show();
-                        rotate_index=0;
-                        return;
+                var step=0;
+                var increment = function(){
+                    rotationGroup.quaternion.multiply(incq);
+                    step+=1;
+                    
+                    if(step < steps) {
+                        setTimeout(increment,wait_time);
+                    } else { //ensure correct final position
+                        rotationGroup.quaternion = final;
                     }
-                    rotationGroup.quaternion.multiply(steps[rotate_index]);
-                    rotate_index+=1;
                     show();
                 };
-
-                if(!rotation_done)
-                    setInterval(increment,wait_time);
-                else{
-                    clearInterval();
-                     rotate_index=0;
-                }
-
-                return this;
+                
+                setTimeout(increment,0);
+            } else { //not animated
+                rotationGroup.quaternion.multiply(q);
+                show();
             }
-            rotationGroup.quaternion.multiply(q);
-            show();
             return this;
 
         };
@@ -1121,53 +1112,41 @@ $3Dmol.GLViewer = (function() {
       viewer.render(callback);
     };
          */
-         var zoomIndex=0;
         this.zoom = function(factor,animationDuration) {
             var factor = factor || 2;
             var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var scale = (CAMERA_Z - rotationGroup.position.z) / factor;
+            var final_z = CAMERA_Z - scale;
 
             if(animationDuration>0){
                 var original_z = rotationGroup.position.z;
-                var final_z = CAMERA_Z - scale;
                 var wait_time = 20;
-                var step = (final_z-original_z)/(animationDuration/wait_time);
-
-                var current_z=original_z;
-
-                var steps=new Array((animationDuration/wait_time));
-
+                var steps = Math.ceil(animationDuration/wait_time);
+                if(steps < 1) steps = 1;
+                var step = (final_z-original_z)/steps;
+                var steps=new Array(steps);
                 for(var i=0;i<steps.length;i++){
-                    current_z+=step;
-                    steps[i]=current_z;
+                    steps[i]=original_z+(i+1)*step;
                 }
 
                 var inc_z_done = false;
 
+                var step = 0;
                 var increment_z = function(){
-                    if(inc_z_done){
-                        clearInterval();
-                        zoomIndex=0;
-                        return;
+                    rotationGroup.position.z=steps[step];
+                    step += 1;
+                    if(step < steps.length) {
+                        setTimeout(increment_z, wait_time);
                     }
-                    if(zoomIndex===steps.length){
-                        inc_z_done = true;
-                        show();
-                        return;
-                    }
-                    rotationGroup.position.z=steps[zoomIndex];
                     show();
-                    zoomIndex+=1;
-                
                 };
 
-                setInterval(increment_z,wait_time);
+                setTimeout(increment_z,wait_time);
                
-
-                return this;
+            } else { //no animation
+                rotationGroup.position.z = final_z;
+                show();
             }
-            rotationGroup.position.z = CAMERA_Z - scale;
-            show();
             return this;
         };
         
@@ -1202,7 +1181,6 @@ $3Dmol.GLViewer = (function() {
       viewer.render(callback);
     };
          */
-         var transIndex=0;
         this.translate = function(x, y, animationDuration) {
             var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var dx = x/WIDTH;
@@ -1210,7 +1188,6 @@ $3Dmol.GLViewer = (function() {
             var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
 
             var original_position=lookingAt.clone();
-
             var wait_time=20;
 
             projector.projectVector(v, camera);
@@ -1224,44 +1201,33 @@ $3Dmol.GLViewer = (function() {
 
             var final_position=lookingAt;
             if(animationDuration>0){
-                var step=new $3Dmol.Vector3((final_position.x-original_position.x)/(animationDuration/wait_time),
-                                            (final_position.y-original_position.y)/(animationDuration/wait_time),
-                                            0);
-                var inc_done = false;
-
-                var steps= new Array((animationDuration/wait_time));
-
+                var steps = Math.ceil(animationDuration/wait_time);
+                if(steps < 1) steps = 1;
+                var xstep = (final_position.x-original_position.x)/steps;
+                var ystep = (final_position.y-original_position.y)/steps;
+                
+                var steps= new Array(steps);
                 for(var i=0;i<steps.length;i++){
-                    currentPosition=new $3Dmol.Vector3(currentPosition.x+step.x,currentPosition.y+step.y,currentPosition.z);
-                    steps[i]=currentPosition;
+                    steps[i]=new $3Dmol.Vector3(
+                            original_position.x+(i+1)*xstep,
+                            original_position.y+(i+1)*ystep,original_position.z);
                 }
 
+                var step = 0;
                 var increment = function(){
-                    if(transIndex===steps.length){
-                        inc_done = true;  
-                        show();
-                        transIndex=0;
-                        return;
+                    camera.lookAt(steps[step]);
+                    step += 1;
+                    if(step < steps.length) {
+                        setTimeout(increment, wait_time);
                     }
-
-                    lookingAt.add(steps[transIndex]);
-                    camera.lookAt(lookingAt);
-                    transIndex+=1;
                     show();
                 };
 
-                if(!inc_done)
-                    setInterval(increment,wait_time);
-                else{
-                    clearInterval();
-                     transIndex=0;
-                }
-
-                return this;
+                setTimeout(increment,wait_time);
+            } else { //no animation
+                camera.lookAt(final_position);
+                show();
             }
-            
-            camera.lookAt(lookingAt);
-            show();
             return this;
         };
         
