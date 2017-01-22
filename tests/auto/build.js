@@ -447,10 +447,7 @@ glviewer_js_zoom: function(viewer,callback,name='glviewer_js_zoom'){try{
     req.onload = function (aEvt) {      
        var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
                           
-      //viewer.translate(10,10);         
-      //viewer.zoomTo({resn:'STI'});
       viewer.zoom(10);
-      //viewer.rotate(90,"y");
       viewer.render(callback);
     };
          
