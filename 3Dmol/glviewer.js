@@ -743,11 +743,13 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [angle] - Angle, in degrees, to rotate by.
          * @param {string}
-         *            [angle] - Axis ("x", "y", or "z") to rotate around.
+         *            [axis] - Axis ("x", "y", or "z") to rotate around.
          *            Default "y"
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
+         * @param {boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
          * @example     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
@@ -770,7 +772,7 @@ $3Dmol.GLViewer = (function() {
     };
          *  
          */
-        this.rotate = function(angle, axis, animationDuration) {
+        this.rotate = function(angle, axis, animationDuration, fixedPath) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
 
             if (typeof (axis) === "undefined") {
@@ -797,12 +799,13 @@ $3Dmol.GLViewer = (function() {
             var rangle = Math.PI * angle / 180.0;
             var q = qFromAngle(rangle);
             
-            if(animationDuration > wait_time){
-                var steps = Math.ceil(animationDuration/wait_time);
-                var original = rotationGroup.quaternion;//quaternion
-                var final = new $3Dmol.Quaternion().copy(original).multiply(q);//final
-                var steps = interpolatedPositions(steps,modelGroup.position, rotationGroup.position.z, final);
-                steps.animate(wait_time);                
+            if(animationDuration ){
+                var final = new $3Dmol.Quaternion().copy(rotationGroup.quaternion).multiply(q);//final
+                animateMotion(animationDuration,fixedPath,
+                        modelGroup.position,
+                        rotationGroup.position.z, 
+                        final,
+                        lookingAt);              
             } else { //not animated
                 rotationGroup.quaternion.multiply(q);
                 show();
@@ -1114,41 +1117,46 @@ $3Dmol.GLViewer = (function() {
             return ret;
         };
         
-        //return an array of position objects interpolated between current 
-        //position and passed positions - can set some parameters to null
+        //animate motion between current position and passed position
+        // can set some parameters to null
+        //if fixed is true will enforce the request animation, otherwise
+        //does relative updates
         //positions objects have modelggroup position, rotation group position.z,
         //and rotationgroup quaternion
         //return array includes final position, but not current 
         //the returned array includes an animate method
-        var interpolatedPositions = function(steps,mpos, rz, rot, cam) {
+        var animateMotion = function(duration, fixed, mpos, rz, rot, cam) {
+            var interval = 20;
+            var steps = Math.ceil(duration/interval);
             if(steps < 1) steps = 1;
-            var steps = new Array(steps);
+            
             var curr = {mpos:modelGroup.position.clone(),
                     rz: rotationGroup.position.z,
                     rot: rotationGroup.quaternion.clone(),
                     cam: lookingAt.clone()};
-            var n = steps.length;
-            for(var i = 0; i < n; i++) {
-                var frac = (i+1)/n;
-                var next = {mpos: curr.mpos, rz:curr.rz, rot:curr.rot};
-                if(mpos) {
-                    next.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac).add(curr.mpos);
-                }
-                if(typeof(rz) != 'undefined' && rz != null) {
-                    next.rz = curr.rz+frac*(rz-curr.rz);
-                }
-                if(rot) {
-                    next.rot = slerp(curr.rot,rot,frac);
-                }
-                if(cam) {
-                    next.cam = cam.clone().sub(curr.cam).multiplyScalar(frac).add(curr.cam);
+            
+            if(fixed) { //precompute path and stick to it
+                var steps = new Array(steps);
+                var n = steps.length;
+                for(var i = 0; i < n; i++) {
+                    var frac = (i+1)/n;
+                    var next = {mpos: curr.mpos, rz:curr.rz, rot:curr.rot};
+                    if(mpos) {
+                        next.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac).add(curr.mpos);
+                    }
+                    if(typeof(rz) != 'undefined' && rz != null) {
+                        next.rz = curr.rz+frac*(rz-curr.rz);
+                    }
+                    if(rot) {
+                        next.rot = slerp(curr.rot,rot,frac);
+                    }
+                    if(cam) {
+                        next.cam = cam.clone().sub(curr.cam).multiplyScalar(frac).add(curr.cam);
+                    }
+                    
+                    steps[i] = next;
                 }
                 
-                steps[i] = next;
-            }
-            
-            steps.animate = function(interval) {
-                interval = interval ? interval : 20;
                 var step = 0;
                 var callback = function() {
                     var p = steps[step];
@@ -1172,8 +1180,48 @@ $3Dmol.GLViewer = (function() {
                     show();
                 }
                 setTimeout(callback, interval);
+               
+            } else { //relative update
+                var delta = {};
+                var frac = 1.0/steps;
+                if(mpos) {
+                    delta.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac);
+                }
+                if(typeof(rz) != 'undefined' && rz != null) {
+                    delta.rz = frac*(rz-curr.rz);
+                }
+                if(rot) {
+                    var next = slerp(curr.rot,rot,frac);
+                    //comptute step delta rotation
+                    delta.rot = curr.rot.clone().inverse().multiply(next);
+                }
+                if(cam) {
+                    delta.cam = cam.clone().sub(curr.cam).multiplyScalar(frac);
+                }
+                var step = 0.0;
+                var callback = function() {
+                    step += 1;
+                    if(delta.mpos) {
+                        modelGroup.position.add(delta.mpos);
+                    }
+                    if(delta.rz) {
+                        rotationGroup.position.z += delta.rz;
+                    }
+                    if(delta.rot) {
+                        rotationGroup.quaternion.multiply(delta.rot);
+                    }
+                    if(delta.cam) {
+                        lookingAt.add(delta.cam);
+                        camera.lookAt(lookingAt);
+                    }
+                    
+                    if(step < steps) {
+                        setTimeout(callback, interval);
+                    }
+                    show();
+                }
+                setTimeout(callback, interval);
             }
-            return steps;
         }
         /**
          * Zoom current view by a constant factor
@@ -1185,6 +1233,8 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation
          * @example   
     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
@@ -1204,20 +1254,18 @@ $3Dmol.GLViewer = (function() {
       viewer.render(callback);
     };
          */
-        this.zoom = function(factor,animationDuration) {
+        this.zoom = function(factor,animationDuration,fixedPath) {
             var factor = factor || 2;
             var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var scale = (CAMERA_Z - rotationGroup.position.z) / factor;
             var final_z = CAMERA_Z - scale;
 
             if(animationDuration>0){
-                var wait_time = 20;
-                var steps = Math.ceil(animationDuration/wait_time);
-                var steps = interpolatedPositions(steps,
+                animateMotion(animationDuration,fixedPath,
                         modelGroup.position, 
                         final_z, 
-                        rotationGroup.quaternion);
-                steps.animate(wait_time);
+                        rotationGroup.quaternion,
+                        lookingAt);
             } else { //no animation
                 rotationGroup.position.z = final_z;
                 show();
@@ -1235,6 +1283,8 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
          * @example     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
@@ -1256,7 +1306,7 @@ $3Dmol.GLViewer = (function() {
       viewer.render(callback);
     };
          */
-        this.translate = function(x, y, animationDuration) {
+        this.translate = function(x, y, animationDuration, fixedPath) {
             var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
@@ -1270,14 +1320,11 @@ $3Dmol.GLViewer = (function() {
 
             var final_position=lookingAt.clone().add(v);
             if(animationDuration>0){
-                var wait_time=20;
-                var steps = Math.ceil(animationDuration/wait_time);
-                var steps = interpolatedPositions(steps,
-                        modelGroup.position, 
+                animateMotion(animationDuration,fixedPath,
+                        modelGroup.position,
                         rotationGroup.position.z, 
                         rotationGroup.quaternion,
                         final_position);
-                steps.animate(wait_time);
             } else { //no animation
                 camera.lookAt(final_position);
                 show();
@@ -1295,6 +1342,8 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
          * @example // if the user were to pass the animationDuration value to 
          *           // the function like so viewer.zoomTo({resn:'STI'},1000);
          *         //   the program would center on resn 'STI' over the course 
@@ -1323,7 +1372,7 @@ $3Dmol.GLViewer = (function() {
       viewer.render(callback);
     };
          */
-        this.center = function(sel,animationDuration){
+        this.center = function(sel,animationDuration,fixedPath){
              animationDuration=animationDuration!==undefined ? animationDuration : 0;
             var allatoms, alltmp;
             sel = sel || {};
@@ -1395,13 +1444,11 @@ $3Dmol.GLViewer = (function() {
             var maxD = Math.sqrt(maxDsq)*2;
             var finalpos = center.clone().multiplyScalar(-1);
             if(animationDuration>0){
-                var wait_time=20;
-                var steps = Math.ceil(animationDuration/wait_time);
-                var steps = interpolatedPositions(steps,
+                animateMotion(animationDuration,fixedPath,
                         finalpos, 
                         rotationGroup.position.z, 
-                        rotationGroup.quaternion);
-                steps.animate(wait_time);
+                        rotationGroup.quaternion,
+                        lookingAt);
             } else { //no animation 
                 modelGroup.position = finalpos;
                 show();
@@ -1418,6 +1465,8 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
           * @example   
     
 
@@ -1435,7 +1484,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.zoomTo();
                 });
          */
-        this.zoomTo = function(sel, animationDuration) {
+        this.zoomTo = function(sel, animationDuration,fixedPath) {
             animationDuration=animationDuration!==undefined ? animationDuration : 0;
             var allatoms, alltmp;
             sel = sel || {};
@@ -1510,13 +1559,11 @@ $3Dmol.GLViewer = (function() {
             var finalz =  -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
             if(animationDuration>0){
-                var wait_time = 20;
-                var steps = Math.ceil(animationDuration/wait_time);
-                var steps = interpolatedPositions(steps,
-                        finalpos, 
+                animateMotion(animationDuration,fixedPath,
+                        finalpos,
                         finalz, 
-                        rotationGroup.quaternion);
-                steps.animate(wait_time);
+                        rotationGroup.quaternion,
+                        lookingAt);                
             } else {
                 modelGroup.position = finalpos;
                 rotationGroup.position.z = finalz;
