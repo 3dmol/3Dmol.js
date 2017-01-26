@@ -428,6 +428,15 @@ $3Dmol.GLViewer = (function() {
 
             show();
         };
+        
+        /**
+         * Return image URI of viewer contents (base64 encoded).
+         * @function $3Dmol.GLViewer#png
+         * 
+         */
+        this.pngURI = function() {
+            return $('canvas',container)[0].toDataURL('image/png');
+        }
 	/**
          * Set the duration of the hover delay
          * 
