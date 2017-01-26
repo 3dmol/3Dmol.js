@@ -6,7 +6,7 @@
 #the user should be able to select exactly what tests they wish to run (this can get pretty sophisticated)
 #at some point there will be image comparison
 import os, re, glob
-from IPython.core.magics import script
+#from IPython.core.magics import script
 def find_all(text,sub):
     examples=[]
     index=0
