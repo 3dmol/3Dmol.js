@@ -25,7 +25,7 @@ class view(object):
             options -- optional options to provide to $3Dmol.download
             js -- url for 3Dmol.js'''
         divid = "3dmolviewer_UNIQUEID" 
-                
+        self.uniqueid = None
         self.startjs = '<div id="%s"  style="position: relative; width: %dpx; height: %dpx">\n' % (divid,width,height)
         self.startjs += '<script>\n'
         self.endjs = '</script>';
@@ -46,9 +46,22 @@ class view(object):
         return IPython.display.HTML(self._repr_html_())
     
     def _repr_html_(self):
-        html = (self.startjs+self.endjs).replace('UNIQUEID',str(time.time()).replace('.',''))
+        self.uniqueid = str(time.time()).replace('.','')
+        html = (self.startjs+self.endjs).replace('UNIQUEID',self.uniqueid)
         #print html
         return html
+    
+    def png(self):
+        '''output png image of viewer, which must already be instantiated'''
+        if not self.uniqueid:
+            raise AssertionError('Must instantiate viewer before generating image.')
+        script = '''<img id="img_{0}">
+            <script>
+            var png = $('canvas','#3dmolviewer_{0}')[0].toDataURL();
+            $('#img_{0}').attr('src', png)
+            </script>'''.format(self.uniqueid)
+        return IPython.display.HTML(script)
+            
     
     def __getattr__(self,name):
         '''auto-instantiate javascript calls based on whatever the user provided'''
