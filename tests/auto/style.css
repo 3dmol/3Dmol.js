@@ -24,3 +24,14 @@ img{
 #label{
     width:10%;
 }
+#summary{
+    width:100%;
+    height:100vh;
+    overflow:hidden; 
+    overflow-y:scroll;
+}
+
+#summary_scroll{
+    width:60%;
+    list-style: none;
+}
