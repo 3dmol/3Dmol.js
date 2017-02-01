@@ -183,15 +183,18 @@ function runTest(i){
 			var percentage=document.createElement('p');
 			var differenceImage=document.createElement('img');
 			var differ=0;
-
+			var listElement=document.createElement('li');
+			listElement.innerHTML=key;
     		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").onComplete(function(data){
     			differ=data.rawMisMatchPercentage;//(100-blankDiff);
     			percentage.innerHTML=differ;
     			differenceImage.src=data.getImageDataUrl();
     			tableRow.getElementsByClassName('difference')[0].appendChild(differenceImage);
    				if(differ>5){
+   					listElement.style.backgroundColor="red";
 					tableRow.getElementsByClassName("label")[0].style.backgroundColor="red";
 				}else{
+					listElement.style.backgroundColor="green";
 					tableRow.getElementsByClassName("label")[0].style.backgroundColor="green";
 				}
     			});
@@ -200,7 +203,7 @@ function runTest(i){
     		//});
     		//df.ignoreAntialiasing();
     		console.log(differ);
-			
+			document.getElementById('summary_scroll').appendChild(listElement)
     		tableRow.getElementsByClassName("label")[0].appendChild(percentage);
 			//remove possible div
 			$(".viewer_3Dmoljs").remove();
