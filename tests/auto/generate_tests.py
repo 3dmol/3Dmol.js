@@ -2,7 +2,7 @@
 
 #this program will parse through all of the tests as well as all of the examples and create an html page from that
 #the page will have referance images on the right corresponding to the canvas snapshots on the left
-#when you clock on the images they will create a webgl instance
+#when you click on the images they will create a webgl instance
 #the user should be able to select exactly what tests they wish to run (this can get pretty sophisticated)
 #at some point there will be image comparison
 import os, re, glob
