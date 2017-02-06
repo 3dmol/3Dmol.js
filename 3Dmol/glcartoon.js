@@ -951,7 +951,7 @@ $3Dmol.drawCartoon = (function() {
             }
         }
 
-        var flushGeom = function() {
+        var flushGeom = function(connect) {
             //write out points, update geom,etc
             for (var i = 0; !thickness && i < num; i++)
                 drawSmoothCurve(group, points[i], 1, colors, div, opacity);
@@ -959,10 +959,26 @@ $3Dmol.drawCartoon = (function() {
                 drawStrip(geo, points, colors, div, thickness, opacity,
                         points.style);
             }
+            
+            if(connect) {
+                //recycle last point to first point of next points array
+                var saved = [];
+                for(i = 0; i < num; i++) {
+                    saved[i] = points[i][points[i].length-1];
+                }
+                var savedc = colors[colors.length-1];
+            }
             points = [];
             for (i = 0; i < num; i++)
                 points[i] = [];
             colors = [];
+            
+            if(connect) {
+                for(i = 0; i < num; i++) {
+                    points[i].push(saved[i]);
+                }
+                colors.push(savedc);
+            }
             
             setGeo(group, geo, opacity, outline, true);
             setGeo(group, shapeGeo, opacity, outline, false);
@@ -990,7 +1006,11 @@ $3Dmol.drawCartoon = (function() {
             //break if it changes within the chain
             if (curr && curr.style.cartoon && (!next.style.cartoon ||
                     curr.style.cartoon.opacity != next.style.cartoon.opacity)) {
-                flushGeom();
+                flushGeom(curr.chain == next.chain);
+            }
+            
+            if(points.length && points[0].length > (30000/num/div/2)) {
+                flushGeom(true);
             }
             
             if (cartoon.style === "trace") // draw cylinders connecting
