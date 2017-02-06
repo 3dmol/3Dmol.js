@@ -8,4 +8,4 @@ $3Dmol.download("pdb:5TZ8", viewer, {}, function(){
                   viewer.setStyle({resi:2},{cartoon:{color:'black'}});
                   viewer.setStyle({resi:3},{cartoon:{color:'yellow'}});
                   viewer.render();
-              }
+              });
