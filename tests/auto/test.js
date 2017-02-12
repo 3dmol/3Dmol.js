@@ -59,7 +59,6 @@ function createRow(key){
 
 	var column1=document.createElement('th');//label
 		column1.className="label";
-			
 	var column2=document.createElement('th');//rendered image
 		column2.className="rendered";
 
@@ -85,6 +84,10 @@ function createRow(key){
 	return tr;
 }
 
+var h1=document.createElement('h3');
+h1.innerHTML="Tests";
+h1.style="display:inline";
+document.getElementById("summary_scroll").appendChild(h1);
 imgs="imgs";
 var keys=getKeys(system)
 keys.sort();
@@ -106,6 +109,12 @@ for(var i=1;i<tests.length;i++){
 		j--;
 	}
 }
+
+var par=document.createElement('p');
+par.innerHTML="   0/"+keys.length;
+document.getElementById("summary_scroll").appendChild(par);
+
+par.style="display:inline";
 var new_arr=[]
 for(var test=0;test<tests.length;test++){
 	new_arr.push(keys[tests[test]]);
@@ -160,7 +169,7 @@ function runTest(i){
 	var key=keys[i];
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
 	var afterGlobals;
-
+    
 	system[key](viewer,function(){
 		waitfor(viewer.surfacesFinished , true , 100 , 0 , "" , function(){
 			var after=Date.now();
@@ -183,7 +192,12 @@ function runTest(i){
 			var percentage=document.createElement('p');
 			var differenceImage=document.createElement('img');
 			var differ=0;
-
+			var listElement=document.createElement('li');
+			var anchor=document.createElement('a');
+			anchor.href="#"+key;
+			listElement.appendChild(anchor);
+			anchor.innerHTML=key;
+			par.innerHTML="   "+i+"/"+keys.length;
     		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").onComplete(function(data){
     			differ=data.rawMisMatchPercentage;//(100-blankDiff);
     			percentage.innerHTML=differ;
@@ -191,6 +205,8 @@ function runTest(i){
     			tableRow.getElementsByClassName('difference')[0].appendChild(differenceImage);
    				if(differ>5){
 					tableRow.getElementsByClassName("label")[0].style.backgroundColor="red";
+					document.getElementById('summary_scroll').appendChild(listElement)
+					anchor.innerHTML+=" "+percentage.innerHTML;
 				}else{
 					tableRow.getElementsByClassName("label")[0].style.backgroundColor="green";
 				}
@@ -200,7 +216,6 @@ function runTest(i){
     		//});
     		//df.ignoreAntialiasing();
     		console.log(differ);
-			
     		tableRow.getElementsByClassName("label")[0].appendChild(percentage);
 			//remove possible div
 			$(".viewer_3Dmoljs").remove();

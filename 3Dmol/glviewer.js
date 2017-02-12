@@ -741,7 +741,9 @@ $3Dmol.GLViewer = (function() {
     };
          */
         this.getModel = function(id) {
-            id = id || models.length - 1;
+            if(!(id in models)) {
+                return models[models.length-1]; //get last model if no (or invalid) id specified
+            }
             return models[id];
         };
 
