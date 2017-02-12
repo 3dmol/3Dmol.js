@@ -59,7 +59,6 @@ function createRow(key){
 
 	var column1=document.createElement('th');//label
 		column1.className="label";
-			
 	var column2=document.createElement('th');//rendered image
 		column2.className="rendered";
 
@@ -195,7 +194,7 @@ function runTest(i){
 			var differ=0;
 			var listElement=document.createElement('li');
 			var anchor=document.createElement('a');
-			anchor.href="generate_test.cgi?test="+key;
+			anchor.href="#"+key;
 			listElement.appendChild(anchor);
 			anchor.innerHTML=key;
 			par.innerHTML="   "+i+"/"+keys.length;
