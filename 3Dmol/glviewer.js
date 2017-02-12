@@ -2505,7 +2505,12 @@ $3Dmol.GLViewer = (function() {
             
             for (var i = 0; i < ms.length; i++) {
                 if (ms[i]) {
-                    ms[i][func](sel, value1, value2, value3);
+                    //allow referencing models by order of creation
+                    if(typeof ms[i] === 'number') {
+                        models[ms[i]][func](sel, value1, value2, value3);
+                    } else { //assume model object
+                        ms[i][func](sel, value1, value2, value3);
+                    }
                 }
             }
         }

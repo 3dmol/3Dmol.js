@@ -191,11 +191,12 @@
         }); */
            
                   viewer.setBackgroundColor(0xffffffff);
-                  viewer.addModel($("#actinpdb").text(),'pdb');
-                  viewer.setStyle({cartoon: {style: 'trace'}});
-                  viewer.zoomTo();
-                  viewer.render();
-                  viewer.zoomTo({resi:3},2000);
+                  $.get('input.pdb',function(data) {
+                     struct1 = viewer.addModel(data);
+    struct1.setStyle({cartoon: {}});
+    viewer.zoomTo();
+    viewer.render(); 
+              });
 
                            
   });

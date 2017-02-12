@@ -17,7 +17,7 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.csb.pitt.edu/doc/$3Dmol.GLViewer.html
     '''
-    def __init__(self,width=640,height=480,query='',options=dict(),js='http://3dmol.csb.pitt.edu/build/3Dmol.js'):
+    def __init__(self,width=640,height=480,query='',options=dict(),js='http://3Dmol.csb.pitt.edu/build/3Dmol.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
@@ -28,29 +28,43 @@ class view(object):
         self.uniqueid = None
         self.startjs = '<div id="%s"  style="position: relative; width: %dpx; height: %dpx">\n' % (divid,width,height)
         self.startjs += '<script>\n'
-        self.endjs = '</script>';
+        self.endjs = '</script>'
         
+        self.updatejs = '' # code added since last show
         #load 3dmol, but only once
         self.startjs += "if(typeof $3Dmolpromise === 'undefined') $3Dmolpromise = $.when($.getScript('%s'))\n" % js
-        
+        self.startjs += "var viewer_UNIQUEID = null;\n";
         self.startjs += "$3Dmolpromise.done(function() {\n";
         self.endjs = "});\n" + self.endjs
-        
-        self.startjs += 'var viewer = $3Dmol.createViewer($("#%s"),{backgroundColor:"white"});\n' % divid
+
+        self.startjs += 'viewer_UNIQUEID = $3Dmol.createViewer($("#%s"),{backgroundColor:"white"});\n' % divid
         if query:
-            self.startjs += '$3Dmol.download("%s", viewer, %s, function() {\n' % (query,json.dumps(options))
+            self.startjs += '$3Dmol.download("%s", viewer_UNIQUEID, %s, function() {\n' % (query,json.dumps(options))
             self.endjs = "})\n" + self.endjs        
-        self.endjs = "viewer.render();\n" + self.endjs;
+        self.endjs = "viewer_UNIQUEID.render();\n" + self.endjs;
 
     def show(self):
+        '''Instantiate a new viewer window. Calling this will orphan any previously instantiated viewer windows.'''
+        self.updatejs = ''
         return IPython.display.HTML(self._repr_html_())
     
     def _repr_html_(self):
         self.uniqueid = str(time.time()).replace('.','')
+        self.updatejs = ''
         html = (self.startjs+self.endjs).replace('UNIQUEID',self.uniqueid)
-        #print html
         return html
     
+    def update(self):
+        '''Apply commands to existing viewer (must be instantiated).'''
+        if self.uniqueid == None:
+            raise AssertionError('Must instantiate viewer before generating image.')
+        script = '''<script>
+            %s
+            viewer_%s.render();
+            </script>''' % (self.updatejs.replace('UNIQUEID',self.uniqueid),self.uniqueid)
+        self.updatejs = ''
+        return IPython.display.HTML(script)
+
     def png(self):
         '''output png image of viewer, which must already be instantiated'''
         if not self.uniqueid:
@@ -69,12 +83,13 @@ class view(object):
             raise AttributeError("%r object has no attribute %r" %
                          (self.__class__, attr))
         def makejs(*args):            
-            cmd = '\tviewer.%s(' % name;
+            cmd = '\tviewer_UNIQUEID.%s(' % name;
             for arg in args:
                 cmd += '%s,' % json.dumps(arg)
             cmd = cmd.rstrip(',')
             cmd += ');\n';
             self.startjs += cmd
+            self.updatejs += cmd
             return self
             
         return makejs
