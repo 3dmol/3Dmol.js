@@ -59,8 +59,10 @@ class view(object):
         if self.uniqueid == None:
             raise AssertionError('Must instantiate viewer before generating image.')
         script = '''<script>
-            %s
-            viewer_%s.render();
+            $3Dmolpromise.done(function() { //wrap in promise for non-interactive functionality
+                %s
+                viewer_%s.render();
+            });
             </script>''' % (self.updatejs.replace('UNIQUEID',self.uniqueid),self.uniqueid)
         self.updatejs = ''
         return IPython.display.HTML(script)
