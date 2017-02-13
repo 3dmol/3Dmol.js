@@ -49,12 +49,22 @@ $3Dmol.Parsers = (function() {
                     var atom2 = otherPoints[j];
 
                     if (areConnected(atom1, atom2)) {
-                        if (atom1.bonds.indexOf(atom2.index) == -1) {
+                        //gracefully handle one-sided bonds
+                        var a2i = atom1.bonds.indexOf(atom2.index);
+                        var a1i = atom2.bonds.indexOf(atom1.index);
+                        if (a2i == -1 && a1i == -1) {
                             atom1.bonds.push(atom2.index);
                             atom1.bondOrder.push(1);
                             atom2.bonds.push(atom1.index);
                             atom2.bondOrder.push(1);
+                        } else if (a2i == -1) {
+                            atom1.bonds.push(atom2.index);
+                            atom1.bondOrder.push(atom2.bondOrder[a1i])
+                        } else if (a1i == -1) {
+                            atom2.bonds.push(atom1.index);
+                            atom2.bondOrder.push(atom1.bondOrder[a2i])                            
                         }
+                            
                     }
                 }
             }
@@ -339,6 +349,27 @@ $3Dmol.Parsers = (function() {
                 atom.ssend = true;
         }
     };
+    
+    
+    //make sure bonds are actually two way
+    var validateBonds = function(atomsarray, serialToIndex) {
+        for (var i = 0, n = atomsarray.length; i < n; i++) {
+            var atom = atomsarray[i];
+            for(var b = 0; b < atom.bonds.length; b++) {
+                var a2i = atom.bonds[b];
+                var atom2 = atomsarray[a2i];
+                var atomi = serialToIndex[atom.serial];
+                if(atom2 && atomi) {
+                    var a1i = atom2.bonds.indexOf(atomi);
+                    if(a1i < 0) {
+                        atom2.bonds.push(atomi);
+                        atom2.bondOrder.push(atom.bondOrder[b]);
+                    }
+                }
+            }
+        }
+    };
+        
 
     /**
      * @param {string}
@@ -1397,8 +1428,9 @@ $3Dmol.Parsers = (function() {
                 var from = parseInt(line.substr(6, 5));
                 var fromindex = serialToIndex[from];
                 var fromAtom = atoms[fromindex];
+                var coffsets = [ 11, 16, 21, 26 ];
                 for (j = 0; j < 4; j++) {
-                    var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
+                    var to = parseInt(line.substr(coffsets[j], 5));
                     var toindex = serialToIndex[to];
                     var toAtom = atoms[toindex];
                     if (fromAtom !== undefined && toAtom !== undefined) {
@@ -1493,11 +1525,13 @@ $3Dmol.Parsers = (function() {
     
                     anisouAtom["uMat"] = uMat;
                 }
-	    }
+            }
         }
 
         var starttime = (new Date()).getTime();
         
+        //fix any "one-way" bonds in CONECT records
+        validateBonds(atoms, serialToIndex);
         // assign bonds - yuck, can't count on connect records
         assignPDBBonds(atoms);
        // console.log("bond connecting " + ((new Date()).getTime() -starttime));
