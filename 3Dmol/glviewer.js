@@ -3431,11 +3431,11 @@ $3Dmol.GLViewer = (function() {
 
 
         /**
-         * @function $3Dmol.GLViewer#linkViewer
          * Synchronize this view matrix of this viewer to the passed viewer.
          * When the viewpoint of this viewer changes, the other viewer will
          * be set to this viewer's view.
          * @function $3Dmol.GLViewer#linkViewer
+         * @param {$3Dmol.GLViewer} otherview 
          */
         this.linkViewer = function(otherviewer) {
            linkedViewers.push(otherviewer);
