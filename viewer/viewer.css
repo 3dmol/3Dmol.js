@@ -1,0 +1,65 @@
+#sidenav{
+        height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    right: 0;
+    background-color:#586073; /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    border-style: solid;
+    border-color: black;
+    border-bottom-style: solid;
+    border-bottom-width: 400px;
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+body{
+    padding:0px;
+    margin:0px;
+    color:black;
+}
+
+.closebtn {
+    position: fixed;
+    top: 20;
+    font-size: 18px !important;
+    color:black;
+    margin-left:10px;
+     
+}
+#openbtn{
+    color:black;
+}
+
+#selections{
+        height:90%;
+}
+
+ul{
+    list-style: none;
+    margin:0px;
+    padding:4px;
+    margin-top: 24px;
+    background-color:black;
+    text-align:center;
+}
+
+
+div{
+    padding:0px;
+}
+
+#add_model{
+    font-size: 24px;
+    font-weight:bold;
+    color:white;
+    height:25px;
+    text-decoration:none;
+    padding-left:51%;
+    padding-right:51%;
+    background-color: #586073;
+}
+
+#add_model:hover{
+    background-color: #1C1F24;
+}
