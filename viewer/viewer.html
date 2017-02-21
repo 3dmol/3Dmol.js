@@ -3,6 +3,7 @@
 <head>
 <title>3Dmol.js Viewer</title>
 <script src="../build/3Dmol-min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script src="viewer.js"></script>
 <link rel="stylesheet" href="viewer.css">
 <script>
@@ -195,9 +196,38 @@
                         }
                     }
     
+
 $(document).ready(function(){
     run();
-    
+
+    $("#sidenav").resizable({
+            handles: 'e',
+            minWidth: 300,
+            maxWidth: 800,
+    });
+
+     $( "#selections" ).sortable({
+            revert: true
+        });
+    $( "#draggable" ).draggable({
+        connectToSortable: "#selections",
+        helper: "clone",
+        revert: "invalid",
+        start: function(event){
+             if(event.target.className!=="selection ui-sortable-handle"){
+            
+        }
+        }
+    });
+
+    $("#sidenav").click(function(event){
+
+        if(event.target.className==="selection ui-sortable-handle"){
+           //open up the sub navigation
+           console.log("passed");
+           event.target.getElementsByClassName('subSelection')[0].style.visibility="auto";
+        }
+    });
 });
 
 </script>
@@ -208,8 +238,10 @@ $(document).ready(function(){
 	<div id="sidenav">
   		<a href="javascript:void(0)" class="closebtn" style="" onclick="closeNav()">&#x2715;</a>
 		<ul id="selections">
-            <li><a href="javascript:void(0)" id="add_model" onclick="state.add_entry()">+</a></li>
+            <div id="buttons"><button href="javascript:void(0)" id="add_model" onclick="state.add_entry('Model');">M</button><button href="javascript:void(0)" id="add_model" onclick="state.add_entry('Selection');">S</button></div>
+
         </ul>
+
 	</div>
     <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>

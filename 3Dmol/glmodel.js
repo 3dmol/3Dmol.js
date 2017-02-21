@@ -2077,7 +2077,7 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
-         * @function setColorByFunction
+         * @function $3Dmol.GLModel.setColorByFunction
          * @deprecated use setStyle and colorfunc attribute
          * @param {type} sel - selection object
          * @param {type} func - function to be used to set the color

@@ -1,22 +1,47 @@
 
 var Viewer = function(){
 	
-	this.entries=[];
-	this.selections=document.getElementById("selections");
+	var entries=[];
+	var selections=document.getElementById("selections");
 	this.init=function(){
 
 	};
 
-
 	/*
 	Adds a new selection object and initializes it 
 	*/
-	this.add_entry = function(){
-		this.entries.push(new Model());
+	this.add_entry = function(type, parent){	
 
-		//add model to the page
-		var model=document.createElement("li");
-		model.className="model";
+		var li = document.createElement('li');
+		if(type == "Model"){
+			var model = new Model();
+			entries.push(model);
+
+			var model_string = document.createElement('input');
+
+
+			var label = document.createElement('p');
+			label.className="label"
+			label.innerHTML="M";
+			li.appendChild(label);
+
+			li.appendChild(model_string);
+			li.className="entry"
+			li.style.float="left";
+
+
+		}else if(type == "Selection"){
+			var selection = new Selection();
+			entries.push(selection);
+
+			var selection_string
+		}else if(type == "Label"){
+
+		}
+
+		var selections=document.getElementById("selections");
+		selections.appendChild(li);
+		
 		
 	};
 
@@ -46,14 +71,19 @@ function closeNav() {
 
 
 var Model = function(){
-	this.type=null;
+	this.type="PDB";
 	this.selections=[];
-	this.model=null;
+	this.model="";
+
+	this.createModel = function(){
+		console.log("model");
+	}
+
+	this.addChild= function(){
+
+	}
 }
 
-var PDBModel = function(){
-	
-}
 
 var Selection = function(){
 	this.type=null;
@@ -61,8 +91,14 @@ var Selection = function(){
 	this.style;
 	this.labels=[];
 
-
+	this.addChild= function(){
+		
+	}
 };
+
+var Style = function(){
+
+}
 
 var Label = function(){
 	this.text="";
