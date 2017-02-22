@@ -1343,6 +1343,36 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         
+
+        /**
+         * Adjust slab to fully enclose selection (default everything).
+         * 
+         * @function $3Dmol.GLViewer#center
+         * @param {Object}
+         *            [sel] - Selection specification specifying model and atom
+         *            properties to select. Default: all atoms in viewer
+         */
+        this.fitSlab = function(sel) {
+            sel = sel || {};
+            var atoms = getAtomsFromSel(sel);
+            var tmp = $3Dmol.getExtent(atoms);
+
+            // fit to bounding box
+            var x = tmp[1][0] - tmp[0][0], 
+                y = tmp[1][1] - tmp[0][1], 
+                z = tmp[1][2] - tmp[0][2];
+
+            var maxD = Math.sqrt(x * x + y * y + z * z);
+            if (maxD < 5)
+                maxD = 5;
+
+            // use full bounding box for slab/fog
+            slabNear = -maxD / 1.9;
+            slabFar = maxD / 2;
+
+            return this;
+        };        
+        
         /**
          * Re-center the viewer around the provided selection (unlike zoomTo, does not zoom).
          * 
@@ -1466,7 +1496,8 @@ $3Dmol.GLViewer = (function() {
                 show();
             }
             return this;
-        }
+        };
+        
         /**
          * Zoom to center of atom selection
          * 
@@ -3433,11 +3464,11 @@ $3Dmol.GLViewer = (function() {
 
 
         /**
-         * @function $3Dmol.GLViewer#linkViewer
          * Synchronize this view matrix of this viewer to the passed viewer.
          * When the viewpoint of this viewer changes, the other viewer will
          * be set to this viewer's view.
          * @function $3Dmol.GLViewer#linkViewer
+         * @param {$3Dmol.GLViewer} otherview 
          */
         this.linkViewer = function(otherviewer) {
            linkedViewers.push(otherviewer);
