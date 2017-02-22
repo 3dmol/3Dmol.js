@@ -1394,7 +1394,7 @@ $3Dmol.GLViewer = (function() {
                 //include shapes when zooming to full scene
                 //TODO: figure out a good way to specify shapes as part of a selection
                 $.each(shapes, function(i, shape) {
-                    if(shape && shape.boundingSphere && shape.boundingSphere.center)
+                    if(shape && shape.boundingSphere && shape.boundingSphere.center) {
                         var c = shape.boundingSphere.center;
                         var r = shape.boundingSphere.radius;
                         if(r > 0) {
@@ -1408,6 +1408,7 @@ $3Dmol.GLViewer = (function() {
                         } else {
                             atoms.push(c);
                         }
+                    }
                 });
                 tmp = $3Dmol.getExtent(atoms);
                 allatoms = atoms;
@@ -1506,7 +1507,7 @@ $3Dmol.GLViewer = (function() {
                 //include shapes when zooming to full scene
                 //TODO: figure out a good way to specify shapes as part of a selection
                 $.each(shapes, function(i, shape) {
-                if(shape && shape.boundingSphere && shape.boundingSphere.center)
+                if(shape && shape.boundingSphere && shape.boundingSphere.center) {
                     var c = shape.boundingSphere.center;
                     var r = shape.boundingSphere.radius;
                     if(r > 0) {
@@ -1520,6 +1521,7 @@ $3Dmol.GLViewer = (function() {
                     } else {
                             atoms.push(c);
                     }
+                  }
                 });
                 tmp = $3Dmol.getExtent(atoms);
                 allatoms = atoms;
