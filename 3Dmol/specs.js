@@ -92,15 +92,11 @@
                                            position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
                   viewer.setStyle({chain:'A'},{cross:{hidden:true}});
                   viewer.setStyle({chain:'B'},{cross:{hidden:false,
-                                                      linewidth:1.0,
                                                       colorscheme:'greenCarbon'}});
                   viewer.setStyle({chain:'C'},{cross:{hidden:false,
-                                                      linewidth:1.0,
                                                       radius:0.5}});
-                  viewer.setStyle({chain:'D'},{cross:{hidden:false,
-                                                      linewidth:10.0}});
+                  viewer.setStyle({chain:'D'},{cross:{hidden:false}});
                   viewer.setStyle({chain:'E'},{cross:{hidden:false,
-                                                      linewidth:1.0,
                                                       color:'black'}});
                   
                   viewer.render();
@@ -182,7 +178,7 @@
  * @prop {ColorSpec} color - solid color
  * @prop {number} opacity - transparency, between 0 and 1
  * @prop {boolean} wireframe - draw as wireframe, not surface
- * @prop {number} linewidth - width of line for wireframe rendering
+ * @prop {number} linewidth - width of line for wireframe rendering **No longer supported by most browsers**
  * @prop {number} smoothness - amount to smooth surface (default 1)
  * @prop {AtomSelectionSpec} sel - selection around which to show data
  * @prop {list} coords - coordinates around which to include data
@@ -197,7 +193,7 @@
  * @prop {ColorSpec} color - solid color
  * @prop {number} alpha - transparency
  * @prop {boolean} wireframe - draw as wireframe, not surface
- * @prop {number} linewidth - width of line for wireframe rendering
+ * @prop {number} linewidth - width of line for wireframe rendering **No longer supported by most browsers**
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click 
  */
