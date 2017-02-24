@@ -164,6 +164,7 @@ document.documentElement.innerHTML = '';
 }
 
 function runTest(i){
+	try{
 	console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
 	var before=Date.now();
 	var key=keys[i];
@@ -198,6 +199,11 @@ function runTest(i){
 			listElement.appendChild(anchor);
 			anchor.innerHTML=key;
 			par.innerHTML="   "+i+"/"+keys.length;
+
+			resemble.outputSettings({
+  				useCrossOrigin: false
+			});
+
     		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").onComplete(function(data){
     			differ=data.rawMisMatchPercentage;//(100-blankDiff);
     			percentage.innerHTML=differ;
@@ -235,6 +241,10 @@ function runTest(i){
 		});
 		
 	});
+
+}catch(e){
+	console.log(e);
+}
 		
 }    
  
