@@ -596,6 +596,8 @@ $3Dmol.GLShape = (function() {
             shape.color = stylespec.color || new $3Dmol.Color();
             if(! (stylespec.color instanceof $3Dmol.Color))
                 shape.color = $3Dmol.CC.color(stylespec.color);
+        } else {
+            shape.color = $3Dmol.CC.color(0);
         }
         shape.wireframe = stylespec.wireframe ? true : false;
         //opacity is the preferred nomenclature, support alpha for backwards compat
@@ -617,7 +619,7 @@ $3Dmol.GLShape = (function() {
         shape.hover_callback = typeof (stylespec.hover_callback) === "function" ? stylespec.hover_callback
                 : null;
 
-	shape.unhover_callback = typeof (stylespec.unhover_callback) === "function" ? stylespec.unhover_callback
+        shape.unhover_callback = typeof (stylespec.unhover_callback) === "function" ? stylespec.unhover_callback
                 : null;
 
         shape.hidden = stylespec.hidden;
