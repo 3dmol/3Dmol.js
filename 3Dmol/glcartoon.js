@@ -41,8 +41,7 @@ var $3Dmol = $3Dmol || {};
  *            group
  * @param {AtomSpec}
  *            atomlist
- * @param {$3Dmol.Gradient}
- *            gradientscheme
+
  */
 $3Dmol.drawCartoon = (function() {
 
@@ -893,7 +892,7 @@ $3Dmol.drawCartoon = (function() {
     var pyrResns = { "DT": true, "DC":true, "U":true, "C":true, "T":true };
     var naResns = { "DA":true, "DG":true, "A":true, "G":true, "DT": true, "DC":true, "U":true, "C":true, "T":true };
     
-    var drawCartoon = function(group, atomList, gradientScheme, fill,
+    var drawCartoon = function(group, atomList, gradientrange, fill,
             doNotSmoothen, num, div) {
         num = num || defaultNum;
         div = div || defaultDiv;
@@ -907,6 +906,26 @@ $3Dmol.drawCartoon = (function() {
         var points = [];
         var opacity = 1;
         var outline = false;
+        
+        var gradients = {};
+        for(var g in $3Dmol.Gradient.builtinGradients) {
+            if($3Dmol.Gradient.builtinGradients.hasOwnProperty(g)) {
+                gradients[g] = new $3Dmol.Gradient.builtinGradients[g](gradientrange[0],gradientrange[1]);
+            }
+        }
+        
+        var cartoonColor = function(next, cartoon) { //atom and cartoon style object
+            if (gradientrange && cartoon.color === 'spectrum') {
+                if(cartoon.colorscheme in gradients) {
+                    return gradients[cartoon.colorscheme].valueToHex(next.resi);
+                } else {
+                    return gradients['sinebow'].valueToHex(next.resi);
+                }
+            }
+            else {
+                return $3Dmol.getColorFromStyle(next, cartoon).getHex();
+            }
+        }
 
         for (var i = 0; i < num; i++)
             points[i] = [];
@@ -1026,10 +1045,7 @@ $3Dmol.drawCartoon = (function() {
                 else if (next.elem === 'C' && next.atom === 'CA' || inNucleicAcid
                         && next.atom === "P") {
                     // determine cylinder color
-                    if (gradientScheme && cartoon.color === 'spectrum')
-                        nextColor = gradientScheme.valueToHex(next.resi,gradientScheme.range());
-                    else
-                        nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
+                    nextColor = cartoonColor(next, cartoon);                    
 
                     // determine cylinder thickness
                     if ($.isNumeric(cartoon.thickness))
@@ -1152,12 +1168,7 @@ $3Dmol.drawCartoon = (function() {
 
                         // determine color and thickness of the next strand
                         // segment
-                        if (gradientScheme && cartoon.color === 'spectrum')
-                            nextColor = gradientScheme.valueToHex(next.resi,
-                                    gradientScheme.range());
-                        else
-                            nextColor = $3Dmol.getColorFromStyle(next, cartoon)
-                                    .getHex();
+                        nextColor = cartoonColor(next, cartoon); 
                         colors.push(nextColor);
                         if ($.isNumeric(cartoon.thickness))
                             thickness = cartoon.thickness;
@@ -1370,9 +1381,9 @@ $3Dmol.drawCartoon = (function() {
         return addArrowPoints;
     };
 
-    var defaultDrawCartoon = function(group, atomList, gradientScheme, quality) {
+    var defaultDrawCartoon = function(group, atomList, gradientrange, quality) {
         quality = parseInt(parseFloat(quality) * 5) || 5;
-        drawCartoon(group, atomList, gradientScheme, true,
+        drawCartoon(group, atomList, gradientrange, true,
                 false, quality, quality);
     }
 

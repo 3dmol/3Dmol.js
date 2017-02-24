@@ -1065,13 +1065,7 @@ $3Dmol.GLModel = (function() {
             }
             // create cartoon if needed - this is a whole model analysis
             if (cartoonAtoms.length > 0) {
-                var gradientscheme = null;
-                //TODO: Should have an option to choose gradient type
-                if (range[0] < range[1])
-                    gradientscheme = new $3Dmol.Gradient.Sinebow(range[1],range[0]); //do red to purple to match pymol/jmol
-
-                $3Dmol.drawCartoon(ret, cartoonAtoms, gradientscheme);
-
+                $3Dmol.drawCartoon(ret, cartoonAtoms, range);
             }
 
             // add sphere geometry
