@@ -444,9 +444,7 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [hoverDuration] - an optional parameter that denotes
          *            the duration of the hover delay (in milliseconds) before the hover action is called
-         * @example
          * 
-         * viewer.setHoverDuration(100);
 	 */
         this.setHoverDuration = function(duration) {
             hoverDuration = duration;
@@ -975,7 +973,7 @@ $3Dmol.GLViewer = (function() {
             //console.log("render time: " + (time2 - time1));
             if(typeof callback ==='function'){
                 callback();
-                console.log("render time: " + (time2 - time1));
+               // console.log("render time: " + (time2 - time1));
             }
             return this;
         };
@@ -2267,11 +2265,6 @@ $3Dmol.GLViewer = (function() {
          * @param {Object} options - can specify interval (speed of animation), loop (direction
          * of looping, 'backward', 'forward' or 'backAndForth') and reps (numer of repetitions, 0 indicates infinite loop)
          *      
-         @example
-         var element=$('#gldiv');
-         var myviewer = $3Dmol.createViewer(element);
-            var m = myviewer.addModel();
-            myviewer.render();
          */
          
         this.animate = function(options) {

@@ -1323,16 +1323,14 @@ $3Dmol.GLModel = (function() {
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
          * 
          *@example
-         var element=$('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
-            var data = $("#test").val();
-            viewer.setBackgroundColor(0xffffff);    
-            var m = viewer.addModel(data, "xyz");
-            m.setStyle({},{stick:{}});
-            m.vibrate(10, 1);
+
+          $3Dmol.download("pdb:4UAA",viewer,{},function(){  
+            viewer.setStyle({},{stick:{}});
+            viewer.vibrate(10, 1);
             viewer.animate({loop: "backAndForth"});
             viewer.zoomTo();
-            viewer.render();
+                  viewer.render();
+              });            
          */
         this.vibrate = function(numFrames, amplitude) {
             var amplitude = amplitude || 1;
@@ -2077,7 +2075,7 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
-         * @function $3Dmol.GLModel.setColorByFunction
+         * @function $3Dmol.GLModel#setColorByFunction
          * @deprecated use setStyle and colorfunc attribute
          * @param {type} sel - selection object
          * @param {type} func - function to be used to set the color
@@ -2330,8 +2328,7 @@ $3Dmol.GLModel = (function() {
         * @function $3Dmol.GLModel#addAtomSpecs
         * @param {Array} customAtomSpecs - array of strings that can be used as atomSelectionSpecs
         * this is to prevent the 'Unknown Selector x' message on the console for the strings passed
-        * @example
-        * model.addAtomSpecs(['priority1','priority2','ignore']);
+        * 
         */
 
         this.addAtomSpecs = function(customAtomSpecs) {

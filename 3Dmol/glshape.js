@@ -1064,7 +1064,6 @@ $3Dmol.GLShape = (function() {
             var len2 = total.distanceTo(maxv);
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
-            console.log(verts.length);
             if(typeof callback =="function")
                 callback();
           }

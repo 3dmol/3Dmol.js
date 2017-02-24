@@ -96,7 +96,7 @@ $.ajaxTransport(
                });
 
     
-/**
+/**@function $3Dmol#createViewer
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
@@ -142,14 +142,15 @@ $3Dmol.viewers = {};
 
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * 
+ * @function $3Dmol#download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
  * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
  * @param {Object} options - Specify additional options
  *                           format: file format to download, if multiple are available, default format is pdb
  *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
  * @param {Function} callback - Function to call with model as argument after data is loaded.
-
+  
+ * @return {$3Dmol.GLModel} GLModel
  * @example
  viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
@@ -157,7 +158,6 @@ $3Dmol.viewers = {};
        viewer.zoomTo();
        viewer.render(callback);
     });
- * @return {$3Dmol.GLModel} GLModel
  */ 
 $3Dmol.download = function(query, viewer, options, callback) {
     var baseURL = '';

@@ -164,7 +164,7 @@ document.documentElement.innerHTML = '';
 }
 
 function runTest(i){
-
+	console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
 	var before=Date.now();
 	var key=keys[i];
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
@@ -215,7 +215,6 @@ function runTest(i){
 				diff.ignoreAntialiasing();
     		//});
     		//df.ignoreAntialiasing();
-    		console.log(differ);
     		tableRow.getElementsByClassName("label")[0].appendChild(percentage);
 			//remove possible div
 			$(".viewer_3Dmoljs").remove();
