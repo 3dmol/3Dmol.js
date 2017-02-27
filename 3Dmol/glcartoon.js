@@ -56,11 +56,10 @@ $3Dmol.drawCartoon = (function() {
     var defaultThickness = 0.4;
 
     // helper functions
-    //fakeobject.callFunction();
-
     // Catmull-Rom subdivision
     var subdivide = function(_points, DIV) { // points as Vector3
         var ret = [];
+
         var points = _points;
         points = []; // Smoothing test
         points.push(_points[0]);

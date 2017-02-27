@@ -179,7 +179,7 @@ if __name__ == '__main__':
     
         for file in test.files:
             for example in file.examples:
-                f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){console.log(err);callback();}},\n")
+                f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){console.log(err);var li=document.createElement('li');li.innerHTML=name+' '+err;document.getElementById('summary_scroll').appendChild(li);callback();}},\n")
         f.write("};")
 
 

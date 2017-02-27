@@ -164,14 +164,16 @@ document.documentElement.innerHTML = '';
 }
 
 function runTest(i){
-	try{
 	console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
 	var before=Date.now();
 	var key=keys[i];
+	
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
 	var afterGlobals;
-    
+
+	try{
 	system[key](viewer,function(){
+  console.log("try");
 		waitfor(viewer.surfacesFinished , true , 100 , 0 , "" , function(){
 			var after=Date.now();
 			//gets the canvas
@@ -235,6 +237,7 @@ function runTest(i){
 			if(i<keys.length-1 ){
 				//run the next test
 				i+=1;
+
 				runTest(i);
 			}
 
@@ -244,6 +247,8 @@ function runTest(i){
 
 }catch(e){
 	console.log(e);
+	console.log("caught");
+	runTest(++i);
 }
 		
 }    

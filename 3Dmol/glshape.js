@@ -788,6 +788,53 @@ $3Dmol.GLShape = (function() {
 
         };
 
+        this.addDashedCylinder = function(cylinderSpec){
+            console.log("addDashedCylinder");
+            cylinderSpec.start = cylinderSpec.start || {};
+            cylinderSpec.end = cylinderSpec.end || {};
+            cylinderSpec.dashLength=cylinderSpec.dashLength || .25;
+            cylinderSpec.gapLength=cylinderSpec.gapLength || .25;
+
+            var start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
+                    cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+            var end = new $3Dmol.Vector3(cylinderSpec.end.x,
+                    cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
+            if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
+
+            var radius = cylinderSpec.radius || 0.1;
+            var color = $3Dmol.CC.color(cylinderSpec.color);
+
+            var cylinderLength = Math.sqrt(Math.pow((start.x-end.x),2)+Math.pow((start.y-end.y),2)+Math.pow((start.z-end.z),2));
+
+            var count = cylinderLength/(cylinderSpec.gapLength+cylinderSpec.dashLength);
+
+            var new_start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
+                    cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+            var new_end = new $3Dmol.Vector3(cylinderSpec.end.x,
+                    cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
+
+            var gapVector = new $3Dmol.Vector3((end.x-start.x)/(cylinderLength/cylinderSpec.gapLength),(end.y-start.y)/(cylinderLength/cylinderSpec.gapLength),(end.z-start.z)/(cylinderLength/cylinderSpec.gapLength));
+            var dashVector = new $3Dmol.Vector3((end.x-start.x)/(cylinderLength/cylinderSpec.dashLength),(end.y-start.y)/(cylinderLength/cylinderSpec.dashLength),(end.z-start.z)/(cylinderLength/cylinderSpec.dashLength));
+
+            for(var place=0; place < count;place++){
+                new_end = new $3Dmol.Vector3(new_start.x+dashVector.x,new_start.y+dashVector.y,new_start.z+dashVector.z);
+
+                this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(new_start, new_end, radius));
+
+                $3Dmol.GLDraw.drawCylinder(geo, new_start, new_end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap); 
+
+                new_start = new $3Dmol.Vector3(new_end.x+gapVector.x,new_end.y+gapVector.y,new_end.z+gapVector.z);
+           
+            }
+            var centroid = new $3Dmol.Vector3();
+            components.push({
+                centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
+            });
+            var geoGroup = geo.updateGeoGroup(0);
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);
+        }
+
         /**
          * Creates a line shape
          * @function $3Dmol.GLShape#addLine         

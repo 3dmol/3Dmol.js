@@ -1948,11 +1948,15 @@ $3Dmol.GLViewer = (function() {
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
-            s.addCylinder(spec);
+            if(spec.dashed)
+                s.addDashedCylinder(spec);
+            else
+                s.addCylinder(spec);
             shapes.push(s);
 
             return s;
         };
+
 
         /**
          * Create and add line shape
@@ -2100,6 +2104,8 @@ $3Dmol.GLViewer = (function() {
         			
         	return s;
         }
+
+        
 
         /**
          * Add custom shape component from user supplied function

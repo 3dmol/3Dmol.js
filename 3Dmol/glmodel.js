@@ -77,7 +77,8 @@ $3Dmol.GLModel = (function() {
         "clickable", // Set this flag to true to enable click selection handling for this atom
         "callback", // Callback click handler function to be executed on this atom and its parent viewer
         "invert", // for selection, inverts the meaning of the selection
-        "reflectivity" //for describing the reflectivity of a model
+        "reflectivity", //for describing the reflectivity of a model
+        "altLoc"
     ];
 
     var validAtomSelectionSpecs = validAtomSpecs.concat([  // valid atom specs are ok too
