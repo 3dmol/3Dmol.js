@@ -58,10 +58,12 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
             if(val < hi) val = hi;
         }
         var middle = (hi+lo)/2;
-        if(typeof(range[2]) != "undefined")
+        if(range && typeof(range[2]) != "undefined")
             middle = range[2];
         else if(typeof(mid) != 'undefined')
             middle = mid; //allow user to specify midpoint
+        else
+            middle = (lo+hi)/2;
         var scale, color;
         
         //scale bottom from red to white
