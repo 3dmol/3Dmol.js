@@ -77,7 +77,8 @@ $3Dmol.GLModel = (function() {
         "clickable", // Set this flag to true to enable click selection handling for this atom
         "callback", // Callback click handler function to be executed on this atom and its parent viewer
         "invert", // for selection, inverts the meaning of the selection
-        "reflectivity" //for describing the reflectivity of a model
+        "reflectivity", //for describing the reflectivity of a model
+        "altLoc"
     ];
 
     var validAtomSelectionSpecs = validAtomSpecs.concat([  // valid atom specs are ok too
@@ -1317,16 +1318,14 @@ $3Dmol.GLModel = (function() {
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
          * 
          *@example
-         var element=$('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
-            var data = $("#test").val();
-            viewer.setBackgroundColor(0xffffff);    
-            var m = viewer.addModel(data, "xyz");
-            m.setStyle({},{stick:{}});
-            m.vibrate(10, 1);
+
+          $3Dmol.download("pdb:4UAA",viewer,{},function(){  
+            viewer.setStyle({},{stick:{}});
+            viewer.vibrate(10, 1);
             viewer.animate({loop: "backAndForth"});
             viewer.zoomTo();
-            viewer.render();
+                  viewer.render();
+              });            
          */
         this.vibrate = function(numFrames, amplitude) {
             var amplitude = amplitude || 1;
@@ -2071,7 +2070,7 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
-         * @function setColorByFunction
+         * @function $3Dmol.GLModel#setColorByFunction
          * @deprecated use setStyle and colorfunc attribute
          * @param {type} sel - selection object
          * @param {type} func - function to be used to set the color
@@ -2324,8 +2323,7 @@ $3Dmol.GLModel = (function() {
         * @function $3Dmol.GLModel#addAtomSpecs
         * @param {Array} customAtomSpecs - array of strings that can be used as atomSelectionSpecs
         * this is to prevent the 'Unknown Selector x' message on the console for the strings passed
-        * @example
-        * model.addAtomSpecs(['priority1','priority2','ignore']);
+        * 
         */
 
         this.addAtomSpecs = function(customAtomSpecs) {

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>3Dmol.js Viewer</title>
+<script src="../build/3Dmol-min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+<script src="viewer.js"></script>
+<link rel="stylesheet" href="viewer.css">
+<script>
+    (function(i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function() {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js',
+            'ga');
+
+    ga('create', 'UA-55629183-1', 'auto');
+    ga('send', 'pageview');
+</script>
+<script>
+    var glviewer = null;
+    //http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
+
+    //Process commands, in order, and run on viewer (array of strings split on '&')
+    var runcmds = function(cmds, viewer) {
+
+        var currentsel = {};
+
+        for (var i = 0; i < cmds.length; i++) {
+            var kv = cmds[i].split('=');
+            var cmdname = kv[0];
+            var cmdobj = $3Dmol.specStringToObject(kv[1]);
+
+            if (cmdname == 'select')
+                currentsel = cmdobj;
+            else if (cmdname == 'surface') {
+                viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel,
+                        currentsel);
+            } else if (cmdname == 'style') {
+                viewer.setStyle(currentsel, cmdobj);
+            } else if (cmdname == 'addstyle') {
+                viewer.addStyle(currentsel, cmdobj);
+            } else if (cmdname == 'labelres') {
+                viewer.addResLabels(currentsel, cmdobj);
+            } else if (cmdname == 'colorbyelement') {
+                if (typeof ($3Dmol.elementColors[cmdobj.colorscheme]) != "undefined")
+                    viewer.setColorByElement(currentsel,
+                            $3Dmol.elementColors[cmdobj.colorscheme]);
+            } else if (cmdname == 'colorbyproperty') {
+                if (typeof (cmdobj.prop) != "undefined"
+                        && typeof ($3Dmol.Gradient[cmdobj.scheme]) != "undefined") {
+                    viewer.setColorByProperty(currentsel, cmdobj.prop,
+                            new $3Dmol.Gradient[cmdobj.scheme]());
+                }
+            }
+
+        }
+
+    };
+    function run() {
+
+                        try {
+                            var url = window.location.search.substr(1);
+                            var cmds = url.split("&");
+                            var first = cmds.splice(0, 1)[0];
+                            var pos = first.indexOf('=');
+                            var src = first.substring(0, pos), data = first
+                                    .substring(pos + 1);
+                            var type = "pdb";
+
+                            glviewer = $3Dmol.createViewer("gldiv", {
+                                defaultcolors : $3Dmol.rasmolElementColors
+                            });
+                            glviewer.setBackgroundColor(0xffffff);
+
+                            if (src == 'pdb') {
+                                data = data.toUpperCase();
+                                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                                    alert("Wrong PDB ID");
+                                    return;
+                                }
+                                data = "http://files.rcsb.org/view/" + data
+                                        + ".pdb";
+                                type = "pdb";
+                            } if (src == 'cif') {
+                                data = data.toUpperCase();
+                                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                                    alert("Wrong PDB ID");
+                                    return;
+                                }
+                                data = "http://files.rcsb.org/view/" + data
+                                        + ".cif";
+                                type = "cif";
+                            } else if (src == 'cid') {
+                                type = "sdf";
+                                data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
+                                        + data + "/SDF?record_type=3d";
+                            } else if (src == 'mmtf') {
+                                data = data.toUpperCase();
+                                data = 'http://mmtf.rcsb.org/full/' + data + '.mmtf';
+                                type = 'mmtf';
+                            } else { //url
+                                //try to extract extension
+                                type = data.substr(data.lastIndexOf('.') + 1);
+                                if(type == 'gz') {
+                                    var base = data.substr(0,data.lastIndexOf('.'));
+                                    type = base.substr(base.lastIndexOf('.')) + '.gz';
+                                }
+                            }
+                            if (cmds[0] && cmds[0].indexOf('type=') == 0) {
+                                type = cmds[0].split('=')[1];
+                            }
+
+                            var start = new Date();
+
+                            if (/\.gz$/.test(data) || type == 'mmtf') { //binary data
+                                $.ajax({url:data, 
+                                    type: "GET",
+                                    dataType: "binary",
+                                    responseType: "arraybuffer",
+                                    processData: false,
+                                    success: function(ret, txt, response) {
+                                        console.log("mtf fetch " + (+new Date() - start) + "ms");
+                                        var time = new Date();
+                                        glviewer.addModel(ret, type);
+                                        runcmds(cmds, glviewer);
+                                        glviewer.render();
+                                        glviewer.zoomTo();
+                                        console.log("mtf load " + (+new Date() - time) + "ms");
+
+                                }}).fail(function() {
+                                    //if couldn't get url natively, go through ../echo server
+                                    $.ajax({ url:"../echo.cgi", 
+                                        data: { 'url' : data },
+                                        processData: false,
+                                        responseType: "arraybuffer",
+                                        dataType: "binary",
+                                        success: function(ret, txt, response) {
+
+                                        glviewer.addModel(ret, type);
+                                        runcmds(cmds, glviewer);
+                                        glviewer.render();
+                                        glviewer.zoomTo();
+                                    }})
+                                });
+                            } else {
+                                $.get(data, function(ret, txt, response) {
+                                    console.log("alt fetch " + (+new Date() - start) + "ms");
+                                    var time = new Date();
+                                    glviewer.addModel(ret, type);
+                                    runcmds(cmds, glviewer);
+                                    glviewer.render();
+                                    glviewer.zoomTo();
+                                    console.log("alt load " + (+new Date() - time) + "ms");
+
+                                }).fail(function() {
+                                    //if couldn't get url natively, go through ../echo server
+                                    $.post("../echo.cgi", {
+                                        'url' : data
+                                    }, function(ret, txt, response) {
+                                        if(src == 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret == "")) {
+                                            //really large files aren't available in pdb format
+                                            type = 'cif';
+                                            data = data.replace(/pdb$/,'cif');
+                                            $.post("../echo.cgi",{
+                                                'url' : data
+                                            }, function(ret, txt, response) {
+
+                                                glviewer.addModel(ret, type);
+                                                runcmds(cmds, glviewer);
+                                                glviewer.render();
+                                                glviewer.zoomTo();
+                                            })
+                                        } else {
+                                            glviewer.addModel(ret, type);
+                                            runcmds(cmds, glviewer);
+                                            glviewer.render();
+                                            glviewer.zoomTo();
+                                        }
+                                    });
+                                });
+                            }
+                        }
+
+                        catch (e) {
+                            console
+                                    .error("Could not instantiate viewer from supplied url: '"
+                                            + e + "'");
+                            window.location = "http://get.webgl.org";
+
+                        }
+                    }
+    
+
+$(document).ready(function(){
+    run();
+
+    $("#sidenav").resizable({
+            handles: 'e',
+            minWidth: 300,
+            maxWidth: 800,
+    });
+
+     $( "#selections" ).sortable({
+            revert: true
+        });
+    $( "#draggable" ).draggable({
+        connectToSortable: "#selections",
+        helper: "clone",
+        revert: "invalid",
+        start: function(event){
+             if(event.target.className!=="selection ui-sortable-handle"){
+            
+        }
+        }
+    });
+
+    $("#sidenav").click(function(event){
+
+        if(event.target.className==="selection ui-sortable-handle"){
+           //open up the sub navigation
+           console.log("passed");
+           event.target.getElementsByClassName('subSelection')[0].style.visibility="auto";
+        }
+    });
+});
+
+</script>
+<script type="text/javascript" src="viewer.js"></script>
+</head>
+<body>
+<span id="openbtn" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;right:0;margin-right:28px;" onclick="openNav();">&#9776;</span>
+	<div id="sidenav">
+  		<a href="javascript:void(0)" class="closebtn" style="" onclick="closeNav()">&#x2715;</a>
+		<ul id="selections">
+            <div id="buttons"><button href="javascript:void(0)" id="add_model" onclick="state.add_entry('Model');">M</button><button href="javascript:void(0)" id="add_model" onclick="state.add_entry('Selection');">S</button></div>
+
+        </ul>
+
+	</div>
+    <div id='gldiv' style="width: 100%; height: 100vh;"></div>
+</body>
+</html>

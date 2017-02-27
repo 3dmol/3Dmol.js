@@ -4,8 +4,9 @@
                data-element='moldata'
                data-backgroundcolor='0xffffff'
                data-style='stick'
-               data-callback='div_callback' ></div>
-
+               data-callback='div_callback' 
+               data-type="pdb"></div>
+				
                */
 
                /*

@@ -444,9 +444,7 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [hoverDuration] - an optional parameter that denotes
          *            the duration of the hover delay (in milliseconds) before the hover action is called
-         * @example
          * 
-         * viewer.setHoverDuration(100);
 	 */
         this.setHoverDuration = function(duration) {
             hoverDuration = duration;
@@ -975,7 +973,7 @@ $3Dmol.GLViewer = (function() {
             //console.log("render time: " + (time2 - time1));
             if(typeof callback ==='function'){
                 callback();
-                console.log("render time: " + (time2 - time1));
+               // console.log("render time: " + (time2 - time1));
             }
             return this;
         };
@@ -1950,11 +1948,15 @@ $3Dmol.GLViewer = (function() {
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
-            s.addCylinder(spec);
+            if(spec.dashed)
+                s.addDashedCylinder(spec);
+            else
+                s.addCylinder(spec);
             shapes.push(s);
 
             return s;
         };
+
 
         /**
          * Create and add line shape
@@ -2102,6 +2104,8 @@ $3Dmol.GLViewer = (function() {
         			
         	return s;
         }
+
+        
 
         /**
          * Add custom shape component from user supplied function
@@ -2267,11 +2271,6 @@ $3Dmol.GLViewer = (function() {
          * @param {Object} options - can specify interval (speed of animation), loop (direction
          * of looping, 'backward', 'forward' or 'backAndForth') and reps (numer of repetitions, 0 indicates infinite loop)
          *      
-         @example
-         var element=$('#gldiv');
-         var myviewer = $3Dmol.createViewer(element);
-            var m = myviewer.addModel();
-            myviewer.render();
          */
          
         this.animate = function(options) {

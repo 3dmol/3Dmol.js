@@ -8,7 +8,8 @@
                data-style='cartoon'
                data-select1="hetflag:true"
                data-style1="sphere:colorscheme=greenCarbon"
-			   data-callback="div_callback"></div>
+			   data-callback="div_callback"
+                  data-type="pdb"></div>
                */
 
                /*

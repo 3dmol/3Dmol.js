@@ -1,0 +1,100 @@
+#sidenav{
+    height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    right: 0;
+    background-color:#1C1F24; /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    border-style: solid;
+    border-color: black;
+    padding:0px;
+    border-bottom-style: solid;
+    border-bottom-width: 400px;
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+body{
+    padding:0px;
+    margin:0px;
+    color:black;
+}
+
+.closebtn {
+    position: fixed;
+    top: 20;
+    font-size: 18px !important;
+    color:white;
+    margin-left:10px;
+     
+}
+#openbtn{
+    color:black;
+}
+
+#selections{
+    height:90%;
+}
+
+ul{
+    list-style: none;
+    margin:0px;
+    padding:0px;
+    padding-top:2px;
+    margin-top: 24px;
+    background-color:#586073;
+    text-align:center;
+}
+
+
+div{
+    padding:0px;
+}
+
+#add_model{
+    font-size: 20px;
+    font-weight:bold;
+    color:white;
+    height:25px;
+    text-decoration:none;
+    cursor: pointer;
+    border: none;
+    background-color: #1C1F24;
+    width:30px;
+}
+
+#add_model:hover{
+    background-color: #373e48;
+}
+
+.entry{
+	margin-top:5px;
+    font-size: 24px;
+    padding:8px;
+    font-weight:bold;
+    color:white;
+    height:25px;
+    text-decoration:none;
+    cursor: pointer;
+    border: none;
+    width:100%;
+    background-color: #1C1F24;
+}
+.entry input{
+	padding:4px;
+	top:0px;
+}
+
+#buttons{
+	background-color: #1C1F24;
+}
+
+.label{
+	display:inline;
+	float:left;
+	margin:0px;
+}
+
+body{
+	font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+}

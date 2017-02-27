@@ -8,7 +8,8 @@
                data-backgroundcolor='0xffffff'
                data-select1='chain:A' data-style1='cartoon:style=trace' data-surface1='opacity:.7;color:red'
                data-select2='chain:B' data-style2='cartoon:thickness=0.1'
-               data-callback="div_callback"></div>
+               data-callback="div_callback"
+               data-type="pdb"></div>
 
 */
 

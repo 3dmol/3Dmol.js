@@ -164,13 +164,16 @@ document.documentElement.innerHTML = '';
 }
 
 function runTest(i){
-
+	console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
 	var before=Date.now();
 	var key=keys[i];
+	
 	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
 	var afterGlobals;
-    
+
+	try{
 	system[key](viewer,function(){
+  console.log("try");
 		waitfor(viewer.surfacesFinished , true , 100 , 0 , "" , function(){
 			var after=Date.now();
 			//gets the canvas
@@ -198,6 +201,11 @@ function runTest(i){
 			listElement.appendChild(anchor);
 			anchor.innerHTML=key;
 			par.innerHTML="   "+i+"/"+keys.length;
+
+			resemble.outputSettings({
+  				useCrossOrigin: false
+			});
+
     		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").onComplete(function(data){
     			differ=data.rawMisMatchPercentage;//(100-blankDiff);
     			percentage.innerHTML=differ;
@@ -215,7 +223,6 @@ function runTest(i){
 				diff.ignoreAntialiasing();
     		//});
     		//df.ignoreAntialiasing();
-    		console.log(differ);
     		tableRow.getElementsByClassName("label")[0].appendChild(percentage);
 			//remove possible div
 			$(".viewer_3Dmoljs").remove();
@@ -230,12 +237,19 @@ function runTest(i){
 			if(i<keys.length-1 ){
 				//run the next test
 				i+=1;
+
 				runTest(i);
 			}
 
 		});
 		
 	});
+
+}catch(e){
+	console.log(e);
+	console.log("caught");
+	runTest(++i);
+}
 		
 }    
  

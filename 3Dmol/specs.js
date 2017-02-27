@@ -82,7 +82,6 @@
  * @prop {boolean} byres - if set, expands the selection to include all atoms of any residue that has any atom selected
  * @prop {number} expand - expands the selection to include all atoms within a given distance from the selection
  * @prop {WithinSelectionSpec} within - intersects the selection with the set of atoms within a given distance from another selection
- 
  * @example
  * $3Dmol.download("pdb:2EJ0",viewer,{},function(){
                   
@@ -94,7 +93,7 @@
                   viewer.setStyle({chain:'B'},{cross:{hidden:false,
                                                       colorscheme:'greenCarbon'}});
                   viewer.setStyle({chain:'C'},{cross:{hidden:false,
-                                                      radius:0.5}});
+                                                      radius:.5}});
                   viewer.setStyle({chain:'D'},{cross:{hidden:false}});
                   viewer.setStyle({chain:'E'},{cross:{hidden:false,
                                                       color:'black'}});
