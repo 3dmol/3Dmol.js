@@ -10349,7 +10349,1902 @@ if ( typeof noGlobal === strundefined ) {
 return jQuery;
 
 }));
-!function(r,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t(r.MMTF=r.MMTF||{})}(this,function(r){"use strict";function t(r){function t(r){for(var t={},e=0;r>e;e++){var n=a();t[n]=a()}return t}function e(t){var e=r.subarray(i,i+t);return i+=t,e}function n(t){var e=r.subarray(i,i+t);i+=t;var n=65535;if(t>n){for(var o=[],a=0;a<e.length;a+=n)o.push(String.fromCharCode.apply(null,e.subarray(a,a+n)));return o.join("")}return String.fromCharCode.apply(null,e)}function o(r){for(var t=new Array(r),e=0;r>e;e++)t[e]=a();return t}function a(){var a,s,c,d=r[i];if(0===(128&d))return i++,d;if(128===(240&d))return s=15&d,i++,t(s);if(144===(240&d))return s=15&d,i++,o(s);if(160===(224&d))return s=31&d,i++,n(s);if(224===(224&d))return a=u.getInt8(i),i++,a;switch(d){case 192:return i++,null;case 194:return i++,!1;case 195:return i++,!0;case 196:return s=u.getUint8(i+1),i+=2,e(s);case 197:return s=u.getUint16(i+1),i+=3,e(s);case 198:return s=u.getUint32(i+1),i+=5,e(s);case 199:return s=u.getUint8(i+1),c=u.getUint8(i+2),i+=3,[c,e(s)];case 200:return s=u.getUint16(i+1),c=u.getUint8(i+3),i+=4,[c,e(s)];case 201:return s=u.getUint32(i+1),c=u.getUint8(i+5),i+=6,[c,e(s)];case 202:return a=u.getFloat32(i+1),i+=5,a;case 203:return a=u.getFloat64(i+1),i+=9,a;case 204:return a=r[i+1],i+=2,a;case 205:return a=u.getUint16(i+1),i+=3,a;case 206:return a=u.getUint32(i+1),i+=5,a;case 207:return i+=9,0;case 208:return a=u.getInt8(i+1),i+=2,a;case 209:return a=u.getInt16(i+1),i+=3,a;case 210:return a=u.getInt32(i+1),i+=5,a;case 211:return i+=9,0;case 212:return c=u.getUint8(i+1),i+=2,[c,e(1)];case 213:return c=u.getUint8(i+1),i+=2,[c,e(2)];case 214:return c=u.getUint8(i+1),i+=2,[c,e(4)];case 215:return c=u.getUint8(i+1),i+=2,[c,e(8)];case 216:return c=u.getUint8(i+1),i+=2,[c,e(16)];case 217:return s=u.getUint8(i+1),i+=2,n(s);case 218:return s=u.getUint16(i+1),i+=3,n(s);case 219:return s=u.getUint32(i+1),i+=5,n(s);case 220:return s=u.getUint16(i+1),i+=3,o(s);case 221:return s=u.getUint32(i+1),i+=5,o(s);case 222:return s=u.getUint16(i+1),i+=3,t(s);case 223:return s=u.getUint32(i+1),i+=5,t(s)}throw new Error("Unknown type 0x"+d.toString(16))}var i=0,u=new DataView(r.buffer);return a()}function e(r){return new Uint8Array(r.buffer,r.byteOffset,r.byteLength)}function n(r){return new Int8Array(r.buffer,r.byteOffset,r.byteLength)}function o(r,t){var e,n,o,a=(r.byteOffset,r.byteLength);for(t||(t=new Int16Array(a/2)),e=0,n=0,o=a/2;o>e;++e,n+=2)t[e]=r[n]<<8^r[n+1]<<0;return t}function a(r,t){var e,n,o,a=(r.byteOffset,r.byteLength);for(t||(t=new Int32Array(a/4)),e=0,n=0,o=a/4;o>e;++e,n+=4)t[e]=r[n]<<24^r[n+1]<<16^r[n+2]<<8^r[n+3]<<0;return t}function i(r){return new Int32Array(r.buffer,r.byteOffset,r.byteLength/4)}function u(r,t,e){var n=r.length,o=1/t;e||(e=new Float32Array(n));for(var a=0;n>a;++a)e[a]=r[a]*o;return e}function s(r,t){var e,n;if(!t){var o=0;for(e=0,n=r.length;n>e;e+=2)o+=r[e+1];t=new r.constructor(o)}var a=0;for(e=0,n=r.length;n>e;e+=2)for(var i=r[e],u=r[e+1],s=0;u>s;++s)t[a]=i,a+=1;return t}function c(r){for(var t=1,e=r.length;e>t;++t)r[t]+=r[t-1];return r}function d(r,t,e){var n=r.length/2+t.length;e||(e=new Int32Array(n));for(var o=0,a=0,i=0,u=r.length;u>i;i+=2){var s=r[i],c=r[i+1];e[o]=s,0!==i&&(e[o]+=e[o-1]),o+=1;for(var d=0;c>d;++d)e[o]=e[o-1]+t[a],o+=1,a+=1}return e}function f(r,t,e,n){var s=r.length/4/2+t.length/2;n||(n=new Float32Array(s));var c=i(n),f=d(a(r),o(t),c);return u(f,e,n)}function g(r,t,e){var n=e?i(e):void 0,o=s(a(r),n);return u(o,t,e)}function l(r,t){function o(r){return i?-1===i.indexOf(r):!0}t=t||{};var i=t.ignoreFields,u=(r.numBonds||0,r.numAtoms||0),d=r.groupTypeList.length/4,l=r.chainIdList.length/4,m=r.chainsPerModel.length,L={numGroups:d,numChains:l,numModels:m};["mmtfVersion","mmtfProducer","unitCell","spaceGroup","structureId","title","depositionDate","releaseDate","experimentalMethods","resolution","rFree","rWork","bioAssemblyList","entityList","groupList","numBonds","numAtoms","groupsPerChain","chainsPerModel"].forEach(function(t){void 0!==r[t]&&(L[t]=r[t])});var h="bondAtomList";r[h]&&o(h)&&(L[h]=a(r[h]));var y="bondOrderList";r[y]&&o(y)&&(L[y]=e(r[y])),L.xCoordList=f(r.xCoordBig,r.xCoordSmall,1e3),L.yCoordList=f(r.yCoordBig,r.yCoordSmall,1e3),L.zCoordList=f(r.zCoordBig,r.zCoordSmall,1e3);var p="bFactorList",v="bFactorBig",C="bFactorSmall";r[v]&&r[C]&&o(p)&&(L[p]=f(r[v],r[C],100));var I="atomIdList";r[I]&&o(I)&&(L[I]=c(s(a(r[I]))));var b="altLocList";r[b]&&o(b)&&(L[b]=s(a(r[b]),new Uint8Array(u)));var U="occupancyList";r[U]&&o(U)&&(L[U]=g(r[U],100)),L.groupIdList=c(s(a(r.groupIdList))),L.groupTypeList=a(r.groupTypeList);var x="secStructList";r[x]&&o(x)&&(L[x]=n(r[x]));var A="insCodeList";r[A]&&o(A)&&(L[A]=s(a(r[A]),new Uint8Array(d)));var w="sequenceIndexList";r[w]&&o(w)&&(L[w]=c(s(a(r[w])))),L.chainIdList=e(r.chainIdList);var F="chainNameList";return r[F]&&o(F)&&(L[F]=e(r[F])),L}function m(r){return String.fromCharCode.apply(null,r).replace(/\0/g,"")}function L(r,t){var e,n,o,a,i=t.onModel,u=t.onChain,s=t.onGroup,c=t.onAtom,d=t.onBond,f=0,g=0,l=0,L=0,h=r.chainNameList,y=r.secStructList,p=r.insCodeList,v=r.sequenceIndexList,C=r.bFactorList,I=r.altLocList,b=r.occupancyList,U=r.bondAtomList,x=r.bondOrderList;if(r.chainsPerModel.forEach(function(t){for(i&&i({chainCount:t,modelIndex:f}),e=0;t>e;++e){var U=r.groupsPerChain[g];if(u){var x=m(r.chainIdList.subarray(4*g,4*g+4)),A=null;h&&(A=m(h.subarray(4*g,4*g+4))),u({groupCount:U,chainIndex:g,modelIndex:f,chainId:x,chainName:A})}for(n=0;U>n;++n){var w=r.groupList[r.groupTypeList[l]],F=w.atomNameList.length;if(s){var S=null;y&&(S=y[l]);var O=null;r.insCodeList&&(O=String.fromCharCode(p[l]));var M=null;v&&(M=v[l]),s({atomCount:F,groupIndex:l,chainIndex:g,modelIndex:f,groupId:r.groupIdList[l],groupType:r.groupTypeList[l],groupName:w.groupName,singleLetterCode:w.singleLetterCode,chemCompType:w.chemCompType,secStruct:S,insCode:O,sequenceIndex:M})}if(d){var T=w.bondAtomList;for(o=0,a=w.bondOrderList.length;a>o;++o)d({atomIndex1:L+T[2*o],atomIndex2:L+T[2*o+1],bondOrder:w.bondOrderList[o]})}for(o=0;F>o;++o){if(c){var B=null;C&&(B=C[L]);var N=null;I&&(N=String.fromCharCode(I[L]));var P=null;b&&(P=b[L]),c({atomIndex:L,groupIndex:l,chainIndex:g,modelIndex:f,atomId:r.atomIdList[L],element:w.elementList[o],atomName:w.atomNameList[o],atomCharge:w.atomChargeList[o],xCoord:r.xCoordList[L],yCoord:r.yCoordList[L],zCoord:r.zCoordList[L],bFactor:B,altLoc:N,occupancy:P})}L+=1}l+=1}g+=1}f+=1}),d&&U)for(o=0,a=U.length;a>o;o+=2)d({atomIndex1:U[o],atomIndex2:U[o+1],bondOrder:x?x[o/2]:null})}function h(r,e){r instanceof ArrayBuffer&&(r=new Uint8Array(r));var n;return n=r instanceof Uint8Array?t(r):r,l(n,e)}var y=L;r.decode=h,r.traverse=y});/* pako 0.2.7 nodeca/pako */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pako = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global, factory) {
+  (factory((global['MMTF'] = global.MMTF || {})));
+}(this, function (exports) { 'use strict';
+
+  /**
+   * @file utf8-utils
+   * @private
+   * @author Alexander Rose <alexander.rose@weirdbyte.de>
+   * mostly copied from https://github.com/creationix/msgpack-js-browser
+   * by Tim Caswell <tim@creationix.com>, MIT License, Copyright (c) 2013
+   */
+
+
+  // Encode string as utf8 into dataview at offset
+  function utf8Write(view, offset, string) {
+    var byteLength = view.byteLength;
+    for(var i = 0, l = string.length; i < l; i++) {
+      var codePoint = string.charCodeAt(i);
+
+      // One byte of UTF-8
+      if (codePoint < 0x80) {
+        view.setUint8(offset++, codePoint >>> 0 & 0x7f | 0x00);
+        continue;
+      }
+
+      // Two bytes of UTF-8
+      if (codePoint < 0x800) {
+        view.setUint8(offset++, codePoint >>> 6 & 0x1f | 0xc0);
+        view.setUint8(offset++, codePoint >>> 0 & 0x3f | 0x80);
+        continue;
+      }
+
+      // Three bytes of UTF-8.
+      if (codePoint < 0x10000) {
+        view.setUint8(offset++, codePoint >>> 12 & 0x0f | 0xe0);
+        view.setUint8(offset++, codePoint >>> 6  & 0x3f | 0x80);
+        view.setUint8(offset++, codePoint >>> 0  & 0x3f | 0x80);
+        continue;
+      }
+
+      // Four bytes of UTF-8
+      if (codePoint < 0x110000) {
+        view.setUint8(offset++, codePoint >>> 18 & 0x07 | 0xf0);
+        view.setUint8(offset++, codePoint >>> 12 & 0x3f | 0x80);
+        view.setUint8(offset++, codePoint >>> 6  & 0x3f | 0x80);
+        view.setUint8(offset++, codePoint >>> 0  & 0x3f | 0x80);
+        continue;
+      }
+      throw new Error("bad codepoint " + codePoint);
+    }
+  }
+
+  function utf8ByteCount(string) {
+    var count = 0;
+    for(var i = 0, l = string.length; i < l; i++) {
+      var codePoint = string.charCodeAt(i);
+      if (codePoint < 0x80) {
+        count += 1;
+        continue;
+      }
+      if (codePoint < 0x800) {
+        count += 2;
+        continue;
+      }
+      if (codePoint < 0x10000) {
+        count += 3;
+        continue;
+      }
+      if (codePoint < 0x110000) {
+        count += 4;
+        continue;
+      }
+      throw new Error("bad codepoint " + codePoint);
+    }
+    return count;
+  }
+
+  /**
+   * encode data value (recursively) into binary encoded MessagePack v5 (http://msgpack.org/)
+   * @param  {Object|Array|String|Number|Boolean|null} value  [description]
+   * @param  {DataView} view   [description]
+   * @param  {Integer} offset [description]
+   * @return {Integer} number of bytes written into view
+   */
+  function encode$1(value, view, offset) {
+    var type = typeof value;
+
+    // Strings Bytes
+    if (type === "string") {
+      var length = utf8ByteCount(value);
+      // fix str
+      if (length < 0x20) {
+        view.setUint8(offset, length | 0xa0);
+        utf8Write(view, offset + 1, value);
+        return 1 + length;
+      }
+      // str 8
+      if (length < 0x100) {
+        view.setUint8(offset, 0xd9);
+        view.setUint8(offset + 1, length);
+        utf8Write(view, offset + 2, value);
+        return 2 + length;
+      }
+      // str 16
+      if (length < 0x10000) {
+        view.setUint8(offset, 0xda);
+        view.setUint16(offset + 1, length);
+        utf8Write(view, offset + 3, value);
+        return 3 + length;
+      }
+      // str 32
+      if (length < 0x100000000) {
+        view.setUint8(offset, 0xdb);
+        view.setUint32(offset + 1, length);
+        utf8Write(view, offset + 5, value);
+        return 5 + length;
+      }
+    }
+
+    if (value instanceof Uint8Array) {
+      var length = value.byteLength;
+      var bytes = new Uint8Array(view.buffer);
+      // bin 8
+      if (length < 0x100) {
+        view.setUint8(offset, 0xc4);
+        view.setUint8(offset + 1, length);
+        bytes.set(value, offset + 2);
+        return 2 + length;
+      }
+      // bin 16
+      if (length < 0x10000) {
+        view.setUint8(offset, 0xc5);
+        view.setUint16(offset + 1, length);
+        bytes.set(value, offset + 3);
+        return 3 + length;
+      }
+      // bin 32
+      if (length < 0x100000000) {
+        view.setUint8(offset, 0xc6);
+        view.setUint32(offset + 1, length);
+        bytes.set(value, offset + 5);
+        return 5 + length;
+      }
+    }
+
+    if (type === "number") {
+      if (!isFinite(value)) {
+          throw new Error("Number not finite: " + value);
+      }
+
+      // Floating point
+      if (Math.floor(value) !== value) {
+        view.setUint8(offset, 0xcb);
+        view.setFloat64(offset + 1, value);
+        return 9;
+      }
+
+      // Integers
+      if (value >=0) {
+        // positive fixnum
+        if (value < 0x80) {
+          view.setUint8(offset, value);
+          return 1;
+        }
+        // uint 8
+        if (value < 0x100) {
+          view.setUint8(offset, 0xcc);
+          view.setUint8(offset + 1, value);
+          return 2;
+        }
+        // uint 16
+        if (value < 0x10000) {
+          view.setUint8(offset, 0xcd);
+          view.setUint16(offset + 1, value);
+          return 3;
+        }
+        // uint 32
+        if (value < 0x100000000) {
+          view.setUint8(offset, 0xce);
+          view.setUint32(offset + 1, value);
+          return 5;
+        }
+        throw new Error("Number too big 0x" + value.toString(16));
+      }
+      // negative fixnum
+      if (value >= -0x20) {
+        view.setInt8(offset, value);
+        return 1;
+      }
+      // int 8
+      if (value >= -0x80) {
+        view.setUint8(offset, 0xd0);
+        view.setInt8(offset + 1, value);
+        return 2;
+      }
+      // int 16
+      if (value >= -0x8000) {
+        view.setUint8(offset, 0xd1);
+        view.setInt16(offset + 1, value);
+        return 3;
+      }
+      // int 32
+      if (value >= -0x80000000) {
+        view.setUint8(offset, 0xd2);
+        view.setInt32(offset + 1, value);
+        return 5;
+      }
+      throw new Error("Number too small -0x" + (-value).toString(16).substr(1));
+    }
+
+    // null
+    if (value === null) {
+      view.setUint8(offset, 0xc0);
+      return 1;
+    }
+
+    // Boolean
+    if (type === "boolean") {
+      view.setUint8(offset, value ? 0xc3 : 0xc2);
+      return 1;
+    }
+
+    // Container Types
+    if (type === "object") {
+      var length, size = 0;
+      var isArray = Array.isArray(value);
+
+      if (isArray) {
+        length = value.length;
+      }
+      else {
+        var keys = Object.keys(value);
+        length = keys.length;
+      }
+
+      var size;
+      if (length < 0x10) {
+        view.setUint8(offset, length | (isArray ? 0x90 : 0x80));
+        size = 1;
+      }
+      else if (length < 0x10000) {
+        view.setUint8(offset, isArray ? 0xdc : 0xde);
+        view.setUint16(offset + 1, length);
+        size = 3;
+      }
+      else if (length < 0x100000000) {
+        view.setUint8(offset, isArray ? 0xdd : 0xdf);
+        view.setUint32(offset + 1, length);
+        size = 5;
+      }
+
+      if (isArray) {
+        for (var i = 0; i < length; i++) {
+          size += encode$1(value[i], view, offset + size);
+        }
+      }
+      else {
+        for (var i = 0; i < length; i++) {
+          var key = keys[i];
+          size += encode$1(key, view, offset + size);
+          size += encode$1(value[key], view, offset + size);
+        }
+      }
+
+      return size;
+    }
+    throw new Error("Unknown type " + type);
+  }
+
+  function encodedSize(value) {
+    var type = typeof value;
+
+    // Raw Bytes
+    if (type === "string") {
+      var length = utf8ByteCount(value);
+      if (length < 0x20) {
+        return 1 + length;
+      }
+      if (length < 0x100) {
+        return 2 + length;
+      }
+      if (length < 0x10000) {
+        return 3 + length;
+      }
+      if (length < 0x100000000) {
+        return 5 + length;
+      }
+    }
+
+    if (value instanceof Uint8Array) {
+      var length = value.byteLength;
+      if (length < 0x100) {
+        return 2 + length;
+      }
+      if (length < 0x10000) {
+        return 3 + length;
+      }
+      if (length < 0x100000000) {
+        return 5 + length;
+      }
+    }
+
+    if (type === "number") {
+      // Floating Point
+      // double
+      if (Math.floor(value) !== value) return 9;
+
+      // Integers
+      if (value >=0) {
+        // positive fixnum
+        if (value < 0x80) return 1;
+        // uint 8
+        if (value < 0x100) return 2;
+        // uint 16
+        if (value < 0x10000) return 3;
+        // uint 32
+        if (value < 0x100000000) return 5;
+        throw new Error("Number too big 0x" + value.toString(16));
+      }
+      // negative fixnum
+      if (value >= -0x20) return 1;
+      // int 8
+      if (value >= -0x80) return 2;
+      // int 16
+      if (value >= -0x8000) return 3;
+      // int 32
+      if (value >= -0x80000000) return 5;
+      throw new Error("Number too small -0x" + value.toString(16).substr(1));
+    }
+
+    // Boolean, null
+    if (type === "boolean" || value === null) return 1;
+
+    // Container Types
+    if (type === "object") {
+      var length, size = 0;
+      if (Array.isArray(value)) {
+        length = value.length;
+        for (var i = 0; i < length; i++) {
+          size += encodedSize(value[i]);
+        }
+      }
+      else {
+        var keys = Object.keys(value);
+        length = keys.length;
+        for (var i = 0; i < length; i++) {
+          var key = keys[i];
+          size += encodedSize(key) + encodedSize(value[key]);
+        }
+      }
+      if (length < 0x10) {
+        return 1 + size;
+      }
+      if (length < 0x10000) {
+        return 3 + size;
+      }
+      if (length < 0x100000000) {
+        return 5 + size;
+      }
+      throw new Error("Array or object too long 0x" + length.toString(16));
+    }
+    throw new Error("Unknown type " + type);
+  }
+
+  function encodeMsgpack(value) {
+    var buffer = new ArrayBuffer(encodedSize(value));
+    var view = new DataView(buffer);
+    encode$1(value, view, 0);
+    return new Uint8Array(buffer);
+  }
+
+  /**
+   * @file mmtf-constants
+   * @private
+   * @author Alexander Rose <alexander.rose@weirdbyte.de>
+   */
+
+
+  var PassThroughFields = [
+      "mmtfVersion", "mmtfProducer",
+      "unitCell", "spaceGroup", "structureId", "title",
+      "depositionDate", "releaseDate",
+      "experimentalMethods", "resolution", "rFree", "rWork",
+      "bioAssemblyList", "ncsOperatorList", "entityList", "groupList",
+      "numBonds", "numAtoms", "numGroups", "numChains", "numModels",
+      "groupsPerChain", "chainsPerModel",
+  ];
+
+  var EncodedFields = [
+  	// required
+      "xCoordList", "yCoordList", "zCoordList",
+      "groupIdList", "groupTypeList",
+      "chainIdList",
+      // optional
+      "bFactorList", "atomIdList", "altLocList", "occupancyList",
+      "secStructList", "insCodeList", "sequenceIndexList",
+      "chainNameList",
+      "bondAtomList", "bondOrderList"
+  ];
+
+  var AllFields = PassThroughFields.concat( EncodedFields );
+
+  /**
+   * @file mmtf-utils
+   * @private
+   * @author Alexander Rose <alexander.rose@weirdbyte.de>
+   */
+
+  /**
+   * mmtf utils module.
+   * @module MmtfUtils
+   */
+
+
+  function getView( ctor, typedArray, elemSize ){
+      return typedArray ? new ctor(
+          typedArray.buffer,
+          typedArray.byteOffset,
+          typedArray.byteLength / ( elemSize || 1 )
+      ) : undefined;
+  }
+
+  function getDataView( typedArray ){
+      return getView( DataView, typedArray );
+  }
+
+  /**
+   * get an Uint8Array view on the input array memory
+   * @static
+   * @param  {TypedArray} dataArray - input array
+   * @return {Uint8Array} new view on the input array memory
+   */
+  function getUint8View( typedArray ){
+      return getView( Uint8Array, typedArray );
+  }
+
+  /**
+   * get an Int8Array view on the input array memory
+   * @static
+   * @param  {TypedArray} dataArray - input array
+   * @return {Int8Array} new view on the input array memory
+   */
+  function getInt8View( typedArray ){
+      return getView( Int8Array, typedArray );
+  }
+
+  /**
+   * get an Int32Array view on the input array memory
+   * @static
+   * @param  {TypedArray} dataArray - input array
+   * @return {Int32Array} new view on the input array memory
+   */
+  function getInt32View( typedArray ){
+      return getView( Int32Array, typedArray, 4 );
+  }
+
+  function getFloat32View( typedArray ){
+      return getView( Float32Array, typedArray, 4 );
+  }
+
+
+  /**
+   * get an Int16Array copy of the the input array data
+   * @static
+   * @param  {TypedArray} view - input data in big endian format
+   * @param  {Int16Array} [dataArray] - pre-allocated output array
+   * @return {Int16Array} copy of the input array data
+   */
+  function decodeInt16( bytes, output ){
+      var n = bytes.length / 2;
+      if( !output ) output = new Int16Array( n );
+      for( var i = 0, i2 = 0; i < n; ++i, i2 += 2 ){
+          output[ i ] = bytes[ i2 ] << 8 ^ bytes[ i2 + 1 ] << 0;
+      }
+      return output;
+  }
+
+  /**
+   * make big endian buffer of an int16 array
+   * @static
+   * @param  {Array|TypedArray} array - array of int16 values
+   * @return {ArrayBuffer} big endian buffer
+   */
+  function encodeInt16( array, output ){
+      var n = array.length;
+      if( !output ) output = new Uint8Array( 2 * n );
+      var dv = getDataView( output );
+      for( var i = 0; i < n; ++i ){
+          dv.setInt16( 2 * i, array[ i ] );
+      }
+      return getUint8View( output );
+  }
+
+  /**
+   * get an Int32Array copy of the the input array data
+   * @static
+   * @param  {TypedArray} view - input data in big endian format
+   * @param  {Int32Array} [dataArray] - pre-allocated output array
+   * @return {Int32Array} copy of the input array data
+   */
+  function decodeInt32( bytes, output ){
+      var n = bytes.length / 4;
+      if( !output ) output = new Int32Array( n );
+      for( var i = 0, i4 = 0; i < n; ++i, i4 += 4 ){
+          output[ i ] = (
+              bytes[ i4     ] << 24 ^ bytes[ i4 + 1 ] << 16 ^
+              bytes[ i4 + 2 ] <<  8 ^ bytes[ i4 + 3 ] <<  0
+          );
+      }
+      return output;
+  }
+
+  /**
+   * make big endian buffer of an int32 array
+   * @static
+   * @param  {Array|TypedArray} array - array of int32 values
+   * @return {ArrayBuffer} big endian buffer
+   */
+  function encodeInt32( array, output ){
+      var n = array.length;
+      if( !output ) output = new Uint8Array( 4 * n );
+      var dv = getDataView( output );
+      for( var i = 0; i < n; ++i ){
+          dv.setInt32( 4 * i, array[ i ] );
+      }
+      return getUint8View( output );
+  }
+
+  function decodeFloat32( bytes, output ){
+      var n = bytes.length;
+      if( !output ) output = new Float32Array( n / 4 );
+      var dvOut = getDataView( output );
+      var dvIn = getDataView( bytes );
+      for( var i = 0, i4 = 0, il = n / 4; i < il; ++i, i4 += 4 ){
+          dvOut.setFloat32( i4, dvIn.getFloat32( i4 ), true );
+      }
+      return output;
+  }
+
+  /**
+   * decode integers into floats using given divisor
+   * example:
+   *     intArray: [ 12, 34, 543, 687, 2, 0, 4689 ]
+   *     divisor: 100
+   *     return: [ 0.12, 0.34, 5.43, 6.87, 0.02, 0.00, 46.89 ]
+   * @static
+   * @param  {TypedArray|Array} intArray - input array containing integers
+   * @param  {Number} divisor - number to devide the integers to obtain floats
+   * @param  {Float32Array} [dataArray] - pre-allocated output array
+   * @return {Float32Array} decoded array
+   */
+  function decodeInteger( intArray, divisor, output ){
+      var n = intArray.length;
+      var invDiv = 1/divisor;
+      if( !output ) output = new Float32Array( n );
+      for( var i = 0; i < n; ++i ){
+          // multiply by inverse of the divisor which is faster then division
+          output[ i ] = intArray[ i ] * invDiv;
+      }
+      return output;
+  }
+
+  function encodeInteger( floatArray, factor, output ){
+      var n = floatArray.length;
+      if( !output ) output = new Int32Array( n );
+      for( var i = 0; i < n; ++i ){
+          output[ i ] = Math.round( floatArray[ i ] * factor );
+      }
+      return output;
+  }
+
+
+
+  /**
+   * perform run-length decoding of input array
+   * example:
+   *     array: [ 0, 2, 3, 5 ]  // pairs of values and length of a run
+   *     return: [ 0, 0, 3, 3, 3, 3, 3 ]
+   * @static
+   * @param  {TypedArray|Array} array - run-length encoded input array
+   * @param  {TypedArray|Array} [dataArray] - pre-allocated output array
+   * @return {TypedArray|Array} decoded array
+   */
+  function decodeRun( array, output ){
+      var i, il;
+      if( !output ){
+          // calculate the length the decoded array will have
+          var fullLength = 0;
+          for( i = 0, il = array.length; i < il; i+=2 ){
+              fullLength += array[ i + 1 ];
+          }
+          // create a new array of the same type of the input array
+          output = new array.constructor( fullLength );
+      }
+      var dataOffset = 0;
+      for( i = 0, il = array.length; i < il; i+=2 ){
+          var value = array[ i ];  // value to be repeated
+          var length = array[ i + 1 ];  // number of repeats
+          for( var j = 0; j < length; ++j ){
+              output[ dataOffset ] = value;
+              ++dataOffset;
+          }
+      }
+      return output;
+  }
+
+  function encodeRun( array ){
+      if( array.length === 0 ) return new Int32Array();
+      var i, il;
+      // calculate output size
+      var fullLength = 2;
+      for( i = 1, il = array.length; i < il; ++i ){
+          if( array[ i - 1 ] !== array[ i ] ){
+              fullLength += 2;
+          }
+      }
+      var output = new Int32Array( fullLength );
+      var offset = 0;
+      var runLength = 1;
+      for( i = 1, il = array.length; i < il; ++i ){
+          if( array[ i - 1 ] !== array[ i ] ){
+              output[ offset ] = array[ i - 1 ];
+              output[ offset + 1 ] = runLength;
+              runLength = 1;
+              offset += 2;
+          }else{
+              ++runLength;
+          }
+      }
+      output[ offset ] = array[ array.length - 1 ];
+      output[ offset + 1 ] = runLength;
+      return output;
+  }
+
+
+
+  /**
+   * perform delta decoding of the input array
+   * by iterativly adding the ith element's value to the i+1th
+   * example:
+   *     dataArray: [ 0, 2, 1, 2, 1, 1, -4, -2, 9 ]
+   *     return: [ 0, 2, 3, 5, 6, 7, 3, 1, 10 ]
+   * @static
+   * @param  {TypedArray|Array} dataArray - delta encoded input array
+   * @return {TypedArray|Array} decoded array
+   */
+  function decodeDelta( array, output ){
+      var n = array.length;
+      if( !output ) output = new array.constructor( n );
+      if( n ) output[ 0 ] = array[ 0 ];
+      for( var i = 1; i < n; ++i ){
+          output[ i ] = array[ i ] + output[ i - 1 ];
+      }
+      return output;
+  }
+
+  function encodeDelta( array, output ){
+      var n = array.length;
+      if( !output ) output = new array.constructor( n );
+      output[ 0 ] = array[ 0 ];
+      for( var i = 1; i < n; ++i ){
+          output[ i ] = array[ i ] - array[ i - 1 ];
+      }
+      return output;
+  }
+
+
+
+  /**
+   * [decodePacking description]
+   * @param  {Int16Array|Int8Array} int16or8 [description]
+   * @param  {Int32Array} output   [description]
+   * @return {Int32Array}          [description]
+   */
+  function decodePacking( int16or8, output ){
+      var upperLimit = int16or8 instanceof Int8Array ? 0x7F : 0x7FFF;
+      var lowerLimit = -upperLimit - 1;
+      var n = int16or8.length;
+      var i, j;
+      if( !output ){
+          var fullLength = 0;
+          for( i = 0; i < n; ++i ){
+              if( int16or8[ i ] < upperLimit && int16or8[ i ] > lowerLimit ){
+                  ++fullLength;
+              }
+          }
+          output = new Int32Array( fullLength );
+      }
+      i = 0;
+      j = 0;
+      while( i < n ){
+          var value = 0;
+          while( int16or8[ i ] === upperLimit || int16or8[ i ] === lowerLimit ){
+              value += int16or8[ i ];
+              ++i;
+          }
+          value += int16or8[ i ];
+          ++i;
+          output[ j ] = value;
+          ++j;
+      }
+      return output;
+  }
+
+  /**
+   * integer packing using recursive indexing
+   * @param  {Array|TyepedArray} intArray [description]
+   * @param  {Boolean} useInt8  [description]
+   * @return {Int16Array|Int8Array}          [description]
+   */
+  function encodePacking( intArray, useInt8 ){
+      var upperLimit = useInt8 ? 0x7F : 0x7FFF;
+      var lowerLimit = -upperLimit - 1;
+      var i;
+      var n = intArray.length;
+      var size = 0;
+      for( i = 0; i < n; ++i ){
+          var value = intArray[ i ];
+          if( value === 0 ){
+              ++size;
+          }else if( value === upperLimit || value === lowerLimit ){
+              size += 2;
+          }else if( value > 0) {
+              size += Math.ceil( value / upperLimit );
+          }else {
+              size += Math.ceil( value / lowerLimit );
+          }
+      }
+      var output = useInt8 ? new Int8Array( size ) : new Int16Array( size );
+      var j = 0;
+      for( i = 0; i < n; ++i ){
+          var value = intArray[ i ];
+          if( value >= 0) {
+              while( value >= upperLimit ){
+                  output[ j ] = upperLimit;
+                  ++j;
+                  value -= upperLimit;
+              }
+          }else{
+              while( value <= lowerLimit ){
+                  output[ j ] = lowerLimit;
+                  ++j;
+                  value -= lowerLimit;
+              }
+          }
+          output[ j ] = value;
+          ++j;
+      }
+      return output;
+  }
+
+
+
+  function decodeDeltaRun( array, output ){
+      return decodeDelta( decodeRun( array ), output );
+  }
+
+  function encodeDeltaRun( array ){
+      return encodeRun( encodeDelta( array ) );
+  }
+
+
+
+  /**
+   * perform run-length decoding followed (@see decodeRunLength)
+   * by decoding integers into floats using given divisor (@see decodeIntegerToFloat)
+   * example:
+   *     array: [ 320, 3, 100, 2 ]
+   *     divisor: 100
+   *     return: [ 3.20, 3.20, 3.20, 1.00, 1.00 ]
+   * @static
+   * @param  {Uint8Array} array - run-length encoded int32 array as bytes in big endian format
+   * @param  {Integer} divisor - number to devide the integers to obtain floats
+   * @param  {Float32Array} dataArray - pre-allocated output array
+   * @return {Float32Array} decoded array
+   */
+  function decodeIntegerRun( intArray, divisor, output ){
+      return decodeInteger(
+          decodeRun( intArray, getInt32View( output ) ), divisor, output
+      );
+  }
+
+  function encodeIntegerRun( floatArray, factor ){
+      return encodeRun( encodeInteger( floatArray, factor ) );
+  }
+
+
+
+  function decodeIntegerDelta( intArray, divisor, output ){
+      return decodeInteger(
+          decodeDelta( intArray, getInt32View( output ) ), divisor, output
+      );
+  }
+
+  function encodeIntegerDelta( floatArray, factor, output ){
+      return encodeDelta( encodeInteger( floatArray, factor ), output );
+  }
+
+
+
+  function decodeIntegerPacking( int16or8, divisor, output ){
+      return decodeInteger(
+          decodePacking( int16or8, getInt32View( output ) ), divisor, output
+      );
+  }
+
+  function decodeIntegerDeltaPacking( int16or8, divisor, output ){
+      var unpacked = decodePacking( int16or8, getInt32View( output ) );
+      return decodeIntegerDelta( unpacked, divisor, getFloat32View( unpacked ) );
+  }
+
+  function encodeIntegerDeltaPacking( floatArray, factor, useInt8 ){
+      return encodePacking( encodeIntegerDelta( floatArray, factor ), useInt8 );
+  }
+
+
+
+  function decodeBytes( bytes ){
+      var dv = getDataView( bytes );
+      var type = dv.getInt32( 0 );
+      var size = dv.getInt32( 4 );
+      var param = bytes.subarray( 8, 12 );
+      var bytes = bytes.subarray( 12 );
+      return [ type, bytes, size, param ];
+  }
+
+  function encodeBytes( type, size, param, bytes ){
+      var buffer = new ArrayBuffer( 12 + bytes.byteLength );
+      var out = new Uint8Array( buffer );
+      var dv = new DataView( buffer );
+      dv.setInt32( 0, type );
+      dv.setInt32( 4, size );
+      if( param ) out.set( param, 8 );
+      out.set( bytes, 12 );
+      return out;
+  }
+
+  function passInt8( int8 ){
+      var size = int8.length;
+      var bytes = getUint8View( int8 );
+      return encodeBytes( 2, size, undefined, bytes );
+  }
+
+  function passInt32( int32 ){
+      var size = int32.length;
+      var bytes = encodeInt32( int32 );
+      return encodeBytes( 4, size, undefined, bytes );
+  }
+
+  function passString( stringBytes, length ){
+      var size = stringBytes.length / length;
+      var param = encodeInt32([ length ]);
+      var bytes = getUint8View( stringBytes );
+      return encodeBytes( 5, size, param, bytes );
+  }
+
+  function runChar( charBytes ){
+      var size = charBytes.length;
+      var bytes = encodeInt32( encodeRun( charBytes ) );
+      return encodeBytes( 6, size, undefined, bytes );
+  }
+
+  function deltaRun( int32 ){
+      var size = int32.length;
+      var bytes = encodeInt32( encodeDeltaRun( int32 ) );
+      return encodeBytes( 8, size, undefined, bytes );
+  }
+
+  function integerRun( float32, factor ){
+      var size = float32.length;
+      var param = encodeInt32([ factor ]);
+      var bytes = encodeInt32( encodeIntegerRun( float32, factor ) );
+      return encodeBytes( 9, size, param, bytes );
+  }
+
+  function integerDeltaPacking16( float32, factor ){
+      var size = float32.length;
+      var param = encodeInt32([ factor ]);
+      var bytes = encodeInt16( encodeIntegerDeltaPacking( float32, factor ) );
+      return encodeBytes( 10, size, param, bytes );
+  }
+
+  function encodeMmtf( inputDict ){
+
+      var outputDict = {};
+
+      // copy some fields over from the input dict
+      PassThroughFields.forEach( function( name ){
+          if( inputDict[ name ] !== undefined ){
+              outputDict[ name ] = inputDict[ name ];
+          }
+      } );
+
+      //////////////
+      // bond data
+
+      // encode inter group bond atom indices, i.e. get bytes in big endian order
+      if( inputDict.bondAtomList ){
+          outputDict.bondAtomList = passInt32( inputDict.bondAtomList );
+      }
+
+      // encode inter group bond orders, i.e. get bytes
+      if( inputDict.bondOrderList ){
+          outputDict.bondOrderList = passInt8( inputDict.bondOrderList );
+      }
+
+      //////////////
+      // atom data
+
+      // split-list delta & integer encode x, y, z atom coords
+      outputDict.xCoordList = integerDeltaPacking16( inputDict.xCoordList, 1000 );
+      outputDict.yCoordList = integerDeltaPacking16( inputDict.yCoordList, 1000 );
+      outputDict.zCoordList = integerDeltaPacking16( inputDict.zCoordList, 1000 );
+
+      // split-list delta & integer encode b-factors
+      if( inputDict.bFactorList ){
+          outputDict.bFactorList = integerDeltaPacking16( inputDict.bFactorList, 100 );
+      }
+
+      // delta & run-length encode atom ids
+      if( inputDict.atomIdList ){
+          outputDict.atomIdList = deltaRun( inputDict.atomIdList );
+      }
+
+      // run-length encode alternate labels
+      if( inputDict.altLocList ){
+          outputDict.altLocList = runChar( inputDict.altLocList );
+      }
+
+      // run-length & integer encode occupancies
+      if( inputDict.occupancyList ){
+          outputDict.occupancyList = integerRun( inputDict.occupancyList, 100 );
+      }
+
+      ///////////////
+      // group data
+
+      // run-length & delta encode group numbers
+      outputDict.groupIdList = deltaRun( inputDict.groupIdList );
+
+      // encode group types, i.e. get int32 array
+      outputDict.groupTypeList = passInt32( inputDict.groupTypeList );
+
+      // encode secondary structure, i.e. get bytes
+      if( inputDict.secStructList ){
+          outputDict.secStructList = passInt8( inputDict.secStructList, 1 );
+      }
+
+      // run-length encode insertion codes
+      if( inputDict.insCodeList ){
+          outputDict.insCodeList = runChar( inputDict.insCodeList );
+      }
+
+      // run-length & delta encode sequence indices
+      if( inputDict.sequenceIndexList ){
+          outputDict.sequenceIndexList = deltaRun( inputDict.sequenceIndexList );
+      }
+
+      ///////////////
+      // chain data
+
+      // encode chain ids, i.e. get bytes
+      outputDict.chainIdList = passString( inputDict.chainIdList, 4 );
+
+      // encode chain names, i.e. get bytes
+      if( inputDict.chainNameList ){
+          outputDict.chainNameList = passString( inputDict.chainNameList, 4 );
+      }
+
+      return outputDict;
+
+  }
+
+  /**
+   * @file msgpack-decode
+   * @private
+   * @author Alexander Rose <alexander.rose@weirdbyte.de>
+   */
+
+  /**
+   * msgpack decode module.
+   * @module MsgpackDecode
+   */
+
+  /**
+   * decode binary encoded MessagePack v5 (http://msgpack.org/) data
+   * @static
+   * @param  {Uint8Array} buffer - binary encoded MessagePack data
+   * @return {Object|Array|String|Number|Boolean|null} decoded Messagepack data
+   */
+  function decodeMsgpack(buffer) {
+    // Loosely based on
+    // The MIT License (MIT)
+    // Copyright (c) 2013 Tim Caswell <tim@creationix.com>
+    // https://github.com/creationix/msgpack-js
+    var offset = 0;
+    var dataView = new DataView(buffer.buffer);
+
+    /**
+     * decode all key-value pairs of a map into an object
+     * @param  {Integer} length - number of key-value pairs
+     * @return {Object} decoded map
+     */
+    function map(length) {
+      var value = {};
+      for (var i = 0; i < length; i++) {
+        var key = parse();
+        value[key] = parse();
+      }
+      return value;
+    }
+
+    /**
+     * decode binary array
+     * @param  {Integer} length - number of elements in the array
+     * @return {Uint8Array} decoded array
+     */
+    function bin(length) {
+      var value = buffer.subarray(offset, offset + length);
+      offset += length;
+      return value;
+    }
+
+    /**
+     * decode string
+     * @param  {Integer} length - number string characters
+     * @return {String} decoded string
+     */
+    function str(length) {
+      var array = buffer.subarray(offset, offset + length);
+      offset += length;
+      // limit number of arguments to String.fromCharCode to something
+      // browsers can handle, see http://stackoverflow.com/a/22747272
+      var chunkSize = 0xffff;
+      if(length > chunkSize){
+        var c = [];
+        for(var i = 0; i < array.length; i += chunkSize) {
+          c.push(String.fromCharCode.apply(
+            null, array.subarray(i, i + chunkSize)
+          ));
+        }
+        return c.join("");
+      }else{
+        return String.fromCharCode.apply(null, array);
+      }
+    }
+
+    /**
+     * decode array
+     * @param  {Integer} length - number of array elements
+     * @return {Array} decoded array
+     */
+    function array(length) {
+      var value = new Array(length);
+      for (var i = 0; i < length; i++) {
+        value[i] = parse();
+      }
+      return value;
+    }
+
+    /**
+     * recursively parse the MessagePack data
+     * @return {Object|Array|String|Number|Boolean|null} decoded MessagePack data
+     */
+    function parse() {
+      var type = buffer[offset];
+      var value, length, extType;
+      // Positive FixInt
+      if ((type & 0x80) === 0x00) {
+        offset++;
+        return type;
+      }
+      // FixMap
+      if ((type & 0xf0) === 0x80) {
+        length = type & 0x0f;
+        offset++;
+        return map(length);
+      }
+      // FixArray
+      if ((type & 0xf0) === 0x90) {
+        length = type & 0x0f;
+        offset++;
+        return array(length);
+      }
+      // FixStr
+      if ((type & 0xe0) === 0xa0) {
+        length = type & 0x1f;
+        offset++;
+        return str(length);
+      }
+      // Negative FixInt
+      if ((type & 0xe0) === 0xe0) {
+        value = dataView.getInt8(offset);
+        offset++;
+        return value;
+      }
+      switch (type) {
+      // nil
+      case 0xc0:
+        offset++;
+        return null;
+      // 0xc1: (never used, could be employed for padding)
+      // false
+      case 0xc2:
+        offset++;
+        return false;
+      // true
+      case 0xc3:
+        offset++;
+        return true;
+      // bin 8
+      case 0xc4:
+        length = dataView.getUint8(offset + 1);
+        offset += 2;
+        return bin(length);
+      // bin 16
+      case 0xc5:
+        length = dataView.getUint16(offset + 1);
+        offset += 3;
+        return bin(length);
+      // bin 32
+      case 0xc6:
+        length = dataView.getUint32(offset + 1);
+        offset += 5;
+        return bin(length);
+      // // ext 8
+      // case 0xc7:
+      //   length = dataView.getUint8(offset + 1);
+      //   extType = dataView.getUint8(offset + 2);
+      //   offset += 3;
+      //   return [extType, bin(length)];
+      // // ext 16
+      // case 0xc8:
+      //   length = dataView.getUint16(offset + 1);
+      //   extType = dataView.getUint8(offset + 3);
+      //   offset += 4;
+      //   return [extType, bin(length)];
+      // // ext 32
+      // case 0xc9:
+      //   length = dataView.getUint32(offset + 1);
+      //   extType = dataView.getUint8(offset + 5);
+      //   offset += 6;
+      //   return [extType, bin(length)];
+      // float 32
+      case 0xca:
+        value = dataView.getFloat32(offset + 1);
+        offset += 5;
+        return value;
+      // float 64
+      case 0xcb:
+        value = dataView.getFloat64(offset + 1);
+        offset += 9;
+        return value;
+      // uint8
+      case 0xcc:
+        value = buffer[offset + 1];
+        offset += 2;
+        return value;
+      // uint 16
+      case 0xcd:
+        value = dataView.getUint16(offset + 1);
+        offset += 3;
+        return value;
+      // uint 32
+      case 0xce:
+        value = dataView.getUint32(offset + 1);
+        offset += 5;
+        return value;
+      // // uint64
+      // case 0xcf:
+      //   // FIXME not available/representable in JS
+      //   // largest possible int in JS is 2^53
+      //   // value = dataView.getUint64(offset + 1);
+      //   offset += 9;
+      //   return 0;
+      // int 8
+      case 0xd0:
+        value = dataView.getInt8(offset + 1);
+        offset += 2;
+        return value;
+      // int 16
+      case 0xd1:
+        value = dataView.getInt16(offset + 1);
+        offset += 3;
+        return value;
+      // int 32
+      case 0xd2:
+        value = dataView.getInt32(offset + 1);
+        offset += 5;
+        return value;
+      // // int 64
+      // case 0xd3:
+      //   // FIXME not available/representable in JS
+      //   // largest possible int in JS is 2^53
+      //   // value = dataView.getInt64(offset + 1);
+      //   offset += 9;
+      //   return 0;
+
+      // // fixext 1
+      // case 0xd4:
+      //   extType = dataView.getUint8(offset + 1);
+      //   offset += 2;
+      //   return [extType, bin(1)];
+      // // fixext 2
+      // case 0xd5:
+      //   extType = dataView.getUint8(offset + 1);
+      //   offset += 2;
+      //   return [extType, bin(2)];
+      // // fixext 4
+      // case 0xd6:
+      //   extType = dataView.getUint8(offset + 1);
+      //   offset += 2;
+      //   return [extType, bin(4)];
+      // // fixext 8
+      // case 0xd7:
+      //   extType = dataView.getUint8(offset + 1);
+      //   offset += 2;
+      //   return [extType, bin(8)];
+      // // fixext 16
+      // case 0xd8:
+      //   extType = dataView.getUint8(offset + 1);
+      //   offset += 2;
+      //   return [extType, bin(16)];
+      // str 8
+      case 0xd9:
+        length = dataView.getUint8(offset + 1);
+        offset += 2;
+        return str(length);
+      // str 16
+      case 0xda:
+        length = dataView.getUint16(offset + 1);
+        offset += 3;
+        return str(length);
+      // str 32
+      case 0xdb:
+        length = dataView.getUint32(offset + 1);
+        offset += 5;
+        return str(length);
+      // array 16
+      case 0xdc:
+        length = dataView.getUint16(offset + 1);
+        offset += 3;
+        return array(length);
+      // array 32
+      case 0xdd:
+        length = dataView.getUint32(offset + 1);
+        offset += 5;
+        return array(length);
+      // map 16:
+      case 0xde:
+        length = dataView.getUint16(offset + 1);
+        offset += 3;
+        return map(length);
+      // map 32
+      case 0xdf:
+        length = dataView.getUint32(offset + 1);
+        offset += 5;
+        return map(length);
+      }
+
+      throw new Error("Unknown type 0x" + type.toString(16));
+    }
+
+    // start the recursive parsing
+    return parse();
+  }
+
+  /**
+   * Fields shared in encoded and decoded mmtf data objects.
+   * @typedef {Object} module:MmtfDecode.SharedMmtfData
+   * @property {String} mmtfVersion - MMTF specification version
+   * @property {String} mmtfProducer - Program that created the file
+   * @property {Float[]} [unitCell] - Crystallographic unit cell
+   * @property {Float} unitCell.0 - x length
+   * @property {Float} unitCell.1 - y length
+   * @property {Float} unitCell.2 - z length
+   * @property {Float} unitCell.3 - alpha angle
+   * @property {Float} unitCell.4 - beta angle
+   * @property {Float} unitCell.5 - gamma angle
+   * @property {String} [spaceGroup] - Hermann-Mauguin symbol
+   * @property {String} [structureId] - Some reference, e.g. a PDB ID
+   * @property {String} [title] - Short description
+   * @property {String} [depositionDate] - Deposition date in YYYY-MM-DD format
+   * @property {String} [releaseDate] - Release date in YYYY-MM-DD format
+   * @property {String[]} [experimentalMethods] - Structure determination methods
+   * @property {Float} [resolution] - Resolution in Å
+   * @property {Float} [rFree] - R-free value
+   * @property {Float} [rWork] - R-work value
+   * @property {Integer} numBonds - Number of bonds
+   * @property {Integer} numAtoms - Number of atoms
+   * @property {Integer} numGroups - Number of groups (residues)
+   * @property {Integer} numChains - Number of chains
+   * @property {Integer} numModels - Number of models
+   * @property {Integer[]} chainsPerModel - List of number of chains in each model
+   * @property {Integer[]} groupsPerChain - List of number of groups in each chain
+   * @property {Entity[]} [entityList] - List of entity objects
+   * @property {Integer[]} entityList.chainIndexList - Pointers into chain data fields
+   * @property {String} entityList.description - Description of the entity
+   * @property {String} entityList.type - Name of the entity type
+   * @property {String} entityList.sequence - One letter code sequence
+   * @property {Assembly[]} [bioAssemblyList] - List of assembly objects
+   * @property {Transform[]} bioAssemblyList.transformList - List of transform objects
+   * @property {Integer[]} bioAssemblyList.transformList.chainIndexList - Pointers into chain data fields
+   * @property {Float[]} bioAssemblyList.transformList.matrix - 4x4 transformation matrix
+   * @property {Array[]} [ncsOperatorList] - List of ncs operator matrices
+   * @property {Float[]} ncsOperatorList. - 4x4 transformation matrix
+   * @property {GroupType[]} groupList - List of groupType objects
+   * @property {Integer[]} groupList.formalChargeList - List of atom formal charges
+   * @property {String[]} groupList.elementList - List of elements
+   * @property {String[]} groupList.atomNameList - List of atom names
+   * @property {Integer[]} groupList.bondAtomList - List of bonded atom indices
+   * @property {Integer[]} groupList.bondOrderList - List of bond orders
+   * @property {String} groupList.groupName - The name of the group
+   * @property {String} groupList.singleLetterCode - The single letter code
+   * @property {String} groupList.chemCompType -  The chemical component type
+   */
+
+  /**
+   * Encoded mmtf data object. Also includes the fields from {@link module:MmtfDecode.SharedMmtfData}. See MMTF specification on how they are encoded.
+   * @typedef {Object} module:MmtfDecode.EncodedMmtfData
+   * @mixes module:MmtfDecode.SharedMmtfData
+   * @property {Uint8Array} [bondAtomList] - Encoded bonded atom indices
+   * @property {Uint8Array} [bondOrderList] - Encoded bond orders
+   * @property {Uint8Array} xCoordBig - Encoded x coordinates in Å, part 1
+   * @property {Uint8Array} xCoordSmall - Encoded x coordinates in Å, part 2
+   * @property {Uint8Array} yCoordBig - Encoded y coordinates in Å, part 1
+   * @property {Uint8Array} yCoordSmall - Encoded y coordinates in Å, part 2
+   * @property {Uint8Array} yCoordBig - Encoded y coordinates in Å, part 1
+   * @property {Uint8Array} yCoordSmall - Encoded y coordinates in Å, part 2
+   * @property {Uint8Array} [bFactorBig] - Encoded B-factors in Å^2, part 1
+   * @property {Uint8Array} [bFactorSmall] - Encoded B-factors in Å^2, part 2
+   * @property {Uint8Array} [atomIdList] - Encoded  atom ids
+   * @property {Uint8Array} [altLocList] - Encoded alternate location labels
+   * @property {Uint8Array} [occupancyList] - Encoded occupancies
+   * @property {Uint8Array} groupIdList - Encoded group ids
+   * @property {Uint8Array} groupTypeList - Encoded group types
+   * @property {Uint8Array} [secStructList] - Encoded secondary structure codes
+   * @property {Uint8Array} [insCodeList] - Encoded insertion codes
+   * @property {Uint8Array} [seuenceIdList] - Encoded sequence ids
+   * @property {Uint8Array} chainIdList - Encoded chain ids
+   * @property {Uint8Array} [chainNameList] - Encoded chain names
+   */
+
+  /**
+   * Decoded mmtf data object. Also includes fields the from {@link module:MmtfDecode.SharedMmtfData}.
+   * @typedef {Object} module:MmtfDecode.MmtfData
+   * @mixes module:MmtfDecode.SharedMmtfData
+   * @property {Int32Array} [bondAtomList] - List of bonded atom indices
+   * @property {Uint8Array} [bondOrderList] - List of bond orders
+   * @property {Float32Array} xCoordList - List of x coordinates in Å
+   * @property {Float32Array} yCoordList - List of y coordinates in Å
+   * @property {Float32Array} zCoordList - List of z coordinates in Å
+   * @property {Float32Array} [bFactorList] - List of B-factors in Å^2
+   * @property {Int32Array} [atomIdList] - List of atom ids
+   * @property {Uint8Array} [altLocList] - List of alternate location labels
+   * @property {Float32Array} [occupancyList] - List of occupancies
+   * @property {Int32Array} groupIdList - List of group ids
+   * @property {Int32Array} groupTypeList - List of group types
+   * @property {Int8Array} [secStructList] - List of secondary structure codes, encoding
+   *    0: pi helix, 1: bend, 2: alpha helix, 3: extended,
+   *    4: 3-10 helix, 5: bridge, 6: turn, 7: coil, -1: undefined
+   * @property {Uint8Array} [insCodeList] - List of insertion codes
+   * @property {Int32Array} [seuenceIdList] - List of sequence ids
+   * @property {Uint8Array} chainIdList - List of chain ids
+   * @property {Uint8Array} [chainNameList] - List of chain names
+   */
+
+
+  /**
+   * [performDecoding description]
+   * @param  {Integer} bytes [description]
+   * @param  {Integer} size  [description]
+   * @param  {Uint8Array} param [description]
+   * @return {TypedArray}       [description]
+   */
+  function performDecoding( type, bytes, size, param ){
+
+      switch( type ){
+          case 1:
+              return decodeFloat32( bytes );
+          case 2:
+              return getInt8View( bytes );
+          case 3:
+              return decodeInt16( bytes );
+          case 4:
+              return decodeInt32( bytes );
+          case 5:
+              // var length = decodeInt32( param )[ 0 ];
+              return getUint8View( bytes );  // interpret as string array
+          case 6:
+              // interpret as char array
+              return decodeRun( decodeInt32( bytes ), new Uint8Array( size ) );
+          case 7:
+              return decodeRun( decodeInt32( bytes ) )
+          case 8:
+              return decodeDeltaRun( decodeInt32( bytes ) );
+          case 9:
+              return decodeIntegerRun( decodeInt32( bytes ), decodeInt32( param )[ 0 ] );
+          case 10:
+              return decodeIntegerDeltaPacking( decodeInt16( bytes ), decodeInt32( param )[ 0 ] );
+          case 11:
+              return decodeInteger( decodeInt16( bytes ), decodeInt32( param )[ 0 ] );
+          case 12:
+              return decodeIntegerPacking( decodeInt16( bytes ), decodeInt32( param )[ 0 ] );
+          case 13:
+              return decodeIntegerPacking( getInt8View( bytes ), decodeInt32( param )[ 0 ] );
+          case 14:
+              return decodePacking( decodeInt16( bytes ) );
+          case 15:
+              return decodePacking( getInt8View( bytes ) );
+      }
+
+  };
+
+
+  /**
+   * Decode MMTF fields
+   * @static
+   * @param  {Object} inputDict - encoded MMTF data
+   * @param  {Object} [params] - decoding parameters
+   * @param  {String[]} params.ignoreFields - names of optional fields not to decode
+   * @return {module:MmtfDecode.MmtfData} mmtfData
+   */
+  function decodeMmtf( inputDict, params ){
+
+      params = params || {};
+      var ignoreFields = params.ignoreFields;
+      var outputDict = {};
+
+      AllFields.forEach( function( name ){
+          var ignore = ignoreFields ? ignoreFields.indexOf( name ) !== -1 : false;
+          var data = inputDict[ name ];
+          if( !ignore && data !== undefined ){
+              if( data instanceof Uint8Array ){
+                  outputDict[ name ] = performDecoding.apply( null, decodeBytes( data ) );
+              }else{
+                  outputDict[ name ] = data;
+              }
+          }
+      } );
+
+      return outputDict;
+
+  }
+
+  /**
+   * @file mmtf-traverse
+   * @private
+   * @author Alexander Rose <alexander.rose@weirdbyte.de>
+   */
+
+  /**
+   * mmtf traverse module.
+   * @module MmtfTraverse
+   */
+
+  /**
+   * Converts an array of ASCII codes trimming '\0' bytes
+   * @private
+   * @param  {Array} charCodeArray - array of ASCII char codes
+   * @return {String} '\0' trimmed string
+   */
+  function fromCharCode( charCodeArray ){
+      return String.fromCharCode.apply( null, charCodeArray ).replace(/\0/g, '');
+  }
+
+
+  /**
+   * @callback module:MmtfTraverse.onModel
+   * @param {Object} modelData
+   * @param {Integer} modelData.chainCount - number of chains in the model
+   * @param {Integer} modelData.modelIndex - index of the model
+   */
+
+  /**
+   * @callback module:MmtfTraverse.onChain
+   * @param {Object} chainData
+   * @param {Integer} chainData.groupCount - number of groups in the chain
+   * @param {Integer} chainData.chainIndex - index of the chain
+   * @param {Integer} chainData.modelIndex - index of the parent model
+   * @param {String} chainData.chainId - chain id
+   * @param {?String} chainData.chainName - additional chain name
+   */
+
+  /**
+   * @callback module:MmtfTraverse.onGroup
+   * @param {Object} groupData
+   * @param {Integer} groupData.atomCount - number of atoms in the group
+   * @param {Integer} groupData.groupIndex - index of the group
+   * @param {Integer} groupData.chainIndex - index of the parent chain
+   * @param {Integer} groupData.modelIndex - index of the parent model
+   * @param {Integer} groupData.groupId - group id (residue number)
+   * @param {Integer} groupData.groupType - index to an entry in {@link module:MmtfDecode.MmtfData}#groupList
+   * @param {String} groupData.groupName - name of the group, 0 to 5 characters
+   * @param {Char} groupData.singleLetterCode - IUPAC single letter code, otherwise 'X', 1 character
+   * @param {String} groupData.chemCompType - chemical component type from the mmCIF dictionary
+   * @param {?Integer} groupData.secStruct - sencoded secondary structure |
+   *    0: pi helix, 1: bend, 2: alpha helix, 3: extended,
+   *    4: 3-10 helix, 5: bridge, 6: turn, 7: coil, -1: undefined
+   * @param {?Char} groupData.insCode - insertion code
+   * @param {?Integer} groupData.sequenceIndex - index to the `sequence` property of
+   *    the corresponding entity, -1 when the entity has no sequence
+   */
+
+  /**
+   * @callback module:MmtfTraverse.onAtom
+   * @param {Object} atomData
+   * @param {Integer} atomData.atomIndex - index of the atom
+   * @param {Integer} atomData.groupIndex - index of the parent group
+   * @param {Integer} atomData.chainIndex - index of the parent chain
+   * @param {Integer} atomData.modelIndex - index of the parent model
+   * @param {?Integer} atomData.atomId - atom id
+   * @param {String} atomData.element - IUPAC element name, 0 to 3 characters
+   * @param {String} atomData.atomName - name of the atom, 0 to 5 characters
+   * @param {Integer} atomData.formalCharge - formal charge of the atom
+   * @param {Float} atomData.xCoord - x coordinate in Å
+   * @param {Float} atomData.yCoord - y coordinate in Å
+   * @param {Float} atomData.zCoord - z coordinate in Å
+   * @param {?Float} atomData.bFactor - B-factor in in Å^2
+   * @param {?Char} atomData.altLoc - alternate location identifier
+   * @param {?Float} atomData.occupancy - occupancy of the atom
+   */
+
+  /**
+   * @callback module:MmtfTraverse.onBond
+   * @param {Object} bondData
+   * @param {Integer} bondData.atomIndex1 - index of the first atom
+   * @param {Integer} bondData.atomIndex2 - index of the secound atom
+   * @param {Integer} bondData.bondOrder - bond order, allowed values are 1 to 3
+   */
+
+
+  /**
+   * Traverse the MMTF structure data.
+   * @static
+   * @param {module:MmtfDecode.MmtfData} mmtfData - decoded mmtf data
+   * @param {Object} eventCallbacks
+   * @param {module:MmtfTraverse.onModel} [eventCallbacks.onModel] - called for each model
+   * @param {module:MmtfTraverse.onChain} [eventCallbacks.onChain] - called for each chain
+   * @param {module:MmtfTraverse.onGroup} [eventCallbacks.onGroup] - called for each group
+   * @param {module:MmtfTraverse.onAtom} [eventCallbacks.onAtom] - called for each atom
+   * @param {module:MmtfTraverse.onBond} [eventCallbacks.onBond] - called for each bond
+   * @param {Object} [params] - traversal parameters
+   * @param {Boolean} [params.firstModelOnly] - traverse only the first model
+   */
+  function traverseMmtf( mmtfData, eventCallbacks, params ){
+
+      params = params || {};
+
+      var firstModelOnly = params.firstModelOnly;
+
+      // setup callbacks
+      var onModel = eventCallbacks.onModel;
+      var onChain = eventCallbacks.onChain;
+      var onGroup = eventCallbacks.onGroup;
+      var onAtom = eventCallbacks.onAtom;
+      var onBond = eventCallbacks.onBond;
+
+      // setup index counters
+      var modelIndex = 0;
+      var chainIndex = 0;
+      var groupIndex = 0;
+      var atomIndex = 0;
+
+      var modelFirstAtomIndex = 0;
+      var modelLastAtomIndex = -1;
+
+      // setup optional fields
+      var chainNameList = mmtfData.chainNameList;
+      var secStructList = mmtfData.secStructList;
+      var insCodeList = mmtfData.insCodeList;
+      var sequenceIndexList = mmtfData.sequenceIndexList;
+      var atomIdList = mmtfData.atomIdList;
+      var bFactorList = mmtfData.bFactorList;
+      var altLocList = mmtfData.altLocList;
+      var occupancyList = mmtfData.occupancyList;
+      var bondAtomList = mmtfData.bondAtomList;
+      var bondOrderList = mmtfData.bondOrderList;
+
+      // hoisted loop variables
+      var o, ol, i, j, k, kl;
+
+      // loop over all models
+      for( o = 0, ol = mmtfData.chainsPerModel.length; o < ol; ++o ){
+
+          if( firstModelOnly && modelIndex > 0 ) break;
+
+          var modelChainCount = mmtfData.chainsPerModel[ modelIndex ];
+
+          if( onModel ){
+              onModel({
+                  chainCount: modelChainCount,
+                  modelIndex: modelIndex
+              });
+          }
+
+          for( i = 0; i < modelChainCount; ++i ){
+
+              var chainGroupCount = mmtfData.groupsPerChain[ chainIndex ];
+              if( onChain ){
+                  var chainId = fromCharCode(
+                      mmtfData.chainIdList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
+                  );
+                  var chainName = null;
+                  if( chainNameList ){
+                      chainName = fromCharCode(
+                          chainNameList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
+                      );
+                  }
+                  onChain({
+                      groupCount: chainGroupCount,
+                      chainIndex: chainIndex,
+                      modelIndex: modelIndex,
+                      chainId: chainId,
+                      chainName: chainName
+                  });
+              }
+
+              for( j = 0; j < chainGroupCount; ++j ){
+
+                  var groupData = mmtfData.groupList[ mmtfData.groupTypeList[ groupIndex ] ];
+                  var groupAtomCount = groupData.atomNameList.length;
+                  if( onGroup ){
+                      var secStruct = null;
+                      if( secStructList ){
+                          secStruct = secStructList[ groupIndex ];
+                      }
+                      var insCode = null;
+                      if( mmtfData.insCodeList ){
+                          insCode = String.fromCharCode( insCodeList[ groupIndex ] );
+                      }
+                      var sequenceIndex = null;
+                      if( sequenceIndexList ){
+                          sequenceIndex = sequenceIndexList[ groupIndex ];
+                      }
+                      onGroup({
+                          atomCount: groupAtomCount,
+                          groupIndex: groupIndex,
+                          chainIndex: chainIndex,
+                          modelIndex: modelIndex,
+                          groupId: mmtfData.groupIdList[ groupIndex ],
+                          groupType: mmtfData.groupTypeList[ groupIndex ],
+                          groupName: groupData.groupName,
+                          singleLetterCode: groupData.singleLetterCode,
+                          chemCompType: groupData.chemCompType,
+                          secStruct: secStruct,
+                          insCode: insCode,
+                          sequenceIndex: sequenceIndex
+                      });
+                  }
+
+                  for( k = 0; k < groupAtomCount; ++k ){
+
+                      if( onAtom ){
+                          var atomId = null;
+                          if( atomIdList ){
+                              atomId = atomIdList[ atomIndex ];
+                          }
+                          var bFactor = null;
+                          if( bFactorList ){
+                              bFactor = bFactorList[ atomIndex ];
+                          }
+                          var altLoc = null;
+                          if( altLocList ){
+                              altLoc = String.fromCharCode( altLocList[ atomIndex ] );
+                          }
+                          var occupancy = null;
+                          if( occupancyList ){
+                              occupancy = occupancyList[ atomIndex ];
+                          }
+                          onAtom({
+                              atomIndex: atomIndex,
+                              groupIndex: groupIndex,
+                              chainIndex: chainIndex,
+                              modelIndex: modelIndex,
+                              atomId: atomId,
+                              element: groupData.elementList[ k ],
+                              atomName: groupData.atomNameList[ k ],
+                              formalCharge: groupData.formalChargeList[ k ],
+                              xCoord: mmtfData.xCoordList[ atomIndex ],
+                              yCoord: mmtfData.yCoordList[ atomIndex ],
+                              zCoord: mmtfData.zCoordList[ atomIndex ],
+                              bFactor: bFactor,
+                              altLoc: altLoc,
+                              occupancy: occupancy
+                          });
+                      }
+
+                      atomIndex += 1;
+                  }
+
+                  if( onBond ){
+                      // intra group bonds
+                      var groupBondAtomList = groupData.bondAtomList;
+                      for( k = 0, kl = groupData.bondOrderList.length; k < kl; ++k ){
+                          onBond({
+                              atomIndex1: atomIndex - groupAtomCount + groupBondAtomList[ k * 2 ],
+                              atomIndex2: atomIndex - groupAtomCount + groupBondAtomList[ k * 2 + 1 ],
+                              bondOrder: groupData.bondOrderList[ k ]
+                          });
+                      }
+                  }
+
+                  groupIndex += 1;
+              }
+
+              chainIndex += 1;
+          }
+
+          modelFirstAtomIndex = modelLastAtomIndex + 1;
+          modelLastAtomIndex = atomIndex - 1;  // subtract one as it already has been incremented
+
+          if( onBond ){
+              // inter group bonds
+              if( bondAtomList ){
+                  for( k = 0, kl = bondAtomList.length; k < kl; k += 2 ){
+                      var atomIndex1 = bondAtomList[ k ];
+                      var atomIndex2 = bondAtomList[ k + 1 ];
+                      if( ( atomIndex1 >= modelFirstAtomIndex && atomIndex1 <= modelLastAtomIndex ) ||
+                          ( atomIndex2 >= modelFirstAtomIndex && atomIndex2 <= modelLastAtomIndex )
+                      ){
+                          onBond({
+                              atomIndex1: atomIndex1,
+                              atomIndex2: atomIndex2,
+                              bondOrder: bondOrderList ? bondOrderList[ k / 2 ] : null
+                          });
+                      }
+                  }
+              }
+          }
+
+          modelIndex += 1;
+      }
+
+  }
+
+  /**
+   * Version name
+   * @static
+   * @type {String}
+   */
+  var version = "v1.0.0";
+
+  /**
+   * Version name
+   * @private
+   * @type {String}
+   */
+  var baseUrl = "http://mmtf.rcsb.org/v1.0/";
+
+  /**
+   * URL of the RCSB webservice to obtain MMTF files
+   * @static
+   * @type {String}
+   */
+  var fetchUrl = baseUrl + "full/";
+
+  /**
+   * URL of the RCSB webservice to obtain reduced MMTF files
+   * @static
+   * @type {String}
+   */
+  var fetchReducedUrl = baseUrl + "reduced/";
+
+  /**
+   * Encode MMTF fields
+   * @static
+   * @param  {module:MmtfDecode.MmtfData} mmtfData - mmtf data
+   * @return {Uint8Array} encoded MMTF fields
+   */
+  function encode( mmtfData ){
+      return encodeMsgpack( encodeMmtf( mmtfData ) );
+  }
+
+  /**
+   * Decode MMTF fields
+   * @static
+   * @example
+   * // bin is Uint8Array containing the mmtf msgpack
+   * var mmtfData = MMTF.decode( bin );
+   * console.log( mmtfData.numAtoms );
+   *
+   * @param  {Uint8Array|ArrayBuffer|module:MmtfDecode.EncodedMmtfData} binOrDict - binary MessagePack or encoded MMTF data
+   * @param  {Object} [params] - decoding parameters
+   * @param {String[]} params.ignoreFields - names of optional fields not to decode
+   * @return {module:MmtfDecode.MmtfData} mmtfData
+   */
+  function decode( binOrDict, params ){
+  	// make sure binOrDict is not a plain Arraybuffer
+      if( binOrDict instanceof ArrayBuffer ){
+          binOrDict = new Uint8Array( binOrDict );
+      }
+
+      var inputDict;
+      if( binOrDict instanceof Uint8Array ){
+          // get dict from msgpack
+          inputDict = decodeMsgpack( binOrDict );
+      }else{
+          // already a dict
+          inputDict = binOrDict;
+      }
+
+      return decodeMmtf( inputDict, params );
+  }
+
+  /**
+   * @callback module:MMTF.onLoad
+   * @param {module:MmtfDecode.MmtfData} mmtfData - decoded mmtf data object
+   */
+
+  /**
+   * helper method to fetch binary files from an URL
+   * @private
+   * @param  {String} pdbid - PDB ID to fetch
+   * @param  {String} baseUrl - URL to fetch from
+   * @param  {module:MMTF.onLoad} onLoad - callback( mmtfData )
+   * @param  {Function} onError - callback( error )
+   * @return {undefined}
+   */
+  function _fetch( pdbid, baseUrl, onLoad, onError ){
+      var xhr = new XMLHttpRequest();
+      function _onLoad(){
+          try{
+              var mmtfData = decode( xhr.response );
+              onLoad( mmtfData );
+          }catch( error ){
+              onError( error );
+          }
+      }
+      xhr.addEventListener( "load", _onLoad, true );
+      xhr.addEventListener( "error", onError, true );
+      xhr.responseType = "arraybuffer";
+      xhr.open( "GET", baseUrl + pdbid.toUpperCase() );
+      xhr.send();
+  }
+
+  /**
+   * Fetch MMTF file from RCSB webservice which contains
+   * @static
+   * @example
+   * MMTF.fetch(
+   *     "3PQR",
+   *     // onLoad callback
+   *     function( mmtfData ){ console.log( mmtfData ) },
+   *     // onError callback
+   *     function( error ){ console.error( error ) }
+   * );
+   *
+   * @param  {String} pdbid - PDB ID to fetch
+   * @param  {module:MMTF.onLoad} onLoad - callback( mmtfData )
+   * @param  {Function} onError - callback( error )
+   * @return {undefined}
+   */
+  function fetch( pdbid, onLoad, onError ){
+      _fetch( pdbid, fetchUrl, onLoad, onError );
+  }
+
+  /**
+   * Fetch reduced MMTF file from RCSB webservice which contains
+   * protein C-alpha, nucleotide phosphate and ligand atoms
+   * @static
+   * @example
+   * MMTF.fetchReduced(
+   *     "3PQR",
+   *     // onLoad callback
+   *     function( mmtfData ){ console.log( mmtfData ) },
+   *     // onError callback
+   *     function( error ){ console.error( error ) }
+   * );
+   *
+   * @param  {String} pdbid - PDB ID to fetch
+   * @param  {module:MMTF.onLoad} onLoad - callback( mmtfData )
+   * @param  {Function} onError - callback( error )
+   * @return {undefined}
+   */
+  function fetchReduced( pdbid, onLoad, onError ){
+      _fetch( pdbid, fetchReducedUrl, onLoad, onError );
+  }
+
+  exports.encode = encode;
+  exports.decode = decode;
+  exports.traverse = traverseMmtf;
+  exports.fetch = fetch;
+  exports.fetchReduced = fetchReduced;
+  exports.version = version;
+  exports.fetchUrl = fetchUrl;
+  exports.fetchReducedUrl = fetchReducedUrl;
+  exports.encodeMsgpack = encodeMsgpack;
+  exports.encodeMmtf = encodeMmtf;
+  exports.decodeMsgpack = decodeMsgpack;
+  exports.decodeMmtf = decodeMmtf;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+}));
+/* pako 0.2.7 nodeca/pako */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define('pako',[],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pako = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -13398,6 +15293,7 @@ exports.ungzip  = inflate;
 
 },{"./utils/common":1,"./utils/strings":2,"./zlib/constants":4,"./zlib/gzheader":6,"./zlib/inflate.js":8,"./zlib/messages":10,"./zlib/zstream":11}]},{},[])("/lib/inflate.js")
 });
+
 //This defines the $3Dmol object which is used to create viewers
 //and configure system-wide settings
 
@@ -13420,9 +15316,7 @@ $3Dmol = (function(window) {
    leave this code in if you would like to increase the 
    likelihood of 3Dmol.js remaining supported.
 */
-if('https:' != document.location.protocol) { //not willing to pay for ssl cert
-    $.get("http://3dmol.csb.pitt.edu/track/report.cgi");
-}
+$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
 
 /* shims for IE */
 /*
@@ -13502,20 +15396,17 @@ $.ajaxTransport(
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
- * 
  * @example
- * // Assume there exists an HTML div with id "gldiv"
- * var element = $("#gldiv");
- * 
- * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors };
- * 
- * // Create GLViewer within 'gldiv' 
- * var myviewer = $3Dmol.createViewer(element, config);
- * //'data' is a string containing molecule data in pdb format  
- * myviewer.addModel(data, "pdb");
- * myviewer.zoomTo();
- * myviewer.render();                        
+   $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });                     
  *                        
  */
 $3Dmol.createViewer = function(element, config)
@@ -13547,7 +15438,6 @@ $3Dmol.viewers = {};
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
  * 
- * @function $3Dmol.download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
  * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
  * @param {Object} options - Specify additional options
@@ -13556,32 +15446,37 @@ $3Dmol.viewers = {};
  * @param {Function} callback - Function to call with model as argument after data is loaded.
 
  * @example
- * var myviewer = $3Dmol.createViewer(gldiv);
- * 
- * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
- * // Note that m will not contain the atomic data until after the network request is completed
- * var m = $3Dmol.download('pdb: 2POR', myviewer, {format:'cif'});
- * 
+ viewer.setBackgroundColor(0xffffffff);
+       $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
+        m.setStyle({'cartoon':{colorscheme:{prop:'ss',map:$3Dmol.ssColors.Jmol}}});
+       viewer.zoomTo();
+       viewer.render(callback);
+    });
  * @return {$3Dmol.GLModel} GLModel
  */ 
 $3Dmol.download = function(query, viewer, options, callback) {
     var baseURL = '';
     var type = "";
     var pdbUri = "";
+    var mmtfUri = "";
     var m = viewer.addModel();
     
     if (query.substr(0, 5) === 'mmtf:') {
-        pdbUri = options && options.pdbUri ? options.pdbUri : "http://mmtf.rcsb.org/full/";
+        pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
-        var uri = pdbUri + query + ".mmtf";        
-        
+        var uri = pdbUri + query;        
+        if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
+                //when fetch directly from pdb, trust structure annotations
+                options.noComputeSecondaryStructure = true;
+        }
+            
         $.ajax({url:uri, 
             type: "GET",
             dataType: "binary",
             responseType: "arraybuffer",
             processData: false}).done(
                 function(ret, txt, response) {
-                    m.addMolData(ret, 'mmtf');
+                    m.addMolData(ret, 'mmtf',options);
                     viewer.zoomTo();
                     viewer.render();
                     if(callback) callback(m);
@@ -13591,16 +15486,27 @@ $3Dmol.download = function(query, viewer, options, callback) {
     }
     else {
         if (query.substr(0, 4) === 'pdb:') {
-            pdbUri = options && options.pdbUri ? options.pdbUri : "http://www.rcsb.org/pdb/files/";
-            type = options && options.format ? options.format : "pdb";
+            type = 'mmtf';
+            if(options && options.format) {
+                type = options.format; //can override and require pdb
+            }
+            
+            if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
+                //when fetch directly from pdb, trust structure annotations
+                options.noComputeSecondaryStructure = true;
+            }
             query = query.substr(4).toUpperCase();
             if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                alert("Wrong PDB ID"); return;
             }
-            if (options && options.format)
-                uri = pdbUri + query + "." + options.format;
-            else
-                uri = pdbUri + query + ".pdb";
+            if(type == 'mmtf') {
+                mmtfUri = options && options.mmtfUri ? options.mmtfUri : 'https://mmtf.rcsb.org/v1.0/full/';
+                uri = mmtfUri + query.toUpperCase();
+            }
+            else  {
+                pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
+                uri = pdbUri + query + "." + type;
+            }
     
         } else if (query.substr(0, 4) == 'cid:') {
             type = "sdf";
@@ -13608,17 +15514,34 @@ $3Dmol.download = function(query, viewer, options, callback) {
             if (!query.match(/^[0-9]+$/)) {
                alert("Wrong Compound ID"); return;
             }
-            uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
+            uri = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
               "/SDF?record_type=3d";
+        } else if (query.substr(0,4) == 'url:') {
+            uri = query.substr(4);
+            type = uri;
         }
     
-       $.get(uri, function(ret) {
+        var handler = function(ret) {
           m.addMolData(ret, type, options);
           viewer.zoomTo();
           viewer.render();
           if(callback) callback(m);
-    
-       });
+        };
+        
+        if(type == 'mmtf') { //binary data
+            $.ajax({url:uri, 
+            type: "GET",
+            dataType: "binary",
+            responseType: "arraybuffer",
+            processData: false}).done(handler).fail(function(e,txt) { 
+                    console.log(txt);
+            });
+        }
+        else {        
+           $.get(uri, handler).fail(function(e) {
+            console.log("fetch of "+uri+" failed: "+e.statusText);
+           });
+        }
    }
    
    return m;
@@ -13965,6 +15888,14 @@ $3Dmol.Quaternion.prototype = {
         return this.multiplyQuaternions(this, q);
     },
 
+    multiplyScalar : function(s) {
+        this.x *= s;
+        this.y *= s;
+        this.z *= s;
+        this.w *= s;
+        return this;
+    },
+    
     multiplyQuaternions : function(a, b) {
 
         var qax = a.x, qay = a.y, qaz = a.z, qaw = a.w;
@@ -13974,8 +15905,21 @@ $3Dmol.Quaternion.prototype = {
         this.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
         this.z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
         this.w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
-
+        return this;
+    },
+    
+    sub : function(q) {
+        this.x -= q.x;
+        this.y -= q.y;
+        this.z -= q.z;
+        this.w -= q.w;
+        return this;
+    },
+    
+    clone : function() {
+        return new $3Dmol.Quaternion(this.x, this.y, this.z,this.w);
     }
+    
 };
 
 //A 2 Vector
@@ -15722,11 +17666,11 @@ $3Dmol.Geometry = (function() {
                     
         var faceArr = this.faceArray, lineArr = this.lineArray = new Uint16Array(this.faceidx*2);      
         this.lineidx = this.faceidx*2;         
-        var faceoffset;
             
         for (var i = 0; i < this.faceidx / 3; ++i) {
             
-            faceoffset = i*3; lineoffset = faceoffset*2;          
+            var faceoffset = i*3;
+            var lineoffset = faceoffset*2;
             var a = faceArr[faceoffset], b = faceArr[faceoffset+1], c = faceArr[faceoffset+2];
             
             lineArr[lineoffset] = a; lineArr[lineoffset+1] = b;
@@ -15758,13 +17702,13 @@ $3Dmol.Geometry = (function() {
             if(this.lineidx > 0) //not always set so reclaim memory
                 this.lineArray = lineArr.subarray(0,this.lineidx); 
             else
-                this.lineArray = new Uint16Array();
+                this.lineArray = new Uint16Array(0);
                         
         }        
         else {
-            this.normalArray = new Float32Array(); 
-            this.faceArray = new Uint16Array(); 
-            this.lineArray = new Uint16Array(); 
+            this.normalArray = new Float32Array(0);
+            this.faceArray = new Uint16Array(0);
+            this.lineArray = new Uint16Array(0);
         }
         if (radiusArr) {
             this.radiusArray = radiusArr.subarray(0, this.vertices);
@@ -15972,7 +17916,7 @@ $3Dmol.Raycaster = (function() {
         
         matrixPosition.getPositionFromMatrix(group.matrixWorld);
         
-        if ((clickable.clickable !== true) || (clickable.intersectionShape === undefined))
+        if (clickable.intersectionShape === undefined)
             return intersects;       
         var intersectionShape = clickable.intersectionShape;
         var precision = raycaster.linePrecision;
@@ -15986,7 +17930,9 @@ $3Dmol.Raycaster = (function() {
             if (!raycaster.ray.isIntersectionSphere(sphere)) {             
 				return intersects;
             }
-        }      
+        }     
+
+
         //Iterate through intersection objects
         var i, il,
             norm, normProj, cylProj, rayProj,
@@ -16122,7 +18068,7 @@ $3Dmol.Raycaster = (function() {
             
             w_0.subVectors(v1, raycaster.ray.origin);
             
-            lineProj = w_0.dot(v3);
+            var lineProj = w_0.dot(v3);
             rayProj = w_0.dot(raycaster.ray.direction);
             
             normProj = clamp(raycaster.ray.direction.dot(v3));
@@ -17005,6 +18951,7 @@ $3Dmol.SphereImposterMaterial.prototype.clone = function() {
 $3Dmol.SphereImposterOutlineMaterial = function(parameters) {
     
     $3Dmol.ImposterMaterial.call(this);
+    parameters = parameters || {};
 
     this.shaderID = "sphereimposteroutline";
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
@@ -17050,6 +18997,7 @@ $3Dmol.StickImposterMaterial.prototype.clone = function() {
 $3Dmol.StickImposterOutlineMaterial = function(parameters) {
     
     $3Dmol.ImposterMaterial.call(this);
+    parameters = parameters || {};
 
     this.shaderID = "stickimposteroutline";
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
@@ -17459,6 +19407,7 @@ $3Dmol.Renderer = function(parameters) {
     var _canvas = parameters.canvas !== undefined ? parameters.canvas
             : document.createElement('canvas'),
 
+
     _precision = parameters.precision !== undefined ? parameters.precision
             : 'highp', _alpha = parameters.alpha !== undefined ? parameters.alpha
             : true, _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha
@@ -17466,19 +19415,20 @@ $3Dmol.Renderer = function(parameters) {
             : false, _stencil = parameters.stencil !== undefined ? parameters.stencil
             : true, _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
             : false, _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(
-            parameters.clearColor)
-            : new $3Dmol.Color(0x000000), _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha
-            : 0, _outlineMaterial = parameters.outline !== undefined ? new $3Dmol.MeshOutlineMaterial(
-            parameters.outline)
-            : null;
-
+            parameters.clearColor) : new $3Dmol.Color(0x000000),
+             _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0, 
+            _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters.outline),
+            _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters.outline),
+            _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters.outline),
+            _outlineEnabled = !!parameters.outline
+            ;
     this.domElement = _canvas;
     this.context = null;
     this.devicePixelRatio = parameters.devicePixelRatio !== undefined ? parameters.devicePixelRatio
             : (self.devicePixelRatio !== undefined) ? self.devicePixelRatio : 1;
 
     // clearing
-
+    _canvas.id=parameters.id;
     this.autoClear = true;
     this.autoClearColor = true;
     this.autoClearDepth = true;
@@ -17609,12 +19559,11 @@ $3Dmol.Renderer = function(parameters) {
         _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters);
         _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters);
         _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters);
+        _outlineEnabled = true;
     };
 
     this.disableOutline = function() {
-        _outlineMaterial = null;
-        _outlineSphereImposterMaterial = null;
-        _outlineStickImposterMaterial = null;
+        _outlineEnabled = false;
     };
 
     this.setSize = function(width, height) {
@@ -18446,7 +20395,7 @@ $3Dmol.Renderer = function(parameters) {
 
                 _this.renderBuffer(camera, lights, fog, material, buffer,
                         object);
-                if (_outlineMaterial) {                  
+                if (_outlineEnabled || material.outline) {                  
                     if(material.shaderID == 'sphereimposter') {
                         _this.renderBuffer(camera, lights, fog, _outlineSphereImposterMaterial,
                                 buffer, object);                        
@@ -21034,13 +22983,14 @@ $3Dmol.ProteinSurface = function() {
 };
 //auto-initialization
 //Create embedded viewer from HTML attributes if true
-
-$(document).ready(function() {
-
+$3Dmol.autoload=function(viewer){
     if ($(".viewer_3Dmoljs")[0] !== undefined)
         $3Dmol.autoinit = true;
+    
+    if ($3Dmol.autoinit) {
+        viewer =(viewer!= undefined) ?
+            viewer :null;
         
-    if ($3Dmol.autoinit) { 
         $3Dmol.viewers = {};
         var nviewers = 0;
         $(".viewer_3Dmoljs").each( function() {
@@ -21050,13 +23000,11 @@ $(document).ready(function() {
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
             }
-        
             var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
                     window[viewerdiv.data("callback")] : null;
-            
             var type = null;
             if (viewerdiv.data("pdb")) {
-                datauri = "http://www.rcsb.org/pdb/files/" + viewerdiv.data("pdb") + ".pdb";
+                datauri = "http://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb";
                 type = "pdb";
             } else if(viewerdiv.data("cid")) {
                 //this doesn't actually work since pubchem does have CORS enabled
@@ -21066,6 +23014,10 @@ $(document).ready(function() {
             }
             else if (viewerdiv.data("href"))
                 datauri = viewerdiv.data("href");
+                
+            var options = {}
+            if(viewerdiv.data("options"))
+                options = $3Dmol.specStringToObject(viewerdiv.data("options"));
                 
             var bgcolor = $3Dmol.CC.color(viewerdiv.data("backgroundcolor"));
             var style = {line:{}};
@@ -21138,11 +23090,13 @@ $(document).ready(function() {
             }
             
             
-            var glviewer = null;
+            var glviewer = viewer;
             try {
-                glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors});
+                if(glviewer==null)
+                    glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors});
                 glviewer.setBackgroundColor(bgcolor);                            
             } catch ( error ) {
+                console.log(error);
                 //for autoload, provide a useful error message
                 window.location = "http://get.webgl.org";                    
             }           
@@ -21155,13 +23109,12 @@ $(document).ready(function() {
                 }
                                 
                 $.get(datauri, function(ret) {
-                    glviewer.addModel(ret, type);
+                    glviewer.addModel(ret, type, options);
                     applyStyles(glviewer);       
                     if (callback) 
                         callback(glviewer);
                 }, 'text');         
-            }
-            
+            }           
             else {
                 
                 if (viewerdiv.data("element")) {
@@ -21176,7 +23129,7 @@ $(document).ready(function() {
                         type = 'pdb';
                     }
 
-                    glviewer.addModel(moldata, type);        
+                    glviewer.addModel(moldata, type, options);        
                 }
 
                 applyStyles(glviewer);                
@@ -21185,10 +23138,13 @@ $(document).ready(function() {
             }
             
         });              
-    }
+    }}
+$(document).ready(function() {
+    $3Dmol.autoload();
+    
 });
     
-//this is only used for create the enum documentation in JSDoc
+ //this is only used for create the enum documentation in JSDoc
 (function() {
 /**
  * Color representation. 
@@ -21215,7 +23171,7 @@ $(document).ready(function() {
  * @prop {string} magenta - 0xFF00FF
  * @prop {string} purple  - 0x800080
  */
-
+//duplicate ---------------------------------------------------------------------------------------------------------------------------------
 $3Dmol.elementColors.greenCarbon['C'] = 0x00ff00;
 
 
@@ -21239,8 +23195,61 @@ $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
 $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 
  /**
- * Color scheme representation. 
+ 
  * @typedef ColorschemeSpec
+ * Built in colorschemes
+ *
+ * @example 
+ 
+              $.get('../test_structs/benzene-homo.cube', function(data){
+                  var voldata = new $3Dmol.VolumeData(data, "cube");
+                  viewer.addIsosurface(voldata, {isoval: 0.01,
+                                                 color: "blue",
+                                                 alpha: 0.5,
+                                                 smoothness: 10});
+                  viewer.addIsosurface(voldata, {isoval: -0.01,
+                                                 color: "red",
+                                                 smoothness: 5,
+                                                 opacity:0.5,
+                                                 wireframe:true,
+                                                 linewidth:0.1,
+                                                 clickable:true,
+                                                 callback:
+                                                 function() {
+                                                     this.opacity = 0.0;
+                                                 }});
+                  viewer.setStyle({}, {stick:{}});
+                  viewer.zoomTo();
+                  
+                                                  viewer.render();
+                 
+                });
+
+ * @example //Using a gradient with colorscheme.
+     viewer.setViewStyle({style:"outline"});
+             
+
+              viewer.setViewStyle({style:"outline"});
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                      
+                  viewer.render(callback);
+                  });
+                  viewer.zoomTo();
+              });
+ * @example //Using a function in order to define the colors. 
+  $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });
  * @prop {string} greenCarbon   - 0x00FF00
  * @prop {string} cyanCarbon    - 0x00FFFF
  * @prop {string} magentaCarbon - 0xFF00FF
@@ -21249,6 +23258,19 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
  * @prop {string} orangeCarbon  - 0xFF6600
  * @prop {string} purpleCarbon  - 0x100080
  * @prop {string} blueCarbon    - 0x0000FF
+ * @prop {string} ssPyMOL - PyMol secondary colorscheme
+ * @prop {string} ssJmol - Jmol secondary colorscheme
+ * @prop {string} Jmol - Jmol primary colorscheme
+ * @prop {string} default - default colorscheme
+ * @prop {string} amino - amino acid colorscheme
+ * @prop {string} shapely - shapely protien colorscheme
+ * @prop {string} nucleic - nucleic acid colorscheme
+ * @prop {string} chain - standard chain colorscheme
+ * @prop {string} chainHetatm - chain Hetatm colorscheme
+ * @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
+ * @prop {Gradient} gradient - Allows the user to provide a gradient to the colorsheme. See example #3.
+ * @prop {object} map - map of a certain AtomSpec propery to a color.: {}} elementMap - Allows the user to provide a mapping of elements to colors to the colorscheme. This is shown in example #2 and it should be noted that this can be done with any properties, and not just 'elem'.
+ * @prop {function} colorfunc - Allows the user to provide a function for setting the colorshemes.See example #4.
  */
  
 });
@@ -21306,11 +23328,20 @@ $3Dmol.CC = {
     },    
     getHex : function(hex) {
         if (!isNaN(parseInt(hex)))
-            return parseInt(hex);
-        
+            return parseInt(hex);        
         else if (typeof(hex) === 'string') {
+            hex = hex.trim();
             
-            return this.colorTab[hex.trim().toLowerCase()] || 0x000000;
+            if(hex.length == 4 && hex[0] == '#') {
+                hex = '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3]; //expand to full hex number
+            }
+            
+            if(hex.length == 7 && hex[0] == '#') {
+                return parseInt(hex.substring(1),16);
+            } 
+            else {
+                return this.colorTab[hex.toLowerCase()] || 0x000000;
+            }
         }
         return hex;
     }
@@ -21323,61 +23354,15 @@ $3Dmol['CC']['color'] = $3Dmol.CC.color;
 
 
 
-/** Return proper color for atom given style
- * @param {AtomSpec} atom
- * @param {AtomStyle} style
- * @return {$3Dmol.Color}
- */
-$3Dmol.getColorFromStyle = function(atom, style) {
-    var color = atom.color;
-    if (typeof (style.color) != "undefined" && style.color != "spectrum")
-        color = style.color;
-    if(typeof(style.colorscheme) != "undefined") {
-        if(typeof($3Dmol.elementColors[style.colorscheme]) != "undefined") {
-            //name of builtin colorscheme
-            var scheme = $3Dmol.elementColors[style.colorscheme];
-            if(typeof(scheme[atom.elem]) != "undefined") {
-                color = scheme[atom.elem];
-            }
-        } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
-            //actual color scheme provided
-            color = style.colorscheme[atom.elem];
-        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
-                typeof(style.colorscheme.gradient) != 'undefined') {         
-            //apply a property mapping
-            var prop = style.colorscheme.prop;
-            var scheme = style.colorscheme.gradient;
-            var range = scheme.range() || [-1,1]; //sensible default
-            var val = $3Dmol.getAtomProperty(atom, prop);
-            if(val != null) {
-                color = scheme.valueToHex(val, range);
-            }
-        } else if(typeof(style.colorscheme.prop) != 'undefined' &&
-                typeof(style.colorscheme.map) != 'undefined') {         
-            //apply a discrete property mapping
-            var prop = style.colorscheme.prop;
-            var val = $3Dmol.getAtomProperty(atom, prop);
-            if( typeof style.colorscheme.map[val] != 'undefined' ) {
-                color = style.colorscheme.map[val];
-            }
-        }
-    } 
-    else if(typeof(style.colorfunc) != "undefined") {
-    	//this is a user provided function for turning an atom into a color
-    	color = style.colorfunc(atom);
-    }
-    
-    var C = $3Dmol.CC.color(color);
-    return C;
-};
 
 /** Preset secondary structure color scheme 
  * @struct
  */
 $3Dmol.ssColors = $3Dmol.ssColors || {};
 //names are in helix-sheet-coil order
-$3Dmol.ssColors.pyMOL = {'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00};
+$3Dmol.ssColors.pyMol = {'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00};
 $3Dmol.ssColors.Jmol = {'h': 0xff0080, 's': 0xffc800, 'c': 0xffffff};
+
 
 /** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
@@ -21410,7 +23395,7 @@ $3Dmol.elementColors.Jmol = {
         'S': 0xFFFF30,
         'Cl': 0x1FF01F,
         'CL': 0x1FF01F,
-        'Ca': 0x3DFF00,
+        'Ca': 0x3DFF00, 
         'CA': 0x3DFF00,
         'Ti': 0xBFC2C7,
         'TI': 0xBFC2C7,
@@ -21513,6 +23498,228 @@ $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
 
 $3Dmol.elementColors.blueCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
+
+$3Dmol.residues = {};
+
+/** @property standard amino acid color scheme*/
+$3Dmol.residues.amino ={
+'Ala' : 0xC8C8C8,        
+'Arg' : 0x145AFF,              
+'Asn' : 0x00DCDC,              
+'Asp' : 0xE60A0A,             
+'Cys' : 0xE6E600,             
+'Gln' : 0x00DCDC,            
+'Glu' : 0xE60A0A,              
+'Gly' : 0xEBEBEB,        
+'His' :  0x8282D2,       
+'Ile' :0x0F820F,             
+'Leu':0x0F820F,              
+'Lys' :0x145AFF,              
+'Met' :0xE6E600,             
+'Phe':0x3232AA,            
+'Pro' :  0xDC9682,    
+'Ser': 0xFA9600,           
+'Thr': 0xFA9600,          
+'Trp' :   0xB45AB4,    
+'Tyr' :0x3232AA,            
+'Val' :0x0F820F,            
+'Asx'  :0xFF69B4,     
+'Glx'  :0xFF69B4,       
+'other' :0xBEA06E,
+
+};
+
+/** @property shapely amino acid color scheme*/
+$3Dmol.residues.shapely ={
+'Ala' : 0x8CFF8C,         
+'Arg' : 0x00007C,              
+'Asn' : 0xFF7C70,              
+'Asp' : 0xA00042,             
+'Cys' : 0xFFFF70,             
+'Gln' : 0xFF4C4C,            
+'Glu' : 0x660000,              
+'Gly' : 0xFFFFFF,        
+'His' :  0x7070FF,       
+'Ile' :0x004C00,             
+'Leu':0x455E45,              
+'Lys' :0x4747B8,              
+'Met' :0xB8A042,             
+'Phe':0x534C52,            
+'Pro' :  0x525252,    
+'Ser': 0xFF7042,           
+'Thr': 0xB84C00,          
+'Trp' :   0x4F4600,    
+'Tyr' :0x8C704C,            
+'Val' :0xFF8CFF,            
+'Asx'  :0xFF00FF,     
+'Glx'  :0xFF00FF,       
+'other' :0xFF00FF,
+
+};
+
+/** @property nucleic acid color scheme*/
+$3Dmol.residues.nucleic = {
+    'A':0xA0A0FF,    
+    'G':  0xFF7070,    
+    'I':  0x80FFFF,    
+    'C':  0xFF8C4B,    
+    'T':  0xA0FFA0,    
+    'U':   0xFF8080
+};
+$3Dmol.chains ={};
+
+/** @property chain based standard color scheme */
+$3Dmol.chains.atom = {
+
+'A' : 0xC0D0FF,        
+'B' : 0xB0FFB0,              
+'C' : 0xFFC0C8 ,              
+'D' : 0xFFFF80,             
+'E' : 0xFFC0FF,             
+'F' : 0xB0F0F0,            
+'G' : 0xFFD070,              
+'H' : 0xF08080,        
+'I' :  0xF5DEB3,       
+'J' :0x00BFFF,             
+'K':0xCD5C5C ,              
+'L' :0x66CDAA,              
+'M' :0x9ACD32,             
+'N':0xEE82EE ,            
+'O' :  0x00CED1,    
+'P': 0x00FF7F,           
+'Q': 0x3CB371 ,          
+'R' :   0x00008B,    
+'S' :0xBDB76B,            
+'T' :0x006400,            
+'U'  :0x800000,     
+'V'  :0x808000,       
+'W' :0x800080,
+'X' :0x008080 ,
+ 'Y':0xB8860B,
+ 'Z':0xB22222,
+};
+
+/** @property hetatm color scheme */
+$3Dmol.chains.hetatm = {
+
+'A' : 0x90A0CF,        
+'B' : 0x80CF98,              
+'C' : 0xCF90B0 ,              
+'D' : 0xCFCF70,             
+'E' : 0xCF90CF,             
+'F' : 0x80C0C0,            
+'G' : 0xCFA060,              
+'H' : 0xC05070,        
+'I' : 0xC5AE83,       
+'J' :0x00A7CF,             
+'K':0xB54C4C ,              
+'L' :0x56B592,              
+'M' :0x8AB52A,             
+'N':0xBE72BE ,            
+'O' :  0x00B6A1,    
+'P': 0x00CF6F,           
+'Q': 0x349B61 ,          
+'R' :   0x0000BB  ,    
+'S' :0xA59F5B,            
+'T' :0x009400,            
+'U'  :0xB00000,     
+'V'  :0xB0B000,       
+'W' :0xB000B0,
+'X' :0x00B0B0 ,
+ 'Y':0xE8B613,
+ 'Z':0xC23232,
+};
+
+/** @property built in color schemes 
+* The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme */
+$3Dmol.builtinColorSchemes = {
+        'ssPyMol' : {'prop':'ss', map:$3Dmol.ssColors.pyMol},
+        'ssJmol' :{'prop':'ss', map:$3Dmol.ssColors.Jmol},
+        'Jmol' :{'prop':'elem', map:$3Dmol.elementColors.Jmol},
+        'default' : {'prop': 'elem', map:$3Dmol.elementColors.defaultColors},
+        'greenCarbon' : {'prop':'elem', map:$3Dmol.elementColors.greenCarbon},
+        'cyanCarbon' : {'prop':'elem', map:$3Dmol.elementColors.cyanCarbon},
+        'magentaCarbon' : {'prop':'elem', map:$3Dmol.elementColors.magentaCarbon},
+        'yellowCarbon' : {'prop':'elem', map:$3Dmol.elementColors.yellowCarbon},
+        'whiteCarbon' : {'prop':'elem', map:$3Dmol.elementColors.whiteCarbon},
+        'orangeCarbon' : {'prop':'elem', map:$3Dmol.elementColors.orangeCarbon},
+        'purpleCarbon' : {'prop':'elem', map:$3Dmol.elementColors.purpleCarbon},
+        'blueCarbon' : {'prop':'elem', map:$3Dmol.elementColors.blueCarbon},
+        'amino' : {'prop':'resAmino', map:$3Dmol.residues.amino},
+        'shapely' :{'prop':'resShapely', map:$3Dmol.residues.shapely},
+        'nucleic' :{'prop':'resNucleic', map:$3Dmol.residues.nucleic},
+        'chain' :{'prop':'chain', map:$3Dmol.chains.atom},
+        'chainHetatm' :{'prop':'chain', map:$3Dmol.chains.hetatm},
+        
+};
+
+/** Return proper color for atom given style
+ * @param {AtomSpec} atom
+ * @param {AtomStyle} style
+ * @return {$3Dmol.Color}
+ */
+ 
+$3Dmol.getColorFromStyle = function(atom, style) {
+    var scheme = style.colorscheme;  
+    if(typeof($3Dmol.builtinColorSchemes[scheme]) != "undefined") {
+        scheme = $3Dmol.builtinColorSchemes[scheme];
+    }
+    var color = atom.color;
+    if (typeof (style.color) != "undefined" && style.color != "spectrum")
+        color = style.color;
+    if(typeof(scheme) != "undefined") {
+        if(typeof($3Dmol.builtinColorSchemes[scheme]) != "undefined") {
+            //name of builtin colorscheme
+            if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
+                color = scheme.map[atom[scheme.prop]];
+            }
+        } 
+        else if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
+            //name of builtin colorscheme
+            var scheme = $3Dmol.elementColors[scheme];
+            if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
+                color = scheme.map[atom[scheme.prop]];
+            }
+        } else if(typeof(scheme[atom[scheme.prop]]) != 'undefined') {
+            //actual color scheme provided
+            color = scheme.map[atom[scheme.prop]];
+        } else if(typeof(scheme.prop) != 'undefined' &&
+                typeof(scheme.gradient) != 'undefined') {         
+            //apply a property mapping
+            var prop = scheme.prop;
+            var grad = scheme.gradient; //redefining scheme
+            if(typeof($3Dmol.Gradient.builtinGradients[grad]) != "undefined") {
+                grad = new $3Dmol.Gradient.builtinGradients[grad](scheme.min, scheme.max, scheme.mid);
+            }
+            
+            var range = grad.range() || [-1,1]; //sensible default
+            var val = $3Dmol.getAtomProperty(atom, prop);
+            if(val != null) {
+                color = grad.valueToHex(val, range);
+            }
+        } else if(typeof(scheme.prop) != 'undefined' &&
+                typeof(scheme.map) != 'undefined') {         
+            //apply a discrete property mapping
+            var prop = scheme.prop;
+            var val = $3Dmol.getAtomProperty(atom, prop);
+            if( typeof scheme.map[val] != 'undefined' ) {
+                color = scheme.map[val];
+            }
+        } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+            //actual color scheme provided
+            color = style.colorscheme[atom.elem];
+        } else {
+            console.log("Could not interpret colorscheme "+scheme);
+        } 
+    } 
+    else if(typeof(style.colorfunc) != "undefined") {
+        //this is a user provided function for turning an atom into a color
+        color = style.colorfunc(atom);
+    }
+    
+    var C = $3Dmol.CC.color(color);
+    return C;
+};
 //glcartoon.js
 //This contains all the routines for rendering a cartoon given a set
 //of atoms with assigned secondary structure
@@ -21521,32 +23728,42 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 
 var $3Dmol = $3Dmol || {};
 
-
-/**@typedef CartoonStyleSpec
+/**
+ * @typedef CartoonStyleSpec
  * @prop {ColorSpec} color - strand color, may specify as 'spectrum'
- * @prop {string} style - style of cartoon rendering (trace, oval, rectangle (default), parabola, edged)
- * @prop {boolean} ribbon - whether to use constant strand width, disregarding secondary structure; use thickness to adjust radius
- * @prop {boolean} arrows - whether to add arrows showing beta-sheet directionality; does not apply to trace or ribbon
- * @prop {boolean} tubes - whether to display alpha helices as simple cylinders; does not apply to trace
+ * @prop {string} style - style of cartoon rendering (trace, oval, rectangle
+ *       (default), parabola, edged)
+ * @prop {boolean} ribbon - whether to use constant strand width, disregarding
+ *       secondary structure; use thickness to adjust radius
+ * @prop {boolean} arrows - whether to add arrows showing beta-sheet
+ *       directionality; does not apply to trace or ribbon
+ * @prop {boolean} tubes - whether to display alpha helices as simple cylinders;
+ *       does not apply to trace
  * @prop {number} thickness - cartoon strand thickness, default is 0.4
- * @prop {number} width - cartoon strand width, default is secondary structure-dependent; does not apply to trace or ribbon
- * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain with a warning outputted in the event of ambiguity
- * @prop {}
- * In nucleic acids, the base cylinders obtain their color from the atom to which the cylinder is drawn, which
- * is 'N1' for purines (resn: 'A', 'G', 'DA', 'DG') and 'N3' for pyrimidines (resn: 'C', 'U', 'DC', 'DT').
- * The different nucleobases can therefore be distinguished as follows:
- * @example
- * viewer.setStyle({resn:'DA', atom:'N1'}, {cartoon:{color:'red'}});
- * viewer.setStyle({resn:'DG', atom:'N1'}, {cartoon:{color:'green'}});
- * viewer.setStyle({resn:'DC', atom:'N3'}, {cartoon:{color:'blue'}});
- * viewer.setStyle({resn:'DT', atom:'N3'}, {cartoon:{color:'yellow'}});
+ * @prop {number} width - cartoon strand width, default is secondary
+ *       structure-dependent; does not apply to trace or ribbon
+ * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain
+ *       with a warning outputted in the event of ambiguity
+ * @prop {} In nucleic acids, the base cylinders obtain their color from the
+ *       atom to which the cylinder is drawn, which is 'N1' for purines (resn:
+ *       'A', 'G', 'DA', 'DG') and 'N3' for pyrimidines (resn: 'C', 'U', 'DC',
+ *       'DT'). The different nucleobases can therefore be distinguished as
+ *       follows:
+ * @example $3Dmol.download("pdb:4ZD3",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  viewer.setViewStyle({style:"outline"});
+                  viewer.setStyle({},{cartoon:{}});
+                  viewer.render();
+              });
  */
 
 /**
  * @ignore
- * @param {$3Dmol.Object3D} group
- * @param {AtomSpec} atomlist
- * @param {$3Dmol.Gradient} gradientscheme
+ * @param {$3Dmol.Object3D}
+ *            group
+ * @param {AtomSpec}
+ *            atomlist
+
  */
 $3Dmol.drawCartoon = (function() {
 
@@ -21557,7 +23774,7 @@ $3Dmol.drawCartoon = (function() {
     var helixSheetWidth = 1.3;
     var nucleicAcidWidth = 0.8;
     var arrowTipWidth = 0.1;
-    var defaultThickness = 0.4; 
+    var defaultThickness = 0.4;
 
     // helper functions
 
@@ -21567,48 +23784,53 @@ $3Dmol.drawCartoon = (function() {
         var points = _points;
         points = []; // Smoothing test
         points.push(_points[0]);
-        
+
         var i, lim, size;
         var p0, p1, p2, p3, v0, v1;
-        
+
         for (i = 1, lim = _points.length - 1; i < lim; i++) {
-            p1 = _points[i]; p2 = _points[i + 1];
-            if (p1.smoothen)
-                points.push(new $3Dmol.Vector3((p1.x + p2.x) / 2, (p1.y + p2.y) / 2,
-                        (p1.z + p2.z) / 2));
+            p1 = _points[i];
+            p2 = _points[i + 1];
+            if (p1.smoothen) {
+                var np = new $3Dmol.Vector3((p1.x + p2.x) / 2,
+                        (p1.y + p2.y) / 2, (p1.z + p2.z) / 2);
+                np.atom = p1.atom;
+                points.push(np);
+            }
             else
                 points.push(p1);
         }
         points.push(_points[_points.length - 1]);
 
-        
         for (i = -1, size = points.length; i <= size - 3; i++) {
             p0 = points[(i === -1) ? 0 : i];
-            p1 = points[i + 1]; p2 = points[i + 2];
+            p1 = points[i + 1];
+            p2 = points[i + 2];
             p3 = points[(i === size - 3) ? size - 1 : i + 3];
             v0 = new $3Dmol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
             v1 = new $3Dmol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
-            if (p2.skip) continue;
+            if (p2.skip)
+                continue;
 
-            for ( var j = 0; j < DIV; j++) {
+            for (var j = 0; j < DIV; j++) {
                 var t = 1.0 / DIV * j;
-                var x = p1.x + t * v0.x + t * t * 
-                        (-3 * p1.x + 3 * p2.x - 2 * v0.x - v1.x) + t * t * t *
-                        (2 * p1.x - 2 * p2.x + v0.x + v1.x);
-                var y = p1.y + t * v0.y + t * t * 
-                        (-3 * p1.y + 3 * p2.y - 2 * v0.y - v1.y) + t * t * t *
-                        (2 * p1.y - 2 * p2.y + v0.y + v1.y);
-                var z = p1.z + t * v0.z + t * t * 
-                        (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t * 
-                        (2 * p1.z - 2 * p2.z + v0.z + v1.z);
-                        
+                var x = p1.x + t * v0.x + t * t
+                        * (-3 * p1.x + 3 * p2.x - 2 * v0.x - v1.x) + t * t * t
+                        * (2 * p1.x - 2 * p2.x + v0.x + v1.x);
+                var y = p1.y + t * v0.y + t * t
+                        * (-3 * p1.y + 3 * p2.y - 2 * v0.y - v1.y) + t * t * t
+                        * (2 * p1.y - 2 * p2.y + v0.y + v1.y);
+                var z = p1.z + t * v0.z + t * t
+                        * (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t
+                        * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
+
                 var pt = new $3Dmol.Vector3(x, y, z);
+                if(j < DIV/2) {
+                    pt.atom = p1.atom;
+                } else {
+                    pt.atom = p2.atom;
+                }
                 
-                var atomIndex = Math.floor( (ret.length+2) / DIV);
-                
-                if (_points[atomIndex] !== undefined && _points[atomIndex].atom !== undefined)
-                    pt.atom = _points[atomIndex].atom;
-                    
                 ret.push(pt);
             }
         }
@@ -21616,134 +23838,135 @@ $3Dmol.drawCartoon = (function() {
         return ret;
     };
 
-    var drawThinStrip = function(group, p1, p2, colors, div, opacity) {
-    
-        var geo = new $3Dmol.Geometry(true);       
+    var drawThinStrip = function(geo, p1, p2, colors, div, opacity) {
+
         var offset, vertoffset;
         var color, colori;
 
-        
-        for ( var i = 0, lim = p1.length; i < lim; i++) {
-            
-            colori = Math.round(i*(colors.length-1)/lim);
+        for (var i = 0, lim = p1.length; i < lim; i++) {
+
+            colori = Math.round(i * (colors.length - 1) / lim);
             color = $3Dmol.CC.color(colors[colori]);
-           
+
             geoGroup = geo.updateGeoGroup(2);
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             var faceArray = geoGroup.faceArray;
-            offset = geoGroup.vertices; vertoffset = offset*3;
-            
+            offset = geoGroup.vertices;
+            vertoffset = offset * 3;
+
             vertexArray[vertoffset] = p1[i].x;
-            vertexArray[vertoffset+1] = p1[i].y;
-            vertexArray[vertoffset+2] = p1[i].z;
-            
-            vertexArray[vertoffset+3] = p2[i].x;
-            vertexArray[vertoffset+4] = p2[i].y;
-            vertexArray[vertoffset+5] = p2[i].z;
-            
-            for (var j = 0; j < 6; ++j)
-            {
-                colorArray[vertoffset+3*j] = color.r;
-                colorArray[vertoffset+1+3*j] = color.g;
-                colorArray[vertoffset+2+3*j] = color.b;
+            vertexArray[vertoffset + 1] = p1[i].y;
+            vertexArray[vertoffset + 2] = p1[i].z;
+
+            vertexArray[vertoffset + 3] = p2[i].x;
+            vertexArray[vertoffset + 4] = p2[i].y;
+            vertexArray[vertoffset + 5] = p2[i].z;
+
+            for (var j = 0; j < 6; ++j) {
+                colorArray[vertoffset + 3 * j] = color.r;
+                colorArray[vertoffset + 1 + 3 * j] = color.g;
+                colorArray[vertoffset + 2 + 3 * j] = color.b;
             }
-           
+
             if (i > 0) {
-                var faces = [offset, offset + 1, offset - 1, offset - 2];
+                var faces = [ offset, offset + 1, offset - 1, offset - 2 ];
                 var faceoffset = geoGroup.faceidx;
-                
-                faceArray[faceoffset] = faces[0]; faceArray[faceoffset+1] = faces[1]; faceArray[faceoffset+2] = faces[3];
-                faceArray[faceoffset+3] = faces[1]; faceArray[faceoffset+4] = faces[2]; faceArray[faceoffset+5] = faces[3];
+
+                faceArray[faceoffset] = faces[0];
+                faceArray[faceoffset + 1] = faces[1];
+                faceArray[faceoffset + 2] = faces[3];
+                faceArray[faceoffset + 3] = faces[1];
+                faceArray[faceoffset + 4] = faces[2];
+                faceArray[faceoffset + 5] = faces[3];
 
                 geoGroup.faceidx += 6;
             }
-            
+
             geoGroup.vertices += 2;
         }
-        
-        geo.initTypedArrays();
-        geo.setUpNormals();
-        
-        var material = new $3Dmol.MeshDoubleLambertMaterial();
-        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
-            material.transparent = true;
-            material.opacity = opacity;
-        }
-        material.vertexColors = $3Dmol.FaceColors;
-        var mesh = new $3Dmol.Mesh(geo, material);
 
-        group.add(mesh);
     };
 
-    var drawShapeStrip = function(group, points, colors, div, thickness, opacity, shape) {
+    var drawShapeStrip = function(geo, points, colors, div, thickness, opacity,
+            shape) {
 
-        // points is a 2D array, dimensionality given by [num = cross-sectional resolution][len = length of strip]
+        // points is a 2D array, dimensionality given by [num = cross-sectional
+        // resolution][len = length of strip]
         var i, j, num, len;
         num = points.length;
-        if (num < 2 || points[0].length < 2) return;
+        if (num < 2 || points[0].length < 2)
+            return;
 
         div = div || axisDIV;
-        for (i = 0; i < num; i++) { // spline to generate greater length-wise resolution
+        for (i = 0; i < num; i++) { // spline to generate greater length-wise
+                                    // resolution
             points[i] = subdivide(points[i], div)
         }
         len = points[0].length;
 
-        if (!thickness) // if thickness is 0, we can use a smaller geometry than this function generates
-            return drawThinStrip(group, points[0], points[num-1], colors, div, opacity);
+        if (!thickness) // if thickness is 0, we can use a smaller geometry than
+                        // this function generates
+            return drawThinStrip(geo, points[0], points[num - 1], colors, div,
+                    opacity);
 
-
-        var geo = new $3Dmol.Geometry(true);
         var axis, cs_shape, cs_bottom, cs_top, last_cs_bottom, last_cs_top;
 
         // cache the available cross-sectional shapes
         var cs_ellipse = [], cs_rectangle = [], cs_parabola = [];
-        for (j=0; j < num; j++) {
-            cs_ellipse.push(0.25 + 1.5*Math.sqrt((num-1)*j - Math.pow(j, 2))/(num-1));
+        for (j = 0; j < num; j++) {
+            cs_ellipse.push(0.25 + 1.5
+                    * Math.sqrt((num - 1) * j - Math.pow(j, 2)) / (num - 1));
             cs_rectangle.push(0.5);
-            cs_parabola.push(2*(Math.pow(j/num, 2) - j/num) + 0.6);
+            cs_parabola.push(2 * (Math.pow(j / num, 2) - j / num) + 0.6);
         }
 
-        /* face_refs array is used to generate faces from vertexArray iteratively.
-           As we move through each cross-sectional segment of points, we draw lateral
-           faces backwards to the previous cross-sectional segment.
-
-           To correctly identify the points needed to make each face we use this
-           array as a lookup table for the relative indices of each needed point
-           in the vertices array.
-
-           4 points are used to create 2 faces.
-        */
+        /*
+         * face_refs array is used to generate faces from vertexArray
+         * iteratively. As we move through each cross-sectional segment of
+         * points, we draw lateral faces backwards to the previous
+         * cross-sectional segment.
+         * 
+         * To correctly identify the points needed to make each face we use this
+         * array as a lookup table for the relative indices of each needed point
+         * in the vertices array.
+         * 
+         * 4 points are used to create 2 faces.
+         */
 
         var face_refs = [];
-        for (j = 0; j < num*2-1; j++) {
-            /* [curr vertex in curr cross-section,
-                next vertex in curr cross-section,
-                next vertex in prev cross-section,
-                curr vertex in prev cross-section] */
-            face_refs[j] = [j, j+1, j+1-2*num, j-2*num];
+        for (j = 0; j < num * 2 - 1; j++) {
+            /*
+             * [curr vertex in curr cross-section, next vertex in curr
+             * cross-section, next vertex in prev cross-section, curr vertex in
+             * prev cross-section]
+             */
+            face_refs[j] = [ j, j + 1, j + 1 - 2 * num, j - 2 * num ];
         }
-        // last face is different. easier to conceptualize this by drawing a diagram
-        face_refs[num*2-1] = [j, j+1-2*num, j+1-4*num, j-2*num];
+        // last face is different. easier to conceptualize this by drawing a
+        // diagram
+        face_refs[num * 2 - 1] = [ j, j + 1 - 2 * num, j + 1 - 4 * num,
+                j - 2 * num ];
 
-                
         var v_offset, va_offset, f_offset;
         var currentAtom, lastAtom
         var color, colori;
-        var geoGroup = geo.updateGeoGroup(2*num*len); // ensure vertex capacity
-        
+        var geoGroup = geo.updateGeoGroup(2 * num * len); // ensure vertex
+                                                            // capacity
+
         for (i = 0; i < len; i++) {
-        
-            colori = Math.round(i*(colors.length-1)/len);
+
+            colori = Math.round(i * (colors.length - 1) / len);
             color = $3Dmol.CC.color(colors[colori]);
-            
+
             last_cs_bottom = cs_bottom;
             last_cs_top = cs_top;
             cs_bottom = [];
             cs_top = [];
             axis = [];
 
-            if (points[0][i].atom !== undefined) // TODO better edge case handling
+            if (points[0][i].atom !== undefined) // TODO better edge case
+                                                    // handling
             {
                 currentAtom = points[0][i].atom;
                 if (shape === "oval")
@@ -21753,119 +23976,138 @@ $3Dmol.drawCartoon = (function() {
                 else if (shape === "parabola")
                     cs_shape = cs_parabola;
             }
-            if (!cs_shape) cs_shape = cs_rectangle;
+            if (!cs_shape)
+                cs_shape = cs_rectangle;
 
-            
-            // calculate thickness at each width point, from cross-sectional shape
+            // calculate thickness at each width point, from cross-sectional
+            // shape
             var toNext, toSide;
-            for (j = 0; j < num; j++)
-            {
-                if (i < len-1)
-                    toNext = points[j][i+1].clone().sub(points[j][i]);
+            for (j = 0; j < num; j++) {
+                if (i < len - 1)
+                    toNext = points[j][i + 1].clone().sub(points[j][i]);
                 else
-                    toNext = points[j][i-1].clone().sub(points[j][i]).negate();
+                    toNext = points[j][i - 1].clone().sub(points[j][i])
+                            .negate();
 
-                if (j < num-1)
-                    toSide = points[j+1][i].clone().sub(points[j][i]);
+                if (j < num - 1)
+                    toSide = points[j + 1][i].clone().sub(points[j][i]);
                 else
-                    toSide = points[j-1][i].clone().sub(points[j][i]).negate();
+                    toSide = points[j - 1][i].clone().sub(points[j][i])
+                            .negate();
 
-                axis[j] = toSide.cross(toNext).normalize().multiplyScalar(thickness*cs_shape[j]);
+                axis[j] = toSide.cross(toNext).normalize().multiplyScalar(
+                        thickness * cs_shape[j]);
             }
 
-            // generate vertices by applying cross-sectional shape thickness to input points
+            // generate vertices by applying cross-sectional shape thickness to
+            // input points
             for (j = 0; j < num; j++)
-                cs_bottom[j] = points[j][i].clone().add(axis[j].clone().negate());
+                cs_bottom[j] = points[j][i].clone().add(
+                        axis[j].clone().negate());
             for (j = 0; j < num; j++)
                 cs_top[j] = points[j][i].clone().add(axis[j]);
-            
 
-            /* Until this point the vertices have been dealt with as $3Dmol.Vector3() objects,
-               but we need to serialize them into the geoGroup.vertexArray, where every three
-               indices represents the next vertex. The colorArray is analogous.
-
-               In the following for-loops, j iterates through VERTICES so we need to index
-               them in vertexArray by 3*j + either 0, 1, or 2 for xyz or rgb component.
-            */
+            /*
+             * Until this point the vertices have been dealt with as
+             * $3Dmol.Vector3() objects, but we need to serialize them into the
+             * geoGroup.vertexArray, where every three indices represents the
+             * next vertex. The colorArray is analogous.
+             * 
+             * In the following for-loops, j iterates through VERTICES so we
+             * need to index them in vertexArray by 3*j + either 0, 1, or 2 for
+             * xyz or rgb component.
+             */
 
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             var faceArray = geoGroup.faceArray;
-            v_offset = geoGroup.vertices; va_offset = v_offset*3; // in case geoGroup already contains vertices
+            v_offset = geoGroup.vertices;
+            va_offset = v_offset * 3; // in case geoGroup already contains
+                                        // vertices
 
             // bottom edge of cross-section, vertices [0, num)
             for (j = 0; j < num; j++) {
-                vertexArray[va_offset + 3*j + 0] = cs_bottom[j].x;
-                vertexArray[va_offset + 3*j + 1] = cs_bottom[j].y;
-                vertexArray[va_offset + 3*j + 2] = cs_bottom[j].z;
+                vertexArray[va_offset + 3 * j + 0] = cs_bottom[j].x;
+                vertexArray[va_offset + 3 * j + 1] = cs_bottom[j].y;
+                vertexArray[va_offset + 3 * j + 2] = cs_bottom[j].z;
             }
 
             // top edge of cross-section, vertices [num, 2*num)
-            // add these backwards, so that each cross-section's vertices are added sequentially to vertexArray
+            // add these backwards, so that each cross-section's vertices are
+            // added sequentially to vertexArray
             for (j = 0; j < num; j++) {
-                vertexArray[va_offset + 3*j + 0 + 3*num] = cs_top[num-1-j].x;
-                vertexArray[va_offset + 3*j + 1 + 3*num] = cs_top[num-1-j].y;
-                vertexArray[va_offset + 3*j + 2 + 3*num] = cs_top[num-1-j].z;
+                vertexArray[va_offset + 3 * j + 0 + 3 * num] = cs_top[num - 1
+                        - j].x;
+                vertexArray[va_offset + 3 * j + 1 + 3 * num] = cs_top[num - 1
+                        - j].y;
+                vertexArray[va_offset + 3 * j + 2 + 3 * num] = cs_top[num - 1
+                        - j].z;
             }
-            
-            for (j = 0; j < 2*num; ++j) {
-                colorArray[va_offset + 3*j + 0] = color.r;
-                colorArray[va_offset + 3*j + 1] = color.g;
-                colorArray[va_offset + 3*j + 2] = color.b;
-            }
-            
-            if (i > 0) {
-             
-                for (j = 0; j < num*2; j++) {
-                
-                    // get VERTEX indices of the 4 points of a rectangular face (as opposed to literal vertexArray indices)
-                    var face = [v_offset + face_refs[j][0],
-                                v_offset + face_refs[j][1],
-                                v_offset + face_refs[j][2],
-                                v_offset + face_refs[j][3]];
-                    
-                    f_offset = geoGroup.faceidx;    
-                    
-                    // need 2 triangles to draw a face between 4 points
-                    faceArray[f_offset]   = face[0];
-                    faceArray[f_offset+1] = face[1]; 
-                    faceArray[f_offset+2] = face[3];
 
-                    faceArray[f_offset+3] = face[1];
-                    faceArray[f_offset+4] = face[2];
-                    faceArray[f_offset+5] = face[3];
-                    
+            for (j = 0; j < 2 * num; ++j) {
+                colorArray[va_offset + 3 * j + 0] = color.r;
+                colorArray[va_offset + 3 * j + 1] = color.g;
+                colorArray[va_offset + 3 * j + 2] = color.b;
+            }
+
+            if (i > 0) {
+
+                for (j = 0; j < num * 2; j++) {
+
+                    // get VERTEX indices of the 4 points of a rectangular face
+                    // (as opposed to literal vertexArray indices)
+                    var face = [ v_offset + face_refs[j][0],
+                            v_offset + face_refs[j][1],
+                            v_offset + face_refs[j][2],
+                            v_offset + face_refs[j][3] ];
+
+                    f_offset = geoGroup.faceidx;
+
+                    // need 2 triangles to draw a face between 4 points
+                    faceArray[f_offset] = face[0];
+                    faceArray[f_offset + 1] = face[1];
+                    faceArray[f_offset + 2] = face[3];
+
+                    faceArray[f_offset + 3] = face[1];
+                    faceArray[f_offset + 4] = face[2];
+                    faceArray[f_offset + 5] = face[3];
+
                     geoGroup.faceidx += 6;
 
-                    // TODO implement clickable the right way. midpoints of strand between consecutive atoms
+                    // TODO implement clickable the right way. midpoints of
+                    // strand between consecutive atoms
                 }
-                    
-                if (currentAtom.clickable)
-                {
+
+                if (currentAtom.clickable) {
                     var faces = [];
 
-                    faces.push(new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[0], cs_bottom[num-1]));
-                    faces.push(new $3Dmol.Triangle(last_cs_bottom[0], cs_bottom[num-1], last_cs_bottom[num-1]));
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[0],
+                            cs_bottom[0], cs_bottom[num - 1]));
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[0],
+                            cs_bottom[num - 1], last_cs_bottom[num - 1]));
 
-                    faces.push(new $3Dmol.Triangle(last_cs_bottom[num-1], cs_bottom[num-1], cs_top[num-1]));
-                    faces.push(new $3Dmol.Triangle(last_cs_bottom[num-1], cs_top[num-1], last_cs_top[num-1]));
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[num - 1],
+                            cs_bottom[num - 1], cs_top[num - 1]));
+                    faces.push(new $3Dmol.Triangle(last_cs_bottom[num - 1],
+                            cs_top[num - 1], last_cs_top[num - 1]));
 
-                    faces.push(new $3Dmol.Triangle(cs_top[0], last_cs_top[0], last_cs_top[num-1]));
-                    faces.push(new $3Dmol.Triangle(cs_top[num-1], cs_top[0], last_cs_top[num-1]));
+                    faces.push(new $3Dmol.Triangle(cs_top[0], last_cs_top[0],
+                            last_cs_top[num - 1]));
+                    faces.push(new $3Dmol.Triangle(cs_top[num - 1], cs_top[0],
+                            last_cs_top[num - 1]));
 
-                    faces.push(new $3Dmol.Triangle(cs_bottom[0], last_cs_bottom[0], last_cs_top[0]));
-                    faces.push(new $3Dmol.Triangle(cs_top[0], cs_bottom[0], last_cs_top[0]));
+                    faces.push(new $3Dmol.Triangle(cs_bottom[0],
+                            last_cs_bottom[0], last_cs_top[0]));
+                    faces.push(new $3Dmol.Triangle(cs_top[0], cs_bottom[0],
+                            last_cs_top[0]));
 
-                    for (j in faces)
-                    {
+                    for (j in faces) {
                         currentAtom.intersectionShape.triangle.push(faces[j]);
-                        
                     }
                 }
-
             }
-            
-            geoGroup.vertices += 2*num;
+
+            geoGroup.vertices += 2 * num;
             lastAtom = currentAtom;
         }
 
@@ -21873,96 +24115,84 @@ $3Dmol.drawCartoon = (function() {
         var vertexArray = geoGroup.vertexArray;
         var colorArray = geoGroup.colorArray;
         var faceArray = geoGroup.faceArray;
-        v_offset = geoGroup.vertices; va_offset = v_offset*3; f_offset = geoGroup.faceidx;
+        v_offset = geoGroup.vertices;
+        va_offset = v_offset * 3;
+        f_offset = geoGroup.faceidx;
 
-        for (i = 0; i<num-1; i++) // "rear" face
+        for (i = 0; i < num - 1; i++) // "rear" face
         {
-            var face = [i, i+1, 2*num-2-i, 2*num-1-i];
+            var face = [ i, i + 1, 2 * num - 2 - i, 2 * num - 1 - i ];
 
             f_offset = geoGroup.faceidx;
 
-            faceArray[f_offset]   = face[0];
-            faceArray[f_offset+1] = face[1]; 
-            faceArray[f_offset+2] = face[3];
+            faceArray[f_offset] = face[0];
+            faceArray[f_offset + 1] = face[1];
+            faceArray[f_offset + 2] = face[3];
 
-            faceArray[f_offset+3] = face[1];
-            faceArray[f_offset+4] = face[2];
-            faceArray[f_offset+5] = face[3];
+            faceArray[f_offset + 3] = face[1];
+            faceArray[f_offset + 4] = face[2];
+            faceArray[f_offset + 5] = face[3];
 
             geoGroup.faceidx += 6;
         }
 
-        for (i = 0; i<num-1; i++) // "front" face
+        for (i = 0; i < num - 1; i++) // "front" face
         {
-            var face = [v_offset-1-i, v_offset-2-i, v_offset-2*num+i+1, v_offset-2*num+i];
+            var face = [ v_offset - 1 - i, v_offset - 2 - i,
+                    v_offset - 2 * num + i + 1, v_offset - 2 * num + i ];
 
             f_offset = geoGroup.faceidx;
 
-            faceArray[f_offset]   = face[0];
-            faceArray[f_offset+1] = face[1]; 
-            faceArray[f_offset+2] = face[3];
+            faceArray[f_offset] = face[0];
+            faceArray[f_offset + 1] = face[1];
+            faceArray[f_offset + 2] = face[3];
 
-            faceArray[f_offset+3] = face[1];
-            faceArray[f_offset+4] = face[2];
-            faceArray[f_offset+5] = face[3];
+            faceArray[f_offset + 3] = face[1];
+            faceArray[f_offset + 4] = face[2];
+            faceArray[f_offset + 5] = face[3];
 
             geoGroup.faceidx += 6;
         }
-        
-        geo.initTypedArrays();
-        geo.setUpNormals();
-        
-        var material = new $3Dmol.MeshDoubleLambertMaterial();
-        material.vertexColors = $3Dmol.FaceColors;
-        if (typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
-            material.transparent = true;
-            material.opacity = opacity;
-        }
-        var mesh = new $3Dmol.Mesh(geo, material);
-        group.add(mesh);
+
     };
 
-    var drawPlainStrip = function(group, points, colors, div, thickness, opacity) {
+    var drawPlainStrip = function(geo, points, colors, div, thickness, opacity) {
         if ((points.length) < 2)
             return;
 
         var p1, p2;
         p1 = points[0];
-        p2 = points[points.length-1];
+        p2 = points[points.length - 1];
 
         div = div || axisDIV;
         p1 = subdivide(p1, div);
         p2 = subdivide(p2, div);
         if (!thickness)
-            return drawThinStrip(group, p1, p2, colors, div, opacity);
+            return drawThinStrip(geo, p1, p2, colors, div, opacity);
 
-        var geo = new $3Dmol.Geometry(true);
-        
-        //var vs = geo.vertices, fs = geo.faces;
+        // var vs = geo.vertices, fs = geo.faces;
         var vs = [], fs = [];
         var axis, p1v, p2v, a1v, a2v;
-        
-        var faces = [ [ 0, 2, -6, -8 ],
-                      [ -4, -2, 6, 4 ],
-                      [ 7, -1, -5, 3 ],
-                      [ -3, 5, 1, -7 ] ];
-                
+
+        var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, -1, -5, 3 ],
+                [ -3, 5, 1, -7 ] ];
+
         var offset, vertoffset, faceoffset;
         var color, colori;
         var currentAtom, lastAtom;
         var i, lim, j;
         var face1, face2, face3;
         var geoGroup;
-        
+
         for (i = 0, lim = p1.length; i < lim; i++) {
-        
-            colori = Math.round(i*(colors.length-1)/lim);
+
+            colori = Math.round(i * (colors.length - 1) / lim);
             color = $3Dmol.CC.color(colors[colori]);
-            
+
             vs.push(p1v = p1[i]); // 0
-            vs.push(p1v);         // 1
+            vs.push(p1v); // 1
             vs.push(p2v = p2[i]); // 2
-            vs.push(p2v);         // 3
+            vs.push(p2v); // 3
             if (i < lim - 1) {
                 var toNext = p1[i + 1].clone().sub(p1[i]);
                 var toSide = p2[i].clone().sub(p1[i]);
@@ -21973,270 +24203,323 @@ $3Dmol.drawCartoon = (function() {
             vs.push(a1v); // 5
             vs.push(a2v = p2[i].clone().add(axis)); // 6
             vs.push(a2v); // 7
-            
+
             if (p1v.atom !== undefined)
                 currentAtom = p1v.atom;
-            
+
             geoGroup = geo.updateGeoGroup(8);
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             var faceArray = geoGroup.faceArray;
-            offset = geoGroup.vertices; vertoffset = offset*3;
-            
-            vertexArray[vertoffset]    = p1v.x; vertexArray[vertoffset+1]  = p1v.y; vertexArray[vertoffset+2]  = p1v.z;
-            vertexArray[vertoffset+3]  = p1v.x; vertexArray[vertoffset+4]  = p1v.y; vertexArray[vertoffset+5]  = p1v.z;
-            vertexArray[vertoffset+6]  = p2v.x; vertexArray[vertoffset+7]  = p2v.y; vertexArray[vertoffset+8]  = p2v.z;
-            vertexArray[vertoffset+9]  = p2v.x; vertexArray[vertoffset+10] = p2v.y; vertexArray[vertoffset+11] = p2v.z;
-            vertexArray[vertoffset+12] = a1v.x; vertexArray[vertoffset+13] = a1v.y; vertexArray[vertoffset+14] = a1v.z;
-            vertexArray[vertoffset+15] = a1v.x; vertexArray[vertoffset+16] = a1v.y; vertexArray[vertoffset+17] = a1v.z;
-            vertexArray[vertoffset+18] = a2v.x; vertexArray[vertoffset+19] = a2v.y; vertexArray[vertoffset+20] = a2v.z;
-            vertexArray[vertoffset+21] = a2v.x; vertexArray[vertoffset+22] = a2v.y; vertexArray[vertoffset+23] = a2v.z;
-            
-            for (j = 0; j < 8; ++j) {                
-                colorArray[vertoffset+3*j] = color.r; colorArray[vertoffset+1+3*j] = color.g; colorArray[vertoffset+2+3*j] = color.b;
+            offset = geoGroup.vertices;
+            vertoffset = offset * 3;
+
+            vertexArray[vertoffset] = p1v.x;
+            vertexArray[vertoffset + 1] = p1v.y;
+            vertexArray[vertoffset + 2] = p1v.z;
+            vertexArray[vertoffset + 3] = p1v.x;
+            vertexArray[vertoffset + 4] = p1v.y;
+            vertexArray[vertoffset + 5] = p1v.z;
+            vertexArray[vertoffset + 6] = p2v.x;
+            vertexArray[vertoffset + 7] = p2v.y;
+            vertexArray[vertoffset + 8] = p2v.z;
+            vertexArray[vertoffset + 9] = p2v.x;
+            vertexArray[vertoffset + 10] = p2v.y;
+            vertexArray[vertoffset + 11] = p2v.z;
+            vertexArray[vertoffset + 12] = a1v.x;
+            vertexArray[vertoffset + 13] = a1v.y;
+            vertexArray[vertoffset + 14] = a1v.z;
+            vertexArray[vertoffset + 15] = a1v.x;
+            vertexArray[vertoffset + 16] = a1v.y;
+            vertexArray[vertoffset + 17] = a1v.z;
+            vertexArray[vertoffset + 18] = a2v.x;
+            vertexArray[vertoffset + 19] = a2v.y;
+            vertexArray[vertoffset + 20] = a2v.z;
+            vertexArray[vertoffset + 21] = a2v.x;
+            vertexArray[vertoffset + 22] = a2v.y;
+            vertexArray[vertoffset + 23] = a2v.z;
+
+            for (j = 0; j < 8; ++j) {
+                colorArray[vertoffset + 3 * j] = color.r;
+                colorArray[vertoffset + 1 + 3 * j] = color.g;
+                colorArray[vertoffset + 2 + 3 * j] = color.b;
             }
-            
+
             if (i > 0) {
-             
-                //both points have distinct atoms
+
+                // both points have distinct atoms
                 var diffAtoms = ((lastAtom !== undefined && currentAtom !== undefined) && lastAtom.serial !== currentAtom.serial);
-                
-                for (j = 0; j < 4; j++ ) {
-                
-                    var face = [offset + faces[j][0], offset + faces[j][1], offset + faces[j][2], offset + faces[j][3]];
-                    
-                    faceoffset = geoGroup.faceidx;    
-                    
-                    faceArray[faceoffset] = face[0]; faceArray[faceoffset+1] = face[1]; faceArray[faceoffset+2] = face[3];
-                    faceArray[faceoffset+3] = face[1]; faceArray[faceoffset+4] = face[2]; faceArray[faceoffset+5] = face[3];
-                    
+
+                for (j = 0; j < 4; j++) {
+
+                    var face = [ offset + faces[j][0], offset + faces[j][1],
+                            offset + faces[j][2], offset + faces[j][3] ];
+
+                    faceoffset = geoGroup.faceidx;
+
+                    faceArray[faceoffset] = face[0];
+                    faceArray[faceoffset + 1] = face[1];
+                    faceArray[faceoffset + 2] = face[3];
+                    faceArray[faceoffset + 3] = face[1];
+                    faceArray[faceoffset + 4] = face[2];
+                    faceArray[faceoffset + 5] = face[3];
+
                     geoGroup.faceidx += 6;
-                    
+
                     if (currentAtom.clickable || lastAtom.clickable) {
-                        
-                        var p1a = vs[face[3]].clone(), p1b = vs[face[0]].clone(),
-                            p2a = vs[face[2]].clone(), p2b = vs[face[1]].clone();
-                        
-                        p1a.atom = vs[face[3]].atom || null; //should be same
-                        p2a.atom = vs[face[2]].atom || null; 
-                        
-                        
-                        p1b.atom = vs[face[0]].atom || null; //should be same                      
-                        p2b.atom = vs[face[1]].atom || null; 
-                        
+
+                        var p1a = vs[face[3]].clone(), p1b = vs[face[0]]
+                                .clone(), p2a = vs[face[2]].clone(), p2b = vs[face[1]]
+                                .clone();
+
+                        p1a.atom = vs[face[3]].atom || null; // should be
+                                                                // same
+                        p2a.atom = vs[face[2]].atom || null;
+
+                        p1b.atom = vs[face[0]].atom || null; // should be
+                                                                // same
+                        p2b.atom = vs[face[1]].atom || null;
+
                         if (diffAtoms) {
                             var m1 = p1a.clone().add(p1b).multiplyScalar(0.5);
                             var m2 = p2a.clone().add(p2b).multiplyScalar(0.5);
                             var m = p1a.clone().add(p2b).multiplyScalar(0.5);
-                            
-                            if (j % 2 === 0)
-                            {
+
+                            if (j % 2 === 0) {
                                 if (lastAtom.clickable) {
                                     face1 = new $3Dmol.Triangle(m1, m, p1a);
                                     face2 = new $3Dmol.Triangle(m2, p2a, m);
                                     face3 = new $3Dmol.Triangle(m, p2a, p1a);
-                                    lastAtom.intersectionShape.triangle.push(face1);
-                                    lastAtom.intersectionShape.triangle.push(face2);
-                                    lastAtom.intersectionShape.triangle.push(face3);
+                                    lastAtom.intersectionShape.triangle
+                                            .push(face1);
+                                    lastAtom.intersectionShape.triangle
+                                            .push(face2);
+                                    lastAtom.intersectionShape.triangle
+                                            .push(face3);
                                 }
-                                
+
                                 if (currentAtom.clickable) {
                                     face1 = new $3Dmol.Triangle(p1b, p2b, m);
                                     face2 = new $3Dmol.Triangle(p2b, m2, m);
                                     face3 = new $3Dmol.Triangle(p1b, m, m1);
-                                    currentAtom.intersectionShape.triangle.push(face1);
-                                    currentAtom.intersectionShape.triangle.push(face2);
-                                    currentAtom.intersectionShape.triangle.push(face3);
+                                    currentAtom.intersectionShape.triangle
+                                            .push(face1);
+                                    currentAtom.intersectionShape.triangle
+                                            .push(face2);
+                                    currentAtom.intersectionShape.triangle
+                                            .push(face3);
                                 }
-                            }
-                            else {
+                            } else {
                                 if (currentAtom.clickable) {
                                     face1 = new $3Dmol.Triangle(m1, m, p1a);
                                     face2 = new $3Dmol.Triangle(m2, p2a, m);
                                     face3 = new $3Dmol.Triangle(m, p2a, p1a);
-                                    currentAtom.intersectionShape.triangle.push(face1);
-                                    currentAtom.intersectionShape.triangle.push(face2);
-                                    currentAtom.intersectionShape.triangle.push(face3);
+                                    currentAtom.intersectionShape.triangle
+                                            .push(face1);
+                                    currentAtom.intersectionShape.triangle
+                                            .push(face2);
+                                    currentAtom.intersectionShape.triangle
+                                            .push(face3);
                                 }
-                                
+
                                 if (lastAtom.clickable) {
                                     face1 = new $3Dmol.Triangle(p1b, p2b, m);
                                     face2 = new $3Dmol.Triangle(p2b, m2, m);
                                     face3 = new $3Dmol.Triangle(p1b, m, m1);
-                                    lastAtom.intersectionShape.triangle.push(face1);
-                                    lastAtom.intersectionShape.triangle.push(face2);
-                                    lastAtom.intersectionShape.triangle.push(face3);
-                                }                          
+                                    lastAtom.intersectionShape.triangle
+                                            .push(face1);
+                                    lastAtom.intersectionShape.triangle
+                                            .push(face2);
+                                    lastAtom.intersectionShape.triangle
+                                            .push(face3);
+                                }
                             }
-                            
+
                         }
-                        
-                        //face for single atom
+
+                        // face for single atom
                         else if (currentAtom.clickable) {
                             face1 = new $3Dmol.Triangle(p1b, p2b, p1a);
                             face2 = new $3Dmol.Triangle(p2b, p2a, p1a);
                             currentAtom.intersectionShape.triangle.push(face1);
                             currentAtom.intersectionShape.triangle.push(face2);
                         }
-                        
+
                     }
-                    
+
                 }
             }
-            
+
             geoGroup.vertices += 8;
             lastAtom = currentAtom;
         }
-        
 
         var vsize = vs.length - 8; // Cap
-        
+
         geoGroup = geo.updateGeoGroup(8);
         var vertexArray = geoGroup.vertexArray;
         var colorArray = geoGroup.colorArray;
         var faceArray = geoGroup.faceArray;
-        offset = geoGroup.vertices; vertoffset = offset*3; faceoffset = geoGroup.faceidx;
-        
+        offset = geoGroup.vertices;
+        vertoffset = offset * 3;
+        faceoffset = geoGroup.faceidx;
+
         for (i = 0; i < 4; i++) {
             vs.push(vs[i * 2]);
             vs.push(vs[vsize + i * 2]);
-            
+
             var v1 = vs[i * 2], v2 = vs[vsize + i * 2];
-            
-            vertexArray[vertoffset+6*i] = v1.x; vertexArray[vertoffset+1+6*i] = v1.y; vertexArray[vertoffset+2+6*i] = v1.z;
-            vertexArray[vertoffset+3+6*i] = v2.x; vertexArray[vertoffset+4+6*i] = v2.y; vertexArray[vertoffset+5+6*i] = v2.z;
-            
-            colorArray[vertoffset+6*i] = color.r; colorArray[vertoffset+1+6*i] = color.g; colorArray[vertoffset+2+6*i] = color.b;
-            colorArray[vertoffset+3+6*i] = color.r; colorArray[vertoffset+4+6*i] = color.g; colorArray[vertoffset+5+6*i] = color.b;
+
+            vertexArray[vertoffset + 6 * i] = v1.x;
+            vertexArray[vertoffset + 1 + 6 * i] = v1.y;
+            vertexArray[vertoffset + 2 + 6 * i] = v1.z;
+            vertexArray[vertoffset + 3 + 6 * i] = v2.x;
+            vertexArray[vertoffset + 4 + 6 * i] = v2.y;
+            vertexArray[vertoffset + 5 + 6 * i] = v2.z;
+
+            colorArray[vertoffset + 6 * i] = color.r;
+            colorArray[vertoffset + 1 + 6 * i] = color.g;
+            colorArray[vertoffset + 2 + 6 * i] = color.b;
+            colorArray[vertoffset + 3 + 6 * i] = color.r;
+            colorArray[vertoffset + 4 + 6 * i] = color.g;
+            colorArray[vertoffset + 5 + 6 * i] = color.b;
 
         }
-        
+
         vsize += 8;
-                
-        face1 = [offset, offset + 2, offset + 6, offset + 4];
-        face2 = [offset + 1, offset + 5, offset + 7, offset + 3];
-        
-        faceArray[faceoffset] = face1[0]; faceArray[faceoffset+1] = face1[1]; faceArray[faceoffset+2] = face1[3];
-        faceArray[faceoffset+3] = face1[1]; faceArray[faceoffset+4] = face1[2]; faceArray[faceoffset+5] = face1[3];
-        faceArray[faceoffset+6] = face2[0]; faceArray[faceoffset+7] = face2[1]; faceArray[faceoffset+8] = face2[3];
-        faceArray[faceoffset+9] = face2[1]; faceArray[faceoffset+10] = face2[2]; faceArray[faceoffset+11] = face2[3];
-        
+
+        face1 = [ offset, offset + 2, offset + 6, offset + 4 ];
+        face2 = [ offset + 1, offset + 5, offset + 7, offset + 3 ];
+
+        faceArray[faceoffset] = face1[0];
+        faceArray[faceoffset + 1] = face1[1];
+        faceArray[faceoffset + 2] = face1[3];
+        faceArray[faceoffset + 3] = face1[1];
+        faceArray[faceoffset + 4] = face1[2];
+        faceArray[faceoffset + 5] = face1[3];
+        faceArray[faceoffset + 6] = face2[0];
+        faceArray[faceoffset + 7] = face2[1];
+        faceArray[faceoffset + 8] = face2[3];
+        faceArray[faceoffset + 9] = face2[1];
+        faceArray[faceoffset + 10] = face2[2];
+        faceArray[faceoffset + 11] = face2[3];
+
         geoGroup.faceidx += 12;
         geoGroup.vertices += 8;
-        
-        //TODO: Add intersection planes for caps
-        
-        geo.initTypedArrays();
-        geo.setUpNormals();
-        
-                // HalfEdgeRec used to store adjacency info of mesh
-        var HalfEdge=function(vertIdx){
-            this.vert=vertIdx; // Vertex index at the end of this half-edge
-            this.twin=null;    // Oppositely oriented adjacent half-edge
-            this.next=null;    //Next half-edge around the face
+
+        // TODO: Add intersection planes for caps
+
+        // HalfEdgeRec used to store adjacency info of mesh
+        var HalfEdge = function(vertIdx) {
+            this.vert = vertIdx; // Vertex index at the end of this half-edge
+            this.twin = null; // Oppositely oriented adjacent half-edge
+            this.next = null; // Next half-edge around the face
         };
-        
-        var computeAdjacency=function(faces,faceCount,vertCount){
-            //all pieces of the half-edge data structure
-            edges=[];
-            
+
+        var computeAdjacency = function(faces, faceCount, vertCount) {
+            // all pieces of the half-edge data structure
+            edges = [];
+
             // a hash table to hold the adjaceney info
             // - Keys are pairs of vertex indices
             // - Values are pointers to half-edge
-            var edgeTable={};
-            var len=0;
-            
-            //Plow through faces and fill all half-edge info except twin pointers:
-            for(var i=0;i<faceCount;i+=3){
-                var A=faces[i];
-                var B=faces[i+1];
-                var C=faces[i+2];
-               // console.log("A="+A+ " B="+ B+ " C="+C);
-                
-                //create the half-edge that goes from C to A
-                var CA=new HalfEdge(A);
+            var edgeTable = {};
+            var len = 0;
+
+            // Plow through faces and fill all half-edge info except twin
+            // pointers:
+            for (var i = 0; i < faceCount; i += 3) {
+                var A = faces[i];
+                var B = faces[i + 1];
+                var C = faces[i + 2];
+                // console.log("A="+A+ " B="+ B+ " C="+C);
+
+                // create the half-edge that goes from C to A
+                var CA = new HalfEdge(A);
                 edges.push(CA);
-                //create the half-edge that goes from A to B
-                var AB=new HalfEdge(B);
+                // create the half-edge that goes from A to B
+                var AB = new HalfEdge(B);
                 edges.push(AB);
-                //create the half-edge that goes from B to C
-                var BC=new HalfEdge(C);
+                // create the half-edge that goes from B to C
+                var BC = new HalfEdge(C);
                 edges.push(BC);
-                
-                CA.next=AB;
-                AB.next=BC;
-                BC.next=CA;
-                
-                edgeTable[C|(A<<16)]=CA; 
-                edgeTable[A|(B<<16)]=AB; 
-                edgeTable[B|(C<<16)]=BC;
+
+                CA.next = AB;
+                AB.next = BC;
+                BC.next = CA;
+
+                edgeTable[C | (A << 16)] = CA;
+                edgeTable[A | (B << 16)] = AB;
+                edgeTable[B | (C << 16)] = BC;
             }
-            
-            //verify that the mesh is clean
-            for(var key in edgeTable){
-                if(edgeTable.hasOwnProperty(key)){
+
+            // verify that the mesh is clean
+            for ( var key in edgeTable) {
+                if (edgeTable.hasOwnProperty(key)) {
                     len++;
                 }
             }
-            if(len!=faceCount*3){
-                console.warn("Bad mesh: duplicated edges or inconsistent winding.len="+len+" faceCount="+faceCount+" vertCount="+vertCount);
+            if (len != faceCount * 3) {
+                console
+                        .warn("Bad mesh: duplicated edges or inconsistent winding.len="
+                                + len
+                                + " faceCount="
+                                + faceCount
+                                + " vertCount=" + vertCount);
             }
-            
-            //Populate the twin pointers by iterating over the hash table
-            var boundaryCount=0;
-            for(var key in edgeTable){
-                if(edgeTable.hasOwnProperty(key)){
-                    var twinKey=((key&0xffff)<<16)|(key>>16);
-                    if(edgeTable.hasOwnProperty(twinKey)){
-                        edgeTable[key].twin=edgeTable[twinKey];
-                        edgeTable[twinKey].twin=edgeTable[key];
-                    }else{
-                        boundaryCount+=1;
+
+            // Populate the twin pointers by iterating over the hash table
+            var boundaryCount = 0;
+            for ( var key in edgeTable) {
+                if (edgeTable.hasOwnProperty(key)) {
+                    var twinKey = ((key & 0xffff) << 16) | (key >> 16);
+                    if (edgeTable.hasOwnProperty(twinKey)) {
+                        edgeTable[key].twin = edgeTable[twinKey];
+                        edgeTable[twinKey].twin = edgeTable[key];
+                    } else {
+                        boundaryCount += 1;
                     }
                 }
             }
-            
-            var ret=new Uint16Array(faceCount*6);
-            // Now that we have a half-edge structure, it's easy to create adjacency info for WebGL
-            if(boundaryCount>0){
-                console.log("Mesh is not watertight. Contains "+boundaryCount +" edges");
-                
-                for(var i=0;i<faceCount;i+=3){
-                    ret[i*2+0]=edges[i+2].vert;
-                    ret[i*2+1]=edges[i+0].twin==null?ret[i*2+0]:edges[i+0].twin.next.vert;
-                    ret[i*2+2]=edges[i+0].vert;
-                    ret[i*2+3]=edges[i+1].twin==null?ret[i*2+1]:edges[i+1].twin.next.vert;                  
-                    ret[i*2+4]=edges[i+1].vert;
-                    ret[i*2+5]=edges[i+2].twin==null?ret[i*2+2]:edges[i+2].twin.next.vert;
+
+            var ret = new Uint16Array(faceCount * 6);
+            // Now that we have a half-edge structure, it's easy to create
+            // adjacency info for WebGL
+            if (boundaryCount > 0) {
+                console.log("Mesh is not watertight. Contains " + boundaryCount
+                        + " edges");
+
+                for (var i = 0; i < faceCount; i += 3) {
+                    ret[i * 2 + 0] = edges[i + 2].vert;
+                    ret[i * 2 + 1] = edges[i + 0].twin == null ? ret[i * 2 + 0]
+                            : edges[i + 0].twin.next.vert;
+                    ret[i * 2 + 2] = edges[i + 0].vert;
+                    ret[i * 2 + 3] = edges[i + 1].twin == null ? ret[i * 2 + 1]
+                            : edges[i + 1].twin.next.vert;
+                    ret[i * 2 + 4] = edges[i + 1].vert;
+                    ret[i * 2 + 5] = edges[i + 2].twin == null ? ret[i * 2 + 2]
+                            : edges[i + 2].twin.next.vert;
+                }
+            } else {
+                for (var i = 0; i < faceCount; i += 3) {
+                    ret[i * 2 + 0] = edges[i + 2].vert;
+                    ret[i * 2 + 1] = edges[i + 0].twin.next.vert;
+                    ret[i * 2 + 2] = edges[i + 0].vert;
+                    ret[i * 2 + 3] = edges[i + 1].twin.next.vert;
+                    ret[i * 2 + 4] = edges[i + 1].vert;
+                    ret[i * 2 + 5] = edges[i + 2].twin.next.vert;
                 }
             }
-            else{
-                for(var i=0;i<faceCount;i+=3){
-                    ret[i*2+0]=edges[i+2].vert;
-                    ret[i*2+1]=edges[i+0].twin.next.vert;
-                    ret[i*2+2]=edges[i+0].vert;
-                    ret[i*2+3]=edges[i+1].twin.next.vert;                   
-                    ret[i*2+4]=edges[i+1].vert;
-                    ret[i*2+5]=edges[i+2].twin.next.vert;
-                } 
-            }
-            
+
             return ret;
         };
-        
-        //geoGroup.adjFaceArray = computeAdjacency(faceArray,faceArray.length,offset);
-        
-        var material = new $3Dmol.MeshDoubleLambertMaterial();
-        material.vertexColors = $3Dmol.FaceColors;
-        if(typeof(opacity) === 'number' && opacity >= 0 && opacity < 1) {
-            material.transparent = true;
-            material.opacity = opacity;
-        }
-        var mesh = new $3Dmol.Mesh(geo, material);
-        group.add(mesh);   
+
+        // geoGroup.adjFaceArray =
+        // computeAdjacency(faceArray,faceArray.length,offset);
+
     };
 
-    //TODO: Need to update this (will we ever use this?)
+    // TODO: Need to update this (will we ever use this?)
     var drawSmoothCurve = function(group, _points, width, colors, div) {
         if (_points.length === 0)
             return;
@@ -22245,13 +24528,11 @@ $3Dmol.drawCartoon = (function() {
 
         var geo = new $3Dmol.Geometry();
         var points = subdivide(_points, div);
-                /*
-        for ( var i = 0; i < points.length; i++) {
-            geo.vertices.push(points[i]);
-            geo.colors.push($3Dmol.color(colors[(i == 0) ? 0 : Math.round((i - 1)
-                    / div)]));
-        }
-                */
+        /*
+         * for ( var i = 0; i < points.length; i++) {
+         * geo.vertices.push(points[i]); geo.colors.push($3Dmol.color(colors[(i ==
+         * 0) ? 0 : Math.round((i - 1) / div)])); }
+         */
         var lineMaterial = new $3Dmol.LineBasicMaterial({
             linewidth : width
         });
@@ -22261,35 +24542,41 @@ $3Dmol.drawCartoon = (function() {
         group.add(line);
     };
 
-    var drawStrip = function(group, points, colors, div, thickness, opacity, shape)
-    {    
+    var drawStrip = function(geo, points, colors, div, thickness, opacity,
+            shape) {
         if (!shape || shape === "default")
             shape = "rectangle";
-        if(shape === 'edged')
-            drawPlainStrip(group, points, colors, div, thickness, opacity);
-        else if (shape === "rectangle" || shape === "oval" || shape === "parabola")
-            drawShapeStrip(group, points, colors, div, thickness, opacity, shape);
+        if (shape === 'edged')
+            drawPlainStrip(geo, points, colors, div, thickness, opacity);
+        else if (shape === "rectangle" || shape === "oval"
+                || shape === "parabola")
+            drawShapeStrip(geo, points, colors, div, thickness, opacity, shape);
     }
 
     // check if given atom is an alpha carbon
-    var isAlphaCarbon = function(atom)
-    {
-        return atom && atom.elem === "C" && atom.atom === "CA"; // note that calcium is also CA
+    var isAlphaCarbon = function(atom) {
+        return atom && atom.elem === "C" && atom.atom === "CA"; // note that
+                                                                // calcium is
+                                                                // also CA
     }
 
-    // check whether two atoms are members of the same residue or subsequent, connected residues (a before b)
-    var inConnectedResidues = function(a, b)
-    {
-        if(a && b && a.chain === b.chain) {
-            if((a.reschain === b.reschain) && (a.resi === b.resi || a.resi === b.resi-1))
+    // check whether two atoms are members of the same residue or subsequent,
+    // connected residues (a before b)
+    var inConnectedResidues = function(a, b) {
+        if (a && b && a.chain === b.chain) {
+            if ((a.reschain === b.reschain)
+                    && (a.resi === b.resi || a.resi === b.resi - 1))
                 return true;
-            if(a.resi < b.resi) {
-                //some PDBs have gaps in the numbering but the residues are still connected
-                //assume if within 4A they are connected
-                var av = new $3Dmol.Vector3(a.x, a.y, a.z);
-                var bv = new $3Dmol.Vector3(b.x, b.y, b.z);
-                var dist = av.distanceToSquared(bv);
-                if(dist < 16.0) return true; //calpha dist
+            if (a.resi < b.resi) {
+                // some PDBs have gaps in the numbering but the residues are
+                // still connected
+                // assume if within 4A they are connected
+                var dx = a.x - b.x;
+                var dy = a.y - b.y;
+                var dz = a.z - b.z;
+                var dist = dx * dx + dy * dy + dz * dz;
+                if (dist < 16.0)
+                    return true; // calpha dist
             }
         }
 
@@ -22297,23 +24584,71 @@ $3Dmol.drawCartoon = (function() {
 
     }
 
-    var drawCartoon = function(group, atomList, gradientScheme, fill, doNotSmoothen, num, div)
-    {
+    // add geo to the group
+    var setGeo = function(group, geo, opacity, outline, setNormals) {
+
+        if(geo == null || geo.vertices == 0) return;
+        if (setNormals) {
+            geo.initTypedArrays();
+            geo.setUpNormals();
+        }
+
+        var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
+        cartoonMaterial.vertexColors = $3Dmol.FaceColors;
+        if (typeof (opacity) === "number" && opacity >= 0 && opacity < 1) {
+            cartoonMaterial.transparent = true;
+            cartoonMaterial.opacity = opacity;
+        }
+        cartoonMaterial.outline = outline;
+        var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
+        group.add(cartoonMesh);
+    };
+
+    
+    // proteins na backbone na terminus nucleobases
+    var cartoonAtoms = { "C":true, "CA":true, "O":true, "P":true, "OP2": true, 
+            "O2P": true, "O5'": true, "O3'": true, "C5'":true,
+            "C2'": true, "O5*": true, "O3*": true, "C5*": true, 
+            "C2*":true, "N1":true, "N3":true };
+    var purResns = { "DA":true, "DG":true, "A":true, "G":true};
+    var pyrResns = { "DT": true, "DC":true, "U":true, "C":true, "T":true };
+    var naResns = { "DA":true, "DG":true, "A":true, "G":true, "DT": true, "DC":true, "U":true, "C":true, "T":true };
+    
+    var drawCartoon = function(group, atomList, gradientrange, fill,
+            doNotSmoothen, num, div) {
         num = num || defaultNum;
         div = div || defaultDiv;
 
-                        //  proteins    na backbone  na terminus                  nucleobases
-        var cartoonAtoms = ["CA", "O",  "P", "OP2", "O2P", "O5'", "O3'", "C5'", "C2'","O5*", "O3*", "C5*", "C2*", "N1", "N3"];
-        var purResns = ["DA", "DG", "A", "G"];
-        var pyrResns = ["DT", "DC", "U", "C", "T"];
-        var naResns  =  purResns.concat(pyrResns);
-
-        var geo, cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
+        var cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
         var tubeStart, tubeEnd, drawingTube;
-        var traceGeo = null;
+        var shapeGeo = new $3Dmol.Geometry(true); // for shapes that don't need normals computed
+        var geo = new $3Dmol.Geometry(true);
         var colors = [];
         var points = [];
+        var opacity = 1;
+        var outline = false;
+        
+        var gradients = {};
+        for(var g in $3Dmol.Gradient.builtinGradients) {
+            if($3Dmol.Gradient.builtinGradients.hasOwnProperty(g)) {
+                gradients[g] = new $3Dmol.Gradient.builtinGradients[g](gradientrange[0],gradientrange[1]);
+            }
+        }
+        
+        var cartoonColor = function(next, cartoon) { //atom and cartoon style object
+            if (gradientrange && cartoon.color === 'spectrum') {
+                if(cartoon.colorscheme in gradients) {
+                    return gradients[cartoon.colorscheme].valueToHex(next.resi);
+                } else {
+                    return gradients['sinebow'].valueToHex(next.resi);
+                }
+            }
+            else {
+                return $3Dmol.getColorFromStyle(next, cartoon).getHex();
+            }
+        }
+
         for (var i = 0; i < num; i++)
             points[i] = [];
 
@@ -22321,72 +24656,118 @@ $3Dmol.drawCartoon = (function() {
         var inSheet = false;
         var inHelix = false;
         i = 0;
-        for (i in atomList)
-        {
+        var atoms = [];
+        for (i in atomList) {
             next = atomList[i];
-            if (next.elem === 'C' && next.atom === 'CA')
-            {
+            if (next.elem === 'C' && next.atom === 'CA') {
                 var connected = inConnectedResidues(curr, next);
 
                 // last two residues in a beta sheet become arrowhead
-                if (connected && next.ss === "s")
-                {
+                if (connected && next.ss === "s") {
                     inSheet = true;
-                }
-                else if (inSheet)
-                {   
-                    if (curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows)
-                    {
+                } else if (inSheet) {
+                    if (curr && prev && curr.style.cartoon.arrows
+                            && prev.style.cartoon.arrows) {
                         curr.ss = "arrow end";
                         prev.ss = "arrow start";
                     }
-                    inSheet = false; 
+                    inSheet = false;
                 }
 
                 // first and last residues in a helix are used to draw tube
-                if (connected && curr.ss === "h")
-                {
-                    if (!inHelix && next.style.cartoon.tubes) next.ss = "tube start";
+                if (connected && curr.ss === "h") {
+                    if (!inHelix && next.style.cartoon.tubes)
+                        next.ss = "tube start";
                     inHelix = true;
-                }
-                else if (inHelix && curr.ss !== "tube start")
-                {
-                    if (prev && prev.style.cartoon.tubes) prev.ss = "tube end";
+                } else if (inHelix && curr.ss !== "tube start") {
+                    if (prev && prev.style.cartoon.tubes)
+                        prev.ss = "tube end";
                     inHelix = false;
                 }
                 prev = curr;
                 curr = next;
             }
+            if(next && next.atom in cartoonAtoms) {
+                atoms.push(next);
+            }
         }
 
+        var flushGeom = function(connect) {
+            //write out points, update geom,etc
+            for (var i = 0; !thickness && i < num; i++)
+                drawSmoothCurve(group, points[i], 1, colors, div, opacity);
+            if (fill && points[0].length > 0) {
+                drawStrip(geo, points, colors, div, thickness, opacity,
+                        points.style);
+            }
+            
+            if(connect) {
+                //recycle last point to first point of next points array
+                var saved = [];
+                for(i = 0; i < num; i++) {
+                    saved[i] = points[i][points[i].length-1];
+                }
+                var savedc = colors[colors.length-1];
+            }
+            points = [];
+            for (i = 0; i < num; i++)
+                points[i] = [];
+            colors = [];
+            
+            if(connect) {
+                for(i = 0; i < num; i++) {
+                    points[i].push(saved[i]);
+                }
+                colors.push(savedc);
+            }
+            
+            setGeo(group, geo, opacity, outline, true);
+            setGeo(group, shapeGeo, opacity, outline, false);
+            geo = new $3Dmol.Geometry(true);
+            shapeGeo = new $3Dmol.Geometry(true);
+        };
+        
         // then accumulate points
         curr = undefined;
-        for (i in atomList)
-        {
-            next = atomList[i];
-            
-            if (next === undefined || $.inArray(next.atom, cartoonAtoms) === -1)
-                continue; // skip array holes, heteroatoms, and atoms not involved in cartoon drawing
+        for (var a = 0; a < atoms.length; a++) {
+            next = atoms[a];
 
-            var inNucleicAcid = ($.inArray(next.resn.trim(), naResns) != -1)
-
+            var nextresn = next.resn.trim();
+            var inNucleicAcid = nextresn in naResns;
+            opacity = 1;
             // determine cartoon style
             cartoon = next.style.cartoon;
-            if (cartoon.style === "trace") // draw cylinders connecting consecutive 'backbone' atoms
+            if(curr && curr.style.cartoon)
+                opacity = curr.style.cartoon.opacity;
+            if(curr && curr.style.cartoon && curr.style.cartoon.outline)
+                outline = curr.style.cartoon.outline;
+            
+            // create a new geometry when opacity changes
+            //the should work fine if opacity is set by chain, but will
+            //break if it changes within the chain
+            if (curr && curr.style.cartoon && (!next.style.cartoon ||
+                    curr.style.cartoon.opacity != next.style.cartoon.opacity)) {
+                flushGeom(curr.chain == next.chain);
+            }
+            
+            if(points.length && points[0].length > (30000/num/div/2)) {
+                flushGeom(true);
+            }
+            
+            if (cartoon.style === "trace") // draw cylinders connecting
+                                            // consecutive 'backbone' atoms
             {
-                /* "trace" style just draws cylinders between consecutive 'backbone' atoms,
-                    such as alpha carbon for polypeptides and phosphorus for DNA. */
-
-                if (!traceGeo) traceGeo = new $3Dmol.Geometry(true);
-
-                if (next.elem === 'C' && next.atom === 'CA' || inNucleicAcid && next.atom === "P")
-                {
+                /*
+                 * "trace" style just draws cylinders between consecutive
+                 * 'backbone' atoms, such as alpha carbon for polypeptides and
+                 * phosphorus for DNA.
+                 */
+                if (next.hetflag) 
+                    ; //ignore non-protein atoms
+                else if (next.elem === 'C' && next.atom === 'CA' || inNucleicAcid
+                        && next.atom === "P") {
                     // determine cylinder color
-                    if (gradientScheme && cartoon.color === 'spectrum')
-                        nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
-                    else
-                        nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
-                    colors.push(nextColor);
+                    nextColor = cartoonColor(next, cartoon);                    
 
                     // determine cylinder thickness
                     if ($.isNumeric(cartoon.thickness))
@@ -22394,122 +24775,89 @@ $3Dmol.drawCartoon = (function() {
                     else
                         thickness = defaultThickness;
 
-                    if (inConnectedResidues(curr, next))
-                    {
+                    if (inConnectedResidues(curr, next)) {
                         // if both atoms are same color, draw single cylinder
-                        if (nextColor == currColor)
-                        {
+                        if (nextColor == currColor) {
                             var color = $3Dmol.CC.color(nextColor);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, next, thickness, color, 2, 2);
+                            $3Dmol.GLDraw.drawCylinder(shapeGeo, curr, next,
+                                    thickness, color, 2, 2);
                         }
 
-                        else // otherwise draw cylinders for each color (split down the middle)
+                        else // otherwise draw cylinders for each color
+                                // (split down the middle)
                         {
-                            var midpoint = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
+                            var midpoint = new $3Dmol.Vector3().addVectors(
+                                    curr, next).multiplyScalar(0.5);
                             var color1 = $3Dmol.CC.color(currColor);
                             var color2 = $3Dmol.CC.color(nextColor);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, curr, midpoint, thickness, color1, 2, 0);
-                            $3Dmol.GLDraw.drawCylinder(traceGeo, midpoint, next, thickness, color2, 0, 2);
-                        } // note that an atom object can be duck-typed as a $3Dmol.Vector3 in this case
-                    }
-
-                    if (curr && traceGeo && (curr.style.cartoon && curr.style.cartoon.style != "trace"
-                        || curr.chain != next.chain))
-                    {
-                        var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
-                        traceMaterial.vertexColors = $3Dmol.FaceColors;
-                        if ( typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
-                            traceMaterial.transparent = true;
-                            traceMaterial.opacity = traceGeo.opacity;
-                            delete traceGeo.opacity;
-                        }
-                        var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
-                        group.add(traceMesh);
-                        traceGeo = null;
-                    } else if (curr) // make sure whole chain is same opacity
-                    {
-                        if (traceGeo.opacity && curr.style.cartoon.opacity)
-                        {
-                            if (traceGeo.opacity != curr.style.cartoon.opacity)
-                            {
-                                console.log("Warning: a trace-style chain's opacity is ambiguous");
-                                traceGeo.opacity = 1;
-                            }
-                        }
-                        else traceGeo.opacity = parseFloat(curr.style.cartoon.opacity) || 1;
+                            $3Dmol.GLDraw.drawCylinder(shapeGeo, curr,
+                                    midpoint, thickness, color1, 2, 0);
+                            $3Dmol.GLDraw.drawCylinder(shapeGeo, midpoint,
+                                    next, thickness, color2, 0, 2);
+                        } // note that an atom object can be duck-typed as a
+                            // $3Dmol.Vector3 in this case
                     }
 
                     curr = next;
                     currColor = nextColor;
                 }
-            }
-
-            else // draw default-style cartoons based on secondary structure
+            } else // draw default-style cartoons based on secondary structure
             {
-                if (!geo) geo = new $3Dmol.Geometry(true);
-
                 // draw backbone through these atoms
-                if (isAlphaCarbon(next) ||
-                    inNucleicAcid && (next.atom === "P" || next.atom.indexOf('O5') == 0))
-                {
-                    if (drawingTube)
-                    {
-                        if (next.ss === "tube end")
-                        {
+                if (isAlphaCarbon(next) || inNucleicAcid
+                        && (next.atom === "P" || next.atom.indexOf('O5') == 0)) {
+                    if (drawingTube) {
+                        if (next.ss === "tube end") {
                             drawingTube = false;
                             tubeEnd = new $3Dmol.Vector3(next.x, next.y, next.z);
-                            $3Dmol.GLDraw.drawCylinder(geo, tubeStart, tubeEnd, 2, $3Dmol.CC.color(currColor), 1, 1);
+                            $3Dmol.GLDraw.drawCylinder(shapeGeo, tubeStart,
+                                    tubeEnd, 2, $3Dmol.CC.color(currColor), 1,
+                                    1);
                             next.ss = "h";
 
-                        }
-                        else continue; // don't accumulate strand points while in the middle of drawing a tube
+                        } else
+                            continue; // don't accumulate strand points while
+                                        // in the middle of drawing a tube
                     }
 
                     // end of a chain of connected residues (of same style)
-                    if (curr && (!inConnectedResidues(curr, next) || curr.style.cartoon.style !== next.style.cartoon.style ||
-                        curr.ss === "tube start"))
-                    { 
-                        if (curr.ss === "tube start")
-                        {
+                    if (curr && (!inConnectedResidues(curr, next)
+                                    || curr.ss === "tube start")) {
+                        if (curr.ss === "tube start") {
                             drawingTube = true;
-                            tubeStart = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+                            tubeStart = new $3Dmol.Vector3(curr.x, curr.y,
+                                    curr.z);
                             curr.ss = "h";
                         }
 
                         if (baseEndPt) // draw the last base if it's a NA chain
                         {
                             if (terminalPt)
-                                baseStartPt = new $3Dmol.Vector3().addVectors(curr, terminalPt).multiplyScalar(0.5);
+                                baseStartPt = new $3Dmol.Vector3().addVectors(
+                                        curr, terminalPt).multiplyScalar(0.5);
                             else
-                                baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+                                baseStartPt = new $3Dmol.Vector3(curr.x,
+                                        curr.y, curr.z);
 
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
-                            arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
+                            $3Dmol.GLDraw.drawCylinder(shapeGeo, baseStartPt,
+                                    baseEndPt, 0.4, $3Dmol.CC
+                                            .color(baseEndPt.color), 0, 2);
+                            addBackbonePoints(points, num,
+                                    !doNotSmoothen, terminalPt, termOrientPt,
+                                    prevOrientPt, curr, atoms, a);
                             colors.push(nextColor);
-                            if (arrow) colors.push(nextColor);
-                            
+
                             baseStartPt = null;
                             baseEndPt = null;
                         }
 
                         // draw accumulated strand points
                         for (i = 0; !thickness && i < num; i++)
-                            drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
-                        if (fill && points[0].length > 0) 
-                            drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
-                        
-                        if (geo != null && geo.vertices > 0)
-                        {
-                            var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
-                            cartoonMaterial.vertexColors = $3Dmol.FaceColors;
-                            if (typeof(points.opacity) === "number" && points.opacity >= 0 && points.opacity < 1) {
-                                cartoonMaterial.transparent = true;
-                                cartoonMaterial.opacity = points.opacity;
-                            }
-                            var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
-                            group.add(cartoonMesh);
-                            geo = null;
-                        }
+                            drawSmoothCurve(group, points[i], 1, colors, div,
+                                    opacity);
+                        if (fill && points[0].length > 0)
+                            drawStrip(geo, points, colors, div, thickness,
+                                    opacity, points.style);
 
                         // clear arrays for points and colors
                         points = [];
@@ -22519,224 +24867,215 @@ $3Dmol.drawCartoon = (function() {
                     }
 
                     // reached next residue (potentially the first residue)
-                    if (curr === undefined || curr.rescode != next.rescode || curr.resi != next.resi)
-                    {
+                    if (curr === undefined || curr.rescode != next.rescode
+                            || curr.resi != next.resi) {
                         if (baseEndPt) // draw last NA residue's base
                         {
-                            // start the cylinder at the midpoint between consecutive backbone atoms
-                            baseStartPt = new $3Dmol.Vector3().addVectors(curr, next).multiplyScalar(0.5);
-                            var startFix = baseStartPt.clone().sub(baseEndPt).multiplyScalar(0.02); //TODO: apply this as function of thickness
+                            // start the cylinder at the midpoint between
+                            // consecutive backbone atoms
+                            baseStartPt = new $3Dmol.Vector3().addVectors(curr,
+                                    next).multiplyScalar(0.5);
+                            var startFix = baseStartPt.clone().sub(baseEndPt)
+                                    .multiplyScalar(0.02); // TODO: apply this
+                                                            // as function of
+                                                            // thickness
                             baseStartPt.add(startFix);
 
-                            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
+                            $3Dmol.GLDraw.drawCylinder(shapeGeo, baseStartPt,
+                                    baseEndPt, 0.4, $3Dmol.CC
+                                            .color(baseEndPt.color), 0, 2);
                             baseStartPt = null;
-                            baseEndPt = null;   
+                            baseEndPt = null;
                         }
 
-                        // determine color and thickness of the next strand segment
-                        if (gradientScheme && cartoon.color === 'spectrum')
-                            nextColor = gradientScheme.valueToHex(next.resi, gradientScheme.range());
-                        else
-                            nextColor = $3Dmol.getColorFromStyle(next, cartoon).getHex();
+                        // determine color and thickness of the next strand
+                        // segment
+                        nextColor = cartoonColor(next, cartoon); 
                         colors.push(nextColor);
                         if ($.isNumeric(cartoon.thickness))
                             thickness = cartoon.thickness;
                         else
                             thickness = defaultThickness;
 
-                        
                         curr = next; // advance backbone
-                        //nextResAtom = atomList[parseInt(i) + resSize[curr.resn]];
                         backbonePt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                         backbonePt.resi = curr.resi;
                         currColor = nextColor;
                     }
 
                     // click handling
-                    if (next.clickable === true &&
-                        (next.intersectionShape === undefined || next.intersectionShape.triangle === undefined)) 
-                        next.intersectionShape = {sphere : null, cylinder : [], line : [], triangle : []};
+                    if (next.clickable === true
+                            && (next.intersectionShape === undefined || next.intersectionShape.triangle === undefined))
+                        next.intersectionShape = {
+                            sphere : null,
+                            cylinder : [],
+                            line : [],
+                            triangle : []
+                        };
                 }
-
                 // atoms used to orient the backbone strand
                 else if (isAlphaCarbon(curr) && next.atom === "O"
-                      || inNucleicAcid && curr.atom === "P" && (next.atom === "OP2" || next.atom === "O2P")
-                      || inNucleicAcid && curr.atom.indexOf("O5") == 0 && next.atom.indexOf("C5") == 0)
-                {
+                        || inNucleicAcid && curr.atom === "P"
+                        && (next.atom === "OP2" || next.atom === "O2P")
+                        || inNucleicAcid && curr.atom.indexOf("O5") == 0
+                        && next.atom.indexOf("C5") == 0) {
                     orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.resi = next.resi;
-                    if (next.atom === "OP2" || next.atom === "O2P") // for NA 3' terminus
-                        termOrientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
+                    if (next.atom === "OP2" || next.atom === "O2P") // for NA 3'
+                                                                    // terminus
+                        termOrientPt = new $3Dmol.Vector3(next.x, next.y,
+                                next.z);
                 }
 
-                // NA 3' terminus is an edge case, need a vector for most recent O3'
-                else if (inNucleicAcid && next.atom.indexOf("O3") == 0)
-                {
+                // NA 3' terminus is an edge case, need a vector for most recent
+                // O3'
+                else if (inNucleicAcid && next.atom.indexOf("O3") == 0) {
                     terminalPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                 }
 
-                // atoms used for drawing the NA base cylinders (diff for purines and pyramidines)
-                else if ((next.atom === "N1" && $.inArray(next.resn.trim(), purResns) != -1) ||
-                         (next.atom === "N3" && $.inArray(next.resn.trim(), pyrResns) != -1))
-                {
+                // atoms used for drawing the NA base cylinders (diff for
+                // purines and pyramidines)
+                else if ((next.atom === "N1" && (nextresn in purResns))
+                        || (next.atom === "N3" && (nextresn in pyrResns))) {
                     baseEndPt = new $3Dmol.Vector3(next.x, next.y, next.z);
-                    baseEndPt.color = $3Dmol.getColorFromStyle(next, cartoon).getHex();
+                    baseEndPt.color = $3Dmol.getColorFromStyle(next, cartoon)
+                            .getHex();
                 }
 
-                // when we have a backbone point and orientation point in the same residue, accumulate strand points
-                if (orientPt && backbonePt && orientPt.resi === backbonePt.resi)
-                {
-                    arrow = addBackbonePoints(points, num, !doNotSmoothen, backbonePt, orientPt, prevOrientPt, curr, atomList, i);
+                // when we have a backbone point and orientation point in the
+                // same residue, accumulate strand points
+                if (orientPt && backbonePt && orientPt.resi === backbonePt.resi) {
+                    addBackbonePoints(points, num, !doNotSmoothen,
+                            backbonePt, orientPt, prevOrientPt, curr, atoms,
+                            a);
                     prevOrientPt = orientPt;
                     backbonePt = null;
                     orientPt = null;
                     colors.push(nextColor);
-                    if (arrow) colors.push(nextColor);
                 }
             }
+            
         }
 
         if (baseEndPt) // draw last NA base if needed
         {
             if (terminalPt)
-                baseStartPt = new $3Dmol.Vector3().addVectors(curr, terminalPt).multiplyScalar(0.5);
+                baseStartPt = new $3Dmol.Vector3().addVectors(curr, terminalPt)
+                        .multiplyScalar(0.5);
             else
                 baseStartPt = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
 
-            $3Dmol.GLDraw.drawCylinder(geo, baseStartPt, baseEndPt, 0.4, $3Dmol.CC.color(baseEndPt.color), 0, 2);
-            arrow = addBackbonePoints(points, num, !doNotSmoothen, terminalPt, termOrientPt, prevOrientPt, curr, atomList, i);
+            $3Dmol.GLDraw.drawCylinder(shapeGeo, baseStartPt, baseEndPt, 0.4,
+                    $3Dmol.CC.color(baseEndPt.color), 0, 2);
+            addBackbonePoints(points, num, !doNotSmoothen, terminalPt,
+                    termOrientPt, prevOrientPt, curr, atoms, a);
             colors.push(nextColor);
-            if (arrow) colors.push(nextColor);
         }
 
         // for default style, draw the last strand
-        for (i = 0; !thickness && i < num; i++)
-            drawSmoothCurve(group, points[i], 1, colors, div, points.opacity);
-        if (fill && points[0].length > 0)
-        {
-            drawStrip(group, points, colors, div, thickness, points.opacity, points.style);
-        }
-        if (geo != null && geo.vertices > 0)
-        {
-            var cartoonMaterial = new $3Dmol.MeshDoubleLambertMaterial();
-            cartoonMaterial.vertexColors = $3Dmol.FaceColors;
-            if (typeof(points.opacity) === "number" && points.opacity >= 0 && points.opacity < 1) {
-                cartoonMaterial.transparent = true;
-                cartoonMaterial.opacity = points.opacity;
-            }
-            var cartoonMesh = new $3Dmol.Mesh(geo, cartoonMaterial);
-            group.add(cartoonMesh);
-            geo = null;
-        }
-
-        if (traceGeo != null && traceGeo.vertices > 0) // generate last mesh for trace geometry
-        {
-            var traceMaterial = new $3Dmol.MeshDoubleLambertMaterial();
-            traceMaterial.vertexColors = $3Dmol.FaceColors;
-            if (typeof(traceGeo.opacity) === "number" && traceGeo.opacity >= 0 && traceGeo.opacity < 1) {
-                traceMaterial.transparent = true;
-                traceMaterial.opacity = traceGeo.opacity;
-                delete traceGeo.opacity;
-            }
-            var traceMesh = new $3Dmol.Mesh(traceGeo, traceMaterial);
-            group.add(traceMesh);
-        }
+        flushGeom();    
     };
 
-    var addBackbonePoints = function(points, num, smoothen, backbonePt, orientPt, prevOrientPt, backboneAtom, atomList, atomi)
-    {
+    var addBackbonePoints = function(points, num, smoothen, backbonePt,
+            orientPt, prevOrientPt, backboneAtom, atoms, atomi) {
         var widthScalar, i, delta, v, addArrowPoints, testOpacity, testStyle;
-        
-        // dictionary of standard amino acid sizes, in number of atoms
-        var resSize = {ALA: 5, ARG: 11, ASN:8, ASP:8, CYS:6, GLN:9, GLU: 9, GLY:4, HIS:10,
-            ILE:8, LEU: 8, LYS: 9, MET:8, PHE:11, PRO:7, SER:6, THR:7, TRP:14, TYR:12, VAL:7}
-        
-        if(!backbonePt || !orientPt || !backboneAtom)
+
+
+        if (!backbonePt || !orientPt || !backboneAtom)
             return;
-        
-        // the side vector points along the axis from backbone atom to orientation atom (eg. CA to O, in peptides)
+
+        // the side vector points along the axis from backbone atom to
+        // orientation atom (eg. CA to O, in peptides)
         var sideVec = orientPt.sub(backbonePt);
         sideVec.normalize();
 
-        // the forward vector points along the axis from backbone atom to next backbone atom
-        var forwardVec = atomList[parseInt(atomi) + resSize[backboneAtom.resn]];
-        forwardVec = forwardVec ? new $3Dmol.Vector3(forwardVec.x, forwardVec.y, forwardVec.z) : new $3Dmol.Vector3(0, 0, 0);
+        //find next atom like this one
+        var forwardVec = atoms[atomi];
+        for(var i = atomi+1; i < atoms.length; i++) {
+            forwardVec = atoms[i];
+            if(forwardVec.atom == backboneAtom.atom)
+                break;
+        }
+        // the forward vector points along the axis from backbone atom to next
+        // backbone atom
+        forwardVec = forwardVec ? new $3Dmol.Vector3(forwardVec.x,
+                forwardVec.y, forwardVec.z) : new $3Dmol.Vector3(0, 0, 0);
         forwardVec.sub(backbonePt);
 
         // adjustments for proper beta arrow appearance
-        if (backboneAtom.ss === "arrow start")
-        {
-            var adjustment = forwardVec.clone().multiplyScalar(0.3).cross(orientPt); // adjust perpendicularly to strand face
+        if (backboneAtom.ss === "arrow start") {
+            var adjustment = forwardVec.clone().multiplyScalar(0.3).cross(
+                    orientPt); // adjust perpendicularly to strand face
             backbonePt.add(adjustment);
 
             var upVec = forwardVec.clone().cross(sideVec).normalize();
             sideVec.rotateAboutVector(upVec, 0.43);
         }
 
-        // determine from cartoon style or secondary structure how wide the strand should be here
+        // determine from cartoon style or secondary structure how wide the
+        // strand should be here
         // ribbon shape should have same width as thickness
-        if (backboneAtom.style.cartoon.ribbon)
-        {
-            widthScalar = backboneAtom.style.cartoon.thickness || defaultThickness;
+        if (backboneAtom.style.cartoon.ribbon) {
+            widthScalar = backboneAtom.style.cartoon.thickness
+                    || defaultThickness;
 
-        } else // depending on secondary structure, multiply the orientation vector by some scalar
+        } else // depending on secondary structure, multiply the orientation
+                // vector by some scalar
         {
-            if (!backboneAtom.style.cartoon.width)
-            {
-                if (backboneAtom.ss === "c")
-                {
+            if (!backboneAtom.style.cartoon.width) {
+                if (backboneAtom.ss === "c") {
                     if (backboneAtom.atom === "P")
                         widthScalar = nucleicAcidWidth;
                     else
                         widthScalar = coilWidth;
-                } else if (backboneAtom.ss === "arrow start")
-                {
+                } else if (backboneAtom.ss === "arrow start") {
                     widthScalar = helixSheetWidth;
                     addArrowPoints = true;
 
                 } else if (backboneAtom.ss === "arrow end")
                     widthScalar = coilWidth;
-                
-                else if (backboneAtom.ss === "h" && backboneAtom.style.cartoon.tubes || backboneAtom.ss === "tube start")
+
+                else if (backboneAtom.ss === "h"
+                        && backboneAtom.style.cartoon.tubes
+                        || backboneAtom.ss === "tube start")
                     widthScalar = coilWidth;
 
                 else
                     widthScalar = helixSheetWidth;
-            }
-            else widthScalar = backboneAtom.style.cartoon.width;  
+            } else
+                widthScalar = backboneAtom.style.cartoon.width;
         }
 
         // make sure the strand orientation doesn't twist more than 90 degrees
         if (prevOrientPt != null && sideVec.dot(prevOrientPt) < 0)
             sideVec.negate();
 
-
         sideVec.multiplyScalar(widthScalar);
-        for (i = 0; i < num; i++)
-        {
-            // produces NUM incremental points from backbone atom minus orientation vector
-            //  to backbone atom plus orientation vector
-            delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
+        for (i = 0; i < num; i++) {
+            // produces NUM incremental points from backbone atom minus
+            // orientation vector
+            // to backbone atom plus orientation vector
+            delta = -1 + i * 2 / (num - 1); // -1 to 1 incrementing by num
             v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
-                                   backbonePt.y + delta * sideVec.y,
-                                   backbonePt.z + delta * sideVec.z);
+                    backbonePt.y + delta * sideVec.y, backbonePt.z + delta
+                            * sideVec.z);
             v.atom = backboneAtom;
-            if (smoothen && backboneAtom.ss === "s") 
+            if (smoothen && backboneAtom.ss === "s")
                 v.smoothen = true;
-            points[i].push(v); // a num-length array of arrays, where each inner array contains length-wise points
-                               // along the backbone offset by some constant pertaining to its cell in the outer array
+            points[i].push(v); // a num-length array of arrays, where each
+                                // inner array contains length-wise points
+            // along the backbone offset by some constant pertaining to its cell
+            // in the outer array
         }
 
-        if (addArrowPoints)
-        {
+        if (addArrowPoints) {
 
             sideVec.multiplyScalar(2);
-            for (i = 0; i < num; i++)
-            {
-                delta = -1 + i * 2/(num - 1); // -1 to 1 incrementing by num
+            for (i = 0; i < num; i++) {
+                delta = -1 + i * 2 / (num - 1); // -1 to 1 incrementing by num
                 v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
-                                       backbonePt.y + delta * sideVec.y,
-                                       backbonePt.z + delta * sideVec.z);
+                        backbonePt.y + delta * sideVec.y, backbonePt.z + delta
+                                * sideVec.z);
                 v.atom = backboneAtom;
                 v.smoothen = false;
                 v.skip = true;
@@ -22744,40 +25083,30 @@ $3Dmol.drawCartoon = (function() {
             }
         }
 
-        // make sure the strand is all the same opacity and style
-        testOpacity = parseFloat(backboneAtom.style.cartoon.opacity) || 1;
-        if (points.opacity)
-        {
-            if (points.opacity != testOpacity)
-            {
-                console.log("Warning: a cartoon-style chain's opacity is ambiguous");
-                points.opacity = 1;
-            }
-
-        } else points.opacity = testOpacity;
-
+        // make sure the strand is all the same style
         testStyle = backboneAtom.style.cartoon.style || 'default';
-        if (points.style)
-        {
-            if (points.style != testStyle)
-            {
-                console.log("Warning: a cartoon chain's strand-style is ambiguous");
+        if (points.style) {
+            if (points.style != testStyle) {
+                console
+                        .log("Warning: a cartoon chain's strand-style is ambiguous");
                 points.style = 'default';
             }
 
-        } else points.style = testStyle;
+        } else
+            points.style = testStyle;
 
         // revert ss keywords used for arrow rendering back to original value
-        if (backboneAtom.ss === "arrow start" || backboneAtom.ss === "arrow end")
+        if (backboneAtom.ss === "arrow start"
+                || backboneAtom.ss === "arrow end")
             backboneAtom.ss = "s";
 
         return addArrowPoints;
     };
 
-    var defaultDrawCartoon = function(group, atomList, gradientScheme, quality)
-    {
-        quality = parseInt(parseFloat(quality)*5) || 5;
-        drawCartoon(group, atomList, gradientScheme, fill=true, doNotSmoothen=false, num=quality, div=quality);
+    var defaultDrawCartoon = function(group, atomList, gradientrange, quality) {
+        quality = parseInt(parseFloat(quality) * 5) || 5;
+        drawCartoon(group, atomList, gradientrange, true,
+                false, quality, quality);
     }
 
     return defaultDrawCartoon;
@@ -22801,7 +25130,7 @@ $3Dmol.GLDraw = (function() {
     var getRotationMatrix = function() {
 
         var d = new $3Dmol.Vector3();
-        // var rot = new Float32Array(9);
+        // var rot = new (9);
 
         return function(dir) {
 
@@ -22910,12 +25239,12 @@ $3Dmol.GLDraw = (function() {
     var cylVertexCache = {
 
         // memoize both rounded and flat caps (hemisphere and circle)
-        cache : {false:{}, true:{}},
+        cache :{} ,
 
-        getVerticesForRadius : function(radius, flat) {
-
-            if (this.cache[flat][radius] !== undefined)
-                return this.cache[flat][radius];
+        getVerticesForRadius : function(radius, cap, capType) {
+            if(typeof(this.chache) !== undefined && this.cache[radius] !== undefined)
+                if(this.cache[radius][cap+capType] !== undefined)                                                      
+                    return this.cache[radius][cap+capType];
 
             var dir = new $3Dmol.Vector3(0, 1, 0);
             var w = basisVectors.length;
@@ -22992,7 +25321,11 @@ $3Dmol.GLDraw = (function() {
                             vertex.x = -radius
                                     * Math.cos(phiStart + u * phiLength)
                                     * Math.sin(thetaStart + v * thetaLength);
-                            vertex.y = flat ? 0 : radius * Math.cos(thetaStart + v * thetaLength);
+                            if(cap==1)
+                                vertex.y=0;
+                            else
+                                vertex.y=radius * Math.cos(thetaStart + v * thetaLength);
+
                             vertex.z = radius
                                     * Math.sin(phiStart + u * phiLength)
                                     * Math.sin(thetaStart + v * thetaLength);
@@ -23004,7 +25337,7 @@ $3Dmol.GLDraw = (function() {
                             if (Math.abs(vertex.z) < 1e-5)
                                 vertex.z = 0;
 
-                            if (flat) {
+                            if (cap === 1) {
                                 n = new $3Dmol.Vector3(0, Math.cos(thetaStart + v * thetaLength), 0);
                                 n.normalize();
                             }
@@ -23047,14 +25380,18 @@ $3Dmol.GLDraw = (function() {
                 w : widthSegments,
                 h : heightSegments
             };
-
-            this.cache[flat][radius] = obj;
+            this.cache[radius]={};
+            this.cache[radius][cap+capType] = obj;
 
             return obj;
 
         }
     };
-
+    this.caps = {
+        NONE : 0,
+        FLAT : 1,
+        ROUND : 2
+        };
     // creates a cylinder
     var drawnC = 0;
     
@@ -23070,7 +25407,7 @@ $3Dmol.GLDraw = (function() {
      *            radius
      * @param {$3Dmol.Color}
      *            color
-     * @param {integer} fromCap - 0 for none, 1 for flat, 2 for round; Note: currently do not support different styles of caps on the same cylinder.
+     * @param {integer} fromCap - 0 for none, 1 for flat, 2 for round; Note: currently does not support different styles of caps on the same cylinder.
      * @param {integer} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
@@ -23080,11 +25417,6 @@ $3Dmol.GLDraw = (function() {
         drawnC++;
         // vertices
         var drawcaps = fromCap || toCap;
-
-        var flat = false;
-        if (fromCap == 1 && toCap == 1) // 0 is none, 1 is flat, 2 is round
-          	flat = true;
-
         color = color || {r:0, g:0, b:0};
 
         /** @type {Array.<number>} */
@@ -23096,8 +25428,8 @@ $3Dmol.GLDraw = (function() {
         var e = getRotationMatrix(dir);
         // get orthonormal vectors from cache
         // TODO: Will have orient with model view matrix according to direction
-        var vobj = cylVertexCache.getVerticesForRadius(radius, flat);
 
+        var vobj = cylVertexCache.getVerticesForRadius(radius, toCap, "to");
         // w (n) corresponds to the number of orthonormal vectors for cylinder
         // (default 16)
         var n = vobj.w, h = vobj.h;
@@ -23174,13 +25506,12 @@ $3Dmol.GLDraw = (function() {
         }
 
         // SPHERE CAPS
-
         if (drawcaps) {
-
             // h - sphere rows, verticesRows.length - 2
+            
             var ystart = (toCap) ? 0 : h / 2;
             var yend = (fromCap) ? h + 1 : h / 2 + 1;
-
+            
             var v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4, v1offset, v2offset, v3offset, v4offset;
 
             for (y = ystart; y < yend; y++) {
@@ -23281,6 +25612,7 @@ $3Dmol.GLDraw = (function() {
                     nz4 = e[5] * normals[v4].y + e[8] * normals[v4].z;
 
                     // if (Math.abs(vobj.sphereVertices[v1].y) === radius) {
+
                     if (y === 0) {
                         // face = [v1, v3, v4];
                         // norm = [n1, n3, n4];
@@ -23807,7 +26139,8 @@ $3Dmol.GLModel = (function() {
         "pdbline", // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
         "clickable", // Set this flag to true to enable click selection handling for this atom
         "callback", // Callback click handler function to be executed on this atom and its parent viewer
-        "invert" // for selection, inverts the meaning of the selection
+        "invert", // for selection, inverts the meaning of the selection
+        "reflectivity" //for describing the reflectivity of a model
     ];
 
     var validAtomSelectionSpecs = validAtomSpecs.concat([  // valid atom specs are ok too
@@ -23817,7 +26150,10 @@ $3Dmol.GLModel = (function() {
         "invert", // if set, inverts the meaning of the selection
         "byres", // if set, expands the selection to include all atoms of any residue that has any atom selected
         "expand", // expands the selection to include all atoms within a given distance from the selection
-        "within" // intersects the selection with the set of atoms within a given distance from another selection
+        "within", // intersects the selection with the set of atoms within a given distance from another selection
+        "and", // and boolean logic
+        "or", // or boolean logic
+        "not", // not boolean logic
     ]);
 
     var validAtomStyleSpecs = [
@@ -23825,7 +26161,8 @@ $3Dmol.GLModel = (function() {
         "cross", // draw atoms as crossed lines (aka stars)
         "stick", // draw bonds as capped cylinders
         "sphere", // draw atoms as spheres
-        "cartoon" // draw cartoon representation of secondary structure
+        "cartoon", // draw cartoon representation of secondary structure
+        "colorfunc",
     ];
 
     // class functions
@@ -23850,7 +26187,7 @@ $3Dmol.GLModel = (function() {
         var lastColors = null;
         var modelData = {};
         var idMatrix = new $3Dmol.Matrix4();
-        var dontDuplicateAtoms;
+        var dontDuplicateAtoms = true;
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
@@ -23914,7 +26251,7 @@ $3Dmol.GLModel = (function() {
             var points = [ [ delta, 0, 0 ], [ -delta, 0, 0 ], [ 0, delta, 0 ],
                     [ 0, -delta, 0 ], [ 0, 0, delta ], [ 0, 0, -delta ] ];
 
-            var clickable = atom.clickable;
+            var clickable = atom.clickable || atom.hoverable;
             if (clickable && atom.intersectionShape === undefined)
                 atom.intersectionShape = {sphere : [], cylinder : [], line : []};
             
@@ -24060,7 +26397,7 @@ $3Dmol.GLModel = (function() {
             var style = atom.style.line;
             if (style.hidden)
                 return;
-
+             var p1a, p1b, p2a, p2b;
             // have a separate geometry for each linewidth
             var linewidth = (style.linewidth || defaultlineWidth);
 
@@ -24086,7 +26423,7 @@ $3Dmol.GLModel = (function() {
                 var mp = p1.clone().add(p2).multiplyScalar(0.5);
                 var singleBond = false;               
                 
-                if (atom.clickable){
+                if (atom.clickable || atom.hoverable){
                     if (atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                     atom.intersectionShape.line.push(p1);
@@ -24121,7 +26458,7 @@ $3Dmol.GLModel = (function() {
                     if(atom.bondOrder[i] == 2) { //double
                         
                         v.multiplyScalar(.1);
-                           p1a = p1.clone();
+                        p1a = p1.clone();
                         p1a.add(v);
                         p1b = p1.clone();
                         p1b.sub(v);
@@ -24232,7 +26569,7 @@ $3Dmol.GLModel = (function() {
             var x, y;
             var radius = getRadiusFromStyle(atom, style);
             
-            if ((atom.clickable === true) && (atom.intersectionShape !== undefined)) {
+            if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
                 var center = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                 atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
             }
@@ -24271,6 +26608,11 @@ $3Dmol.GLModel = (function() {
 
             radiusArray[startv] = radius;
 
+            if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
+                var center = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
+            }
+            
             geoGroup.vertices += 1;
 
         };
@@ -24341,6 +26683,11 @@ $3Dmol.GLModel = (function() {
             
             var radius = getRadiusFromStyle(atom, style);
             var C = $3Dmol.getColorFromStyle(atom, style);
+            
+            if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
+                var center = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
+            }
             
             drawSphereImposter(geo, atom, radius, C);            
         };
@@ -24494,13 +26841,13 @@ $3Dmol.GLModel = (function() {
                         
                         if (atom.clickable || atom2.clickable) {
                             mp = new $3Dmol.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-                            if (atom.clickable){
+                            if (atom.clickable || atom.hoverable){
                                 var cylinder1 = new $3Dmol.Cylinder(p1 , mp , bondR);
                                 var sphere1 = new $3Dmol.Sphere(p1 , bondR);
                                 atom.intersectionShape.cylinder.push(cylinder1);   
                                 atom.intersectionShape.sphere.push(sphere1);                             
                             }
-                            if (atom2.clickable){
+                            if (atom2.clickable || atom2.hoverable){
                                 var cylinder2 = new $3Dmol.Cylinder(p2 , mp , bondR);
                                 var sphere2 = new $3Dmol.Sphere(p2 , bondR);
                                 atom2.intersectionShape.cylinder.push(cylinder2);
@@ -24512,7 +26859,9 @@ $3Dmol.GLModel = (function() {
                     } 
                     
                     else if (atom.bondOrder[i] > 1) {
-                        var mfromCap = 0; mtoCap = 0; //multi bond caps
+                        //multi bond caps
+                        var mfromCap = 0;
+                        var mtoCap = 0;
                         
                         if(bondR != atomBondR) {
                             //assume jmol style multiple bonds - the radius doesn't fit within atom sphere
@@ -24561,15 +26910,15 @@ $3Dmol.GLModel = (function() {
                                                .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
-                                if (atom.clickable) {
-                                    cylinder1a = new $3Dmol.Cylinder(p1a , mp , r);
-                                    cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
+                                if (atom.clickable || atom.hoverable) {
+                                    var cylinder1a = new $3Dmol.Cylinder(p1a , mp , r);
+                                    var cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                 }
-                                if (atom2.clickable) {
-                                    cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
-                                    cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
+                                if (atom2.clickable || atom2.hoverable) {
+                                    var cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
+                                    var cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);                               
                                 }
@@ -24618,18 +26967,18 @@ $3Dmol.GLModel = (function() {
                                 mp3 = new $3Dmol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
                                                                 
-                                if (atom.clickable) {
-                                    cylinder1a = new $3Dmol.Cylinder(p1a.clone(), mp.clone(), r);
-                                    cylinder1b = new $3Dmol.Cylinder(p1b.clone(), mp2.clone(), r);
-                                    cylinder1c = new $3Dmol.Cylinder(p1.clone(), mp3.clone(), r);
+                                if (atom.clickable || atom.hoverable) {
+                                    var cylinder1a = new $3Dmol.Cylinder(p1a.clone(), mp.clone(), r);
+                                    var cylinder1b = new $3Dmol.Cylinder(p1b.clone(), mp2.clone(), r);
+                                    var cylinder1c = new $3Dmol.Cylinder(p1.clone(), mp3.clone(), r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                     atom.intersectionShape.cylinder.push(cylinder1c);
                                 } 
-                                if (atom2.clickable) {                               
-                                    cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
-                                    cylinder2b = new $3Dmol.Cylinder(p2b.clone(), mp2.clone(), r);
-                                    cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
+                                if (atom2.clickable || atom2.hoverable) {                               
+                                    var cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
+                                    var cylinder2b = new $3Dmol.Cylinder(p2b.clone(), mp2.clone(), r);
+                                    var cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);
                                     atom2.intersectionShape.cylinder.push(cylinder2c);                                
@@ -24732,7 +27081,7 @@ $3Dmol.GLModel = (function() {
 
                 if (atom && atom.style) {
 
-                    if (atom.clickable && atom.intersectionShape === undefined)
+                    if ((atom.clickable || atom.hoverable) && atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle : []};
 
                     testOpacities = {line:undefined, cross:undefined, stick:undefined, sphere:undefined};
@@ -24779,13 +27128,7 @@ $3Dmol.GLModel = (function() {
             }
             // create cartoon if needed - this is a whole model analysis
             if (cartoonAtoms.length > 0) {
-                var gradientscheme = null;
-                //TODO: Should have an option to choose gradient type
-                if (range[0] < range[1])
-                    gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
-
-                $3Dmol.drawCartoon(ret, cartoonAtoms, gradientscheme);
-
+                $3Dmol.drawCartoon(ret, cartoonAtoms, range);
             }
 
             // add sphere geometry
@@ -24916,6 +27259,7 @@ $3Dmol.GLModel = (function() {
                     ret.add(cross);
                 }
             }
+
             
             //for BIOMT assembly
             if (dontDuplicateAtoms && modelData.symmetries && modelData.symmetries.length > 0) {
@@ -25034,22 +27378,31 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#vibrate
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
+         * 
+         *@example
+         var element=$('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+            var data = $("#test").val();
+            viewer.setBackgroundColor(0xffffff);    
+            var m = viewer.addModel(data, "xyz");
+            m.setStyle({},{stick:{}});
+            m.vibrate(10, 1);
+            viewer.animate({loop: "backAndForth"});
+            viewer.zoomTo();
+            viewer.render();
          */
         this.vibrate = function(numFrames, amplitude) {
-            var vectors = [];
             var amplitude = amplitude || 1;
             var numFrames = numFrames || 10; 
-            for (var i = 0; i < atoms.length; i++) {
-                var vector = new $3Dmol.Vector3(atoms[i].dx, atoms[i].dy, atoms[i].dz);
-                vectors.push(vector);
-            }
             numFrames--;
             for (var i = 1; i <= numFrames; i++) {
                 var newAtoms = [];
                 for (var j = 0; j < atoms.length; j++) {
-                    var newVector = new $3Dmol.Vector3(atoms[j].dx, atoms[j].dy, atoms[j].dz);
+                    var newVector = new $3Dmol.Vector3(
+                                            $3Dmol.getAtomProperty(atoms[j],'dx'), 
+                                            $3Dmol.getAtomProperty(atoms[j],'dy'), 
+                                            $3Dmol.getAtomProperty(atoms[j],'dz'));
                     var starting = new $3Dmol.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
-                    newVector.sub(starting);
                     newVector.multiplyScalar((i*amplitude)/numFrames);
                     starting.add(newVector);
                     var newAtom = {};
@@ -25074,7 +27427,7 @@ $3Dmol.GLModel = (function() {
                     atom.style = atom.style || defaultAtomStyle;
                     atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
                     atom.model = id;
-                    if (atom.clickable)
+                    if (atom.clickable || atom.hoverable)
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                 }
             }
@@ -25085,7 +27438,7 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#addMolData
          * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
          * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
-         * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
+         * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input format
          */
         this.addMolData = function(data, format, options) {
             options = options || {};
@@ -25101,7 +27454,7 @@ $3Dmol.GLModel = (function() {
             }
 
             if (frames.length == 0) { //first call
-                for (var i = 0; i < parsedAtoms.length; i++) {
+                for (var i = 0; i < parsedAtoms.length; i++) {  
                     if (parsedAtoms[i].length != 0)
                         frames.push(parsedAtoms[i]);
                 }
@@ -25125,12 +27478,15 @@ $3Dmol.GLModel = (function() {
             for (var i = 0; i < frames.length; i++) {
                 this.setAtomDefaults(frames[i], id);
             }
-            
+
             if(options.vibrate && options.vibrate.frames && options.vibrate.amplitude) {
                 //fill in vibrational modes
                 this.vibrate(options.vibrate.frames, options.vibrate.amplitude);
             }
-
+            
+            if(options.style) {
+                this.setStyle({},options.style);
+            }
         };
 
         this.setDontDuplicateAtoms = function(dup) {
@@ -25154,7 +27510,38 @@ $3Dmol.GLModel = (function() {
             var invert = !!sel.invert;
             var ret = true;
             for ( var key in sel) {
-                if(key === 'predicate') { //a user supplied function for evaluating atoms
+                if(key == "and" || key == "or" || key == "not"){//boolean fields
+                    if(key == "not"){
+                        if(this.atomIsSelected(atom,sel[key])){
+                            ret=false;
+                            break;
+                        }
+                    }else{//"or" and "and"
+                        if(key == "and"){
+                            var and=sel[key];//array format
+                            for(var i=0;i<and.length;i++){
+                                if(!this.atomIsSelected(atom,and[i])){
+                                    ret=false;
+                                    break;
+                                }
+                            }
+                        }else if(key =="or"){
+                            var or=sel[key];
+                            var condition=true;
+                            for(var i=0;i<or.length;i++){
+                                if(this.atomIsSelected(atom,or[i])){
+                                    condition=true;
+                                    break;
+                                }
+                                else{
+                                    condition=false;
+                                }
+                            }
+                            ret=condition;
+                        }
+                    }
+
+                }else if(key === 'predicate') { //a user supplied function for evaluating atoms
                     if(!sel['predicate'](atom) ) {
                         ret = false;
                         break;
@@ -25172,7 +27559,7 @@ $3Dmol.GLModel = (function() {
                         }
                     }
                 }
-                else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
+                else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within"  && key != "and" && key != "or" && key != "not") {
 
                     // if something is in sel, atom must have it                    
                     if (typeof (atom[key]) === "undefined") {
@@ -25220,10 +27607,25 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#selectedAtoms
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
+         * @example
+         *$3Dmol.download("pdb:4UB9",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+
+                  viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.render();
+              });
          */
         this.selectedAtoms = function(sel, from) {
             var ret = [];
             sel = sel || {};
+
             if (!from) from = atoms;
             var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
@@ -25258,18 +27660,28 @@ $3Dmol.GLModel = (function() {
 
                 // get atoms in second selection
                 var sel2 = this.selectedAtoms(sel.within.sel, atoms);
-                var within = [];
+                var within = {};
                 for (var i = 0; i < sel2.length; i++) {
                     for (var j = 0; j < ret.length; j++) {
 
                         var dist = squaredDistance(sel2[i], ret[j]);
                         var thresh = Math.pow(parseFloat(sel.within.distance), 2);
                         if (dist < thresh && dist > 0) {
-                            within.push(ret[j]);
+                          within[j] = 1;
                         }
-                    }
+                  }
                 }
-                ret = within;
+                var newret = [];
+                if(sel.within.invert) {
+                  for (var j = 0; j < ret.length; j++) {
+                    if(!within[j]) newret.push(ret[j]);
+                  }
+                } else {
+                  for(j in within) {
+                    newret.push(ret[j]);
+                  }
+                }
+                ret = newret;
             }
 
             // byres selection flag
@@ -25365,6 +27777,15 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#addAtoms
          * @param {type} newatoms
+         * @example
+         * var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
+           
+            viewer.setBackgroundColor(0xffffffff);
+            var m = viewer.addModel();
+            m.addAtoms(atoms);
+            m.setStyle({},{stick:{}});
+            viewer.zoomTo();
+            viewer.render();
          */        
         this.addAtoms = function(newatoms) {
             molObj = null;
@@ -25409,7 +27830,7 @@ $3Dmol.GLModel = (function() {
         /** Remove specified atoms from model
          * 
          * @function $3Dmol.GLModel#removeAtoms
-         * @param {type} badatoms
+         * @param {type} badatoms - list of atoms
          * @return {removeAtoms}
          */
         this.removeAtoms = function(badatoms) {
@@ -25442,6 +27863,20 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
+         @example
+        $3Dmol.download("pdb:4UB9",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+
+                  viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.render();
+              });
          */
         this.setStyle = function(sel, style, add) {
             
@@ -25478,7 +27913,7 @@ $3Dmol.GLModel = (function() {
             
                 for ( var i = 0; i < selected.length; i++) {                
                     changedAtoms = true;
-                    if (selected[i].clickable) 
+                    if (selected[i].clickable || selected[i].hoverable) 
                         selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};                    
                    
 
@@ -25511,6 +27946,33 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
+         * @example
+        
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.setClickable = function(sel, clickable, callback) {           
 
@@ -25544,7 +28006,77 @@ $3Dmol.GLModel = (function() {
 
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
-        
+         /** Set hoverable and callback of selected atoms
+         * 
+         * @function $3Dmol.GLModel#setHoverable
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} hoverable - whether hover-handling is enabled for the selection
+         * @param {function} hover_callback - function called when an atom in the selection is hovered over
+         * @param {function} unhover_callback - function called when the mouse moves out of the hover area
+         * @example
+         
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
+         */
+        this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
+            var s;
+            for (s in sel) {
+                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure hoverable is a boolean
+            hoverable = !!hoverable;
+
+            // report to console if hover_callback is not a valid function
+            if (hover_callback && typeof hover_callback != "function") {
+                console.log("Hover_callback is not a function");
+                return;
+            }
+            // report to console if unhover_callback is not a valid function
+            if (unhover_callback && typeof unhover_callback != "function") {
+                console.log("Unhover_callback is not a function");
+                return;
+            }
+
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].hoverable= hoverable;
+                if (hover_callback) selected[i].hover_callback = hover_callback;
+                if (unhover_callback) selected[i].unhover_callback = unhover_callback;
+
+            }
+
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
+        }
         /** given a mapping from element to color, set atom colors
          * 
          * @function $3Dmol.GLModel#setColorByElement
@@ -25571,16 +28103,18 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel.setColorByProperty
          * @param {type} sel
          * @param {type} prop
-         * @param {type} scheme
+         * @param {type} gradient
          */
         this.setColorByProperty = function(sel, prop, scheme, range) {
+            var i, a;
             var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
-            var min =  Number.POSITIVE_INFINITY;
-            var max =  Number.NEGATIVE_INFINITY;
-            var i, a;
+
+            if(typeof($3Dmol.Gradient.builtinGradients[scheme]) != "undefined") {
+                scheme = new $3Dmol.Gradient.builtinGradients[scheme]();
+            }
             
             if(!range) { //no explicit range, get from scheme
                 range = scheme.range();
@@ -25594,18 +28128,33 @@ $3Dmol.GLModel = (function() {
                 a = atoms[i];
                 var val = $3Dmol.getAtomProperty(a, prop);
                 if(val != null) {
-                    a.color = scheme.valueToHex(parseFloat(a.properties[prop]), [range[0],range[1]]);
+                    a.color = scheme.valueToHex(parseFloat(a.properties[prop]), range);
                 }                    
             }
         };
         
         /**
-         * @function $3Dmol.GLModel.setColorByFunction
-         * @param {type} sel
-         * @param {type} func
+         * @function setColorByFunction
+         * @deprecated use setStyle and colorfunc attribute
+         * @param {type} sel - selection object
+         * @param {type} func - function to be used to set the color
+         @example
+          $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });
+        
          */
         this.setColorByFunction = function(sel, colorfun) {
             var atoms = this.selectedAtoms(sel, atoms);
+            if(typeof(colorfun)!=='function')
+                return
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
@@ -25714,9 +28263,16 @@ $3Dmol.GLModel = (function() {
             molObj = null;
         };
         
-        /** Don't show this model is future renderings.  Keep all styles and state
+        /**@function hide
+             Don't show this model is future renderings.  Keep all styles and state
          * so it can be efficiencly shown again.
-         * 
+         * @example
+         var element=$('#gldiv');
+         var viewer = $3Dmol.createViewer(element);
+            var m = viewer.addModel();
+            m.hide();
+            viewer.render(callback);
+
          * @function $3Dmol.GLModel#hide
          */
         this.hide = function() {
@@ -25778,6 +28334,118 @@ $3Dmol.GLModel = (function() {
             }
         }
 
+    /**
+    * Set coordinates for the atoms parsed from the prmtop file. 
+    * @function $3Dmol.GLModel#setCoordinates
+    * @param {string} str - contains the data of the file
+    * @param {string} format - contains the format of the file
+    * @param {function} callback - function called when a inpcrd or a mdcrd file is uploaded
+    */
+
+        this.setCoordinates = function(str, format) {
+            format = format || "";
+            if (!str)
+                return []; // leave an empty model
+
+            if (/\.gz$/.test(format)) {
+                // unzip gzipped files
+                format = format.replace(/\.gz$/, '');
+                try {
+                    str = pako.inflate(str, {
+                        to : 'string'
+                    });
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+            if (format == "mdcrd" || format == "inpcrd" || format == "pdb") {
+                frames = [];
+                var atomCount = atoms.length;
+                var values = GLModel.parseCrd(str, format);
+                var count = 0;
+                while (count < values.length) {
+                    var temp = [];
+                    for (var i = 0; i < atomCount; i++) {
+                        temp[i] = atoms[i];
+                    }
+                
+                    for (var i = 0; i < atomCount; i++) {
+                        temp[i].x = values[count++];
+                        temp[i].y = values[count++];
+                        temp[i].z = values[count++];
+                    }
+                    frames.push(temp);
+                }
+                atoms = frames[0];
+                return frames;
+            }
+            return [];
+        }
+
+       /**
+        * add atomSpecs to validAtomSelectionSpecs
+        * @function $3Dmol.GLModel#addAtomSpecs
+        * @param {Array} customAtomSpecs - array of strings that can be used as atomSelectionSpecs
+        * this is to prevent the 'Unknown Selector x' message on the console for the strings passed
+        * @example
+        * model.addAtomSpecs(['priority1','priority2','ignore']);
+        */
+
+        this.addAtomSpecs = function(customAtomSpecs) {
+            for (var i = 0; i < customAtomSpecs.length; i++) {
+                if (validAtomSelectionSpecs.indexOf(customAtomSpecs[i]) == -1) {
+                    validAtomSelectionSpecs.push(customAtomSpecs[i]);
+                }
+            }
+        }
+    }
+
+    GLModel.parseCrd = function(data, format) {
+        var values = []; // this will contain the all the float values in the
+                            // file.
+        var counter = 0;
+        if (format == "pdb") {
+            var index = data.indexOf("\nATOM");
+            while (index != -1) {
+                while (data.slice(index, index + 5) == "\nATOM"
+                        || data.slice(index, index + 7) == "\nHETATM") {
+                    values[counter++] = parseFloat(data.slice(index + 31,
+                            index + 39));
+                    values[counter++] = parseFloat(data.slice(index + 39,
+                            index + 47));
+                    values[counter++] = parseFloat(data.slice(index + 47,
+                            index + 55));
+                    index = data.indexOf("\n", index + 54);
+                    if (data.slice(index, index + 4) == "\nTER")
+                        index = data.indexOf("\n", index + 5);
+                }
+                index = data.indexOf("\nATOM", index);
+            }
+            return values;
+        } else {
+            var valueLength = 8;
+            var index = data.indexOf("\n");
+            data = data.slice(index + 1);// remove the first line containing
+                                            // title.
+            if (format == "inpcrd") {
+                index = data.indexOf("\n");
+                data = data.slice(index + 1);// remove the second line
+                                                // containing number of atoms.
+                valueLength = 12;
+            }
+            index = 0;
+            while (index < data.length - valueLength) {
+                if (data[index] == "\n")
+                    index++;
+                if (data[index] != "\n") {
+                    values[counter] = parseFloat(data.slice(index, index
+                            + valueLength));
+                    index = index + valueLength;
+                    counter++;
+                }
+            }
+            return values;
+        }
     }
 
     GLModel.parseMolData = function(data, format, options) {
@@ -25796,22 +28464,24 @@ $3Dmol.GLModel = (function() {
             }
         }
 
-        if(typeof($3Dmol.Parsers[format]) == "undefined") {
-            //let someone provide a file name and get format from extension
+        if (typeof ($3Dmol.Parsers[format]) == "undefined") {
+            // let someone provide a file name and get format from extension
             format = format.split('.').pop();
-            if(typeof($3Dmol.Parsers[format]) == "undefined") {
-                console.log("Unknown format: "+format);
-                //try to guess correct format from data contents
-                if(data.match(/^@<TRIPOS>MOLECULE/gm)) {
+            if (typeof ($3Dmol.Parsers[format]) == "undefined") {
+                console.log("Unknown format: " + format);
+                // try to guess correct format from data contents
+                if (data.match(/^@<TRIPOS>MOLECULE/gm)) {
                     format = "mol2";
-                } else if(data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
+                } else if (data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
                     format = "pdb";
-                } else if(data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)){
-                    format = "sdf"; //could look at line 3
+                } else if (data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
+                    format = "sdf"; // could look at line 3 
+                } else if (data.match(/^%VERSION\s+\VERSION_STAMP/gm)) {
+                    format = "prmtop";
                 } else {
                     format = "xyz";
                 }
-                console.log("Best guess: "+format);
+                console.log("Best guess: " + format);
             }
         }
         var parse = $3Dmol.Parsers[format];
@@ -25829,7 +28499,7 @@ $3Dmol.GLModel = (function() {
                 atom.style = atom.style || defaultAtomStyle;
                 atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
                 atom.model = id;
-                if (atom.clickable)
+                if (atom.clickable || atom.hoverable)
                     atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
             }
         }
@@ -25846,6 +28516,9 @@ $3Dmol.GLModel = (function() {
  * @param {number} sid - Unique identifier
  * @param {ShapeSpec} stylespec - shape style specification
  */
+
+ 
+
 $3Dmol.GLShape = (function() {
 
     // Marching cube, to match with protein surface generation
@@ -26433,6 +29106,8 @@ $3Dmol.GLShape = (function() {
             shape.color = stylespec.color || new $3Dmol.Color();
             if(! (stylespec.color instanceof $3Dmol.Color))
                 shape.color = $3Dmol.CC.color(stylespec.color);
+        } else {
+            shape.color = $3Dmol.CC.color(0);
         }
         shape.wireframe = stylespec.wireframe ? true : false;
         //opacity is the preferred nomenclature, support alpha for backwards compat
@@ -26449,6 +29124,14 @@ $3Dmol.GLShape = (function() {
         shape.clickable = stylespec.clickable ? true : false;
         shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
                 : null;
+
+        shape.hoverable = stylespec.hoverable ? true : false;
+        shape.hover_callback = typeof (stylespec.hover_callback) === "function" ? stylespec.hover_callback
+                : null;
+
+        shape.unhover_callback = typeof (stylespec.unhover_callback) === "function" ? stylespec.unhover_callback
+                : null;
+
         shape.hidden = stylespec.hidden;
     };
 
@@ -26486,6 +29169,7 @@ $3Dmol.GLShape = (function() {
         var linegeo = new $3Dmol.Geometry(true);
 
         /** Update shape with new style specification
+	 * @function $3Dmol.GLShape#updateStyle
          * @param {ShapeSpec} newspec
          * @return {$3Dmol.GLShape}
          */
@@ -26501,8 +29185,9 @@ $3Dmol.GLShape = (function() {
         /**
          * Creates a custom shape from supplied vertex and face arrays
          * @function $3Dmol.GLShape#addCustom
-         * @param {CustomSpec} customSpec
+         * @param {CustomShapeSpec} customSpec
          * @return {$3Dmol.GLShape}
+         
          */
         this.addCustom = function(customSpec) {
 
@@ -26520,6 +29205,10 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addSphere
          * @param {SphereSpec} sphereSpec
          * @return {$3Dmol.GLShape}
+         @example 
+         viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
+         
+         viewer.render();
          */
         this.addSphere = function(sphereSpec) {
 
@@ -26553,11 +29242,38 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addCylinder
          * @param {CylinderSpec} cylinderSpec
          * @return {$3Dmol.GLShape}
+         @example
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.addCylinder = function(cylinderSpec) {
 
             cylinderSpec.start = cylinderSpec.start || {};
             cylinderSpec.end = cylinderSpec.end || {};
+
 
             var start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
                     cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
@@ -26571,7 +29287,7 @@ $3Dmol.GLShape = (function() {
             this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(start, end, radius));
 
             $3Dmol.GLDraw.drawCylinder(geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);            
-            
+           
             var centroid = new $3Dmol.Vector3();
             components.push({
                 centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
@@ -26587,6 +29303,12 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addLine         
          * @param {LineSpec} lineSpec
          * @return {$3Dmol.GLShape}
+         @example
+         $3Dmol.download("pdb:2ABJ",viewer,{},function(){
+                  viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
+                  viewer.render(callback);
+              });
+
          */
         this.addLine = function(lineSpec) {
             lineSpec.start = lineSpec.start || {};
@@ -26626,6 +29348,23 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addArrow        
          * @param {ArrowSpec} arrowSpec
          * @return {$3Dmol.GLShape}
+         @example
+          $3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  viewer.addArrow({
+                      start: {x:-10.0, y:0.0, z:0.0},
+                      end: {x:0.0, y:-10.0, z:0.0},
+                      radius: 1.0,
+                      radiusRadio:1.0,
+                      mid:1.0,
+                      clickable:true,
+                      callback:function(){
+                          this.color.setHex(0xFF0000FF);
+                          viewer.render();
+                      }
+                  });
+                  viewer.render();
+                });
          */
         this.addArrow = function(arrowSpec) {
 
@@ -26667,14 +29406,40 @@ $3Dmol.GLShape = (function() {
                     geoGroup.vertexArray);
 
         };
+
         
         /**
          * Create isosurface from voluemetric data.
          * @function $3Dmol.GLShape#addIsosurface         
          * @param {$3Dmol.VolumeData} data - volumetric input data
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
+         * @example //the user can specify a selected region for the isosurface 
+         $.get('../test_structs/benzene-homo.cube', function(data){
+                  var voldata = new $3Dmol.VolumeData(data, "cube");
+                  viewer.addIsosurface(voldata, {isoval: 0.01,
+                                                 color: "blue",
+                                                 alpha: 0.5,
+                                                 smoothness: 10});
+                  viewer.addIsosurface(voldata, {isoval: -0.01,
+                                                 color: "red",
+                                                 smoothness: 5,
+                                                 opacity:0.5,
+                                                 wireframe:true,
+                                                 linewidth:0.1,
+                                                 clickable:true,
+                                                 callback:
+                                                 function() {
+                                                     this.opacity = 0.0;
+                                                     viewer.render(callback);
+                                                 }});
+                  viewer.setStyle({}, {stick:{}});
+                  viewer.zoomTo();
+                  viewer.render(callback);
+                });
+         //this specific example selects every atom in the
          */
-        this.addIsosurface = function(data, volSpec) {
+        this.addIsosurface = function(data, volSpec, callback) {//may want to cache the arrays geneerated when selectedRegion ==true
+           
             var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
                     : 0.0;
             var voxel = (volSpec.voxel) ? true : false;
@@ -26685,22 +29450,22 @@ $3Dmol.GLShape = (function() {
             var nZ = data.size.z;
             var vertnums = new Int16Array(nX * nY * nZ);
             var vals = data.data;
+
             var i, il;
 
             for (i = 0, il = vertnums.length; i < il; ++i)
                 vertnums[i] = -1;
 
-            //mark locations partitioned by isoval
             var bitdata = new Uint8Array(nX * nY * nZ);
-
+           
+            //mark locations partitioned by isoval
             for (i = 0, il = vals.length; i < il; ++i) {
                 var val = (isoval >= 0) ? vals[i] - isoval : isoval - vals[i];
-
                 if (val > 0)
                     bitdata[i] |= ISDONE;
 
             }
-
+               
             var verts = [], faces = [];
 
             $3Dmol.MarchingCube.march(bitdata, verts, faces, {
@@ -26713,17 +29478,83 @@ $3Dmol.GLShape = (function() {
                 nY : nY,
                 nZ : nZ
             });
-
+            
             if (!voxel && smoothness > 0)
                 $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
+            var vertexmapping= [];
+            var newvertices= [];
+            var newfaces=[];
 
+            if (volSpec.selectedRegion !== undefined) {
+
+                var xmax = volSpec.selectedRegion[0], ymax = volSpec.selectedRegion[0], zmax = volSpec.selectedRegion[0], xmin = volSpec.selectedRegion[0], ymin = volSpec.selectedRegion[0], zmin = volSpec.selectedRegion[0];
+
+                for (var i = 0; i < volSpec.selectedRegion.length; i++) {
+                    if (volSpec.selectedRegion[i].x > xmax.x)
+                        xmax = volSpec.selectedRegion[i];
+                    else if (volSpec.selectedRegion[i].x < xmin.x)
+                        xmin = volSpec.selectedRegion[i];
+                    if (volSpec.selectedRegion[i].y > ymax.y)
+                        ymax = volSpec.selectedRegion[i];
+                    else if (volSpec.selectedRegion[i].y < ymin.y)
+                        ymin = volSpec.selectedRegion[i];
+                    if (volSpec.selectedRegion[i].z > zmax.z)
+                        zmax = volSpec.selectedRegion[i];
+                    else if (volSpec.selectedRegion[i].z < zmin.z)
+                        zmin = volSpec.selectedRegion[i];
+                }
+
+                var rad = volSpec.radius;
+                xmax.x = xmax.x + rad;
+                xmin.x = xmin.x - rad;
+                ymin.y = ymin.y - rad;
+                ymax.y = ymax.y + rad;
+                zmin.z = zmin.z - rad;
+                zmax.z = zmax.z + rad;
+
+                // accounts for radius
+                for (var i = 0; i < verts.length; i++) {
+                    if (verts[i].x > xmin.x
+                            && verts[i].x < xmax.x
+                            && verts[i].y > ymin.y
+                            && verts[i].y < ymax.y
+                            && verts[i].z > zmin.z
+                            && verts[i].z < zmax.z
+                            && inSelectedRegion(verts[i],
+                                    volSpec.selectedRegion,
+                                    volSpec.selectedOffset, volSpec.radius)) {
+                        vertexmapping.push(newvertices.length);
+                        newvertices.push(verts[i]);
+
+                    } else {
+                        vertexmapping.push(-1);
+                    }
+
+                }
+                for (var i = 0; i + 2 < faces.length; i += 3) {
+                    if (vertexmapping[faces[i]] !== -1
+                            && vertexmapping[faces[i + 1]] !== -1
+                            && vertexmapping[faces[i + 2]] !== -1) {
+                        newfaces.push(faces[i]
+                                - (faces[i] - vertexmapping[faces[i]]));
+                        newfaces.push(faces[i + 1]
+                                - (faces[i + 1] - vertexmapping[faces[i + 1]]));
+                        newfaces.push(faces[i + 2]
+                                - (faces[i + 2] - vertexmapping[faces[i + 2]]));
+                    }
+                }
+                verts = newvertices;
+                faces = newfaces;
+            }
+           
             drawCustom(this, geo, {
                 vertexArr : verts,
                 faceArr : faces,
                 normalArr : [],
-                clickable : volSpec.clickable
+                clickable : volSpec.clickable,
+                hoverable : volSpec.hoverable
             });
-           
+            
             this.updateStyle(volSpec);
             
             //computing bounding sphere from vertices
@@ -26743,9 +29574,39 @@ $3Dmol.GLShape = (function() {
             var len2 = total.distanceTo(maxv);
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
-           
-        };
-        
+            console.log(verts.length);
+            if(typeof callback =="function")
+                callback();
+          }
+        var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
+            
+            for(var i=0;i<selectedRegion.length;i++){
+                if(distance_from(selectedRegion[i],coordinate)<=radius)
+                    return true;
+            }
+            return false;
+        }
+        var distance_from= function(c1,c2){
+            return Math.sqrt(Math.pow((c1.x-c2.x),2)+Math.pow((c1.y-c2.y),2)+Math.pow((c1.z-c2.z),2));
+        }
+        /**
+         * @deprecated unnecesary
+
+        */
+        var convert=function(i,j,k,data){
+            var pt;
+            if(data.matrix) {
+                pt = new $3Dmol.Vector3(i,j,k);
+                pt = pt.applyMatrix4(data.matrix);
+                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
+
+            } else {
+                pt.x = data.origin.x+data.unit.x*i;
+                pt.y = data.origin.y+data.unit.y*j;
+                pt.z = data.origin.z+data.unit.z*k;
+            }
+            return pt;
+        }
         /** 
          * @deprecated Use addIsosurface instead
          * Creates custom shape from volumetric data 
@@ -26912,6 +29773,7 @@ $3Dmol.splitMesh = function(mesh) {
         }
         return slices;
     }
+
 //a molecular viewer based on GLMol
 
 
@@ -26941,7 +29803,8 @@ $3Dmol.GLViewer = (function() {
             defaultcolors = $3Dmol.elementColors.defaultColors;
         var nomouse = config.nomouse;
         var bgColor = 0;
-
+        config.backgroundColor = config.backgroundColor || "#ffffff";
+       //config.disableFog= config.disableFog || false;
         if(typeof(config.backgroundColor) != undefined) {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
         }
@@ -26959,8 +29822,15 @@ $3Dmol.GLViewer = (function() {
         var surfaces = {};
         var shapes = []; // Generic shapes
         var labels = [];
+        var fixed_labels = [];
         var clickables = []; //things you can click on
-        
+        var hoverables = []; //things you can hover over
+        var popups = [];
+        var current_hover = null;
+        var hoverDuration = 500;
+        if(typeof(config.hoverDuration) != undefined) {
+            hoverDuration = config.hoverDuration;
+        }
         var WIDTH = container.width();
         var HEIGHT = container.height();
 
@@ -26978,9 +29848,9 @@ $3Dmol.GLViewer = (function() {
         var renderer = new $3Dmol.Renderer({
             antialias : true,
             preserveDrawingBuffer: true, //so we can export images
-            premultipliedAlpha : false/* more traditional compositing with background */
+            premultipliedAlpha : false,/* more traditional compositing with background */
+            id:config.id
         });
-
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
         renderer.domElement.style.padding = "0";
@@ -27024,7 +29894,7 @@ $3Dmol.GLViewer = (function() {
             //compute the next highest surface id directly from surfaces
             //this is necessary to support linking of model data
             var max = 0;
-            for (i in surfaces) { // this is an object with possible holes
+            for (var i in surfaces) { // this is an object with possible holes
                 if(!surfaces.hasOwnProperty(i)) continue;
                 if(i > max) max = i;
             }
@@ -27032,6 +29902,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         var setSlabAndFog = function() {
+            
             var center = camera.position.z - rotationGroup.position.z;
             if (center < 1)
                 center = 1;
@@ -27049,10 +29920,15 @@ $3Dmol.GLViewer = (function() {
             camera.bottom = -camera.top;
             
             camera.updateProjectionMatrix();
+
             scene.fog.near = camera.near + fogStart
                     * (camera.far - camera.near);
             // if (scene.fog.near > center) scene.fog.near = center;
             scene.fog.far = camera.far;
+            
+            if(config.disableFog){
+                scene.fog.near=scene.fog.far;
+            }
         };
 
         // display scene
@@ -27060,14 +29936,12 @@ $3Dmol.GLViewer = (function() {
         var show = function(nolink) {
             if (!scene)
                 return;
-
             // var time = new Date();
             setSlabAndFog();
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
-            if(!nolink && linkedViewers.length > 0) {
-                var view = _viewer.getView();
+            if(!nolink && linkedViewers.length > 0) {                var view = _viewer.getView();
                 for(var i = 0; i < linkedViewers.length; i++) {
                     var other = linkedViewers[i];
                     other.setView(view, true);
@@ -27106,31 +29980,42 @@ $3Dmol.GLViewer = (function() {
         // enable mouse support
 
         //regenerate the list of clickables
+        //also updates hoverables
         var updateClickables = function() {
             clickables.splice(0,clickables.length);
+            hoverables.splice(0,hoverables.length);
             var i, il;
-
+            
             for (i = 0, il = models.length; i < il; i++) {
                 var model = models[i];
                 if(model) {
                     var atoms = model.selectedAtoms({
                         clickable : true
                     });
+                    
+                    var hoverable_atoms = model.selectedAtoms({
+                        hoverable : true
+                    });
+                    Array.prototype.push.apply(hoverables,hoverable_atoms);
+
                     Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
+                    
                 }
             }
-
             for (i = 0, il = shapes.length; i < il; i++) {
 
                 var shape = shapes[i];
                 if (shape && shape.clickable) {
                     clickables.push(shape);
                 }
+                if( shape && shape.hoverable){
+                    hoverables.push(shape);
+                }
             }
         };
-        
         // Checks for selection intersects on mousedown
         var handleClickSelection = function(mouseX, mouseY, event) {
+
             if(clickables.length == 0) return;
             var mouse = {
                 x : mouseX,
@@ -27154,6 +30039,62 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
+        //checks for selection intersects on hover
+        var handleHoverSelection = function(mouseX, mouseY, event){
+            if(hoverables.length == 0) return;
+            var mouse = {
+                x : mouseX,
+                y : mouseY,
+                z : -1.0
+            };
+            mouseVector.set(mouse.x, mouse.y, mouse.z);
+            projector.unprojectVector(mouseVector, camera);
+            mouseVector.sub(camera.position).normalize();
+
+            raycaster.set(camera.position, mouseVector);
+
+            var intersects = [];
+            intersects = raycaster.intersectObjects(modelGroup, hoverables);
+            if (intersects.length) {
+                var selected = intersects[0].clickable;
+                current_hover=selected;
+                if (selected.hover_callback !== undefined
+                        && typeof (selected.hover_callback) === "function") {
+                    selected.hover_callback(selected, _viewer, event, container);
+                }
+            }
+            else{
+                current_hover=null;
+            }
+        }
+        //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
+        var handleHoverContinue = function(mouseX,mouseY,event){
+            console.log("continue");
+            var mouse = {
+                x : mouseX,
+                y : mouseY,
+                z : -1.0
+            };
+
+            mouseVector.set(mouse.x, mouse.y, mouse.z);
+            projector.unprojectVector(mouseVector, camera);
+            mouseVector.sub(camera.position).normalize();
+
+            raycaster.set(camera.position, mouseVector);
+
+            var intersects = [];
+            intersects = raycaster.intersectObjects(modelGroup, hoverables);
+            if(intersects[0] === undefined){                
+                current_hover.unhover_callback(current_hover, _viewer, event, container);
+                current_hover=null;
+            }
+            if(intersects[0]!== undefined)
+            if(intersects[0].clickable !== current_hover){
+                current_hover.unhover_callback(current_hover, _viewer, event, container);
+                current_hover=null;
+            }
+        }
+
 
         var calcTouchDistance = function(ev) { // distance between first two
                                                 // fingers
@@ -27208,7 +30149,6 @@ $3Dmol.GLViewer = (function() {
                     var offset = $('canvas',container).offset();
                     var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
-
                     handleClickSelection(mouseX, mouseY, ev, container);
                 }
             }
@@ -27216,7 +30156,8 @@ $3Dmol.GLViewer = (function() {
             isDragging = false;
 
         });
-        
+
+        var mouseButton;
         var _handleMouseDown = this._handleMouseDown = function(ev) {
             ev.preventDefault();
             if (!scene)
@@ -27224,7 +30165,6 @@ $3Dmol.GLViewer = (function() {
             var xy = getXY(ev);
             var x = xy[0];
             var y = xy[1];
-            
             if (x === undefined)
                 return;
             isDragging = true;
@@ -27265,7 +30205,45 @@ $3Dmol.GLViewer = (function() {
             show();
         };
         
+        /**
+         * Return image URI of viewer contents (base64 encoded).
+         * @function $3Dmol.GLViewer#png
+         * 
+         */
+        this.pngURI = function() {
+            return $('canvas',container)[0].toDataURL('image/png');
+        }
+	/**
+         * Set the duration of the hover delay
+         * 
+         * @function $3Dmol.GLViewer#setHoverDuration
+         * @param {number}
+         *            [hoverDuration] - an optional parameter that denotes
+         *            the duration of the hover delay (in milliseconds) before the hover action is called
+         * @example
+         * 
+         * viewer.setHoverDuration(100);
+	 */
+        this.setHoverDuration = function(duration) {
+            hoverDuration = duration;
+        }
+        var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
+
+            clearTimeout(hoverTimeout);
+
+            
+            var offset = $('canvas',container).offset();
+            var mouseX = ((getXY(ev)[0] - offset.left) / WIDTH) * 2 - 1;
+            var mouseY = -((getXY(ev)[1] - offset.top) / HEIGHT) * 2 + 1;
+            if(current_hover !== null)
+                handleHoverContinue(mouseX,mouseY,ev);
+            hoverTimeout=setTimeout(
+                function(){
+                    handleHoverSelection(mouseX,mouseY,ev);
+                }
+                ,hoverDuration);
+
             WIDTH = container.width();
             HEIGHT = container.height();
             ev.preventDefault();
@@ -27280,6 +30258,8 @@ $3Dmol.GLViewer = (function() {
             var y = xy[1];
             if (x === undefined)
                 return;
+            //hover timeout
+
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
             // check for pinch
@@ -27363,24 +30343,6 @@ $3Dmol.GLViewer = (function() {
          * @param {Object | string} element
          *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
 
-         * @example
-         * // Assume there exist HTML divs with ids "gldiv", "gldiv2"
-         * var element = $("#gldiv"), element2 = $("#gldiv2");
-         * // Create GLViewer within 'gldiv'
-         * var myviewer = $3Dmol.createViewer(element);
-         * // Move the canvas to the other div
-         * myviewer.setContainer(element2)
-         *
-         * @example
-         * // Assume there exists an HTML div with id "gldiv"
-         * var element = $("#gldiv");
-         * // Create GLViewer within 'gldiv'
-         * var myviewer = $3Dmol.createViewer(element);
-         * // Remove the element from the DOM, and add a new element
-         * element.remove()
-         * $('body').prepend("<div id='newdiv'></div>")
-         * // Show the canvas in the new element
-         * myviewer.setContainer('newdiv')
          */
         this.setContainer = function(element) {
             if($.type(element) === "string")
@@ -27403,8 +30365,9 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example
          * 
-         * //Set 'myviewer' background color to white
-         * myviewer.setBackgroundColor(0xffffff)
+         * viewer.setBackgroundColor(0x00000000);
+
+
          * 
          */
         this.setBackgroundColor = function(hex, a) {
@@ -27430,7 +30393,17 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setProjection
          * 
          * @example
-         * myviewer.setProjection("orthographic");
+         viewer.setViewStyle({style:"outline"});
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                  });
+                  viewer.zoomTo();
+
+                  viewer.setProjection("orthographic");
+                  viewer.render(callback);
+              });
          * 
          */
         this.setProjection = function(proj) {
@@ -27443,7 +30416,15 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setViewStyle
          * 
          * @example
-         * myviewer.setViewStyle({style:"outline", color:"black", width:0.1})
+         *   viewer.setViewStyle({style:"outline"});
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                  });
+                  viewer.zoomTo();
+                  viewer.render(callback);
+              });
          * 
          */
          this.setViewStyle = function(parameters) {
@@ -27516,10 +30497,29 @@ $3Dmol.GLViewer = (function() {
          * @return {GLModel}
          * 
          * @example // Retrieve reference to first GLModel added var m =
-         *          glviewer.getModel(0);
+         *      $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.getModel(0);
+      viewer.zoomTo();
+      viewer.render(callback);
+
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      viewer.render(callback);
+    };
          */
         this.getModel = function(id) {
-            id = id || models.length - 1;
+            if(!(id in models)) {
+                return models[models.length-1]; //get last model if no (or invalid) id specified
+            }
             return models[id];
         };
 
@@ -27530,29 +30530,86 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [angle] - Angle, in degrees, to rotate by.
          * @param {string}
-         *            [angle] - Axis ("x", "y", or "z") to rotate around.
+         *            [axis] - Axis ("x", "y", or "z") to rotate around.
          *            Default "y"
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @param {boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
+         * @example     $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      //viewer.translate(10,10);         
+      //viewer.zoomTo({resn:'STI'});
+      //viewer.zoom(10);
+      viewer.rotate(90,"y");
+      viewer.render(callback);
+    };
+         *  
          */
-        this.rotate = function(angle, axis) {
+        this.rotate = function(angle, axis, animationDuration, fixedPath) {
+            animationDuration = animationDuration!==undefined ? animationDuration : 0;
+
             if (typeof (axis) === "undefined") {
                 axis = "y";
             }
-            var i = 0, j = 0, k = 0;
-            var rangle = Math.PI * angle / 180.0;
-            var s = Math.sin(rangle / 2.0);
-            var c = Math.cos(rangle / 2.0);
-            if (axis == "x")
-                i = s;
-            if (axis == "y")
-                j = s;
-            if (axis == "z")
-                k = s;
+            
+            var qFromAngle = function(rangle) {
+                var s = Math.sin(rangle / 2.0);
+                var c = Math.cos(rangle / 2.0);
+                var i = 0, j = 0, k = 0;
 
-            var q = new $3Dmol.Quaternion(i, j, k, c).normalize();
-            rotationGroup.quaternion.multiply(q);
-            show();
+                if (axis == "x")
+                    i = s;
+                if (axis == "y")
+                    j = s;
+                if (axis == "z")
+                    k = s;
+
+                return new $3Dmol.Quaternion(i, j, k, c).normalize();
+            }
+            
+
+            var wait_time = 20;
+            var rangle = Math.PI * angle / 180.0;
+            var q = qFromAngle(rangle);
+            
+            if(animationDuration ){
+                var final = new $3Dmol.Quaternion().copy(rotationGroup.quaternion).multiply(q);//final
+                animateMotion(animationDuration,fixedPath,
+                        modelGroup.position,
+                        rotationGroup.position.z, 
+                        final,
+                        lookingAt);              
+            } else { //not animated
+                rotationGroup.quaternion.multiply(q);
+                show();
+            }
             return this;
+
+        };
+
+        this.surfacesFinished= function() {
+              for(var key in surfaces){
+                if(!surfaces[key][0].done){
+                    return false;
+                }
+            }
+            return true;
+
+
         };
 
         /** Returns an array representing the current viewpoint.
@@ -27604,10 +30661,10 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#render
          */
-        this.render = function() {
+        this.render = function(callback) {
+            var time1 = new Date();
 
             updateClickables(); //must render for clickable styles to take effect
-            var time1 = new Date();
             var view = this.getView();
             
             var i, n;
@@ -27692,6 +30749,10 @@ $3Dmol.GLViewer = (function() {
             this.setView(view); // Calls show() => renderer render
             var time2 = new Date();
             //console.log("render time: " + (time2 - time1));
+            if(typeof callback ==='function'){
+                callback();
+                console.log("render time: " + (time2 - time1));
+            }
             return this;
         };
 
@@ -27762,6 +30823,10 @@ $3Dmol.GLViewer = (function() {
         }
 
         
+        this.autoload = function(callback,viewer){
+            $3Dmol.autoload(callback,viewer);
+        }
+
         /** return list of atoms selected by sel
          * 
          * @function $3Dmol.GLViewer#selectedAtoms
@@ -27788,6 +30853,163 @@ $3Dmol.GLViewer = (function() {
             return ret;
         };
 
+        //interpolate between two normalized quaternions (t between 0 and 1)
+        //https://en.wikipedia.org/wiki/Slerp
+        var slerp = function(v0, v1, t) {
+            // Compute the cosine of the angle between the two vectors.
+            //dot product
+            if(t == 1) return v1;
+            else if(t == 0) return v0;
+            var dot = v0.x*v1.x+v0.y*v1.y+v0.z*v1.z+v0.w*v1.w;
+            if (dot > 0.9995) {
+                // If the inputs are too close for comfort, linearly interpolate
+                // and normalize the result.
+                var result = new $3Dmol.Quaternion(
+                        v0.x+t*(v1.x-v0.x),
+                        v0.y+t*(v1.y-v0.y),
+                        v0.z+t*(v1.z-v0.z),
+                        v0.w+t*(v1.w-v0.w));
+                        
+                result.normalize();
+                return result;
+            }
+
+            // If the dot product is negative, the quaternions
+            // have opposite handed-ness and slerp won't take
+            // the shorted path. Fix by reversing one quaternion.
+            if (dot < 0.0) {
+                v1 = v1.clone().multiplyScalar(-1);
+                dot = -dot;
+            }  
+
+            if(dot > 1) dot = 1.0;
+            else if(dot < -1) dot = -1.0;
+
+            var theta_0 = Math.acos(dot);  // theta_0 = angle between input vectors
+            var theta = theta_0*t;    // theta = angle between v0 and result 
+
+            var v2 = v1.clone();
+            v2.sub(v0.clone().multiplyScalar(dot));
+            v2.normalize();              // { v0, v2 } is now an orthonormal basis
+
+            var c = Math.cos(theta);
+            var s = Math.sin(theta);
+            var ret = new $3Dmol.Quaternion(
+                    v0.x*c+v2.x*s,
+                    v0.y*c+v2.y*s,
+                    v0.z*c+v2.z*s,
+                    v0.w*c+v2.w*s
+            );
+            ret.normalize();
+            return ret;
+        };
+        
+        //animate motion between current position and passed position
+        // can set some parameters to null
+        //if fixed is true will enforce the request animation, otherwise
+        //does relative updates
+        //positions objects have modelggroup position, rotation group position.z,
+        //and rotationgroup quaternion
+        //return array includes final position, but not current 
+        //the returned array includes an animate method
+        var animateMotion = function(duration, fixed, mpos, rz, rot, cam) {
+            var interval = 20;
+            var steps = Math.ceil(duration/interval);
+            if(steps < 1) steps = 1;
+            
+            var curr = {mpos:modelGroup.position.clone(),
+                    rz: rotationGroup.position.z,
+                    rot: rotationGroup.quaternion.clone(),
+                    cam: lookingAt.clone()};
+            
+            if(fixed) { //precompute path and stick to it
+                var steps = new Array(steps);
+                var n = steps.length;
+                for(var i = 0; i < n; i++) {
+                    var frac = (i+1)/n;
+                    var next = {mpos: curr.mpos, rz:curr.rz, rot:curr.rot};
+                    if(mpos) {
+                        next.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac).add(curr.mpos);
+                    }
+                    if(typeof(rz) != 'undefined' && rz != null) {
+                        next.rz = curr.rz+frac*(rz-curr.rz);
+                    }
+                    if(rot) {
+                        next.rot = slerp(curr.rot,rot,frac);
+                    }
+                    if(cam) {
+                        next.cam = cam.clone().sub(curr.cam).multiplyScalar(frac).add(curr.cam);
+                    }
+                    
+                    steps[i] = next;
+                }
+                
+                var step = 0;
+                var callback = function() {
+                    var p = steps[step];
+                    step += 1;
+                    if(p.mpos) {
+                        modelGroup.position = p.mpos;
+                    }
+                    if(p.rz) {
+                        rotationGroup.position.z = p.rz;
+                    }
+                    if(p.rot) {
+                        rotationGroup.quaternion = p.rot;
+                    }
+                    if(p.cam) {
+                        camera.lookAt(p.cam);
+                    }
+                    
+                    if(step < steps.length) {
+                        setTimeout(callback, interval);
+                    }
+                    show();
+                }
+                setTimeout(callback, interval);
+               
+            } else { //relative update
+                var delta = {};
+                var frac = 1.0/steps;
+                if(mpos) {
+                    delta.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac);
+                }
+                if(typeof(rz) != 'undefined' && rz != null) {
+                    delta.rz = frac*(rz-curr.rz);
+                }
+                if(rot) {
+                    var next = slerp(curr.rot,rot,frac);
+                    //comptute step delta rotation
+                    delta.rot = curr.rot.clone().inverse().multiply(next);
+                }
+                if(cam) {
+                    delta.cam = cam.clone().sub(curr.cam).multiplyScalar(frac);
+                }
+                var step = 0.0;
+                var callback = function() {
+                    step += 1;
+                    if(delta.mpos) {
+                        modelGroup.position.add(delta.mpos);
+                    }
+                    if(delta.rz) {
+                        rotationGroup.position.z += delta.rz;
+                    }
+                    if(delta.rot) {
+                        rotationGroup.quaternion.multiply(delta.rot);
+                    }
+                    if(delta.cam) {
+                        lookingAt.add(delta.cam);
+                        camera.lookAt(lookingAt);
+                    }
+                    
+                    if(step < steps) {
+                        setTimeout(callback, interval);
+                    }
+                    show();
+                }
+                setTimeout(callback, interval);
+            }
+        }
         /**
          * Zoom current view by a constant factor
          * 
@@ -27795,13 +31017,46 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [factor] - Magnification factor. Values greater than 1
          *            will zoom in, less than one will zoom out. Default 2.
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation
+         * @example   
+    $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      viewer.zoom(10);
+      viewer.render(callback);
+    };
          */
-        this.zoom = function(factor) {
+        this.zoom = function(factor,animationDuration,fixedPath) {
             var factor = factor || 2;
+            var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var scale = (CAMERA_Z - rotationGroup.position.z) / factor;
-            rotationGroup.position.z = CAMERA_Z - scale;
-            show();
+            var final_z = CAMERA_Z - scale;
+
+            if(animationDuration>0){
+                animateMotion(animationDuration,fixedPath,
+                        modelGroup.position, 
+                        final_z, 
+                        rotationGroup.quaternion,
+                        lookingAt);
+            } else { //no animation
+                rotationGroup.position.z = final_z;
+                show();
+            }
             return this;
         };
         
@@ -27812,40 +31067,130 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#translate
          * @param {number} x
          * @param {number} y
-         * 
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
+         * @example     $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      viewer.translate(10,10);         
+      //viewer.zoomTo({resn:'STI'});
+      //viewer.zoom(10);
+      //viewer.rotate(90,"y");
+      viewer.render(callback);
+    };
          */
-        this.translate = function(x, y) {
-            
+        this.translate = function(x, y, animationDuration, fixedPath) {
+            var animationDuration = animationDuration!==undefined ? animationDuration : 0;
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
             var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
-
+            
             projector.projectVector(v, camera);
             v.x -= dx;
             v.y -= dy;
             projector.unprojectVector(v, camera);
             v.z = 0;            
-            lookingAt.add(v);
-            camera.lookAt(lookingAt);
-            show();
+
+            var final_position=lookingAt.clone().add(v);
+            if(animationDuration>0){
+                animateMotion(animationDuration,fixedPath,
+                        modelGroup.position,
+                        rotationGroup.position.z, 
+                        rotationGroup.quaternion,
+                        final_position);
+            } else { //no animation
+                camera.lookAt(final_position);
+                show();
+            }
             return this;
         };
         
 
         /**
-         * Zoom to center of atom selection
+         * Adjust slab to fully enclose selection (default everything).
          * 
-         * @function $3Dmol.GLViewer#zoomTo
+         * @function $3Dmol.GLViewer#center
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
          *            properties to select. Default: all atoms in viewer
-         * @example // Assuming we have created a model of a protein with
-         *          multiple chains (e.g. from a PDB file), focus on atoms in
-         *          chain B glviewer.zoomTo({chain: 'B'});
-         *  // Focus on centroid of all atoms of all models in this
-         * viewer glviewer.zoomTo(); // (equivalent to glviewer.zoomTo({}) )
          */
-        this.zoomTo = function(sel) {
+        this.fitSlab = function(sel) {
+            sel = sel || {};
+            var atoms = getAtomsFromSel(sel);
+            var tmp = $3Dmol.getExtent(atoms);
+
+            // fit to bounding box
+            var x = tmp[1][0] - tmp[0][0], 
+                y = tmp[1][1] - tmp[0][1], 
+                z = tmp[1][2] - tmp[0][2];
+
+            var maxD = Math.sqrt(x * x + y * y + z * z);
+            if (maxD < 5)
+                maxD = 5;
+
+            // use full bounding box for slab/fog
+            slabNear = -maxD / 1.9;
+            slabFar = maxD / 2;
+
+            return this;
+        };        
+        
+        /**
+         * Re-center the viewer around the provided selection (unlike zoomTo, does not zoom).
+         * 
+         * @function $3Dmol.GLViewer#center
+         * @param {Object}
+         *            [sel] - Selection specification specifying model and atom
+         *            properties to select. Default: all atoms in viewer
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
+         * @example // if the user were to pass the animationDuration value to 
+         *           // the function like so viewer.zoomTo({resn:'STI'},1000);
+         *         //   the program would center on resn 'STI' over the course 
+         *         //   of 1 second(1000 milleseconds).
+         *  // Reposition to centroid of all atoms of all models in this
+         * //viewer glviewer.center();
+    $.get('volData/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render(callback);
+    });
+    
+    //can't use jquery with binary data
+    var req = new XMLHttpRequest();
+    req.open('GET', 'volData/4csv.ccp4.gz', true);
+    req.responseType = "arraybuffer";
+    req.onload = function (aEvt) {      
+       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
+                          
+      //viewer.translate(10,10);         
+      //viewer.zoomTo({resn:'STI'});
+      //viewer.zoom(10);
+      //viewer.rotate(90,"y");
+      viewer.center();
+      viewer.render(callback);
+    };
+         */
+        this.center = function(sel,animationDuration,fixedPath){
+             animationDuration=animationDuration!==undefined ? animationDuration : 0;
             var allatoms, alltmp;
             sel = sel || {};
             var atoms = getAtomsFromSel(sel);
@@ -27855,20 +31200,21 @@ $3Dmol.GLViewer = (function() {
                 //include shapes when zooming to full scene
                 //TODO: figure out a good way to specify shapes as part of a selection
                 $.each(shapes, function(i, shape) {
-                	if(shape && shape.boundingSphere && shape.boundingSphere.center)
-                	    var c = shape.boundingSphere.center;
-                	    var r = shape.boundingSphere.radius;
-                	    if(r > 0) {
-                	        //make sure full shape is visible
+                    if(shape && shape.boundingSphere && shape.boundingSphere.center) {
+                        var c = shape.boundingSphere.center;
+                        var r = shape.boundingSphere.radius;
+                        if(r > 0) {
+                            //make sure full shape is visible
                             atoms.push(new $3Dmol.Vector3(c.x+r,c.y,c.z));
                             atoms.push(new $3Dmol.Vector3(c.x-r,c.y,c.z));
                             atoms.push(new $3Dmol.Vector3(c.x,c.y+r,c.z));
                             atoms.push(new $3Dmol.Vector3(c.x,c.y-r,c.z));
                             atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z+r));
                             atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z-r));
-                	    } else {
+                        } else {
                             atoms.push(c);
-                	    }
+                        }
+                    }
                 });
                 tmp = $3Dmol.getExtent(atoms);
                 allatoms = atoms;
@@ -27882,7 +31228,7 @@ $3Dmol.GLViewer = (function() {
 
             // use selection for center
             var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
-            modelGroup.position = center.clone().multiplyScalar(-1);
+
             // but all for bounding box
             var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
                     - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
@@ -27914,14 +31260,139 @@ $3Dmol.GLViewer = (function() {
             }
             
             var maxD = Math.sqrt(maxDsq)*2;
-
-            rotationGroup.position.z = -(maxD * 0.5
-                    / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
-            show();
-            
+            var finalpos = center.clone().multiplyScalar(-1);
+            if(animationDuration>0){
+                animateMotion(animationDuration,fixedPath,
+                        finalpos, 
+                        rotationGroup.position.z, 
+                        rotationGroup.quaternion,
+                        lookingAt);
+            } else { //no animation 
+                modelGroup.position = finalpos;
+                show();
+            }
             return this;
         };
         
+        /**
+         * Zoom to center of atom selection
+         * 
+         * @function $3Dmol.GLViewer#zoomTo
+         * @param {Object}
+         *            [sel] - Selection specification specifying model and atom
+         *            properties to select. Default: all atoms in viewer
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
+          * @example   
+    
+
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {
+                          opacity:0.85,
+                          voldata: new $3Dmol.VolumeData(volumedata, "cube"),
+                          volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'charge'))
+                      },{});
+                      
+                  viewer.render();
+                  });
+                  viewer.zoomTo();
+                });
+         */
+        this.zoomTo = function(sel, animationDuration,fixedPath) {
+            animationDuration=animationDuration!==undefined ? animationDuration : 0;
+            var allatoms, alltmp;
+            sel = sel || {};
+            var atoms = getAtomsFromSel(sel);
+            var tmp = $3Dmol.getExtent(atoms);
+
+            if($.isEmptyObject(sel)) {
+                //include shapes when zooming to full scene
+                //TODO: figure out a good way to specify shapes as part of a selection
+                $.each(shapes, function(i, shape) {
+                if(shape && shape.boundingSphere && shape.boundingSphere.center) {
+                    var c = shape.boundingSphere.center;
+                    var r = shape.boundingSphere.radius;
+                    if(r > 0) {
+                        //make sure full shape is visible
+                            atoms.push(new $3Dmol.Vector3(c.x+r,c.y,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x-r,c.y,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y+r,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y-r,c.z));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z+r));
+                            atoms.push(new $3Dmol.Vector3(c.x,c.y,c.z-r));
+                    } else {
+                            atoms.push(c);
+                    }
+                  }
+                });
+                tmp = $3Dmol.getExtent(atoms);
+                allatoms = atoms;
+                alltmp = tmp;
+
+            }
+            else {
+                allatoms = getAtomsFromSel({});
+                alltmp = $3Dmol.getExtent(allatoms);
+            }
+
+            // use selection for center
+            var center = new $3Dmol.Vector3(tmp[2][0], tmp[2][1], tmp[2][2]);
+
+            
+            // but all for bounding box
+            var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1]
+                    - alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
+
+            var maxD = Math.sqrt(x * x + y * y + z * z);
+            if (maxD < 5)
+                maxD = 5;
+
+            // use full bounding box for slab/fog
+            slabNear = -maxD / 1.9;
+            slabFar = maxD / 2;
+
+            // for zoom, use selection box
+            x = tmp[1][0] - tmp[0][0];
+            y = tmp[1][1] - tmp[0][1];
+            z = tmp[1][2] - tmp[0][2];
+            maxD = Math.sqrt(x * x + y * y + z * z);
+            if (maxD < 5)
+                maxD = 5;
+            
+            //find the farthest atom from center to get max distance needed for view
+            var maxDsq = 25;
+            for (var i = 0; i < atoms.length; i++) {
+                if(atoms[i]) {
+                    var dsq = center.distanceToSquared(atoms[i]);
+                    if(dsq > maxDsq)
+                        maxDsq = dsq;
+                }
+            }
+            
+            var maxD = Math.sqrt(maxDsq)*2;
+            var finalpos = center.clone().multiplyScalar(-1);
+            var finalz =  -(maxD * 0.5
+                    / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
+            if(animationDuration>0){
+                animateMotion(animationDuration,fixedPath,
+                        finalpos,
+                        finalz, 
+                        rotationGroup.quaternion,
+                        lookingAt);                
+            } else {
+                modelGroup.position = finalpos;
+                rotationGroup.position.z = finalz;
+                show();
+            }
+            return this;
+        
+        };
+
         /**
          * Set slab of view (contents outside of slab are clipped). M
          * Must call render to update.
@@ -27951,37 +31422,56 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addLabel
          * @param {string}
          *            text - Label text
-         * @param {Object}
-         *            data - Label style specification
+         * @param {LabelSpec}
+         *            options - Label style specification
+          @param {AtomSelection}
+         *            sel - Set position of label to center of this selection
          * @return {$3Dmol.Label}
          * 
          * @example
-         *  // Assuming glviewer contains a model representing a protein, label
-         * all alpha carbons with their residue name
-         *  // Select all alpha carbons (have property atom : "CA") from last
-         * model added var atoms =
-         * glviewer.getModel().selectedAtoms({atom:"CA"}); var labels = [];
-         * 
-         * for (var a in atoms) { var atom = atoms[a];
-         *  // Create label at alpha carbon's position displaying atom's residue
-         * and residue number var labelText = atom.resname + " " + atom.resi;
-         * 
-         * var l = glviewer.createLabel(labelText, {fontSize: 12, position: {x:
-         * atom.x, y: atom.y, z: atom.z});
-         * 
-         * labels.push(l); }
+         *  $3Dmol.download("pdb:2EJ0",viewer,{},function(){
+                  
+                  viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
+                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+                  viewer.setStyle({chain:'A'},{cross:{hidden:true}});
+                  viewer.setStyle({chain:'B'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      colorscheme:'greenCarbon'}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      radius:0.5}});
+                  viewer.setStyle({chain:'D'},{cross:{hidden:false,
+                                                      linewidth:10.0}});
+                  viewer.setStyle({chain:'E'},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      color:'black'}});
+                  
+                  viewer.render();
 
-         *  // Render labels glviewer.render();
+                  
+                });
+            
          */
-        this.addLabel = function(text, data) {
-            var label = new $3Dmol.Label(text, data);
+        this.addLabel = function(text, options, sel) {
+            options = options || {};
+            if(sel) {
+                var extent = $3Dmol.getExtent(getAtomsFromSel(sel));
+                options.position = {x: extent[2][0], y: extent[2][1], z: extent[2][2]};
+            }
+            var label = new $3Dmol.Label(text, options);
             label.setContext();
             modelGroup.add(label.sprite);
+            if(options.fixed)
+                fixed_labels.push(labels.length);
             labels.push(label);
             show();
             return label;
         };
         
+
+
         /** Add residue labels.  This will generate one label per a
          * residue within the selected atoms.  The label will be at the
          * centroid of the atoms and styled according to the passed style.
@@ -28002,12 +31492,18 @@ $3Dmol.GLViewer = (function() {
          * @param {$3Dmol.Label}
          *            label - $3Dmol label
          * 
-         * @example // Remove labels created in [addLabel example]{@link $3Dmol.GLViewer#addLabel}
-         * 
-         * for (var i = 0; i < labels.length; i++) {
-         * glviewer.removeLabel(label); }
-         * 
-         * glviewer.render();
+         * @example // Remove labels created in 
+         $3Dmol.download("pdb:2EJ0",viewer,{},function(){
+         *    viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
+                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+                  viewer.remove
+                  viewer.render();
+
+                  
+                });
+
          */
         this.removeLabel = function(label) {
             //todo: don't do the linear search
@@ -28021,6 +31517,8 @@ $3Dmol.GLViewer = (function() {
             }
             return this;
         };
+
+
 
         /**
          * Remove all labels from viewer
@@ -28079,6 +31577,10 @@ $3Dmol.GLViewer = (function() {
 
         };
 
+        var scale_labels= function(factor){
+
+        }
+
         /**
          * Add shape object to viewer 
          * @see {@link $3Dmol.GLShape}
@@ -28135,6 +31637,11 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addSphere
          * @param {SphereSpec} spec - Sphere shape style specification
          * @return {$3Dmol.GLShape}
+         @example
+         
+         viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
+         
+         viewer.render();
          */
         this.addSphere = function(spec) {
             spec = spec || {};
@@ -28152,6 +31659,23 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addArrow
          * @param {ArrowSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
+         @example
+        $3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  viewer.addArrow({
+                      start: {x:-10.0, y:0.0, z:0.0},
+                      end: {x:0.0, y:-10.0, z:0.0},
+                      radius: 1.0,
+                      radiusRadio:1.0,
+                      mid:1.0,
+                      clickable:true,
+                      callback:function(){
+                          this.color.setHex(0xFF0000FF);
+                          viewer.render();
+                      }
+                  });
+                  viewer.render();
+                });
          */
         this.addArrow = function(spec) {
             spec = spec || {};
@@ -28169,6 +31693,34 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addCylinder
          * @param {CylinderSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
+
+          @example
+         viewer.setBackgroundColor(0xffffffff);
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.addCylinder = function(spec) {
             spec = spec || {};
@@ -28186,6 +31738,18 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addLine
          * @param {LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
          * @return {$3Dmol.GLShape}
+         @example
+         $3Dmol.download("pdb:2ABJ",viewer,{},function(){
+                  
+                  viewer.setViewStyle({style:"outline"});
+                  viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
+                  viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
+                  viewer.setStyle({chain:'G'},{sphere:{colorscheme:'greenCarbon'}});
+                  viewer.setStyle({chain:'J'},{sphere:{color:'blue'}});
+                  viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
+                  viewer.render();
+              });
+
          */
         this.addLine = function(spec) {
             spec = spec || {};
@@ -28321,6 +31885,32 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addCustom
          * @param {CustomSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
+         @example
+         function triangle(viewer) {
+    var vertices = [];
+    var normals = [];
+    var colors = [];
+    var r = 20;
+    //triangle
+    vertices.push(new $3Dmol.Vector3(0,0,0));
+    vertices.push(new $3Dmol.Vector3(r,0,0));
+    vertices.push(new $3Dmol.Vector3(0,r,0));
+    
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    
+    colors.push({r:1,g:0,b:0});
+    colors.push({r:0,g:1,b:0});
+    colors.push({r:0,g:0,b:1});
+
+    var faces = [ 0,1,2 ];
+    
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    viewer.addCustom(spec);
+}
+            triangle(viewer);
+            viewer.render();
          */
         this.addCustom = function(spec) {
             spec = spec || {};
@@ -28342,8 +31932,17 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLShape}
          * 
          * @example
-         * viewer.addVolumetricData(data, "cube", {isoval: 0.01, color: "blue", opacity: 0.95});              
-         * viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
+
+    
+    $.get('volData/bohr.cube', function(data) {
+      
+      viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render();
+    });
+
+                
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};
@@ -28362,21 +31961,49 @@ $3Dmol.GLViewer = (function() {
          * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
          * 
-         * @example
-         * var data = new $3Dmol.VolumeData(str,"cube");
-         * viewer.addIsosurface(data, {isoval: 0.01, color: "blue", opacity: 0.95});              
-         * viewer.addIsosurface(data, {isoval: -0.01, color: "red", opacity: 0.95}); 
+         @example 
+         $.get('../test_structs/benzene-homo.cube', function(data){
+                  var voldata = new $3Dmol.VolumeData(data, "cube");
+                  viewer.addIsosurface(voldata, {isoval: 0.01,
+                                                 color: "blue",
+                                                 alpha: 0.5,
+                                                 smoothness: 10});
+                  viewer.addIsosurface(voldata, {isoval: -0.01,
+                                                 color: "red",
+                                                 smoothness: 5,
+                                                 opacity:0.5,
+                                                 wireframe:true,
+                                                 linewidth:0.1,
+                                                 clickable:true,
+                                                 callback:
+                                                 function() {
+                                                     this.opacity = 0.0;
+                                                     viewer.render(callback);
+                                                 }});
+                  viewer.setStyle({}, {stick:{}});
+                  viewer.zoomTo();
+                  viewer.render();
+                });
          */
-        this.addIsosurface = function(data,  spec) {
+        this.addIsosurface = function(data,  spec,callback) {
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
-            s.addIsosurface(data, spec);
+            s.addIsosurface(data, spec, callback);
             shapes.push(s);
-
             return s;
         };
         
+        this.enableFog = function(fog){
+            if(fog){
+                scene.fog=new $3Dmol.Fog(bgColor, 100, 200);
+            }else{
+                config.disableFog=true;
+                show();
+            }
+
+        }
+
         /**
          * Sets the atomlists of all models in the viewer to specified frame
          * Sets to last frame if framenum out of range
@@ -28416,10 +32043,13 @@ $3Dmol.GLViewer = (function() {
          * @param {Object} options - can specify interval (speed of animation), loop (direction
          * of looping, 'backward', 'forward' or 'backAndForth') and reps (numer of repetitions, 0 indicates infinite loop)
          *      
-         * @example
-         * viewer.addModelAsFrames(data, "pdb");
-         * viewer.animate({interval: 75, loop: "backward", reps: 30});
+         @example
+         var element=$('#gldiv');
+         var myviewer = $3Dmol.createViewer(element);
+            var m = myviewer.addModel();
+            myviewer.render();
          */
+         
         this.animate = function(options) {
             animated = true;
             var interval = 100;
@@ -28485,14 +32115,28 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Create and add model to viewer, given molecular data and its format 
-         * (pdb, sdf, xyz, or mol2)
          * 
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
-         * @return {$3Dmol.GLModel}
+         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')
+         * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
+         * @example
+         
+
+              viewer.setViewStyle({style:"outline"});
+              $.get('volData/1fas.pqr', function(data){
+                  viewer.addModel(data, "pqr");
+                  $.get("volData/1fas.cube",function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                      
+                  viewer.render();
+                  });
+                  viewer.zoomTo();
+              });
+         *
+         * @return {$3Dmol.GLModel} 
          */
-        this.addModel = function(data, format, options) {
+        this.addModel =  function(data, format, options) {
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
             models.push(m);
@@ -28506,7 +32150,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addModels
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format (see {@link FileFormats})
          * @return {Array<$3Dmol.GLModel>}
          */
         this.addModels = function(data, format, options) {
@@ -28521,7 +32165,8 @@ $3Dmol.GLViewer = (function() {
                 newModel.setAtomDefaults(modelatoms[i]);
                 newModel.addFrame(modelatoms[i]);
                 newModel.setFrame(0);
-                newModel.setModelData(modelatoms.modelData[i]);
+                if(modelatoms.modelData)
+                    newModel.setModelData(modelatoms.modelData[i]);
                 newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
                 models.push(newModel);
             }
@@ -28536,7 +32181,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addModelsAsFrames
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
          */
         this.addModelsAsFrames = function(data, format, options) {
@@ -28556,8 +32201,16 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#addAsOneMolecule
          * @param {string} data - Input data
-         * @param {string} format - Input format ('pdb', 'sdf', 'xyz', or 'mol2')
+         * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
+         @example
+          
+
+              $.get('../test_structs/multiple.sdf', function(data){
+                  viewer.addAsOneMolecule(data, "sdf");
+                  viewer.zoomTo();
+                  viewer.render();
+              });
          */
         this.addAsOneMolecule = function(data, format, options) {
             options = options || {};
@@ -28645,7 +32298,7 @@ $3Dmol.GLViewer = (function() {
             return m;
         };
 
-        function applyToModels(func, sel, value1, value2) {
+        function applyToModels(func, sel, value1, value2, value3) {
             
             //apply func to all models that are selected by sel with value1 and 2
             var ms = []
@@ -28663,7 +32316,12 @@ $3Dmol.GLViewer = (function() {
             
             for (var i = 0; i < ms.length; i++) {
                 if (ms[i]) {
-                    ms[i][func](sel, value1, value2);
+                    //allow referencing models by order of creation
+                    if(typeof ms[i] === 'number') {
+                        models[ms[i]][func](sel, value1, value2, value3);
+                    } else { //assume model object
+                        ms[i][func](sel, value1, value2, value3);
+                    }
                 }
             }
         }
@@ -28676,8 +32334,18 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
          * 
          * @example
-         * viewer.setStyle({}, {stick:{}}); //set all atoms to stick
-         * viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'}}); //set chain B to rainbow cartoon
+         viewer.setBackgroundColor(0xffffffff);
+       $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
+        m.setStyle({chain:'A'},{'cartoon':{color:'spectrum'}});
+        m.setStyle({chain:'C'},{'cartoon':{style:'trace',color:'blue'}});
+        m.setStyle({chain:'E'},{'cartoon':{tubes:true,arrows:true,color:'green',opacity:0.75}});
+        m.setStyle({chain:'B'},{'cartoon':{color:'red',opacity:0.5}});
+        m.setStyle({chain:'D'},{'cartoon':{style:'trace',color:'grey',opacity:0.75}});
+        m.setStyle({chain:'F'},{'cartoon':{arrows:true,color:'white'}});
+       // viewer.addStyle({chain:'B'},{line:{}});
+       viewer.zoomTo();
+       viewer.render();
+    });
          */
         this.setStyle = function(sel, style) {
             if(typeof(style) === 'undefined') {
@@ -28696,6 +32364,13 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addStyle
          * @param {AtomSelectionSpec} sel - Atom selection specification
          * @param {AtomStyleSpec} style - style spec to add to specified atoms
+         @example
+         
+       $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
+       viewer.addStyle({chain:'B'},{line:{}});
+       viewer.zoomTo();
+       viewer.render();
+       });
          */
         this.addStyle = function(sel, style) {
             if(typeof(style) === 'undefined') {
@@ -28707,8 +32382,9 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
+
         /**
-         * Set click-handling properties to all selected atoms
+         * Set click-handling properties to all selected atomsthis.
          * 
          * @function $3Dmol.GLViewer#setClickable
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
@@ -28716,22 +32392,64 @@ $3Dmol.GLViewer = (function() {
          * @param {function} callback - function called when an atom in the selection is clicked
          * 
          * @example
-         * viewer.setClickable({}, false); // disable click-handling for entire viewer
-         * viewer.setClickable({chain: 'B'}, true, function(){ console.log(this.elem); }); // chain B prints the clicked element to console
+         *   viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
+                                  hover_callback: function(){ viewer.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
+
+
          */
         this.setClickable = function(sel, clickable, callback) {
             applyToModels("setClickable", sel, clickable, callback);
             return this;
         };
 
+        this.setHoverable = function(sel,hoverable,hover_callback,unhover_callback){
+            applyToModels("setHoverable", sel,hoverable, hover_callback,unhover_callback);
+            return this;
+        }
+        
+        /**
+         * If  atoms have dx, dy, dz properties (in some xyz files), vibrate populates each model's frame property based on parameters.
+         * Models can then be animated
+         * 
+         * @function $3Dmol.GLViewer#vibrate
+         * @param {number} numFrames - number of frames to be created, default to 10
+         * @param {number} amplitude - amplitude of distortion, default to 1 (full)
+         */
+        this.vibrate = function(numFrames, amplitude) {
+            applyToModels("vibrate", numFrames, amplitude);
+            return this;
+        }
         /**
          * @function $3Dmol.GLViewer#setColorByProperty
          * @param {AtomSelectionSpec} sel
          * @param {type} prop
          * @param {type} scheme
          */
-        this.setColorByProperty = function(sel, prop, scheme) {
-            applyToModels("setColorByProperty", sel, prop, scheme);
+        this.setColorByProperty = function(sel, prop, scheme, range) {
+            applyToModels("setColorByProperty", sel, prop, scheme, range);
             return this;
         };
 
@@ -28766,7 +32484,7 @@ $3Dmol.GLViewer = (function() {
                     continue;
                 if (atom.z < extent[0][2] || atom.z > extent[1][2])
                     continue;
-                ret.push(i);
+                ret.push(atom);
             }
             return ret;
         };
@@ -28795,6 +32513,20 @@ $3Dmol.GLViewer = (function() {
         var carveUpExtent = function(extent, atomlist, atomstoshow) {
             var ret = [];
 
+            var index2atomlist = {}; //map from atom.index to position in atomlist
+            for(var i = 0, n = atomlist.length; i < n; i++) {
+                index2atomlist[atomlist[i].index] = i;
+            }
+            
+            var atomsToListIndex = function(atoms) {
+            //return a list of indices into atomlist
+                var ret = [];
+                for(var i = 0, n = atoms.length; i < n; i++) {
+                    if(atoms[i].index in index2atomlist)
+                        ret.push(index2atomlist[atoms[i].index])
+                }
+                return ret;
+            }
             var copyExtent = function(extent) {
                 // copy just the dimensions
                 var ret = [];
@@ -28856,8 +32588,8 @@ $3Dmol.GLViewer = (function() {
                 // ultimately, divide up by atom for best meshing
                 ret.push({
                     extent : splits[i],
-                    atoms : atoms,
-                    toshow : toshow
+                    atoms : atomsToListIndex(atoms),
+                    toshow : atomsToListIndex(toshow)
                 });
             }
 
@@ -29020,7 +32752,7 @@ $3Dmol.GLViewer = (function() {
 
             ps.buildboundary();
 
-            if (type == $3Dmol.SurfaceType.SES) {
+            if (type == $3Dmol.SurfaceType.SES || type == $3Dmol.SurfaceType.MS) {
                 ps.fastdistancemap();
                 ps.boundingatom(false);
                 ps.fillvoxelswaals(atoms, extendedAtoms);
@@ -29095,10 +32827,18 @@ $3Dmol.GLViewer = (function() {
             });
             return ret;
         }
+
+        var surfaceTypeMap={
+            "VDW":$3Dmol.SurfaceType.VDW,
+            "MS":$3Dmol.SurfaceType.MS,
+            "SAS":$3Dmol.SurfaceType.SAS,
+            "SES":$3Dmol.SurfaceType.SES
+        }
+
         /**
          * Add surface representation to atoms
          *  @function $3Dmol.GLViewer#addSurface
-         * @param {$3Dmol.SurfaceType} type - Surface type
+         * @param {$3Dmol.SurfaceType|string} type - Surface type
          * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
@@ -29117,6 +32857,18 @@ $3Dmol.GLViewer = (function() {
             // surfaces
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
+            
+
+            if(typeof type =="string"){
+                if(surfaceTypeMap[type]!== undefined)
+                    type = surfaceTypeMap[type];
+                else{
+                    console.log("Surface type : " + type + " is not recognized");
+                } 
+            }
+            else if(type===undefined){
+                    console.log("Surface type : " + type + " is not recognized");
+            }
             // atoms specified by this selection
             var atomlist = null, focusSele = null;
             //TODO: currently generating a shallow copy to avoid problems when atoms are chagned
@@ -29261,14 +33013,14 @@ $3Dmol.GLViewer = (function() {
 
                     var rfunction = function(event) {
                         var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
-							                           faceArr:event.data.faces});
-					    for(var i=0,vl=VandFs.length;i<vl;i++){
+                                                       faceArr:event.data.faces});
+                        for(var i=0,vl=VandFs.length;i<vl;i++){
                             var VandF={vertices:VandFs[i].vertexArr,
-								       faces:VandFs[i].faceArr};
+                                       faces:VandFs[i].faceArr};
                             var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                             $3Dmol.mergeGeos(surfobj.geo, mesh);
                             _viewer.render();
-						}
+                        }
 
                     //    console.log("async mesh generation " + (+new Date() - time) + "ms");
                         cnt++;
@@ -29298,6 +33050,7 @@ $3Dmol.GLViewer = (function() {
                 // NOTE: This is misleading if 'async' mesh generation - returns
                 // immediately
                 //console.log("full mesh generation " + (+new Date() - time) + "ms");
+                
             }
             
             style = style || {};
@@ -29318,15 +33071,17 @@ $3Dmol.GLViewer = (function() {
                     modelsAtomsToShow[atomsToShow[n].model].push(atomsToShow[n]);
                 }
                 for (n = 0; n < models.length; n++) {
-                    surfobj.push({
-                        geo : new $3Dmol.Geometry(true),
-                        mat : mat,
-                        done : false,
-                        finished : false,
-                        symmetries : models[n].getSymmetries()
-                    // also webgl initialized
-                    });
-                    addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+					if(modelsAtomsToShow[n].length > 0) {
+						surfobj.push({
+							geo : new $3Dmol.Geometry(true),
+							mat : mat,
+							done : false,
+							finished : false,
+							symmetries : models[n].getSymmetries()
+						// also webgl initialized
+						});
+						addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+					}
                 }
             }
             else {
@@ -29350,14 +33105,18 @@ $3Dmol.GLViewer = (function() {
          * Set the surface material to something else, must render change
         *  @function $3Dmol.GLViewer#setSurfaceMaterialStyle
          * @param {number} surf - Surface ID to apply changes to
-         * @param {matSpec} style - new material style specification
+         * @param {SurfaceStyleSpec} style - new material style specification
          */ 
         this.setSurfaceMaterialStyle = function(surf, style) {
             if (surfaces[surf]) {
-                surfArr = surfaces[surf];
+                var surfArr = surfaces[surf];
                 for (var i = 0; i < surfArr.length; i++) {
                     surfArr[i].mat = getMatWithStyle(style);
                     surfArr[i].mat.side = $3Dmol.FrontSide;
+                    if(style.color) {
+                        surfArr[i].mat.color = style.color;
+                        surfArr[i].geo.colorsNeedUpdate = true;
+                    }
                     surfArr[i].finished = false; // trigger redraw
                 }
             }
@@ -29388,7 +33147,7 @@ $3Dmol.GLViewer = (function() {
         /** Remove all surfaces.
          * @function $3Dmol.GLViewer#removeAllSurfaces */
         this.removeAllSurfaces = function() {
-            for (n in  surfaces) {
+            for (var n in  surfaces) {
                 if(!surfaces.hasOwnProperty(n)) continue;
                 var surfArr = surfaces[n];
                 for(var i = 0; i < surfArr.length; i++) {
@@ -29479,12 +33238,13 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
+
         /**
-         * @function $3Dmol.GLViewer#linkViewer
          * Synchronize this view matrix of this viewer to the passed viewer.
          * When the viewpoint of this viewer changes, the other viewer will
          * be set to this viewer's view.
          * @function $3Dmol.GLViewer#linkViewer
+         * @param {$3Dmol.GLViewer} otherview 
          */
         this.linkViewer = function(otherviewer) {
            linkedViewers.push(otherviewer);
@@ -29506,10 +33266,11 @@ $3Dmol.GLViewer = (function() {
 })();
 
 $3Dmol['glmolViewer'] = $3Dmol.GLViewer;
+
 //color scheme mappings
 var $3Dmol = $3Dmol || {};
 
-/** Color mapping gradiens
+/** Color mapping gradients
  * @interface
  * @param {number} min
  * @param {number} max
@@ -29530,22 +33291,18 @@ $3Dmol.Gradient.range = function() {};
 
 /**
  * Color scheme red to white to blue, for charges
+ * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
  * @implements {$3Dmol.Gradient}
  */
 $3Dmol.Gradient.RWB = function(min, max,mid) {
+
     var mult = 1.0;
     if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
         //we were passed a single range
         max = min[1];
         min = min[0];
     }
-    if(max < min) { //reverse the order
-        mult = -1.0;
-        min *= -1.0;
-        max *= -1.0;
-    }
-        
     //map value to hex color, range is provided
     this.valueToHex = function(val, range) {
         var lo, hi;
@@ -29561,25 +33318,50 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
     
         if(val === undefined)
             return 0xffffff;
-        
-        if(val < lo) val = lo;
-        if(val > hi) val = hi;
-        
+        if(hi>lo){
+            if(val < lo) val = lo;
+            if(val > hi) val = hi;
+        }
+        else{
+            if(val>lo) val=lo;
+            if(val < hi) val = hi;
+        }
         var middle = (hi+lo)/2;
-        if(typeof(mid) != 'undefined')
+        if(range && typeof(range[2]) != "undefined")
+            middle = range[2];
+        else if(typeof(mid) != 'undefined')
             middle = mid; //allow user to specify midpoint
+        else
+            middle = (lo+hi)/2;
         var scale, color;
         
         //scale bottom from red to white
-        if(val <= middle) {
-            scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
-            color = 0xff0000 + 0x100*scale + scale;
-            return color;
+        if(lo<hi){
+            if(val <= middle) {
+                scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
+                color = 0xff0000 + 0x100*scale + scale;
+                return color;
+            }
+            else { //form white to blue
+                scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
+                color =  0x10000*scale+0x100*scale+0xff;
+                return color;
+            }
         }
-        else { //form white to blue
-            scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
-            color =  0x10000*scale+0x100*scale+0xff;
-            return color;
+        else if(lo>hi){
+            //val=min-val;
+             if(val <= middle) {
+
+                scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
+                color =  0x10000*scale+0x100*scale+0xff;
+                return color;
+            }
+            else { //form white to blue
+
+                scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
+                color = 0xff0000 + 0x100*scale + scale;
+                return color;
+            }
         }
     };
     
@@ -29594,8 +33376,10 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
 
 };
 
+
 /**
  * rainbow gradient, but without purple to match jmol
+ * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
  * @implements {$3Dmol.Gradient}
  */
@@ -29605,11 +33389,6 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         //we were passed a single range
         max = min[1];
         min = min[0];
-    }
-    if(max < min) { //reverse the order
-        mult = -1.0;
-        min *= -1.0;
-        max *= -1.0;
     }
     
     //map value to hex color, range is provided
@@ -29628,35 +33407,64 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         if(typeof(val) == "undefined")
             return 0xffffff;
         
-        if(val < lo) val = lo;
-        if(val > hi) val = hi;
+        if(hi>lo){
+            if(val < lo) val = lo;
+            if(val > hi) val = hi;
+        }
+        else{
+            if(val>lo) val=lo;
+            if(val < hi) val = hi;
+        }
         
         var mid = (lo+hi)/2;
         var q1 = (lo+mid)/2;
         var q3 = (mid+hi)/2;
         
         var scale, color;
-        
-        if(val < q1) { //scale green up, red up, blue down
-            scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
-            color = 0xff0000 + 0x100*scale + 0;
-            return color;
+        if(lo<hi){
+            if(val < q1) { //scale green up, red up, blue down
+                scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+                color = 0xff0000 + 0x100*scale + 0;
+                return color;
+            }
+            else if(val < mid) { //scale red down, green up, blue down
+                scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+                color =  0x010000*scale+0xff00+0x0;
+                return color;
+            }
+            else if(val < q3) { //scale blue up, red down, green up
+                scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+                color = 0x000000 + 0xff00 + 0x1*scale;
+                return color;
+            }
+            else { //scale green down, blue up, red down
+                scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+                color =  0x000000+0x0100*scale+0xff;
+                return color;
+            }        
         }
-        else if(val < mid) { //scale red down, green up, blue down
-            scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
-            color =  0x010000*scale+0xff00+0x0;
-            return color;
+        else if(hi<lo){
+             if(val < q1) { //scale green up, red up, blue down
+                scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+                color =  0x000000+0x0100*scale+0xff;
+                return color;
+            }
+            else if(val < mid) { //scale red down, green up, blue down
+                scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+                color = 0x000000 + 0xff00 + 0x1*scale;
+                return color;
+            }
+            else if(val < q3) { //scale blue up, red down, green up\
+                scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+                color =  0x010000*scale+0xff00+0x0;
+                return color;
+            }
+            else { //scale green down, blue up, red down
+                scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+                color = 0xff0000 + 0x100*scale + 0;
+                return color;
+            }     
         }
-        else if(val < q3) { //scale blue up, red down, green up
-            scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
-            color = 0x000000 + 0xff00 + 0x1*scale;
-            return color;
-        }
-        else { //scale green down, blue up, red down
-            scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
-            color =  0x000000+0x0100*scale+0xff;
-            return color;
-        }        
     };
    
 
@@ -29672,6 +33480,7 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
 
 /**
  * rainbow gradient with constant saturation, all the way to purple!
+ * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
  * @implements {$3Dmol.Gradient}
  */
@@ -29702,10 +33511,14 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
     
         if(typeof(val) == "undefined")
             return 0xffffff;
-        
-        if(val < lo) val = lo;
-        if(val > hi) val = hi;
-        
+        if(hi>lo){
+            if(val < lo) val = lo;
+            if(val > hi) val = hi;
+        }
+        else{
+            if(val>lo) val=lo;
+            if(val < hi) val = hi;
+        }
         var scale = (val-lo)/(hi-lo);
         var h = (5*scale/6.0+0.5);
         var r = Math.sin(Math.PI*h);
@@ -29716,6 +33529,7 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
         b *= b*255;
         
         return 0x10000*Math.floor(r)+0x100*Math.floor(b)+0x1*Math.floor(g);
+        
     };
     
 
@@ -29728,6 +33542,13 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
     };
 
 };
+
+//map from names to gradient constructors
+$3Dmol.Gradient.builtinGradients = {
+    'rwb': $3Dmol.Gradient.RWB,
+    'roygb': $3Dmol.Gradient.ROYGB,
+    'sinebow': $3Dmol.Gradient.Sinebow
+}
 //Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
 
 $3Dmol.LabelCount = 0;
@@ -29812,6 +33633,7 @@ $3Dmol.Label.prototype = {
          * @prop {Object} position - x,y,z coordinates for label
          * @prop {boolean} inFront - always put labels in from of model
          * @prop {boolean} showBackground - show background rounded rectangle, default true
+         * @prop {boolean} fixed - sets the label to change with the model when zooming
          */
         return function() {
             
@@ -30634,12 +34456,22 @@ $3Dmol.Parsers = (function() {
                     var atom2 = otherPoints[j];
 
                     if (areConnected(atom1, atom2)) {
-                        if (atom1.bonds.indexOf(atom2.index) == -1) {
+                        //gracefully handle one-sided bonds
+                        var a2i = atom1.bonds.indexOf(atom2.index);
+                        var a1i = atom2.bonds.indexOf(atom1.index);
+                        if (a2i == -1 && a1i == -1) {
                             atom1.bonds.push(atom2.index);
                             atom1.bondOrder.push(1);
                             atom2.bonds.push(atom1.index);
                             atom2.bondOrder.push(1);
+                        } else if (a2i == -1) {
+                            atom1.bonds.push(atom2.index);
+                            atom1.bondOrder.push(atom2.bondOrder[a1i])
+                        } else if (a1i == -1) {
+                            atom2.bonds.push(atom1.index);
+                            atom2.bondOrder.push(atom1.bondOrder[a2i])                            
                         }
+                            
                     }
                 }
             }
@@ -30924,11 +34756,32 @@ $3Dmol.Parsers = (function() {
                 atom.ssend = true;
         }
     };
+    
+    
+    //make sure bonds are actually two way
+    var validateBonds = function(atomsarray, serialToIndex) {
+        for (var i = 0, n = atomsarray.length; i < n; i++) {
+            var atom = atomsarray[i];
+            for(var b = 0; b < atom.bonds.length; b++) {
+                var a2i = atom.bonds[b];
+                var atom2 = atomsarray[a2i];
+                var atomi = serialToIndex[atom.serial];
+                if(atom2 && atomi) {
+                    var a1i = atom2.bonds.indexOf(atomi);
+                    if(a1i < 0) {
+                        atom2.bonds.push(atomi);
+                        atom2.bondOrder.push(atom.bondOrder[b]);
+                    }
+                }
+            }
+        }
+    };
+        
 
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.vasp = parsers.VASP = function (str, options) {
@@ -31016,7 +34869,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.cube = parsers.CUBE = function(str, options) {
@@ -31082,7 +34935,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.xyz = parsers.XYZ = function(str, options) {
@@ -31162,7 +35015,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.sdf = parsers.SDF = function(str, options) {
@@ -31298,7 +35151,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.mcif = parsers.cif = function(str, options) {
@@ -31533,7 +35386,7 @@ $3Dmol.Parsers = (function() {
                     var matrix22 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[2][2]'][i]);
                     var matrix23 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[2][3]'][i]);
                     var vector2 = parseFloat(mmCIF['_pdbx_struct_oper_list_vector[2]'][i]);
-                    var matrix31 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][1]'][i]);
+	            var matrix31 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][1]'][i]);
                     var matrix32 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][2]'][i]);
                     var matrix33 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][3]'][i]);
                     var vector3 = parseFloat(mmCIF['_pdbx_struct_oper_list_vector[3]'][i]);
@@ -31622,7 +35475,7 @@ $3Dmol.Parsers = (function() {
     /**
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options
      */
     parsers.mol2 = parsers.MOL2 = function(str, options) {
@@ -31799,6 +35652,8 @@ $3Dmol.Parsers = (function() {
             return false; // maybe duplicate position.
         else if (distSquared > maxsq)
             return false;
+        else if(atom1.altLoc != atom2.altLoc && atom1.altLoc != ' ' && atom2.altLoc != ' ')
+            return false; // don't connect across alternate locations
         else
             return true;
     };
@@ -31849,63 +35704,54 @@ $3Dmol.Parsers = (function() {
         }
     }
 
+    var isEmpty = function( obj ) {
+        var name;
+        for ( name in obj ) {
+            return false;
+        }
+        return true;
+    };
 
-    // parse pdb file from str and create atoms
-    // if computeStruct is true will always perform secondary structure
-    // analysis,
-    // otherwise only do analysis of SHEET/HELIX comments are missing
-    /**
-     * @param {string}
-     *            str
-     * @param {Object}
-     *            options - keepH (do not strip hydrogens), noSecondaryStructure
-     *            (do not compute ss)
-     */
-    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(str, options) {
-
-        var atoms = [[]];
-        var atoms_cnt = 0;
+    //return one model worth of pdb, returns atoms, modelData, and remaining lines
+    var getSinglePDB = function(lines, options, sslookup) {
+        var atoms = [];
         var noH = !options.keepH; // suppress hydrogens by default
-        var computeStruct = !options.noSecondaryStructure;
+        var ignoreStruct = !!options.noSecondaryStructure; 
+        var computeStruct = !options.noComputeSecondaryStructure;
         var noAssembly = !options.doAssembly; // don't assemble by default
         var copyMatrix = !options.duplicateAssemblyAtoms; //default true
-        var modelData = atoms.modelData = [{symmetries:[]}];
-
-        var start = atoms[atoms.length-1].length;
+        var selAltLoc = options.altLoc ? options.altLoc : 'A'; //default alternate location to select if present
+        var modelData  = {symmetries:[]};
         var atom;
-        var protein = {
-            sheet : [],
-            helix : []
-        }; // get secondary structure straight from pdb
+        var remainingLines = [];
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
-        var lines = str.split(/\r?\n|\r/);
         var i, j, k, line;
         var seenbonds = {}; //sometimes connect records are duplicated as an unofficial means of relaying bond orders
+        
         for (i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
             var startChain, startResi, endChain, endResi;
             
             if(recordName.indexOf("END") == 0) {
-                if (options.multimodel) {
-                    if (!options.onemol) {
-                        atoms.push([]);
-                        modelData.push({symmetries:[]});
+                remainingLines = lines.slice(i+1);
+                if(recordName == "END") { //ass opposed to ENDMDL
+                    //reset secondary structure
+                    for (var prop in sslookup) {
+                        if (sslookup.hasOwnProperty(prop)) {
+                            delete sslookup[prop];
+                        }
                     }
-                    continue;
                 }
-                else {
-                    break;
-                }
+                break;
             }
-
             else if (recordName == 'ATOM  ' || recordName == 'HETATM') {
                 var resn, chain, resi, icode, x, y, z, hetflag, elem, serial, altLoc, b;
                 altLoc = line.substr(16, 1);
-                if (altLoc != ' ' && altLoc != 'A')
-                    continue; // FIXME: ad hoc
+                if (altLoc != ' ' && altLoc != selAltLoc && selAltLoc != '*')
+                    continue; 
                 serial = parseInt(line.substr(6, 5));
                 atom = line.substr(12, 4).replace(/ /g, "");
                 resn = line.substr(17, 3).replace(/ /g, "");
@@ -31937,18 +35783,19 @@ $3Dmol.Parsers = (function() {
 
                 if(elem == 'H' && noH)
                     continue;
-                if (line[0] == 'H')
+                if (recordName[0] == 'H')
                     hetflag = true;
                 else
                     hetflag = false;
-                serialToIndex[serial] = atoms[atoms.length-1].length;
-                atoms[atoms.length-1].push({
+                serialToIndex[serial] = atoms.length;
+                atoms.push({
                     'resn' : resn,
                     'x' : x,
                     'y' : y,
                     'z' : z,
                     'elem' : elem,
                     'hetflag' : hetflag,
+                    'altLoc' : altLoc,
                     'chain' : chain,
                     'resi' : resi,
                     'icode' : icode,
@@ -31971,19 +35818,28 @@ $3Dmol.Parsers = (function() {
                 startResi = parseInt(line.substr(22, 4));
                 endChain = line.substr(32, 1);
                 endResi = parseInt(line.substr(33, 4));
-                protein.sheet
-                        .push([ startChain, startResi, endChain, endResi ]);
+                if(!(startChain in sslookup)) {
+                    sslookup[startChain] = {};
+                }
+                //mark start and end with additional character
+                sslookup[startChain][startResi] = 's1';
+                for(var res = startResi+1; res < endResi; res++) {
+                    sslookup[startChain][res] = 's';
+                }
+                sslookup[startChain][endResi] = 's2';
+
             } else if (recordName == 'CONECT') {
                 // MEMO: We don't have to parse SSBOND, LINK because both are
                 // also
                 // described in CONECT. But what about 2JYT???
                 var from = parseInt(line.substr(6, 5));
                 var fromindex = serialToIndex[from];
-                var fromAtom = atoms[atoms.length-1][fromindex];
+                var fromAtom = atoms[fromindex];
+                var coffsets = [ 11, 16, 21, 26 ];
                 for (j = 0; j < 4; j++) {
-                    var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
+                    var to = parseInt(line.substr(coffsets[j], 5));
                     var toindex = serialToIndex[to];
-                    var toAtom = atoms[atoms.length-1][toindex];
+                    var toAtom = atoms[toindex];
                     if (fromAtom !== undefined && toAtom !== undefined) {
                         // duplicated conect records indicate bond order
                         if(!seenbonds[ [fromindex,toindex] ]) {
@@ -32014,8 +35870,15 @@ $3Dmol.Parsers = (function() {
                 startResi = parseInt(line.substr(21, 4));
                 endChain = line.substr(31, 1);
                 endResi = parseInt(line.substr(33, 4));
-                protein.helix
-                        .push([ startChain, startResi, endChain, endResi ]);
+                if(!(startChain in sslookup)) {
+                    sslookup[startChain] = {};
+                }
+                sslookup[startChain][startResi] = 'h1';
+                for(var res = startResi+1; res < endResi; res++) {
+                    sslookup[startChain][res] = 'h';
+                }
+                sslookup[startChain][endResi] = 'h2';
+
             } else if ((!noAssembly) && (recordName == 'REMARK')
                     && (line.substr(13, 5) == 'BIOMT')) {
                 var n;
@@ -32047,7 +35910,7 @@ $3Dmol.Parsers = (function() {
                 matrix.elements[7] = 0;
                 matrix.elements[11] = 0;
                 matrix.elements[15] = 1;
-                modelData[modelData.length-1].symmetries.push(matrix);
+                modelData.symmetries.push(matrix);
                 i--; // set i back
             } else if (recordName == 'CRYST1') {
                 var a, b, c, alpha, beta, gamma;
@@ -32057,62 +35920,107 @@ $3Dmol.Parsers = (function() {
                 alpha = parseFloat(line.substr(34, 6));
                 beta = parseFloat(line.substr(41, 6));
                 gamma = parseFloat(line.substr(48, 6));
-                modelData[modelData.length-1].cryst = {'a' : a, 'b' : b, 'c' : c, 'alpha' : alpha, 'beta' : beta, 'gamma' : gamma};
+                modelData.cryst = {'a' : a, 'b' : b, 'c' : c, 'alpha' : alpha, 'beta' : beta, 'gamma' : gamma};
+            } else if (recordName == 'ANISOU') {
+                var serial = parseInt(line.substr(6, 5));
+                var anisouAtomIndex = serialToIndex[serial];
+                var anisouAtom = atoms[anisouAtomIndex];
+                if(anisouAtom) {
+                    var vals = line.substr(30).trim().split(/\s+/);
+                    var uMat = {u11:parseInt(vals[0]), u22:parseInt(vals[1]), u33:parseInt(vals[2]), 
+                        u12:parseInt(vals[3]), u13:parseInt(vals[4]), u23:parseInt(vals[5])};
+    
+                    anisouAtom["uMat"] = uMat;
+                }
             }
         }
 
         var starttime = (new Date()).getTime();
         
-        for (var n = 0; n < atoms.length; n++) {
-            // assign bonds - yuck, can't count on connect records
-            assignPDBBonds(atoms[n]);
-            // console.log("bond connecting " + ((new Date()).getTime() -
-            // starttime));
-        
-            if (!noAssembly)
-                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
+        //fix any "one-way" bonds in CONECT records
+        validateBonds(atoms, serialToIndex);
+        // assign bonds - yuck, can't count on connect records
+        assignPDBBonds(atoms);
+       // console.log("bond connecting " + ((new Date()).getTime() -starttime));
 
-            if (computeStruct || !hasStruct) {
-                starttime = (new Date()).getTime();
-                computeSecondaryStructure(atoms[n]);
-                // console.log("secondary structure " + ((new Date()).getTime() -
-                // starttime));
-            }
+        if (!noAssembly)
+            processSymmetries(modelData.symmetries, copyMatrix, atoms);
 
-            // Assign secondary structures from pdb file
-            for (i = start; i < atoms[n].length; i++) {
-                atom = atoms[n][i];
+        if (computeStruct  && !ignoreStruct) {
+            starttime = (new Date()).getTime();
+            computeSecondaryStructure(atoms);
+           // console.log("secondary structure " + ((new Date()).getTime() - starttime));
+        }
+        starttime = (new Date()).getTime();
+
+        // Assign secondary structures from pdb file
+        if(!isEmpty(sslookup)) {
+            for (i = 0; i < atoms.length; i++) {
+                atom = atoms[i];
                 if (atom === undefined)
                     continue;
+                if(atom.chain in sslookup &&
+                    atom.resi in sslookup[atom.chain]) {
+                    var code = sslookup[atom.chain][atom.resi];
+                    atom.ss = code[0];
+                    if(code.length > 1) {
+                        if(code[1] == '1') atom.ssbegin = true;
+                        else if(code[1] == '2') atom.ssend = true;
+                    }
+                }
+            }
+        }
+    //console.log("assign structure " + ((new Date()).getTime() - starttime));
+        
+        return [atoms,modelData,remainingLines];
+    };
 
-                var found = false;
-                // MEMO: Can start chain and end chain differ?
-                for (j = 0; j < protein.sheet.length; j++) {
-                    if (atom.chain != protein.sheet[j][0])
-                        continue;
-                    if (atom.resi < protein.sheet[j][1])
-                        continue;
-                    if (atom.resi > protein.sheet[j][3])
-                        continue;
-                    atom.ss = 's';
-                    if (atom.resi == protein.sheet[j][1])
-                        atom.ssbegin = true;
-                    if (atom.resi == protein.sheet[j][3])
-                        atom.ssend = true;
+
+    // parse pdb file from str and create atoms
+    // if computeStruct is true will always perform secondary structure
+    // analysis,
+    // otherwise only do analysis of SHEET/HELIX comments are missing
+    /**
+     * @param {string}
+     *            str
+     * @param {ParserOptionsSpec}
+     *            options - keepH (do not strip hydrogens), noSecondaryStructure
+     *            (do not compute ss), altLoc (which alternate location to select, if present; '*' to load all)
+     */
+    parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(str, options) {
+
+        var atoms = []; //a separate list for each model
+        var sslookup = {}; //stores SHEET and HELIX info, which is shared across models
+        atoms.modelData = [];
+        var lines = str.split(/\r?\n|\r/);
+        while(lines.length > 0) {
+            var pdbinfo = getSinglePDB(lines, options, sslookup);
+            var modelatoms = pdbinfo[0];
+            var modelData = pdbinfo[1];
+            lines = pdbinfo[2];
+            
+            if(modelatoms.length == 0) {
+                continue; //happens when there are blank lines
+            }
+            if(options.multimodel && options.onemol && atoms.length > 0) {
+                //merge into existing atoms
+                var inc = atoms[0].length;
+                for(var i = 0; i < modelatoms.length; i++) {
+                    //renumber
+                    var atom = modelatoms[i];
+                    atom.index = i;
+                    for(var b = 0; b < atom.bonds.length; b++) {
+                        atom.bonds[b] += inc;
+                    }
+                    atoms[0].push(atom);
                 }
-                for (j = 0; j < protein.helix.length; j++) {
-                    if (atom.chain != protein.helix[j][0])
-                        continue;
-                    if (atom.resi < protein.helix[j][1])
-                        continue;
-                    if (atom.resi > protein.helix[j][3])
-                        continue;
-                    atom.ss = 'h';
-                    if (atom.resi == protein.helix[j][1])
-                        atom.ssbegin = true;
-                    else if (atom.resi == protein.helix[j][3])
-                        atom.ssend = true;
-                }
+            } else  {
+                atoms.modelData.push(modelData);
+                atoms.push(modelatoms);
+            }
+            
+            if(!options.multimodel) {
+                break;
             }
         }
         
@@ -32125,7 +36033,7 @@ $3Dmol.Parsers = (function() {
      *
      * @param {string}
      *            str
-     * @param {Object}
+     * @param {ParserOptionsSpec}
      *            options - noSecondaryStructure (do not compute ss)
      */
     parsers.pqr = parsers.PQR = function(str, options) {
@@ -32161,6 +36069,7 @@ $3Dmol.Parsers = (function() {
                 // I would have liked to split based solely on whitespace, but
                 // it seems that there is no guarantee that all the fields will
                 // be filled out (e.g. the chain) so this doesn't work
+                var hetflag;
                 var serial = parseInt(line.substr(6, 5));
                 var atom = line.substr(12, 4).replace(/ /g, "");
                 var resn = line.substr(17, 3);
@@ -32252,7 +36161,14 @@ $3Dmol.Parsers = (function() {
     parsers.mmtf = parsers.MMTF = function(bindata, options) {
         
         var noH = !options.keepH; // suppress hydrogens by default
-
+        var selAltLoc = options.altLoc ? options.altLoc : 'A'; //default alternate location to select if present
+        var ignoreStruct = !!options.noSecondaryStructure; 
+        var computeStruct = !options.noComputeSecondaryStructure;
+        //extract symmetries - only take first assembly, apply to all models (ignoring changes for now)
+        var noAssembly = !options.doAssembly; // don't assemble by default
+        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
+        var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
+        
         var mmtfData = MMTF.decode( bindata );
         var atoms = [[]];
         var modelData = atoms.modelData = [];
@@ -32280,13 +36196,10 @@ $3Dmol.Parsers = (function() {
         // hoisted loop variables
         var i, j, k, kl, m, n;
         
-        //extract symmetries - only take first assembly, apply to all models (ignoring changes for now)
-        var noAssembly = !options.doAssembly; // don't assemble by default
-        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
-        var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
+
         
         var symmetries = [];
-        if(mmtfData.bioAssemblyList && mmtfData.bioAssemblyList.length > 0) {
+        if(!noAssembly && mmtfData.bioAssemblyList && mmtfData.bioAssemblyList.length > 0) {
             var transforms = mmtfData.bioAssemblyList[assemblyIndex].transformList;
             for(i = 0, n = transforms.length; i < n; i++) {
                 var matrix = new $3Dmol.Matrix4(transforms[i].matrix);
@@ -32309,15 +36222,33 @@ $3Dmol.Parsers = (function() {
                 var chainId = fromCharCode(
                     mmtfData.chainIdList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
                 );
+                if(mmtfData.chainNameList) {
+                    chainId = fromCharCode(
+                            mmtfData.chainNameList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
+                    );
+                }
 
                 var startGroup = groupIndex;
+                var prevSS = '';
                 for( j = 0; j < chainGroupCount; ++j ){ //over residues (groups)
 
                     var groupData = mmtfData.groupList[ mmtfData.groupTypeList[ groupIndex ] ];
                     var groupAtomCount = groupData.atomNameList.length;
                     var secStruct = 0;
+                    var secStructBegin = false;
+                    var secStructEnd = false;
+                    
                     if( secStructList ){
                         secStruct = secStructList[ groupIndex ];
+                        var sscode = convertSS(secStruct)
+                        if(groupIndex  == 0 || sscode != prevSS) {
+                            secStructBegin = true;
+                        }
+                        prevSS = sscode;
+                        var nextgroup = groupIndex+1;
+                        if(nextgroup >= secStructList.length || convertSS(secStructList[nextgroup] != sscode)) {
+                            secStructEnd = true;
+                        }
                     }
                     var insCode = null;
                     if( mmtfData.insCodeList ){
@@ -32331,7 +36262,7 @@ $3Dmol.Parsers = (function() {
                     var groupId = mmtfData.groupIdList[ groupIndex ];
                     var groupName = groupData.groupName;
                     var startAtom = atomIndex;
-
+                    
                     for( k = 0; k < groupAtomCount; ++k ){
 
                         var element = groupData.elementList[ k ];
@@ -32344,8 +36275,8 @@ $3Dmol.Parsers = (function() {
                         if( bFactorList ){
                             bFactor = bFactorList[ atomIndex ];
                         }
-                        var altLoc = ' ';
-                        if( altLocList ){
+                        var altLoc = '';
+                        if( altLocList && altLocList[ atomIndex ]){ //not zero
                             altLoc = String.fromCharCode( altLocList[ atomIndex ] );
                         }
                         var occupancy = '';
@@ -32353,9 +36284,15 @@ $3Dmol.Parsers = (function() {
                             occupancy = occupancyList[ atomIndex ];
                         }
 
+                        if (altLoc != '' && altLoc != selAltLoc && selAltLoc != '*') {
+                            atomIndex += 1;
+                            continue; 
+                        }
+                        
                         var atomId = mmtfData.atomIdList[ atomIndex ];
                         var atomName = groupData.atomNameList[ k ];
-                        var atomCharge = groupData.atomChargeList[ k ];
+                        var atomCharge = 0;
+                        if(groupData.atomChargeList) atomCharge = groupData.atomChargeList[ k ];
                         var xCoord = mmtfData.xCoordList[ atomIndex ];
                         var yCoord = mmtfData.yCoordList[ atomIndex ];
                         var zCoord = mmtfData.zCoordList[ atomIndex ];
@@ -32376,9 +36313,13 @@ $3Dmol.Parsers = (function() {
                             // and
                             // icode
                             'serial' : atomId,
+                            'altLoc' : altLoc,
+                            'index' : atomIndex,
                             'atom' : atomName,
                             'bonds' : [],
                             'ss' : convertSS(secStruct),
+                            'ssbegin' : secStructBegin,
+                            'ssend' : secStructEnd,
                             'bondOrder' : [],
                             'properties' : {charge: atomCharge, occupancy:occupancy},
                             'b' : bFactor,
@@ -32450,18 +36391,216 @@ $3Dmol.Parsers = (function() {
             if (options.multimodel) {
                 if (!options.onemol) atoms.push([]);
             }
+
+            if(!noAssembly) {
+                for (var n = 0; n < atoms.length; n++) {        
+                        processSymmetries(modelData[modelIndex].symmetries, copyMatrix, atoms[n]);
+                }
+            }
             modelIndex += 1;
         } 
                 
         
-        for (var n = 0; n < atoms.length; n++) {        
-            if (!noAssembly)
-                processSymmetries(modelData[n].symmetries, copyMatrix, atoms[n]);
-        }
+        if (computeStruct  && !ignoreStruct) {
+            computeSecondaryStructure(atoms);
+        }       
         
         return atoms;
     };
     
+    /**
+     * Parse a prmtop file from str and create atoms
+     */
+    parsers.prmtop = parsers.PRMTOP = function(str, options) {
+	var atoms = [];
+	var count = 0;
+        var lines = str.split(/\r?\n|\r/);
+	if(lines.length > 0 && lines[0].includes("VERSION")){
+	    var sectionList = lines.filter(function (line){	//store the relevant section lists
+		return line.includes("POINTERS") || line.includes("ATOM_NAME") ||
+		line.includes("CHARGE") || line.includes("RADII") || line.includes("BONDS_INC_HYDROGEN") ||
+		line.includes("BONDS_WITHOUT_HYDROGEN");
+	    });
+	    var index = getIndex("POINTERS");
+	    if (index == -1)
+		return [];
+	    var col = getColEleSize(index);
+	    var atomCount = parseInt(lines[index+1].slice(0,col[1]));
+            if (isNaN(atomCount) || atomCount <= 0)
+                return [];
+	    index = getIndex("ATOM_NAME");
+	    if (index == -1)
+		return [];
+	    col = getColEleSize(index);
+	    var noOfCol = col[0];
+	    for (i = 0; i < atomCount/col[0]; i++){
+		if (i == parseInt(atomCount/col[0]))
+		    noOfCol = atomCount % col[0]; 
+		for(j=0; j < noOfCol; j++){
+		    var atom = {};
+		    var properties = {"charge":"", "radii":""};
+	    	    atom.serial = count;
+		    atom.x = 0;
+		    atom.y = 0;
+		    atom.z = 0;
+		    atom.atom = lines[index+1].slice(col[1]*j, col[1]*(j+1));
+		    atom.elem = lines[index+1].slice(col[1]*j, col[1]*j+1);
+		    atom.properties = properties;
+		    atom.bonds = [];
+		    atom.bondOrder = [];
+		    atoms.push(atom);
+		    count++;
+		}
+		index++;
+	    }
+	    index = getIndex("CHARGE");
+	    if (index != -1){
+	        col = getColEleSize(index);
+	        count = 0;
+		noOfCol = col[0];
+	        for (i = 0; i < atomCount/col[0]; i++){
+		    if (i == parseInt(atomCount/col[0]))
+			noOfCol = atomCount % col[0];
+		    for(j = 0; j < noOfCol; j++){
+		       atoms[count].properties["charge"] = lines[index+1].slice(col[1]*j, col[1]*(j+1));	
+		        count++;
+		    }
+		    index++;
+	        }
+	    }
+	    index = getIndex("RADII");
+	    if (index != -1){
+		col = getColEleSize(index);
+		count = 0;
+		noOfCol = col[0];
+		for (i = 0; i < atomCount/col[0]; i++){
+		    if (i == parseInt(atomCount/col[0]))
+			noOfCol = atomCount % col[0];
+		    for(j = 0; j < noOfCol; j++){
+			atoms[count].properties.radii = lines[index+1].slice(col[1]*j, col[1]*(j+1));
+			count++;
+		    }
+		    index++;
+		}
+	    }
+	    index = getIndex("BONDS_WITHOUT_HYDROGEN");
+	    if (index != -1){
+		col = getColEleSize(index);
+		count = 0;
+		noOfCol = col[0];
+		var atomIndex;
+		for (i = 0; i < atomCount/col[0]; i++){
+		    if (i == parseInt(atomCount/col[0]))
+			noOfCol = atomCount % col[0];	
+		    for (j = 0; j < noOfCol; j++){
+			if (count%3 == 0){
+			    atomIndex = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			}
+			if (count%3 == 1){
+			    atoms[atomIndex].bonds.push(parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1));
+			}
+		    count++;
+		    }
+		index++;
+		}
+	    }
+	    index = getIndex("BONDS_INC_HYDROGEN");
+	    if (index != -1){
+		col = getColEleSize(index);
+		count = 0;
+		noOfCol = col[0];
+		var atomIndex;
+		for (i = 0; i < atomCount/col[0]; i++){
+		    if (i == parseInt(atomCount/col[0]))
+			noOfCol = atomCount % col[0];	
+		    for (j = 0; j < noOfCol; j++){
+			if (count%3 == 0){
+			    atomIndex = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			}
+			if (count%3 == 1){
+			    atoms[atomIndex].bonds.push(parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1));
+			}
+		    count++;
+		    }
+		index++;
+		}
+	    }
+	}
+	else{
+	    return [];
+	}
+	function getIndex(section){
+	    var index = lines.indexOf(sectionList.filter(function (line){
+		return line.includes(section);
+	    })[0]);	//returns the index of the line containing FLAG POINTERS
+	    if (Number.isInteger(index) && index > 0){
+		while(!lines[index].includes("FORMAT"))  //doing this so as to take comments into consideration
+		    index++;
+	    	return index;
+	    }
+	    else{
+		return -1;
+	    }
+	}
+	function getColEleSize(i){
+	    var numberOfCol = lines[i].match(/\((\d*)\S*/); // stores the number of columns
+	    var elementSize = lines[i].match(/[a-zA-Z](\d*)\)\s*/);
+	    if(elementSize == null){
+		elementSize = lines[i].match(/[a-zA-Z](\d*)\.\d*\)\s*/); //stores the element size
+	    }
+	    return [numberOfCol[1], elementSize[1]];	
+	}       
+        return [atoms];
+    };
+
+    /**
+     * Parse a gro file from str and create atoms
+     */
+    parsers.gro = parsers.GRO = function(str, options) {
+	var atoms = [];
+        var lines = str.split(/\r?\n|\r/);
+        while (lines.length > 0) {
+            if (lines.length < 3)
+                break;
+            var atomCount = parseInt(lines[1]);
+            if (isNaN(atomCount) || atomCount <= 0)
+                break;
+            if (lines.length < atomCount + 3)
+                break;
+	    atoms.push([]);
+            var offset = 2;
+            var start = atoms[atoms.length-1].length;
+            var end = start + atomCount;
+            for (var i = start; i < end; i++) {
+                var line = lines[offset++];
+                var atom = {};
+                atom.serial = i;
+                atom.atom = line.slice(10,15).trim();
+		if(atom.atom.charCodeAt(1) >= 97 && atom.atom.charCodeAt(1) <= 122)
+		    atom.elem = atom.atom.slice(0,2);
+		else
+		    atom.elem = atom.atom[0];
+                atom.x = parseFloat(line.slice(20,28));
+                atom.y = parseFloat(line.slice(28,36));
+                atom.z = parseFloat(line.slice(36,44));
+		atom.resi = line.slice(5,10);
+                atom.bonds = [];
+                atom.bondOrder = [];
+                atom.properties = {};
+		if (line.length > 44){
+                    atom.dx = parseFloat(line.slice(44,52));
+                    atom.dy = parseFloat(line.slice(52,60));
+                    atom.dz = parseFloat(line.slice(60,68));
+		}
+                atoms[atoms.length-1][i] = atom;
+            }
+	    lines.splice(0, ++offset);
+        }
+	for (var i=0; i<atoms.length; i++){
+	    assignBonds(atoms[i]);
+	}
+        return atoms;
+    }
     return parsers;
 })();
 var $3Dmol = $3Dmol || {};
@@ -32676,7 +36815,7 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * @prop {number} serial - Atom's serial id number
  * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
  * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
- * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
+ * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix) 
  * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
  * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
  * @prop {Object} properties - Optional mapping of additional properties
@@ -32687,15 +36826,40 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * @prop {boolean} invert - for selection, inverts the meaning of the selection
  */
 
+ /**
+  * Parser options specification. Used to specify the options of a GLModel.  Depending on the input file format, not all fields may be defined.
+  * @typedef ParserOptionsSpec
+  * @prop {boolean} duplicateAssemblyAtoms- Set to true if you wish to diplicate assembly atoms otherwise false ; supported by all
+  * @prop {boolean} frames - true if you want to add to a new frame and false otherwise ; supported by all
+  * @prop {object} vibrate - object specifying the vibration behavior ; supported by all
+  * @prop {number} vibrate.frames - number of frames to be created, default to 10 ; supported by all
+  * @prop {number} vibrate.amplitude -amplitude of distortion, default to 1 (full) ; supported by all
+  * @prop {boolean} multimodel - specifies weather or not multiple models are being defined ; supported by xyz,sdf, or mol2
+  * @prop {boolean} onemol -specifies weather or not the model is of one molecule ; Supported by xyz , sdf , mol2
+  * @prop {boolean} keepH - do not strip hydrogens ; supported by sdf,mol2
+  * @prop {object} parseStyle - used to define ChemDoodle styles ; upported by cdjson
+  * @prop {boolean} doAssembly - boolean dictating weather or not to do assembly ; supported by mcif
+  * @prop {boolean} noSecondaryStructure - boolean dictating the presence of a secondary structure ; supported by pdb
+  * @prob {boolean} noComputeSecondaryStructure - do not compute ss ; supported by pdb
+  * @prob {string} altLoc -which alternate location to select, if present; '*' to load all ; supported by pdb
+  * @prob {number} assemblyIndex - index of the assembly in symmetry ; supported by mmtf
+  */
+
+/**
+*3 dimensional vector 
+*@typedef Vector3
+*@prop {number} x - x coordinate
+*@prop {number} y - y coordinate
+*@prop {number} z - z coordinate
+
+
+*/
 
 /**
  * Atom selection object. Used to specify what atoms should be selected.  Can include
  * any field from {@link AtomSpec} in which case atoms must equal the specified value.  
  * All fields must match for the selection to hold. If values
  * are provided as a list, then only one value of the list must match.
- * 
- * @example
- * viewer.addResLabels({resi: [1,2,3,4,5], atom: 'CA'}); // will label alpha carbons (CA) of residues 1-5
  * 
  * @typedef AtomSelectionSpec
  * @prop {AtomSpec} ... - any field from {@link AtomSpec}, values may be singletons or lists
@@ -32706,6 +36870,27 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * @prop {boolean} byres - if set, expands the selection to include all atoms of any residue that has any atom selected
  * @prop {number} expand - expands the selection to include all atoms within a given distance from the selection
  * @prop {WithinSelectionSpec} within - intersects the selection with the set of atoms within a given distance from another selection
+ 
+ * @example
+ * $3Dmol.download("pdb:2EJ0",viewer,{},function(){
+                  
+                  viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
+                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+                  viewer.setStyle({chain:'A'},{cross:{hidden:true}});
+                  viewer.setStyle({chain:'B'},{cross:{hidden:false,
+                                                      colorscheme:'greenCarbon'}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:false,
+                                                      radius:0.5}});
+                  viewer.setStyle({chain:'D'},{cross:{hidden:false}});
+                  viewer.setStyle({chain:'E'},{cross:{hidden:false,
+                                                      color:'black'}});
+                  
+                  viewer.render();
+
+                  
+                });
  */
 
 /**
@@ -32713,12 +36898,25 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * some distance from another atom selection. When added as a field of an {@link AtomSelectionSpec},
  * intersects the set of atoms in that selection with the set of atoms within a given
  * distance from the given {@link AtomSelectionSpec}.
- *
- * @example
- * viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); // stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
- *
+ 
  * @typedef WithinSelectionSpec
+ * @example
+ $3Dmol.download("pdb:2EJ0",viewer,{},function(){
+                  
+                  viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
+                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+            
+ * viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); 
+                  
+                  viewer.render();
+
+                  
+                });// stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
+ *
  * @prop {number} distance - the distance in angstroms away from the atom selection to include atoms in the parent selection
+*  @prop {boolean} invert - if set, selects atoms not within distance range for intersection
  * @prop {AtomSelectionSpec} sel - the selection of atoms against which to measure the distance from the parent atom selection
  */
 
@@ -32743,7 +36941,20 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead.
  * 
  * @example
- * viewer.addSurface($3Dmol.SurfaceType.MS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:0.85});
+ * var setStyles = function(volumedata){
+                    var data = new $3Dmol.VolumeData(volumedata, "cube");
+                    viewer.addSurface("VDW", {opacity:0.85, voldata: data, volscheme: new $3Dmol.Gradient.RWB(-10,10)},{chain:'A'});
+                    viewer.mapAtomProperties($3Dmol.applyPartialCharges);
+                    viewer.addSurface($3Dmol.SurfaceType.SAS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.05,.05)}, opacity:1.0},{chain:'B'});
+                    viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, color:'red'},{chain:'C'});
+                    viewer.addSurface($3Dmol.SurfaceType.SAS, {opacity:0.85,voldata: data, colorscheme:'greenCarbon'},{chain:'D'});
+                 
+              viewer.render();
+              };
+              $3Dmol.download("pdb:4DLN",viewer,{},function(){
+                  
+                  $.get("volData/1fas.cube",setStyles);
+                });
 
  */
 
@@ -32755,8 +36966,11 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * @prop {ColorSpec} color - solid color
  * @prop {number} opacity - transparency, between 0 and 1
  * @prop {boolean} wireframe - draw as wireframe, not surface
- * @prop {number} linewidth - width of line for wireframe rendering
+ * @prop {number} linewidth - width of line for wireframe rendering **No longer supported by most browsers**
  * @prop {number} smoothness - amount to smooth surface (default 1)
+ * @prop {AtomSelectionSpec} sel - selection around which to show data
+ * @prop {list} coords - coordinates around which to include data
+ * @prop {number} seldist - distance around selection/coords to include data [default = 2.0]
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click 
  */
@@ -32767,7 +36981,7 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * @prop {ColorSpec} color - solid color
  * @prop {number} alpha - transparency
  * @prop {boolean} wireframe - draw as wireframe, not surface
- * @prop {number} linewidth - width of line for wireframe rendering
+ * @prop {number} linewidth - width of line for wireframe rendering **No longer supported by most browsers**
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click 
  */
@@ -32821,6 +37035,24 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
  * @prop {$3Dmol.Vector3} end
  */
 
+
+/**
+* File formats supported by 3Dmol.js
+* @typedef FileFormats
+* @prop cdjson,json  Chemical JSON format
+* @prop cube Gaussian cube format
+* @prop gro  Gromacs topology format, need to add coordinates to resulting model.
+* @prop mcif,cif Crystallographic Information File, the successor to PDB that makes you miss the PDB file format
+* @prop mmtf Macromolecular Transmission Format, the successor to PDB that is totally awesome
+* @prop mol2 Sybyl Mol2 format 
+* @prop pdb The venerable Protein Data Bank format
+* @prop pqr Like PDB but with partial charges which are read into the partialcharge atom property
+* @prop prmtop Amber topology file, must add coordinates
+* @prop sdf MDL MOL format, supports muliple models and meta data
+* @prop vasp VASP format (CONTCAR, POSCAR)
+* @prop xyz XYZ cartesian coordinates format
+*/
+	
 });
 /**
  * $3Dmol.VolumeData stores volumetric data. This includes file parsing
@@ -32920,6 +37152,29 @@ $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     
     return this.data[x*this.size.y*this.size.z + y*this.size.z + z];
 };
+
+$3Dmol.VolumeData.prototype.getCoordinates = function(index){
+    
+    var x = index/(this.size.y*this.size.z);
+    var y = index % (this.size.y*this.size.z);
+    var z = index % this.size.z;
+
+    x *= this.unit.x;
+    y *= this.unit.y;
+    z *= this.unit.z;
+
+    x += this.origin.x;
+    y += this.origin.y;
+    z += this.origin.z;
+    //console.log("getCoordinates : "+x+" , "+y+" , "+z);
+    //console.log("val : "+data.getVal(x,y,z));
+    //console.log("actual : "+data.data[index]);
+    return {x:x,y:y,z:z};
+    /*
+    Y = (int)(index / Width)
+    X = index - (Y * Width)
+    */
+}
 
 /*
  * parse vasp data
@@ -33025,6 +37280,74 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
     //console.log(this.data);
 
 };
+
+// parse dx data - does not support all features of the file format
+$3Dmol.VolumeData.prototype.dx = function(str) {
+    var lines = str.split(/[\n\r]+/);
+    var i, m;
+    var recounts = /gridpositions\s+counts\s+(\d+)\s+(\d+)\s+(\d+)/;
+    var reorig = /^origin\s+(\S+)\s+(\S+)\s+(\S+)/;
+    var redelta = /^delta\s+(\S+)\s+(\S+)\s+(\S+)/;
+    var follows = /data follows/;
+        
+    for(i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if((m = recounts.exec(line)) ) {
+            var nX = parseInt(m[1]);
+            var nY = parseInt(m[2]);
+            var nZ = parseInt(m[3]);
+            this.size = {x:nX, y:nY, z:nZ};
+        }
+        else if((m = redelta.exec(line))) {
+            var xunit = parseFloat(m[1]);
+            if(parseFloat(m[2]) != 0 || parseFloat(m[3]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }
+            i += 1;
+            line = lines[i];
+            m = redelta.exec(line);
+            if(m == null) {
+                console.log("Parse error in dx delta matrix");
+                return;
+            }
+            
+            var yunit = parseFloat(m[2]);
+            if(parseFloat(m[1]) != 0 || parseFloat(m[3]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }
+            
+            i += 1;
+            line = lines[i];
+            m = redelta.exec(line);
+            if(m == null) {
+                console.log("Parse error in dx delta matrix");
+                return;
+            }
+            
+            var zunit = parseFloat(m[3]);
+            if(parseFloat(m[1]) != 0 || parseFloat(m[2]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }    
+            this.unit = new $3Dmol.Vector3(xunit,yunit,zunit);        
+        }
+        else if((m = reorig.exec(line))) {
+            var xorig = parseFloat(m[1]);
+            var yorig = parseFloat(m[2]);
+            var zorig = parseFloat(m[3]);
+            this.origin = new $3Dmol.Vector3(xorig,yorig,zorig);
+        } else if((m = follows.exec(line))) {
+            break;
+        }
+    }
+    i += 1;
+    if(!this.size || !this.origin || !this.unit || !this.size) {
+        console.log("Error parsing dx format");
+        return;
+    }
+    var raw = lines.splice(i).join(" ");
+    raw = raw.split(/[\s\r]+/);
+    this.data = new Float32Array(raw);
+}
 
 // parse cube data
 $3Dmol.VolumeData.prototype.cube = function(str) {
@@ -33322,7 +37645,7 @@ $3Dmol.workerString = function(){
 $3Dmol.workerString += "; var ProteinSurface=" + $3Dmol.ProteinSurface.toString().replace(/\$3Dmol.MarchingCube./g, "MarchingCube.");
 $3Dmol.workerString += ",MarchingCube=("+$3Dmol.MarchingCubeInitializer.toString() +")();";
 
-$3Dmol.SurfaceWorker = window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'}));
+$3Dmol.SurfaceWorker = window.URL ? window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'})) : {postMessage:function(){}};
 
 $3Dmol['workerString'] = $3Dmol.workerString;
 $3Dmol['SurfaceWorker'] = $3Dmol.SurfaceWorker;
