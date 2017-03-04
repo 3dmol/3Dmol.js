@@ -96,8 +96,9 @@ $.ajaxTransport(
                });
 
     
-/**@function $3Dmol#createViewer
+/**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ @function $3Dmol.createViewer
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
@@ -142,7 +143,7 @@ $3Dmol.viewers = {};
 
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * @function $3Dmol#download
+ * @function $3Dmol.download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
  * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
  * @param {Object} options - Specify additional options
