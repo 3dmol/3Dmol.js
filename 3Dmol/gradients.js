@@ -87,7 +87,7 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
                 color =  0x10000*scale+0x100*scale+0xff;
                 return color;
             }
-            else { //form white to blue
+            else { //from white to blue
 
                 scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
                 color = 0xff0000 + 0x100*scale + scale;
@@ -145,6 +145,11 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         else{
             if(val>lo) val=lo;
             if(val < hi) val = hi;
+            //flip the meaning of val, lo, hi
+            val = lo-val;
+            var tmp = lo;
+            lo = hi;
+            hi = tmp;
         }
         
         var mid = (lo+hi)/2;
@@ -152,50 +157,26 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         var q3 = (mid+hi)/2;
         
         var scale, color;
-        if(lo<hi){
-            if(val < q1) { //scale green up, red up, blue down
-                scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
-                color = 0xff0000 + 0x100*scale + 0;
-                return color;
-            }
-            else if(val < mid) { //scale red down, green up, blue down
-                scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
-                color =  0x010000*scale+0xff00+0x0;
-                return color;
-            }
-            else if(val < q3) { //scale blue up, red down, green up
-                scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
-                color = 0x000000 + 0xff00 + 0x1*scale;
-                return color;
-            }
-            else { //scale green down, blue up, red down
-                scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
-                color =  0x000000+0x0100*scale+0xff;
-                return color;
-            }        
+        if(val < q1) { //scale green up, red up, blue down
+            scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
+            color = 0xff0000 + 0x100*scale + 0;
+            return color;
         }
-        else if(hi<lo){
-             if(val < q1) { //scale green up, red up, blue down
-                scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
-                color =  0x000000+0x0100*scale+0xff;
-                return color;
-            }
-            else if(val < mid) { //scale red down, green up, blue down
-                scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
-                color = 0x000000 + 0xff00 + 0x1*scale;
-                return color;
-            }
-            else if(val < q3) { //scale blue up, red down, green up\
-                scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
-                color =  0x010000*scale+0xff00+0x0;
-                return color;
-            }
-            else { //scale green down, blue up, red down
-                scale = Math.floor(255*Math.sqrt((val-lo)/(q1-lo)));
-                color = 0xff0000 + 0x100*scale + 0;
-                return color;
-            }     
+        else if(val < mid) { //scale red down, green up, blue down
+            scale = Math.floor(255*Math.sqrt((1-(val-q1)/(mid-q1))));
+            color =  0x010000*scale+0xff00+0x0;
+            return color;
         }
+        else if(val < q3) { //scale blue up, red down, green up
+            scale = Math.floor(255*Math.sqrt((val-mid)/(q3-mid)));
+            color = 0x000000 + 0xff00 + 0x1*scale;
+            return color;
+        }
+        else { //scale green down, blue up, red down
+            scale = Math.floor(255*Math.sqrt((1-(val-q3)/(hi-q3))));
+            color =  0x000000+0x0100*scale+0xff;
+            return color;
+        }               
     };
    
 
