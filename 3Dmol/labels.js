@@ -83,6 +83,7 @@ $3Dmol.Label.prototype = {
          * @prop {boolean} inFront - always put labels in from of model
          * @prop {boolean} showBackground - show background rounded rectangle, default true
          * @prop {boolean} fixed - sets the label to change with the model when zooming
+         * @prop {string} alignment - how to orient the label w/respect to position: topLeft (default), topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight
          */
         return function() {
             
@@ -133,6 +134,9 @@ $3Dmol.Label.prototype = {
             // clear canvas
 
             var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
+            if(typeof(spriteAlignment) == 'string' && spriteAlignment in $3Dmol.SpriteAlignment) {
+                spriteAlignment = $3Dmol.SpriteAlignment[spriteAlignment];
+            }
 
             var bold = "";
             if(style.bold)
