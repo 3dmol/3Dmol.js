@@ -3061,7 +3061,7 @@ $3Dmol.GLViewer = (function() {
         /**
          * Add surface representation to atoms
          *  @function $3Dmol.GLViewer#addSurface
-         * @param {$3Dmol.SurfaceType|string} type - Surface type
+         * @param {$3Dmol.SurfaceType|string} type - Surface type (VDW, MS, SAS, or SES)
          * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
@@ -3069,7 +3069,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @return {number} surfid - Identifying number for this surface
          */
-        this.addSurface = function(type, style, atomsel, allsel, focus) {
+        this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
             // if sync is true, does all work in main thread, otherwise uses
             // workers
@@ -3081,6 +3081,9 @@ $3Dmol.GLViewer = (function() {
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
             
+            //surfacecallback gets called when done
+            
+            var surfid = nextSurfID();
 
             if(typeof type =="string"){
                 if(surfaceTypeMap[type]!== undefined)
@@ -3200,14 +3203,24 @@ $3Dmol.GLViewer = (function() {
 
                     // to keep the browser from locking up, call through setTimeout
                     var callSyncHelper = function callSyncHelper(i) {
-                        if (i >= extents.length)
+                        if (i >= extents.length) {
+                            if(surfacecallback && typeof(surfacecallback) == "function") {
+                                surfacecallback(surfid);
+                            }
                             return;
+                        }
 
                         var VandF = generateMeshSyncHelper(type, extents[i].extent,
                                 extents[i].atoms, extents[i].toshow, reducedAtoms,
                                 totalVol);
-                        var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                        $3Dmol.mergeGeos(surfobj.geo, mesh);
+                        //complicated surfaces sometimes have > 2^16 vertices
+                        var VandFs = $3Dmol.splitMesh({vertexArr:VandF.vertices, faceArr:VandF.faces});
+                        for(var vi=0,vl=VandFs.length;vi<vl;vi++){
+                            var VandF={vertices:VandFs[vi].vertexArr,
+                                    faces:VandFs[vi].faceArr};                            
+                            var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                            $3Dmol.mergeGeos(surfobj.geo, mesh);
+                        }
                         _viewer.render();
 
                         setTimeout(callSyncHelper, 1, i + 1);
@@ -3242,13 +3255,17 @@ $3Dmol.GLViewer = (function() {
                                        faces:VandFs[i].faceArr};
                             var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                             $3Dmol.mergeGeos(surfobj.geo, mesh);
-                            _viewer.render();
                         }
+                        _viewer.render();
 
                     //    console.log("async mesh generation " + (+new Date() - time) + "ms");
                         cnt++;
-                        if (cnt == extents.length)
+                        if (cnt == extents.length) {
                             surfobj.done = true;
+                            if(surfacecallback && typeof(surfacecallback) == "function") {
+                                surfacecallback(surfid);
+                            }
+                        }
                     };
 
                     var efunction = function(event) {
@@ -3317,7 +3334,6 @@ $3Dmol.GLViewer = (function() {
                 });
                 addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
             } 
-            var surfid = nextSurfID();
             surfaces[surfid] = surfobj;
             
             return surfid;
@@ -3334,11 +3350,24 @@ $3Dmol.GLViewer = (function() {
             if (surfaces[surf]) {
                 var surfArr = surfaces[surf];
                 for (var i = 0; i < surfArr.length; i++) {
-                    surfArr[i].mat = getMatWithStyle(style);
+                    var mat = surfArr[i].mat = getMatWithStyle(style);
                     surfArr[i].mat.side = $3Dmol.FrontSide;
                     if(style.color) {
                         surfArr[i].mat.color = style.color;
                         surfArr[i].geo.colorsNeedUpdate = true;
+                        var c = $3Dmol.CC.color(style.color);
+                        surfArr[i].geo.setColors(function() { return c;});
+                    }
+                    else if(mat.voldata && mat.volscheme) {
+                        //convert volumetric data into colors
+                        var scheme = mat.volscheme;
+                        var voldata = mat.voldata;
+                        var range = scheme.range() || [-1,1];
+                        surfArr[i].geo.setColors(function(x,y,z) {
+                            var val = voldata.getVal(x,y,z);
+                            var col =  $3Dmol.CC.color(scheme.valueToHex(val, range));
+                            return col;
+                        });
                     }
                     surfArr[i].finished = false; // trigger redraw
                 }

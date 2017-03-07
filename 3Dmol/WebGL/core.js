@@ -317,6 +317,24 @@ $3Dmol.Geometry = (function() {
         
     };
     
+    geometryGroup.prototype.setColors = function(setcolor) {
+        //apply a function that takes the vertex coordinate and returns a color
+        var v = this.vertexArray;
+        var c = this.colorArray;
+        if(v.length != c.length) {
+            console.log("Cannot re-color geometry group due to mismatched lengths.");
+            return;
+        }
+        for(var i = 0; i < v.length; i+= 3) {
+            var col = setcolor(v[i],v[i+1],v[i+2]);
+            if(!(col instanceof $3Dmol.Color)) {
+                col = $3Dmol.CC.color(col);
+            }
+            c[i] = col.r;
+            c[i+1] = col.g;
+            c[i+2] = col.b;
+        }
+    };
     geometryGroup.prototype.getNumVertices = function() {
         return this.vertices;
     };
@@ -548,6 +566,16 @@ $3Dmol.Geometry = (function() {
                 
             }  
                       
+        },
+        
+        setColors : function(setcolor) {
+            var len = this.geometryGroups.length;
+            for (var g = 0; g < len; g++) {
+                
+                var geoGroup = this.geometryGroups[g];                            
+                geoGroup.setColors(setcolor);
+                
+            }  
         },
         
         setUpWireframe : function() {
