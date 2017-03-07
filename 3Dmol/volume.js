@@ -4,7 +4,7 @@
  * 
  * @class
  * @param {string} str - volumetric data
- * @param {string} format - format of supplied data (cube)
+ * @param {string} format - format of supplied data (cube, dx, vasp); append .gz if compressed
  * @param {Object} options - normalize (zero mean, unit variance), negate
  */
 $3Dmol.VolumeData = function(str, format, options) {
@@ -34,7 +34,7 @@ $3Dmol.VolumeData = function(str, format, options) {
         //unzip gzipped files
         format = format.replace(/\.gz$/,'');
         try {
-            str = pako.inflate(str);
+            str = new TextDecoder("utf-8").decode(pako.inflate(str));
         } catch(err) {
             console.log(err);
         }

@@ -142,6 +142,27 @@ $3Dmol.createViewer = function(element, config)
 $3Dmol.viewers = {};
 
 /**
+ * Download binary data (e.g. a gzipped file) into an array buffer and provide
+ * arraybuffer to callback.
+ * @function $3Dmol.getbin
+ * @param {string} uri - location of data
+ * @param {Function} callback - Function to call with arraybuffer as argument.  
+
+ */ 
+$3Dmol.getbin = function(uri, callback) {
+    $.ajax({url:uri, 
+        type: "GET",
+        dataType: "binary",
+        responseType: "arraybuffer",
+        processData: false}).done(
+            function(ret, txt, response) {
+                callback(ret);
+            }).fail(function(e,txt) { 
+                console.log(txt);
+                });
+};
+
+/**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
  * @function $3Dmol.download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
@@ -176,19 +197,13 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 options.noComputeSecondaryStructure = true;
         }
             
-        $.ajax({url:uri, 
-            type: "GET",
-            dataType: "binary",
-            responseType: "arraybuffer",
-            processData: false}).done(
-                function(ret, txt, response) {
+        $3Dmol.getbin(uri,
+                function(ret) {
                     m.addMolData(ret, 'mmtf',options);
                     viewer.zoomTo();
                     viewer.render();
                     if(callback) callback(m);
-                }).fail(function(e,txt) { 
-                    console.log(txt);
-                    });
+                });
     }
     else {
         if (query.substr(0, 4) === 'pdb:') {
@@ -235,13 +250,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
         };
         
         if(type == 'mmtf') { //binary data
-            $.ajax({url:uri, 
-            type: "GET",
-            dataType: "binary",
-            responseType: "arraybuffer",
-            processData: false}).done(handler).fail(function(e,txt) { 
-                    console.log(txt);
-            });
+            $3Dmol.getbin(uri, handler);
         }
         else {        
            $.get(uri, handler).fail(function(e) {

@@ -2302,14 +2302,16 @@ $3Dmol.GLModel = (function() {
                 while (count < values.length) {
                     var temp = [];
                     for (var i = 0; i < atomCount; i++) {
-                        temp[i] = atoms[i];
-                    }
-                
-                    for (var i = 0; i < atomCount; i++) {
+                        var newAtom = {};
+                        for (var k in atoms[i]) {
+                            newAtom[k] = atoms[i][k];
+                        }
+                        temp[i] = newAtom;
                         temp[i].x = values[count++];
                         temp[i].y = values[count++];
                         temp[i].z = values[count++];
                     }
+
                     frames.push(temp);
                 }
                 atoms = frames[0];
@@ -2358,27 +2360,13 @@ $3Dmol.GLModel = (function() {
             }
             return values;
         } else {
-            var valueLength = 8;
-            var index = data.indexOf("\n");
-            data = data.slice(index + 1);// remove the first line containing
-                                            // title.
-            if (format == "inpcrd") {
-                index = data.indexOf("\n");
-                data = data.slice(index + 1);// remove the second line
-                                                // containing number of atoms.
-                valueLength = 12;
-            }
-            index = 0;
-            while (index < data.length - valueLength) {
-                if (data[index] == "\n")
-                    index++;
-                if (data[index] != "\n") {
-                    values[counter] = parseFloat(data.slice(index, index
-                            + valueLength));
-                    index = index + valueLength;
-                    counter++;
-                }
-            }
+            var index = data.indexOf("\n"); // remove the first line containing title
+            if(format == 'inpcrd') {
+                index = data.indexOf("\n",index+1); //remove second line w/#atoms
+            }                
+
+            data = data.slice(index + 1);
+            values = data.match(/\S+/g).map(parseFloat);
             return values;
         }
     }
