@@ -2360,8 +2360,12 @@ $3Dmol.GLModel = (function() {
             }
             return values;
         } else {
-            var index = data.indexOf("\n");
-            data = data.slice(index + 1);// remove the first line containing title
+            var index = data.indexOf("\n"); // remove the first line containing title
+            if(format == 'inpcrd') {
+                index = data.indexOf("\n",index+1); //remove second line w/#atoms
+            }                
+
+            data = data.slice(index + 1);
             values = data.match(/\S+/g).map(parseFloat);
             return values;
         }
