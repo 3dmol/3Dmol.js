@@ -885,7 +885,6 @@ $3Dmol.GLViewer = (function() {
          */
         this.render = function(callback) {
             var time1 = new Date();
-
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();
             

@@ -22,5 +22,6 @@
                   viewer.setStyle({chain:'D'},{line:{hidden:false,
                                                      linewidth:1.0,
                                                      color:'black'}});
+                  console.log("hello")
                   viewer.render();
               });
