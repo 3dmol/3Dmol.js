@@ -1334,7 +1334,8 @@ $3Dmol.GLViewer = (function() {
                         rotationGroup.quaternion,
                         final_position);
             } else { //no animation
-                camera.lookAt(final_position);
+                lookingAt = final_position;
+                camera.lookAt(lookingAt);
                 show();
             }
             return this;
