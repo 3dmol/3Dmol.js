@@ -15,6 +15,11 @@ $3Dmol = (function(window) {
 
 })(window);
 
+if ( typeof module === "object" && typeof module.exports === "object" ) { 
+	//for node.js exporting
+	module.exports = $3Dmol; 
+}
+
 /* The following code "phones home" to register that an ip 
    address has loaded 3Dmol.js.  Being able track this usage
    is very helpful when reporting to funding agencies.  Please

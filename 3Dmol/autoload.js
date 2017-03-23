@@ -3,7 +3,7 @@
 $3Dmol.autoload=function(viewer){
     if ($(".viewer_3Dmoljs")[0] !== undefined)
         $3Dmol.autoinit = true;
-    
+
     if ($3Dmol.autoinit) {
         viewer =(viewer!= undefined) ?
             viewer :null;
@@ -12,7 +12,7 @@ $3Dmol.autoload=function(viewer){
         var nviewers = 0;
         $(".viewer_3Dmoljs").each( function() {
             var viewerdiv = $(this);
-            var datauri = null;
+            var datauri = [];
             if(viewerdiv.css('position') == 'static') {
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
@@ -21,17 +21,32 @@ $3Dmol.autoload=function(viewer){
                     window[viewerdiv.data("callback")] : null;
             var type = null;
             if (viewerdiv.data("pdb")) {
-                datauri = "http://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb";
+                datauri.push("http://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb");
                 type = "pdb";
             } else if(viewerdiv.data("cid")) {
                 //this doesn't actually work since pubchem does have CORS enabled
                 type = "sdf";
-                datauri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
-                "/SDF?record_type=3d";
+                datauri.push("http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
+                "/SDF?record_type=3d");
             }
-            else if (viewerdiv.data("href"))
-                datauri = viewerdiv.data("href");
-                
+            else if (viewerdiv.data("href")){
+                datauri.push(viewerdiv.data("href"));
+
+            }
+            
+            var divdata=viewerdiv.data();
+            for(var i in divdata){
+                if((i.substring(0,3) ==="pdb" && !(i === "pdb"))){
+                    datauri.push("http://files.rcsb.org/view/" +divdata[i]+".pdb")
+
+                }else if(i.substring(0,4) ==="href" && !(i==="href")){
+                    datauri.push(divdata[i]);
+
+                }else if(i.substring(0,3)==="cid" && !(i==="cid")){
+                datauri.push("http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] + 
+                "/SDF?record_type=3d");
+                }
+            }
             var options = {}
             if(viewerdiv.data("options"))
                 options = $3Dmol.specStringToObject(viewerdiv.data("options"));
@@ -118,19 +133,26 @@ $3Dmol.autoload=function(viewer){
                 window.location = "http://get.webgl.org";                    
             }           
             
-            if (datauri) {  
-                
-                type = viewerdiv.data("type") || viewerdiv.data("datatype") || type;
-                if(!type) {
-                    type = datauri.substr(datauri.lastIndexOf('.')+1);
-                }
+            if (datauri.length!=0) {
+                for(var i=0;i<datauri.length;i++){
+                    val=i;
+                    uri=datauri[i];
+                    type = viewerdiv.data("type") || viewerdiv.data("datatype") || type;
+                    if(!type) {
+                        type = uri.substr(uri.lastIndexOf('.')+1);
+                    }
                                 
-                $.get(datauri, function(ret) {
-                    glviewer.addModel(ret, type, options);
-                    applyStyles(glviewer);       
-                    if (callback) 
-                        callback(glviewer);
-                }, 'text');         
+                    $.get(uri, function(ret) {
+                        glviewer.addModel(ret, type, options);
+                        applyStyles(glviewer);       
+                        if (callback) {
+                            if(val==datauri.length-1){
+
+                                callback(glviewer);
+                            }
+                        }
+                    }, 'text');        
+                }
             }           
             else {
                 
@@ -149,7 +171,7 @@ $3Dmol.autoload=function(viewer){
                     glviewer.addModel(moldata, type, options);        
                 }
 
-                applyStyles(glviewer);                
+                applyStyles(glviewer);              
                 if (callback) 
                     callback(glviewer);
             }

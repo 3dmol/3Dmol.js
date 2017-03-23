@@ -1,5 +1,4 @@
 $(document).ready(function(){
-
 var getKeys = function(obj){
    var keys = [];
    for(var key in obj){
@@ -173,7 +172,6 @@ function runTest(i){
 
 	try{
 	system[key](viewer,function(){
-  console.log("try");
 		waitfor(viewer.surfacesFinished , true , 100 , 0 , "" , function(){
 			var after=Date.now();
 			//gets the canvas
@@ -246,9 +244,12 @@ function runTest(i){
 	});
 
 }catch(e){
+	console.log("caught");
 	console.log(e);
 	console.log("caught");
-	runTest(++i);
+	i+=1
+	console.log(i);
+	runTest(i);
 }
 		
 }    

@@ -47,6 +47,13 @@ class view(object):
         '''Instantiate a new viewer window. Calling this will orphan any previously instantiated viewer windows.'''
         self.updatejs = ''
         return IPython.display.HTML(self._repr_html_())
+        
+    def insert(self, containerid):
+        '''Instead of inserting into notebook here, insert html
+        into existing container'''
+        html = self._repr_html_()
+        html += '''<script>$("#%s").append($("#3dmolviewer_%s")); </script>'''%(containerid,self.uniqueid)
+        return IPython.display.HTML(html)
     
     def _repr_html_(self):
         self.uniqueid = str(time.time()).replace('.','')
