@@ -8,11 +8,10 @@ var $scope = {}
 
   $scope.init = function() {
     console.log("Initialising...");
-    $scope.getChgcarNames();
     //MAIN_VIEWER = $3Dmol.viewers.viewer;
-    $scope.addModelObject("../../test_structs/CONTCAR", true); // Maybe erase in the future
-    $scope.addChgcarObject("../../test_structs/CHGCAR"); // Maybe erase in the future
     $scope.MAIN_VIEWER=$3Dmol.createViewer($("#gldiv"));
+    $scope.addModelObject("../test_structs/CONTCAR", true); // Maybe erase in the future
+    $scope.addChgcarObject("../test_structs/CHGCAR"); // Maybe erase in the future
     $scope.MAIN_VIEWER.setBackgroundColor(0xffffff);
   }
 
@@ -131,3 +130,4 @@ var $scope = {}
   }
 
   $scope.init();
+  $scope.renderChgcar();
