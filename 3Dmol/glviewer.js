@@ -1334,7 +1334,8 @@ $3Dmol.GLViewer = (function() {
                         rotationGroup.quaternion,
                         final_position);
             } else { //no animation
-                camera.lookAt(final_position);
+                lookingAt = final_position;
+                camera.lookAt(lookingAt);
                 show();
             }
             return this;
@@ -2004,21 +2005,29 @@ $3Dmol.GLViewer = (function() {
             s.shapePosition = shapes.length;
             var data = model.getCrystData();
             if (data) {
-                var a = data.a, b = data.b, c = data.c, alpha = data.alpha, beta = data.beta, gamma = data.gamma;
-                alpha = alpha * Math.PI/180.0;
-                beta = beta * Math.PI/180.0;
-                gamma = gamma * Math.PI/180.0;
+		    
+                if (data.matrix) {
+			
+		    var matrix = data.matrix
+		    
+		} else {
+			
+                    var a = data.a, b = data.b, c = data.c, alpha = data.alpha, beta = data.beta, gamma = data.gamma;
+                    alpha = alpha * Math.PI/180.0;
+                    beta = beta * Math.PI/180.0;
+                    gamma = gamma * Math.PI/180.0;
             
-                var u, v, w;
+                    var u, v, w;
             
-                u = Math.cos(beta);
-                v = (Math.cos(alpha) - Math.cos(beta)*Math.cos(gamma))/Math.sin(gamma);
-                w = Math.sqrt(Math.max(0, 1-u*u-v*v));
+                    u = Math.cos(beta);
+                    v = (Math.cos(alpha) - Math.cos(beta)*Math.cos(gamma))/Math.sin(gamma);
+                    w = Math.sqrt(Math.max(0, 1-u*u-v*v));
             
-                var matrix = new $3Dmol.Matrix4(a, b*Math.cos(gamma), c*u, 0, 
-                                                0, b*Math.sin(gamma), c*v, 0,
-                                                0, 0,                 c*w, 0,
-                                                0, 0,                 0,   1); 
+                    var matrix = new $3Dmol.Matrix4(a, b*Math.cos(gamma), c*u, 0, 
+                                                    0, b*Math.sin(gamma), c*v, 0,
+                                                    0, 0,                 c*w, 0,
+                                                    0, 0,                 0,   1); 
+		}  
          
                 var points = [  new $3Dmol.Vector3(0, 0, 0),
                                 new $3Dmol.Vector3(1, 0, 0),

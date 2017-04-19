@@ -21,12 +21,12 @@ $3Dmol.autoload=function(viewer){
                     window[viewerdiv.data("callback")] : null;
             var type = null;
             if (viewerdiv.data("pdb")) {
-                datauri.push("http://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb");
+                datauri.push("https://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb");
                 type = "pdb";
             } else if(viewerdiv.data("cid")) {
                 //this doesn't actually work since pubchem does have CORS enabled
                 type = "sdf";
-                datauri.push("http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
+                datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
                 "/SDF?record_type=3d");
             }
             else if (viewerdiv.data("href")){
@@ -37,13 +37,13 @@ $3Dmol.autoload=function(viewer){
             var divdata=viewerdiv.data();
             for(var i in divdata){
                 if((i.substring(0,3) ==="pdb" && !(i === "pdb"))){
-                    datauri.push("http://files.rcsb.org/view/" +divdata[i]+".pdb")
+                    datauri.push("https://files.rcsb.org/view/" +divdata[i]+".pdb")
 
                 }else if(i.substring(0,4) ==="href" && !(i==="href")){
                     datauri.push(divdata[i]);
 
                 }else if(i.substring(0,3)==="cid" && !(i==="cid")){
-                datauri.push("http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] + 
+                datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] + 
                 "/SDF?record_type=3d");
                 }
             }
