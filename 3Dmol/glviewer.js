@@ -293,7 +293,6 @@ $3Dmol.GLViewer = (function() {
         }
         //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
         var handleHoverContinue = function(mouseX,mouseY,event){
-            console.log("continue");
             var mouse = {
                 x : mouseX,
                 y : mouseY,
