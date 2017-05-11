@@ -2004,12 +2004,12 @@ $3Dmol.GLViewer = (function() {
             s.shapePosition = shapes.length;
             var data = model.getCrystData();
             if (data) {
-		    
+						    
                 if (data.matrix) {
 			
-		    var matrix = data.matrix
+		    		var matrix = data.matrix
 		    
-		} else {
+				} else {
 			
                     var a = data.a, b = data.b, c = data.c, alpha = data.alpha, beta = data.beta, gamma = data.gamma;
                     alpha = alpha * Math.PI/180.0;
@@ -2026,7 +2026,7 @@ $3Dmol.GLViewer = (function() {
                                                     0, b*Math.sin(gamma), c*v, 0,
                                                     0, 0,                 c*w, 0,
                                                     0, 0,                 0,   1); 
-		}  
+				}  
          
                 var points = [  new $3Dmol.Vector3(0, 0, 0),
                                 new $3Dmol.Vector3(1, 0, 0),
