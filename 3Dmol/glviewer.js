@@ -430,7 +430,7 @@ $3Dmol.GLViewer = (function() {
         
         /**
          * Return image URI of viewer contents (base64 encoded).
-         * @function $3Dmol.GLViewer#png
+         * @function $3Dmol.GLViewer#pngURI
          * 
          */
         this.pngURI = function() {
