@@ -2401,6 +2401,8 @@ $3Dmol.GLModel = (function() {
                     format = "sdf"; // could look at line 3 
                 } else if (data.match(/^%VERSION\s+\VERSION_STAMP/gm)) {
                     format = "prmtop";
+                } else if (data.match(/ITEM: TIMESTEP/gm)) {
+                    format = "lammpstrj";
                 } else {
                     format = "xyz";
                 }

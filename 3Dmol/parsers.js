@@ -2208,28 +2208,30 @@ $3Dmol.Parsers = (function() {
      */
     parsers.lammpstrj = parsers.LAMMPSTRJ = function(str, options){
  	var atoms = [];
-        var dic = {'id':'serial','xs':'x','ys','y','zs','z'};
+        var dic = {'id':'serial','xs':'x','ys':'y','zs':'z'};
         var lines = str.split('/\r?\n|\r/');
         while (lines.length > 0){
-           var offset = lines.indexOf('/ITEM: ATOMS/')+1;
-           var types = lines[offset].replace('ITEM: ATOMS ','').split(' ');
-           var index = lines.indexOf('/ITEM: NUMBER OF ATOMS/');
-           var atomCount = parseInt(lines[index+1]);
-           for (var i=offset; i<offset+atomCount; i++){
+            var offset = lines.indexOf('/ITEM: ATOMS/')+1;
+            var types = lines[offset].replace('ITEM: ATOMS ','').split(' ');
+            var index = lines.indexOf('/ITEM: NUMBER OF ATOMS/');
+            var atomCount = parseInt(lines[index+1]);
+            for (var i=offset; i<offset+atomCount; i++){
                 var atom = {};
                 var tokens = lines[i].split(' ');
                 for (var j=0; j<tokens.length; j++){
                     prop = dic[types[j]];
                     if (prop != undefined){
                         atom.prop = tokens[j];
-                atom.bonds = [];
-                atom.bondOrder = [];
-                atom.properties = {};
-                atoms[atoms.length-1][i] = atom;   
-            }
+                     }
+                     atom.bonds = [];
+                     atom.bondOrder = [];
+                     atom.properties = {};
+                     atoms[atoms.length-1][i] = atom;   
+                 }
             lines.splice(0,end);
+            }
         }
-	for (var i=0; i<atoms.length; i++){
+        for (var i=0; i<atoms.length; i++){
 	    assignBonds(atoms[i]);
 	}
         return atoms;       
