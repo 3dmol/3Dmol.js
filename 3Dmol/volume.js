@@ -34,7 +34,12 @@ $3Dmol.VolumeData = function(str, format, options) {
         //unzip gzipped files
         format = format.replace(/\.gz$/,'');
         try {
-            str = new TextDecoder("utf-8").decode(pako.inflate(str));
+            if(this[format] && this[format].isbinary) {
+                str = pako.inflate(str);
+            }
+            else {
+                str = new TextDecoder("utf-8").decode(pako.inflate(str));
+            }
         } catch(err) {
             console.log(err);
         }
@@ -557,3 +562,4 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
       }
 
 };
+$3Dmol.VolumeData.prototype.ccp4.isbinary = true;
