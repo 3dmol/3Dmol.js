@@ -2204,32 +2204,47 @@ $3Dmol.Parsers = (function() {
     }
 
     /**
-     * Parse a prmtop file from str and create atoms
+     * Parse a lammps trajectory file from str and create atoms
      */
     parsers.lammpstrj = parsers.LAMMPSTRJ = function(str, options){
  	var atoms = [];
-        var dic = {'id':'serial','xs':'x','ys','y','zs','z'};
-        var lines = str.split('/\r?\n|\r/');
+        var dic = {'id':'serial','xs':'x','ys':'y','zs':'z'};
+        var lines = str.split(/\r?\n|\r/);
         while (lines.length > 0){
-           var offset = lines.indexOf('/ITEM: ATOMS/')+1;
-           var types = lines[offset].replace('ITEM: ATOMS ','').split(' ');
-           var index = lines.indexOf('/ITEM: NUMBER OF ATOMS/');
-           var atomCount = parseInt(lines[index+1]);
-           for (var i=offset; i<offset+atomCount; i++){
+            if (lines.length < 9)
+                break;
+            var offset = 0;
+            var atomCount = 0;
+            for (var i=0; i<lines.length; i++){
+                if (lines[i].match(/ITEM: ATOMS/)){
+                    offset = i+1;
+                    break;
+                }
+                if (lines[i].match(/ITEM: NUMBER OF ATOMS/))
+                    atomCount = parseInt(lines[i+1]);
+            }
+            var types = lines[offset-1].replace('ITEM: ATOMS ','').split(' ');
+            atoms.push([]);
+            for (var i=offset; i<offset+atomCount; i++){
                 var atom = {};
                 var tokens = lines[i].split(' ');
                 for (var j=0; j<tokens.length; j++){
-                    prop = dic[types[j]];
+                    var prop = dic[types[j]];
                     if (prop != undefined){
-                        atom.prop = tokens[j];
-                atom.bonds = [];
-                atom.bondOrder = [];
-                atom.properties = {};
-                atoms[atoms.length-1][i] = atom;   
+                        if (prop == 'serial')
+                            atom[prop] = parseInt(tokens[j]);
+                        else
+                            atom[prop] = parseFloat(tokens[j]);
+                     }
+                     atom.bonds = [];
+                     atom.bondOrder = [];
+                     atom.properties = {};
+                     atoms[atoms.length-1][i-offset] = atom;   
+                }
             }
-            lines.splice(0,end);
+            lines.splice(0,offset+atomCount-1);
         }
-	for (var i=0; i<atoms.length; i++){
+        for (var i=0; i<atoms.length; i++){
 	    assignBonds(atoms[i]);
 	}
         return atoms;       
