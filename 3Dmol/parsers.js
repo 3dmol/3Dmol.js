@@ -407,9 +407,11 @@ $3Dmol.Parsers = (function() {
                                       lattice.yVec[0], lattice.yVec[1], lattice.yVec[2], 0,
                                       lattice.zVec[0], lattice.zVec[1], lattice.zVec[2], 0,
                                       0,                             0,               0, 1);
-      var modelData = atoms.modelData = [];
-      modelData.cryst = {'matrix': matrix};
-	    
+      
+	  matrix.multiplyScalar(lattice.length)
+
+      var modelData = atoms.modelData = [{symmetries:[], cryst:{matrix:matrix}}];
+	  
       var atomSymbols=lines[5].replace(/\s+/, "").replace(/\s+$/,"").split(/\s+/);
       var atomSpeciesNumber=new Int16Array(lines[6].replace(/^\s+/, "").split(/\s+/));
       var vaspMode=lines[7].replace(/\s+/, "");
