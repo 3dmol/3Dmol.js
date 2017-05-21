@@ -365,7 +365,9 @@ $3Dmol.GLModel = (function() {
                     if (atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                     atom.intersectionShape.line.push(p1);
-                    atom.intersectionShape.line.push(p2);
+                    atom.intersectionShape.line.push(mp);
+                    atom2.intersectionShape.line.push(mp);
+                    atom2.intersectionShape.line.push(p2);
                 }
 
                 var c1 = $3Dmol.getColorFromStyle(atom, atom.style.line);

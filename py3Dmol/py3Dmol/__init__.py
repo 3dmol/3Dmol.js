@@ -54,13 +54,13 @@ class view(object):
         html = self._repr_html_()
         html += '''<script>$("#%s").append($("#3dmolviewer_%s")); </script>'''%(containerid,self.uniqueid)
         return IPython.display.HTML(html)
-    
+        
     def _repr_html_(self):
         self.uniqueid = str(time.time()).replace('.','')
         self.updatejs = ''
         html = (self.startjs+self.endjs).replace('UNIQUEID',self.uniqueid)
-        return html
-    
+        return html    
+        
     def update(self):
         '''Apply commands to existing viewer (must be instantiated).'''
         if self.uniqueid == None:
@@ -89,8 +89,8 @@ class view(object):
     def __getattr__(self,name):
         '''auto-instantiate javascript calls based on whatever the user provided'''
         if name.startswith('_'): #object to ipython canary functions
-            raise AttributeError("%r object has no attribute %r" %
-                         (self.__class__, attr))
+            raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
+                                                  
         def makejs(*args):            
             cmd = '\tviewer_UNIQUEID.%s(' % name;
             for arg in args:

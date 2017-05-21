@@ -22,7 +22,7 @@ $3Dmol.GLViewer = (function() {
         // set variables
         config = config || {};
         var callback = config.callback;
-        var defaultcolors = config.defaultcolors;    	
+        var defaultcolors = config.defaultcolors;       
         if(!defaultcolors)
             defaultcolors = $3Dmol.elementColors.defaultColors;
         var nomouse = config.nomouse;
@@ -430,13 +430,13 @@ $3Dmol.GLViewer = (function() {
         
         /**
          * Return image URI of viewer contents (base64 encoded).
-         * @function $3Dmol.GLViewer#png
+         * @function $3Dmol.GLViewer#pngURI
          * 
          */
         this.pngURI = function() {
             return $('canvas',container)[0].toDataURL('image/png');
         }
-	/**
+    /**
          * Set the duration of the hover delay
          * 
          * @function $3Dmol.GLViewer#setHoverDuration
@@ -444,7 +444,7 @@ $3Dmol.GLViewer = (function() {
          *            [hoverDuration] - an optional parameter that denotes
          *            the duration of the hover delay (in milliseconds) before the hover action is called
          * 
-	 */
+     */
         this.setHoverDuration = function(duration) {
             hoverDuration = duration;
         }
@@ -714,7 +714,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#getModel
          * @param {number}
          *            [id=last model id] - Retrieve model with specified id
-         * @default Returns last model added to viewer
+         * @default Returns last model added to viewer or null if there are no models
          * @return {GLModel}
          * 
          * @example // Retrieve reference to first GLModel added var m =
@@ -739,10 +739,14 @@ $3Dmol.GLViewer = (function() {
          */
         this.getModel = function(id) {
             if(!(id in models)) {
-                return models[models.length-1]; //get last model if no (or invalid) id specified
+                if(models.length == 0) 
+                    return null;
+                else
+                    return models[models.length-1]; //get last model if no (or invalid) id specified
             }
             return models[id];
         };
+
 
         /**
          * Rotate scene by angle degrees around axis
@@ -2004,13 +2008,10 @@ $3Dmol.GLViewer = (function() {
             s.shapePosition = shapes.length;
             var data = model.getCrystData();
             if (data) {
-						    
+
                 if (data.matrix) {
-			
-		    		var matrix = data.matrix
-		    
-				} else {
-			
+                    var matrix = data.matrix
+                } else {
                     var a = data.a, b = data.b, c = data.c, alpha = data.alpha, beta = data.beta, gamma = data.gamma;
                     alpha = alpha * Math.PI/180.0;
                     beta = beta * Math.PI/180.0;
@@ -2026,7 +2027,7 @@ $3Dmol.GLViewer = (function() {
                                                     0, b*Math.sin(gamma), c*v, 0,
                                                     0, 0,                 c*w, 0,
                                                     0, 0,                 0,   1); 
-				}  
+                }  
          
                 var points = [  new $3Dmol.Vector3(0, 0, 0),
                                 new $3Dmol.Vector3(1, 0, 0),
@@ -2069,10 +2070,10 @@ $3Dmol.GLViewer = (function() {
             spec.end = spec.end || {};
             
             var p1 = new $3Dmol.Vector3(spec.start.x || 0,
-        			spec.start.y || 0, spec.start.z || 0)
-        	var p2 = new $3Dmol.Vector3(spec.end.x,
-        			spec.end.y || 0, spec.end.z || 0);
-        			
+                    spec.start.y || 0, spec.start.z || 0)
+            var p2 = new $3Dmol.Vector3(spec.end.x,
+                    spec.end.y || 0, spec.end.z || 0);
+                    
             var dir = new $3Dmol.Vector3();
             var dash = new $3Dmol.Vector3();
             var gap = new $3Dmol.Vector3();
@@ -2108,8 +2109,8 @@ $3Dmol.GLViewer = (function() {
                 p1 = temp.clone();   
                 drawn += gapAmt;
             }
-        			
-        	return s;
+                    
+            return s;
         }
 
         
@@ -3318,17 +3319,17 @@ $3Dmol.GLViewer = (function() {
                     modelsAtomsToShow[atomsToShow[n].model].push(atomsToShow[n]);
                 }
                 for (n = 0; n < models.length; n++) {
-					if(modelsAtomsToShow[n].length > 0) {
-						surfobj.push({
-							geo : new $3Dmol.Geometry(true),
-							mat : mat,
-							done : false,
-							finished : false,
-							symmetries : models[n].getSymmetries()
-						// also webgl initialized
-						});
-						addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
-					}
+                    if(modelsAtomsToShow[n].length > 0) {
+                        surfobj.push({
+                            geo : new $3Dmol.Geometry(true),
+                            mat : mat,
+                            done : false,
+                            finished : false,
+                            symmetries : models[n].getSymmetries()
+                        // also webgl initialized
+                        });
+                        addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+                    }
                 }
             }
             else {
