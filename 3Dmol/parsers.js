@@ -2202,5 +2202,51 @@ $3Dmol.Parsers = (function() {
 	}
         return atoms;
     }
+
+    /**
+     * Parse a lammps trajectory file from str and create atoms
+     */
+    parsers.lammpstrj = parsers.LAMMPSTRJ = function(str, options){
+ 	var atoms = [];
+        var dic = {'id':'serial','type':'atom','xs':'x','ys':'y','zs':'z'};
+        var lines = str.split(/\r?\n|\r/);
+        var offset = 0;
+        var atomCount = 0;
+        var start = 0;
+        while (start<lines.length-9){
+            for (var j=start; j<lines.length; j++){
+               if (lines[j].match(/ITEM: NUMBER OF ATOMS/))
+                    atomCount = parseInt(lines[j+1]);
+               if (lines[j].match(/ITEM: ATOMS/)){
+                    offset = j+1;
+                    break;
+                }
+            }
+            var types = lines[offset-1].replace('ITEM: ATOMS ','').split(' ');
+            atoms.push([]);
+            for (var j=offset; j<offset+atomCount; j++){
+                var atom = {};
+                var tokens = lines[j].split(' ');
+                for (var k=0; k<tokens.length; k++){
+                    var prop = dic[types[k]];
+                    if (prop != undefined){
+                        if (prop == 'serial' || prop == 'atom')
+                            atom[prop] = parseInt(tokens[k]);
+                        else
+                            atom[prop] = parseFloat(tokens[k]);
+                    }
+                    atom.bonds = [];
+                    atom.bondOrder = [];
+                    atom.properties = {};
+                }
+                atoms[atoms.length-1][j-offset] = atom;   
+            }
+            start = offset+atomCount-1;
+        }
+        for (var i=0; i<atoms.length; i++){
+            assignBonds(atoms[i]);
+        }
+        return atoms;       
+    }
     return parsers;
 })();
