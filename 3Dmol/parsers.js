@@ -2208,7 +2208,10 @@ $3Dmol.Parsers = (function() {
      */
     parsers.lammpstrj = parsers.LAMMPSTRJ = function(str, options){
  	var atoms = [];
-        var dic = {'id':'serial','type':'atom','xs':'x','ys':'y','zs':'z'};
+        var dic = {'id':'serial','type':'atom','element':'elem','q':'charge','radius':'radius',
+                         'x':'x','xu':'x','xs':'x','xsu':'x',
+                         'y':'y','yu':'y','ys':'y','ysu':'y',
+                         'z':'z','zu':'z','zs':'z','zsu':'z'};
         var lines = str.split(/\r?\n|\r/);
         var offset = 0;
         var atomCount = 0;
@@ -2226,25 +2229,31 @@ $3Dmol.Parsers = (function() {
             atoms.push([]);
             for (var j=offset; j<offset+atomCount; j++){
                 var atom = {};
+                var properties = {};
                 var tokens = lines[j].split(' ');
                 for (var k=0; k<tokens.length; k++){
                     var prop = dic[types[k]];
                     if (prop != undefined){
-                        if (prop == 'serial' || prop == 'atom')
+                        if (prop == 'serial')
                             atom[prop] = parseInt(tokens[k]);
-                        else
+                        else if (prop == 'x' || prop == 'y' || prop === 'z')
                             atom[prop] = parseFloat(tokens[k]);
+                        else if (prop == 'charge' || prop == 'radius')
+                            properties[prop] = parseFloat(tokens[k]);
+                        else
+                            atom[prop] = tokens[k];
                     }
+                    atom.properties = properties;
                     atom.bonds = [];
                     atom.bondOrder = [];
-                    atom.properties = {};
                 }
                 atoms[atoms.length-1][j-offset] = atom;   
             }
             start = offset+atomCount-1;
         }
-        for (var i=0; i<atoms.length; i++){
-            assignBonds(atoms[i]);
+        if (options.assignbonds){
+ 	    for (var i=0; i<atoms.length; i++)
+	        assignBonds(atoms[i]);          
         }
         return atoms;       
     }
