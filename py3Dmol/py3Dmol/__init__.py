@@ -65,7 +65,7 @@ class view(object):
         '''Apply commands to existing viewer (will auto-instantiate if necessary).'''
         script = ''
         if self.uniqueid == None:
-            script = self._repr_html()
+            script = self._repr_html_()
         script += '''<script>
             $3Dmolpromise.done(function() { //wrap in promise for non-interactive functionality
                 %s
