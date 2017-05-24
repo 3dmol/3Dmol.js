@@ -62,10 +62,11 @@ class view(object):
         return html    
         
     def update(self):
-        '''Apply commands to existing viewer (must be instantiated).'''
+        '''Apply commands to existing viewer (will auto-instantiate if necessary).'''
+        script = ''
         if self.uniqueid == None:
-            raise AssertionError('Must instantiate viewer before generating image.')
-        script = '''<script>
+            script = self._repr_html_()
+        script += '''<script>
             $3Dmolpromise.done(function() { //wrap in promise for non-interactive functionality
                 %s
                 viewer_%s.render();
