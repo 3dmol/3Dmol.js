@@ -879,6 +879,13 @@ $3Dmol.GLShape = (function() {
             lineArray[li+1] = vstart+1;
             geoGroup.lineidx += 2;
             
+            var centroid = new $3Dmol.Vector3();
+            components.push({
+                centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
+            });
+            var geoGroup = geo.updateGeoGroup(0);
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);            
         }
         /**
          * Creates an arrow shape
