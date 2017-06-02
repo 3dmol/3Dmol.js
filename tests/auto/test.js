@@ -204,7 +204,8 @@ function runTest(i){
   				useCrossOrigin: false
 			});
 
-    		var diff = resemble(canvasImage.src).ignoreAntialiasing().compareTo("imgs/"+key+".png").onComplete(function(data){
+    		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").ignoreAntialiasing().scaleToSameSize().onComplete(function(data){
+    		    //ignoreantialiasing provides some flex - scaletosamesize is necessary for retina displays
     			differ=data.rawMisMatchPercentage;//(100-blankDiff);
     			percentage.innerHTML=differ;
     			differenceImage.src=data.getImageDataUrl();
@@ -233,7 +234,7 @@ function runTest(i){
    	                i+=1;
    	                runTest(i);
    	            }   				
-    		});
+    		}); //end onComplete
 
 		});
 		

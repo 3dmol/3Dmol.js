@@ -13,6 +13,7 @@ $3Dmol.autoload=function(viewer){
         $(".viewer_3Dmoljs").each( function() {
             var viewerdiv = $(this);
             var datauri = [];
+            var datatypes = []
             if(viewerdiv.css('position') == 'static') {
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
@@ -22,29 +23,33 @@ $3Dmol.autoload=function(viewer){
             var type = null;
             if (viewerdiv.data("pdb")) {
                 datauri.push("https://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb");
-                type = "pdb";
+                datatypes.push("pdb");
             } else if(viewerdiv.data("cid")) {
                 //this doesn't actually work since pubchem does have CORS enabled
-                type = "sdf";
+                datatypes.push("sdf");
                 datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
                 "/SDF?record_type=3d");
             }
             else if (viewerdiv.data("href")){
-                datauri.push(viewerdiv.data("href"));
-
+                var uri = viewerdiv.data("href");
+                datauri.push(uri);
+                var type = uri.substr(uri.lastIndexOf('.')+1);                
+                datatypes.push(type);
             }
             
             var divdata=viewerdiv.data();
             for(var i in divdata){
                 if((i.substring(0,3) ==="pdb" && !(i === "pdb"))){
                     datauri.push("https://files.rcsb.org/view/" +divdata[i]+".pdb")
+                    datatypes.push('pdb');
 
                 }else if(i.substring(0,4) ==="href" && !(i==="href")){
-                    datauri.push(divdata[i]);
-
+                    var uri = divdata[i];
+                    datauri.push(uri);
+                    datatypes.push(uri.substr(uri.lastIndexOf('.')+1));
                 }else if(i.substring(0,3)==="cid" && !(i==="cid")){
-                datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] + 
-                "/SDF?record_type=3d");
+                    datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] +  "/SDF?record_type=3d");
+                    datatypes.push('sdf');
                 }
             }
             var options = {}
@@ -134,25 +139,25 @@ $3Dmol.autoload=function(viewer){
             }           
             
             if (datauri.length!=0) {
-                for(var i=0;i<datauri.length;i++){
-                    val=i;
-                    uri=datauri[i];
-                    type = viewerdiv.data("type") || viewerdiv.data("datatype") || type;
-                    if(!type) {
-                        type = uri.substr(uri.lastIndexOf('.')+1);
+                //load multiple data elements in serial
+                var i = 0;
+                var process = function(moldata) {
+                    //add moldata to viewer and load next model
+                    uri = datauri[i]; //this is where the moldata came from
+                    var type = viewerdiv.data("type") || viewerdiv.data("datatype") || datatypes[i]; 
+                    glviewer.addModel(moldata, type, options);
+                    i += 1;
+                    if(i < datauri.length) {
+                        $.get(datauri[i], process);
                     }
-                                
-                    $.get(uri, function(ret) {
-                        glviewer.addModel(ret, type, options);
-                        applyStyles(glviewer);       
-                        if (callback) {
-                            if(val==datauri.length-1){
-
-                                callback(glviewer);
-                            }
-                        }
-                    }, 'text');        
+                    else {
+                        // or finalize if this is the last model
+                        applyStyles(glviewer);
+                        if(callback) callback(glviewer);
+                    }
                 }
+                $.get(datauri[0], process);
+         
             }           
             else {
                 
