@@ -204,7 +204,7 @@ function runTest(i){
   				useCrossOrigin: false
 			});
 
-    		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").onComplete(function(data){
+    		var diff = resemble(canvasImage.src).ignoreAntialiasing().compareTo("imgs/"+key+".png").onComplete(function(data){
     			differ=data.rawMisMatchPercentage;//(100-blankDiff);
     			percentage.innerHTML=differ;
     			differenceImage.src=data.getImageDataUrl();
@@ -216,28 +216,24 @@ function runTest(i){
 				}else{
 					tableRow.getElementsByClassName("label")[0].style.backgroundColor="green";
 				}
-    			});
-
-				diff.ignoreAntialiasing();
-    		//});
-    		//df.ignoreAntialiasing();
-    		tableRow.getElementsByClassName("label")[0].appendChild(percentage);
-			//remove possible div
-			$(".viewer_3Dmoljs").remove();
-			//remove canvas
-			$(canvas).remove();
-			//compare globals before and after
-			afterGlobals=GlobalTester.after(window);
-			var str="";
-			for(var field in afterGlobals){
-				str+=field+"\n";
-			}
-			if(i<keys.length-1 ){
-				//run the next test
-				i+=1;
-
-				runTest(i);
-			}
+   				
+   	            tableRow.getElementsByClassName("label")[0].appendChild(percentage);
+   	            //remove possible div
+   	            $(".viewer_3Dmoljs").remove();
+   	            //remove canvas
+   	            $(canvas).remove();
+   	            //compare globals before and after
+   	            afterGlobals=GlobalTester.after(window);
+   	            var str="";
+   	            for(var field in afterGlobals){
+   	                str+=field+"\n";
+   	            }
+   	            if(i<keys.length-1 ){
+   	                //run the next test
+   	                i+=1;
+   	                runTest(i);
+   	            }   				
+    		});
 
 		});
 		
