@@ -104,7 +104,7 @@ $3Dmol.GLViewer = (function() {
         // UI variables
         var cq = new $3Dmol.Quaternion(0, 0, 0, 1);
         var dq = new $3Dmol.Quaternion(0, 0, 0, 1);
-        var animated = false;
+        var animated = 0;
         var isDragging = false;
         var mouseStartX = 0;
         var mouseStartY = 0;
@@ -114,6 +114,14 @@ $3Dmol.GLViewer = (function() {
         var cslabNear = 0;
         var cslabFar = 0;      
         
+        var decAnim = function() {
+            //decrement the number of animations currently
+            animated--;
+            if(animated < 0) animated = 0;
+        }
+        var incAnim = function() {
+            animated++;
+        }
         var nextSurfID = function() {
             //compute the next highest surface id directly from surfaces
             //this is necessary to support linking of model data
@@ -559,7 +567,7 @@ $3Dmol.GLViewer = (function() {
          * Change the viewer's container element 
          * Also useful if the original container element was removed from the DOM.
          * 
-         * @function $3Dmol.GLViewer#resetContainer
+         * @function $3Dmol.GLViewer#setContainer
          *
          * @param {Object | string} element
          *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
@@ -1140,6 +1148,7 @@ $3Dmol.GLViewer = (function() {
             var interval = 20;
             var steps = Math.ceil(duration/interval);
             if(steps < 1) steps = 1;
+            incAnim();
             
             var curr = {mpos:modelGroup.position.clone(),
                     rz: rotationGroup.position.z,
@@ -1187,6 +1196,8 @@ $3Dmol.GLViewer = (function() {
                     
                     if(step < steps.length) {
                         setTimeout(callback, interval);
+                    } else {
+                        decAnim();
                     }
                     show();
                 }
@@ -1228,6 +1239,8 @@ $3Dmol.GLViewer = (function() {
                     
                     if(step < steps) {
                         setTimeout(callback, interval);
+                    } else {
+                        decAnim();
                     }
                     show();
                 }
@@ -2282,7 +2295,7 @@ $3Dmol.GLViewer = (function() {
          */
          
         this.animate = function(options) {
-            animated = true;
+            incAnim();
             var interval = 100;
             var loop = "forward";
             var reps = 0;
@@ -2319,6 +2332,7 @@ $3Dmol.GLViewer = (function() {
                 that.render();
                 if (++displayCount == displayMax || !that.isAnimated()) {
                     clearInterval(intervalID);
+                    decAnim(); 
                 }
             };
             var intervalID = setInterval( function() { display(loop); }, interval);
@@ -2330,7 +2344,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#stopAnimate
          */
         this.stopAnimate = function() {
-            animated = false;
+            animated = 0;
             return this;
         };
         
@@ -2340,7 +2354,7 @@ $3Dmol.GLViewer = (function() {
          * @return {boolean}
          */
         this.isAnimated = function() {
-            return animated;
+            return animated > 0;
         };
         
 
@@ -3090,7 +3104,7 @@ $3Dmol.GLViewer = (function() {
             // if focusSele is specified, will start rending surface around the
             
             //surfacecallback gets called when done
-            
+console.log('start surface');            
             var surfid = nextSurfID();
 
             if(typeof type =="string"){
@@ -3270,6 +3284,7 @@ $3Dmol.GLViewer = (function() {
                         cnt++;
                         if (cnt == extents.length) {
                             surfobj.done = true;
+console.log('done with surface');
                             if(surfacecallback && typeof(surfacecallback) == "function") {
                                 surfacecallback(surfid);
                             }

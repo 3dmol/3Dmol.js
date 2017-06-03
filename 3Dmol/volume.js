@@ -68,7 +68,7 @@ $3Dmol.VolumeData = function(str, format, options) {
                 total += diff*diff; //variance is ave of squared difference with mean
             }
             var variance = total/this.data.length;
-            console.log("Computed variance: "+variance);
+            //console.log("Computed variance: "+variance);
             //now normalize
             for(var i = 0, n = this.data.length; i < n; i++) {
                 this.data[i] = (this.data[i]-mean)/variance;
@@ -481,7 +481,7 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
 
     // 56      NLABL           Number of labels being used
     // 57-256  LABEL(20,10)    10  80 character text labels (ie. A4 format)
-    console.log("Map has min,mean,average,rmsddv: "+header.DMIN+","+header.DMAX+","+header.DMEAN+","+header.ARMS);
+    //console.log("Map has min,mean,average,rmsddv: "+header.DMIN+","+header.DMAX+","+header.DMEAN+","+header.ARMS);
 
     //create transformation matrix, code mostly copied from ngl
     var h = header;

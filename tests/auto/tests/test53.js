@@ -7,7 +7,7 @@ $.get("volData/TC5b.prmtop",
 		m.setCoordinates(data, "mdcrd");
 		viewer.setStyle({},{sphere:{}});
 		viewer.zoomTo();
-		viewer.animate({loop:"forward"});
+		viewer.animate({loop:"forward",reps:1});
 		viewer.render();
 	    }); //getbin  
     });

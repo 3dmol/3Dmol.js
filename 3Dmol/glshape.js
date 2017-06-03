@@ -789,7 +789,6 @@ $3Dmol.GLShape = (function() {
         };
 
         this.addDashedCylinder = function(cylinderSpec){
-            console.log("addDashedCylinder");
             cylinderSpec.start = cylinderSpec.start || {};
             cylinderSpec.end = cylinderSpec.end || {};
             cylinderSpec.dashLength=cylinderSpec.dashLength || .25;

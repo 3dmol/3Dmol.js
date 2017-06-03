@@ -5,7 +5,7 @@
 	        viewer.setStyle({},{sphere:{radius:0.05}});
 	        viewer.zoomTo();
                 viewer.zoom(4);
-                viewer.animate({loop:"forward"});
+                viewer.animate({loop:"forward",reps:1});
 	        viewer.render();
 	    });
 
