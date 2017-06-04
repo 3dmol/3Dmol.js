@@ -4,12 +4,10 @@ var $scope = {}
   $scope.CHGCARS=[];
   $scope.MODELS=[];
 
-
+  $scope.done = 0; //for testing.. don't call test callback until finished
 
   $scope.init = function() {
-    //console.log("Initialising...");
-    //MAIN_VIEWER = $3Dmol.viewers.viewer;
-    $scope.MAIN_VIEWER=$3Dmol.createViewer($("#gldiv"));
+    $scope.MAIN_VIEWER=viewer;
     $scope.addModelObject("../test_structs/CONTCAR", true); // Maybe erase in the future
     $scope.addChgcarObject("../test_structs/CHGCAR"); // Maybe erase in the future
     $scope.MAIN_VIEWER.setBackgroundColor(0xffffff);
@@ -98,6 +96,7 @@ var $scope = {}
         chgcarObject.data = voldata;
         $scope.MAIN_VIEWER.addIsosurface(voldata , {voxel:voxel , isoval: isovalue  , color: color, opacity:opacity , smoothness:smoothness , alpha: alpha});
         $scope.MAIN_VIEWER.render();
+        $scope.done++;
       }).fail(function(err) {console.log(err);});
     }
   }
@@ -121,6 +120,7 @@ var $scope = {}
       model.setStyle({}, {sphere:{scale: 0.2}, stick:{radius:0.1}});
       $scope.MAIN_VIEWER.zoomTo();
       $scope.MAIN_VIEWER.render();
+      $scope.done++;
     });
   }
   $scope.renderModels = function() {
@@ -130,4 +130,14 @@ var $scope = {}
   }
 
   $scope.init();
-  $scope.renderChgcar();
+  $scope.render();
+
+  function checkdone() {
+        // Check if condition met. If not, re-check later (msec).
+        if ($scope.done !== 2) {
+            setTimeout(checkdone, 500);            
+        } else {
+            viewer.render(callback);
+        }
+  }
+  checkdone();

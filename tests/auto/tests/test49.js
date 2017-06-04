@@ -1011,8 +1011,8 @@ END
             var rec = viewer.addModel($('#rec').val(),'pdb');
             rec.setHoverable({},true, function(atom){  //hover
                 viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});
-                viewer.render();},
-              	function(){ viewer.removeAllLabels();viewer.render();}); //unhover
+                viewer.render( /*no callback*/);},
+              	function(){ viewer.removeAllLabels();viewer.render( /*no callback*/ );}); //unhover
        
             rec.setStyle({sphere:{}});
 

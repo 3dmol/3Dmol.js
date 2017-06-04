@@ -14,7 +14,7 @@
                                                  callback:
                                                  function() {
                                                      this.opacity = 0.0;
-                                                     viewer.render(callback);
+                                                     viewer.render( );
                                                  }});
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();

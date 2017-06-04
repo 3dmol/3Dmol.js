@@ -1324,7 +1324,7 @@ $3Dmol.GLModel = (function() {
           $3Dmol.download("pdb:4UAA",viewer,{},function(){  
             viewer.setStyle({},{stick:{}});
             viewer.vibrate(10, 1);
-            viewer.animate({loop: "backAndForth"});
+            viewer.animate({loop: "forward",reps: 1});
             viewer.zoomTo();
                   viewer.render();
               });            
@@ -1894,9 +1894,9 @@ $3Dmol.GLModel = (function() {
                                   color:'red',
                                   hoverable:true,
                                   clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
-                                  hover_callback: function(){ viewer.render();},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},
@@ -1961,9 +1961,9 @@ $3Dmol.GLModel = (function() {
                                   color:'red',
                                   hoverable:true,
                                   clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
-                                  hover_callback: function(){ viewer.render();},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},

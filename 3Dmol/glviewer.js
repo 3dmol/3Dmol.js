@@ -726,24 +726,15 @@ $3Dmol.GLViewer = (function() {
          * @return {GLModel}
          * 
          * @example // Retrieve reference to first GLModel added var m =
-         *      $.get('volData/4csv.pdb', function(data) {
-      viewer.addModel(data,'pdb');
-      viewer.setStyle({cartoon:{},stick:{}});
-      viewer.getModel(0);
-      viewer.zoomTo();
-      viewer.render(callback);
-
-    });
-    
-    //can't use jquery with binary data
-    var req = new XMLHttpRequest();
-    req.open('GET', 'volData/4csv.ccp4.gz', true);
-    req.responseType = "arraybuffer";
-    req.onload = function (aEvt) {      
-       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
-                          
-      viewer.render(callback);
-    };
+         *    $3Dmol.download("pdb:1UBQ",viewer,{},function(m1){
+                  $3Dmol.download("pdb:1UBI", viewer,{}, function(m2) {
+                    viewer.zoomTo();
+                    m1.setStyle({cartoon:'green'});
+                    //could use m2 here as well
+                    viewer.getModel().setStyle({cartoon:'blue'});
+                    viewer.render();
+                })
+              });     
          */
         this.getModel = function(id) {
             if(!(id in models)) {
@@ -767,29 +758,16 @@ $3Dmol.GLViewer = (function() {
          *            Default "y"
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
-         *            the duration of a zoom animation
+         *            the duration of the rotation animation. Default 0 (no animation)
          * @param {boolean} [fixedPath] - if true animation is constrained to 
          *      requested motion, overriding updates that happen during the animation         *            
-         * @example     $.get('volData/4csv.pdb', function(data) {
-      viewer.addModel(data,'pdb');
-      viewer.setStyle({cartoon:{},stick:{}});
+         * @example     $3Dmol.download('cid:4000', viewer, {}, function() {
+      viewer.setStyle({cstick:{}});
       viewer.zoomTo();
+      viewer.rotate(90,'y',1);
       viewer.render(callback);
     });
-    
-    //can't use jquery with binary data
-    var req = new XMLHttpRequest();
-    req.open('GET', 'volData/4csv.ccp4.gz', true);
-    req.responseType = "arraybuffer";
-    req.onload = function (aEvt) {      
-       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
-                          
-      //viewer.translate(10,10);         
-      //viewer.zoomTo({resn:'STI'});
-      //viewer.zoom(10);
-      viewer.rotate(90,"y");
-      viewer.render(callback);
-    };
+
          *  
          */
         this.rotate = function(angle, axis, animationDuration, fixedPath) {
@@ -1267,17 +1245,7 @@ $3Dmol.GLViewer = (function() {
       viewer.render(callback);
     });
     
-    //can't use jquery with binary data
-    var req = new XMLHttpRequest();
-    req.open('GET', 'volData/4csv.ccp4.gz', true);
-    req.responseType = "arraybuffer";
-    req.onload = function (aEvt) {      
-       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
-                          
-      viewer.zoom(10);
-      viewer.render(callback);
-    };
-         */
+             */
         this.zoom = function(factor,animationDuration,fixedPath) {
             var factor = factor || 2;
             var animationDuration = animationDuration!==undefined ? animationDuration : 0;
@@ -1313,22 +1281,10 @@ $3Dmol.GLViewer = (function() {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
+      viewer.translate(10,10);         
+
       viewer.render(callback);
     });
-    
-    //can't use jquery with binary data
-    var req = new XMLHttpRequest();
-    req.open('GET', 'volData/4csv.ccp4.gz', true);
-    req.responseType = "arraybuffer";
-    req.onload = function (aEvt) {      
-       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
-                          
-      viewer.translate(10,10);         
-      //viewer.zoomTo({resn:'STI'});
-      //viewer.zoom(10);
-      //viewer.rotate(90,"y");
-      viewer.render(callback);
-    };
          */
         this.translate = function(x, y, animationDuration, fixedPath) {
             var animationDuration = animationDuration!==undefined ? animationDuration : 0;
@@ -1408,24 +1364,9 @@ $3Dmol.GLViewer = (function() {
     $.get('volData/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
-      viewer.zoomTo();
-      viewer.render(callback);
-    });
-    
-    //can't use jquery with binary data
-    var req = new XMLHttpRequest();
-    req.open('GET', 'volData/4csv.ccp4.gz', true);
-    req.responseType = "arraybuffer";
-    req.onload = function (aEvt) {      
-       var voldata = new $3Dmol.VolumeData(req.response, 'ccp4.gz');
-                          
-      //viewer.translate(10,10);         
-      //viewer.zoomTo({resn:'STI'});
-      //viewer.zoom(10);
-      //viewer.rotate(90,"y");
       viewer.center();
       viewer.render(callback);
-    };
+    });
          */
         this.center = function(sel,animationDuration,fixedPath){
              animationDuration=animationDuration!==undefined ? animationDuration : 0;
@@ -1909,7 +1850,7 @@ $3Dmol.GLViewer = (function() {
                       clickable:true,
                       callback:function(){
                           this.color.setHex(0xFF0000FF);
-                          viewer.render();
+                          viewer.render( );
                       }
                   });
                   viewer.render();
@@ -1942,9 +1883,9 @@ $3Dmol.GLViewer = (function() {
                                   color:'red',
                                   hoverable:true,
                                   clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
-                                  hover_callback: function(){ viewer.render();},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},
@@ -2227,7 +2168,7 @@ $3Dmol.GLViewer = (function() {
                                                  callback:
                                                  function() {
                                                      this.opacity = 0.0;
-                                                     viewer.render(callback);
+                                                     viewer.render( );
                                                  }});
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();
@@ -2316,6 +2257,7 @@ $3Dmol.GLViewer = (function() {
             var displayCount = 0;
             var displayMax = mostFrames * reps;
             var display = function(direction) {
+
                 if (direction == "forward") {
                     that.setFrame(currFrame);
                     currFrame = (currFrame + inc) % mostFrames;
@@ -2645,9 +2587,9 @@ $3Dmol.GLViewer = (function() {
                                   color:'red',
                                   hoverable:true,
                                   clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
-                                  hover_callback: function(){ viewer.render();},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},
@@ -3104,7 +3046,6 @@ $3Dmol.GLViewer = (function() {
             // if focusSele is specified, will start rending surface around the
             
             //surfacecallback gets called when done
-console.log('start surface');            
             var surfid = nextSurfID();
 
             if(typeof type =="string"){
@@ -3226,6 +3167,7 @@ console.log('start surface');
                     // to keep the browser from locking up, call through setTimeout
                     var callSyncHelper = function callSyncHelper(i) {
                         if (i >= extents.length) {
+                            surfobj.done = true;
                             if(surfacecallback && typeof(surfacecallback) == "function") {
                                 surfacecallback(surfid);
                             }
@@ -3284,7 +3226,6 @@ console.log('start surface');
                         cnt++;
                         if (cnt == extents.length) {
                             surfobj.done = true;
-console.log('done with surface');
                             if(surfacecallback && typeof(surfacecallback) == "function") {
                                 surfacecallback(surfid);
                             }
