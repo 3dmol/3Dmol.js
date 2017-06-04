@@ -40,7 +40,7 @@ $(document).ready(function(){
 
     function waitfor(test, expectedValue, msec, count, source, callback) {
         // Check if condition met. If not, re-check later (msec).
-        while (test() !== expectedValue) {
+        if (test() !== expectedValue) {
             count++;
             setTimeout(function() {
                 waitfor(test, expectedValue, msec, count, source, callback);
@@ -154,7 +154,7 @@ $(document).ready(function(){
                     tableRow.find(".label").append(percentage);
 
                     var setError = function(msg) {
-                        var listElement=$('<li class="erroritem">').append('<a href="#'+key+'">'+key+' '+msg+'</a>');
+                        var listElement=$('<li class="erroritem">').append('<a href="#'+key+'_row">'+key+' '+msg+'</a>');
                         tableRow.find('.label').css('backgroundColor','red');
                         $('#summary_scroll').append(listElement)
                         percentage.html(msg);
@@ -211,12 +211,12 @@ $(document).ready(function(){
                             }
                             
                             console.log("running nexti "+nexti);
-                            runTest(nexti);             
+                            setTimeout(function() {runTest(nexti);}, 1); //let page update             
                         }); //end onComplete
                     }catch(e) {
                         setError("Error "+e);
                         console.log("running e2 nexti "+nexti);
-                        runTest(nexti);
+                        setTimeout(function() {runTest(nexti);}, 1); //let page update             
                     }
                 });
                 
@@ -227,7 +227,7 @@ $(document).ready(function(){
             console.log(e);
             failures++;
             console.log("running e3 nexti "+nexti);
-            runTest(nexti);
+            setTimeout(function() {runTest(nexti);}, 1); //let page update             
         }
             
     }    

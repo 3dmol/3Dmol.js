@@ -1,5 +1,6 @@
+var oldval = $3Dmol.syncSurface;
+
 var setStyles = function(volumedata){
-    var oldval = $3Dmol.syncSurface;
     $3Dmol.syncSurface = true;    
     var data = new $3Dmol.VolumeData(volumedata, "cube.gz");
     viewer.addSurface("VDW", {color:'red'} ,{chain:'A'},null,null, function(sa) {
@@ -11,9 +12,10 @@ var setStyles = function(volumedata){
       
     });
     $3Dmol.syncSurface = oldval; //otherwise we change this for all other tests
+    viewer.render();
 };
 $3Dmol.download("pdb:4DLN",viewer,{},function(){
   $3Dmol.syncSurface = true;    
   $3Dmol.getbin("volData/4dln.cube.gz",setStyles);
-  viewer.render();
+  viewer.render( /*no callback*/);
 });
