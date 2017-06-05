@@ -79,14 +79,14 @@ function Style(modifier){
 }
 //selection object for displaying
 function Selection(selection){
-    this.selections=[];
+    this.subselections=[];
     var sc_split=selection.split(";")
     for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
         var colon_split=sc_split[i].split(":")
         var obj={}
         obj[colon_split[0]]=colon_split[1]
 
-        this.selections.push(obj)
+        this.subselections.push(obj)
     }
 
     this.style=null;
@@ -101,8 +101,6 @@ function File(type,path){
 
     this.path=path;
     this.type=type;
-
-
 }
 
 var Query = function(){
@@ -146,7 +144,7 @@ var parseURL = function(url){
             query.file=new File(split[0],split[1])
         }else if(strType(tokens[i])=="style"){
             var split=tokens[i].split("=")
-            var style=Style(split[1])
+            var style=new Style(split[1])
             if(currentSelection==null){
                 query.globalStyle=style;
             }else{
@@ -154,34 +152,21 @@ var parseURL = function(url){
 
                 currentSelection=null
             }
+
             
         }else if(strType(tokens[i])=="select"){
             var split=tokens[i].split("=")
             currentSelection=new Selection(split[1])
-
+            query.selections.push(currentSelection)
         }
     }
 
-    /*
-    //pattern for structure (ie. pdb=... , cid = ... , etc. )
-    var structure = new RegExp('((pdb=|cid=|url=).+?)(?=&)')
-    structure=url.match(structure);
-    console.log(structure)
-    url=url.substring(structure.index+structure[0].length+1)
-    //pattern matching for select and style
-    var selectStyle = new RegExp('(select=).+?(style=.*(?=&)|style=.*)')
-    selectStyle=url.match(selectStyle);
-    console.log(selectStyle)
-    url=url.substring(selectStyle.index+selectStyle[0].length+1)
-    //style 
-    */
+    console.log(query);
     return query;
 }
 
 
 var query= parseURL(window.location.href.substring(29));
-
-
 
 
 
@@ -197,8 +182,8 @@ var initSide = function(url){
 
     var list=document.getElementById("selection_list");
 
-    for(var i=0;i<urlObject["selections"].length;i++){
-        list.appendChild(createSelection(urlObject["selections"][i]));
+    for(var i=0;i<query.selections.length;i++){
+        list.appendChild(createSelection(query.selections[i]));
     }
 }
 
