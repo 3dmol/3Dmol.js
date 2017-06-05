@@ -1,12 +1,12 @@
 //auto-initialization
 //Create embedded viewer from HTML attributes if true
-$3Dmol.autoload=function(viewer){
+//viewer and callback are used by the testing harness
+$3Dmol.autoload=function(viewer,callback){
     if ($(".viewer_3Dmoljs")[0] !== undefined)
         $3Dmol.autoinit = true;
 
     if ($3Dmol.autoinit) {
-        viewer =(viewer!= undefined) ?
-            viewer :null;
+        viewer =(viewer!= undefined) ? viewer :null;
         
         $3Dmol.viewers = {};
         var nviewers = 0;
@@ -18,8 +18,7 @@ $3Dmol.autoload=function(viewer){
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
             }
-            var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
-                    window[viewerdiv.data("callback")] : null;
+
             var type = null;
             if (viewerdiv.data("pdb")) {
                 datauri.push("https://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb");

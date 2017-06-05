@@ -729,9 +729,9 @@ $3Dmol.GLViewer = (function() {
          *    $3Dmol.download("pdb:1UBQ",viewer,{},function(m1){
                   $3Dmol.download("pdb:1UBI", viewer,{}, function(m2) {
                     viewer.zoomTo();
-                    m1.setStyle({cartoon:'green'});
+                    m1.setStyle({cartoon: {color:'green'}});
                     //could use m2 here as well
-                    viewer.getModel().setStyle({cartoon:'blue'});
+                    viewer.getModel().setStyle({cartoon: {color:'blue'}});
                     viewer.render();
                 })
               });     
@@ -762,7 +762,7 @@ $3Dmol.GLViewer = (function() {
          * @param {boolean} [fixedPath] - if true animation is constrained to 
          *      requested motion, overriding updates that happen during the animation         *            
          * @example     $3Dmol.download('cid:4000', viewer, {}, function() {
-      viewer.setStyle({cstick:{}});
+      viewer.setStyle({stick:{}});
       viewer.zoomTo();
       viewer.rotate(90,'y',1);
       viewer.render(callback);
@@ -1032,10 +1032,6 @@ $3Dmol.GLViewer = (function() {
             return false;
         }
 
-        
-        this.autoload = function(callback,viewer){
-            $3Dmol.autoload(callback,viewer);
-        }
 
         /** return list of atoms selected by sel
          * 
@@ -1281,7 +1277,7 @@ $3Dmol.GLViewer = (function() {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
-      viewer.translate(10,10);         
+      viewer.translate(100,10);         
 
       viewer.render(callback);
     });

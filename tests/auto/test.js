@@ -25,11 +25,11 @@ $(document).ready(function(){
         }
 
         var after = function(w){
-            var errors={};
+            var errors=[];
             for(var field in w){
                 if(!fields[field]){
                     delete window[field];
-                    errors[field]=window[field];
+                    errors.push(field);
                 }            
             }
             return errors;
@@ -58,47 +58,50 @@ $(document).ready(function(){
         $('<td class="rendered">').appendTo(tr);
         $('<td class="reference">').appendTo(tr).append('<img src="imgs/'+key+'.png">');
         $('<td class="difference">').appendTo(tr);
-
+        $('#tests_table').append(tr);
         return tr;
     }
 
-    var h1=$('<h3>Tests</h3>').css('display','inline');
-    $("#summary_scroll").append(h1);
-    imgs="imgs";
+    $('#sorttable').click(function() {
+        //sort the table with the worse examples first
+        //detach rows from tbody
+        var rows = $('#tests_table tr').detach().get();
+        //sort
+        rows.sort(function(a, b) {
+
+            var A = $(a).find('.percentage').html();
+            var B = $(b).find('.percentage').html();
+            A = parseFloat(A);
+            B = parseFloat(B);
+            if(isNaN(A)) A = 10000; //error messages go to front
+            if(isNaN(B)) B = 10000;
+            return B-A; //large to small
+
+        });
+
+        //reattach
+        $('#tests_table').append(rows);
+       
+    });
+    
     var keys=getKeys(system)
-    keys.sort();
-    var tests=[];
-    var copy=keys.slice(0);
-    for(var i=0;i<keys.length;i++){
-        if(keys[i].substring(0,4)=="test"){
-            tests.push(i);
-            copy.splice(i);
-        }
-    }
-    //sort the tests
-    for(var i=1;i<tests.length;i++){
-        var j=i;
-        while(j>0 && parseInt(keys[tests[j-1]].substring(4)) > parseInt(keys[tests[j]].substring(4))){
-            var hold=tests[j];
-            tests[j]=tests[j-1];
-            tests[j-1]=hold;
-            j--;
-        }
-    }
+    keys.sort(function(a,b) {
+       var getval = function(name) {
+           var m = name.match(/^test(\d+)/);
+           if(m) return parseInt(m[1]);
+           else return 9999999;
+       } 
+       var A = getval(a);
+       var B = getval(b);
+       return A-B;
+    });
 
     var par=$('<p>   0/'+keys.length+'</p>').css('display','inline');
-    $("#summary_scroll").append(par);
+    $("#summary_list").append(par);
 
-    var new_arr=[]
-    for(var test=0;test<tests.length;test++){
-        new_arr.push(keys[tests[test]]);
-    }
-    keys=new_arr;
-    keys=keys.concat(copy);
     var beforeGlobals;
     var i=0;
     $('#gldiv').hide();
-    beforeGlobals=GlobalTester.before(window);
 
     // apparently toDataURL isn't technically a standard for webgl canvases
     // and (some versions of) safari return the image flipped vertically
@@ -134,8 +137,8 @@ $(document).ready(function(){
         if(i == keys.length) {
             //finished
             var endTime = Date.now();
-            $('#summary_scroll').append('<li class="totaltime">Total time: '+(endTime-beginTime)/1000+'s'+'</p>');
-            $('#summary_scroll').append('<li class="failures">Total failures: '+failures+'</p>');
+            $('#summary_list').append('<li class="totaltime">Total time: '+(endTime-beginTime)/1000+'s'+'</p>');
+            $('#summary_list').append('<li class="failures">Total failures: '+failures+'</p>');
             return;
         }
         console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
@@ -156,7 +159,7 @@ $(document).ready(function(){
                     var setError = function(msg) {
                         var listElement=$('<li class="erroritem">').append('<a href="#'+key+'_row">'+key+' '+msg+'</a>');
                         tableRow.find('.label').css('backgroundColor','red');
-                        $('#summary_scroll').append(listElement)
+                        $('#summary_list').append(listElement)
                         percentage.html(msg);
                         failures++;
                     }
@@ -170,7 +173,7 @@ $(document).ready(function(){
                         var canvasImage=$("<img class='referenceImage'>").attr('src',canvasImageData);
 
                         //click event for canvas
-                        tableRow.click(function(){
+                        canvasImage.click(function(){
                             var win = window.open();
                             win.location="generate_test.cgi?test="+key;
                         });
@@ -193,7 +196,14 @@ $(document).ready(function(){
                                 percentage.html(differ+'<br>'+(after-before)+'ms');
                                 differenceImage.attr('src',data.getImageDataUrl());
                                 tableRow.find('.difference').append(differenceImage);
-                                if(differ>5){
+                                
+                                //compare globals before and after
+                                afterGlobals=GlobalTester.after(window);
+                                
+                                if(afterGlobals.length > 0) {
+                                    setError("Globals added: "+afterGlobals);
+                                }
+                                else if(differ>5){
                                     setError(differ);
                                 }else{
                                     tableRow.find(".label").css('backgroundColor',"green");
@@ -203,19 +213,16 @@ $(document).ready(function(){
                                 $(".viewer_3Dmoljs").remove();
                                 //remove canvas
                                 $(canvas).remove();
-                                //compare globals before and after
-                                afterGlobals=GlobalTester.after(window);
+
 
                             } catch(e) {
                                 setError("Img Error "+e);
                             }
                             
-                            console.log("running nexti "+nexti);
                             setTimeout(function() {runTest(nexti);}, 1); //let page update             
                         }); //end onComplete
                     }catch(e) {
                         setError("Error "+e);
-                        console.log("running e2 nexti "+nexti);
                         setTimeout(function() {runTest(nexti);}, 1); //let page update             
                     }
                 });
@@ -226,11 +233,15 @@ $(document).ready(function(){
             console.log("Exception in "+key);
             console.log(e);
             failures++;
-            console.log("running e3 nexti "+nexti);
             setTimeout(function() {runTest(nexti);}, 1); //let page update             
         }
             
     }    
-     
+    
+    //initialize a viewer since jquery adds some event handling stuff to the window
+    //that we don't want to caught by the global tester
+    $3Dmol.createViewer($("#gldiv"));    
+    GlobalTester.before(window);     
+    
     runTest(0);
 });

@@ -12,12 +12,16 @@
                     </head>
                     <body>
             <div id="summary">
-              <ul id="summary_scroll">
+            <button type="button" id="sorttable">Sort</button>
+            <h3>Status</h3>
+              <ul id="summary_list">
               </ul>
             </div>
             <table id="tests">
-              <tbody>
+              <thead>
               <tr><th>Status</th><th>Rendered</th><th>Reference</th><th>Difference</th></tr>
+              </thead>
+              <tbody id="tests_table">
               </tbody>
             </table>
 

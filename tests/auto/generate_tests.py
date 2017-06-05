@@ -61,7 +61,16 @@ class Example():
         for div in self.divs:
             text += "var objectHTML=$.parseHTML(`"+div+"`);\n$(\"body\").append(objectHTML);\n"
         if self.divs:
-            text += "global_viewer=viewer;\nglobal_callback=callback;\nviewer.autoload(viewer);\n"
+            # remove the div when done with it
+            text += "var finished_with_div_callback = function() { callback(); "
+            if self.datas:
+                text += "$(wrapper).remove(); "
+            text += "$(objectHTML).remove();}\n"
+            if 'viewer.render(callback)' in self.script: # test code calls callback
+                self.script.replace('viewer.render(callback)','viewer.render(finished_with_div_callback)')
+                text += "$3Dmol.autoload(viewer);\n"
+            else:
+                text += "$3Dmol.autoload(viewer,finished_with_div_callback);\n"
         
         #code should happen after data is initialized
         text += self.script
@@ -173,12 +182,6 @@ if __name__ == '__main__':
     
     with open(path,"a") as f:
     
-        f.write("""var global_viewer=null;
-                   var global_callback=null;
-                        function div_callback(){
-                            global_viewer.render(global_callback);
-    
-                        }""")
         f.write("var system={\n")
     
         for file in test.files:
