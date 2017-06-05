@@ -9,7 +9,7 @@
                       clickable:true,
                       callback:function(){
                           this.color.setHex(0xFF0000FF);
-                          viewer.render();
+                          viewer.render( /*no callback*/);
                       }
                   });
                   viewer.setStyle({chain:'A'},{line:{hidden:true}});
@@ -22,6 +22,5 @@
                   viewer.setStyle({chain:'D'},{line:{hidden:false,
                                                      linewidth:1.0,
                                                      color:'black'}});
-                  console.log("hello")
                   viewer.render();
               });

@@ -1,4 +1,4 @@
-
+var v = viewer;
               viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
                                   end:{x:10.0,y:0.0,z:0.0},
                                   radius:1.0,
@@ -7,9 +7,9 @@
                                   color:'red',
                                   hoverable:true,
                                   clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
-                                  hover_callback: function(){ viewer.render();},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                  callback:function(){ this.color.setHex(0x00FFFF00);v.render();},
+                                  hover_callback: function(){ v.render();},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);v.render();}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},

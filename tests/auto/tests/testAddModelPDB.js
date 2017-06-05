@@ -4,8 +4,7 @@
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
-      viewer.render();
-    });
+      viewer.render( /*no callback*/);
     
     //can't use jquery with binary data
     var req = new XMLHttpRequest();
@@ -27,4 +26,4 @@
     };
     req.send(null);
 
-
+});

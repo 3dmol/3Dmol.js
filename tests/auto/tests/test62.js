@@ -9,7 +9,7 @@ $3Dmol.download("pdb:4DM7",viewer,{},function(){
                       clickable:true,
                       callback:function(){
                           this.color.setHex(0xFF0000FF);
-                          viewer.render();
+                          viewer.render( /*no callback*/);
                       }
                   });
                   viewer.setStyle({chain:'A'},{line:{hidden:true}});

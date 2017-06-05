@@ -4,7 +4,7 @@
                   
                   m1.setStyle({}, {stick:{color:"red"}});
                   m2.setStyle({}, {cartoon:{color:"blue"}});
-                  viewer.animate({loop:"forward"});
+                  viewer.animate({loop:"forward",reps:1});
                   viewer.render();
                 });
               });

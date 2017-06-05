@@ -4,12 +4,10 @@ var $scope = {}
   $scope.CHGCARS=[];
   $scope.MODELS=[];
 
-
+  $scope.done = 0; //for testing.. don't call test callback until finished
 
   $scope.init = function() {
-    console.log("Initialising...");
-    //MAIN_VIEWER = $3Dmol.viewers.viewer;
-    $scope.MAIN_VIEWER=$3Dmol.createViewer($("#gldiv"));
+    $scope.MAIN_VIEWER=viewer;
     $scope.addModelObject("../test_structs/CONTCAR", true); // Maybe erase in the future
     $scope.addChgcarObject("../test_structs/CHGCAR"); // Maybe erase in the future
     $scope.MAIN_VIEWER.setBackgroundColor(0xffffff);
@@ -43,14 +41,14 @@ var $scope = {}
   }
 
   $scope.getChgcarNames = function() {
-    console.log("Reading chgcars from  "+$scope.volumetricFilesPath);
+    //console.log("Reading chgcars from  "+$scope.volumetricFilesPath);
     $.get($scope.volumetricFilesPath, function(data){
-      console.log(data);
+      //console.log(data);
       data = data.split(/[\n\r]/);
       data.forEach(function(name){
         if (name) {
           $scope.addChgcarObject(name);
-          console.log($scope.CHGCARS);
+          //console.log($scope.CHGCARS);
         }
       });
     });
@@ -58,7 +56,7 @@ var $scope = {}
 
 
   $scope.clear = function() {
-    console.log("Clearing..");
+    //console.log("Clearing..");
     $scope.MAIN_VIEWER.clear();
   }
 
@@ -91,19 +89,20 @@ var $scope = {}
       $scope.MAIN_VIEWER.addIsosurface(chgcarObject.data , {voxel:voxel , isoval: isovalue  , color: color, opacity:opacity , smoothness:smoothness , alpha: alpha});
       $scope.MAIN_VIEWER.render();
     } else {
-      console.log("Loading volumetric_data from "+volumetric_path);
+      //console.log("Loading volumetric_data from "+volumetric_path);
       $.get(volumetric_path, function (data) {
-        console.log("Volumetric data received");
+        //console.log("Volumetric data received");
         var voldata    = new $3Dmol.VolumeData(data, format);
         chgcarObject.data = voldata;
         $scope.MAIN_VIEWER.addIsosurface(voldata , {voxel:voxel , isoval: isovalue  , color: color, opacity:opacity , smoothness:smoothness , alpha: alpha});
         $scope.MAIN_VIEWER.render();
+        $scope.done++;
       }).fail(function(err) {console.log(err);});
     }
   }
 
   $scope.renderChgcar = function() {
-    console.log("Rendering Chgcar");
+    //console.log("Rendering Chgcar");
     $scope.CHGCARS.forEach(function(chgcarObject, index){
       if (chgcarObject.value) {
         $scope.renderVolumetricData(chgcarObject);
@@ -116,11 +115,12 @@ var $scope = {}
     var modelPath=model.name;
     var format=model.format;
     $.get(modelPath,function(data){
-      console.log("Structural data received");
+      //console.log("Structural data received");
       var model = $scope.MAIN_VIEWER.addModel(data, format);
       model.setStyle({}, {sphere:{scale: 0.2}, stick:{radius:0.1}});
       $scope.MAIN_VIEWER.zoomTo();
       $scope.MAIN_VIEWER.render();
+      $scope.done++;
     });
   }
   $scope.renderModels = function() {
@@ -130,4 +130,14 @@ var $scope = {}
   }
 
   $scope.init();
-  $scope.renderChgcar();
+  $scope.render();
+
+  function checkdone() {
+        // Check if condition met. If not, re-check later (msec).
+        if ($scope.done !== 2) {
+            setTimeout(checkdone, 500);            
+        } else {
+            viewer.render(callback);
+        }
+  }
+  checkdone();

@@ -5,7 +5,7 @@
 #when you click on the images they will create a webgl instance
 #the user should be able to select exactly what tests they wish to run (this can get pretty sophisticated)
 #at some point there will be image comparison
-import os, re, glob
+import os, re, glob, sys
 #from IPython.core.magics import script
 def find_all(text,sub):
     examples=[]
@@ -51,6 +51,8 @@ class Example():
         if 'viewer.render(callback)' not in self.script and len(self.divs) == 0:
             self.script += "\nviewer.render(callback);\n";
         
+        if self.script.count("viewer.render(callback)") > 1:
+            sys.stderr.write("More than one 'viewer.render' call in %s.  FIX THIS NOW!\n"%self.name)
         #construct all javascript test    
         text = ''
         for data in self.datas:
@@ -59,7 +61,16 @@ class Example():
         for div in self.divs:
             text += "var objectHTML=$.parseHTML(`"+div+"`);\n$(\"body\").append(objectHTML);\n"
         if self.divs:
-            text += "global_viewer=viewer;\nglobal_callback=callback;\nviewer.autoload(viewer);\n"
+            # remove the div when done with it
+            text += "var finished_with_div_callback = function() { callback(); "
+            if self.datas:
+                text += "$(wrapper).remove(); "
+            text += "$(objectHTML).remove();}\n"
+            if 'viewer.render(callback)' in self.script: # test code calls callback
+                self.script.replace('viewer.render(callback)','viewer.render(finished_with_div_callback)')
+                text += "$3Dmol.autoload(viewer);\n"
+            else:
+                text += "$3Dmol.autoload(viewer,finished_with_div_callback);\n"
         
         #code should happen after data is initialized
         text += self.script
@@ -119,12 +130,14 @@ class File():
             exmp=exmp.replace('*','')
             filename=filename.replace("3Dmol/","").lstrip('.').lstrip('/')
             flname=filename+"_"+name
+            
             flname=flname.replace(".","_")
             flname=flname.replace("/","_")
             flname=flname.replace("3Dmol_","")
             flname=flname.replace(" ","")
             flname=flname.replace("3Dmol","")
             flname=flname.replace("3","_3")
+            flname=flname.replace('$','') #special character in jquery
             exmp=Example(flname,exmp)
             examples.append(exmp)
             file.close()
@@ -169,12 +182,6 @@ if __name__ == '__main__':
     
     with open(path,"a") as f:
     
-        f.write("""var global_viewer=null;
-                   var global_callback=null;
-                        function div_callback(){
-                            global_viewer.render(global_callback);
-    
-                        }""")
         f.write("var system={\n")
     
         for file in test.files:

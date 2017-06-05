@@ -741,9 +741,9 @@ $3Dmol.GLShape = (function() {
                                   color:'red',
                                   hoverable:true,
                                   clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render();},
-                                  hover_callback: function(){ viewer.render();},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render();}
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:0.0},
@@ -789,7 +789,6 @@ $3Dmol.GLShape = (function() {
         };
 
         this.addDashedCylinder = function(cylinderSpec){
-            console.log("addDashedCylinder");
             cylinderSpec.start = cylinderSpec.start || {};
             cylinderSpec.end = cylinderSpec.end || {};
             cylinderSpec.dashLength=cylinderSpec.dashLength || .25;
@@ -904,7 +903,7 @@ $3Dmol.GLShape = (function() {
                       clickable:true,
                       callback:function(){
                           this.color.setHex(0xFF0000FF);
-                          viewer.render();
+                          viewer.render( );
                       }
                   });
                   viewer.render();
@@ -974,13 +973,12 @@ $3Dmol.GLShape = (function() {
                                                  callback:
                                                  function() {
                                                      this.opacity = 0.0;
-                                                     viewer.render(callback);
+                                                     viewer.render( );
                                                  }});
                   viewer.setStyle({}, {stick:{}});
                   viewer.zoomTo();
-                  viewer.render(callback);
+                  viewer.render();
                 });
-         //this specific example selects every atom in the
          */
         this.addIsosurface = function(data, volSpec, callback) {//may want to cache the arrays geneerated when selectedRegion ==true
            

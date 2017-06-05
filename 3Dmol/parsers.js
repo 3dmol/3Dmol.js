@@ -443,7 +443,7 @@ $3Dmol.Parsers = (function() {
 
         var coords = new Float32Array(lines[atomCounter + j].replace(/^\s+/, "").split(/\s+/));
 
-        atom={};
+        var atom={};
         atom.elem = atomSymbol;
         if (vaspMode == "cartesian") {
           atom.x = lattice.length*coords[0];
@@ -2034,10 +2034,10 @@ $3Dmol.Parsers = (function() {
 		return [];
 	    col = getColEleSize(index);
 	    var noOfCol = col[0];
-	    for (i = 0; i < atomCount/col[0]; i++){
+	    for (var i = 0; i < atomCount/col[0]; i++){
 		if (i == parseInt(atomCount/col[0]))
 		    noOfCol = atomCount % col[0]; 
-		for(j=0; j < noOfCol; j++){
+		for(var j=0; j < noOfCol; j++){
 		    var atom = {};
 		    var properties = {"charge":"", "radii":""};
 	    	    atom.serial = count;

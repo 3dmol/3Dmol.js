@@ -1,258 +1,247 @@
 $(document).ready(function(){
-var getKeys = function(obj){
-   var keys = [];
-   for(var key in obj){
-      keys.push(key);
-   }
-   return keys;
-}
+    var getKeys = function(obj){
+       var keys = [];
+       for(var key in obj){
+          keys.push(key);
+       }
+       return keys;
+    }
 
-var canvasCount= function(){
+    var canvasCount= function(){
 
-	return $('#gldiv').children().length;
-}
+        return $('#gldiv').children().length;
+    }
 
-/**
-Tests for global vairiables 
-*/
-var GlobalTester = (function(){
-	var fields={}
-    var before = function(w){
-        for(var field in w){
-            fields[field] = true;
+    /**
+    Tests for global vairiables 
+    */
+    var GlobalTester = (function(){
+        var fields={}
+        var before = function(w){
+            for(var field in w){
+                fields[field] = true;
+            }
+            return fields;
         }
-        return fields;
-    }
 
-    var after = function(w){
-    	var errors={};
-        for(var field in w){
-            if(!fields[field]){
-            	delete window[field];
-            	errors[field]=window[field];
-            }            
+        var after = function(w){
+            var errors=[];
+            for(var field in w){
+                if(!fields[field]){
+                    delete window[field];
+                    errors.push(field);
+                }            
+            }
+            return errors;
+
         }
-        return errors;
+        return {before: before, after:after};
+    }());
 
+    function waitfor(test, expectedValue, msec, count, source, callback) {
+        // Check if condition met. If not, re-check later (msec).
+        if (test() !== expectedValue) {
+            count++;
+            setTimeout(function() {
+                waitfor(test, expectedValue, msec, count, source, callback);
+            }, msec);
+            return;
+        }
+        // Condition finally met. callback() can be executed.
+        callback();
     }
-    return {before: before, after:after};
-}());
 
-function waitfor(test, expectedValue, msec, count, source, callback) {
-    // Check if condition met. If not, re-check later (msec).
-    while (test() !== expectedValue) {
-        count++;
-        setTimeout(function() {
-            waitfor(test, expectedValue, msec, count, source, callback);
-        }, msec);
-        return;
+    function createRow(key){
+
+        var tr = $('<tr class="examplerow">').prop('id',key+"_row");
+        $('<td class="label">').appendTo(tr).append('<p>'+key+'</p>');
+        $('<td class="rendered">').appendTo(tr);
+        $('<td class="reference">').appendTo(tr).append('<img src="imgs/'+key+'.png">');
+        $('<td class="difference">').appendTo(tr);
+        $('#tests_table').append(tr);
+        return tr;
     }
-    // Condition finally met. callback() can be executed.
-    callback();
-}
 
-function createRow(key){
+    $('#sorttable').click(function() {
+        //sort the table with the worse examples first
+        //detach rows from tbody
+        var rows = $('#tests_table tr').detach().get();
+        //sort
+        rows.sort(function(a, b) {
 
-	var tr=document.createElement('tr');
-		tr.id=key;
+            var A = $(a).find('.percentage').html();
+            var B = $(b).find('.percentage').html();
+            A = parseFloat(A);
+            B = parseFloat(B);
+            if(isNaN(A)) A = 10000; //error messages go to front
+            if(isNaN(B)) B = 10000;
+            return B-A; //large to small
 
-	var column1=document.createElement('th');//label
-		column1.className="label";
-	var column2=document.createElement('th');//rendered image
-		column2.className="rendered";
+        });
 
-	var column3=document.createElement('th');//reference image
-		column3.className="reference";
+        //reattach
+        $('#tests_table').append(rows);
+       
+    });
+    
+    var keys=getKeys(system)
+    keys.sort(function(a,b) {
+       var getval = function(name) {
+           var m = name.match(/^test(\d+)/);
+           if(m) return parseInt(m[1]);
+           else return 9999999;
+       } 
+       var A = getval(a);
+       var B = getval(b);
+       return A-B;
+    });
 
-	var column4=document.createElement('th');//reference image
-		column4.className="difference";
+    var par=$('<p>   0/'+keys.length+'</p>').css('display','inline');
+    $("#summary_list").append(par);
 
-	var label=document.createElement('p');
-	label.innerHTML=key;
-	column1.appendChild(label);
+    var beforeGlobals;
+    var i=0;
+    $('#gldiv').hide();
 
-	var reference=document.createElement('img');
-	reference.src="imgs/"+key+".png";
-	column3.appendChild(reference);
+    // apparently toDataURL isn't technically a standard for webgl canvases
+    // and (some versions of) safari return the image flipped vertically
+    // this returns an image uri in a (hopefully) portable way
+    function imageFromWebGlCanvas(canvas) {
+        var w = canvas.width;
+        var h = canvas.height;
+        var c = $("<canvas>").get(0);
+        c.width = w;
+        c.height = h;
+        var drawctx = c.getContext("2d");
+        var ctx3d = canvas.getContext("webgl");
+        const webglPixels = new Uint8Array(4 * w * h);
 
-	tr.appendChild(column1);
-	tr.appendChild(column2);
-	tr.appendChild(column3);
-	tr.appendChild(column4);
+        //in what was probably a horrible design decision,
+        //the ordering of pixels extracted from a webgl context is
+        //flipped vertically from that of a 2d
+        ctx3d.readPixels(0,0,w,h,ctx3d.RGBA,ctx3d.UNSIGNED_BYTE,webglPixels);
 
-	return tr;
-}
+        var idata = drawctx.getImageData(0, 0, w, h);
 
-var h1=document.createElement('h3');
-h1.innerHTML="Tests";
-h1.style="display:inline";
-document.getElementById("summary_scroll").appendChild(h1);
-imgs="imgs";
-var keys=getKeys(system)
-keys.sort();
-var tests=[];
-var copy=keys.slice(0);
-for(var i=0;i<keys.length;i++){
-	if(keys[i].substring(0,4)=="test"){
-		tests.push(i);
-		copy.splice(i);
-	}
-}
-//sort the tests
-for(var i=1;i<tests.length;i++){
-	var j=i;
-	while(j>0 && parseInt(keys[tests[j-1]].substring(4)) > parseInt(keys[tests[j]].substring(4))){
-		var hold=tests[j];
-		tests[j]=tests[j-1];
-		tests[j-1]=hold;
-		j--;
-	}
-}
+        idata.data.set(webglPixels);
+        //so we flip
+        drawctx.putImageData(idata, 0, 0);  
+        drawctx.scale(1, -1);
+        drawctx.drawImage(c, 0, -h);
+        return c.toDataURL("image/png"); // standard in 2d
+    }
 
-var par=document.createElement('p');
-par.innerHTML="   0/"+keys.length;
-document.getElementById("summary_scroll").appendChild(par);
+    var beginTime = Date.now();
+    var failures = 0;
+    function runTest(i){
+        if(i == keys.length) {
+            //finished
+            var endTime = Date.now();
+            $('#summary_list').append('<li class="totaltime">Total time: '+(endTime-beginTime)/1000+'s'+'</p>');
+            $('#summary_list').append('<li class="failures">Total failures: '+failures+'</p>');
+            return;
+        }
+        console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
+        var before=Date.now();
+        var key=keys[i];
+        
+        var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
+        var afterGlobals;
+        var nexti = i+1; //just in case exception happens after i increment
+        try{
+            system[key](viewer,function(){
+                waitfor(function() { return viewer.surfacesFinished() && !viewer.isAnimated() } , true , 100 , 0 , "" , function(){
+                    //create the table row
+                    var tableRow=createRow(key);
+                    var percentage=$('<p class="percentage">');
+                    tableRow.find(".label").append(percentage);
 
-par.style="display:inline";
-var new_arr=[]
-for(var test=0;test<tests.length;test++){
-	new_arr.push(keys[tests[test]]);
-}
-keys=new_arr;
-keys=keys.concat(copy);
-var beforeGlobals;
-var i=0;
-$('#gldiv').hide();
-beforeGlobals=GlobalTester.before(window);
+                    var setError = function(msg) {
+                        var listElement=$('<li class="erroritem">').append('<a href="#'+key+'_row">'+key+' '+msg+'</a>');
+                        tableRow.find('.label').css('backgroundColor','red');
+                        $('#summary_list').append(listElement)
+                        percentage.html(msg);
+                        failures++;
+                    }
+                    
+                    try {
+                        var after=Date.now();
+                        //gets the canvas
+                        var canvas=$("canvas#"+key).get(0);
+                        //creates an image for the canvas
+                        var canvasImageData = imageFromWebGlCanvas(canvas);
+                        var canvasImage=$("<img class='referenceImage'>").attr('src',canvasImageData);
 
-var getUrl=function(){
-var url=window.location.search.substring(1);
-url=url+".html";
-url=url.substring(0,url.indexOf(".html"));
-if(url!==""){
-document.documentElement.innerHTML = '';
-	for(var key in keys){
-		if(keys[key]===url){
-			var div_test=document.createElement("div");
-			div_test.id="div_"+keys[key];
-			div_test.style="height:0px;width:0px;"
-			document.body.appendChild(div_test);
+                        //click event for canvas
+                        canvasImage.click(function(){
+                            var win = window.open();
+                            win.location="generate_test.cgi?test="+key;
+                        });
+                        tableRow.find('.rendered').append(canvasImage);
+                        $('#tests').find('tbody').append(tableRow);
 
-			document.body.style="overflow:hidden";
-			var div=document.createElement('div');
-			div.id="gldiv";
-			div.style="width: 100vw; height: 100vh; position: relative;";
+                        var differenceImage=$('<img>');
+                        var differ=0;
 
-			document.body.appendChild(div);
+                        par.html("   "+(i+1)+"/"+keys.length);
 
-			var script=document.createElement('script');
-			script.innerHTML+=system[keys[key]].toString();
-			script.innerHTML="var callback=function(){};\nvar viewer=$3Dmol.createViewer($(\"#gldiv\"));\n"+script.innerHTML.substring(script.innerHTML.indexOf("try{")+4,script.innerHTML.indexOf("}catch(err)"));
-			
-			console.log(script.innerHTML);
-			
-			document.body.appendChild(script);
-			
-			}
-		}
+                        resemble.outputSettings({
+                            useCrossOrigin: false
+                        });
 
-}else{
+                        var diff = resemble(canvasImageData).compareTo("imgs/"+key+".png").set3DmolTolerances().scaleToSameSize().onComplete(function(data){
+                            //ignoreantialiasing provides some flex - scaletosamesize is necessary for retina displays
+                            try {
+                                differ=data.rawMisMatchPercentage;//(100-blankDiff);
+                                percentage.html(differ+'<br>'+(after-before)+'ms');
+                                differenceImage.attr('src',data.getImageDataUrl());
+                                tableRow.find('.difference').append(differenceImage);
+                                
+                                //compare globals before and after
+                                afterGlobals=GlobalTester.after(window);
+                                
+                                if(afterGlobals.length > 0) {
+                                    setError("Globals added: "+afterGlobals);
+                                }
+                                else if(differ>5){
+                                    setError(differ);
+                                }else{
+                                    tableRow.find(".label").css('backgroundColor',"green");
+                                }
+                                
+                                //remove possible div
+                                $(".viewer_3Dmoljs").remove();
+                                //remove canvas
+                                $(canvas).remove();
 
-	runTest(i);   
-}
-}
 
-function runTest(i){
-	console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
-	var before=Date.now();
-	var key=keys[i];
-	
-	var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
-	var afterGlobals;
+                            } catch(e) {
+                                setError("Img Error "+e);
+                            }
+                            
+                            setTimeout(function() {runTest(nexti);}, 1); //let page update             
+                        }); //end onComplete
+                    }catch(e) {
+                        setError("Error "+e);
+                        setTimeout(function() {runTest(nexti);}, 1); //let page update             
+                    }
+                });
+                
+            });
 
-	try{
-	system[key](viewer,function(){
-		waitfor(viewer.surfacesFinished , true , 100 , 0 , "" , function(){
-			var after=Date.now();
-			//gets the canvas
-			var canvas=document.getElementById(key);
-			//creates an image for the canvas
-			var canvasImage=document.createElement("img");
-				canvasImage.class="referenceImage";
-
-			canvasImage.src=canvas.toDataURL("image/png");
-			//click event for canvas
-			canvasImage.onclick=function(){
-				var win = window.open();
-				win.location="generate_test.cgi?test="+key;
-			};
-			//create the table row
-			var tableRow=createRow(key);
-			tableRow.getElementsByClassName('rendered')[0].appendChild(canvasImage);
-			document.getElementById("tests").getElementsByTagName('tbody')[0].appendChild(tableRow);
-			var percentage=document.createElement('p');
-			var differenceImage=document.createElement('img');
-			var differ=0;
-			var listElement=document.createElement('li');
-			var anchor=document.createElement('a');
-			anchor.href="#"+key;
-			listElement.appendChild(anchor);
-			anchor.innerHTML=key;
-			par.innerHTML="   "+i+"/"+keys.length;
-
-			resemble.outputSettings({
-  				useCrossOrigin: false
-			});
-
-    		var diff = resemble(canvasImage.src).compareTo("imgs/"+key+".png").onComplete(function(data){
-    			differ=data.rawMisMatchPercentage;//(100-blankDiff);
-    			percentage.innerHTML=differ;
-    			differenceImage.src=data.getImageDataUrl();
-    			tableRow.getElementsByClassName('difference')[0].appendChild(differenceImage);
-   				if(differ>5){
-					tableRow.getElementsByClassName("label")[0].style.backgroundColor="red";
-					document.getElementById('summary_scroll').appendChild(listElement)
-					anchor.innerHTML+=" "+percentage.innerHTML;
-				}else{
-					tableRow.getElementsByClassName("label")[0].style.backgroundColor="green";
-				}
-    			});
-
-				diff.ignoreAntialiasing();
-    		//});
-    		//df.ignoreAntialiasing();
-    		tableRow.getElementsByClassName("label")[0].appendChild(percentage);
-			//remove possible div
-			$(".viewer_3Dmoljs").remove();
-			//remove canvas
-			$(canvas).remove();
-			//compare globals before and after
-			afterGlobals=GlobalTester.after(window);
-			var str="";
-			for(var field in afterGlobals){
-				str+=field+"\n";
-			}
-			if(i<keys.length-1 ){
-				//run the next test
-				i+=1;
-
-				runTest(i);
-			}
-
-		});
-		
-	});
-
-}catch(e){
-	console.log("caught");
-	console.log(e);
-	console.log("caught");
-	i+=1
-	console.log(i);
-	runTest(i);
-}
-		
-}    
- 
-getUrl();
+        } catch(e) {
+            console.log("Exception in "+key);
+            console.log(e);
+            failures++;
+            setTimeout(function() {runTest(nexti);}, 1); //let page update             
+        }
+            
+    }    
+    
+    //initialize a viewer since jquery adds some event handling stuff to the window
+    //that we don't want to caught by the global tester
+    $3Dmol.createViewer($("#gldiv"));    
+    GlobalTester.before(window);     
+    
+    runTest(0);
 });
