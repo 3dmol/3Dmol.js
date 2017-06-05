@@ -189,7 +189,7 @@ $(document).ready(function(){
                             useCrossOrigin: false
                         });
 
-                        var diff = resemble(canvasImageData).compareTo("imgs/"+key+".png").ignoreAntialiasing().scaleToSameSize().onComplete(function(data){
+                        var diff = resemble(canvasImageData).compareTo("imgs/"+key+".png").set3DmolTolerances().scaleToSameSize().onComplete(function(data){
                             //ignoreantialiasing provides some flex - scaletosamesize is necessary for retina displays
                             try {
                                 differ=data.rawMisMatchPercentage;//(100-blankDiff);
