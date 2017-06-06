@@ -86,7 +86,18 @@ URL: https://github.com/Huddle/Resemble.js
 		var ignoreAntialiasing = false;
 		var ignoreColors = false;
 		var scaleToSameSize = false;
-
+		var adjustByAlpha = false; // scale RBG by alpha rather than evaluating it
+		
+		//return pixel with alpha applied (assumes white background)
+		function applyAlpha(pixel) {
+		    var a = pixel.a/255.0;
+		    pixel.r *= a;
+		    pixel.g *= a;
+		    pixel.b *= a;
+		    pixel.a = 255;
+		    return pixel;
+		}
+		
 		function triggerDataUpdate(){
 			var len = updateCallbackArray.length;
 			var i;
@@ -451,6 +462,10 @@ URL: https://github.com/Huddle/Resemble.js
 					return;
 				}
 
+				if(adjustByAlpha) {
+				    pixel1 = applyAlpha(pixel1);
+				    pixel2 = applyAlpha(pixel2);
+				}
 				if (ignoreColors){
 
 					addBrightnessInfo(pixel1);
@@ -660,9 +675,9 @@ URL: https://github.com/Huddle/Resemble.js
                     tolerance.green = 32;
                     tolerance.blue = 32;
                     tolerance.alpha = 256; //don't care
-                    tolerance.minBrightness = 64;
-                    tolerance.maxBrightness = 96;
-
+                    tolerance.minBrightness = 8;
+                    tolerance.maxBrightness = 250;
+                    //adjustByAlpha = true;
                     ignoreAntialiasing = true;
                     ignoreColors = false;
 

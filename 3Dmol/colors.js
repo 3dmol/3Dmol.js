@@ -53,46 +53,6 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
  * @typedef ColorschemeSpec
  * Built in colorschemes
  *
- * @example 
- 
-              $.get('../test_structs/benzene-homo.cube', function(data){
-                  var voldata = new $3Dmol.VolumeData(data, "cube");
-                  viewer.addIsosurface(voldata, {isoval: 0.01,
-                                                 color: "blue",
-                                                 alpha: 0.5,
-                                                 smoothness: 10});
-                  viewer.addIsosurface(voldata, {isoval: -0.01,
-                                                 color: "red",
-                                                 smoothness: 5,
-                                                 opacity:0.5,
-                                                 wireframe:true,
-                                                 linewidth:0.1,
-                                                 clickable:true,
-                                                 callback:
-                                                 function() {
-                                                     this.opacity = 0.0;
-                                                 }});
-                  viewer.setStyle({}, {stick:{}});
-                  viewer.zoomTo();
-                  
-                                                  viewer.render();
-                 
-                });
-
- * @example //Using a gradient with colorscheme.
-     viewer.setViewStyle({style:"outline"});
-             
-
-              viewer.setViewStyle({style:"outline"});
-              $.get('volData/1fas.pqr', function(data){
-                  viewer.addModel(data, "pqr");
-                  $.get("volData/1fas.cube",function(volumedata){
-                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
-                      
-                  viewer.render(callback);
-                  });
-                  viewer.zoomTo();
-              });
  * @example //Using a function in order to define the colors. 
   $3Dmol.download("pdb:4UAA",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
@@ -100,7 +60,8 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
                     return atom.resi % 2 ? 'white': 'green'
                   };
 
-                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+                  viewer.setStyle( {chain:'A'}, { cartoon: {colorfunc: colorAsSnake }});
+                  viewer.setStyle( {chain:'B'}, { stick: {colorscheme: 'yellowCarbon'}});
 
                   viewer.render();
               });
@@ -522,13 +483,7 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     if (typeof (style.color) != "undefined" && style.color != "spectrum")
         color = style.color;
     if(typeof(scheme) != "undefined") {
-        if(typeof($3Dmol.builtinColorSchemes[scheme]) != "undefined") {
-            //name of builtin colorscheme
-            if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
-                color = scheme.map[atom[scheme.prop]];
-            }
-        } 
-        else if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
+        if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
             //name of builtin colorscheme
             var scheme = $3Dmol.elementColors[scheme];
             if(typeof(scheme[atom[scheme.prop]]) != "undefined") {

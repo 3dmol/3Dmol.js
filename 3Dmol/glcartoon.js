@@ -8,7 +8,7 @@ var $3Dmol = $3Dmol || {};
 
 /**
  * @typedef CartoonStyleSpec
- * @prop {ColorSpec} color - strand color, may specify as 'spectrum'
+ * @prop {ColorSpec} color - strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number
  * @prop {string} style - style of cartoon rendering (trace, oval, rectangle
  *       (default), parabola, edged)
  * @prop {boolean} ribbon - whether to use constant strand width, disregarding
@@ -909,7 +909,8 @@ $3Dmol.drawCartoon = (function() {
         var gradients = {};
         for(var g in $3Dmol.Gradient.builtinGradients) {
             if($3Dmol.Gradient.builtinGradients.hasOwnProperty(g)) {
-                gradients[g] = new $3Dmol.Gradient.builtinGradients[g](gradientrange[0],gradientrange[1]);
+                //COUNTER INTUITIVE - spectrum reverses direction to gradient to match other tools
+                gradients[g] = new $3Dmol.Gradient.builtinGradients[g](gradientrange[1],gradientrange[0]);
             }
         }
         

@@ -8,7 +8,6 @@
         viewer.addIsosurface(voldata, {isoval: 0.25,
                                        color: "blue",
                                        wireframe: true,
-                                       linewidth:0.005,
                                        selectedRegion: viewer.selectedAtoms({}),
                                        selectedOffset: 3,
                                        radius: 3.0                                   
