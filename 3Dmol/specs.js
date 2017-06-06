@@ -21,7 +21,7 @@
  * @prop {string} elem - Element abbreviation (e.g. 'H', 'Ca', etc)
  * @prop {boolean} hetflag - Set to true if atom is a heteroatom
  * @prop {string} chain - Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
- * @prop {number} resi - Residue number 
+ * @prop {number} resi - Residue number
  * @prop {number} icode
  * @prop {number} rescode
  * @prop {number} serial - Atom's serial id number
@@ -74,7 +74,7 @@
  * are provided as a list, then only one value of the list must match.
  * 
  * @typedef AtomSelectionSpec
- * @prop {AtomSpec} ... - any field from {@link AtomSpec}, values may be singletons or lists
+ * @prop {AtomSpec} ... - any field from {@link AtomSpec}, values may be singletons or lists. Integer numerical ranges are supported as strings.
  * @prop {GLModel} model - a single model or list of models from which atoms should be selected
  * @prop {number} bonds - overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
  * @prop {function} predicate - user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
@@ -83,21 +83,12 @@
  * @prop {number} expand - expands the selection to include all atoms within a given distance from the selection
  * @prop {WithinSelectionSpec} within - intersects the selection with the set of atoms within a given distance from another selection
  * @example
- * $3Dmol.download("pdb:2EJ0",viewer,{},function(){
-                  
-                  viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
-                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
-                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
-                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
-                  viewer.setStyle({chain:'A'},{cross:{hidden:true}});
-                  viewer.setStyle({chain:'B'},{cross:{hidden:false,
-                                                      colorscheme:'greenCarbon'}});
-                  viewer.setStyle({chain:'C'},{cross:{hidden:false,
-                                                      radius:.5}});
-                  viewer.setStyle({chain:'D'},{cross:{hidden:false}});
-                  viewer.setStyle({chain:'E'},{cross:{hidden:false,
-                                                      color:'black'}});
-                  
+ * $3Dmol.download("pdb:2EJ0",viewer,{},function(){                     
+                  viewer.setStyle({chain:'B'},{cartoon:{color:'spectrum'}});
+                  viewer.setStyle({chain:'B',invert:true},{cartoon:{}});
+                  viewer.setStyle({bonds: 0},{sphere:{radius:0.5}}); //water molecules
+                  viewer.setStyle({resn:'PMP',byres:true,expand:5},{stick:{colorscheme:"greenCarbon"}});
+                  viewer.setStyle({resi:["91-95","42-50"]},{cartoon:{color:"green",thickness:1.0}});                  
                   viewer.render();
 
                   
@@ -113,17 +104,9 @@
  * @typedef WithinSelectionSpec
  * @example
  $3Dmol.download("pdb:2EJ0",viewer,{},function(){
-                  
-                  viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
-                  viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
-                                           borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
-                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
-            
- * viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}}); 
-                  
-                  viewer.render();
-
-                  
+                            
+                  viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}});                   
+                  viewer.render();                  
                 });// stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
  *
  * @prop {number} distance - the distance in angstroms away from the atom selection to include atoms in the parent selection
