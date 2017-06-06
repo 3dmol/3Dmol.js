@@ -149,11 +149,9 @@ var parseURL = function(url){
                 query.globalStyle=style;
             }else{
                 currentSelection.style=style;
-
                 currentSelection=null
             }
 
-            
         }else if(strType(tokens[i])=="select"){
             var split=tokens[i].split("=")
             currentSelection=new Selection(split[1])
