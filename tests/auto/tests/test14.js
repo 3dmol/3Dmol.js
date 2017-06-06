@@ -9,7 +9,6 @@
                                                  smoothness: 5,
                                                  opacity:0.5,
                                                  wireframe:true,
-                                                 linewidth:0.1,
                                                  clickable:true,
                                                  callback:
                                                  function() {

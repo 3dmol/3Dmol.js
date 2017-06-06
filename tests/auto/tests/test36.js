@@ -14,6 +14,6 @@ H    -0.465979   -0.364991   -0.807088    0.392764    0.342436    0.764260
             var m = viewer.addModel(data, "xyz");
             m.setStyle({},{stick:{}});
             m.vibrate(10, 1);
-            viewer.animate({loop: "backAndForth"});
+            viewer.animate({loop: "forward",reps:1});
             viewer.zoomTo();
             viewer.render();

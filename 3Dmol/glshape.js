@@ -968,7 +968,6 @@ $3Dmol.GLShape = (function() {
                                                  smoothness: 5,
                                                  opacity:0.5,
                                                  wireframe:true,
-                                                 linewidth:0.1,
                                                  clickable:true,
                                                  callback:
                                                  function() {
@@ -1029,39 +1028,44 @@ $3Dmol.GLShape = (function() {
 
             if (volSpec.selectedRegion !== undefined) {
 
-                var xmax = volSpec.selectedRegion[0], ymax = volSpec.selectedRegion[0], zmax = volSpec.selectedRegion[0], xmin = volSpec.selectedRegion[0], ymin = volSpec.selectedRegion[0], zmin = volSpec.selectedRegion[0];
+                var xmax = volSpec.selectedRegion[0].x, 
+                    ymax = volSpec.selectedRegion[0].y, 
+                    zmax = volSpec.selectedRegion[0].z, 
+                    xmin = volSpec.selectedRegion[0].x, 
+                    ymin = volSpec.selectedRegion[0].y, 
+                    zmin = volSpec.selectedRegion[0].z;
 
                 for (var i = 0; i < volSpec.selectedRegion.length; i++) {
-                    if (volSpec.selectedRegion[i].x > xmax.x)
-                        xmax = volSpec.selectedRegion[i];
-                    else if (volSpec.selectedRegion[i].x < xmin.x)
-                        xmin = volSpec.selectedRegion[i];
-                    if (volSpec.selectedRegion[i].y > ymax.y)
-                        ymax = volSpec.selectedRegion[i];
-                    else if (volSpec.selectedRegion[i].y < ymin.y)
-                        ymin = volSpec.selectedRegion[i];
-                    if (volSpec.selectedRegion[i].z > zmax.z)
-                        zmax = volSpec.selectedRegion[i];
-                    else if (volSpec.selectedRegion[i].z < zmin.z)
-                        zmin = volSpec.selectedRegion[i];
+                    if (volSpec.selectedRegion[i].x > xmax)
+                        xmax = volSpec.selectedRegion[i].x;
+                    else if (volSpec.selectedRegion[i].x < xmin)
+                        xmin = volSpec.selectedRegion[i].x;
+                    if (volSpec.selectedRegion[i].y > ymax)
+                        ymax = volSpec.selectedRegion[i].y;
+                    else if (volSpec.selectedRegion[i].y < ymin)
+                        ymin = volSpec.selectedRegion[i].y;
+                    if (volSpec.selectedRegion[i].z > zmax)
+                        zmax = volSpec.selectedRegion[i].z;
+                    else if (volSpec.selectedRegion[i].z < zmin)
+                        zmin = volSpec.selectedRegion[i].z;
                 }
 
                 var rad = volSpec.radius;
-                xmax.x = xmax.x + rad;
-                xmin.x = xmin.x - rad;
-                ymin.y = ymin.y - rad;
-                ymax.y = ymax.y + rad;
-                zmin.z = zmin.z - rad;
-                zmax.z = zmax.z + rad;
+                xmin -= rad;
+                xmax += rad;
+                ymin -= rad;
+                ymax += rad;
+                zmin -= rad;
+                zmax += rad;
 
                 // accounts for radius
                 for (var i = 0; i < verts.length; i++) {
-                    if (verts[i].x > xmin.x
-                            && verts[i].x < xmax.x
-                            && verts[i].y > ymin.y
-                            && verts[i].y < ymax.y
-                            && verts[i].z > zmin.z
-                            && verts[i].z < zmax.z
+                    if (verts[i].x > xmin
+                            && verts[i].x < xmax
+                            && verts[i].y > ymin
+                            && verts[i].y < ymax
+                            && verts[i].z > zmin
+                            && verts[i].z < zmax
                             && inSelectedRegion(verts[i],
                                     volSpec.selectedRegion,
                                     volSpec.selectedOffset, volSpec.radius)) {
