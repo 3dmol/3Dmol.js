@@ -19,6 +19,21 @@ $3Dmol.Gradient.valueToHex = function(val, range) {};
 $3Dmol.Gradient.range = function() {};
 
 
+//if lo > hi, flip, also cap
+$3Dmol.Gradient.normalizeValue = function(lo, hi, val) {
+    if(hi>=lo){
+        if(val < lo) val = lo;
+        if(val > hi) val = hi;
+        return {lo: lo, hi: hi, val: val};
+    }
+    else{
+        if(val>lo) val=lo;
+        if(val < hi) val = hi;
+        //flip the meaning of val, lo, hi
+        val = (lo-val)+hi;
+        return {lo: hi, hi: lo, val: val};
+    }
+};
 
 /**
  * Color scheme red to white to blue, for charges
@@ -49,14 +64,12 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
     
         if(val === undefined)
             return 0xffffff;
-        if(hi>lo){
-            if(val < lo) val = lo;
-            if(val > hi) val = hi;
-        }
-        else{
-            if(val>lo) val=lo;
-            if(val < hi) val = hi;
-        }
+        
+        var norm = $3Dmol.Gradient.normalizeValue(lo, hi, val);
+        lo = norm.lo;
+        hi = norm.hi;
+        val = norm.val;
+        
         var middle = (hi+lo)/2;
         if(range && typeof(range[2]) != "undefined")
             middle = range[2];
@@ -67,32 +80,15 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
         var scale, color;
         
         //scale bottom from red to white
-        if(lo<hi){
-            if(val <= middle) {
-                scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
-                color = 0xff0000 + 0x100*scale + scale;
-                return color;
-            }
-            else { //form white to blue
-                scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
-                color =  0x10000*scale+0x100*scale+0xff;
-                return color;
-            }
+        if(val <= middle) {
+            scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
+            color = 0xff0000 + 0x100*scale + scale;
+            return color;
         }
-        else if(lo>hi){
-            //val=min-val;
-             if(val <= middle) {
-
-                scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
-                color =  0x10000*scale+0x100*scale+0xff;
-                return color;
-            }
-            else { //from white to blue
-
-                scale = Math.floor(255*Math.sqrt((val-lo)/(middle-lo)));
-                color = 0xff0000 + 0x100*scale + scale;
-                return color;
-            }
+        else { //form white to blue
+            scale = Math.floor(255*Math.sqrt((1-(val-middle)/(hi-middle))));
+            color =  0x10000*scale+0x100*scale+0xff;
+            return color;
         }
     };
     
@@ -138,19 +134,10 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         if(typeof(val) == "undefined")
             return 0xffffff;
         
-        if(hi>lo){
-            if(val < lo) val = lo;
-            if(val > hi) val = hi;
-        }
-        else{
-            if(val>lo) val=lo;
-            if(val < hi) val = hi;
-            //flip the meaning of val, lo, hi
-            val = lo-val;
-            var tmp = lo;
-            lo = hi;
-            hi = tmp;
-        }
+        var norm = $3Dmol.Gradient.normalizeValue(lo, hi, val);
+        lo = norm.lo;
+        hi = norm.hi;
+        val = norm.val;
         
         var mid = (lo+hi)/2;
         var q1 = (lo+mid)/2;
@@ -223,14 +210,11 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
     
         if(typeof(val) == "undefined")
             return 0xffffff;
-        if(hi>lo){
-            if(val < lo) val = lo;
-            if(val > hi) val = hi;
-        }
-        else{
-            if(val>lo) val=lo;
-            if(val < hi) val = hi;
-        }
+        var norm = $3Dmol.Gradient.normalizeValue(lo, hi, val);
+        lo = norm.lo;
+        hi = norm.hi;
+        val = norm.val;
+        
         var scale = (val-lo)/(hi-lo);
         var h = (5*scale/6.0+0.5);
         var r = Math.sin(Math.PI*h);
