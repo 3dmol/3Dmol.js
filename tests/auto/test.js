@@ -133,6 +133,10 @@ $(document).ready(function(){
 
     var beginTime = Date.now();
     var failures = 0;
+    resemble.outputSettings({
+        useCrossOrigin: false
+    });
+    
     function runTest(i){
         if(i == keys.length) {
             //finished
@@ -148,93 +152,78 @@ $(document).ready(function(){
         var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
         var afterGlobals;
         var nexti = i+1; //just in case exception happens after i increment
-        try{
-            system[key](viewer,function(){
-                waitfor(function() { return viewer.surfacesFinished() && !viewer.isAnimated() } , true , 100 , 0 , "" , function(){
-                    //create the table row
-                    var tableRow=createRow(key);
-                    var percentage=$('<p class="percentage">');
-                    tableRow.find(".label").append(percentage);
 
-                    var setError = function(msg) {
-                        var listElement=$('<li class="erroritem">').append('<a href="#'+key+'_row">'+key+' '+msg+'</a>');
-                        tableRow.find('.label').css('backgroundColor','red');
-                        $('#summary_list').append(listElement)
-                        percentage.html(msg);
-                        failures++;
+        //create the table row
+        var tableRow=createRow(key);
+        var percentage=$('<p class="percentage">');
+        tableRow.find(".label").append(percentage);
+        par.html("   "+(i+1)+"/"+keys.length);
+
+        //setup error handling
+        var setError = function(msg) {
+            var listElement=$('<li class="erroritem">').append('<a href="#'+key+'_row">'+key+' '+msg+'</a>');
+            tableRow.find('.label').css('backgroundColor','red');
+            $('#summary_list').append(listElement)
+            percentage.html(msg);
+            failures++;
+        }
+        
+        //override default error handling (try/catch isn't sufficient due to callbacks)
+        window.onerror = function(message, file, lineNumber) {
+            setError(message);
+            failures++;
+            setTimeout(function() {runTest(nexti);}, 1); //let page update  
+            return true; 
+          };
+          
+        system[key](viewer,function(){
+            waitfor(function() { return viewer.surfacesFinished() && !viewer.isAnimated() } , true , 100 , 0 , "" , function(){
+                var after=Date.now();
+                //gets the canvas
+                var canvas=$("canvas#"+key).get(0);
+                //creates an image for the canvas
+                var canvasImageData = imageFromWebGlCanvas(canvas);
+                var canvasImage=$("<img class='referenceImage'>").attr('src',canvasImageData);
+
+                //click event for canvas
+                canvasImage.click(function(){
+                    var win = window.open();
+                    win.location="generate_test.cgi?test="+key;
+                });
+                tableRow.find('.rendered').append(canvasImage);
+                $('#tests').find('tbody').append(tableRow);
+
+                var differenceImage=$('<img>');
+                var differ=0;
+
+                var diff = resemble(canvasImageData).compareTo("imgs/"+key+".png").set3DmolTolerances().scaleToSameSize().onComplete(function(data){
+                    //scaletosamesize is necessary for retina displays
+                    differ=data.rawMisMatchPercentage;//(100-blankDiff);
+                    percentage.html(differ+'<br>'+(after-before)+'ms');
+                    differenceImage.attr('src',data.getImageDataUrl());
+                    tableRow.find('.difference').append(differenceImage);
+                    
+                    //compare globals before and after
+                    afterGlobals=GlobalTester.after(window);
+                    
+                    if(afterGlobals.length > 0) {
+                        setError("Globals added: "+afterGlobals);
+                    } else if(differ>5){
+                        setError(differ);
+                    } else{
+                        tableRow.find(".label").css('backgroundColor',"green");
                     }
                     
-                    try {
-                        var after=Date.now();
-                        //gets the canvas
-                        var canvas=$("canvas#"+key).get(0);
-                        //creates an image for the canvas
-                        var canvasImageData = imageFromWebGlCanvas(canvas);
-                        var canvasImage=$("<img class='referenceImage'>").attr('src',canvasImageData);
-
-                        //click event for canvas
-                        canvasImage.click(function(){
-                            var win = window.open();
-                            win.location="generate_test.cgi?test="+key;
-                        });
-                        tableRow.find('.rendered').append(canvasImage);
-                        $('#tests').find('tbody').append(tableRow);
-
-                        var differenceImage=$('<img>');
-                        var differ=0;
-
-                        par.html("   "+(i+1)+"/"+keys.length);
-
-                        resemble.outputSettings({
-                            useCrossOrigin: false
-                        });
-
-                        var diff = resemble(canvasImageData).compareTo("imgs/"+key+".png").set3DmolTolerances().scaleToSameSize().onComplete(function(data){
-                            //ignoreantialiasing provides some flex - scaletosamesize is necessary for retina displays
-                            try {
-                                differ=data.rawMisMatchPercentage;//(100-blankDiff);
-                                percentage.html(differ+'<br>'+(after-before)+'ms');
-                                differenceImage.attr('src',data.getImageDataUrl());
-                                tableRow.find('.difference').append(differenceImage);
-                                
-                                //compare globals before and after
-                                afterGlobals=GlobalTester.after(window);
-                                
-                                if(afterGlobals.length > 0) {
-                                    setError("Globals added: "+afterGlobals);
-                                }
-                                else if(differ>5){
-                                    setError(differ);
-                                }else{
-                                    tableRow.find(".label").css('backgroundColor',"green");
-                                }
-                                
-                                //remove possible div
-                                $(".viewer_3Dmoljs").remove();
-                                //remove canvas
-                                $(canvas).remove();
-
-
-                            } catch(e) {
-                                setError("Img Error "+e);
-                            }
-                            
-                            setTimeout(function() {runTest(nexti);}, 1); //let page update             
-                        }); //end onComplete
-                    }catch(e) {
-                        setError("Error "+e);
-                        setTimeout(function() {runTest(nexti);}, 1); //let page update             
-                    }
-                });
-                
+                    //remove possible div
+                    $(".viewer_3Dmoljs").remove();
+                    //remove canvas
+                    $(canvas).remove();
+                    
+                    setTimeout(function() {runTest(nexti);}, 1); //let page update             
+                }); //end onComplete
             });
-
-        } catch(e) {
-            console.log("Exception in "+key);
-            console.log(e);
-            failures++;
-            setTimeout(function() {runTest(nexti);}, 1); //let page update             
-        }
+            
+        });
             
     }    
     

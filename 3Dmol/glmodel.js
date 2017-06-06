@@ -1516,10 +1516,20 @@ $3Dmol.GLModel = (function() {
                     else if ($.isArray(sel[key])) {
                         // can be any of the listed values
                         var valarr = sel[key];
+                        var atomval = atom[key];
                         for ( var i = 0; i < valarr.length; i++) {
-                            if (atom[key] == valarr[i]) {
+                            if (atomval == valarr[i]) {
                                 isokay = true;
                                 break;
+                            } else if(typeof(valarr[i]) == 'string'){
+                                //support numerical integer ranges, e.g. resi: 3-7
+                               var match = valarr[i].match(/(-?\d+)\s*-\s*(-?\d+)/);
+                               var lo = parseInt(match[1]);
+                               var hi = parseInt(match[2]);
+                               if(match && atomval >= lo && atomval <= hi) {
+                                   isokay = true;
+                                   break;
+                               }
                             }
                         }
                         if (!isokay) {
