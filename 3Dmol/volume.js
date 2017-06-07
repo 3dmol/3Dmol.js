@@ -83,14 +83,26 @@ $3Dmol.VolumeData = function(str, format, options) {
  * @returns - value closest to provided coordinate; zero if coordinate invalid
  */
 $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
-    x -= this.origin.x;
-    y -= this.origin.y;
-    z -= this.origin.z;
     
-    x /= this.unit.x;
-    y /= this.unit.y;
-    z /= this.unit.z;
-    
+    if(this.matrix) {
+        //all transformation is done through matrix multiply
+        if(!this.inversematrix) {
+            this.inversematrix = new $3Dmol.Matrix4().getInverse(this.matrix);
+        }
+        pt = new $3Dmol.Vector3(x,y,z);
+        pt = pt.applyMatrix4(this.inversematrix);
+        x = pt.x;
+        y = pt.y;
+        z = pt.z;        
+    } else { //use simple origin/unit transform            
+        x -= this.origin.x;
+        y -= this.origin.y;
+        z -= this.origin.z;
+        
+        x /= this.unit.x;
+        y /= this.unit.y;
+        z /= this.unit.z;
+    }
     x = Math.round(x);
     y = Math.round(y);
     z = Math.round(z);
@@ -99,7 +111,7 @@ $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     if(y < 0 || y >= this.size.y) return 0;
     if(z < 0 || z >= this.size.z) return 0;
     
-    return this.data[x*this.size.y*this.size.z + y*this.size.z + z];
+    return this.data[x*this.size.y*this.size.z + y*this.size.z + z];    
 };
 
 $3Dmol.VolumeData.prototype.getCoordinates = function(index){

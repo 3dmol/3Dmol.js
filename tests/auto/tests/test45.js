@@ -6,13 +6,7 @@
       //viewer.render( /*no callback*/);
       $3Dmol.getbin('volData/4csv.ccp4.gz', function(data) {
         var voldata = new $3Dmol.VolumeData(data, 'ccp4.gz');
-        viewer.addIsosurface(voldata, {isoval: 0.25,
-                                       color: "blue",
-                                       wireframe: true,
-                                       selectedRegion: viewer.selectedAtoms({}),
-                                       selectedOffset: 3,
-                                       radius: 3.0                                   
-                                    });
+        viewer.addSurface("SES", {opacity:0.9, voldata: voldata, volscheme: new $3Dmol.Gradient.RWB(-.25,.25)});
         viewer.render();
       });
     });
