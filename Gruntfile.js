@@ -95,6 +95,7 @@ module.exports = function(grunt) {
                 js : ['build/3Dmol-pre.js'],
                 jsOutputFile : 'build/3Dmol-min-pre.js',
                 noreport : true,
+		maxBuffer:500,
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
@@ -107,6 +108,7 @@ module.exports = function(grunt) {
                 js : ['js/jquery-1.11.3.js'],
                 jsOutputFile : 'build/jquery-1.11.3-min-pre.js',
                 noreport : true,
+		maxBuffer:500,
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
@@ -118,6 +120,7 @@ module.exports = function(grunt) {
                 js : ['js/mmtf.js'],
                 jsOutputFile : 'build/mmtf-min-pre.js',
                 noreport : true,
+		maxBuffer:500,
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
@@ -129,6 +132,7 @@ module.exports = function(grunt) {
                 js : ['js/pako_inflate.js'],
                 jsOutputFile : 'build/pako_inflate-min-pre.js',
                 noreport : true,
+		maxBuffer:500,
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',

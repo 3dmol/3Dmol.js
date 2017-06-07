@@ -3,63 +3,54 @@
 var width=300;
 var urlObject={};
 
+/*
+builds an html tree that goes inside of the selection portion of the viewer page
+*/
+var buildHTMLTree = function(query){
+    var parent = document.getElementById('selection_list');
 
-var createSelection = function(selection_object){
-    var li=document.createElement('li');
+    //list file type and path
+    document.getElementById("model_type").value=query.file.type;
+    document.getElementById("model_input").value=query.file.path;
 
-    li.className="selection";
+    //loops through selections and creates a selection tree
+    var selections = query.selections;
+    for(var i=0;i<selections.length; i++){
+        var selection = document.createElement('li');
+        selection.className =  "selection ui-sortable-handle";
+        
+        //add together sub selections
+        var modifier = "";
+        for(var j = 0; j<selections[i].subselections.length;j++){
+            if(j!=0)
+                modifier+=";"
+            var subselections_keys=Object.keys(selections[i].subselections[j]);
+            var subselections_values=Object.values(selections[i].subselections[j]);
 
-    var delete_button=document.createElement('a');
-    delete_button.className="delete_button";
-    delete_button.innerHTML="&#x2715;";
-    $(delete_button).click(function(event){
-        removeSelection(selection);
-    });
-    delete_button.style.float="right";
-    delete_button.style.color="white";
-    var selection_div=document.createElement('div');
+            modifier+=subselections_keys[j]+":"+subselections_values[j]
+        }
+        var selection_div = document.createElement('div');
+        selection_div.onClick="this.contentEditable='true';"
+        selection_div.innerHTML=modifier
+        selection_div.className='selection_div'
+        selection.appendChild(selection_div)
+        // onClick="this.contentEditable='true';"
+        parent.appendChild(selection);
+        //creates a style tree
 
-    selection_div.innerHTML=selection_object.selection;
-
-    selection_div.className="selection_div";
-    selection_div.appendChild(delete_button);
-
-    li.appendChild(selection_div);
-    //sub selections(list of the style,surface, or labelres)
-    var div=document.createElement('div');
-    div.className="subSelection";
-
-    var sublist=document.createElement('ul');
-
-    sublist.style.visibility="hidden";
-
-    for(var i=0;i<selection_object.list.length;i++){
-        var lst=createSubSelection(selection_object.list[i]);
-
-        sublist.appendChild(lst);
     }
-
-    div.appendChild(sublist);
-
-    li.appendChild(div);
-
-    //sub sub selections
-
-    var list=document.createElement('ul');
-
-
-    for(var i=0;i<selection_object.list.length;i++){
-        var sublist_object=createSubSelection(selection_object.list[i]);
-        list.appendChild(sublist_object);
-    }
-
-    list.style.visibility="hidden";
-
-    li.appendChild(list);
-
-    return li;
 }
 
+/*
+takes the query object and updates the url based on its contents
+*/
+var unpackQuery = function(query){
+    var url= "";
+}
+
+var updateHTMLTree = function(){
+
+}
 
 //style object for styling the selected model portion
 function Style(modifier){
@@ -113,6 +104,7 @@ var Query = function(){
     //update function for query object
     this.update = function(){
         //this is called on every click of render
+        //this should read the forms and change query according to the changes
     }
 
 }
@@ -158,25 +150,17 @@ var parseURL = function(url){
             query.selections.push(currentSelection)
         }
     }
-
-    console.log(query);
+    console.log(query)
     return query;
 }
 
 
-var query= parseURL(window.location.href.substring(29));
-
-
-
+var query = parseURL(window.location.search.substring(1));
 
 //initializes the sidebar based on the given url
 var initSide = function(url){
-
-    console.log(query.file);
+    buildHTMLTree(query);
     //model type value
-    document.getElementById("model_type").value=query.file.fileType;
-    //query value
-    document.getElementById("model_input").value=query.file.fileValue;
 
     var list=document.getElementById("selection_list");
 

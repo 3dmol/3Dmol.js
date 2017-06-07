@@ -277,7 +277,7 @@ $(document).ready(function(){
             <button id="add_selection" onclick="addSelection('selection');">Add</button>
         </div>
         <br>
-        <button id="render" class="option" onclick="query.update();" style="pointer-events:auto" type="button">Render</button>
+        <button id="render" class="option" onclick="query.update();updateHTMLTree()" style="pointer-events:auto" type="button">Render</button>
         <button id="center" class="option" onclick="glviewer.zoomTo();" style="pointer-events:auto">Center</button>
     </li>
 </div>
