@@ -232,5 +232,5 @@ $(document).ready(function(){
     $3Dmol.createViewer($("#gldiv"));    
     GlobalTester.before(window);     
     
-    runTest(97);
+    runTest(0);
 });

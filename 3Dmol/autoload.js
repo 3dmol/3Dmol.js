@@ -18,8 +18,6 @@ $3Dmol.autoload=function(viewer,callback){
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
             }
-            var divcallback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
-                                        window[viewerdiv.data("callback")] : null;
 
             var type = null;
             if (viewerdiv.data("pdb")) {
@@ -154,7 +152,14 @@ $3Dmol.autoload=function(viewer,callback){
                     else {
                         // or finalize if this is the last model
                         applyStyles(glviewer);
-                        if(divcallback) divcallback(glviewer);
+                        if(viewerdiv.data("callback")) {
+                            //evaluate javascript in the string, if it resolves to a function,
+                            //call it with the viewer
+                            var runres = eval(viewerdiv.data("callback"));
+                            if(typeof(runres) == 'function') {
+                                runres(glviewer);
+                            }
+                        }
                         if(callback) callback(glviewer);
                     }
                 }
