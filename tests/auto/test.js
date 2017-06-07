@@ -85,16 +85,7 @@ $(document).ready(function(){
     });
     
     var keys=getKeys(system)
-    keys.sort(function(a,b) {
-       var getval = function(name) {
-           var m = name.match(/^test(\d+)/);
-           if(m) return parseInt(m[1]);
-           else return 9999999;
-       } 
-       var A = getval(a);
-       var B = getval(b);
-       return A-B;
-    });
+    keys.sort(); //lexographic ordering
 
     var par=$('<p>   0/'+keys.length+'</p>').css('display','inline');
     $("#summary_list").append(par);
