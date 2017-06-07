@@ -12,15 +12,17 @@ var v = viewer;
                                   unhover_callback: function(){ this.color.setHex(0xFF000000);v.render();}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
-                                  end:{x:0.0,y:10.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:-15.0},
                                   radius:0.5,
                                   fromCap:false,
                                   toCap:true,
                                   color:'teal'});
               viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
-                                  end:{x:20.0,y:0.0,z:0.0},
+                                  end:{x:15.0,y:0.0,z:10.0},
                                   radius:1.0,
                                   color:'black',
                                   fromCap:false,
                                   toCap:false});
+                                  
+              viewer.zoomTo();
               viewer.render();

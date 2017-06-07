@@ -295,7 +295,7 @@ $3Dmol.GLDraw = (function() {
      *            radius
      * @param {$3Dmol.Color}
      *            color
-     * @param {integer} fromCap - 0 for none, 1 for flat, 2 for round; Note: currently does not support different styles of caps on the same cylinder.
+     * @param {integer} fromCap - 0 for none, 1 for flat, 2 for round
      * @param {integer} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */

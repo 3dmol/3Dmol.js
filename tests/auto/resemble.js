@@ -85,6 +85,7 @@ URL: https://github.com/Huddle/Resemble.js
 
 		var ignoreAntialiasing = false;
 		var ignoreColors = false;
+		var ignoreBackground = false; //if true, only normalize but number of set pixels
 		var scaleToSameSize = false;
 		var adjustByAlpha = false; // scale RBG by alpha rather than evaluating it
 		
@@ -426,6 +427,7 @@ URL: https://github.com/Huddle/Resemble.js
 			var targetPix = imgd.data;
 
 			var mismatchCount = 0;
+			var backgroundCount = 0;
 			var diffBounds = {
 				top: height,
 				left: width,
@@ -446,7 +448,8 @@ URL: https://github.com/Huddle/Resemble.js
 			if(!!largeImageThreshold && ignoreAntialiasing && (width > largeImageThreshold || height > largeImageThreshold)){
 				skip = 6;
 			}
-
+			var background = getPixelInfo(data1, 0,1);
+			
 			loop(height, width, function(verticalPos, horizontalPos){
 				if(skip){ // only skip if the image isn't small
 					if(verticalPos % skip === 0 || horizontalPos % skip === 0){
@@ -462,6 +465,9 @@ URL: https://github.com/Huddle/Resemble.js
 					return;
 				}
 
+				if(isRGBSame(pixel1,background) && isRGBSame(pixel2,background)) {
+				    backgroundCount++;
+				}
 				if(adjustByAlpha) {
 				    pixel1 = applyAlpha(pixel1);
 				    pixel2 = applyAlpha(pixel2);
@@ -506,7 +512,11 @@ URL: https://github.com/Huddle/Resemble.js
 
 			});
 
-			data.rawMisMatchPercentage = (mismatchCount / (height*width) * 100);
+			if(ignoreBackground && backgroundCount != height*width) {
+                data.rawMisMatchPercentage = (mismatchCount / (height*width-backgroundCount) * 100);			    
+			} else {
+			    data.rawMisMatchPercentage = (mismatchCount / (height*width) * 100);
+			}
 			data.misMatchPercentage = data.rawMisMatchPercentage.toFixed(2);
 			data.diffBounds = diffBounds;
 			data.analysisTime = Date.now() - time;
@@ -679,6 +689,7 @@ URL: https://github.com/Huddle/Resemble.js
                     tolerance.maxBrightness = 250;
                     //adjustByAlpha = true;
                     ignoreAntialiasing = true;
+                    ignoreBackground = true;
                     ignoreColors = false;
 
                     if(hasMethod) { param(); }

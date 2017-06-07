@@ -89,7 +89,7 @@ $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
         if(!this.inversematrix) {
             this.inversematrix = new $3Dmol.Matrix4().getInverse(this.matrix);
         }
-        pt = new $3Dmol.Vector3(x,y,z);
+        var pt = new $3Dmol.Vector3(x,y,z);
         pt = pt.applyMatrix4(this.inversematrix);
         x = pt.x;
         y = pt.y;

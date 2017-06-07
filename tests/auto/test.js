@@ -148,6 +148,8 @@ $(document).ready(function(){
         var tableRow=createRow(key);
         var percentage=$('<p class="percentage">');
         tableRow.find(".label").append(percentage);
+        $('#tests').find('tbody').append(tableRow);
+        
         par.html("   "+(i+1)+"/"+keys.length);
 
         //setup error handling
@@ -174,7 +176,7 @@ $(document).ready(function(){
                 var canvas=$("canvas#"+key).get(0);
                 //creates an image for the canvas
                 var canvasImageData = imageFromWebGlCanvas(canvas);
-                var canvasImage=$("<img class='referenceImage'>").attr('src',canvasImageData);
+                var canvasImage=$("<img class='renderedImage'>").attr('src',canvasImageData);
 
                 //click event for canvas
                 canvasImage.click(function(){
@@ -182,7 +184,6 @@ $(document).ready(function(){
                     win.location="generate_test.cgi?test="+key;
                 });
                 tableRow.find('.rendered').append(canvasImage);
-                $('#tests').find('tbody').append(tableRow);
 
                 var differenceImage=$('<img>');
                 var differ=0;
