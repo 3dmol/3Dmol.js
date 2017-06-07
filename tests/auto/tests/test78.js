@@ -4,8 +4,7 @@
                class='viewer_3Dmoljs'
                data-element='moldata'
                data-backgroundcolor='0xffffff'
-               data-style='cartoon:color=spectrum,colorscheme=roygb'
-               data-callback='div_callback' ></div>
+               data-style='cartoon:color=spectrum,colorscheme=roygb'></div>
 
                */
 

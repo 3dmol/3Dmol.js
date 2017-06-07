@@ -45,6 +45,7 @@ class Example():
         self.script = re.sub(re.compile(r'/\*.*?\*/',re.DOTALL),'',text) #example without comments
         self.divs = re.findall(re.compile(r'/\*\s*@div\s*(.*?)\*/',re.DOTALL),text) #all div code
         self.datas = re.findall(re.compile(r'/\*\s*@data\s*(.*?)\*/',re.DOTALL),text) #all data
+        self.prescripts = re.findall(re.compile(r'/\*\s*@script\s*(.*?)\*/',re.DOTALL),text) #script to run before div
 
         #make sure callback is called
         self.script = self.script.replace('viewer.render()','viewer.render(callback)')
@@ -55,6 +56,7 @@ class Example():
             sys.stderr.write("More than one 'viewer.render' call in %s.  FIX THIS NOW!\n"%self.name)
         #construct all javascript test    
         text = ''
+
         for data in self.datas:
             text += "var wrapper=$.parseHTML(`"+data+"`);\n$('body').append(wrapper);\n"
             
@@ -66,7 +68,15 @@ class Example():
             if self.datas:
                 text += "$(wrapper).remove(); "
             text += "$(objectHTML).remove();}\n"
-            if 'viewer.render(callback)' in self.script: # test code calls callback
+            prescript = ''
+            for s in self.prescripts:
+                prescript += s.replace('viewer.render()','viewer.render(callback)')
+            
+            if 'viewer.render(callback)' in prescript: # presumably callback in prescript
+                prescript = prescript.replace('viewer.render(callback)','viewer.render(finished_with_div_callback)')
+                text += prescript
+                text += "$3Dmol.autoload(viewer);\n"                
+            elif 'viewer.render(callback)' in self.script: # test code calls callback
                 self.script.replace('viewer.render(callback)','viewer.render(finished_with_div_callback)')
                 text += "$3Dmol.autoload(viewer);\n"
             else:
