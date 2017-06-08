@@ -46,6 +46,63 @@ takes the query object and updates the url based on its contents
 */
 var unpackQuery = function(query){
     var url= "";
+
+
+    var unpackStyle = function(style){
+        var attr = style.attributes;
+        var str="style=";
+        for(var attribute in attr){
+            var index = Object.keys(attr).indexOf(attribute)
+            if(index!=0)
+                str+=";";
+            str+=attribute;
+            //console.log(str)
+            if(Object.keys(attr[attribute])!=undefined){
+                if(Object.keys(attr).indexOf(attribute)!=0)
+                    str+=":";
+                for(var style in attr[attribute]){
+                    if(Object.keys(attr[attribute]).indexOf(style))
+                        str+=",";
+                    str+=style+"~"+attr[attribute][style];
+                }
+            }
+        }
+        return str;
+    }
+
+    var unpackSelection = function(selection){
+        var sels=selection.subselections;
+        var str = "select=";
+        for(var sel in sels){
+            if(Object.keys(sels).indexOf(sel)!=0)
+                str+=";";
+            if(Object.keys(sels[sel])!=undefined){
+                for(var style in sels[sel]){
+
+                    str+=style+":"+sels[sel][style];
+                }
+            }
+        }
+        str+="&"+unpackStyle(selection.style);
+        return str;
+    }
+
+    //unpack file type and name
+    url+=query.file.type+"="+query.file.path+"&";
+    //unpack global style if it exists
+    
+    if(query.globalStyle!=null){
+        url+=unpackStyle(query.globalStyle)+"&";
+    }
+
+    //unpack other selections and styles
+    var selections= query.selections;
+    for(var sel in selections){
+        url+=unpackSelection(selections[sel])+"&";
+    }
+    console.log(url)
+    return url;
+
 }
 
 var updateHTMLTree = function(){
@@ -151,6 +208,7 @@ var parseURL = function(url){
         }
     }
     console.log(query)
+    unpackQuery(query);
     return query;
 }
 
