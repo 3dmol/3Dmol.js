@@ -1442,10 +1442,12 @@ $3Dmol.GLModel = (function() {
             } else if(typeof(val) == 'string' && typeof(atomval) == 'number'){
                 //support numerical integer ranges, e.g. resi: 3-7
                var match = val.match(/(-?\d+)\s*-\s*(-?\d+)/);
-               var lo = parseInt(match[1]);
-               var hi = parseInt(match[2]);
-               if(match && atomval >= lo && atomval <= hi) {
-                   return true;                   
+               if(match) {
+                   var lo = parseInt(match[1]);
+                   var hi = parseInt(match[2]);
+                   if(match && atomval >= lo && atomval <= hi) {
+                       return true;                   
+                   }
                }
             }
             return false;
