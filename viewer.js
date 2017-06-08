@@ -58,7 +58,7 @@ var unpackQuery = function(query){
             str+=attribute;
             //console.log(str)
             if(Object.keys(attr[attribute])!=undefined){
-                if(Object.keys(attr).indexOf(attribute)!=0)
+                if(Object.keys(attr[attribute]).length!=0 )
                     str+=":";
                 for(var style in attr[attribute]){
                     if(Object.keys(attr[attribute]).indexOf(style))
@@ -84,6 +84,12 @@ var unpackQuery = function(query){
             }
         }
         str+="&"+unpackStyle(selection.style);
+        for(var i in selection.dumps){
+            if(Object.keys(sels).length!=0)
+                str+="&"
+            
+            str+=selection.dumps[i]
+        }
         return str;
     }
 
@@ -136,7 +142,7 @@ function Selection(selection){
 
         this.subselections.push(obj)
     }
-
+    this.dumps=[];
     this.style=null;
 }
 
@@ -198,16 +204,18 @@ var parseURL = function(url){
                 query.globalStyle=style;
             }else{
                 currentSelection.style=style;
-                currentSelection=null
             }
-
         }else if(strType(tokens[i])=="select"){
             var split=tokens[i].split("=")
             currentSelection=new Selection(split[1])
             query.selections.push(currentSelection)
+        }else{
+            currentSelection.dumps.push(tokens[i]);
         }
+
+        console.log(tokens[i])
     }
-    console.log(query)
+    console.log(query);
     unpackQuery(query);
     return query;
 }
