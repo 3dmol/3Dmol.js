@@ -42,7 +42,7 @@
             
             var initShapes = function(viewer) {
                 $.get('tests/test_structs/benzene-homo.cube', function(data){
-		    var voldata = new $3Dmol.VolumeData(data, "cube");
+                    var voldata = new $3Dmol.VolumeData(data, "cube");
                     viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
                     viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
                     viewer.setStyle({}, {stick:{}});

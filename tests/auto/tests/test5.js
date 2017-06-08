@@ -7,8 +7,7 @@
                data-select1='chain:A' data-style1='cross:colorscheme=cyanCarbon'
                data-select2='chain:B' data-style2='cross:color=maroon'
                data-select3='chain:C' data-style3='stick:hidden=true'
-               data-select4='chain:D' data-style4='stick:radius=0.1'
-               data-callback="div_callback"></div>
+               data-select4='chain:D' data-style4='stick:radius=0.1'></div>
 
 
 

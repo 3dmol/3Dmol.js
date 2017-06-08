@@ -9,12 +9,9 @@ $3Dmol.download("pdb:2EJ0",viewer,{},function(){
                                                       linewidth:1.0,
                                                       colorscheme:'greenCarbon'}});
                   viewer.setStyle({chain:'C'},{cross:{hidden:false,
-                                                      linewidth:1.0,
                                                       radius:0.5}});
-                  viewer.setStyle({chain:'D'},{cross:{hidden:false,
-                                                      linewidth:10.0}});
+                  viewer.setStyle({chain:'D'},{cross:{hidden:false}});
                   viewer.setStyle({chain:'E'},{cross:{hidden:false,
-                                                      linewidth:1.0,
                                                       color:'black'}});
                   
                   viewer.render();

@@ -160,7 +160,7 @@ $3Dmol.GLModel = (function() {
         // cross drawing
         /** @typedef CrossStyleSpec
          * @prop {boolean} hidden - do not show 
-         * @prop {number} linewidth 
+         * @prop {number} linewidth *deprecated due to vanishing browser support* 
          * @prop {number} radius 
          * @prop {number} scale - scale radius by specified amount
          * @prop {ColorschemeSpec} colorscheme - element based coloring
@@ -315,7 +315,7 @@ $3Dmol.GLModel = (function() {
         
         /**@typedef LineStyleSpec
          * @prop {boolean} hidden - do not show line
-         * @prop {number} linewidth 
+         * @prop {number} linewidth *deprecated due to vanishing browser support* 
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
@@ -1435,6 +1435,21 @@ $3Dmol.GLModel = (function() {
             modelData = mData;
         }
         
+        //return true if atom value matches property val
+        var propertyMatches = function(atomval, val) {
+            if (atomval == val) {
+                return true;                
+            } else if(typeof(val) == 'string' && typeof(atomval) == 'number'){
+                //support numerical integer ranges, e.g. resi: 3-7
+               var match = val.match(/(-?\d+)\s*-\s*(-?\d+)/);
+               var lo = parseInt(match[1]);
+               var hi = parseInt(match[2]);
+               if(match && atomval >= lo && atomval <= hi) {
+                   return true;                   
+               }
+            }
+            return false;
+        }
         /** given a selection specification, return true if atom is selected
          * 
          * @function $3Dmol.GLModel#atomIsSelected
@@ -1518,19 +1533,10 @@ $3Dmol.GLModel = (function() {
                         var valarr = sel[key];
                         var atomval = atom[key];
                         for ( var i = 0; i < valarr.length; i++) {
-                            if (atomval == valarr[i]) {
+                            if(propertyMatches(atomval, valarr[i])) {
                                 isokay = true;
                                 break;
-                            } else if(typeof(valarr[i]) == 'string'){
-                                //support numerical integer ranges, e.g. resi: 3-7
-                               var match = valarr[i].match(/(-?\d+)\s*-\s*(-?\d+)/);
-                               var lo = parseInt(match[1]);
-                               var hi = parseInt(match[2]);
-                               if(match && atomval >= lo && atomval <= hi) {
-                                   isokay = true;
-                                   break;
-                               }
-                            }
+                            }                        
                         }
                         if (!isokay) {
                             ret = false;
@@ -1538,7 +1544,7 @@ $3Dmol.GLModel = (function() {
                         }
                     } else { // single match
                         var val = sel[key];
-                        if (atom[key] != val) {
+                        if(!propertyMatches(atom[key], val)) {
                             ret = false;
                             break;
                         }
@@ -1556,17 +1562,12 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
          * @example
-         *$3Dmol.download("pdb:4UB9",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
-
-                  viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+         *$3Dmol.download("pdb:4wwy",viewer,{},function(){
+                  var atoms = viewer.selectedAtoms({chain:'A'});
+                  for(var i = 0, n = atoms.length; i < n; i++) {
+                     atoms[i].b = 0.0;
+                  }
+                  viewer.setStyle({cartoon:{colorscheme:{prop:'b',gradient: 'roygb',min:0,max:30}}});
                   viewer.render();
               });
          */
@@ -1816,9 +1817,9 @@ $3Dmol.GLModel = (function() {
                   viewer.setBackgroundColor(0xffffffff);
 
                   viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'B'},{line:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{line:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
                   viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-                  viewer.setStyle({chain:'D'},{cross:{linewidth:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cross:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
                   viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
                   viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
                   viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
@@ -1880,7 +1881,7 @@ $3Dmol.GLModel = (function() {
             var that = this;
             setStyleHelper(atoms);
             for (var i = 0; i < frames.length; i++) {
-                setStyleHelper(frames[i]);
+                if(frames[i] !== atoms) setStyleHelper(frames[i]);
             }
             
             if (changedAtoms)
