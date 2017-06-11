@@ -1,6 +1,4 @@
-    
-
-var width=300;
+var width=400;
 var urlObject={};
 
 /*
@@ -13,31 +11,129 @@ var buildHTMLTree = function(query){
     document.getElementById("model_type").value=query.file.type;
     document.getElementById("model_input").value=query.file.path;
 
+    
+
     //loops through selections and creates a selection tree
     var selections = query.selections;
     for(var i=0;i<selections.length; i++){
-        var selection = document.createElement('li');
-        selection.className =  "selection ui-sortable-handle";
-        
-        //add together sub selections
-        var modifier = "";
-        for(var j = 0; j<selections[i].subselections.length;j++){
-            if(j!=0)
-                modifier+=";"
-            var subselections_keys=Object.keys(selections[i].subselections[j]);
-            var subselections_values=Object.values(selections[i].subselections[j]);
 
-            modifier+=subselections_keys[j]+":"+subselections_values[j]
+        var createSelection = function(){
+            //creates container
+            var selection = document.createElement('li');
+            selection.className =  "selection";// ui-sortable-handle
+        
+            //add together sub selections
+            var modifier = "";
+            for(var j = 0; j<selections[i].subselections.length;j++){
+                if(j!=0)
+                    modifier+=";"
+                modifier+=Object.keys(selections[i].subselections[j])[0]+":"+selections[i].subselections[j][Object.keys(selections[i].subselections[j])[0]]
+            }
+            
+            var selection_spec = document.createElement('div');
+            selection_spec.innerHTML=modifier
+            var att= document.createAttribute('contenteditable');
+            att.value='true';
+            selection_spec.setAttributeNode(att);
+            selection_spec.className='selection_spec'
+            selection.appendChild(selection_spec)
+
+            //creates style if it exists
+            var model_specifications=document.createElement('ul');
+            model_specifications.className='model_specifications';
+
+            var createModelSpecification = function(type,spec){
+
+                var model_specification = null;
+                var createStyle = function(spec){
+
+                    var style = document.createElement('li');
+
+                    style.innerHTML='Style';
+                    style.className='style';
+
+                    var style_specs= document.createElement('ul');
+                    style_specs.className='style_specs';
+                    style.appendChild(style_specs)
+
+                    var createStyleSpec= function(specification,type){
+                        var style_spec = document.createElement('li');
+                        style_spec.className = 'style_spec';
+
+                        var style_spec_name = document.createElement('div');
+                        style_spec_name.innerHTML= type;
+
+                        style_spec.appendChild(style_spec_name);
+
+                        var style_spec_attributes = document.createElement('ul');
+                        style_spec_attributes.className="style_spec_attributes";
+
+                        style_spec.appendChild(style_spec_attributes);
+
+                        var createAttribute = function(name,value){
+                            var attr = document.createElement('li');
+                            attr.className = 'attribute';
+
+                            var name_div = document.createElement('div');
+                            name_div.className = "attribute_name";
+                            name_div.innerHTML = name;
+
+                            var value_div = document.createElement('div');
+                            value_div.className = "attribute_value";
+                            value_div.innerHTML= value;
+
+                            attr.appendChild(name_div);
+                            attr.appendChild(value_div);
+                            return attr;
+                        }
+
+                        var attrs = Object.keys(specification)
+
+                        for(var attri=0; attri<attrs.length;attri++){
+                            console.log(attrs[attri] +" "+ specification[attrs[attri]])
+                            style_spec_attributes.appendChild(createAttribute(attrs[attri],specification[attrs[attri]]))
+                        }
+                        return style_spec;
+                    }
+
+                    var specAttrKeys = Object.keys(spec.attributes);
+                    for(var index = 0; index<specAttrKeys.length;index++){
+                        //loop through style_specs and create style specs for them
+                        var specif = spec.attributes[specAttrKeys[index]];
+                        var type = specAttrKeys[index]
+                        style_specs.appendChild(createStyleSpec(specif,type));                      
+
+                    }                    
+                    return style; 
+                }
+
+                //check for type
+                if(type=="style"){
+                   model_specification = createStyle(spec)
+                }
+
+                return model_specification;
+
+            }
+
+            //check if style exists and if so create it
+            if(selections[i].style !=undefined){
+                var style = createModelSpecification("style",selections[i].style);
+                model_specifications.appendChild(style);
+            }
+
+            selection.appendChild(model_specifications);
+
+
+            //this is where surfaces and other thigns will be created
+
+            return selection;
         }
-        var selection_div = document.createElement('div');
-        selection_div.onClick="this.contentEditable='true';"
-        selection_div.innerHTML=modifier
-        selection_div.className='selection_div'
-        selection.appendChild(selection_div)
+
+        var selection=createSelection()
         // onClick="this.contentEditable='true';"
         parent.appendChild(selection);
         //creates a style tree
-
     }
 }
 
@@ -47,7 +143,6 @@ takes the query object and updates the url based on its contents
 var unpackQuery = function(query){
     var url= "";
 
-
     var unpackStyle = function(style){
         var attr = style.attributes;
         var str="style=";
@@ -56,7 +151,6 @@ var unpackQuery = function(query){
             if(index!=0)
                 str+=";";
             str+=attribute;
-            //console.log(str)
             if(Object.keys(attr[attribute])!=undefined){
                 if(Object.keys(attr[attribute]).length!=0 )
                     str+=":";
@@ -92,7 +186,6 @@ var unpackQuery = function(query){
         }
         return str;
     }
-
     //unpack file type and name
     url+=query.file.type+"="+query.file.path+"&";
     //unpack global style if it exists
@@ -108,7 +201,6 @@ var unpackQuery = function(query){
     }
     console.log(url)
     return url;
-
 }
 
 var updateHTMLTree = function(){
@@ -131,6 +223,7 @@ function Style(modifier){
         }
     }
 }
+
 //selection object for displaying
 function Selection(selection){
     this.subselections=[];
@@ -169,14 +262,11 @@ var Query = function(){
         //this is called on every click of render
         //this should read the forms and change query according to the changes
     }
-
 }
-
 
 function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
-
 
 var parseURL = function(url){
     var query = new Query();
@@ -220,21 +310,16 @@ var parseURL = function(url){
     return query;
 }
 
-
 var query = parseURL(window.location.search.substring(1));
 
 //initializes the sidebar based on the given url
 var initSide = function(url){
+    var list = document.createElement('ul')
+    document.getElementById('container').appendChild(list);
     buildHTMLTree(query);
     //model type value
-
-    var list=document.getElementById("selection_list");
-
-    for(var i=0;i<query.selections.length;i++){
-        list.appendChild(createSelection(query.selections[i]));
-    }
+    
 }
-
 
 //opens up the side bar
 var openSide= function(){
@@ -254,4 +339,3 @@ var closeSide= function(){
 
     glviewer.translate(-width/2,0);
 }
-

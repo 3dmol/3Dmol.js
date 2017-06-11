@@ -210,7 +210,7 @@ $(document).ready(function(){
             minWidth: 300,
             maxWidth: 800,
     });
-
+    /*
      $( "#selection_list" ).sortable({
             revert: true
         });
@@ -224,7 +224,7 @@ $(document).ready(function(){
         }
         }
     });
-
+    
     $("#sidenav").click(function(event){
 
         if(event.target.className==="selection ui-sortable-handle"){
@@ -233,7 +233,7 @@ $(document).ready(function(){
            event.target.getElementsByClassName('subSelection')[0].style.visibility="auto";
         }
     });
-
+    */
 
 });
 
@@ -250,9 +250,6 @@ $(document).ready(function(){
     <li class="option"  style="pointer-events:auto;">
         <h3>File/PDB/URL</h3>
         <div class="container">
-            <p>
-                Choose a model through Protien Data Bank, File, or URL.
-            </p>
             <label>Model Type: </label>
             <select id="model_type">
                 <option value="pdb">PDB</option>
@@ -266,9 +263,6 @@ $(document).ready(function(){
     <li id="selections" class="option" style="pointer-events:auto">
         <h3>Selections</h3>
         <div id="container">
-            <p>
-                    Add, Remove, and/or Edit selections in order to modify the look and feel of the model.
-                </p>
             <ul id="selection_list">
                 
 
