@@ -1,63 +1,242 @@
-    
-
-var width=300;
+var width=400;
 var urlObject={};
 
+/*
+builds an html tree that goes inside of the selection portion of the viewer page
+*/
+var buildHTMLTree = function(query){
+    var parent = document.getElementById('selection_list');
+    parent.innerHTML="";
+    //list file type and path
+    document.getElementById("model_type").value=query.file.type;
+    document.getElementById("model_input").value=query.file.path;
 
-var createSelection = function(selection_object){
-    var li=document.createElement('li');
+    //loops through selections and creates a selection tree
+    var selections = query.selections;
+    for(var i=0;i<selections.length; i++){
 
-    li.className="selection";
+        var createSelection = function(){
+            //creates container
+            var selection = document.createElement('li');
+            selection.className =  "selection";// ui-sortable-handle
+            
+            //add together sub selections
+            var modifier = "";
+            for(var j = 0; j<selections[i].subselections.length;j++){
+                if(j!=0)
+                    modifier+=";"
+                modifier+=Object.keys(selections[i].subselections[j])[0]+":"+selections[i].subselections[j][Object.keys(selections[i].subselections[j])[0]]
+            }
+            
+            var selection_spec = document.createElement('div');
+            selection_spec.innerHTML=modifier
+            var att= document.createAttribute('contenteditable');
+            att.value='true';
+            selection_spec.setAttributeNode(att);
+            selection_spec.className='selection_spec'
+            selection.appendChild(selection_spec)
 
-    var delete_button=document.createElement('a');
-    delete_button.className="delete_button";
-    delete_button.innerHTML="&#x2715;";
-    $(delete_button).click(function(event){
-        removeSelection(selection);
-    });
-    delete_button.style.float="right";
-    delete_button.style.color="white";
-    var selection_div=document.createElement('div');
+            //creates style if it exists
+            var model_specifications=document.createElement('ul');
+            model_specifications.className='model_specifications';
 
-    selection_div.innerHTML=selection_object.selection;
+            var createModelSpecification = function(type,spec){
 
-    selection_div.className="selection_div";
-    selection_div.appendChild(delete_button);
+                var model_specification = null;
+                var createStyle = function(spec){
 
-    li.appendChild(selection_div);
-    //sub selections(list of the style,surface, or labelres)
-    var div=document.createElement('div');
-    div.className="subSelection";
+                    var style = document.createElement('li');
+                    style.innerHTML='Style';
+                    style.className='style';
 
-    var sublist=document.createElement('ul');
+                    var style_specs= document.createElement('ul');
+                    style_specs.className='style_specs';
+                    style.appendChild(style_specs)
 
-    sublist.style.visibility="hidden";
+                    var createStyleSpec= function(specification,typ,type){
+                        var style_spec = document.createElement('li');
+                        style_spec.className = 'style_spec';
 
-    for(var i=0;i<selection_object.list.length;i++){
-        var lst=createSubSelection(selection_object.list[i]);
+                        var style_spec_name = document.createElement('div');
+                        style_spec_name.innerHTML= typ;
 
-        sublist.appendChild(lst);
+                        style_spec.appendChild(style_spec_name);
+
+                        var style_spec_attributes = document.createElement('ul');
+                        style_spec_attributes.className="style_spec_attributes";
+
+                        style_spec.appendChild(style_spec_attributes);
+
+                        var createAttribute = function(name,value){
+                            var attr = document.createElement('li');
+                            attr.className = 'attribute';
+
+                            var name_div = document.createElement('span');
+                            name_div.className = "attribute_name";
+                            name_div.innerHTML = name;
+                            var att_name= document.createAttribute('contenteditable');
+                            att.value='true';
+                            name_div.setAttributeNode(att_name);
+
+                            
+                            var value_div = document.createElement('span');
+                            value_div.className = "attribute_value";
+                            value_div.innerHTML= value;
+
+                            var att_value= document.createAttribute('contenteditable');
+                            att_value.value='true';
+                            value_div.setAttributeNode(att_value);
+
+                            attr.appendChild(name_div);
+                            attr.appendChild(value_div);
+
+
+                            return attr;
+                        }
+
+                        var attrs = Object.keys(specification)
+
+                        for(var attri=0; attri<attrs.length;attri++){
+                            console.log(attrs[attri] +" "+ specification[attrs[attri]])
+                            style_spec_attributes.appendChild(createAttribute(attrs[attri],specification[attrs[attri]]))
+                        }
+
+                        var add_attribute= document.createElement('button');
+                        add_attribute.className="add_attribute";
+                        add_attribute.innerHTML="Add Attribute"
+
+                        var atr = document.createAttribute('obj');
+                        console.log(i,type,typ)
+                        atr.value=i+","+type+","+typ;
+                        add_attribute.setAttributeNode(atr);
+
+                        add_attribute.onclick= function(){addAttribute(this)};
+                        style_spec.appendChild(add_attribute);
+                        
+                        return style_spec;
+                    }
+
+                    var specAttrKeys = Object.keys(spec.attributes);
+                    for(var index = 0; index<specAttrKeys.length;index++){
+                        //loop through style_specs and create style specs for them
+                        var specif = spec.attributes[specAttrKeys[index]];
+                        var typ = specAttrKeys[index]
+                        style_specs.appendChild(createStyleSpec(specif,typ,type));                      
+
+                    }                    
+                    return style; 
+                }
+
+                //check for type
+                if(type=="style"){
+                   model_specification = createStyle(spec)
+                }
+                var add_style_spec= document.createElement('button');
+                add_style_spec.className="add_style_spec";
+                add_style_spec.innerHTML="Add Style Spec";
+
+                var obj = document.createAttribute('obj');
+                obj.value=[i,type];
+                add_style_spec.setAttributeNode(obj);
+
+                add_style_spec.onclick = function(){addStyleSpec(this)};
+
+                model_specification.appendChild(add_style_spec);
+                return model_specification;
+
+            }
+
+            //check if style exists and if so create it
+            if(selections[i].style !=undefined){
+                var style = createModelSpecification("style",selections[i].style);
+                model_specifications.appendChild(style);
+            }
+
+            selection.appendChild(model_specifications);
+
+
+            //this is where surfaces and other thigns will be created
+            var add_model_spec = document.createElement('button');
+            add_model_spec.className="add_model_spec";
+            add_model_spec.innerHTML="Add Model Spec";
+            var obj = document.createAttribute('obj');
+            obj.value=i;
+            add_model_spec.setAttributeNode(obj);
+            add_model_spec.onclick=function(){addModelSpec(this)};
+            selection.appendChild(add_model_spec);
+            return selection;
+        }
+
+        var selection=createSelection()
+        // onClick="this.contentEditable='true';"
+        parent.appendChild(selection);
+        //creates a style tree
+    }
+}
+/*
+takes the query object and updates the url based on its contents
+*/
+var unpackQuery = function(query){
+    var url= "";
+
+    var unpackStyle = function(style){
+        var attr = style.attributes;
+        var str="style=";
+        for(var attribute in attr){
+            var index = Object.keys(attr).indexOf(attribute)
+            if(index!=0)
+                str+=";";
+            str+=attribute;
+            if(Object.keys(attr[attribute])!=undefined){
+                if(Object.keys(attr[attribute]).length!=0 )
+                    str+=":";
+                for(var style in attr[attribute]){
+                    if(Object.keys(attr[attribute]).indexOf(style))
+                        str+=",";
+                    str+=style+"~"+attr[attribute][style];
+                }
+            }
+        }
+        return str;
     }
 
-    div.appendChild(sublist);
+    var unpackSelection = function(selection){
+        var sels=selection.subselections;
+        var str = "select=";
+        for(var sel in sels){
+            if(Object.keys(sels).indexOf(sel)!=0)
+                str+=";";
+            if(Object.keys(sels[sel])!=undefined){
+                for(var style in sels[sel]){
 
-    li.appendChild(div);
-
-    //sub sub selections
-
-    var list=document.createElement('ul');
-
-
-    for(var i=0;i<selection_object.list.length;i++){
-        var sublist_object=createSubSelection(selection_object.list[i]);
-        list.appendChild(sublist_object);
+                    str+=style+":"+sels[sel][style];
+                }
+            }
+        }
+        str+="&"+unpackStyle(selection.style);
+        for(var i in selection.dumps){
+            if(Object.keys(sels).length!=0)
+                str+="&"
+            
+            str+=selection.dumps[i]
+        }
+        return str;
+    }
+    //unpack file type and name
+    url+=query.file.type+"="+query.file.path+"&";
+    //unpack global style if it exists
+    
+    if(query.globalStyle!=null){
+        url+=unpackStyle(query.globalStyle)+"&";
     }
 
-    list.style.visibility="hidden";
-
-    li.appendChild(list);
-
-    return li;
+    //unpack other selections and styles
+    var selections= query.selections;
+    for(var sel in selections){
+        url+=unpackSelection(selections[sel])+"&";
+    }
+    console.log(url)
+    return url;
 }
 
 
@@ -77,6 +256,7 @@ function Style(modifier){
         }
     }
 }
+
 //selection object for displaying
 function Selection(selection){
     this.subselections=[];
@@ -88,7 +268,7 @@ function Selection(selection){
 
         this.subselections.push(obj)
     }
-
+    this.dumps=[];
     this.style=null;
 }
 
@@ -110,18 +290,11 @@ var Query = function(){
 
     this.file = new File();
 
-    //update function for query object
-    this.update = function(){
-        //this is called on every click of render
-    }
-
 }
-
 
 function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
-
 
 var parseURL = function(url){
     var query = new Query();
@@ -149,42 +322,75 @@ var parseURL = function(url){
                 query.globalStyle=style;
             }else{
                 currentSelection.style=style;
-                currentSelection=null
             }
-
         }else if(strType(tokens[i])=="select"){
             var split=tokens[i].split("=")
             currentSelection=new Selection(split[1])
             query.selections.push(currentSelection)
+        }else{
+            currentSelection.dumps.push(tokens[i]);
         }
-    }
 
+        console.log(tokens[i])
+    }
     console.log(query);
+    unpackQuery(query);
     return query;
 }
 
-
-var query= parseURL(window.location.href.substring(29));
-
-
-
-
-//initializes the sidebar based on the given url
-var initSide = function(url){
-
-    console.log(query.file);
-    //model type value
-    document.getElementById("model_type").value=query.file.fileType;
-    //query value
-    document.getElementById("model_input").value=query.file.fileValue;
-
-    var list=document.getElementById("selection_list");
-
-    for(var i=0;i<query.selections.length;i++){
-        list.appendChild(createSelection(query.selections[i]));
-    }
+//these functions all edit the query object 
+var addSelection = function(){
+    query.selections.push(new Selection(""))
+    buildHTMLTree(query);
+}
+var addModelSpec = function(selection){
+    if(query.selections[selection.getAttribute("obj")].style==null)
+        query.selections[selection.getAttribute("obj")].style=new Style("");
+    buildHTMLTree(query);
 }
 
+var addStyleSpec = function(model_spec){
+    var str=model_spec.getAttribute("obj")
+    var i=str.split(",")[0];
+    var type=str.split(",")[1];
+    console.log(query.selections[i][type])
+    query.selections[i][type].attributes[query.selections[i][type].attributes.length]="";
+    buildHTMLTree(query);
+}
+
+var addAttribute = function(style_spec){
+    var list=style_spec.getAttribute("obj").split(",");
+    console.log(query.selections[list[0]][list[1]].attributes[list[2]])
+    query.selections[list[0]][list[1]].attributes[list[2]][""]="";
+    buildHTMLTree(query);
+}
+//this function reads the form changes and upates the query accordingly
+var updateQuery = function(){
+    //console.log(document.getElementById("model_input").value)
+    query.file.path=document.getElementById("model_input").value;
+    query.file.type=document.getElementById("model_type").value;
+}
+
+
+var center = function(){
+    glviewer.center({},1000,false);
+}
+
+var query = parseURL(window.location.search.substring(1));
+//this function compresses the html object back into a url
+var render = function(){
+    //calls update query
+    updateQuery();
+    setURL(unpackQuery(query));
+}
+//initializes the sidebar based on the given url
+var initSide = function(url){
+    var list = document.createElement('ul')
+    document.getElementById('container').appendChild(list);
+    buildHTMLTree(query);
+    //model type value
+    
+}
 
 //opens up the side bar
 var openSide= function(){
@@ -192,7 +398,7 @@ var openSide= function(){
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
-    glviewer.translate(width/2,0);
+    
     glviewer.zoomTo();
     glviewer.render();
 }
@@ -204,4 +410,3 @@ var closeSide= function(){
 
     glviewer.translate(-width/2,0);
 }
-
