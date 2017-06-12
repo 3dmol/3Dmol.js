@@ -6,12 +6,10 @@ builds an html tree that goes inside of the selection portion of the viewer page
 */
 var buildHTMLTree = function(query){
     var parent = document.getElementById('selection_list');
-
+    parent.innerHTML="";
     //list file type and path
     document.getElementById("model_type").value=query.file.type;
     document.getElementById("model_input").value=query.file.path;
-
-    
 
     //loops through selections and creates a selection tree
     var selections = query.selections;
@@ -21,7 +19,7 @@ var buildHTMLTree = function(query){
             //creates container
             var selection = document.createElement('li');
             selection.className =  "selection";// ui-sortable-handle
-        
+            
             //add together sub selections
             var modifier = "";
             for(var j = 0; j<selections[i].subselections.length;j++){
@@ -48,7 +46,6 @@ var buildHTMLTree = function(query){
                 var createStyle = function(spec){
 
                     var style = document.createElement('li');
-
                     style.innerHTML='Style';
                     style.className='style';
 
@@ -74,13 +71,21 @@ var buildHTMLTree = function(query){
                             var attr = document.createElement('li');
                             attr.className = 'attribute';
 
-                            var name_div = document.createElement('div');
+                            var name_div = document.createElement('span');
                             name_div.className = "attribute_name";
                             name_div.innerHTML = name;
+                            var att_name= document.createAttribute('contenteditable');
+                            att.value='true';
+                            name_div.setAttributeNode(att_name);
 
-                            var value_div = document.createElement('div');
+                            
+                            var value_div = document.createElement('span');
                             value_div.className = "attribute_value";
                             value_div.innerHTML= value;
+                            
+                            var att_value= document.createAttribute('contenteditable');
+                            att_value.value='true';
+                            value_div.setAttributeNode(att_value);
 
                             attr.appendChild(name_div);
                             attr.appendChild(value_div);
@@ -93,6 +98,13 @@ var buildHTMLTree = function(query){
                             console.log(attrs[attri] +" "+ specification[attrs[attri]])
                             style_spec_attributes.appendChild(createAttribute(attrs[attri],specification[attrs[attri]]))
                         }
+
+
+                        var add_attribute= document.createElement('button');
+                        add_attribute.className="add_attribute";
+                        add_attribute.innerHTML="Add Attribute"
+                        style_spec.appendChild(add_attribute);
+                        
                         return style_spec;
                     }
 
@@ -111,7 +123,10 @@ var buildHTMLTree = function(query){
                 if(type=="style"){
                    model_specification = createStyle(spec)
                 }
-
+                var add_style_spec= document.createElement('button');
+                add_style_spec.className="add_style_spec";
+                add_style_spec.innerHTML="Add Style Spec"
+                model_specification.appendChild(add_style_spec);
                 return model_specification;
 
             }
@@ -126,7 +141,10 @@ var buildHTMLTree = function(query){
 
 
             //this is where surfaces and other thigns will be created
-
+            var add_model_spec = document.createElement('button');
+            add_model_spec.className="add_model_spec";
+            add_model_spec.innerHTML="Add Model Spec"
+            selection.appendChild(add_model_spec)
             return selection;
         }
 
