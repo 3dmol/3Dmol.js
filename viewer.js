@@ -97,7 +97,7 @@ var buildHTMLTree = function(query){
                             "text":"Add Attribute",
                             "data-index":selection_index,
                             "data-type":model_spec_type,
-                            "data-spectype":style_spec_type,
+                            "data-styletype":style_spec_type,
                             "click":function(){addAttribute(this)},
                         }).appendTo(style_spec);
                         
@@ -222,7 +222,6 @@ var unpackQuery = function(query){
     return url;
 }
 
-
 //style object for styling the selected model portion
 function Style(modifier){
     this.attributes={};
@@ -255,24 +254,25 @@ function Selection(selection){
     this.style=null;
 }
 
-function File(type,path){
-    var fileTypes = {
-        PDB:0,
-        CID:1,
-        URL:2,
-    };
+function File(string){
+    var split = string.split("=");
+    this.path=split[1];
+    this.type=split[0];
+}
 
-    this.path=path;
-    this.type=type;
+
+function Surface(string){
+
+}
+
+function LabelRes(string){
+
 }
 
 var Query = function(){
     this.globalStyle = null;
-
     this.selections = [];
-
     this.file = new File();
-
 }
 
 function setURL(urlPath){
@@ -282,39 +282,40 @@ function setURL(urlPath){
 var parseURL = function(url){
     var query = new Query();
     var tokens=url.split("&");
-    console.log(tokens)
 
-    function strType(str){
-        if(str.indexOf("select")==0)
+    function stringType(string){
+        if(string.indexOf("select")==0)
             return "select"
-        else if(str.indexOf("pdb=")==0 || str.indexOf("cid=")==0 || str.indexOf("url=")==0)
+        else if(string.indexOf("pdb=")==0 || string.indexOf("cid=")==0 || string.indexOf("url=")==0)
             return "file"
-        else if(str.indexOf("style")==0)
+        else if(string.indexOf("style")==0)
             return "style"
         return null;
     }
-    var currentSelection=null;
-    for(var i=0;i<tokens.length;i++){
-        if(strType(tokens[i])=="file"){
-            var split=tokens[i].split("=")
-            query.file=new File(split[0],split[1])
-        }else if(strType(tokens[i])=="style"){
-            var split=tokens[i].split("=")
+
+    var currentSelection = null;
+    for(var token in tokens){
+        if(stringType(tokens[token])=="file"){
+            query.file = new File(tokens[token]);
+        }else if(stringType(tokens[token])=="style"){
+            var split=tokens[token].split("=")
             var style=new Style(split[1])
             if(currentSelection==null){
                 query.globalStyle=style;
             }else{
                 currentSelection.style=style;
             }
-        }else if(strType(tokens[i])=="select"){
-            var split=tokens[i].split("=")
+        }else if(stringType(tokens[token])=="select"){
+            var split=tokens[token].split("=")
             currentSelection=new Selection(split[1])
             query.selections.push(currentSelection)
-        }else{
-            currentSelection.dumps.push(tokens[i]);
-        }
+        /*}else if(stringType(tokens[token])=="surface"){
 
-        console.log(tokens[i])
+        }else if(stringType(tokens[token])=="labelres"){
+            
+        */}else{
+            currentSelection.dumps.push(tokens[token]);
+        }
     }
     console.log(query);
     unpackQuery(query);
@@ -354,7 +355,6 @@ var updateQuery = function(){
     query.file.type=document.getElementById("model_type").value;
 }
 
-
 var center = function(){
     glviewer.center({},1000,true);
 }
@@ -372,9 +372,6 @@ var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
     buildHTMLTree(query);
-
-    //model type value
-    
 }
 
 //opens up the side bar
@@ -389,10 +386,6 @@ var openSide= function(){
 }
 //closes the side bar
 var closeSide= function(){
-
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
-
-    
 }
-
