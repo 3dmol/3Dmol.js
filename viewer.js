@@ -41,7 +41,6 @@ var buildHTMLTree = function(query){
             });
 
             var createModelSpecification = function(model_spec_type,model_spec_object){
-                console.log(model_spec_type,model_spec_object);
                 var model_specification = null;
                 var createStyle = function(spec){
 
@@ -55,7 +54,6 @@ var buildHTMLTree = function(query){
                     }).appendTo(style);
 
                     var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type){
-                        console.log(style_spec_object,style_spec_type,model_spec_type);
                         var style_spec=$('<li/>',{
                             "class":"style_spec",
                         });
@@ -105,7 +103,6 @@ var buildHTMLTree = function(query){
                         
                         return style_spec;
                     }       
-                    console.log(model_spec_object.attributes)
                     for(var attribute_index in model_spec_object.attributes){
                         createStyleSpec(model_spec_object.attributes[attribute_index],attribute_index,model_spec_type).appendTo(style_specs);
                     }
@@ -161,24 +158,31 @@ var unpackQuery = function(query){
     var url= "";
 
     var unpackStyle = function(style){
-        var attr = style.attributes;
-        var str="style=";
-        for(var attribute in attr){
-            var index = Object.keys(attr).indexOf(attribute)
-            if(index!=0)
-                str+=";";
-            str+=attribute;
-            if(Object.keys(attr[attribute])!=undefined){
-                if(Object.keys(attr[attribute]).length!=0 )
-                    str+=":";
-                for(var style in attr[attribute]){
-                    if(Object.keys(attr[attribute]).indexOf(style))
-                        str+=",";
-                    str+=style+"~"+attr[attribute][style];
-                }
-            }
-        }
-        return str;
+
+        var style_attributes = style.attributes;
+        var string="style=";
+
+        var subStyles = [];
+        $.each(style_attributes, function(key,value){
+
+            var unpackSubStyle = function(val){
+                var assignments = [];
+                $.each(val, function(key, value){
+                   assignments.push(key+"~"+value);
+                });
+                return assignments.join(",");
+            };
+            var sub_style_unpacked=unpackSubStyle(value);
+
+            if(sub_style_unpacked=="")
+                subStyles.push(key);
+            else
+                subStyles.push(key+":"+sub_style_unpacked);
+
+        });
+        string+=subStyles.join(";");
+        console.log(string);
+        return string;
     }
 
     var unpackSelection = function(selection){
@@ -358,6 +362,7 @@ var center = function(){
 }
 
 var query = parseURL(window.location.search.substring(1));
+console.log($3Dmol.specStringToObject(window.location.search.substring(1)))
 //this function compresses the html object back into a url
 var render = function(){
     //calls update query
