@@ -158,7 +158,6 @@ var unpackQuery = function(query){
     var url= "";
 
     var unpackStyle = function(style){
-
         var style_attributes = style.attributes;
         var string="style=";
 
@@ -181,31 +180,29 @@ var unpackQuery = function(query){
 
         });
         string+=subStyles.join(";");
-        console.log(string);
         return string;
     }
 
     var unpackSelection = function(selection){
-        var sels=selection.subselections;
-        var str = "select=";
-        for(var sel in sels){
-            if(Object.keys(sels).indexOf(sel)!=0)
-                str+=";";
-            if(Object.keys(sels[sel])!=undefined){
-                for(var style in sels[sel]){
+        var subselections=selection.subselections;
 
-                    str+=style+":"+sels[sel][style];
-                }
-            }
-        }
-        str+="&"+unpackStyle(selection.style);
-        for(var i in selection.dumps){
-            if(Object.keys(sels).length!=0)
-                str+="&"
-            
-            str+=selection.dumps[i]
-        }
-        return str;
+        var subSelections = []
+        $.each(subselections, function(index, value){
+            $.each(value, function(key, value){
+                subSelections.push(key+":"+value);
+            });
+        });
+
+        var subselections_string = "select="+subSelections.join(";");
+
+        var statements = [];
+        statements=statements.concat(subselections_string);
+        statements=statements.concat(unpackStyle(selection.style))
+        statements=statements.concat(selection.dumps);
+        
+        string = statements.join("&");
+        console.log(string)
+        return string
     }
     //unpack file type and name
     url+=query.file.type+"="+query.file.path+"&";
@@ -216,10 +213,11 @@ var unpackQuery = function(query){
     }
 
     //unpack other selections and styles
-    var selections= query.selections;
-    for(var sel in selections){
-        url+=unpackSelection(selections[sel])+"&";
+    var unpacked =[]
+    for(var sel in query.selections){
+        unpacked.push(unpackSelection(query.selections[sel]));
     }
+    url+=unpacked.join("&");
     console.log(url)
     return url;
 }
