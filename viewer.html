@@ -201,9 +201,7 @@
 
 
 $(document).ready(function(){
-    run();
     var url=window.location.href.substring(window.location.href.indexOf("?")+1);
-    initSide(url);
 
     $("#sidenav").resizable({
             handles: 'e',
@@ -211,9 +209,11 @@ $(document).ready(function(){
             maxWidth: 800,
     });
     /*
-     $( "#selection_list" ).sortable({
+    
+    $( "#selection_list" ).sortable({
             revert: true
-        });
+    });
+
     $( "#draggable" ).draggable({
         connectToSortable: "#selection_list",
         helper: "clone",
@@ -229,12 +229,13 @@ $(document).ready(function(){
 
         if(event.target.className==="selection ui-sortable-handle"){
            //open up the sub navigation
-           console.log("passed");
            event.target.getElementsByClassName('subSelection')[0].style.visibility="auto";
         }
     });
     */
 
+    run();
+    initSide(url);
 });
 
 </script>
@@ -243,7 +244,7 @@ $(document).ready(function(){
 
 <span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openSide();">&#9776;</span>
 <div id="sidenav" class="ui-widget-content">
-  <h1 id="header" >3Dmol Viewer</h1>
+  <h1 id="header">3Dmol Viewer</h1>
   <a href="javascript:void(0)" class="closebtn" onclick="closeSide()">&#x2715;</a>
   <br>
   <ul>
@@ -267,7 +268,7 @@ $(document).ready(function(){
 
             </ul>
             <button id="addSelection" onclick="addSelection()">Add Selection</button>
-            <button id="renderModel" onclick="render();run()">Render</button><button id="centerModel">Center</button>
+            <button id="renderModel" onclick="render();run()">Render</button><button onclick="center();" id="centerModel">Center</button>
         </div>
     </li>
 </div>

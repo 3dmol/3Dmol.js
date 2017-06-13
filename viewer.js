@@ -1,175 +1,156 @@
-var width=400;
-var urlObject={};
-
 /*
 builds an html tree that goes inside of the selection portion of the viewer page
 */
 var buildHTMLTree = function(query){
-    var parent = document.getElementById('selection_list');
-    parent.innerHTML="";
+    //get parent object for the html tree
+    var parent = $('#selection_list');
+    parent.text("");
     //list file type and path
-    document.getElementById("model_type").value=query.file.type;
-    document.getElementById("model_input").value=query.file.path;
+    $("#model_type").attr("value",query.file.type);
+    $("#model_input").attr("value",query.file.path);
 
     //loops through selections and creates a selection tree
-    var selections = query.selections;
-    for(var i=0;i<selections.length; i++){
+    for(var selection_index in query.selections){
+        var selection_object = query.selections[selection_index];
 
+        //this function creates the selection object
         var createSelection = function(){
             //creates container
-            var selection = document.createElement('li');
-            selection.className =  "selection";// ui-sortable-handle
+            var selection = $("<li/>",{
+                class:"selection"
+            });
             
             //add together sub selections
-            var modifier = "";
-            for(var j = 0; j<selections[i].subselections.length;j++){
-                if(j!=0)
-                    modifier+=";"
-                modifier+=Object.keys(selections[i].subselections[j])[0]+":"+selections[i].subselections[j][Object.keys(selections[i].subselections[j])[0]]
+            // i think using object.keys is valid here
+            var attribute_pairs =[];
+            for(var subselection in selection_object.subselections){
+                var obj=selection_object.subselections[subselection];
+                attribute_pairs.push(Object.keys(obj)[0]+":"+obj[Object.keys(obj)[0]]);
             }
-            
-            var selection_spec = document.createElement('div');
-            selection_spec.innerHTML=modifier
-            var att= document.createAttribute('contenteditable');
-            att.value='true';
-            selection_spec.setAttributeNode(att);
-            selection_spec.className='selection_spec'
-            selection.appendChild(selection_spec)
+            var modifier=attribute_pairs.join(";");
+
+            var selection_spec=$('<div/>', {
+                class:'selection_spec',
+                text:modifier,
+                contenteditable:'true',
+            }).appendTo(selection);        
 
             //creates style if it exists
-            var model_specifications=document.createElement('ul');
-            model_specifications.className='model_specifications';
+            var model_specifications=$('<ul/>',{
+                class:'model_specifications'
+            });
 
-            var createModelSpecification = function(type,spec){
-
+            var createModelSpecification = function(model_spec_type,model_spec_object){
+                console.log(model_spec_type,model_spec_object);
                 var model_specification = null;
                 var createStyle = function(spec){
 
-                    var style = document.createElement('li');
-                    style.innerHTML='Style';
-                    style.className='style';
+                    var style=$('<li/>',{
+                        text:"Style",
+                        "class":"style",
+                    });
 
-                    var style_specs= document.createElement('ul');
-                    style_specs.className='style_specs';
-                    style.appendChild(style_specs)
+                    var style_specs = $('<ul/>',{
+                        "class":'style_specs',
+                    }).appendTo(style);
 
-                    var createStyleSpec= function(specification,typ,type){
-                        var style_spec = document.createElement('li');
-                        style_spec.className = 'style_spec';
+                    var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type){
+                        console.log(style_spec_object,style_spec_type,model_spec_type);
+                        var style_spec=$('<li/>',{
+                            "class":"style_spec",
+                        });
 
-                        var style_spec_name = document.createElement('div');
-                        style_spec_name.innerHTML= typ;
+                        var style_spec_name=$('<div/>',{
+                            text:style_spec_type,
+                            class:"style_spec_name",
+                        }).appendTo(style_spec);
 
-                        style_spec.appendChild(style_spec_name);
-
-                        var style_spec_attributes = document.createElement('ul');
-                        style_spec_attributes.className="style_spec_attributes";
-
-                        style_spec.appendChild(style_spec_attributes);
+                        var style_spec_attributes = $('<ul/>',{
+                            class:'style_spec_attributes',
+                        }).appendTo(style_spec);
 
                         var createAttribute = function(name,value){
-                            var attr = document.createElement('li');
-                            attr.className = 'attribute';
 
-                            var name_div = document.createElement('span');
-                            name_div.className = "attribute_name";
-                            name_div.innerHTML = name;
-                            var att_name= document.createAttribute('contenteditable');
-                            att.value='true';
-                            name_div.setAttributeNode(att_name);
-
+                            var attribute = $('<li/>',{
+                                class:'attribute'
+                            });
                             
-                            var value_div = document.createElement('span');
-                            value_div.className = "attribute_value";
-                            value_div.innerHTML= value;
+                            var attribute_name = $('<span/>',{
+                                class:'attribute_name',
+                                text:name,
+                                contenteditable:'true',
+                            }).appendTo(attribute);
 
-                            var att_value= document.createAttribute('contenteditable');
-                            att_value.value='true';
-                            value_div.setAttributeNode(att_value);
-
-                            attr.appendChild(name_div);
-                            attr.appendChild(value_div);
-
-
-                            return attr;
+                            var attribute_value = $('<span/>',{
+                                class:'attribute_value',
+                                text:value,
+                                contenteditable:'true',
+                            }).appendTo(attribute);
+                                                     
+                            return attribute;
                         }
 
-                        var attrs = Object.keys(specification)
-
-                        for(var attri=0; attri<attrs.length;attri++){
-                            console.log(attrs[attri] +" "+ specification[attrs[attri]])
-                            style_spec_attributes.appendChild(createAttribute(attrs[attri],specification[attrs[attri]]))
+                        for(var attribute_index in style_spec_object){
+                            createAttribute(attribute_index,style_spec_object[attribute_index]).appendTo(style_spec_attributes);
                         }
 
-                        var add_attribute= document.createElement('button');
-                        add_attribute.className="add_attribute";
-                        add_attribute.innerHTML="Add Attribute"
-
-                        var atr = document.createAttribute('obj');
-                        console.log(i,type,typ)
-                        atr.value=i+","+type+","+typ;
-                        add_attribute.setAttributeNode(atr);
-
-                        add_attribute.onclick= function(){addAttribute(this)};
-                        style_spec.appendChild(add_attribute);
+                        var add_attribute = $('<button/>',{
+                            "class":"add_attribute",
+                            "text":"Add Attribute",
+                            "data-index":selection_index,
+                            "data-type":model_spec_type,
+                            "data-spectype":style_spec_type,
+                            "click":function(){addAttribute(this)},
+                        }).appendTo(style_spec);
                         
                         return style_spec;
+                    }       
+                    console.log(model_spec_object.attributes)
+                    for(var attribute_index in model_spec_object.attributes){
+                        createStyleSpec(model_spec_object.attributes[attribute_index],attribute_index,model_spec_type).appendTo(style_specs);
                     }
 
-                    var specAttrKeys = Object.keys(spec.attributes);
-                    for(var index = 0; index<specAttrKeys.length;index++){
-                        //loop through style_specs and create style specs for them
-                        var specif = spec.attributes[specAttrKeys[index]];
-                        var typ = specAttrKeys[index]
-                        style_specs.appendChild(createStyleSpec(specif,typ,type));                      
-
-                    }                    
                     return style; 
                 }
 
                 //check for type
-                if(type=="style"){
-                   model_specification = createStyle(spec)
+                if(model_spec_type=="style"){
+                   model_specification = createStyle(model_spec_object.attributes)
                 }
-                var add_style_spec= document.createElement('button');
-                add_style_spec.className="add_style_spec";
-                add_style_spec.innerHTML="Add Style Spec";
 
-                var obj = document.createAttribute('obj');
-                obj.value=[i,type];
-                add_style_spec.setAttributeNode(obj);
+                var add_style_spec = $('<button/>',{
+                    "class":"add_style_spec",
+                    "text":"Add Style Spec",
+                    "data-index":selection_index,
+                    "data-type":model_spec_type,
+                    "click":function(){addStyleSpec(this)},
+                }).appendTo(model_specification);
 
-                add_style_spec.onclick = function(){addStyleSpec(this)};
-
-                model_specification.appendChild(add_style_spec);
                 return model_specification;
-
             }
 
-            //check if style exists and if so create it
-            if(selections[i].style !=undefined){
-                var style = createModelSpecification("style",selections[i].style);
-                model_specifications.appendChild(style);
+            //check if style exists and if so create the object
+            if(selection_object.style !=undefined){
+                var style = createModelSpecification("style",selection_object.style);
+                //add style to model_specifications
+                style.appendTo(model_specifications);
             }
+            //add model_specifications to selection
+            model_specifications.appendTo(selection);
 
-            selection.appendChild(model_specifications);
+            var add_model_spec = $('<button/>',{
+                "class":"add_model_spec",
+                "text":"Add Model Spec",
+                "data-index":selection_index,
+                "click":function(){addModelSpec(this)},
+            }).appendTo(selection);
 
-
-            //this is where surfaces and other thigns will be created
-            var add_model_spec = document.createElement('button');
-            add_model_spec.className="add_model_spec";
-            add_model_spec.innerHTML="Add Model Spec";
-            var obj = document.createAttribute('obj');
-            obj.value=i;
-            add_model_spec.setAttributeNode(obj);
-            add_model_spec.onclick=function(){addModelSpec(this)};
-            selection.appendChild(add_model_spec);
             return selection;
         }
 
         var selection=createSelection()
         // onClick="this.contentEditable='true';"
-        parent.appendChild(selection);
+        selection.appendTo(parent);
         //creates a style tree
     }
 }
@@ -373,7 +354,7 @@ var updateQuery = function(){
 
 
 var center = function(){
-    glviewer.center({},1000,false);
+    glviewer.center({},1000,true);
 }
 
 var query = parseURL(window.location.search.substring(1));
@@ -388,13 +369,14 @@ var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
     buildHTMLTree(query);
+
     //model type value
     
 }
 
 //opens up the side bar
 var openSide= function(){
-    console.log("open")
+    var width=400;
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
@@ -408,5 +390,6 @@ var closeSide= function(){
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
 
-    glviewer.translate(-width/2,0);
+    
 }
+
