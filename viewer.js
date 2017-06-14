@@ -1,65 +1,287 @@
+/*
+builds an html tree that goes inside of the selection portion of the viewer page
+*/
+var buildHTMLTree = function(query){
+    //get parent object for the html tree
+    var parent = $('#selection_list');
+    parent.text("");
+    //list file type and path
+    $("#model_type").attr("value",query.file.type);
+    $("#model_input").attr("value",query.file.path);
     
+    
+    //loops through selections and creates a selection tree
+    for(var selection_index in query.selections){
+        var selection_object = query.selections[selection_index];
 
-var width=300;
-var urlObject={};
+        var selection_booleans ={
+            surface:false,
+            style:false,
+            labelres:false,
+        }
+        //this function creates the selection object
+        var createSelection = function(){
+            //creates container
+            var selection = $("<li/>",{
+                class:"selection"
+            });
+            
+            //add together sub selections
+            // i think using object.keys is valid here
+            var attribute_pairs =[];
+            for(var subselection in selection_object.subselections){
+                var obj=selection_object.subselections[subselection];
+                attribute_pairs.push(Object.keys(obj)[0]+":"+obj[Object.keys(obj)[0]]);
+            }
+            var modifier=attribute_pairs.join(";");
 
+            var selection_spec=$('<div/>', {
+                class:'selection_spec',
+                text:modifier,
+                contenteditable:'true',
+            }).appendTo(selection);        
 
-var createSelection = function(selection_object){
-    var li=document.createElement('li');
+            //creates style if it exists
+            var model_specifications=$('<ul/>',{
+                class:'model_specifications'
+            });
 
-    li.className="selection";
+            var createModelSpecification = function(model_spec_type,model_spec_object){
+                var model_specification = null;
 
-    var delete_button=document.createElement('a');
-    delete_button.className="delete_button";
-    delete_button.innerHTML="&#x2715;";
-    $(delete_button).click(function(event){
-        removeSelection(selection);
-    });
-    delete_button.style.float="right";
-    delete_button.style.color="white";
-    var selection_div=document.createElement('div');
+                var createAttribute = function(name,value){
 
-    selection_div.innerHTML=selection_object.selection;
+                    var attribute = $('<li/>',{
+                        class:'attribute'
+                    });
+                            
+                    var attribute_name = $('<span/>',{
+                        class:'attribute_name',
+                        text:name,
+                        contenteditable:'true',
+                    }).appendTo(attribute);
 
-    selection_div.className="selection_div";
-    selection_div.appendChild(delete_button);
+                    var attribute_value = $('<span/>',{
+                        class:'attribute_value',
+                        text:value,
+                        contenteditable:'true',
+                    }).appendTo(attribute);
+                                                     
+                    return attribute;
+                }
 
-    li.appendChild(selection_div);
-    //sub selections(list of the style,surface, or labelres)
-    var div=document.createElement('div');
-    div.className="subSelection";
+                var createStyle = function(spec){
 
-    var sublist=document.createElement('ul');
+                    var style=$('<li/>',{
+                        text:"Style",
+                        "class":"style",
+                    });
 
-    sublist.style.visibility="hidden";
+                    var style_specs = $('<ul/>',{
+                        "class":'style_specs',
+                    }).appendTo(style);
 
-    for(var i=0;i<selection_object.list.length;i++){
-        var lst=createSubSelection(selection_object.list[i]);
+                    var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type){
+                        var style_spec=$('<li/>',{
+                            "class":"style_spec",
+                        });
 
-        sublist.appendChild(lst);
+                        var style_spec_name=$('<div/>',{
+                            text:style_spec_type,
+                            class:"style_spec_name",
+                        }).appendTo(style_spec);
+
+                        var style_spec_attributes = $('<ul/>',{
+                            class:'style_spec_attributes',
+                        }).appendTo(style_spec);
+
+                        for(var attribute_index in style_spec_object){
+                            createAttribute(attribute_index,style_spec_object[attribute_index]).appendTo(style_spec_attributes);
+                        }
+
+                        var add_attribute = $('<button/>',{
+                            "class":"add_attribute",
+                            "text":"Add Attribute",
+                            "data-index":selection_index,
+                            "data-type":model_spec_type,
+                            "data-styletype":style_spec_type,
+                            "click":function(){addAttribute(this)},
+                        }).appendTo(style_spec);
+                        
+                        return style_spec;
+                    }       
+                    for(var attribute_index in model_spec_object.attributes){
+                        createStyleSpec(model_spec_object.attributes[attribute_index],attribute_index,model_spec_type).appendTo(style_specs);
+                    }
+
+                    return style; 
+                }
+
+                var createOtherModelSpec = function(spec,type){
+                    var other=$('<li/>',{
+                        text:type,
+                        "class":type.toLowerCase(),
+                    });
+
+                    var attributes = $('<ul/>',{
+                        "class":type.toLowerCase()+'_attributes',
+                    }).appendTo(other);
+
+                    for(var attribute_index in spec){
+                        var object_keys = Object.keys(spec[attribute_index]);
+                        createAttribute(object_keys[0],spec[attribute_index][object_keys[0]]).appendTo(attributes);
+                    }
+                    return other;
+                }
+                //check for type
+                if(model_spec_type=="style"){
+                   model_specification = createStyle(model_spec_object.attributes)
+                    var add_style_spec = $('<button/>',{
+                    "class":"add_style_spec",
+                    "text":"Add Style Spec",
+                    "data-index":selection_index,
+                    "data-type":model_spec_type,
+                    "click":function(){addStyleSpec(this)},
+                }).appendTo(model_specification);
+                }else if(model_spec_type=="surface"){
+                    model_specification = createOtherModelSpec(model_spec_object.attributes,"Surface")
+                }else if(model_spec_type=="labelres"){
+                    model_specification = createOtherModelSpec(model_spec_object.attributes,"LabelRes")
+                }             
+
+                return model_specification;
+            }
+            console.log(query)
+            //check if style exists and if so create the object
+            if(selection_object.style !=null && !selection_booleans.style){
+                var style = createModelSpecification("style",selection_object.style);
+                //add style to model_specifications
+                style.appendTo(model_specifications);
+                selection_booleans.style=true;
+            }else if(selection_object.surface !=null && !selection_booleans.surface){
+                var surface = createModelSpecification("surface", selection_object.surface)
+                surface.appendTo(model_specifications);
+                selection_booleans.surface=true;
+            }else if(selection_object.labelres != null && !selection_booleans.labelres){
+                var labelres= createModelSpecification("labelres", selection_object.labelres)
+                labelres.appendTo(model_specifications);
+                selection_booleans.labelres=true;
+            }
+            //add model_specifications to selection
+            model_specifications.appendTo(selection);
+
+            var add_model_spec = $('<button/>',{
+                "class":"add_model_spec",
+                "text":"Add Model Spec",
+                "data-index":selection_index,
+                "click":function(){addModelSpec(this)},
+            }).appendTo(selection);
+
+            return selection;
+        }
+        var selection_count = 0;
+
+        if(selection_object.surface !=undefined)
+            selection_count++;
+        if(selection_object.style != undefined)
+            selection_count++;
+        if(selection_object.labelres !=undefined)
+            selection_count++;
+        for(var i=0;i<selection_count;i++){
+            var selection=createSelection()
+            selection.appendTo(parent);
+        }
+        //creates a style tree
     }
-
-    div.appendChild(sublist);
-
-    li.appendChild(div);
-
-    //sub sub selections
-
-    var list=document.createElement('ul');
-
-
-    for(var i=0;i<selection_object.list.length;i++){
-        var sublist_object=createSubSelection(selection_object.list[i]);
-        list.appendChild(sublist_object);
-    }
-
-    list.style.visibility="hidden";
-
-    li.appendChild(list);
-
-    return li;
 }
+/*
+takes the query object and updates the url based on its contents
+*/
+var unpackQuery = function(query){
+    var url= "";
 
+    var unpackStyle = function(style){
+        var style_attributes = style.attributes;
+        var string="style=";
+
+        var subStyles = [];
+        $.each(style_attributes, function(key,value){
+
+            var unpackSubStyle = function(val){
+                var assignments = [];
+                $.each(val, function(key, value){
+                   assignments.push(key+"~"+value);
+                });
+                return assignments.join(",");
+            };
+            var sub_style_unpacked=unpackSubStyle(value);
+
+            if(sub_style_unpacked=="")
+                subStyles.push(key);
+            else
+                subStyles.push(key+":"+sub_style_unpacked);
+
+        });
+        string+=subStyles.join(";");
+        return string;
+    }
+
+    var unpackSelection = function(selection){
+        var subselections=selection.subselections;
+        //todo refactor this all inot one function
+        var subSelections = []
+        $.each(subselections, function(index, value){
+            $.each(value, function(key, value){
+                subSelections.push(key+":"+value);
+            });
+        });
+
+        var parseString =function(arr,type){
+            var array=[]
+            $.each(arr, function(index, value){
+                $.each(value, function(key, value){
+                    array.push(key+":"+value);
+                });
+            });
+            array[0]=type+'='+array[0]
+            array=array.join(";")
+            otherModelSpecs=otherModelSpecs.concat(array)
+        };
+
+        var otherModelSpecs =[];
+
+        if(selection.labelres!=null){
+            parseString(selection.labelres.attributes, "labelres");
+        }
+        if(selection.surface!=null){
+            parseString(selection.surface.attributes, "surface")
+        }
+
+        var subselections_string = "select="+subSelections.join(";");
+
+        var statements = [];
+        statements=statements.concat(subselections_string);
+        statements=statements.concat(unpackStyle(selection.style))
+        statements=statements.concat(otherModelSpecs);
+        string = statements.join("&");
+        return string
+    }
+    //unpack file type and name
+    url+=query.file.type+"="+query.file.path+"&";
+    //unpack global style if it exists
+    
+    if(query.globalStyle!=null){
+        url+=unpackStyle(query.globalStyle)+"&";
+    }
+
+    //unpack other selections and styles
+    var unpacked =[]
+    for(var sel in query.selections){
+        unpacked.push(unpackSelection(query.selections[sel]));
+    }
+    url+=unpacked.join("&");
+    return url;
+}
 
 //style object for styling the selected model portion
 function Style(modifier){
@@ -77,6 +299,7 @@ function Style(modifier){
         }
     }
 }
+
 //selection object for displaying
 function Selection(selection){
     this.subselections=[];
@@ -88,120 +311,166 @@ function Selection(selection){
 
         this.subselections.push(obj)
     }
-
+    this.surface=null;
+    this.labelres=null;
     this.style=null;
 }
 
-function File(type,path){
-    var fileTypes = {
-        PDB:0,
-        CID:1,
-        URL:2,
-    };
+function File(string){
+    if(string!= undefined)
+        var split = string.split("=");
+    else
+        split=["",""]
+    this.path=split[1];
+    this.type=split[0];
+}
 
-    this.path=path;
-    this.type=type;
+
+function Surface(string){
+    this.attributes=[]
+    var sc_split=string.split(";")
+    for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
+        var colon_split=sc_split[i].split(":")
+        var obj={}
+        obj[colon_split[0]]=colon_split[1]
+
+        this.attributes.push(obj)
+    }
+}
+
+function LabelRes(string){
+    this.attributes=[]
+    var sc_split=string.split(";")
+    for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
+        var colon_split=sc_split[i].split(":")
+        var obj={}
+        obj[colon_split[0]]=colon_split[1]
+
+        this.attributes.push(obj)
+    }
 }
 
 var Query = function(){
     this.globalStyle = null;
-
     this.selections = [];
-
     this.file = new File();
-
-    //update function for query object
-    this.update = function(){
-        //this is called on every click of render
-    }
-
 }
-
 
 function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
 
-
 var parseURL = function(url){
     var query = new Query();
     var tokens=url.split("&");
-    console.log(tokens)
 
-    function strType(str){
-        if(str.indexOf("select")==0)
+    function stringType(string){
+        if(string.indexOf("select")==0)
             return "select"
-        else if(str.indexOf("pdb=")==0 || str.indexOf("cid=")==0 || str.indexOf("url=")==0)
+        else if(string.indexOf("pdb=")==0 || string.indexOf("cid=")==0 || string.indexOf("url=")==0)
             return "file"
-        else if(str.indexOf("style")==0)
+        else if(string.indexOf("style")==0)
             return "style"
+        else if(string.indexOf("surface")==0)
+            return "surface"
+        else if(string.indexOf("labelres")==0)
+            return "labelres"
         return null;
     }
-    var currentSelection=null;
-    for(var i=0;i<tokens.length;i++){
-        if(strType(tokens[i])=="file"){
-            var split=tokens[i].split("=")
-            query.file=new File(split[0],split[1])
-        }else if(strType(tokens[i])=="style"){
-            var split=tokens[i].split("=")
+
+    var currentSelection = null;
+    for(var token in tokens){
+        if(stringType(tokens[token])=="file"){
+            query.file = new File(tokens[token]);
+        }else if(stringType(tokens[token])=="style"){
+            var split=tokens[token].split("=")
             var style=new Style(split[1])
             if(currentSelection==null){
                 query.globalStyle=style;
             }else{
                 currentSelection.style=style;
-                currentSelection=null
             }
-
-        }else if(strType(tokens[i])=="select"){
-            var split=tokens[i].split("=")
+        }else if(stringType(tokens[token])=="select"){
+            var split=tokens[token].split("=")
             currentSelection=new Selection(split[1])
             query.selections.push(currentSelection)
+        }else if(stringType(tokens[token])=="surface"){
+            var split = tokens[token].split("=");
+            currentSelection.surface=new Surface(split[1])
+        }else if(stringType(tokens[token])=="labelres"){
+             var split = tokens[token].split("=");
+            currentSelection.labelres=new LabelRes(split[1])
+        }else{
+            currentSelection.dumps.push(tokens[token]);
         }
     }
-
-    console.log(query);
+    unpackQuery(query);
     return query;
 }
 
-
-var query= parseURL(window.location.href.substring(29));
-
-
-
-
-//initializes the sidebar based on the given url
-var initSide = function(url){
-
-    console.log(query.file);
-    //model type value
-    document.getElementById("model_type").value=query.file.fileType;
-    //query value
-    document.getElementById("model_input").value=query.file.fileValue;
-
-    var list=document.getElementById("selection_list");
-
-    for(var i=0;i<query.selections.length;i++){
-        list.appendChild(createSelection(query.selections[i]));
-    }
+//these functions all edit the query object 
+var addSelection = function(){
+    query.selections.push(new Selection(""))
+    buildHTMLTree(query);
+}
+var addModelSpec = function(selection){
+    if(query.selections[selection.getAttribute("obj")].style==null)
+        query.selections[selection.getAttribute("obj")].style=new Style("");
+    buildHTMLTree(query);
 }
 
+var addStyleSpec = function(model_spec){
+    var str=model_spec.getAttribute("obj")
+    var i=str.split(",")[0];
+    var type=str.split(",")[1];
+    query.selections[i][type].attributes[query.selections[i][type].attributes.length]="";
+    buildHTMLTree(query);
+}
+
+var addAttribute = function(style_spec){
+    var list=style_spec.getAttribute("obj").split(",");
+    query.selections[list[0]][list[1]].attributes[list[2]][""]="";
+    buildHTMLTree(query);
+}
+//this function reads the form changes and upates the query accordingly
+var updateQuery = function(){
+    query.file.path=document.getElementById("model_input").value;
+    query.file.type=document.getElementById("model_type").value;
+}
+
+var center = function(){
+    glviewer.center({},1000,true);
+}
+
+var query = parseURL(window.location.search.substring(1));
+//this function compresses the html object back into a url
+var render = function(){
+    //calls update query
+    updateQuery();
+    setURL(unpackQuery(query));
+}
+//initializes the sidebar based on the given url
+var initSide = function(url){
+    var list = document.createElement('ul')
+    document.getElementById('container').appendChild(list);
+    glviewer.center({},1000,true);
+    buildHTMLTree(query);
+}
 
 //opens up the side bar
 var openSide= function(){
-    console.log("open")
+    var width=400;
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
-    glviewer.translate(width/2,0);
-    glviewer.zoomTo();
+    glviewer.translate(200,0,400,false);
     glviewer.render();
 }
 //closes the side bar
 var closeSide= function(){
-
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
 
-    glviewer.translate(-width/2,0);
+    glviewer.translate(-200,0,400,false);
+    glviewer.render();
 }
-

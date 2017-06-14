@@ -23,10 +23,11 @@ li{
     margin:10px;
     padding:4px;
     background-color:#f2f2f2;
-    border-radius: 15px;
+    list-style:none;
+
 }
 #selections{
-    height:67%;
+    height:78%;
 }
 
 ul{
@@ -64,18 +65,10 @@ h3{
     list-style: none;
     overflow:hidden; 
     overflow-y:scroll;
-    height:75%;
+    height:95%;
 }
-p{
-    
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-#selection_list li .selection_div{
+
+#selection_list li .selection_spec{
     border-radius:0px;
     height:4%;
     background-color:rgba(0,0,102,.9);
@@ -83,14 +76,8 @@ p{
     padding:10px;
 
 
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
-#selection_list li .selection_div:hover{
+#selection_list li .selection_spec:hover{
     background-color:rgba(0,0,102,.5);
 }
 #header{
@@ -105,59 +92,93 @@ p{
 #container{
     text-align:left;
     padding:10px;
-    height:80%;
+    height:90%;
 }
 .container{
     
     text-align:left;
     padding:10px;
-    height:100%;
+    height:105%;
 }
 .fixed{
     position: relative;
     bottom:0%;
     width:100%;
 }
-.fixed button{
-    width:45%;
-    height:25px;
-}
-#model_type{
-    width:65%;
-}
-.selection_delete{
-    text-decoration: none;
-    display:inline;
-    float:right;
-    margin-right:10px;
-}
-.selection_delete p{
-    color:white;
-     display:inline;
-}
 
-#add_selection{
-    bottom:12%;
-    position:absolute;
-    width:85%;
-}
-
-.selectionSpan{
-    background-color:#9999ff;
-    width:90%;
-    height:20%;
-    margin-top:4px;
-}
-
-.edit{
-    width:20%;
-    float:right;
-    height:65%;
-    margin:6px;
-
-    margin-right:10px;
-
-}
 input{
     width:80%;
+}
+
+.style{
+    background-color:rgba(0,0,102,.9);
+    color:white;
+    margin:0px;
+}
+.selection{
+
+    border-color:gray;
+    border-style:solid;
+    background-color:gray;
+}
+
+.selection_spec{
+    margin-bottom: 10px;
+    border-radius: 15px;
+}
+.style_spec{
+    color:black;
+}
+.attribute_name,.attribute_value{
+    color:black;
+    width:43%;
+    height:20px;
+    padding:5px;
+    background-color: white;
+    display:inline-block;
+}
+.attribute_value{
+    float:right;
+}
+.attribute{
+    background-color:rgba(0,0,102,.9);
+    height:30px;
+}
+.add_model_spec{
+    width:100%;
+    height:30px;
+    margin-top:5px;
+}
+
+#addSelection{
+    width:100%;
+    height:25px;
+    margin-top:10px;
+}
+
+#renderModel{
+    width:47%;
+    height:25px;
+    margin-top:5px;
+}
+
+#centerModel{
+    width:47%;
+    height: 25px;
+    margin-top:5px;
+    float:right;
+}
+
+.add_style_spec{
+    margin-left:4%;
+    width:92%;
+    height: 25px;
+
+}
+.add_attribute{
+
+    width:92%;
+    margin-left:4%;
+    height: 25px;
+    margin-top:5px;
 }
