@@ -42,6 +42,28 @@ var buildHTMLTree = function(query){
 
             var createModelSpecification = function(model_spec_type,model_spec_object){
                 var model_specification = null;
+
+                var createAttribute = function(name,value){
+
+                    var attribute = $('<li/>',{
+                        class:'attribute'
+                    });
+                            
+                    var attribute_name = $('<span/>',{
+                        class:'attribute_name',
+                        text:name,
+                        contenteditable:'true',
+                    }).appendTo(attribute);
+
+                    var attribute_value = $('<span/>',{
+                        class:'attribute_value',
+                        text:value,
+                        contenteditable:'true',
+                    }).appendTo(attribute);
+                                                     
+                    return attribute;
+                }
+
                 var createStyle = function(spec){
 
                     var style=$('<li/>',{
@@ -67,27 +89,6 @@ var buildHTMLTree = function(query){
                             class:'style_spec_attributes',
                         }).appendTo(style_spec);
 
-                        var createAttribute = function(name,value){
-
-                            var attribute = $('<li/>',{
-                                class:'attribute'
-                            });
-                            
-                            var attribute_name = $('<span/>',{
-                                class:'attribute_name',
-                                text:name,
-                                contenteditable:'true',
-                            }).appendTo(attribute);
-
-                            var attribute_value = $('<span/>',{
-                                class:'attribute_value',
-                                text:value,
-                                contenteditable:'true',
-                            }).appendTo(attribute);
-                                                     
-                            return attribute;
-                        }
-
                         for(var attribute_index in style_spec_object){
                             createAttribute(attribute_index,style_spec_object[attribute_index]).appendTo(style_spec_attributes);
                         }
@@ -110,18 +111,40 @@ var buildHTMLTree = function(query){
                     return style; 
                 }
 
+                var createOtherModelSpec = function(spec,type){
+                    var other=$('<li/>',{
+                        text:type,
+                        "class":type.toLowerCase(),
+                    });
+
+                    var attributes = $('<ul/>',{
+                        "class":type.toLowerCase()+'_attributes',
+                    }).appendTo(other);
+
+                    for(var attribute_index in spec){
+                        var object_keys = Object.keys(spec[attribute_index]);
+                        createAttribute(object_keys[0],spec[attribute_index][object_keys[0]]).appendTo(attributes);
+                    }
+                    console.log(other)
+                    return other;
+                }
+                console.log(model_spec_type)
                 //check for type
                 if(model_spec_type=="style"){
                    model_specification = createStyle(model_spec_object.attributes)
-                }
-
-                var add_style_spec = $('<button/>',{
+                    var add_style_spec = $('<button/>',{
                     "class":"add_style_spec",
                     "text":"Add Style Spec",
                     "data-index":selection_index,
                     "data-type":model_spec_type,
                     "click":function(){addStyleSpec(this)},
                 }).appendTo(model_specification);
+                }else if(model_spec_type=="surface"){
+                    model_specification = createOtherModelSpec(model_spec_object.attributes,"Surface")
+                    console.log(model_specification)
+                }else if(model_spec_type=="labelres"){
+                    model_specification = createOtherModelSpec(model_spec_object.attributes,"LabelRes")
+                }             
 
                 return model_specification;
             }
@@ -131,7 +154,14 @@ var buildHTMLTree = function(query){
                 var style = createModelSpecification("style",selection_object.style);
                 //add style to model_specifications
                 style.appendTo(model_specifications);
+            }if(selection_object.surface !=undefined){
+                var surface = createModelSpecification("surface", selection_object.surface)
+                surface.appendTo(model_specifications);
+            }if(selection_object.labelres != undefined){
+                var labelres= createModelSpecification("labelres", selection_object.labelres)
+                labelres.appendTo(model_specifications);
             }
+            console.log(model_specifications)
             //add model_specifications to selection
             model_specifications.appendTo(selection);
 
@@ -185,7 +215,7 @@ var unpackQuery = function(query){
 
     var unpackSelection = function(selection){
         var subselections=selection.subselections;
-
+        //todo refactor this all inot one function
         var subSelections = []
         $.each(subselections, function(index, value){
             $.each(value, function(key, value){
@@ -193,15 +223,42 @@ var unpackQuery = function(query){
             });
         });
 
+        var otherModelSpecs =[];
+
+        if(selection.labelres!=null){
+            var labelres=[]
+            $.each(selection.labelres.attributes, function(index, value){
+                $.each(value, function(key, value){
+                    labelres.push(key+":"+value);
+                });
+            });
+            labelres[0]='labelres='+labelres[0]
+            labelres=labelres.join(";")
+            otherModelSpecs=otherModelSpecs.concat(labelres)
+        }
+
+        if(selection.surface!=null){
+            var surface=[]
+            $.each(selection.surface.attributes, function(index, value){
+                $.each(value, function(key, value){
+                    surface.push(key+":"+value);
+                });
+            });
+            console.log(surface)
+            surface[0]="surface="+surface[0];
+            surface=surface.join(";")
+            otherModelSpecs=otherModelSpecs.concat(surface)
+        }
+
         var subselections_string = "select="+subSelections.join(";");
 
         var statements = [];
         statements=statements.concat(subselections_string);
         statements=statements.concat(unpackStyle(selection.style))
-        statements=statements.concat(selection.dumps);
-        
+        //statements=statements.concat(selection.dumps);
+        statements=statements.concat(otherModelSpecs);
+        console.log(statements)
         string = statements.join("&");
-        console.log(string)
         return string
     }
     //unpack file type and name
@@ -250,23 +307,43 @@ function Selection(selection){
 
         this.subselections.push(obj)
     }
-    this.dumps=[];
+    this.surface=null;
+    this.labelres=null;
     this.style=null;
 }
 
 function File(string){
-    var split = string.split("=");
+    if(string!= undefined)
+        var split = string.split("=");
+    else
+        split=["",""]
     this.path=split[1];
     this.type=split[0];
 }
 
 
 function Surface(string){
+    this.attributes=[]
+    var sc_split=string.split(";")
+    for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
+        var colon_split=sc_split[i].split(":")
+        var obj={}
+        obj[colon_split[0]]=colon_split[1]
 
+        this.attributes.push(obj)
+    }
 }
 
 function LabelRes(string){
+    this.attributes=[]
+    var sc_split=string.split(";")
+    for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
+        var colon_split=sc_split[i].split(":")
+        var obj={}
+        obj[colon_split[0]]=colon_split[1]
 
+        this.attributes.push(obj)
+    }
 }
 
 var Query = function(){
@@ -290,6 +367,10 @@ var parseURL = function(url){
             return "file"
         else if(string.indexOf("style")==0)
             return "style"
+        else if(string.indexOf("surface")==0)
+            return "surface"
+        else if(string.indexOf("labelres")==0)
+            return "labelres"
         return null;
     }
 
@@ -309,11 +390,13 @@ var parseURL = function(url){
             var split=tokens[token].split("=")
             currentSelection=new Selection(split[1])
             query.selections.push(currentSelection)
-        /*}else if(stringType(tokens[token])=="surface"){
-
+        }else if(stringType(tokens[token])=="surface"){
+            var split = tokens[token].split("=");
+            currentSelection.surface=new Surface(split[1])
         }else if(stringType(tokens[token])=="labelres"){
-            
-        */}else{
+             var split = tokens[token].split("=");
+            currentSelection.labelres=new LabelRes(split[1])
+        }else{
             currentSelection.dumps.push(tokens[token]);
         }
     }
