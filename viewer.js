@@ -8,11 +8,17 @@ var buildHTMLTree = function(query){
     //list file type and path
     $("#model_type").attr("value",query.file.type);
     $("#model_input").attr("value",query.file.path);
-
+    
+    
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
 
+        var selection_booleans ={
+            surface:false,
+            style:false,
+            labelres:false,
+        }
         //this function creates the selection object
         var createSelection = function(){
             //creates container
@@ -125,10 +131,8 @@ var buildHTMLTree = function(query){
                         var object_keys = Object.keys(spec[attribute_index]);
                         createAttribute(object_keys[0],spec[attribute_index][object_keys[0]]).appendTo(attributes);
                     }
-                    console.log(other)
                     return other;
                 }
-                console.log(model_spec_type)
                 //check for type
                 if(model_spec_type=="style"){
                    model_specification = createStyle(model_spec_object.attributes)
@@ -141,25 +145,27 @@ var buildHTMLTree = function(query){
                 }).appendTo(model_specification);
                 }else if(model_spec_type=="surface"){
                     model_specification = createOtherModelSpec(model_spec_object.attributes,"Surface")
-                    console.log(model_specification)
                 }else if(model_spec_type=="labelres"){
                     model_specification = createOtherModelSpec(model_spec_object.attributes,"LabelRes")
                 }             
 
                 return model_specification;
             }
-
+            console.log(query)
             //check if style exists and if so create the object
-            if(selection_object.style !=undefined){
+            if(selection_object.style !=null && !selection_booleans.style){
                 var style = createModelSpecification("style",selection_object.style);
                 //add style to model_specifications
                 style.appendTo(model_specifications);
-            }if(selection_object.surface !=undefined){
+                selection_booleans.style=true;
+            }else if(selection_object.surface !=null && !selection_booleans.surface){
                 var surface = createModelSpecification("surface", selection_object.surface)
                 surface.appendTo(model_specifications);
-            }if(selection_object.labelres != undefined){
+                selection_booleans.surface=true;
+            }else if(selection_object.labelres != null && !selection_booleans.labelres){
                 var labelres= createModelSpecification("labelres", selection_object.labelres)
                 labelres.appendTo(model_specifications);
+                selection_booleans.labelres=true;
             }
             //add model_specifications to selection
             model_specifications.appendTo(selection);
@@ -173,9 +179,18 @@ var buildHTMLTree = function(query){
 
             return selection;
         }
+        var selection_count = 0;
 
-        var selection=createSelection()
-        selection.appendTo(parent);
+        if(selection_object.surface !=undefined)
+            selection_count++;
+        if(selection_object.style != undefined)
+            selection_count++;
+        if(selection_object.labelres !=undefined)
+            selection_count++;
+        for(var i=0;i<selection_count;i++){
+            var selection=createSelection()
+            selection.appendTo(parent);
+        }
         //creates a style tree
     }
 }
@@ -438,6 +453,7 @@ var render = function(){
 var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
+    glviewer.center({},1000,true);
     buildHTMLTree(query);
 }
 
