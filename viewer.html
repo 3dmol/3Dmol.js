@@ -132,8 +132,8 @@
                                         var time = new Date();
                                         glviewer.addModel(ret, type);
                                         runcmds(cmds, glviewer);
-                                        glviewer.render();
                                         glviewer.zoomTo();
+                                        glviewer.render();
                                         console.log("mtf load " + (+new Date() - time) + "ms");
 
                                 }}).fail(function() {
@@ -147,8 +147,8 @@
 
                                         glviewer.addModel(ret, type);
                                         runcmds(cmds, glviewer);
-                                        glviewer.render();
                                         glviewer.zoomTo();
+                                        glviewer.render();
                                     }})
                                 });
                             } else {
@@ -157,8 +157,8 @@
                                     var time = new Date();
                                     glviewer.addModel(ret, type);
                                     runcmds(cmds, glviewer);
-                                    glviewer.render();
                                     glviewer.zoomTo();
+                                    glviewer.render();
                                     console.log("alt load " + (+new Date() - time) + "ms");
 
                                 }).fail(function() {
@@ -176,14 +176,14 @@
 
                                                 glviewer.addModel(ret, type);
                                                 runcmds(cmds, glviewer);
-                                                glviewer.render();
                                                 glviewer.zoomTo();
+                                                glviewer.render();
                                             })
                                         } else {
                                             glviewer.addModel(ret, type);
                                             runcmds(cmds, glviewer);
-                                            glviewer.render();
                                             glviewer.zoomTo();
+                                            glviewer.render();
                                         }
                                     });
                                 });

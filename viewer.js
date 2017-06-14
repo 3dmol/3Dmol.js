@@ -161,7 +161,6 @@ var buildHTMLTree = function(query){
                 var labelres= createModelSpecification("labelres", selection_object.labelres)
                 labelres.appendTo(model_specifications);
             }
-            console.log(model_specifications)
             //add model_specifications to selection
             model_specifications.appendTo(selection);
 
@@ -176,7 +175,6 @@ var buildHTMLTree = function(query){
         }
 
         var selection=createSelection()
-        // onClick="this.contentEditable='true';"
         selection.appendTo(parent);
         //creates a style tree
     }
@@ -223,31 +221,25 @@ var unpackQuery = function(query){
             });
         });
 
+        var parseString =function(arr,type){
+            var array=[]
+            $.each(arr, function(index, value){
+                $.each(value, function(key, value){
+                    array.push(key+":"+value);
+                });
+            });
+            array[0]=type+'='+array[0]
+            array=array.join(";")
+            otherModelSpecs=otherModelSpecs.concat(array)
+        };
+
         var otherModelSpecs =[];
 
         if(selection.labelres!=null){
-            var labelres=[]
-            $.each(selection.labelres.attributes, function(index, value){
-                $.each(value, function(key, value){
-                    labelres.push(key+":"+value);
-                });
-            });
-            labelres[0]='labelres='+labelres[0]
-            labelres=labelres.join(";")
-            otherModelSpecs=otherModelSpecs.concat(labelres)
+            parseString(selection.labelres.attributes, "labelres");
         }
-
         if(selection.surface!=null){
-            var surface=[]
-            $.each(selection.surface.attributes, function(index, value){
-                $.each(value, function(key, value){
-                    surface.push(key+":"+value);
-                });
-            });
-            console.log(surface)
-            surface[0]="surface="+surface[0];
-            surface=surface.join(";")
-            otherModelSpecs=otherModelSpecs.concat(surface)
+            parseString(selection.surface.attributes, "surface")
         }
 
         var subselections_string = "select="+subSelections.join(";");
@@ -255,9 +247,7 @@ var unpackQuery = function(query){
         var statements = [];
         statements=statements.concat(subselections_string);
         statements=statements.concat(unpackStyle(selection.style))
-        //statements=statements.concat(selection.dumps);
         statements=statements.concat(otherModelSpecs);
-        console.log(statements)
         string = statements.join("&");
         return string
     }
@@ -275,7 +265,6 @@ var unpackQuery = function(query){
         unpacked.push(unpackSelection(query.selections[sel]));
     }
     url+=unpacked.join("&");
-    console.log(url)
     return url;
 }
 
@@ -400,7 +389,6 @@ var parseURL = function(url){
             currentSelection.dumps.push(tokens[token]);
         }
     }
-    console.log(query);
     unpackQuery(query);
     return query;
 }
@@ -420,20 +408,17 @@ var addStyleSpec = function(model_spec){
     var str=model_spec.getAttribute("obj")
     var i=str.split(",")[0];
     var type=str.split(",")[1];
-    console.log(query.selections[i][type])
     query.selections[i][type].attributes[query.selections[i][type].attributes.length]="";
     buildHTMLTree(query);
 }
 
 var addAttribute = function(style_spec){
     var list=style_spec.getAttribute("obj").split(",");
-    console.log(query.selections[list[0]][list[1]].attributes[list[2]])
     query.selections[list[0]][list[1]].attributes[list[2]][""]="";
     buildHTMLTree(query);
 }
 //this function reads the form changes and upates the query accordingly
 var updateQuery = function(){
-    //console.log(document.getElementById("model_input").value)
     query.file.path=document.getElementById("model_input").value;
     query.file.type=document.getElementById("model_type").value;
 }
@@ -443,7 +428,6 @@ var center = function(){
 }
 
 var query = parseURL(window.location.search.substring(1));
-console.log($3Dmol.specStringToObject(window.location.search.substring(1)))
 //this function compresses the html object back into a url
 var render = function(){
     //calls update query
@@ -463,12 +447,14 @@ var openSide= function(){
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
     //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
-    
-    glviewer.zoomTo();
+    glviewer.translate(200,0,400,false);
     glviewer.render();
 }
 //closes the side bar
 var closeSide= function(){
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
+
+    glviewer.translate(-200,0,400,false);
+    glviewer.render();
 }
