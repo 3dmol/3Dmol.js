@@ -151,7 +151,6 @@ var buildHTMLTree = function(query){
 
                 return model_specification;
             }
-            console.log(query)
             //check if style exists and if so create the object
             if(selection_object.style !=null && !selection_booleans.style){
                 var style = createModelSpecification("style",selection_object.style);
@@ -283,87 +282,31 @@ var unpackQuery = function(query){
     return url;
 }
 
-//style object for styling the selected model portion
-function Style(modifier){
-    this.attributes={};
-    var sc_split=modifier.split(";")
-    for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
-        var colon_split=sc_split[i].split(":")
-        this.attributes[colon_split[0]]={}
-        if(colon_split[1]!=undefined){
-            var comma_split=colon_split[1].split(",")
-            for(var j=0;j<comma_split.length;j++){
-                var equals_split=comma_split[j].split("~");
-                this.attributes[colon_split[0]][equals_split[0]]=equals_split[1]
-            }
-        }
-    }
-}
-
-//selection object for displaying
-function Selection(selection){
-    this.subselections=[];
-    var sc_split=selection.split(";")
-    for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
-        var colon_split=sc_split[i].split(":")
-        var obj={}
-        obj[colon_split[0]]=colon_split[1]
-
-        this.subselections.push(obj)
-    }
-    this.surface=null;
-    this.labelres=null;
-    this.style=null;
-}
-
-function File(string){
-    if(string!= undefined)
-        var split = string.split("=");
-    else
-        split=["",""]
-    this.path=split[1];
-    this.type=split[0];
-}
 
 
-function Surface(string){
-    this.attributes=[]
-    var sc_split=string.split(";")
-    for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
-        var colon_split=sc_split[i].split(":")
-        var obj={}
-        obj[colon_split[0]]=colon_split[1]
-
-        this.attributes.push(obj)
-    }
-}
-
-function LabelRes(string){
-    this.attributes=[]
-    var sc_split=string.split(";")
-    for(var i =0; i<sc_split.length;i++){//types such as line,cartoon
-        var colon_split=sc_split[i].split(":")
-        var obj={}
-        obj[colon_split[0]]=colon_split[1]
-
-        this.attributes.push(obj)
-    }
+function File(path,type){
+    this.path=path;
+    this.type=type;
 }
 
 var Query = function(){
-    this.globalStyle = null;
+    this.style = null;
     this.selections = [];
     this.file = new File();
+    this.surface=null;
+    this.labelres=null;
 }
 
 function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
 
+
 var parseURL = function(url){
     var query = new Query();
-    var tokens=url.split("&");
-
+    var tokens = url.split("&");
+    
+    //still using indexOf because otherwise i would need to check to see if the first substring in the string is "select" and check to see if the string isnt to small
     function stringType(string){
         if(string.indexOf("select")==0)
             return "select"
@@ -380,31 +323,37 @@ var parseURL = function(url){
 
     var currentSelection = null;
     for(var token in tokens){
-        if(stringType(tokens[token])=="file"){
-            query.file = new File(tokens[token]);
-        }else if(stringType(tokens[token])=="style"){
-            var split=tokens[token].split("=")
-            var style=new Style(split[1])
-            if(currentSelection==null){
-                query.globalStyle=style;
-            }else{
-                currentSelection.style=style;
-            }
-        }else if(stringType(tokens[token])=="select"){
-            var split=tokens[token].split("=")
-            currentSelection=new Selection(split[1])
-            query.selections.push(currentSelection)
-        }else if(stringType(tokens[token])=="surface"){
-            var split = tokens[token].split("=");
-            currentSelection.surface=new Surface(split[1])
-        }else if(stringType(tokens[token])=="labelres"){
-             var split = tokens[token].split("=");
-            currentSelection.labelres=new LabelRes(split[1])
-        }else{
-            currentSelection.dumps.push(tokens[token]);
+        var strings = tokens[token].split("=");
+        var type = stringType(tokens[token]);
+        var string = strings[1];
+        
+        var object = $3Dmol.specStringToObject(string);
+        if(type == "file"){
+            query.file = new File(string,strings[0]);
+        }else if(type == "select"){
+            var selection = object;
+            query.selections.push(selection);
+            currentSelection = selection;
+        }else if(type == "style"){
+            console.log(currentSelection)
+            if(currentSelection==null)
+                query.style = object;
+            else
+                currentSelection.style = object;
+        }else if(type == "surface"){
+            if(currentSelection==null)
+                query.surface = object;
+            else
+                currentSelection.surface = object;
+        }else if(type == "labelres"){
+             if(currentSelection==null)
+                query.labelres = object;
+            else
+                currentSelection.labelres = object;
         }
+
     }
-    unpackQuery(query);
+    console.log(query)
     return query;
 }
 
@@ -443,6 +392,7 @@ var center = function(){
 }
 
 var query = parseURL(window.location.search.substring(1));
+console.log($3Dmol.specStringToObject(window.location.search.substring(1)));
 //this function compresses the html object back into a url
 var render = function(){
     //calls update query
