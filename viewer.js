@@ -9,6 +9,7 @@ var buildHTMLTree = function(query){
     $("#model_type").attr("value",query.file.type);
     $("#model_input").attr("value",query.file.path);
     
+    console.log(query)
     
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
@@ -25,13 +26,24 @@ var buildHTMLTree = function(query){
             var selection = $("<li/>",{
                 class:"selection"
             });
-            
+            var augmentSelection = function(selection){
+                var copiedObject = jQuery.extend(true,{}, selection)
+        
+                if(copiedObject.style!=undefined){
+                    delete copiedObject.style;
+                }if(copiedObject.labelres!=undefined){
+                    delete copiedObject.labelres;
+                }if(copiedObject.surface!=undefined){
+                    delete copiedObject.surface;
+                }
+                return copiedObject;
+            }
             //add together sub selections
-            // i think using object.keys is valid here
             var attribute_pairs =[];
-            for(var subselection in selection_object.subselections){
-                var obj=selection_object.subselections[subselection];
-                attribute_pairs.push(Object.keys(obj)[0]+":"+obj[Object.keys(obj)[0]]);
+            var sel = augmentSelection(selection_object)
+            for(var subselection in sel){
+                var obj=sel[subselection];
+                attribute_pairs.push(subselection+":"+obj);
             }
             var modifier=attribute_pairs.join(";");
 
@@ -110,8 +122,8 @@ var buildHTMLTree = function(query){
                         
                         return style_spec;
                     }       
-                    for(var attribute_index in model_spec_object.attributes){
-                        createStyleSpec(model_spec_object.attributes[attribute_index],attribute_index,model_spec_type).appendTo(style_specs);
+                    for(var attribute_index in model_spec_object){
+                        createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type).appendTo(style_specs);
                     }
 
                     return style; 
@@ -128,8 +140,8 @@ var buildHTMLTree = function(query){
                     }).appendTo(other);
 
                     for(var attribute_index in spec){
-                        var object_keys = Object.keys(spec[attribute_index]);
-                        createAttribute(object_keys[0],spec[attribute_index][object_keys[0]]).appendTo(attributes);
+                        console.log(spec)
+                        createAttribute(attribute_index,spec[attribute_index]).appendTo(attributes);
                     }
                     return other;
                 }
@@ -144,9 +156,9 @@ var buildHTMLTree = function(query){
                     "click":function(){addStyleSpec(this)},
                 }).appendTo(model_specification);
                 }else if(model_spec_type=="surface"){
-                    model_specification = createOtherModelSpec(model_spec_object.attributes,"Surface")
+                    model_specification = createOtherModelSpec(model_spec_object,"Surface")
                 }else if(model_spec_type=="labelres"){
-                    model_specification = createOtherModelSpec(model_spec_object.attributes,"LabelRes")
+                    model_specification = createOtherModelSpec(model_spec_object,"LabelRes")
                 }             
 
                 return model_specification;
@@ -227,7 +239,6 @@ var unpackQuery = function(query){
             if(Object.size(sub_style_object)!=0)
                 string+=":";
             var assignments =[]
-            console.log(sub_style_object)
             $.each(sub_style_object, function(key,value){
                 assignments.push(key+"~"+value);
             });
@@ -272,10 +283,8 @@ var unpackQuery = function(query){
         objects.push("style="+unpackObject(query.style));
     }
     for(var selection in query.selections){
-        console.log(query.selections[selection])
         objects.push(unpackSelection(query.selections[selection]))
     }
-    console.log(objects);
 
     return objects.join("&");
 }
@@ -346,7 +355,6 @@ var parseURL = function(url){
         }
 
     }
-    console.log(unpackQuery(query))
     return query;
 }
 
@@ -385,7 +393,6 @@ var center = function(){
 }
 
 var query = parseURL(window.location.search.substring(1));
-console.log($3Dmol.specStringToObject(window.location.search.substring(1)));
 //this function compresses the html object back into a url
 var render = function(){
     //calls update query
