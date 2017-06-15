@@ -193,97 +193,92 @@ var buildHTMLTree = function(query){
         //creates a style tree
     }
 }
-/*
-takes the query object and updates the url based on its contents
-*/
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
 var unpackQuery = function(query){
-    var url= "";
-
-    var unpackStyle = function(style){
-        var style_attributes = style.attributes;
-        var string="style=";
-
-        var subStyles = [];
-        $.each(style_attributes, function(key,value){
-
-            var unpackSubStyle = function(val){
-                var assignments = [];
-                $.each(val, function(key, value){
-                   assignments.push(key+"~"+value);
-                });
-                return assignments.join(",");
-            };
-            var sub_style_unpacked=unpackSubStyle(value);
-
-            if(sub_style_unpacked=="")
-                subStyles.push(key);
-            else
-                subStyles.push(key+":"+sub_style_unpacked);
-
+    var url = "";
+    //unpacks everything except for style which has multiple layers 
+    var unpackObject = function (object){
+        var objs =[]
+        $.each(object, function(key,value){
+            //array values 
+            if(Array.isArray(value)){
+                //sperate by commas
+                objs.push(key+":"+value.join(","));
+            }else{
+                objs.push(key+":"+value);
+            }
         });
-        string+=subStyles.join(";");
-        return string;
+        return objs.join(";");
     }
 
-    var unpackSelection = function(selection){
-        var subselections=selection.subselections;
-        //todo refactor this all inot one function
-        var subSelections = []
-        $.each(subselections, function(index, value){
-            $.each(value, function(key, value){
-                subSelections.push(key+":"+value);
+    var unpackStyle = function(object){
+        var subStyles=[]
+        $.each(object, function(sub_style,sub_style_object){
+            var string="";
+            string+=sub_style;
+            if(Object.size(sub_style_object)!=0)
+                string+=":";
+            var assignments =[]
+            console.log(sub_style_object)
+            $.each(sub_style_object, function(key,value){
+                assignments.push(key+"~"+value);
             });
+            string+=assignments.join(",");
+            subStyles.push(string)
         });
 
-        var parseString =function(arr,type){
-            var array=[]
-            $.each(arr, function(index, value){
-                $.each(value, function(key, value){
-                    array.push(key+":"+value);
-                });
-            });
-            array[0]=type+'='+array[0]
-            array=array.join(";")
-            otherModelSpecs=otherModelSpecs.concat(array)
-        };
+        return subStyles.join(";");
+    }
+    //global 
 
-        var otherModelSpecs =[];
-
-        if(selection.labelres!=null){
-            parseString(selection.labelres.attributes, "labelres");
+    var unpackSelection = function(object){
+        var copiedObject = jQuery.extend(true,{}, object)
+        var objs=[];
+        var string="";
+        
+        if(copiedObject.style!=undefined){
+            objs.push("style="+unpackStyle(copiedObject.style));
+            delete copiedObject.style;
+        }if(copiedObject.labelres!=undefined){
+            objs.push("labelres="+unpackObject(copiedObject.labelres));
+            delete copiedObject.labelres;
         }
-        if(selection.surface!=null){
-            parseString(selection.surface.attributes, "surface")
+        if(copiedObject.surface!=undefined){
+            objs.push("surface="+unpackObject(copiedObject.surface));
+            delete copiedObject.surface;
         }
-
-        var subselections_string = "select="+subSelections.join(";");
-
-        var statements = [];
-        statements=statements.concat(subselections_string);
-        statements=statements.concat(unpackStyle(selection.style))
-        statements=statements.concat(otherModelSpecs);
-        string = statements.join("&");
-        return string
-    }
-    //unpack file type and name
-    url+=query.file.type+"="+query.file.path+"&";
-    //unpack global style if it exists
-    
-    if(query.globalStyle!=null){
-        url+=unpackStyle(query.globalStyle)+"&";
+        var select="select="+unpackObject(copiedObject);
+        objs.unshift(select);//prepend
+        return objs.join("&");
     }
 
-    //unpack other selections and styles
-    var unpacked =[]
-    for(var sel in query.selections){
-        unpacked.push(unpackSelection(query.selections[sel]));
+    var objects = [];
+
+    objects.push(query.file.type+"="+query.file.path);
+
+    if(query.labelres!=null){
+        objects.push("labelres="+unpackObject(query.labelres));
+    }else if(query.surface!=null){
+        objects.push("surface="+unpackObject(query.surface));
+    }else if(query.style!=null){
+        objects.push("style="+unpackObject(query.style));
     }
-    url+=unpacked.join("&");
-    return url;
+    for(var selection in query.selections){
+        console.log(query.selections[selection])
+        objects.push(unpackSelection(query.selections[selection]))
+    }
+    console.log(objects);
+
+    return objects.join("&");
 }
-
-
-
 function File(path,type){
     this.path=path;
     this.type=type;
@@ -300,7 +295,6 @@ var Query = function(){
 function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
-
 
 var parseURL = function(url){
     var query = new Query();
@@ -326,8 +320,8 @@ var parseURL = function(url){
         var strings = tokens[token].split("=");
         var type = stringType(tokens[token]);
         var string = strings[1];
-        
         var object = $3Dmol.specStringToObject(string);
+
         if(type == "file"){
             query.file = new File(string,strings[0]);
         }else if(type == "select"){
@@ -335,7 +329,6 @@ var parseURL = function(url){
             query.selections.push(selection);
             currentSelection = selection;
         }else if(type == "style"){
-            console.log(currentSelection)
             if(currentSelection==null)
                 query.style = object;
             else
@@ -353,7 +346,7 @@ var parseURL = function(url){
         }
 
     }
-    console.log(query)
+    console.log(unpackQuery(query))
     return query;
 }
 
