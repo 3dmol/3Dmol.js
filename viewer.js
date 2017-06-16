@@ -1,3 +1,191 @@
+//removes style,labelres, and surface from a copy of the selection object and returns it
+var augmentSelection = function(selection){
+    var copiedObject = jQuery.extend(true,{}, selection);//deep copy
+        
+    if(copiedObject.style!=undefined){
+        delete copiedObject.style;
+    }if(copiedObject.labelres!=undefined){
+        delete copiedObject.labelres;
+    }if(copiedObject.surface!=undefined){
+        delete copiedObject.surface;
+    }
+    return copiedObject;
+}
+
+var createAttribute = function(name,value){
+
+    var attribute = $('<li/>',{
+        class:'attribute'
+    });
+                           
+    var attribute_name = $('<span/>',{
+        class:'attribute_name',
+        text:name,
+        contenteditable:'true',
+    }).appendTo(attribute);
+
+    var attribute_value = $('<span/>',{
+        class:'attribute_value',
+        text:value,
+        contenteditable:'true',
+    }).appendTo(attribute);
+                                                    
+    return attribute;
+}
+
+var createOtherModelSpec = function(spec,type){
+    var other=$('<li/>',{
+        text:type,
+        "class":type.toLowerCase(),
+    });
+
+    var attributes = $('<ul/>',{
+        "class":type.toLowerCase()+'_attributes',
+    }).appendTo(other);
+
+    for(var attribute_index in spec){
+        createAttribute(attribute_index,spec[attribute_index]).appendTo(attributes);
+    }
+    return other;
+}
+
+var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type,selection_index){
+    var style_spec=$('<li/>',{
+        "class":"style_spec",
+    });
+
+    var style_spec_name=$('<div/>',{
+        text:style_spec_type,
+        class:"style_spec_name",
+    }).appendTo(style_spec);
+
+    var style_spec_attributes = $('<ul/>',{
+        class:'style_spec_attributes',
+    }).appendTo(style_spec);
+
+    for(var attribute_index in style_spec_object){
+        createAttribute(attribute_index,style_spec_object[attribute_index]).appendTo(style_spec_attributes);
+    }
+    var add_attribute = $('<button/>',{
+        "class":"add_attribute",
+        "text":"Add Attribute",
+        "data-index":selection_index,
+        "data-type":model_spec_type,
+        "data-styletype":style_spec_type,
+        "click":function(){addAttribute(this)},
+    }).appendTo(style_spec);
+                        
+    return style_spec;
+}
+
+var createStyle = function(model_spec_object,model_spec_type,selection_index){
+    var style=$('<span/>',{
+        text:"Style",
+        "class":"style",
+    });
+
+    var style_specs = $('<ul/>',{
+        "class":'style_specs',
+    }).appendTo(style);
+                        
+    for(var attribute_index in model_spec_object){
+        createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index).appendTo(style_specs);
+    }
+
+    return style; 
+}
+
+var createModelSpecification = function(model_spec_type,model_spec_object,selection_index){
+    var model_specification = null;
+    //check for type
+    if(model_spec_type=="style"){
+        model_specification = createStyle(model_spec_object,model_spec_type,selection_index)
+
+        var add_style_spec = $('<button/>',{
+            "class":"add_style_spec",
+            "text":"Add Style Spec",
+            "data-index":selection_index,
+            "data-type":model_spec_type,
+            "click":function(){addStyleSpec(this)},
+        }).appendTo(model_specification);
+         
+    }else if(model_spec_type=="surface"){
+        model_specification = createOtherModelSpec(model_spec_object,"Surface")
+    }else if(model_spec_type=="labelres"){
+        model_specification = createOtherModelSpec(model_spec_object,"LabelRes")
+    }             
+
+    return model_specification;
+}
+
+var createModelSpecButtons = function(selection_index,selection){
+
+    //add model spec
+    var add_style = $('<button/>',{
+        "class":"add_style",
+        "text":"Add Style",
+        "data-index":selection_index,
+        "click":function(){addModelSpec("style",this)},
+    }).appendTo(selection);
+
+    var add_surface = $('<button/>',{
+        "class":"add_surface",
+        "text":"Add Surface",
+        "data-index":selection_index,
+        "click":function(){addModelSpec("surface",this)},
+    }).appendTo(selection);
+
+    var add_labelres = $('<button/>',{
+        "class":"add_labelres",
+        "text":"Add LabelRes",
+        "data-index":selection_index,
+        "click":function(){addModelSpec("labelres",this)},
+    }).appendTo(selection);
+}
+//this function creates the selection object
+var createSelection = function(selection_object, selection_index,selection_booleans){
+
+    //creates container
+    var selection = $("<li/>",{
+        class:"selection"
+    });
+            
+    //add together sub selections
+    var attribute_pairs =[];
+    var sel = augmentSelection(selection_object)
+    for(var subselection in sel){
+        var obj=sel[subselection];
+        attribute_pairs.push(subselection+":"+obj);
+    }
+
+    var modifier=attribute_pairs.join(";");
+
+    var selection_spec=$('<div/>', {
+        class:'selection_spec',
+        text:modifier,
+        contenteditable:'true',
+     }).appendTo(selection);        
+
+
+    //check if style exists and if so create the object
+    if(selection_object.style !=null && !selection_booleans.style){
+        var style = createModelSpecification("style",selection_object.style, selection_index);
+        style.appendTo(selection);
+        selection_booleans.style=true;
+    }else if(selection_object.surface !=null && !selection_booleans.surface){
+        var surface = createModelSpecification("surface", selection_object.surface, selection_index);
+        surface.appendTo(selection);
+        selection_booleans.surface=true;
+    }else if(selection_object.labelres != null && !selection_booleans.labelres){
+        var labelres= createModelSpecification("labelres", selection_object.labelres, selection_index);
+        labelres.appendTo(selection);
+        selection_booleans.labelres=true;
+    }
+
+    createModelSpecButtons(selection_index,selection);
+
+    return selection;
+}
 /*
 builds an html tree that goes inside of the selection portion of the viewer page
 */
@@ -8,189 +196,18 @@ var buildHTMLTree = function(query){
     //list file type and path
     $("#model_type").attr("value",query.file.type);
     $("#model_input").attr("value",query.file.path);
-    
-    console.log(query)
-    
+ 
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
 
-        var selection_booleans ={
+        var selection_count = 0;
+
+        var selection_booleans = {
             surface:false,
             style:false,
             labelres:false,
         }
-        //this function creates the selection object
-        var createSelection = function(){
-            //creates container
-            var selection = $("<li/>",{
-                class:"selection"
-            });
-            var augmentSelection = function(selection){
-                var copiedObject = jQuery.extend(true,{}, selection)
-        
-                if(copiedObject.style!=undefined){
-                    delete copiedObject.style;
-                }if(copiedObject.labelres!=undefined){
-                    delete copiedObject.labelres;
-                }if(copiedObject.surface!=undefined){
-                    delete copiedObject.surface;
-                }
-                return copiedObject;
-            }
-            //add together sub selections
-            var attribute_pairs =[];
-            var sel = augmentSelection(selection_object)
-            for(var subselection in sel){
-                var obj=sel[subselection];
-                attribute_pairs.push(subselection+":"+obj);
-            }
-            var modifier=attribute_pairs.join(";");
-
-            var selection_spec=$('<div/>', {
-                class:'selection_spec',
-                text:modifier,
-                contenteditable:'true',
-            }).appendTo(selection);        
-
-            //creates style if it exists
-            var model_specifications=$('<ul/>',{
-                class:'model_specifications'
-            });
-
-            var createModelSpecification = function(model_spec_type,model_spec_object){
-                var model_specification = null;
-
-                var createAttribute = function(name,value){
-
-                    var attribute = $('<li/>',{
-                        class:'attribute'
-                    });
-                            
-                    var attribute_name = $('<span/>',{
-                        class:'attribute_name',
-                        text:name,
-                        contenteditable:'true',
-                    }).appendTo(attribute);
-
-                    var attribute_value = $('<span/>',{
-                        class:'attribute_value',
-                        text:value,
-                        contenteditable:'true',
-                    }).appendTo(attribute);
-                                                     
-                    return attribute;
-                }
-
-                var createStyle = function(spec){
-
-                    var style=$('<li/>',{
-                        text:"Style",
-                        "class":"style",
-                    });
-
-                    var style_specs = $('<ul/>',{
-                        "class":'style_specs',
-                    }).appendTo(style);
-
-                    var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type){
-                        var style_spec=$('<li/>',{
-                            "class":"style_spec",
-                        });
-
-                        var style_spec_name=$('<div/>',{
-                            text:style_spec_type,
-                            class:"style_spec_name",
-                        }).appendTo(style_spec);
-
-                        var style_spec_attributes = $('<ul/>',{
-                            class:'style_spec_attributes',
-                        }).appendTo(style_spec);
-
-                        for(var attribute_index in style_spec_object){
-                            createAttribute(attribute_index,style_spec_object[attribute_index]).appendTo(style_spec_attributes);
-                        }
-
-                        var add_attribute = $('<button/>',{
-                            "class":"add_attribute",
-                            "text":"Add Attribute",
-                            "data-index":selection_index,
-                            "data-type":model_spec_type,
-                            "data-styletype":style_spec_type,
-                            "click":function(){addAttribute(this)},
-                        }).appendTo(style_spec);
-                        
-                        return style_spec;
-                    }       
-                    for(var attribute_index in model_spec_object){
-                        createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type).appendTo(style_specs);
-                    }
-
-                    return style; 
-                }
-
-                var createOtherModelSpec = function(spec,type){
-                    var other=$('<li/>',{
-                        text:type,
-                        "class":type.toLowerCase(),
-                    });
-
-                    var attributes = $('<ul/>',{
-                        "class":type.toLowerCase()+'_attributes',
-                    }).appendTo(other);
-
-                    for(var attribute_index in spec){
-                        console.log(spec)
-                        createAttribute(attribute_index,spec[attribute_index]).appendTo(attributes);
-                    }
-                    return other;
-                }
-                //check for type
-                if(model_spec_type=="style"){
-                   model_specification = createStyle(model_spec_object.attributes)
-                    var add_style_spec = $('<button/>',{
-                    "class":"add_style_spec",
-                    "text":"Add Style Spec",
-                    "data-index":selection_index,
-                    "data-type":model_spec_type,
-                    "click":function(){addStyleSpec(this)},
-                }).appendTo(model_specification);
-                }else if(model_spec_type=="surface"){
-                    model_specification = createOtherModelSpec(model_spec_object,"Surface")
-                }else if(model_spec_type=="labelres"){
-                    model_specification = createOtherModelSpec(model_spec_object,"LabelRes")
-                }             
-
-                return model_specification;
-            }
-            //check if style exists and if so create the object
-            if(selection_object.style !=null && !selection_booleans.style){
-                var style = createModelSpecification("style",selection_object.style);
-                //add style to model_specifications
-                style.appendTo(model_specifications);
-                selection_booleans.style=true;
-            }else if(selection_object.surface !=null && !selection_booleans.surface){
-                var surface = createModelSpecification("surface", selection_object.surface)
-                surface.appendTo(model_specifications);
-                selection_booleans.surface=true;
-            }else if(selection_object.labelres != null && !selection_booleans.labelres){
-                var labelres= createModelSpecification("labelres", selection_object.labelres)
-                labelres.appendTo(model_specifications);
-                selection_booleans.labelres=true;
-            }
-            //add model_specifications to selection
-            model_specifications.appendTo(selection);
-
-            var add_model_spec = $('<button/>',{
-                "class":"add_model_spec",
-                "text":"Add Model Spec",
-                "data-index":selection_index,
-                "click":function(){addModelSpec(this)},
-            }).appendTo(selection);
-
-            return selection;
-        }
-        var selection_count = 0;
 
         if(selection_object.surface !=undefined)
             selection_count++;
@@ -198,12 +215,19 @@ var buildHTMLTree = function(query){
             selection_count++;
         if(selection_object.labelres !=undefined)
             selection_count++;
+        if(selection_count==0)//empty selection
+            selection_count++;
+        //creates individual selections for each surface, style and labelres
         for(var i=0;i<selection_count;i++){
-            var selection=createSelection()
+            var selection=createSelection(selection_object,selection_index,selection_booleans)
             selection.appendTo(parent);
         }
-        //creates a style tree
     }
+}
+
+//reads the html tree and redefines the query object based on its contents
+var readHTMLTree = function(tree){
+
 }
 
 Object.size = function(obj) {
@@ -214,6 +238,7 @@ Object.size = function(obj) {
     return size;
 };
 
+//takes the queyr object and creates a url for it
 var unpackQuery = function(query){
     var url = "";
     //unpacks everything except for style which has multiple layers 
@@ -305,6 +330,8 @@ function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
 
+
+//takes the search url string and makes a query object for it 
 var parseURL = function(url){
     var query = new Query();
     var tokens = url.split("&");
@@ -353,19 +380,25 @@ var parseURL = function(url){
             else
                 currentSelection.labelres = object;
         }
-
     }
     return query;
 }
 
 //these functions all edit the query object 
 var addSelection = function(){
-    query.selections.push(new Selection(""))
+    query.selections.push({})
     buildHTMLTree(query);
 }
-var addModelSpec = function(selection){
-    if(query.selections[selection.getAttribute("obj")].style==null)
-        query.selections[selection.getAttribute("obj")].style=new Style("");
+
+var addModelSpec = function(type,selection){
+    var current_selection = query.selections[selection.dataset.index]
+    if(type == "style" || type == "surface" || type == "labelres"){
+        if(current_selection[type]==null)
+            current_selection[type]={};
+        else
+            console.log(type+" already defined for selection");//TODO error handling
+    }
+    
     buildHTMLTree(query);
 }
 
@@ -412,7 +445,6 @@ var openSide= function(){
     var width=400;
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
-    //document.getElementById("url").value=window.location.href.substring(window.location.href.indexOf("?")+1);
     glviewer.translate(200,0,400,false);
     glviewer.render();
 }

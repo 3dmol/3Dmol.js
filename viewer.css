@@ -120,6 +120,8 @@ input{
     border-color:gray;
     border-style:solid;
     background-color:gray;
+    border-radius: 15px;
+
 }
 
 .selection_spec{
