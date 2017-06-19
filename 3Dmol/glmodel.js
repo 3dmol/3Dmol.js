@@ -2375,7 +2375,7 @@ $3Dmol.GLModel = (function() {
             }
 
         } else if (format == "netcdf") {
-            reader = new netcdfjs(data);
+            var reader = new netcdfjs(data);
             values = [].concat.apply([],reader.getDataVariable('coordinates'));
 
         } else {
