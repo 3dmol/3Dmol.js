@@ -2036,7 +2036,7 @@ $3Dmol.Parsers = (function() {
 	    var noOfCol = col[0];
 	    for (var i = 0; i < atomCount/col[0]; i++){
 		if (i == parseInt(atomCount/col[0]))
-		    noOfCol = atomCount % col[0]; 
+		    noOfCol = atomCount % col[0];
 		for(var j=0; j < noOfCol; j++){
 		    var atom = {};
 		    var properties = {"charge":"", "radii":""};
@@ -2063,7 +2063,7 @@ $3Dmol.Parsers = (function() {
 		    if (i == parseInt(atomCount/col[0]))
 			noOfCol = atomCount % col[0];
 		    for(j = 0; j < noOfCol; j++){
-		       atoms[count].properties["charge"] = lines[index+1].slice(col[1]*j, col[1]*(j+1));	
+		        atoms[count].properties["charge"] = parseFloat(lines[index+1].slice(col[1]*j, col[1]*(j+1)));	
 		        count++;
 		    }
 		    index++;
@@ -2078,7 +2078,7 @@ $3Dmol.Parsers = (function() {
 		    if (i == parseInt(atomCount/col[0]))
 			noOfCol = atomCount % col[0];
 		    for(j = 0; j < noOfCol; j++){
-			atoms[count].properties.radii = lines[index+1].slice(col[1]*j, col[1]*(j+1));
+			atoms[count].properties.radii = parseFloat(lines[index+1].slice(col[1]*j, col[1]*(j+1)));
 			count++;
 		    }
 		    index++;
@@ -2090,43 +2090,45 @@ $3Dmol.Parsers = (function() {
 		count = 0;
 		noOfCol = col[0];
 		var atomIndex;
-		for (i = 0; i < atomCount/col[0]; i++){
-		    if (i == parseInt(atomCount/col[0]))
+                index = index + 1;
+                while (!lines[index].match(/^%FLAG/)){
+                    if (lines[index+1].match(/^%FLAG/)) //its the last line
 			noOfCol = atomCount % col[0];	
 		    for (j = 0; j < noOfCol; j++){
 			if (count%3 == 0){
-			    atomIndex = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
+			    atomIndex = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3);
 			}
 			if (count%3 == 1){
-			    atoms[atomIndex].bonds.push(parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1));
+			    atoms[atomIndex].bonds.push(parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3));
 			}
-		    count++;
+		        count++;
 		    }
-		index++;
+		    index++;
 		}
 	    }
-	    index = getIndex("BONDS_INC_HYDROGEN");
-	    if (index != -1){
-		col = getColEleSize(index);
-		count = 0;
-		noOfCol = col[0];
-		var atomIndex;
-		for (i = 0; i < atomCount/col[0]; i++){
-		    if (i == parseInt(atomCount/col[0]))
-			noOfCol = atomCount % col[0];	
+            index = getIndex("BONDS_INC_HYDROGEN");
+            if (index != -1){
+                col = getColEleSize(index);
+                count = 0;
+                noOfCol = col[0];
+                var atomIndex;
+                index = index + 1;
+                while (!lines[index].match(/^%FLAG/)){
+                    if (lines[index+1].match(/^%FLAG/)) //its the last line
+                        noOfCol = atomCount % col[0];	
 		    for (j = 0; j < noOfCol; j++){
-			if (count%3 == 0){
-			    atomIndex = parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1);
-			}
-			if (count%3 == 1){
-			    atoms[atomIndex].bonds.push(parseInt(lines[index+1].slice(col[1]*j, col[1]*(j+1))/3 + 1));
-			}
-		    count++;
-		    }
-		index++;
-		}
-	    }
-	}
+                        if (count%3 == 0){
+                            atomIndex = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3);
+                        }
+                        if (count%3 == 1){
+                            atoms[atomIndex].bonds.push(parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3));
+                        }
+                        count++;
+                    }
+                    index++;
+                }
+            }
+        }
 	else{
 	    return [];
 	}
@@ -2150,7 +2152,7 @@ $3Dmol.Parsers = (function() {
 		elementSize = lines[i].match(/[a-zA-Z](\d*)\.\d*\)\s*/); //stores the element size
 	    }
 	    return [numberOfCol[1], elementSize[1]];	
-	}       
+	} 
         return [atoms];
     };
 

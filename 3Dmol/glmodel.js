@@ -1442,10 +1442,12 @@ $3Dmol.GLModel = (function() {
             } else if(typeof(val) == 'string' && typeof(atomval) == 'number'){
                 //support numerical integer ranges, e.g. resi: 3-7
                var match = val.match(/(-?\d+)\s*-\s*(-?\d+)/);
-               var lo = parseInt(match[1]);
-               var hi = parseInt(match[2]);
-               if(match && atomval >= lo && atomval <= hi) {
-                   return true;                   
+               if(match) {
+                   var lo = parseInt(match[1]);
+                   var hi = parseInt(match[2]);
+                   if(match && atomval >= lo && atomval <= hi) {
+                       return true;                   
+                   }
                }
             }
             return false;
@@ -2307,7 +2309,7 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
                 }
             }
-            if (format == "mdcrd" || format == "inpcrd" || format == "pdb") {
+            if (format == "mdcrd" || format == "inpcrd" || format == "pdb" || format == "netcdf") {
                 frames = [];
                 var atomCount = atoms.length;
                 var values = GLModel.parseCrd(str, format);
@@ -2371,7 +2373,11 @@ $3Dmol.GLModel = (function() {
                 }
                 index = data.indexOf("\nATOM", index);
             }
-            return values;
+
+        } else if (format == "netcdf") {
+            var reader = new netcdfjs(data);
+            values = [].concat.apply([],reader.getDataVariable('coordinates'));
+
         } else {
             var index = data.indexOf("\n"); // remove the first line containing title
             if(format == 'inpcrd') {
@@ -2380,8 +2386,8 @@ $3Dmol.GLModel = (function() {
 
             data = data.slice(index + 1);
             values = data.match(/\S+/g).map(parseFloat);
-            return values;
         }
+        return values;
     }
 
     GLModel.parseMolData = function(data, format, options) {

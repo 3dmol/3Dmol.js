@@ -43,21 +43,21 @@ module.exports = function(grunt) {
             },            
             
             big : {
-                src : ['js/jquery-1.11.3.js','js/mmtf.js','js/pako_inflate.js','build/3Dmol-pre.js'],
+                src : ['js/jquery-3.2.1.js','js/mmtf.js','js/pako_inflate.js','js/netcdfjs.js','build/3Dmol-pre.js'],
                 dest : 'build/3Dmol.js'
             },
             
             bignojquery : {
-                src : ['js/mmtf.js','js/pako_inflate.js', 'build/3Dmol-pre.js'],
+                src : ['js/mmtf.js','js/pako_inflate.js','js/netcdfjs.js','build/3Dmol-pre.js'],
                 dest : 'build/3Dmol-nojquery.js'
             },
             
             closure : {
-                src : ['build/jquery-1.11.3-min-pre.js','build/mmtf-min-pre.js','build/pako_inflate-min-pre.js','build/3Dmol-min-pre.js'],
+                src : ['build/jquery-3.2.1-min-pre.js','build/mmtf-min-pre.js','build/pako_inflate-min-pre.js','build/netcdfjs-min-pre.js','build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-min.js'
             },
             closurenojquery: {
-                src : ['build/mmtf-min-pre.js','build/pako_inflate-min-pre.js','build/3Dmol-min-pre.js'],
+                src : ['build/mmtf-min-pre.js','build/pako_inflate-min-pre.js','build/netcdfjs-min-pre.js','build/3Dmol-min-pre.js'],
                 dest : 'build/3Dmol-nojquery-min.js'
             }, 
             append : {
@@ -75,8 +75,8 @@ module.exports = function(grunt) {
                 dest : 'build/3Dmol-min-pre.js'
             },
             jquery : {
-                src : ['js/jquery-1.11.3.js'],
-                dest : 'build/jquery-1.11.3-min-pre.js'
+                src : ['js/jquery-3.2.1.js'],
+                dest : 'build/jquery-3.2.1-min-pre.js'
             },
             mmtf : {
                 src : ['js/mmtf.js'],
@@ -85,7 +85,11 @@ module.exports = function(grunt) {
 	    pako : {
 		src : ['js/pako_inflate.js'],
                 dest : 'build/pako_inflate-min-pre.js'
-           }
+            },
+            netcdfjs : {
+                src : ['js/netcdfjs.js'],
+                dest : 'build/netcdfjs-min-pre.js'
+            },
         },
         
         'closure-compiler' : {
@@ -105,8 +109,8 @@ module.exports = function(grunt) {
             },            
             jquery : {
                 closurePath : 'lib/closure_compiler',
-                js : ['js/jquery-1.11.3.js'],
-                jsOutputFile : 'build/jquery-1.11.3-min-pre.js',
+                js : ['js/jquery-3.2.1.js'],
+                jsOutputFile : 'build/jquery-3.2.1-min-pre.js',
                 noreport : true,
 		maxBuffer:500,
                 options : {
@@ -138,7 +142,7 @@ module.exports = function(grunt) {
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5'
                 }
-            },            
+            },           
         },
         
         shell : {
