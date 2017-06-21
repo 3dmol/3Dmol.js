@@ -427,8 +427,6 @@ var updateQuery = function(){
     query.file.path=document.getElementById("model_input").value;
     query.file.type=document.getElementById("model_type").value;
 
-   
-
     var updateOther = function(other){
         var object={};
      
@@ -459,6 +457,7 @@ var updateQuery = function(){
     var updateSelectionElements = function(selection_string){
         return $3Dmol.specStringToObject(selection_string)
     }
+
     function arraysEqual(a, b) {
         if (a === b) return true;
         if (a == null || b == null) return false;
@@ -472,6 +471,7 @@ var updateQuery = function(){
         }
         return true;
     }
+
     var isSame = function(obj1,obj2){
         for(var key in obj1){
             if(Array.isArray(obj1[key])){
@@ -509,10 +509,10 @@ var updateQuery = function(){
                 }   
                 return obj1;
             }            
-
             var val=getSubObject(index);
             var selection = updateSelectionElements($(listItems[index]).children(".selection_spec")[0].innerHTML);
             var extended=extend(selection,val)
+            console.log(extended)
             selects.push(extended)
         }
     });
@@ -524,7 +524,6 @@ var updateQuery = function(){
         return obj1;
     }
 
-    console.log(selects)
     var final_selections = [];
     var used=[]
     for(var sele in selects){
@@ -535,7 +534,6 @@ var updateQuery = function(){
         for(var sele1 in selects){
             if(sele== sele1 || used.includes(sele1))
                 continue;
-            console.log(selects[sele1])
             if(isSame(augmentSelection(selects[sele1]),augmented)){
                augmented = extend(selects[sele1],augmented);
                used.push(sele1);
@@ -543,7 +541,8 @@ var updateQuery = function(){
         }
         final_selections.push(extend(selects[sele],augmented))
     }
-    console.log(final_selections)
+
+    query.selections=final_selections;
 }
 
 var center = function(){
@@ -556,6 +555,7 @@ var render = function(){
     //calls update query
     updateQuery();
     setURL(unpackQuery(query));
+
 }
 //initializes the sidebar based on the given url
 var initSide = function(url){
