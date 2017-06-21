@@ -33,8 +33,7 @@ var createAttribute = function(name,value){
     return attribute;
 }
 
-var createOtherModelSpec = function(spec,type){
-
+var createOtherModelSpec = function(spec,type,selection_index){
     var attributes = $('<ul/>',{
         "class":type.toLowerCase()+'_attributes',
     });
@@ -42,6 +41,15 @@ var createOtherModelSpec = function(spec,type){
     for(var attribute_index in spec){
         createAttribute(attribute_index,spec[attribute_index]).appendTo(attributes);
     }
+
+    var add_attribute = $('<button/>',{
+        "class":"add_attribute",
+        "text":"Add Attribute",
+        "data-index":selection_index,
+        "data-type":type,
+        "click":function(){addOtherAttribute(this)},
+    }).appendTo(attributes);
+
     return attributes;
 }
 
@@ -105,9 +113,9 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
         }).appendTo(model_specification);
 
     }else if(model_spec_type=="surface"){
-        model_specification = createOtherModelSpec(model_spec_object,"Surface")
+        model_specification = createOtherModelSpec(model_spec_object,"Surface",selection_index)
     }else if(model_spec_type=="labelres"){
-        model_specification = createOtherModelSpec(model_spec_object,"LabelRes")
+        model_specification = createOtherModelSpec(model_spec_object,"LabelRes",selection_index)
     }             
 
     return model_specification;
@@ -415,6 +423,13 @@ var addModelSpec = function(type,selection){
 var addStyleSpec = function(model_spec){
     query.selections[model_spec.dataset.index][model_spec.dataset.type][""]={};
     buildHTMLTree(query);
+}
+var addOtherAttribute= function(spec){
+    console.log(spec.dataset)
+    console.log(query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()])
+    console.log(spec.dataset.type)
+    query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][""]="";
+    buildHTMLTree(query)
 }
 
 var addAttribute = function(style_spec){
