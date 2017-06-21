@@ -1,10 +1,26 @@
-* {
-	margin: 0;
-	padding: 0;
-    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+
+/*handle for dragging*/
+.ui-resizable-e {
+    width: 15px;
 }
 
+/*close button for sidenav*/
+.closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px !important;
+    margin-left: 50px;
+     
+}
 
+/*font, hamburger button, general styleing*/
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+}
+/*makes the side nav visible*/
 .ui-widget-content {
     height: 100%;
     width: 0;
@@ -18,26 +34,10 @@
     padding:0;
     text-align:center;
 }
-li{
-    
-    margin:10px;
-    padding:4px;
-    background-color:#f2f2f2;
-    list-style:none;
 
-}
-#selections{
-    height:78%;
-}
-
-ul{
-    height:100%;
-}
-
-h1,h3{
+/* sub headings like file/pdb/url and selections*/
+h3{ 
     text-align:left;
-}
-h3{
     background-color:rgba(0,0,102,.5);
     margin:5px;
     padding-left:10px;
@@ -45,43 +45,10 @@ h3{
     border-radius: 15px 50px
 
 }
-.ui-widget-content input{
-    width:80%;
-    margin: 0 auto;
-
-    resize:horizontal;
-    overflow:auto;
-}
-
-.closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px !important;
-    margin-left: 50px;
-     
-}
-#selection_list{
-    list-style: none;
-    overflow:hidden; 
-    overflow-y:scroll;
-    height:95%;
-}
-
-#selection_list li .selection_spec{
-    border-radius:0px;
-    height:4%;
-    background-color:rgba(0,0,102,.9);
-    color:white;
-    padding:10px;
-
-
-}
-#selection_list li .selection_spec:hover{
-    background-color:rgba(0,0,102,.5);
-}
+/*gets the page header working*/
 #header{
-    position : relative;
+    text-align:left;
+    /*position : relative; does not seem necessary*/
     color:white;
     background-color:rgba(0,0,102,.5);
     margin:8px;
@@ -89,67 +56,36 @@ h3{
     padding-left:20px;
     border-radius: 15px 50px;
 }
-#container{
-    text-align:left;
-    padding:10px;
-    height:90%;
-}
-.container{
-    
-    text-align:left;
-    padding:10px;
-    height:105%;
-}
-.fixed{
-    position: relative;
-    bottom:0%;
-    width:100%;
+
+
+#model_type{
+    width: 70%;
 }
 
-input{
-    width:80%;
-}
-
-.style{
-    background-color:rgba(0,0,102,.9);
-    color:white;
-    margin:0px;
-}
-.selection{
-
-    border-color:gray;
-    border-style:solid;
-    background-color:gray;
-}
-
-.selection_spec{
-    margin-bottom: 10px;
-    border-radius: 15px;
-}
-.style_spec{
-    color:black;
-}
-.attribute_name,.attribute_value{
-    color:black;
-    width:43%;
-    height:20px;
-    padding:5px;
-    background-color: white;
-    display:inline-block;
-}
-.attribute_value{
-    float:right;
-}
-.attribute{
-    background-color:rgba(0,0,102,.9);
-    height:30px;
-}
+/*add buttons styling
+this may change*/
 .add_model_spec{
     width:100%;
     height:30px;
     margin-top:5px;
 }
 
+.add_style_spec{
+    margin-left:4%;
+    width:92%;
+    height: 25px;
+    background-color: white;
+
+}
+.add_attribute{
+
+    width:92%;
+    margin-left:4%;
+    height: 25px;
+    margin-top:5px;
+}
+
+/* bottom buttons */
 #addSelection{
     width:100%;
     height:25px;
@@ -169,16 +105,156 @@ input{
     float:right;
 }
 
-.add_style_spec{
-    margin-left:4%;
-    width:92%;
-    height: 25px;
+/* list elements*/
+
+li{
+    
+    margin:10px;
+    padding:4px;
+    background-color:#f2f2f2;
+    list-style:none;
 
 }
-.add_attribute{
+/* attribute styleing*/
+.attribute_name,.attribute_value{
+    color:black;
+    width:43%;
+    height:20px;
+    padding:5px;
+    background-color: white;
+    display:inline-block;
+}
+.attribute_value{
+    float:right;
+}
+.attribute{
+    background-color:rgba(0,0,102,.9);
+    height:30px;
+}
+#selections{
+    height:80%;
+}
 
-    width:92%;
-    margin-left:4%;
-    height: 25px;
-    margin-top:5px;
+/* selections list
+
+
+
+.ui-widget-content input{
+    width:80%;
+    margin: 0 auto;
+
+    resize:horizontal;
+    overflow:auto;
+}
+
+
+.container{
+    
+    text-align:left;
+    padding:10px;
+    height:105%;
+}
+
+
+
+*/
+
+
+.style_spec{
+    color:black;
+}
+
+
+#selection_list{
+    list-style: none;
+    overflow:hidden; 
+    overflow-y:scroll;
+    height:95%;
+}
+
+
+#container{
+    text-align:left;
+    height:90%;
+}
+
+ul{
+    height:100%;
+}
+
+/* selection list element*/
+.selection{
+
+    border-color:gray;
+    border-style:solid;
+    background-color:gray;
+    border-radius: 15px;
+    padding-top:15px;
+
+}
+
+#selection_list li .selection_spec{
+    border-radius:0px;
+    height:4%;
+    background-color:rgba(0,0,102,.9);
+    color:white;
+    padding:10px;
+
+
+}
+
+#selection_list li .selection_spec:hover{
+    background-color:rgba(0,0,102,.5);
+}
+
+
+.fixed{
+    position: relative;
+    bottom:0%;
+    width:100%;
+}
+
+input{
+    width:80%;
+}
+
+.style{
+    color:white;
+    margin:0px;
+}
+
+
+.selection_type{
+    background-color: rgba(0,0,102,.9);
+    color:white;
+    height:4%;
+    width:20%;
+    text-align: center;
+    padding:10px;
+    margin:0px;
+    position:relative;
+    float:left;
+}
+
+
+.selection_spec{
+    margin-bottom: 10px;
+    border-radius: 15px;
+    width:54%;
+    margin:0px;
+    margin-left:28%;
+    position:relative;
+}
+
+.delete_selection{
+    float:right;
+    position: relative;
+    height:4%;
+    padding:10px;
+}
+
+
+.selection_header{
+    display:inline;
+    margin-bottom:10%;
 }

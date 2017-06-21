@@ -352,7 +352,7 @@ $3Dmol.specStringToObject = function(str) {
            else if(val.indexOf('.') >= 0) {
                return parseFloat(val); // ".7" for example, does not parseInt
            }
-           else {
+           else{
                return parseInt(val);
            }
         }
@@ -395,7 +395,7 @@ $3Dmol.specStringToObject = function(str) {
         ret[f] = val;
     }
 
-return ret;
+  return ret;
 }
 
 

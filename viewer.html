@@ -199,40 +199,21 @@
                         }
                     }
 
-
 $(document).ready(function(){
     var url=window.location.href.substring(window.location.href.indexOf("?")+1);
-
+    var start_width=$("#sidenav").width();
     $("#sidenav").resizable({
-            handles: 'e',
-            minWidth: 300,
-            maxWidth: 800,
-    });
-    /*
-    
-    $( "#selection_list" ).sortable({
-            revert: true
-    });
-
-    $( "#draggable" ).draggable({
-        connectToSortable: "#selection_list",
-        helper: "clone",
-        revert: "invalid",
-        start: function(event){
-             if(event.target.className!=="selection ui-sortable-handle"){
-            
-        }
+        handles: 'e',
+        minWidth: 300,
+        maxWidth: 1000,
+        start:function(event,ui){
+        },
+        resize:function(event,ui){
+            console.log($("#sidenav").width()-start_width)
+            glviewer.translate(($("#sidenav").width()-start_width)/2,0);
+            start_width=$("#sidenav").width();
         }
     });
-    
-    $("#sidenav").click(function(event){
-
-        if(event.target.className==="selection ui-sortable-handle"){
-           //open up the sub navigation
-           event.target.getElementsByClassName('subSelection')[0].style.visibility="auto";
-        }
-    });
-    */
 
     run();
     initSide(url);
