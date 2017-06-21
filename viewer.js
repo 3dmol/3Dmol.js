@@ -570,6 +570,16 @@ var updateQuery = function(){
 
     query.selections=final_selections;
 }
+
+var query = parseURL(window.location.search.substring(1));
+//this function compresses the html object back into a url
+var render = function(){
+    //calls update query
+    updateQuery();
+    setURL(unpackQuery(query));
+    buildHTMLTree(query)
+
+}
 //these functions all edit the query object 
 var addSelection = function(){
     query.selections.push({})
@@ -580,8 +590,10 @@ var deleteSelection = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type];
     if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
         delete query.selections[spec.dataset.index]
-    setURL(unpackQuery(query));
+    
     buildHTMLTree(query);
+    render();
+    run();
 }
 
 var addModelSpec = function(type,selection){
@@ -603,8 +615,10 @@ var addStyleSpec = function(model_spec){
 
 var deleteStyleSpec = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
-    setURL(unpackQuery(query));
+    
     buildHTMLTree(query);
+    render();
+    run();
 }
 
 var addOtherAttribute= function(spec){
@@ -614,8 +628,10 @@ var addOtherAttribute= function(spec){
 
 var deleteOtherAttribute = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
-    setURL(unpackQuery(query));
-    buildHTMLTree(query)
+    
+    buildHTMLTree(query);
+    render();
+    run();
 }
 
 var addAttribute = function(style_spec){
@@ -625,8 +641,10 @@ var addAttribute = function(style_spec){
 
 var deleteStyleAttribute = function(spec){
     delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
-    setURL(unpackQuery(query));
-    buildHTMLTree(query)
+    
+    buildHTMLTree(query);
+    render();
+    run();
 }
 
 //this function reads the form changes and upates the query accordingly
@@ -634,19 +652,20 @@ var center = function(){
     glviewer.center({},1000,true);
 }
 
-var query = parseURL(window.location.search.substring(1));
-//this function compresses the html object back into a url
-var render = function(){
-    //calls update query
-    updateQuery();
-    setURL(unpackQuery(query));
-    buildHTMLTree(query)
 
-}
 //initializes the sidebar based on the given url
 var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
+
+$(window).on('popstate', function() {
+
+        query = parseURL(window.location.search.substring(1));
+        buildHTMLTree(query);
+        render();
+        run();
+    });
+
     buildHTMLTree(query);
 }
 //opens up the side bar
