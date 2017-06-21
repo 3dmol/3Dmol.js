@@ -199,16 +199,21 @@
                         }
                     }
 
-
 $(document).ready(function(){
     var url=window.location.href.substring(window.location.href.indexOf("?")+1);
-
+    var start_width=$("#sidenav").width();
     $("#sidenav").resizable({
-            handles: 'e',
-            minWidth: 300,
-            maxWidth: 1000,
+        handles: 'e',
+        minWidth: 300,
+        maxWidth: 1000,
+        start:function(event,ui){
+        },
+        resize:function(event,ui){
+            console.log($("#sidenav").width()-start_width)
+            glviewer.translate(($("#sidenav").width()-start_width)/2,0);
+            start_width=$("#sidenav").width();
+        }
     });
-   
 
     run();
     initSide(url);
