@@ -9,34 +9,44 @@ var augmentSelection = function(selection){
     }if(copiedObject.surface!=undefined){
         delete copiedObject.surface;
     }
+
     return copiedObject;
-}
-
-var createAttribute = function(name,value){
-
-    var attribute = $('<li/>',{
-        class:'attribute'
-    });
-                           
-    var attribute_name = $('<span/>',{
-        class:'attribute_name',
-        text:name,
-        contenteditable:'true',
-    }).appendTo(attribute);
-
-    var attribute_value = $('<span/>',{
-        class:'attribute_value',
-        text:value,
-        contenteditable:'true',
-    }).appendTo(attribute);
-                                                    
-    return attribute;
 }
 
 var createOtherModelSpec = function(spec,type,selection_index){
     var attributes = $('<ul/>',{
         "class":type.toLowerCase()+'_attributes',
     });
+
+    var createAttribute = function(name,value){
+        var attribute = $('<li/>',{
+            class:'attribute'
+        });
+                           
+        var attribute_name = $('<span/>',{
+            class:'attribute_name',
+            text:name,
+            contenteditable:'true',
+        }).appendTo(attribute);
+        //delete button
+        console.log(type)
+        var delete_selection = $("<span/>",{
+            html:"&#x2715;",
+            class:"delete_attribute",
+            "data-index":selection_index,
+            "data-attr":name,
+            "data-type":type.toLowerCase(),
+            "click":function(){deleteOtherAttribute(this)},
+        }).appendTo(attribute); 
+
+        var attribute_value = $('<span/>',{
+            class:'attribute_value',
+            text:value,
+            contenteditable:'true',
+        }).appendTo(attribute);
+
+        return attribute;
+    }
 
     for(var attribute_index in spec){
         createAttribute(attribute_index,spec[attribute_index]).appendTo(attributes);
@@ -58,18 +68,59 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         "class":"style_spec",
     });
 
-    var style_spec_name=$('<div/>',{
+    var style_spec_name=$('<span/>',{
         text:style_spec_type,
         class:"style_spec_name",
     }).appendTo(style_spec);
+
+
+    var delete_selection = $("<span/>",{
+        html:"&#x2715;",
+        class:"delete_style_spec",
+        "data-index":selection_index,
+        "data-type":model_spec_type,
+        "data-attr":style_spec_type,
+        "click":function(){deleteStyleSpec(this)},
+    }).appendTo(style_spec); 
 
     var style_spec_attributes = $('<ul/>',{
         class:'style_spec_attributes',
     }).appendTo(style_spec);
 
+    var createAttribute = function(name,value){
+        var attribute = $('<li/>',{
+            class:'attribute'
+        });
+                           
+        var attribute_name = $('<span/>',{
+            class:'attribute_name',
+            text:name,
+            contenteditable:'true',
+        }).appendTo(attribute);
+        //delete button
+        console.log(name)
+        var delete_selection = $("<div/>",{
+            html:"&#x2715;",
+            class:"delete_attribute",
+            "data-index":selection_index,
+            "data-type":style_spec_type,
+            "data-attr":name,
+            "click":function(){deleteStyleAttribute(this)},
+        }).appendTo(attribute); 
+
+        var attribute_value = $('<span/>',{
+            class:'attribute_value',
+            text:value,
+            contenteditable:'true',
+        }).appendTo(attribute);
+                     
+        return attribute;
+    }
+
     for(var attribute_index in style_spec_object){
         createAttribute(attribute_index,style_spec_object[attribute_index]).appendTo(style_spec_attributes);
     }
+
     var add_attribute = $('<button/>',{
         "class":"add_attribute",
         "text":"Add Attribute",
@@ -122,7 +173,6 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
 }
 
 var createModelSpecButtons = function(selection_index,selection){
-
     //add model spec
     var add_style = $('<button/>',{
         "class":"add_style",
@@ -148,7 +198,6 @@ var createModelSpecButtons = function(selection_index,selection){
 
 //this function creates the selection object
 var createSelection = function(selection_object, selection_index,selection_booleans){
-
     //creates container
     var selection = $("<li/>",{
         class:"selection"
@@ -158,15 +207,14 @@ var createSelection = function(selection_object, selection_index,selection_boole
         class:"selection_type",
         text:""
     }).appendTo(selection);
-
-
     //delete button
     var delete_selection = $("<div/>",{
         html:"&#x2715;",
         class:"delete_selection",
         "data-index":selection_index,
+        "data-type":"",
+        "click":function(){deleteSelection(this);}
     }).appendTo(selection); 
-    
     //add together sub selections
     var attribute_pairs =[];
     var sel = augmentSelection(selection_object)
@@ -182,28 +230,29 @@ var createSelection = function(selection_object, selection_index,selection_boole
         text:modifier,
         contenteditable:'true',
     }).appendTo(selection); 
-
     //check if style exists and if so create the object
     if(selection_object.style !=null && !selection_booleans.style){
         var style = createModelSpecification("style",selection_object.style, selection_index);
 
         selection_type.text("style");
+        delete_selection.attr("data-type","style");
         style.appendTo(selection);
         selection_booleans.style=true;
     }else if(selection_object.surface !=null && !selection_booleans.surface){
         var surface = createModelSpecification("surface", selection_object.surface, selection_index);
 
         selection_type.text("surface");
+        delete_selection.attr("data-type","surface");
         surface.appendTo(selection);
         selection_booleans.surface=true;
     }else if(selection_object.labelres != null && !selection_booleans.labelres){
         var labelres = createModelSpecification("labelres", selection_object.labelres, selection_index);
 
         selection_type.text("labelres");     
+        delete_selection.attr("data-type","labelres");
         labelres.appendTo(selection);
         selection_booleans.labelres=true;
     }
-
 
     createModelSpecButtons(selection_index,selection);
 
@@ -223,9 +272,7 @@ var buildHTMLTree = function(query){
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
-
         var selection_count = 0;
-
         var selection_booleans = {
             surface:false,
             style:false,
@@ -292,7 +339,6 @@ var unpackQuery = function(query){
         return subStyles.join(";");
     }
     //global 
-
     var unpackSelection = function(object){
         var copiedObject = jQuery.extend(true,{}, object)
         var objs=[];
@@ -331,6 +377,7 @@ var unpackQuery = function(query){
 
     return objects.join("&");
 }
+
 function File(path,type){
     this.path=path;
     this.type=type;
@@ -347,7 +394,6 @@ var Query = function(){
 function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
-
 
 //takes the search url string and makes a query object for it 
 var parseURL = function(url){
@@ -402,41 +448,6 @@ var parseURL = function(url){
     return query;
 }
 
-//these functions all edit the query object 
-var addSelection = function(){
-    query.selections.push({})
-    buildHTMLTree(query);
-}
-
-var addModelSpec = function(type,selection){
-    var current_selection = query.selections[selection.dataset.index]
-    if(type == "style" || type == "surface" || type == "labelres"){
-        if(current_selection[type]==null)
-            current_selection[type]={};
-        else
-            console.log(type+" already defined for selection");//TODO error handling
-    }
-    
-    buildHTMLTree(query);
-}
-
-var addStyleSpec = function(model_spec){
-    query.selections[model_spec.dataset.index][model_spec.dataset.type][""]={};
-    buildHTMLTree(query);
-}
-var addOtherAttribute= function(spec){
-    console.log(spec.dataset)
-    console.log(query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()])
-    console.log(spec.dataset.type)
-    query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][""]="";
-    buildHTMLTree(query)
-}
-
-var addAttribute = function(style_spec){
-    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][""]="";
-    buildHTMLTree(query);
-}
-//this function reads the form changes and upates the query accordingly
 var updateQuery = function(){
     //File/PDB/URL updating
     query.file.path=document.getElementById("model_input").value;
@@ -559,7 +570,66 @@ var updateQuery = function(){
 
     query.selections=final_selections;
 }
+//these functions all edit the query object 
+var addSelection = function(){
+    query.selections.push({})
+    buildHTMLTree(query);
+}
 
+var deleteSelection = function(spec){
+    delete query.selections[spec.dataset.index][spec.dataset.type];
+    if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
+        delete query.selections[spec.dataset.index]
+    setURL(unpackQuery(query));
+    buildHTMLTree(query);
+}
+
+var addModelSpec = function(type,selection){
+    var current_selection = query.selections[selection.dataset.index]
+    if(type == "style" || type == "surface" || type == "labelres"){
+        if(current_selection[type]==null)
+            current_selection[type]={};
+        else
+            console.log(type+" already defined for selection");//TODO error handling
+    }
+    
+    buildHTMLTree(query);
+}
+
+var addStyleSpec = function(model_spec){
+    query.selections[model_spec.dataset.index][model_spec.dataset.type][""]={};
+    buildHTMLTree(query);
+}
+
+var deleteStyleSpec = function(spec){
+    delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
+    setURL(unpackQuery(query));
+    buildHTMLTree(query);
+}
+
+var addOtherAttribute= function(spec){
+    query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][""]="";
+    buildHTMLTree(query)
+}
+
+var deleteOtherAttribute = function(spec){
+    delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
+    setURL(unpackQuery(query));
+    buildHTMLTree(query)
+}
+
+var addAttribute = function(style_spec){
+    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][""]="";
+    buildHTMLTree(query);
+}
+
+var deleteStyleAttribute = function(spec){
+    delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
+    setURL(unpackQuery(query));
+    buildHTMLTree(query)
+}
+
+//this function reads the form changes and upates the query accordingly
 var center = function(){
     glviewer.center({},1000,true);
 }
@@ -570,6 +640,7 @@ var render = function(){
     //calls update query
     updateQuery();
     setURL(unpackQuery(query));
+    buildHTMLTree(query)
 
 }
 //initializes the sidebar based on the given url
@@ -578,20 +649,19 @@ var initSide = function(url){
     document.getElementById('container').appendChild(list);
     buildHTMLTree(query);
 }
-
 //opens up the side bar
 var openSide= function(){
-    var width=400;
+    var width=420;
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
-    glviewer.translate(200,0,400,false);
+    glviewer.translate(width/2,0,400,false);
     glviewer.render();
 }
 //closes the side bar
 var closeSide= function(){
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
-
+    //todo make resize dynamic
     glviewer.translate(-200,0,400,false);
     glviewer.render();
 }
