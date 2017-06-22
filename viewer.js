@@ -22,14 +22,26 @@ var createOtherModelSpec = function(spec,type,selection_index){
         var attribute = $('<li/>',{
             class:'attribute'
         });
-                           
-        var attribute_name = $('<span/>',{
+
+        var validNames;
+        if(type.toLowerCase() == "surface"){
+            validNames = glviewer.getModel().validSurfaceSpecs;
+        }else if(type.toLowerCase() == "labelres"){
+            validNames = glviewer.getModel().validLabelResSpecs;
+        }
+
+        var attribute_name = $('<select>',{
             class:'attribute_name',
-            text:name,
-            contenteditable:'true',
         }).appendTo(attribute);
+
+        $.each(validNames,function(key,value) {
+            if(value.valid){
+                attribute_name.append($("<option>").attr('value',key).text(key));
+            }
+        });
+
+        attribute_name.val(name)
         //delete button
-        console.log(type)
         var delete_selection = $("<span/>",{
             html:"&#x2715;",
             class:"delete_attribute",
@@ -68,11 +80,19 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         "class":"style_spec",
     });
 
-    var style_spec_name=$('<span/>',{
-        text:style_spec_type,
-        class:"style_spec_name",
+    var validNames=glviewer.getModel().validAtomStyleSpecs;
+
+    var style_spec_name = $('<select>',{
+        class:'style_spec_name',
     }).appendTo(style_spec);
 
+    $.each(validNames,function(key,value) {
+        if(value.valid){
+            style_spec_name.append($("<option>").attr('value',key).text(key));
+        }
+    });
+    
+    style_spec_name.val(style_spec_type)
 
     var delete_selection = $("<span/>",{
         html:"&#x2715;",
@@ -91,12 +111,19 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         var attribute = $('<li/>',{
             class:'attribute'
         });
-                           
-        var attribute_name = $('<span/>',{
+
+        var validItems = validNames[style_spec_type].validItems;
+        console.log()
+        var attribute_name = $('<select>',{
             class:'attribute_name',
-            text:name,
-            contenteditable:'true',
         }).appendTo(attribute);
+
+        $.each(validItems,function(key,value) {
+            if(value.valid){
+                attribute_name.append($("<option>").attr('value',key).text(key));
+            }
+        });
+        attribute_name.val(name)
         //delete button
         console.log(name)
         var delete_selection = $("<div/>",{
@@ -304,7 +331,7 @@ Object.size = function(obj) {
 };
 
 //takes the queyr object and creates a url for it
-var unpackQuery = function(query){
+var queryToURL = function(query){
     var url = "";
     //unpacks everything except for style which has multiple layers 
     var unpackObject = function (object){
@@ -396,7 +423,7 @@ function setURL(urlPath){
 }
 
 //takes the search url string and makes a query object for it 
-var parseURL = function(url){
+var urlToQuery = function(url){
     var query = new Query();
     var tokens = url.split("&");
     
@@ -448,7 +475,7 @@ var parseURL = function(url){
     return query;
 }
 
-var updateQuery = function(){
+var updateQueryFromHTML = function(){
     //File/PDB/URL updating
     query.file.path=document.getElementById("model_input").value;
     query.file.type=document.getElementById("model_type").value;
@@ -571,12 +598,12 @@ var updateQuery = function(){
     query.selections=final_selections;
 }
 
-var query = parseURL(window.location.search.substring(1));
+var query = urlToQuery(window.location.search.substring(1));
 //this function compresses the html object back into a url
 var render = function(){
     //calls update query
-    updateQuery();
-    setURL(unpackQuery(query));
+    updateQueryFromHTML();
+    setURL(queryToURL(query));
     buildHTMLTree(query)
 
 }
@@ -657,22 +684,23 @@ var center = function(){
 var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
+    //updating on back button
+    $(window).on('popstate', function() {
 
-$(window).on('popstate', function() {
-
-        query = parseURL(window.location.search.substring(1));
+        query = urlToQuery(window.location.search.substring(1));
         buildHTMLTree(query);
         render();
         run();
     });
 
-    buildHTMLTree(query);
 }
 //opens up the side bar
 var openSide= function(){
     var width=420;
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
+
+    buildHTMLTree(query);
     glviewer.translate(width/2,0,400,false);
     glviewer.render();
 }

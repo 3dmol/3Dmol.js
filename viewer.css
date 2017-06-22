@@ -113,6 +113,10 @@ li{
     white-space: pre;overflow:hidden;
 }
 
+.attribute_name{
+    height:30px;
+}
+
 .attribute_value{
     float:right; 
 }
