@@ -34,6 +34,11 @@ var createOtherModelSpec = function(spec,type,selection_index){
             class:'attribute_name',
         }).appendTo(attribute);
 
+        $(attribute_name).change(function(){
+            console.log("other  change")
+            render();
+        })
+
         $.each(validNames,function(key,value) {
             if(value.gui){
                 attribute_name.append($("<option>").attr('value',key).text(key));
@@ -51,11 +56,16 @@ var createOtherModelSpec = function(spec,type,selection_index){
             "click":function(){deleteOtherAttribute(this)},
         }).appendTo(attribute); 
 
-        var attribute_value = $('<span/>',{
+        var attribute_value = $('<input/>',{
             class:'attribute_value',
-            text:value,
+            value:value,
             contenteditable:'true',
         }).appendTo(attribute);
+
+        attribute_value.change(function(){
+            console.log("attr render")
+                render();
+            })
 
         return attribute;
     }
@@ -85,6 +95,10 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     var style_spec_name = $('<select>',{
         class:'style_spec_name',
     }).appendTo(style_spec);
+
+    style_spec_name.change(function(){
+                render();
+            })
 
     $.each(validNames,function(key,value) {
         if(value.gui){
@@ -117,7 +131,9 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         var attribute_name = $('<select>',{
             class:'attribute_name',
         }).appendTo(attribute);
-
+        attribute_name.change(function(){
+            render();
+        })
         $.each(validItems,function(key,value) {
             if(value.gui){
                 attribute_name.append($("<option>").attr('value',key).text(key));
@@ -157,18 +173,25 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
                 class:'attribute_value',
             }).appendTo(attribute);
 
+            attribute_value.change(function(){
+                console.log("style render")
+                render();
+            })
+
             $.each(validItemsValue,function(key,value) {
                 attribute_value.append($("<option>").attr('value',value).text(value));
             });
-            console.log(value)
             attribute_value.val(value.toString())
             
         }else{
-            var attribute_value = $('<span/>',{
+            var attribute_value = $('<input/>',{
                 class:'attribute_value',
-                text:value,
-                contenteditable:'true',
+                value:value,
             }).appendTo(attribute);
+
+            attribute_value.change(function(){
+                render();
+            })
         }
         return attribute;
     }
@@ -263,11 +286,14 @@ var createSelection = function(selection_object, selection_index,selection_boole
 
     var modifier=attribute_pairs.join(";");
 
-    var selection_spec=$('<div/>', {
+    var selection_spec=$('<input/>', {
         class:'selection_spec',
-        text:modifier,
-        contenteditable:'true',
+        value:modifier,
     }).appendTo(selection); 
+
+        selection_spec.change(function(){
+            render();
+        })
     //check if style exists and if so create the object
     if(selection_object.style !=null && !selection_booleans.style){
         var style = createModelSpecification("style",selection_object.style, selection_index);
@@ -504,7 +530,7 @@ var updateQueryFromHTML = function(){
      
         var otherList = $(other).children(".attribute");
         otherList.each(function(li){
-            object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].innerHTML
+            object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value
         });
         return object;
     }
@@ -520,10 +546,7 @@ var updateQueryFromHTML = function(){
             otherList=$(otherList).children(".attribute")
             otherList.each(function(li){
                 var tag=object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].tagName
-                if(tag != "SELECT")
-                    object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].innerHTML;
-                else
-                    object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value;
+                object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value;
             });
             
         });
@@ -586,7 +609,7 @@ var updateQueryFromHTML = function(){
                 return obj1;
             }            
             var val=getSubObject(index);
-            var selection = updateSelectionElements($(listItems[index]).children(".selection_spec")[0].innerHTML);
+            var selection = updateSelectionElements($(listItems[index]).children(".selection_spec")[0].value);
             var extended=extend(selection,val)
             selects.push(extended)
         }
@@ -626,7 +649,8 @@ var render = function(){
     //calls update query
     updateQueryFromHTML();
     setURL(queryToURL(query));
-    buildHTMLTree(query)
+    buildHTMLTree(query);
+    run();
 
 }
 //these functions all edit the query object 
@@ -642,7 +666,6 @@ var deleteSelection = function(spec){
     
     buildHTMLTree(query);
     render();
-    run();
 }
 
 var addModelSpec = function(type,selection){
@@ -670,14 +693,13 @@ var deleteStyleSpec = function(spec){
     
     buildHTMLTree(query);
     render();
-    run();
 }
 
 var addOtherAttribute= function(spec){
     var defaultKey = "";
     var defaultValue = "";
     query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
-    buildHTMLTree(query)
+    buildHTMLTree(query);
 }
 
 var deleteOtherAttribute = function(spec){
@@ -685,7 +707,6 @@ var deleteOtherAttribute = function(spec){
     
     buildHTMLTree(query);
     render();
-    run();
 }
 
 var addAttribute = function(style_spec){
@@ -701,7 +722,6 @@ var deleteStyleAttribute = function(spec){
     
     buildHTMLTree(query);
     render();
-    run();
 }
 
 //this function reads the form changes and upates the query accordingly
@@ -719,7 +739,6 @@ var initSide = function(url){
         query = urlToQuery(window.location.search.substring(1));
         buildHTMLTree(query);
         render();
-        run();
     });
 
 }
