@@ -125,7 +125,6 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         });
         attribute_name.val(name)
         //delete button
-        console.log(name)
         var delete_selection = $("<div/>",{
             html:"&#x2715;",
             class:"delete_attribute",
@@ -199,30 +198,6 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
     return model_specification;
 }
 
-var createModelSpecButtons = function(selection_index,selection){
-    //add model spec
-    var add_style = $('<button/>',{
-        "class":"add_style",
-        "text":"Add Style",
-        "data-index":selection_index,
-        "click":function(){addModelSpec("style",this)},
-    }).appendTo(selection);
-
-    var add_surface = $('<button/>',{
-        "class":"add_surface",
-        "text":"Add Surface",
-        "data-index":selection_index,
-        "click":function(){addModelSpec("surface",this)},
-    }).appendTo(selection);
-
-    var add_labelres = $('<button/>',{
-        "class":"add_labelres",
-        "text":"Add LabelRes",
-        "data-index":selection_index,
-        "click":function(){addModelSpec("labelres",this)},
-    }).appendTo(selection);
-}
-
 //this function creates the selection object
 var createSelection = function(selection_object, selection_index,selection_booleans){
     //creates container
@@ -230,10 +205,17 @@ var createSelection = function(selection_object, selection_index,selection_boole
         class:"selection"
     });
 
-    var selection_type = $('<div/>',{
-        class:"selection_type",
-        text:""
+    var validNames=["Style","Surface","LabelRes"];
+
+    var selection_type = $('<select>',{
+        class:'selection_type',
     }).appendTo(selection);
+
+    $.each(validNames,function(key,value) {
+        console.log(value);
+        selection_type.append($("<option>").attr('value',value).text(value));
+    });
+
     //delete button
     var delete_selection = $("<div/>",{
         html:"&#x2715;",
@@ -261,27 +243,31 @@ var createSelection = function(selection_object, selection_index,selection_boole
     if(selection_object.style !=null && !selection_booleans.style){
         var style = createModelSpecification("style",selection_object.style, selection_index);
 
-        selection_type.text("style");
         delete_selection.attr("data-type","style");
         style.appendTo(selection);
+
+        selection_type.val(validNames[0])
+
         selection_booleans.style=true;
     }else if(selection_object.surface !=null && !selection_booleans.surface){
         var surface = createModelSpecification("surface", selection_object.surface, selection_index);
 
-        selection_type.text("surface");
         delete_selection.attr("data-type","surface");
         surface.appendTo(selection);
+
+        selection_type.val(validNames[1])//non dynamic
+
         selection_booleans.surface=true;
     }else if(selection_object.labelres != null && !selection_booleans.labelres){
         var labelres = createModelSpecification("labelres", selection_object.labelres, selection_index);
-
-        selection_type.text("labelres");     
+    
         delete_selection.attr("data-type","labelres");
         labelres.appendTo(selection);
+
+        selection_type.val(validNames[2])
+
         selection_booleans.labelres=true;
     }
-
-    createModelSpecButtons(selection_index,selection);
 
     return selection;
 }
@@ -485,7 +471,7 @@ var updateQueryFromHTML = function(){
      
         var otherList = $(other).children(".attribute");
         otherList.each(function(li){
-            object[$(otherList[li]).children(".attribute_name")[0].innerHTML]=$(otherList[li]).children(".attribute_value")[0].innerHTML
+            object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].innerHTML
         });
         return object;
     }
@@ -495,12 +481,12 @@ var updateQueryFromHTML = function(){
         var list = $(styl).children(".style_specs");
         list = $(list).children(".style_spec")
         list.each(function(li){
-            var subtype=$(list[li]).children(".style_spec_name")[0].innerHTML;
+            var subtype=$(list[li]).children(".style_spec_name")[0].value;
             object[subtype]={};
             var otherList =$(list[li]).children(".style_spec_attributes")[0];
             otherList=$(otherList).children(".attribute")
             otherList.each(function(li){
-                object[subtype][$(otherList[li]).children(".attribute_name")[0].innerHTML]=$(otherList[li]).children(".attribute_value")[0].innerHTML;
+                object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].innerHTML;
             });
             
         });
@@ -540,12 +526,13 @@ var updateQueryFromHTML = function(){
 
     var selects = [];
     var listItems = $(".selection")
+    console.log(listItems)
     listItems.each(function(index,value){
         if(listItems.hasOwnProperty(index)){
             var getSubObject = function(index){
                 var attr = $(value);
                 var attribute=attr[0]
-                var type=$(attribute).children()[0].innerHTML
+                var type=$(attribute).children()[0].value.toLowerCase()
 
                 if(type=="style"){
                     return {style:updateStyle($(attribute).children(".style")[0])}
@@ -576,7 +563,7 @@ var updateQueryFromHTML = function(){
         }   
         return obj1;
     }
-
+    console.log(selects)
     var final_selections = [];
     var used=[]
     for(var sele in selects){
@@ -603,6 +590,7 @@ var query = urlToQuery(window.location.search.substring(1));
 var render = function(){
     //calls update query
     updateQueryFromHTML();
+    console.log(queryToURL(query))
     setURL(queryToURL(query));
     buildHTMLTree(query)
 
