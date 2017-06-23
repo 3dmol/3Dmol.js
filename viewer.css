@@ -1,19 +1,15 @@
-
 /*handle for dragging*/
 .ui-resizable-e {
     width: 15px;
 }
-
 /*close button for sidenav*/
 .closebtn {
     position: absolute;
     top: 0;
     right: 25px;
     font-size: 36px !important;
-    margin-left: 50px;
-     
+    margin-left: 50px;    
 }
-
 /*font, hamburger button, general styleing*/
 * {
     margin: 0;
@@ -34,7 +30,6 @@
     padding:0;
     text-align:center;
 }
-
 /* sub headings like file/pdb/url and selections*/
 h3{ 
     text-align:left;
@@ -43,7 +38,6 @@ h3{
     padding-left:10px;
     color:white;
     border-radius: 15px 50px
-
 }
 /*gets the page header working*/
 #header{
@@ -56,12 +50,9 @@ h3{
     padding-left:20px;
     border-radius: 15px 50px;
 }
-
-
 #model_type{
     width: 70%;
 }
-
 /*add buttons styling
 this may change*/
 .add_model_spec{
@@ -77,6 +68,7 @@ this may change*/
     background-color: white;
 
 }
+
 .add_attribute{
 
     width:92%;
@@ -84,7 +76,6 @@ this may change*/
     height: 25px;
     margin-top:5px;
 }
-
 /* bottom buttons */
 #addSelection{
     width:100%;
@@ -104,66 +95,58 @@ this may change*/
     margin-top:5px;
     float:right;
 }
-
 /* list elements*/
-
 li{
-    
     margin:10px;
     padding:4px;
     background-color:#f2f2f2;
     list-style:none;
-
 }
 /* attribute styleing*/
 .attribute_name,.attribute_value{
     color:black;
-    width:43%;
+    width:42%;
     height:20px;
     padding:5px;
     background-color: white;
     display:inline-block;
+    white-space: pre;overflow:hidden;
+}
+
+.attribute_name, select.attribute_value{
+    height:30px;
+}
+
+select.attribute_value{
+    width:45%;
 }
 .attribute_value{
+    float:right; 
+}
+
+.delete_attribute{
+    float:right;
+    color:white;
+    margin-left:10px;
+}
+
+.delete_style_spec{
     float:right;
 }
+
 .attribute{
     background-color:rgba(0,0,102,.9);
     height:30px;
+    margin-right:0px;
 }
+
 #selections{
     height:80%;
 }
 
-/* selections list
-
-
-
-.ui-widget-content input{
-    width:80%;
-    margin: 0 auto;
-
-    resize:horizontal;
-    overflow:auto;
-}
-
-
-.container{
-    
-    text-align:left;
-    padding:10px;
-    height:105%;
-}
-
-
-
-*/
-
-
 .style_spec{
     color:black;
 }
-
 
 #selection_list{
     list-style: none;
@@ -171,7 +154,6 @@ li{
     overflow-y:scroll;
     height:95%;
 }
-
 
 #container{
     text-align:left;
@@ -181,16 +163,13 @@ li{
 ul{
     height:100%;
 }
-
 /* selection list element*/
 .selection{
-
     border-color:gray;
     border-style:solid;
     background-color:gray;
     border-radius: 15px;
     padding-top:15px;
-
 }
 
 #selection_list li .selection_spec{
@@ -199,14 +178,11 @@ ul{
     background-color:rgba(0,0,102,.9);
     color:white;
     padding:10px;
-
-
 }
 
 #selection_list li .selection_spec:hover{
     background-color:rgba(0,0,102,.5);
 }
-
 
 .fixed{
     position: relative;
@@ -223,12 +199,11 @@ input{
     margin:0px;
 }
 
-
 .selection_type{
     background-color: rgba(0,0,102,.9);
     color:white;
     height:4%;
-    width:20%;
+    width:29%;
     text-align: center;
     padding:10px;
     margin:0px;
@@ -236,13 +211,12 @@ input{
     float:left;
 }
 
-
 .selection_spec{
     margin-bottom: 10px;
     border-radius: 15px;
     width:54%;
     margin:0px;
-    margin-left:28%;
+    margin-left:30%;
     position:relative;
 }
 
@@ -253,8 +227,11 @@ input{
     padding:10px;
 }
 
-
 .selection_header{
     display:inline;
     margin-bottom:10%;
+}
+
+select{
+    font-size:14px;
 }

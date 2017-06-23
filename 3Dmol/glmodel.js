@@ -51,57 +51,209 @@ $3Dmol.GLModel = (function() {
         "NI" : 1.63,
         "Ni" : 1.63
     };
+    /*
+        The dictioanries are for dropdown menus and validation of the viewer
+    */
 
-    var validAtomSpecs = [
-        "resn", // Parent residue name
-        "x", // Atom's x coordinate
-        "y", // Atom's y coordinate
-        "z", // Atom's z coordinate
-        "color", // Atom's color, as hex code
-        "surfaceColor", // Hex code for color to be used for surface patch over this atom
-        "elem", // Element abbreviation (e.g. 'H', 'Ca', etc)
-        "hetflag", // Set to true if atom is a heteroatom
-        "chain", // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
-        "resi", // Residue number 
-        "icode",
-        "rescode",
-        "serial", // Atom's serial id numbermodels
-        "atom", // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
-        "bonds", // Array of atom ids this atom is bonded to
-        "ss", // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
-        "singleBonds", // true if this atom forms only single bonds or no bonds at all
-        "bondOrder", // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
-        "properties", // Optional mapping of additional properties
-        "b", // Atom b factor data
-        "pdbline", // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
-        "clickable", // Set this flag to true to enable click selection handling for this atom
-        "callback", // Callback click handler function to be executed on this atom and its parent viewer
-        "invert", // for selection, inverts the meaning of the selection
-        "reflectivity", //for describing the reflectivity of a model
-        "altLoc"
-    ];
+    var validElements = [
+        "H",
+        "Li",
+        "LI",
+        "Na",
+        "NA",
+        "K",
+        "C",
+        "N",
+        "O",
+        "F",
+        "P",
+        "S",
+        "CL",
+        "Cl",
+        "BR",
+        "Br",
+        "SE",
+        "Se",
+        "ZN",
+        "Zn",
+        "CU",
+        "Cu",
+        "NI",
+        "Ni"
+    ]
 
-    var validAtomSelectionSpecs = validAtomSpecs.concat([  // valid atom specs are ok too
-        "model", // a single model or list of models from which atoms should be selected
-        "bonds", // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
-        "predicate", // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
-        "invert", // if set, inverts the meaning of the selection
-        "byres", // if set, expands the selection to include all atoms of any residue that has any atom selected
-        "expand", // expands the selection to include all atoms within a given distance from the selection
-        "within", // intersects the selection with the set of atoms within a given distance from another selection
-        "and", // and boolean logic
-        "or", // or boolean logic
-        "not", // not boolean logic
-    ]);
+    var validColorSpecs=[
+        "white",
+        "silver",
+        "gray",
+        "grey",
+        "black",
+        "red",
+        "maroon",
+        "yellow",
+        "orange",
+        "olive",
+        "lime",
+        "green",
+        "aqua",
+        "cyan",
+        "teal",
+        "blue",
+        "navy",
+        "fuchsia",
+        "magenta",
+        "purple",
+    ]
 
-    var validAtomStyleSpecs = [
-        "line", // draw bonds as lines
-        "cross", // draw atoms as crossed lines (aka stars)
-        "stick", // draw bonds as capped cylinders
-        "sphere", // draw atoms as spheres
-        "cartoon", // draw cartoon representation of secondary structure
-        "colorfunc",
-    ];
+    var validColorSchemeSpecs =[
+        "greenCarbon",
+        "cyanCarbon",
+        "magentaCarbon",
+        "yellowCarbon",
+        "whiteCarbon",
+        "orangeCarbon",
+        "purpleCarbon",
+        "blueCarbon",
+        "ssPyMOL",
+        "ssJmol",
+        "Jmol",
+        "default",
+        "amino",
+        "shapely",
+        "nucleic",
+        "chain",
+        "chainHetatm",
+    ]
+
+    var validAtomSpecs = {
+        "resn":{type:"string",valid :true}, // Parent residue name
+        "x":{type:"number",valid:false}, // Atom's x coordinate
+        "y":{type:"number",valid:false}, // Atom's y coordinate
+        "z":{type:"number",valid:false}, // Atom's z coordinate
+        "color":{type:"ColorSpec",gui:true}, // Atom's color, as hex code
+        "surfaceColor":{type:"ColorSpec",gui:true}, // Hex code for color to be used for surface patch over this atom
+        "elem":{type:"Element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
+        "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
+        "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+        "resi":{type:["array","number"],gui:true}, // Residue number 
+        "icode":{type:"number",valid:false},
+        "rescode":{type:"number",valid:false},
+        "serial":{type:"number",valid:false}, // Atom's serial id numbermodels
+        "atom":{type:"string",valid:false}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+        "bonds":{type:"array",valid:false}, // Array of atom ids this atom is bonded to
+        "ss":{type:"string",valid:false}, // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
+        "singleBonds":{type:"boolean",valid:false}, // true if this atom forms only single bonds or no bonds at all
+        "bondOrder":{type:"array",valid:false}, // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
+        "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
+        "b":{type:"number",valid:false}, // Atom b factor data
+        "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
+        "clickable":{type:"boolean",valid:false}, // Set this flag to true to enable click selection handling for this atom
+        "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
+        "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
+        //unsure about this
+        "reflectivity":{type:"number",gui:true}, //for describing the reflectivity of a model
+        "altLoc":{type:"invalid",valid:false}
+    };
+    function extend(obj1, src1) {
+        for (var key in src1) {
+            if (src1.hasOwnProperty(key)) obj1[key] = src1[key];
+        }   
+        return obj1;
+    }   
+    //type is irrelivent here becuase htey are are invalid
+    var validExtras ={  // valid atom specs are ok too
+        "model":{type:"string",valid :false}, // a single model or list of models from which atoms should be selected
+        "bonds":{type:"string",valid :false}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
+        "predicate":{type:"string",valid :false}, // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
+        "invert":{type:"string",valid :false}, // if set, inverts the meaning of the selection
+        "byres":{type:"string",valid :false}, // if set, expands the selection to include all atoms of any residue that has any atom selected
+        "expand":{type:"string",valid :false}, // expands the selection to include all atoms within a given distance from the selection
+        "within":{type:"string",valid :false}, // intersects the selection with the set of atoms within a given distance from another selection
+        "and":{type:"string",valid :false}, // and boolean logic
+        "or":{type:"string",valid :false}, // or boolean logic
+        "not":{type:"string",valid :false}, // not boolean logic
+    }
+    var validAtomSelectionSpecs = extend(validAtomSpecs,validExtras);
+
+    var validLineSpec = {
+        "hidden":{type:"boolean",gui:true},
+        "linewidth":{type:"number",gui:true},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+
+    };
+
+    var validCrossSpec = {
+        "hidden":{type:"boolean",gui:true},
+        "linewidth":{type:"number",gui:true},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "radius":{type:"number",gui:true},
+        "scale":{type:"number",gui:true,range:[]},
+    }
+
+    var validStickSpec = {
+        "hidden":{type:"boolean",gui:true},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "radius":{type:"number",gui:true},
+        "singleBonds":{type:"boolean",gui:true},
+    }
+
+    var validSphereSpec = {
+        "hidden":{type:"boolean",gui:true},
+        "singleBonds":{type:"boolean",gui:true},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "radius":{type:"number",gui:true},
+    }
+
+    var validCartoonSpec = {
+        "style":{type:"string",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "arrows":{type:"boolean",gui:true},
+        "ribbon":{type:"boolean",gui:true},
+        "hidden":{type:"boolean",gui:true},
+        "tubes":{type:"boolean",gui:true},
+        "thickness":{type:"number",gui:true},
+        "width":{type:"number",gui:true},
+        "opacity":{type:"number",gui:true},
+    }
+
+    var validAtomStyleSpecs = {
+        "line":{validItems:validLineSpec,gui:true}, // draw bonds as lines
+        "cross":{validItems:validCrossSpec,gui:true}, // draw atoms as crossed lines (aka stars)
+        "stick":{validItems:validStickSpec,gui:true}, // draw bonds as capped cylinders
+        "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
+        "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
+        "colorfunc":{validItems:null,valid:false},
+    };
+
+    var validSurfaceSpecs = {
+        "opacity":{type:"number",gui:true},
+        "colorscheme":{type:"number",gui:true},
+        "color":{type:"number",gui:true},
+        "voldata":{type:"number",gui:true},
+        "volscheme":{type:"number",gui:true},
+        "map":{type:"number",gui:true},
+    }
+
+    var validLabelResSpecs = {
+        "font":{type:"string",gui:true},
+        "fontSize":{type:"number",gui:true},
+        "fontColor":{type:"ColorSpec",gui:true},
+        "fontOpacity":{type:"number",gui:true},
+        "borderThickness":{type:"number",gui:true},
+        "borderColor":{type:"ColorSpec",gui:true},
+        "borderOpacity":{type:"number",gui:true},
+        "backgroundColor":{type:"ColorSpec",gui:true},
+        "backgroundOpacity":{type:"number",gui:true},
+        "position":{type:"array",valid:false},
+        "inFront":{type:"boolean",gui:true},
+        "showBackground":{type:"number",gui:true},
+        "fixed":{type:"boolean",gui:true},
+        "alignment":{type:"string",gui:true},
+    }
 
     // class functions
 
@@ -129,7 +281,13 @@ $3Dmol.GLModel = (function() {
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
-
+        this.validAtomSelectionSpecs = validAtomSelectionSpecs;
+        this.validAtomStyleSpecs = validAtomStyleSpecs;
+        this.validSurfaceSpecs = validSurfaceSpecs;
+        this.validLabelResSpecs = validLabelResSpecs;
+        this.validElements = validElements;
+        this.validColorSpecs = validColorSpecs;
+        this.validColorSchemeSpecs = validColorSchemeSpecs;
 
         // drawing functions must be associated with model object since
         // geometries can't span multiple canvases
@@ -1840,13 +1998,13 @@ $3Dmol.GLModel = (function() {
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
-                if(validAtomSelectionSpecs.indexOf(s) === -1) {
+                if(!validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
             // report to console if this is not a valid style
             for (s in style) {
-                if(validAtomStyleSpecs.indexOf(s) === -1) {
+                if(!validAtomStyleSpecs.hasOwnProperty(s)) {
                     console.log('Unknown style ' + s);
                 }
             }
@@ -1930,7 +2088,7 @@ $3Dmol.GLModel = (function() {
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
-                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                if (!validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
@@ -1995,7 +2153,7 @@ $3Dmol.GLModel = (function() {
         this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
             var s;
             for (s in sel) {
-                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                if (!validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
@@ -2345,7 +2503,7 @@ $3Dmol.GLModel = (function() {
 
         this.addAtomSpecs = function(customAtomSpecs) {
             for (var i = 0; i < customAtomSpecs.length; i++) {
-                if (validAtomSelectionSpecs.indexOf(customAtomSpecs[i]) == -1) {
+                if (validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
                     validAtomSelectionSpecs.push(customAtomSpecs[i]);
                 }
             }
