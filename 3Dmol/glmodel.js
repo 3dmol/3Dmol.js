@@ -130,12 +130,12 @@ $3Dmol.GLModel = (function() {
         "x":{type:"number",valid:false}, // Atom's x coordinate
         "y":{type:"number",valid:false}, // Atom's y coordinate
         "z":{type:"number",valid:false}, // Atom's z coordinate
-        "color":{type:"ColorSpec",valid:true}, // Atom's color, as hex code
-        "surfaceColor":{type:"ColorSpec",valid:true}, // Hex code for color to be used for surface patch over this atom
-        "elem":{type:"Element",valid:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
+        "color":{type:"ColorSpec",gui:true}, // Atom's color, as hex code
+        "surfaceColor":{type:"ColorSpec",gui:true}, // Hex code for color to be used for surface patch over this atom
+        "elem":{type:"Element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
         "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
-        "chain":{type:"string",valid:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
-        "resi":{type:["array","number"],valid:true}, // Residue number 
+        "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+        "resi":{type:["array","number"],gui:true}, // Residue number 
         "icode":{type:"number",valid:false},
         "rescode":{type:"number",valid:false},
         "serial":{type:"number",valid:false}, // Atom's serial id numbermodels
@@ -151,7 +151,7 @@ $3Dmol.GLModel = (function() {
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
-        "reflectivity":{type:"number",valid:true}, //for describing the reflectivity of a model
+        "reflectivity":{type:"number",gui:true}, //for describing the reflectivity of a model
         "altLoc":{type:"invalid",valid:false}
     };
     function extend(obj1, src1) {
@@ -176,83 +176,83 @@ $3Dmol.GLModel = (function() {
     var validAtomSelectionSpecs = extend(validAtomSpecs,validExtras);
 
     var validLineSpec = {
-        "hidden":{type:"boolean",valid:true},
-        "linewidth":{type:"number",valid:true},
-        "colorscheme":{type:"ColorschemeSpec",valid:true},
-        "color":{type:"ColorSpec",valid:true},
+        "hidden":{type:"boolean",gui:true},
+        "linewidth":{type:"number",gui:true},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
 
     };
 
     var validCrossSpec = {
-        "hidden":{type:"boolean",valid:true},
-        "linewidth":{type:"number",valid:true},
-        "colorscheme":{type:"ColorschemeSpec",valid:true},
-        "color":{type:"ColorSpec",valid:true},
-        "radius":{type:"number",valid:true},
-        "scale":{type:"number",valid:true,range:[]},
+        "hidden":{type:"boolean",gui:true},
+        "linewidth":{type:"number",gui:true},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "radius":{type:"number",gui:true},
+        "scale":{type:"number",gui:true,range:[]},
     }
 
     var validStickSpec = {
-        "hidden":{type:"boolean",valid:true},
-        "colorscheme":{type:"ColorschemeSpec",valid:true},
-        "color":{type:"ColorSpec",valid:true},
-        "radius":{type:"number",valid:true},
-        "singleBonds":{type:"boolean",valid:true},
+        "hidden":{type:"boolean",gui:true},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "radius":{type:"number",gui:true},
+        "singleBonds":{type:"boolean",gui:true},
     }
 
     var validSphereSpec = {
-        "hidden":{type:"boolean",valid:true},
-        "singleBonds":{type:"boolean",valid:true},
-        "colorscheme":{type:"ColorschemeSpec",valid:true},
-        "color":{type:"ColorSpec",valid:true},
-        "radius":{type:"number",valid:true},
+        "hidden":{type:"boolean",gui:true},
+        "singleBonds":{type:"boolean",gui:true},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "radius":{type:"number",gui:true},
     }
 
     var validCartoonSpec = {
-        "style":{type:"string",valid:true},
-        "color":{type:"ColorSpec",valid:true},
-        "arrows":{type:"boolean",valid:true},
-        "ribbon":{type:"boolean",valid:true},
-        "hidden":{type:"boolean",valid:true},
-        "tubes":{type:"boolean",valid:true},
-        "thickness":{type:"number",valid:true},
-        "width":{type:"number",valid:true},
-        "opacity":{type:"number",valid:true},
+        "style":{type:"string",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "arrows":{type:"boolean",gui:true},
+        "ribbon":{type:"boolean",gui:true},
+        "hidden":{type:"boolean",gui:true},
+        "tubes":{type:"boolean",gui:true},
+        "thickness":{type:"number",gui:true},
+        "width":{type:"number",gui:true},
+        "opacity":{type:"number",gui:true},
     }
 
     var validAtomStyleSpecs = {
-        "line":{validItems:validLineSpec,valid:true}, // draw bonds as lines
-        "cross":{validItems:validCrossSpec,valid:true}, // draw atoms as crossed lines (aka stars)
-        "stick":{validItems:validStickSpec,valid:true}, // draw bonds as capped cylinders
-        "sphere":{validItems:validSphereSpec,valid:true}, // draw atoms as spheres
-        "cartoon":{validItems:validCartoonSpec,valid:true}, // draw cartoon representation of secondary structure
+        "line":{validItems:validLineSpec,gui:true}, // draw bonds as lines
+        "cross":{validItems:validCrossSpec,gui:true}, // draw atoms as crossed lines (aka stars)
+        "stick":{validItems:validStickSpec,gui:true}, // draw bonds as capped cylinders
+        "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
+        "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
         "colorfunc":{validItems:null,valid:false},
     };
 
     var validSurfaceSpecs = {
-        "opacity":{type:"number",valid:true},
-        "colorscheme":{type:"number",valid:true},
-        "color":{type:"number",valid:true},
-        "voldata":{type:"number",valid:true},
-        "volscheme":{type:"number",valid:true},
-        "map":{type:"number",valid:true},
+        "opacity":{type:"number",gui:true},
+        "colorscheme":{type:"number",gui:true},
+        "color":{type:"number",gui:true},
+        "voldata":{type:"number",gui:true},
+        "volscheme":{type:"number",gui:true},
+        "map":{type:"number",gui:true},
     }
 
     var validLabelResSpecs = {
-        "font":{type:"string",valid:true},
-        "fontSize":{type:"number",valid:true},
-        "fontColor":{type:"ColorSpec",valid:true},
-        "fontOpacity":{type:"number",valid:true},
-        "borderThickness":{type:"number",valid:true},
-        "borderColor":{type:"ColorSpec",valid:true},
-        "borderOpacity":{type:"number",valid:true},
-        "backgroundColor":{type:"ColorSpec",valid:true},
-        "backgroundOpacity":{type:"number",valid:true},
+        "font":{type:"string",gui:true},
+        "fontSize":{type:"number",gui:true},
+        "fontColor":{type:"ColorSpec",gui:true},
+        "fontOpacity":{type:"number",gui:true},
+        "borderThickness":{type:"number",gui:true},
+        "borderColor":{type:"ColorSpec",gui:true},
+        "borderOpacity":{type:"number",gui:true},
+        "backgroundColor":{type:"ColorSpec",gui:true},
+        "backgroundOpacity":{type:"number",gui:true},
         "position":{type:"array",valid:false},
-        "inFront":{type:"boolean",valid:true},
-        "showBackground":{type:"number",valid:true},
-        "fixed":{type:"boolean",valid:true},
-        "alignment":{type:"string",valid:true},
+        "inFront":{type:"boolean",gui:true},
+        "showBackground":{type:"number",gui:true},
+        "fixed":{type:"boolean",gui:true},
+        "alignment":{type:"string",gui:true},
     }
 
     // class functions

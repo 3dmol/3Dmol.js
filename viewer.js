@@ -35,7 +35,7 @@ var createOtherModelSpec = function(spec,type,selection_index){
         }).appendTo(attribute);
 
         $.each(validNames,function(key,value) {
-            if(value.valid){
+            if(value.gui){
                 attribute_name.append($("<option>").attr('value',key).text(key));
             }
         });
@@ -87,7 +87,7 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     }).appendTo(style_spec);
 
     $.each(validNames,function(key,value) {
-        if(value.valid){
+        if(value.gui){
             style_spec_name.append($("<option>").attr('value',key).text(key));
         }
     });
@@ -113,17 +113,17 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         });
 
         var validItems = validNames[style_spec_type].validItems;
-        console.log()
+
         var attribute_name = $('<select>',{
             class:'attribute_name',
         }).appendTo(attribute);
 
         $.each(validItems,function(key,value) {
-            if(value.valid){
+            if(value.gui){
                 attribute_name.append($("<option>").attr('value',key).text(key));
             }
         });
-        attribute_name.val(name)
+        attribute_name.val(name.toString())
         //delete button
         var delete_selection = $("<div/>",{
             html:"&#x2715;",
@@ -134,12 +134,42 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
             "click":function(){deleteStyleAttribute(this)},
         }).appendTo(attribute); 
 
-        var attribute_value = $('<span/>',{
-            class:'attribute_value',
-            text:value,
-            contenteditable:'true',
-        }).appendTo(attribute);
-                     
+        var itemIsDescrete = function(key){
+            if(key == "")
+                return false;
+            var type = validNames[style_spec_type].validItems[key].type;
+
+            return type == "boolean" || type == "ColorSpec" || type == "ColorschemeSpec"
+        }
+
+        if(itemIsDescrete(name)){
+            var validItemsValue;
+            var type = validNames[style_spec_type].validItems[name].type;
+            if(type=="boolean"){
+                validItemsValue = ["true","false"];
+            }else if(type == "ColorschemeSpec"){
+                validItemsValue =  glviewer.getModel().validColorschemeSpecs;
+            }else if(type == "ColorSpec"){
+                validItemsValue =  glviewer.getModel().validColorSpecs;
+            }
+
+            var attribute_value = $('<select>',{
+                class:'attribute_value',
+            }).appendTo(attribute);
+
+            $.each(validItemsValue,function(key,value) {
+                attribute_value.append($("<option>").attr('value',value).text(value));
+            });
+            console.log(value)
+            attribute_value.val(value.toString())
+            
+        }else{
+            var attribute_value = $('<span/>',{
+                class:'attribute_value',
+                text:value,
+                contenteditable:'true',
+            }).appendTo(attribute);
+        }
         return attribute;
     }
 
@@ -212,7 +242,6 @@ var createSelection = function(selection_object, selection_index,selection_boole
     }).appendTo(selection);
 
     $.each(validNames,function(key,value) {
-        console.log(value);
         selection_type.append($("<option>").attr('value',value).text(value));
     });
 
@@ -408,6 +437,10 @@ function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
 
+//this function will look through the dictionaries defined in glmodel and validate if the types are correct and return a dictionary with flags for the types that are incorecct
+var validateQuery = function(query){
+
+}
 //takes the search url string and makes a query object for it 
 var urlToQuery = function(url){
     var query = new Query();
@@ -486,7 +519,11 @@ var updateQueryFromHTML = function(){
             var otherList =$(list[li]).children(".style_spec_attributes")[0];
             otherList=$(otherList).children(".attribute")
             otherList.each(function(li){
-                object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].innerHTML;
+                var tag=object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].tagName
+                if(tag != "SELECT")
+                    object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].innerHTML;
+                else
+                    object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value;
             });
             
         });
@@ -526,7 +563,6 @@ var updateQueryFromHTML = function(){
 
     var selects = [];
     var listItems = $(".selection")
-    console.log(listItems)
     listItems.each(function(index,value){
         if(listItems.hasOwnProperty(index)){
             var getSubObject = function(index){
@@ -552,7 +588,6 @@ var updateQueryFromHTML = function(){
             var val=getSubObject(index);
             var selection = updateSelectionElements($(listItems[index]).children(".selection_spec")[0].innerHTML);
             var extended=extend(selection,val)
-            console.log(extended)
             selects.push(extended)
         }
     });
@@ -563,7 +598,6 @@ var updateQueryFromHTML = function(){
         }   
         return obj1;
     }
-    console.log(selects)
     var final_selections = [];
     var used=[]
     for(var sele in selects){
@@ -585,12 +619,12 @@ var updateQueryFromHTML = function(){
     query.selections=final_selections;
 }
 
+
 var query = urlToQuery(window.location.search.substring(1));
 //this function compresses the html object back into a url
 var render = function(){
     //calls update query
     updateQueryFromHTML();
-    console.log(queryToURL(query))
     setURL(queryToURL(query));
     buildHTMLTree(query)
 
@@ -617,14 +651,17 @@ var addModelSpec = function(type,selection){
         if(current_selection[type]==null)
             current_selection[type]={};
         else
-            console.log(type+" already defined for selection");//TODO error handling
+            console.err(type+" already defined for selection");//TODO error handling
+            
     }
     
     buildHTMLTree(query);
 }
 
 var addStyleSpec = function(model_spec){
-    query.selections[model_spec.dataset.index][model_spec.dataset.type][""]={};
+    var defaultKey = "";
+    var defaultValue = {};
+    query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
     buildHTMLTree(query);
 }
 
@@ -637,7 +674,9 @@ var deleteStyleSpec = function(spec){
 }
 
 var addOtherAttribute= function(spec){
-    query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][""]="";
+    var defaultKey = "";
+    var defaultValue = "";
+    query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
     buildHTMLTree(query)
 }
 
@@ -650,7 +689,10 @@ var deleteOtherAttribute = function(spec){
 }
 
 var addAttribute = function(style_spec){
-    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][""]="";
+    var defaultKey = "";
+    var defaultValue = "";
+    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
+
     buildHTMLTree(query);
 }
 
@@ -666,7 +708,6 @@ var deleteStyleAttribute = function(spec){
 var center = function(){
     glviewer.center({},1000,true);
 }
-
 
 //initializes the sidebar based on the given url
 var initSide = function(url){

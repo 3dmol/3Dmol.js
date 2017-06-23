@@ -113,10 +113,13 @@ li{
     white-space: pre;overflow:hidden;
 }
 
-.attribute_name{
+.attribute_name, select.attribute_value{
     height:30px;
 }
 
+select.attribute_value{
+    width:45%;
+}
 .attribute_value{
     float:right; 
 }
