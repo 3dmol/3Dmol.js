@@ -257,7 +257,6 @@ $3Dmol.Parsers = (function() {
         // compute, per residue, what the secondary structure is
         var chres = {}; // lookup by chain and resid
         var i, il, c, r; // i: used in for loop, il: length of atomsarray
-                         //
         var atom, val;
 
         //identify helices first
