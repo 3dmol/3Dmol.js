@@ -209,7 +209,7 @@ $3Dmol.GLModel = (function() {
     }
 
     var validCartoonSpec = {
-        "style":{type:"string",gui:true},
+        "style":{validItems:["trace","oval","rectangle","parabola","edged"],gui:true},
         "color":{type:"color",gui:true},
         "arrows":{type:"boolean",gui:true},
         "ribbon":{type:"boolean",gui:true},

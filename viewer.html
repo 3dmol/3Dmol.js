@@ -210,7 +210,6 @@ $(document).ready(function(){
             start_width=$("#sidenav").width();
         },
         resize:function(event,ui){
-            console.log($("#sidenav").width())
             glviewer.center();
             glviewer.translate(($("#sidenav").width()-start_width)/2,0,0,false);
             start_width=$("#sidenav").width();
