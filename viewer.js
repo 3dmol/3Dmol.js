@@ -34,7 +34,6 @@ var createOtherModelSpec = function(spec,type,selection_index){
         }).appendTo(attribute);
 
         $(attribute_name).change(function(){
-            console.log("other  change")
             render();
         })
 
@@ -84,8 +83,6 @@ var createOtherModelSpec = function(spec,type,selection_index){
             $.each(validItemsValue,function(key,value) {
                 attribute_value.append($("<option>").attr('value',value).text(value));
             });
-
-            console.log(attribute_value[0])
 
             attribute_value.val(value.toString())
             
@@ -695,7 +692,6 @@ var updateQueryFromHTML = function(){
     query.selections=final_selections;
 }
 
-
 var query = urlToQuery(window.location.search.substring(1));
 //this function compresses the html object back into a url
 var render = function(){
@@ -704,8 +700,8 @@ var render = function(){
     setURL(queryToURL(query));
     buildHTMLTree(query);
     run();
-
 }
+
 //these functions all edit the query object 
 var addSelection = function(){
     query.selections.push({})
@@ -723,12 +719,12 @@ var deleteSelection = function(spec){
 
 var addModelSpec = function(type,selection){
     var current_selection = query.selections[selection.dataset.index]
+
     if(type == "style" || type == "surface" || type == "labelres"){
         if(current_selection[type]==null)
             current_selection[type]={};
         else
             console.err(type+" already defined for selection");//TODO error handling
-            
     }
     
     buildHTMLTree(query);
