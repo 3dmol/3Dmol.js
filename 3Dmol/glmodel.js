@@ -105,7 +105,7 @@ $3Dmol.GLModel = (function() {
         "purple",
     ]
 
-    var validColorSchemeSpecs =[
+    var validColorschemeSpecs =[
         "greenCarbon",
         "cyanCarbon",
         "magentaCarbon",
@@ -130,9 +130,9 @@ $3Dmol.GLModel = (function() {
         "x":{type:"number",valid:false,step:.1}, // Atom's x coordinate
         "y":{type:"number",valid:false,step:.1}, // Atom's y coordinate
         "z":{type:"number",valid:false,step:.1}, // Atom's z coordinate
-        "color":{type:"ColorSpec",gui:true}, // Atom's color, as hex code
-        "surfaceColor":{type:"ColorSpec",gui:true}, // Hex code for color to be used for surface patch over this atom
-        "elem":{type:"Element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
+        "color":{type:"color",gui:true}, // Atom's color, as hex code
+        "surfaceColor":{type:"color",gui:true}, // Hex code for color to be used for surface patch over this atom
+        "elem":{type:"element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
         "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
         "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
         "resi":{type:"number",gui:true}, // Residue number 
@@ -178,24 +178,24 @@ $3Dmol.GLModel = (function() {
     var validLineSpec = {
         "hidden":{type:"boolean",gui:true},
         "linewidth":{type:"number",gui:true,step:.1},
-        "colorscheme":{type:"ColorschemeSpec",gui:true},
-        "color":{type:"ColorSpec",gui:true},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
 
     };
 
     var validCrossSpec = {
         "hidden":{type:"boolean",gui:true},
         "linewidth":{type:"number",gui:true,step:.1},
-        "colorscheme":{type:"ColorschemeSpec",gui:true},
-        "color":{type:"ColorSpec",gui:true},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
         "radius":{type:"number",gui:true,step:.1},
         "scale":{type:"number",gui:true,range:[],step:.1},
     }
 
     var validStickSpec = {
         "hidden":{type:"boolean",gui:true},
-        "colorscheme":{type:"ColorschemeSpec",gui:true},
-        "color":{type:"ColorSpec",gui:true},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
         "radius":{type:"number",gui:true,step:.1},
         "singleBonds":{type:"boolean",gui:true},
     }
@@ -203,14 +203,14 @@ $3Dmol.GLModel = (function() {
     var validSphereSpec = {
         "hidden":{type:"boolean",gui:true},
         "singleBonds":{type:"boolean",gui:true},
-        "colorscheme":{type:"ColorschemeSpec",gui:true},
-        "color":{type:"ColorSpec",gui:true},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
         "radius":{type:"number",gui:true,step:.1},
     }
 
     var validCartoonSpec = {
         "style":{type:"string",gui:true},
-        "color":{type:"ColorSpec",gui:true},
+        "color":{type:"color",gui:true},
         "arrows":{type:"boolean",gui:true},
         "ribbon":{type:"boolean",gui:true},
         "hidden":{type:"boolean",gui:true},
@@ -231,8 +231,8 @@ $3Dmol.GLModel = (function() {
 
     var validSurfaceSpecs = {
         "opacity":{type:"number",gui:true,step:.1},
-        "colorscheme":{type:"ColorschemeSpec",gui:true},
-        "color":{type:"ColorSpec",gui:true},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
         "voldata":{type:"number",gui:false},
         "volscheme":{type:"number",gui:false},
         "map":{type:"number",gui:false},
@@ -241,12 +241,12 @@ $3Dmol.GLModel = (function() {
     var validLabelResSpecs = {
         "font":{type:"string",gui:true},
         "fontSize":{type:"number",gui:true,step:1},
-        "fontColor":{type:"ColorSpec",gui:true},
+        "fontColor":{type:"color",gui:true},
         "fontOpacity":{type:"number",gui:true,step:.1},
         "borderThickness":{type:"number",gui:true,step:.1},
-        "borderColor":{type:"ColorSpec",gui:true},
+        "borderColor":{type:"color",gui:true},
         "borderOpacity":{type:"number",gui:true,step:.1},
-        "backgroundColor":{type:"ColorSpec",gui:true},
+        "backgroundColor":{type:"color",gui:true},
         "backgroundOpacity":{type:"number",gui:true,step:.1},
         "position":{type:"array",valid:false},
         "inFront":{type:"boolean",gui:true},
@@ -287,7 +287,7 @@ $3Dmol.GLModel = (function() {
         this.validLabelResSpecs = validLabelResSpecs;
         this.validElements = validElements;
         this.validColorSpecs = validColorSpecs;
-        this.validColorSchemeSpecs = validColorSchemeSpecs;
+        this.validColorschemeSpecs = validColorschemeSpecs;
 
         // drawing functions must be associated with model object since
         // geometries can't span multiple canvases

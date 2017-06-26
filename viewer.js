@@ -17,8 +17,7 @@ var createOtherModelSpec = function(spec,type,selection_index){
     var attributes = $('<ul/>',{
         "class":type.toLowerCase()+'_attributes',
     });
-
-    var createAttribute = function(name,value){
+    var createAttribute = function(name,value,type){
         var attribute = $('<li/>',{
             class:'attribute'
         });
@@ -56,19 +55,52 @@ var createOtherModelSpec = function(spec,type,selection_index){
             "click":function(){deleteOtherAttribute(this)},
         }).appendTo(attribute); 
 
-        var attribute_value = $('<input/>',{
-            class:'attribute_value',
-            value:value,
-            contenteditable:'true',
-        }).appendTo(attribute);
+        var itemIsDescrete = function(key){
+            if(key == "")
+                return false;
+            var type = validNames[key].type;
+            return type == "boolean" || type == "color" || type == "colorscheme"
+        }
+
+        var attribute_value;
+        if(itemIsDescrete(name)){
+            var validItemsValue;
+            var type = validNames[name].type.toLowerCase();
+
+            if(type=="boolean"){
+                validItemsValue = ["true","false"];
+            }else if(type == "colorscheme"){
+                validItemsValue =  glviewer.getModel().validColorschemeSpecs;
+            }else if(type == "color"){
+                validItemsValue =  glviewer.getModel().validColorSpecs;
+            }
+
+            var attribute_value = $('<select/>',{
+                class:'attribute_value',
+                value:value,
+                contenteditable:'true',
+            }).appendTo(attribute);
+
+            $.each(validItemsValue,function(key,value) {
+                attribute_value.append($("<option>").attr('value',value).text(value));
+            });
+
+            console.log(attribute_value[0])
+
+            attribute_value.val(value.toString())
+            
+        }else{
+            attribute_value = $('<input/>',{
+                class:'attribute_value',
+                value:value,
+            }).appendTo(attribute);
+        }
 
         attribute_value.change(function(){
-            console.log("attr render")
             render();
         });
 
-        console.log(validNames, name)
-        if(attribute_value.prop("tagName") == "INPUT" && validNames[name.toString()].type =="number"){
+        if(name.toString()!="" &&  attribute_value.prop("tagName") == "INPUT" && validNames[name.toString()].type =="number"){
             validNames[name.toString()].type =="number"
             attribute_value.attr("type","number")
             attribute_value.attr("step",validNames[name.toString()].step)
@@ -78,7 +110,7 @@ var createOtherModelSpec = function(spec,type,selection_index){
     }
 
     for(var attribute_index in spec){
-        createAttribute(attribute_index,spec[attribute_index]).appendTo(attributes);
+        createAttribute(attribute_index,spec[attribute_index],type).appendTo(attributes);
     }
 
     var add_attribute = $('<button/>',{
@@ -164,20 +196,21 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         var itemIsDescrete = function(key){
             if(key == "")
                 return false;
+
             var type = validNames[style_spec_type].validItems[key].type;
 
-            return type == "boolean" || type == "ColorSpec" || type == "ColorschemeSpec"
+            return type == "boolean" || type == "color" || type == "colorscheme"
         }
 
         var attribute_value;
         if(itemIsDescrete(name)){
             var validItemsValue;
-            var type = validNames[style_spec_type].validItems[name].type;
+            var type = validItems[name].type.toLowerCase();
             if(type=="boolean"){
                 validItemsValue = ["true","false"];
-            }else if(type == "ColorschemeSpec"){
+            }else if(type == "colorscheme"){
                 validItemsValue =  glviewer.getModel().validColorschemeSpecs;
-            }else if(type == "ColorSpec"){
+            }else if(type == "color"){
                 validItemsValue =  glviewer.getModel().validColorSpecs;
             }
 
@@ -186,13 +219,13 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
             }).appendTo(attribute);
 
             attribute_value.change(function(){
-                console.log("style render")
                 render();
             })
 
             $.each(validItemsValue,function(key,value) {
                 attribute_value.append($("<option>").attr('value',value).text(value));
             });
+            console.log(value)
             attribute_value.val(value.toString())
             
         }else{
@@ -205,8 +238,8 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
                 render();
             })
         }
-        console.log(attribute_value.prop("tagName"))
-        if(attribute_value.prop("tagName") == "INPUT" && validItems[name.toString()].type =="number"){
+        console.log(name.toString())
+        if(name.toString()!="" && attribute_value.prop("tagName") == "INPUT" && validItems[name.toString()].type =="number"){
             validItems[name.toString()].type =="number"
             attribute_value.attr("type","number")
             attribute_value.attr("step",validItems[name.toString()].step)
