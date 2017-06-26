@@ -183,7 +183,15 @@ $3Dmol.autoload=function(viewer,callback){
                     glviewer.addModel(moldata, type, options);        
                 }
 
-                applyStyles(glviewer);              
+                applyStyles(glviewer);
+                if(viewerdiv.data("callback")) {
+                    //evaluate javascript in the string, if it resolves to a function,
+                    //call it with the viewer
+                    var runres = eval(viewerdiv.data("callback"));
+                    if(typeof(runres) == 'function') {
+                        runres(glviewer);
+                    }
+                }                
                 if (callback) 
                     callback(glviewer);
             }
