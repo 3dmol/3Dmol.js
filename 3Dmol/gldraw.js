@@ -595,6 +595,14 @@ $3Dmol.GLDraw = (function() {
         geoGroup.vertices += n_verts;
     };
 
+    //returns the center of the selection that is passed to this function
+    var getCenter = function(sel){
+        //todo: look in zoomto at how it is done there
+        //this may just take a list of all of the selected 
+        //atoms and generate an average coordinate and return that
+
+    }
+
     /** Create a cone 
      * @function $3Dmol.GLDraw.drawCone
      * @param {geometry}
@@ -611,6 +619,9 @@ $3Dmol.GLDraw = (function() {
     draw.drawCone = function(geo, from, to, radius, color) {
         if (!from || !to)
             return;
+        console.log(from)
+        console.log(to)
+        //check if from and to do not contain x,y,z and if  so generate a center based on the passed selections
 
         color = color || {r:0, g:0, b:0};
 

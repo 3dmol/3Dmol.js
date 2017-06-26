@@ -118,10 +118,11 @@ li{
 }
 
 select.attribute_value{
-    width:45%;
+    width:46%;
 }
 .attribute_value{
     float:right; 
+    height:16px;
 }
 
 .delete_attribute{
@@ -214,9 +215,9 @@ input{
 .selection_spec{
     margin-bottom: 10px;
     border-radius: 15px;
-    width:54%;
+    width:50%;
+    margin-left:10px;
     margin:0px;
-    margin-left:30%;
     position:relative;
 }
 
