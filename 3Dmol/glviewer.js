@@ -1805,6 +1805,15 @@ $3Dmol.GLViewer = (function() {
             return this;
         }
 
+        //gets the center of the selection 
+        var getSelectionCenter = function(sel){
+            var atoms = getAtomsFromSel(sel);
+            var extent = $3Dmol.getExtent(atoms)
+
+            var center = {x:extent[0][0]+(extent[1][0]-extent[0][0])/2,y:extent[0][1]+(extent[1][1]-extent[0][1])/2,z:extent[0][2]+(extent[1][2]-extent[0][2])/2}
+            return center;
+        }
+
         /**
          * Create and add sphere shape. This method provides a shorthand 
          * way to create a spherical shape object
@@ -1820,6 +1829,10 @@ $3Dmol.GLViewer = (function() {
          */
         this.addSphere = function(spec) {
             spec = spec || {};
+            if(!spec.center.hasOwnProperty("x") || !spec.center.hasOwnProperty("y") || !spec.center.hasOwnProperty("z")){
+                spec.center=getSelectionCenter(spec.center);
+            }
+
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addSphere(spec);
@@ -1854,6 +1867,14 @@ $3Dmol.GLViewer = (function() {
          */
         this.addArrow = function(spec) {
             spec = spec || {};
+           
+            if(!spec.start.hasOwnProperty("x") || !spec.start.hasOwnProperty("y") || !spec.start.hasOwnProperty("z")){
+                spec.start=getSelectionCenter(spec.start);
+            }
+            if(!spec.end.hasOwnProperty("x") || !spec.end.hasOwnProperty("y") || !spec.end.hasOwnProperty("z")){
+                spec.end=getSelectionCenter(spec.end);
+            }
+           
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addArrow(spec);
@@ -1899,6 +1920,14 @@ $3Dmol.GLViewer = (function() {
          */
         this.addCylinder = function(spec) {
             spec = spec || {};
+
+            if(!spec.start.hasOwnProperty("x") || !spec.start.hasOwnProperty("y") || !spec.start.hasOwnProperty("z")){
+                spec.start=getSelectionCenter(spec.start);
+            }
+            if(!spec.end.hasOwnProperty("x") || !spec.end.hasOwnProperty("y") || !spec.end.hasOwnProperty("z")){
+                spec.end=getSelectionCenter(spec.end);
+            }
+            
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             if(spec.dashed)
@@ -1932,6 +1961,14 @@ $3Dmol.GLViewer = (function() {
          */
         this.addLine = function(spec) {
             spec = spec || {};
+
+            if(!spec.start.hasOwnProperty("x") || !spec.start.hasOwnProperty("y") || !spec.start.hasOwnProperty("z")){
+                spec.start=getSelectionCenter(spec.start);
+            }
+            if(!spec.end.hasOwnProperty("x") || !spec.end.hasOwnProperty("y") || !spec.end.hasOwnProperty("z")){
+                spec.end=getSelectionCenter(spec.end);
+            }
+            
             spec.wireframe = true;
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
