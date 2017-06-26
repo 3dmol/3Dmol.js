@@ -127,31 +127,31 @@ $3Dmol.GLModel = (function() {
 
     var validAtomSpecs = {
         "resn":{type:"string",valid :true}, // Parent residue name
-        "x":{type:"number",valid:false}, // Atom's x coordinate
-        "y":{type:"number",valid:false}, // Atom's y coordinate
-        "z":{type:"number",valid:false}, // Atom's z coordinate
+        "x":{type:"number",valid:false,step:.1}, // Atom's x coordinate
+        "y":{type:"number",valid:false,step:.1}, // Atom's y coordinate
+        "z":{type:"number",valid:false,step:.1}, // Atom's z coordinate
         "color":{type:"ColorSpec",gui:true}, // Atom's color, as hex code
         "surfaceColor":{type:"ColorSpec",gui:true}, // Hex code for color to be used for surface patch over this atom
         "elem":{type:"Element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
         "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
         "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
-        "resi":{type:["array","number"],gui:true}, // Residue number 
-        "icode":{type:"number",valid:false},
-        "rescode":{type:"number",valid:false},
-        "serial":{type:"number",valid:false}, // Atom's serial id numbermodels
+        "resi":{type:"number",gui:true}, // Residue number 
+        "icode":{type:"number",valid:false,step:.1},
+        "rescode":{type:"number",valid:false,step:.1},
+        "serial":{type:"number",valid:false,step:.1}, // Atom's serial id numbermodels
         "atom":{type:"string",valid:false}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds":{type:"array",valid:false}, // Array of atom ids this atom is bonded to
         "ss":{type:"string",valid:false}, // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
         "singleBonds":{type:"boolean",valid:false}, // true if this atom forms only single bonds or no bonds at all
         "bondOrder":{type:"array",valid:false}, // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
         "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
-        "b":{type:"number",valid:false}, // Atom b factor data
+        "b":{type:"number",valid:false,step:.1}, // Atom b factor data
         "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
         "clickable":{type:"boolean",valid:false}, // Set this flag to true to enable click selection handling for this atom
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
-        "reflectivity":{type:"number",gui:true}, //for describing the reflectivity of a model
+        "reflectivity":{type:"number",gui:true,step:.1}, //for describing the reflectivity of a model
         "altLoc":{type:"invalid",valid:false}
     };
     function extend(obj1, src1) {
@@ -177,7 +177,7 @@ $3Dmol.GLModel = (function() {
 
     var validLineSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:true},
+        "linewidth":{type:"number",gui:true,step:.1},
         "colorscheme":{type:"ColorschemeSpec",gui:true},
         "color":{type:"ColorSpec",gui:true},
 
@@ -185,18 +185,18 @@ $3Dmol.GLModel = (function() {
 
     var validCrossSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:true},
+        "linewidth":{type:"number",gui:true,step:.1},
         "colorscheme":{type:"ColorschemeSpec",gui:true},
         "color":{type:"ColorSpec",gui:true},
-        "radius":{type:"number",gui:true},
-        "scale":{type:"number",gui:true,range:[]},
+        "radius":{type:"number",gui:true,step:.1},
+        "scale":{type:"number",gui:true,range:[],step:.1},
     }
 
     var validStickSpec = {
         "hidden":{type:"boolean",gui:true},
         "colorscheme":{type:"ColorschemeSpec",gui:true},
         "color":{type:"ColorSpec",gui:true},
-        "radius":{type:"number",gui:true},
+        "radius":{type:"number",gui:true,step:.1},
         "singleBonds":{type:"boolean",gui:true},
     }
 
@@ -205,7 +205,7 @@ $3Dmol.GLModel = (function() {
         "singleBonds":{type:"boolean",gui:true},
         "colorscheme":{type:"ColorschemeSpec",gui:true},
         "color":{type:"ColorSpec",gui:true},
-        "radius":{type:"number",gui:true},
+        "radius":{type:"number",gui:true,step:.1},
     }
 
     var validCartoonSpec = {
@@ -215,9 +215,9 @@ $3Dmol.GLModel = (function() {
         "ribbon":{type:"boolean",gui:true},
         "hidden":{type:"boolean",gui:true},
         "tubes":{type:"boolean",gui:true},
-        "thickness":{type:"number",gui:true},
-        "width":{type:"number",gui:true},
-        "opacity":{type:"number",gui:true},
+        "thickness":{type:"number",gui:true,step:.1},
+        "width":{type:"number",gui:true,step:.1},
+        "opacity":{type:"number",gui:true,step:.1},
     }
 
     var validAtomStyleSpecs = {
@@ -230,24 +230,24 @@ $3Dmol.GLModel = (function() {
     };
 
     var validSurfaceSpecs = {
-        "opacity":{type:"number",gui:true},
-        "colorscheme":{type:"number",gui:true},
-        "color":{type:"number",gui:true},
-        "voldata":{type:"number",gui:true},
-        "volscheme":{type:"number",gui:true},
-        "map":{type:"number",gui:true},
+        "opacity":{type:"number",gui:true,step:.1},
+        "colorscheme":{type:"ColorschemeSpec",gui:true},
+        "color":{type:"ColorSpec",gui:true},
+        "voldata":{type:"number",gui:false},
+        "volscheme":{type:"number",gui:false},
+        "map":{type:"number",gui:false},
     }
 
     var validLabelResSpecs = {
         "font":{type:"string",gui:true},
-        "fontSize":{type:"number",gui:true},
+        "fontSize":{type:"number",gui:true,step:1},
         "fontColor":{type:"ColorSpec",gui:true},
-        "fontOpacity":{type:"number",gui:true},
-        "borderThickness":{type:"number",gui:true},
+        "fontOpacity":{type:"number",gui:true,step:.1},
+        "borderThickness":{type:"number",gui:true,step:.1},
         "borderColor":{type:"ColorSpec",gui:true},
-        "borderOpacity":{type:"number",gui:true},
+        "borderOpacity":{type:"number",gui:true,step:.1},
         "backgroundColor":{type:"ColorSpec",gui:true},
-        "backgroundOpacity":{type:"number",gui:true},
+        "backgroundOpacity":{type:"number",gui:true,step:.1},
         "position":{type:"array",valid:false},
         "inFront":{type:"boolean",gui:true},
         "showBackground":{type:"number",gui:true},

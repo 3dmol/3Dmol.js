@@ -64,8 +64,15 @@ var createOtherModelSpec = function(spec,type,selection_index){
 
         attribute_value.change(function(){
             console.log("attr render")
-                render();
-            })
+            render();
+        });
+
+        console.log(validNames, name)
+        if(attribute_value.prop("tagName") == "INPUT" && validNames[name.toString()].type =="number"){
+            validNames[name.toString()].type =="number"
+            attribute_value.attr("type","number")
+            attribute_value.attr("step",validNames[name.toString()].step)
+        }
 
         return attribute;
     }
@@ -131,15 +138,19 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         var attribute_name = $('<select>',{
             class:'attribute_name',
         }).appendTo(attribute);
-        attribute_name.change(function(){
-            render();
-        })
+
         $.each(validItems,function(key,value) {
             if(value.gui){
                 attribute_name.append($("<option>").attr('value',key).text(key));
             }
         });
+
+        attribute_name.change(function(){
+            render();
+        })
+
         attribute_name.val(name.toString())
+        
         //delete button
         var delete_selection = $("<div/>",{
             html:"&#x2715;",
@@ -158,6 +169,7 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
             return type == "boolean" || type == "ColorSpec" || type == "ColorschemeSpec"
         }
 
+        var attribute_value;
         if(itemIsDescrete(name)){
             var validItemsValue;
             var type = validNames[style_spec_type].validItems[name].type;
@@ -169,7 +181,7 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
                 validItemsValue =  glviewer.getModel().validColorSpecs;
             }
 
-            var attribute_value = $('<select>',{
+            attribute_value = $('<select>',{
                 class:'attribute_value',
             }).appendTo(attribute);
 
@@ -184,7 +196,7 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
             attribute_value.val(value.toString())
             
         }else{
-            var attribute_value = $('<input/>',{
+            attribute_value = $('<input/>',{
                 class:'attribute_value',
                 value:value,
             }).appendTo(attribute);
@@ -193,7 +205,15 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
                 render();
             })
         }
-        return attribute;
+        console.log(attribute_value.prop("tagName"))
+        if(attribute_value.prop("tagName") == "INPUT" && validItems[name.toString()].type =="number"){
+            validItems[name.toString()].type =="number"
+            attribute_value.attr("type","number")
+            attribute_value.attr("step",validItems[name.toString()].step)
+        }
+
+
+        return attribute;        
     }
 
     for(var attribute_index in style_spec_object){
