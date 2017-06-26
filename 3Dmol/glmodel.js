@@ -1484,9 +1484,6 @@ $3Dmol.GLModel = (function() {
             viewer.vibrate(10, 1);
             viewer.animate({loop: "forward",reps: 1});
 
-
-                viewer.addSphere({center:{},radius:10.0,color:'red'});
-         
             viewer.zoomTo();
                   viewer.render();
               });            
