@@ -107,7 +107,7 @@ module.exports = function(grunt) {
                     'create_source_map': 'script.map'                 
                 }
             },            
-            /*jquery : {
+            jquery : {
                 closurePath : 'lib/closure_compiler',
                 js : ['js/jquery-3.2.1.js'],
                 jsOutputFile : 'build/jquery-3.2.1-min-pre.js',
@@ -118,7 +118,7 @@ module.exports = function(grunt) {
                     'warning_level': 'DEFAULT',
                     'language_in': 'ECMASCRIPT5'
                 }
-            },*/
+            },
             mmtf : {
                 closurePath : 'lib/closure_compiler',
                 js : ['js/mmtf.js'],

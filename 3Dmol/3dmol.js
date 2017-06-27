@@ -312,7 +312,7 @@ $3Dmol.multiLineString = function(f) {
 $3Dmol.syncSurface = false;
 
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
-// no way of checking for this feature directly, so must do a brower check
+// no way of checking for this feature directly, so must do a browser check
 if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
         window.navigator.userAgent.indexOf('Trident/') >= 0) {
     $3Dmol.syncSurface = true; // can't use webworkers
