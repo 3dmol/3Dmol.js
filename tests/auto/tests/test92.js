@@ -1,4 +1,3 @@
-
           $3Dmol.download("pdb:4UAA",viewer,{},function(){  
             viewer.setStyle({},{stick:{}});
 
@@ -9,7 +8,7 @@
                                   color:'black',
                                   fromCap:false,
                                   toCap:false});
-                                   viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{}});
+                viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{}});
 
                 viewer.addArrow({
                       start: {},
@@ -23,7 +22,7 @@
                           viewer.render( );
                       }
                   });
-                
+               
             viewer.zoomTo();
             viewer.render();
               });   

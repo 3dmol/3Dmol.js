@@ -133,6 +133,19 @@ $3Dmol.GLViewer = (function() {
             return max+1;
         };
 
+        //updates font size of labels based on camera zoom
+        var setLabelStyles = function(){
+            for(var label in labels){
+                var label = labels[label];
+                console.log(label)
+                console.log(camera)
+                console.log(scene)
+                if(label.stylespec.scale){
+                    //update font size
+                }
+            }
+        }
+
         var setSlabAndFog = function() {
             
             var center = camera.position.z - rotationGroup.position.z;
@@ -170,6 +183,7 @@ $3Dmol.GLViewer = (function() {
                 return;
             // var time = new Date();
             setSlabAndFog();
+            setLabelStyles();
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
@@ -419,6 +433,8 @@ $3Dmol.GLViewer = (function() {
             ev.preventDefault();
             if (!scene)
                 return;
+
+
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
             var mult = 1.0;
             if(ev.originalEvent.ctrlKey) {
@@ -1806,12 +1822,15 @@ $3Dmol.GLViewer = (function() {
         }
 
         //gets the center of the selection 
-        var getSelectionCenter = function(sel){
-            var atoms = getAtomsFromSel(sel);
-            var extent = $3Dmol.getExtent(atoms)
+        var getSelectionCenter = function(spec){
+            if(spec.hasOwnProperty("x") && spec.hasOwnProperty("y") && spec.hasOwnProperty("z"))
+                return spec;
+            var atoms = getAtomsFromSel(spec);
+            if(atoms.length == 0)
+                return {x:0,y:0,z:0};
 
-            var center = {x:extent[0][0]+(extent[1][0]-extent[0][0])/2,y:extent[0][1]+(extent[1][1]-extent[0][1])/2,z:extent[0][2]+(extent[1][2]-extent[0][2])/2}
-            return center;
+            var extent = $3Dmol.getExtent(atoms)
+            return {x:extent[0][0]+(extent[1][0]-extent[0][0])/2,y:extent[0][1]+(extent[1][1]-extent[0][1])/2,z:extent[0][2]+(extent[1][2]-extent[0][2])/2};
         }
 
         /**
@@ -1829,10 +1848,9 @@ $3Dmol.GLViewer = (function() {
          */
         this.addSphere = function(spec) {
             spec = spec || {};
-            if(!spec.center.hasOwnProperty("x") || !spec.center.hasOwnProperty("y") || !spec.center.hasOwnProperty("z")){
-                spec.center=getSelectionCenter(spec.center);
-            }
-
+            console.log(spec.center)
+            spec.center = getSelectionCenter(spec.center);
+            console.log(spec.center)
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addSphere(spec);
@@ -1867,14 +1885,15 @@ $3Dmol.GLViewer = (function() {
          */
         this.addArrow = function(spec) {
             spec = spec || {};
-           
-            if(!spec.start.hasOwnProperty("x") || !spec.start.hasOwnProperty("y") || !spec.start.hasOwnProperty("z")){
-                spec.start=getSelectionCenter(spec.start);
-            }
-            if(!spec.end.hasOwnProperty("x") || !spec.end.hasOwnProperty("y") || !spec.end.hasOwnProperty("z")){
-                spec.end=getSelectionCenter(spec.end);
-            }
-           
+
+            console.log(spec.start)
+            console.log(spec.end)      
+            
+            spec.start = getSelectionCenter(spec.start)
+            spec.end = getSelectionCenter(spec.end)           
+            
+            console.log(spec.start)
+            console.log(spec.end)
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addArrow(spec);
@@ -1921,12 +1940,11 @@ $3Dmol.GLViewer = (function() {
         this.addCylinder = function(spec) {
             spec = spec || {};
 
-            if(!spec.start.hasOwnProperty("x") || !spec.start.hasOwnProperty("y") || !spec.start.hasOwnProperty("z")){
-                spec.start=getSelectionCenter(spec.start);
-            }
-            if(!spec.end.hasOwnProperty("x") || !spec.end.hasOwnProperty("y") || !spec.end.hasOwnProperty("z")){
-                spec.end=getSelectionCenter(spec.end);
-            }
+            console.log(spec)   
+            
+            spec.start = getSelectionCenter(spec.start)
+            spec.end = getSelectionCenter(spec.end)   
+            console.log(spec)     
             
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
@@ -1962,13 +1980,14 @@ $3Dmol.GLViewer = (function() {
         this.addLine = function(spec) {
             spec = spec || {};
 
-            if(!spec.start.hasOwnProperty("x") || !spec.start.hasOwnProperty("y") || !spec.start.hasOwnProperty("z")){
-                spec.start=getSelectionCenter(spec.start);
-            }
-            if(!spec.end.hasOwnProperty("x") || !spec.end.hasOwnProperty("y") || !spec.end.hasOwnProperty("z")){
-                spec.end=getSelectionCenter(spec.end);
-            }
+            console.log(spec.start)
+            console.log(spec.end)      
             
+            spec.start = getSelectionCenter(spec.start)
+            spec.end = getSelectionCenter(spec.end)    
+            console.log(spec.start)
+            console.log(spec.end)     
+
             spec.wireframe = true;
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
