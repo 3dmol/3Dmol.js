@@ -133,6 +133,16 @@ $3Dmol.GLViewer = (function() {
             return max+1;
         };
 
+        //updates font size of labels based on camera zoom
+        var setLabelStyles = function(){
+            for(var label in labels){
+                var label = labels[label];
+                if(label.stylespec.scale){
+                    //update font size
+                }
+            }
+        }
+
         var setSlabAndFog = function() {
             
             var center = camera.position.z - rotationGroup.position.z;
@@ -170,6 +180,7 @@ $3Dmol.GLViewer = (function() {
                 return;
             // var time = new Date();
             setSlabAndFog();
+            setLabelStyles();
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
@@ -419,6 +430,8 @@ $3Dmol.GLViewer = (function() {
             ev.preventDefault();
             if (!scene)
                 return;
+
+
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
             var mult = 1.0;
             if(ev.originalEvent.ctrlKey) {
@@ -1805,6 +1818,18 @@ $3Dmol.GLViewer = (function() {
             return this;
         }
 
+        //gets the center of the selection 
+        var getSelectionCenter = function(spec){
+            if(spec.hasOwnProperty("x") && spec.hasOwnProperty("y") && spec.hasOwnProperty("z"))
+                return spec;
+            var atoms = getAtomsFromSel(spec);
+            if(atoms.length == 0)
+                return {x:0,y:0,z:0};
+
+            var extent = $3Dmol.getExtent(atoms)
+            return {x:extent[0][0]+(extent[1][0]-extent[0][0])/2,y:extent[0][1]+(extent[1][1]-extent[0][1])/2,z:extent[0][2]+(extent[1][2]-extent[0][2])/2};
+        }
+
         /**
          * Create and add sphere shape. This method provides a shorthand 
          * way to create a spherical shape object
@@ -1820,6 +1845,9 @@ $3Dmol.GLViewer = (function() {
          */
         this.addSphere = function(spec) {
             spec = spec || {};
+            console.log(spec.center)
+            spec.center = getSelectionCenter(spec.center);
+            console.log(spec.center)
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addSphere(spec);
@@ -1854,6 +1882,15 @@ $3Dmol.GLViewer = (function() {
          */
         this.addArrow = function(spec) {
             spec = spec || {};
+
+            console.log(spec.start)
+            console.log(spec.end)      
+            
+            spec.start = getSelectionCenter(spec.start)
+            spec.end = getSelectionCenter(spec.end)           
+            
+            console.log(spec.start)
+            console.log(spec.end)
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addArrow(spec);
@@ -1899,6 +1936,13 @@ $3Dmol.GLViewer = (function() {
          */
         this.addCylinder = function(spec) {
             spec = spec || {};
+
+            console.log(spec)   
+            
+            spec.start = getSelectionCenter(spec.start)
+            spec.end = getSelectionCenter(spec.end)   
+            console.log(spec)     
+            
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             if(spec.dashed)
@@ -1932,6 +1976,15 @@ $3Dmol.GLViewer = (function() {
          */
         this.addLine = function(spec) {
             spec = spec || {};
+
+            console.log(spec.start)
+            console.log(spec.end)      
+            
+            spec.start = getSelectionCenter(spec.start)
+            spec.end = getSelectionCenter(spec.end)    
+            console.log(spec.start)
+            console.log(spec.end)     
+
             spec.wireframe = true;
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;

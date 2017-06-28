@@ -24,16 +24,16 @@
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: rgba(0,0,0,.5);
-    overflow: hidden;
+    background-color: rgba(230,230,230,.5);
     transition: 0.5s;
     padding:0;
     text-align:center;
 }
+
 /* sub headings like file/pdb/url and selections*/
 h3{ 
     text-align:left;
-    background-color:rgba(0,0,102,.5);
+    background-color:rgba(0,0,122,.5);
     margin:5px;
     padding-left:10px;
     color:white;
@@ -44,7 +44,7 @@ h3{
     text-align:left;
     /*position : relative; does not seem necessary*/
     color:white;
-    background-color:rgba(0,0,102,.5);
+    background-color:rgba(0,0,122,.5);
     margin:8px;
     margin-bottom:-20px;
     padding-left:20px;
@@ -66,7 +66,6 @@ this may change*/
     width:92%;
     height: 25px;
     background-color: white;
-
 }
 
 .add_attribute{
@@ -99,7 +98,6 @@ this may change*/
 li{
     margin:10px;
     padding:4px;
-    background-color:#f2f2f2;
     list-style:none;
 }
 /* attribute styleing*/
@@ -110,7 +108,8 @@ li{
     padding:5px;
     background-color: white;
     display:inline-block;
-    white-space: pre;overflow:hidden;
+    white-space: pre;
+    overflow:hidden;
 }
 
 .attribute_name, select.attribute_value{
@@ -142,7 +141,7 @@ select.attribute_value{
 }
 
 #selections{
-    height:80%;
+    height: 100%;
 }
 
 .style_spec{
@@ -151,9 +150,7 @@ select.attribute_value{
 
 #selection_list{
     list-style: none;
-    overflow:hidden; 
-    overflow-y:scroll;
-    height:95%;
+    margin-bottom: 70px;
 }
 
 #container{
@@ -161,16 +158,14 @@ select.attribute_value{
     height:90%;
 }
 
-ul{
-    height:100%;
-}
 /* selection list element*/
 .selection{
     border-color:gray;
     border-style:solid;
-    background-color:gray;
+    background-color:white;
     border-radius: 15px;
     padding-top:15px;
+
 }
 
 #selection_list li .selection_spec{
@@ -235,4 +230,27 @@ input{
 
 select{
     font-size:14px;
+}
+
+#fixed_bottom{
+    bottom:0;
+    background-color:white;
+    width:100%;
+    height:70px;
+    position: absolute;
+}
+.option{
+    margin:0px;
+}
+
+#list{
+    height:100%;
+    margin-top:40px;
+    overflow: hidden;
+    overflow-y:scroll;
+    margin-bottom:70px;
+}
+
+#header{
+    font-size: 32px;
 }

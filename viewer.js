@@ -13,101 +13,115 @@ var augmentSelection = function(selection){
     return copiedObject;
 }
 
+var createAttribute = function(name,value,parent){
+    var attribute = $('<li/>',{
+        class:'attribute'
+    });
+    
+    var other=false;
+    var validNames;
+    if(parent.type == "line"  || parent.type == "stick" || parent.type== "cross" || parent.type == "sphere" || parent.type == "cartoon"){
+        validNames=glviewer.getModel().validAtomStyleSpecs[parent.type].validItems;
+        other=false;
+    }else if(parent.type.toLowerCase() == "surface"){
+        validNames = glviewer.getModel().validSurfaceSpecs;
+        other=true;
+    }else if(parent.type.toLowerCase() == "labelres"){
+        validNames = glviewer.getModel().validLabelResSpecs;
+        other=true;
+    }
+
+    var attribute_name = $('<select>',{
+        class:'attribute_name',
+    }).appendTo(attribute);
+
+    $(attribute_name).change(function(){
+        render();
+    })
+
+    $.each(validNames,function(key,value) {
+        if(value.gui){
+            attribute_name.append($("<option>").attr('value',key).text(key));
+        }
+    });
+
+    attribute_name.val(name.toString())
+    //delete button
+    var delete_selection = $("<span/>",{
+        html:"&#x2715;",
+        class:"delete_attribute",
+        "data-index":parent.index,
+        "data-attr":name,
+        "data-type":parent.type.toLowerCase(),
+        "click":function(){
+            if(other)
+                deleteOtherAttribute(this);
+            else
+                deleteStyleAttribute(this);
+        }
+    }).appendTo(attribute); 
+
+    var itemIsDescrete = function(key){
+        if(key == "")
+            return false;
+        var type = validNames[key].type;
+        return type == "boolean" || type == "color" || type == "colorscheme" || validNames[key].validItems!=undefined
+    }
+ 
+    var attribute_value;
+    if(itemIsDescrete(name)){
+        var validItemsValue;
+        if( validNames[name].type != undefined)
+            var type = validNames[name].type.toLowerCase();
+        else 
+            var type = undefined
+        if(type=="boolean"){
+            validItemsValue = ["true","false"];
+        }else if(type == "colorscheme"){
+            validItemsValue =  glviewer.getModel().validColorschemeSpecs;
+        }else if(type == "color"){
+            validItemsValue =  glviewer.getModel().validColorSpecs;
+        }else if(type == undefined){
+            validItemsValue = validNames[name].validItems;
+        }
+
+        var attribute_value = $('<select/>',{
+            class:'attribute_value',
+        }).appendTo(attribute);
+
+        $.each(validItemsValue,function(key,value) {
+            attribute_value.append($("<option>").attr('value',value).text(value));
+        });
+
+        attribute_value.val(value.toString())
+            
+    }else{
+        attribute_value = $('<input/>',{
+            class:'attribute_value',
+            value:value,
+        }).appendTo(attribute);
+    }
+
+    attribute_value.change(function(){
+        render();
+    });
+
+    if(name.toString()!="" &&  attribute_value.prop("tagName") == "INPUT" && validNames[name.toString()].type =="number"){
+        validNames[name.toString()].type =="number"
+        attribute_value.attr("type","number")
+        attribute_value.attr("step",validNames[name.toString()].step)
+    }
+
+    return attribute;
+}
+
 var createOtherModelSpec = function(spec,type,selection_index){
     var attributes = $('<ul/>',{
         "class":type.toLowerCase()+'_attributes',
     });
-    var createAttribute = function(name,value,type){
-        var attribute = $('<li/>',{
-            class:'attribute'
-        });
-
-        var validNames;
-        if(type.toLowerCase() == "surface"){
-            validNames = glviewer.getModel().validSurfaceSpecs;
-        }else if(type.toLowerCase() == "labelres"){
-            validNames = glviewer.getModel().validLabelResSpecs;
-        }
-
-        var attribute_name = $('<select>',{
-            class:'attribute_name',
-        }).appendTo(attribute);
-
-        $(attribute_name).change(function(){
-            render();
-        })
-
-        $.each(validNames,function(key,value) {
-            if(value.gui){
-                attribute_name.append($("<option>").attr('value',key).text(key));
-            }
-        });
-
-        attribute_name.val(name)
-        //delete button
-        var delete_selection = $("<span/>",{
-            html:"&#x2715;",
-            class:"delete_attribute",
-            "data-index":selection_index,
-            "data-attr":name,
-            "data-type":type.toLowerCase(),
-            "click":function(){deleteOtherAttribute(this)},
-        }).appendTo(attribute); 
-
-        var itemIsDescrete = function(key){
-            if(key == "")
-                return false;
-            var type = validNames[key].type;
-            return type == "boolean" || type == "color" || type == "colorscheme"
-        }
-
-        var attribute_value;
-        if(itemIsDescrete(name)){
-            var validItemsValue;
-            var type = validNames[name].type.toLowerCase();
-
-            if(type=="boolean"){
-                validItemsValue = ["true","false"];
-            }else if(type == "colorscheme"){
-                validItemsValue =  glviewer.getModel().validColorschemeSpecs;
-            }else if(type == "color"){
-                validItemsValue =  glviewer.getModel().validColorSpecs;
-            }
-
-            var attribute_value = $('<select/>',{
-                class:'attribute_value',
-                value:value,
-                contenteditable:'true',
-            }).appendTo(attribute);
-
-            $.each(validItemsValue,function(key,value) {
-                attribute_value.append($("<option>").attr('value',value).text(value));
-            });
-
-            attribute_value.val(value.toString())
-            
-        }else{
-            attribute_value = $('<input/>',{
-                class:'attribute_value',
-                value:value,
-            }).appendTo(attribute);
-        }
-
-        attribute_value.change(function(){
-            render();
-        });
-
-        if(name.toString()!="" &&  attribute_value.prop("tagName") == "INPUT" && validNames[name.toString()].type =="number"){
-            validNames[name.toString()].type =="number"
-            attribute_value.attr("type","number")
-            attribute_value.attr("step",validNames[name.toString()].step)
-        }
-
-        return attribute;
-    }
-
+    
     for(var attribute_index in spec){
-        createAttribute(attribute_index,spec[attribute_index],type).appendTo(attributes);
+        createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index}).appendTo(attributes);
     }
 
     var add_attribute = $('<button/>',{
@@ -157,97 +171,8 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         class:'style_spec_attributes',
     }).appendTo(style_spec);
 
-    var createAttribute = function(name,value){
-        var attribute = $('<li/>',{
-            class:'attribute'
-        });
-
-        var validItems = validNames[style_spec_type].validItems;
-
-        var attribute_name = $('<select>',{
-            class:'attribute_name',
-        }).appendTo(attribute);
-
-        $.each(validItems,function(key,value) {
-            if(value.gui){
-                attribute_name.append($("<option>").attr('value',key).text(key));
-            }
-        });
-
-        attribute_name.change(function(){
-            render();
-        })
-
-        attribute_name.val(name.toString())
-        
-        //delete button
-        var delete_selection = $("<div/>",{
-            html:"&#x2715;",
-            class:"delete_attribute",
-            "data-index":selection_index,
-            "data-type":style_spec_type,
-            "data-attr":name,
-            "click":function(){deleteStyleAttribute(this)},
-        }).appendTo(attribute); 
-
-        var itemIsDescrete = function(key){
-            if(key == "")
-                return false;
-
-            var type = validNames[style_spec_type].validItems[key].type;
-
-            return type == "boolean" || type == "color" || type == "colorscheme"
-        }
-
-        var attribute_value;
-        if(itemIsDescrete(name)){
-            var validItemsValue;
-            var type = validItems[name].type.toLowerCase();
-            if(type=="boolean"){
-                validItemsValue = ["true","false"];
-            }else if(type == "colorscheme"){
-                validItemsValue =  glviewer.getModel().validColorschemeSpecs;
-            }else if(type == "color"){
-                validItemsValue =  glviewer.getModel().validColorSpecs;
-            }
-
-            attribute_value = $('<select>',{
-                class:'attribute_value',
-            }).appendTo(attribute);
-
-            attribute_value.change(function(){
-                render();
-            })
-
-            $.each(validItemsValue,function(key,value) {
-                attribute_value.append($("<option>").attr('value',value).text(value));
-            });
-            console.log(value)
-            attribute_value.val(value.toString())
-            
-        }else{
-            attribute_value = $('<input/>',{
-                class:'attribute_value',
-                value:value,
-            }).appendTo(attribute);
-
-            attribute_value.change(function(){
-                render();
-            })
-        }
-        console.log(name.toString())
-        if(name.toString()!="" && attribute_value.prop("tagName") == "INPUT" && validItems[name.toString()].type =="number"){
-            validItems[name.toString()].type =="number"
-            attribute_value.attr("type","number")
-            attribute_value.attr("step",validItems[name.toString()].step)
-        }
-
-
-        return attribute;        
-    }
-
     for(var attribute_index in style_spec_object){
-        createAttribute(attribute_index,style_spec_object[attribute_index]).appendTo(style_spec_attributes);
+        createAttribute(attribute_index,style_spec_object[attribute_index],{type:style_spec_type,index:selection_index}).appendTo(style_spec_attributes);
     }
 
     var add_attribute = $('<button/>',{
@@ -316,6 +241,10 @@ var createSelection = function(selection_object, selection_index,selection_boole
 
     $.each(validNames,function(key,value) {
         selection_type.append($("<option>").attr('value',value).text(value));
+    });
+
+    $(selection_type).change(function(){
+        render();
     });
 
     //delete button
@@ -410,7 +339,9 @@ var buildHTMLTree = function(query){
             var selection=createSelection(selection_object,selection_index,selection_booleans)
             selection.appendTo(parent);
         }
+
     }
+        var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
 }
 
 Object.size = function(obj) {
@@ -767,6 +698,10 @@ var addAttribute = function(style_spec){
 }
 
 var deleteStyleAttribute = function(spec){
+
+    console.log(spec)
+    console.log(query.selections[spec.dataset.index])
+    console.log(query.selections[spec.dataset.index][spec.dataset.attr])
     delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
     
     buildHTMLTree(query);
@@ -783,6 +718,7 @@ var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
     //updating on back button
+    console.log("hi")
     $(window).on('popstate', function() {
 
         query = urlToQuery(window.location.search.substring(1));
@@ -796,7 +732,7 @@ var openSide= function(){
     var width=420;
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
-
+    document.getElementById("header").style.visibility="visible";
     buildHTMLTree(query);
     glviewer.translate(width/2,0,400,false);
     glviewer.render();
@@ -805,6 +741,7 @@ var openSide= function(){
 var closeSide= function(){
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
+    document.getElementById("header").style.visibility="hidden";
     //todo make resize dynamic
     glviewer.translate(-200,0,400,false);
     glviewer.render();
