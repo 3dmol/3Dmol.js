@@ -2443,6 +2443,27 @@ $3Dmol.GLModel = (function() {
             }
         }
 
+
+    /**
+    * Set coordinates for the atoms parsed from various topology files. 
+    * @function $3Dmol.GLModel#setCoordinatesFromUrl
+    * @param {string} url - contains the url where mdsrv has been hosted
+    * @param {string} path - contains the path of the file (<root>/filename)
+    * @param {function} callback - function called when a file is uploaded using mdsrv
+    */
+
+        this.setCoordinatesFromUrl = function(url, path) {
+            var numFrames = 0;
+            $.get("http://"+url+"/traj/numframes/"+path, function (data){
+                numFrames = data;
+            });
+            //for ( var i = 0; i < numFrames; i++) {
+            $.post("http://"+url+"/traj/frame/0/"+path, function (data){
+                console.log(data);
+            });
+            //}
+        }
+
     /**
     * Set coordinates for the atoms parsed from the prmtop file. 
     * @function $3Dmol.GLModel#setCoordinates
