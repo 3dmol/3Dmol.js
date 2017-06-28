@@ -137,9 +137,6 @@ $3Dmol.GLViewer = (function() {
         var setLabelStyles = function(){
             for(var label in labels){
                 var label = labels[label];
-                console.log(label)
-                console.log(camera)
-                console.log(scene)
                 if(label.stylespec.scale){
                     //update font size
                 }

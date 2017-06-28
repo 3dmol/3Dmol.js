@@ -339,7 +339,9 @@ var buildHTMLTree = function(query){
             var selection=createSelection(selection_object,selection_index,selection_booleans)
             selection.appendTo(parent);
         }
+
     }
+        var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
 }
 
 Object.size = function(obj) {
@@ -716,6 +718,7 @@ var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
     //updating on back button
+    console.log("hi")
     $(window).on('popstate', function() {
 
         query = urlToQuery(window.location.search.substring(1));
@@ -729,7 +732,7 @@ var openSide= function(){
     var width=420;
     document.getElementById("sidenav").style.width = width+"px";
     document.getElementById("menu").style.visibility="hidden";
-
+    document.getElementById("header").style.visibility="visible";
     buildHTMLTree(query);
     glviewer.translate(width/2,0,400,false);
     glviewer.render();
@@ -738,6 +741,7 @@ var openSide= function(){
 var closeSide= function(){
     document.getElementById("menu").style.visibility="visible";
     document.getElementById("sidenav").style.width = "0";
+    document.getElementById("header").style.visibility="hidden";
     //todo make resize dynamic
     glviewer.translate(-200,0,400,false);
     glviewer.render();
