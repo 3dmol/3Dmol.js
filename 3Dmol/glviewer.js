@@ -1068,17 +1068,16 @@ $3Dmol.GLViewer = (function() {
             if (typeof (sel) === "undefined")
                 sel = {};            
             var atoms = getAtomsFromSel(sel);
-            var values = [];
+            var values = {};
 
             for(var atom in atoms){
                 if(atoms[atom].hasOwnProperty(attribute)){
                     var value = atoms[atom][attribute];
-                    if(!values.includes(value))
-                        values.push(value);
+                    values[value] = true;
                 }
             }
 
-            return values;
+            return Object.keys(values);
         }
         
         /**
