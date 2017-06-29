@@ -1055,6 +1055,31 @@ $3Dmol.GLViewer = (function() {
         this.selectedAtoms = function(sel) {
             return getAtomsFromSel(sel);
         };
+
+        /**
+        * Returns valid values for the specified attribute in the given selection
+        * @function $3Dmol.GlViewer#getUniqueValues 
+        * @param {string} attribute
+        * @param {AtomSelectionSpec} sel
+        * @return {Array.<Object>}
+        *
+        */
+        this.getUniqueValues = function(attribute, sel){
+            if (typeof (sel) === "undefined")
+                sel = {};            
+            var atoms = getAtomsFromSel(sel);
+            var values = [];
+
+            for(var atom in atoms){
+                if(atoms[atom].hasOwnProperty(attribute)){
+                    var value = atoms[atom][attribute];
+                    if(!values.includes(value))
+                        values.push(value);
+                }
+            }
+
+            return values;
+        }
         
         /**
          * Return pdb output of selected atoms (if atoms from pdb input)
@@ -1845,9 +1870,9 @@ $3Dmol.GLViewer = (function() {
          */
         this.addSphere = function(spec) {
             spec = spec || {};
-            console.log(spec.center)
+
             spec.center = getSelectionCenter(spec.center);
-            console.log(spec.center)
+
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addSphere(spec);
@@ -1882,15 +1907,10 @@ $3Dmol.GLViewer = (function() {
          */
         this.addArrow = function(spec) {
             spec = spec || {};
-
-            console.log(spec.start)
-            console.log(spec.end)      
             
             spec.start = getSelectionCenter(spec.start)
             spec.end = getSelectionCenter(spec.end)           
             
-            console.log(spec.start)
-            console.log(spec.end)
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addArrow(spec);
@@ -1937,12 +1957,9 @@ $3Dmol.GLViewer = (function() {
         this.addCylinder = function(spec) {
             spec = spec || {};
 
-            console.log(spec)   
-            
             spec.start = getSelectionCenter(spec.start)
             spec.end = getSelectionCenter(spec.end)   
-            console.log(spec)     
-            
+
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             if(spec.dashed)
@@ -1977,13 +1994,8 @@ $3Dmol.GLViewer = (function() {
         this.addLine = function(spec) {
             spec = spec || {};
 
-            console.log(spec.start)
-            console.log(spec.end)      
-            
             spec.start = getSelectionCenter(spec.start)
             spec.end = getSelectionCenter(spec.end)    
-            console.log(spec.start)
-            console.log(spec.end)     
 
             spec.wireframe = true;
             var s = new $3Dmol.GLShape(spec);
