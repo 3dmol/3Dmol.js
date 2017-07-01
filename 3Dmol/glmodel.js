@@ -2453,15 +2453,39 @@ $3Dmol.GLModel = (function() {
     */
 
         this.setCoordinatesFromUrl = function(url, path) {
+            var atomCount = atoms.length;
+            frames = [];
             var numFrames = 0;
             $.get("http://"+url+"/traj/numframes/"+path, function (data){
                 numFrames = data;
             });
-            //for ( var i = 0; i < numFrames; i++) {
-            $.post("http://"+url+"/traj/frame/0/"+path, function (data){
-                console.log(data);
-            });
-            //}
+            for ( var i = 0; i < 1; i++) { //numFrames; i++) {
+                uri = "http://"+url+"/traj/frame/"+i+"/"+path;
+                $.ajax({url:uri, 
+                    type: "POST",
+                    dataType: "binary",
+                    responseType: "arraybuffer",
+                    processData: false}).done(
+                        function(ret, txt, response) {
+                            var values = new Float32Array(ret,44);
+                            var temp = [];
+                            var count = 0;
+                            for (var i = 0; i < atomCount; i++) {
+                                var newAtom = {};
+                                for (var k in atoms[i]) {
+                                    newAtom[k] = atoms[i][k];
+                                }
+                                temp[i] = newAtom;
+                                temp[i].x = values[count++];
+                                temp[i].y = values[count++];
+                                temp[i].z = values[count++];
+                            }
+                            frames.push(temp);
+                            atoms = frames[0];   
+                        }).fail(function(e,txt) { 
+                            console.log(txt);
+                            });
+            }
         }
 
     /**
