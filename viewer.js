@@ -30,7 +30,6 @@ var createAttribute = function(name,value,parent){
         validNames = glviewer.getModel().validLabelResSpecs;
         other=true;
     }
-
     var attribute_name = $('<select>',{
         class:'attribute_name',
     }).appendTo(attribute);
@@ -121,6 +120,8 @@ var createOtherModelSpec = function(spec,type,selection_index){
     });
     
     for(var attribute_index in spec){
+        if(attribute_index == "order")
+            continue
         createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index}).appendTo(attributes);
     }
 
@@ -147,8 +148,8 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     }).appendTo(style_spec);
 
     style_spec_name.change(function(){
-                render();
-            })
+        render();
+    })
 
     $.each(validNames,function(key,value) {
         if(value.gui){
@@ -197,6 +198,8 @@ var createStyle = function(model_spec_object,model_spec_type,selection_index){
     }).appendTo(style);
                         
     for(var attribute_index in model_spec_object){
+        if(attribute_index == "order" || attribute_index == "")
+            continue;
         createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index).appendTo(style_specs);
     }
 
@@ -225,7 +228,6 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
 
     return model_specification;
 }
-
 //this function creates the selection object
 var createSelection = function(selection_object, selection_index,selection_booleans){
     //creates container
@@ -246,7 +248,6 @@ var createSelection = function(selection_object, selection_index,selection_boole
     $(selection_type).change(function(){
         render();
     });
-
     //delete button
     var delete_selection = $("<div/>",{
         html:"&#x2715;",
@@ -260,23 +261,25 @@ var createSelection = function(selection_object, selection_index,selection_boole
     var sel = augmentSelection(selection_object)
     for(var subselection in sel){
         var obj=sel[subselection];
+        if(subselection == "" || subselection == "order")
+            continue;
         attribute_pairs.push(subselection+":"+obj);
     }
 
     var modifier=attribute_pairs.join(";");
-
     var selection_spec=$('<input/>', {
         class:'selection_spec',
         value:modifier,
     }).appendTo(selection); 
 
-        selection_spec.change(function(){
-            render();
-        })
+    selection_spec.change(function(){
+        render();
+    })
+    var order= null;
     //check if style exists and if so create the object
     if(selection_object.style !=null && !selection_booleans.style){
         var style = createModelSpecification("style",selection_object.style, selection_index);
-
+        order = selection_object.style.order;
         delete_selection.attr("data-type","style");
         style.appendTo(selection);
 
@@ -286,6 +289,7 @@ var createSelection = function(selection_object, selection_index,selection_boole
     }else if(selection_object.surface !=null && !selection_booleans.surface){
         var surface = createModelSpecification("surface", selection_object.surface, selection_index);
 
+        order = selection_object.surface.order;
         delete_selection.attr("data-type","surface");
         surface.appendTo(selection);
 
@@ -295,6 +299,7 @@ var createSelection = function(selection_object, selection_index,selection_boole
     }else if(selection_object.labelres != null && !selection_booleans.labelres){
         var labelres = createModelSpecification("labelres", selection_object.labelres, selection_index);
     
+        order = selection_object.labelres.order;
         delete_selection.attr("data-type","labelres");
         labelres.appendTo(selection);
 
@@ -303,19 +308,21 @@ var createSelection = function(selection_object, selection_index,selection_boole
         selection_booleans.labelres=true;
     }
 
-    return selection;
+    return [order, selection];
 }
 /*
 builds an html tree that goes inside of the selection portion of the viewer page
 */
 var buildHTMLTree = function(query){
+    console.log(query)
     //get parent object for the html tree
     var parent = $('#selection_list');
     parent.text("");
     //list file type and path
     $("#model_type").attr("value",query.file.type);
     $("#model_input").attr("value",query.file.path);
- 
+    var total=0;
+    var arr =[];
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
@@ -334,13 +341,33 @@ var buildHTMLTree = function(query){
             selection_count++;
         if(selection_count==0)//empty selection
             selection_count++;
+        total+=selection_count;
+
+
         //creates individual selections for each surface, style and labelres
         for(var i=0;i<selection_count;i++){
             var selection=createSelection(selection_object,selection_index,selection_booleans)
-            selection.appendTo(parent);
+            arr.push(selection)   
         }
 
     }
+    //sort
+    for(var i =0;i<arr.length;i++){
+
+        for(var j =i +1; j<arr.length; j++){
+            if(arr[j][0]<arr[i][0]){
+                var copy = arr[j];
+                arr[j]= arr[i]
+                arr[i]= copy;
+            }
+        }
+    }
+    console.log(arr)
+    //add to parent
+    for(var i =0;i<arr.length;i++){
+        parent.append(arr[i][1])
+    }
+            //$("#selection_list .selection:eq("+(order)+")").after(selection);
         var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
 }
 
@@ -351,7 +378,6 @@ Object.size = function(obj) {
     }
     return size;
 };
-
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
     var url = "";
@@ -360,11 +386,13 @@ var queryToURL = function(query){
         var objs =[]
         $.each(object, function(key,value){
             //array values 
-            if(Array.isArray(value)){
-                //sperate by commas
-                objs.push(key+":"+value.join(","));
-            }else{
-                objs.push(key+":"+value);
+            if(key != "order"){
+                if(Array.isArray(value)){
+                    //sperate by commas
+                    objs.push(key+":"+value.join(","));
+                }else{
+                    objs.push(key+":"+value);
+                }
             }
         });
         return objs.join(";");
@@ -373,16 +401,20 @@ var queryToURL = function(query){
     var unpackStyle = function(object){
         var subStyles=[]
         $.each(object, function(sub_style,sub_style_object){
+
+            if(sub_style != "order"){
             var string="";
             string+=sub_style;
             if(Object.size(sub_style_object)!=0)
                 string+=":";
             var assignments =[]
-            $.each(sub_style_object, function(key,value){
-                assignments.push(key+"~"+value);
-            });
-            string+=assignments.join(",");
-            subStyles.push(string)
+            
+             $.each(sub_style_object, function(key,value){
+                    assignments.push(key+"~"+value);
+                });
+                string+=assignments.join(",");
+                subStyles.push(string)
+            }
         });
 
         return subStyles.join(";");
@@ -468,13 +500,13 @@ var urlToQuery = function(url){
         return null;
     }
 
+        var ord = 0;
     var currentSelection = null;
     for(var token in tokens){
         var strings = tokens[token].split("=");
         var type = stringType(tokens[token]);
         var string = strings[1];
         var object = $3Dmol.specStringToObject(string);
-
         if(type == "file"){
             query.file = new File(string,strings[0]);
         }else if(type == "select"){
@@ -482,22 +514,39 @@ var urlToQuery = function(url){
             query.selections.push(selection);
             currentSelection = selection;
         }else if(type == "style"){
-            if(currentSelection==null)
+            if(currentSelection==null){
                 query.style = object;
-            else
+                query.style.order = ord;
+                ord++;
+            }else{
                 currentSelection.style = object;
+                currentSelection.style.order = ord;
+                ord++;
+            }
         }else if(type == "surface"){
-            if(currentSelection==null)
+            if(currentSelection==null){
                 query.surface = object;
-            else
+                query.surface.order = ord;
+                ord++;
+            }
+            else{
                 currentSelection.surface = object;
+                currentSelection.surface.order = ord;
+                ord++;
+            }
         }else if(type == "labelres"){
-             if(currentSelection==null)
+             if(currentSelection==null){
                 query.labelres = object;
-            else
+                query.labelres.order = ord;
+                ord++;
+            }else{
                 currentSelection.labelres = object;
+                currentSelection.labelres.order = ord;
+                ord++;
+            }
         }
     }
+    console.log(query)
     return query;
 }
 
@@ -564,22 +613,32 @@ var updateQueryFromHTML = function(){
         }
         return true;
     }
-
+    var cnt = 0;
     var selects = [];
     var listItems = $(".selection")
     listItems.each(function(index,value){
         if(listItems.hasOwnProperty(index)){
+
             var getSubObject = function(index){
                 var attr = $(value);
                 var attribute=attr[0]
                 var type=$(attribute).children()[0].value.toLowerCase()
 
                 if(type=="style"){
-                    return {style:updateStyle($(attribute).children(".style")[0])}
+                    var style = {style:updateStyle($(attribute).children(".style")[0])}
+                    style.style.order = cnt;
+                    cnt++;
+                    return style;
                 }else if(type=="surface"){
-                    return {"surface":updateOther($(attribute).children(".surface_attributes")[0])} 
+                    var surface =  {"surface":updateOther($(attribute).children(".surface_attributes")[0])} 
+                    surface.surface.order = cnt;
+                    cnt++;
+                    return surface
                 }else if(type == "labelres"){
-                    return {"labelres":updateOther($(attribute).children(".labelres_attributes")[0])} 
+                    var labelres = {"labelres":updateOther($(attribute).children(".labelres_attributes")[0])} 
+                    labelres.labelres.order = cnt
+                    cnt++;
+                    return labelres
                 }
             }
 
@@ -621,6 +680,7 @@ var updateQueryFromHTML = function(){
     }
 
     query.selections=final_selections;
+    console.log(query)
 }
 
 var query = urlToQuery(window.location.search.substring(1));
@@ -635,7 +695,7 @@ var render = function(){
 
 //these functions all edit the query object 
 var addSelection = function(){
-    query.selections.push({})
+    query.selections.push({style:{order:$("#selection_list .selection").length}})
     buildHTMLTree(query);
 }
 
@@ -643,7 +703,7 @@ var deleteSelection = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type];
     if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
         delete query.selections[spec.dataset.index]
-    
+    console.log(query)
     buildHTMLTree(query);
     render();
 }
@@ -699,9 +759,6 @@ var addAttribute = function(style_spec){
 
 var deleteStyleAttribute = function(spec){
 
-    console.log(spec)
-    console.log(query.selections[spec.dataset.index])
-    console.log(query.selections[spec.dataset.index][spec.dataset.attr])
     delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
     
     buildHTMLTree(query);
@@ -725,7 +782,6 @@ var initSide = function(url){
         buildHTMLTree(query);
         render();
     });
-
 }
 //opens up the side bar
 var openSide= function(){

@@ -253,6 +253,7 @@ $3Dmol.GLModel = (function() {
         "showBackground":{type:"boolean",gui:true},
         "fixed":{type:"boolean",gui:true},
         "alignment":{validItems:["topLeft","topCenter","topRight","centerLeft","center","centerRight","bottomLeft","bottomCenter","bottomRight"],gui:true},
+        "scale":{type:"boolean",gui:true},
     }
 
     // class functions
