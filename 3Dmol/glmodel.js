@@ -2519,6 +2519,7 @@ $3Dmol.GLModel = (function() {
                     frames.push(temp);
                 }
                 atoms = frames[0];
+                return frames;
             }
             return [];
         }
