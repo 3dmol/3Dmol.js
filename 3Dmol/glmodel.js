@@ -2449,43 +2449,26 @@ $3Dmol.GLModel = (function() {
     * @function $3Dmol.GLModel#setCoordinatesFromUrl
     * @param {string} url - contains the url where mdsrv has been hosted
     * @param {string} path - contains the path of the file (<root>/filename)
-    * @param {function} callback - function called when a file is uploaded using mdsrv
+    * @param {object} viewer - contains the glviewer object
     */
 
-        this.setCoordinatesFromUrl = function(url, path) {
+        this.setCoordinatesFromUrl = function(url, path, viewer) {
             var atomCount = atoms.length;
+            var self = this;
             frames = [];
-            var numFrames = 0;
-            $.get("http://"+url+"/traj/numframes/"+path, function (data){
-                numFrames = data;
+            $.get("http://"+url+"/traj/numframes/"+path, function (numFrames) {
+                if (!isNaN(parseInt(numFrames))) {
+                    for (var i = 0; i < numFrames; i++) {
+                        $3Dmol.getbin("http://"+url+"/traj/frame/"+i+"/"+path, function (buffer) {
+                            self.setCoordinates(buffer, "unknown");
+                            viewer.setStyle({},{sphere:{}});
+                            viewer.zoomTo();
+                            viewer.animate({loop:"forward",reps:1});
+                            viewer.render();
+                        },'POST');
+                    }
+                }
             });
-            for ( var i = 0; i < 1; i++) { //numFrames; i++) {
-                uri = "http://"+url+"/traj/frame/"+i+"/"+path;
-                $.ajax({url:uri, 
-                    type: "POST",
-                    dataType: "binary",
-                    responseType: "arraybuffer",
-                    processData: false}).done(
-                        function(ret, txt, response) {
-                            var values = new Float32Array(ret,44);
-                            var temp = [];
-                            var count = 0;
-                            for (var i = 0; i < atomCount; i++) {
-                                var newAtom = {};
-                                for (var k in atoms[i]) {
-                                    newAtom[k] = atoms[i][k];
-                                }
-                                temp[i] = newAtom;
-                                temp[i].x = values[count++];
-                                temp[i].y = values[count++];
-                                temp[i].z = values[count++];
-                            }
-                            frames.push(temp);
-                            atoms = frames[0];   
-                        }).fail(function(e,txt) { 
-                            console.log(txt);
-                            });
-            }
         }
 
     /**
@@ -2512,8 +2495,10 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
                 }
             }
-            if (format == "mdcrd" || format == "inpcrd" || format == "pdb" || format == "netcdf") {
-                frames = [];
+            var supportedFormats = ["mdcrd","inpcrd","pdb","netcdf","unknown"];
+            if (supportedFormats.indexOf(format) !== -1) {
+                if (format != "unknown")
+                    frames = [];
                 var atomCount = atoms.length;
                 var values = GLModel.parseCrd(str, format);
                 var count = 0;
@@ -2533,7 +2518,6 @@ $3Dmol.GLModel = (function() {
                     frames.push(temp);
                 }
                 atoms = frames[0];
-                return frames;
             }
             return [];
         }
@@ -2581,6 +2565,8 @@ $3Dmol.GLModel = (function() {
             var reader = new netcdfjs(data);
             values = [].concat.apply([],reader.getDataVariable('coordinates'));
 
+        } else if (format == "unknown") { // format unknown; arraybuffer obtained from MDsrv
+            values = new Float32Array(data,44);
         } else {
             var index = data.indexOf("\n"); // remove the first line containing title
             if(format == 'inpcrd') {
