@@ -185,7 +185,7 @@ $3Dmol.GLModel = (function() {
 
     var validCrossSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:true,step:.1},
+        "linewidth":{type:"number",gui:false,step:.1},//deprecated
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
         "radius":{type:"number",gui:true,step:.1},
@@ -209,7 +209,7 @@ $3Dmol.GLModel = (function() {
     }
 
     var validCartoonSpec = {
-        "style":{type:"string",gui:true},
+        "style":{validItems:["trace","oval","rectangle","parabola","edged"],gui:true},
         "color":{type:"color",gui:true},
         "arrows":{type:"boolean",gui:true},
         "ribbon":{type:"boolean",gui:true},
@@ -250,9 +250,9 @@ $3Dmol.GLModel = (function() {
         "backgroundOpacity":{type:"number",gui:true,step:.1},
         "position":{type:"array",valid:false},
         "inFront":{type:"boolean",gui:true},
-        "showBackground":{type:"number",gui:true},
+        "showBackground":{type:"boolean",gui:true},
         "fixed":{type:"boolean",gui:true},
-        "alignment":{type:"string",gui:true},
+        "alignment":{validItems:["topLeft","topCenter","topRight","centerLeft","center","centerRight","bottomLeft","bottomCenter","bottomRight"],gui:true},
     }
 
     // class functions
@@ -1483,6 +1483,7 @@ $3Dmol.GLModel = (function() {
             viewer.setStyle({},{stick:{}});
             viewer.vibrate(10, 1);
             viewer.animate({loop: "forward",reps: 1});
+
             viewer.zoomTo();
                   viewer.render();
               });            
