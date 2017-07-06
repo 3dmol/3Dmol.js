@@ -101,6 +101,10 @@ var createAttribute = function(name,value,parent){
         }).appendTo(attribute);
     }
 
+   attribute_value.dblclick(function(e){ 
+        e.preventDefault();
+    })
+
     attribute_value.change(function(){
         render();
     });
@@ -267,6 +271,8 @@ var createSelection = function(selection_object, selection_index,selection_boole
     }
 
     var modifier=attribute_pairs.join(";");
+    if(selection_index == -1)
+        modifier = "all"
     var selection_spec=$('<input/>', {
         class:'selection_spec',
         value:modifier,
@@ -327,6 +333,7 @@ var buildHTMLTree = function(query){
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
         var selection_count = 0;
+
         var selection_booleans = {
             surface:false,
             style:false,
@@ -351,6 +358,22 @@ var buildHTMLTree = function(query){
         }
 
     }
+    var selection_count = 0;
+    if(query.global.surface !=undefined)
+        selection_count++;
+    if(query.global.style != undefined)
+        selection_count++;
+    if(query.global.labelres !=undefined)
+        selection_count++;
+    if(selection_count==0)//empty selection
+        selection_count++;
+    total+=selection_count;
+    var selection_booleans = {
+        surface:false,
+        style:false,
+        labelres:false,
+    }
+    arr.push(createSelection(query.global,-1,selection_booleans))
     //sort
     for(var i =0;i<arr.length;i++){
 
@@ -367,8 +390,8 @@ var buildHTMLTree = function(query){
     for(var i =0;i<arr.length;i++){
         parent.append(arr[i][1])
     }
-            //$("#selection_list .selection:eq("+(order)+")").after(selection);
-        var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
+    //$("#selection_list .selection:eq("+(order)+")").after(selection);
+    var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
 }
 
 Object.size = function(obj) {
@@ -465,11 +488,10 @@ function File(path,type){
 }
 
 var Query = function(){
-    this.style = null;
     this.selections = [];
     this.file = new File();
-    this.surface=null;
-    this.labelres=null;
+
+    this.global = {}
 }
 
 function setURL(urlPath){
@@ -515,8 +537,8 @@ var urlToQuery = function(url){
             currentSelection = selection;
         }else if(type == "style"){
             if(currentSelection==null){
-                query.style = object;
-                query.style.order = ord;
+                query.global.style = object;
+                query.global.style.order = ord;
                 ord++;
             }else{
                 currentSelection.style = object;
@@ -525,19 +547,18 @@ var urlToQuery = function(url){
             }
         }else if(type == "surface"){
             if(currentSelection==null){
-                query.surface = object;
-                query.surface.order = ord;
+                query.global.surface = object;
+                query.global.surface.order = ord;
                 ord++;
-            }
-            else{
+            }else{
                 currentSelection.surface = object;
                 currentSelection.surface.order = ord;
                 ord++;
             }
         }else if(type == "labelres"){
              if(currentSelection==null){
-                query.labelres = object;
-                query.labelres.order = ord;
+                query.global.labelres = object;
+                query.global.labelres.order = ord;
                 ord++;
             }else{
                 currentSelection.labelres = object;
