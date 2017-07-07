@@ -2453,7 +2453,7 @@ $3Dmol.GLModel = (function() {
     * @param {object} viewer - contains the glviewer object
     */
 
-        this.setCoordinatesFromUrl = function(url, path, viewer) {
+        this.setCoordinatesFromUrl = function(url, path) {
             var atomCount = atoms.length;
             var self = this;
             frames = [];
@@ -2462,11 +2462,8 @@ $3Dmol.GLModel = (function() {
                     for (var i = 0; i < numFrames; i++) {
                         $3Dmol.getbin("http://"+url+"/traj/frame/"+i+"/"+path, function (buffer) {
                             self.setCoordinates(buffer, "unknown");
-                            viewer.setStyle({},{sphere:{}});
-                            viewer.zoomTo();
-                            viewer.animate({loop:"forward",reps:1});
-                            viewer.render();
-                        },'POST');
+                            self.setFrame(i) 
+                        });
                     }
                 }
             });
@@ -2496,8 +2493,8 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
                 }
             }
-            var supportedFormats = ["mdcrd","inpcrd","pdb","netcdf","unknown"];
-            if (supportedFormats.indexOf(format) !== -1) {
+            var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":"","unknown":""};
+            if (supportedFormats.hasOwnProperty(format)) {
                 if (format != "unknown")
                     frames = [];
                 var atomCount = atoms.length;
