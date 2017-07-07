@@ -640,6 +640,21 @@ var render = function(){
     run();
 }
 
+var addSurface = function(){
+    query.selections.push({surface:{}})
+    buildHTMLTree(query);
+}
+
+var addStyle = function(){
+    query.selections.push({style:{}})
+    buildHTMLTree(query);
+}
+
+var addLabelRes = function(){
+    query.selections.push({labelres:{}})
+    buildHTMLTree(query);
+}
+
 //these functions all edit the query object 
 var addSelection = function(){
     query.selections.push({})
