@@ -227,27 +227,47 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
 }
 
 //this function creates the selection object
-var createSelection = function(selection_object, selection_index,selection_booleans){
+var createSelection = function(selection_object,selection_index,selection_booleans){
     //creates container
     var selection = $("<li/>",{
         class:"selection"
     });
+    var selection_type;
 
-    var validNames=["Style","Surface","LabelRes"];
+    var createHeader = function(){
+        selection_type = $('<select>',{
+            class:'selection_type',
+        }).appendTo(selection);
 
-    var selection_type = $('<select>',{
-        class:'selection_type',
-    }).appendTo(selection);
+        $.each(validNames,function(key,value) {
+            selection_type.append($("<option>").attr('value',value).text(value));
+        });
 
-    $.each(validNames,function(key,value) {
-        selection_type.append($("<option>").attr('value',value).text(value));
-    });
+        $(selection_type).change(function(){
+            render();
+        });
 
-    $(selection_type).change(function(){
-        render();
-    });
+        //add together sub selections
+        var attribute_pairs =[];
+        var sel = augmentSelection(selection_object)
+        for(var subselection in sel){
+            var obj=sel[subselection];
+            attribute_pairs.push(subselection+":"+obj);
+        }
 
-    //delete button
+        var modifier=attribute_pairs.join(";");
+
+        var selection_spec=$('<input/>', {
+            class:'selection_spec',
+            value:modifier,
+        }).appendTo(selection); 
+
+        selection_spec.change(function(){
+            render();
+        })
+    }
+
+     //delete button
     var delete_selection = $("<div/>",{
         html:"&#x2715;",
         class:"delete_selection",
@@ -255,24 +275,11 @@ var createSelection = function(selection_object, selection_index,selection_boole
         "data-type":"",
         "click":function(){deleteSelection(this);}
     }).appendTo(selection); 
-    //add together sub selections
-    var attribute_pairs =[];
-    var sel = augmentSelection(selection_object)
-    for(var subselection in sel){
-        var obj=sel[subselection];
-        attribute_pairs.push(subselection+":"+obj);
-    }
 
-    var modifier=attribute_pairs.join(";");
+    createHeader()
+    var validNames=["Style","Surface","LabelRes"];
 
-    var selection_spec=$('<input/>', {
-        class:'selection_spec',
-        value:modifier,
-    }).appendTo(selection); 
-
-        selection_spec.change(function(){
-            render();
-        })
+    
     //check if style exists and if so create the object
     if(selection_object.style !=null && !selection_booleans.style){
         var style = createModelSpecification("style",selection_object.style, selection_index);
