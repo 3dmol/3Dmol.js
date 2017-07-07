@@ -76,8 +76,8 @@ this may change*/
     margin-top:5px;
 }
 /* bottom buttons */
-#addSelection{
-    width:100%;
+#addStyle,#addSurface,#addLabelRes{
+    width:30%;
     height:25px;
     margin-top:10px;
 }
@@ -194,23 +194,28 @@ input{
     color:white;
     margin:0px;
 }
-
+.selection_div{
+    width:80%;
+    margin:0px;
+    display:inline;
+}
 .selection_type{
     background-color: rgba(0,0,102,.9);
     color:white;
     height:4%;
-    width:29%;
+    width:25%;
     text-align: center;
     padding:10px;
     margin:0px;
     position:relative;
     float:left;
+    margin-right:5px;
 }
 
 .selection_spec{
     margin-bottom: 10px;
     border-radius: 15px;
-    width:50%;
+    width:42%;
     margin-left:10px;
     margin:0px;
     position:relative;
@@ -220,6 +225,7 @@ input{
     float:right;
     position: relative;
     height:4%;
+    margin-left:4%;
     padding:10px;
 }
 

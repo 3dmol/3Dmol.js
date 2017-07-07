@@ -240,14 +240,17 @@ var createSelection = function(selection_object, selection_index,selection_boole
     });
 
     var validNames=["Style","Surface","LabelRes"];
-
-    var selection_type = $('<select>',{
-        class:'selection_type',
+    var selection_div = $('<div/>',{
+        class:'selection_div',
     }).appendTo(selection);
+    var selection_type = $('<span/>',{
+        class:'selection_type',
+        text:"Style"
+    }).appendTo(selection_div);
 
-    $.each(validNames,function(key,value) {
-        selection_type.append($("<option>").attr('value',value).text(value));
-    });
+   // $.each(validNames,function(key,value) {
+   //     selection_type.append($("<option>").attr('value',value).text(value));
+   // });
 
     $(selection_type).change(function(){
         render();
@@ -276,7 +279,7 @@ var createSelection = function(selection_object, selection_index,selection_boole
     var selection_spec=$('<input/>', {
         class:'selection_spec',
         value:modifier,
-    }).appendTo(selection); 
+    }).appendTo(selection_div); 
 
     selection_spec.change(function(){
         render();
@@ -316,6 +319,26 @@ var createSelection = function(selection_object, selection_index,selection_boole
 
     return [order, selection];
 }
+
+/*
+var createStyle = function(){
+
+}
+
+var createSurface = function(){
+
+}
+
+var createLabelRes = function(){
+    
+}
+
+var createHeader = function(type,text){
+
+}
+
+
+*/
 /*
 builds an html tree that goes inside of the selection portion of the viewer page
 */
@@ -350,7 +373,6 @@ var buildHTMLTree = function(query){
             selection_count++;
         total+=selection_count;
 
-
         //creates individual selections for each surface, style and labelres
         for(var i=0;i<selection_count;i++){
             var selection=createSelection(selection_object,selection_index,selection_booleans)
@@ -365,8 +387,8 @@ var buildHTMLTree = function(query){
         selection_count++;
     if(query.global.labelres !=undefined)
         selection_count++;
-    if(selection_count==0)//empty selection
-        selection_count++;
+    //if(selection_count==0)//empty selection
+    //    selection_count++;
     total+=selection_count;
     var selection_booleans = {
         surface:false,
@@ -385,7 +407,6 @@ var buildHTMLTree = function(query){
             }
         }
     }
-    console.log(arr)
     //add to parent
     for(var i =0;i<arr.length;i++){
         parent.append(arr[i][1])
@@ -535,6 +556,20 @@ var urlToQuery = function(url){
             var selection = object;
             query.selections.push(selection);
             currentSelection = selection;
+        }else if(type == "style" || type=="surface" || type == "labelres"){
+            if(currentSelection == null){
+                query.global[type] = object;
+                query.global[type].order = ord;
+                ord++;
+            }else{
+                currentSelection[type] = object;
+                currentSelection[type].order = ord;
+                ord++;
+            }
+
+        }
+            /*
+        }
         }else if(type == "style"){
             if(currentSelection==null){
                 query.global.style = object;
@@ -566,6 +601,7 @@ var urlToQuery = function(url){
                 ord++;
             }
         }
+        */
     }
     console.log(query)
     return query;
@@ -643,8 +679,8 @@ var updateQueryFromHTML = function(){
             var getSubObject = function(index){
                 var attr = $(value);
                 var attribute=attr[0]
-                var type=$(attribute).children()[0].value.toLowerCase()
-
+                var div = $(attribute).children()[0]
+                var type=$(div).children()[0].innerHTML.toLowerCase()
                 if(type=="style"){
                     var style = {style:updateStyle($(attribute).children(".style")[0])}
                     style.style.order = cnt;
@@ -670,7 +706,12 @@ var updateQueryFromHTML = function(){
                 return obj1;
             }            
             var val=getSubObject(index);
-            var selection = updateSelectionElements($(listItems[index]).children(".selection_spec")[0].value);
+            console.log(val)
+            var attr = $(value);
+            var attribute=attr[0]
+            var div = $(attribute).children()[0]
+            var selection=$(div).children()[1].innerHTML.toLowerCase()
+            
             var extended=extend(selection,val)
             selects.push(extended)
         }
@@ -701,7 +742,6 @@ var updateQueryFromHTML = function(){
     }
 
     query.selections=final_selections;
-    console.log(query)
 }
 
 var query = urlToQuery(window.location.search.substring(1));
@@ -712,6 +752,18 @@ var render = function(){
     setURL(queryToURL(query));
     buildHTMLTree(query);
     run();
+}
+
+var addStyle = function(){
+    query.selections.push({style:{order:$("#selection_list .selection").length}})
+}
+
+var addSurface = function(){
+
+}
+
+var addLabelRes = function(){
+
 }
 
 //these functions all edit the query object 
@@ -730,7 +782,11 @@ var deleteSelection = function(spec){
 }
 
 var addModelSpec = function(type,selection){
-    var current_selection = query.selections[selection.dataset.index]
+    var current_selection;
+    if(selection.dataset.index != -1)
+        current_selection = query.selections[selection.dataset.index]
+    else
+        current_selection = query.global
 
     if(type == "style" || type == "surface" || type == "labelres"){
         if(current_selection[type]==null)
@@ -745,7 +801,10 @@ var addModelSpec = function(type,selection){
 var addStyleSpec = function(model_spec){
     var defaultKey = "";
     var defaultValue = {};
-    query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
+    if(model_spec.dataset.index == -1)
+        query.global[model_spec.dataset.type][defaultKey]=defaultValue;
+    else
+        query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
     buildHTMLTree(query);
 }
 
@@ -759,13 +818,17 @@ var deleteStyleSpec = function(spec){
 var addOtherAttribute= function(spec){
     var defaultKey = "";
     var defaultValue = "";
-    query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
+    if(spec.dataset.index == -1)
+        query.global[spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
+    else
+        query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
     buildHTMLTree(query);
 }
 
 var deleteOtherAttribute = function(spec){
+    console.log(query)
     delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
-    
+    console.log(query)
     buildHTMLTree(query);
     render();
 }
@@ -773,15 +836,16 @@ var deleteOtherAttribute = function(spec){
 var addAttribute = function(style_spec){
     var defaultKey = "";
     var defaultValue = "";
-    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
+    if(style_spec.dataset.index == -1)
+        query.global[style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
+    else
+        query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
 
     buildHTMLTree(query);
 }
 
 var deleteStyleAttribute = function(spec){
-
     delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
-    
     buildHTMLTree(query);
     render();
 }
@@ -798,7 +862,6 @@ var initSide = function(url){
     //updating on back button
     console.log("hi")
     $(window).on('popstate', function() {
-
         query = urlToQuery(window.location.search.substring(1));
         buildHTMLTree(query);
         render();
