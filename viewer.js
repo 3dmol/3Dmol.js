@@ -283,6 +283,7 @@ var createSelection = function(selection_object,selection_index,selection_boolea
 
     createHeader()    
     //check if style exists and if so create the object
+    var order;
     if(selection_object.style !=null && !selection_booleans.style){
         var style = createModelSpecification("style",selection_object.style, selection_index);
 
@@ -290,6 +291,7 @@ var createSelection = function(selection_object,selection_index,selection_boolea
         style.appendTo(selection);
 
         selection_type.val(validNames[0])
+        order = selection_object.style.order;
 
         selection_booleans.style=true;
     }else if(selection_object.surface !=null && !selection_booleans.surface){
@@ -299,6 +301,7 @@ var createSelection = function(selection_object,selection_index,selection_boolea
         surface.appendTo(selection);
 
         selection_type.val(validNames[1])//non dynamic
+        order = selection_object.surface.order;
 
         selection_booleans.surface=true;
     }else if(selection_object.labelres != null && !selection_booleans.labelres){
@@ -308,11 +311,12 @@ var createSelection = function(selection_object,selection_index,selection_boolea
         labelres.appendTo(selection);
 
         selection_type.val(validNames[2])
+        order = selection_object.labelres.order;
 
         selection_booleans.labelres=true;
     }
 
-    return selection;
+    return [order,selection];
 }
 /*
 builds an html tree that goes inside of the selection portion of the viewer page
@@ -324,7 +328,8 @@ var buildHTMLTree = function(query){
     //list file type and path
     $("#model_type").attr("value",query.file.type);
     $("#model_input").attr("value",query.file.path);
- 
+    
+    var arr = []
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
@@ -346,9 +351,22 @@ var buildHTMLTree = function(query){
         //creates individual selections for each surface, style and labelres
         for(var i=0;i<selection_count;i++){
             var selection=createSelection(selection_object,selection_index,selection_booleans)
-            selection.appendTo(parent);
+            arr.push(selection);
         }
-
+    }
+    //sort
+    for(var i =0;i<arr.length;i++){
+        for(var j =i +1; j<arr.length; j++){
+            if(arr[j][0]<arr[i][0]){
+                var copy = arr[j];
+                arr[j]= arr[i]
+                arr[i]= copy;
+            }
+        }
+    }
+    //add to parent
+    for(var i =0;i<arr.length;i++){
+        parent.append(arr[i][1])
     }
         var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
 }
