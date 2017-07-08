@@ -9,6 +9,7 @@ var augmentSelection = function(selection){
     }if(copiedObject.surface!=undefined){
         delete copiedObject.surface;
     }
+    delete copiedObject.order;
 
     return copiedObject;
 }
@@ -121,6 +122,8 @@ var createOtherModelSpec = function(spec,type,selection_index){
     });
     
     for(var attribute_index in spec){
+        if(attribute_index == "order")
+            continue;
         createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index}).appendTo(attributes);
     }
 
@@ -197,6 +200,9 @@ var createStyle = function(model_spec_object,model_spec_type,selection_index){
     }).appendTo(style);
                         
     for(var attribute_index in model_spec_object){
+        //ignore the order attribute
+        if(attribute_index == "order")
+            continue;
         createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index).appendTo(style_specs);
     }
 
@@ -205,7 +211,6 @@ var createStyle = function(model_spec_object,model_spec_type,selection_index){
 
 var createModelSpecification = function(model_spec_type,model_spec_object,selection_index){
     var model_specification = null;
-    //check for type
     if(model_spec_type=="style"){
         model_specification = createStyle(model_spec_object,model_spec_type,selection_index)
 
@@ -234,6 +239,7 @@ var createSelection = function(selection_object,selection_index,selection_boolea
     });
     var selection_type;
 
+    var validNames=["Style","Surface","LabelRes"];
     var createHeader = function(){
         selection_type = $('<select>',{
             class:'selection_type',
@@ -266,7 +272,6 @@ var createSelection = function(selection_object,selection_index,selection_boolea
             render();
         })
     }
-
      //delete button
     var delete_selection = $("<div/>",{
         html:"&#x2715;",
@@ -276,10 +281,7 @@ var createSelection = function(selection_object,selection_index,selection_boolea
         "click":function(){deleteSelection(this);}
     }).appendTo(selection); 
 
-    createHeader()
-    var validNames=["Style","Surface","LabelRes"];
-
-    
+    createHeader()    
     //check if style exists and if so create the object
     if(selection_object.style !=null && !selection_booleans.style){
         var style = createModelSpecification("style",selection_object.style, selection_index);
@@ -379,17 +381,20 @@ var queryToURL = function(query){
 
     var unpackStyle = function(object){
         var subStyles=[]
+        console.log(object)
         $.each(object, function(sub_style,sub_style_object){
-            var string="";
-            string+=sub_style;
-            if(Object.size(sub_style_object)!=0)
-                string+=":";
-            var assignments =[]
-            $.each(sub_style_object, function(key,value){
-                assignments.push(key+"~"+value);
-            });
-            string+=assignments.join(",");
-            subStyles.push(string)
+            if(sub_style != "order"){
+                var string="";
+                string+=sub_style;
+                if(Object.size(sub_style_object)!=0)
+                    string+=":";
+                var assignments =[]
+                $.each(sub_style_object, function(key,value){
+                    assignments.push(key+"~"+value);
+                });
+                string+=assignments.join(",");
+                subStyles.push(string)
+            }
         });
 
         return subStyles.join(";");
@@ -440,11 +445,9 @@ function File(path,type){
 }
 
 var Query = function(){
-    this.style = null;
     this.selections = [];
     this.file = new File();
-    this.surface=null;
-    this.labelres=null;
+    this.global = {};
 }
 
 function setURL(urlPath){
@@ -455,23 +458,27 @@ function setURL(urlPath){
 var validateQuery = function(query){
 
 }
+var count = 0;
 //takes the search url string and makes a query object for it 
 var urlToQuery = function(url){
     var query = new Query();
     var tokens = url.split("&");
-    
     //still using indexOf because otherwise i would need to check to see if the first substring in the string is "select" and check to see if the string isnt to small
     function stringType(string){
         if(string.indexOf("select")==0)
             return "select"
         else if(string.indexOf("pdb=")==0 || string.indexOf("cid=")==0 || string.indexOf("url=")==0)
             return "file"
-        else if(string.indexOf("style")==0)
+        else if(string.indexOf("style")==0){
+            count++;
             return "style"
-        else if(string.indexOf("surface")==0)
+        }else if(string.indexOf("surface")==0){
+            count++;
             return "surface"
-        else if(string.indexOf("labelres")==0)
+        }else if(string.indexOf("labelres")==0){
+            count++;
             return "labelres"
+        }
         return null;
     }
 
@@ -488,21 +495,14 @@ var urlToQuery = function(url){
             var selection = object;
             query.selections.push(selection);
             currentSelection = selection;
-        }else if(type == "style"){
-            if(currentSelection==null)
-                query.style = object;
-            else
-                currentSelection.style = object;
-        }else if(type == "surface"){
-            if(currentSelection==null)
-                query.surface = object;
-            else
-                currentSelection.surface = object;
-        }else if(type == "labelres"){
-             if(currentSelection==null)
-                query.labelres = object;
-            else
-                currentSelection.labelres = object;
+         }else if(type == "style" || type=="surface" || type == "labelres"){
+            if(currentSelection == null){
+                query.global[type] = object;
+                query.global[type].order = count;
+            }else{
+                currentSelection[type] = object;
+                currentSelection[type].order = count;
+            }
         }
     }
     return query;
@@ -550,9 +550,6 @@ var updateQueryFromHTML = function(){
         if (a == null || b == null) return false;
         if (a.length != b.length) return false;
 
-        // If you don't care about the order of the elements inside
-        // the array, you should sort both arrays here.
-
         for (var i = 0; i < a.length; ++i) {
             if (a[i] !== b[i]) return false;
         }
@@ -579,14 +576,20 @@ var updateQueryFromHTML = function(){
             var getSubObject = function(index){
                 var attr = $(value);
                 var attribute=attr[0]
-                var type=$(attribute).children()[0].value.toLowerCase()
+                var type=$(attribute).children()[1].value.toLowerCase()
 
                 if(type=="style"){
-                    return {style:updateStyle($(attribute).children(".style")[0])}
+                    var style =updateStyle($(attribute).children(".style")[0])
+                    style.order = index+1
+                    return {"style":style}
                 }else if(type=="surface"){
-                    return {"surface":updateOther($(attribute).children(".surface_attributes")[0])} 
+                    var surface = updateOther($(attribute).children(".surface_attributes")[0])
+                    surface.order = index+1
+                    return {"surface":surface} 
                 }else if(type == "labelres"){
-                    return {"labelres":updateOther($(attribute).children(".labelres_attributes")[0])} 
+                    var labelres = updateOther($(attribute).children(".labelres_attributes")[0])
+                    labelres.order = index+1
+                    return {"labelres":labelres} 
                 }
             }
 
@@ -640,33 +643,35 @@ var render = function(){
     run();
 }
 
-var addSurface = function(){
-    query.selections.push({surface:{}})
-    buildHTMLTree(query);
-}
-
-var addStyle = function(){
-    query.selections.push({style:{}})
-    buildHTMLTree(query);
-}
-
-var addLabelRes = function(){
-    query.selections.push({labelres:{}})
-    buildHTMLTree(query);
-}
-
 //these functions all edit the query object 
-var addSelection = function(){
-    query.selections.push({})
+var addSelection = function(type){
+    count++;
+    if(type == "style")      
+        query.selections.push({"style":{},order:count})
+    if(type == "surface")
+        query.selections.push({"surface":{},order:count})
+    if(type == "labelres")
+        query.selections.push({"labelres":{},order:count})
     buildHTMLTree(query);
 }
 
 var deleteSelection = function(spec){
+    console.log(query.selections[spec.dataset.index])
+    var order = query.selections[spec.dataset.index][spec.dataset.type].order
     delete query.selections[spec.dataset.index][spec.dataset.type];
     if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
         delete query.selections[spec.dataset.index]
-    
-    buildHTMLTree(query);
+    /*count--;
+
+    //shift other orders
+    for(var i in query.selections){
+        for(var j in query.selections[i]){
+            if(query.selections[i][j].order > order)
+                query.selections[i][j].order++;
+        }
+    }
+    console.log(query)
+    */buildHTMLTree(query);
     render();
 }
 
