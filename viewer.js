@@ -230,7 +230,6 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
 
     return model_specification;
 }
-
 //this function creates the selection object
 var createSelection = function(selection_object,selection_index,selection_booleans){
     //creates container
@@ -261,8 +260,11 @@ var createSelection = function(selection_object,selection_index,selection_boolea
             attribute_pairs.push(subselection+":"+obj);
         }
 
-        var modifier=attribute_pairs.join(";");
-
+        var modifier;
+        if(selection_index != -1)
+            modifier=attribute_pairs.join(";");
+        else
+            modifier = "all";
         var selection_spec=$('<input/>', {
             class:'selection_spec',
             value:modifier,
@@ -329,6 +331,17 @@ var buildHTMLTree = function(query){
     $("#model_type").attr("value",query.file.type);
     $("#model_input").attr("value",query.file.path);
     
+    var getObjectCount = function(selection_object){
+        var selection_count = 0;
+        if(selection_object.surface !=undefined)
+            selection_count++;
+        if(selection_object.style != undefined)
+            selection_count++;
+        if(selection_object.labelres !=undefined)
+            selection_count++;
+        return selection_count;
+    }
+
     var arr = []
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
@@ -340,12 +353,7 @@ var buildHTMLTree = function(query){
             labelres:false,
         }
 
-        if(selection_object.surface !=undefined)
-            selection_count++;
-        if(selection_object.style != undefined)
-            selection_count++;
-        if(selection_object.labelres !=undefined)
-            selection_count++;
+        var selection_count = getObjectCount(selection_object);
         if(selection_count==0)//empty selection
             selection_count++;
         //creates individual selections for each surface, style and labelres
@@ -353,6 +361,19 @@ var buildHTMLTree = function(query){
             var selection=createSelection(selection_object,selection_index,selection_booleans)
             arr.push(selection);
         }
+    }
+    var global_count = getObjectCount(query.global);
+    
+    var selection_booleans = {
+        surface:false,
+        style:false,
+        labelres:false,
+    }
+
+    for(var i=0;i<global_count;i++){
+        var selection = createSelection(query.global,-1,selection_booleans)
+        arr.push(selection);
+
     }
     //sort
     for(var i =0;i<arr.length;i++){
@@ -378,7 +399,6 @@ Object.size = function(obj) {
     }
     return size;
 };
-
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
     var url = "";
@@ -443,12 +463,12 @@ var queryToURL = function(query){
 
     objects.push(query.file.type+"="+query.file.path);
 
-    if(query.labelres!=null){
-        objects.push("labelres="+unpackObject(query.labelres));
-    }else if(query.surface!=null){
-        objects.push("surface="+unpackObject(query.surface));
-    }else if(query.style!=null){
-        objects.push("style="+unpackObject(query.style));
+    if(query.global.labelres!=null){
+        objects.push("labelres="+unpackObject(query.global.labelres));
+    }else if(query.global.surface!=null){
+        objects.push("surface="+unpackObject(query.global.surface));
+    }else if(query.global.style!=null){
+        objects.push("style="+unpackStyle(query.global.style));
     }
     for(var selection in query.selections){
         objects.push(unpackSelection(query.selections[selection]))
@@ -471,7 +491,6 @@ var Query = function(){
 function setURL(urlPath){
     window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
 }
-
 //this function will look through the dictionaries defined in glmodel and validate if the types are correct and return a dictionary with flags for the types that are incorecct
 var validateQuery = function(query){
 
@@ -588,6 +607,7 @@ var updateQueryFromHTML = function(){
     }
 
     var selects = [];
+    var global_obj = {};
     var listItems = $(".selection")
     listItems.each(function(index,value){
         if(listItems.hasOwnProperty(index)){
@@ -617,13 +637,21 @@ var updateQueryFromHTML = function(){
                 }   
                 return obj1;
             }            
+
             var val=getSubObject(index);
-            var selection = updateSelectionElements($(listItems[index]).children(".selection_spec")[0].value);
-            var extended=extend(selection,val)
-            selects.push(extended)
+            var selection_spec = $(listItems[index]).children(".selection_spec")[0].value;
+            var selection;
+            if(selection_spec != "all"){
+                selection = updateSelectionElements(selection_spec);
+                var extended=extend(selection,val)
+                selects.push(extended)
+            }else{
+                global_obj=extend(global_obj,val)
+            }
+
         }
     });
-
+    query.global = global_obj
     function extend(obj1, src1) {
         for (var key in src1) {
             if (src1.hasOwnProperty(key)) obj1[key] = src1[key];
@@ -660,42 +688,38 @@ var render = function(){
     buildHTMLTree(query);
     run();
 }
-
 //these functions all edit the query object 
 var addSelection = function(type){
     count++;
     if(type == "style")      
         query.selections.push({"style":{},order:count})
-    if(type == "surface")
+    else if(type == "surface")
         query.selections.push({"surface":{},order:count})
-    if(type == "labelres")
+    else if(type == "labelres")
         query.selections.push({"labelres":{},order:count})
+
     buildHTMLTree(query);
 }
 
 var deleteSelection = function(spec){
-    console.log(query.selections[spec.dataset.index])
-    var order = query.selections[spec.dataset.index][spec.dataset.type].order
-    delete query.selections[spec.dataset.index][spec.dataset.type];
-    if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
-        delete query.selections[spec.dataset.index]
-    /*count--;
-
-    //shift other orders
-    for(var i in query.selections){
-        for(var j in query.selections[i]){
-            if(query.selections[i][j].order > order)
-                query.selections[i][j].order++;
-        }
+    if(spec.dataset.index == -1){
+        delete query.global[spec.dataset.type]
+    }else{
+        delete query.selections[spec.dataset.index][spec.dataset.type];
+        if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
+            delete query.selections[spec.dataset.index]
     }
-    console.log(query)
-    */buildHTMLTree(query);
+    buildHTMLTree(query);
     render();
 }
 
 var addModelSpec = function(type,selection){
-    var current_selection = query.selections[selection.dataset.index]
-
+    var current_selection;
+    if(spec.dataset.index == -1){
+        current_selection = query.global
+    }else{
+        current_selection = query.selections[selection.dataset.index]
+    }
     if(type == "style" || type == "surface" || type == "labelres"){
         if(current_selection[type]==null)
             current_selection[type]={};
@@ -709,13 +733,20 @@ var addModelSpec = function(type,selection){
 var addStyleSpec = function(model_spec){
     var defaultKey = "";
     var defaultValue = {};
-    query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
+    if(model_spec.dataset.index == -1){
+        query.global[model_spec.dataset.type][defaultKey] = defaultValue;
+    }else{
+        query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
+    }
     buildHTMLTree(query);
 }
 
 var deleteStyleSpec = function(spec){
-    delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
-    
+    if(spec.dataset.index == -1){
+        delete query.global[spec.dataset.type][spec.dataset.attr]
+    }else{
+        delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
+    }
     buildHTMLTree(query);
     render();
 }
@@ -723,13 +754,20 @@ var deleteStyleSpec = function(spec){
 var addOtherAttribute= function(spec){
     var defaultKey = "";
     var defaultValue = "";
-    query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
+    if(spec.dataset.index == -1){
+        query.global[spec.dataset.type.toLowerCase()][defaultKey]= defaultValue;
+    }else{
+        query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
+    }
     buildHTMLTree(query);
 }
 
 var deleteOtherAttribute = function(spec){
-    delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
-    
+    if(spec.dataset.index == -1){
+        delete query.global[spec.dataset.type][spec.dataset.attr]
+    }else{
+        delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
+    }
     buildHTMLTree(query);
     render();
 }
@@ -737,40 +775,37 @@ var deleteOtherAttribute = function(spec){
 var addAttribute = function(style_spec){
     var defaultKey = "";
     var defaultValue = "";
-    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
-
+    if(style_spec.dataset.index == -1){
+        query.global[style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]= defaultValue;
+    }else{
+        query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
+    }
     buildHTMLTree(query);
 }
 
 var deleteStyleAttribute = function(spec){
-
-    console.log(spec)
-    console.log(query.selections[spec.dataset.index])
-    console.log(query.selections[spec.dataset.index][spec.dataset.attr])
-    delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
-    
+    if(spec.dataset.index == -1){
+        delete query.global.style[spec.dataset.type][spec.dataset.attr]
+    }else{
+        delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
+    }
     buildHTMLTree(query);
     render();
 }
-
 //this function reads the form changes and upates the query accordingly
 var center = function(){
     glviewer.center({},1000,true);
 }
-
 //initializes the sidebar based on the given url
 var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
     //updating on back button
-    console.log("hi")
     $(window).on('popstate', function() {
-
         query = urlToQuery(window.location.search.substring(1));
         buildHTMLTree(query);
         render();
     });
-
 }
 //opens up the side bar
 var openSide= function(){
