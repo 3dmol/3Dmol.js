@@ -138,7 +138,6 @@ var createOtherModelSpec = function(spec,type,selection_index){
     });
     
     for(var attribute_index in spec){
-        console.log(spec)
         createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index}).appendTo(attributes);
     }
 
@@ -306,6 +305,7 @@ builds an html tree that goes inside of the selection portion of the viewer page
 var buildHTMLTree = function(query){
     //get parent object for the html tree
     var parent = $('#selection_list');
+    parent.text("");
     //list file type and path
     $("#model_type").attr("value",query.file.type); 
     $("#model_type").change(function(){
@@ -350,7 +350,6 @@ var queryToURL = function(query){
                 objs.push(key+":"+value);
             }
         });
-        
         return objs.join(";");
     }
 
@@ -384,18 +383,6 @@ var queryToURL = function(query){
                 objs.push(obj+"="+unpackOther(object[obj]))
             }
         }
-        /*
-        if(copiedObject.style!=undefined){
-            objs.push("style="+unpackStyle(copiedObject.style));
-            delete copiedObject.style;
-        }if(copiedObject.labelres!=undefined){
-            objs.push("labelres="+unpackOther(copiedObject.labelres));
-            delete copiedObject.labelres;
-        }
-        if(copiedObject.surface!=undefined){
-            objs.push("surface="+unpackOther(copiedObject.surface));
-            delete copiedObject.surface;
-        }*/
         var select="select="+unpackOther(augmentSelection(object));
         objs.unshift(select);//prepend
         return objs.join("&");
@@ -671,6 +658,7 @@ var addAttribute = function(style_spec){
     var defaultKey = "";
     var defaultValue = "";
     query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
+    console.log(style_spec)
     buildHTMLTree(query);
 }
 
