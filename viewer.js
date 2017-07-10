@@ -150,8 +150,8 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     }).appendTo(style_spec);
 
     style_spec_name.change(function(){
-                render();
-            })
+        render();
+    })
 
     $.each(validNames,function(key,value) {
         if(value.gui){
@@ -389,20 +389,22 @@ var queryToURL = function(query){
     var unpackObject = function (object){
         var objs =[]
         $.each(object, function(key,value){
-            //array values 
-            if(Array.isArray(value)){
-                //sperate by commas
-                objs.push(key+":"+value.join(","));
-            }else{
-                objs.push(key+":"+value);
+            if(key != "order"){
+                //array values 
+                if(Array.isArray(value)){
+                    //sperate by commas
+                    objs.push(key+":"+value.join(","));
+                }else{
+                    objs.push(key+":"+value);
+                }
             }
         });
+        
         return objs.join(";");
     }
 
     var unpackStyle = function(object){
         var subStyles=[]
-        console.log(object)
         $.each(object, function(sub_style,sub_style_object){
             if(sub_style != "order"){
                 var string="";
@@ -597,7 +599,7 @@ var updateQueryFromHTML = function(){
             var getSubObject = function(index){
                 var attr = $(value);
                 var attribute=attr[0]
-                var type=$(attribute).children()[1].value.toLowerCase()
+                var type=$(attribute).children()[1].innerHTML.toLowerCase()
 
                 if(type=="style"){
                     var style =updateStyle($(attribute).children(".style")[0])
