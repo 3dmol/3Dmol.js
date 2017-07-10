@@ -257,9 +257,7 @@ $3Dmol.GLModel = (function() {
         "scale":{type:"boolean",gui:true},
         "order":{type:"number",gui:true},
     }
-
     // class functions
-
     // return true if a and b represent the same style
     var sameObj = function(a,b) {
         if(a && b)
@@ -267,7 +265,6 @@ $3Dmol.GLModel = (function() {
         else
             return a == b;
     };    
-
    
     function GLModel(mid, defaultcolors) {
         // private variables
@@ -327,7 +324,6 @@ $3Dmol.GLModel = (function() {
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
-        
         /**
          * 
          * @param {AtomSpec} atom

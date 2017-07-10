@@ -286,38 +286,28 @@ var createSelection = function(selection_object,selection_index,selection_boolea
     createHeader()    
     //check if style exists and if so create the object
     var order;
+
+    var name; 
     if(selection_object.style !=null && !selection_booleans.style){
-        var style = createModelSpecification("style",selection_object.style, selection_index);
-
-        delete_selection.attr("data-type","style");
-        style.appendTo(selection);
-
-        selection_type.val(validNames[0])
-        order = selection_object.style.order;
-
-        selection_booleans.style=true;
+        name = "style";
     }else if(selection_object.surface !=null && !selection_booleans.surface){
-        var surface = createModelSpecification("surface", selection_object.surface, selection_index);
-
-        delete_selection.attr("data-type","surface");
-        surface.appendTo(selection);
-
-        selection_type.val(validNames[1])//non dynamic
-        order = selection_object.surface.order;
-
-        selection_booleans.surface=true;
+        name = "surface";
     }else if(selection_object.labelres != null && !selection_booleans.labelres){
-        var labelres = createModelSpecification("labelres", selection_object.labelres, selection_index);
-    
-        delete_selection.attr("data-type","labelres");
-        labelres.appendTo(selection);
-
-        selection_type.val(validNames[2])
-        order = selection_object.labelres.order;
-
-        selection_booleans.labelres=true;
+        name = "labelres";
     }
 
+    if(name != undefined){
+        var object = createModelSpecification(name,selection_object[name], selection_index);
+
+        delete_selection.attr("data-type",name);
+        object.appendTo(selection);
+
+        selection_type.val(validNames[0])
+        order = selection_object[name].order;
+
+        selection_booleans[name]=true;
+    }
+    
     return [order,selection];
 }
 /*
@@ -407,11 +397,13 @@ var queryToURL = function(query){
         var objs =[]
         $.each(object, function(key,value){
             //array values 
-            if(Array.isArray(value)){
-                //sperate by commas
-                objs.push(key+":"+value.join(","));
-            }else{
-                objs.push(key+":"+value);
+            if(key != "order"){
+                if(Array.isArray(value)){
+                    //sperate by commas
+                    objs.push(key+":"+value.join(","));
+                }else{
+                    objs.push(key+":"+value);
+                }
             }
         });
         return objs.join(";");

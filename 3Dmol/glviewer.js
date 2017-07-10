@@ -436,7 +436,6 @@ $3Dmol.GLViewer = (function() {
                 return;
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
             var mult = 1.0;
-            console.log(camera.position.z)
             if(ev.originalEvent.ctrlKey) {
                 mult = -1.0; //this is a pinch event turned into a wheel event (or they're just holding down the ctrl)
             }
@@ -448,11 +447,9 @@ $3Dmol.GLViewer = (function() {
                         * ev.originalEvent.wheelDelta / 400;
             }
             if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
-            console.log(scaleFactor/originalPosition)
-            setLabelStyles(scaleFactor/originalPosition);
+            //setLabelStyles(scaleFactor/originalPosition);
             show();
-        };
-        
+        };        
         /**
          * Return image URI of viewer contents (base64 encoded).
          * @function $3Dmol.GLViewer#pngURI
