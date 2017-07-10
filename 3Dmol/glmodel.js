@@ -180,7 +180,6 @@ $3Dmol.GLModel = (function() {
         "linewidth":{type:"number",gui:true,step:.1},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-
     };
 
     var validCrossSpec = {
@@ -227,6 +226,7 @@ $3Dmol.GLModel = (function() {
         "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
         "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
         "colorfunc":{validItems:null,valid:false},
+        "order":{type:"number",gui:true}
     };
 
     var validSurfaceSpecs = {
@@ -236,6 +236,7 @@ $3Dmol.GLModel = (function() {
         "voldata":{type:"number",gui:false},
         "volscheme":{type:"number",gui:false},
         "map":{type:"number",gui:false},
+        "order":{type:"number",gui:true}
     }
 
     var validLabelResSpecs = {
@@ -254,6 +255,7 @@ $3Dmol.GLModel = (function() {
         "fixed":{type:"boolean",gui:true},
         "alignment":{validItems:["topLeft","topCenter","topRight","centerLeft","center","centerRight","bottomLeft","bottomCenter","bottomRight"],gui:true},
         "scale":{type:"boolean",gui:true},
+        "order":{type:"number",gui:true},
     }
 
     // class functions
