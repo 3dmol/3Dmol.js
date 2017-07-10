@@ -251,7 +251,6 @@ var createSelection = function(selection_object,selection_index,selection_boolea
         $(selection_type).change(function(){
             render();
         });
-
         //add together sub selections
         var attribute_pairs =[];
         var sel = augmentSelection(selection_object)
@@ -286,28 +285,38 @@ var createSelection = function(selection_object,selection_index,selection_boolea
     createHeader()    
     //check if style exists and if so create the object
     var order;
-
-    var name; 
     if(selection_object.style !=null && !selection_booleans.style){
-        name = "style";
-    }else if(selection_object.surface !=null && !selection_booleans.surface){
-        name = "surface";
-    }else if(selection_object.labelres != null && !selection_booleans.labelres){
-        name = "labelres";
-    }
+        var style = createModelSpecification("style",selection_object.style, selection_index);
 
-    if(name != undefined){
-        var object = createModelSpecification(name,selection_object[name], selection_index);
-
-        delete_selection.attr("data-type",name);
-        object.appendTo(selection);
+        delete_selection.attr("data-type","style");
+        style.appendTo(selection);
 
         selection_type.val(validNames[0])
-        order = selection_object[name].order;
+        order = selection_object.style.order;
 
-        selection_booleans[name]=true;
-    }
+        selection_booleans.style=true;
+    }else if(selection_object.surface !=null && !selection_booleans.surface){
+        var surface = createModelSpecification("surface", selection_object.surface, selection_index);
+
+        delete_selection.attr("data-type","surface");
+        surface.appendTo(selection);
+
+        selection_type.val(validNames[1])//non dynamic
+        order = selection_object.surface.order;
+
+        selection_booleans.surface=true;
+    }else if(selection_object.labelres != null && !selection_booleans.labelres){
+        var labelres = createModelSpecification("labelres", selection_object.labelres, selection_index);
     
+        delete_selection.attr("data-type","labelres");
+        labelres.appendTo(selection);
+
+        selection_type.val(validNames[2])
+        order = selection_object.labelres.order;
+
+        selection_booleans.labelres=true;
+    }
+
     return [order,selection];
 }
 /*
@@ -397,13 +406,11 @@ var queryToURL = function(query){
         var objs =[]
         $.each(object, function(key,value){
             //array values 
-            if(key != "order"){
-                if(Array.isArray(value)){
-                    //sperate by commas
-                    objs.push(key+":"+value.join(","));
-                }else{
-                    objs.push(key+":"+value);
-                }
+            if(Array.isArray(value)){
+                //sperate by commas
+                objs.push(key+":"+value.join(","));
+            }else{
+                objs.push(key+":"+value);
             }
         });
         return objs.join(";");
