@@ -14,6 +14,24 @@ var augmentSelection = function(selection){
     return copiedObject;
 }
 
+//removes eveyrhting but style,surface, and labelres
+var removeAllButValid = function(object){
+    var copy = jQuery.extend(true,{},object);
+    for(var i in object){
+        if(i!= "surface" || i!= "labelres" || i!= "style")
+            delete copy[i]
+    }
+    return copy;
+}
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
 var createAttribute = function(name,value,parent){
     var attribute = $('<li/>',{
         class:'attribute'
@@ -209,6 +227,12 @@ var createStyle = function(model_spec_object,model_spec_type,selection_index){
     return style; 
 }
 
+var validNames = {
+    "style":"Style",
+    "surface":"Surface",
+    "labelres":"LabelRes",
+}
+
 var createModelSpecification = function(model_spec_type,model_spec_object,selection_index){
     var model_specification = null;
     if(model_spec_type=="style"){
@@ -231,32 +255,31 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
     return model_specification;
 }
 //this function creates the selection object
-var createSelection = function(selection_object,selection_index,selection_booleans){
+var createSelection = function(spec,object,index,type){
     //creates container
     var selection = $("<li/>",{
         class:"selection"
     });
-    var selection_type;
-
-    var validNames=["Style","Surface","LabelRes"];
+    console.log(object)
     var createHeader = function(){
-        selection_type = $('<p>',{
+        var selection_type = $('<p>',{
             class:'selection_type',
+            text:validNames[type],
         }).appendTo(selection);
 
         //add together sub selections
         var attribute_pairs =[];
-        var sel = augmentSelection(selection_object)
-        for(var subselection in sel){
-            var obj=sel[subselection];
+        for(var subselection in spec){
+            var obj=spec[subselection];
             attribute_pairs.push(subselection+":"+obj);
         }
 
         var modifier;
-        if(selection_index != -1)
+        if(index != -1)
             modifier=attribute_pairs.join(";");
         else
             modifier = "all";
+
         var selection_spec=$('<input/>', {
             class:'selection_spec',
             value:modifier,
@@ -266,42 +289,28 @@ var createSelection = function(selection_object,selection_index,selection_boolea
             render();
         })
     }
+
      //delete button
     var delete_selection = $("<div/>",{
         html:"&#x2715;",
         class:"delete_selection",
-        "data-index":selection_index,
+        "data-index":index,
         "data-type":"",
         "click":function(){deleteSelection(this);}
     }).appendTo(selection); 
 
     createHeader()    
     //check if style exists and if so create the object
-    var order;
-    var name; 
-    var num;
-    if(selection_object.style !=null && !selection_booleans.style){
-        name = "style";
-        num=0;
-    }else if(selection_object.surface !=null && !selection_booleans.surface){
-        name = "surface";
-        num=1;
-    }else if(selection_object.labelres != null && !selection_booleans.labelres){
-        name = "labelres";
-        num=2;
-    }
-    if(name != undefined){
-        var object = createModelSpecification(name,selection_object[name], selection_index);
+   
+    var ret = createModelSpecification(type,object[type], index);
+    console.log(ret)
 
-        delete_selection.attr("data-type",name);
-        object.appendTo(selection);
+    delete_selection.attr("data-type",type);
+    ret.appendTo(selection);
 
-        selection_type.text(validNames[num])
-        order = selection_object[name].order;
+   
 
-        selection_booleans[name]=true;
-    }
-    return [order,selection];
+    return selection;
 }
 /*
 builds an html tree that goes inside of the selection portion of the viewer page
@@ -309,94 +318,48 @@ builds an html tree that goes inside of the selection portion of the viewer page
 var buildHTMLTree = function(query){
     //get parent object for the html tree
     var parent = $('#selection_list');
-    parent.text("");
     //list file type and path
-    $("#model_type").attr("value",query.file.type);
+    $("#model_type").attr("value",query.file.type); 
+    $("#model_type").change(function(){
+        render();
+    })
     $("#model_input").attr("value",query.file.path);
-    
-    var getObjectCount = function(selection_object){
-        var selection_count = 0;
-        if(selection_object.surface !=undefined)
-            selection_count++;
-        if(selection_object.style != undefined)
-            selection_count++;
-        if(selection_object.labelres !=undefined)
-            selection_count++;
-        return selection_count;
-    }
+     $("#model_input").change(function(){
+        render();
+    })
 
-    var arr = []
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
-        var selection_count = 0;
-        var selection_booleans = {
-            surface:false,
-            style:false,
-            labelres:false,
-        }
 
-        var selection_count = getObjectCount(selection_object);
-        if(selection_count==0)//empty selection
-            selection_count++;
-        //creates individual selections for each surface, style and labelres
-        for(var i=0;i<selection_count;i++){
-            var selection=createSelection(selection_object,selection_index,selection_booleans)
-            arr.push(selection);
+        if(selection_object.style != undefined){
+            parent.append(createSelection(augmentSelection(selection_object),selection_object.style,selection_index,"style"))
+        }
+        if(selection_object.labelres != undefined){
+            parent.append(createSelection(augmentSelection(selection_object),selection_object.labelres,selection_index,"labelres"))
+        }
+        if(selection_object.surface != undefined){
+            parent.append(createSelection(augmentSelection(selection_object),selection_object.surface,selection_index,"surface"))
         }
     }
-    var global_count = getObjectCount(query.global);
-    
-    var selection_booleans = {
-        surface:false,
-        style:false,
-        labelres:false,
-    }
 
-    for(var i=0;i<global_count;i++){
-        var selection = createSelection(query.global,-1,selection_booleans)
-        arr.push(selection);
-
-    }
-    //sort
-    for(var i =0;i<arr.length;i++){
-        for(var j =i +1; j<arr.length; j++){
-            if(arr[j][0]<arr[i][0]){
-                var copy = arr[j];
-                arr[j]= arr[i]
-                arr[i]= copy;
-            }
-        }
-    }
-    //add to parent
-    for(var i =0;i<arr.length;i++){
-        parent.append(arr[i][1])
-    }
-        var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
+    var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
 }
 
-Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
+
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
     var url = "";
     //unpacks everything except for style which has multiple layers 
-    var unpackObject = function (object){
+    var unpackOther = function (object){
         var objs =[]
         $.each(object, function(key,value){
-            if(key != "order"){
-                //array values 
-                if(Array.isArray(value)){
-                    //sperate by commas
-                    objs.push(key+":"+value.join(","));
-                }else{
-                    objs.push(key+":"+value);
-                }
+            //array values 
+            if(Array.isArray(value)){
+                //sperate by commas
+                objs.push(key+":"+value.join(","));
+            }else{
+                objs.push(key+":"+value);
             }
         });
         
@@ -406,40 +369,46 @@ var queryToURL = function(query){
     var unpackStyle = function(object){
         var subStyles=[]
         $.each(object, function(sub_style,sub_style_object){
-            if(sub_style != "order"){
-                var string="";
-                string+=sub_style;
-                if(Object.size(sub_style_object)!=0)
-                    string+=":";
-                var assignments =[]
-                $.each(sub_style_object, function(key,value){
-                    assignments.push(key+"~"+value);
-                });
-                string+=assignments.join(",");
-                subStyles.push(string)
-            }
+            var string="";
+            string+=sub_style;
+            if(Object.size(sub_style_object)!=0)
+                string+=":";
+            var assignments =[]
+            $.each(sub_style_object, function(key,value){
+                assignments.push(key+"~"+value);
+            });
+            string+=assignments.join(",");
+            subStyles.push(string)
         });
 
         return subStyles.join(";");
     }
-    //global 
+
     var unpackSelection = function(object){
         var copiedObject = jQuery.extend(true,{}, object)
         var objs=[];
         var string="";
-        
+
+        for(var obj in object){
+            if(obj == "style"){
+                objs.push("style="+unpackStyle(object.style))
+            }else if(obj == "labelres" || obj == "surface"){
+                objs.push(obj+"="+unpackOther(object[obj]))
+            }
+        }
+        /*
         if(copiedObject.style!=undefined){
             objs.push("style="+unpackStyle(copiedObject.style));
             delete copiedObject.style;
         }if(copiedObject.labelres!=undefined){
-            objs.push("labelres="+unpackObject(copiedObject.labelres));
+            objs.push("labelres="+unpackOther(copiedObject.labelres));
             delete copiedObject.labelres;
         }
         if(copiedObject.surface!=undefined){
-            objs.push("surface="+unpackObject(copiedObject.surface));
+            objs.push("surface="+unpackOther(copiedObject.surface));
             delete copiedObject.surface;
-        }
-        var select="select="+unpackObject(copiedObject);
+        }*/
+        var select="select="+unpackOther(augmentSelection(object));
         objs.unshift(select);//prepend
         return objs.join("&");
     }
@@ -448,13 +417,6 @@ var queryToURL = function(query){
 
     objects.push(query.file.type+"="+query.file.path);
 
-    if(query.global.labelres!=null){
-        objects.push("labelres="+unpackObject(query.global.labelres));
-    }else if(query.global.surface!=null){
-        objects.push("surface="+unpackObject(query.global.surface));
-    }else if(query.global.style!=null){
-        objects.push("style="+unpackStyle(query.global.style));
-    }
     for(var selection in query.selections){
         objects.push(unpackSelection(query.selections[selection]))
     }
@@ -470,7 +432,6 @@ function File(path,type){
 var Query = function(){
     this.selections = [];
     this.file = new File();
-    this.global = {};
 }
 
 function setURL(urlPath){
@@ -487,28 +448,23 @@ var urlToQuery = function(url){
     var tokens = url.split("&");
     //still using indexOf because otherwise i would need to check to see if the first substring in the string is "select" and check to see if the string isnt to small
     function stringType(string){
-        if(string.indexOf("select")==0)
+        if(string ==  "select")
             return "select"
-        else if(string.indexOf("pdb=")==0 || string.indexOf("cid=")==0 || string.indexOf("url=")==0)
+        else if(string =="pdb" || string == "cid" || string == "url")
             return "file"
-        else if(string.indexOf("style")==0){
+        else if(string == "style" || string == "surface" || string == "labelres"){
             count++;
-            return "style"
-        }else if(string.indexOf("surface")==0){
-            count++;
-            return "surface"
-        }else if(string.indexOf("labelres")==0){
-            count++;
-            return "labelres"
-        }
-        return null;
+            return string;
+        }        
+        throw "Illegal url string : "+string;
+        return;
     }
 
-    var currentSelection = null;
+    var currentSelection = {};
     for(var token in tokens){
         var strings = tokens[token].split("=");
-        var type = stringType(tokens[token]);
-        var string = strings[1];
+        var type = stringType(strings[0]);//left side of equals
+        var string = strings[1];//right side of equals
         var object = $3Dmol.specStringToObject(string);
 
         if(type == "file"){
@@ -517,14 +473,8 @@ var urlToQuery = function(url){
             var selection = object;
             query.selections.push(selection);
             currentSelection = selection;
-         }else if(type == "style" || type=="surface" || type == "labelres"){
-            if(currentSelection == null){
-                query.global[type] = object;
-                query.global[type].order = count;
-            }else{
-                currentSelection[type] = object;
-                currentSelection[type].order = count;
-            }
+        }else if(type == "style" || type=="surface" || type == "labelres"){
+            currentSelection[type] = object;
         }
     }
     return query;
@@ -534,6 +484,10 @@ var updateQueryFromHTML = function(){
     //File/PDB/URL updating
     query.file.path=document.getElementById("model_input").value;
     query.file.type=document.getElementById("model_type").value;
+
+    $("#model_type").change(function(){
+        render();
+    });
 
     var updateOther = function(other){
         var object={};
@@ -564,7 +518,7 @@ var updateQueryFromHTML = function(){
     }
 
     var updateSelectionElements = function(selection_string){
-        return $3Dmol.specStringToObject(selection_string)
+        return $3Dmol.specStringToObject(selection_string);
     }
 
     function arraysEqual(a, b) {
@@ -591,8 +545,14 @@ var updateQueryFromHTML = function(){
         return true;
     }
 
+    function combine(obj1, src1) {
+        for (var key in src1) {
+            if (src1.hasOwnProperty(key)) obj1[key] = src1[key];
+        }   
+        return obj1;
+    }      
+
     var selects = [];
-    var global_obj = {};
     var listItems = $(".selection")
     listItems.each(function(index,value){
         if(listItems.hasOwnProperty(index)){
@@ -603,46 +563,26 @@ var updateQueryFromHTML = function(){
 
                 if(type=="style"){
                     var style =updateStyle($(attribute).children(".style")[0])
-                    style.order = index+1
                     return {"style":style}
                 }else if(type=="surface"){
                     var surface = updateOther($(attribute).children(".surface_attributes")[0])
-                    surface.order = index+1
                     return {"surface":surface} 
                 }else if(type == "labelres"){
                     var labelres = updateOther($(attribute).children(".labelres_attributes")[0])
-                    labelres.order = index+1
                     return {"labelres":labelres} 
                 }
             }
 
-            function extend(obj1, src1) {
-                for (var key in src1) {
-                    if (src1.hasOwnProperty(key)) obj1[key] = src1[key];
-                }   
-                return obj1;
-            }            
-
-            var val=getSubObject(index);
+            var val = getSubObject(index);
             var selection_spec = $(listItems[index]).children(".selection_spec")[0].value;
-            var selection;
-            if(selection_spec != "all"){
-                selection = updateSelectionElements(selection_spec);
-                var extended=extend(selection,val)
-                selects.push(extended)
-            }else{
-                global_obj=extend(global_obj,val)
-            }
+            var selection = updateSelectionElements(selection_spec);
+            var extended = combine(selection,val)
+            selects.push(extended)
+              
 
         }
     });
-    query.global = global_obj
-    function extend(obj1, src1) {
-        for (var key in src1) {
-            if (src1.hasOwnProperty(key)) obj1[key] = src1[key];
-        }   
-        return obj1;
-    }
+
     var final_selections = [];
     var used=[]
     for(var sele in selects){
@@ -654,7 +594,7 @@ var updateQueryFromHTML = function(){
             if(sele== sele1 || used.includes(sele1))
                 continue;
             if(isSame(augmentSelection(selects[sele1]),augmented)){
-               augmented = extend(selects[sele1],augmented);
+               augmented = combine(selects[sele1],augmented);
                used.push(sele1);
             }
         }
@@ -687,24 +627,18 @@ var addSelection = function(type){
 }
 
 var deleteSelection = function(spec){
-    if(spec.dataset.index == -1){
-        delete query.global[spec.dataset.type]
-    }else{
-        delete query.selections[spec.dataset.index][spec.dataset.type];
-        if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
-            delete query.selections[spec.dataset.index]
-    }
+    delete query.selections[spec.dataset.index][spec.dataset.type];
+    if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
+        delete query.selections[spec.dataset.index]
+    
     buildHTMLTree(query);
     render();
 }
 
 var addModelSpec = function(type,selection){
     var current_selection;
-    if(spec.dataset.index == -1){
-        current_selection = query.global
-    }else{
-        current_selection = query.selections[selection.dataset.index]
-    }
+    current_selection = query.selections[selection.dataset.index]
+    
     if(type == "style" || type == "surface" || type == "labelres"){
         if(current_selection[type]==null)
             current_selection[type]={};
@@ -718,20 +652,14 @@ var addModelSpec = function(type,selection){
 var addStyleSpec = function(model_spec){
     var defaultKey = "";
     var defaultValue = {};
-    if(model_spec.dataset.index == -1){
-        query.global[model_spec.dataset.type][defaultKey] = defaultValue;
-    }else{
-        query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
-    }
+    query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
+    
     buildHTMLTree(query);
 }
 
 var deleteStyleSpec = function(spec){
-    if(spec.dataset.index == -1){
-        delete query.global[spec.dataset.type][spec.dataset.attr]
-    }else{
-        delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
-    }
+    delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
+    
     buildHTMLTree(query);
     render();
 }
@@ -739,20 +667,14 @@ var deleteStyleSpec = function(spec){
 var addOtherAttribute= function(spec){
     var defaultKey = "";
     var defaultValue = "";
-    if(spec.dataset.index == -1){
-        query.global[spec.dataset.type.toLowerCase()][defaultKey]= defaultValue;
-    }else{
-        query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
-    }
+    query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
+    
     buildHTMLTree(query);
 }
 
 var deleteOtherAttribute = function(spec){
-    if(spec.dataset.index == -1){
-        delete query.global[spec.dataset.type][spec.dataset.attr]
-    }else{
-        delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
-    }
+    delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
+    
     buildHTMLTree(query);
     render();
 }
@@ -760,20 +682,12 @@ var deleteOtherAttribute = function(spec){
 var addAttribute = function(style_spec){
     var defaultKey = "";
     var defaultValue = "";
-    if(style_spec.dataset.index == -1){
-        query.global[style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]= defaultValue;
-    }else{
-        query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
-    }
+    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
     buildHTMLTree(query);
 }
 
 var deleteStyleAttribute = function(spec){
-    if(spec.dataset.index == -1){
-        delete query.global.style[spec.dataset.type][spec.dataset.attr]
-    }else{
-        delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
-    }
+    delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
     buildHTMLTree(query);
     render();
 }
