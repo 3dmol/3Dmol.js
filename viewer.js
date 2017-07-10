@@ -240,17 +240,10 @@ var createSelection = function(selection_object,selection_index,selection_boolea
 
     var validNames=["Style","Surface","LabelRes"];
     var createHeader = function(){
-        selection_type = $('<select>',{
+        selection_type = $('<p>',{
             class:'selection_type',
         }).appendTo(selection);
 
-        $.each(validNames,function(key,value) {
-            selection_type.append($("<option>").attr('value',value).text(value));
-        });
-
-        $(selection_type).change(function(){
-            render();
-        });
         //add together sub selections
         var attribute_pairs =[];
         var sel = augmentSelection(selection_object)
@@ -303,7 +296,7 @@ var createSelection = function(selection_object,selection_index,selection_boolea
         delete_selection.attr("data-type",name);
         object.appendTo(selection);
 
-        selection_type.val(validNames[num])
+        selection_type.text(validNames[num])
         order = selection_object[name].order;
 
         selection_booleans[name]=true;
