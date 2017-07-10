@@ -9,7 +9,6 @@ var augmentSelection = function(selection){
     }if(copiedObject.surface!=undefined){
         delete copiedObject.surface;
     }
-    delete copiedObject.order;
 
     return copiedObject;
 }
@@ -130,7 +129,6 @@ var createAttribute = function(name,value,parent){
         attribute_value.attr("type","number")
         attribute_value.attr("step",validNames[name.toString()].step)
     }
-
     return attribute;
 }
 
@@ -140,8 +138,7 @@ var createOtherModelSpec = function(spec,type,selection_index){
     });
     
     for(var attribute_index in spec){
-        if(attribute_index == "order")
-            continue;
+        console.log(spec)
         createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index}).appendTo(attributes);
     }
 
@@ -218,9 +215,7 @@ var createStyle = function(model_spec_object,model_spec_type,selection_index){
     }).appendTo(style);
                         
     for(var attribute_index in model_spec_object){
-        //ignore the order attribute
-        if(attribute_index == "order")
-            continue;
+        console.log(model_spec_object)
         createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index).appendTo(style_specs);
     }
 
@@ -237,7 +232,6 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
     var model_specification = null;
     if(model_spec_type=="style"){
         model_specification = createStyle(model_spec_object,model_spec_type,selection_index)
-
         var add_style_spec = $('<button/>',{
             "class":"add_style_spec",
             "text":"Add Style Spec",
@@ -260,7 +254,7 @@ var createSelection = function(spec,object,index,type){
     var selection = $("<li/>",{
         class:"selection"
     });
-    console.log(object)
+
     var createHeader = function(){
         var selection_type = $('<p>',{
             class:'selection_type',
@@ -274,11 +268,9 @@ var createSelection = function(spec,object,index,type){
             attribute_pairs.push(subselection+":"+obj);
         }
 
-        var modifier;
-        if(index != -1)
-            modifier=attribute_pairs.join(";");
-        else
-            modifier = "all";
+        var modifier=attribute_pairs.join(";");
+        if(modifier == "")
+            modifier = "all"
 
         var selection_spec=$('<input/>', {
             class:'selection_spec',
@@ -301,14 +293,10 @@ var createSelection = function(spec,object,index,type){
 
     createHeader()    
     //check if style exists and if so create the object
-   
-    var ret = createModelSpecification(type,object[type], index);
-    console.log(ret)
+    var ret = createModelSpecification(type,object, index);
 
     delete_selection.attr("data-type",type);
     ret.appendTo(selection);
-
-   
 
     return selection;
 }
@@ -598,7 +586,7 @@ var updateQueryFromHTML = function(){
                used.push(sele1);
             }
         }
-        final_selections.push(extend(selects[sele],augmented))
+        final_selections.push(combine(selects[sele],augmented))
     }
 
     query.selections=final_selections;
@@ -617,11 +605,11 @@ var render = function(){
 var addSelection = function(type){
     count++;
     if(type == "style")      
-        query.selections.push({"style":{},order:count})
+        query.selections.push({"style":{}})
     else if(type == "surface")
-        query.selections.push({"surface":{},order:count})
+        query.selections.push({"surface":{}})
     else if(type == "labelres")
-        query.selections.push({"labelres":{},order:count})
+        query.selections.push({"labelres":{}})
 
     buildHTMLTree(query);
 }
