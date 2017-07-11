@@ -225,11 +225,10 @@ $(document).ready(function(){
 </script>
 </head>
 <body>
-
-<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openSide();">&#9776;</span>
+<span id="menu"  onclick="toggleHide();">&#9776;</span>
 <div id="sidenav" class="ui-widget-content">
-  <div id="header" style="visibility:hidden">3Dmol Viewer</div>
-  <a href="javascript:void(0)" class="closebtn" onclick="closeSide()">&#x2715;</a>
+  <div id="header">3Dmol Viewer</div>
+  <a href="javascript:void(0)" class="closebtn" onclick="toggleHide()">&#x2715;</a>
   <ul id="list">
     <li class="option"  style="pointer-events:auto;">
         <h3>File/PDB/URL</h3>
@@ -261,7 +260,6 @@ $(document).ready(function(){
 </div>
             
 </div>
-
-    <div id='gldiv' style="width: 100%; height: 100vh;"></div>
+<div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>

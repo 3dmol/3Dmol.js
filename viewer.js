@@ -683,23 +683,26 @@ var initSide = function(url){
         buildHTMLTree(query);
         render();
     });
-}
-//opens up the side bar
-var openSide= function(){
-    var width=420;
-    document.getElementById("sidenav").style.width = width+"px";
-    document.getElementById("menu").style.visibility="hidden";
-    document.getElementById("header").style.visibility="visible";
+
     buildHTMLTree(query);
-    glviewer.translate(width/2,0,400,false);
-    glviewer.render();
+    render();
 }
-//closes the side bar
-var closeSide= function(){
-    document.getElementById("menu").style.visibility="visible";
-    document.getElementById("sidenav").style.width = "0";
-    document.getElementById("header").style.visibility="hidden";
-    //todo make resize dynamic
-    glviewer.translate(-200,0,400,false);
-    glviewer.render();
+var toggle = true;
+var width=420;
+var toggleHide =  function(){
+    if(toggle){        
+        $("#menu").css("display","none");
+        $("#sidenav").css("width",width+"px");
+        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel').css("display","inline")
+        $('#header').css("display","block")
+        glviewer.translate(width/2,0,400,false);
+        glviewer.render();
+    }else{
+        $("#sidenav").css("width","0");
+        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#header').css("display","none")
+        $("#menu").css("display","inline");
+        glviewer.translate(-200,0,400,false);
+        glviewer.render();
+    }
+    toggle = !toggle;
 }

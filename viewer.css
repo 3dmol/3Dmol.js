@@ -49,6 +49,7 @@ h3{
     margin-bottom:-20px;
     padding-left:20px;
     border-radius: 15px 50px;
+    display:none;
 }
 #model_type{
     width: 70%;
@@ -67,6 +68,12 @@ this may change*/
     height: 25px;
     background-color: white;
 }
+#menu{
+    font-size:30px;
+    cursor:pointer;
+    position:absolute;
+    z-index:1;
+}
 
 .add_attribute{
 
@@ -80,18 +87,17 @@ this may change*/
     width:30%;
     height:25px;
     margin-top:10px;
+    display:none;
 }
 
-#renderModel{
+#renderModel,#centerModel{
     width:47%;
     height:25px;
     margin-top:5px;
+    display:none;
 }
 
 #centerModel{
-    width:47%;
-    height: 25px;
-    margin-top:5px;
     float:right;
 }
 /* list elements*/
