@@ -1339,7 +1339,7 @@ $3Dmol.Parsers = (function() {
             
             if(recordName.indexOf("END") == 0) {
                 remainingLines = lines.slice(i+1);
-                if(recordName == "END") { //ass opposed to ENDMDL
+                if(recordName == "END") { //as opposed to ENDMDL
                     //reset secondary structure
                     for (var prop in sslookup) {
                         if (sslookup.hasOwnProperty(prop)) {
