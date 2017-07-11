@@ -2374,11 +2374,11 @@ $3Dmol.GLModel = (function() {
         };
         
         /**@function hide
-             Don't show this model is future renderings.  Keep all styles and state
+         * Don't show this model in future renderings. Keep all styles and state
          * so it can be efficiencly shown again.
          * @example
-         var element=$('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
+            var element=$('#gldiv');
+            var viewer = $3Dmol.createViewer(element);
             var m = viewer.addModel();
             m.hide();
             viewer.render(callback);

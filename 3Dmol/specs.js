@@ -49,7 +49,7 @@
   * @prop {boolean} multimodel - specifies weather or not multiple models are being defined ; supported by xyz,sdf, or mol2
   * @prop {boolean} onemol -specifies weather or not the model is of one molecule ; Supported by xyz , sdf , mol2
   * @prop {boolean} keepH - do not strip hydrogens ; supported by sdf,mol2
-  * @prop {object} parseStyle - used to define ChemDoodle styles ; upported by cdjson
+  * @prop {object} parseStyle - used to define ChemDoodle styles ; supported by cdjson
   * @prop {boolean} doAssembly - boolean dictating weather or not to do assembly ; supported by mcif
   * @prop {boolean} noSecondaryStructure - boolean dictating the presence of a secondary structure ; supported by pdb
   * @prob {boolean} noComputeSecondaryStructure - do not compute ss ; supported by pdb
