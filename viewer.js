@@ -383,6 +383,8 @@ var queryToURL = function(query){
             }
         }
         var select="select="+unpackOther(augmentSelection(object));
+        if(select == "select=")
+            select = "select=all"
         objs.unshift(select);//prepend
         return objs.join("&");
     }
@@ -561,9 +563,15 @@ var updateQueryFromHTML = function(){
     var prev;
     for(var sele in selects){
         var augmented = augmentSelection(selects[sele])
-        if(prev != undefined)
-        console.log(isSame(augmented,prev))
-        if(prev != undefined && isSame(augmented,prev) && isSame(prev, augmented)){
+        var prev_not_included = true;
+        if(final_selections.length != 0){
+            var previous_item = final_selections[final_selections.length-1]
+            var curr = selects[sele]
+            if(previous_item.hasOwnProperty(Object.keys(curr)[0]))
+                prev_not_included = false;
+        }
+        console.log(prev_not_included)
+        if(prev != undefined && isSame(augmented,prev) && isSame(prev, augmented) && prev_not_included){
             final_selections[final_selections.length-1] = combine(selects[sele],final_selections[final_selections.length-1]);
         }else{
             final_selections.push(selects[sele])
