@@ -214,7 +214,6 @@ var createStyle = function(model_spec_object,model_spec_type,selection_index){
     }).appendTo(style);
                         
     for(var attribute_index in model_spec_object){
-        console.log(model_spec_object)
         createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index).appendTo(style_specs);
     }
 
@@ -508,6 +507,8 @@ var updateQueryFromHTML = function(){
     }
 
     var isSame = function(obj1,obj2){
+        console.log(obj1)
+        console.log(obj2)
         for(var key in obj1){
             if(Array.isArray(obj1[key])){
                 if(Array.isArray(obj2[key]))
@@ -531,7 +532,7 @@ var updateQueryFromHTML = function(){
     var listItems = $(".selection")
     listItems.each(function(index,value){
         if(listItems.hasOwnProperty(index)){
-            var getSubObject = function(index){
+            var getSubObject = function(){
                 var attr = $(value);
                 var attribute=attr[0]
                 var type=$(attribute).children()[1].innerHTML.toLowerCase()
@@ -548,34 +549,28 @@ var updateQueryFromHTML = function(){
                 }
             }
 
-            var val = getSubObject(index);
+            var val = getSubObject();
             var selection_spec = $(listItems[index]).children(".selection_spec")[0].value;
             var selection = updateSelectionElements(selection_spec);
             var extended = combine(selection,val)
             selects.push(extended)
-              
-
         }
     });
 
     var final_selections = [];
-    var used=[]
+    var prev;
     for(var sele in selects){
-        var augmented = augmentSelection(selects[sele]);
-        if(used.includes(sele))
-            continue;
-        used.push(sele)
-        for(var sele1 in selects){
-            if(sele== sele1 || used.includes(sele1))
-                continue;
-            if(isSame(augmentSelection(selects[sele1]),augmented)){
-               augmented = combine(selects[sele1],augmented);
-               used.push(sele1);
-            }
+        var augmented = augmentSelection(selects[sele])
+        if(prev != undefined)
+        console.log(isSame(augmented,prev))
+        if(prev != undefined && isSame(augmented,prev) && isSame(prev, augmented)){
+            final_selections[final_selections.length-1] = combine(selects[sele],final_selections[final_selections.length-1]);
+        }else{
+            final_selections.push(selects[sele])
         }
-        final_selections.push(combine(selects[sele],augmented))
-    }
 
+        prev = augmented
+    }
     query.selections=final_selections;
 }
 
@@ -590,7 +585,6 @@ var render = function(){
 }
 //these functions all edit the query object 
 var addSelection = function(type){
-    count++;
     if(type == "style")      
         query.selections.push({"style":{}})
     else if(type == "surface")
