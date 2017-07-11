@@ -55,7 +55,7 @@ $3Dmol.GLModel = (function() {
         The dictioanries are for dropdown menus and validation of the viewer
     */
 
-    var validElements = [
+     GLModel.validElements = [
         "H",
         "Li",
         "LI",
@@ -82,7 +82,7 @@ $3Dmol.GLModel = (function() {
         "Ni"
     ]
 
-    var validColorSpecs=[
+    GLModel.validColorSpecs=[
         "white",
         "silver",
         "gray",
@@ -105,12 +105,12 @@ $3Dmol.GLModel = (function() {
         "purple",
     ]
 
-    var validColorschemeSpecs =[
+    GLModel.validColorschemeSpecs =[
+        "whiteCarbon",
         "greenCarbon",
         "cyanCarbon",
         "magentaCarbon",
         "yellowCarbon",
-        "whiteCarbon",
         "orangeCarbon",
         "purpleCarbon",
         "blueCarbon",
@@ -125,7 +125,7 @@ $3Dmol.GLModel = (function() {
         "chainHetatm",
     ]
 
-    var validAtomSpecs = {
+    GLModel.validAtomSpecs = {
         "resn":{type:"string",valid :true}, // Parent residue name
         "x":{type:"number",valid:false,step:.1}, // Atom's x coordinate
         "y":{type:"number",valid:false,step:.1}, // Atom's y coordinate
@@ -173,29 +173,29 @@ $3Dmol.GLModel = (function() {
         "or":{type:"string",valid :false}, // or boolean logic
         "not":{type:"string",valid :false}, // not boolean logic
     }
-    var validAtomSelectionSpecs = extend(validAtomSpecs,validExtras);
+    GLModel.validAtomSelectionSpecs = extend(GLModel.validAtomSpecs,validExtras);
 
     var validLineSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:true,step:.1},
+        "linewidth":{type:"number",gui:true,step:.1,default:defaultlineWidth},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
     };
 
     var validCrossSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:false,step:.1},//deprecated
+        "linewidth":{type:"number",gui:false,step:.1,default:defaultlineWidth},//deprecated
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:.1},
-        "scale":{type:"number",gui:true,range:[],step:.1},
+        "radius":{type:"number",gui:true,step:.1,default:1},
+        "scale":{type:"number",gui:true,range:[],step:.1,default:1},
     }
 
     var validStickSpec = {
         "hidden":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:.1},
+        "radius":{type:"number",gui:true,step:.1,default:.25},
         "singleBonds":{type:"boolean",gui:true},
     }
 
@@ -204,7 +204,7 @@ $3Dmol.GLModel = (function() {
         "singleBonds":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:.1},
+        "radius":{type:"number",gui:true,step:.1,default:1.5},
     }
 
     var validCartoonSpec = {
@@ -214,48 +214,45 @@ $3Dmol.GLModel = (function() {
         "ribbon":{type:"boolean",gui:true},
         "hidden":{type:"boolean",gui:true},
         "tubes":{type:"boolean",gui:true},
-        "thickness":{type:"number",gui:true,step:.1},
-        "width":{type:"number",gui:true,step:.1},
-        "opacity":{type:"number",gui:true,step:.1},
+        "thickness":{type:"number",gui:true,step:.1,default:1},
+        "width":{type:"number",gui:true,step:.1,default:1},
+        "opacity":{type:"number",gui:true,step:.1,default:1},
     }
 
-    var validAtomStyleSpecs = {
+    GLModel.validAtomStyleSpecs = {
         "line":{validItems:validLineSpec,gui:true}, // draw bonds as lines
         "cross":{validItems:validCrossSpec,gui:true}, // draw atoms as crossed lines (aka stars)
         "stick":{validItems:validStickSpec,gui:true}, // draw bonds as capped cylinders
         "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
         "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
-        "colorfunc":{validItems:null,valid:false},
-        "order":{type:"number",gui:true}
+        "colorfunc":{validItems:null,valid:false}
     };
 
-    var validSurfaceSpecs = {
-        "opacity":{type:"number",gui:true,step:.1},
+    GLModel.validSurfaceSpecs = {
+        "opacity":{type:"number",gui:true,step:.1,default:1},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
         "voldata":{type:"number",gui:false},
         "volscheme":{type:"number",gui:false},
-        "map":{type:"number",gui:false},
-        "order":{type:"number",gui:true}
+        "map":{type:"number",gui:false}
     }
 
-    var validLabelResSpecs = {
+    GLModel.validLabelResSpecs = {
         "font":{type:"string",gui:true},
-        "fontSize":{type:"number",gui:true,step:1},
+        "fontSize":{type:"number",gui:true,step:1,default:12},
         "fontColor":{type:"color",gui:true},
-        "fontOpacity":{type:"number",gui:true,step:.1},
-        "borderThickness":{type:"number",gui:true,step:.1},
+        "fontOpacity":{type:"number",gui:true,step:.1,default:1},
+        "borderThickness":{type:"number",gui:true,step:.1,default:1},
         "borderColor":{type:"color",gui:true},
-        "borderOpacity":{type:"number",gui:true,step:.1},
+        "borderOpacity":{type:"number",gui:true,step:.1,default:1},
         "backgroundColor":{type:"color",gui:true},
-        "backgroundOpacity":{type:"number",gui:true,step:.1},
+        "backgroundOpacity":{type:"number",gui:true,step:.1,default:1},
         "position":{type:"array",valid:false},
         "inFront":{type:"boolean",gui:true},
         "showBackground":{type:"boolean",gui:true},
         "fixed":{type:"boolean",gui:true},
         "alignment":{validItems:["topLeft","topCenter","topRight","centerLeft","center","centerRight","bottomLeft","bottomCenter","bottomRight"],gui:true},
-        "scale":{type:"boolean",gui:true},
-        "order":{type:"number",gui:true},
+        "scale":{type:"boolean",gui:false},
     }
     // class functions
     // return true if a and b represent the same style
@@ -281,13 +278,6 @@ $3Dmol.GLModel = (function() {
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
-        this.validAtomSelectionSpecs = validAtomSelectionSpecs;
-        this.validAtomStyleSpecs = validAtomStyleSpecs;
-        this.validSurfaceSpecs = validSurfaceSpecs;
-        this.validLabelResSpecs = validLabelResSpecs;
-        this.validElements = validElements;
-        this.validColorSpecs = validColorSpecs;
-        this.validColorschemeSpecs = validColorschemeSpecs;
 
         // drawing functions must be associated with model object since
         // geometries can't span multiple canvases
@@ -1998,13 +1988,13 @@ $3Dmol.GLModel = (function() {
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
-                if(!validAtomSelectionSpecs.hasOwnProperty(s)) {
+                if(!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
             // report to console if this is not a valid style
             for (s in style) {
-                if(!validAtomStyleSpecs.hasOwnProperty(s)) {
+                if(!GLModel.validAtomStyleSpecs.hasOwnProperty(s)) {
                     console.log('Unknown style ' + s);
                 }
             }
@@ -2088,7 +2078,7 @@ $3Dmol.GLModel = (function() {
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
-                if (!validAtomSelectionSpecs.hasOwnProperty(s)) {
+                if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
@@ -2153,7 +2143,7 @@ $3Dmol.GLModel = (function() {
         this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
             var s;
             for (s in sel) {
-                if (!validAtomSelectionSpecs.hasOwnProperty(s)) {
+                if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
@@ -2503,8 +2493,8 @@ $3Dmol.GLModel = (function() {
 
         this.addAtomSpecs = function(customAtomSpecs) {
             for (var i = 0; i < customAtomSpecs.length; i++) {
-                if (validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
-                    validAtomSelectionSpecs.push(customAtomSpecs[i]);
+                if (GLModel.validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
+                    GLModel.validAtomSelectionSpecs.push(customAtomSpecs[i]);
                 }
             }
         }

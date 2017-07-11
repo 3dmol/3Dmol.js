@@ -38,14 +38,18 @@ var createAttribute = function(name,value,parent){
     
     var other=false;
     var validNames;
+    var type;
     if(parent.type == "line"  || parent.type == "stick" || parent.type== "cross" || parent.type == "sphere" || parent.type == "cartoon"){
-        validNames=glviewer.getModel().validAtomStyleSpecs[parent.type].validItems;
+        type = "style";
+        validNames=$3Dmol.GLModel.validAtomStyleSpecs[parent.type].validItems;
         other=false;
     }else if(parent.type.toLowerCase() == "surface"){
-        validNames = glviewer.getModel().validSurfaceSpecs;
+        type = "surface";
+        validNames = $3Dmol.GLModel.validSurfaceSpecs;
         other=true;
     }else if(parent.type.toLowerCase() == "labelres"){
-        validNames = glviewer.getModel().validLabelResSpecs;
+        type = "labelres";
+        validNames =$3Dmol.GLModel.validLabelResSpecs;
         other=true;
     }
 
@@ -64,6 +68,27 @@ var createAttribute = function(name,value,parent){
     });
 
     attribute_name.val(name.toString())
+    if(name.toString() == ""){
+        var list;
+        if(type == "style")
+            list = query.selections[parent.index][type][parent.type];
+        else
+            list = query.selections[parent.index][type];
+
+        var index;
+        for(var i in validNames){
+            if(validNames[i].gui && list[i] == undefined){
+                index = i;
+                break;
+            }
+        }
+        name = index;
+
+        if(name == undefined)
+            return;//all of the attribute names are being used
+        attribute_name.val(index)
+    }
+
     //delete button
     var delete_selection = $("<span/>",{
         html:"&#x2715;",
@@ -94,11 +119,11 @@ var createAttribute = function(name,value,parent){
         else 
             var type = undefined
         if(type=="boolean"){
-            validItemsValue = ["true","false"];
+            validItemsValue = ["false","true"];
         }else if(type == "colorscheme"){
-            validItemsValue =  glviewer.getModel().validColorschemeSpecs;
+            validItemsValue =  $3Dmol.GLModel.validColorschemeSpecs;
         }else if(type == "color"){
-            validItemsValue =  glviewer.getModel().validColorSpecs;
+            validItemsValue =  $3Dmol.GLModel.validColorSpecs;
         }else if(type == undefined){
             validItemsValue = validNames[name].validItems;
         }
@@ -111,9 +136,13 @@ var createAttribute = function(name,value,parent){
             attribute_value.append($("<option>").attr('value',value).text(value));
         });
 
-        attribute_value.val(value.toString())
-            
+        attribute_value.val(value.toString());
+        if(value == ""){
+            attribute_value.val(validItemsValue[0])
+        } 
     }else{
+        if(value == "")
+            value = validNames[name].default
         attribute_value = $('<input/>',{
             class:'attribute_value',
             value:value,
@@ -124,10 +153,10 @@ var createAttribute = function(name,value,parent){
         render();
     });
 
-    if(name.toString()!="" &&  attribute_value.prop("tagName") == "INPUT" && validNames[name.toString()].type =="number"){
-        validNames[name.toString()].type =="number"
+    if(name!="" &&  attribute_value.prop("tagName") == "INPUT" && validNames[name].type =="number"){
+        validNames[name].type =="number"
         attribute_value.attr("type","number")
-        attribute_value.attr("step",validNames[name.toString()].step)
+        attribute_value.attr("step",validNames[name].step)
     }
     return attribute;
 }
@@ -138,7 +167,9 @@ var createOtherModelSpec = function(spec,type,selection_index){
     });
     
     for(var attribute_index in spec){
-        createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index}).appendTo(attributes);
+        var attribute=createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index})
+        if(attribute != undefined)
+            attribute.appendTo(attributes);
     }
 
     var add_attribute = $('<button/>',{
@@ -157,7 +188,7 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         "class":"style_spec",
     });
 
-    var validNames=glviewer.getModel().validAtomStyleSpecs;
+    var validNames=$3Dmol.GLModel.validAtomStyleSpecs;
 
     var style_spec_name = $('<select>',{
         class:'style_spec_name',
@@ -173,7 +204,20 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
         }
     });
     
-    style_spec_name.val(style_spec_type)
+    style_spec_name.val(style_spec_type.toString())
+    if(style_spec_type == ""){
+        var list = query.selections[selection_index].style;
+        var index=0
+        for(var i in validNames){
+            if(validNames[i].gui && list[i] == undefined){
+                index = i;
+                break;
+            }
+        }
+        if(index == 0)
+            return;
+        style_spec_name.val(index)
+    }
 
     var delete_selection = $("<span/>",{
         html:"&#x2715;",
@@ -189,7 +233,9 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     }).appendTo(style_spec);
 
     for(var attribute_index in style_spec_object){
-        createAttribute(attribute_index,style_spec_object[attribute_index],{type:style_spec_type,index:selection_index}).appendTo(style_spec_attributes);
+        var attribute = createAttribute(attribute_index,style_spec_object[attribute_index],{type:style_spec_type,index:selection_index})
+        if(attribute != undefined)
+            attribute.appendTo(style_spec_attributes);
     }
 
     var add_attribute = $('<button/>',{
@@ -214,7 +260,9 @@ var createStyle = function(model_spec_object,model_spec_type,selection_index){
     }).appendTo(style);
                         
     for(var attribute_index in model_spec_object){
-        createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index).appendTo(style_specs);
+        var spec = createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index)
+        if(spec!= undefined)
+            spec.appendTo(style_specs);
     }
 
     return style; 
@@ -310,11 +358,11 @@ var buildHTMLTree = function(query){
     $("#model_type").change(function(){
         render();
     })
+
     $("#model_input").attr("value",query.file.path);
-     $("#model_input").change(function(){
+    $("#model_input").change(function(){
         render();
     })
-
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
@@ -330,10 +378,8 @@ var buildHTMLTree = function(query){
         }
     }
 
-    var spacer = $('<li><br><br><br><br></li>').appendTo(parent)
+    $('<li><br><br><br><br></li>').appendTo(parent)
 }
-
-
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
     var url = "";
@@ -601,6 +647,7 @@ var addSelection = function(type){
         query.selections.push({"labelres":{}})
 
     buildHTMLTree(query);
+    render();
 }
 
 var deleteSelection = function(spec){
@@ -624,6 +671,7 @@ var addModelSpec = function(type,selection){
     }
     
     buildHTMLTree(query);
+    render();
 }
 
 var addStyleSpec = function(model_spec){
@@ -632,6 +680,7 @@ var addStyleSpec = function(model_spec){
     query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
     
     buildHTMLTree(query);
+    render();
 }
 
 var deleteStyleSpec = function(spec){
@@ -647,6 +696,7 @@ var addOtherAttribute= function(spec){
     query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
     
     buildHTMLTree(query);
+    render();
 }
 
 var deleteOtherAttribute = function(spec){
@@ -660,8 +710,9 @@ var addAttribute = function(style_spec){
     var defaultKey = "";
     var defaultValue = "";
     query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
-    console.log(style_spec)
+
     buildHTMLTree(query);
+    render();
 }
 
 var deleteStyleAttribute = function(spec){
