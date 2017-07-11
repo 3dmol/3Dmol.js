@@ -618,8 +618,9 @@ var updateQueryFromHTML = function(){
     });
 
     var final_selections = selects;
-    var prev;
     /*
+    var prev;
+    
     for(var sele in selects){
         var augmented = augmentSelection(selects[sele])
         var prev_not_included = true;
