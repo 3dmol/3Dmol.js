@@ -1,6 +1,6 @@
 {
-  "name": "3Dmol",
-  "version": "1.0.6",
+  "name": "3dmol",
+  "version": "1.1.2",
   "description": "Object oriented Javascript molecular visualization library",
   "repository": {
     "type": "git",
@@ -20,5 +20,10 @@
     "grunt-contrib-uglify": "^0.5.0",
     "grunt-node-inspector": "^0.1.5",
     "grunt-shell": "^0.7.0"
-  }
+  },
+  "scripts": {
+    "build": "grunt build",
+    "prepublish": "npm run build"
+  },
+  "main": "build/3Dmol-min.js"
 }

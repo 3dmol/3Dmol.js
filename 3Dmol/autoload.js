@@ -1,37 +1,59 @@
 //auto-initialization
 //Create embedded viewer from HTML attributes if true
-
-$(document).ready(function() {
-
+//viewer and callback are used by the testing harness
+$3Dmol.autoload=function(viewer,callback){
     if ($(".viewer_3Dmoljs")[0] !== undefined)
         $3Dmol.autoinit = true;
+
+    if ($3Dmol.autoinit) {
+        viewer =(viewer!= undefined) ? viewer :null;
         
-    if ($3Dmol.autoinit) { 
         $3Dmol.viewers = {};
         var nviewers = 0;
         $(".viewer_3Dmoljs").each( function() {
             var viewerdiv = $(this);
-            var datauri = null;
+            var datauri = [];
+            var datatypes = []
             if(viewerdiv.css('position') == 'static') {
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
             }
-        
-            var callback = (typeof(window[viewerdiv.data("callback")]) === 'function') ? 
-                    window[viewerdiv.data("callback")] : null;
-            
+
             var type = null;
             if (viewerdiv.data("pdb")) {
-                datauri = "http://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb";
-                type = "pdb";
+                datauri.push("https://files.rcsb.org/view/" + viewerdiv.data("pdb") + ".pdb");
+                datatypes.push("pdb");
             } else if(viewerdiv.data("cid")) {
                 //this doesn't actually work since pubchem does have CORS enabled
-                type = "sdf";
-                datauri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
-                "/SDF?record_type=3d";
+                datatypes.push("sdf");
+                datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
+                "/SDF?record_type=3d");
             }
-            else if (viewerdiv.data("href"))
-                datauri = viewerdiv.data("href");
+            else if (viewerdiv.data("href")){
+                var uri = viewerdiv.data("href");
+                datauri.push(uri);
+                var type = uri.substr(uri.lastIndexOf('.')+1);                
+                datatypes.push(type);
+            }
+            
+            var divdata=viewerdiv.data();
+            for(var i in divdata){
+                if((i.substring(0,3) ==="pdb" && !(i === "pdb"))){
+                    datauri.push("https://files.rcsb.org/view/" +divdata[i]+".pdb")
+                    datatypes.push('pdb');
+
+                }else if(i.substring(0,4) ==="href" && !(i==="href")){
+                    var uri = divdata[i];
+                    datauri.push(uri);
+                    datatypes.push(uri.substr(uri.lastIndexOf('.')+1));
+                }else if(i.substring(0,3)==="cid" && !(i==="cid")){
+                    datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] +  "/SDF?record_type=3d");
+                    datatypes.push('sdf');
+                }
+            }
+            var options = {}
+            if(viewerdiv.data("options"))
+                options = $3Dmol.specStringToObject(viewerdiv.data("options"));
                 
             var bgcolor = $3Dmol.CC.color(viewerdiv.data("backgroundcolor"));
             var style = {line:{}};
@@ -104,30 +126,46 @@ $(document).ready(function() {
             }
             
             
-            var glviewer = null;
+            var glviewer = viewer;
             try {
-                glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors});
+                if(glviewer==null)
+                    glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors});
                 glviewer.setBackgroundColor(bgcolor);                            
             } catch ( error ) {
+                console.log(error);
                 //for autoload, provide a useful error message
                 window.location = "http://get.webgl.org";                    
             }           
             
-            if (datauri) {  
-                
-                type = viewerdiv.data("type") || viewerdiv.data("datatype") || type;
-                if(!type) {
-                    type = datauri.substr(datauri.lastIndexOf('.')+1);
+            if (datauri.length!=0) {
+                //load multiple data elements in serial
+                var i = 0;
+                var process = function(moldata) {
+                    //add moldata to viewer and load next model
+                    uri = datauri[i]; //this is where the moldata came from
+                    var type = viewerdiv.data("type") || viewerdiv.data("datatype") || datatypes[i]; 
+                    glviewer.addModel(moldata, type, options);
+                    i += 1;
+                    if(i < datauri.length) {
+                        $.get(datauri[i], process);
+                    }
+                    else {
+                        // or finalize if this is the last model
+                        applyStyles(glviewer);
+                        if(viewerdiv.data("callback")) {
+                            //evaluate javascript in the string, if it resolves to a function,
+                            //call it with the viewer
+                            var runres = eval(viewerdiv.data("callback"));
+                            if(typeof(runres) == 'function') {
+                                runres(glviewer);
+                            }
+                        }
+                        if(callback) callback(glviewer);
+                    }
                 }
-                                
-                $.get(datauri, function(ret) {
-                    glviewer.addModel(ret, type);
-                    applyStyles(glviewer);       
-                    if (callback) 
-                        callback(glviewer);
-                }, 'text');         
-            }
-            
+                $.get(datauri[0], process);
+         
+            }           
             else {
                 
                 if (viewerdiv.data("element")) {
@@ -142,15 +180,27 @@ $(document).ready(function() {
                         type = 'pdb';
                     }
 
-                    glviewer.addModel(moldata, type);        
+                    glviewer.addModel(moldata, type, options);        
                 }
 
-                applyStyles(glviewer);                
+                applyStyles(glviewer);
+                if(viewerdiv.data("callback")) {
+                    //evaluate javascript in the string, if it resolves to a function,
+                    //call it with the viewer
+                    var runres = eval(viewerdiv.data("callback"));
+                    if(typeof(runres) == 'function') {
+                        runres(glviewer);
+                    }
+                }                
                 if (callback) 
                     callback(glviewer);
             }
             
         });              
-    }
+    }}
+$(document).ready(function() {
+    $3Dmol.autoload();
+    
 });
     
+ 

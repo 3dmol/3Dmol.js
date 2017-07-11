@@ -103,6 +103,14 @@ $3Dmol.Quaternion.prototype = {
         return this.multiplyQuaternions(this, q);
     },
 
+    multiplyScalar : function(s) {
+        this.x *= s;
+        this.y *= s;
+        this.z *= s;
+        this.w *= s;
+        return this;
+    },
+    
     multiplyQuaternions : function(a, b) {
 
         var qax = a.x, qay = a.y, qaz = a.z, qaw = a.w;
@@ -112,8 +120,21 @@ $3Dmol.Quaternion.prototype = {
         this.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
         this.z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
         this.w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
-
+        return this;
+    },
+    
+    sub : function(q) {
+        this.x -= q.x;
+        this.y -= q.y;
+        this.z -= q.z;
+        this.w -= q.w;
+        return this;
+    },
+    
+    clone : function() {
+        return new $3Dmol.Quaternion(this.x, this.y, this.z,this.w);
     }
+    
 };
 
 //A 2 Vector

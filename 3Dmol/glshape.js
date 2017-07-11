@@ -596,6 +596,8 @@ $3Dmol.GLShape = (function() {
             shape.color = stylespec.color || new $3Dmol.Color();
             if(! (stylespec.color instanceof $3Dmol.Color))
                 shape.color = $3Dmol.CC.color(stylespec.color);
+        } else {
+            shape.color = $3Dmol.CC.color(0);
         }
         shape.wireframe = stylespec.wireframe ? true : false;
         //opacity is the preferred nomenclature, support alpha for backwards compat
@@ -617,7 +619,7 @@ $3Dmol.GLShape = (function() {
         shape.hover_callback = typeof (stylespec.hover_callback) === "function" ? stylespec.hover_callback
                 : null;
 
-	shape.unhover_callback = typeof (stylespec.unhover_callback) === "function" ? stylespec.unhover_callback
+        shape.unhover_callback = typeof (stylespec.unhover_callback) === "function" ? stylespec.unhover_callback
                 : null;
 
         shape.hidden = stylespec.hidden;
@@ -657,6 +659,7 @@ $3Dmol.GLShape = (function() {
         var linegeo = new $3Dmol.Geometry(true);
 
         /** Update shape with new style specification
+	 * @function $3Dmol.GLShape#updateStyle
          * @param {ShapeSpec} newspec
          * @return {$3Dmol.GLShape}
          */
@@ -674,6 +677,7 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addCustom
          * @param {CustomShapeSpec} customSpec
          * @return {$3Dmol.GLShape}
+         
          */
         this.addCustom = function(customSpec) {
 
@@ -691,6 +695,10 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addSphere
          * @param {SphereSpec} sphereSpec
          * @return {$3Dmol.GLShape}
+         @example 
+         viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
+         
+         viewer.render();
          */
         this.addSphere = function(sphereSpec) {
 
@@ -724,6 +732,32 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addCylinder
          * @param {CylinderSpec} cylinderSpec
          * @return {$3Dmol.GLShape}
+         @example
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.addCylinder = function(cylinderSpec) {
 
@@ -754,11 +788,63 @@ $3Dmol.GLShape = (function() {
 
         };
 
+        this.addDashedCylinder = function(cylinderSpec){
+            cylinderSpec.start = cylinderSpec.start || {};
+            cylinderSpec.end = cylinderSpec.end || {};
+            cylinderSpec.dashLength=cylinderSpec.dashLength || .25;
+            cylinderSpec.gapLength=cylinderSpec.gapLength || .25;
+
+            var start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
+                    cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+            var end = new $3Dmol.Vector3(cylinderSpec.end.x,
+                    cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
+            if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
+
+            var radius = cylinderSpec.radius || 0.1;
+            var color = $3Dmol.CC.color(cylinderSpec.color);
+
+            var cylinderLength = Math.sqrt(Math.pow((start.x-end.x),2)+Math.pow((start.y-end.y),2)+Math.pow((start.z-end.z),2));
+
+            var count = cylinderLength/(cylinderSpec.gapLength+cylinderSpec.dashLength);
+
+            var new_start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
+                    cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+            var new_end = new $3Dmol.Vector3(cylinderSpec.end.x,
+                    cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
+
+            var gapVector = new $3Dmol.Vector3((end.x-start.x)/(cylinderLength/cylinderSpec.gapLength),(end.y-start.y)/(cylinderLength/cylinderSpec.gapLength),(end.z-start.z)/(cylinderLength/cylinderSpec.gapLength));
+            var dashVector = new $3Dmol.Vector3((end.x-start.x)/(cylinderLength/cylinderSpec.dashLength),(end.y-start.y)/(cylinderLength/cylinderSpec.dashLength),(end.z-start.z)/(cylinderLength/cylinderSpec.dashLength));
+
+            for(var place=0; place < count;place++){
+                new_end = new $3Dmol.Vector3(new_start.x+dashVector.x,new_start.y+dashVector.y,new_start.z+dashVector.z);
+
+                this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(new_start, new_end, radius));
+
+                $3Dmol.GLDraw.drawCylinder(geo, new_start, new_end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap); 
+
+                new_start = new $3Dmol.Vector3(new_end.x+gapVector.x,new_end.y+gapVector.y,new_end.z+gapVector.z);
+           
+            }
+            var centroid = new $3Dmol.Vector3();
+            components.push({
+                centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
+            });
+            var geoGroup = geo.updateGeoGroup(0);
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);
+        }
+
         /**
          * Creates a line shape
          * @function $3Dmol.GLShape#addLine         
          * @param {LineSpec} lineSpec
          * @return {$3Dmol.GLShape}
+         @example
+         $3Dmol.download("pdb:2ABJ",viewer,{},function(){
+                  viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
+                  viewer.render(callback);
+              });
+
          */
         this.addLine = function(lineSpec) {
             lineSpec.start = lineSpec.start || {};
@@ -792,12 +878,36 @@ $3Dmol.GLShape = (function() {
             lineArray[li+1] = vstart+1;
             geoGroup.lineidx += 2;
             
+            var centroid = new $3Dmol.Vector3();
+            components.push({
+                centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
+            });
+            var geoGroup = geo.updateGeoGroup(0);
+            updateBoundingFromPoints(this.boundingSphere, components,
+                    geoGroup.vertexArray);            
         }
         /**
          * Creates an arrow shape
          * @function $3Dmol.GLShape#addArrow        
          * @param {ArrowSpec} arrowSpec
          * @return {$3Dmol.GLShape}
+         @example
+          $3Dmol.download("pdb:4DM7",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  viewer.addArrow({
+                      start: {x:-10.0, y:0.0, z:0.0},
+                      end: {x:0.0, y:-10.0, z:0.0},
+                      radius: 1.0,
+                      radiusRadio:1.0,
+                      mid:1.0,
+                      clickable:true,
+                      callback:function(){
+                          this.color.setHex(0xFF0000FF);
+                          viewer.render( );
+                      }
+                  });
+                  viewer.render();
+                });
          */
         this.addArrow = function(arrowSpec) {
 
@@ -847,17 +957,29 @@ $3Dmol.GLShape = (function() {
          * @param {$3Dmol.VolumeData} data - volumetric input data
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
          * @example //the user can specify a selected region for the isosurface 
-         * viewer.addIsosurface(voldata, {isoval: 0.25,
-                                       color: "blue",
-                                       wireframe: true,
-                                       linewidth:0.005,
-                                       selectedRegion: viewer.selectedAtoms({}),
-                                       selectedOffset: 3,
-                                       radius: 3.0                                   
-                                    });
-         this specific example selects every atom in the
+         $.get('../test_structs/benzene-homo.cube', function(data){
+                  var voldata = new $3Dmol.VolumeData(data, "cube");
+                  viewer.addIsosurface(voldata, {isoval: 0.01,
+                                                 color: "blue",
+                                                 alpha: 0.5,
+                                                 smoothness: 10});
+                  viewer.addIsosurface(voldata, {isoval: -0.01,
+                                                 color: "red",
+                                                 smoothness: 5,
+                                                 opacity:0.5,
+                                                 wireframe:true,
+                                                 clickable:true,
+                                                 callback:
+                                                 function() {
+                                                     this.opacity = 0.0;
+                                                     viewer.render( );
+                                                 }});
+                  viewer.setStyle({}, {stick:{}});
+                  viewer.zoomTo();
+                  viewer.render();
+                });
          */
-        this.addIsosurface = function(data, volSpec) {
+        this.addIsosurface = function(data, volSpec, callback) {//may want to cache the arrays geneerated when selectedRegion ==true
            
             var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
                     : 0.0;
@@ -906,39 +1028,44 @@ $3Dmol.GLShape = (function() {
 
             if (volSpec.selectedRegion !== undefined) {
 
-                var xmax = volSpec.selectedRegion[0], ymax = volSpec.selectedRegion[0], zmax = volSpec.selectedRegion[0], xmin = volSpec.selectedRegion[0], ymin = volSpec.selectedRegion[0], zmin = volSpec.selectedRegion[0];
+                var xmax = volSpec.selectedRegion[0].x, 
+                    ymax = volSpec.selectedRegion[0].y, 
+                    zmax = volSpec.selectedRegion[0].z, 
+                    xmin = volSpec.selectedRegion[0].x, 
+                    ymin = volSpec.selectedRegion[0].y, 
+                    zmin = volSpec.selectedRegion[0].z;
 
                 for (var i = 0; i < volSpec.selectedRegion.length; i++) {
-                    if (volSpec.selectedRegion[i].x > xmax.x)
-                        xmax = volSpec.selectedRegion[i];
-                    else if (volSpec.selectedRegion[i].x < xmin.x)
-                        xmin = volSpec.selectedRegion[i];
-                    if (volSpec.selectedRegion[i].y > ymax.y)
-                        ymax = volSpec.selectedRegion[i];
-                    else if (volSpec.selectedRegion[i].y < ymin.y)
-                        ymin = volSpec.selectedRegion[i];
-                    if (volSpec.selectedRegion[i].z > zmax.z)
-                        zmax = volSpec.selectedRegion[i];
-                    else if (volSpec.selectedRegion[i].z < zmin.z)
-                        zmin = volSpec.selectedRegion[i];
+                    if (volSpec.selectedRegion[i].x > xmax)
+                        xmax = volSpec.selectedRegion[i].x;
+                    else if (volSpec.selectedRegion[i].x < xmin)
+                        xmin = volSpec.selectedRegion[i].x;
+                    if (volSpec.selectedRegion[i].y > ymax)
+                        ymax = volSpec.selectedRegion[i].y;
+                    else if (volSpec.selectedRegion[i].y < ymin)
+                        ymin = volSpec.selectedRegion[i].y;
+                    if (volSpec.selectedRegion[i].z > zmax)
+                        zmax = volSpec.selectedRegion[i].z;
+                    else if (volSpec.selectedRegion[i].z < zmin)
+                        zmin = volSpec.selectedRegion[i].z;
                 }
 
                 var rad = volSpec.radius;
-                xmax.x = xmax.x + rad;
-                xmin.x = xmin.x - rad;
-                ymin.y = ymin.y - rad;
-                ymax.y = ymax.y + rad;
-                zmin.z = zmin.z - rad;
-                zmax.z = zmax.z + rad;
+                xmin -= rad;
+                xmax += rad;
+                ymin -= rad;
+                ymax += rad;
+                zmin -= rad;
+                zmax += rad;
 
                 // accounts for radius
                 for (var i = 0; i < verts.length; i++) {
-                    if (verts[i].x > xmin.x
-                            && verts[i].x < xmax.x
-                            && verts[i].y > ymin.y
-                            && verts[i].y < ymax.y
-                            && verts[i].z > zmin.z
-                            && verts[i].z < zmax.z
+                    if (verts[i].x > xmin
+                            && verts[i].x < xmax
+                            && verts[i].y > ymin
+                            && verts[i].y < ymax
+                            && verts[i].z > zmin
+                            && verts[i].z < zmax
                             && inSelectedRegion(verts[i],
                                     volSpec.selectedRegion,
                                     volSpec.selectedOffset, volSpec.radius)) {
@@ -993,7 +1120,8 @@ $3Dmol.GLShape = (function() {
             var len2 = total.distanceTo(maxv);
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
-            console.log(verts.length);
+            if(typeof callback =="function")
+                callback();
           }
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
             

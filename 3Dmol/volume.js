@@ -4,7 +4,7 @@
  * 
  * @class
  * @param {string} str - volumetric data
- * @param {string} format - format of supplied data (cube)
+ * @param {string} format - format of supplied data (cube, dx, vasp); append .gz if compressed
  * @param {Object} options - normalize (zero mean, unit variance), negate
  */
 $3Dmol.VolumeData = function(str, format, options) {
@@ -34,7 +34,12 @@ $3Dmol.VolumeData = function(str, format, options) {
         //unzip gzipped files
         format = format.replace(/\.gz$/,'');
         try {
-            str = pako.inflate(str);
+            if(this[format] && this[format].isbinary) {
+                str = pako.inflate(str);
+            }
+            else {
+                str = new TextDecoder("utf-8").decode(pako.inflate(str));
+            }
         } catch(err) {
             console.log(err);
         }
@@ -63,7 +68,7 @@ $3Dmol.VolumeData = function(str, format, options) {
                 total += diff*diff; //variance is ave of squared difference with mean
             }
             var variance = total/this.data.length;
-            console.log("Computed variance: "+variance);
+            //console.log("Computed variance: "+variance);
             //now normalize
             for(var i = 0, n = this.data.length; i < n; i++) {
                 this.data[i] = (this.data[i]-mean)/variance;
@@ -78,14 +83,26 @@ $3Dmol.VolumeData = function(str, format, options) {
  * @returns - value closest to provided coordinate; zero if coordinate invalid
  */
 $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
-    x -= this.origin.x;
-    y -= this.origin.y;
-    z -= this.origin.z;
     
-    x /= this.unit.x;
-    y /= this.unit.y;
-    z /= this.unit.z;
-    
+    if(this.matrix) {
+        //all transformation is done through matrix multiply
+        if(!this.inversematrix) {
+            this.inversematrix = new $3Dmol.Matrix4().getInverse(this.matrix);
+        }
+        var pt = new $3Dmol.Vector3(x,y,z);
+        pt = pt.applyMatrix4(this.inversematrix);
+        x = pt.x;
+        y = pt.y;
+        z = pt.z;        
+    } else { //use simple origin/unit transform            
+        x -= this.origin.x;
+        y -= this.origin.y;
+        z -= this.origin.z;
+        
+        x /= this.unit.x;
+        y /= this.unit.y;
+        z /= this.unit.z;
+    }
     x = Math.round(x);
     y = Math.round(y);
     z = Math.round(z);
@@ -94,7 +111,7 @@ $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     if(y < 0 || y >= this.size.y) return 0;
     if(z < 0 || z >= this.size.z) return 0;
     
-    return this.data[x*this.size.y*this.size.z + y*this.size.z + z];
+    return this.data[x*this.size.y*this.size.z + y*this.size.z + z];    
 };
 
 $3Dmol.VolumeData.prototype.getCoordinates = function(index){
@@ -224,6 +241,74 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
     //console.log(this.data);
 
 };
+
+// parse dx data - does not support all features of the file format
+$3Dmol.VolumeData.prototype.dx = function(str) {
+    var lines = str.split(/[\n\r]+/);
+    var i, m;
+    var recounts = /gridpositions\s+counts\s+(\d+)\s+(\d+)\s+(\d+)/;
+    var reorig = /^origin\s+(\S+)\s+(\S+)\s+(\S+)/;
+    var redelta = /^delta\s+(\S+)\s+(\S+)\s+(\S+)/;
+    var follows = /data follows/;
+        
+    for(i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if((m = recounts.exec(line)) ) {
+            var nX = parseInt(m[1]);
+            var nY = parseInt(m[2]);
+            var nZ = parseInt(m[3]);
+            this.size = {x:nX, y:nY, z:nZ};
+        }
+        else if((m = redelta.exec(line))) {
+            var xunit = parseFloat(m[1]);
+            if(parseFloat(m[2]) != 0 || parseFloat(m[3]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }
+            i += 1;
+            line = lines[i];
+            m = redelta.exec(line);
+            if(m == null) {
+                console.log("Parse error in dx delta matrix");
+                return;
+            }
+            
+            var yunit = parseFloat(m[2]);
+            if(parseFloat(m[1]) != 0 || parseFloat(m[3]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }
+            
+            i += 1;
+            line = lines[i];
+            m = redelta.exec(line);
+            if(m == null) {
+                console.log("Parse error in dx delta matrix");
+                return;
+            }
+            
+            var zunit = parseFloat(m[3]);
+            if(parseFloat(m[1]) != 0 || parseFloat(m[2]) != 0) {
+                console.log("Non-orthogonal delta matrix not currently supported in dx format");
+            }    
+            this.unit = new $3Dmol.Vector3(xunit,yunit,zunit);        
+        }
+        else if((m = reorig.exec(line))) {
+            var xorig = parseFloat(m[1]);
+            var yorig = parseFloat(m[2]);
+            var zorig = parseFloat(m[3]);
+            this.origin = new $3Dmol.Vector3(xorig,yorig,zorig);
+        } else if((m = follows.exec(line))) {
+            break;
+        }
+    }
+    i += 1;
+    if(!this.size || !this.origin || !this.unit || !this.size) {
+        console.log("Error parsing dx format");
+        return;
+    }
+    var raw = lines.splice(i).join(" ");
+    raw = raw.split(/[\s\r]+/);
+    this.data = new Float32Array(raw);
+}
 
 // parse cube data
 $3Dmol.VolumeData.prototype.cube = function(str) {
@@ -408,7 +493,7 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
 
     // 56      NLABL           Number of labels being used
     // 57-256  LABEL(20,10)    10  80 character text labels (ie. A4 format)
-    console.log("Map has min,mean,average,rmsddv: "+header.DMIN+","+header.DMAX+","+header.DMEAN+","+header.ARMS);
+    //console.log("Map has min,mean,average,rmsddv: "+header.DMIN+","+header.DMAX+","+header.DMEAN+","+header.ARMS);
 
     //create transformation matrix, code mostly copied from ngl
     var h = header;
@@ -489,3 +574,4 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
       }
 
 };
+$3Dmol.VolumeData.prototype.ccp4.isbinary = true;

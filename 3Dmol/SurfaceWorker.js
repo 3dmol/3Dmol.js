@@ -27,10 +27,12 @@ $3Dmol.workerString = function(){
     
 }.toString().replace(/(^.*?\{|\}$)/g, "");
 
-$3Dmol.workerString += "; var ProteinSurface=" + $3Dmol.ProteinSurface.toString().replace(/\$3Dmol.MarchingCube./g, "MarchingCube.");
+// NOTE: variable replacement is simplified
+// (See: http://stackoverflow.com/questions/1661197/what-characters-are-valid-for-javascript-variable-names)
+$3Dmol.workerString += "; var ProteinSurface=" + $3Dmol.ProteinSurface.toString().replace(/[a-zA-Z_$]{1}[0-9a-zA-Z_$]*.MarchingCube./g, "MarchingCube.");
 $3Dmol.workerString += ",MarchingCube=("+$3Dmol.MarchingCubeInitializer.toString() +")();";
 
-$3Dmol.SurfaceWorker = window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'}));
+$3Dmol.SurfaceWorker = window.URL ? window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'})) : {postMessage:function(){}};
 
 $3Dmol['workerString'] = $3Dmol.workerString;
 $3Dmol['SurfaceWorker'] = $3Dmol.SurfaceWorker;

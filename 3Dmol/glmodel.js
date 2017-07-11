@@ -51,52 +51,209 @@ $3Dmol.GLModel = (function() {
         "NI" : 1.63,
         "Ni" : 1.63
     };
+    /*
+        The dictioanries are for dropdown menus and validation of the viewer
+    */
 
-    var validAtomSpecs = [
-        "resn", // Parent residue name
-        "x", // Atom's x coordinate
-        "y", // Atom's y coordinate
-        "z", // Atom's z coordinate
-        "color", // Atom's color, as hex code
-        "surfaceColor", // Hex code for color to be used for surface patch over this atom
-        "elem", // Element abbreviation (e.g. 'H', 'Ca', etc)
-        "hetflag", // Set to true if atom is a heteroatom
-        "chain", // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
-        "resi", // Residue number 
-        "icode",
-        "rescode",
-        "serial", // Atom's serial id numbermodels
-        "atom", // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
-        "bonds", // Array of atom ids this atom is bonded to
-        "ss", // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
-        "singleBonds", // true if this atom forms only single bonds or no bonds at all
-        "bondOrder", // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
-        "properties", // Optional mapping of additional properties
-        "b", // Atom b factor data
-        "pdbline", // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
-        "clickable", // Set this flag to true to enable click selection handling for this atom
-        "callback", // Callback click handler function to be executed on this atom and its parent viewer
-        "invert" // for selection, inverts the meaning of the selection
-    ];
+    var validElements = [
+        "H",
+        "Li",
+        "LI",
+        "Na",
+        "NA",
+        "K",
+        "C",
+        "N",
+        "O",
+        "F",
+        "P",
+        "S",
+        "CL",
+        "Cl",
+        "BR",
+        "Br",
+        "SE",
+        "Se",
+        "ZN",
+        "Zn",
+        "CU",
+        "Cu",
+        "NI",
+        "Ni"
+    ]
 
-    var validAtomSelectionSpecs = validAtomSpecs.concat([  // valid atom specs are ok too
-        "model", // a single model or list of models from which atoms should be selected
-        "bonds", // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
-        "predicate", // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
-        "invert", // if set, inverts the meaning of the selection
-        "byres", // if set, expands the selection to include all atoms of any residue that has any atom selected
-        "expand", // expands the selection to include all atoms within a given distance from the selection
-        "within" // intersects the selection with the set of atoms within a given distance from another selection
-    ]);
+    var validColorSpecs=[
+        "white",
+        "silver",
+        "gray",
+        "grey",
+        "black",
+        "red",
+        "maroon",
+        "yellow",
+        "orange",
+        "olive",
+        "lime",
+        "green",
+        "aqua",
+        "cyan",
+        "teal",
+        "blue",
+        "navy",
+        "fuchsia",
+        "magenta",
+        "purple",
+    ]
 
-    var validAtomStyleSpecs = [
-        "line", // draw bonds as lines
-        "cross", // draw atoms as crossed lines (aka stars)
-        "stick", // draw bonds as capped cylinders
-        "sphere", // draw atoms as spheres
-        "cartoon", // draw cartoon representation of secondary structure
-        "colorfunc",
-    ];
+    var validColorschemeSpecs =[
+        "greenCarbon",
+        "cyanCarbon",
+        "magentaCarbon",
+        "yellowCarbon",
+        "whiteCarbon",
+        "orangeCarbon",
+        "purpleCarbon",
+        "blueCarbon",
+        "ssPyMOL",
+        "ssJmol",
+        "Jmol",
+        "default",
+        "amino",
+        "shapely",
+        "nucleic",
+        "chain",
+        "chainHetatm",
+    ]
+
+    var validAtomSpecs = {
+        "resn":{type:"string",valid :true}, // Parent residue name
+        "x":{type:"number",valid:false,step:.1}, // Atom's x coordinate
+        "y":{type:"number",valid:false,step:.1}, // Atom's y coordinate
+        "z":{type:"number",valid:false,step:.1}, // Atom's z coordinate
+        "color":{type:"color",gui:true}, // Atom's color, as hex code
+        "surfaceColor":{type:"color",gui:true}, // Hex code for color to be used for surface patch over this atom
+        "elem":{type:"element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
+        "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
+        "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+        "resi":{type:"number",gui:true}, // Residue number 
+        "icode":{type:"number",valid:false,step:.1},
+        "rescode":{type:"number",valid:false,step:.1},
+        "serial":{type:"number",valid:false,step:.1}, // Atom's serial id numbermodels
+        "atom":{type:"string",valid:false}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+        "bonds":{type:"array",valid:false}, // Array of atom ids this atom is bonded to
+        "ss":{type:"string",valid:false}, // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
+        "singleBonds":{type:"boolean",valid:false}, // true if this atom forms only single bonds or no bonds at all
+        "bondOrder":{type:"array",valid:false}, // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
+        "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
+        "b":{type:"number",valid:false,step:.1}, // Atom b factor data
+        "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
+        "clickable":{type:"boolean",valid:false}, // Set this flag to true to enable click selection handling for this atom
+        "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
+        "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
+        //unsure about this
+        "reflectivity":{type:"number",gui:true,step:.1}, //for describing the reflectivity of a model
+        "altLoc":{type:"invalid",valid:false}
+    };
+    function extend(obj1, src1) {
+        for (var key in src1) {
+            if (src1.hasOwnProperty(key)) obj1[key] = src1[key];
+        }   
+        return obj1;
+    }   
+    //type is irrelivent here becuase htey are are invalid
+    var validExtras ={  // valid atom specs are ok too
+        "model":{type:"string",valid :false}, // a single model or list of models from which atoms should be selected
+        "bonds":{type:"string",valid :false}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
+        "predicate":{type:"string",valid :false}, // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
+        "invert":{type:"string",valid :false}, // if set, inverts the meaning of the selection
+        "byres":{type:"string",valid :false}, // if set, expands the selection to include all atoms of any residue that has any atom selected
+        "expand":{type:"string",valid :false}, // expands the selection to include all atoms within a given distance from the selection
+        "within":{type:"string",valid :false}, // intersects the selection with the set of atoms within a given distance from another selection
+        "and":{type:"string",valid :false}, // and boolean logic
+        "or":{type:"string",valid :false}, // or boolean logic
+        "not":{type:"string",valid :false}, // not boolean logic
+    }
+    var validAtomSelectionSpecs = extend(validAtomSpecs,validExtras);
+
+    var validLineSpec = {
+        "hidden":{type:"boolean",gui:true},
+        "linewidth":{type:"number",gui:true,step:.1},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
+
+    };
+
+    var validCrossSpec = {
+        "hidden":{type:"boolean",gui:true},
+        "linewidth":{type:"number",gui:false,step:.1},//deprecated
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
+        "radius":{type:"number",gui:true,step:.1},
+        "scale":{type:"number",gui:true,range:[],step:.1},
+    }
+
+    var validStickSpec = {
+        "hidden":{type:"boolean",gui:true},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
+        "radius":{type:"number",gui:true,step:.1},
+        "singleBonds":{type:"boolean",gui:true},
+    }
+
+    var validSphereSpec = {
+        "hidden":{type:"boolean",gui:true},
+        "singleBonds":{type:"boolean",gui:true},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
+        "radius":{type:"number",gui:true,step:.1},
+    }
+
+    var validCartoonSpec = {
+        "style":{validItems:["trace","oval","rectangle","parabola","edged"],gui:true},
+        "color":{type:"color",gui:true},
+        "arrows":{type:"boolean",gui:true},
+        "ribbon":{type:"boolean",gui:true},
+        "hidden":{type:"boolean",gui:true},
+        "tubes":{type:"boolean",gui:true},
+        "thickness":{type:"number",gui:true,step:.1},
+        "width":{type:"number",gui:true,step:.1},
+        "opacity":{type:"number",gui:true,step:.1},
+    }
+
+    var validAtomStyleSpecs = {
+        "line":{validItems:validLineSpec,gui:true}, // draw bonds as lines
+        "cross":{validItems:validCrossSpec,gui:true}, // draw atoms as crossed lines (aka stars)
+        "stick":{validItems:validStickSpec,gui:true}, // draw bonds as capped cylinders
+        "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
+        "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
+        "colorfunc":{validItems:null,valid:false},
+    };
+
+    var validSurfaceSpecs = {
+        "opacity":{type:"number",gui:true,step:.1},
+        "colorscheme":{type:"colorscheme",gui:true},
+        "color":{type:"color",gui:true},
+        "voldata":{type:"number",gui:false},
+        "volscheme":{type:"number",gui:false},
+        "map":{type:"number",gui:false},
+    }
+
+    var validLabelResSpecs = {
+        "font":{type:"string",gui:true},
+        "fontSize":{type:"number",gui:true,step:1},
+        "fontColor":{type:"color",gui:true},
+        "fontOpacity":{type:"number",gui:true,step:.1},
+        "borderThickness":{type:"number",gui:true,step:.1},
+        "borderColor":{type:"color",gui:true},
+        "borderOpacity":{type:"number",gui:true,step:.1},
+        "backgroundColor":{type:"color",gui:true},
+        "backgroundOpacity":{type:"number",gui:true,step:.1},
+        "position":{type:"array",valid:false},
+        "inFront":{type:"boolean",gui:true},
+        "showBackground":{type:"boolean",gui:true},
+        "fixed":{type:"boolean",gui:true},
+        "alignment":{validItems:["topLeft","topCenter","topRight","centerLeft","center","centerRight","bottomLeft","bottomCenter","bottomRight"],gui:true},
+    }
 
     // class functions
 
@@ -120,11 +277,17 @@ $3Dmol.GLModel = (function() {
         var lastColors = null;
         var modelData = {};
         var idMatrix = new $3Dmol.Matrix4();
-        var dontDuplicateAtoms;
+        var dontDuplicateAtoms = true;
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
         var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
-
+        this.validAtomSelectionSpecs = validAtomSelectionSpecs;
+        this.validAtomStyleSpecs = validAtomStyleSpecs;
+        this.validSurfaceSpecs = validSurfaceSpecs;
+        this.validLabelResSpecs = validLabelResSpecs;
+        this.validElements = validElements;
+        this.validColorSpecs = validColorSpecs;
+        this.validColorschemeSpecs = validColorschemeSpecs;
 
         // drawing functions must be associated with model object since
         // geometries can't span multiple canvases
@@ -155,7 +318,7 @@ $3Dmol.GLModel = (function() {
         // cross drawing
         /** @typedef CrossStyleSpec
          * @prop {boolean} hidden - do not show 
-         * @prop {number} linewidth 
+         * @prop {number} linewidth *deprecated due to vanishing browser support* 
          * @prop {number} radius 
          * @prop {number} scale - scale radius by specified amount
          * @prop {ColorschemeSpec} colorscheme - element based coloring
@@ -310,7 +473,7 @@ $3Dmol.GLModel = (function() {
         
         /**@typedef LineStyleSpec
          * @prop {boolean} hidden - do not show line
-         * @prop {number} linewidth 
+         * @prop {number} linewidth *deprecated due to vanishing browser support* 
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
          */
@@ -330,7 +493,7 @@ $3Dmol.GLModel = (function() {
             var style = atom.style.line;
             if (style.hidden)
                 return;
-
+             var p1a, p1b, p2a, p2b;
             // have a separate geometry for each linewidth
             var linewidth = (style.linewidth || defaultlineWidth);
 
@@ -360,7 +523,9 @@ $3Dmol.GLModel = (function() {
                     if (atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                     atom.intersectionShape.line.push(p1);
-                    atom.intersectionShape.line.push(p2);
+                    atom.intersectionShape.line.push(mp);
+                    atom2.intersectionShape.line.push(mp);
+                    atom2.intersectionShape.line.push(p2);
                 }
 
                 var c1 = $3Dmol.getColorFromStyle(atom, atom.style.line);
@@ -391,7 +556,7 @@ $3Dmol.GLModel = (function() {
                     if(atom.bondOrder[i] == 2) { //double
                         
                         v.multiplyScalar(.1);
-                           p1a = p1.clone();
+                        p1a = p1.clone();
                         p1a.add(v);
                         p1b = p1.clone();
                         p1b.sub(v);
@@ -792,7 +957,9 @@ $3Dmol.GLModel = (function() {
                     } 
                     
                     else if (atom.bondOrder[i] > 1) {
-                        var mfromCap = 0; mtoCap = 0; //multi bond caps
+                        //multi bond caps
+                        var mfromCap = 0;
+                        var mtoCap = 0;
                         
                         if(bondR != atomBondR) {
                             //assume jmol style multiple bonds - the radius doesn't fit within atom sphere
@@ -842,14 +1009,14 @@ $3Dmol.GLModel = (function() {
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
                                 if (atom.clickable || atom.hoverable) {
-                                    cylinder1a = new $3Dmol.Cylinder(p1a , mp , r);
-                                    cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
+                                    var cylinder1a = new $3Dmol.Cylinder(p1a , mp , r);
+                                    var cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                 }
                                 if (atom2.clickable || atom2.hoverable) {
-                                    cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
-                                    cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
+                                    var cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
+                                    var cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);                               
                                 }
@@ -899,17 +1066,17 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                                                 
                                 if (atom.clickable || atom.hoverable) {
-                                    cylinder1a = new $3Dmol.Cylinder(p1a.clone(), mp.clone(), r);
-                                    cylinder1b = new $3Dmol.Cylinder(p1b.clone(), mp2.clone(), r);
-                                    cylinder1c = new $3Dmol.Cylinder(p1.clone(), mp3.clone(), r);
+                                    var cylinder1a = new $3Dmol.Cylinder(p1a.clone(), mp.clone(), r);
+                                    var cylinder1b = new $3Dmol.Cylinder(p1b.clone(), mp2.clone(), r);
+                                    var cylinder1c = new $3Dmol.Cylinder(p1.clone(), mp3.clone(), r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                     atom.intersectionShape.cylinder.push(cylinder1c);
                                 } 
                                 if (atom2.clickable || atom2.hoverable) {                               
-                                    cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
-                                    cylinder2b = new $3Dmol.Cylinder(p2b.clone(), mp2.clone(), r);
-                                    cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
+                                    var cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
+                                    var cylinder2b = new $3Dmol.Cylinder(p2b.clone(), mp2.clone(), r);
+                                    var cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);
                                     atom2.intersectionShape.cylinder.push(cylinder2c);                                
@@ -1059,13 +1226,7 @@ $3Dmol.GLModel = (function() {
             }
             // create cartoon if needed - this is a whole model analysis
             if (cartoonAtoms.length > 0) {
-                var gradientscheme = null;
-                //TODO: Should have an option to choose gradient type
-                if (range[0] < range[1])
-                    gradientscheme = new $3Dmol.Gradient.Sinebow(range[0], range[1]);
-
-                $3Dmol.drawCartoon(ret, cartoonAtoms, gradientscheme);
-
+                $3Dmol.drawCartoon(ret, cartoonAtoms, range);
             }
 
             // add sphere geometry
@@ -1315,6 +1476,17 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#vibrate
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
+         * 
+         *@example
+
+          $3Dmol.download("pdb:4UAA",viewer,{},function(){  
+            viewer.setStyle({},{stick:{}});
+            viewer.vibrate(10, 1);
+            viewer.animate({loop: "forward",reps: 1});
+
+            viewer.zoomTo();
+                  viewer.render();
+              });            
          */
         this.vibrate = function(numFrames, amplitude) {
             var amplitude = amplitude || 1;
@@ -1323,7 +1495,10 @@ $3Dmol.GLModel = (function() {
             for (var i = 1; i <= numFrames; i++) {
                 var newAtoms = [];
                 for (var j = 0; j < atoms.length; j++) {
-                    var newVector = new $3Dmol.Vector3(atoms[j].dx, atoms[j].dy, atoms[j].dz);
+                    var newVector = new $3Dmol.Vector3(
+                                            $3Dmol.getAtomProperty(atoms[j],'dx'), 
+                                            $3Dmol.getAtomProperty(atoms[j],'dy'), 
+                                            $3Dmol.getAtomProperty(atoms[j],'dz'));
                     var starting = new $3Dmol.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
                     newVector.multiplyScalar((i*amplitude)/numFrames);
                     starting.add(newVector);
@@ -1360,7 +1535,7 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#addMolData
          * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
          * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
-         * @param {Object} options - format dependent options (e.g. 'options.keepH' to keep hydrogens)
+         * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input format
          */
         this.addMolData = function(data, format, options) {
             options = options || {};
@@ -1376,7 +1551,7 @@ $3Dmol.GLModel = (function() {
             }
 
             if (frames.length == 0) { //first call
-                for (var i = 0; i < parsedAtoms.length; i++) {
+                for (var i = 0; i < parsedAtoms.length; i++) {  
                     if (parsedAtoms[i].length != 0)
                         frames.push(parsedAtoms[i]);
                 }
@@ -1405,7 +1580,10 @@ $3Dmol.GLModel = (function() {
                 //fill in vibrational modes
                 this.vibrate(options.vibrate.frames, options.vibrate.amplitude);
             }
-
+            
+            if(options.style) {
+                this.setStyle({},options.style);
+            }
         };
 
         this.setDontDuplicateAtoms = function(dup) {
@@ -1416,6 +1594,23 @@ $3Dmol.GLModel = (function() {
             modelData = mData;
         }
         
+        //return true if atom value matches property val
+        var propertyMatches = function(atomval, val) {
+            if (atomval == val) {
+                return true;                
+            } else if(typeof(val) == 'string' && typeof(atomval) == 'number'){
+                //support numerical integer ranges, e.g. resi: 3-7
+               var match = val.match(/(-?\d+)\s*-\s*(-?\d+)/);
+               if(match) {
+                   var lo = parseInt(match[1]);
+                   var hi = parseInt(match[2]);
+                   if(match && atomval >= lo && atomval <= hi) {
+                       return true;                   
+                   }
+               }
+            }
+            return false;
+        }
         /** given a selection specification, return true if atom is selected
          * 
          * @function $3Dmol.GLModel#atomIsSelected
@@ -1429,7 +1624,38 @@ $3Dmol.GLModel = (function() {
             var invert = !!sel.invert;
             var ret = true;
             for ( var key in sel) {
-                if(key === 'predicate') { //a user supplied function for evaluating atoms
+                if(key == "and" || key == "or" || key == "not"){//boolean fields
+                    if(key == "not"){
+                        if(this.atomIsSelected(atom,sel[key])){
+                            ret=false;
+                            break;
+                        }
+                    }else{//"or" and "and"
+                        if(key == "and"){
+                            var and=sel[key];//array format
+                            for(var i=0;i<and.length;i++){
+                                if(!this.atomIsSelected(atom,and[i])){
+                                    ret=false;
+                                    break;
+                                }
+                            }
+                        }else if(key =="or"){
+                            var or=sel[key];
+                            var condition=true;
+                            for(var i=0;i<or.length;i++){
+                                if(this.atomIsSelected(atom,or[i])){
+                                    condition=true;
+                                    break;
+                                }
+                                else{
+                                    condition=false;
+                                }
+                            }
+                            ret=condition;
+                        }
+                    }
+
+                }else if(key === 'predicate') { //a user supplied function for evaluating atoms
                     if(!sel['predicate'](atom) ) {
                         ret = false;
                         break;
@@ -1447,7 +1673,7 @@ $3Dmol.GLModel = (function() {
                         }
                     }
                 }
-                else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within") {
+                else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within"  && key != "and" && key != "or" && key != "not") {
 
                     // if something is in sel, atom must have it                    
                     if (typeof (atom[key]) === "undefined") {
@@ -1466,11 +1692,12 @@ $3Dmol.GLModel = (function() {
                     else if ($.isArray(sel[key])) {
                         // can be any of the listed values
                         var valarr = sel[key];
+                        var atomval = atom[key];
                         for ( var i = 0; i < valarr.length; i++) {
-                            if (atom[key] == valarr[i]) {
+                            if(propertyMatches(atomval, valarr[i])) {
                                 isokay = true;
                                 break;
-                            }
+                            }                        
                         }
                         if (!isokay) {
                             ret = false;
@@ -1478,7 +1705,7 @@ $3Dmol.GLModel = (function() {
                         }
                     } else { // single match
                         var val = sel[key];
-                        if (atom[key] != val) {
+                        if(!propertyMatches(atom[key], val)) {
                             ret = false;
                             break;
                         }
@@ -1495,10 +1722,20 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#selectedAtoms
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
+         * @example
+         *$3Dmol.download("pdb:4wwy",viewer,{},function(){
+                  var atoms = viewer.selectedAtoms({chain:'A'});
+                  for(var i = 0, n = atoms.length; i < n; i++) {
+                     atoms[i].b = 0.0;
+                  }
+                  viewer.setStyle({cartoon:{colorscheme:{prop:'b',gradient: 'roygb',min:0,max:30}}});
+                  viewer.render();
+              });
          */
         this.selectedAtoms = function(sel, from) {
             var ret = [];
             sel = sel || {};
+
             if (!from) from = atoms;
             var aLength = from.length;
             for ( var i = 0; i < aLength; i++) {
@@ -1533,18 +1770,28 @@ $3Dmol.GLModel = (function() {
 
                 // get atoms in second selection
                 var sel2 = this.selectedAtoms(sel.within.sel, atoms);
-                var within = [];
+                var within = {};
                 for (var i = 0; i < sel2.length; i++) {
                     for (var j = 0; j < ret.length; j++) {
 
                         var dist = squaredDistance(sel2[i], ret[j]);
                         var thresh = Math.pow(parseFloat(sel.within.distance), 2);
                         if (dist < thresh && dist > 0) {
-                            within.push(ret[j]);
+                          within[j] = 1;
                         }
-                    }
+                  }
                 }
-                ret = within;
+                var newret = [];
+                if(sel.within.invert) {
+                  for (var j = 0; j < ret.length; j++) {
+                    if(!within[j]) newret.push(ret[j]);
+                  }
+                } else {
+                  for(j in within) {
+                    newret.push(ret[j]);
+                  }
+                }
+                ret = newret;
             }
 
             // byres selection flag
@@ -1640,6 +1887,15 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#addAtoms
          * @param {type} newatoms
+         * @example
+         * var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
+           
+            viewer.setBackgroundColor(0xffffffff);
+            var m = viewer.addModel();
+            m.addAtoms(atoms);
+            m.setStyle({},{stick:{}});
+            viewer.zoomTo();
+            viewer.render();
          */        
         this.addAtoms = function(newatoms) {
             molObj = null;
@@ -1684,7 +1940,7 @@ $3Dmol.GLModel = (function() {
         /** Remove specified atoms from model
          * 
          * @function $3Dmol.GLModel#removeAtoms
-         * @param {type} badatoms
+         * @param {type} badatoms - list of atoms
          * @return {removeAtoms}
          */
         this.removeAtoms = function(badatoms) {
@@ -1717,6 +1973,20 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @param {AtomStyleSpec} style
          * @param {boolean} add - if true, add to current style, don't replace
+         @example
+        $3Dmol.download("pdb:4UB9",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+
+                  viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'B'},{line:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'D'},{cross:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+                  viewer.render();
+              });
          */
         this.setStyle = function(sel, style, add) {
             
@@ -1729,13 +1999,13 @@ $3Dmol.GLModel = (function() {
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
-                if(validAtomSelectionSpecs.indexOf(s) === -1) {
+                if(!validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
             // report to console if this is not a valid style
             for (s in style) {
-                if(validAtomStyleSpecs.indexOf(s) === -1) {
+                if(!validAtomStyleSpecs.hasOwnProperty(s)) {
                     console.log('Unknown style ' + s);
                 }
             }
@@ -1772,7 +2042,7 @@ $3Dmol.GLModel = (function() {
             var that = this;
             setStyleHelper(atoms);
             for (var i = 0; i < frames.length; i++) {
-                setStyleHelper(frames[i]);
+                if(frames[i] !== atoms) setStyleHelper(frames[i]);
             }
             
             if (changedAtoms)
@@ -1786,13 +2056,40 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
+         * @example
+        
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
          */
         this.setClickable = function(sel, clickable, callback) {           
 
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
-                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                if (!validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
@@ -1819,11 +2116,45 @@ $3Dmol.GLModel = (function() {
 
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
         };
-        
+         /** Set hoverable and callback of selected atoms
+         * 
+         * @function $3Dmol.GLModel#setHoverable
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} hoverable - whether hover-handling is enabled for the selection
+         * @param {function} hover_callback - function called when an atom in the selection is hovered over
+         * @param {function} unhover_callback - function called when the mouse moves out of the hover area
+         * @example
+         
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:'red',
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:'teal'});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:'black',
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();
+         */
         this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
             var s;
             for (s in sel) {
-                if (validAtomSelectionSpecs.indexOf(s) === -1) {
+                if (!validAtomSelectionSpecs.hasOwnProperty(s)) {
                     console.log('Unknown selector ' + s);
                 }
             }
@@ -1882,16 +2213,18 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel.setColorByProperty
          * @param {type} sel
          * @param {type} prop
-         * @param {type} scheme
+         * @param {type} gradient
          */
         this.setColorByProperty = function(sel, prop, scheme, range) {
+            var i, a;
             var atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
-            var min =  Number.POSITIVE_INFINITY;
-            var max =  Number.NEGATIVE_INFINITY;
-            var i, a;
+
+            if(typeof($3Dmol.Gradient.builtinGradients[scheme]) != "undefined") {
+                scheme = new $3Dmol.Gradient.builtinGradients[scheme]();
+            }
             
             if(!range) { //no explicit range, get from scheme
                 range = scheme.range();
@@ -1905,18 +2238,33 @@ $3Dmol.GLModel = (function() {
                 a = atoms[i];
                 var val = $3Dmol.getAtomProperty(a, prop);
                 if(val != null) {
-                    a.color = scheme.valueToHex(parseFloat(a.properties[prop]), [range[0],range[1]]);
+                    a.color = scheme.valueToHex(parseFloat(a.properties[prop]), range);
                 }                    
             }
         };
         
         /**
-         * @function $3Dmol.GLModel.setColorByFunction
-         * @param {type} sel
-         * @param {type} func
+         * @function $3Dmol.GLModel#setColorByFunction
+         * @deprecated use setStyle and colorfunc attribute
+         * @param {type} sel - selection object
+         * @param {type} func - function to be used to set the color
+         @example
+          $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });
+        
          */
         this.setColorByFunction = function(sel, colorfun) {
             var atoms = this.selectedAtoms(sel, atoms);
+            if(typeof(colorfun)!=='function')
+                return
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
@@ -2025,9 +2373,16 @@ $3Dmol.GLModel = (function() {
             molObj = null;
         };
         
-        /** Don't show this model is future renderings.  Keep all styles and state
+        /**@function hide
+         * Don't show this model in future renderings. Keep all styles and state
          * so it can be efficiencly shown again.
-         * 
+         * @example
+            var element=$('#gldiv');
+            var viewer = $3Dmol.createViewer(element);
+            var m = viewer.addModel();
+            m.hide();
+            viewer.render(callback);
+
          * @function $3Dmol.GLModel#hide
          */
         this.hide = function() {
@@ -2113,28 +2468,46 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
                 }
             }
-            if (format == "mdcrd" || format == "inpcrd" || format == "pdb") {
+            if (format == "mdcrd" || format == "inpcrd" || format == "pdb" || format == "netcdf") {
                 frames = [];
                 var atomCount = atoms.length;
                 var values = GLModel.parseCrd(str, format);
                 var count = 0;
                 while (count < values.length) {
                     var temp = [];
-                    for (i = 0; i < atomCount; i++) {
-                        temp[i] = atoms[i];
-                    }
-                
-                    for (i = 0; i < atomCount; i++) {
+                    for (var i = 0; i < atomCount; i++) {
+                        var newAtom = {};
+                        for (var k in atoms[i]) {
+                            newAtom[k] = atoms[i][k];
+                        }
+                        temp[i] = newAtom;
                         temp[i].x = values[count++];
                         temp[i].y = values[count++];
                         temp[i].z = values[count++];
                     }
+
                     frames.push(temp);
                 }
                 atoms = frames[0];
                 return frames;
             }
             return [];
+        }
+
+       /**
+        * add atomSpecs to validAtomSelectionSpecs
+        * @function $3Dmol.GLModel#addAtomSpecs
+        * @param {Array} customAtomSpecs - array of strings that can be used as atomSelectionSpecs
+        * this is to prevent the 'Unknown Selector x' message on the console for the strings passed
+        * 
+        */
+
+        this.addAtomSpecs = function(customAtomSpecs) {
+            for (var i = 0; i < customAtomSpecs.length; i++) {
+                if (validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
+                    validAtomSelectionSpecs.push(customAtomSpecs[i]);
+                }
+            }
         }
     }
 
@@ -2159,36 +2532,25 @@ $3Dmol.GLModel = (function() {
                 }
                 index = data.indexOf("\nATOM", index);
             }
-            return values;
+
+        } else if (format == "netcdf") {
+            var reader = new netcdfjs(data);
+            values = [].concat.apply([],reader.getDataVariable('coordinates'));
+
         } else {
-            var valueLength = 8;
-            var index = data.indexOf("\n");
-            data = data.slice(index + 1);// remove the first line containing
-                                            // title.
-            if (format == "inpcrd") {
-                index = data.indexOf("\n");
-                data = data.slice(index + 1);// remove the second line
-                                                // containing number of atoms.
-                valueLength = 12;
-            }
-            index = 0;
-            while (index < data.length - valueLength) {
-                if (data[index] == "\n")
-                    index++;
-                if (data[index] != "\n") {
-                    values[counter] = parseFloat(data.slice(index, index
-                            + valueLength));
-                    index = index + valueLength;
-                    counter++;
-                }
-            }
-            return values;
+            var index = data.indexOf("\n"); // remove the first line containing title
+            if(format == 'inpcrd') {
+                index = data.indexOf("\n",index+1); //remove second line w/#atoms
+            }                
+
+            data = data.slice(index + 1);
+            values = data.match(/\S+/g).map(parseFloat);
         }
+        return values;
     }
 
     GLModel.parseMolData = function(data, format, options) {
         format = format || "";
-
         if (!data)
             return []; //leave an empty model
 
@@ -2212,8 +2574,10 @@ $3Dmol.GLModel = (function() {
                     format = "mol2";
                 } else if (data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
                     format = "pdb";
+                } else if (data.match(/ITEM: TIMESTEP/gm)) {
+                    format = "lammpstrj";
                 } else if (data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
-                    format = "sdf"; // could look at line 3
+                    format = "sdf"; // could look at line 3 
                 } else if (data.match(/^%VERSION\s+\VERSION_STAMP/gm)) {
                     format = "prmtop";
                 } else {

@@ -1,7 +1,5 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.MMTF = global.MMTF || {})));
+  (factory((global['MMTF'] = global.MMTF || {})));
 }(this, function (exports) { 'use strict';
 
   /**
@@ -607,7 +605,7 @@
   }
 
   function encodeRun( array ){
-      if( array.length === 0 ) return new Int32Array(0);
+      if( array.length === 0 ) return new Int32Array();
       var i, il;
       // calculate output size
       var fullLength = 2;
@@ -695,9 +693,6 @@
           while( int16or8[ i ] === upperLimit || int16or8[ i ] === lowerLimit ){
               value += int16or8[ i ];
               ++i;
-              if( int16or8[ i ] === 0 ){
-                  break;
-              }
           }
           value += int16or8[ i ];
           ++i;
@@ -1744,14 +1739,14 @@
    * @static
    * @type {String}
    */
-  var version = "v0.3.0";
+  var version = "v1.0.0";
 
   /**
    * Version name
    * @private
    * @type {String}
    */
-  var baseUrl = "http://mmtf.rcsb.org/v0.2/";
+  var baseUrl = "http://mmtf.rcsb.org/v1.0/";
 
   /**
    * URL of the RCSB webservice to obtain MMTF files
@@ -1894,5 +1889,7 @@
   exports.encodeMmtf = encodeMmtf;
   exports.decodeMsgpack = decodeMsgpack;
   exports.decodeMmtf = decodeMmtf;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 }));

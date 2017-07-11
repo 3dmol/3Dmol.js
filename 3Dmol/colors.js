@@ -49,9 +49,22 @@ $3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
 $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
 
  /**
- * Color scheme representation. 
- * @example viewer.setStyle({chain:'G'},{sphere:{colorscheme:'greenCarbon'}});
+ 
  * @typedef ColorschemeSpec
+ * Built in colorschemes
+ *
+ * @example //Using a function in order to define the colors. 
+  $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {chain:'A'}, { cartoon: {colorfunc: colorAsSnake }});
+                  viewer.setStyle( {chain:'B'}, { stick: {colorscheme: 'yellowCarbon'}});
+
+                  viewer.render();
+              });
  * @prop {string} greenCarbon   - 0x00FF00
  * @prop {string} cyanCarbon    - 0x00FFFF
  * @prop {string} magentaCarbon - 0xFF00FF
@@ -69,6 +82,10 @@ $3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
  * @prop {string} nucleic - nucleic acid colorscheme
  * @prop {string} chain - standard chain colorscheme
  * @prop {string} chainHetatm - chain Hetatm colorscheme
+ * @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
+ * @prop {Gradient} gradient - Allows the user to provide a gradient to the colorsheme. See example #3.
+ * @prop {object} map - map of a certain AtomSpec propery to a color.: {}} elementMap - Allows the user to provide a mapping of elements to colors to the colorscheme. This is shown in example #2 and it should be noted that this can be done with any properties, and not just 'elem'.
+ * @prop {function} colorfunc - Allows the user to provide a function for setting the colorshemes.See example #4.
  */
  
 });
@@ -193,7 +210,7 @@ $3Dmol.elementColors.Jmol = {
         'S': 0xFFFF30,
         'Cl': 0x1FF01F,
         'CL': 0x1FF01F,
-        'Ca': 0x3DFF00,
+        'Ca': 0x3DFF00, 
         'CA': 0x3DFF00,
         'Ti': 0xBFC2C7,
         'TI': 0xBFC2C7,
@@ -466,13 +483,7 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     if (typeof (style.color) != "undefined" && style.color != "spectrum")
         color = style.color;
     if(typeof(scheme) != "undefined") {
-        if(typeof($3Dmol.builtinColorSchemes[scheme]) != "undefined") {
-            //name of builtin colorscheme
-            if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
-                color = scheme.map[atom[scheme.prop]];
-            }
-        } 
-        else if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
+        if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
             //name of builtin colorscheme
             var scheme = $3Dmol.elementColors[scheme];
             if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
@@ -485,11 +496,15 @@ $3Dmol.getColorFromStyle = function(atom, style) {
                 typeof(scheme.gradient) != 'undefined') {         
             //apply a property mapping
             var prop = scheme.prop;
-            var scheme = scheme.gradient;
-            var range = scheme.range() || [-1,1]; //sensible default
+            var grad = scheme.gradient; //redefining scheme
+            if(typeof($3Dmol.Gradient.builtinGradients[grad]) != "undefined") {
+                grad = new $3Dmol.Gradient.builtinGradients[grad](scheme.min, scheme.max, scheme.mid);
+            }
+            
+            var range = grad.range() || [-1,1]; //sensible default
             var val = $3Dmol.getAtomProperty(atom, prop);
             if(val != null) {
-                color = scheme.valueToHex(val, range);
+                color = grad.valueToHex(val, range);
             }
         } else if(typeof(scheme.prop) != 'undefined' &&
                 typeof(scheme.map) != 'undefined') {         
@@ -499,7 +514,12 @@ $3Dmol.getColorFromStyle = function(atom, style) {
             if( typeof scheme.map[val] != 'undefined' ) {
                 color = scheme.map[val];
             }
-        }
+        } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
+            //actual color scheme provided
+            color = style.colorscheme[atom.elem];
+        } else {
+            console.log("Could not interpret colorscheme "+scheme);
+        } 
     } 
     else if(typeof(style.colorfunc) != "undefined") {
         //this is a user provided function for turning an atom into a color

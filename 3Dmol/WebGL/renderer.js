@@ -9,6 +9,7 @@ $3Dmol.Renderer = function(parameters) {
     var _canvas = parameters.canvas !== undefined ? parameters.canvas
             : document.createElement('canvas'),
 
+
     _precision = parameters.precision !== undefined ? parameters.precision
             : 'highp', _alpha = parameters.alpha !== undefined ? parameters.alpha
             : true, _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha
@@ -23,14 +24,13 @@ $3Dmol.Renderer = function(parameters) {
             _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters.outline),
             _outlineEnabled = !!parameters.outline
             ;
-
     this.domElement = _canvas;
     this.context = null;
     this.devicePixelRatio = parameters.devicePixelRatio !== undefined ? parameters.devicePixelRatio
             : (self.devicePixelRatio !== undefined) ? self.devicePixelRatio : 1;
 
     // clearing
-
+    _canvas.id=parameters.id;
     this.autoClear = true;
     this.autoClearColor = true;
     this.autoClearDepth = true;

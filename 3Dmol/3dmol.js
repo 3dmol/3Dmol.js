@@ -15,13 +15,18 @@ $3Dmol = (function(window) {
 
 })(window);
 
+if ( typeof module === "object" && typeof module.exports === "object" ) { 
+	//for node.js exporting
+	module.exports = $3Dmol; 
+}
+
 /* The following code "phones home" to register that an ip 
    address has loaded 3Dmol.js.  Being able track this usage
    is very helpful when reporting to funding agencies.  Please
    leave this code in if you would like to increase the 
    likelihood of 3Dmol.js remaining supported.
 */
-$.get("http://3dmol.csb.pitt.edu/track/report.cgi");
+$.get("https://3dmol.csb.pitt.edu/track/report.cgi");
 
 /* shims for IE */
 /*
@@ -98,23 +103,21 @@ $.ajaxTransport(
     
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
+ @function $3Dmol.createViewer
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
- * 
  * @example
- * // Assume there exists an HTML div with id "gldiv"
- * var element = $("#gldiv");
- * 
- * // Viewer config - properties 'defaultcolors' and 'callback'
- * var config = {defaultcolors: $3Dmol.rasmolElementColors };
- * 
- * // Create GLViewer within 'gldiv' 
- * var myviewer = $3Dmol.createViewer(element, config);
- * //'data' is a string containing molecule data in pdb format  
- * myviewer.addModel(data, "pdb");
- * myviewer.zoomTo();
- * myviewer.render();                        
+   $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
+
+                  viewer.render();
+              });                     
  *                        
  */
 $3Dmol.createViewer = function(element, config)
@@ -144,8 +147,28 @@ $3Dmol.createViewer = function(element, config)
 $3Dmol.viewers = {};
 
 /**
+ * Download binary data (e.g. a gzipped file) into an array buffer and provide
+ * arraybuffer to callback.
+ * @function $3Dmol.getbin
+ * @param {string} uri - location of data
+ * @param {Function} callback - Function to call with arraybuffer as argument.  
+
+ */ 
+$3Dmol.getbin = function(uri, callback) {
+    $.ajax({url:uri, 
+        type: "GET",
+        dataType: "binary",
+        responseType: "arraybuffer",
+        processData: false}).done(
+            function(ret, txt, response) {
+                callback(ret);
+            }).fail(function(e,txt) { 
+                console.log(txt);
+                });
+};
+
+/**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * 
  * @function $3Dmol.download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
  * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
@@ -153,45 +176,47 @@ $3Dmol.viewers = {};
  *                           format: file format to download, if multiple are available, default format is pdb
  *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
  * @param {Function} callback - Function to call with model as argument after data is loaded.
-
- * @example
- * var myviewer = $3Dmol.createViewer(gldiv);
- * 
- * // GLModel 'm' created and loaded into glviewer for PDB id 2POR
- * // Note that m will not contain the atomic data until after the network request is completed
- * var m = $3Dmol.download('pdb: 2POR', myviewer, {format:'cif'});
- * 
+  
  * @return {$3Dmol.GLModel} GLModel
+ * @example
+ viewer.setBackgroundColor(0xffffffff);
+       $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
+        m.setStyle({'cartoon':{colorscheme:{prop:'ss',map:$3Dmol.ssColors.Jmol}}});
+       viewer.zoomTo();
+       viewer.render(callback);
+    });
  */ 
 $3Dmol.download = function(query, viewer, options, callback) {
     var baseURL = '';
     var type = "";
     var pdbUri = "";
+    var mmtfUri = "";
     var m = viewer.addModel();
     
     if (query.substr(0, 5) === 'mmtf:') {
-        pdbUri = options && options.pdbUri ? options.pdbUri : "http://mmtf.rcsb.org/full/";
+        pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
-        var uri = pdbUri + query + ".mmtf";        
-        
-        $.ajax({url:uri, 
-            type: "GET",
-            dataType: "binary",
-            responseType: "arraybuffer",
-            processData: false}).done(
-                function(ret, txt, response) {
-                    m.addMolData(ret, 'mmtf');
+        var uri = pdbUri + query;        
+        if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
+                //when fetch directly from pdb, trust structure annotations
+                options.noComputeSecondaryStructure = true;
+        }
+            
+        $3Dmol.getbin(uri,
+                function(ret) {
+                    m.addMolData(ret, 'mmtf',options);
                     viewer.zoomTo();
                     viewer.render();
                     if(callback) callback(m);
-                }).fail(function(e,txt) { 
-                    console.log(txt);
-                    });
+                });
     }
     else {
         if (query.substr(0, 4) === 'pdb:') {
-            pdbUri = options && options.pdbUri ? options.pdbUri : "http://www.rcsb.org/pdb/files/";
-            type = options && options.format ? options.format : "pdb";
+            type = 'mmtf';
+            if(options && options.format) {
+                type = options.format; //can override and require pdb
+            }
+            
             if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
@@ -200,10 +225,14 @@ $3Dmol.download = function(query, viewer, options, callback) {
             if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                alert("Wrong PDB ID"); return;
             }
-            if (options && options.format)
-                uri = pdbUri + query + "." + options.format;
-            else
-                uri = pdbUri + query + ".pdb";
+            if(type == 'mmtf') {
+                mmtfUri = options && options.mmtfUri ? options.mmtfUri : 'https://mmtf.rcsb.org/v1.0/full/';
+                uri = mmtfUri + query.toUpperCase();
+            }
+            else  {
+                pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
+                uri = pdbUri + query + "." + type;
+            }
     
         } else if (query.substr(0, 4) == 'cid:') {
             type = "sdf";
@@ -213,17 +242,26 @@ $3Dmol.download = function(query, viewer, options, callback) {
             }
             uri = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
               "/SDF?record_type=3d";
+        } else if (query.substr(0,4) == 'url:') {
+            uri = query.substr(4);
+            type = uri;
         }
     
-       $.get(uri, function(ret) {
+        var handler = function(ret) {
           m.addMolData(ret, type, options);
           viewer.zoomTo();
           viewer.render();
           if(callback) callback(m);
-    
-       }).fail(function(e) {
-        console.log("fetch of "+uri+" failed: "+e.statusText);
-       });
+        };
+        
+        if(type == 'mmtf') { //binary data
+            $3Dmol.getbin(uri, handler);
+        }
+        else {        
+           $.get(uri, handler).fail(function(e) {
+            console.log("fetch of "+uri+" failed: "+e.statusText);
+           });
+        }
    }
    
    return m;
@@ -274,7 +312,7 @@ $3Dmol.multiLineString = function(f) {
 $3Dmol.syncSurface = false;
 
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
-// no way of checking for this feature directly, so must do a brower check
+// no way of checking for this feature directly, so must do a browser check
 if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
         window.navigator.userAgent.indexOf('Trident/') >= 0) {
     $3Dmol.syncSurface = true; // can't use webworkers
@@ -314,7 +352,7 @@ $3Dmol.specStringToObject = function(str) {
            else if(val.indexOf('.') >= 0) {
                return parseFloat(val); // ".7" for example, does not parseInt
            }
-           else {
+           else{
                return parseInt(val);
            }
         }
@@ -357,7 +395,7 @@ $3Dmol.specStringToObject = function(str) {
         ret[f] = val;
     }
 
-return ret;
+  return ret;
 }
 
 

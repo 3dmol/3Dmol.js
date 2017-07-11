@@ -138,6 +138,7 @@ $3Dmol.GLDraw = (function() {
             var nvecs = [], norms = [];
             var n;
 
+
             for (var i = 0; i < w; i++) {
                 // bottom
                 nvecs.push(basisVectors[i].clone().multiplyScalar(radius));
@@ -294,7 +295,7 @@ $3Dmol.GLDraw = (function() {
      *            radius
      * @param {$3Dmol.Color}
      *            color
-     * @param {integer} fromCap - 0 for none, 1 for flat, 2 for round; Note: currently does not support different styles of caps on the same cylinder.
+     * @param {integer} fromCap - 0 for none, 1 for flat, 2 for round
      * @param {integer} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
@@ -303,7 +304,7 @@ $3Dmol.GLDraw = (function() {
             return;
         drawnC++;
         // vertices
-        var drawcaps = fromCap || toCap;
+        var drawcaps = toCap || fromCap;
         color = color || {r:0, g:0, b:0};
 
         /** @type {Array.<number>} */
@@ -398,7 +399,6 @@ $3Dmol.GLDraw = (function() {
             
             var ystart = (toCap) ? 0 : h / 2;
             var yend = (fromCap) ? h + 1 : h / 2 + 1;
-            
             var v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4, v1offset, v2offset, v3offset, v4offset;
 
             for (y = ystart; y < yend; y++) {
@@ -407,7 +407,13 @@ $3Dmol.GLDraw = (function() {
                 // n number of points for each level (verticesRows[i].length -
                 // 1)
                 var cap = (y <= h / 2) ? to : from;
-
+                var toObj = cylVertexCache.getVerticesForRadius(radius, toCap, "to");
+                var fromObj = cylVertexCache.getVerticesForRadius(radius, fromCap, "from");
+                if(cap===to){
+                    vertices = toObj.vertices, normals = toObj.normals, verticesRows = toObj.verticesRows;
+                }else if(cap==from){
+                    vertices = fromObj.vertices, normals = fromObj.normals, verticesRows = fromObj.verticesRows;
+                }
                 for (x = 0; x < n; x++) {
 
                     faceoffset = geoGroup.faceidx;
@@ -500,7 +506,7 @@ $3Dmol.GLDraw = (function() {
 
                     // if (Math.abs(vobj.sphereVertices[v1].y) === radius) {
 
-                    if (y === 0) {
+                    if (y === 0) {//to center circle
                         // face = [v1, v3, v4];
                         // norm = [n1, n3, n4];
 
@@ -524,7 +530,7 @@ $3Dmol.GLDraw = (function() {
 
                     // else if (Math.abs(vobj.sphereVertices[v3].y) === radius)
                     // {
-                    else if (y === yend - 1) {
+                    else if (y === yend - 1) {//from end center circle
                         // face = [v1, v2, v3];
                         // norm = [n1, n2, n3];
 
@@ -546,7 +552,7 @@ $3Dmol.GLDraw = (function() {
 
                     }
 
-                    else {
+                    else { // the rest of the circles
                         // face = [v1, v2, v3, v4];
                         // norm = [n1, n2, n3, n4];
 
@@ -589,6 +595,14 @@ $3Dmol.GLDraw = (function() {
         geoGroup.vertices += n_verts;
     };
 
+    //returns the center of the selection that is passed to this function
+    var getCenter = function(sel){
+        //todo: look in zoomto at how it is done there
+        //this may just take a list of all of the selected 
+        //atoms and generate an average coordinate and return that
+
+    }
+
     /** Create a cone 
      * @function $3Dmol.GLDraw.drawCone
      * @param {geometry}
@@ -605,6 +619,9 @@ $3Dmol.GLDraw = (function() {
     draw.drawCone = function(geo, from, to, radius, color) {
         if (!from || !to)
             return;
+        console.log(from)
+        console.log(to)
+        //check if from and to do not contain x,y,z and if  so generate a center based on the passed selections
 
         color = color || {r:0, g:0, b:0};
 

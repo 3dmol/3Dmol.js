@@ -42,7 +42,7 @@
             
             var initShapes = function(viewer) {
                 $.get('tests/test_structs/benzene-homo.cube', function(data){
-		    var voldata = new $3Dmol.VolumeData(data, "cube");
+                    var voldata = new $3Dmol.VolumeData(data, "cube");
                     viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
                     viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
                     viewer.setStyle({}, {stick:{}});
@@ -71,6 +71,7 @@ $( document ).ready(function() {
 	  $("#text3Dmol").hide();
 	    $("#viewtext").hide();
 	    $("#embedtext").hide();
+	    $("#jupytertext").hide();
 	    $("#developtext").hide();
   };
   $('#view').hover(
@@ -91,6 +92,15 @@ $( document ).ready(function() {
 	    hidetext();
 		$("#text3Dmol").show();
   });
+    $('#jupyter').hover(
+  function () {
+	    hidetext();
+    $("#jupytertext").show();
+  }, 
+  function () {
+	    hidetext();
+		$("#text3Dmol").show();
+  });  
       $('#develop').hover(
   function () {
 	    hidetext();
@@ -113,12 +123,14 @@ $( document ).ready(function() {
    <div id="strip" class = "titlefont">
     <a href="doc/tutorial-url.html" id="view" class="titletext">View</a>
     <a href="doc/tutorial-embeddable.html" id="embed" class="titletext">Embed</a>
+    <a href="http://nbviewer.jupyter.org/github/3dmol/3Dmol.js/blob/0be6abab73a014ecf0969af7d10940b44fb591fc/py3Dmol/examples.ipynb" id="jupyter" class="titletext">Jupyter&nbsp;&nbsp</a>
     <a href="doc/index.html" id="develop" class="titletext">Develop</a>
    </div>
    <div id="infotext">
     <span id="text3Dmol" class="floattext">A modern, object-oriented JavaScript library for visualizing molecular data</span>
     <span id="viewtext" class="floattext">View structures through a declarative URL interface</span>
     <span id="embedtext" class="floattext">Embed molecular viewers in webpages with two lines of code</span>
+    <span id="jupytertext" class="floattext">Include interactive 3D structures in Jupyter notebooks</span>
     <span id="developtext" class="floattext">Develop web applications using a full featured API</span>
 
    </div>
