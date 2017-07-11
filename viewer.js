@@ -197,6 +197,7 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     style_spec_name.change(function(){
         render();
     })
+    console.log(style_spec_object)
 
     $.each(validNames,function(key,value) {
         if(value.gui){
@@ -366,15 +367,26 @@ var buildHTMLTree = function(query){
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
-
+        var arr = [];
         if(selection_object.style != undefined){
-            parent.append(createSelection(augmentSelection(selection_object),selection_object.style,selection_index,"style"))
+            var ord = selection_object.order;
+            arr[ord] = createSelection(augmentSelection(selection_object),selection_object.style,selection_index,"style");
+            delete selection_object.order
         }
         if(selection_object.labelres != undefined){
-            parent.append(createSelection(augmentSelection(selection_object),selection_object.labelres,selection_index,"labelres"))
+            var ord = selection_object.order;
+            arr[ord]=createSelection(augmentSelection(selection_object),selection_object.labelres,selection_index,"labelres");
+            delete selection_object.order
         }
         if(selection_object.surface != undefined){
-            parent.append(createSelection(augmentSelection(selection_object),selection_object.surface,selection_index,"surface"))
+            var ord = selection_object.order;
+            arr[ord]=createSelection(augmentSelection(selection_object),selection_object.surface,selection_index,"surface");
+            delete selection_object.order
+        }
+
+        for(var i in arr){
+            if(arr[i]!= undefined)
+                parent.append(arr[i])
         }
     }
 
@@ -605,8 +617,9 @@ var updateQueryFromHTML = function(){
         }
     });
 
-    var final_selections = [];
+    var final_selections = selects;
     var prev;
+    /*
     for(var sele in selects){
         var augmented = augmentSelection(selects[sele])
         var prev_not_included = true;
@@ -616,15 +629,15 @@ var updateQueryFromHTML = function(){
             if(previous_item.hasOwnProperty(Object.keys(curr)[0]))
                 prev_not_included = false;
         }
-        console.log(prev_not_included)
         if(prev != undefined && isSame(augmented,prev) && isSame(prev, augmented) && prev_not_included){
             final_selections[final_selections.length-1] = combine(selects[sele],final_selections[final_selections.length-1]);
+
         }else{
             final_selections.push(selects[sele])
         }
-
         prev = augmented
     }
+    */
     query.selections=final_selections;
 }
 
@@ -645,7 +658,6 @@ var addSelection = function(type){
         query.selections.push({"surface":{}})
     else if(type == "labelres")
         query.selections.push({"labelres":{}})
-
     buildHTMLTree(query);
     render();
 }
