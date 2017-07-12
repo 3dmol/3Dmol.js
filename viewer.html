@@ -32,7 +32,8 @@
     //Process commands, in order, and run on viewer (array of strings split on '&')
     var runcmds = function(cmds, viewer,renderSurface) {
         renderSurface = renderSurface == undefined ? true : renderSurface;
-
+        if(renderSurface)
+            viewer.removeAllSurfaces();
         var currentsel = {};
 
         for (var i = 0; i < cmds.length; i++) {
@@ -43,7 +44,6 @@
             if (cmdname == 'select')
                 currentsel = cmdobj;
             else if (cmdname == 'surface' && renderSurface){
-                viewer.removeAllSurfaces();
                 console.log("rendering")
                 viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel,
                         currentsel);

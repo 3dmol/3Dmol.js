@@ -625,6 +625,7 @@ var render = function(surfaceEdited){
 }
 //these functions all edit the query object 
 var addSelection = function(type){
+    var surface  = type == "surface"
     if(type == "style")      
         query.selections.push({"style":{}})
     else if(type == "surface")
@@ -632,7 +633,7 @@ var addSelection = function(type){
     else if(type == "labelres")
         query.selections.push({"labelres":{}})
     buildHTMLTree(query);
-    render();
+    render(surface);
 }
 
 var deleteSelection = function(spec){
