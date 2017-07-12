@@ -165,9 +165,10 @@ var createOtherModelSpec = function(spec,type,selection_index){
     var attributes = $('<ul/>',{
         "class":type.toLowerCase()+'_attributes',
     });
-    
+    console.log(spec)
     for(var attribute_index in spec){
         var attribute=createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index})
+        console.log(attribute)
         if(attribute != undefined)
             attribute.appendTo(attributes);
     }
@@ -196,8 +197,7 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
 
     style_spec_name.change(function(){
         render();
-    })
-    console.log(style_spec_object)
+    });
 
     $.each(validNames,function(key,value) {
         if(value.gui){
@@ -266,6 +266,14 @@ var createStyle = function(model_spec_object,model_spec_type,selection_index){
             spec.appendTo(style_specs);
     }
 
+    var add_style_spec = $('<button/>',{
+        "class":"add_style_spec",
+        "text":"Add Style Spec",
+        "data-index":selection_index,
+        "data-type":model_spec_type,
+        "click":function(){addStyleSpec(this)},
+    }).appendTo(style);
+
     return style; 
 }
 
@@ -276,17 +284,10 @@ var validNames = {
 }
 
 var createModelSpecification = function(model_spec_type,model_spec_object,selection_index){
+    console.log(model_spec_object)
     var model_specification = null;
     if(model_spec_type=="style"){
         model_specification = createStyle(model_spec_object,model_spec_type,selection_index)
-        var add_style_spec = $('<button/>',{
-            "class":"add_style_spec",
-            "text":"Add Style Spec",
-            "data-index":selection_index,
-            "data-type":model_spec_type,
-            "click":function(){addStyleSpec(this)},
-        }).appendTo(model_specification);
-
     }else if(model_spec_type=="surface"){
         model_specification = createOtherModelSpec(model_spec_object,"Surface",selection_index)
     }else if(model_spec_type=="labelres"){
@@ -297,6 +298,7 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
 }
 //this function creates the selection object
 var createSelection = function(spec,object,index,type){
+    console.log(object)
     //creates container
     var selection = $("<li/>",{
         class:"selection"
@@ -340,6 +342,7 @@ var createSelection = function(spec,object,index,type){
 
     createHeader()    
     //check if style exists and if so create the object
+    console.log(object)
     var ret = createModelSpecification(type,object, index);
 
     delete_selection.attr("data-type",type);
@@ -351,6 +354,7 @@ var createSelection = function(spec,object,index,type){
 builds an html tree that goes inside of the selection portion of the viewer page
 */
 var buildHTMLTree = function(query){
+    console.log(query)
     //get parent object for the html tree
     var parent = $('#selection_list');
     parent.text("");
@@ -364,30 +368,26 @@ var buildHTMLTree = function(query){
     $("#model_input").change(function(){
         render();
     })
+    var arr=[]
     //loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
-        var arr = [];
+        var aug = augmentSelection(selection_object);
+
         if(selection_object.style != undefined){
-            var ord = selection_object.order;
-            arr[ord] = createSelection(augmentSelection(selection_object),selection_object.style,selection_index,"style");
-            delete selection_object.order
-        }
-        if(selection_object.labelres != undefined){
-            var ord = selection_object.order;
-            arr[ord]=createSelection(augmentSelection(selection_object),selection_object.labelres,selection_index,"labelres");
-            delete selection_object.order
+            arr.push(createSelection(aug,selection_object.style,selection_index,"style"));
         }
         if(selection_object.surface != undefined){
-            var ord = selection_object.order;
-            arr[ord]=createSelection(augmentSelection(selection_object),selection_object.surface,selection_index,"surface");
-            delete selection_object.order
+            arr.push(createSelection(aug,selection_object.surface,selection_index,"surface"))
         }
-
-        for(var i in arr){
-            if(arr[i]!= undefined)
-                parent.append(arr[i])
+        if(selection_object.labelres != undefined){
+            arr.push(createSelection(aug,selection_object.labelres,selection_index,"labelres"))
         }
+    }
+    console.log(arr)
+    for(var i in arr){
+        if(arr[i]!= undefined)
+            parent.append(arr[i])
     }
 
     $('<li><br><br><br><br></li>').appendTo(parent)
@@ -500,13 +500,11 @@ var urlToQuery = function(url){
         var type = stringType(strings[0]);//left side of equals
         var string = strings[1];//right side of equals
         var object = $3Dmol.specStringToObject(string);
-
         if(type == "file"){
             query.file = new File(string,strings[0]);
         }else if(type == "select"){
-            var selection = object;
-            query.selections.push(selection);
-            currentSelection = selection;
+            currentSelection = object
+            query.selections.push(currentSelection);
         }else if(type == "style" || type=="surface" || type == "labelres"){
             currentSelection[type] = object;
         }
@@ -567,8 +565,6 @@ var updateQueryFromHTML = function(){
     }
 
     var isSame = function(obj1,obj2){
-        console.log(obj1)
-        console.log(obj2)
         for(var key in obj1){
             if(Array.isArray(obj1[key])){
                 if(Array.isArray(obj2[key]))
@@ -591,6 +587,7 @@ var updateQueryFromHTML = function(){
     var selects = [];
     var listItems = $(".selection")
     listItems.each(function(index,value){
+        console.log(value)
         if(listItems.hasOwnProperty(index)){
             var getSubObject = function(){
                 var attr = $(value);
@@ -610,6 +607,7 @@ var updateQueryFromHTML = function(){
             }
 
             var val = getSubObject();
+            console.log(val)
             var selection_spec = $(listItems[index]).children(".selection_spec")[0].value;
             var selection = updateSelectionElements(selection_spec);
             var extended = combine(selection,val)
