@@ -58,9 +58,6 @@ var createAttribute = function(name,value,parent){
         class:'attribute_name',
     }).appendTo(attribute);
     var obj_type = type;
-    $(attribute_name).change(function(){
-        render(obj_type == "surface");
-    });
 
     $.each(validNames,function(key,value) {
         if(value.gui){
@@ -149,9 +146,29 @@ var createAttribute = function(name,value,parent){
             value:value,
         }).appendTo(attribute);
     }
+    $(attribute_name).change(function(){
+        var validItemsValue;
+        var type = validNames[attribute_name.val()].type
+        if(type=="boolean"){
+            validItemsValue = ["false","true"];
+        }else if(type == "colorscheme"){
+            validItemsValue =  $3Dmol.GLModel.validColorschemeSpecs;
+        }else if(type == "color"){
+            validItemsValue =  $3Dmol.GLModel.validColorSpecs;
+        }else if(type == undefined){
+            validItemsValue = validNames[name].validItems;
+        }
+        console.log(validItemsValue)
+        var defa = validNames[attribute_name.val()].default;
+        if(validItemsValue != undefined){
+            attribute_value.val(validItemsValue[0])
+        }else{
+            attribute_value.val(defa)
+        }
 
+        render(obj_type == "surface");
+    });
     attribute_value.change(function(){
-        console.log(obj_type == "surface")
         render(obj_type == "surface");
     });
 
