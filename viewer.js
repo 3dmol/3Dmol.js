@@ -158,7 +158,6 @@ var createAttribute = function(name,value,parent){
         }else if(type == undefined){
             validItemsValue = validNames[name].validItems;
         }
-        console.log(validItemsValue)
         var defa = validNames[attribute_name.val()].default;
         if(validItemsValue != undefined){
             attribute_value.val(validItemsValue[0])
@@ -706,7 +705,7 @@ var deleteOtherAttribute = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
     
     buildHTMLTree(query);
-    render();
+    render(spec.dataset.type == "surface");
 }
 
 var addAttribute = function(style_spec){
