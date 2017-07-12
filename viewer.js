@@ -1,3 +1,4 @@
+
 //removes style,labelres, and surface from a copy of the selection object and returns it
 var augmentSelection = function(selection){
     var copiedObject = jQuery.extend(true,{}, selection);//deep copy
@@ -56,10 +57,10 @@ var createAttribute = function(name,value,parent){
     var attribute_name = $('<select>',{
         class:'attribute_name',
     }).appendTo(attribute);
-
+    var obj_type = type;
     $(attribute_name).change(function(){
-        render();
-    })
+        render(obj_type == "surface");
+    });
 
     $.each(validNames,function(key,value) {
         if(value.gui){
@@ -150,7 +151,8 @@ var createAttribute = function(name,value,parent){
     }
 
     attribute_value.change(function(){
-        render();
+        console.log(obj_type == "surface")
+        render(obj_type == "surface");
     });
 
     if(name!="" &&  attribute_value.prop("tagName") == "INPUT" && validNames[name].type =="number"){
@@ -165,10 +167,8 @@ var createOtherModelSpec = function(spec,type,selection_index){
     var attributes = $('<ul/>',{
         "class":type.toLowerCase()+'_attributes',
     });
-    console.log(spec)
     for(var attribute_index in spec){
         var attribute=createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index})
-        console.log(attribute)
         if(attribute != undefined)
             attribute.appendTo(attributes);
     }
@@ -284,7 +284,6 @@ var validNames = {
 }
 
 var createModelSpecification = function(model_spec_type,model_spec_object,selection_index){
-    console.log(model_spec_object)
     var model_specification = null;
     if(model_spec_type=="style"){
         model_specification = createStyle(model_spec_object,model_spec_type,selection_index)
@@ -298,7 +297,6 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
 }
 //this function creates the selection object
 var createSelection = function(spec,object,index,type){
-    console.log(object)
     //creates container
     var selection = $("<li/>",{
         class:"selection"
@@ -342,7 +340,6 @@ var createSelection = function(spec,object,index,type){
 
     createHeader()    
     //check if style exists and if so create the object
-    console.log(object)
     var ret = createModelSpecification(type,object, index);
 
     delete_selection.attr("data-type",type);
@@ -354,7 +351,6 @@ var createSelection = function(spec,object,index,type){
 builds an html tree that goes inside of the selection portion of the viewer page
 */
 var buildHTMLTree = function(query){
-    console.log(query)
     //get parent object for the html tree
     var parent = $('#selection_list');
     parent.text("");
@@ -384,7 +380,6 @@ var buildHTMLTree = function(query){
             arr.push(createSelection(aug,selection_object.labelres,selection_index,"labelres"))
         }
     }
-    console.log(arr)
     for(var i in arr){
         if(arr[i]!= undefined)
             parent.append(arr[i])
@@ -587,7 +582,6 @@ var updateQueryFromHTML = function(){
     var selects = [];
     var listItems = $(".selection")
     listItems.each(function(index,value){
-        console.log(value)
         if(listItems.hasOwnProperty(index)){
             var getSubObject = function(){
                 var attr = $(value);
@@ -607,7 +601,6 @@ var updateQueryFromHTML = function(){
             }
 
             var val = getSubObject();
-            console.log(val)
             var selection_spec = $(listItems[index]).children(".selection_spec")[0].value;
             var selection = updateSelectionElements(selection_spec);
             var extended = combine(selection,val)
@@ -615,39 +608,20 @@ var updateQueryFromHTML = function(){
         }
     });
 
-    var final_selections = selects;
-    /*
-    var prev;
-    
-    for(var sele in selects){
-        var augmented = augmentSelection(selects[sele])
-        var prev_not_included = true;
-        if(final_selections.length != 0){
-            var previous_item = final_selections[final_selections.length-1]
-            var curr = selects[sele]
-            if(previous_item.hasOwnProperty(Object.keys(curr)[0]))
-                prev_not_included = false;
-        }
-        if(prev != undefined && isSame(augmented,prev) && isSame(prev, augmented) && prev_not_included){
-            final_selections[final_selections.length-1] = combine(selects[sele],final_selections[final_selections.length-1]);
-
-        }else{
-            final_selections.push(selects[sele])
-        }
-        prev = augmented
-    }
-    */
-    query.selections=final_selections;
+    query.selections=selects;
 }
 
 var query = urlToQuery(window.location.search.substring(1));
 //this function compresses the html object back into a url
-var render = function(){
+var render = function(surfaceEdited){
+    surfaceEdited = surfaceEdited == undefined ? false : surfaceEdited;
     //calls update query
     updateQueryFromHTML();
-    setURL(queryToURL(query));
+    var url = queryToURL(query);
+    setURL(url);
     buildHTMLTree(query);
-    run();
+    runcmds(url.split("&"),glviewer,surfaceEdited);
+    glviewer.render();
 }
 //these functions all edit the query object 
 var addSelection = function(type){

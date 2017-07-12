@@ -30,7 +30,8 @@
     //http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
 
     //Process commands, in order, and run on viewer (array of strings split on '&')
-    var runcmds = function(cmds, viewer) {
+    var runcmds = function(cmds, viewer,renderSurface) {
+        renderSurface = renderSurface == undefined ? true : renderSurface;
 
         var currentsel = {};
 
@@ -41,22 +42,24 @@
 
             if (cmdname == 'select')
                 currentsel = cmdobj;
-            else if (cmdname == 'surface') {
+            else if (cmdname == 'surface' && renderSurface){
+                viewer.removeAllSurfaces();
+                console.log("rendering")
                 viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel,
                         currentsel);
-            } else if (cmdname == 'style') {
+            } else if (cmdname == 'style'){
                 viewer.setStyle(currentsel, cmdobj);
-            } else if (cmdname == 'addstyle') {
+            } else if (cmdname == 'addstyle'){
                 viewer.addStyle(currentsel, cmdobj);
-            } else if (cmdname == 'labelres') {
+            } else if (cmdname == 'labelres'){
                 viewer.addResLabels(currentsel, cmdobj);
-            } else if (cmdname == 'colorbyelement') {
+            } else if (cmdname == 'colorbyelement'){
                 if (typeof ($3Dmol.elementColors[cmdobj.colorscheme]) != "undefined")
                     viewer.setColorByElement(currentsel,
                             $3Dmol.elementColors[cmdobj.colorscheme]);
-            } else if (cmdname == 'colorbyproperty') {
+            } else if (cmdname == 'colorbyproperty'){
                 if (typeof (cmdobj.prop) != "undefined"
-                        && typeof ($3Dmol.Gradient[cmdobj.scheme]) != "undefined") {
+                        && typeof ($3Dmol.Gradient[cmdobj.scheme]) != "undefined"){
                     viewer.setColorByProperty(currentsel, cmdobj.prop,
                             new $3Dmol.Gradient[cmdobj.scheme]());
                 }
@@ -256,7 +259,7 @@ $(document).ready(function(){
 </ul>
 <div id="fixed_bottom">
     <button id="addStyle" onclick="addSelection('style')">Add Style</button><button id="addSurface" onclick="addSelection('surface')">Add Surface</button><button id="addLabelRes" onclick="addSelection('labelres')">Add LabelRes</button>
-    <button id="renderModel" onclick="render();run()">Render</button><button onclick="center();" id="centerModel">Center</button>
+    <button id="renderModel" onclick="render();">Render</button><button onclick="center();" id="centerModel">Center</button>
 </div>
             
 </div>
