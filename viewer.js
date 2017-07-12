@@ -325,7 +325,7 @@ var createSelection = function(spec,object,index,type){
         }).appendTo(selection); 
 
         selection_spec.change(function(){
-            render();
+            render(type == "surface");
         })
     }
 
@@ -642,7 +642,7 @@ var deleteSelection = function(spec){
         delete query.selections[spec.dataset.index]
     
     buildHTMLTree(query);
-    render();
+    render(spec.dataset.type == "surface");
 }
 
 var addModelSpec = function(type,selection){
