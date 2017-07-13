@@ -4,10 +4,10 @@
 <title>3Dmol.js Viewer</title>
 <script src="build/3Dmol.js"></script>
 <script src="viewer.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="viewer.css">
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script>
     (function(i, s, o, g, r, a, m) {
@@ -28,12 +28,12 @@
 <script>
     var glviewer = null;
     //http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
-
     //Process commands, in order, and run on viewer (array of strings split on '&')
     var runcmds = function(cmds, viewer,renderSurface) {
         renderSurface = renderSurface == undefined ? true : renderSurface;
         if(renderSurface)
             viewer.removeAllSurfaces();
+        viewer.removeAllLabels();
         var currentsel = {};
 
         for (var i = 0; i < cmds.length; i++) {
@@ -204,6 +204,7 @@
 
 $(document).ready(function(){
     var url=window.location.href.substring(window.location.href.indexOf("?")+1);
+    run();
     var start_width;
     $("#sidenav").resizable({
         handles: 'e',
@@ -220,9 +221,8 @@ $(document).ready(function(){
     });
 
     $("#selection_list").accordion();
-
-    run();
     initSide(url);
+
 });
 
 </script>

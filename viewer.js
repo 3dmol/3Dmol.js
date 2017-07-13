@@ -175,6 +175,17 @@ var createAttribute = function(name,value,parent){
         validNames[name].type =="number"
         attribute_value.attr("type","number")
         attribute_value.attr("step",validNames[name].step)
+        attribute_value.addClass("spinner")
+        var max = validNames[name].max;
+        var min = validNames[name].min;
+        console.log(max)
+        console.log(min)        
+        if(max != undefined)
+            attribute_value.attr("max",max);
+        if(min != undefined)
+            attribute_value.attr("min",min);
+        
+        
     }
     return attribute;
 }
@@ -400,7 +411,7 @@ var buildHTMLTree = function(query){
         if(arr[i]!= undefined)
             parent.append(arr[i])
     }
-
+    //this adds spinners to things with spinner as a class this is here because they need to ba  a part of the dom before this is called
     $('<li><br><br><br><br></li>').appendTo(parent)
 }
 //takes the queyr object and creates a url for it
@@ -747,7 +758,7 @@ var toggleHide =  function(){
         $("#menu").css("display","none");
         $("#sidenav").css("width",width+"px");
         $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel').css("display","inline")
-        $('#header').css("display","block")
+        $('#header').css("display","block");
         glviewer.translate(width/2,0,400,false);
         glviewer.render();
     }else{

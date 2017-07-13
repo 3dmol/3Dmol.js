@@ -184,18 +184,18 @@ $3Dmol.GLModel = (function() {
 
     var validCrossSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:false,step:.1,default:defaultlineWidth},//deprecated
+        "linewidth":{type:"number",gui:false,step:.1,default:defaultlineWidth,min:0},//deprecated
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:.1,default:1},
-        "scale":{type:"number",gui:true,range:[],step:.1,default:1},
+        "radius":{type:"number",gui:true,step:.1,default:1,min:.1},
+        "scale":{type:"number",gui:true,step:.1,default:1,min:0},
     }
 
     var validStickSpec = {
         "hidden":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:.1,default:.25},
+        "radius":{type:"number",gui:true,step:.1,default:.25,min:.1},
         "singleBonds":{type:"boolean",gui:true},
     }
 
@@ -204,7 +204,7 @@ $3Dmol.GLModel = (function() {
         "singleBonds":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:.1,default:1.5},
+        "radius":{type:"number",gui:true,step:.1,default:1.5,min:1},
     }
 
     var validCartoonSpec = {
@@ -214,9 +214,9 @@ $3Dmol.GLModel = (function() {
         "ribbon":{type:"boolean",gui:true},
         "hidden":{type:"boolean",gui:true},
         "tubes":{type:"boolean",gui:true},
-        "thickness":{type:"number",gui:true,step:.1,default:1},
-        "width":{type:"number",gui:true,step:.1,default:1},
-        "opacity":{type:"number",gui:true,step:.1,default:1},
+        "thickness":{type:"number",gui:true,step:.1,default:1,min:0},
+        "width":{type:"number",gui:true,step:.1,default:1,min:0},
+        "opacity":{type:"number",gui:true,step:.1,default:1,min:0,max:1},
     }
 
     GLModel.validAtomStyleSpecs = {
@@ -229,7 +229,7 @@ $3Dmol.GLModel = (function() {
     };
 
     GLModel.validSurfaceSpecs = {
-        "opacity":{type:"number",gui:true,step:.1,default:1},
+        "opacity":{type:"number",gui:true,step:.1,default:1,min:0,max:1},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
         "voldata":{type:"number",gui:false},
@@ -239,14 +239,14 @@ $3Dmol.GLModel = (function() {
 
     GLModel.validLabelResSpecs = {
         "font":{type:"string",gui:true},
-        "fontSize":{type:"number",gui:true,step:1,default:12},
+        "fontSize":{type:"number",gui:true,step:1,default:12,min:1},
         "fontColor":{type:"color",gui:true},
-        "fontOpacity":{type:"number",gui:true,step:.1,default:1},
-        "borderThickness":{type:"number",gui:true,step:.1,default:1},
+        "fontOpacity":{type:"number",gui:true,step:.1,default:1,min:0,max:1},
+        "borderThickness":{type:"number",gui:true,step:.1,default:1,min:0},
         "borderColor":{type:"color",gui:true},
-        "borderOpacity":{type:"number",gui:true,step:.1,default:1},
+        "borderOpacity":{type:"number",gui:true,step:.1,default:1,min:0,max:1},
         "backgroundColor":{type:"color",gui:true},
-        "backgroundOpacity":{type:"number",gui:true,step:.1,default:1},
+        "backgroundOpacity":{type:"number",gui:true,step:.1,default:1,min:0,max:1},
         "position":{type:"array",valid:false},
         "inFront":{type:"boolean",gui:true},
         "showBackground":{type:"boolean",gui:true},
