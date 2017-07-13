@@ -1446,14 +1446,24 @@ $3Dmol.GLModel = (function() {
          * @param {number} framenum - model's atoms are set to this index in frames list
          */
         this.setFrame = function(framenum) {
+           
             if (frames.length == 0) {
                 return;
             }
-            if (framenum >= 0 && framenum < frames.length) {
-                atoms = frames[framenum];
+            if (framenum < 0 || framenum > frames.length) {
+                framenum = frames.length - 1;
             }
-            else {
-                atoms = frames[frames.length-1];
+            atoms = frames[framenum];
+            if (frames.url != undefined) {
+                $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path, function (buffer) {
+                    var values = new Float32Array(buffer,44);
+                    var count = 0;
+                    for (var i = 0; i < atoms.length; i++) {
+                        atoms[i].x = values[count++];
+                        atoms[i].y = values[count++];
+                        atoms[i].z = values[count++];
+                    }
+                });
             }
             molObj = null;
         };
@@ -2447,24 +2457,30 @@ $3Dmol.GLModel = (function() {
 
     /**
     * Set coordinates for the atoms parsed from various topology files. 
-    * @function $3Dmol.GLModel#setCoordinatesFromUrl
+    * @function $3Dmol.GLModel#setupFrames
     * @param {string} url - contains the url where mdsrv has been hosted
     * @param {string} path - contains the path of the file (<root>/filename)
-    * @param {object} viewer - contains the glviewer object
     */
 
-        this.setCoordinatesFromUrl = function(url, path) {
+        this.setupFrames = function (url, path) {
             var atomCount = atoms.length;
             var self = this;
             frames = [];
             $.get("http://"+url+"/traj/numframes/"+path, function (numFrames) {
                 if (!isNaN(parseInt(numFrames))) {
                     for (var i = 0; i < numFrames; i++) {
-                        $3Dmol.getbin("http://"+url+"/traj/frame/"+i+"/"+path, function (buffer) {
-                            self.setCoordinates(buffer, "unknown");
-                            self.setFrame(i) 
-                        });
+                        var temp = [];
+                        for (var j = 0; j < atomCount; j++) {
+                            var newAtom = {};
+                            for (var k in atoms[j]) {
+                                newAtom[k] = atoms[j][k];
+                            }
+                            temp[j] = newAtom;
+                        }
+                        frames.push(temp);
                     }
+                    frames.url = url;
+                    frames.path = path;
                 }
             });
         }
@@ -2474,7 +2490,6 @@ $3Dmol.GLModel = (function() {
     * @function $3Dmol.GLModel#setCoordinates
     * @param {string} str - contains the data of the file
     * @param {string} format - contains the format of the file
-    * @param {function} callback - function called when a inpcrd or a mdcrd file is uploaded
     */
 
         this.setCoordinates = function(str, format) {
@@ -2493,10 +2508,8 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
                 }
             }
-            var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":"","unknown":""};
+            var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":""};
             if (supportedFormats.hasOwnProperty(format)) {
-                if (format != "unknown")
-                    frames = [];
                 var atomCount = atoms.length;
                 var values = GLModel.parseCrd(str, format);
                 var count = 0;
@@ -2564,8 +2577,6 @@ $3Dmol.GLModel = (function() {
             var reader = new netcdfjs(data);
             values = [].concat.apply([],reader.getDataVariable('coordinates'));
 
-        } else if (format == "unknown") { // format unknown; arraybuffer obtained from MDsrv
-            values = new Float32Array(data,44);
         } else {
             var index = data.indexOf("\n"); // remove the first line containing title
             if(format == 'inpcrd') {

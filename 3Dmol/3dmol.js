@@ -157,6 +157,7 @@ $3Dmol.getbin = function(uri, callback) {
     $.ajax({url:uri, 
         type: "POST",
         dataType: "binary",
+        async: "false",
         responseType: "arraybuffer",
         processData: false}).done(
             function(ret, txt, response) {
