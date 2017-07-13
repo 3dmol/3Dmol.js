@@ -2265,9 +2265,12 @@ $3Dmol.GLViewer = (function() {
             var mostFrames = 0;
             var modelNum = 0;
             for (var i = 0; i < models.length; i++) {
-                if (models[i].getFrames().length > mostFrames) {
+                var length = models[i].getFrames().length;
+                if (models[i].getFrames().numFrames != undefined)
+                    length = models[i].getFrames().numFrames;
+                if (length > mostFrames) {
                     modelNum = i;
-                    mostFrames = models[i].getFrames().length;
+                    mostFrames = length;
                 }
             }
             return mostFrames;

@@ -152,12 +152,14 @@ $3Dmol.viewers = {};
  * @function $3Dmol.getbin
  * @param {string} uri - location of data
  * @param {Function} callback - Function to call with arraybuffer as argument.  
+ * @param {binary} asyn - send request asynchronously or not
  */ 
-$3Dmol.getbin = function(uri, callback) {
+$3Dmol.getbin = function(uri, callback, asyn) {
+    asyn = (asyn == undefined)?true:asyn;
     $.ajax({url:uri, 
         type: "POST",
         dataType: "binary",
-        async: "false",
+        async: asyn,
         responseType: "arraybuffer",
         processData: false}).done(
             function(ret, txt, response) {

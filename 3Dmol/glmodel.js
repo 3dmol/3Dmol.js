@@ -1446,16 +1446,15 @@ $3Dmol.GLModel = (function() {
          * @param {number} framenum - model's atoms are set to this index in frames list
          */
         this.setFrame = function(framenum) {
-           
-            if (frames.length == 0) {
+            var numFrames = (frames.numFrames != undefined)?frames.numFrames:frames.length;
+            if (numFrames == 0) {
                 return;
             }
-            if (framenum < 0 || framenum > frames.length) {
-                framenum = frames.length - 1;
+            if (framenum < 0 || framenum > numFrames) {
+                framenum = numFrames - 1;
             }
-            atoms = frames[framenum];
             if (frames.url != undefined) {
-                $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path, function (buffer) {
+                 $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path, function (buffer) {
                     var values = new Float32Array(buffer,44);
                     var count = 0;
                     for (var i = 0; i < atoms.length; i++) {
@@ -1463,8 +1462,10 @@ $3Dmol.GLModel = (function() {
                         atoms[i].y = values[count++];
                         atoms[i].z = values[count++];
                     }
-                });
+                },false);
             }
+            else
+                atoms = frames[framenum];
             molObj = null;
         };
         
@@ -2457,33 +2458,24 @@ $3Dmol.GLModel = (function() {
 
     /**
     * Set coordinates for the atoms parsed from various topology files. 
-    * @function $3Dmol.GLModel#setupFrames
+    * @function $3Dmol.GLModel#setCoordinatesFromURL
     * @param {string} url - contains the url where mdsrv has been hosted
     * @param {string} path - contains the path of the file (<root>/filename)
     */
 
-        this.setupFrames = function (url, path) {
+        this.setCoordinatesFromURL = function (url, path) {
             var atomCount = atoms.length;
             var self = this;
             frames = [];
             $.get("http://"+url+"/traj/numframes/"+path, function (numFrames) {
                 if (!isNaN(parseInt(numFrames))) {
-                    for (var i = 0; i < numFrames; i++) {
-                        var temp = [];
-                        for (var j = 0; j < atomCount; j++) {
-                            var newAtom = {};
-                            for (var k in atoms[j]) {
-                                newAtom[k] = atoms[j][k];
-                            }
-                            temp[j] = newAtom;
-                        }
-                        frames.push(temp);
-                    }
+                    frames.push(atoms);
+                    frames.numFrames = numFrames;
                     frames.url = url;
                     frames.path = path; 
+                    self.setFrame(0);
                 }
             });
-            this.setFrame(0);
         }
 
     /**
@@ -2511,6 +2503,7 @@ $3Dmol.GLModel = (function() {
             }
             var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":""};
             if (supportedFormats.hasOwnProperty(format)) {
+                frames = [];
                 var atomCount = atoms.length;
                 var values = GLModel.parseCrd(str, format);
                 var count = 0;
