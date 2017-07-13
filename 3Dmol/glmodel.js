@@ -2480,9 +2480,10 @@ $3Dmol.GLModel = (function() {
                         frames.push(temp);
                     }
                     frames.url = url;
-                    frames.path = path;
+                    frames.path = path; 
                 }
             });
+            this.setFrame(0);
         }
 
     /**
