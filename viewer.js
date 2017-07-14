@@ -183,9 +183,7 @@ var createAttribute = function(name,value,parent){
         if(max != undefined)
             attribute_value.attr("max",max);
         if(min != undefined)
-            attribute_value.attr("min",min);
-        
-        
+            attribute_value.attr("min",min);   
     }
     return attribute;
 }
@@ -389,7 +387,11 @@ var buildHTMLTree = function(query){
 
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(function(){
+        //query = urlToQuery(window.location.search.substring(1));
+        //console.log(query)
+       // buildHTMLTree(query)
         render();
+         run();
     })
     var arr=[]
     //loops through selections and creates a selection tree
@@ -500,6 +502,8 @@ var validateQuery = function(query){
 var count = 0;
 //takes the search url string and makes a query object for it 
 var urlToQuery = function(url){
+    if(url == "")
+        return new Query();
     var query = new Query();
     var tokens = url.split("&");
     //still using indexOf because otherwise i would need to check to see if the first substring in the string is "select" and check to see if the string isnt to small
@@ -540,7 +544,7 @@ var updateQueryFromHTML = function(){
     query.file.type=document.getElementById("model_type").value;
 
     $("#model_type").change(function(){
-        render();
+       render();
     });
 
     var updateOther = function(other){
