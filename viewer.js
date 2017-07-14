@@ -147,6 +147,7 @@ var createAttribute = function(name,value,parent){
         }).appendTo(attribute);
     }
     attribute_name.change(function(){
+        console.log("attribute_index")
         var validItemsValue;
         var type = validNames[attribute_name.val()].type
         if(type=="boolean"){
@@ -162,13 +163,13 @@ var createAttribute = function(name,value,parent){
         var val;
         if(validItemsValue != undefined){
             val = validItemsValue[0];
-            attribute_value.val(val)
         }else{
             val = defa
-            attribute_value.val(val)
         }
-        updateQueryFromHTML();
-        query.selections[parent.index][parent.type.toLowerCase()][attribute_name.val()]= val;
+        if(attribute_value.children()[0]!= undefined)
+            attribute_value.children()[0].value = val;
+        else
+            attribute_value.val(val);
         render(obj_type == "surface");
     });
     attribute_value.change(function(){
@@ -543,16 +544,14 @@ var urlToQuery = function(url){
             query.file.helper = string;
         }
     }
-    console.log(query.file.type)
     return query;
 }
 
 var updateQueryFromHTML = function(){
     //File/PDB/URL updating
-    console.log(query.file.type)
     query.file.path= $("#model_input").val(); 
     query.file.type=$("#model_type").val();
-    console.log(query.file.type)
+
     $("#model_type").change(function(){
        render();
     });
@@ -562,6 +561,7 @@ var updateQueryFromHTML = function(){
      
         var otherList = $(other).children(".attribute");
         otherList.each(function(li){
+            console.log($(otherList[li]).children(".attribute_value")[0].value)
             object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value
         });
         return object;
