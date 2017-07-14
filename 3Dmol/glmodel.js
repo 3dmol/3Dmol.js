@@ -1431,11 +1431,11 @@ $3Dmol.GLModel = (function() {
         /**
          * Returns model's frames property, a list of atom lists
          * 
-         * @function $3Dmol.GLModel#getFrames
-         * @return {Array.<Object>}
+         * @function $3Dmol.GLModel#getNumFrames
+         * @return {number}
          */
-        this.getFrames = function() {
-            return frames;
+        this.getNumFrames = function() {
+            return (frames.numFrames != undefined)?frames.numFrames:frames.length;
         };
         
         /**
@@ -1446,7 +1446,7 @@ $3Dmol.GLModel = (function() {
          * @param {number} framenum - model's atoms are set to this index in frames list
          */
         this.setFrame = function(framenum) {
-            var numFrames = (frames.numFrames != undefined)?frames.numFrames:frames.length;
+            var numFrames = this.getNumFrames();
             if (numFrames == 0) {
                 return;
             }

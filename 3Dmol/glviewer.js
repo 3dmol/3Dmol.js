@@ -2258,19 +2258,16 @@ $3Dmol.GLViewer = (function() {
         /**
          * Returns the number of frames that the model with the most frames in the viewer has
          * 
-         * @function $3Dmol.GLViewer#getFrames
+         * @function $3Dmol.GLViewer#getNumFrames
          * @return {number}
          */
-        this.getFrames = function() {
+        this.getNumFrames = function() {
             var mostFrames = 0;
             var modelNum = 0;
             for (var i = 0; i < models.length; i++) {
-                var length = models[i].getFrames().length;
-                if (models[i].getFrames().numFrames != undefined)
-                    length = models[i].getFrames().numFrames;
-                if (length > mostFrames) {
+                if (models[i].getNumFrames() > mostFrames) {
                     modelNum = i;
-                    mostFrames = length;
+                    mostFrames = models[i].getNumFrames();
                 }
             }
             return mostFrames;
@@ -2300,7 +2297,7 @@ $3Dmol.GLViewer = (function() {
             if (options.reps) {
                 reps = options.reps;
             }
-            var mostFrames = this.getFrames();
+            var mostFrames = this.getNumFrames();
             var that = this;
             var currFrame = 0;
             var inc = 1;
