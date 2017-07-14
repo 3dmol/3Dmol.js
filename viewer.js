@@ -103,6 +103,7 @@ var createAttribute = function(name,value,parent){
     }).appendTo(attribute); 
 
     var itemIsDescrete = function(key){
+        console.log(key)
         if(key == "")
             return false;
         var type = validNames[key].type;
@@ -224,6 +225,20 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     }).appendTo(style_spec);
 
     style_spec_name.change(function(){
+        console.log("------------------------------")
+        var obj = query.selections[selection_index]["style"][style_spec_type];
+        console.log(style_spec_name.val())
+        console.log(validNames[style_spec_name.val()].validItems)
+        for(var i in obj){
+            if(!validNames[style_spec_name.val()].validItems.hasOwnProperty(i)){
+                console.log(query.selections[selection_index]["style"][style_spec_type][i])
+                delete query.selections[selection_index]["style"][style_spec_type][i];
+                console.log(query.selections[selection_index]["style"][style_spec_type][i])
+            }
+        }
+        query.selections[selection_index]["style"][style_spec_name.val()]=query.selections[selection_index]["style"][style_spec_type];
+        delete query.selections[selection_index]["style"][style_spec_type];
+        buildHTMLTree(query)
         render();
     });
 
