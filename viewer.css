@@ -49,6 +49,7 @@ h3{
     margin-bottom:-20px;
     padding-left:20px;
     border-radius: 15px 50px;
+    display:none;
 }
 #model_type{
     width: 70%;
@@ -67,6 +68,12 @@ this may change*/
     height: 25px;
     background-color: white;
 }
+#menu{
+    font-size:30px;
+    cursor:pointer;
+    position:absolute;
+    z-index:1;
+}
 
 .add_attribute{
 
@@ -76,22 +83,21 @@ this may change*/
     margin-top:5px;
 }
 /* bottom buttons */
-#addSelection{
-    width:100%;
+#addStyle,#addSurface,#addLabelRes{
+    width:30%;
     height:25px;
     margin-top:10px;
+    display:none;
 }
 
-#renderModel{
+#renderModel,#centerModel{
     width:47%;
     height:25px;
     margin-top:5px;
+    display:none;
 }
 
 #centerModel{
-    width:47%;
-    height: 25px;
-    margin-top:5px;
     float:right;
 }
 /* list elements*/
@@ -194,23 +200,28 @@ input{
     color:white;
     margin:0px;
 }
-
+.selection_div{
+    width:80%;
+    margin:0px;
+    display:inline;
+}
 .selection_type{
     background-color: rgba(0,0,102,.9);
     color:white;
     height:4%;
-    width:29%;
+    width:25%;
     text-align: center;
     padding:10px;
     margin:0px;
     position:relative;
     float:left;
+    margin-right:5px;
 }
 
 .selection_spec{
     margin-bottom: 10px;
     border-radius: 15px;
-    width:50%;
+    width:42%;
     margin-left:10px;
     margin:0px;
     position:relative;
@@ -220,6 +231,7 @@ input{
     float:right;
     position: relative;
     height:4%;
+    margin-left:4%;
     padding:10px;
 }
 
@@ -253,4 +265,14 @@ select{
 
 #header{
     font-size: 32px;
+}
+
+.spinner {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none; 
+    user-select: none;
 }
