@@ -146,7 +146,7 @@ var createAttribute = function(name,value,parent){
             value:value,
         }).appendTo(attribute);
     }
-    $(attribute_name).change(function(){
+    attribute_name.change(function(){
         var validItemsValue;
         var type = validNames[attribute_name.val()].type
         if(type=="boolean"){
@@ -159,12 +159,16 @@ var createAttribute = function(name,value,parent){
             validItemsValue = validNames[name].validItems;
         }
         var defa = validNames[attribute_name.val()].default;
+        var val;
         if(validItemsValue != undefined){
-            attribute_value.val(validItemsValue[0])
+            val = validItemsValue[0];
+            attribute_value.val(val)
         }else{
-            attribute_value.val(defa)
+            val = defa
+            attribute_value.val(val)
         }
-
+        updateQueryFromHTML();
+        query.selections[parent.index][parent.type.toLowerCase()][attribute_name.val()]= val;
         render(obj_type == "surface");
     });
     attribute_value.change(function(){
@@ -178,8 +182,6 @@ var createAttribute = function(name,value,parent){
         attribute_value.addClass("spinner")
         var max = validNames[name].max;
         var min = validNames[name].min;
-        console.log(max)
-        console.log(min)        
         if(max != undefined)
             attribute_value.attr("max",max);
         if(min != undefined)
@@ -380,18 +382,16 @@ var buildHTMLTree = function(query){
     var parent = $('#selection_list');
     parent.text("");
     //list file type and path
-    $("#model_type").attr("value",query.file.type); 
+    //$("#model_type").attr("value",query.file.type); 
+    document.getElementById("model_type").value = query.file.type
     $("#model_type").change(function(){
         render();
     })
 
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(function(){
-        //query = urlToQuery(window.location.search.substring(1));
-        //console.log(query)
-       // buildHTMLTree(query)
         render();
-         run();
+        run();
     })
     var arr=[]
     //loops through selections and creates a selection tree
@@ -472,8 +472,10 @@ var queryToURL = function(query){
     }
 
     var objects = [];
-
-    objects.push(query.file.type+"="+query.file.path);
+    var str = query.file.type+"="+query.file.path;
+    if(query.file.helper != "")
+        str+="&type="+query.file.helper
+    objects.push(str);
 
     for(var selection in query.selections){
         objects.push(unpackSelection(query.selections[selection]))
@@ -485,6 +487,7 @@ var queryToURL = function(query){
 function File(path,type){
     this.path=path;
     this.type=type;
+    this.helper="";
 }
 
 var Query = function(){
@@ -493,7 +496,7 @@ var Query = function(){
 }
 
 function setURL(urlPath){
-    window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
+    window.history.pushState('page2',"Title", "viewer.html?"+urlPath);
 }
 //this function will look through the dictionaries defined in glmodel and validate if the types are correct and return a dictionary with flags for the types that are incorecct
 var validateQuery = function(query){
@@ -515,7 +518,9 @@ var urlToQuery = function(url){
         else if(string == "style" || string == "surface" || string == "labelres"){
             count++;
             return string;
-        }        
+        }else if(string == "type"){
+            return string
+        }    
         throw "Illegal url string : "+string;
         return;
     }
@@ -527,22 +532,27 @@ var urlToQuery = function(url){
         var string = strings[1];//right side of equals
         var object = $3Dmol.specStringToObject(string);
         if(type == "file"){
+            console.log(string,strings[0])
             query.file = new File(string,strings[0]);
         }else if(type == "select"){
             currentSelection = object
             query.selections.push(currentSelection);
         }else if(type == "style" || type=="surface" || type == "labelres"){
             currentSelection[type] = object;
+        }else if(type == type){
+            query.file.helper = string;
         }
     }
+    console.log(query.file.type)
     return query;
 }
 
 var updateQueryFromHTML = function(){
     //File/PDB/URL updating
-    query.file.path=document.getElementById("model_input").value;
-    query.file.type=document.getElementById("model_type").value;
-
+    console.log(query.file.type)
+    query.file.path= $("#model_input").val(); 
+    query.file.type=$("#model_type").val();
+    console.log(query.file.type)
     $("#model_type").change(function(){
        render();
     });
@@ -753,7 +763,6 @@ var initSide = function(url){
     });
 
     buildHTMLTree(query);
-    render();
 }
 var toggle = true;
 var width=420;
