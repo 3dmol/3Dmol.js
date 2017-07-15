@@ -104,6 +104,8 @@ var createAttribute = function(name,value,parent){
 
     var itemIsDescrete = function(key){
         console.log(key)
+        console.log(validNames[key])
+        console.log(validNames)
         if(key == "")
             return false;
         var type = validNames[key].type;
@@ -542,6 +544,8 @@ var urlToQuery = function(url){
     }
 
     var currentSelection = {};
+    query.selections.push(currentSelection);
+    console.log(tokens)
     for(var token in tokens){
         var strings = tokens[token].split("=");
         var type = stringType(strings[0]);//left side of equals
