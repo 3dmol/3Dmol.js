@@ -432,7 +432,7 @@ var buildHTMLTree = function(query){
             parent.append(arr[i])
     }
     //this adds spinners to things with spinner as a class this is here because they need to ba  a part of the dom before this is called
-    $('<li><br><br><br><br></li>').appendTo(parent)
+    $('<li id = "spacer"><br><br><br><br></li>').appendTo(parent)
 }
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
@@ -543,25 +543,31 @@ var urlToQuery = function(url){
         return;
     }
 
-    var currentSelection = {};
-    query.selections.push(currentSelection);
+    var currentSelection = null;
     for(var token in tokens){
         var strings = tokens[token].split("=");
         var type = stringType(strings[0]);//left side of equals
         var string = strings[1];//right side of equals
         var object = $3Dmol.specStringToObject(string);
         if(type == "file"){
-            console.log(string,strings[0])
             query.file = new File(string,strings[0]);
         }else if(type == "select"){
             currentSelection = object
             query.selections.push(currentSelection);
         }else if(type == "style" || type=="surface" || type == "labelres"){
+            if(currentSelection == null){
+                currentSelection = {}
+                query.selections.push(currentSelection)
+            }
             currentSelection[type] = object;
         }else if(type == type){
             query.file.helper = string;
         }
     }
+    console.log(query.selections[0])
+    if(query.selections[0] === {})
+        delete query.selections[0]
+    console.log(query.selections[0])
     return query;
 }
 
@@ -641,10 +647,11 @@ var updateQueryFromHTML = function(){
     var selects = [];
     var listItems = $(".selection")
     listItems.each(function(index,value){
-        if(listItems.hasOwnProperty(index)){
+        if(listItems.hasOwnProperty(index) && listItems[index].id!="spacer"){
             var getSubObject = function(){
                 var attr = $(value);
                 var attribute=attr[0]
+                console.log($(attribute).children()[1].innerHTML)
                 var type=$(attribute).children()[1].innerHTML.toLowerCase()
 
                 if(type=="style"){

@@ -219,7 +219,15 @@ $(document).ready(function(){
             start_width=$("#sidenav").width();
         }
     });
-    $("#selection_list").accordion();
+    $( "#selection_list" ).sortable({
+      items: ".selection:not(#spacer)",
+      update:  function (event, ui) {
+            console.log("render")
+            render(true);
+        },
+    });//$("#selection_list").accordion();
+    $("#selection_list").disableSelection();
+
     initSide(url);
 });
 
