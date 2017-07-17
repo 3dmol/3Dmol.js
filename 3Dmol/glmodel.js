@@ -103,6 +103,7 @@ $3Dmol.GLModel = (function() {
         "fuchsia",
         "magenta",
         "purple",
+        "spectrum",
     ]
 
     GLModel.validColorschemeSpecs =[

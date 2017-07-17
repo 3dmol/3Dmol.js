@@ -103,6 +103,9 @@ var createAttribute = function(name,value,parent){
     }).appendTo(attribute); 
 
     var itemIsDescrete = function(key){
+        console.log(key)
+        console.log(validNames[key])
+        console.log(validNames)
         if(key == "")
             return false;
         var type = validNames[key].type;
@@ -146,7 +149,8 @@ var createAttribute = function(name,value,parent){
             value:value,
         }).appendTo(attribute);
     }
-    $(attribute_name).change(function(){
+    attribute_name.change(function(){
+        console.log("attribute_index")
         var validItemsValue;
         var type = validNames[attribute_name.val()].type
         if(type=="boolean"){
@@ -159,12 +163,16 @@ var createAttribute = function(name,value,parent){
             validItemsValue = validNames[name].validItems;
         }
         var defa = validNames[attribute_name.val()].default;
+        var val;
         if(validItemsValue != undefined){
-            attribute_value.val(validItemsValue[0])
+            val = validItemsValue[0];
         }else{
-            attribute_value.val(defa)
+            val = defa
         }
-
+        if(attribute_value.children()[0]!= undefined)
+            attribute_value.children()[0].value = val;
+        else
+            attribute_value.val(val);
         render(obj_type == "surface");
     });
     attribute_value.change(function(){
@@ -178,8 +186,6 @@ var createAttribute = function(name,value,parent){
         attribute_value.addClass("spinner")
         var max = validNames[name].max;
         var min = validNames[name].min;
-        console.log(max)
-        console.log(min)        
         if(max != undefined)
             attribute_value.attr("max",max);
         if(min != undefined)
@@ -221,6 +227,20 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     }).appendTo(style_spec);
 
     style_spec_name.change(function(){
+        console.log("------------------------------")
+        var obj = query.selections[selection_index]["style"][style_spec_type];
+        console.log(style_spec_name.val())
+        console.log(validNames[style_spec_name.val()].validItems)
+        for(var i in obj){
+            if(!validNames[style_spec_name.val()].validItems.hasOwnProperty(i)){
+                console.log(query.selections[selection_index]["style"][style_spec_type][i])
+                delete query.selections[selection_index]["style"][style_spec_type][i];
+                console.log(query.selections[selection_index]["style"][style_spec_type][i])
+            }
+        }
+        query.selections[selection_index]["style"][style_spec_name.val()]=query.selections[selection_index]["style"][style_spec_type];
+        delete query.selections[selection_index]["style"][style_spec_type];
+        buildHTMLTree(query)
         render();
     });
 
@@ -380,18 +400,16 @@ var buildHTMLTree = function(query){
     var parent = $('#selection_list');
     parent.text("");
     //list file type and path
-    $("#model_type").attr("value",query.file.type); 
+    //$("#model_type").attr("value",query.file.type); 
+    document.getElementById("model_type").value = query.file.type
     $("#model_type").change(function(){
         render();
     })
 
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(function(){
-        //query = urlToQuery(window.location.search.substring(1));
-        //console.log(query)
-       // buildHTMLTree(query)
         render();
-         run();
+        run();
     })
     var arr=[]
     //loops through selections and creates a selection tree
@@ -414,7 +432,7 @@ var buildHTMLTree = function(query){
             parent.append(arr[i])
     }
     //this adds spinners to things with spinner as a class this is here because they need to ba  a part of the dom before this is called
-    $('<li><br><br><br><br></li>').appendTo(parent)
+    $('<li id = "spacer"><br><br><br><br></li>').appendTo(parent)
 }
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
@@ -472,8 +490,10 @@ var queryToURL = function(query){
     }
 
     var objects = [];
-
-    objects.push(query.file.type+"="+query.file.path);
+    var str = query.file.type+"="+query.file.path;
+    if(query.file.helper != "")
+        str+="&type="+query.file.helper
+    objects.push(str);
 
     for(var selection in query.selections){
         objects.push(unpackSelection(query.selections[selection]))
@@ -485,6 +505,7 @@ var queryToURL = function(query){
 function File(path,type){
     this.path=path;
     this.type=type;
+    this.helper="";
 }
 
 var Query = function(){
@@ -493,7 +514,7 @@ var Query = function(){
 }
 
 function setURL(urlPath){
-    window.history.pushState({"html":"test","pageTitle":"test"},"", "viewer.html?"+urlPath);
+    window.history.pushState('page2',"Title", "viewer.html?"+urlPath);
 }
 //this function will look through the dictionaries defined in glmodel and validate if the types are correct and return a dictionary with flags for the types that are incorecct
 var validateQuery = function(query){
@@ -515,12 +536,14 @@ var urlToQuery = function(url){
         else if(string == "style" || string == "surface" || string == "labelres"){
             count++;
             return string;
-        }        
+        }else if(string == "type"){
+            return string
+        }    
         throw "Illegal url string : "+string;
         return;
     }
 
-    var currentSelection = {};
+    var currentSelection = null;
     for(var token in tokens){
         var strings = tokens[token].split("=");
         var type = stringType(strings[0]);//left side of equals
@@ -532,16 +555,26 @@ var urlToQuery = function(url){
             currentSelection = object
             query.selections.push(currentSelection);
         }else if(type == "style" || type=="surface" || type == "labelres"){
+            if(currentSelection == null){
+                currentSelection = {}
+                query.selections.push(currentSelection)
+            }
             currentSelection[type] = object;
+        }else if(type == type){
+            query.file.helper = string;
         }
     }
+    console.log(query.selections[0])
+    if(query.selections[0] === {})
+        delete query.selections[0]
+    console.log(query.selections[0])
     return query;
 }
 
 var updateQueryFromHTML = function(){
     //File/PDB/URL updating
-    query.file.path=document.getElementById("model_input").value;
-    query.file.type=document.getElementById("model_type").value;
+    query.file.path= $("#model_input").val(); 
+    query.file.type=$("#model_type").val();
 
     $("#model_type").change(function(){
        render();
@@ -552,6 +585,7 @@ var updateQueryFromHTML = function(){
      
         var otherList = $(other).children(".attribute");
         otherList.each(function(li){
+            console.log($(otherList[li]).children(".attribute_value")[0].value)
             object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value
         });
         return object;
@@ -613,10 +647,11 @@ var updateQueryFromHTML = function(){
     var selects = [];
     var listItems = $(".selection")
     listItems.each(function(index,value){
-        if(listItems.hasOwnProperty(index)){
+        if(listItems.hasOwnProperty(index) && listItems[index].id!="spacer"){
             var getSubObject = function(){
                 var attr = $(value);
                 var attribute=attr[0]
+                console.log($(attribute).children()[1].innerHTML)
                 var type=$(attribute).children()[1].innerHTML.toLowerCase()
 
                 if(type=="style"){
@@ -651,6 +686,7 @@ var render = function(surfaceEdited){
     var url = queryToURL(query);
     setURL(url);
     buildHTMLTree(query);
+    glviewer.setStyle({},{line:{}});
     runcmds(url.split("&"),glviewer,surfaceEdited);
     glviewer.render();
 }
@@ -658,7 +694,7 @@ var render = function(surfaceEdited){
 var addSelection = function(type){
     var surface  = type == "surface"
     if(type == "style")      
-        query.selections.push({"style":{}})
+        query.selections.push({"style":{line:{}}})
     else if(type == "surface")
         query.selections.push({"surface":{}})
     else if(type == "labelres")
@@ -753,7 +789,6 @@ var initSide = function(url){
     });
 
     buildHTMLTree(query);
-    render();
 }
 var toggle = true;
 var width=420;

@@ -204,7 +204,6 @@
 
 $(document).ready(function(){
     var url=window.location.href.substring(window.location.href.indexOf("?")+1);
-    console.log("url : "+url)
     run();
     var start_width;
     $("#sidenav").resizable({
@@ -220,10 +219,16 @@ $(document).ready(function(){
             start_width=$("#sidenav").width();
         }
     });
+    $( "#selection_list" ).sortable({
+      items: ".selection:not(#spacer)",
+      update:  function (event, ui) {
+            console.log("render")
+            render(true);
+        },
+    });//$("#selection_list").accordion();
+    $("#selection_list").disableSelection();
 
-    $("#selection_list").accordion();
     initSide(url);
-
 });
 
 </script>
