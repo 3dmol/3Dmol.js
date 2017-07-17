@@ -545,7 +545,6 @@ var urlToQuery = function(url){
 
     var currentSelection = {};
     query.selections.push(currentSelection);
-    console.log(tokens)
     for(var token in tokens){
         var strings = tokens[token].split("=");
         var type = stringType(strings[0]);//left side of equals
@@ -680,6 +679,7 @@ var render = function(surfaceEdited){
     var url = queryToURL(query);
     setURL(url);
     buildHTMLTree(query);
+    glviewer.setStyle({},{line:{}});
     runcmds(url.split("&"),glviewer,surfaceEdited);
     glviewer.render();
 }
@@ -687,7 +687,7 @@ var render = function(surfaceEdited){
 var addSelection = function(type){
     var surface  = type == "surface"
     if(type == "style")      
-        query.selections.push({"style":{}})
+        query.selections.push({"style":{line:{}}})
     else if(type == "surface")
         query.selections.push({"surface":{}})
     else if(type == "labelres")
