@@ -357,7 +357,6 @@ var createSelection = function(spec,object,index,type){
         var modifier=attribute_pairs.join(";");
         if(modifier == "")
             modifier = "all"
-        console.log(modifier)
         var selection_spec=$('<input/>', {
             class:'selection_spec',
             value:modifier,
@@ -799,7 +798,7 @@ var initSide = function(url){
     $(window).on('popstate', function() {
         query = urlToQuery(window.location.search.substring(1));
         buildHTMLTree(query);
-        render();
+        render(true);
     });
 
     buildHTMLTree(query);
