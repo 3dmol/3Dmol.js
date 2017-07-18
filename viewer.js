@@ -103,9 +103,6 @@ var createAttribute = function(name,value,parent){
     }).appendTo(attribute); 
 
     var itemIsDescrete = function(key){
-        console.log(key)
-        console.log(validNames[key])
-        console.log(validNames)
         if(key == "")
             return false;
         var type = validNames[key].type;
@@ -227,15 +224,10 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     }).appendTo(style_spec);
 
     style_spec_name.change(function(){
-        console.log("------------------------------")
         var obj = query.selections[selection_index]["style"][style_spec_type];
-        console.log(style_spec_name.val())
-        console.log(validNames[style_spec_name.val()].validItems)
         for(var i in obj){
             if(!validNames[style_spec_name.val()].validItems.hasOwnProperty(i)){
-                console.log(query.selections[selection_index]["style"][style_spec_type][i])
                 delete query.selections[selection_index]["style"][style_spec_type][i];
-                console.log(query.selections[selection_index]["style"][style_spec_type][i])
             }
         }
         query.selections[selection_index]["style"][style_spec_name.val()]=query.selections[selection_index]["style"][style_spec_type];
@@ -357,13 +349,15 @@ var createSelection = function(spec,object,index,type){
         var attribute_pairs =[];
         for(var subselection in spec){
             var obj=spec[subselection];
+            if(Object.keys(obj).length === 0)
+                obj = ""
             attribute_pairs.push(subselection+":"+obj);
         }
 
         var modifier=attribute_pairs.join(";");
         if(modifier == "")
             modifier = "all"
-
+        console.log(modifier)
         var selection_spec=$('<input/>', {
             class:'selection_spec',
             value:modifier,
@@ -410,6 +404,8 @@ var buildHTMLTree = function(query){
     $("#model_input").change(function(){
         render();
         run();
+        var width = $("#sidenav").width();
+        glviewer.translate(width/2,0,0,false);
     })
     var arr=[]
     //loops through selections and creates a selection tree
@@ -436,11 +432,29 @@ var buildHTMLTree = function(query){
 }
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
+
+    var isSame = function(obj1,obj2){
+        for(var key in obj1){
+            if(Array.isArray(obj1[key])){
+                if(Array.isArray(obj2[key]))
+                    return arraysEqual(obj1[key],obj2[key])
+                return false;
+            }
+            if(obj2[key]==undefined || obj2[key] != obj1[key])
+                return false;
+        }
+        return true;
+    }
     var url = "";
     //unpacks everything except for style which has multiple layers 
     var unpackOther = function (object){
+        
+
         var objs =[]
         $.each(object, function(key,value){
+            console.log(value)
+            if(isSame(value,{}))
+                value = ""
             //array values 
             if(Array.isArray(value)){
                 //sperate by commas
@@ -482,7 +496,8 @@ var queryToURL = function(query){
                 objs.push(obj+"="+unpackOther(object[obj]))
             }
         }
-        var select="select="+unpackOther(augmentSelection(object));
+        var unpacked =unpackOther(augmentSelection(object));
+        var select="select="+ unpacked
         if(select == "select=")
             select = "select=all"
         objs.unshift(select);//prepend
@@ -585,7 +600,6 @@ var updateQueryFromHTML = function(){
      
         var otherList = $(other).children(".attribute");
         otherList.each(function(li){
-            console.log($(otherList[li]).children(".attribute_value")[0].value)
             object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value
         });
         return object;
@@ -804,7 +818,8 @@ var toggleHide =  function(){
         $("#sidenav").css("width","0");
         $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#header').css("display","none")
         $("#menu").css("display","inline");
-        glviewer.translate(-200,0,400,false);
+        width = $("#sidenav").width();
+        glviewer.translate(-width/2,0,400,false);
         glviewer.render();
     }
     toggle = !toggle;

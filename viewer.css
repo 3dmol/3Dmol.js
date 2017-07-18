@@ -66,7 +66,6 @@ this may change*/
     margin-left:4%;
     width:92%;
     height: 25px;
-    background-color: white;
 }
 #menu{
     font-size:30px;
@@ -152,6 +151,7 @@ select.attribute_value{
 
 .style_spec{
     color:black;
+    margin:5px;
 }
 
 #selection_list{
@@ -170,7 +170,7 @@ select.attribute_value{
     border-style:solid;
     background-color:white;
     border-radius: 15px;
-    padding-top:15px;
+    padding-top:7px;
 
 }
 
@@ -240,8 +240,8 @@ input{
     margin-bottom:10%;
 }
 
-select{
-    font-size:14px;
+select,input{
+    font-size:16px;
 }
 
 #fixed_bottom{
