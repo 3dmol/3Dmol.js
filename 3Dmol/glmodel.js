@@ -1447,26 +1447,30 @@ $3Dmol.GLModel = (function() {
          */
         this.setFrame = function(framenum) {
             var numFrames = this.getNumFrames();
-            if (numFrames == 0) {
-                return;
-            }
-            if (framenum < 0 || framenum > numFrames) {
-                framenum = numFrames - 1;
-            }
-            if (frames.url != undefined) {
-                 $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path, function (buffer) {
-                    var values = new Float32Array(buffer,44);
-                    var count = 0;
-                    for (var i = 0; i < atoms.length; i++) {
-                        atoms[i].x = values[count++];
-                        atoms[i].y = values[count++];
-                        atoms[i].z = values[count++];
-                    }
-                },false);
-            }
-            else
-                atoms = frames[framenum];
-            molObj = null;
+            return new Promise(function(resolve, reject) {
+                if (numFrames == 0) {
+                    return;
+                }
+                if (framenum < 0 || framenum > numFrames) {
+                    framenum = numFrames - 1;
+                }
+                if (frames.url != undefined) {
+                     $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path, function (buffer) {
+                        var values = new Float32Array(buffer,44);
+                        var count = 0;
+                        for (var i = 0; i < atoms.length; i++) {
+                            atoms[i].x = values[count++];
+                            atoms[i].y = values[count++];
+                            atoms[i].z = values[count++];
+                        }
+                        resolve();
+                    });
+                }
+                else {
+                    atoms = frames[framenum];
+                }
+                molObj = null;
+            });
         };
         
         /**
@@ -2463,19 +2467,23 @@ $3Dmol.GLModel = (function() {
     * @param {string} path - contains the path of the file (<root>/filename)
     */
 
-        this.setCoordinatesFromURL = function (url, path) {
+        this.setCoordinatesFromURL = function* (url, path) {
             var atomCount = atoms.length;
-            var self = this;
             frames = [];
-            $.get("http://"+url+"/traj/numframes/"+path, function (numFrames) {
-                if (!isNaN(parseInt(numFrames))) {
-                    frames.push(atoms);
-                    frames.numFrames = numFrames;
-                    frames.url = url;
-                    frames.path = path; 
-                    self.setFrame(0);
-                }
-            });
+
+            var numFrames = yield function(){return new Promise(function(resolve,reject){
+                $.get("http://"+url+"/traj/numframes/"+path,resolve);
+            })}();
+
+            if (!isNaN(parseInt(numFrames))) {
+                frames.push(atoms);
+                frames.numFrames = numFrames;
+                frames.url = url;
+                frames.path = path; 
+            }
+
+            yield this.setFrame(0);
+
         }
 
     /**

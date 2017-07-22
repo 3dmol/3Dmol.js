@@ -2248,11 +2248,11 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setFrame
          * @param {number} framenum - each model in viewer has their atoms set to this index in frames list
          */
-        this.setFrame = function(framenum) {
+        this.setFrame = function* (framenum) {
             for (var i = 0; i < models.length; i++) {
-                models[i].setFrame(framenum);
+                yield models[i].setFrame(framenum);
             }
-            return this;
+            //return this;
         };
         
         /**
@@ -2306,24 +2306,25 @@ $3Dmol.GLViewer = (function() {
             var display = function(direction) {
 
                 if (direction == "forward") {
-                    that.setFrame(currFrame);
+                    $3Dmol.runGenerator(that.setFrame(currFrame));
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else if (direction == "backward") {
-                    that.setFrame((mostFrames-1) - currFrame);
+                    $3Dmol.runGenerator(that.setFrame((mostFrames-1) - currFrame));
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else { //back and forth
-                    that.setFrame(currFrame);
+                    $3Dmol.runGenerator(that.setFrame(currFrame));
                     currFrame += inc;
                     inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
                 }
-                that.render();
+                that.render()
                 if (++displayCount == displayMax || !that.isAnimated()) {
                     clearInterval(intervalID);
                     decAnim(); 
                 }
             };
+ 
             var intervalID = setInterval( function() { display(loop); }, interval);
             return this;
         };
@@ -2398,7 +2399,7 @@ $3Dmol.GLViewer = (function() {
                 var newModel = new $3Dmol.GLModel(models.length, defaultcolors);
                 newModel.setAtomDefaults(modelatoms[i]);
                 newModel.addFrame(modelatoms[i]);
-                newModel.setFrame(0);
+                $3Dmol.runGenerator(newModel.setFrame(0));
                 if(modelatoms.modelData)
                     newModel.setModelData(modelatoms.modelData[i]);
                 newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
