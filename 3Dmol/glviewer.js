@@ -134,11 +134,16 @@ $3Dmol.GLViewer = (function() {
         };
 
         //updates font size of labels based on camera zoom
-        var setLabelStyles = function(){
+        var setLabelStyles = function(scaleFactor){
             for(var label in labels){
                 var label = labels[label];
                 if(label.stylespec.scale){
-                    //update font size
+                    modelGroup.remove(label.sprite);
+                    label.dispose();
+                    //change font size here
+                    label.stylespec.fontSize*=(1+scaleFactor);
+                    label.setContext();
+                    modelGroup.add(label.sprite);
                 }
             }
         }
@@ -180,7 +185,6 @@ $3Dmol.GLViewer = (function() {
                 return;
             // var time = new Date();
             setSlabAndFog();
-            setLabelStyles();
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
@@ -430,8 +434,6 @@ $3Dmol.GLViewer = (function() {
             ev.preventDefault();
             if (!scene)
                 return;
-
-
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
             var mult = 1.0;
             if(ev.originalEvent.ctrlKey) {
@@ -445,10 +447,9 @@ $3Dmol.GLViewer = (function() {
                         * ev.originalEvent.wheelDelta / 400;
             }
             if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
-
+            //setLabelStyles(scaleFactor/originalPosition);
             show();
-        };
-        
+        };        
         /**
          * Return image URI of viewer contents (base64 encoded).
          * @function $3Dmol.GLViewer#pngURI
@@ -1789,10 +1790,6 @@ $3Dmol.GLViewer = (function() {
 
         };
 
-        var scale_labels= function(factor){
-
-        }
-
         /**
          * Add shape object to viewer 
          * @see {@link $3Dmol.GLShape}
@@ -1888,6 +1885,7 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLShape}
          @example
         $3Dmol.download("pdb:4DM7",viewer,{},function(){
+
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.addArrow({
                       start: {x:-10.0, y:0.0, z:0.0},

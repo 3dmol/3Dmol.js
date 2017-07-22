@@ -4,10 +4,10 @@
 <title>3Dmol.js Viewer</title>
 <script src="build/3Dmol.js"></script>
 <script src="viewer.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="viewer.css">
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script>
     (function(i, s, o, g, r, a, m) {
@@ -28,10 +28,12 @@
 <script>
     var glviewer = null;
     //http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
-
     //Process commands, in order, and run on viewer (array of strings split on '&')
-    var runcmds = function(cmds, viewer) {
-
+    var runcmds = function(cmds, viewer,renderSurface) {
+        renderSurface = renderSurface == undefined ? true : renderSurface;
+        if(renderSurface)
+            viewer.removeAllSurfaces();
+        viewer.removeAllLabels();
         var currentsel = {};
 
         for (var i = 0; i < cmds.length; i++) {
@@ -41,22 +43,23 @@
 
             if (cmdname == 'select')
                 currentsel = cmdobj;
-            else if (cmdname == 'surface') {
+            else if (cmdname == 'surface' && renderSurface){
+                console.log("rendering")
                 viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel,
                         currentsel);
-            } else if (cmdname == 'style') {
+            } else if (cmdname == 'style'){
                 viewer.setStyle(currentsel, cmdobj);
-            } else if (cmdname == 'addstyle') {
+            } else if (cmdname == 'addstyle'){
                 viewer.addStyle(currentsel, cmdobj);
-            } else if (cmdname == 'labelres') {
+            } else if (cmdname == 'labelres'){
                 viewer.addResLabels(currentsel, cmdobj);
-            } else if (cmdname == 'colorbyelement') {
+            } else if (cmdname == 'colorbyelement'){
                 if (typeof ($3Dmol.elementColors[cmdobj.colorscheme]) != "undefined")
                     viewer.setColorByElement(currentsel,
                             $3Dmol.elementColors[cmdobj.colorscheme]);
-            } else if (cmdname == 'colorbyproperty') {
+            } else if (cmdname == 'colorbyproperty'){
                 if (typeof (cmdobj.prop) != "undefined"
-                        && typeof ($3Dmol.Gradient[cmdobj.scheme]) != "undefined") {
+                        && typeof ($3Dmol.Gradient[cmdobj.scheme]) != "undefined"){
                     viewer.setColorByProperty(currentsel, cmdobj.prop,
                             new $3Dmol.Gradient[cmdobj.scheme]());
                 }
@@ -201,6 +204,7 @@
 
 $(document).ready(function(){
     var url=window.location.href.substring(window.location.href.indexOf("?")+1);
+    run();
     var start_width;
     $("#sidenav").resizable({
         handles: 'e',
@@ -215,19 +219,25 @@ $(document).ready(function(){
             start_width=$("#sidenav").width();
         }
     });
+    $( "#selection_list" ).sortable({
+      items: ".selection:not(#spacer)",
+      update:  function (event, ui) {
+            console.log("render")
+            render(true);
+        },
+    });//$("#selection_list").accordion();
+    $("#selection_list").disableSelection();
 
-    run();
     initSide(url);
 });
 
 </script>
 </head>
 <body>
-
-<span id="menu" style="font-size:30px;cursor:pointer;position:absolute;z-index:1;" onclick="openSide();">&#9776;</span>
+<span id="menu"  onclick="toggleHide();">&#9776;</span>
 <div id="sidenav" class="ui-widget-content">
-  <div id="header" style="visibility:hidden">3Dmol Viewer</div>
-  <a href="javascript:void(0)" class="closebtn" onclick="closeSide()">&#x2715;</a>
+  <div id="header">3Dmol Viewer</div>
+  <a href="javascript:void(0)" class="closebtn" onclick="toggleHide()">&#x2715;</a>
   <ul id="list">
     <li class="option"  style="pointer-events:auto;">
         <h3>File/PDB/URL</h3>
@@ -254,13 +264,11 @@ $(document).ready(function(){
      
 </ul>
 <div id="fixed_bottom">
-                <button id="addSelection" onclick="addSelection()">Add Selection</button>
-                <button id="renderModel" onclick="render();run()">Render</button><button onclick="center();" id="centerModel">Center</button>
-            </div>
-
+    <button id="addStyle" onclick="addSelection('style')">Add Style</button><button id="addSurface" onclick="addSelection('surface')">Add Surface</button><button id="addLabelRes" onclick="addSelection('labelres')">Add LabelRes</button>
+    <button id="renderModel" onclick="render(true);">Render</button><button onclick="center();" id="centerModel">Center</button>
+</div>
             
 </div>
-
-    <div id='gldiv' style="width: 100%; height: 100vh;"></div>
+<div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>
