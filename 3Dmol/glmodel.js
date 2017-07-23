@@ -2455,29 +2455,24 @@ $3Dmol.GLModel = (function() {
     * @function $3Dmol.GLModel#setCoordinatesFromURL
     * @param {string} url - contains the url where mdsrv has been hosted
     * @param {string} path - contains the path of the file (<root>/filename)
-    * @param {function} callback - function called after request
     */
 
-        this.setCoordinatesFromURL = function (url, path, callback) {
+        this.setCoordinatesFromURL = function (url, path) {
             var atomCount = atoms.length;
             frames = [];
             var self = this;
-            new Promise(function(resolve,reject){
+            return new Promise(function(resolve,reject){
                 $.get("http://"+url+"/traj/numframes/"+path,function(numFrames){
                     if (!isNaN(parseInt(numFrames))) {
                         frames.push(atoms);
                         frames.numFrames = numFrames;
                         frames.url = url;
                         frames.path = path;
-                        resolve();
+                        self.setFrame(0)
+                        .then(function() {
+                            resolve();
+                        });
                     }
-                });
-                   
-            })
-            .then(function(){
-                self.setFrame(0)
-                .then(function() {
-                    callback();
                 });
             });
         }
