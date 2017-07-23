@@ -1454,7 +1454,7 @@ $3Dmol.GLModel = (function() {
                             atoms[i].z = values[count++];
                         }
                         resolve();
-                    });
+                    },"POST");
                 }
                 else {
                     atoms = frames[framenum];
