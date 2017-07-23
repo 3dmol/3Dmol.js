@@ -152,11 +152,12 @@ $3Dmol.viewers = {};
  * @function $3Dmol.getbin
  * @param {string} uri - location of data
  * @param {Function} callback - Function to call with arraybuffer as argument.  
-
+ * @param {string} request - type of request
  */ 
-$3Dmol.getbin = function(uri, callback) {
+$3Dmol.getbin = function(uri, callback, request) {
+    request = (request == undefined)?"GET":request;
     $.ajax({url:uri, 
-        type: "GET",
+        type: request,
         dataType: "binary",
         responseType: "arraybuffer",
         processData: false}).done(
@@ -501,5 +502,36 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
 //since we doing use the require optimizer to combine modules
 if( typeof(define) === 'function' && define.amd) {
     define('$3Dmol',$3Dmol);
+}
+
+/* Function for running generator functions
+* @function $3Dmol.runGenerator
+* @param {object} it - Generator object
+* @param {function} resolve - code to execute after the Generator is done
+*/
+
+$3Dmol.runGenerator = function(it, resolve) {
+    resolve = (resolve != undefined)?resolve:function(){};
+    var ret;
+
+    // asynchronously iterate over generator
+    (function iterate(val){
+        ret = it.next(val);
+        if (!ret.done) {
+            if ("then" in ret.value) {
+                // wait on the promise
+                ret.value.then( iterate );
+            }
+            else {
+                // avoid synchronous recursion
+                setTimeout( function(){
+                    iterate();
+                }, 0 );
+            }
+        }
+        else {
+            resolve();
+        }
+    })();
 }
 

@@ -2246,26 +2246,26 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setFrame
          * @param {number} framenum - each model in viewer has their atoms set to this index in frames list
          */
-        this.setFrame = function(framenum) {
+        this.setFrame = function* (framenum) {
             for (var i = 0; i < models.length; i++) {
-                models[i].setFrame(framenum);
+                yield models[i].setFrame(framenum);
             }
-            return this;
+            //return this;
         };
         
         /**
          * Returns the number of frames that the model with the most frames in the viewer has
          * 
-         * @function $3Dmol.GLViewer#getFrames
+         * @function $3Dmol.GLViewer#getNumFrames
          * @return {number}
          */
-        this.getFrames = function() {
+        this.getNumFrames = function() {
             var mostFrames = 0;
             var modelNum = 0;
             for (var i = 0; i < models.length; i++) {
-                if (models[i].getFrames().length > mostFrames) {
+                if (models[i].getNumFrames() > mostFrames) {
                     modelNum = i;
-                    mostFrames = models[i].getFrames().length;
+                    mostFrames = models[i].getNumFrames();
                 }
             }
             return mostFrames;
@@ -2295,7 +2295,7 @@ $3Dmol.GLViewer = (function() {
             if (options.reps) {
                 reps = options.reps;
             }
-            var mostFrames = this.getFrames();
+            var mostFrames = this.getNumFrames();
             var that = this;
             var currFrame = 0;
             var inc = 1;
@@ -2304,24 +2304,25 @@ $3Dmol.GLViewer = (function() {
             var display = function(direction) {
 
                 if (direction == "forward") {
-                    that.setFrame(currFrame);
+                    $3Dmol.runGenerator(that.setFrame(currFrame));
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else if (direction == "backward") {
-                    that.setFrame((mostFrames-1) - currFrame);
+                    $3Dmol.runGenerator(that.setFrame((mostFrames-1) - currFrame));
                     currFrame = (currFrame + inc) % mostFrames;
                 }
                 else { //back and forth
-                    that.setFrame(currFrame);
+                    $3Dmol.runGenerator(that.setFrame(currFrame));
                     currFrame += inc;
                     inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
                 }
-                that.render();
+                that.render()
                 if (++displayCount == displayMax || !that.isAnimated()) {
                     clearInterval(intervalID);
                     decAnim(); 
                 }
             };
+ 
             var intervalID = setInterval( function() { display(loop); }, interval);
             return this;
         };
@@ -2396,7 +2397,7 @@ $3Dmol.GLViewer = (function() {
                 var newModel = new $3Dmol.GLModel(models.length, defaultcolors);
                 newModel.setAtomDefaults(modelatoms[i]);
                 newModel.addFrame(modelatoms[i]);
-                newModel.setFrame(0);
+                $3Dmol.runGenerator(newModel.setFrame(0));
                 if(modelatoms.modelData)
                     newModel.setModelData(modelatoms.modelData[i]);
                 newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
