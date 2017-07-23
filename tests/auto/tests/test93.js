@@ -3,7 +3,7 @@
         var m = viewer.addModel(data, "xyz");
         var url = "proteinformatics.charite.de/mdsrvdev";
         var pathToFile = "data2/md.xtc";
-        $3Dmol.runGenerator(m.setCoordinatesFromURL(url,pathToFile), function(){
+        m.setCoordinatesFromURL(url, pathToFile, function(){
             viewer.setStyle({},{sphere:{}});
             viewer.zoomTo();
             viewer.animate({loop:"forward",reps:1});
