@@ -1434,6 +1434,7 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#setFrame
          * @param {number} framenum - model's atoms are set to this index in frames list
+         * @return {Promise}
          */
         this.setFrame = function(framenum) {
             var numFrames = this.getNumFrames();
@@ -2455,6 +2456,7 @@ $3Dmol.GLModel = (function() {
     * @function $3Dmol.GLModel#setCoordinatesFromURL
     * @param {string} url - contains the url where mdsrv has been hosted
     * @param {string} path - contains the path of the file (<root>/filename)
+    * @return {Promise}
     */
 
         this.setCoordinatesFromURL = function (url, path) {
