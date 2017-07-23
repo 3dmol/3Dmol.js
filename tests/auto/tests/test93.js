@@ -1,8 +1,8 @@
 
-    $.get("volData/model1.prmtop",  function (data){
-        var m = viewer.addModel(data, "prmtop");
-        var url = "127.0.0.1:800/mdsrv";
-        var pathToFile = "root/3Dmol.js/tests/auto/volData/model1_md2.nc";
+    $.get("volData/md.xyz",  function (data){
+        var m = viewer.addModel(data, "xyz");
+        var url = "proteinformatics.charite.de/mdsrvdev";
+        var pathToFile = "data2/md.xtc";
         $3Dmol.runGenerator(m.setCoordinatesFromURL(url,pathToFile), function(){
             viewer.setStyle({},{sphere:{}});
             viewer.zoomTo();
