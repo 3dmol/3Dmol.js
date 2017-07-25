@@ -72,6 +72,9 @@
 
                         try {
                             var url = window.location.search.substr(1);
+                            console.log(url)
+                            url= decodeURIComponent(url)
+                            console.log(url)
                             var cmds = url.split("&");
                             var first = cmds.splice(0, 1)[0];
                             var pos = first.indexOf('=');

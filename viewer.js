@@ -52,7 +52,13 @@ var createAttribute = function(name,value,parent){
         type = "labelres";
         validNames =$3Dmol.GLModel.validLabelResSpecs;
         other=true;
+    }else{
+        //undefined name 
+        return undefined;
     }
+
+    if(validNames[name] == undefined)
+        return undefined
 
     var attribute_name = $('<select>',{
         class:'attribute_name',
@@ -108,13 +114,12 @@ var createAttribute = function(name,value,parent){
         var type = validNames[key].type;
         return type == "boolean" || type == "color" || type == "colorscheme" || validNames[key].validItems!=undefined
     }
- 
     var attribute_value;
-    if(itemIsDescrete(name)){
+    if(itemIsDescrete(name) ){
         var validItemsValue;
-        if( validNames[name].type != undefined)
+        if(validNames[name].type != undefined)
             var type = validNames[name].type.toLowerCase();
-        else 
+        else
             var type = undefined
         if(type=="boolean"){
             validItemsValue = ["false","true"];
@@ -147,7 +152,6 @@ var createAttribute = function(name,value,parent){
         }).appendTo(attribute);
     }
     attribute_name.change(function(){
-        console.log("attribute_index")
         var validItemsValue;
         var type = validNames[attribute_name.val()].type
         if(type=="boolean"){
@@ -176,7 +180,7 @@ var createAttribute = function(name,value,parent){
         render(obj_type == "surface");
     });
 
-    if(name!="" &&  attribute_value.prop("tagName") == "INPUT" && validNames[name].type =="number"){
+    if(name!="" &&attribute_value.prop("tagName") == "INPUT" && validNames[name].type =="number"){
         validNames[name].type =="number"
         attribute_value.attr("type","number")
         attribute_value.attr("step",validNames[name].step)
@@ -537,6 +541,8 @@ var validateQuery = function(query){
 var count = 0;
 //takes the search url string and makes a query object for it 
 var urlToQuery = function(url){
+    url= decodeURIComponent(url)
+    console.log(url)
     if(url == "")
         return new Query();
     var query = new Query();
