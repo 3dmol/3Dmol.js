@@ -52,12 +52,12 @@ var createAttribute = function(name,value,parent){
         type = "labelres";
         validNames =$3Dmol.GLModel.validLabelResSpecs;
         other=true;
-    }else{
+    }else if(name != ""){
         //undefined name 
         return undefined;
     }
 
-    if(validNames[name] == undefined)
+    if(validNames[name] == undefined && name!="")
         return undefined
 
     var attribute_name = $('<select>',{
@@ -623,7 +623,6 @@ var updateQueryFromHTML = function(){
                 var tag=object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].tagName
                 object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value;
             });
-            
         });
         return object;
     }
@@ -670,7 +669,6 @@ var updateQueryFromHTML = function(){
             var getSubObject = function(){
                 var attr = $(value);
                 var attribute=attr[0]
-                console.log($(attribute).children()[1].innerHTML)
                 var type=$(attribute).children()[1].innerHTML.toLowerCase()
 
                 if(type=="style"){
