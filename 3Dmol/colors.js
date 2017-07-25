@@ -509,8 +509,6 @@ $3Dmol.getColorFromStyle = function(atom, style) {
             //apply a discrete property mapping
             var prop = scheme.prop;
             var val = $3Dmol.getAtomProperty(atom, prop);
-            console.log(val)
-            console.log(atom)
             if( typeof scheme.map[val] != 'undefined' ) {
                 color = scheme.map[val];
             }

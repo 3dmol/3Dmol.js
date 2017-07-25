@@ -30,6 +30,7 @@
     //http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
     //Process commands, in order, and run on viewer (array of strings split on '&')
     var runcmds = function(cmds, viewer,renderSurface) {
+                console.log("rendering")
         renderSurface = renderSurface == undefined ? true : renderSurface;
         if(renderSurface)
             viewer.removeAllSurfaces();
@@ -44,7 +45,6 @@
             if (cmdname == 'select')
                 currentsel = cmdobj;
             else if (cmdname == 'surface' && renderSurface){
-                console.log("rendering")
                 viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel,
                         currentsel);
             } else if (cmdname == 'style'){
@@ -69,12 +69,10 @@
 
     };
     function run() {
-
+            $("#undefined").remove();
                         try {
                             var url = window.location.search.substr(1);
-                            console.log(url)
                             url= decodeURIComponent(url)
-                            console.log(url)
                             var cmds = url.split("&");
                             var first = cmds.splice(0, 1)[0];
                             var pos = first.indexOf('=');
@@ -225,7 +223,6 @@ $(document).ready(function(){
     $( "#selection_list" ).sortable({
       items: ".selection:not(#spacer)",
       update:  function (event, ui) {
-            console.log("render")
             render(true);
         },
     });//$("#selection_list").accordion();

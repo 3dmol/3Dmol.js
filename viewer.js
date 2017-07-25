@@ -1,4 +1,4 @@
-
+var prev = null;
 //removes style,labelres, and surface from a copy of the selection object and returns it
 var augmentSelection = function(selection){
     var copiedObject = jQuery.extend(true,{}, selection);//deep copy
@@ -405,7 +405,8 @@ var buildHTMLTree = function(query){
 
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(function(){
-        render();
+        glviewer.clear();
+        render(true);
         run();
         var width = $("#sidenav").width();
         glviewer.translate(width/2,0,0,false);
@@ -455,7 +456,6 @@ var queryToURL = function(query){
 
         var objs =[]
         $.each(object, function(key,value){
-            console.log(value)
             if(isSame(value,{}))
                 value = ""
             //array values 
@@ -542,7 +542,6 @@ var count = 0;
 //takes the search url string and makes a query object for it 
 var urlToQuery = function(url){
     url= decodeURIComponent(url)
-    console.log(url)
     if(url == "")
         return new Query();
     var query = new Query();
@@ -584,10 +583,8 @@ var urlToQuery = function(url){
             query.file.helper = string;
         }
     }
-    console.log(query.selections[0])
     if(query.selections[0] === {})
         delete query.selections[0]
-    console.log(query.selections[0])
     return query;
 }
 
