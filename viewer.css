@@ -146,7 +146,6 @@ select.attribute_value{
 }
 
 #selections{
-    height: 100%;
 }
 
 .style_spec{
@@ -182,7 +181,7 @@ select.attribute_value{
     padding:10px;
 }
 
-#selection_list li .selection_spec:hover{
+#selection_list li .selection_spec:hover,.delete_attribute:hover{
     background-color:rgba(0,0,102,.5);
 }
 
@@ -275,4 +274,25 @@ select,input{
     -ms-user-select: none;
     -o-user-select: none; 
     user-select: none;
+}
+
+
+#selection_list li .selection_spec:hover,.delete_attribute:hover{
+    background-color:rgba(0,0,102,.5);
+}
+
+.delete_selection:hover{
+    background-color:rgba(0,0,102,.5);
+    border-radius:5px;
+    color:white;
+
+}
+.delete_selection{
+    background-color:rgba(0,0,102,.9);
+    border-radius:5px;
+    color:white;
+}
+
+.delete_style_spec{
+    padding:5px;
 }

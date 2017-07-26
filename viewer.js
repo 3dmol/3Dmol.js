@@ -406,8 +406,6 @@ var buildHTMLTree = function(query){
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(function(){
         var val =  $("#model_input").val().toUpperCase();
-        console.log(val)
-        console.log(prev)
         if(prev != val){
         if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
             glviewer.clear();
@@ -444,7 +442,7 @@ var buildHTMLTree = function(query){
             parent.append(arr[i])
     }
     //this adds spinners to things with spinner as a class this is here because they need to ba  a part of the dom before this is called
-    $('<li id = "spacer"><br><br><br><br></li>').appendTo(parent)
+    $('<li id = "spacer"><br><br><br></li>').appendTo(parent)
 }
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
@@ -547,9 +545,7 @@ function setURL(urlPath){
     window.history.pushState('page2',"Title", "viewer.html?"+urlPath);
 }
 //this function will look through the dictionaries defined in glmodel and validate if the types are correct and return a dictionary with flags for the types that are incorecct
-var validateQuery = function(query){
 
-}
 var count = 0;
 //takes the search url string and makes a query object for it 
 var urlToQuery = function(url){
