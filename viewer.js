@@ -400,26 +400,32 @@ var buildHTMLTree = function(query){
     //$("#model_type").attr("value",query.file.type); 
     document.getElementById("model_type").value = query.file.type
     $("#model_type").change(function(){
-        render();
+        var val =  $("#model_type").val().toUpperCase();
+        if(prev_type != val){
+            
+            render(true);
+            run();
+            glviewer.translate(width/2,0,0,false);
+        }
+        prev_type = val
     })
 
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(function(){
         var val =  $("#model_input").val().toUpperCase();
-        if(prev != val){
-        if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
-            glviewer.clear();
-            render(true);
-            run();
-            var width = $("#sidenav").width();
-            glviewer.translate(width/2,0,0,false);
-        }else{
-            console.log(prev)
-            if(prev!= val)
-                alert("Invalid PDB")
+        if(prev_in != val){
+            if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
+                glviewer.clear();
+                render(true);
+                run();
+                var width = $("#sidenav").width();
+                glviewer.translate(width/2,0,0,false);
+            }else{
+                if(prev_in!= val)
+                    alert("Invalid PDB")
+            }
         }
-        }
-        prev = val;
+        prev_in = val;
     })
     var arr=[]
     //loops through selections and creates a selection tree
@@ -811,7 +817,8 @@ var initSide = function(url){
 }
 var toggle = true;
 var width=420;
-var prev = $("#model_input").val();
+var prev_in = $("#model_input").val();
+var prev_type = $("#model_type").val();
 var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
