@@ -86,6 +86,7 @@
                             glviewer.setBackgroundColor(0xffffff);
 
                             if (src == 'pdb') {
+                                console.log(data)
                                 data = data.toUpperCase();
                                 if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                                     alert("Wrong PDB ID");

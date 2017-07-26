@@ -1,4 +1,4 @@
-var prev = null;
+
 //removes style,labelres, and surface from a copy of the selection object and returns it
 var augmentSelection = function(selection){
     var copiedObject = jQuery.extend(true,{}, selection);//deep copy
@@ -405,11 +405,23 @@ var buildHTMLTree = function(query){
 
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(function(){
-        glviewer.clear();
-        render(true);
-        run();
-        var width = $("#sidenav").width();
-        glviewer.translate(width/2,0,0,false);
+        var val =  $("#model_input").val().toUpperCase();
+        console.log(val)
+        console.log(prev)
+        if(prev != val){
+        if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
+            glviewer.clear();
+            render(true);
+            run();
+            var width = $("#sidenav").width();
+            glviewer.translate(width/2,0,0,false);
+        }else{
+            console.log(prev)
+            if(prev!= val)
+                alert("Invalid PDB")
+        }
+        }
+        prev = val;
     })
     var arr=[]
     //loops through selections and creates a selection tree
@@ -593,10 +605,7 @@ var updateQueryFromHTML = function(){
     query.file.path= $("#model_input").val(); 
     query.file.type=$("#model_type").val();
 
-    $("#model_type").change(function(){
-       render();
-    });
-
+   
     var updateOther = function(other){
         var object={};
      
@@ -806,6 +815,7 @@ var initSide = function(url){
 }
 var toggle = true;
 var width=420;
+var prev = $("#model_input").val();
 var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
