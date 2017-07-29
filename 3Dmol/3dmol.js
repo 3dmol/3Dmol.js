@@ -504,34 +504,3 @@ if( typeof(define) === 'function' && define.amd) {
     define('$3Dmol',$3Dmol);
 }
 
-/* Function for running generator functions
-* @function $3Dmol.runGenerator
-* @param {object} it - Generator object
-* @param {function} resolve - code to execute after the Generator is done
-*/
-
-$3Dmol.runGenerator = function(it, resolve) {
-    resolve = (resolve != undefined)?resolve:function(){};
-    var ret;
-
-    // asynchronously iterate over generator
-    (function iterate(val){
-        ret = it.next(val);
-        if (!ret.done) {
-            if ("then" in ret.value) {
-                // wait on the promise
-                ret.value.then( iterate );
-            }
-            else {
-                // avoid synchronous recursion
-                setTimeout( function(){
-                    iterate();
-                }, 0 );
-            }
-        }
-        else {
-            resolve();
-        }
-    })();
-}
-

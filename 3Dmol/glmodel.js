@@ -1440,7 +1440,8 @@ $3Dmol.GLModel = (function() {
             var numFrames = this.getNumFrames();
             return new Promise(function(resolve, reject) {
                 if (numFrames == 0) {
-                    return;
+                    //return;
+                    resolve();
                 }
                 if (framenum < 0 || framenum > numFrames) {
                     framenum = numFrames - 1;
@@ -1459,6 +1460,7 @@ $3Dmol.GLModel = (function() {
                 }
                 else {
                     atoms = frames[framenum];
+                    resolve();
                 }
                 molObj = null;
             });
