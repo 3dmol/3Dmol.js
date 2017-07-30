@@ -2343,7 +2343,7 @@ $3Dmol.GLViewer = (function() {
                     });          
                 }
             };
-            var intervalID = setTimeout(display, interval, loop);
+            var intervalID = setTimeout(display, 0, loop);
             return this;
         };
         
@@ -2417,7 +2417,7 @@ $3Dmol.GLViewer = (function() {
                 var newModel = new $3Dmol.GLModel(models.length, defaultcolors);
                 newModel.setAtomDefaults(modelatoms[i]);
                 newModel.addFrame(modelatoms[i]);
-                $3Dmol.runGenerator(newModel.setFrame(0));
+                newModel.setFrame(0);
                 if(modelatoms.modelData)
                     newModel.setModelData(modelatoms.modelData[i]);
                 newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
