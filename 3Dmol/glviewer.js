@@ -2313,9 +2313,9 @@ $3Dmol.GLViewer = (function() {
                     decAnim(); 
                 }
                 else {
-                    var newInterval = interval - (new Date().getSeconds() - time.getSeconds())/1000000.0;
+                    var newInterval = interval - (new Date() - time);
                     newInterval = (newInterval>0)?newInterval:0;
-                    setTimeout(display,newInterval,loop);
+                    setTimeout(display, newInterval, loop);
                 }
             }
             var display = function(direction) {
