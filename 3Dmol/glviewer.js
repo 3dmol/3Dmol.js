@@ -2245,27 +2245,31 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#setFrame
          * @param {number} framenum - each model in viewer has their atoms set to this index in frames list
+         * @return {Promise}
          */
-        this.setFrame = function(framenum) {
-            for (var i = 0; i < models.length; i++) {
-                models[i].setFrame(framenum);
-            }
-            return this;
-        };
+        this.setFrame = function (framenum) {
+            return new Promise(function (resolve, reject) {
+                var modelMap = models.map(function (model) {
+                    return model.setFrame(framenum);
+                });
+                Promise.all(modelMap)
+                    .then(function() {resolve()});
+            });
+        }
         
         /**
          * Returns the number of frames that the model with the most frames in the viewer has
          * 
-         * @function $3Dmol.GLViewer#getFrames
+         * @function $3Dmol.GLViewer#getNumFrames
          * @return {number}
          */
-        this.getFrames = function() {
+        this.getNumFrames = function() {
             var mostFrames = 0;
             var modelNum = 0;
             for (var i = 0; i < models.length; i++) {
-                if (models[i].getFrames().length > mostFrames) {
+                if (models[i].getNumFrames() > mostFrames) {
                     modelNum = i;
-                    mostFrames = models[i].getFrames().length;
+                    mostFrames = models[i].getNumFrames();
                 }
             }
             return mostFrames;
@@ -2295,34 +2299,51 @@ $3Dmol.GLViewer = (function() {
             if (options.reps) {
                 reps = options.reps;
             }
-            var mostFrames = this.getFrames();
+            var mostFrames = this.getNumFrames();
             var that = this;
             var currFrame = 0;
             var inc = 1;
             var displayCount = 0;
             var displayMax = mostFrames * reps;
-            var display = function(direction) {
-
-                if (direction == "forward") {
-                    that.setFrame(currFrame);
-                    currFrame = (currFrame + inc) % mostFrames;
-                }
-                else if (direction == "backward") {
-                    that.setFrame((mostFrames-1) - currFrame);
-                    currFrame = (currFrame + inc) % mostFrames;
-                }
-                else { //back and forth
-                    that.setFrame(currFrame);
-                    currFrame += inc;
-                    inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
-                }
+            var time = new Date();
+            var resolve = function() {
                 that.render();
                 if (++displayCount == displayMax || !that.isAnimated()) {
-                    clearInterval(intervalID);
+                    clearTimeout(intervalID);
                     decAnim(); 
                 }
+                else {
+                    var newInterval = interval - (new Date() - time);
+                    newInterval = (newInterval>0)?newInterval:0;
+                    setTimeout(display, newInterval, loop);
+                }
+            }
+            var display = function(direction) {
+                time = new Date();
+                if (direction == "forward") {
+                    that.setFrame(currFrame)
+                    .then(function () {
+                        currFrame = (currFrame + inc) % mostFrames;
+                        resolve();
+                    });
+                }
+                else if (direction == "backward") {
+                    that.setFrame((mostFrames-1) - currFrame)
+                    .then(function () {
+                        currFrame = (currFrame + inc) % mostFrames;
+                        resolve();
+                    });
+                }
+                else { //back and forth
+                    that.setFrame(currFrame)
+                    .then(function () {
+                        currFrame += inc;
+                        inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
+                        resolve();
+                    });          
+                }
             };
-            var intervalID = setInterval( function() { display(loop); }, interval);
+            var intervalID = setTimeout(display, 0, loop);
             return this;
         };
         
