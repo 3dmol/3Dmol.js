@@ -1443,7 +1443,7 @@ $3Dmol.GLModel = (function() {
                     //return;
                     resolve();
                 }
-                if (framenum < 0 || framenum > numFrames) {
+                if (framenum < 0 || framenum >= numFrames) {
                     framenum = numFrames - 1;
                 }
                 if (frames.url != undefined) {
