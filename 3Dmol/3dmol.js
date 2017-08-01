@@ -185,6 +185,7 @@ $3Dmol.getbin = function(uri, callback, request) {
  * @param {Function} callback - Function to call with model as argument after data is loaded.
   
  * @return {$3Dmol.GLModel} GLModel
+ * @return {Promise}
  * @example
  viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
