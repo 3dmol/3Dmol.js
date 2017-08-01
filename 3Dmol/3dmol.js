@@ -199,7 +199,6 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var pdbUri = "";
     var mmtfUri = "";
     var m = viewer.addModel();
-    
     if (query.substr(0, 5) === 'mmtf:') {
         pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
@@ -208,14 +207,26 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
         }
-            
-        $3Dmol.getbin(uri,
-                function(ret) {
-                    m.addMolData(ret, 'mmtf',options);
-                    viewer.zoomTo();
-                    viewer.render();
-                    if(callback) callback(m);
-                });
+        var handler = function (ret) {
+            m.addMolData(ret, 'mmtf',options);
+            viewer.zoomTo();
+            viewer.render();
+        };
+        if (callback) {
+            $3Dmol.getbin(uri)
+            .then(function(ret) {
+                handler(ret);
+                callback(m);
+            });
+            return m;
+        }
+        return new Promise(function(resolve, reject) {
+            $3Dmol.getbin(uri)
+            .then(function(ret) {
+                handler(ret);
+                resolve(m);
+            });
+        });
     }
     else {
         if (query.substr(0, 4) === 'pdb:') {
@@ -255,23 +266,47 @@ $3Dmol.download = function(query, viewer, options, callback) {
         }
     
         var handler = function(ret) {
-          m.addMolData(ret, type, options);
-          viewer.zoomTo();
-          viewer.render();
-          if(callback) callback(m);
+            m.addMolData(ret, type, options);
+            viewer.zoomTo();
+            viewer.render();
         };
-        
-        if(type == 'mmtf') { //binary data
-            $3Dmol.getbin(uri, handler);
+        if (callback) {
+            if(type == 'mmtf') { //binary data
+                $3Dmol.getbin(uri)
+                .then(function(ret) {
+                    handler(ret);
+                    callback(m);
+                });
+            }
+            else {        
+               $.get(uri, function(ret) {
+                   handler(ret);
+                   callback(m);
+               }).fail(function(e) {
+                   console.log("fetch of "+uri+" failed: "+e.statusText);
+               });
+            }
+            return m;
         }
-        else {        
-           $.get(uri, handler).fail(function(e) {
-            console.log("fetch of "+uri+" failed: "+e.statusText);
-           });
-        }
-   }
-   
-   return m;
+        return new Promise(function(resolve, reject) {
+            if(type == 'mmtf') { //binary data
+                $3Dmol.getbin(uri)
+                .then(function(ret) {
+                    handler(ret);
+                    resolve(m);
+                });
+            }
+            else {        
+               $.get(uri, function(ret) {
+                   handler(ret);
+                   resolve(m);
+               }).fail(function(e) {
+                   console.log("fetch of "+uri+" failed: "+e.statusText);
+                   reject(m);
+               });
+            }
+        });
+    }
 };
        
 
