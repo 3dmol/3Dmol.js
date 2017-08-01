@@ -153,19 +153,25 @@ $3Dmol.viewers = {};
  * @param {string} uri - location of data
  * @param {Function} callback - Function to call with arraybuffer as argument.  
  * @param {string} request - type of request
+ * @return {Promise}
  */ 
 $3Dmol.getbin = function(uri, callback, request) {
-    request = (request == undefined)?"GET":request;
-    $.ajax({url:uri, 
-        type: request,
-        dataType: "binary",
-        responseType: "arraybuffer",
-        processData: false}).done(
-            function(ret, txt, response) {
-                callback(ret);
-            }).fail(function(e,txt) { 
-                console.log(txt);
-                });
+    return new Promise(function(resolve, reject) {
+        callback = (callback == undefined)?function(ret){}:callback;
+        request = (request == undefined)?"GET":request;
+        $.ajax({url:uri, 
+            type: request,
+            dataType: "binary",
+            responseType: "arraybuffer",
+            processData: false}).done(
+                function(ret, txt, response) {
+                    callback(ret);
+                    resolve(ret);
+                }).fail(function(e,txt) { 
+                    console.log(txt);
+                    reject();
+                    });
+    });
 };
 
 /**
