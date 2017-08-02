@@ -153,19 +153,26 @@ $3Dmol.viewers = {};
  * @param {string} uri - location of data
  * @param {Function} callback - Function to call with arraybuffer as argument.  
  * @param {string} request - type of request
+ * @return {Promise}
  */ 
 $3Dmol.getbin = function(uri, callback, request) {
-    request = (request == undefined)?"GET":request;
-    $.ajax({url:uri, 
-        type: request,
-        dataType: "binary",
-        responseType: "arraybuffer",
-        processData: false}).done(
-            function(ret, txt, response) {
-                callback(ret);
-            }).fail(function(e,txt) { 
-                console.log(txt);
-                });
+    var promise = new Promise(function(resolve, reject) {
+        request = (request == undefined)?"GET":request;
+        $.ajax({url:uri, 
+            type: request,
+            dataType: "binary",
+            responseType: "arraybuffer",
+            processData: false})
+        .done(function(ret, txt, response) {
+            resolve(ret);
+        })
+        .fail(function(e,txt) { 
+            console.log(txt);
+            reject();
+        });
+    });
+    if (callback) return promise.then(callback);
+    else return promise;
 };
 
 /**
@@ -178,7 +185,7 @@ $3Dmol.getbin = function(uri, callback, request) {
  *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
  * @param {Function} callback - Function to call with model as argument after data is loaded.
   
- * @return {$3Dmol.GLModel} GLModel
+ * @return {$3Dmol.GLModel} GLModel, Promise if callback is not provided
  * @example
  viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
@@ -193,7 +200,6 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var pdbUri = "";
     var mmtfUri = "";
     var m = viewer.addModel();
-    
     if (query.substr(0, 5) === 'mmtf:') {
         pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
@@ -202,14 +208,15 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
         }
-            
-        $3Dmol.getbin(uri,
-                function(ret) {
-                    m.addMolData(ret, 'mmtf',options);
-                    viewer.zoomTo();
-                    viewer.render();
-                    if(callback) callback(m);
-                });
+        var promise = new Promise(function(resolve, reject) {
+            $3Dmol.getbin(uri)
+            .then(function(ret) {
+                m.addMolData(ret, 'mmtf',options);
+                viewer.zoomTo();
+                viewer.render();
+                resolve(m);
+            });
+        });
     }
     else {
         if (query.substr(0, 4) === 'pdb:') {
@@ -249,23 +256,35 @@ $3Dmol.download = function(query, viewer, options, callback) {
         }
     
         var handler = function(ret) {
-          m.addMolData(ret, type, options);
-          viewer.zoomTo();
-          viewer.render();
-          if(callback) callback(m);
+            m.addMolData(ret, type, options);
+            viewer.zoomTo();
+            viewer.render();
         };
-        
-        if(type == 'mmtf') { //binary data
-            $3Dmol.getbin(uri, handler);
-        }
-        else {        
-           $.get(uri, handler).fail(function(e) {
-            console.log("fetch of "+uri+" failed: "+e.statusText);
-           });
-        }
-   }
-   
-   return m;
+        var promise = new Promise(function(resolve, reject) {
+            if(type == 'mmtf') { //binary data
+                $3Dmol.getbin(uri)
+                .then(function(ret) {
+                    handler(ret);
+                    resolve(m);
+                });
+            }
+            else {        
+               $.get(uri, function(ret) {
+                   handler(ret);
+                   resolve(m);
+               }).fail(function(e) {
+                   console.log("fetch of "+uri+" failed: "+e.statusText);
+               });
+            }
+        });
+    }
+    if (callback) {
+        promise.then(function(m){
+            callback(m);
+        });
+        return m;
+    }
+    else return promise;
 };
        
 
