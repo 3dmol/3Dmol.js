@@ -184,8 +184,7 @@ $3Dmol.getbin = function(uri, callback, request) {
  *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
  * @param {Function} callback - Function to call with model as argument after data is loaded.
   
- * @return {$3Dmol.GLModel} GLModel
- * @return {Promise}
+ * @return {$3Dmol.GLModel} GLModel, Promise if callback is not provided
  * @example
  viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
@@ -208,23 +207,12 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
         }
-        var handler = function (ret) {
-            m.addMolData(ret, 'mmtf',options);
-            viewer.zoomTo();
-            viewer.render();
-        };
-        if (callback) {
+        var promise = new Promise(function(resolve, reject) {
             $3Dmol.getbin(uri)
             .then(function(ret) {
-                handler(ret);
-                callback(m);
-            });
-            return m;
-        }
-        return new Promise(function(resolve, reject) {
-            $3Dmol.getbin(uri)
-            .then(function(ret) {
-                handler(ret);
+                m.addMolData(ret, 'mmtf',options);
+                viewer.zoomTo();
+                viewer.render();
                 resolve(m);
             });
         });
@@ -271,25 +259,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
             viewer.zoomTo();
             viewer.render();
         };
-        if (callback) {
-            if(type == 'mmtf') { //binary data
-                $3Dmol.getbin(uri)
-                .then(function(ret) {
-                    handler(ret);
-                    callback(m);
-                });
-            }
-            else {        
-               $.get(uri, function(ret) {
-                   handler(ret);
-                   callback(m);
-               }).fail(function(e) {
-                   console.log("fetch of "+uri+" failed: "+e.statusText);
-               });
-            }
-            return m;
-        }
-        return new Promise(function(resolve, reject) {
+        var promise = new Promise(function(resolve, reject) {
             if(type == 'mmtf') { //binary data
                 $3Dmol.getbin(uri)
                 .then(function(ret) {
@@ -303,11 +273,17 @@ $3Dmol.download = function(query, viewer, options, callback) {
                    resolve(m);
                }).fail(function(e) {
                    console.log("fetch of "+uri+" failed: "+e.statusText);
-                   reject(m);
                });
             }
         });
     }
+    if (callback) {
+        promise.then(function(m){
+            callback(m);
+        });
+        return m;
+    }
+    else return promise;
 };
        
 
