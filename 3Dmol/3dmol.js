@@ -156,22 +156,23 @@ $3Dmol.viewers = {};
  * @return {Promise}
  */ 
 $3Dmol.getbin = function(uri, callback, request) {
-    return new Promise(function(resolve, reject) {
-        callback = (callback == undefined)?function(ret){}:callback;
+    var promise = new Promise(function(resolve, reject) {
         request = (request == undefined)?"GET":request;
         $.ajax({url:uri, 
             type: request,
             dataType: "binary",
             responseType: "arraybuffer",
-            processData: false}).done(
-                function(ret, txt, response) {
-                    callback(ret);
-                    resolve(ret);
-                }).fail(function(e,txt) { 
-                    console.log(txt);
-                    reject();
-                    });
+            processData: false})
+        .done(function(ret, txt, response) {
+            resolve(ret);
+        })
+        .fail(function(e,txt) { 
+            console.log(txt);
+            reject();
+        });
     });
+    if (callback) return promise.then(callback);
+    else return promise;
 };
 
 /**
