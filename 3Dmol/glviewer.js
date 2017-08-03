@@ -68,12 +68,16 @@ $3Dmol.GLViewer = (function() {
         var fov = 20;
 
         var linkedViewers = [];
-
         var renderer = new $3Dmol.Renderer({
             antialias : true,
             preserveDrawingBuffer: true, //so we can export images
             premultipliedAlpha : false,/* more traditional compositing with background */
-            id:config.id
+            id:config.id,
+            row:config.row,
+            col:config.col,
+            rows:config.rows,
+            cols:config.cols,
+            canvas:config.canvas
         });
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
@@ -181,6 +185,7 @@ $3Dmol.GLViewer = (function() {
         // display scene
         //if nolink is set/true, don't propagate changes to linked viewers
         var show = function(nolink) {
+            renderer.setViewport();
             if (!scene)
                 return;
             // var time = new Date();
@@ -623,6 +628,7 @@ $3Dmol.GLViewer = (function() {
             var c = $3Dmol.CC.color(hex);
             scene.fog.color = c;
             bgColor = c.getHex();
+            renderer.setViewport();
             renderer.setClearColorHex(c.getHex(), a);
             show();
             return this;
@@ -887,6 +893,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#render
          */
         this.render = function(callback) {
+            renderer.setViewport();
             var time1 = new Date();
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();

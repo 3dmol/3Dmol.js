@@ -5,6 +5,10 @@
 $3Dmol.Renderer = function(parameters) {
 
     parameters = parameters || {};
+    this.row = parameters.row;
+    this.col = parameters.col;
+    this.rows = parameters.rows;
+    this.cols = parameters.cols;
 
     var _canvas = parameters.canvas !== undefined ? parameters.canvas
             : document.createElement('canvas'),
@@ -167,16 +171,42 @@ $3Dmol.Renderer = function(parameters) {
     this.disableOutline = function() {
         _outlineEnabled = false;
     };
+    this.setViewport = function(){
+        if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
 
+            var wid = _canvas.width/this.cols;
+            var hei = _canvas.height/this.rows;
+           
+            _viewportWidth =  wid * this.devicePixelRatio;
+            _viewportHeight = hei * this.devicePixelRatio;
+            _gl.enable(_gl.SCISSOR_TEST);
+            _gl.scissor(wid*this.col,hei * this.row, wid, hei);
+            _gl.viewport(wid * this.col , hei * this.row, wid, hei);
+        }
+    }
     this.setSize = function(width, height) {
+        if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
+            var wid = width/this.cols;
+            var hei = height/this.rows;
+            _canvas.width =width* this.devicePixelRatio;
+            _canvas.height = height*this.devicePixelRatio;
 
-        _viewportWidth = _canvas.width = width * this.devicePixelRatio;
-        _viewportHeight =  _canvas.height = height * this.devicePixelRatio;
+            _viewportWidth =  wid * this.devicePixelRatio;
+            _viewportHeight = hei * this.devicePixelRatio;
 
-        _canvas.style.width = width + 'px';
-        _canvas.style.height = height + 'px';
+            _canvas.style.width = width + 'px';
+            _canvas.style.height = height + 'px';
 
-        _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
+            _gl.viewport(wid * this.col , hei * this.row, wid, hei);
+        }else{
+            _viewportWidth = _canvas.width = width * this.devicePixelRatio;
+            _viewportHeight =  _canvas.height = height * this.devicePixelRatio;
+
+            _canvas.style.width = width + 'px';
+            _canvas.style.height = height + 'px';
+
+            _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
+        }
     };
 
     this.clear = function(color, depth, stencil) {
@@ -189,6 +219,7 @@ $3Dmol.Renderer = function(parameters) {
             bits |= _gl.DEPTH_BUFFER_BIT;
         if (stencil === undefined || stencil)
             bits |= _gl.STENCIL_BUFFER_BIT;
+        this.setViewport();
         _gl.clear(bits);
 
     };
@@ -1067,7 +1098,7 @@ $3Dmol.Renderer = function(parameters) {
 
         _currentWidth = _viewportWidth;
         _currentHeight = _viewportHeight;
-
+        this.setViewport();
         if (this.autoClear || forceClear) {
             this.clear(this.autoClearColor, this.autoClearDepth,
                     this.autoClearStencil);
