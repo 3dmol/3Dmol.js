@@ -27,8 +27,7 @@ $3Dmol.Renderer = function(parameters) {
             _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters.outline),
             _outlineEnabled = !!parameters.outline
             ;
-    this.domElement = _canvas;
-    this.aspect = undefined;
+    this.domElement = _canvas;    
     this.context = null;
     this.devicePixelRatio = parameters.devicePixelRatio !== undefined ? parameters.devicePixelRatio
             : (self.devicePixelRatio !== undefined) ? self.devicePixelRatio : 1;
@@ -1557,18 +1556,19 @@ $3Dmol.Renderer = function(parameters) {
         }
 
     }
-    this.getAspect = function(){
-        if(this.aspect==undefined){
-            var aspect = _canvas.width/_canvas.height;
-            if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
-
-                var wid = _canvas.width/this.cols;
-                var hei = _canvas.height/this.rows;
-                aspect = wid/hei;
-            }
-            this.aspect =aspect;
+    this.getAspect = function(width,height){
+        if(width == undefined || height == undefined){
+            width = _canvas.width;
+            height = _canvas.height;
         }
-        return this.aspect;
+        var aspect = width/height;
+        console.log(width)
+        if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
+            var wid = width/this.cols;
+            var hei = height/this.rows;
+            aspect = wid/hei;
+        }
+        return aspect;
     }
 
     this.setTexture = function(texture, slot) {
