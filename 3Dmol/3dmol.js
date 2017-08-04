@@ -146,7 +146,6 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
     if(!element) return;
 
     config = config || {}; 
-    console.log(config.row)
 
     var viewers = [];
 

@@ -199,7 +199,8 @@ $3Dmol.Renderer = function(parameters) {
 
             _canvas.style.width = width + 'px';
             _canvas.style.height = height + 'px';
-
+            console.log(width)
+            console.log(height)
             _gl.viewport(wid * this.col , hei * this.row, wid, hei);
         }else{
             _viewportWidth = _canvas.width = width * this.devicePixelRatio;
@@ -1562,8 +1563,8 @@ $3Dmol.Renderer = function(parameters) {
             height = _canvas.height;
         }
         var aspect = width/height;
-        console.log(width)
         if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
+            console.log("divide")
             var wid = width/this.cols;
             var hei = height/this.rows;
             aspect = wid/hei;

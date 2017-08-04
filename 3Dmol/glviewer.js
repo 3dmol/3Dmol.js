@@ -88,7 +88,6 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.zIndex = "0";
 
         var ASPECT =renderer.getAspect(WIDTH,HEIGHT);
-        console.log(ASPECT)
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
         camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
@@ -567,7 +566,6 @@ $3Dmol.GLViewer = (function() {
             WIDTH = container.width();
             HEIGHT = container.height();
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
-            console.log(ASPECT)
             renderer.setSize(WIDTH, HEIGHT);
             container.append(renderer.domElement);
             glDOM = $(renderer.domElement);
@@ -730,8 +728,9 @@ $3Dmol.GLViewer = (function() {
         this.resize = function() {
             WIDTH = container.width();
             HEIGHT = container.height();
-            ASPECT = renderer.getAspect();
-            console.log(ASPECT)
+            console.log(WIDTH)
+            console.log(HEIGHT)
+            ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
