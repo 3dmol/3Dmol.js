@@ -9,7 +9,6 @@ $3Dmol.Renderer = function(parameters) {
     this.col = parameters.col;
     this.rows = parameters.rows;
     this.cols = parameters.cols;
-
     var _canvas = parameters.canvas !== undefined ? parameters.canvas
             : document.createElement('canvas'),
 
@@ -29,6 +28,7 @@ $3Dmol.Renderer = function(parameters) {
             _outlineEnabled = !!parameters.outline
             ;
     this.domElement = _canvas;
+    this.aspect = undefined;
     this.context = null;
     this.devicePixelRatio = parameters.devicePixelRatio !== undefined ? parameters.devicePixelRatio
             : (self.devicePixelRatio !== undefined) ? self.devicePixelRatio : 1;
@@ -179,9 +179,13 @@ $3Dmol.Renderer = function(parameters) {
            
             _viewportWidth =  wid * this.devicePixelRatio;
             _viewportHeight = hei * this.devicePixelRatio;
+
+             _gl.drawingBufferWidth = _viewportWidth*3;
+              _gl.drawingBufferHeight = _viewportHeight;
             _gl.enable(_gl.SCISSOR_TEST);
             _gl.scissor(wid*this.col,hei * this.row, wid, hei);
             _gl.viewport(wid * this.col , hei * this.row, wid, hei);
+
         }
     }
     this.setSize = function(width, height) {
@@ -1552,6 +1556,19 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
+    }
+    this.getAspect = function(){
+        if(this.aspect==undefined){
+            var aspect = _canvas.width/_canvas.height;
+            if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
+
+                var wid = _canvas.width/this.cols;
+                var hei = _canvas.height/this.rows;
+                aspect = wid/hei;
+            }
+            this.aspect =aspect;
+        }
+        return this.aspect;
     }
 
     this.setTexture = function(texture, slot) {

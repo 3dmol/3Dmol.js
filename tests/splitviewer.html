@@ -30,7 +30,10 @@
               }
           }
           
-        
+           $3Dmol.download("pdb:1YCR",viewers[0][2],{},function(){
+              viewers[0][2].setStyle({},{line:{}});
+              viewers[0][2].render();
+           });
           /*
           
           var viewer = $3Dmol.createViewer($("#test38"),{});
