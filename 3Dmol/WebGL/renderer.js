@@ -156,6 +156,8 @@ $3Dmol.Renderer = function(parameters) {
         _clearColor.setHex(hex);
         _clearAlpha = alpha;
 
+        this.setViewport();
+
         _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b,
                         _clearAlpha);
     };

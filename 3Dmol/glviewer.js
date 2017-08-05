@@ -633,6 +633,7 @@ $3Dmol.GLViewer = (function() {
             renderer.setViewport();
             renderer.setClearColorHex(c.getHex(), a);
             show();
+            
             return this;
         };
         

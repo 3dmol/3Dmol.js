@@ -13,8 +13,9 @@
 
         <script>
         
-          function callback(viewer){
+          function callback(viewer,color){
             return function(){
+                        viewer.setBackgroundColor(color);
                         viewer.setStyle({}, {cartoon:{color:"spectrum"}});
                         console.log(viewer)
                         viewer.render();
@@ -22,12 +23,12 @@
           }
           var viewers = $3Dmol.createViewerGrid($("#test38"),{rows:1,cols:3},{})
           console.log(viewers)
-          var colors = ["000000","666666","FFFFFF"] 
+          var colors = ["000000","666666","808080"] 
           for(var r = 0; r< viewers.length ; r++){
               for(var c = 0; c< viewers[0].length; c++){
                   var viewer = viewers[r][c]; 
-                  viewer.setBackgroundColor(colors[c]);
-                  $3Dmol.download("pdb:1YCR",viewer,{},callback(viewer));
+                  var color = colors[c]
+                  $3Dmol.download("pdb:1YCR",viewer,{},callback(viewer,color));
               }
           }
           
