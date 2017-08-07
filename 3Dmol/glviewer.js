@@ -452,6 +452,26 @@ $3Dmol.GLViewer = (function() {
             ev.preventDefault();
             if (!scene)
                 return;
+
+            WIDTH = container.width();
+            HEIGHT = container.height(); 
+
+            var xy = getXY(ev);
+            var x = xy[0];
+            var y = xy[1];
+            if (x === undefined)
+                return;
+            if(viewers != undefined){
+                var width = WIDTH/cols;
+                var height = HEIGHT/rows;
+                var r =Math.floor(xy[1]/height);
+                var c=Math.floor(xy[0]/width);
+
+                if(r != row || c != col)
+                    return;
+
+            }
+
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
             var mult = 1.0;
             if(ev.originalEvent.ctrlKey) {
