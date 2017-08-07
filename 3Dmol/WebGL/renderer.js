@@ -201,9 +201,8 @@ $3Dmol.Renderer = function(parameters) {
 
             _canvas.style.width = width + 'px';
             _canvas.style.height = height + 'px';
-            console.log(width)
-            console.log(height)
-            _gl.viewport(wid * this.col , hei * this.row, wid, hei);
+            
+            this.setViewport();
         }else{
             _viewportWidth = _canvas.width = width * this.devicePixelRatio;
             _viewportHeight =  _canvas.height = height * this.devicePixelRatio;
@@ -225,7 +224,6 @@ $3Dmol.Renderer = function(parameters) {
             bits |= _gl.DEPTH_BUFFER_BIT;
         if (stencil === undefined || stencil)
             bits |= _gl.STENCIL_BUFFER_BIT;
-        this.setViewport();
         _gl.clear(bits);
 
     };

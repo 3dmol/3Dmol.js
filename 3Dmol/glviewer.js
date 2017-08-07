@@ -506,30 +506,6 @@ $3Dmol.GLViewer = (function() {
                     }
                 ,hoverDuration);
 
-            function calculateViewer(xy, viewers){
-                for(var r =0;r< viewers.length;r++){
-                    for(var c=0;c< viewers[0].length;c++){
-                        var width = WIDTH/viewers[viewer].rows;
-                        var height = HEIGHT/viewers[viewer].height;
-
-                        var x = viewers[r][c].col * width;
-                        var y = viewers[r][c].row * height;
-                        if(xy[0]<(x+width) && xy[0] >= x && xy[1]<(y+height) && xy[1]>=y) {
-                            return viewers[r][c]
-                        }
-                    }
-                }
-                return undefined;
-            }
-            console.log(viewers)
-
-            if(viewers != undefined){
-                console.log("defined")
-                console.log(row);
-
-
-            }
-
             ev.preventDefault();
             if (!scene)
                 return;
@@ -543,6 +519,18 @@ $3Dmol.GLViewer = (function() {
             if (x === undefined)
                 return;
             //hover timeout
+
+            if(viewers != undefined){
+                var width = WIDTH/cols;
+                var height = HEIGHT/rows;
+                var r =Math.floor(xy[1]/height);
+                var c=Math.floor(xy[0]/width);
+
+                if(r != row || c != col)
+                    return;
+
+            }
+
 
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
@@ -668,7 +656,6 @@ $3Dmol.GLViewer = (function() {
             var c = $3Dmol.CC.color(hex);
             scene.fog.color = c;
             bgColor = c.getHex();
-            renderer.setViewport();
             renderer.setClearColorHex(c.getHex(), a);
             show();
             
