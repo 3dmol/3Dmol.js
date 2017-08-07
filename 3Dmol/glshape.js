@@ -956,7 +956,6 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#addIsosurface         
          * @param {$3Dmol.VolumeData} data - volumetric input data
          * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
-         * @return {Promise}
          * @example //the user can specify a selected region for the isosurface 
          $.get('../test_structs/benzene-homo.cube', function(data){
                   var voldata = new $3Dmol.VolumeData(data, "cube");
@@ -981,152 +980,148 @@ $3Dmol.GLShape = (function() {
                 });
          */
         this.addIsosurface = function(data, volSpec, callback) {//may want to cache the arrays geneerated when selectedRegion ==true
-            var that = this;
-            var promise = new Promise (function(resolve, reject) {   
-                var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
-                        : 0.0;
-                var voxel = (volSpec.voxel) ? true : false;
-                var smoothness = (volSpec.smoothness === undefined) ? 1 : volSpec.smoothness;
-    
-                var nX = data.size.x;
-                var nY = data.size.y;
-                var nZ = data.size.z;
-                var vertnums = new Int16Array(nX * nY * nZ);
-                var vals = data.data;
-    
-                var i, il;
-    
-                for (i = 0, il = vertnums.length; i < il; ++i)
-                    vertnums[i] = -1;
-    
-                var bitdata = new Uint8Array(nX * nY * nZ);
+           
+            var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
+                    : 0.0;
+            var voxel = (volSpec.voxel) ? true : false;
+            var smoothness = (volSpec.smoothness === undefined) ? 1 : volSpec.smoothness;
+
+            var nX = data.size.x;
+            var nY = data.size.y;
+            var nZ = data.size.z;
+            var vertnums = new Int16Array(nX * nY * nZ);
+            var vals = data.data;
+
+            var i, il;
+
+            for (i = 0, il = vertnums.length; i < il; ++i)
+                vertnums[i] = -1;
+
+            var bitdata = new Uint8Array(nX * nY * nZ);
+           
+            //mark locations partitioned by isoval
+            for (i = 0, il = vals.length; i < il; ++i) {
+                var val = (isoval >= 0) ? vals[i] - isoval : isoval - vals[i];
+                if (val > 0)
+                    bitdata[i] |= ISDONE;
+
+            }
                
-                //mark locations partitioned by isoval
-                for (i = 0, il = vals.length; i < il; ++i) {
-                    var val = (isoval >= 0) ? vals[i] - isoval : isoval - vals[i];
-                    if (val > 0)
-                        bitdata[i] |= ISDONE;
-    
-                }
-                   
-                var verts = [], faces = [];
-    
-                $3Dmol.MarchingCube.march(bitdata, verts, faces, {
-                    fulltable : true,
-                    voxel : voxel,
-                    unitCube : data.unit,
-                    origin : data.origin,
-                    matrix: data.matrix,
-                    nX : nX,
-                    nY : nY,
-                    nZ : nZ
-                });
-                
-                if (!voxel && smoothness > 0)
-                    $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
-                var vertexmapping= [];
-                var newvertices= [];
-                var newfaces=[];
-    
-                if (volSpec.selectedRegion !== undefined) {
-    
-                    var xmax = volSpec.selectedRegion[0].x, 
-                        ymax = volSpec.selectedRegion[0].y, 
-                        zmax = volSpec.selectedRegion[0].z, 
-                        xmin = volSpec.selectedRegion[0].x, 
-                        ymin = volSpec.selectedRegion[0].y, 
-                        zmin = volSpec.selectedRegion[0].z;
-    
-                    for (var i = 0; i < volSpec.selectedRegion.length; i++) {
-                        if (volSpec.selectedRegion[i].x > xmax)
-                            xmax = volSpec.selectedRegion[i].x;
-                        else if (volSpec.selectedRegion[i].x < xmin)
-                            xmin = volSpec.selectedRegion[i].x;
-                        if (volSpec.selectedRegion[i].y > ymax)
-                            ymax = volSpec.selectedRegion[i].y;
-                        else if (volSpec.selectedRegion[i].y < ymin)
-                            ymin = volSpec.selectedRegion[i].y;
-                        if (volSpec.selectedRegion[i].z > zmax)
-                            zmax = volSpec.selectedRegion[i].z;
-                        else if (volSpec.selectedRegion[i].z < zmin)
-                            zmin = volSpec.selectedRegion[i].z;
-                    }
-    
-                    var rad = volSpec.radius;
-                    xmin -= rad;
-                    xmax += rad;
-                    ymin -= rad;
-                    ymax += rad;
-                    zmin -= rad;
-                    zmax += rad;
-    
-                    // accounts for radius
-                    for (var i = 0; i < verts.length; i++) {
-                        if (verts[i].x > xmin
-                                && verts[i].x < xmax
-                                && verts[i].y > ymin
-                                && verts[i].y < ymax
-                                && verts[i].z > zmin
-                                && verts[i].z < zmax
-                                && inSelectedRegion(verts[i],
-                                        volSpec.selectedRegion,
-                                        volSpec.selectedOffset, volSpec.radius)) {
-                            vertexmapping.push(newvertices.length);
-                            newvertices.push(verts[i]);
-    
-                        } else {
-                            vertexmapping.push(-1);
-                        }
-    
-                    }
-                    for (var i = 0; i + 2 < faces.length; i += 3) {
-                        if (vertexmapping[faces[i]] !== -1
-                                && vertexmapping[faces[i + 1]] !== -1
-                                && vertexmapping[faces[i + 2]] !== -1) {
-                            newfaces.push(faces[i]
-                                    - (faces[i] - vertexmapping[faces[i]]));
-                            newfaces.push(faces[i + 1]
-                                    - (faces[i + 1] - vertexmapping[faces[i + 1]]));
-                            newfaces.push(faces[i + 2]
-                                    - (faces[i + 2] - vertexmapping[faces[i + 2]]));
-                        }
-                    }
-                    verts = newvertices;
-                    faces = newfaces;
-                }
-               
-                drawCustom(that, geo, {
-                    vertexArr : verts,
-                    faceArr : faces,
-                    normalArr : [],
-                    clickable : volSpec.clickable,
-                    hoverable : volSpec.hoverable
-                });
-                
-                that.updateStyle(volSpec);
-                
-                //computing bounding sphere from vertices
-                var origin = new $3Dmol.Vector3(data.origin.x, data.origin.y, data.origin.z);
-                var size = new $3Dmol.Vector3(data.size.x*data.unit.x, data.size.y*data.unit.y, data.size.z*data.unit.z);            
-    
-                var total = new $3Dmol.Vector3(0,0,0);
-                var maxv = origin.clone();
-                var minv = origin.clone().add(size);
-                for(var i = 0; i < verts.length; i++) {
-                    total.add(verts[i]);
-                    maxv.max(verts[i]);
-                    minv.min(verts[i]);
-                }
-                total.divideScalar(verts.length);
-                var len1 = total.distanceTo(minv);
-                var len2 = total.distanceTo(maxv);
-                that.boundingSphere.center = total;
-                that.boundingSphere.radius = Math.max(len1,len2);
-                resolve();
+            var verts = [], faces = [];
+
+            $3Dmol.MarchingCube.march(bitdata, verts, faces, {
+                fulltable : true,
+                voxel : voxel,
+                unitCube : data.unit,
+                origin : data.origin,
+                matrix: data.matrix,
+                nX : nX,
+                nY : nY,
+                nZ : nZ
             });
+            
+            if (!voxel && smoothness > 0)
+                $3Dmol.MarchingCube.laplacianSmooth(smoothness, verts, faces);
+            var vertexmapping= [];
+            var newvertices= [];
+            var newfaces=[];
+
+            if (volSpec.selectedRegion !== undefined) {
+
+                var xmax = volSpec.selectedRegion[0].x, 
+                    ymax = volSpec.selectedRegion[0].y, 
+                    zmax = volSpec.selectedRegion[0].z, 
+                    xmin = volSpec.selectedRegion[0].x, 
+                    ymin = volSpec.selectedRegion[0].y, 
+                    zmin = volSpec.selectedRegion[0].z;
+
+                for (var i = 0; i < volSpec.selectedRegion.length; i++) {
+                    if (volSpec.selectedRegion[i].x > xmax)
+                        xmax = volSpec.selectedRegion[i].x;
+                    else if (volSpec.selectedRegion[i].x < xmin)
+                        xmin = volSpec.selectedRegion[i].x;
+                    if (volSpec.selectedRegion[i].y > ymax)
+                        ymax = volSpec.selectedRegion[i].y;
+                    else if (volSpec.selectedRegion[i].y < ymin)
+                        ymin = volSpec.selectedRegion[i].y;
+                    if (volSpec.selectedRegion[i].z > zmax)
+                        zmax = volSpec.selectedRegion[i].z;
+                    else if (volSpec.selectedRegion[i].z < zmin)
+                        zmin = volSpec.selectedRegion[i].z;
+                }
+
+                var rad = volSpec.radius;
+                xmin -= rad;
+                xmax += rad;
+                ymin -= rad;
+                ymax += rad;
+                zmin -= rad;
+                zmax += rad;
+
+                // accounts for radius
+                for (var i = 0; i < verts.length; i++) {
+                    if (verts[i].x > xmin
+                            && verts[i].x < xmax
+                            && verts[i].y > ymin
+                            && verts[i].y < ymax
+                            && verts[i].z > zmin
+                            && verts[i].z < zmax
+                            && inSelectedRegion(verts[i],
+                                    volSpec.selectedRegion,
+                                    volSpec.selectedOffset, volSpec.radius)) {
+                        vertexmapping.push(newvertices.length);
+                        newvertices.push(verts[i]);
+
+                    } else {
+                        vertexmapping.push(-1);
+                    }
+
+                }
+                for (var i = 0; i + 2 < faces.length; i += 3) {
+                    if (vertexmapping[faces[i]] !== -1
+                            && vertexmapping[faces[i + 1]] !== -1
+                            && vertexmapping[faces[i + 2]] !== -1) {
+                        newfaces.push(faces[i]
+                                - (faces[i] - vertexmapping[faces[i]]));
+                        newfaces.push(faces[i + 1]
+                                - (faces[i + 1] - vertexmapping[faces[i + 1]]));
+                        newfaces.push(faces[i + 2]
+                                - (faces[i + 2] - vertexmapping[faces[i + 2]]));
+                    }
+                }
+                verts = newvertices;
+                faces = newfaces;
+            }
+           
+            drawCustom(this, geo, {
+                vertexArr : verts,
+                faceArr : faces,
+                normalArr : [],
+                clickable : volSpec.clickable,
+                hoverable : volSpec.hoverable
+            });
+            
+            this.updateStyle(volSpec);
+            
+            //computing bounding sphere from vertices
+            var origin = new $3Dmol.Vector3(data.origin.x, data.origin.y, data.origin.z);
+            var size = new $3Dmol.Vector3(data.size.x*data.unit.x, data.size.y*data.unit.y, data.size.z*data.unit.z);            
+
+            var total = new $3Dmol.Vector3(0,0,0);
+            var maxv = origin.clone();
+            var minv = origin.clone().add(size);
+            for(var i = 0; i < verts.length; i++) {
+                total.add(verts[i]);
+                maxv.max(verts[i]);
+                minv.min(verts[i]);
+            }
+            total.divideScalar(verts.length);
+            var len1 = total.distanceTo(minv);
+            var len2 = total.distanceTo(maxv);
+            this.boundingSphere.center = total;
+            this.boundingSphere.radius = Math.max(len1,len2);
             if(typeof callback =="function")
-                return promise.then(callback());
-            else return promise;
+                callback();
           }
         var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
             
