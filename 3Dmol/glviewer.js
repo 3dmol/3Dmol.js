@@ -92,6 +92,7 @@ $3Dmol.GLViewer = (function() {
         var cols = config.cols;
         var rows = config.rows;
         var viewers = config.viewers;
+        var control_all = config.control_all;
 
         var ASPECT =renderer.getAspect(WIDTH,HEIGHT);
 
@@ -232,7 +233,6 @@ $3Dmol.GLViewer = (function() {
         };
 
         initializeScene();
-
         renderer.setClearColorHex(bgColor, 1.0);
         scene.fog.color = $3Dmol.CC.color(bgColor);
 
@@ -461,7 +461,7 @@ $3Dmol.GLViewer = (function() {
             var y = xy[1];
             if (x === undefined)
                 return;
-            if(viewers != undefined){
+            if(viewers != undefined && !control_all){
                 var width = WIDTH/cols;
                 var height = HEIGHT/rows;
                 var r =Math.floor(xy[1]/height);
@@ -540,7 +540,7 @@ $3Dmol.GLViewer = (function() {
                 return;
             //hover timeout
 
-            if(viewers != undefined){
+            if(viewers != undefined && ! control_all){
                 var width = WIDTH/cols;
                 var height = HEIGHT/rows;
                 var r =Math.floor(xy[1]/height);

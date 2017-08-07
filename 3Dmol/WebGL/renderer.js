@@ -153,10 +153,10 @@ $3Dmol.Renderer = function(parameters) {
     };
 
     this.setClearColorHex = function(hex, alpha) {
+        clearColor = _clearColor;
+        clearAlpha = _clearAlpha;
         _clearColor.setHex(hex);
         _clearAlpha = alpha;
-
-        this.setViewport();
 
         _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b,
                         _clearAlpha);
@@ -201,7 +201,7 @@ $3Dmol.Renderer = function(parameters) {
 
             _canvas.style.width = width + 'px';
             _canvas.style.height = height + 'px';
-            
+
             this.setViewport();
         }else{
             _viewportWidth = _canvas.width = width * this.devicePixelRatio;
@@ -217,7 +217,6 @@ $3Dmol.Renderer = function(parameters) {
     this.clear = function(color, depth, stencil) {
 
         var bits = 0;
-
         if (color === undefined || color)
             bits |= _gl.COLOR_BUFFER_BIT;
         if (depth === undefined || depth)

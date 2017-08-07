@@ -13,22 +13,19 @@
 
         <script>
         
-          function callback(viewer,color){
+          function callback(viewer){
             return function(){
-                        viewer.setBackgroundColor(color);
                         viewer.setStyle({}, {cartoon:{color:"spectrum"}});
                         console.log(viewer)
                         viewer.render();
                       }
           }
-          var viewers = $3Dmol.createViewerGrid($("#test38"),{rows:1,cols:3},{})
+          var viewers = $3Dmol.createViewerGrid($("#test38"),{rows:1,cols:3,control_all:true},{})
           console.log(viewers)
-          var colors = ["000000","666666","808080"] 
           for(var r = 0; r< viewers.length ; r++){
               for(var c = 0; c< viewers[0].length; c++){
                   var viewer = viewers[r][c]; 
-                  var color = colors[c]
-                  $3Dmol.download("pdb:1YCR",viewer,{},callback(viewer,color));
+                  $3Dmol.download("pdb:1YCR",viewer,{},callback(viewer));
               }
           }
           
@@ -36,6 +33,7 @@
               viewers[0][2].setStyle({},{line:{}});
               viewers[0][2].render();
            });
+
           /*
           
           
