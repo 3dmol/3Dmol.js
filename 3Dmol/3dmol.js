@@ -154,7 +154,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
 
     viewer_config.rows = config.rows;
     viewer_config.cols = config.cols;
-
+    viewer_config.grid = true;
     $(element).append($(canvas));
 
       //try to create the  viewer
@@ -165,6 +165,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
           viewer_config.row = r;
           viewer_config.col = c;
           viewer_config.canvas = canvas;
+          viewer_config.viewers = viewers;
           var viewer = $3Dmol.createViewer(element, viewer_config);
           viewers[r].push(viewer)
         }

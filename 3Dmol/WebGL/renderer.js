@@ -1559,6 +1559,13 @@ $3Dmol.Renderer = function(parameters) {
         }
 
     }
+    this.getXYRatio = function(){
+       if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
+            return [this.cols,this.rows];
+       }else{
+            return [1,1];
+       }
+    }
     this.getAspect = function(width,height){
         if(width == undefined || height == undefined){
             width = _canvas.width;

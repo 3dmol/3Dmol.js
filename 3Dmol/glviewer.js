@@ -87,6 +87,12 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.left = "0px";
         renderer.domElement.style.zIndex = "0";
 
+        var row = config.row;
+        var col = config.col;
+        var cols = config.cols;
+        var rows = config.rows;
+        var viewers = config.viewers;
+
         var ASPECT =renderer.getAspect(WIDTH,HEIGHT);
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
@@ -195,7 +201,8 @@ $3Dmol.GLViewer = (function() {
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
-            if(!nolink && linkedViewers.length > 0) {                var view = _viewer.getView();
+            if(!nolink && linkedViewers.length > 0) {                
+                var view = _viewer.getView();
                 for(var i = 0; i < linkedViewers.length; i++) {
                     var other = linkedViewers[i];
                     other.setView(view, true);
@@ -435,6 +442,10 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
+            console.log(row)
+
+
+
         };
         
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
@@ -480,22 +491,45 @@ $3Dmol.GLViewer = (function() {
         var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
 
-            clearTimeout(hoverTimeout);
+            WIDTH = container.width();
+            HEIGHT = container.height();
 
-            
+            clearTimeout(hoverTimeout);
             var offset = $('canvas',container).offset();
             var mouseX = ((getXY(ev)[0] - offset.left) / WIDTH) * 2 - 1;
             var mouseY = -((getXY(ev)[1] - offset.top) / HEIGHT) * 2 + 1;
             if(current_hover !== null)
                 handleHoverContinue(mouseX,mouseY,ev);
-            hoverTimeout=setTimeout(
-                function(){
-                    handleHoverSelection(mouseX,mouseY,ev);
-                }
+                hoverTimeout=setTimeout(
+                    function(){
+                        handleHoverSelection(mouseX,mouseY,ev);
+                    }
                 ,hoverDuration);
 
-            WIDTH = container.width();
-            HEIGHT = container.height();
+            function calculateViewer(xy, viewers){
+                for(var r =0;r< viewers.length;r++){
+                    for(var c=0;c< viewers[0].length;c++){
+                        var width = WIDTH/viewers[viewer].rows;
+                        var height = HEIGHT/viewers[viewer].height;
+
+                        var x = viewers[r][c].col * width;
+                        var y = viewers[r][c].row * height;
+                        if(xy[0]<(x+width) && xy[0] >= x && xy[1]<(y+height) && xy[1]>=y) {
+                            return viewers[r][c]
+                        }
+                    }
+                }
+                return undefined;
+            }
+            console.log(viewers)
+
+            if(viewers != undefined){
+                console.log("defined")
+                console.log(row);
+
+
+            }
+
             ev.preventDefault();
             if (!scene)
                 return;
@@ -527,7 +561,11 @@ $3Dmol.GLViewer = (function() {
                 // translate
                 mode = 1;
             }
-
+            var xyRatio = renderer.getXYRatio();
+            var ratioX = xyRatio[0];
+            var ratioY = xyRatio[1];
+            dx*=ratioX;
+            dy*=ratioY;
             var r = Math.sqrt(dx * dx + dy * dy);
             var scaleFactor;
             if (mode == 3
@@ -543,7 +581,7 @@ $3Dmol.GLViewer = (function() {
                 if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
             } else if (mode == 1 || mouseButton == 2
                     || ev.ctrlKey) { // Translate
-                var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+                var t = screenXY2model(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
                 modelGroup.position.addVectors(currentModelPos,t);
                 
             } else if ((mode === 0 || mouseButton == 1)
@@ -729,8 +767,6 @@ $3Dmol.GLViewer = (function() {
         this.resize = function() {
             WIDTH = container.width();
             HEIGHT = container.height();
-            console.log(WIDTH)
-            console.log(HEIGHT)
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
