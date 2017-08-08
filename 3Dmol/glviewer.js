@@ -3096,8 +3096,8 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
-         * 
-         * @return {number} surfid - Identifying number for this surface
+         * @param {function} surfacecallback - function to be called after setting the surface
+         * @return {number} surfid - Identifying number for this surface, else promise if no surfacecallback is specified
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -3275,26 +3275,18 @@ $3Dmol.GLViewer = (function() {
                             'volume' : totalVol
                         });
                     }
-                    var cnt = 0;
 
-                    var rfunction = function(event) {
-                        var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
-                                                       faceArr:event.data.faces});
-                        for(var i=0,vl=VandFs.length;i<vl;i++){
-                            var VandF={vertices:VandFs[i].vertexArr,
-                                       faces:VandFs[i].faceArr};
-                            var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                            $3Dmol.mergeGeos(surfobj.geo, mesh);
-                        }
-                        _viewer.render();
-
-                    //    console.log("async mesh generation " + (+new Date() - time) + "ms");
-                        cnt++;
-                        if (cnt == extents.length) {
-                            surfobj.done = true;
-                            if(surfacecallback && typeof(surfacecallback) == "function") {
-                                surfacecallback(surfid);
+                    var rfunction = function(event_data) {
+                        for (var j=0;j<event_data.length;j++) {
+                            var VandFs = $3Dmol.splitMesh({vertexArr:event_data[j].vertices,
+                                                           faceArr:event_data[j].faces});
+                            for(var i=0,vl=VandFs.length;i<vl;i++){
+                                var VandF={vertices:VandFs[i].vertexArr,
+                                           faces:VandFs[i].faceArr};
+                                var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                                $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
+                            _viewer.render();
                         }
                     };
 
@@ -3302,19 +3294,36 @@ $3Dmol.GLViewer = (function() {
                         console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
                     };
 
-                    for (i = 0; i < extents.length; i++) {
-                        var worker = workers[i % workers.length];
-                        worker.onmessage = rfunction;
-
-                        worker.onerror = efunction;
-
-                        worker.postMessage({
-                            'type' : type,
-                            'expandedExtent' : extents[i].extent,
-                            'extendedAtoms' : extents[i].atoms,
-                            'atomsToShow' : extents[i].toshow
+                    var startWorker = function(i) {
+                        return new Promise(function(resolve, reject) {
+                            var worker = workers[i % workers.length];
+                            worker.onmessage = function(event) {
+                                resolve(event.data);
+                            }
+                            worker.onerror = function(event) {
+                                reject(event);
+                            }
+                            worker.postMessage({
+                                'type' : type,
+                                'expandedExtent' : extents[i].extent,
+                                'extendedAtoms' : extents[i].atoms,
+                                'atomsToShow' : extents[i].toshow
+                            });
                         });
                     }
+                    var promises = []
+                    for (i = 0; i < extents.length; i++) {
+                        promises.push(startWorker(i));
+                    }
+
+                    return Promise.all(promises)
+                    .then(function(event_data) {
+                        rfunction(event_data);
+                        surfobj.done = true;
+                    })
+                    .catch(function(event) {
+                        efunction(event);
+                    });
                 }
 
                 // NOTE: This is misleading if 'async' mesh generation - returns
@@ -3350,7 +3359,7 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+                        var promise = addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
                     }
                 }
             }
@@ -3362,12 +3371,18 @@ $3Dmol.GLViewer = (function() {
                     finished : false,
                     symmetries : [new $3Dmol.Matrix4()]
                 });
-                addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
+                var promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
             } 
-            surfaces[surfid] = surfobj;
-            
-            return surfid;
-
+            if(surfacecallback && typeof(surfacecallback) == "function") {
+                promise.then(function() {
+                    surfacecallback(surfid);
+                    surfaces[surfid] = surfobj;
+                });
+                return surfid;
+            }
+            else return promise.then(function() {
+                surfaces[surfid] = surfobj;
+            });
         };
 
         /**
