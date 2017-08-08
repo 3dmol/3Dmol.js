@@ -62,18 +62,22 @@ $3Dmol.GLViewer = (function() {
         // $(container).width(WIDTH);
         // $(container).height(HEIGHT);
 
-        var ASPECT = WIDTH / HEIGHT;
+       
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
         var fov = 20;
 
         var linkedViewers = [];
-
         var renderer = new $3Dmol.Renderer({
             antialias : true,
             preserveDrawingBuffer: true, //so we can export images
             premultipliedAlpha : false,/* more traditional compositing with background */
-            id:config.id
+            id:config.id,
+            row:config.row,
+            col:config.col,
+            rows:config.rows,
+            cols:config.cols,
+            canvas:config.canvas
         });
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
@@ -82,6 +86,15 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.top = "0px";
         renderer.domElement.style.left = "0px";
         renderer.domElement.style.zIndex = "0";
+
+        var row = config.row;
+        var col = config.col;
+        var cols = config.cols;
+        var rows = config.rows;
+        var viewers = config.viewers;
+        var control_all = config.control_all;
+
+        var ASPECT =renderer.getAspect(WIDTH,HEIGHT);
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
         camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
@@ -181,6 +194,7 @@ $3Dmol.GLViewer = (function() {
         // display scene
         //if nolink is set/true, don't propagate changes to linked viewers
         var show = function(nolink) {
+            renderer.setViewport();
             if (!scene)
                 return;
             // var time = new Date();
@@ -188,7 +202,8 @@ $3Dmol.GLViewer = (function() {
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
-            if(!nolink && linkedViewers.length > 0) {                var view = _viewer.getView();
+            if(!nolink && linkedViewers.length > 0) {                
+                var view = _viewer.getView();
                 for(var i = 0; i < linkedViewers.length; i++) {
                     var other = linkedViewers[i];
                     other.setView(view, true);
@@ -218,7 +233,6 @@ $3Dmol.GLViewer = (function() {
         };
 
         initializeScene();
-
         renderer.setClearColorHex(bgColor, 1.0);
         scene.fog.color = $3Dmol.CC.color(bgColor);
 
@@ -428,12 +442,36 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
+            console.log(row)
+
+
+
         };
         
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
             ev.preventDefault();
             if (!scene)
                 return;
+
+            WIDTH = container.width();
+            HEIGHT = container.height(); 
+
+            var xy = getXY(ev);
+            var x = xy[0];
+            var y = xy[1];
+            if (x === undefined)
+                return;
+            if(viewers != undefined && !control_all){
+                var width = WIDTH/cols;
+                var height = HEIGHT/rows;
+                var r =Math.floor(xy[1]/height);
+                var c=Math.floor(xy[0]/width);
+
+                if(r != row || c != col)
+                    return;
+
+            }
+
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
             var mult = 1.0;
             if(ev.originalEvent.ctrlKey) {
@@ -473,22 +511,21 @@ $3Dmol.GLViewer = (function() {
         var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
 
-            clearTimeout(hoverTimeout);
+            WIDTH = container.width();
+            HEIGHT = container.height();
 
-            
+            clearTimeout(hoverTimeout);
             var offset = $('canvas',container).offset();
             var mouseX = ((getXY(ev)[0] - offset.left) / WIDTH) * 2 - 1;
             var mouseY = -((getXY(ev)[1] - offset.top) / HEIGHT) * 2 + 1;
             if(current_hover !== null)
                 handleHoverContinue(mouseX,mouseY,ev);
-            hoverTimeout=setTimeout(
-                function(){
-                    handleHoverSelection(mouseX,mouseY,ev);
-                }
+                hoverTimeout=setTimeout(
+                    function(){
+                        handleHoverSelection(mouseX,mouseY,ev);
+                    }
                 ,hoverDuration);
 
-            WIDTH = container.width();
-            HEIGHT = container.height();
             ev.preventDefault();
             if (!scene)
                 return;
@@ -502,6 +539,18 @@ $3Dmol.GLViewer = (function() {
             if (x === undefined)
                 return;
             //hover timeout
+
+            if(viewers != undefined && ! control_all){
+                var width = WIDTH/cols;
+                var height = HEIGHT/rows;
+                var r =Math.floor(xy[1]/height);
+                var c=Math.floor(xy[0]/width);
+
+                if(r != row || c != col)
+                    return;
+
+            }
+
 
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
@@ -520,7 +569,11 @@ $3Dmol.GLViewer = (function() {
                 // translate
                 mode = 1;
             }
-
+            var xyRatio = renderer.getXYRatio();
+            var ratioX = xyRatio[0];
+            var ratioY = xyRatio[1];
+            dx*=ratioX;
+            dy*=ratioY;
             var r = Math.sqrt(dx * dx + dy * dy);
             var scaleFactor;
             if (mode == 3
@@ -536,7 +589,7 @@ $3Dmol.GLViewer = (function() {
                 if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
             } else if (mode == 1 || mouseButton == 2
                     || ev.ctrlKey) { // Translate
-                var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+                var t = screenXY2model(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
                 modelGroup.position.addVectors(currentModelPos,t);
                 
             } else if ((mode === 0 || mouseButton == 1)
@@ -558,7 +611,7 @@ $3Dmol.GLViewer = (function() {
             container = element;
             WIDTH = container.width();
             HEIGHT = container.height();
-            ASPECT = WIDTH / HEIGHT;
+            ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             container.append(renderer.domElement);
             glDOM = $(renderer.domElement);
@@ -625,6 +678,7 @@ $3Dmol.GLViewer = (function() {
             bgColor = c.getHex();
             renderer.setClearColorHex(c.getHex(), a);
             show();
+            
             return this;
         };
         
@@ -720,7 +774,7 @@ $3Dmol.GLViewer = (function() {
         this.resize = function() {
             WIDTH = container.width();
             HEIGHT = container.height();
-            ASPECT = WIDTH / HEIGHT;
+            ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
@@ -790,18 +844,22 @@ $3Dmol.GLViewer = (function() {
             if (typeof (axis) === "undefined") {
                 axis = "y";
             }
-            
+
+            if(axis == "x"){
+                axis = {x:1,y:0,z:0}
+            }if(axis =="y"){
+                axis = {x:0,y:1,z:0}
+            }if(axis =="z"){
+                axis = {x:0,y:0,z:1}
+            }
             var qFromAngle = function(rangle) {
                 var s = Math.sin(rangle / 2.0);
                 var c = Math.cos(rangle / 2.0);
                 var i = 0, j = 0, k = 0;
 
-                if (axis == "x")
-                    i = s;
-                if (axis == "y")
-                    j = s;
-                if (axis == "z")
-                    k = s;
+                i = axis.x * s 
+                j = axis.y * s 
+                k = axis.z * s
 
                 return new $3Dmol.Quaternion(i, j, k, c).normalize();
             }
@@ -887,6 +945,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#render
          */
         this.render = function(callback) {
+            renderer.setViewport();
             var time1 = new Date();
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();
@@ -1147,6 +1206,32 @@ $3Dmol.GLViewer = (function() {
             ret.normalize();
             return ret;
         };
+        var spinInterval;
+        this.spin = function(spin,axis,interval){
+
+
+            spin = spin != undefined ? spin : true;
+            axis = axis != undefined ? axis : [1,0,0];
+            interval = interval != undefined ? interval : 50;
+            clearInterval(spinInterval)
+            if(!spin)
+                return
+
+            if(Array.isArray(axis)){
+               axis = {x:axis[0],y:axis[1],z:axis[2]} 
+            }
+
+            var viewer = this;
+
+            
+            spinInterval = setInterval(
+                function(){
+                    console.log("rotating")
+                    viewer.rotate(1,axis)
+                }
+            ,interval);            
+            
+        }
         
         //animate motion between current position and passed position
         // can set some parameters to null
