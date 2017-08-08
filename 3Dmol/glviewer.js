@@ -844,18 +844,22 @@ $3Dmol.GLViewer = (function() {
             if (typeof (axis) === "undefined") {
                 axis = "y";
             }
-            
+
+            if(axis == "x"){
+                axis = {x:1,y:0,z:0}
+            }if(axis =="y"){
+                axis = {x:0,y:1,z:0}
+            }if(axis =="z"){
+                axis = {x:0,y:0,z:1}
+            }
             var qFromAngle = function(rangle) {
                 var s = Math.sin(rangle / 2.0);
                 var c = Math.cos(rangle / 2.0);
                 var i = 0, j = 0, k = 0;
 
-                if (axis == "x")
-                    i = s;
-                if (axis == "y")
-                    j = s;
-                if (axis == "z")
-                    k = s;
+                i = axis.x * s 
+                j = axis.y * s 
+                k = axis.z * s
 
                 return new $3Dmol.Quaternion(i, j, k, c).normalize();
             }
@@ -1202,6 +1206,32 @@ $3Dmol.GLViewer = (function() {
             ret.normalize();
             return ret;
         };
+        var spinInterval;
+        this.spin = function(spin,axis,interval){
+
+
+            spin = spin != undefined ? spin : true;
+            axis = axis != undefined ? axis : [1,0,0];
+            interval = interval != undefined ? interval : 50;
+            clearInterval(spinInterval)
+            if(!spin)
+                return
+
+            if(Array.isArray(axis)){
+               axis = {x:axis[0],y:axis[1],z:axis[2]} 
+            }
+
+            var viewer = this;
+
+            
+            spinInterval = setInterval(
+                function(){
+                    console.log("rotating")
+                    viewer.rotate(1,axis)
+                }
+            ,interval);            
+            
+        }
         
         //animate motion between current position and passed position
         // can set some parameters to null
