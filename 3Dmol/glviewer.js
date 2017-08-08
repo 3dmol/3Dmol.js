@@ -3275,46 +3275,57 @@ $3Dmol.GLViewer = (function() {
                             'volume' : totalVol
                         });
                     }
-                    var cnt = 0;
+                    //var cnt = 0;
 
-                    var rfunction = function(event) {
-                        var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
-                                                       faceArr:event.data.faces});
-                        for(var i=0,vl=VandFs.length;i<vl;i++){
-                            var VandF={vertices:VandFs[i].vertexArr,
-                                       faces:VandFs[i].faceArr};
-                            var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                            $3Dmol.mergeGeos(surfobj.geo, mesh);
-                        }
-                        _viewer.render();
-
-                    //    console.log("async mesh generation " + (+new Date() - time) + "ms");
-                        cnt++;
-                        if (cnt == extents.length) {
-                            surfobj.done = true;
-                            if(surfacecallback && typeof(surfacecallback) == "function") {
-                                surfacecallback(surfid);
+                    var rfunction = function(event_data) {
+                        for (var j=0;j<event_data.length;j++) {
+                            var VandFs = $3Dmol.splitMesh({vertexArr:event_data[j].vertices,
+                                                           faceArr:event_data[j].faces});
+                            for(var i=0,vl=VandFs.length;i<vl;i++){
+                                var VandF={vertices:VandFs[i].vertexArr,
+                                           faces:VandFs[i].faceArr};
+                                var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                                $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
+                            _viewer.render();
                         }
                     };
 
                     var efunction = function(event) {
                         console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
                     };
-
-                    for (i = 0; i < extents.length; i++) {
-                        var worker = workers[i % workers.length];
-                        worker.onmessage = rfunction;
-
-                        worker.onerror = efunction;
-
-                        worker.postMessage({
-                            'type' : type,
-                            'expandedExtent' : extents[i].extent,
-                            'extendedAtoms' : extents[i].atoms,
-                            'atomsToShow' : extents[i].toshow
+                    var startWorker = function(i) {
+                        return new Promise(function(resolve, reject) {
+                            var worker = workers[i % workers.length];
+                            worker.onmessage = function(event) {
+                                resolve(event.data);
+                            }
+                            worker.onerror = function(event) {
+                                reject(event);
+                            }
+                            worker.postMessage({
+                                'type' : type,
+                                'expandedExtent' : extents[i].extent,
+                                'extendedAtoms' : extents[i].atoms,
+                                'atomsToShow' : extents[i].toshow
+                            });
                         });
                     }
+                    var promises = []
+                    for (i = 0; i < extents.length; i++) {
+                        promises.push(startWorker(i));
+                    }
+
+                    Promise.all(promises)
+                    .then(function(event_data) {
+                        rfunction(event_data);
+                        surfobj.done = true;
+                        if(surfacecallback && typeof(surfacecallback) == "function")
+                            surfacecallback(surfid);
+                    })
+                    .catch(function(event) {
+                        efunction(event);
+                    });
                 }
 
                 // NOTE: This is misleading if 'async' mesh generation - returns
