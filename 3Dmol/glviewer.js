@@ -3096,8 +3096,8 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
-         * 
-         * @return {number} surfid - Identifying number for this surface
+         * @param {function} surfacecallback - function to be called after setting the surface
+         * @return {number} surfid - Identifying number for this surface, else promise if no surfacecallback is specified
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -3275,7 +3275,6 @@ $3Dmol.GLViewer = (function() {
                             'volume' : totalVol
                         });
                     }
-                    //var cnt = 0;
 
                     var rfunction = function(event_data) {
                         for (var j=0;j<event_data.length;j++) {
@@ -3294,6 +3293,7 @@ $3Dmol.GLViewer = (function() {
                     var efunction = function(event) {
                         console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
                     };
+
                     var startWorker = function(i) {
                         return new Promise(function(resolve, reject) {
                             var worker = workers[i % workers.length];
@@ -3316,12 +3316,10 @@ $3Dmol.GLViewer = (function() {
                         promises.push(startWorker(i));
                     }
 
-                    Promise.all(promises)
+                    return Promise.all(promises)
                     .then(function(event_data) {
                         rfunction(event_data);
                         surfobj.done = true;
-                        if(surfacecallback && typeof(surfacecallback) == "function")
-                            surfacecallback(surfid);
                     })
                     .catch(function(event) {
                         efunction(event);
@@ -3361,7 +3359,7 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+                        var promise = addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
                     }
                 }
             }
@@ -3373,12 +3371,18 @@ $3Dmol.GLViewer = (function() {
                     finished : false,
                     symmetries : [new $3Dmol.Matrix4()]
                 });
-                addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
+                var promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
             } 
-            surfaces[surfid] = surfobj;
-            
-            return surfid;
-
+            if(surfacecallback && typeof(surfacecallback) == "function") {
+                promise.then(function() {
+                    surfacecallback(surfid);
+                    surfaces[surfid] = surfobj;
+                });
+                return surfid;
+            }
+            else return promise.then(function() {
+                surfaces[surfid] = surfobj;
+            });
         };
 
         /**
