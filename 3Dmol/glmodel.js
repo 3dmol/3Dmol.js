@@ -205,7 +205,7 @@ $3Dmol.GLModel = (function() {
         "singleBonds":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:.1,default:1.5,min:1},
+        "radius":{type:"number",gui:true,step:.1,default:1.5,min:0},
     }
 
     var validCartoonSpec = {

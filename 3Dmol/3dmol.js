@@ -127,6 +127,7 @@ $3Dmol.createViewer = function(element, config)
     if(!element) return;
 
     config = config || {}; 
+    console.log(config)
 
     //try to create the  viewer
     try {
@@ -138,6 +139,44 @@ $3Dmol.createViewer = function(element, config)
     
     return null;
 };
+
+$3Dmol.createViewerGrid  = function(element,config,viewer_config){
+    if($.type(element) === "string")
+        element = $("#"+element);
+    if(!element) return;
+
+    config = config || {}; 
+
+    var viewers = [];
+
+    //create canvas
+    var canvas = document.createElement('canvas');
+
+    viewer_config.rows = config.rows;
+    viewer_config.cols = config.cols;
+    viewer_config.control_all = config.control_all != undefined ? config.control_all : false;
+    $(element).append($(canvas));
+
+      //try to create the  viewer
+    try {  
+      for(var r =0;r<config.rows;r++){
+        viewers.push(new Array());
+        for(var c = 0;c<config.cols;c++){
+          viewer_config.row = r;
+          viewer_config.col = c;
+          viewer_config.canvas = canvas;
+          viewer_config.viewers = viewers;
+          viewer_config.control_all = config.control_all;
+          var viewer = $3Dmol.createViewer(element, viewer_config);
+          viewers[r].push(viewer)
+        }
+      }
+    }catch(e) {
+        throw "error creating viewer grid: "+e;
+    }
+    
+    return viewers;
+}
    
 /**
  * Contains a dictionary of embedded viewers created from HTML elements
