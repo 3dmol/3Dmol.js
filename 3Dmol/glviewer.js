@@ -3090,7 +3090,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Add surface representation to atoms
-         *  @function $3Dmol.GLViewer#addSurface
+         * @function $3Dmol.GLViewer#addSurface
          * @param {$3Dmol.SurfaceType|string} type - Surface type (VDW, MS, SAS, or SES)
          * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
@@ -3113,7 +3113,6 @@ $3Dmol.GLViewer = (function() {
             
             //surfacecallback gets called when done
             var surfid = nextSurfID();
-
             if(typeof type =="string"){
                 if(surfaceTypeMap[type]!== undefined)
                     type = surfaceTypeMap[type];
@@ -3159,7 +3158,6 @@ $3Dmol.GLViewer = (function() {
                 var atom;
                 var time = new Date();
                 var extent = $3Dmol.getExtent(atomsToShow, true);
-
                 var i, il;
                 if (style['map'] && style['map']['prop']) {
                     // map color space using already set atom properties
@@ -3229,34 +3227,34 @@ $3Dmol.GLViewer = (function() {
 
                 var sync = !!($3Dmol.syncSurface);
                 if (sync) { // don't use worker, still break up for memory purposes
-
+                    var cnt = 0;
                     // to keep the browser from locking up, call through setTimeout
                     var callSyncHelper = function callSyncHelper(i) {
-                        if (i >= extents.length) {
-                            surfobj.done = true;
-                            if(surfacecallback && typeof(surfacecallback) == "function") {
-                                surfacecallback(surfid);
+                        return new Promise(function(resolve, reject) { 
+                            var VandF = generateMeshSyncHelper(type, extents[i].extent,
+                                    extents[i].atoms, extents[i].toshow, reducedAtoms,
+                                    totalVol);
+                            //complicated surfaces sometimes have > 2^16 vertices
+                            var VandFs = $3Dmol.splitMesh({vertexArr:VandF.vertices, faceArr:VandF.faces});
+                            for(var vi=0,vl=VandFs.length;vi<vl;vi++){
+                                var VandF={vertices:VandFs[vi].vertexArr,
+                                        faces:VandFs[vi].faceArr};                            
+                                var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                                $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
-                            return;
-                        }
-
-                        var VandF = generateMeshSyncHelper(type, extents[i].extent,
-                                extents[i].atoms, extents[i].toshow, reducedAtoms,
-                                totalVol);
-                        //complicated surfaces sometimes have > 2^16 vertices
-                        var VandFs = $3Dmol.splitMesh({vertexArr:VandF.vertices, faceArr:VandF.faces});
-                        for(var vi=0,vl=VandFs.length;vi<vl;vi++){
-                            var VandF={vertices:VandFs[vi].vertexArr,
-                                    faces:VandFs[vi].faceArr};                            
-                            var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                            $3Dmol.mergeGeos(surfobj.geo, mesh);
-                        }
-                        _viewer.render();
-
-                        setTimeout(callSyncHelper, 1, i + 1);
+                            resolve();
+                        })
+                        .then(function() {
+                            _viewer.render();
+                            if (cnt >= extents.length) {
+                                surfobj.done = true;
+                            }
+                            else setTimeout(callSyncHelper, 1, cnt++);
+                        });
                     }
+                    return callSyncHelper(cnt)
 
-                    setTimeout(callSyncHelper, 1, 0);
+
 
                     // TODO: Asynchronously generate geometryGroups (not separate
                     // meshes) and merge them into a single geometry
@@ -3372,17 +3370,15 @@ $3Dmol.GLViewer = (function() {
                     symmetries : [new $3Dmol.Matrix4()]
                 });
                 var promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
-            } 
+            }
+            surfaces[surfid] = surfobj;
             if(surfacecallback && typeof(surfacecallback) == "function") {
                 promise.then(function() {
                     surfacecallback(surfid);
-                    surfaces[surfid] = surfobj;
                 });
                 return surfid;
             }
-            else return promise.then(function() {
-                surfaces[surfid] = surfobj;
-            });
+            else return promise;
         };
 
         /**
