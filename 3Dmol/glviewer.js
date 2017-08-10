@@ -1207,7 +1207,7 @@ $3Dmol.GLViewer = (function() {
             return ret;
         };
         var spinInterval;
-        this.spin = function(axis,interval){
+        this.spin = function(axis){
             clearInterval(spinInterval)
             if(typeof axis == 'undefined')
                 axis = 'y';
@@ -1218,10 +1218,10 @@ $3Dmol.GLViewer = (function() {
                     axis = 'y'
             }
 
-            interval = interval != undefined ? interval : 50;
             if(Array.isArray(axis)){
                axis = {x:axis[0],y:axis[1],z:axis[2]} 
             }
+            //out of bounds check
 
             var viewer = this;
 
@@ -1229,7 +1229,7 @@ $3Dmol.GLViewer = (function() {
                 function(){
                     viewer.rotate(1,axis)
                 }
-            ,interval);            
+            ,25);            
             
         }
         
