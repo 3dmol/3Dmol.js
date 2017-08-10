@@ -1207,26 +1207,26 @@ $3Dmol.GLViewer = (function() {
             return ret;
         };
         var spinInterval;
-        this.spin = function(spin,axis,interval){
-
-
-            spin = spin != undefined ? spin : true;
-            axis = axis != undefined ? axis : [1,0,0];
-            interval = interval != undefined ? interval : 50;
+        this.spin = function(axis,interval){
             clearInterval(spinInterval)
-            if(!spin)
-                return
+            if(typeof axis == 'undefined')
+                axis = 'y';
+            if(typeof axis == "boolean"){
+                if(!axis)
+                    return
+                else
+                    axis = 'y'
+            }
 
+            interval = interval != undefined ? interval : 50;
             if(Array.isArray(axis)){
                axis = {x:axis[0],y:axis[1],z:axis[2]} 
             }
 
             var viewer = this;
 
-            
             spinInterval = setInterval(
                 function(){
-                    console.log("rotating")
                     viewer.rotate(1,axis)
                 }
             ,interval);            
