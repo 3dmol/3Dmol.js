@@ -562,3 +562,31 @@ if( typeof(define) === 'function' && define.amd) {
     define('$3Dmol',$3Dmol);
 }
 
+/* create 2 side by side viewers 
+* @function $3Dmol.createStereoViewer
+* @param {string} div id
+* @return {list} list of viewers
+*/
+$3Dmol.createStereoViewer = function(divId) {
+            var element = document.getElementById("gldiv");
+            var gldiv1 = document.createElement('div');
+            var gldiv2 = document.createElement('div');
+            gldiv1.id = "gldiv1";
+            gldiv2.id = "gldiv2";
+            gldiv1.style.cssText = gldiv2.style.cssText = 'position: relative; float: left; width: 50%; height: 100%; margin: 0; padding: 0; border: 0;';
+            element.appendChild(gldiv1);
+            element.appendChild(gldiv2);
+
+            glviewer1 = $3Dmol.createViewer($("#gldiv1"),{
+                camerax: 3});
+            glviewer2 = $3Dmol.createViewer($("#gldiv2"),{
+                camerax: -3});
+
+            glviewer1.setBackgroundColor(0xffffff);
+            glviewer2.setBackgroundColor(0xeeeeee);
+
+            glviewer1.linkViewer(glviewer2);
+            glviewer2.linkViewer(glviewer1);
+
+    return [glviewer1,glviewer2];
+}
