@@ -8,7 +8,7 @@
                           {opacity:0.85,
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"), 
                           volscheme: new $3Dmol.Gradient.RWB(-10,10)},
-                          {}).then(function(){
+                          {}).then(function(surfid){
                               viewer.zoomTo(); //just for testing
                           });
                           viewer.render(callback);
