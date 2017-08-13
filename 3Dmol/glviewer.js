@@ -3312,7 +3312,7 @@ $3Dmol.GLViewer = (function() {
 
                 var sync = !!($3Dmol.syncSurface);
                 if (sync) { // don't use worker, still break up for memory purposes
-                    var cnt = 0;
+
                     // to keep the browser from locking up, call through setTimeout
                     var callSyncHelper = function callSyncHelper(i) {
                         return new Promise(function(resolve, reject) { 
@@ -3327,19 +3327,18 @@ $3Dmol.GLViewer = (function() {
                                 var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                                 $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
+                            _viewer.render();
                             resolve();
                         })
-                        .then(function() {
-                            _viewer.render();
-                            if (cnt >= extents.length) {
-                                surfobj.done = true;
-                            }
-                            else setTimeout(callSyncHelper, 1, cnt++);
-                        });
                     }
-                    return callSyncHelper(cnt)
-
-
+                    var promises = [];
+                    for (var i = 0; i < extents.length; i++) {
+                        promises.push(callSyncHelper(i));
+                    }
+                    return Promise.all(promises)
+                    .then(function() {
+                        surfobj.done = true;
+                    });
 
                     // TODO: Asynchronously generate geometryGroups (not separate
                     // meshes) and merge them into a single geometry
@@ -3442,7 +3441,12 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        var promise = addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+                        var promise = new Promise(function(resolve, reject) {
+                            addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n])
+                            .then(function(){
+                                resolve(surfid);
+                            });
+                        });
                     }
                 }
             }
@@ -3454,11 +3458,16 @@ $3Dmol.GLViewer = (function() {
                     finished : false,
                     symmetries : [new $3Dmol.Matrix4()]
                 });
-                var promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
+                var promise = new Promise(function(resolve, reject) {
+                    addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow)
+                    .then(function() {
+                        resolve(surfid);
+                    });
+                });
             }
             surfaces[surfid] = surfobj;
             if(surfacecallback && typeof(surfacecallback) == "function") {
-                promise.then(function() {
+                promise.then(function(surfid) {
                     surfacecallback(surfid);
                 });
                 return surfid;
