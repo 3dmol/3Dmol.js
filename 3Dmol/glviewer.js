@@ -3338,6 +3338,7 @@ $3Dmol.GLViewer = (function() {
                     return Promise.all(promises)
                     .then(function() {
                         surfobj.done = true;
+                        return Promise.resolve(surfid);
                     });
 
                     // TODO: Asynchronously generate geometryGroups (not separate
@@ -3402,6 +3403,7 @@ $3Dmol.GLViewer = (function() {
                     .then(function(event_data) {
                         rfunction(event_data);
                         surfobj.done = true;
+                        return Promise.resolve(surfid);
                     })
                     .catch(function(event) {
                         efunction(event);
@@ -3441,12 +3443,7 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        var promise = new Promise(function(resolve, reject) {
-                            addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n])
-                            .then(function(){
-                                resolve(surfid);
-                            });
-                        });
+                        var promise = addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n])
                     }
                 }
             }
@@ -3458,12 +3455,7 @@ $3Dmol.GLViewer = (function() {
                     finished : false,
                     symmetries : [new $3Dmol.Matrix4()]
                 });
-                var promise = new Promise(function(resolve, reject) {
-                    addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow)
-                    .then(function() {
-                        resolve(surfid);
-                    });
-                });
+                var promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow)
             }
             surfaces[surfid] = surfobj;
             if(surfacecallback && typeof(surfacecallback) == "function") {
