@@ -1103,6 +1103,8 @@ $3Dmol.Renderer = function(parameters) {
         _currentHeight = _viewportHeight;
         this.setViewport();
         if (this.autoClear || forceClear) {
+            _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b,
+                _clearAlpha);
             this.clear(this.autoClearColor, this.autoClearDepth,
                     this.autoClearStencil);
 
@@ -1155,7 +1157,6 @@ $3Dmol.Renderer = function(parameters) {
 
         this.setDepthTest(true);
         this.setDepthWrite(true);
-
         // _gl.finish();
 
     };
