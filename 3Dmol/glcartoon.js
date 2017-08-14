@@ -697,7 +697,7 @@ $3Dmol.drawCartoon = (function() {
             // all pieces of the half-edge data structure
             edges = [];
 
-            // a hash table to hold the adjaceney info
+            // a hash table to hold the adjacency info
             // - Keys are pairs of vertex indices
             // - Values are pointers to half-edge
             var edgeTable = {};
@@ -1021,7 +1021,7 @@ $3Dmol.drawCartoon = (function() {
                 outline = curr.style.cartoon.outline;
             
             // create a new geometry when opacity changes
-            //the should work fine if opacity is set by chain, but will
+            //this should work fine if opacity is set by chain, but will
             //break if it changes within the chain
             if (curr && curr.style.cartoon && (!next.style.cartoon ||
                     curr.style.cartoon.opacity != next.style.cartoon.opacity)) {

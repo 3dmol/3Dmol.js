@@ -1421,11 +1421,11 @@ $3Dmol.GLModel = (function() {
         /**
          * Returns model's frames property, a list of atom lists
          * 
-         * @function $3Dmol.GLModel#getFrames
-         * @return {Array.<Object>}
+         * @function $3Dmol.GLModel#getNumFrames
+         * @return {number}
          */
-        this.getFrames = function() {
-            return frames;
+        this.getNumFrames = function() {
+            return (frames.numFrames != undefined)?frames.numFrames:frames.length;
         };
         
         /**
@@ -1434,18 +1434,36 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#setFrame
          * @param {number} framenum - model's atoms are set to this index in frames list
+         * @return {Promise}
          */
         this.setFrame = function(framenum) {
-            if (frames.length == 0) {
-                return;
-            }
-            if (framenum >= 0 && framenum < frames.length) {
-                atoms = frames[framenum];
-            }
-            else {
-                atoms = frames[frames.length-1];
-            }
-            molObj = null;
+            var numFrames = this.getNumFrames();
+            return new Promise(function(resolve, reject) {
+                if (numFrames == 0) {
+                    //return;
+                    resolve();
+                }
+                if (framenum < 0 || framenum >= numFrames) {
+                    framenum = numFrames - 1;
+                }
+                if (frames.url != undefined) {
+                     $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path, function (buffer) {
+                        var values = new Float32Array(buffer,44);
+                        var count = 0;
+                        for (var i = 0; i < atoms.length; i++) {
+                            atoms[i].x = values[count++];
+                            atoms[i].y = values[count++];
+                            atoms[i].z = values[count++];
+                        }
+                        resolve();
+                    },"POST");
+                }
+                else {
+                    atoms = frames[framenum];
+                    resolve();
+                }
+                molObj = null;
+            });
         };
         
         /**
@@ -2364,11 +2382,11 @@ $3Dmol.GLModel = (function() {
         };
         
         /**@function hide
-             Don't show this model is future renderings.  Keep all styles and state
+         * Don't show this model in future renderings. Keep all styles and state
          * so it can be efficiencly shown again.
          * @example
-         var element=$('#gldiv');
-         var viewer = $3Dmol.createViewer(element);
+            var element=$('#gldiv');
+            var viewer = $3Dmol.createViewer(element);
             var m = viewer.addModel();
             m.hide();
             viewer.render(callback);
@@ -2434,12 +2452,40 @@ $3Dmol.GLModel = (function() {
             }
         }
 
+
+    /**
+    * Set coordinates for the atoms parsed from various topology files. 
+    * @function $3Dmol.GLModel#setCoordinatesFromURL
+    * @param {string} url - contains the url where mdsrv has been hosted
+    * @param {string} path - contains the path of the file (<root>/filename)
+    * @return {Promise}
+    */
+
+        this.setCoordinatesFromURL = function (url, path) {
+            var atomCount = atoms.length;
+            frames = [];
+            var self = this;
+            return new Promise(function(resolve,reject){
+                $.get("http://"+url+"/traj/numframes/"+path,function(numFrames){
+                    if (!isNaN(parseInt(numFrames))) {
+                        frames.push(atoms);
+                        frames.numFrames = numFrames;
+                        frames.url = url;
+                        frames.path = path;
+                        self.setFrame(0)
+                        .then(function() {
+                            resolve();
+                        });
+                    }
+                });
+            });
+        }
+
     /**
     * Set coordinates for the atoms parsed from the prmtop file. 
     * @function $3Dmol.GLModel#setCoordinates
     * @param {string} str - contains the data of the file
     * @param {string} format - contains the format of the file
-    * @param {function} callback - function called when a inpcrd or a mdcrd file is uploaded
     */
 
         this.setCoordinates = function(str, format) {
@@ -2458,7 +2504,8 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
                 }
             }
-            if (format == "mdcrd" || format == "inpcrd" || format == "pdb" || format == "netcdf") {
+            var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":""};
+            if (supportedFormats.hasOwnProperty(format)) {
                 frames = [];
                 var atomCount = atoms.length;
                 var values = GLModel.parseCrd(str, format);
