@@ -469,7 +469,6 @@ $3Dmol.GLViewer = (function() {
 
                 if(r != row || c != col)
                     return;
-
             }
 
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
