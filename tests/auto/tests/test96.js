@@ -5,7 +5,10 @@
                 glviewer2.render();
         };
 
-    var [glviewer1, glviewer2] = $3Dmol.createStereoViewer("gldiv");
+    var viewers = $3Dmol.createStereoViewer("gldiv");
+    var glviewer1 = viewers[0];
+    var glviewer2 = viewers[1];
+
     $.get("volData/1fas.pqr",
         function(data) {
 
