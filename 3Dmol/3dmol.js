@@ -578,9 +578,13 @@ $3Dmol.createStereoViewer = function(divId) {
             element.appendChild(gldiv2);
 
             glviewer1 = $3Dmol.createViewer($("#gldiv1"),{
-                camerax: 3});
+                camerax: 3,
+                fov: 80,
+                CAMERA_Z: 0});
             glviewer2 = $3Dmol.createViewer($("#gldiv2"),{
-                camerax: -3});
+                camerax: -3,
+                fov: 80,
+                CAMERA_Z: 0});
 
             glviewer1.setBackgroundColor(0xffffff);
             glviewer2.setBackgroundColor(0xeeeeee);
