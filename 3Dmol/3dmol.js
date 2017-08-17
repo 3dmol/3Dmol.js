@@ -565,10 +565,12 @@ if( typeof(define) === 'function' && define.amd) {
 /* create 2 side by side viewers 
 * @function $3Dmol.createStereoViewer
 * @param {string} div id
+* @param {list} atoms
 * @return {list} list of viewers
 */
-$3Dmol.createStereoViewer = function(divId) {
-            var element = document.getElementById("gldiv");
+$3Dmol.createStereoViewer = function(divId, atoms) {
+
+            var element = document.getElementById(divId);
             var gldiv1 = document.createElement('div');
             var gldiv2 = document.createElement('div');
             gldiv1.id = "gldiv1";
@@ -577,17 +579,14 @@ $3Dmol.createStereoViewer = function(divId) {
             element.appendChild(gldiv1);
             element.appendChild(gldiv2);
 
-            glviewer1 = $3Dmol.createViewer($("#gldiv1"),{
-                camerax: 3,
-                fov: 80,
-                CAMERA_Z: 0});
-            glviewer2 = $3Dmol.createViewer($("#gldiv2"),{
-                camerax: -3,
-                fov: 80,
-                CAMERA_Z: 0});
+            var tmp = $3Dmol.getExtent(atoms);
+            var camerax =  (tmp[1][0] - tmp[0][0])/2.0;
 
-            glviewer1.setBackgroundColor(0xffffff);
-            glviewer2.setBackgroundColor(0xeeeeee);
+            glviewer1 = $3Dmol.createViewer($("#gldiv1"),{
+                camerax: -camerax});
+
+            glviewer2 = $3Dmol.createViewer($("#gldiv2"),{
+                camerax: camerax,});
 
             glviewer1.linkViewer(glviewer2);
             glviewer2.linkViewer(glviewer1);

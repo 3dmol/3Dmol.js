@@ -64,8 +64,8 @@ $3Dmol.GLViewer = (function() {
 
        
         var NEAR = 1, FAR = 800;
-        var CAMERA_Z = (config.CAMERA_Z)?config.CAMERA_Z:150;
-        var fov = (config.fov)?config.fov:20;
+        var CAMERA_Z = 150;
+        var fov = 20;
 
         var linkedViewers = [];
         var renderer = new $3Dmol.Renderer({
@@ -1687,6 +1687,7 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.z = finalz;
                 show();
             }
+            camera.lookAt(new $3Dmol.Vector3(0,0,finalz)); //required if camera has a non-zero camerax value
             return this;
         
         };
