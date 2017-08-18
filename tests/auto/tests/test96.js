@@ -1,3 +1,5 @@
+
+
         var setStyle = function(style) {
                 glviewer1.setStyle(style); 
                 glviewer2.setStyle(style); 
@@ -6,21 +8,25 @@
 
     var glviewer1;
     var glviewer2;
+    [glviewer1, glviewer2] = $3Dmol.createStereoViewer("gldiv", 10);
 
-    $.get("volData/1fas.pqr",
+    $.get("volData/TC5b.prmtop",
         function(data) {
-            
-            var m = viewer.addModel(data, "1fas.pqr");
 
-            [glviewer1, glviewer2] = $3Dmol.createStereoViewer("gldiv", m.selectedAtoms({}));
-            glviewer1.addModel(data, "1fas.pqr");
-            glviewer2.addModel(data,"1fas.pqr");
-            setStyle({cartoon:{color:'spectrum'}})
+            var m1 = glviewer1.addModel(data, "prmtop");
+            var m2 = glviewer2.addModel(data,"prmtop");
 
-            glviewer1.zoomTo();
-            glviewer2.zoomTo();
-
-            glviewer1.render();
-            glviewer2.render();
-
+            $.get("volData/heat1.mdcrd", 
+            function(data) {
+                m1.setCoordinates(data, "mdcrd");
+                m2.setCoordinates(data, "mdcrd");
+                glviewer1.setStyle({},{sphere:{}});
+                glviewer2.setStyle({},{sphere:{}});
+                glviewer1.zoomTo();
+                glviewer2.zoomTo();
+                glviewer1.animate({loop:"forward",reps:1});
+                glviewer2.animate({loop:"forward",reps:1});
+                glviewer1.render(callback);
+                glviewer2.render(callback);
+            });
         });

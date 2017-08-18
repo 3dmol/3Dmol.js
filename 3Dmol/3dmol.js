@@ -562,32 +562,37 @@ if( typeof(define) === 'function' && define.amd) {
     define('$3Dmol',$3Dmol);
 }
 
-/* create 2 side by side viewers 
+/* create 2 side by side viewers for stereoscopic rendering
 * @function $3Dmol.createStereoViewer
 * @param {string} div id
-* @param {list} atoms
+* @param {number} eyeSeparation
 * @return {list} list of viewers
 */
-$3Dmol.createStereoViewer = function(divId, atoms) {
-
+$3Dmol.createStereoViewer = function(divId, eyeSeparation) {
+            eyeSeparation = (eyeSeparation != undefined)?eyeSeparation:6;
             var element = document.getElementById(divId);
             var gldiv1 = document.createElement('div');
             var gldiv2 = document.createElement('div');
             gldiv1.id = "gldiv1";
             gldiv2.id = "gldiv2";
             gldiv1.style.cssText = gldiv2.style.cssText = 'position: relative; float: left; width: 50%; height: 100%; margin: 0; padding: 0; border: 0;';
+
             element.appendChild(gldiv1);
             element.appendChild(gldiv2);
 
-            var tmp = $3Dmol.getExtent(atoms);
-            var camerax =  (tmp[1][0] - tmp[0][0])/2.0;
+            var glviewer1 = $3Dmol.createViewer($("#gldiv1"),{
+                camerax: -eyeSeparation/2.0});
 
-            glviewer1 = $3Dmol.createViewer($("#gldiv1"),{
-                camerax: -camerax});
+            var glviewer2 = $3Dmol.createViewer($("#gldiv2"),{
+                camerax: eyeSeparation/2.0});
 
-            glviewer2 = $3Dmol.createViewer($("#gldiv2"),{
-                camerax: camerax,});
-
+            var func = function() {
+                glviewer1.rotate(15);
+                glviewer2.rotate(15);
+                glviewer1.render();
+                glviewer2.render();
+            };
+            element.addEventListener("click",func,false);
             glviewer1.linkViewer(glviewer2);
             glviewer2.linkViewer(glviewer1);
 
