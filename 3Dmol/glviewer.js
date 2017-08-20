@@ -62,18 +62,22 @@ $3Dmol.GLViewer = (function() {
         // $(container).width(WIDTH);
         // $(container).height(HEIGHT);
 
-        var ASPECT = WIDTH / HEIGHT;
+       
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
         var fov = 20;
 
         var linkedViewers = [];
-
         var renderer = new $3Dmol.Renderer({
             antialias : true,
             preserveDrawingBuffer: true, //so we can export images
             premultipliedAlpha : false,/* more traditional compositing with background */
-            id:config.id
+            id:config.id,
+            row:config.row,
+            col:config.col,
+            rows:config.rows,
+            cols:config.cols,
+            canvas:config.canvas
         });
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
@@ -82,6 +86,15 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.top = "0px";
         renderer.domElement.style.left = "0px";
         renderer.domElement.style.zIndex = "0";
+
+        var row = config.row;
+        var col = config.col;
+        var cols = config.cols;
+        var rows = config.rows;
+        var viewers = config.viewers;
+        var control_all = config.control_all;
+
+        var ASPECT =renderer.getAspect(WIDTH,HEIGHT);
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
         camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
@@ -181,6 +194,7 @@ $3Dmol.GLViewer = (function() {
         // display scene
         //if nolink is set/true, don't propagate changes to linked viewers
         var show = function(nolink) {
+            renderer.setViewport();
             if (!scene)
                 return;
             // var time = new Date();
@@ -188,7 +202,8 @@ $3Dmol.GLViewer = (function() {
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
-            if(!nolink && linkedViewers.length > 0) {                var view = _viewer.getView();
+            if(!nolink && linkedViewers.length > 0) {                
+                var view = _viewer.getView();
                 for(var i = 0; i < linkedViewers.length; i++) {
                     var other = linkedViewers[i];
                     other.setView(view, true);
@@ -218,7 +233,6 @@ $3Dmol.GLViewer = (function() {
         };
 
         initializeScene();
-
         renderer.setClearColorHex(bgColor, 1.0);
         scene.fog.color = $3Dmol.CC.color(bgColor);
 
@@ -428,12 +442,35 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
+            console.log(row)
+
+
+
         };
         
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
             ev.preventDefault();
             if (!scene)
                 return;
+
+            WIDTH = container.width();
+            HEIGHT = container.height(); 
+
+            var xy = getXY(ev);
+            var x = xy[0];
+            var y = xy[1];
+            if (x === undefined)
+                return;
+            if(viewers != undefined && !control_all){
+                var width = WIDTH/cols;
+                var height = HEIGHT/rows;
+                var r =Math.floor(xy[1]/height);
+                var c=Math.floor(xy[0]/width);
+
+                if(r != row || c != col)
+                    return;
+            }
+
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
             var mult = 1.0;
             if(ev.originalEvent.ctrlKey) {
@@ -473,22 +510,21 @@ $3Dmol.GLViewer = (function() {
         var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
 
-            clearTimeout(hoverTimeout);
+            WIDTH = container.width();
+            HEIGHT = container.height();
 
-            
+            clearTimeout(hoverTimeout);
             var offset = $('canvas',container).offset();
             var mouseX = ((getXY(ev)[0] - offset.left) / WIDTH) * 2 - 1;
             var mouseY = -((getXY(ev)[1] - offset.top) / HEIGHT) * 2 + 1;
             if(current_hover !== null)
                 handleHoverContinue(mouseX,mouseY,ev);
-            hoverTimeout=setTimeout(
-                function(){
-                    handleHoverSelection(mouseX,mouseY,ev);
-                }
+                hoverTimeout=setTimeout(
+                    function(){
+                        handleHoverSelection(mouseX,mouseY,ev);
+                    }
                 ,hoverDuration);
 
-            WIDTH = container.width();
-            HEIGHT = container.height();
             ev.preventDefault();
             if (!scene)
                 return;
@@ -502,6 +538,18 @@ $3Dmol.GLViewer = (function() {
             if (x === undefined)
                 return;
             //hover timeout
+
+            if(viewers != undefined && ! control_all){
+                var width = WIDTH/cols;
+                var height = HEIGHT/rows;
+                var r =Math.floor(xy[1]/height);
+                var c=Math.floor(xy[0]/width);
+
+                if(r != row || c != col)
+                    return;
+
+            }
+
 
             var dx = (x - mouseStartX) / WIDTH;
             var dy = (y - mouseStartY) / HEIGHT;
@@ -520,7 +568,11 @@ $3Dmol.GLViewer = (function() {
                 // translate
                 mode = 1;
             }
-
+            var xyRatio = renderer.getXYRatio();
+            var ratioX = xyRatio[0];
+            var ratioY = xyRatio[1];
+            dx*=ratioX;
+            dy*=ratioY;
             var r = Math.sqrt(dx * dx + dy * dy);
             var scaleFactor;
             if (mode == 3
@@ -536,7 +588,7 @@ $3Dmol.GLViewer = (function() {
                 if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
             } else if (mode == 1 || mouseButton == 2
                     || ev.ctrlKey) { // Translate
-                var t = screenXY2model(x-mouseStartX, y-mouseStartY);
+                var t = screenXY2model(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
                 modelGroup.position.addVectors(currentModelPos,t);
                 
             } else if ((mode === 0 || mouseButton == 1)
@@ -558,7 +610,7 @@ $3Dmol.GLViewer = (function() {
             container = element;
             WIDTH = container.width();
             HEIGHT = container.height();
-            ASPECT = WIDTH / HEIGHT;
+            ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             container.append(renderer.domElement);
             glDOM = $(renderer.domElement);
@@ -625,6 +677,7 @@ $3Dmol.GLViewer = (function() {
             bgColor = c.getHex();
             renderer.setClearColorHex(c.getHex(), a);
             show();
+            
             return this;
         };
         
@@ -720,7 +773,7 @@ $3Dmol.GLViewer = (function() {
         this.resize = function() {
             WIDTH = container.width();
             HEIGHT = container.height();
-            ASPECT = WIDTH / HEIGHT;
+            ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
@@ -790,18 +843,22 @@ $3Dmol.GLViewer = (function() {
             if (typeof (axis) === "undefined") {
                 axis = "y";
             }
-            
+
+            if(axis == "x"){
+                axis = {x:1,y:0,z:0}
+            }if(axis =="y"){
+                axis = {x:0,y:1,z:0}
+            }if(axis =="z"){
+                axis = {x:0,y:0,z:1}
+            }
             var qFromAngle = function(rangle) {
                 var s = Math.sin(rangle / 2.0);
                 var c = Math.cos(rangle / 2.0);
                 var i = 0, j = 0, k = 0;
 
-                if (axis == "x")
-                    i = s;
-                if (axis == "y")
-                    j = s;
-                if (axis == "z")
-                    k = s;
+                i = axis.x * s 
+                j = axis.y * s 
+                k = axis.z * s
 
                 return new $3Dmol.Quaternion(i, j, k, c).normalize();
             }
@@ -887,6 +944,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#render
          */
         this.render = function(callback) {
+            renderer.setViewport();
             var time1 = new Date();
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();
@@ -1147,6 +1205,32 @@ $3Dmol.GLViewer = (function() {
             ret.normalize();
             return ret;
         };
+        var spinInterval;
+        this.spin = function(axis){
+            clearInterval(spinInterval)
+            if(typeof axis == 'undefined')
+                axis = 'y';
+            if(typeof axis == "boolean"){
+                if(!axis)
+                    return
+                else
+                    axis = 'y'
+            }
+
+            if(Array.isArray(axis)){
+               axis = {x:axis[0],y:axis[1],z:axis[2]} 
+            }
+            //out of bounds check
+
+            var viewer = this;
+
+            spinInterval = setInterval(
+                function(){
+                    viewer.rotate(1,axis)
+                }
+            ,25);            
+            
+        }
         
         //animate motion between current position and passed position
         // can set some parameters to null
@@ -2245,27 +2329,31 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#setFrame
          * @param {number} framenum - each model in viewer has their atoms set to this index in frames list
+         * @return {Promise}
          */
-        this.setFrame = function(framenum) {
-            for (var i = 0; i < models.length; i++) {
-                models[i].setFrame(framenum);
-            }
-            return this;
-        };
+        this.setFrame = function (framenum) {
+            return new Promise(function (resolve, reject) {
+                var modelMap = models.map(function (model) {
+                    return model.setFrame(framenum);
+                });
+                Promise.all(modelMap)
+                    .then(function() {resolve()});
+            });
+        }
         
         /**
          * Returns the number of frames that the model with the most frames in the viewer has
          * 
-         * @function $3Dmol.GLViewer#getFrames
+         * @function $3Dmol.GLViewer#getNumFrames
          * @return {number}
          */
-        this.getFrames = function() {
+        this.getNumFrames = function() {
             var mostFrames = 0;
             var modelNum = 0;
             for (var i = 0; i < models.length; i++) {
-                if (models[i].getFrames().length > mostFrames) {
+                if (models[i].getNumFrames() > mostFrames) {
                     modelNum = i;
-                    mostFrames = models[i].getFrames().length;
+                    mostFrames = models[i].getNumFrames();
                 }
             }
             return mostFrames;
@@ -2295,34 +2383,51 @@ $3Dmol.GLViewer = (function() {
             if (options.reps) {
                 reps = options.reps;
             }
-            var mostFrames = this.getFrames();
+            var mostFrames = this.getNumFrames();
             var that = this;
             var currFrame = 0;
             var inc = 1;
             var displayCount = 0;
             var displayMax = mostFrames * reps;
-            var display = function(direction) {
-
-                if (direction == "forward") {
-                    that.setFrame(currFrame);
-                    currFrame = (currFrame + inc) % mostFrames;
-                }
-                else if (direction == "backward") {
-                    that.setFrame((mostFrames-1) - currFrame);
-                    currFrame = (currFrame + inc) % mostFrames;
-                }
-                else { //back and forth
-                    that.setFrame(currFrame);
-                    currFrame += inc;
-                    inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
-                }
+            var time = new Date();
+            var resolve = function() {
                 that.render();
                 if (++displayCount == displayMax || !that.isAnimated()) {
-                    clearInterval(intervalID);
+                    clearTimeout(intervalID);
                     decAnim(); 
                 }
+                else {
+                    var newInterval = interval - (new Date() - time);
+                    newInterval = (newInterval>0)?newInterval:0;
+                    setTimeout(display, newInterval, loop);
+                }
+            }
+            var display = function(direction) {
+                time = new Date();
+                if (direction == "forward") {
+                    that.setFrame(currFrame)
+                    .then(function () {
+                        currFrame = (currFrame + inc) % mostFrames;
+                        resolve();
+                    });
+                }
+                else if (direction == "backward") {
+                    that.setFrame((mostFrames-1) - currFrame)
+                    .then(function () {
+                        currFrame = (currFrame + inc) % mostFrames;
+                        resolve();
+                    });
+                }
+                else { //back and forth
+                    that.setFrame(currFrame)
+                    .then(function () {
+                        currFrame += inc;
+                        inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
+                        resolve();
+                    });          
+                }
             };
-            var intervalID = setInterval( function() { display(loop); }, interval);
+            var intervalID = setTimeout(display, 0, loop);
             return this;
         };
         
@@ -3069,14 +3174,14 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Add surface representation to atoms
-         *  @function $3Dmol.GLViewer#addSurface
+         * @function $3Dmol.GLViewer#addSurface
          * @param {$3Dmol.SurfaceType|string} type - Surface type (VDW, MS, SAS, or SES)
          * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
-         * 
-         * @return {number} surfid - Identifying number for this surface
+         * @param {function} surfacecallback - function to be called after setting the surface
+         * @return {number} surfid - Identifying number for this surface, else promise if no surfacecallback is specified
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -3092,7 +3197,6 @@ $3Dmol.GLViewer = (function() {
             
             //surfacecallback gets called when done
             var surfid = nextSurfID();
-
             if(typeof type =="string"){
                 if(surfaceTypeMap[type]!== undefined)
                     type = surfaceTypeMap[type];
@@ -3138,7 +3242,6 @@ $3Dmol.GLViewer = (function() {
                 var atom;
                 var time = new Date();
                 var extent = $3Dmol.getExtent(atomsToShow, true);
-
                 var i, il;
                 if (style['map'] && style['map']['prop']) {
                     // map color space using already set atom properties
@@ -3211,31 +3314,31 @@ $3Dmol.GLViewer = (function() {
 
                     // to keep the browser from locking up, call through setTimeout
                     var callSyncHelper = function callSyncHelper(i) {
-                        if (i >= extents.length) {
-                            surfobj.done = true;
-                            if(surfacecallback && typeof(surfacecallback) == "function") {
-                                surfacecallback(surfid);
+                        return new Promise(function(resolve, reject) { 
+                            var VandF = generateMeshSyncHelper(type, extents[i].extent,
+                                    extents[i].atoms, extents[i].toshow, reducedAtoms,
+                                    totalVol);
+                            //complicated surfaces sometimes have > 2^16 vertices
+                            var VandFs = $3Dmol.splitMesh({vertexArr:VandF.vertices, faceArr:VandF.faces});
+                            for(var vi=0,vl=VandFs.length;vi<vl;vi++){
+                                var VandF={vertices:VandFs[vi].vertexArr,
+                                        faces:VandFs[vi].faceArr};                            
+                                var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                                $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
-                            return;
-                        }
-
-                        var VandF = generateMeshSyncHelper(type, extents[i].extent,
-                                extents[i].atoms, extents[i].toshow, reducedAtoms,
-                                totalVol);
-                        //complicated surfaces sometimes have > 2^16 vertices
-                        var VandFs = $3Dmol.splitMesh({vertexArr:VandF.vertices, faceArr:VandF.faces});
-                        for(var vi=0,vl=VandFs.length;vi<vl;vi++){
-                            var VandF={vertices:VandFs[vi].vertexArr,
-                                    faces:VandFs[vi].faceArr};                            
-                            var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                            $3Dmol.mergeGeos(surfobj.geo, mesh);
-                        }
-                        _viewer.render();
-
-                        setTimeout(callSyncHelper, 1, i + 1);
+                            _viewer.render();
+                            resolve();
+                        })
                     }
-
-                    setTimeout(callSyncHelper, 1, 0);
+                    var promises = [];
+                    for (var i = 0; i < extents.length; i++) {
+                        promises.push(callSyncHelper(i));
+                    }
+                    return Promise.all(promises)
+                    .then(function() {
+                        surfobj.done = true;
+                        return Promise.resolve(surfid);
+                    });
 
                     // TODO: Asynchronously generate geometryGroups (not separate
                     // meshes) and merge them into a single geometry
@@ -3254,26 +3357,18 @@ $3Dmol.GLViewer = (function() {
                             'volume' : totalVol
                         });
                     }
-                    var cnt = 0;
 
-                    var rfunction = function(event) {
-                        var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
-                                                       faceArr:event.data.faces});
-                        for(var i=0,vl=VandFs.length;i<vl;i++){
-                            var VandF={vertices:VandFs[i].vertexArr,
-                                       faces:VandFs[i].faceArr};
-                            var mesh = generateSurfaceMesh(atomlist, VandF, mat);
-                            $3Dmol.mergeGeos(surfobj.geo, mesh);
-                        }
-                        _viewer.render();
-
-                    //    console.log("async mesh generation " + (+new Date() - time) + "ms");
-                        cnt++;
-                        if (cnt == extents.length) {
-                            surfobj.done = true;
-                            if(surfacecallback && typeof(surfacecallback) == "function") {
-                                surfacecallback(surfid);
+                    var rfunction = function(event_data) {
+                        for (var j=0;j<event_data.length;j++) {
+                            var VandFs = $3Dmol.splitMesh({vertexArr:event_data[j].vertices,
+                                                           faceArr:event_data[j].faces});
+                            for(var i=0,vl=VandFs.length;i<vl;i++){
+                                var VandF={vertices:VandFs[i].vertexArr,
+                                           faces:VandFs[i].faceArr};
+                                var mesh = generateSurfaceMesh(atomlist, VandF, mat);
+                                $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
+                            _viewer.render();
                         }
                     };
 
@@ -3281,19 +3376,37 @@ $3Dmol.GLViewer = (function() {
                         console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
                     };
 
-                    for (i = 0; i < extents.length; i++) {
-                        var worker = workers[i % workers.length];
-                        worker.onmessage = rfunction;
-
-                        worker.onerror = efunction;
-
-                        worker.postMessage({
-                            'type' : type,
-                            'expandedExtent' : extents[i].extent,
-                            'extendedAtoms' : extents[i].atoms,
-                            'atomsToShow' : extents[i].toshow
+                    var startWorker = function(i) {
+                        return new Promise(function(resolve, reject) {
+                            var worker = workers[i % workers.length];
+                            worker.onmessage = function(event) {
+                                resolve(event.data);
+                            }
+                            worker.onerror = function(event) {
+                                reject(event);
+                            }
+                            worker.postMessage({
+                                'type' : type,
+                                'expandedExtent' : extents[i].extent,
+                                'extendedAtoms' : extents[i].atoms,
+                                'atomsToShow' : extents[i].toshow
+                            });
                         });
                     }
+                    var promises = []
+                    for (i = 0; i < extents.length; i++) {
+                        promises.push(startWorker(i));
+                    }
+
+                    return Promise.all(promises)
+                    .then(function(event_data) {
+                        rfunction(event_data);
+                        surfobj.done = true;
+                        return Promise.resolve(surfid);
+                    })
+                    .catch(function(event) {
+                        efunction(event);
+                    });
                 }
 
                 // NOTE: This is misleading if 'async' mesh generation - returns
@@ -3329,7 +3442,7 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]);
+                        var promise = addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n])
                     }
                 }
             }
@@ -3341,12 +3454,16 @@ $3Dmol.GLViewer = (function() {
                     finished : false,
                     symmetries : [new $3Dmol.Matrix4()]
                 });
-                addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
-            } 
+                var promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow)
+            }
             surfaces[surfid] = surfobj;
-            
-            return surfid;
-
+            if(surfacecallback && typeof(surfacecallback) == "function") {
+                promise.then(function(surfid) {
+                    surfacecallback(surfid);
+                });
+                return surfid;
+            }
+            else return promise;
         };
 
         /**

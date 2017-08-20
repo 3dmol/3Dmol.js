@@ -52,7 +52,13 @@ var createAttribute = function(name,value,parent){
         type = "labelres";
         validNames =$3Dmol.GLModel.validLabelResSpecs;
         other=true;
+    }else if(name != ""){
+        //undefined name 
+        return undefined;
     }
+
+    if(validNames[name] == undefined && name!="")
+        return undefined
 
     var attribute_name = $('<select>',{
         class:'attribute_name',
@@ -103,21 +109,17 @@ var createAttribute = function(name,value,parent){
     }).appendTo(attribute); 
 
     var itemIsDescrete = function(key){
-        console.log(key)
-        console.log(validNames[key])
-        console.log(validNames)
         if(key == "")
             return false;
         var type = validNames[key].type;
         return type == "boolean" || type == "color" || type == "colorscheme" || validNames[key].validItems!=undefined
     }
- 
     var attribute_value;
-    if(itemIsDescrete(name)){
+    if(itemIsDescrete(name) ){
         var validItemsValue;
-        if( validNames[name].type != undefined)
+        if(validNames[name].type != undefined)
             var type = validNames[name].type.toLowerCase();
-        else 
+        else
             var type = undefined
         if(type=="boolean"){
             validItemsValue = ["false","true"];
@@ -150,7 +152,6 @@ var createAttribute = function(name,value,parent){
         }).appendTo(attribute);
     }
     attribute_name.change(function(){
-        console.log("attribute_index")
         var validItemsValue;
         var type = validNames[attribute_name.val()].type
         if(type=="boolean"){
@@ -179,7 +180,7 @@ var createAttribute = function(name,value,parent){
         render(obj_type == "surface");
     });
 
-    if(name!="" &&  attribute_value.prop("tagName") == "INPUT" && validNames[name].type =="number"){
+    if(name!="" &&attribute_value.prop("tagName") == "INPUT" && validNames[name].type =="number"){
         validNames[name].type =="number"
         attribute_value.attr("type","number")
         attribute_value.attr("step",validNames[name].step)
@@ -227,15 +228,10 @@ var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type
     }).appendTo(style_spec);
 
     style_spec_name.change(function(){
-        console.log("------------------------------")
         var obj = query.selections[selection_index]["style"][style_spec_type];
-        console.log(style_spec_name.val())
-        console.log(validNames[style_spec_name.val()].validItems)
         for(var i in obj){
             if(!validNames[style_spec_name.val()].validItems.hasOwnProperty(i)){
-                console.log(query.selections[selection_index]["style"][style_spec_type][i])
                 delete query.selections[selection_index]["style"][style_spec_type][i];
-                console.log(query.selections[selection_index]["style"][style_spec_type][i])
             }
         }
         query.selections[selection_index]["style"][style_spec_name.val()]=query.selections[selection_index]["style"][style_spec_type];
@@ -357,13 +353,14 @@ var createSelection = function(spec,object,index,type){
         var attribute_pairs =[];
         for(var subselection in spec){
             var obj=spec[subselection];
+            if(Object.keys(obj).length === 0)
+                obj = ""
             attribute_pairs.push(subselection+":"+obj);
         }
 
         var modifier=attribute_pairs.join(";");
         if(modifier == "")
             modifier = "all"
-
         var selection_spec=$('<input/>', {
             class:'selection_spec',
             value:modifier,
@@ -403,13 +400,32 @@ var buildHTMLTree = function(query){
     //$("#model_type").attr("value",query.file.type); 
     document.getElementById("model_type").value = query.file.type
     $("#model_type").change(function(){
-        render();
+        var val =  $("#model_type").val().toUpperCase();
+        if(prev_type != val){
+            
+            render(true);
+            run();
+            glviewer.translate(width/2,0,0,false);
+        }
+        prev_type = val
     })
 
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(function(){
-        render();
-        run();
+        var val =  $("#model_input").val().toUpperCase();
+        if(prev_in != val){
+            if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
+                glviewer.clear();
+                render(true);
+                run();
+                var width = $("#sidenav").width();
+                glviewer.translate(width/2,0,0,false);
+            }else{
+                if(prev_in!= val)
+                    alert("Invalid PDB")
+            }
+        }
+        prev_in = val;
     })
     var arr=[]
     //loops through selections and creates a selection tree
@@ -432,15 +448,32 @@ var buildHTMLTree = function(query){
             parent.append(arr[i])
     }
     //this adds spinners to things with spinner as a class this is here because they need to ba  a part of the dom before this is called
-    $('<li id = "spacer"><br><br><br><br></li>').appendTo(parent)
+    $('<li id = "spacer"><br><br><br></li>').appendTo(parent)
 }
 //takes the queyr object and creates a url for it
 var queryToURL = function(query){
+
+    var isSame = function(obj1,obj2){
+        for(var key in obj1){
+            if(Array.isArray(obj1[key])){
+                if(Array.isArray(obj2[key]))
+                    return arraysEqual(obj1[key],obj2[key])
+                return false;
+            }
+            if(obj2[key]==undefined || obj2[key] != obj1[key])
+                return false;
+        }
+        return true;
+    }
     var url = "";
     //unpacks everything except for style which has multiple layers 
     var unpackOther = function (object){
+        
+
         var objs =[]
         $.each(object, function(key,value){
+            if(isSame(value,{}))
+                value = ""
             //array values 
             if(Array.isArray(value)){
                 //sperate by commas
@@ -482,7 +515,8 @@ var queryToURL = function(query){
                 objs.push(obj+"="+unpackOther(object[obj]))
             }
         }
-        var select="select="+unpackOther(augmentSelection(object));
+        var unpacked =unpackOther(augmentSelection(object));
+        var select="select="+ unpacked
         if(select == "select=")
             select = "select=all"
         objs.unshift(select);//prepend
@@ -517,12 +551,11 @@ function setURL(urlPath){
     window.history.pushState('page2',"Title", "viewer.html?"+urlPath);
 }
 //this function will look through the dictionaries defined in glmodel and validate if the types are correct and return a dictionary with flags for the types that are incorecct
-var validateQuery = function(query){
 
-}
 var count = 0;
 //takes the search url string and makes a query object for it 
 var urlToQuery = function(url){
+    url= decodeURIComponent(url)
     if(url == "")
         return new Query();
     var query = new Query();
@@ -564,10 +597,8 @@ var urlToQuery = function(url){
             query.file.helper = string;
         }
     }
-    console.log(query.selections[0])
     if(query.selections[0] === {})
         delete query.selections[0]
-    console.log(query.selections[0])
     return query;
 }
 
@@ -576,16 +607,12 @@ var updateQueryFromHTML = function(){
     query.file.path= $("#model_input").val(); 
     query.file.type=$("#model_type").val();
 
-    $("#model_type").change(function(){
-       render();
-    });
-
+   
     var updateOther = function(other){
         var object={};
      
         var otherList = $(other).children(".attribute");
         otherList.each(function(li){
-            console.log($(otherList[li]).children(".attribute_value")[0].value)
             object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value
         });
         return object;
@@ -604,7 +631,6 @@ var updateQueryFromHTML = function(){
                 var tag=object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].tagName
                 object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value;
             });
-            
         });
         return object;
     }
@@ -651,7 +677,6 @@ var updateQueryFromHTML = function(){
             var getSubObject = function(){
                 var attr = $(value);
                 var attribute=attr[0]
-                console.log($(attribute).children()[1].innerHTML)
                 var type=$(attribute).children()[1].innerHTML.toLowerCase()
 
                 if(type=="style"){
@@ -785,13 +810,15 @@ var initSide = function(url){
     $(window).on('popstate', function() {
         query = urlToQuery(window.location.search.substring(1));
         buildHTMLTree(query);
-        render();
+        render(true);
     });
 
     buildHTMLTree(query);
 }
 var toggle = true;
 var width=420;
+var prev_in = $("#model_input").val();
+var prev_type = $("#model_type").val();
 var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
@@ -804,7 +831,8 @@ var toggleHide =  function(){
         $("#sidenav").css("width","0");
         $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#header').css("display","none")
         $("#menu").css("display","inline");
-        glviewer.translate(-200,0,400,false);
+        width = $("#sidenav").width();
+        glviewer.translate(-width/2,0,400,false);
         glviewer.render();
     }
     toggle = !toggle;
