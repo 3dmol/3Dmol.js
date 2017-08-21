@@ -1686,6 +1686,7 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.z = finalz;
                 show();
             }
+            camera.lookAt(new $3Dmol.Vector3(0,0,finalz)); //required if camera has a non-zero camerax value
             return this;
         
         };
@@ -3232,7 +3233,7 @@ $3Dmol.GLViewer = (function() {
             }
 
             var addSurfaceHelper = function addSurfaceHelper(surfobj, atomlist, atomsToShow) {
-            
+                //function returns promise with surfid resolved
                 if(!focus) {
                     focusSele = atomsToShow;
                 } else {
@@ -3398,7 +3399,7 @@ $3Dmol.GLViewer = (function() {
                         promises.push(startWorker(i));
                     }
 
-                    return Promise.all(promises)
+                    return Promise.all(promises) //proceed forward only when all the workers are done
                     .then(function(event_data) {
                         rfunction(event_data);
                         surfobj.done = true;
