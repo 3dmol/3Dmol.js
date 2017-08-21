@@ -573,7 +573,7 @@ $3Dmol.createStereoViewer = function(divId, eyeSeparation) {
     var that = this;
     eyeSeparation = (eyeSeparation != undefined)?eyeSeparation:6;
     var element = document.getElementById(divId);
-    var gldiv1 = document.createElement('div');
+    var gldiv1 = document.createElement('div'); //create two divs having half of the width and place them side by side
     var gldiv2 = document.createElement('div');
     gldiv1.id = "gldiv1";
     gldiv2.id = "gldiv2";
@@ -588,43 +588,57 @@ $3Dmol.createStereoViewer = function(divId, eyeSeparation) {
     this.glviewer2 = $3Dmol.createViewer($("#gldiv2"),{
         camerax: eyeSeparation/2.0});
 
-    var func = function() {
+    var singleClickEvent = function() {
         that.glviewer1.rotate(15);
         that.glviewer2.rotate(15);
         that.glviewer1.render();
         that.glviewer2.render();
     };
-    element.addEventListener("click",func,false);
+
+    var doubleClickEvent = function() {
+        that.glviewer1.zoom(1.05);
+        that.glviewer2.zoom(1.05);
+    };
+
+    var clicks = 0, DELAY = 700, timer = null;
+    var handleClicks = function() { //to handle single and double clicks differently
+        clicks++;
+        if (clicks == 1) {
+            timer = setTimeout(function() {
+                singleClickEvent();
+                clicks = 0;
+            },DELAY);
+        }
+        else {
+            clearTimeout(timer);
+            doubleClickEvent();
+            clicks = 0;
+        }
+    };
+    element.addEventListener("click", handleClicks, false);
+
     this.glviewer1.linkViewer(this.glviewer2);
     this.glviewer2.linkViewer(this.glviewer1);
 
-    this.setStyle = function (sel,style) {
-        this.glviewer1.setStyle(sel,style);
-        this.glviewer2.setStyle(sel,style);
+    var methods = Object.getOwnPropertyNames(this.glviewer1) //get all methods of glviewer object
+    .filter(function(property) {
+        return typeof that.glviewer1[property] == 'function';
+    });
+
+    for (var i = 0; i < methods.length; i++) { //create methods of the same name
+        this[methods[i]] = (function(method){
+            return function(){
+                var m1=this['glviewer1'][method].apply(this['glviewer1'],arguments);
+                var m2=this['glviewer2'][method].apply(this['glviewer2'],arguments);
+                return [m1,m2];
+            };
+        })(methods[i]);
     }
-    this.zoomTo = function (sel, animationDuration, fixedPath) {
-        this.glviewer1.zoomTo(sel, animationDuration, fixedPath);
-        this.glviewer2.zoomTo(sel, animationDuration, fixedPath);
-    }
-    this.animate = function (options) {
-        this.glviewer1.animate(options);
-        this.glviewer2.animate(options);
-    }
-    this.render = function (callback) {
-        this.glviewer1.render(callback);
-        this.glviewer2.render(callback);
-    }
-    this.setBackgroundColor = function (hex, a) {
-        this.glviewer1.setBackgroundColor(hex,a);
-        this.glviewer2.setBackgroundColor(hex,a);
-    }
-    this.addModel = function (data, format, options) {
-        var m1 = this.glviewer1.addModel(data, format, options);
-        var m2 = this.glviewer2.addModel(data, format, options);
-        return [m1,m2];
-    }
-    this.setCoordinates = function (models, data, format) {
-        models[0].setCoordinates(data, format);
-        models[1].setCoordinates(data, format);
-    }
+
+    this.setCoordinates = function (models, data, format) { //for setting the coordinates of the models
+        for (var i = 0; i < models.length; i++) {
+            models[i].setCoordinates(data, format);
+        }
+    };
+
 }
