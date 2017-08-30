@@ -9,7 +9,6 @@
 $3Dmol = (function(window) {
     
     var my = window['$3Dmol'] || {};
-    //var $ = window['jQuery'];
     
     return my;
 
@@ -26,7 +25,9 @@ if ( typeof module === "object" && typeof module.exports === "object" ) {
    leave this code in if you would like to increase the 
    likelihood of 3Dmol.js remaining supported.
 */
-$.get("https://3dmol.csb.pitt.edu/track/report.cgi");
+if(!$3Dmol.notrack) {
+ $.get("https://3dmol.csb.pitt.edu/track/report.cgi");
+}
 
 /* shims for IE */
 /*
