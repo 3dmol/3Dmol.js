@@ -1686,6 +1686,7 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.z = finalz;
                 show();
             }
+            camera.lookAt(new $3Dmol.Vector3(0,0,finalz)); //required if camera has a non-zero camerax value
             return this;
         
         };
@@ -3232,7 +3233,7 @@ $3Dmol.GLViewer = (function() {
             }
 
             var addSurfaceHelper = function addSurfaceHelper(surfobj, atomlist, atomsToShow) {
-            
+                //function returns promise with surfid resolved
                 if(!focus) {
                     focusSele = atomsToShow;
                 } else {
@@ -3398,7 +3399,7 @@ $3Dmol.GLViewer = (function() {
                         promises.push(startWorker(i));
                     }
 
-                    return Promise.all(promises)
+                    return Promise.all(promises) //proceed forward only when all the workers are done
                     .then(function(event_data) {
                         rfunction(event_data);
                         surfobj.done = true;
@@ -3637,6 +3638,40 @@ $3Dmol.GLViewer = (function() {
             // errors in callback shouldn't invalidate the viewer
             console.log("error with glviewer callback: " + e);
         }
+
+        /**
+         * Return the z distance between the model and the camera
+         * @function $3Dmol.GLViewer#getPerceivedDistance
+         * @return {number} distance
+         */
+        this.getPerceivedDistance = function() {
+            return CAMERA_Z - rotationGroup.position.z;
+        }
+
+        /**
+         * Set the distance between the model and the camera
+         * Essentially zooming. Useful while stereo rendering.
+         * @function $3Dmol.GLViewer#setPerceivedDistance
+         */
+        this.setPerceivedDistance = function(dist) {
+            rotationGroup.position.z = CAMERA_Z - dist;
+        }
+
+        /**
+         * Used for setting an approx value of eyeSeparation. Created for calling by StereoViewer object
+         * @function $3Dmol.GLViewer#setAutoEyeSeparation
+         * @return {number} camera x position
+         */
+        this.setAutoEyeSeparation = function() {
+            var dist = this.getPerceivedDistance();
+            if (camera.position.x > 0) //setting a value of dist*tan(5)
+                camera.position.x = dist*Math.tan(Math.PI / 180.0 * 5.0) 
+            else
+                camera.position.x = -dist*Math.tan(Math.PI / 180.0 * 5.0)
+            camera.lookAt(new $3Dmol.Vector3(0,0,rotationGroup.position.z));
+            return camera.position.x
+        }
+
     }
 
     return GLViewer;
