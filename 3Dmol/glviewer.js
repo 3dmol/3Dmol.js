@@ -3181,7 +3181,7 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
          * @param {function} surfacecallback - function to be called after setting the surface
-         * @return {number} surfid - Identifying number for this surface, else promise if no surfacecallback is specified
+         * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a surfid field for immediate access.
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -3418,7 +3418,7 @@ $3Dmol.GLViewer = (function() {
             style = style || {};
             var mat = getMatWithStyle(style);
             var surfobj = [];
-            
+            var promise = null;
             if (symmetries) { //do preprocessing
                 var modelsAtomList = {};
                 var modelsAtomsToShow = {};
@@ -3432,6 +3432,7 @@ $3Dmol.GLViewer = (function() {
                 for (n = 0; n < atomsToShow.length; n++) {
                     modelsAtomsToShow[atomsToShow[n].model].push(atomsToShow[n]);
                 }
+                var promises = [];
                 for (n = 0; n < models.length; n++) {
                     if(modelsAtomsToShow[n].length > 0) {
                         surfobj.push({
@@ -3442,9 +3443,10 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        var promise = addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n])
+                        promises.append(addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]))
                     }
                 }
+                promise = Promise.all(promises);
             }
             else {
                 surfobj.push({
@@ -3454,9 +3456,10 @@ $3Dmol.GLViewer = (function() {
                     finished : false,
                     symmetries : [new $3Dmol.Matrix4()]
                 });
-                var promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow)
+                promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow)
             }
             surfaces[surfid] = surfobj;
+            promise.surfid = surfid;
             if(surfacecallback && typeof(surfacecallback) == "function") {
                 promise.then(function(surfid) {
                     surfacecallback(surfid);
