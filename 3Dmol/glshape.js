@@ -1026,31 +1026,44 @@ $3Dmol.GLShape = (function() {
             var newvertices= [];
             var newfaces=[];
 
-            if (volSpec.selectedRegion !== undefined) {
+            if (volSpec.selectedRegion && volSpec.coords === undefined) {
+                volSpec.coords = volSpec.selectedRegion; //backwards compat for incorrectly documented feature
+            }
+            if (volSpec.coords !== undefined) {
 
-                var xmax = volSpec.selectedRegion[0].x, 
-                    ymax = volSpec.selectedRegion[0].y, 
-                    zmax = volSpec.selectedRegion[0].z, 
-                    xmin = volSpec.selectedRegion[0].x, 
-                    ymin = volSpec.selectedRegion[0].y, 
-                    zmin = volSpec.selectedRegion[0].z;
+                var xmax = volSpec.coords[0].x, 
+                    ymax = volSpec.coords[0].y, 
+                    zmax = volSpec.coords[0].z, 
+                    xmin = volSpec.coords[0].x, 
+                    ymin = volSpec.coords[0].y, 
+                    zmin = volSpec.coords[0].z;
 
-                for (var i = 0; i < volSpec.selectedRegion.length; i++) {
-                    if (volSpec.selectedRegion[i].x > xmax)
-                        xmax = volSpec.selectedRegion[i].x;
-                    else if (volSpec.selectedRegion[i].x < xmin)
-                        xmin = volSpec.selectedRegion[i].x;
-                    if (volSpec.selectedRegion[i].y > ymax)
-                        ymax = volSpec.selectedRegion[i].y;
-                    else if (volSpec.selectedRegion[i].y < ymin)
-                        ymin = volSpec.selectedRegion[i].y;
-                    if (volSpec.selectedRegion[i].z > zmax)
-                        zmax = volSpec.selectedRegion[i].z;
-                    else if (volSpec.selectedRegion[i].z < zmin)
-                        zmin = volSpec.selectedRegion[i].z;
+                for (var i = 0; i < volSpec.coords.length; i++) {
+                    if (volSpec.coords[i].x > xmax)
+                        xmax = volSpec.coords[i].x;
+                    else if (volSpec.coords[i].x < xmin)
+                        xmin = volSpec.coords[i].x;
+                    if (volSpec.coords[i].y > ymax)
+                        ymax = volSpec.coords[i].y;
+                    else if (volSpec.coords[i].y < ymin)
+                        ymin = volSpec.coords[i].y;
+                    if (volSpec.coords[i].z > zmax)
+                        zmax = volSpec.coords[i].z;
+                    else if (volSpec.coords[i].z < zmin)
+                        zmin = volSpec.coords[i].z;
                 }
 
-                var rad = volSpec.radius;
+                var rad = 2;
+                if(volSpec.radius !== undefined) {
+                    rad = volSpec.radius; //backwards compat
+                }
+                if(volSpec.selectedOffset !== undefined) { //backwards compat
+                    rad = volSpec.selectedOffset;
+                }
+                if(volSpec.seldist !== undefined) { 
+                    rad = volSpec.seldist;
+                }
+
                 xmin -= rad;
                 xmax += rad;
                 ymin -= rad;
@@ -1067,8 +1080,7 @@ $3Dmol.GLShape = (function() {
                             && verts[i].z > zmin
                             && verts[i].z < zmax
                             && inSelectedRegion(verts[i],
-                                    volSpec.selectedRegion,
-                                    volSpec.selectedOffset, volSpec.radius)) {
+                                    volSpec.coords, rad)) {
                         vertexmapping.push(newvertices.length);
                         newvertices.push(verts[i]);
 
@@ -1123,7 +1135,7 @@ $3Dmol.GLShape = (function() {
             if(typeof callback =="function")
                 callback();
           }
-        var inSelectedRegion=function(coordinate,selectedRegion,offset,radius){
+        var inSelectedRegion=function(coordinate,selectedRegion,radius){
             
             for(var i=0;i<selectedRegion.length;i++){
                 if(distance_from(selectedRegion[i],coordinate)<=radius)

@@ -116,7 +116,7 @@ module.exports = function(grunt) {
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
-                    'language_in': 'ECMASCRIPT5'
+                    'language_in': 'ECMASCRIPT6'
                 }
             },
             mmtf : {
@@ -128,7 +128,7 @@ module.exports = function(grunt) {
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
-                    'language_in': 'ECMASCRIPT5'
+                    'language_in': 'ECMASCRIPT6'
                 }
             },
             pako : {
@@ -140,7 +140,7 @@ module.exports = function(grunt) {
                 options : {
                     'compilation_level': 'SIMPLE_OPTIMIZATIONS',
                     'warning_level': 'DEFAULT',
-                    'language_in': 'ECMASCRIPT5'
+                    'language_in': 'ECMASCRIPT6'
                 }
             },           
         },
