@@ -29,7 +29,7 @@ $3Dmol.autoload=function(viewer,callback){
                 datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.data("cid") + 
                 "/SDF?record_type=3d");
             }
-            else if (viewerdiv.data("href")){
+            else if (viewerdiv.data("href") || viewerdiv.data("url")){
                 var uri = viewerdiv.data("href");
                 datauri.push(uri);
                 var type = uri.substr(uri.lastIndexOf('.')+1);                
@@ -147,7 +147,7 @@ $3Dmol.autoload=function(viewer,callback){
                     glviewer.addModel(moldata, type, options);
                     i += 1;
                     if(i < datauri.length) {
-                        $.get(datauri[i], process);
+                        $.get(datauri[i], process, 'text');
                     }
                     else {
                         // or finalize if this is the last model
@@ -163,7 +163,7 @@ $3Dmol.autoload=function(viewer,callback){
                         if(callback) callback(glviewer);
                     }
                 }
-                $.get(datauri[0], process);
+                $.get(datauri[0], process, 'text');
          
             }           
             else {

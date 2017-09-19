@@ -79,11 +79,11 @@ There is also an unminified version provided that is missing jQuery for use when
 
 The files hosted by 3Dmol.csb.pitt.edu closely track the development version and so
 will change frequently.  If you desire more stability you may copy the files into your
-own project or, alternatively, we host release snapshots on the <a href="http://www.jsdelivr.com">jsDeliver</a>
-content delivery network (CDN).
+own project or, alternatively, we host release snapshots on the <a href="http://www.jsdelivr.com">CloudFare</a>
+content delivery network (note that you must specify the release version).
 ```
-{@lang xml}<script src="http://cdn.jsdelivr.net/3dmol.js/latest/3Dmol-min.js"></script>
-<script src="http://cdn.jsdelivr.net/3dmol.js/latest/3Dmol-nojquery-min.js"></script>
+{@lang xml}<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.2.0/3Dmol-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.2.0/3Dmol-nojquery.js"></script>
 ```
 
 Using the CDN will likely provide the best network performance to your users, but features will
