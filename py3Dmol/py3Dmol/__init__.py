@@ -13,11 +13,16 @@ class view(object):
        to be an active kernel but also that there is no communication between
        the javascript viewer and ipython.
        
+       Optionally, a viewergrid tuple (rows,columns) can be passed to create
+       a grid of viewers in a single canvas object.  Successive commands than need to
+       specify which viewer they apply to (with viewer=(r,c)) or will apply to all
+       viewers in the grid.
+       
        The API for the created object is exactly that for $3Dmol.GLViewer, with
        the exception that the functions all return None.
        http://3dmol.csb.pitt.edu/doc/$3Dmol.GLViewer.html
     '''
-    def __init__(self,width=640,height=480,query='',options=dict(),js='https://3dmol.csb.pitt.edu/build/3Dmol.js'):
+    def __init__(self,width=640,height=480,query='',viewergrid=None,linked=True,options=dict(),js='https://3dmol.csb.pitt.edu/build/3Dmol.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
@@ -36,12 +41,33 @@ class view(object):
         self.startjs += "var viewer_UNIQUEID = null;\n";
         self.startjs += "$3Dmolpromise.done(function() {\n";
         self.endjs = "});\n" + self.endjs
-
-        self.startjs += 'viewer_UNIQUEID = $3Dmol.createViewer($("#%s"),{backgroundColor:"white"});\n' % divid
+        self.viewergrid = None
+        
+        if viewergrid: #create split view
+            if len(viewergrid) != 2:
+                raise ValueError("Incorrectly formated viewergrid arguments.  Must specify rows x columns",viewergrid)
+            self.startjs += "var viewergrid_UNIQUEID = null;\n";
+            self.startjs += 'viewergrid_UNIQUEID = $3Dmol.createViewerGrid($("#%s"),{rows: %d, cols: %d, control_all: %s},{backgroundColor:"white"});\n' % (divid, viewergrid[0],viewergrid[1],'true' if linked else 'false')
+            self.startjs += "viewer_UNIQUEID = viewergrid_UNIQUEID[0][0];\n" 
+            self.viewergrid = viewergrid
+        else:
+            self.startjs += 'viewer_UNIQUEID = $3Dmol.createViewer($("#%s"),{backgroundColor:"white"});\n' % divid
         if query:
-            self.startjs += '$3Dmol.download("%s", viewer_UNIQUEID, %s, function() {\n' % (query,json.dumps(options))
-            self.endjs = "})\n" + self.endjs        
-        self.endjs = "viewer_UNIQUEID.render();\n" + self.endjs;
+            if viewergrid:
+                for r in range(viewergrid[0]):
+                    for c in range(viewergrid[1]):
+                        self.startjs += '$3Dmol.download("%s", viewergrid_UNIQUEID[%d][%d], %s, function() {\n' % (query,r,c,json.dumps(options))
+                        self.endjs = "})\n" + self.endjs
+            else:
+                self.startjs += '$3Dmol.download("%s", viewer_UNIQUEID, %s, function() {\n' % (query,json.dumps(options))
+                self.endjs = "})\n" + self.endjs        
+        
+        if viewergrid:
+            for r in range(viewergrid[0]):
+                for c in range(viewergrid[1]):
+                    self.endjs = "viewergrid_UNIQUEID[%d][%d].render();\n"%(r,c) + self.endjs;
+        else:
+            self.endjs = "viewer_UNIQUEID.render();\n" + self.endjs;
 
     def show(self):
         '''Instantiate a new viewer window. Calling this will orphan any previously instantiated viewer windows.'''
@@ -92,12 +118,33 @@ class view(object):
         if name.startswith('_'): #object to ipython canary functions
             raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
                                                   
-        def makejs(*args):            
-            cmd = '\tviewer_UNIQUEID.%s(' % name;
-            for arg in args:
-                cmd += '%s,' % json.dumps(arg)
-            cmd = cmd.rstrip(',')
-            cmd += ');\n';
+        def makejs(*args,**kwargs):            
+            if self.viewergrid:
+                if 'viewer' in kwargs:
+                    coords = kwargs['viewer']
+                    if len(coords) != 2 or coords[0] >= self.viewergrid[0] or coords[1] >= self.viewergrid[1] or coords[0] < 0 or coords[1] < 0:
+                        raise ValueError("Incorrectly formated viewer argument.  Must specify row and column",self.viewergrid)
+                    cmd = '\tviewergrid_UNIQUEID[%d][%d].%s(' % (coords[0],coords[1],name);
+                    for arg in args:
+                        cmd += '%s,' % json.dumps(arg)
+                    cmd = cmd.rstrip(',')
+                    cmd += ');\n';
+                else: #apply to every viewer
+                    cmd = ''
+                    for r in range(self.viewergrid[0]):
+                        for c in range(self.viewergrid[1]):
+                            cmd += '\tviewergrid_UNIQUEID[%d][%d].%s(' % (r,c,name);
+                            for arg in args:
+                                cmd += '%s,' % json.dumps(arg)
+                            cmd = cmd.rstrip(',')
+                            cmd += ');\n';
+            else:
+                cmd = '\tviewer_UNIQUEID.%s(' % name;
+                for arg in args:
+                    cmd += '%s,' % json.dumps(arg)
+                cmd = cmd.rstrip(',')
+                cmd += ');\n';
+
             self.startjs += cmd
             self.updatejs += cmd
             return self

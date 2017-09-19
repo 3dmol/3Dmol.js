@@ -442,10 +442,6 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
-            console.log(row)
-
-
-
         };
         
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
