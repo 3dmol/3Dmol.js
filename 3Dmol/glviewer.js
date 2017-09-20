@@ -396,6 +396,26 @@ $3Dmol.GLViewer = (function() {
             t.applyQuaternion(q);
             return t;
         }
+        
+        //for grid viewers, return true if point is in this viewer
+        var isInViewer = function(x,y) {
+            var WIDTH = container.width();
+            var HEIGHT = container.height(); 
+            if(viewers != undefined && !control_all){
+                var width = WIDTH/cols;
+                var height = HEIGHT/rows;
+                var offset = $('canvas',container).offset();
+                var relx = (x - offset.left)
+                var rely = (y - offset.top) 
+                    
+                var r = rows-Math.floor(rely/height)-1;
+                var c= Math.floor(relx/width);
+
+                if(r != row || c != col)
+                    return false;
+            }
+            return true;
+        }
 
         // this event is bound to the body element, not the container,
         // so no need to put it inside initContainer()
@@ -449,22 +469,13 @@ $3Dmol.GLViewer = (function() {
             if (!scene)
                 return;
 
-            WIDTH = container.width();
-            HEIGHT = container.height(); 
-
             var xy = getXY(ev);
             var x = xy[0];
             var y = xy[1];
             if (x === undefined)
                 return;
-            if(viewers != undefined && !control_all){
-                var width = WIDTH/cols;
-                var height = HEIGHT/rows;
-                var r =Math.floor(xy[1]/height);
-                var c=Math.floor(xy[0]/width);
-
-                if(r != row || c != col)
-                    return;
+            if(!isInViewer(x,y)) {
+                return;
             }
 
             var scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
@@ -513,6 +524,8 @@ $3Dmol.GLViewer = (function() {
             var offset = $('canvas',container).offset();
             var mouseX = ((getXY(ev)[0] - offset.left) / WIDTH) * 2 - 1;
             var mouseY = -((getXY(ev)[1] - offset.top) / HEIGHT) * 2 + 1;
+            
+            //hover timeout
             if(current_hover !== null)
                 handleHoverContinue(mouseX,mouseY,ev);
                 hoverTimeout=setTimeout(
@@ -533,17 +546,9 @@ $3Dmol.GLViewer = (function() {
             var y = xy[1];
             if (x === undefined)
                 return;
-            //hover timeout
 
-            if(viewers != undefined && ! control_all){
-                var width = WIDTH/cols;
-                var height = HEIGHT/rows;
-                var r =Math.floor(xy[1]/height);
-                var c=Math.floor(xy[0]/width);
-
-                if(r != row || c != col)
-                    return;
-
+            if(!isInViewer(x,y)) {
+                return;
             }
 
 

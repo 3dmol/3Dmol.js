@@ -161,7 +161,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
       //try to create the  viewer
     try {  
       for(var r =0;r<config.rows;r++){
-        viewers.push(new Array());
+        var row = new Array();
         for(var c = 0;c<config.cols;c++){
           viewer_config.row = r;
           viewer_config.col = c;
@@ -169,8 +169,9 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
           viewer_config.viewers = viewers;
           viewer_config.control_all = config.control_all;
           var viewer = $3Dmol.createViewer(element, viewer_config);
-          viewers[r].push(viewer)
+          row.push(viewer)
         }
+        viewers.unshift(row); //compensate for weird ordering in renderer
       }
     }catch(e) {
         throw "error creating viewer grid: "+e;

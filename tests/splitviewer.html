@@ -9,7 +9,7 @@
 
   <body style="height: 100%">
 
-  <div id="test38" style="width: 100%; height: 100%; position: relative"></div>
+  <div id="test38" style="width: 800px; height: 1200px; margin: 50px; position: relative"></div>
 
         <script>
         
@@ -20,7 +20,7 @@
                         viewer.render();
                       }
           }
-          var viewers = $3Dmol.createViewerGrid($("#test38"),{rows:2,cols:3,control_all:true},{})
+          var viewers = $3Dmol.createViewerGrid($("#test38"),{rows:2,cols:3,control_all:false},{})
           console.log(viewers)
           for(var r = 0; r< viewers.length ; r++){
               for(var c = 0; c< viewers[0].length; c++){
