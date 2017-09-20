@@ -128,7 +128,6 @@ $3Dmol.createViewer = function(element, config)
     if(!element) return;
 
     config = config || {}; 
-    console.log(config)
 
     //try to create the  viewer
     try {

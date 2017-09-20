@@ -1571,7 +1571,6 @@ $3Dmol.Renderer = function(parameters) {
         }
         var aspect = width/height;
         if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
-            console.log("divide")
             var wid = width/this.cols;
             var hei = height/this.rows;
             aspect = wid/hei;
