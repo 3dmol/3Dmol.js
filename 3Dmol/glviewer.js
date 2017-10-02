@@ -3346,11 +3346,10 @@ $3Dmol.GLViewer = (function() {
                     // meshes) and merge them into a single geometry
                 } else { // use worker
 
-                    var workers = [];
+                   var workers = [];
                     if (type < 0)
                         type = 0; // negative reserved for atom data
-                    for (i = 0, il = numWorkers; i < il; i++) {
-                        // var w = new Worker('3Dmol/SurfaceWorker.js');
+                    for (var i = 0, il = numWorkers; i < il; i++) {
                         var w = new Worker($3Dmol.SurfaceWorker);
                         workers.push(w);
                         w.postMessage({
@@ -3359,11 +3358,13 @@ $3Dmol.GLViewer = (function() {
                             'volume' : totalVol
                         });
                     }
+                    
+                    return new Promise(function(resolve,reject) {
+                        var cnt = 0;
 
-                    var rfunction = function(event_data) {
-                        for (var j=0;j<event_data.length;j++) {
-                            var VandFs = $3Dmol.splitMesh({vertexArr:event_data[j].vertices,
-                                                           faceArr:event_data[j].faces});
+                        var rfunction = function(event) {
+                            var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
+                                                           faceArr:event.data.faces});
                             for(var i=0,vl=VandFs.length;i<vl;i++){
                                 var VandF={vertices:VandFs[i].vertexArr,
                                            faces:VandFs[i].faceArr};
@@ -3371,49 +3372,39 @@ $3Dmol.GLViewer = (function() {
                                 $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
                             _viewer.render();
-                        }
-                    };
 
-                    var efunction = function(event) {
-                        console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
-                    };
+                        //    console.log("async mesh generation " + (+new Date() - time) + "ms");
+                            cnt++;
+                            if (cnt == extents.length) {
+                                surfobj.done = true;
+                                resolve(surfid);
+                                if(surfacecallback && typeof(surfacecallback) == "function") {
+                                    surfacecallback(surfid);
+                                }
+                            }
+                        };
 
-                    var startWorker = function(i) {
-                        return new Promise(function(resolve, reject) {
+                        var efunction = function(event) {
+                            console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
+                            reject(event);
+                        };
+
+                        for (i = 0; i < extents.length; i++) {
                             var worker = workers[i % workers.length];
-                            worker.onmessage = function(event) {
-                                resolve(event.data);
-                            }
-                            worker.onerror = function(event) {
-                                reject(event);
-                            }
+                            worker.onmessage = rfunction;
+
+                            worker.onerror = efunction;
+
                             worker.postMessage({
                                 'type' : type,
                                 'expandedExtent' : extents[i].extent,
                                 'extendedAtoms' : extents[i].atoms,
                                 'atomsToShow' : extents[i].toshow
                             });
-                        });
-                    }
-                    var promises = []
-                    for (i = 0; i < extents.length; i++) {
-                        promises.push(startWorker(i));
-                    }
-
-                    return Promise.all(promises) //proceed forward only when all the workers are done
-                    .then(function(event_data) {
-                        rfunction(event_data);
-                        surfobj.done = true;
-                        return Promise.resolve(surfid);
-                    })
-                    .catch(function(event) {
-                        efunction(event);
+                        }
                     });
                 }
 
-                // NOTE: This is misleading if 'async' mesh generation - returns
-                // immediately
-                //console.log("full mesh generation " + (+new Date() - time) + "ms");
                 
             }
             

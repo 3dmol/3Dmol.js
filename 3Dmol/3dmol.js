@@ -199,7 +199,6 @@ $3Dmol.getbin = function(uri, callback, request) {
     var promise = new Promise(function(resolve, reject) {
         request = (request == undefined)?"GET":request;
         $.ajax({url:uri, 
-            type: request,
             dataType: "binary",
             responseType: "arraybuffer",
             processData: false})
