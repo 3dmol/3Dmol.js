@@ -264,7 +264,7 @@ $3Dmol.GLModel = (function() {
             return a == b;
     };    
    
-    function GLModel(mid, defaultcolors) {
+    function GLModel(mid, defaultcolors, cartoonQuality) {
         // private variables
         var atoms = [];
         var frames = [];
@@ -285,6 +285,8 @@ $3Dmol.GLModel = (function() {
 
         // sphere drawing
         var defaultSphereRadius = 1.5;
+
+        var defaultCartoonQuality = (cartoonQuality)? cartoonQuality : 10;
 
         // return proper radius for atom given style
         /** 
@@ -1216,7 +1218,7 @@ $3Dmol.GLModel = (function() {
             }
             // create cartoon if needed - this is a whole model analysis
             if (cartoonAtoms.length > 0) {
-                $3Dmol.drawCartoon(ret, cartoonAtoms, range);
+                $3Dmol.drawCartoon(ret, cartoonAtoms, range,defaultCartoonQuality);
             }
 
             // add sphere geometry

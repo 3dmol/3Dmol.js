@@ -2476,7 +2476,7 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLModel} 
          */
         this.addModel =  function(data, format, options) {
-            var m = new $3Dmol.GLModel(models.length, defaultcolors);
+            var m = new $3Dmol.GLModel(models.length, defaultcolors, options.cartoonQuality);
             m.addMolData(data, format, options);
             models.push(m);
 
