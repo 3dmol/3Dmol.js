@@ -264,7 +264,7 @@ $3Dmol.GLModel = (function() {
             return a == b;
     };    
    
-    function GLModel(mid, defaultcolors, cartoonQuality) {
+    function GLModel(mid, options) {
         // private variables
         var atoms = [];
         var frames = [];
@@ -278,15 +278,16 @@ $3Dmol.GLModel = (function() {
         var dontDuplicateAtoms = true;
         var defaultColor = $3Dmol.elementColors.defaultColor;
         
-        var ElementColors = (defaultcolors) ? defaultcolors : $3Dmol.elementColors.defaultColors;
+        options = options ? options : {};
+        var ElementColors = (options.defaultcolors) ? options.defaultcolors : $3Dmol.elementColors.defaultColors;
 
         // drawing functions must be associated with model object since
         // geometries can't span multiple canvases
 
         // sphere drawing
-        var defaultSphereRadius = 1.5;
+        var defaultSphereRadius = (options.defaultSphereRadius) ? options.defaultSphereRadius : 1.5;
 
-        var defaultCartoonQuality = (cartoonQuality)? cartoonQuality : 10;
+        var defaultCartoonQuality = (options.cartoonQuality)? options.cartoonQuality : 5;
 
         // return proper radius for atom given style
         /** 

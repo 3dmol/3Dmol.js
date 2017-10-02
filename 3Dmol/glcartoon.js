@@ -1382,7 +1382,7 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var defaultDrawCartoon = function(group, atomList, gradientrange, quality) {
-        quality = parseInt(parseFloat(quality) * 5) || 10;
+        quality = parseInt(parseFloat(quality) * 5) || 5;
         drawCartoon(group, atomList, gradientrange, true,
                 false, quality, quality);
     }
