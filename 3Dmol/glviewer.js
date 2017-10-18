@@ -368,6 +368,8 @@ $3Dmol.GLViewer = (function() {
         //check targetTouches as well
         var getXY = function(ev) {
             var x = ev.pageX, y = ev.pageY;
+            if(x == undefined) x = ev.originalEvent.pageX; //firefox
+            if(y == undefined) y = ev.originalEvent.pageY;
             if (ev.originalEvent.targetTouches
                     && ev.originalEvent.targetTouches[0]) {
                 x = ev.originalEvent.targetTouches[0].pageX;
