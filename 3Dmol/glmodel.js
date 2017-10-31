@@ -515,6 +515,8 @@ $3Dmol.GLModel = (function() {
                 if (atom.clickable || atom.hoverable){
                     if (atom.intersectionShape === undefined)
                         atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                    if (atom2.intersectionShape === undefined)
+                        atom2.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
                     atom.intersectionShape.line.push(p1);
                     atom.intersectionShape.line.push(mp);
                     atom2.intersectionShape.line.push(mp);
