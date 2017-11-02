@@ -418,7 +418,7 @@ $3Dmol.StickImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.p
 
 $3Dmol.StickImposterMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.StickImposterOutlineMaterial();
+    var material = new $3Dmol.StickImposterMaterial();
     $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
     return material;
 };

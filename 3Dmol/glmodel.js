@@ -1151,7 +1151,8 @@ $3Dmol.GLModel = (function() {
                 sphereGeometry.imposter = true;
                 stickGeometry = new $3Dmol.Geometry(true, true);
                 stickGeometry.imposter = true;
-                stickGeometry.sphereGeometry = sphereGeometry; //for caps
+                stickGeometry.sphereGeometry = new $3Dmol.Geometry(true); //for caps
+                stickGeometry.sphereGeometry.imposter = true;
                 stickGeometry.drawnCaps = {};
             }
             else if (options.supportsAIA) {
@@ -1271,38 +1272,44 @@ $3Dmol.GLModel = (function() {
             // add stick geometry
             if (stickGeometry.vertices > 0) {
                 
-                if(stickGeometry.imposter) {
-                    var imposterMaterial = new $3Dmol.StickImposterMaterial({
-                        ambient : 0x000000,
-                        vertexColors : true,
-                        reflectivity : 0
-                    });
-                    
-                    //Initialize buffers in geometry                
-                    stickGeometry.initTypedArrays();
-                    
-                    var sticks = new $3Dmol.Mesh(stickGeometry, imposterMaterial);
-                    ret.add(sticks);                    
-                } else {                
-                    var cylinderMaterial = new $3Dmol.MeshLambertMaterial({
-                        vertexColors : true,
-                        ambient : 0x000000,
-                        reflectivity : 0
-                    });
-                    if (opacities.stick < 1 && opacities.stick >= 0)
-                    {
-                        cylinderMaterial.transparent = true;
-                        cylinderMaterial.opacity = opacities.stick;
-                    }
-    
-                    //Initialize buffers in geometry                
-                    stickGeometry.initTypedArrays();
-                    
-                    if (cylinderMaterial.wireframe)
-                        stickGeometry.setUpWireframe();
+                var stickMaterial = null;
+                var ballMaterial = null;
+                var balls = stickGeometry.sphereGeometry;
+                if(balls.vertices == 0) spheres = null; //no balls
+
+                //Initialize buffers in geometry                
+                stickGeometry.initTypedArrays();
+                if(balls) balls.initTypedArrays();
                 
-                    var sticks = new $3Dmol.Mesh(stickGeometry, cylinderMaterial);
-                    ret.add(sticks);
+                //create material
+                var matvals = {ambient: 0x000000, vertexColors : true, reflectivity : 0};
+                
+                if(stickGeometry.imposter) {
+                    var stickMaterial = new $3Dmol.StickImposterMaterial(matvals);
+                    ballMaterial = new $3Dmol.SphereImposterMaterial(matvals)
+                } else {                
+                    stickMaterial = new $3Dmol.MeshLambertMaterial(matvals);
+                    ballMaterial = new $3Dmol.MeshLambertMaterial(matvals)
+
+                    if (stickMaterial.wireframe) {
+                        stickGeometry.setUpWireframe();
+                        if(balls) balls.setUpWireframe();
+                    }
+                }
+                
+                if (opacities.stick < 1 && opacities.stick >= 0)
+                {
+                    stickMaterial.transparent = true;
+                    stickMaterial.opacity = opacities.stick;
+                    ballMaterial.transparent = true;
+                    ballMaterial.opacity = opacities.stick;
+                }                
+                var sticks = new $3Dmol.Mesh(stickGeometry, stickMaterial);
+                ret.add(sticks);
+                
+                if(balls) {
+                    var stickspheres = new $3Dmol.Mesh(balls, ballMaterial);
+                    ret.add(stickspheres);
                 }
             }
             
