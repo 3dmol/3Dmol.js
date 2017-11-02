@@ -300,6 +300,18 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
+        
+        //set current_hover to sel (which can be null), calling appropraite callbacks
+        var setHover = function(selected, event) {
+            if(current_hover == selected) return;
+            if(current_hover) current_hover.unhover_callback(current_hover, _viewer, event, container);
+            current_hover=selected;
+            if (selected && selected.hover_callback !== undefined
+                    && typeof (selected.hover_callback) === "function") {
+                selected.hover_callback(selected, _viewer, event, container);
+            }  
+        };
+        
         //checks for selection intersects on hover
         var handleHoverSelection = function(mouseX, mouseY, event){
             if(hoverables.length == 0) return;
@@ -318,14 +330,11 @@ $3Dmol.GLViewer = (function() {
             intersects = raycaster.intersectObjects(modelGroup, hoverables);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
+                setHover(selected);
                 current_hover=selected;
-                if (selected.hover_callback !== undefined
-                        && typeof (selected.hover_callback) === "function") {
-                    selected.hover_callback(selected, _viewer, event, container);
-                }
             }
             else{
-                current_hover=null;
+                setHover(null);
             }
         }
         //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
@@ -344,14 +353,11 @@ $3Dmol.GLViewer = (function() {
 
             var intersects = [];
             intersects = raycaster.intersectObjects(modelGroup, hoverables);
-            if(intersects[0] === undefined){                
-                current_hover.unhover_callback(current_hover, _viewer, event, container);
-                current_hover=null;
+            if(intersects.length == 0 || intersects[0] === undefined){
+                setHover(null);
             }
-            if(intersects[0]!== undefined)
-            if(intersects[0].clickable !== current_hover){
-                current_hover.unhover_callback(current_hover, _viewer, event, container);
-                current_hover=null;
+            if(intersects[0]!== undefined && intersects[0].clickable !== current_hover){
+                setHover(null);
             }
         }
 
@@ -1783,6 +1789,7 @@ $3Dmol.GLViewer = (function() {
          */
         this.addResLabels = function(sel, style) {
             applyToModels("addResLabels", sel, this, style);
+            show();
             return this;
         }
 
@@ -1816,6 +1823,7 @@ $3Dmol.GLViewer = (function() {
                     break;
                 }
             }
+            show();
             return this;
         };
 
@@ -1831,6 +1839,7 @@ $3Dmol.GLViewer = (function() {
                 modelGroup.remove(labels[i].sprite);
             }
             labels.splice(0,labels.length); //don't overwrite in case linked
+            show();
             return this;
         };
         
@@ -2735,40 +2744,47 @@ $3Dmol.GLViewer = (function() {
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
          * 
-         * @example
-         *   viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
-                                  end:{x:10.0,y:0.0,z:0.0},
-                                  radius:1.0,
-                                  fromCap:1,
-                                  toCap:2,
-                                  color:'red',
-                                  hoverable:true,
-                                  clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
-                                  hover_callback: function(){ viewer.render( );},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
-                                 });
-              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
-                                  end:{x:0.0,y:10.0,z:0.0},
-                                  radius:0.5,
-                                  fromCap:false,
-                                  toCap:true,
-                                  color:'teal'});
-              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
-                                  end:{x:20.0,y:0.0,z:0.0},
-                                  radius:1.0,
-                                  color:'black',
-                                  fromCap:false,
-                                  toCap:false});
-              viewer.render();
-
-
+         * @example       
+            $3Dmol.download("cid:307900",viewer,{},function(){
+                              
+                   viewer.setStyle({},{sphere:{}});                
+                   viewer.setClickable({},true,function(atom,viewer,event,container) {
+                       viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'darkgreen', backgroundOpacity: 0.8});
+                   });
+                   viewer.render();
+        });
          */
         this.setClickable = function(sel, clickable, callback) {
             applyToModels("setClickable", sel, clickable, callback);
             return this;
         };
 
+        /** Set hoverable and callback of selected atoms
+         * 
+         * @function $3Dmol.GLViewer#setHoverable
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} hoverable - whether hover-handling is enabled for the selection
+         * @param {function} hover_callback - function called when an atom in the selection is hovered over
+         * @param {function} unhover_callback - function called when the mouse moves out of the hover area  
+        @example             
+        $3Dmol.download("pdb:1ubq",viewer,{},function(){
+                          
+               viewer.setHoverable({},true,function(atom,viewer,event,container) {
+                   if(!atom.label) {
+                    atom.label = viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'mintcream', fontColor:'black'});
+                   }
+               },
+               function(atom) { 
+                   if(atom.label) {
+                    viewer.removeLabel(atom.label); 
+                   }
+                }
+               );
+               viewer.setStyle({},{stick:{}});               
+               viewer.render();
+        });
+
+         */
         this.setHoverable = function(sel,hoverable,hover_callback,unhover_callback){
             applyToModels("setHoverable", sel,hoverable, hover_callback,unhover_callback);
             return this;

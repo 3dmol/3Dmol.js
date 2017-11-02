@@ -512,17 +512,23 @@ $3Dmol.GLModel = (function() {
                 var mp = p1.clone().add(p2).multiplyScalar(0.5);
                 var singleBond = false;               
                 
-                if (atom.clickable || atom.hoverable){
-                    if (atom.intersectionShape === undefined)
-                        atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
-                    if (atom2.intersectionShape === undefined)
-                        atom2.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
-                    atom.intersectionShape.line.push(p1);
-                    atom.intersectionShape.line.push(mp);
-                    atom2.intersectionShape.line.push(mp);
-                    atom2.intersectionShape.line.push(p2);
+                var atomneedsi = atom.clickable || atom.hoverable;
+                var atom2needsi = atom2.clickable || atom2.hoverable;
+                
+                if(atomneedsi || atom2needsi) {
+                    if (atomneedsi){
+                        if (atom.intersectionShape === undefined)
+                            atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                        atom.intersectionShape.line.push(p1);
+                        atom.intersectionShape.line.push(mp);                                        
+                    }
+                    if (atom2needsi) {
+                        if (atom2.intersectionShape === undefined)
+                            atom2.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                        atom2.intersectionShape.line.push(mp);
+                        atom2.intersectionShape.line.push(p2);
+                    }
                 }
-
                 var c1 = $3Dmol.getColorFromStyle(atom, atom.style.line);
                 var c2 = $3Dmol.getColorFromStyle(atom2, atom2.style.line);
                
@@ -932,25 +938,26 @@ $3Dmol.GLModel = (function() {
                             drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap);
                         }
                         
-                        if (atom.clickable || atom2.clickable) {
-                            mp = new $3Dmol.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-                            if (atom.clickable || atom.hoverable){
+                        
+                        var atomneedsi = atom.clickable || atom.hoverable;
+                        var atom2needsi = atom2.clickable || atom2.hoverable;
+                        
+                        if(atomneedsi || atom2needsi) {
+                            if(!mp) mp = new $3Dmol.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+                            if (atomneedsi){
                                 var cylinder1 = new $3Dmol.Cylinder(p1 , mp , bondR);
                                 var sphere1 = new $3Dmol.Sphere(p1 , bondR);
                                 atom.intersectionShape.cylinder.push(cylinder1);   
                                 atom.intersectionShape.sphere.push(sphere1);                             
                             }
-                            if (atom2.clickable || atom2.hoverable){
+                            if (atom2needsi){
                                 var cylinder2 = new $3Dmol.Cylinder(p2 , mp , bondR);
                                 var sphere2 = new $3Dmol.Sphere(p2 , bondR);
                                 atom2.intersectionShape.cylinder.push(cylinder2);
                                 atom2.intersectionShape.sphere.push(sphere2);
                             }
-
-                        }
-                        
-                    } 
-                    
+                        }                        
+                    }                     
                     else if (atom.bondOrder[i] > 1) {
                         //multi bond caps
                         var mfromCap = 0;
@@ -998,23 +1005,27 @@ $3Dmol.GLModel = (function() {
                                 drawCyl(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
                                 drawCyl(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
                             }
-                            if (atom.clickable || atom2.clickable){
-                                mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
+                            
+                            var atomneedsi = atom.clickable || atom.hoverable;
+                            var atom2needsi = atom2.clickable || atom2.hoverable;
+                            
+                            if(atomneedsi || atom2needsi) {
+                                if(!mp) mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
                                                .multiplyScalar(0.5);
-                                mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
+                                if(!mp2) mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                                 .multiplyScalar(0.5);
-                                if (atom.clickable || atom.hoverable) {
+                                if (atomneedsi) {
                                     var cylinder1a = new $3Dmol.Cylinder(p1a , mp , r);
                                     var cylinder1b = new $3Dmol.Cylinder(p1b , mp2 , r);
                                     atom.intersectionShape.cylinder.push(cylinder1a);
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                 }
-                                if (atom2.clickable || atom2.hoverable) {
+                                if (atom2needsi) {
                                     var cylinder2a = new $3Dmol.Cylinder(p2a , mp , r);
                                     var cylinder2b = new $3Dmol.Cylinder(p2b , mp2 , r);
                                     atom2.intersectionShape.cylinder.push(cylinder2a);
                                     atom2.intersectionShape.cylinder.push(cylinder2b);                               
-                                }
+                                }                      
                             }
                         } 
                         else if (atom.bondOrder[i] == 3) {
@@ -1052,15 +1063,19 @@ $3Dmol.GLModel = (function() {
                                 drawCyl(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
 
                             }
-                            if (atom.clickable || atom2.clickable) {
-                                mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
+                                                            
+                            var atomneedsi = atom.clickable || atom.hoverable;
+                            var atom2needsi = atom2.clickable || atom2.hoverable;
+                            
+                            if(atomneedsi || atom2needsi) {
+                                if(!mp) mp = new $3Dmol.Vector3().addVectors(p1a, p2a)
                                         .multiplyScalar(0.5);
-                                mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
+                                if(!mp2) mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                mp3 = new $3Dmol.Vector3().addVectors(p1, p2)
+                                if(!mp3) mp3 = new $3Dmol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
-                                                                
-                                if (atom.clickable || atom.hoverable) {
+                        
+                                if (atomneedsi) {
                                     var cylinder1a = new $3Dmol.Cylinder(p1a.clone(), mp.clone(), r);
                                     var cylinder1b = new $3Dmol.Cylinder(p1b.clone(), mp2.clone(), r);
                                     var cylinder1c = new $3Dmol.Cylinder(p1.clone(), mp3.clone(), r);
@@ -1068,7 +1083,7 @@ $3Dmol.GLModel = (function() {
                                     atom.intersectionShape.cylinder.push(cylinder1b);
                                     atom.intersectionShape.cylinder.push(cylinder1c);
                                 } 
-                                if (atom2.clickable || atom2.hoverable) {                               
+                                if (atom2needsi) {                               
                                     var cylinder2a = new $3Dmol.Cylinder(p2a.clone(), mp.clone(), r);
                                     var cylinder2b = new $3Dmol.Cylinder(p2b.clone(), mp2.clone(), r);
                                     var cylinder2c = new $3Dmol.Cylinder(p2.clone(), mp3.clone(), r);
@@ -1275,7 +1290,7 @@ $3Dmol.GLModel = (function() {
                 var stickMaterial = null;
                 var ballMaterial = null;
                 var balls = stickGeometry.sphereGeometry;
-                if(balls.vertices == 0) spheres = null; //no balls
+                if(balls.vertices == 0) balls = null; //no balls
 
                 //Initialize buffers in geometry                
                 stickGeometry.initTypedArrays();
@@ -2076,33 +2091,7 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
-         * @example
-        
-              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
-                                  end:{x:10.0,y:0.0,z:0.0},
-                                  radius:1.0,
-                                  fromCap:1,
-                                  toCap:2,
-                                  color:'red',
-                                  hoverable:true,
-                                  clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
-                                  hover_callback: function(){ viewer.render( );},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
-                                 });
-              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
-                                  end:{x:0.0,y:10.0,z:0.0},
-                                  radius:0.5,
-                                  fromCap:false,
-                                  toCap:true,
-                                  color:'teal'});
-              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
-                                  end:{x:20.0,y:0.0,z:0.0},
-                                  radius:1.0,
-                                  color:'black',
-                                  fromCap:false,
-                                  toCap:false});
-              viewer.render();
+
          */
         this.setClickable = function(sel, clickable, callback) {           
 
@@ -2142,34 +2131,7 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
          * @param {boolean} hoverable - whether hover-handling is enabled for the selection
          * @param {function} hover_callback - function called when an atom in the selection is hovered over
-         * @param {function} unhover_callback - function called when the mouse moves out of the hover area
-         * @example
-         
-              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
-                                  end:{x:10.0,y:0.0,z:0.0},
-                                  radius:1.0,
-                                  fromCap:1,
-                                  toCap:2,
-                                  color:'red',
-                                  hoverable:true,
-                                  clickable:true,
-                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
-                                  hover_callback: function(){ viewer.render( );},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
-                                 });
-              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
-                                  end:{x:0.0,y:10.0,z:0.0},
-                                  radius:0.5,
-                                  fromCap:false,
-                                  toCap:true,
-                                  color:'teal'});
-              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
-                                  end:{x:20.0,y:0.0,z:0.0},
-                                  radius:1.0,
-                                  color:'black',
-                                  fromCap:false,
-                                  toCap:false});
-              viewer.render();
+         * @param {function} unhover_callback - function called when the mouse moves out of the hover area               
          */
         this.setHoverable = function(sel, hoverable, hover_callback,unhover_callback){
             var s;
