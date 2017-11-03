@@ -170,7 +170,7 @@ $(document).ready(function(){
           };
           
         system[key](viewer,function(){
-            waitfor(function() { return viewer.surfacesFinished() && !viewer.isAnimated() } , true , 100 , 0 , "" , function(){
+            waitfor(function() { return viewer.surfacesFinished() && !viewer.isAnimated() } , true , 1000 , 0 , "" , function(){
                 var after=Date.now();
                 //gets the canvas
                 var canvas=$("canvas#"+key).get(0);
@@ -190,6 +190,9 @@ $(document).ready(function(){
 
                 var diff = resemble(canvasImageData).compareTo("imgs/"+key+".png").set3DmolTolerances().scaleToSameSize().onComplete(function(data){
                     //scaletosamesize is necessary for retina displays
+                    if(data.error) {
+                        throw data.error; //probably need to create an image file
+                    }
                     differ=data.rawMisMatchPercentage;//(100-blankDiff);
                     percentage.html(differ+'<br>'+(after-before)+'ms');
                     differenceImage.attr('src',data.getImageDataUrl());

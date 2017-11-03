@@ -141,6 +141,7 @@ $3Dmol.GLViewer = (function() {
             var max = 0;
             for (var i in surfaces) { // this is an object with possible holes
                 if(!surfaces.hasOwnProperty(i)) continue;
+                i = parseInt(i);
                 if(i > max) max = i;
             }
             return max+1;
@@ -3398,10 +3399,7 @@ $3Dmol.GLViewer = (function() {
                             cnt++;
                             if (cnt == extents.length) {
                                 surfobj.done = true;
-                                resolve(surfid);
-                                if(surfacecallback && typeof(surfacecallback) == "function") {
-                                    surfacecallback(surfid);
-                                }
+                                resolve(surfid); //caller of helper will resolve callback if present
                             }
                         };
 
@@ -3425,7 +3423,6 @@ $3Dmol.GLViewer = (function() {
                         }
                     });
                 }
-
                 
             }
             
