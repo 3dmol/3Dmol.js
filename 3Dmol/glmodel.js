@@ -1474,7 +1474,8 @@ $3Dmol.GLModel = (function() {
                     framenum = numFrames - 1;
                 }
                 if (frames.url != undefined) {
-                     $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path).then(function (buffer) {
+                    var url = frames.url;
+                     $3Dmol.getbin(url+"/traj/frame/"+framenum+"/"+frames.path).then(function (buffer) {
                         var values = new Float32Array(buffer,44);
                         var count = 0;
                         for (var i = 0; i < atoms.length; i++) {
@@ -2440,7 +2441,8 @@ $3Dmol.GLModel = (function() {
             frames = [];
             var self = this;
             return new Promise(function(resolve,reject){
-                $.get("http://"+url+"/traj/numframes/"+path,function(numFrames){
+                if(!url.startsWith('http://')) url = 'http://'+url;
+                $.get(url+"/traj/numframes/"+path,function(numFrames){
                     if (!isNaN(parseInt(numFrames))) {
                         frames.push(atoms);
                         frames.numFrames = numFrames;

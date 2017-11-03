@@ -1314,6 +1314,29 @@ $3Dmol.Parsers = (function() {
         return true;
     };
 
+    //attempts to infer atomic element from an atom name
+    var atomNameToElem = function(name, nothetero) {
+        var elem = name.replace(/ /g, "");
+        if(elem.length > 0 && elem[0] == 'H' && elem != 'Hg') {
+            elem = 'H'; //workaround weird hydrogen names from MD, note mercury must use lowercase
+        }
+        if(elem.length > 1) {
+            elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();   
+            if(typeof(bondTable[elem]) === 'undefined') {
+                //not a known element, probably should just use first letter
+                elem = elem[0];
+            } else if(nothetero) {
+                if(elem == 'Ca') { //alpha carbon, not calcium
+                    elem = 'C';
+                }
+                else if(elem == 'Cd') {
+                    elem = 'C';
+                }
+            }
+        }
+        return elem;
+    };
+    
     //return one model worth of pdb, returns atoms, modelData, and remaining lines
     var getSinglePDB = function(lines, options, sslookup) {
         var atoms = [];
@@ -1366,19 +1389,7 @@ $3Dmol.Parsers = (function() {
                 b = parseFloat(line.substr(60, 8));
                 elem = line.substr(76, 2).replace(/ /g, "");
                 if (elem === '' || typeof(bondTable[elem]) === 'undefined') { // for some incorrect PDB files
-                    elem = line.substr(12, 2).replace(/ /g, "");
-                    if(elem.length > 0 && elem[0] == 'H' && elem != 'Hg') {
-                        elem = 'H'; //workaround weird hydrogen names from MD, note mercury must use lowercase
-                    }
-                    if(elem.length > 1) {
-                        elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();   
-                        if(typeof(bondTable[elem]) === 'undefined') {
-                            //not a known element, probably should just use first letter
-                            elem = elem[0];
-                        } else if(line[0] == 'A' && elem == 'Ca') { //alpha carbon, not calcium
-                            elem = "C";
-                        }
-                    }
+                    elem = atomNameToElem(line.substr(12,2),line[0] == 'A');
                 } else {
                     elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();                    
                 }
@@ -2161,7 +2172,7 @@ $3Dmol.Parsers = (function() {
      * Parse a gro file from str and create atoms
      */
     parsers.gro = parsers.GRO = function(str, options) {
-	var atoms = [];
+        var allatoms = [];
         var lines = str.split(/\r?\n|\r/);
         while (lines.length > 0) {
             if (lines.length < 3)
@@ -2171,39 +2182,40 @@ $3Dmol.Parsers = (function() {
                 break;
             if (lines.length < atomCount + 3)
                 break;
-	    atoms.push([]);
+            var atoms = []
+            allatoms.push(atoms);
             var offset = 2;
-            var start = atoms[atoms.length-1].length;
+            var start = atoms.length;
             var end = start + atomCount;
             for (var i = start; i < end; i++) {
                 var line = lines[offset++];
                 var atom = {};
                 atom.serial = i;
                 atom.atom = line.slice(10,15).trim();
-		if(atom.atom.charCodeAt(1) >= 97 && atom.atom.charCodeAt(1) <= 122)
-		    atom.elem = atom.atom.slice(0,2);
-		else
-		    atom.elem = atom.atom[0];
-                atom.x = parseFloat(line.slice(20,28));
-                atom.y = parseFloat(line.slice(28,36));
-                atom.z = parseFloat(line.slice(36,44));
-		atom.resi = line.slice(5,10);
+                atom.elem = atomNameToElem(atom.atom, true);
+                //coordinates are in nM, convert to A
+                atom.x = 10.0*parseFloat(line.slice(20,28));
+                atom.y = 10.0*parseFloat(line.slice(28,36));
+                atom.z = 10.0*parseFloat(line.slice(36,44));
+                atom.resi = parseInt(line.slice(0,5));
+                atom.resn = line.slice(5,10).trim();
                 atom.bonds = [];
                 atom.bondOrder = [];
                 atom.properties = {};
-		if (line.length > 44){
-                    atom.dx = parseFloat(line.slice(44,52));
-                    atom.dy = parseFloat(line.slice(52,60));
-                    atom.dz = parseFloat(line.slice(60,68));
-		}
-                atoms[atoms.length-1][i] = atom;
-            }
-	    lines.splice(0, ++offset);
+        		if (line.length > 44){
+                    atom.dx = 10.0*parseFloat(line.slice(44,52));
+                    atom.dy = 10.0*parseFloat(line.slice(52,60));
+                    atom.dz = 10.0*parseFloat(line.slice(60,68));
+        		}
+                atoms[i] = atom;
+            } //for all atoms
+            lines.splice(0, ++offset);
         }
-	for (var i=0; i<atoms.length; i++){
-	    assignBonds(atoms[i]);
-	}
-        return atoms;
+        
+    	for (var i=0; i<allatoms.length; i++){
+    	    assignPDBBonds(allatoms[i]);
+    	}
+        return allatoms;
     }
 
     /**

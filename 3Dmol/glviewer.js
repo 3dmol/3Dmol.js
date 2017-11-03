@@ -2402,6 +2402,10 @@ $3Dmol.GLViewer = (function() {
             var that = this;
             var currFrame = 0;
             var inc = 1;
+            if (options.step) {
+                inc = options.step;
+                reps /= inc;
+            }
             var displayCount = 0;
             var displayMax = mostFrames * reps;
             var time = new Date();
@@ -2722,7 +2726,9 @@ $3Dmol.GLViewer = (function() {
          @example
          
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
-       viewer.addStyle({chain:'B'},{line:{}});
+       viewer.setStyle({cartoon:{}});
+       //keep cartoon style, but show thick sticks for chain A
+       viewer.addStyle({chain:'A'},{stick:{radius:.5,colorscheme:"magentaCarbon"}});
        viewer.zoomTo();
        viewer.render();
        });

@@ -202,9 +202,10 @@ $3Dmol.viewers = {};
 $3Dmol.getbin = function(uri, callback, request) {
     var promise = new Promise(function(resolve, reject) {
         
-        request = (request == undefined)?"GET":request;
+        request = (request == undefined)?"POST":request;
         $.ajax({url:uri, 
             dataType: "binary",
+            method: request,
             responseType: "arraybuffer",
             processData: false})
         .done(function(ret, txt, response) {
