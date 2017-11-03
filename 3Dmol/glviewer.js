@@ -141,7 +141,8 @@ $3Dmol.GLViewer = (function() {
             var max = 0;
             for (var i in surfaces) { // this is an object with possible holes
                 if(!surfaces.hasOwnProperty(i)) continue;
-                i = parseInt(i);
+                var val = parseInt(i);
+                if(!isNaN(val)) i = val;
                 if(i > max) max = i;
             }
             return max+1;

@@ -9,5 +9,5 @@
             viewer.zoomTo();
             viewer.animate({loop:"forward",reps:1});
             viewer.render();
-        });
+        }).catch(function() {viewer.render()});
     });

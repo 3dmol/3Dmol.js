@@ -74,15 +74,19 @@ $.ajaxTransport(
                                        || null, password = options.password
                                        || null;
 
-                               xhr.addEventListener('load', function() {
+                               var xhrret = function() {
                                    var data = {};
                                    data[options.dataType] = xhr.response;
                                    // make callback and send data
                                    callback(xhr.status, xhr.statusText,
                                            data,
                                            xhr.getAllResponseHeaders());
-                               });
-
+                               };
+                               
+                               xhr.addEventListener('load', xhrret);
+                               xhr.addEventListener('error', xhrret);
+                               xhr.addEventListener('abort', xhrret);
+                               
                                xhr.open(type, url, async, username,
                                        password);
 
@@ -197,6 +201,7 @@ $3Dmol.viewers = {};
  */ 
 $3Dmol.getbin = function(uri, callback, request) {
     var promise = new Promise(function(resolve, reject) {
+        
         request = (request == undefined)?"GET":request;
         $.ajax({url:uri, 
             dataType: "binary",

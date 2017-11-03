@@ -1,5 +1,5 @@
 
-
+/*
     var stereoViewer = new $3Dmol.createStereoViewer("gldiv", 10);
 
     $.get("volData/TC5b.prmtop",
@@ -17,3 +17,4 @@
                 stereoViewer.render(callback);
             });
         });
+*/

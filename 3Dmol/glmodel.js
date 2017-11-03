@@ -1474,7 +1474,7 @@ $3Dmol.GLModel = (function() {
                     framenum = numFrames - 1;
                 }
                 if (frames.url != undefined) {
-                     $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path, function (buffer) {
+                     $3Dmol.getbin("http://"+frames.url+"/traj/frame/"+framenum+"/"+frames.path).then(function (buffer) {
                         var values = new Float32Array(buffer,44);
                         var count = 0;
                         for (var i = 0; i < atoms.length; i++) {
@@ -1483,7 +1483,7 @@ $3Dmol.GLModel = (function() {
                             atoms[i].z = values[count++];
                         }
                         resolve();
-                    },"POST");
+                    }).catch(reject);
                 }
                 else {
                     atoms = frames[framenum];
@@ -2449,7 +2449,7 @@ $3Dmol.GLModel = (function() {
                         self.setFrame(0)
                         .then(function() {
                             resolve();
-                        });
+                        }).catch(reject);
                     }
                 });
             });

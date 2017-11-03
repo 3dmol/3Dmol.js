@@ -3,8 +3,8 @@
             var resis=viewer.getUniqueValues('resi',{})
             var sel = {resi:resis[0]}
             var sel1 = {resi:resis[resis.length-1]}
-            console.log(sel)
-            console.log(sel1)
+          //  console.log(sel)
+          //  console.log(sel1)
                 viewer.addSphere({center:{resi:147},radius:10.0,color:'red'});
                 viewer.addCylinder({start:sel1,
                                   end:{x:20.0,y:0.0,z:0.0},
