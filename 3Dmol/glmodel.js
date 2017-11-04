@@ -1475,7 +1475,7 @@ $3Dmol.GLModel = (function() {
                 }
                 if (frames.url != undefined) {
                     var url = frames.url;
-                     $3Dmol.getbin(url+"/traj/frame/"+framenum+"/"+frames.path).then(function (buffer) {
+                     $3Dmol.getbin(url+"/traj/frame/"+framenum+"/"+frames.path, null, 'POST').then(function (buffer) {
                         var values = new Float32Array(buffer,44);
                         var count = 0;
                         for (var i = 0; i < atoms.length; i++) {

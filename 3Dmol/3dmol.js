@@ -199,13 +199,14 @@ $3Dmol.viewers = {};
  * @param {string} request - type of request
  * @return {Promise}
  */ 
-$3Dmol.getbin = function(uri, callback, request) {
+$3Dmol.getbin = function(uri, callback, request,postdata) {
     var promise = new Promise(function(resolve, reject) {
         
-        request = (request == undefined)?"POST":request;
+        request = (request == undefined)?"GET":request;
         $.ajax({url:uri, 
             dataType: "binary",
             method: request,
+            data: postdata,
             responseType: "arraybuffer",
             processData: false})
         .done(function(ret, txt, response) {
