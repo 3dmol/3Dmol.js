@@ -1,5 +1,5 @@
 
-    $.get("volData/Al.lammpstrj",
+    $.get("data/Al.lammpstrj",
         function (data){
                 var m = viewer.addModel(data, "lammpstrj");	
                 viewer.setStyle({},{sphere:{radius:0.05}});

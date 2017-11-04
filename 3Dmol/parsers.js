@@ -1086,22 +1086,17 @@ $3Dmol.Parsers = (function() {
         if (typeof options.keepH !== "undefined")
             noH = !options.keepH;
 
-        // assert (mol_pos < atom_pos), "Unexpected formatting of mol2 file
-        // (expected 'molecule' section before 'atom' section)";
+        // Note: these regex's work, though they don't match '<TRIPOS>'
+        // correctly - something to do with angle brackets
+        var mol_pos = str.search(/@<TRIPOS>MOLECULE/);
+        var atom_pos = str.search(/@<TRIPOS>ATOM/);
 
-        var lines = str.substr(mol_pos, str.length).split(/\r?\n|\r/);
-        
+        // Assuming both Molecule and Atom sections exist
+        if (mol_pos == -1 || atom_pos == -1)
+            return atoms;
+
+        var lines = str.substr(mol_pos, str.length).split(/\r?\n|\r/);        
         while(lines.length > 0) { 
-        
-            // Note: these regex's work, though they don't match '<TRIPOS>'
-            // correctly - something to do with angle brackets
-            var mol_pos = str.search(/@<TRIPOS>MOLECULE/);
-            var atom_pos = str.search(/@<TRIPOS>ATOM/);
-
-            // Assuming both Molecule and Atom sections exist
-            if (mol_pos == -1 || atom_pos == -1)
-                break;
-        
             // serial is atom's index in file; index is atoms index in 'atoms'
             var serialToIndex = []; 
             var tokens = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(
@@ -1179,9 +1174,9 @@ $3Dmol.Parsers = (function() {
                     tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
                             " ");
                     var from = parseInt(tokens[1]);
-                    fromAtom = atoms[atoms.length-1][serialToIndex[from]];
+                    var fromAtom = atoms[atoms.length-1][serialToIndex[from]];
                     var to = parseInt(tokens[2]);
-                    toAtom = atoms[atoms.length-1][serialToIndex[to]];
+                    var toAtom = atoms[atoms.length-1][serialToIndex[to]];
 
                     // Won't be able to read aromatic bonds correctly...
                     var order = parseInt(tokens[3]);

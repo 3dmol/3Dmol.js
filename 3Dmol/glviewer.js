@@ -447,6 +447,50 @@ $3Dmol.GLViewer = (function() {
 
         });
 
+        //if the user has specify zoom limits, readjust to fit within them
+        //also, make sure we don't go past CAMERA_Z
+        var adjustZoomToLimits = function(z) {
+            //a lower limit of 0 is at CAMERA_Z
+            if(config.lowerZoomLimit && config.lowerZoomLimit > 0) {
+                var lower = CAMERA_Z-config.lowerZoomLimit;
+                if(z > lower) z = lower;
+            }
+            
+            if(config.upperZoomLimit && config.upperZoomLimit > 0) {
+                var upper = CAMERA_Z-config.upperZoomLimit;
+                if(z < upper) z = upper;
+            }
+            
+            if(z > CAMERA_Z) {
+                z = CAMERA_Z*0.999; //avoid getting stuck
+            }
+            return z;
+        };
+        
+        
+        /**
+         * Set lower and upper limit stops for zoom.
+         * 
+         * @function $3Dmol.GLViewer#setZoomLimits
+         * @param {lower} - limit on zoom in (positive number).  Default 0.
+         * @param {upper} - limit on zoom out (positive number).  Default infinite.
+         * @example
+          $.get("data/set1_122_complex.mol2", function(moldata) {
+                var m = viewer.addModel(moldata);
+                viewer.setStyle({stick:{colorscheme:"Jmol"}});
+                viewer.setZoomLimits(100,200);
+                viewer.zoomTo();
+                viewer.zoom(10); //will not zoom all the way
+                viewer.render();
+            });
+     */
+        this.setZoomLimits = function(lower, upper) {
+            if(typeof(lower) !== 'undefined') config.lowerZoomLimit = lower;
+            if(upper) config.upperZoomLimit = upper;
+            rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
+            show();
+        };
+
         var mouseButton;
         var _handleMouseDown = this._handleMouseDown = function(ev) {
             ev.preventDefault();
@@ -493,15 +537,14 @@ $3Dmol.GLViewer = (function() {
             if(ev.originalEvent.ctrlKey) {
                 mult = -1.0; //this is a pinch event turned into a wheel event (or they're just holding down the ctrl)
             }
-            if (ev.originalEvent.detail) { // Webkit
+            if (ev.originalEvent.detail) { 
                 rotationGroup.position.z += mult * scaleFactor
                         * ev.originalEvent.detail / 10;
-            } else if (ev.originalEvent.wheelDelta) { // Firefox
+            } else if (ev.originalEvent.wheelDelta) { 
                 rotationGroup.position.z -= mult * scaleFactor
                         * ev.originalEvent.wheelDelta / 400;
             }
-            if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
-            //setLabelStyles(scaleFactor/originalPosition);
+            rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);            
             show();
         };        
         /**
@@ -596,7 +639,7 @@ $3Dmol.GLViewer = (function() {
                 if (scaleFactor < 80)
                     scaleFactor = 80;
                 rotationGroup.position.z = cz + dy * scaleFactor;
-                if(rotationGroup.position.z > CAMERA_Z) rotationGroup.position.z = CAMERA_Z*0.999; //avoid getting stuck
+                rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z); 
             } else if (mode == 1 || mouseButton == 2
                     || ev.ctrlKey) { // Translate
                 var t = screenXY2model(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
@@ -701,9 +744,9 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example
          viewer.setViewStyle({style:"outline"});
-              $.get('volData/1fas.pqr', function(data){
+              $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
-                  $.get("volData/1fas.cube",function(volumedata){
+                  $.get("data/1fas.cube",function(volumedata){
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
                   });
                   viewer.zoomTo();
@@ -724,9 +767,9 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example
          *   viewer.setViewStyle({style:"outline"});
-              $.get('volData/1fas.pqr', function(data){
+              $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
-                  $.get("volData/1fas.cube",function(volumedata){
+                  $.get("data/1fas.cube",function(volumedata){
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
                   });
                   viewer.zoomTo();
@@ -1367,7 +1410,7 @@ $3Dmol.GLViewer = (function() {
          * @param {Boolean} [fixedPath] - if true animation is constrained to 
          *      requested motion, overriding updates that happen during the animation
          * @example   
-    $.get('volData/4csv.pdb', function(data) {
+    $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
@@ -1384,11 +1427,11 @@ $3Dmol.GLViewer = (function() {
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position, 
-                        final_z, 
+                        adjustZoomToLimits(final_z), 
                         rotationGroup.quaternion,
                         lookingAt);
             } else { //no animation
-                rotationGroup.position.z = final_z;
+                rotationGroup.position.z = adjustZoomToLimits(final_z);
                 show();
             }
             return this;
@@ -1406,7 +1449,7 @@ $3Dmol.GLViewer = (function() {
          *            the duration of a zoom animation
          * @param {Boolean} [fixedPath] - if true animation is constrained to 
          *      requested motion, overriding updates that happen during the animation         *            
-         * @example     $.get('volData/4csv.pdb', function(data) {
+         * @example     $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
@@ -1490,7 +1533,7 @@ $3Dmol.GLViewer = (function() {
          *         //   of 1 second(1000 milleseconds).
          *  // Reposition to centroid of all atoms of all models in this
          * //viewer glviewer.center();
-    $.get('volData/4csv.pdb', function(data) {
+    $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.center();
@@ -1597,9 +1640,9 @@ $3Dmol.GLViewer = (function() {
           * @example   
     
 
-              $.get('volData/1fas.pqr', function(data){
+              $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
-                  $.get("volData/1fas.cube",function(volumedata){
+                  $.get("data/1fas.cube",function(volumedata){
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {
                           opacity:0.85,
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"),
@@ -1686,6 +1729,8 @@ $3Dmol.GLViewer = (function() {
             var finalpos = center.clone().multiplyScalar(-1);
             var finalz =  -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
+                    
+            finalz = adjustZoomToLimits(finalz);
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         finalpos,
@@ -2281,7 +2326,7 @@ $3Dmol.GLViewer = (function() {
          * @example
 
     
-    $.get('volData/bohr.cube', function(data) {
+    $.get('data/bohr.cube', function(data) {
       
       viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
       viewer.setStyle({cartoon:{},stick:{}});
@@ -2480,9 +2525,9 @@ $3Dmol.GLViewer = (function() {
          
 
               viewer.setViewStyle({style:"outline"});
-              $.get('volData/1fas.pqr', function(data){
+              $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
-                  $.get("volData/1fas.cube",function(volumedata){
+                  $.get("data/1fas.cube",function(volumedata){
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
                       
                   viewer.render();

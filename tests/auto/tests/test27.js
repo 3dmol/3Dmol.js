@@ -1,8 +1,8 @@
 
 
-              $.get('volData/1fas.pqr', function(data){
+              $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
-                  $.get("volData/1fas.cube",function(volumedata){
+                  $.get("data/1fas.cube",function(volumedata){
                       var range = $3Dmol.getPropertyRange(viewer.selectedAtoms(),'partialCharge');
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {
                           opacity:0.85,

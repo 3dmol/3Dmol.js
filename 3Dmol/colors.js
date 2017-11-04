@@ -220,7 +220,6 @@ $3Dmol.CC = {
         }
     },
  
-    colorTab : htmlColors,    
     getHex : function(hex) {
         if (!isNaN(parseInt(hex)))
             return parseInt(hex);        
@@ -235,7 +234,7 @@ $3Dmol.CC = {
                 return parseInt(hex.substring(1),16);
             } 
             else {
-                return this.colorTab[hex.toLowerCase()] || 0x000000;
+                return htmlColors[hex.toLowerCase()] || 0x000000;
             }
         }
         return hex;
@@ -531,7 +530,7 @@ $3Dmol.getColorFromStyle = function(atom, style) {
         scheme = $3Dmol.builtinColorSchemes[scheme];
     } else if(typeof(scheme) == 'string' && scheme.endsWith('Carbon')) {
         //any color you want of carbon
-        var ccolor = scheme.substring(0,scheme.lastIndexOf("Carbon"));
+        var ccolor = scheme.substring(0,scheme.lastIndexOf("Carbon")).toLowerCase();
         if(typeof(htmlColors[ccolor]) != "undefined") {
             var newscheme = $.extend({},$3Dmol.elementColors.defaultColors);
             newscheme['C'] = htmlColors[ccolor];

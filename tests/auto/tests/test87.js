@@ -14,6 +14,6 @@ var setStyles = function(volumedata){
 
 };
 $3Dmol.download("pdb:4DLN",viewer,{},function(){
-  $3Dmol.getbin("volData/4dln.cube.gz",setStyles);
+  $3Dmol.getbin("data/4dln.cube.gz",setStyles);
   viewer.render( /*no callback*/);
 });
