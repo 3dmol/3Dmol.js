@@ -2811,7 +2811,6 @@ $3Dmol.GLViewer = (function() {
             applyToModels("setClickable", sel, clickable, callback);
             return this;
         };
-
         /** Set hoverable and callback of selected atoms
          * 
          * @function $3Dmol.GLViewer#setHoverable
@@ -2829,7 +2828,8 @@ $3Dmol.GLViewer = (function() {
                },
                function(atom) { 
                    if(atom.label) {
-                    viewer.removeLabel(atom.label); 
+                    viewer.removeLabel(atom.label);
+                    delete atom.label;
                    }
                 }
                );
