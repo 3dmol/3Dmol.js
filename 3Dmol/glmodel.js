@@ -82,50 +82,6 @@ $3Dmol.GLModel = (function() {
         "Ni"
     ]
 
-    GLModel.validColorSpecs=[
-        "white",
-        "silver",
-        "gray",
-        "grey",
-        "black",
-        "red",
-        "maroon",
-        "yellow",
-        "orange",
-        "olive",
-        "lime",
-        "green",
-        "aqua",
-        "cyan",
-        "teal",
-        "blue",
-        "navy",
-        "fuchsia",
-        "magenta",
-        "purple",
-        "spectrum",
-    ]
-
-    GLModel.validColorschemeSpecs =[
-        "whiteCarbon",
-        "greenCarbon",
-        "cyanCarbon",
-        "magentaCarbon",
-        "yellowCarbon",
-        "orangeCarbon",
-        "purpleCarbon",
-        "blueCarbon",
-        "ssPyMOL",
-        "ssJmol",
-        "Jmol",
-        "default",
-        "amino",
-        "shapely",
-        "nucleic",
-        "chain",
-        "chainHetatm",
-    ]
-
     GLModel.validAtomSpecs = {
         "resn":{type:"string",valid :true}, // Parent residue name
         "x":{type:"number",valid:false,step:.1}, // Atom's x coordinate
@@ -268,6 +224,8 @@ $3Dmol.GLModel = (function() {
         // private variables
         var atoms = [];
         var frames = [];
+        var box = null;
+        var atomdfs = null; //depth first search over connected components
         var id = mid;
         var hidden = false;
         var molObj = null;
@@ -1455,6 +1413,42 @@ $3Dmol.GLModel = (function() {
             return (frames.numFrames != undefined)?frames.numFrames:frames.length;
         };
         
+        var adjustCoord = function(x1, x2, margin, adjust) {
+            //return new value of x2 that isn't more than margin away  
+            var dist = x2-x1;
+            if(dist < -margin) {
+                return x2+adjust;
+            } else if(dist > margin) {
+                return x2-adjust;
+            } 
+            return x2;
+        };
+        //go over current atoms in depth first order and ensure that connected
+        //attoms aren't split across the box
+        var adjustCoordinatesToBox = function() {
+            if(!box) return;
+            if(!atomdfs) return;
+            var bx = box[0]; 
+            var by = box[1];
+            var bz = box[2];
+            var mx = bx*0.9;
+            var my = by*0.9;
+            var mz = bz*0.9;
+            
+            for(var c = 0; c < atomdfs.length; c++) {
+                //for each connected component
+                var component = atomdfs[c];
+                for(var i = 1; i < component.length; i++) {
+                    //compare each atom to its previous and prevent coordinates from wrapping
+                    var atom = atoms[component[i][0]];
+                    var prev = atoms[component[i][1]];
+                    atom.x = adjustCoord(prev.x,atom.x,mx,bx);
+                    atom.y = adjustCoord(prev.y,atom.y,my,by);
+                    atom.z = adjustCoord(prev.z,atom.z,mz,bz);
+                }
+            }
+        };
+        
         /**
          * Sets model's atomlist to specified frame
          * Sets to last frame if framenum out of range
@@ -1482,6 +1476,10 @@ $3Dmol.GLModel = (function() {
                             atoms[i].x = values[count++];
                             atoms[i].y = values[count++];
                             atoms[i].z = values[count++];
+                        }
+                        //if a box was provided, check to see if we need to wrap connected components
+                        if(box && atomdfs) {
+                            adjustCoordinatesToBox();
                         }
                         resolve();
                     }).catch(reject);
@@ -1584,6 +1582,12 @@ $3Dmol.GLModel = (function() {
                 } else {
                     modelData = mData;
                 }
+            }
+            
+            if(parsedAtoms.box) {
+                box = parsedAtoms.box;
+            } else {
+                box = null;
             }
 
             if (frames.length == 0) { //first call
@@ -2428,6 +2432,36 @@ $3Dmol.GLModel = (function() {
         }
 
 
+    //recurse over the current atoms to establish a depth first order
+    var setupDFS = function() {
+        atomdfs = [];
+        
+        var visited = new Int8Array(atoms.length);
+        visited.fill(0);
+        
+        var search = function(i, prev, component) {
+            //add i to component and recursive explore connected atoms
+            component.push([i,prev]);
+            var atom = atoms[i];
+            visited[i] = 1;
+            for(var b = 0; b < atom.bonds.length; b++) {
+                var nexti = atom.bonds[b];
+                if(atoms[nexti] && !visited[nexti]) {
+                    search(nexti,i,component);
+                }
+            }
+        }
+        
+        for ( var i = 0; i < atoms.length; i++) {
+            var atom = atoms[i];
+            if(atom && !visited[i]) {
+                var component = [];
+                search(i, -1, component);
+                atomdfs.push(component);
+            }
+        }
+    };
+
     /**
     * Set coordinates for the atoms parsed from various topology files. 
     * @function $3Dmol.GLModel#setCoordinatesFromURL
@@ -2440,6 +2474,8 @@ $3Dmol.GLModel = (function() {
             var atomCount = atoms.length;
             frames = [];
             var self = this;
+            if(box) setupDFS();
+            
             return new Promise(function(resolve,reject){
                 if(!url.startsWith('http://')) url = 'http://'+url;
                 $.get(url+"/traj/numframes/"+path,function(numFrames){

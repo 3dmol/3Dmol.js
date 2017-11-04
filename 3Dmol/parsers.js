@@ -2202,19 +2202,31 @@ $3Dmol.Parsers = (function() {
                 atom.bonds = [];
                 atom.bondOrder = [];
                 atom.properties = {};
-        		if (line.length > 44){
+                if (line.length > 44){
                     atom.dx = 10.0*parseFloat(line.slice(44,52));
                     atom.dy = 10.0*parseFloat(line.slice(52,60));
                     atom.dz = 10.0*parseFloat(line.slice(60,68));
-        		}
+                }
                 atoms[i] = atom;
             } //for all atoms
+            
+            if(lines.length <= offset+3) {
+                //single line left, assume it is the box
+                var last = lines[offset++];
+                var box = last.trim().split(/\s+/);
+                if(box.length == 3) {
+                    for(var b = 0; b < 3; b++) {
+                        box[b] = parseFloat(box[b])*10.0;
+                    }
+                    allatoms.box = box;
+                }
+            }
             lines.splice(0, ++offset);
         }
         
-    	for (var i=0; i<allatoms.length; i++){
-    	    assignPDBBonds(allatoms[i]);
-    	}
+        for (var i=0; i<allatoms.length; i++){
+            assignPDBBonds(allatoms[i]);
+        }
         return allatoms;
     }
 
