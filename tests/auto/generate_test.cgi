@@ -39,6 +39,10 @@ else:
         <body style="margin:0;padding:0">
     """ % test
     
+    if ex.prescripts:
+        for prescript in ex.prescripts:
+            print "<script>\n%s</script>\n" % prescript
+        
     if ex.datas:
         for d in ex.datas:
             print d

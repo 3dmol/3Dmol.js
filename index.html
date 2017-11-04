@@ -54,10 +54,8 @@
             
             var init1YCR = function(viewer) {
             	viewer.addStyle({}, {"line":{}});
-                viewer.setColorByElement({"chain":"A"}, $3Dmol.elementColors.whiteCarbon);
-                viewer.setColorByElement({"chain":"B"}, $3Dmol.elementColors.Jmol);
-            	viewer.addSurface($3Dmol.SurfaceType.VDW, {'opacity':0.8}, {"chain":"A"},{"chain":"A"});
-            	viewer.addStyle({"chain":"B"}, {"stick":{}});
+            	viewer.addSurface($3Dmol.SurfaceType.VDW, {'opacity':0.8, colorscheme: 'whiteCarbon'}, {"chain":"A"},{"chain":"A"});
+            	viewer.addStyle({"chain":"B"}, {"stick":{colorscheme:'Jmol'}});
             	viewer.zoomTo({"chain":"B"});
             };
 
