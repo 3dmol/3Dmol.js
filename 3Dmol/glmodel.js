@@ -1248,7 +1248,7 @@ $3Dmol.GLModel = (function() {
                 var stickMaterial = null;
                 var ballMaterial = null;
                 var balls = stickGeometry.sphereGeometry;
-                if(typeof(balls.vertices) === 'undefined' || balls.vertices == 0) balls = null; //no balls
+                if(!balls || typeof(balls.vertices) === 'undefined' || balls.vertices == 0) balls = null; //no balls
 
                 //Initialize buffers in geometry                
                 stickGeometry.initTypedArrays();
