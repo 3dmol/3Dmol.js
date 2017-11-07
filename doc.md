@@ -82,8 +82,8 @@ will change frequently.  If you desire more stability you may copy the files int
 own project or, alternatively, we host release snapshots on the <a href="https://cdnjs.com/libraries/3Dmol">CloudFare</a>
 content delivery network (note that you must specify the release version).
 ```
-{@lang xml}<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.2.0/3Dmol-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.2.0/3Dmol-nojquery.js"></script>
+{@lang xml}<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.3.0/3Dmol-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.3.0/3Dmol-nojquery.js"></script>
 ```
 
 Using the CDN will likely provide the best network performance to your users, but features will
