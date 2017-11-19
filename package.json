@@ -27,5 +27,5 @@
     "prepublish": "npm run build"
   },
   "license" : "BSD-3-Clause",
-  "main": "build/3Dmol-min.js"
+  "main": "build/3Dmol-nojquery.js"
 }
