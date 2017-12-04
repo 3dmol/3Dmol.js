@@ -447,6 +447,7 @@ $3Dmol.GLViewer = (function() {
 
         });
 
+        
         //if the user has specify zoom limits, readjust to fit within them
         //also, make sure we don't go past CAMERA_Z
         var adjustZoomToLimits = function(z) {
@@ -678,6 +679,7 @@ $3Dmol.GLViewer = (function() {
                 glDOM.bind("contextmenu", function(ev) {
                     ev.preventDefault();
                 });
+                
             }
         };
         initContainer(container);

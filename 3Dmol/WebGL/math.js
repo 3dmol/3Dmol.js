@@ -133,11 +133,26 @@ $3Dmol.Quaternion.prototype = {
     
     clone : function() {
         return new $3Dmol.Quaternion(this.x, this.y, this.z,this.w);
+    },
+    setFromEuler : function(e) {
+        var c1 = Math.cos(e.x / 2);
+        var c2 = Math.cos(e.y / 2);
+        var c3 = Math.cos(e.z / 2);
+        var s1 = Math.sin(e.x / 2);
+        var s2 = Math.sin(e.y / 2);
+        var s3 = Math.sin(e.z / 2);
+
+        this.x = s1 * c2 * c3 + c1 * s2 * s3;
+        this.y = c1 * s2 * c3 - s1 * c2 * s3;
+        this.z = c1 * c2 * s3 + s1 * s2 * c3;
+        this.w = c1 * c2 * c3 - s1 * s2 * s3;
+
+        return this;
     }
     
 };
 
-//A 2 Vector
+// A 2 Vector
 /** @constructor */
 $3Dmol.Vector2 = function(x, y) {
     
