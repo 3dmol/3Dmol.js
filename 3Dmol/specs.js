@@ -178,6 +178,7 @@
  * @prop {ColorSpec} color - solid color
  * @prop {number} alpha - transparency
  * @prop {boolean} wireframe - draw as wireframe, not surface
+ * @prop {boolean} hidden - if true, do not display object
  * @prop {number} linewidth - width of line for wireframe rendering **No longer supported by most browsers**
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click 
