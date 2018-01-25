@@ -113,16 +113,13 @@ $.ajaxTransport(
  * @param {ViewerSpec} config Viewer specification
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
  * @example
-   $3Dmol.download("pdb:4UAA",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
-                  var colorAsSnake = function(atom) {
-                    return atom.resi % 2 ? 'white': 'green'
-                  };
-
-                  viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
-
-                  viewer.render();
-              });                     
+   var viewer = $3Dmol.createViewer(
+     'mycontainer',
+     {
+       defaultcolors: $3Dmol.elementColors.rasmol,
+       backgroundColor: 'black'
+     }
+   );
  *                        
  */
 $3Dmol.createViewer = function(element, config)
