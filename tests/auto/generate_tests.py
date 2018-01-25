@@ -64,7 +64,7 @@ class Example():
             text += "var objectHTML=$.parseHTML(`"+div+"`);\n$(\"body\").append(objectHTML);\n"
         if self.divs:
             # remove the div when done with it
-            text += "var finished_with_div_callback = function() { callback(); "
+            text += "var finished_with_div_callback = function() { callback(viewer); "
             if self.datas:
                 text += "$(wrapper).remove(); "
             text += "$(objectHTML).remove();}\n"
@@ -196,7 +196,7 @@ if __name__ == '__main__':
     
         for file in test.files:
             for example in file.examples:
-                f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){console.log(err);var li=document.createElement('li');li.innerHTML=name+' '+err;document.getElementById('summary_scroll').appendChild(li);callback();}},\n")
+                f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){\nconsole.log(err);\nvar li=document.createElement('li');li.innerHTML=name+' '+err;document.getElementById('summary_scroll').appendChild(li);callback(viewer);}},\n")
         f.write("};")
 
 

@@ -2364,12 +2364,11 @@ $3Dmol.GLModel = (function() {
          * Don't show this model in future renderings. Keep all styles and state
          * so it can be efficiencly shown again.
          * @example
-            var element=$('#gldiv');
-            var viewer = $3Dmol.createViewer(element);
-            var m = viewer.addModel();
-            m.hide();
-            viewer.render(callback);
-
+            $3Dmol.download("pdb:3ucr",viewer,{},function(){  
+            viewer.setStyle({},{stick:{}});
+            viewer.getModel().hide();  
+            viewer.render();
+            });
          * @function $3Dmol.GLModel#hide
          */
         this.hide = function() {
@@ -2378,6 +2377,18 @@ $3Dmol.GLModel = (function() {
             if(molObj) molObj.setVisible(false);
         }
         
+        /**@function show
+         * Unhide a hidden model (see $3Dmol.GLModel#hide)
+         * @example
+            $3Dmol.download("pdb:3ucr",viewer,{},function(){  
+            viewer.setStyle({},{stick:{}});
+            viewer.getModel().hide();  
+            viewer.render(  )
+            viewer.getModel().show()
+            viewer.render();
+            });
+         * @function $3Dmol.GLModel#show
+         */        
         this.show = function() {
             hidden = false;
             if(renderedMolObj) renderedMolObj.setVisible(true);
