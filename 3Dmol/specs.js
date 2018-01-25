@@ -8,6 +8,14 @@
  * @prop {boolean} nomouse - if true, disable handling of mouse events
  * @prop {ColorSpec} backgroundColor - color of background
  */
+    
+/**
+ * Grid GLViewer input specification
+ * @typedef ViewerGridSpec
+ * @prop {number} rows - number of rows in grid
+ * @prop {number} cols - number of columns in grid
+ * @prop {boolean} control_all - if true, mouse events are linked
+ */
 
 /**
  * Atom representation. Depending on the input file format, not all fields may be defined.

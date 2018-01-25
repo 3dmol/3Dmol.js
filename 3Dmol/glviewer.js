@@ -3750,9 +3750,9 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setAutoEyeSeparation
          * @return {number} camera x position
          */
-        this.setAutoEyeSeparation = function() {
+        this.setAutoEyeSeparation = function(isright) {
             var dist = this.getPerceivedDistance();
-            if (camera.position.x > 0) //setting a value of dist*tan(5)
+            if (isright || camera.position.x > 0) //setting a value of dist*tan(5)
                 camera.position.x = dist*Math.tan(Math.PI / 180.0 * 5.0) 
             else
                 camera.position.x = -dist*Math.tan(Math.PI / 180.0 * 5.0)

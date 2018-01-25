@@ -141,13 +141,60 @@ $3Dmol.createViewer = function(element, config)
     return null;
 };
 
+/**
+ * Create and initialize an appropriate a grid of viewers that share a WebGL canvas
+ @function $createViewerGrid
+ * @param {Object | string} element - Either HTML element or string identifier
+ * @param {GridSpec} grid configuration
+ * @param {ViewerGridSpec} config Viewer specification to apply to all subviewers
+ * @return [[$3Dmol.GLViewer]] 2D array of GLViewers
+ * @example                    
+   var viewers = $3Dmol.createViewerGrid(
+     'gldiv', //id of div to create canvas in
+     {
+       rows: 2,
+       cols: 2,
+       control_all: true  //mouse controls all viewers
+     },
+     { backgroundColor: 'lightgrey' }
+   );
+   $.get('data/1jpy.cif', function(data) {
+     var viewer = viewers[0][0];
+     viewer.addModel(data,'cif');
+     viewer.setStyle({sphere:{}});
+     viewer.zoomTo();
+     viewer.render( );
+
+     viewer = viewers[0][1];
+     viewer.addModel(data,'cif');
+     viewer.setStyle({stick:{}});
+     viewer.zoomTo();     
+     viewer.render( );
+     
+     viewer = viewers[1][0];
+     viewer.addModel(data,'cif');
+     viewer.setStyle({cartoon:{color:'spectrum'}});
+     viewer.zoomTo();     
+     viewer.render( );
+     
+     viewer = viewers[1][1];
+     viewer.addModel(data,'cif');
+     viewer.setStyle({cartoon:{colorscheme:'chain'}});
+     viewer.zoomTo();     
+     viewer.render();
+     
+     
+   });
+     
+ */
 $3Dmol.createViewerGrid  = function(element,config,viewer_config){
     if($.type(element) === "string")
         element = $("#"+element);
     if(!element) return;
 
     config = config || {}; 
-
+    viewer_config = viewer_config || {};
+    
     var viewers = [];
 
     //create canvas
@@ -568,58 +615,23 @@ if( typeof(define) === 'function' && define.amd) {
 
 /* StereoViewer for stereoscopic viewing
 * @constructor
-* @param {string} div id
-* @param {number} eyeSeparation
+* @param {Object | string} element - Either HTML element or string identifier
 * 
 */
 
-$3Dmol.createStereoViewer = function(divId, eyeSeparation) {
+$3Dmol.createStereoViewer = function(element) {
     var that = this;
-    eyeSeparation = (eyeSeparation != undefined)?eyeSeparation:6;
-    var element = document.getElementById(divId);
-    var gldiv1 = document.createElement('div'); //create two divs having half of the width and place them side by side
-    var gldiv2 = document.createElement('div');
-    gldiv1.id = "gldiv1";
-    gldiv2.id = "gldiv2";
-    gldiv1.style.cssText = gldiv2.style.cssText = 'position: relative; float: left; width: 50%; height: 100%; margin: 0; padding: 0; border: 0;';
-
-    element.appendChild(gldiv1);
-    element.appendChild(gldiv2);
-
-    this.glviewer1 = $3Dmol.createViewer($("#gldiv1"),{
-        camerax: -eyeSeparation/2.0});
-
-    this.glviewer2 = $3Dmol.createViewer($("#gldiv2"),{
-        camerax: eyeSeparation/2.0});
-
-    var singleClickEvent = function() {
-        that.glviewer1.rotate(15);
-        that.glviewer2.rotate(15);
-        that.glviewer1.render();
-        that.glviewer2.render();
-    };
-
-    var doubleClickEvent = function() {
-        that.glviewer1.zoom(1.05);
-        that.glviewer2.zoom(1.05);
-    };
-
-    var clicks = 0, DELAY = 700, timer = null;
-    var handleClicks = function() { //to handle single and double clicks differently
-        clicks++;
-        if (clicks == 1) {
-            timer = setTimeout(function() {
-                singleClickEvent();
-                clicks = 0;
-            },DELAY);
-        }
-        else {
-            clearTimeout(timer);
-            doubleClickEvent();
-            clicks = 0;
-        }
-    };
-    element.addEventListener("click", handleClicks, false);
+    if($.type(element) === "string")
+        element = $("#"+element);
+    if(!element) return;
+    
+    var viewers = $3Dmol.createViewerGrid(element, {rows: 1, cols: 2, control_all: true});
+    
+    this.glviewer1 = viewers[0][0];
+    this.glviewer2 = viewers[0][1];
+    
+    this.glviewer1.setAutoEyeSeparation(false);
+    this.glviewer2.setAutoEyeSeparation(true);    
 
     this.glviewer1.linkViewer(this.glviewer2);
     this.glviewer2.linkViewer(this.glviewer1);
@@ -638,11 +650,32 @@ $3Dmol.createStereoViewer = function(divId, eyeSeparation) {
             };
         })(methods[i]);
     }
-
+    
+    //special cased methods
     this.setCoordinates = function (models, data, format) { //for setting the coordinates of the models
         for (var i = 0; i < models.length; i++) {
             models[i].setCoordinates(data, format);
         }
+    };
+    
+    this.surfacesFinished = function() {
+        return this.glviewer1.surfacesFinished() && this.glviewer2.surfacesFinished();
+    };
+    
+    this.isAnimated = function() {
+        return this.glviewer1.isAnimated() || this.glviewer2.isAnimated();
+    };
+    
+    this.render = function(callback) {
+        this.glviewer1.render();
+        this.glviewer2.render();
+        if(callback) {
+            callback(this); //call only once
+        }
+    };
+    
+    this.getCanvas = function() {
+        return this.glviewer1.getCanvas(); //same for both
     };
 
 }
