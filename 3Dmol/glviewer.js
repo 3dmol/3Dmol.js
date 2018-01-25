@@ -556,6 +556,13 @@ $3Dmol.GLViewer = (function() {
         this.pngURI = function() {
             return $('canvas',container)[0].toDataURL('image/png');
         }
+        
+        /**
+         * Return underlying canvas element.         
+         */
+        this.getCanvas = function() {
+            return glDOM.get(0);
+        }
     /**
          * Set the duration of the hover delay
          * 
@@ -1088,7 +1095,7 @@ $3Dmol.GLViewer = (function() {
             var time2 = new Date();
             //console.log("render time: " + (time2 - time1));
             if(typeof callback ==='function'){
-                callback();
+                callback(this);
                // console.log("render time: " + (time2 - time1));
             }
             return this;

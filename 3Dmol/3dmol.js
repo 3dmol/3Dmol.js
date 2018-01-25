@@ -114,7 +114,7 @@ $.ajaxTransport(
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
  * @example
    var viewer = $3Dmol.createViewer(
-     'mycontainer',
+     'gldiv', //id of div to create canvas in
      {
        defaultcolors: $3Dmol.elementColors.rasmol,
        backgroundColor: 'black'
