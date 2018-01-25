@@ -8,8 +8,22 @@
  * 
  * @constructor 
  * @param {Object} element HTML element within which to create viewer
- * @param {function} callback - Callback function to be immediately executed on this viewer
- * @param {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
+ * @param {Object} config Object containing optional configuration for the viewer including:
+ * @param {function} config.callback - Callback function to be immediately executed on this viewer
+ * @param {Object} config.defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
+ * @param {boolean} config.nomouse - Whether to disable mouse handlers
+ * @param {string} config.backgroundColor - Color of the canvas' background
+ * @param {number} config.camerax
+ * @param {number} config.hoverDuration
+ * @param {string} config.id - id of the canvas
+ * @param config.row
+ * @param config.col
+ * @param config.rows
+ * @param config.cols
+ * @param config.canvases
+ * @param config.viewers
+ * @param {boolean} config.control_all
+ * @param {boolean} config.orthographic
  */
 $3Dmol.GLViewer = (function() {
     // private class variables
