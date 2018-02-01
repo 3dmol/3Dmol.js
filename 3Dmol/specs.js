@@ -216,8 +216,9 @@
  * Box shape specification. Extends {@link ShapeSpec}  
  * 
  * @typedef BoxSpec   
- * @prop {$3Dmol.Vector3} corner
- * @prop {Object} dimensions - width, height and depth; can be either scalars or vectors (for not-axis aligned boxes)
+ * @prop {$3Dmol.Vector3} corner - bottom corner of box
+ * @prop {$3Dmol.Vector3} center - alternative to corner: center of box
+ * @prop {Object} dimensions - {w:width, h:height, d:depth}; can be either scalars or vectors (for not-axis aligned boxes)
  * 
  */
 
