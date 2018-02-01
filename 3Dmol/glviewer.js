@@ -2023,7 +2023,7 @@ $3Dmol.GLViewer = (function() {
          * way to create a spherical shape object
          * 
          * @function $3Dmol.GLViewer#addSphere
-         * @param {SphereSpec} spec - Sphere shape style specification
+         * @param {SphereShapeSpec} spec - Sphere shape style specification
          * @return {$3Dmol.GLShape}
          @example
          
@@ -2044,6 +2044,33 @@ $3Dmol.GLViewer = (function() {
             return s;
         };
 
+        /**
+         * Create and add box shape. This method provides a shorthand 
+         * way to create a box shape object
+         * 
+         * @function $3Dmol.GLViewer#addBox
+         * @param {BoxSpec} spec - Box shape style specification
+         * @return {$3Dmol.GLShape}
+         @example
+         
+         viewer.addBox({corner:{x:0,y:0,z:0},dimensions: {w:3,h:4,d:2},color:'blue'});
+         viewer.zoomTo();
+         viewer.rotate(45, {x:1,y:1,z:1});
+         viewer.render();
+         */
+        this.addBox = function(spec) {
+            spec = spec || {};
+
+            spec.corner = getSelectionCenter(spec.corner);
+
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addBox(spec);
+            shapes.push(s);
+
+            return s;
+        };
+        
         /**
          * Create and add arrow shape
          * 

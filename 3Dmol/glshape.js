@@ -547,9 +547,9 @@ $3Dmol.GLShape = (function() {
      * @param {$3Dmol.Sphere}
      *            sphere
      * @param {Object}
-     *            components
+     *            components, centroid of all objects in shape
      * @param {Array}
-     *            points
+     *            points, flat array of all points in shape
      */
     var updateBoundingFromPoints = function(sphere, components, points) {
 
@@ -727,6 +727,104 @@ $3Dmol.GLShape = (function() {
                     geoGroup.vertexArray);
         };
 
+
+        /**
+         * Creates a box
+         * @function $3Dmol.GLShape#addBox
+         * @param {BoxSpec} boxSpec
+         * @return {$3Dmol.GLShape}
+         @example 
+         var shape = viewer.addShape({color:'red'});
+         shape.addBox({corner: {x:1,y:2,z:0}, dimensions: {w: 4, h: 2, d: 6}});
+         shape.addBox({corner: {x:-5,y:-3,z:0},
+                       dimensions: { w: {x:1,y:1,z:0},
+                                     h: {x:-1,y:1,z:0},
+                                     d: {x:0,y:0,z:1} }});
+         viewer.zoomTo();
+         viewer.rotate(30);
+         viewer.render();
+         */
+        this.addBox = function(boxSpec) {
+
+            var corner = boxSpec.corner || {x:0,y:0,z:0};
+            var dim = boxSpec.dimensions || { w: 1, h:1, d: 1};
+
+            //dimensions may be scalar or vector quantities
+            var w = dim.w;
+            if(typeof(dim.w) == "number") {
+                w = {x:dim.w,y:0,z:0};
+            }
+            var h = dim.h;
+            if(typeof(dim.h) == "number") {
+                h = {x:0,y:dim.h,z:0};
+            }
+            var d = dim.d;
+            if(typeof(dim.d) == "number") {
+                d = {x:0,y:0,z:dim.d};
+            }
+            
+            //8 vertices
+            var c = corner;
+            var uv = 
+                [{x: c.x, y: c.y, z:c.z},
+                 {x: c.x+w.x, y: c.y+w.y, z:c.z+w.z},
+                 {x: c.x+h.x, y: c.y+h.y, z:c.z+h.z},
+                 {x: c.x+w.x+h.x, y: c.y+w.y+h.y, z:c.z+w.z+h.z},
+                 {x: c.x+d.x, y: c.y+d.y, z:c.z+d.z},
+                 {x: c.x+w.x+d.x, y: c.y+w.y+d.y, z:c.z+w.z+d.z},
+                 {x: c.x+h.x+d.x, y: c.y+h.y+d.y, z:c.z+h.z+d.z},
+                 {x: c.x+w.x+h.x+d.x, y: c.y+w.y+h.y+d.y, z:c.z+w.z+h.z+d.z}];
+                 
+            //but.. so that we can have sharp issues, we want a unique normal
+            //for each face - since normals are associated with vertices, need to duplicate 
+            
+            //bottom
+            // 0 1
+            // 2 3
+            //top
+            // 4 5
+            // 6 7
+            var verts = [];
+            var faces = [];
+            //bottom
+            verts.splice(verts.length, 0, uv[0],uv[1],uv[2],uv[3]);
+            faces.splice(faces.length,0, 0,2,1, 1,2,3);
+            var foff = 4;
+            //front
+            verts.splice(verts.length, 0, uv[2],uv[3],uv[6],uv[7]);
+            faces.splice(faces.length,0, foff+0,foff+2,foff+1, foff+1,foff+2,foff+3); 
+            foff += 4;   
+            //back
+            verts.splice(verts.length, 0, uv[4],uv[5],uv[0],uv[1]);
+            faces.splice(faces.length,0, foff+0,foff+2,foff+1, foff+1,foff+2,foff+3); 
+            foff += 4;   
+            //top
+            verts.splice(verts.length, 0, uv[6],uv[7],uv[4],uv[5]);
+            faces.splice(faces.length,0, foff+0,foff+2,foff+1, foff+1,foff+2,foff+3); 
+            foff += 4;  
+            //right
+            verts.splice(verts.length, 0, uv[3],uv[1],uv[7],uv[5]);
+            faces.splice(faces.length,0, foff+0,foff+2,foff+1, foff+1,foff+2,foff+3); 
+            foff += 4;  
+            //left
+            verts.splice(verts.length, 0, uv[2],uv[0],uv[6],uv[4]);
+            faces.splice(faces.length,0, foff+0,foff+2,foff+1, foff+1,foff+2,foff+3); 
+            foff += 4; 
+                                    
+            var spec = $.extend({},boxSpec);
+            spec.vertexArr = verts;
+            spec.faceArr = faces;
+            spec.normalArr = [];
+            drawCustom(this, geo, spec);
+            
+            var centroid = new $3Dmol.Vector3();
+            components.push({
+                centroid : centroid.addVectors(uv[0],uv[7]).multiplyScalar(0.5)
+            });
+            var geoGroup = geo.updateGeoGroup(0);
+            updateBoundingFromPoints(this.boundingSphere, components, geoGroup.vertexArray);
+        };
+        
         /**
          * Creates a cylinder shape
          * @function $3Dmol.GLShape#addCylinder

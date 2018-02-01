@@ -206,9 +206,18 @@
 /**
  * Sphere shape specification. Extends {@link ShapeSpec}  
  * 
- * @typedef SphereSpec   
+ * @typedef SphereShapeSpec   
  * @prop {$3Dmol.Vector3} center
  * @prop {number} radius
+ * 
+ */
+ 
+/**
+ * Box shape specification. Extends {@link ShapeSpec}  
+ * 
+ * @typedef BoxSpec   
+ * @prop {$3Dmol.Vector3} corner
+ * @prop {Object} dimensions - width, height and depth; can be either scalars or vectors (for not-axis aligned boxes)
  * 
  */
 
