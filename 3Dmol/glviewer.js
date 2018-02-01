@@ -8,8 +8,22 @@
  * 
  * @constructor 
  * @param {Object} element HTML element within which to create viewer
- * @param {function} callback - Callback function to be immediately executed on this viewer
- * @param {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
+ * @param {Object} config Object containing optional configuration for the viewer including:
+ * @param {function} config.callback - Callback function to be immediately executed on this viewer
+ * @param {Object} config.defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
+ * @param {boolean} config.nomouse - Whether to disable mouse handlers
+ * @param {string} config.backgroundColor - Color of the canvas' background
+ * @param {number} config.camerax
+ * @param {number} config.hoverDuration
+ * @param {string} config.id - id of the canvas
+ * @param config.row
+ * @param config.col
+ * @param config.rows
+ * @param config.cols
+ * @param config.canvases
+ * @param config.viewers
+ * @param {boolean} config.control_all
+ * @param {boolean} config.orthographic
  */
 $3Dmol.GLViewer = (function() {
     // private class variables
@@ -556,6 +570,13 @@ $3Dmol.GLViewer = (function() {
         this.pngURI = function() {
             return $('canvas',container)[0].toDataURL('image/png');
         }
+        
+        /**
+         * Return underlying canvas element.         
+         */
+        this.getCanvas = function() {
+            return glDOM.get(0);
+        }
     /**
          * Set the duration of the hover delay
          * 
@@ -1088,7 +1109,7 @@ $3Dmol.GLViewer = (function() {
             var time2 = new Date();
             //console.log("render time: " + (time2 - time1));
             if(typeof callback ==='function'){
-                callback();
+                callback(this);
                // console.log("render time: " + (time2 - time1));
             }
             return this;
@@ -2002,7 +2023,7 @@ $3Dmol.GLViewer = (function() {
          * way to create a spherical shape object
          * 
          * @function $3Dmol.GLViewer#addSphere
-         * @param {SphereSpec} spec - Sphere shape style specification
+         * @param {SphereShapeSpec} spec - Sphere shape style specification
          * @return {$3Dmol.GLShape}
          @example
          
@@ -2023,6 +2044,33 @@ $3Dmol.GLViewer = (function() {
             return s;
         };
 
+        /**
+         * Create and add box shape. This method provides a shorthand 
+         * way to create a box shape object
+         * 
+         * @function $3Dmol.GLViewer#addBox
+         * @param {BoxSpec} spec - Box shape style specification
+         * @return {$3Dmol.GLShape}
+         @example
+         
+         viewer.addBox({corner:{x:0,y:0,z:0},dimensions: {w:3,h:4,d:2},color:'blue'});
+         viewer.zoomTo();
+         viewer.rotate(45, {x:1,y:1,z:1});
+         viewer.render();
+         */
+        this.addBox = function(spec) {
+            spec = spec || {};
+
+            spec.corner = getSelectionCenter(spec.corner);
+
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addBox(spec);
+            shapes.push(s);
+
+            return s;
+        };
+        
         /**
          * Create and add arrow shape
          * 
@@ -3729,9 +3777,9 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setAutoEyeSeparation
          * @return {number} camera x position
          */
-        this.setAutoEyeSeparation = function() {
+        this.setAutoEyeSeparation = function(isright) {
             var dist = this.getPerceivedDistance();
-            if (camera.position.x > 0) //setting a value of dist*tan(5)
+            if (isright || camera.position.x > 0) //setting a value of dist*tan(5)
                 camera.position.x = dist*Math.tan(Math.PI / 180.0 * 5.0) 
             else
                 camera.position.x = -dist*Math.tan(Math.PI / 180.0 * 5.0)

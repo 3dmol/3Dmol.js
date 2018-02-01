@@ -8,6 +8,14 @@
  * @prop {boolean} nomouse - if true, disable handling of mouse events
  * @prop {ColorSpec} backgroundColor - color of background
  */
+    
+/**
+ * Grid GLViewer input specification
+ * @typedef ViewerGridSpec
+ * @prop {number} rows - number of rows in grid
+ * @prop {number} cols - number of columns in grid
+ * @prop {boolean} control_all - if true, mouse events are linked
+ */
 
 /**
  * Atom representation. Depending on the input file format, not all fields may be defined.
@@ -198,9 +206,18 @@
 /**
  * Sphere shape specification. Extends {@link ShapeSpec}  
  * 
- * @typedef SphereSpec   
+ * @typedef SphereShapeSpec   
  * @prop {$3Dmol.Vector3} center
  * @prop {number} radius
+ * 
+ */
+ 
+/**
+ * Box shape specification. Extends {@link ShapeSpec}  
+ * 
+ * @typedef BoxSpec   
+ * @prop {$3Dmol.Vector3} corner
+ * @prop {Object} dimensions - width, height and depth; can be either scalars or vectors (for not-axis aligned boxes)
  * 
  */
 

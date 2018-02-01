@@ -169,11 +169,11 @@ $(document).ready(function(){
             return true; 
           };
           
-        system[key](viewer,function(){
+        system[key](viewer,function(viewer){
             waitfor(function() { return viewer.surfacesFinished() && !viewer.isAnimated() } , true , 1000 , 0 , "" , function(){
                 var after=Date.now();
                 //gets the canvas
-                var canvas=$("canvas#"+key).get(0);
+                var canvas=viewer.getCanvas(); //$("canvas#"+key).get(0);
                 //creates an image for the canvas
                 var canvasImageData = imageFromWebGlCanvas(canvas);
                 var canvasImage=$("<img class='renderedImage'>").attr('src',canvasImageData);

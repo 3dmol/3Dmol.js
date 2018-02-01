@@ -1,8 +1,6 @@
 /**
-    A collection of functions relating to resolving @borrows tags in JSDoc symbols.
-    @module jsdoc/borrow
-    @author Michael Mathews <micmath@gmail.com>
-    @license Apache License 2.0 - See file 'LICENSE.md' in this project.
+ * A collection of functions relating to resolving @borrows tags in JSDoc symbols.
+ * @module jsdoc/borrow
  */
 'use strict';
 
@@ -53,13 +51,12 @@ function cloneBorrowedDoclets(doclet, doclets) {
     doclet.borrowed.forEach(function(borrowed) {
         var borrowedDoclets = doclets.index.longname[borrowed.from];
         var borrowedAs = borrowed.as || borrowed.from;
-        var clonedDoclets;
         var parts;
         var scopePunc;
 
         if (borrowedDoclets) {
             borrowedAs = borrowedAs.replace(/^prototype\./, SCOPE.PUNC.INSTANCE);
-            clonedDoclets = doop(borrowedDoclets).forEach(function(clone) {
+            doop(borrowedDoclets).forEach(function(clone) {
                 // TODO: this will fail on longnames like '"Foo#bar".baz'
                 parts = borrowedAs.split(SCOPE.PUNC.INSTANCE);
 
@@ -93,6 +90,7 @@ exports.resolveBorrows = function(doclets) {
 
     if (!doclets.index) {
         logger.error('Unable to resolve borrowed symbols, because the docs have not been indexed.');
+
         return;
     }
 
