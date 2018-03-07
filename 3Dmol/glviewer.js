@@ -1765,7 +1765,6 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.z = finalz;
                 show();
             }
-            camera.lookAt(new $3Dmol.Vector3(lookingAt.x,lookingAt.y,finalz)); //required if camera has a non-zero camerax value
             return this;
         
         };
