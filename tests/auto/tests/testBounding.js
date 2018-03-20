@@ -5415,7 +5415,7 @@ END
 
 
 var data = $("#mydata").val();
-var m = viewer.addModel(data, "xyz");
+var m = viewer.addModel(data, "pdb");
 m.setStyle({cartoon:{}});
 viewer.zoomTo();
 //adding a sphere within protein should not change bounding box
