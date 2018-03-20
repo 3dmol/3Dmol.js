@@ -1765,7 +1765,6 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.z = finalz;
                 show();
             }
-            camera.lookAt(new $3Dmol.Vector3(0,0,finalz)); //required if camera has a non-zero camerax value
             return this;
         
         };
@@ -2053,7 +2052,11 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLShape}
          @example
          
-         viewer.addBox({corner:{x:0,y:0,z:0},dimensions: {w:3,h:4,d:2},color:'blue'});
+         viewer.addLine({color:'red',start:{x:0,y:0,z:0},end:{x:5,y:0,z:0}});
+         viewer.addLine({color:'blue',start:{x:0,y:0,z:0},end:{x:0,y:5,z:0}});
+         viewer.addLine({color:'green',start:{x:0,y:0,z:0},end:{x:0,y:0,z:5}});
+
+         viewer.addBox({center:{x:0,y:0,z:0},dimensions: {w:3,h:4,d:2},color:'magenta'});
          viewer.zoomTo();
          viewer.rotate(45, {x:1,y:1,z:1});
          viewer.render();
@@ -2061,7 +2064,12 @@ $3Dmol.GLViewer = (function() {
         this.addBox = function(spec) {
             spec = spec || {};
 
-            spec.corner = getSelectionCenter(spec.corner);
+            if(spec.corner != undefined) {
+                spec.corner = getSelectionCenter(spec.corner);
+            }
+            if(spec.center != undefined) {
+                spec.center = getSelectionCenter(spec.center);
+            }
 
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;

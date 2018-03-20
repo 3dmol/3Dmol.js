@@ -749,7 +749,6 @@ $3Dmol.GLShape = (function() {
          */
         this.addBox = function(boxSpec) {
 
-            var corner = boxSpec.corner || {x:0,y:0,z:0};
             var dim = boxSpec.dimensions || { w: 1, h:1, d: 1};
 
             //dimensions may be scalar or vector quantities
@@ -766,8 +765,20 @@ $3Dmol.GLShape = (function() {
                 d = {x:0,y:0,z:dim.d};
             }
             
+            //can position using corner OR center
+            var c = boxSpec.corner
+            if(c == undefined) {
+                if(boxSpec.center !== undefined) {
+                    
+                    c  = {x: boxSpec.center.x - 0.5*(w.x+h.x+d.x),
+                          y: boxSpec.center.y - 0.5*(w.y+h.y+d.y),
+                          z: boxSpec.center.z - 0.5*(w.z+h.z+d.z)}
+                } else { // default to origin
+                    c = {x:0,y:0,z:0};
+                }
+            }
+            
             //8 vertices
-            var c = corner;
             var uv = 
                 [{x: c.x, y: c.y, z:c.z},
                  {x: c.x+w.x, y: c.y+w.y, z:c.z+w.z},
