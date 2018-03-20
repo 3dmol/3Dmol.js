@@ -481,7 +481,7 @@ $3Dmol.GLShape = (function() {
             center.divideScalar(cnt);
             
             
-            updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, vertexArray);
+            updateBoundingFromPoints(shape.boundingSphere, {centroid: center}, vertexArray, geoGroup.vertices);
         }
 
         geoGroup.faceArray = new Uint16Array(faceArr);
@@ -550,8 +550,9 @@ $3Dmol.GLShape = (function() {
      *            components, centroid of all objects in shape
      * @param {Array}
      *            points, flat array of all points in shape
+     * @param {int} numPoints, number of valid poitns in points
      */
-    var updateBoundingFromPoints = function(sphere, components, points) {
+    var updateBoundingFromPoints = function(sphere, components, points, numPoints) {
 
         sphere.center.set(0, 0, 0);
 
@@ -568,8 +569,10 @@ $3Dmol.GLShape = (function() {
         }
 
         var maxRadiusSq = sphere.radius * sphere.radius;
-
-        for (i = 0, il = points.length / 3; i < il; i++) {
+        if(points.length/3 < numPoints)
+            numPoints = points.length/3;
+            
+        for (i = 0, il = numPoints; i < il; i++) {
             var x = points[i * 3], y = points[i * 3 + 1], z = points[i * 3 + 2];
             var radiusSq = sphere.center.distanceToSquared({
                 x : x,
@@ -724,7 +727,7 @@ $3Dmol.GLShape = (function() {
             var geoGroup = geo.updateGeoGroup(0);
             
             updateBoundingFromPoints(this.boundingSphere, components,
-                    geoGroup.vertexArray);
+                    geoGroup.vertexArray, geoGroup.vertices);
         };
 
 
@@ -822,7 +825,7 @@ $3Dmol.GLShape = (function() {
                 centroid : centroid.addVectors(uv[0],uv[7]).multiplyScalar(0.5)
             });
             var geoGroup = geo.updateGeoGroup(0);
-            updateBoundingFromPoints(this.boundingSphere, components, geoGroup.vertexArray);
+            updateBoundingFromPoints(this.boundingSphere, components, geoGroup.vertexArray, geoGroup.vertices);
         };
         
         /**
@@ -882,7 +885,7 @@ $3Dmol.GLShape = (function() {
             });
             var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
-                    geoGroup.vertexArray);
+                    geoGroup.vertexArray, geoGroup.vertices);
 
         };
 
@@ -929,7 +932,7 @@ $3Dmol.GLShape = (function() {
             });
             var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
-                    geoGroup.vertexArray);
+                    geoGroup.vertexArray, geoGroup.vertices);
         }
 
         /**
@@ -982,7 +985,7 @@ $3Dmol.GLShape = (function() {
             });
             var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
-                    geoGroup.vertexArray);            
+                    geoGroup.vertexArray, geoGroup.vertices);            
         }
         /**
          * Creates an arrow shape
@@ -1044,7 +1047,7 @@ $3Dmol.GLShape = (function() {
             });
             var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
-                    geoGroup.vertexArray);
+                    geoGroup.vertexArray, geoGroup.vertices);
 
         };
 
