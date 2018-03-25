@@ -23,6 +23,12 @@ From PyPI:
     pip install py3Dmol
 
 
+*Important:* In order to use with JupyterLab you must install the JupyterLab extension:
+
+    jupyter labextension install jupyterlab_3dmol
+
+
+
 Usage
 -----
 
