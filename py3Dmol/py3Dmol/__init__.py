@@ -36,10 +36,31 @@ class view(object):
         self.endjs = '</script>'
         
         self.updatejs = '' # code added since last show
-        #load 3dmol, but only once
-        self.startjs += "if(typeof $3Dmolpromise === 'undefined') $3Dmolpromise = $.when($.getScript('%s'))\n" % js
-        self.startjs += "var viewer_UNIQUEID = null;\n";
-        self.startjs += "$3Dmolpromise.done(function() {\n";
+        #load 3dmol, but only once, can't use jquery :-(
+        #https://medium.com/@vschroeder/javascript-how-to-execute-code-from-an-asynchronously-loaded-script-although-when-it-is-not-bebcbd6da5ea
+        self.startjs += """
+var loadScriptAsync = function(uri){
+  return new Promise((resolve, reject) => {
+    var tag = document.createElement('script');
+    tag.src = uri;
+    tag.async = true;
+    tag.onload = () => {
+      resolve();
+    };
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+});
+};
+
+if(typeof $3Dmolpromise === 'undefined') {
+$3Dmolpromise = null;
+  $3Dmolpromise = loadScriptAsync('%s');
+}
+
+var viewer_UNIQUEID = null;
+""" % js
+
+        self.startjs += "$3Dmolpromise.then(function() {\n";
         self.endjs = "});\n" + self.endjs
         self.viewergrid = None
         
@@ -72,26 +93,31 @@ class view(object):
     def show(self):
         '''Instantiate a new viewer window. Calling this will orphan any previously instantiated viewer windows.'''
         self.updatejs = ''
-        return IPython.display.HTML(self._repr_html_())
+        html = self._make_html()
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
         
     def insert(self, containerid):
         '''Instead of inserting into notebook here, insert html
         into existing container'''
-        html = self._repr_html_()
+        html = self._make_html()
         html += '''<script>$("#%s").append($("#3dmolviewer_%s")); </script>'''%(containerid,self.uniqueid)
-        return IPython.display.HTML(html)
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
         
-    def _repr_html_(self):
+    def _make_html(self):
         self.uniqueid = str(time.time()).replace('.','')
         self.updatejs = ''
         html = (self.startjs+self.endjs).replace('UNIQUEID',self.uniqueid)
         return html    
+
+    def _repr_html_(self):
+        html = self._make_html()
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
         
     def update(self):
         '''Apply commands to existing viewer (will auto-instantiate if necessary).'''
         script = ''
         if self.uniqueid == None:
-            script = self._repr_html_()
+            script = self._make_html()
         script += '''<script>
             $3Dmolpromise.done(function() { //wrap in promise for non-interactive functionality
                 %s
@@ -99,7 +125,7 @@ class view(object):
             });
             </script>''' % (self.updatejs.replace('UNIQUEID',self.uniqueid),self.uniqueid)
         self.updatejs = ''
-        return IPython.display.HTML(script)
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
 
     def png(self):
         '''output png image of viewer, which must already be instantiated'''
@@ -110,7 +136,7 @@ class view(object):
             var png = $('canvas','#3dmolviewer_{0}')[0].toDataURL();
             $('#img_{0}').attr('src', png)
             </script>'''.format(self.uniqueid)
-        return IPython.display.HTML(script)
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
             
     
     def __getattr__(self,name):
