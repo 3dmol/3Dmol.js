@@ -29,9 +29,13 @@ class view(object):
             query -- optional argument to provide to $3Dmol.download
             options -- optional options to provide to $3Dmol.download
             js -- url for 3Dmol.js'''
-        divid = "3dmolviewer_UNIQUEID" 
+        divid = "3dmolviewer_UNIQUEID"
+        warnid = "3dmolwarning_UNIQUEID" 
         self.uniqueid = None
-        self.startjs = '<div id="%s"  style="position: relative; width: %dpx; height: %dpx">\n' % (divid,width,height)
+        self.startjs = '''<div id="%s"  style="position: relative; width: %dpx; height: %dpx">
+        <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab.  You need to install the 3dmol extension: <br>
+        <tt>jupyter labextension install jupyterlab_3dmol</tt></p>
+        </div>\n''' % (divid,width,height,warnid)
         self.startjs += '<script>\n'
         self.endjs = '</script>'
         
@@ -58,7 +62,11 @@ $3Dmolpromise = null;
 }
 
 var viewer_UNIQUEID = null;
-""" % js
+var warn = document.getElementById("%s");
+if(warn) {
+    warn.parentNode.removeChild(warn);
+}
+""" % (js,warnid)
 
         self.startjs += "$3Dmolpromise.then(function() {\n";
         self.endjs = "});\n" + self.endjs
