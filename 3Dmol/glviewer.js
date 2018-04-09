@@ -299,14 +299,10 @@ $3Dmol.GLViewer = (function() {
                 y : mouseY,
                 z : -1.0
             };
-            mouseVector.set(mouse.x, mouse.y, mouse.z);
-            projector.unprojectVector(mouseVector, camera);
-            mouseVector.sub(camera.position).normalize();
 
-            raycaster.set(camera.position, mouseVector);
-
+            raycaster.setFromCamera(mouse,camera);
+            
             var intersects = [];
-
             intersects = raycaster.intersectObjects(modelGroup, clickables);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
@@ -336,11 +332,7 @@ $3Dmol.GLViewer = (function() {
                 y : mouseY,
                 z : -1.0
             };
-            mouseVector.set(mouse.x, mouse.y, mouse.z);
-            projector.unprojectVector(mouseVector, camera);
-            mouseVector.sub(camera.position).normalize();
-
-            raycaster.set(camera.position, mouseVector);
+            raycaster.setFromCamera(mouse,camera);
 
             var intersects = [];
             intersects = raycaster.intersectObjects(modelGroup, hoverables);
@@ -361,11 +353,7 @@ $3Dmol.GLViewer = (function() {
                 z : -1.0
             };
 
-            mouseVector.set(mouse.x, mouse.y, mouse.z);
-            projector.unprojectVector(mouseVector, camera);
-            mouseVector.sub(camera.position).normalize();
-
-            raycaster.set(camera.position, mouseVector);
+            raycaster.setFromCamera(mouse,camera);
 
             var intersects = [];
             intersects = raycaster.intersectObjects(modelGroup, hoverables);

@@ -900,6 +900,27 @@ $3Dmol.Raycaster = (function() {
           
     };
     
+    Raycaster.prototype.setFromCamera =  function ( ) { 
+        var _viewProjectionMatrix = new $3Dmol.Matrix4();
+        return function(coords, camera ) {    
+
+            if ( !camera.ortho ) {            
+                this.ray.origin.setFromMatrixPosition( camera.matrixWorld );
+                this.ray.direction.set( coords.x, coords.y, coords.z);
+
+                camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+                _viewProjectionMatrix.multiplyMatrices(camera.matrixWorld, camera.projectionMatrixInverse);
+                this.ray.direction.applyProjection( _viewProjectionMatrix );                                
+                this.ray.direction.sub( this.ray.origin ).normalize();
+    
+            } else {
+                this.ray.origin.set( coords.x, coords.y, ( camera.near + camera.far ) / ( camera.near - camera.far ) ).unproject( camera ); 
+                this.ray.direction.set( 0, 0, - 1 ).transformDirection( camera.matrixWorld );
+    
+            } 
+        }
+    }();
+    
     Raycaster.prototype.intersectObjects = function(group, objects) {     
         var intersects = [];
         
