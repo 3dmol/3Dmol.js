@@ -143,7 +143,7 @@ $3Dmol.createViewer = function(element, config)
 
 /**
  * Create and initialize an appropriate a grid of viewers that share a WebGL canvas
- @function $createViewerGrid
+ @function $3Dmol.createViewerGrid
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {GridSpec} grid configuration
  * @param {ViewerGridSpec} config Viewer specification to apply to all subviewers
@@ -614,7 +614,7 @@ if( typeof(define) === 'function' && define.amd) {
 }
 
 /* StereoViewer for stereoscopic viewing
-* @constructor
+  @function $3Dmol.createStereoViewer
 * @param {Object | string} element - Either HTML element or string identifier
 * 
 */

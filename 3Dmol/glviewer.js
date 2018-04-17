@@ -2027,7 +2027,7 @@ $3Dmol.GLViewer = (function() {
             s.shapePosition = shapes.length;
             s.addSphere(spec);
             shapes.push(s);
-
+            s.globj(); //finalize shape for memory efficiency, assume shape won't be extended
             return s;
         };
 
@@ -2063,6 +2063,7 @@ $3Dmol.GLViewer = (function() {
             s.shapePosition = shapes.length;
             s.addBox(spec);
             shapes.push(s);
+            s.globj(); //finalize shape for memory efficiency, assume shape won't be extended
 
             return s;
         };
@@ -2102,6 +2103,7 @@ $3Dmol.GLViewer = (function() {
             s.shapePosition = shapes.length;
             s.addArrow(spec);
             shapes.push(s);
+            s.globj(); //finalize shape for memory efficiency, assume shape won't be extended
 
             return s;
         };
@@ -2154,6 +2156,7 @@ $3Dmol.GLViewer = (function() {
             else
                 s.addCylinder(spec);
             shapes.push(s);
+            s.globj(); //finalize shape for memory efficiency, assume shape won't be extended
 
             return s;
         };
@@ -2192,6 +2195,7 @@ $3Dmol.GLViewer = (function() {
             else
                 s.addLine(spec);
             shapes.push(s);
+            s.globj(); //finalize shape for memory efficiency, assume shape won't be extended
 
             return s;
         };
@@ -2262,6 +2266,8 @@ $3Dmol.GLViewer = (function() {
             }
             
             shapes.push(s);
+            s.globj(); //finalize shape for memory efficiency, assume shape won't be extended
+            
             return s;
         };
 
@@ -2311,6 +2317,7 @@ $3Dmol.GLViewer = (function() {
                 p1 = temp.clone();   
                 drawn += gapAmt;
             }
+            s.globj(); //finalize shape for memory efficiency, assume shape won't be extended
                     
             return s;
         }
@@ -2356,6 +2363,7 @@ $3Dmol.GLViewer = (function() {
             s.shapePosition = shapes.length;
             s.addCustom(spec);
             shapes.push(s);
+            s.globj(); //finalize shape for memory efficiency, assume shape won't be extended
 
             return s;
         };
