@@ -1289,6 +1289,12 @@ $3Dmol.GLShape = (function() {
             this.addIsosurface(data, volSpec);
         };
 
+        //for internal use, truncate buffers to save memory
+        this.finalize = function() {
+            finalizeGeo(geo);
+            geo.initTypedArrays();
+        }
+        
         /**
          * Initialize webgl objects for rendering
          * @param {$3Dmol.Object3D} group
