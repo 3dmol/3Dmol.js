@@ -141,7 +141,7 @@ if(warn) {
             raise AssertionError('Must instantiate viewer before generating image.')
         script = '''<img id="img_{0}">
             <script>
-            var png = $('canvas','#3dmolviewer_{0}')[0].toDataURL();
+            var png = viewer_{0}.pngURI()
             $('#img_{0}').attr('src', png)
             </script>'''.format(self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
