@@ -1765,7 +1765,7 @@ $3Dmol.Parsers = (function() {
     };
 
     
-    //mmtf shoul be passed as a binary UInt8Array buffer
+    //mmtf shoul be passed as a binary UInt8Array buffer or a base64 encoded string
     parsers.mmtf = parsers.MMTF = function(bindata, options) {
         
         var noH = !options.keepH; // suppress hydrogens by default
@@ -1777,7 +1777,13 @@ $3Dmol.Parsers = (function() {
         var copyMatrix = !options.duplicateAssemblyAtoms; //default true
         var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
         
-        var mmtfData = MMTF.decode( bindata );
+        if(typeof(bindata) == "string") {
+            //assume base64 encoded
+            bindata = $3Dmol.base64ToArray(bindata);
+        }
+        
+        var mmtfData = MMTF.decode( bindata );       
+        
         var atoms = [[]];
         var modelData = atoms.modelData = [];
         
@@ -1815,6 +1821,12 @@ $3Dmol.Parsers = (function() {
                 symmetries.push(matrix);
             }
         }
+        var unitCell = null;
+        //unit cell info
+        if(mmtfData.unitCell) {
+            var u = mmtfData.unitCell;
+            unitCell = {'a' : u[0], 'b' : u[1], 'c' : u[2], 'alpha' : u[3], 'beta' : u[4], 'gamma' : u[5]};
+        }
 
         var bondAtomListStart = 0; //for current model
         //loop over models, 
@@ -1823,7 +1835,7 @@ $3Dmol.Parsers = (function() {
             var matoms = atoms[atoms.length-1];
             var serialToIndex = []; // map to matoms index, needed for noh
 
-            modelData.push({symmetries:symmetries});
+            modelData.push({symmetries:symmetries, cryst: unitCell});
             for( i = 0; i < modelChainCount; ++i ){
 
                 var chainGroupCount = mmtfData.groupsPerChain[ chainIndex ];

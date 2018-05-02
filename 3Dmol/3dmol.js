@@ -266,6 +266,21 @@ $3Dmol.getbin = function(uri, callback, request,postdata) {
 };
 
 /**
+ * Convert a base64 encoded string to a Uint8Array
+ * @function $3Dmol.base64ToArray
+ * @param {string} base64 encoded string
+ */
+$3Dmol.base64ToArray = function(base64) {
+    var binary_string =  window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array( len );
+    for (var i = 0; i < len; i++)        {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes;
+}
+
+/**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
  * @function $3Dmol.download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
