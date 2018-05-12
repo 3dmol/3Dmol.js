@@ -2645,7 +2645,7 @@ $3Dmol.GLViewer = (function() {
          * @example
                 $.get('../test_structs/multiple2.xyz', function(data){
                   viewer.addModelsAsFrames(data, "xyz");
-                  viewer.setFrame(3);
+                  viewer.animate({loop: "forward",reps: 1});
                   viewer.setStyle({stick:{colorscheme:'magentaCarbon'}});
                   viewer.zoomTo();
                   viewer.render();
