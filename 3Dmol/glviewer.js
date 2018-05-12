@@ -2442,7 +2442,7 @@ $3Dmol.GLViewer = (function() {
          * Sets to last frame if framenum out of range
          * 
          * @function $3Dmol.GLViewer#setFrame
-         * @param {number} framenum - each model in viewer has their atoms set to this index in frames list
+         * @param {number} framenum - fame index to use, starts at zero
          * @return {Promise}
          */
         this.setFrame = function (framenum) {
@@ -2641,6 +2641,15 @@ $3Dmol.GLViewer = (function() {
          * @param {string} data - Input data
          * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
+         * 
+         * @example
+                $.get('../test_structs/multiple2.xyz', function(data){
+                  viewer.addModelsAsFrames(data, "xyz");
+                  viewer.setFrame(3);
+                  viewer.setStyle({stick:{colorscheme:'magentaCarbon'}});
+                  viewer.zoomTo();
+                  viewer.render();
+              });
          */
         this.addModelsAsFrames = function(data, format, options) {
             options = options || {};
