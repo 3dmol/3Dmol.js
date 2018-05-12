@@ -556,7 +556,7 @@ $3Dmol.GLViewer = (function() {
          * 
          */
         this.pngURI = function() {
-            return $('canvas',container)[0].toDataURL('image/png');
+            return this.getCanvas().toDataURL('image/png');
         }
         
         /**

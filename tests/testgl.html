@@ -122,10 +122,10 @@
         <hr style="margin: 0;"> 
 
         <br>
-        <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
+        <input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{},sphere:{opacity:.8,color:'yellow',radius:0.5}}); glviewer.render();"></input>
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
-        <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
+        <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}});  glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
         <input type="button" value="Trace" onclick="glviewer.setStyle({},{cartoon:{style: 'trace',color: 'spectrum',thickness: 0.3}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
@@ -141,6 +141,8 @@
         <input type="button" value="Orthographic" onclick="glviewer.setProjection('orthographic'); glviewer.render();"></input>
         <input type="button" value="Perspective" onclick="glviewer.setProjection('perspective'); glviewer.render();"></input>
                 <br>
+        <input type="button" value="PNG" onclick="$('#pngimage').attr('src',glviewer.pngURI());"></input>
+        <img id="pngimage">
         <input id="pdbid" value="2POR" size=4><button onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer);">Download</button><br>
  
 
