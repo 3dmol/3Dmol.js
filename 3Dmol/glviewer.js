@@ -2209,7 +2209,7 @@ $3Dmol.GLViewer = (function() {
          * @return {$3Dmol.GLShape}  Line shape delineating unit cell.
          */
         this.addUnitCell = function(model) {
-
+            if(!model) model = this.getModel();
             var s = new $3Dmol.GLShape({'wireframe' : true});
             s.shapePosition = shapes.length;
             var data = model.getCrystData();
