@@ -1841,8 +1841,17 @@ $3Dmol.GLViewer = (function() {
          * centroid of the atoms and styled according to the passed style.
          * The label text will be [resn][resi]
          * 
+         * @function $3Dmol.GLViewer#addResLabels
          * @param {Object} sel
          * @param {Object} style
+         * 
+         * * @example  
+             $3Dmol.download("mmtf:2ll5",viewer,{},function(){
+                  viewer.setStyle({stick:{radius:0.15},cartoon:{}});
+                  viewer.addResLabels({hetflag:false}, {font: 'Arial', fontColor:'black',showBackground:false});
+                  viewer.zoomTo();
+                  viewer.render();                  
+                });
          */
         this.addResLabels = function(sel, style) {
             applyToModels("addResLabels", sel, this, style);
@@ -1850,6 +1859,27 @@ $3Dmol.GLViewer = (function() {
             return this;
         }
 
+        /** Add property labels.  This will generate one label per a selected
+         * atom at the atom's coordinates with the property value as the label text.
+         * 
+         * @function $3Dmol.GLViewer#addPropertyLabels
+         * @param {string} prop - property name
+         * @param {Object} sel
+         * @param {Object} style
+         * 
+         * * @example  
+             $3Dmol.download("cid:5291",viewer,{},function(){
+                  viewer.setStyle({stick: {radius:.2}});
+                  viewer.addPropertyLabels("index",{not:{elem:'H'}}, {fontColor:'black',font: 'sans-serif', fontSize: 28, showBackground:false,alignment:'center'});
+                  viewer.zoomTo();
+                  viewer.render();                  
+                });
+         */
+        this.addPropertyLabels = function(prop, sel, style) {
+            applyToModels("addPropertyLabels", prop, sel, this, style);
+            show();
+            return this;
+        }        
         /**
          * Remove label from viewer
          * 

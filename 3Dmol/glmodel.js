@@ -2395,6 +2395,35 @@ $3Dmol.GLModel = (function() {
             if(molObj) molObj.setVisible(true);
         }
         
+        
+        /** Create labels for atoms that show the value of the passed property.
+         * @function $3Dmol.GLModel#addPropertyLabels
+         * 
+         * @param {String} prop - property name
+         * @param {AtomSelectionSpec} sel
+         * @param {$3Dmol.GLViewer} viewer
+         * @param {LabelSpec} options
+         */
+        this.addPropertyLabels = function(prop, sel, viewer, style) {
+            var atoms = this.selectedAtoms(sel, atoms);
+            var mystyle = $.extend(true, {}, style);
+            for(var i = 0; i < atoms.length; i++) {
+                var a = atoms[i];
+                var label = null;
+                if(typeof(a[prop]) != 'undefined') {
+                    label = String(a[prop]);
+                } else if(typeof(a.properties[prop] != 'undefined')) {
+                    label = String(a.properties[prop]);
+                }
+                
+                if(label != null) {
+                    mystyle.position = a;
+                    viewer.addLabel(label, mystyle);
+                }
+            }           
+        }
+
+        
         /** Create labels for residues of selected atoms.
          * Will create a single label at the center of mass of all atoms
          * with the same chain,resn, and resi.
@@ -2402,6 +2431,7 @@ $3Dmol.GLModel = (function() {
          * 
          * @param {AtomSelectionSpec} sel
          * @param {$3Dmol.GLViewer} viewer
+         * @param {LabelSpec} options
          */
         this.addResLabels = function(sel, viewer, style) {
             var atoms = this.selectedAtoms(sel, atoms);
