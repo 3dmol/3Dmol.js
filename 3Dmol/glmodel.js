@@ -856,7 +856,7 @@ $3Dmol.GLModel = (function() {
                     // cylinders of the same
                     // color
                     var style2 = atom2.style;
-                    if (!style2.stick)
+                    if (!style2.stick || style2.stick.hidden)
                         continue; // don't sweat the details                     
                    
                     var C2 = $3Dmol.getColorFromStyle(atom2, style2.stick);
