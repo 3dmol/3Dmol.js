@@ -1717,6 +1717,12 @@ $3Dmol.GLViewer = (function() {
             // use full bounding box for slab/fog
             slabNear = -maxD / 1.9;
             slabFar = maxD / 2;
+            
+            //if we are selecting everything, do not slab
+            if(Object.keys(sel).length === 0) {
+                slabNear = -999999;
+                slabFar = 999999;
+            }
 
             // for zoom, use selection box
             x = tmp[1][0] - tmp[0][0];
