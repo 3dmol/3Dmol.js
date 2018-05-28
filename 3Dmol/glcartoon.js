@@ -35,6 +35,68 @@ var $3Dmol = $3Dmol || {};
               });
  */
 
+
+// helper functions
+// Catmull-Rom subdivision
+$3Dmol.subdivide_spline = function(_points, DIV) { // points as Vector3
+    var ret = [];
+    var points = _points;
+    points = []; // Smoothing test
+    points.push(_points[0]);
+
+    var i, lim, size;
+    var p0, p1, p2, p3, v0, v1;
+
+    for (i = 1, lim = _points.length - 1; i < lim; i++) {
+        p1 = _points[i];
+        p2 = _points[i + 1];
+        if (p1.smoothen) {
+            var np = new $3Dmol.Vector3((p1.x + p2.x) / 2,
+                    (p1.y + p2.y) / 2, (p1.z + p2.z) / 2);
+            np.atom = p1.atom;
+            points.push(np);
+        }
+        else
+            points.push(p1);
+    }
+    points.push(_points[_points.length - 1]);
+
+    for (i = -1, size = points.length; i <= size - 3; i++) {
+        p0 = points[(i === -1) ? 0 : i];
+        p1 = points[i + 1];
+        p2 = points[i + 2];
+        p3 = points[(i === size - 3) ? size - 1 : i + 3];
+        v0 = new $3Dmol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
+        v1 = new $3Dmol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
+        if (p2.skip)
+            continue;
+
+        for (var j = 0; j < DIV; j++) {
+            var t = 1.0 / DIV * j;
+            var x = p1.x + t * v0.x + t * t
+                    * (-3 * p1.x + 3 * p2.x - 2 * v0.x - v1.x) + t * t * t
+                    * (2 * p1.x - 2 * p2.x + v0.x + v1.x);
+            var y = p1.y + t * v0.y + t * t
+                    * (-3 * p1.y + 3 * p2.y - 2 * v0.y - v1.y) + t * t * t
+                    * (2 * p1.y - 2 * p2.y + v0.y + v1.y);
+            var z = p1.z + t * v0.z + t * t
+                    * (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t
+                    * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
+
+            var pt = new $3Dmol.Vector3(x, y, z);
+            if(j < DIV/2) {
+                pt.atom = p1.atom;
+            } else {
+                pt.atom = p2.atom;
+            }
+            
+            ret.push(pt);
+        }
+    }
+    ret.push(points[points.length - 1]);
+    return ret;
+};
+    
 /**
  * @ignore
  * @param {$3Dmol.Object3D}
@@ -54,66 +116,6 @@ $3Dmol.drawCartoon = (function() {
     var arrowTipWidth = 0.1;
     var defaultThickness = 0.4;
 
-    // helper functions
-    // Catmull-Rom subdivision
-    var subdivide = function(_points, DIV) { // points as Vector3
-        var ret = [];
-        var points = _points;
-        points = []; // Smoothing test
-        points.push(_points[0]);
-
-        var i, lim, size;
-        var p0, p1, p2, p3, v0, v1;
-
-        for (i = 1, lim = _points.length - 1; i < lim; i++) {
-            p1 = _points[i];
-            p2 = _points[i + 1];
-            if (p1.smoothen) {
-                var np = new $3Dmol.Vector3((p1.x + p2.x) / 2,
-                        (p1.y + p2.y) / 2, (p1.z + p2.z) / 2);
-                np.atom = p1.atom;
-                points.push(np);
-            }
-            else
-                points.push(p1);
-        }
-        points.push(_points[_points.length - 1]);
-
-        for (i = -1, size = points.length; i <= size - 3; i++) {
-            p0 = points[(i === -1) ? 0 : i];
-            p1 = points[i + 1];
-            p2 = points[i + 2];
-            p3 = points[(i === size - 3) ? size - 1 : i + 3];
-            v0 = new $3Dmol.Vector3().subVectors(p2, p0).multiplyScalar(0.5);
-            v1 = new $3Dmol.Vector3().subVectors(p3, p1).multiplyScalar(0.5);
-            if (p2.skip)
-                continue;
-
-            for (var j = 0; j < DIV; j++) {
-                var t = 1.0 / DIV * j;
-                var x = p1.x + t * v0.x + t * t
-                        * (-3 * p1.x + 3 * p2.x - 2 * v0.x - v1.x) + t * t * t
-                        * (2 * p1.x - 2 * p2.x + v0.x + v1.x);
-                var y = p1.y + t * v0.y + t * t
-                        * (-3 * p1.y + 3 * p2.y - 2 * v0.y - v1.y) + t * t * t
-                        * (2 * p1.y - 2 * p2.y + v0.y + v1.y);
-                var z = p1.z + t * v0.z + t * t
-                        * (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t
-                        * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
-
-                var pt = new $3Dmol.Vector3(x, y, z);
-                if(j < DIV/2) {
-                    pt.atom = p1.atom;
-                } else {
-                    pt.atom = p2.atom;
-                }
-                
-                ret.push(pt);
-            }
-        }
-        ret.push(points[points.length - 1]);
-        return ret;
-    };
 
     var drawThinStrip = function(geo, p1, p2, colors, div, opacity) {
 
@@ -178,7 +180,7 @@ $3Dmol.drawCartoon = (function() {
         div = div || axisDIV;
         for (i = 0; i < num; i++) { // spline to generate greater length-wise
                                     // resolution
-            points[i] = subdivide(points[i], div)
+            points[i] = $3Dmol.subdivide_spline(points[i], div)
         }
         len = points[0].length;
 
@@ -442,8 +444,8 @@ $3Dmol.drawCartoon = (function() {
         p2 = points[points.length - 1];
 
         div = div || axisDIV;
-        p1 = subdivide(p1, div);
-        p2 = subdivide(p2, div);
+        p1 = $3Dmol.subdivide_spline(p1, div);
+        p2 = $3Dmol.subdivide_spline(p2, div);
         if (!thickness)
             return drawThinStrip(geo, p1, p2, colors, div, opacity);
 
@@ -804,7 +806,7 @@ $3Dmol.drawCartoon = (function() {
         div = (div === undefined) ? 5 : div;
 
         var geo = new $3Dmol.Geometry();
-        var points = subdivide(_points, div);
+        var points = $3Dmol.subdivide_spline(_points, div);
         /*
          * for ( var i = 0; i < points.length; i++) {
          * geo.vertices.push(points[i]); geo.colors.push($3Dmol.color(colors[(i ==
