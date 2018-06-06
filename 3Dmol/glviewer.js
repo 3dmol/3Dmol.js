@@ -2197,6 +2197,41 @@ $3Dmol.GLViewer = (function() {
             return s;
         };
 
+        /**
+         * Create and add Curve shape
+         * 
+         * @function $3Dmol.GLViewer#addCurve
+         * @param {CurveSpec} spec - Style specification
+         * @return {$3Dmol.GLShape}
+
+         @example
+              viewer.addCurve({points: [{x:0.0,y:0.0,z:0.0}, {x:5.0,y:3.0,z:0.0}, {x:5.0,y:7.0,z:0.0}, {x:0.0,y:10.0,z:0.0}],
+                                  radius:0.5,
+                                  smooth: 10,
+                                  fromArrow:false,
+                                  toArrow: true,
+                                  color:'orange',                                  
+                                  });
+              viewer.addCurve({points: [{x:-1,y:0.0,z:0.0}, {x:-5.0,y:5.0,z:0.0}, {x:-2,y:10.0,z:0.0}],
+                                  radius:1,
+                                  fromArrow:true,
+                                  toArrow: false,
+                                  color:'purple',                                  
+                                  });
+              viewer.zoomTo();
+              viewer.render();
+         */
+        this.addCurve = function(spec) {
+            spec = spec || {};            
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.addCurve(spec);
+            shapes.push(s);
+            s.finalize(); //finalize shape for memory efficiency, assume shape won't be extended
+
+            return s;
+        };
+
 
         /**
          * Create and add line shape

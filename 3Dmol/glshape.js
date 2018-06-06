@@ -900,6 +900,12 @@ $3Dmol.GLShape = (function() {
 
         };
 
+        /**
+         * Creates a dashed cylinder shape
+         * @function $3Dmol.GLShape#addDashedCylinder
+         * @param {CylinderSpec} cylinderSpec
+         * @return {$3Dmol.GLShape}       
+         */
         this.addDashedCylinder = function(cylinderSpec){
             cylinderSpec.start = cylinderSpec.start || {};
             cylinderSpec.end = cylinderSpec.end || {};
@@ -946,6 +952,84 @@ $3Dmol.GLShape = (function() {
                     geoGroup.vertexArray, geoGroup.vertices);
         }
 
+        /**
+         * Creates a curved shape
+         * @function $3Dmol.GLShape#addCurve
+         * @param {CurveSpec} curveSpec
+         * @return {$3Dmol.GLShape}
+         */
+        this.addCurve = function(curveSpec) {
+
+            curveSpec.points = curveSpec.points || [];            
+            curveSpec.smooth = curveSpec.smooth || 10;   
+            if(typeof(curveSpec.fromCap) == "undefined") curveSpec.fromCap = 2;           
+            if(typeof(curveSpec.toCap) == "undefined") curveSpec.toCap = 2;           
+
+            //subdivide into smoothed spline points
+            var points = $3Dmol.subdivide_spline(curveSpec.points, curveSpec.smooth);
+            
+            if(points.length < 3) {
+                console.log("Too few points in addCurve");
+                return;
+            }
+
+            var radius = curveSpec.radius || 0.1;
+            var color = $3Dmol.CC.color(curveSpec.color);
+            //TODO TODO - this is very inefficient, should create our
+            //own water tight model with proper normals...
+            
+            
+            //if arrows are requested, peel off enough points to fit
+            //at least 2*r of arrowness
+            var start = 0;
+            var end = points.length-1;
+            var segmentlen = points[0].distanceTo(points[1]);
+            var npts = Math.ceil(2*radius/segmentlen);
+            if(curveSpec.toArrow) {
+                end -= npts;
+                var arrowspec = { start: points[end],
+                                  end: points[points.length-1],
+                                  radius: radius,
+                                  color: color,
+                                  mid: 0.0001
+                              };
+                this.addArrow(arrowspec);
+            }
+            if(curveSpec.fromArrow) {
+                start += npts;
+                var arrowspec = { start: points[start],
+                                  end: points[0],
+                                  radius: radius,
+                                  color: color,
+                                  mid: 0.0001
+                              };
+                this.addArrow(arrowspec);
+            }            
+            
+            var midway = Math.ceil(points.length/2);
+            var middleSpec = { radius: radius, color: color, fromCap: 2, toCap: 2 };            
+            for(var i=start; i < end; i++){
+                middleSpec.start = points[i];
+                middleSpec.end = points[i+1];
+                middleSpec.fromCap = 2;
+                middleSpec.toCap = 2;
+                if(i < midway) {
+                    middleSpec.fromCap = 2;
+                    middleSpec.toCap = 0;
+                } else if(i > midway) {
+                    middleSpec.fromCap = 0;
+                    middleSpec.toCap = 2;
+                } else {
+                    middleSpec.fromCap = 2;
+                    middleSpec.toCap = 2;                    
+                }
+                
+                this.addCylinder(middleSpec);
+            }
+            
+
+        };
+        
         /**
          * Creates a line shape
          * @function $3Dmol.GLShape#addLine         

@@ -240,8 +240,18 @@
  * @prop {$3Dmol.Vector3} start
  * @prop {$3Dmol.Vector3} end
  * @prop {number} radius
- * @prop {boolean} fromCap - 0 for none, 1 for flat, 2 for round
- * @prop {boolean} toCap - 0 for none, 1 for flat, 2 for round
+ * @prop {number} fromCap - 0 for none, 1 for flat, 2 for round
+ * @prop {numger} toCap - 0 for none, 1 for flat, 2 for round
+ */
+
+/**
+ * Curve shape specification.  Extends {@link ShapeSpec}  
+ * @typedef CylinderSpec
+ * @prop [{$3Dmol.Vector3}] points - list of (x,y,z) points to interpolate between to make curve
+ * @prop {number} smooth - amount of interpolation
+ * @prop {number} radius
+ * @prop {boolean} fromArrow - if an arrow should be drawn at the start
+ * @prop {boolean} toArrow - if an arrow should be drawn at the end
  */
 
 /**
