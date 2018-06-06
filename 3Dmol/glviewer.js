@@ -2821,7 +2821,10 @@ $3Dmol.GLViewer = (function() {
                 if (ms[i] || typeof ms[i] === 'number') {
                     //allow referencing models by order of creation
                     if(typeof ms[i] === 'number') {
-                        models[ms[i]][func](sel, value1, value2, value3);
+                        var index = ms[i];
+                        //support python backward indexing
+                        if(index < 0) index += models.length;
+                        models[index][func](sel, value1, value2, value3);
                     } else { //assume model object
                         ms[i][func](sel, value1, value2, value3);
                     }
