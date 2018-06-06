@@ -1103,6 +1103,34 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
+        /** @param {ATomSelectionSpec} sel
+         * @return list of models specified by sel
+         */
+        function getModelList(sel) {
+            var ms = []
+            if (typeof sel.model === "undefined") {
+                for (i = 0; i < models.length; i++) {
+                    if (models[i])
+                        ms.push(models[i]);
+                }
+            } else { // specific to some models
+                ms = sel.model;
+                if (!$.isArray(ms))
+                    ms = [ ms ];
+                
+                for (var i = 0; i < ms.length; i++) {
+                        //allow referencing models by order of creation
+                    if(typeof ms[i] === 'number') {
+                        var index = ms[i];
+                        //support python backward indexing
+                        if(index < 0) index += models.length;
+                        ms[i] = models[index];
+                    }             
+                }
+            }
+            
+            return ms;            
+        }
         /**
          * 
          * @param {AtomSelectionSpec}
@@ -1114,21 +1142,9 @@ $3Dmol.GLViewer = (function() {
             if (typeof (sel) === "undefined")
                 sel = {};
 
-            var ms = [];
-            var i;
+            var ms = getModelList(sel);
 
-            if (typeof sel.model === "undefined") {
-                for (i = 0; i < models.length; i++) {
-                    if (models[i])
-                        ms.push(models[i]);
-                }
-            } else { // specific to some models
-                ms = sel.model;
-                if (!$.isArray(ms))
-                    ms = [ ms ];
-            }
-
-            for (i = 0; i < ms.length; i++) {
+            for (var i = 0; i < ms.length; i++) {
                 atoms = atoms.concat(ms[i].selectedAtoms(sel));
             }
 
@@ -1147,21 +1163,9 @@ $3Dmol.GLViewer = (function() {
             if (typeof (sel) === "undefined")
                 sel = {};
 
-            var ms = [];
-            var i;
-
-            if (typeof sel.model === "undefined") {
-                for (i = 0; i < models.length; i++) {
-                    if (models[i])
-                        ms.push(models[i]);
-                }
-            } else { // specific to some models
-                ms = sel.model;
-                if (!$.isArray(ms))
-                    ms = [ ms ];
-            }
-
-            for (i = 0; i < ms.length; i++) {
+            var ms = getModelList(sel);
+            
+            for (var i = 0; i < ms.length; i++) {
                 if (ms[i].atomIsSelected(atom, sel))
                     return true;
             }
@@ -2839,31 +2843,9 @@ $3Dmol.GLViewer = (function() {
         function applyToModels(func, sel, value1, value2, value3) {
             
             //apply func to all models that are selected by sel with value1 and 2
-            var ms = []
-            if (typeof sel.model === "undefined") {
-                for (i = 0; i < models.length; i++) {
-                    if (models[i])
-                        ms.push(models[i]);
-                }
-            } else { // specific to some models
-                ms = sel.model;
-                if (!$.isArray(ms))
-                    ms = [ ms ];
-            }
-            
-            
+            var ms = getModelList(sel);
             for (var i = 0; i < ms.length; i++) {
-                if (ms[i] || typeof ms[i] === 'number') {
-                    //allow referencing models by order of creation
-                    if(typeof ms[i] === 'number') {
-                        var index = ms[i];
-                        //support python backward indexing
-                        if(index < 0) index += models.length;
-                        models[index][func](sel, value1, value2, value3);
-                    } else { //assume model object
-                        ms[i][func](sel, value1, value2, value3);
-                    }
-                }
+                ms[i][func](sel, value1, value2, value3);
             }
         }
 
