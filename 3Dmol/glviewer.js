@@ -3766,7 +3766,7 @@ $3Dmol.GLViewer = (function() {
          * Add specified properties to all atoms matching input argument
          * @function $3Dmol.GLViewer#mapAtomProperties
          * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
-         * @param {AtomSelectionSpec} sel
+         * @param {AtomSelectionSpec} sel  - subset of atoms to work on - model selection must be specified here
          */
         this.mapAtomProperties = function(props, sel) {
             sel = sel || {};

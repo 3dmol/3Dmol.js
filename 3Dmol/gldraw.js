@@ -268,7 +268,8 @@ $3Dmol.GLDraw = (function() {
                 w : widthSegments,
                 h : heightSegments
             };
-            this.cache[radius]={};
+            
+            if(!(radius in this.cache)) this.cache[radius]={};
             this.cache[radius][cap+capType] = obj;
 
             return obj;

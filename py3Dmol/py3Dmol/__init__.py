@@ -33,7 +33,7 @@ class view(object):
         warnid = "3dmolwarning_UNIQUEID" 
         self.uniqueid = None
         self.startjs = '''<div id="%s"  style="position: relative; width: %dpx; height: %dpx">
-        <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab.  You need to install the 3dmol extension: <br>
+        <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab (or JavaScript failed to load for some other reason).  You need to install the 3dmol extension: <br>
         <tt>jupyter labextension install jupyterlab_3dmol</tt></p>
         </div>\n''' % (divid,width,height,warnid)
         self.startjs += '<script>\n'
