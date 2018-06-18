@@ -1759,7 +1759,17 @@ $3Dmol.Parsers = (function() {
     
     var convertSS = function(val) {
       //convert mmtf code to 3dmol code
-        if(val == 2) return 'h';
+	/*    
+        0:  pi helix
+        1:  bend
+        2:  alpha helix
+        3:  sheet extended
+        4:  3-10 helix
+        5:  bridge
+        6:  turn
+        7:  coil
+       */
+        if(val == 0 || val == 2 || val == 4) return 'h';
         if(val == 3) return 's';
         return 'c';
     };
