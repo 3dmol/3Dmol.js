@@ -240,8 +240,8 @@
  * @prop {$3Dmol.Vector3} start
  * @prop {$3Dmol.Vector3} end
  * @prop {number} radius
- * @prop {number} fromCap - 0 for none, 1 for flat, 2 for round
- * @prop {numger} toCap - 0 for none, 1 for flat, 2 for round
+ * @prop {$3Dmol.CAP} fromCap - 0 for none, 1 for flat, 2 for round
+ * @prop {$3Dmol.CAP} toCap - 0 for none, 1 for flat, 2 for round  
  */
 
 /**

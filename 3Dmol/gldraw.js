@@ -2,6 +2,19 @@
 
 var $3Dmol = $3Dmol || {};
 
+//define enum values
+/**
+ * Enum for cylinder cap styles.
+ * @readonly
+ * @enum {number} $3Dmol.CAP
+ */
+$3Dmol.CAP = {
+    NONE : 0,
+    FLAT : 1,
+    ROUND : 2
+};
+
+
 /**
  * Lower level utilities for creating WebGL shape geometries.
  * These are not intended for general consumption.
@@ -225,7 +238,7 @@ $3Dmol.GLDraw = (function() {
                             if (Math.abs(vertex.z) < 1e-5)
                                 vertex.z = 0;
 
-                            if (cap === 1) {
+                            if (cap == $3Dmol.CAP.FLAT) {
                                 n = new $3Dmol.Vector3(0, Math.cos(thetaStart + v * thetaLength), 0);
                                 n.normalize();
                             }
@@ -276,11 +289,8 @@ $3Dmol.GLDraw = (function() {
 
         }
     };
-    this.caps = {
-        NONE : 0,
-        FLAT : 1,
-        ROUND : 2
-        };
+    
+
     // creates a cylinder
     var drawnC = 0;
     
@@ -296,8 +306,8 @@ $3Dmol.GLDraw = (function() {
      *            radius
      * @param {$3Dmol.Color}
      *            color
-     * @param {integer} fromCap - 0 for none, 1 for flat, 2 for round
-     * @param {integer} toCap = 0 for none, 1 for flat, 2 for round
+     * @param {$3Dmol.CAP} fromCap - 0 for none, 1 for flat, 2 for round
+     * @param {$3Dmol.CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
     draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
