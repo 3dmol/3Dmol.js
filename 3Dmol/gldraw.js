@@ -276,11 +276,6 @@ $3Dmol.GLDraw = (function() {
 
         }
     };
-    this.caps = {
-        NONE : 0,
-        FLAT : 1,
-        ROUND : 2
-        };
     // creates a cylinder
     var drawnC = 0;
     
