@@ -1395,6 +1395,10 @@ $3Dmol.GLShape = (function() {
                 return;
             finalizeGeo(geo);
             geo.initTypedArrays();
+            
+            if(this.wireframe) {
+                geo.setUpWireframe();
+            }
 
             if(typeof(this.color) != 'undefined')
                 updateColor(geo, this.color);

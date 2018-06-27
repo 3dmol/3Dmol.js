@@ -414,6 +414,9 @@ $3Dmol.Geometry = (function() {
         if (! this.faceidx)
             return;
                     
+        if(this.lineArray && this.lineArray.length == this.faceidx*2 && this.lineidx == this.faceidx*2) 
+            return; //assume already computed
+        
         var faceArr = this.faceArray, lineArr = this.lineArray = new Uint16Array(this.faceidx*2);      
         this.lineidx = this.faceidx*2;         
             
