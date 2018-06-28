@@ -91,10 +91,10 @@ lag behind the development branch as we only plan to tag new releases a few time
 
 
 <br>
-The full source distribution is available [from github](https://github.com/dkoes/3Dmol.js).
+The full source distribution is available [from github](https://github.com/3dmol/3Dmol.js).
 
 ```
-git clone https://github.com/dkoes/3Dmol.js.git
+git clone https://github.com/3dmol/3Dmol.js.git
 ``` 
 The checked out code can be built using [grunt](http://gruntjs.com/).
 ```
@@ -154,8 +154,8 @@ Yes, as long as they support WebGL.  For example, it runs great in Safari on an 
 
 ##Contact
 
-Please address any questions or concerns to [dkoes@pitt.edu](mailto:dkoes+3dmol@pitt.edu).  
-You may also [submit an issue](https://github.com/dkoes/3Dmol.js/issues) on github.
+Please address any questions or concerns to [dkoes@pitt.edu](mailto:dkoes@pitt.edu).  
+You may also [submit an issue](https://github.com/3dmol/3Dmol.js/issues) on github.
 
 ##Funding
 

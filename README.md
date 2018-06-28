@@ -91,7 +91,7 @@ Please check out our documentation at http://3dmol.csb.pitt.edu/doc/index.html w
 ## Contact
 
 Please address any questions or concerns to [dkoes@pitt.edu](mailto:dkoes+3dmol@pitt.edu).  
-You may also [submit an issue](https://github.com/dkoes/3Dmol.js/issues) on github.
+You may also [submit an issue](https://github.com/3dmol/3Dmol.js/issues) on github.
 
 ## Citing
 
