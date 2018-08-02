@@ -725,7 +725,7 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example
          * 
-         * viewer.setBackgroundColor(0x00000000);
+         * viewer.setBackgroundColor(0x000000);
 
 
          * 

@@ -336,6 +336,35 @@ $3Dmol.GLModel = (function() {
         //it is appropraite to draw multiple bonds
         var getSideBondV = function(atom, atom2, i) {
 
+            var getGoodCross = function(atom, atom2) {
+                // get vector 2 different neighboring atom
+                //find most divergent neighbor
+                var bestv = null;
+                var bestlen = -1;
+                for(var j = 0, n = atom.bonds.length; j < n; j++) {
+                    if(atom.bonds[j] != atom2.index) {;
+                        j2 = atom.bonds[j];
+                        atom3 = atoms[j2];
+                        p3 = new $3Dmol.Vector3(atom3.x, atom3.y, atom3.z);
+
+                        dir2 = p3.clone();
+                        dir2.sub(p1);
+
+                        v = dir2.clone();
+                        v.cross(dir);
+                        var l = v.lengthSq();
+                        if(l > bestlen) {
+                            bestlen = l;
+                            bestv = v;
+                            if(bestlen > 0.1) {
+                                return bestv; 
+                            }
+                        }
+                    }
+                }
+                return bestv;                     
+            };
+                        
             var p1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
             var p2 = new $3Dmol.Vector3(atom2.x, atom2.y, atom2.z);
 
@@ -365,17 +394,12 @@ $3Dmol.GLModel = (function() {
                     v.cross(dir);
                 }
             } else {
-                // get vector 2 different neighboring atom
-                i2 = (i + 1) % atom.bonds.length;
-                j2 = atom.bonds[i2];
-                atom3 = atoms[j2];
-                p3 = new $3Dmol.Vector3(atom3.x, atom3.y, atom3.z);
-
-                dir2 = p3.clone();
-                dir2.sub(p1);
-
-                v = dir2.clone();
-                v.cross(dir);
+                v = getGoodCross(atom,atom2);
+                
+                if(v.lengthSq() < 0.01) {
+                    var v2 = getGoodCross(atom2,atom);
+                    if(v2 != null) v = v2; //can be null if no other neighbors
+                }
             }
 
             // especially for C#C (triple bond) dir and dir2
