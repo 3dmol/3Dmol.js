@@ -934,7 +934,7 @@ $3Dmol.drawCartoon = (function() {
 
         // first determine where beta sheet arrows and alpha helix tubes belong
         var inSheet = false;
-        var inHelix = false;
+        var inHelix = false; //only considering tube styled helices
         i = 0;
         var atoms = [];
         for (i in atomList) {
@@ -955,12 +955,15 @@ $3Dmol.drawCartoon = (function() {
                 }
 
                 // first and last residues in a helix are used to draw tube
-                if (connected && curr.ss === "h") {
-                    if (!inHelix && next.style.cartoon.tubes)
+                if (connected && (curr.ss === "h" || curr.ss == "tube start") && curr.style.cartoon.tubes) {
+                    if (!inHelix && curr.ss != "tube start" && next.style.cartoon.tubes) {
                         next.ss = "tube start";
-                    inHelix = true;
-                } else if (inHelix && curr.ss !== "tube start") {
-                    if (prev && prev.style.cartoon.tubes)
+                        inHelix = true;
+                    }
+                } else if (inHelix) {
+                    if (curr.ss === "tube start")
+                        curr.ss = "h"; //only one residue
+                    else if (prev && prev.style.cartoon.tubes)
                         prev.ss = "tube end";
                     inHelix = false;
                 }
@@ -970,6 +973,10 @@ $3Dmol.drawCartoon = (function() {
             if(next && next.atom in cartoonAtoms) {
                 atoms.push(next);
             }
+        }
+        if(inHelix && curr.style.cartoon.tubes) {
+            curr.ss = "tube end";
+            inHelix = false;
         }
 
         var flushGeom = function(connect) {
@@ -1095,7 +1102,14 @@ $3Dmol.drawCartoon = (function() {
                                     1);
                             next.ss = "h";
 
-                        } else
+                        } else if(curr.chain != next.chain) { //don't span chains no matter what
+                            drawingTube = false;
+                            tubeEnd = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
+                            $3Dmol.GLDraw.drawCylinder(shapeGeo, tubeStart,
+                                    tubeEnd, 2, $3Dmol.CC.color(currColor), 1,
+                                    1);
+                        } 
+                        else
                             continue; // don't accumulate strand points while
                                         // in the middle of drawing a tube
                     }
