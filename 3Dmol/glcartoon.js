@@ -961,12 +961,14 @@ $3Dmol.drawCartoon = (function() {
                         inHelix = true;
                     }
                 } else if (inHelix) {
-                    if (curr.ss === "tube start")
-                        curr.ss = "h"; //only one residue
-                    else if (prev && prev.style.cartoon.tubes)
+                    if (curr.ss === "tube start") {
+                        curr.ss = "tube end"; //only one residue
+                    } else if (prev && prev.style.cartoon.tubes) {
                         prev.ss = "tube end";
+                    }
                     inHelix = false;
                 }
+                if(curr && prev) console.log(curr.chain+":"+curr.resi+" "+curr.ss+" "+prev.ss+" "+curr.resn);
                 prev = curr;
                 curr = next;
             }
@@ -1102,13 +1104,15 @@ $3Dmol.drawCartoon = (function() {
                                     1);
                             next.ss = "h";
 
-                        } else if(curr.chain != next.chain) { //don't span chains no matter what
+                        }                        
+                        else if(curr.chain != next.chain || curr.ss === "tube end") { //don't span chains no matter what, check for short tubes (less than ideal)
                             drawingTube = false;
+                            curr.ss = "h";
                             tubeEnd = new $3Dmol.Vector3(curr.x, curr.y, curr.z);
                             $3Dmol.GLDraw.drawCylinder(shapeGeo, tubeStart,
                                     tubeEnd, 2, $3Dmol.CC.color(currColor), 1,
                                     1);
-                        } 
+                        }
                         else
                             continue; // don't accumulate strand points while
                                         // in the middle of drawing a tube
