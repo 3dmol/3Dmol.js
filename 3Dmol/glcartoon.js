@@ -357,7 +357,7 @@ $3Dmol.drawCartoon = (function() {
                     // strand between consecutive atoms
                 }
 
-                if (currentAtom.clickable) {
+                if (currentAtom.clickable || currentAtom.hoverable) {
                     var faces = [];
 
                     faces.push(new $3Dmol.Triangle(last_cs_bottom[0],
@@ -545,7 +545,7 @@ $3Dmol.drawCartoon = (function() {
 
                     geoGroup.faceidx += 6;
 
-                    if (currentAtom.clickable || lastAtom.clickable) {
+                    if (currentAtom.clickable || lastAtom.clickable || currentAtom.hoverable || lastAtom.hoverable) {
 
                         var p1a = vs[face[3]].clone(), p1b = vs[face[0]]
                                 .clone(), p2a = vs[face[2]].clone(), p2b = vs[face[1]]
@@ -565,7 +565,7 @@ $3Dmol.drawCartoon = (function() {
                             var m = p1a.clone().add(p2b).multiplyScalar(0.5);
 
                             if (j % 2 === 0) {
-                                if (lastAtom.clickable) {
+                                if (lastAtom.clickable || lastAtom.hoverable) {
                                     face1 = new $3Dmol.Triangle(m1, m, p1a);
                                     face2 = new $3Dmol.Triangle(m2, p2a, m);
                                     face3 = new $3Dmol.Triangle(m, p2a, p1a);
@@ -577,7 +577,7 @@ $3Dmol.drawCartoon = (function() {
                                             .push(face3);
                                 }
 
-                                if (currentAtom.clickable) {
+                                if (currentAtom.clickable || currentAtom.hoverable) {
                                     face1 = new $3Dmol.Triangle(p1b, p2b, m);
                                     face2 = new $3Dmol.Triangle(p2b, m2, m);
                                     face3 = new $3Dmol.Triangle(p1b, m, m1);
@@ -589,7 +589,7 @@ $3Dmol.drawCartoon = (function() {
                                             .push(face3);
                                 }
                             } else {
-                                if (currentAtom.clickable) {
+                                if (currentAtom.clickable || currentAtom.hoverable) {
                                     face1 = new $3Dmol.Triangle(m1, m, p1a);
                                     face2 = new $3Dmol.Triangle(m2, p2a, m);
                                     face3 = new $3Dmol.Triangle(m, p2a, p1a);
@@ -601,7 +601,7 @@ $3Dmol.drawCartoon = (function() {
                                             .push(face3);
                                 }
 
-                                if (lastAtom.clickable) {
+                                if (lastAtom.clickable || lastAtom.hoverable) {
                                     face1 = new $3Dmol.Triangle(p1b, p2b, m);
                                     face2 = new $3Dmol.Triangle(p2b, m2, m);
                                     face3 = new $3Dmol.Triangle(p1b, m, m1);
@@ -617,7 +617,7 @@ $3Dmol.drawCartoon = (function() {
                         }
 
                         // face for single atom
-                        else if (currentAtom.clickable) {
+                        else if (currentAtom.clickable || currentAtom.hoverable) {
                             face1 = new $3Dmol.Triangle(p1b, p2b, p1a);
                             face2 = new $3Dmol.Triangle(p2b, p2a, p1a);
                             currentAtom.intersectionShape.triangle.push(face1);
@@ -968,7 +968,6 @@ $3Dmol.drawCartoon = (function() {
                     }
                     inHelix = false;
                 }
-                if(curr && prev) console.log(curr.chain+":"+curr.resi+" "+curr.ss+" "+prev.ss+" "+curr.resn);
                 prev = curr;
                 curr = next;
             }
@@ -1202,7 +1201,7 @@ $3Dmol.drawCartoon = (function() {
                     }
 
                     // click handling
-                    if (next.clickable === true
+                    if ((next.clickable === true || next.hoverable === true)
                             && (next.intersectionShape === undefined || next.intersectionShape.triangle === undefined))
                         next.intersectionShape = {
                             sphere : null,
