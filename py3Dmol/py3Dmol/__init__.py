@@ -147,6 +147,50 @@ if(warn) {
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
             
     
+    class model(object):
+      '''Wrapper for referencing a model within a viewer'''
+      def __init__(self, viewer, accesscmd):
+        self.accesscmd = accesscmd
+        self.viewer = viewer
+        
+      def __getattr__(self,name):
+        '''auto-instantiate javascript calls through model'''
+        if name.startswith('_'): #object to ipython canary functions
+            raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
+               
+        def makejs(*args,**kwargs):
+          cmd = '\t%s.%s(' % (self.accesscmd,name);
+          for arg in args:
+              cmd += '%s,' % json.dumps(arg)
+          cmd = cmd.rstrip(',')
+          cmd += ');\n';
+
+          self.viewer.startjs += cmd
+          self.viewer.updatejs += cmd
+          return self.viewer
+        return makejs #return from getattr
+        
+    def getModel(self,*args,**kwargs):
+      if self.viewergrid:
+        if kwargs and 'viewer' in kwargs:
+          coords = kwargs['viewer']
+          if len(coords) != 2 or coords[0] >= self.viewergrid[0] or coords[1] >= self.viewergrid[1] or coords[0] < 0 or coords[1] < 0:
+              raise ValueError("Incorrectly formated viewer argument.  Must specify row and column",self.viewergrid)
+          cmd = '\tviewergrid_UNIQUEID[%d][%d].getModel(' % (coords[0],coords[1]);
+          for arg in args:
+              cmd += '%s,' % json.dumps(arg)
+          cmd = cmd.rstrip(',')
+          cmd += ')';   
+        else:
+          raise ValueError('Must specify specific viewer with getModel and viewergrid enabled')
+      else:
+        cmd = '\tviewer_UNIQUEID.getModel(';
+        for arg in args:
+            cmd += '%s,' % json.dumps(arg)
+        cmd = cmd.rstrip(',')
+        cmd += ')';
+      return self.model(self,cmd)
+      
     def __getattr__(self,name):
         '''auto-instantiate javascript calls based on whatever the user provided'''
         if name.startswith('_'): #object to ipython canary functions
@@ -154,7 +198,7 @@ if(warn) {
                                                   
         def makejs(*args,**kwargs):            
             if self.viewergrid:
-                if 'viewer' in kwargs:
+                if kwargs and 'viewer' in kwargs:
                     coords = kwargs['viewer']
                     if len(coords) != 2 or coords[0] >= self.viewergrid[0] or coords[1] >= self.viewergrid[1] or coords[0] < 0 or coords[1] < 0:
                         raise ValueError("Incorrectly formated viewer argument.  Must specify row and column",self.viewergrid)
