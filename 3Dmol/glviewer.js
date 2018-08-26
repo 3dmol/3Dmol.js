@@ -3400,7 +3400,7 @@ $3Dmol.GLViewer = (function() {
                 } 
             }
             else if(type===undefined){
-                    console.log("Surface type : " + type + " is not recognized");
+                type = $3Dmol.SurfaceType.VDW; //default
             }
             // atoms specified by this selection
             var atomlist = null, focusSele = null;

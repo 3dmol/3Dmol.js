@@ -182,7 +182,8 @@ $3Dmol.GLModel = (function() {
         "stick":{validItems:validStickSpec,gui:true}, // draw bonds as capped cylinders
         "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
         "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
-        "colorfunc":{validItems:null,valid:false}
+        "colorfunc":{validItems:null,valid:false},
+        "clicksphere":{validItems:validSphereSpec} //invisible style for click handling
     };
 
     GLModel.validSurfaceSpecs = {
@@ -658,6 +659,24 @@ $3Dmol.GLModel = (function() {
             $3Dmol.GLDraw.drawSphere(geo, atom, radius, C);    
             
         };
+        
+        /** Register atom shaped click handlers */
+        var drawAtomClickSphere = function(atom) {
+            
+            if (!atom.style.clicksphere)
+                return;
+            var style = atom.style.clicksphere;
+            if (style.hidden)
+                return;
+                                  
+            var x, y;
+            var radius = getRadiusFromStyle(atom, style);
+            
+            if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
+                var center = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+                atom.intersectionShape.sphere.push(new $3Dmol.Sphere(center, radius));
+            }                        
+        };        
 
         var drawAtomInstanced = function(atom, geo) {
 
@@ -1199,7 +1218,7 @@ $3Dmol.GLModel = (function() {
                     }
 
                     drawSphereFunc(atom, sphereGeometry);
-                   
+                    drawAtomClickSphere(atom);
                     drawAtomCross(atom, crossGeometries);
                     drawBondLines(atom, atoms, lineGeometries);
                     drawBondSticks(atom, atoms, stickGeometry);
