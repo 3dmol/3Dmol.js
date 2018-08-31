@@ -1641,7 +1641,8 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Zoom to center of atom selection
+         * Zoom to center of atom selection.  The slab will be set appropriately for
+         * the selection, unless an empty selection is provided, in which case there will be no slab.
          * 
          * @function $3Dmol.GLViewer#zoomTo
          * @param {Object}
