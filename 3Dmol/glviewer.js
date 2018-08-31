@@ -1504,7 +1504,7 @@ $3Dmol.GLViewer = (function() {
         /**
          * Adjust slab to fully enclose selection (default everything).
          * 
-         * @function $3Dmol.GLViewer#center
+         * @function $3Dmol.GLViewer#fitSlab
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
          *            properties to select. Default: all atoms in viewer
