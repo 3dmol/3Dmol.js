@@ -642,7 +642,7 @@ $3Dmol.GLViewer = (function() {
             if (mode == 3
                     || (mouseButton == 3 && ev.ctrlKey)) { // Slab
                 slabNear = cslabNear + dx * 100;
-                slabFar = cslabFar + dy * 100;
+                slabFar = cslabFar - dy * 100;
             } else if (mode == 2 || mouseButton == 3
                     || ev.shiftKey) { // Zoom
                 scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
