@@ -41,7 +41,7 @@
  
 });
 
-var htmlColors = {
+var htmlColors = $3Dmol.htmlColors = {
     "aliceblue" : 0xF0F8FF,
     "antiquewhite" : 0xFAEBD7,
     "aqua" : 0x00FFFF,

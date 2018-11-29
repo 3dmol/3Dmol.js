@@ -2370,7 +2370,7 @@ $3Dmol.GLModel = (function() {
          */
         this.globj = function(group, options) {
             var time = new Date();
-            if(molObj === null) { // have to regenerate
+            if(molObj === null || options.regen) { // have to regenerate
                 molObj = createMolObj(atoms, options);
                 var time2 = new Date();
                 //console.log("object creation time: " + (time2 - time));

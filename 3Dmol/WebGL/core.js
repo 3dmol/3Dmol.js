@@ -216,9 +216,17 @@ $3Dmol.Object3D.prototype = {
         if(!indent) indent = ' ';
         //all objects have a transformation (usually identity)
         //not quite sure if getting rotation right here..
+        var theta = 2*Math.atan2(this.quaternion.lengthxyz(),this.quaternion.w);
+        var x = 0, y = 0, z = 0;
+        if(theta != 0) {
+            st = Math.sin(theta/2);
+            x = this.quaternion.x/st;
+            y = this.quaternion.y/st;
+            z = this.quaternion.z/st;
+        } 
         var ret = indent+"Transform {\n" +
         indent+" center "+this.position.x+" "+this.position.y+" "+this.position.z+"\n"+
-        indent+" rotation "+this.rotation.x+" "+this.rotation.y+" "+this.rotation.z+" 3.14159\n"+
+        indent+" rotation "+x+" "+y+" "+z+" "+theta+"\n"+
         indent+" children [\n";
         
         if(this.geometry) {
@@ -506,9 +514,10 @@ $3Dmol.Geometry = (function() {
             ret += indent+'geometry IndexedFaceSet {\n' +
             indent+' colorPerVertex TRUE\n'+
             indent+' normalPerVertex TRUE\n'+
+            indent+' solid FALSE\n';
             
             //vertices
-            indent+' coord Coordinate {\n'+
+            ret += indent+' coord Coordinate {\n'+
             indent+'  point [\n';
             var x,y,z;
             for (var i = 0; i < this.vertices; ++i) {
@@ -520,8 +529,8 @@ $3Dmol.Geometry = (function() {
             ret += indent+' }\n'; //end coordinate
             
             //normals
-            ret += indent+' normal Coordinate {\n'+
-                   indent+'  point [\n';
+            ret += indent+' normal Normal {\n'+
+                   indent+'  vector [\n';
             for (var i = 0; i < this.vertices; ++i) {
                 var offset = i*3;                
                 x = this.normalArray[offset]; y = this.normalArray[offset+1]; z = this.normalArray[offset+2];

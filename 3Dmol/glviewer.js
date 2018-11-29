@@ -1008,14 +1008,14 @@ $3Dmol.GLViewer = (function() {
          * 
          * @function $3Dmol.GLViewer#render
          */
-        this.render = function(callback) {
+        this.render = function(callback, exts) {
             renderer.setViewport();
             var time1 = new Date();
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();
             
             var i, n;
-            var exts = renderer.supportedExtensions();
+            if(!exts) exts = renderer.supportedExtensions();
             for (i = 0; i < models.length; i++) {
                 if (models[i]) {
                     models[i].globj(modelGroup, exts);
@@ -1039,7 +1039,7 @@ $3Dmol.GLViewer = (function() {
                         // formed; force various recalculations until full surface
                         // is
                         // available
-                        if (!surfArr[n].finished) {
+                        if (!surfArr[n].finished || exts.regen) {
                             geo.verticesNeedUpdate = true;
                             geo.elementsNeedUpdate = true;
                             geo.normalsNeedUpdate = true;
@@ -2823,8 +2823,15 @@ $3Dmol.GLViewer = (function() {
          * @return VRML
          */
         this.exportVRML = function() {
-            return'#VRML V2.0 utf8\n' + modelGroup.vrml() + '\n';
+            var savedmodelGroup = modelGroup;
+            modelGroup = new $3Dmol.Object3D();
+            //rendering with plain mesh
+            this.render(null, {supportsImposters: false, supportsAIA: false, regen: true});
+            var ret = '#VRML V2.0 utf8\n' + modelGroup.vrml() + '\n';
+            modelGroup = savedmodelGroup;
+            return ret;
         }
+        
         /**
          * Create a new model from atoms specified by sel.
          * If extract, removes selected atoms from existing models 

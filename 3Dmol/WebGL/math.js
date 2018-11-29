@@ -75,6 +75,11 @@ $3Dmol.Quaternion.prototype = {
         
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w);
     },
+    
+    lengthxyz : function() {
+        
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    },
 
     normalize : function() {
         

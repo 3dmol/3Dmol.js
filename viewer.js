@@ -124,9 +124,9 @@ var createAttribute = function(name,value,parent){
         if(type=="boolean"){
             validItemsValue = ["false","true"];
         }else if(type == "colorscheme"){
-            validItemsValue =  $3Dmol.GLModel.validColorschemeSpecs;
+            validItemsValue =  Object.keys($3Dmol.builtinColorSchemes).concat(['greenCarbon','cyanCarbon','yellowCarbon','whiteCarbon','magentaCarbon']);
         }else if(type == "color"){
-            validItemsValue =  $3Dmol.GLModel.validColorSpecs;
+            validItemsValue =  Object.keys($3Dmol.htmlColors);
         }else if(type == undefined){
             validItemsValue = validNames[name].validItems;
         }
@@ -806,16 +806,8 @@ var center = function(){
 var vrml = function() {
     var filename = "3dmol.wrl";
     var text = glviewer.exportVRML();
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', filename);
-
-    element.style.display = 'none';
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
+    var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, filename);
 }
 //initializes the sidebar based on the given url
 var initSide = function(url){
