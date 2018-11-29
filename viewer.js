@@ -802,6 +802,21 @@ var deleteStyleAttribute = function(spec){
 var center = function(){
     glviewer.center({},1000,true);
 }
+
+var vrml = function() {
+    var filename = "3dmol.wrl";
+    var text = glviewer.exportVRML();
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
 //initializes the sidebar based on the given url
 var initSide = function(url){
     var list = document.createElement('ul')
@@ -823,13 +838,13 @@ var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
         $("#sidenav").css("width",width+"px");
-        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel').css("display","inline")
+        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#vrmlExport').css("display","inline")
         $('#header').css("display","block");
         glviewer.translate(width/2,0,400,false);
         glviewer.render();
     }else{
         $("#sidenav").css("width","0");
-        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#header').css("display","none")
+        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#header,#vrmlExport').css("display","none")
         $("#menu").css("display","inline");
         width = $("#sidenav").width();
         glviewer.translate(-width/2,0,400,false);

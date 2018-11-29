@@ -210,6 +210,28 @@ $3Dmol.Object3D.prototype = {
         }
     },
     
+    //convert to vrml
+    vrml: function(indent) {
+        //attempt to pretty print
+        if(!indent) indent = ' ';
+        //all objects have a transformation (usually identity)
+        //not quite sure if getting rotation right here..
+        var ret = indent+"Transform {\n" +
+        indent+" center "+this.position.x+" "+this.position.y+" "+this.position.z+"\n"+
+        indent+" rotation "+this.rotation.x+" "+this.rotation.y+" "+this.rotation.z+" 3.14159\n"+
+        indent+" children [\n";
+        
+        if(this.geometry) {
+            ret += this.geometry.vrml(indent, this.material);
+        }
+        for(var i = 0; i < this.children.length; i++) {
+            ret += this.children[i].vrml(indent+" ")+",\n";
+        }
+        ret += ' ]\n';
+        ret += '}';
+        return ret;
+    },
+    
     updateMatrix : function() {
         
         this.matrix.setPosition(this.position);
@@ -433,6 +455,108 @@ $3Dmol.Geometry = (function() {
         }
     };
     
+    geometryGroup.prototype.vrml = function(indent, material) {
+        var ret = '';
+        ret += indent+'Shape {\n'+
+               indent+' appearance Appearance {\n'+
+               indent+'  material Material {\n' +
+               indent+'   diffuseColor '+material.color.r+' '+material.color.g+' '+material.color.b+'\n';
+        if(material.transparent) {
+            ret += indent+'   transparency '+(1.0-material.opacity)+'\n';            
+        }
+        ret += indent+ '  }\n'; //material
+        ret += indent+' }\n'; //appearance
+        
+        var oldindent = indent;
+        indent += ' '; //inshape
+        if(material instanceof $3Dmol.LineBasicMaterial) {
+            ret += indent+'geometry IndexedLineSet {\n' +
+            indent+' colorPerVertex TRUE\n'+
+            indent+' coord Coordinate {\n'+
+            indent+'  point [\n';
+            var x,y,z;
+            for (var i = 0; i < this.vertices; ++i) {
+                var offset = i*3;                
+                x = this.vertexArray[offset]; y = this.vertexArray[offset+1]; z = this.vertexArray[offset+2];
+                ret += indent+'   '+x+' '+y+' '+z+',\n';
+            }
+            ret += indent+'  ]\n';
+            ret += indent+' }\n'; //end coordinate
+            
+            if(this.colorArray) {
+                ret += indent+' color Color {\n'+
+                    indent+'  color [\n';
+                for (var i = 0; i < this.vertices; ++i) {
+                    var offset = i*3;                
+                    x = this.colorArray[offset]; y = this.colorArray[offset+1]; z = this.colorArray[offset+2];
+                    ret += indent+'   '+x+' '+y+' '+z+',\n';
+                }
+                ret += indent+'  ]\n';
+                ret += indent+' }\n'; //end color
+            }
+            
+            ret += indent+' coordIndex [\n';
+            for(var i = 0; i < this.vertices; i += 2) {
+                ret += indent+'  '+i+', '+(i+1)+', -1,\n';
+            }
+            ret += indent+' ]\n';
+            ret += indent+'}\n'; //geometry
+        } else {
+            //faces
+            ret += indent+'geometry IndexedFaceSet {\n' +
+            indent+' colorPerVertex TRUE\n'+
+            indent+' normalPerVertex TRUE\n'+
+            
+            //vertices
+            indent+' coord Coordinate {\n'+
+            indent+'  point [\n';
+            var x,y,z;
+            for (var i = 0; i < this.vertices; ++i) {
+                var offset = i*3;                
+                x = this.vertexArray[offset]; y = this.vertexArray[offset+1]; z = this.vertexArray[offset+2];
+                ret += indent+'   '+x+' '+y+' '+z+',\n';
+            }
+            ret += indent+'  ]\n';
+            ret += indent+' }\n'; //end coordinate
+            
+            //normals
+            ret += indent+' normal Coordinate {\n'+
+                   indent+'  point [\n';
+            for (var i = 0; i < this.vertices; ++i) {
+                var offset = i*3;                
+                x = this.normalArray[offset]; y = this.normalArray[offset+1]; z = this.normalArray[offset+2];
+                ret += indent+'   '+x+' '+y+' '+z+',\n';
+            }
+            ret += indent+'  ]\n';
+            ret += indent+' }\n'; //end normal
+            
+            //colors
+            if(this.colorArray) {
+                ret += indent+' color Color {\n'+
+                    indent+'  color [\n';
+                for (var i = 0; i < this.vertices; ++i) {
+                    var offset = i*3;                
+                    x = this.colorArray[offset]; y = this.colorArray[offset+1]; z = this.colorArray[offset+2];
+                    ret += indent+'   '+x+' '+y+' '+z+',\n';
+                }
+                ret += indent+'  ]\n';
+                ret += indent+' }\n'; //end color
+            }
+            
+            //faces
+            ret += indent+' coordIndex [\n';
+            for(var i = 0; i < this.faceidx; i += 3) {
+                x = this.faceArray[i]; y = this.faceArray[i+1]; z = this.faceArray[i+2];                
+                ret += indent+'  '+x+', '+y+', '+z+', -1,\n';
+            }
+            ret += indent+' ]\n'; //end faces 
+            ret += indent+'}\n'; //geometry            
+        }
+        
+        ret += oldindent+'}'; //shape
+        return ret;
+    },
+    
     geometryGroup.prototype.truncateArrayBuffers = function(mesh, reallocatemem) {
         
         mesh = (mesh === true) ? true : false;
@@ -551,6 +675,17 @@ $3Dmol.Geometry = (function() {
                 
             return retGroup;
             
+        },
+        
+        //return comma separated list of IndexedFace (or Line) sets from geometry groups
+        vrml : function(indent, material) {
+            var ret = '';
+            var len = this.geometryGroups.length;
+            for (var g = 0; g < len; g++) {
+                var geoGroup = this.geometryGroups[g];
+                ret += geoGroup.vrml(indent, material) +',\n';                
+            }
+            return ret;
         },
         
         addGeoGroup : function() {

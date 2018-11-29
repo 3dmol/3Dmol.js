@@ -2387,6 +2387,15 @@ $3Dmol.GLModel = (function() {
             }
         };
         
+        /** return a VRML string representation of the model.  Does not include VRML header information
+         * @function $3Dmol.GLModel#exportVRML
+         * @return VRML
+         */
+        this.exportVRML = function() {
+            //todo: export spheres and cylinder objects instead of all mesh
+            var tmpobj = createMolObj(atoms, {supportsImposters: false, supportsAIA: false});
+            return tmpobj.vrml();            
+        }
         /** Remove any renderable mol object from scene
          * 
          * @function $3Dmol.GLModel#removegl

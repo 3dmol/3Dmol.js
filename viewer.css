@@ -89,16 +89,14 @@ this may change*/
     display:none;
 }
 
-#renderModel,#centerModel{
-    width:47%;
+#renderModel,#centerModel,#vrmlExport{
+    width:30%;
     height:25px;
     margin-top:5px;
     display:none;
 }
 
-#centerModel{
-    float:right;
-}
+
 /* list elements*/
 li{
     margin:10px;

@@ -2818,6 +2818,13 @@ $3Dmol.GLViewer = (function() {
             return JSON.stringify(object);
         }
 
+        /** return a VRML string representation of the scene.  Include VRML header information
+         * @function $3Dmol.GLViewer#exportVRML
+         * @return VRML
+         */
+        this.exportVRML = function() {
+            return'#VRML V2.0 utf8\n' + modelGroup.vrml() + '\n';
+        }
         /**
          * Create a new model from atoms specified by sel.
          * If extract, removes selected atoms from existing models 
