@@ -880,7 +880,7 @@ $3Dmol.GLModel = (function() {
 
             var C1 = $3Dmol.getColorFromStyle(atom, style);
 
-            var mp, mp1, mp2;
+            var mp, mp1, mp2, mp3;
             
             if (!atom.capDrawn && atom.bonds.length < 4)
                 fromCap = 2;
