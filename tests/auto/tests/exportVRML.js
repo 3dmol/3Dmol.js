@@ -26,7 +26,7 @@ var data = "HETATM 2364  C1 A1BO A 501       9.103  27.061  27.339  0.50 40.13  
   );
 
   viewer.zoomTo();
-  viewer.render();
+  viewer.render( );
   
    model.setStyle({},
       {"stick": {
@@ -36,7 +36,7 @@ var data = "HETATM 2364  C1 A1BO A 501       9.103  27.061  27.339  0.50 40.13  
   );
 
   viewer.zoomTo();
-  viewer.render();
+  viewer.render( );
                     
                     
 model.setStyle(
@@ -48,9 +48,12 @@ model.setStyle(
             );
 
   viewer.zoomTo();
-  viewer.render();
+  viewer.render( );
 
   var txt = viewer.exportVRML();
+  if(txt.length < 100) {
+      throw "Where's the VRML?";
+  }
   console.log(txt);                    
 
 model.setStyle(

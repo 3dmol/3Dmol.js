@@ -2828,8 +2828,8 @@ $3Dmol.GLViewer = (function() {
             modelGroup = new $3Dmol.Object3D();
             //rendering with plain mesh
             this.render(null, {supportsImposters: false, supportsAIA: false, regen: true});
-            applyToModels("removegl",modelGroup); //cleanup
             var ret = '#VRML V2.0 utf8\n' + modelGroup.vrml() + '\n';
+            applyToModels("removegl",modelGroup); //cleanup
             modelGroup = savedmodelGroup;
             return ret;
         }
