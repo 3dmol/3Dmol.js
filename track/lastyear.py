@@ -5,8 +5,8 @@ import os,MySQLdb
 
 conn = MySQLdb.connect (host = "localhost",user = "tracker",db="3dmoltrack")
 cursor = conn.cursor()
-cursor.execute("SELECT DISTINCT(domain) FROM `accessed`  WHERE `time` >= DATE_SUB(NOW(),INTERVAL 1 YEAR)")
+cursor.execute("SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(domain, '/', 3), '://', -1), '/', 1), '?', 1) FROM `accessed` WHERE `time` >= DATE_SUB(NOW(),INTERVAL 1 YEAR)")
 
 for row in cursor:
-    print row
+    print row[0]
 
