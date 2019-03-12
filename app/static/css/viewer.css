@@ -81,65 +81,27 @@ this may change*/
     height: 25px;
     margin-top:5px;
 }
-
-.dropdown {
-    position: relative;
-    /* margin-b:250px; */
-    display: inline-block;
-  }
-  .dropbtn{
-    min-width: 120px;
-    display: none;
-}
-  .dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 120px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    /* padding: 12px 16px; */
-    z-index: 1;
-  }
-  
-  .dropdown:hover .dropdown-content {
-    display: block;
-  }
 /* bottom buttons */
 #addStyle,#addSurface,#addLabelRes{
-    min-width: 120px;
-    /* width:30%; */
-    /* height:25px; */
-    /* margin-top:10px; */
+    width:30%;
+    height:25px;
+    margin-top:10px;
     display:none;
 }
 
 #renderModel,#centerModel,#vrmlExport{
-    min-width: 120px;
-    /* width:30%;
+    width:30%;
     height:25px;
-    margin-top:5px; */
+    margin-top:5px;
     display:none;
 }
 #createSession,#joinSession{
-    min-width: 120px;
-    /* width:30%;
+    width:30%;
     height:25px;
-    margin-top:25px; */
+    margin-top:25px;
     display:none;
 }
-#options{
-    margin-top: 160px;
 
-    height: 25px;
-    
-    position: absolute;
-    
-    display: none;
-    
-    width: auto;
-    
-    left: 12px;
-}
 /* list elements*/
 li{
     margin:10px;

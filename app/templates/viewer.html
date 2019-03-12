@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3Dmol.js Viewer</title>
-<script src="build/3Dmol.js"></script>
+<script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+<script type = "text/javascript" src = "{{ url_for('static', filename = 'js/viewer.js') }}"></script>
 <script src="viewer.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 <script src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.min.js"></script>
-<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> -->
+
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="viewer.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/viewer.css') }}">
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script>
     (function(i, s, o, g, r, a, m) {
@@ -202,7 +201,7 @@
                             console
                                     .error("Could not instantiate viewer from supplied url: '"
                                             + e + "'");
-                            window.location = "http://get.webgl.org";
+                            // window.location = "http://get.webgl.org";
 
                         }
                     }
@@ -213,7 +212,7 @@ $(document).ready(function(){
     var start_width;
     $("#sidenav").resizable({
         handles: 'e',
-        minWidth: 400,
+        minWidth: 300,
         maxWidth: 1000,
         start:function(event,ui){
             start_width=$("#sidenav").width();
@@ -225,73 +224,58 @@ $(document).ready(function(){
         }
     });
     $( "#selection_list" ).sortable({
-        items: ".selection:not(#spacer)",
-        update:  function (event, ui) {
+      items: ".selection:not(#spacer)",
+      update:  function (event, ui) {
             render(true);
         },
     });//$("#selection_list").accordion();
     $("#selection_list").disableSelection();
-    
+
     initSide(url);
 });
 
 </script>
 </head>
 <body>
-    <span id="menu"  onclick="toggleHide();">&#9776;</span>
-    <div id="sidenav" class="ui-widget-content">
-        <div id="header">3Dmol Viewer</div>
-        <button id="options">Display Options</button><br>
-        <a href="javascript:void(0)" class="closebtn" onclick="toggleHide()">&#x2715;</a>
-        <ul id="list">
-            <li class="option"  style="pointer-events:auto;">
-                <h3>File/PDB/URL</h3>
-                <div class="container">
-                    <label>Model Type: </label>
-                    <select id="model_type">
-                        <option value="pdb">PDB</option>
-                        <option value="url">URL</option>
-                        <option value="cid">CID</option>
-                    </select>
-                    <br>
-                    <span><label>Query: </label><input id="model_input"></input></span>
-                </div>
-                <br>
-            </li>
-            <li id="selections" class="option" style="pointer-events:auto">
-                <h3>Selections</h3>
-                <div id="container">
-                    <ul id="selection_list">
-                        
-                    </ul>
-                    <div id="session_list">
-                        
-                    </div>
-                </div>
-                
-            </li>
-            
-        </ul>
-        
-        <div id="fixed_bottom">
-            <div class="dropdown">
-                <button class="dropbtn">Session</button>
-                <div class="dropdown-content">
-                <button id="createSession">Create Session</button><br><button id="joinSession">Join Session</button>
-            </div> </div>
-            <div class="dropdown">
-                    <button class="dropbtn">Style</button>
-                    <div class="dropdown-content">
-                        <button id="addStyle" onclick="addSelection('style')">Add Style</button><button id="addSurface" onclick="addSelection('surface')">Add Surface</button><button id="addLabelRes" onclick="addSelection('labelres')">Add LabelRes</button>
-                </div> </div>
-                <div class="dropdown">
-                        <button class="dropbtn">Misc</button>
-                        <div class="dropdown-content">
-                            <button id="renderModel" onclick="render(true);">Render</button><button onclick="center();" id="centerModel">Center</button><button onclick="vrml();" id="vrmlExport">VRML</button>
-                    </div> </div>
+<span id="menu"  onclick="toggleHide();">&#9776;</span>
+<div id="sidenav" class="ui-widget-content">
+  <div id="header">3Dmol Viewer</div>
+  <a href="javascript:void(0)" class="closebtn" onclick="toggleHide()">&#x2715;</a>
+  <ul id="list">
+    <li class="option"  style="pointer-events:auto;">
+        <h3>File/PDB/URL</h3>
+        <div class="container">
+            <label>Model Type: </label>
+            <select id="model_type">
+                <option value="pdb">PDB</option>
+                <option value="url">URL</option>
+                <option value="cid">CID</option>
+            </select>
+            <br>
+            <span><label>Query: </label><input id="model_input"></input></span>
         </div>
-        
-    </div>
-    <div id='gldiv' style="width: 100%; height: 100vh;"></div>
+        <br>
+    </li>
+    <li id="selections" class="option" style="pointer-events:auto">
+        <h3>Selections</h3>
+        <div id="container">
+            <ul id="selection_list">
+
+            </ul>
+            <div id="session_list">
+
+                </div>
+        </div>
+    </li>
+     
+</ul>
+<div id="fixed_bottom">
+        <button id="createSession">Create Session</button><button id="joinSession">Join Session</button>
+    <button id="addStyle" onclick="addSelection('style')">Add Style</button><button id="addSurface" onclick="addSelection('surface')">Add Surface</button><button id="addLabelRes" onclick="addSelection('labelres')">Add LabelRes</button>
+    <button id="renderModel" onclick="render(true);">Render</button><button onclick="center();" id="centerModel">Center</button><button onclick="vrml();" id="vrmlExport">VRML</button>
+</div>
+            
+</div>
+<div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
 </html>

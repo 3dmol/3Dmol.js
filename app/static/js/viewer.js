@@ -835,9 +835,6 @@ $('#joinSession').click(function(){
   $('#session_list').append('<form action="/sessions" method="post"> Session Name: <input type="text" name="sname2"><br> Session ID: <input type="text" name="sid"><br><input type="submit" value="Submit"></form>').toggle();
 
 })
-$('#options').click(function(){
-    $('#fixed_bottom').toggle();
-})
 });
 var createSession = function(url){
     
@@ -850,14 +847,13 @@ var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
         $("#sidenav").css("width",width+"px");
-        $('#options').css("display","block");
-        $('.dropbtn,#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#vrmlExport').css("display","inline")
+        $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#vrmlExport').css("display","inline")
         $('#header').css("display","block");
         glviewer.translate(width/2,0,400,false);
         glviewer.render();
     }else{
         $("#sidenav").css("width","0");
-        $('.dropbtn,#options,#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#header,#vrmlExport').css("display","none")
+        $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#header,#vrmlExport').css("display","none")
         $("#menu").css("display","inline");
         width = $("#sidenav").width();
         glviewer.translate(-width/2,0,400,false);
