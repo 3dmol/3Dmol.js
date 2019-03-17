@@ -943,7 +943,7 @@
 
       // encode secondary structure, i.e. get bytes
       if( inputDict.secStructList ){
-          outputDict.secStructList = passInt8( inputDict.secStructList, 1 );
+          outputDict.secStructList = passInt8( inputDict.secStructList );
       }
 
       // run-length encode insertion codes
