@@ -20,6 +20,7 @@ The contents of the viewer can be set and manipulated through the use of `data-`
  - **data-style** The value is a style specification.
  - **data-surface** A surface style specification.
  - **data-labelres** A residue label style specification.
+ - **data-zoomto** An {@link AtomSpec} selection specification to zoom to.
  
  Multiple selections, styles, residue labels, and surfaces can be provided by appending a suffix
  each tag.  For example.

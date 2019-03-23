@@ -63,6 +63,7 @@ $3Dmol.autoload=function(viewer,callback){
             var selectstylelist = [];
             var surfaces = [];
             var labels = [];
+            var zoomto = {};
             var d = viewerdiv.data();
             
             //let users specify individual but matching select/style tags, eg.
@@ -100,6 +101,9 @@ $3Dmol.autoload=function(viewer,callback){
                     var styleobj = $3Dmol.specStringToObject(d[dataname]);
                     labels.push([newsel,styleobj]);
                 }
+                if(dataname == "zoomto") {
+                    zoomto = $3Dmol.specStringToObject(d[dataname]);
+                }
             }
             
             //apply all the selections/styles parsed out above to the passed viewer
@@ -121,7 +125,7 @@ $3Dmol.autoload=function(viewer,callback){
                     glviewer.addResLabels(sel, sty);
                 }               
                 
-                glviewer.zoomTo();
+                glviewer.zoomTo(zoomto);
                 glviewer.render();             
             }
             

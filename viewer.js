@@ -353,6 +353,8 @@ var createSelection = function(spec,object,index,type){
         var attribute_pairs =[];
         for(var subselection in spec){
             var obj=spec[subselection];
+            if(typeof(obj) === 'object' && Object.keys(obj).length === 0)
+                obj = ""; // empty object
             attribute_pairs.push(subselection+":"+obj);
         }
 
@@ -461,7 +463,7 @@ var queryToURL = function(query){
             if(obj2[key]==undefined || obj2[key] != obj1[key])
                 return false;
         }
-        return true;
+        return typeof(obj1) == typeof(obj2); //{} != 0
     }
     var url = "";
     //unpacks everything except for style which has multiple layers 
@@ -553,7 +555,7 @@ function setURL(urlPath){
 var count = 0;
 //takes the search url string and makes a query object for it 
 var urlToQuery = function(url){
-    url= decodeURIComponent(url)
+    //url= decodeURIComponent(url)
     if(url == "")
         return new Query();
     var query = new Query();
@@ -576,12 +578,14 @@ var urlToQuery = function(url){
 
     var currentSelection = null;
     for(var token in tokens){
-        var strings = tokens[token].split("=");
-        var type = stringType(strings[0]);//left side of equals
-        var string = strings[1];//right side of equals
+	var uri = decodeURIComponent(tokens[token]);
+	var i = uri.indexOf('=');
+	var left = uri.slice(0,i);
+        var type = stringType(left);//left side of first equals
+        var string = uri.slice(i+1);//right side of equals
         var object = $3Dmol.specStringToObject(string);
         if(type == "file"){
-            query.file = new File(string,strings[0]);
+            query.file = new File(string,left);
         }else if(type == "select"){
             currentSelection = object
             query.selections.push(currentSelection);
@@ -658,7 +662,7 @@ var updateQueryFromHTML = function(){
             if(obj2[key]==undefined || obj2[key] != obj1[key])
                 return false;
         }
-        return true;
+        return typeof(obj1) == typeof(obj2); //0 != {}
     }
 
     function combine(obj1, src1) {
