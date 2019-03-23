@@ -623,9 +623,9 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
 }
 
 //hackish way to work with requirejs - doesn't actually work yet
-//since we doing use the require optimizer to combine modules
+//since we don't use the require optimizer to combine modules
 if( typeof(define) === 'function' && define.amd) {
-    define('$3Dmol',$3Dmol);
+    define('$3Dmol',[], function() { return $3Dmol; });
 }
 
 /* StereoViewer for stereoscopic viewing

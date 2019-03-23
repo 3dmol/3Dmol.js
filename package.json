@@ -9,6 +9,9 @@
   "author": "David Koes and contributors",
   "homepage": "http://3dmol.csb.pitt.edu",
   "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "babel-loader": "^8.0.5",
     "grunt": "^1.0.2",
     "grunt-closure-compiler": ">=0.0.21",
     "grunt-concurrent": ">=0.5.0",
@@ -20,7 +23,8 @@
     "grunt-contrib-uglify": ">=0.5.0",
     "grunt-node-inspector": ">=0.1.5",
     "grunt-shell": ">=0.7.0",
-    "jsdoc": ">=3.5.5"
+    "jsdoc": ">=3.5.5",
+    "webpack": "^4.29.0"
   },
   "scripts": {
     "build": "grunt build",

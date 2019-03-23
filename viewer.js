@@ -353,8 +353,6 @@ var createSelection = function(spec,object,index,type){
         var attribute_pairs =[];
         for(var subselection in spec){
             var obj=spec[subselection];
-            if(Object.keys(obj).length === 0)
-                obj = ""
             attribute_pairs.push(subselection+":"+obj);
         }
 
