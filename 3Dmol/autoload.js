@@ -130,9 +130,11 @@ function load(self, viewer = null, nviewers = 0) {
         window.location = "http://get.webgl.org";
     }
 
-    const context = glviewer.getCanvas().getContext("webgl");
+    const canvas = glviewer.getCanvas();
+    const context = canvas.getContext("webgl");
     glviewer.getCanvas().addEventListener("click", () => {
         if(context.isContextLost()) {
+            canvas.parentNode.removeChild(canvas);
             load(self);
         }
     });
