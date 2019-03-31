@@ -310,13 +310,14 @@ $3Dmol.GLDraw = (function() {
      * @param {$3Dmol.CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
-    draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
+    draw.drawCylinder = function(geo, from, to, radius, color, opacity, fromCap, toCap) {
         if (!from || !to)
             return;
         drawnC++;
         // vertices
         var drawcaps = toCap || fromCap;
         color = color || {r:0, g:0, b:0};
+        opacity = opacity || 1;
 
         /** @type {Array.<number>} */
         var dir = [ to.x, to.y, to.z ];
@@ -348,6 +349,7 @@ $3Dmol.GLDraw = (function() {
         var vertexArray = geoGroup.vertexArray;
         var normalArray = geoGroup.normalArray;
         var colorArray = geoGroup.colorArray;
+        var opacityArray = geoGroup.opacityArray;
         var faceArray = geoGroup.faceArray;
         // add vertices, opposing vertices paired together
         for (i = 0; i < n; ++i) {
@@ -389,6 +391,11 @@ $3Dmol.GLDraw = (function() {
             colorArray[offset + 4] = color.g;
             colorArray[offset + 2] = color.b;
             colorArray[offset + 5] = color.b;
+
+            //opacities
+            // #deletecomment : index needs revising
+            opacityArray[start+vi] = opacity;
+            opacityArray[start+vi+1] = opacity;
 
             // faces
             // 0 - 2 - 1
@@ -491,6 +498,12 @@ $3Dmol.GLDraw = (function() {
                     colorArray[v2offset + 2] = color.b;
                     colorArray[v3offset + 2] = color.b;
                     colorArray[v4offset + 2] = color.b;
+
+                    // #deletecomment : indexing needs revising
+                    opacityArray[v1offset/3] = opacity;
+                    opacityArray[v2offset/3] = opacity;
+                    opacityArray[v3offset/3] = opacity;
+                    opacityArray[v4offset/3] = opacity;
 
                     nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6]
                             * normals[v1].z;
@@ -658,6 +671,7 @@ $3Dmol.GLDraw = (function() {
         var vertexArray = geoGroup.vertexArray;
         var normalArray = geoGroup.normalArray;
         var colorArray = geoGroup.colorArray;
+        var opacityArray = geoGroup.opacityArray;
         var faceArray = geoGroup.faceArray;
         
         var offset = start*3;
@@ -672,18 +686,19 @@ $3Dmol.GLDraw = (function() {
         colorArray[offset] = color.r;
         colorArray[offset + 1] = color.g;
         colorArray[offset + 2] = color.b;
+        opacityArray[offset/3] = opacity;
         
         //second vertex top
         vertexArray[offset+3] = to.x;
         vertexArray[offset+4] = to.y;
         vertexArray[offset+5] = to.z;
-        
         normalArray[offset+3] = ndir.x;
         normalArray[offset+4] = ndir.y;
         normalArray[offset+5] = ndir.z;
         colorArray[offset+3] = color.r;
         colorArray[offset + 4] = color.g;
         colorArray[offset + 5] = color.b;
+        opacityArray[(offset/3)+1] = opacity;
         
         offset += 6;
         
@@ -712,6 +727,8 @@ $3Dmol.GLDraw = (function() {
             colorArray[offset + 1] = color.g;
             colorArray[offset + 2] = color.b;
             
+            opacityArray[offset/3] = opacity;
+
             offset += 3;
 
         }
@@ -812,7 +829,7 @@ $3Dmol.GLDraw = (function() {
      * @param {$3Dmol.Color}
      *            color
      */
-    draw.drawSphere = function(geo, pos, radius, color) {
+    draw.drawSphere = function(geo, pos, radius, color, opacity) {
 
         var center = new $3Dmol.Vector3(pos.x, pos.y, pos.z);
 
@@ -827,6 +844,7 @@ $3Dmol.GLDraw = (function() {
         var start = geoGroup.vertices;
         var vertexArray = geoGroup.vertexArray;
         var colorArray = geoGroup.colorArray;
+        var opacityArray = geoGroup.opacityArray;
         var faceArray = geoGroup.faceArray;
         var lineArray = geoGroup.lineArray;
         var normalArray = geoGroup.normalArray;
@@ -842,6 +860,8 @@ $3Dmol.GLDraw = (function() {
             colorArray[offset] = color.r;
             colorArray[offset + 1] = color.g;
             colorArray[offset + 2] = color.b;
+
+            opacityArray[offset/3] = opacity;
 
         }
 

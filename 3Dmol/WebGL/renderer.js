@@ -605,9 +605,10 @@ $3Dmol.Renderer = function(parameters) {
         var prefix_vertex = [ prefix ].join("\n");
 
         var prefix_fragment = [
-                parameters.fragdepth ? "#extension GL_EXT_frag_depth: enable"
-                        : "",
-                parameters.wireframe ? "#define WIREFRAME 1" : "", prefix ]
+                parameters.fragdepth ? "#extension GL_EXT_frag_depth: enable" : "",
+                parameters.wireframe ? "#define WIREFRAME 1" : "",
+                parameters.varyingopacity ? "#define VARYINGOPACITY 1" : "", 
+                prefix ]
                 .join("\n");
 
         var glFragmentShader = getShader("fragment", prefix_fragment
@@ -646,7 +647,7 @@ $3Dmol.Renderer = function(parameters) {
         }
 
         // attributes
-        identifiers = [ 'position', 'normal', 'color', 'lineDistance',
+        identifiers = [ 'position', 'normal', 'color', 'varopacity', 'lineDistance',
                 'offset', 'radius' ];
 
         /*
@@ -695,7 +696,8 @@ $3Dmol.Renderer = function(parameters) {
 
         parameters = {
             wireframe : material.wireframe,
-            fragdepth : material.imposter
+            fragdepth : material.imposter,
+            varyingopacity: material.varyingOpacity,
         };
 
         material.program = buildProgram(material.fragmentShader,
@@ -871,6 +873,15 @@ $3Dmol.Renderer = function(parameters) {
                         geometryGroup.__webglColorBuffer);
                 enableAttribute(attributes.color);
                 _gl.vertexAttribPointer(attributes.color, 3, _gl.FLOAT, false,
+                        0, 0);
+            }
+
+            // Opacities
+            if (attributes.varopacity >= 0) {
+                _gl.bindBuffer(_gl.ARRAY_BUFFER,
+                        geometryGroup.__webglOpacityBuffer);
+                enableAttribute(attributes.varopacity);
+                _gl.vertexAttribPointer(attributes.varopacity, 1, _gl.FLOAT, false,
                         0, 0);
             }
 
@@ -1333,7 +1344,8 @@ $3Dmol.Renderer = function(parameters) {
 
                 if (geometry.verticesNeedUpdate || geometry.elementsNeedUpdate
                         || geometry.colorsNeedUpdate
-                        || geometry.normalsNeedUpdate) {
+                        || geometry.normalsNeedUpdate
+                        || geometry.opacitiesNeedUpdate) {
                     setBuffers(geometryGroup, _gl.STATIC_DRAW);
                 }
             }
@@ -1342,6 +1354,7 @@ $3Dmol.Renderer = function(parameters) {
             geometry.elementsNeedUpdate = false;
             geometry.normalsNeedUpdate = false;
             geometry.colorsNeedUpdate = false;
+            geometry.opacitiesNeedUpdate = false;
 
             geometry.buffersNeedUpdate = false;
 
@@ -1392,6 +1405,7 @@ $3Dmol.Renderer = function(parameters) {
             if (!material.wireframe) {
                 var blankMaterial = material.clone();
                 blankMaterial.opacity = 0.0;
+                // blankMaterial.blank = true; // #deletecomment: hackish solution for the blank material problem with varopacity (blank render was not blank)
                 globject.blank = blankMaterial;
             }
         }
@@ -1402,12 +1416,16 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
+        // detect if object have multiple opacities within different styles
+        //for ()
+
     }
 
     function setBuffers(geometryGroup, hint, line) {
 
         var vertexArray = geometryGroup.vertexArray;
         var colorArray = geometryGroup.colorArray;
+        var opacityArray = geometryGroup.opacityArray;
 
         // offset buffers
         if (geometryGroup.__webglOffsetBuffer !== undefined ) {
@@ -1422,6 +1440,10 @@ $3Dmol.Renderer = function(parameters) {
         // color buffers
         _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
         _gl.bufferData(_gl.ARRAY_BUFFER, colorArray, hint);
+
+        // opacity buffer
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglOpacityBuffer);
+        _gl.bufferData(_gl.ARRAY_BUFFER, opacityArray, hint);
 
         // normal buffers
         if (geometryGroup.normalArray
@@ -1476,6 +1498,7 @@ $3Dmol.Renderer = function(parameters) {
         geometryGroup.__webglVertexBuffer = _gl.createBuffer();
         geometryGroup.__webglNormalBuffer = _gl.createBuffer();
         geometryGroup.__webglColorBuffer = _gl.createBuffer();
+        geometryGroup.__webglOpacityBuffer = _gl.createBuffer();
 
         geometryGroup.__webglFaceBuffer = _gl.createBuffer();
         geometryGroup.__webglLineBuffer = _gl.createBuffer();
@@ -1487,6 +1510,7 @@ $3Dmol.Renderer = function(parameters) {
 
         geometry.__webglVertexBuffer = _gl.createBuffer();
         geometry.__webglColorBuffer = _gl.createBuffer();
+        geometry.__webglOpacityBuffer = _gl.createBuffer();
 
         _this.info.memory.geometries++;
     }

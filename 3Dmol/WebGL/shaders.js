@@ -36,6 +36,7 @@ $3Dmol.ShaderUtils = {
 
      "varying vec3 vLight;",
      "varying vec3 vColor;",
+     "varying float vOpacity;",
      "varying vec3 cposition;",
      "varying vec3 p1;",
      "varying vec3 p2;",
@@ -112,10 +113,11 @@ $3Dmol.ShaderLib = {
 "uniform float fogFar;",
 
 "varying vec3 vColor;",
+"varying float vOpacity;",
 
 "void main() {",
     
-"    gl_FragColor = vec4( vColor, opacity );",
+"    gl_FragColor = vec4( vColor, vOpacity*opacity/opacity );",
     
 "    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
 "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
@@ -135,12 +137,15 @@ $3Dmol.ShaderLib = {
 
 "attribute vec3 position;",
 "attribute vec3 color;",
+"attribute float varopacity;",
 
 "varying vec3 vColor;",
+"varying float vOpacity;",
 
 "void main() {",
 
 "    vColor = color;",
+"    vOpacity = varopacity;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    gl_Position = projectionMatrix * mvPosition;",
 
@@ -170,6 +175,7 @@ $3Dmol.ShaderLib = {
 "uniform vec3 directionalLightColor[ 1 ];",
 
 "varying vec3 vColor;",
+"varying float vOpacity;",
 "varying vec2 mapping;",
 "varying float rval;",
 "varying vec3 vLight;",
@@ -190,7 +196,7 @@ $3Dmol.ShaderLib = {
 "    float dotProduct = dot( norm, vLight );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
 "    vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    gl_FragColor = vec4(vLight*vColor, opacity*opacity );", 
+"    gl_FragColor = vec4(vLight*vColor, vOpacity*opacity/opacity );", 
 "    float fogFactor = smoothstep( fogNear, fogFar, gl_FragDepthEXT/gl_FragCoord.w );",
 "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
@@ -211,9 +217,11 @@ $3Dmol.ShaderLib = {
 "attribute vec3 position;",
 "attribute vec3 normal;",
 "attribute vec3 color;",
+"attribute float varopacity;",
 
 "varying vec2 mapping;",
 "varying vec3 vColor;",
+"varying float vOpacity;",
 "varying float rval;",
 "varying vec3 vLight;",
 "varying vec3 center;",
@@ -221,6 +229,7 @@ $3Dmol.ShaderLib = {
 "void main() {",
 
 "    vColor = color;",
+"    vOpacity = varopacity;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    center = mvPosition.xyz;",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
@@ -549,7 +558,11 @@ $3Dmol.ShaderLib = {
       fragmentShader : [$3Dmol.ShaderUtils.stickimposterFragmentShader,
     "    float dotProduct = dot( norm, vLight );",
     "    vec3 light = vec3( max( dotProduct, 0.0 ) );",    
-    "    gl_FragColor = vec4(light*color, opacity*opacity );", 
+    "    #ifndef VARYINGOPACITY",
+    "    gl_FragColor = vec4(light*color, opacity );",
+    "    #else",
+    "    gl_FragColor = vec4(light*color, vOpacity*opacity/opacity );",
+    "    #endif",
     "    float fogFactor = smoothstep( fogNear, fogFar, depth );",   
     "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
     "}"].join("\n"),
@@ -565,9 +578,11 @@ $3Dmol.ShaderLib = {
 "attribute vec3 position;",
 "attribute vec3 normal;",
 "attribute vec3 color;",
+"attribute float varopacity;",
 "attribute float radius;",
 
 "varying vec3 vColor;",
+"varying float vOpacity;",
 "varying vec3 vLight;",
 "varying vec3 cposition;",
 "varying vec3 p1;",
@@ -577,6 +592,7 @@ $3Dmol.ShaderLib = {
 "void main() {",
    
 "    vColor = color; vColor.z = abs(vColor.z);", //z indicates which vertex and so would vary
+"    vOpacity = varopacity;",
 "    r = abs(radius);",
 "    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
 "    vec4 pt = modelViewMatrix*vec4(position, 1.0);",

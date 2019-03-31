@@ -336,6 +336,7 @@ $3Dmol.Geometry = (function() {
         //for performance reasons, callers must directly modify these
         this.vertexArray = null;
         this.colorArray = null;
+        this.opacityArray = null;
         this.normalArray = null;
         this.faceArray = null;
         this.radiusArray = null;
@@ -572,6 +573,7 @@ $3Dmol.Geometry = (function() {
         
         var vertexArr = this.vertexArray,
             colorArr = this.colorArray,
+            opacityArr = this.opacityArray,
             normalArr = this.normalArray,
             faceArr = this.faceArray,
             lineArr = this.lineArray,
@@ -580,6 +582,7 @@ $3Dmol.Geometry = (function() {
         //subarray to avoid copying and reallocating memory
         this.vertexArray = vertexArr.subarray(0,this.vertices*3);
         this.colorArray = colorArr.subarray(0,this.vertices*3);
+        this.opacityArray = opacityArr.subarray(0,this.vertices);
         
         if (mesh) {
             this.normalArray = normalArr.subarray(0,this.vertices*3);
@@ -607,6 +610,7 @@ $3Dmol.Geometry = (function() {
             if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
             if(this.vertexArray) this.vertexArray = new Float32Array(this.vertexArray);
             if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
+            if(this.opacityArray) this.opacityArray = new Float32Array(this.opacityArray);
             if(this.radiusArray) this.radiusArray = new Float32Array(this.radiusArray);
         }
         this.__inittedArrays = true;        
@@ -620,6 +624,7 @@ $3Dmol.Geometry = (function() {
         
         ret.vertexArray = new Float32Array(BUFFERSIZE*3);
         ret.colorArray = new Float32Array(BUFFERSIZE*3);
+        ret.opacityArray = new Float32Array(BUFFERSIZE);
         
         //TODO: instantiating uint arrays according to max number of vertices
         // is dangerous, since there exists the possibility that there will be 
@@ -659,6 +664,7 @@ $3Dmol.Geometry = (function() {
         this.elementsNeedUpdate = false;
         this.normalsNeedUpdate = false;
         this.colorsNeedUpdate = false;
+        this.opacitiesNeedUpdate = false;
     
         this.buffersNeedUpdate = false;
         
