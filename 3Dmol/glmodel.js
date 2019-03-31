@@ -1252,10 +1252,7 @@ $3Dmol.GLModel = (function() {
                         {
                             if (testOpacities[j] != undefined && opacities[j].val != testOpacities[j])
                             {
-                                console.log("Warning: " + j + " opacity is ambiguous");
                                 opacities[j].varying = true;
-                                // #deletecomment: el 7etta di mafrod a5ali el opacity l tefdal 
-                                // lel type da tkon a2al wa7da 3ashan lw hya a2al mn 1 yb2a transparent
                             }
 
                         } else opacities[j].val = testOpacities[j];

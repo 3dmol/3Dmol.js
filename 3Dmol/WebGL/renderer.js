@@ -876,8 +876,8 @@ $3Dmol.Renderer = function(parameters) {
                         0, 0);
             }
 
-            // Opacities
-            if (attributes.varopacity >= 0) {
+            // Opacities => only fill buffers when material opacity varies through atoms
+            if (attributes.varopacity >= 0 && material.varyingOpacity) {
                 _gl.bindBuffer(_gl.ARRAY_BUFFER,
                         geometryGroup.__webglOpacityBuffer);
                 enableAttribute(attributes.varopacity);
@@ -1289,7 +1289,7 @@ $3Dmol.Renderer = function(parameters) {
                     if (!geometryGroup.__webglVertexBuffer) {
 
                         if (object instanceof $3Dmol.Mesh) {
-                            createMeshBuffers(geometryGroup);
+                            createMeshBuffers(geometryGroup, material);
                             geometry.elementsNeedUpdate = true;
                             geometry.normalsNeedUpdate = true;
                         }
@@ -1442,9 +1442,11 @@ $3Dmol.Renderer = function(parameters) {
         _gl.bufferData(_gl.ARRAY_BUFFER, colorArray, hint);
 
         // opacity buffer
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglOpacityBuffer);
-        _gl.bufferData(_gl.ARRAY_BUFFER, opacityArray, hint);
-
+        if (geometryGroup.__webglOpacityBuffer !== undefined ) {
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglOpacityBuffer);
+            _gl.bufferData(_gl.ARRAY_BUFFER, opacityArray, hint);
+        }
+        
         // normal buffers
         if (geometryGroup.normalArray
                 && geometryGroup.__webglNormalBuffer !== undefined) {
@@ -1487,7 +1489,7 @@ $3Dmol.Renderer = function(parameters) {
     // Creates appropriate gl buffers for geometry chunk
     // TODO: do we need line buffer for mesh objects?
     // Also, can we integrate this with createLineBuffers?
-    function createMeshBuffers(geometryGroup) {
+    function createMeshBuffers(geometryGroup, material) {
 
         if (geometryGroup.radiusArray) {
             geometryGroup.__webglRadiusBuffer = _gl.createBuffer();
@@ -1498,8 +1500,9 @@ $3Dmol.Renderer = function(parameters) {
         geometryGroup.__webglVertexBuffer = _gl.createBuffer();
         geometryGroup.__webglNormalBuffer = _gl.createBuffer();
         geometryGroup.__webglColorBuffer = _gl.createBuffer();
-        geometryGroup.__webglOpacityBuffer = _gl.createBuffer();
-
+        if (material.varyingOpacity){
+            geometryGroup.__webglOpacityBuffer = _gl.createBuffer();
+        }
         geometryGroup.__webglFaceBuffer = _gl.createBuffer();
         geometryGroup.__webglLineBuffer = _gl.createBuffer();
 

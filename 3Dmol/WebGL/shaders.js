@@ -116,9 +116,13 @@ $3Dmol.ShaderLib = {
 "varying float vOpacity;",
 
 "void main() {",
-    
+
+"    #ifndef VARYINGOPACITY",
+"    gl_FragColor = vec4( vColor, opacity );",
+"    #else",
 "    gl_FragColor = vec4( vColor, vOpacity*opacity/opacity );",
-    
+"    #endif",
+
 "    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
 "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
     
@@ -196,7 +200,11 @@ $3Dmol.ShaderLib = {
 "    float dotProduct = dot( norm, vLight );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
 "    vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    gl_FragColor = vec4(vLight*vColor, vOpacity*opacity/opacity );", 
+"    #ifndef VARYINGOPACITY",
+"    gl_FragColor = vec4(vLight*vColor, opacity );",
+"    #else",
+"    gl_FragColor = vec4(vLight*vColor, vOpacity*opacity/opacity );",
+"    #endif", 
 "    float fogFactor = smoothstep( fogNear, fogFar, gl_FragDepthEXT/gl_FragCoord.w );",
 "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
