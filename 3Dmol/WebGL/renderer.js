@@ -1405,7 +1405,6 @@ $3Dmol.Renderer = function(parameters) {
             if (!material.wireframe) {
                 var blankMaterial = material.clone();
                 blankMaterial.opacity = 0.0;
-                // blankMaterial.blank = true; // #deletecomment: hackish solution for the blank material problem with varopacity (blank render was not blank)
                 globject.blank = blankMaterial;
             }
         }

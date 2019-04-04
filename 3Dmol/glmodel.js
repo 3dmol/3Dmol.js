@@ -549,11 +549,9 @@ $3Dmol.GLModel = (function() {
                     if(bstyle.singleBond) singleBond = true;
                     if(typeof(bstyle.color1) != "undefined") {
                         c1 = $3Dmol.CC.color(bstyle.color1);
-                        // #deletecomment: does this need to get opacity too?
                     }
                     if(typeof(bstyle.color2) != "undefined") {
                         c2 = $3Dmol.CC.color(bstyle.color2);
-                        // #deletecomment: does this need to get opacity too?
                     }
                 }
 
@@ -768,7 +766,7 @@ $3Dmol.GLModel = (function() {
 
             //same colors for all 4 vertices
             var normalArray = geoGroup.normalArray;
-            var colorArray = geoGroup.colorArray;  // #deletecomment: why is this line repeated? 
+            var colorArray = geoGroup.colorArray; 
             for(var i = 0; i < 4; i++) {
                 colorArray[start+3*i] = C.r;
                 colorArray[start+3*i+1] = C.g;
@@ -828,7 +826,7 @@ $3Dmol.GLModel = (function() {
         };
                 
           
-        var drawStickImposter =  function(geo, from, to, radius, color, opacity, fromCap, toCap) {
+        var drawStickImposter =  function(geo, from, to, radius, color, fromCap, toCap, opacity) {
            //we need the four corners - two have from coord, two have to coord, the normal
             //is the opposing point, from which we can get the normal and length
             //also need the radius
@@ -955,11 +953,9 @@ $3Dmol.GLModel = (function() {
                         if(bstyle.singleBond) singleBond = true;
                         if(typeof(bstyle.color1) != "undefined") {
                             C1 = $3Dmol.CC.color(bstyle.color1);
-                            // #deletecomment : do I need to get opacity here?
                         }
                         if(typeof(bstyle.color2) != "undefined") {
                             C2 = $3Dmol.CC.color(bstyle.color2);
-                            // #deletecomment : do I need to get opacity here?
                         }
                     }
                     var p1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
@@ -974,10 +970,10 @@ $3Dmol.GLModel = (function() {
                         if (C1 != C2) {
                             mp = new $3Dmol.Vector3().addVectors(p1, p2)
                                     .multiplyScalar(0.5);
-                            drawCyl(geo, p1, mp, bondR, C1, O1, fromCap, 0);
-                            drawCyl(geo, mp, p2, bondR, C2, O2, 0, toCap);
+                            drawCyl(geo, p1, mp, bondR, C1, fromCap, 0, O1);
+                            drawCyl(geo, mp, p2, bondR, C2, 0, toCap, O2);
                         } else {
-                            drawCyl(geo, p1, p2, bondR, C1, O1, fromCap, toCap);
+                            drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap, O1);
                         }
                         
                         
@@ -1039,13 +1035,13 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp2 = new $3Dmol.Vector3().addVectors(p1b, p2b)
                                         .multiplyScalar(0.5);
-                                drawCyl(geo, p1a, mp, r, C1, O1, mfromCap, 0);
-                                drawCyl(geo, mp, p2a, r, C2, O2, 0, mtoCap);
-                                drawCyl(geo, p1b, mp2, r, C1, O1, mfromCap, 0);
-                                drawCyl(geo, mp2, p2b, r, C2, O2, 0, mtoCap);
+                                drawCyl(geo, p1a, mp, r, C1, mfromCap, 0, O1);
+                                drawCyl(geo, mp, p2a, r, C2, 0, mtoCap, O2);
+                                drawCyl(geo, p1b, mp2, r, C1, mfromCap, 0, O1);
+                                drawCyl(geo, mp2, p2b, r, C2, 0, mtoCap, O2);
                             } else {
-                                drawCyl(geo, p1a, p2a, r, C1, O1, mfromCap, mtoCap);
-                                drawCyl(geo, p1b, p2b, r, C1, O1, mfromCap, mtoCap);
+                                drawCyl(geo, p1a, p2a, r, C1, mfromCap, mtoCap, O1);
+                                drawCyl(geo, p1b, p2b, r, C1, mfromCap, mtoCap, O1);
                             }
                             
                             var atomneedsi = atom.clickable || atom.hoverable;
@@ -1093,16 +1089,16 @@ $3Dmol.GLModel = (function() {
                                         .multiplyScalar(0.5);
                                 mp3 = new $3Dmol.Vector3().addVectors(p1, p2)
                                         .multiplyScalar(0.5);
-                                drawCyl(geo, p1a, mp, r, C1, O1, mfromCap, 0);
-                                drawCyl(geo, mp, p2a, r, C2, O2, 0, mtoCap);
-                                drawCyl(geo, p1, mp3, r, C1, O1, fromCap, 0);
-                                drawCyl(geo, mp3, p2, r, C2, O2, 0, toCap);
-                                drawCyl(geo, p1b, mp2, r, C1, O1, mfromCap, 0);
-                                drawCyl(geo, mp2, p2b, r, C2, O2, 0, mtoCap);
+                                drawCyl(geo, p1a, mp, r, C1, mfromCap, 0, O1);
+                                drawCyl(geo, mp, p2a, r, C2, 0, mtoCap, O2);
+                                drawCyl(geo, p1, mp3, r, C1, fromCap, 0, O1);
+                                drawCyl(geo, mp3, p2, r, C2, 0, toCap, O2);
+                                drawCyl(geo, p1b, mp2, r, C1, mfromCap, 0, O1);
+                                drawCyl(geo, mp2, p2b, r, C2, 0, mtoCap, O2);
                             } else {
-                                drawCyl(geo, p1a, p2a, r, C1, O1, mfromCap, mtoCap);
-                                drawCyl(geo, p1, p2, r, C1, O1, fromCap, toCap);
-                                drawCyl(geo, p1b, p2b, r, C1, O1, mfromCap, mtoCap);
+                                drawCyl(geo, p1a, p2a, r, C1, mfromCap, mtoCap, O1);
+                                drawCyl(geo, p1, p2, r, C1, fromCap, toCap, O1);
+                                drawCyl(geo, p1b, p2b, r, C1, mfromCap, mtoCap, O1);
 
                             }
                                                             

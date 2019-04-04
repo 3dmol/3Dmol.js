@@ -310,7 +310,7 @@ $3Dmol.GLDraw = (function() {
      * @param {$3Dmol.CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
-    draw.drawCylinder = function(geo, from, to, radius, color, opacity, fromCap, toCap) {
+    draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap, opacity) {
         if (!from || !to)
             return;
         drawnC++;
@@ -393,7 +393,6 @@ $3Dmol.GLDraw = (function() {
             colorArray[offset + 5] = color.b;
 
             //opacities
-            // #deletecomment : index needs revising
             opacityArray[start+vi] = opacity;
             opacityArray[start+vi+1] = opacity;
 
@@ -499,11 +498,10 @@ $3Dmol.GLDraw = (function() {
                     colorArray[v3offset + 2] = color.b;
                     colorArray[v4offset + 2] = color.b;
 
-                    // #deletecomment : indexing needs revising
-                    opacityArray[v1offset/3] = opacity;
-                    opacityArray[v2offset/3] = opacity;
-                    opacityArray[v3offset/3] = opacity;
-                    opacityArray[v4offset/3] = opacity;
+                    opacityArray[v1 + start] = opacity;
+                    opacityArray[v2 + start] = opacity;
+                    opacityArray[v3 + start] = opacity;
+                    opacityArray[v4 + start] = opacity;
 
                     nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6]
                             * normals[v1].z;
@@ -861,7 +859,7 @@ $3Dmol.GLDraw = (function() {
             colorArray[offset + 1] = color.g;
             colorArray[offset + 2] = color.b;
 
-            opacityArray[offset/3] = opacity;
+            opacityArray[start + i] = opacity;
 
         }
 
