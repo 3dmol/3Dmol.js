@@ -89,7 +89,7 @@ this may change*/
     display:none;
 }
 
-#renderModel,#centerModel,#vrmlExport{
+#savePng,#centerModel,#vrmlExport{
     width:30%;
     height:25px;
     margin-top:5px;

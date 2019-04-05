@@ -811,6 +811,17 @@ var vrml = function() {
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
     saveAs(blob, filename);
 }
+var savePng = function() {
+    var filename = "3dmol.png";
+    var text = glviewer.pngURI();
+    var ImgData = text;
+    var link = document.createElement('a');
+    link.href = ImgData;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 //initializes the sidebar based on the given url
 var initSide = function(url){
     var list = document.createElement('ul')
@@ -832,13 +843,13 @@ var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
         $("#sidenav").css("width",width+"px");
-        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#vrmlExport').css("display","inline")
+        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#vrmlExport').css("display","inline")
         $('#header').css("display","block");
         glviewer.translate(width/2,0,400,false);
         glviewer.render();
     }else{
         $("#sidenav").css("width","0");
-        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#renderModel,#header,#vrmlExport').css("display","none")
+        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#header,#vrmlExport').css("display","none")
         $("#menu").css("display","inline");
         width = $("#sidenav").width();
         glviewer.translate(-width/2,0,400,false);
