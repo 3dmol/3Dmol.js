@@ -798,36 +798,30 @@ Type
 
 Vector3
 
+### Matrix3 Class
+
+#### Short Description
+
+A 3x3 matrix can be instantiated.
+Points on the 2D plane have their rotation, scaling ..etc matrices in their matrices in 3x3 form.
+
+#### Constructor for Matrix3
+
+##### Matrix3(n11, n12, n13, n21, n22, n23, n31, n32, n33)
+
+The 9 values are set upon creation of an instance.
+
+Parameters
+
+| Name 	|  Type  	|                 Description                 	|
+|:----:	|:------:	|:-------------------------------------------:	|
+|  n11, n12, n13, n21, n22, n23, n31, n32, n33 	| Number 	| These are the values assigned to the 3x3 matrix with their subscript as matrix indexes. |
 
 
 
+Returns
 
+Type 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Vector3
 
