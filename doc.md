@@ -13,7 +13,7 @@
 
 </script>
 
-#3Dmol.js
+# 3Dmol.js
 
 <div  style="float: right; height: 250px; width: 250px; position: relative;" class='viewer_3Dmoljs' data-pdb='1UBQ' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"color": "spectrum"}}'></div>  
 <script>
@@ -26,7 +26,7 @@ setInterval(function() {
 </script>
 
 
-##Overview    
+## Overview    
 
 3Dmol.js is an object-oriented, webGL based JavaScript library for online molecular visualization - No Java required!
 With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications.  Features include
@@ -38,28 +38,28 @@ With 3Dmol.js, you can add beautifully rendered molecular visualizations to your
  * clickable interactivity with molecular data
  * geometric shapes including spheres and arrows
 
-## Getting Started ##
+## Getting Started 
 
 Molecular data can be shared and visualized without writing any HTML
  using only a declarative URL specification and our hosted viewer (see {@tutorial url}).
 
 Viewers can be quickly embedded in any HTML document using just two lines of source code (see {@tutorial embeddable}).
 
-####Mouse Controls####
+#### Mouse Controls 
 
-Movement | &nbsp;&nbsp;&nbsp;&nbsp; | Mouse Input | &nbsp;&nbsp;&nbsp;&nbsp; | Touch Input
----------|-|:------------|------------
-Rotation | |   Primary Mouse Button | | Single touch
-Translation | |    Middle Mouse Button or Ctrl+Primary | | Triple touch
-Zoom | | Scroll Wheel or Second Mouse Button or Shift+Primary | | Pinch (double touch)
-Slab | | Ctrl+Second | | Not Available
+Movement | Mouse Input | Touch Input
+---------------|----------------|----------------
+Rotation |    Primary Mouse Button |  Single touch
+Translation |     Middle Mouse Button or Ctrl+Primary |  Triple touch
+Zoom |  Scroll Wheel or Second Mouse Button or Shift+Primary |  Pinch (double touch)
+Slab |  Ctrl+Second |  Not Available
 
 
-##Developing with 3Dmol.js##
+## Developing with 3Dmol.js 
 
 3Dmol.js provides a full-featured API for manipulating and styling molecular data.
 
-###Getting the source code###
+### Getting the source code
 The library is available as a single minified JavaScript file (includes jQuery):
 
 ``` 
@@ -105,7 +105,7 @@ grunt build
 Since 3Dmol.js is licensed under the permissive BSD open-source license, you are free
 to copy this code and use it any any project, as long the code is properly acknowledged.
 
-###Using the source code###
+### Using the source code
 
 Every 3Dmol.js viewer canvas corresponds to a {@link $3Dmol.GLViewer} object. The viewer object
 includes methods for setting viewer properties and for creating and manipulating molecular models, surfaces
@@ -128,7 +128,7 @@ If this software is useful in your work, please use the following citation:
 > 3Dmol.js: molecular visualization with WebGL   
 > Bioinformatics (2015) 31 (8): 1322-1324 [doi:10.1093/bioinformatics/btu829](http://doi.org/10.1093/bioinformatics/btu829)
 
-##FAQ
+## FAQ
 
 **What are your future plans for 3Dmol.js?**
 
@@ -152,12 +152,12 @@ automatically provide additional formats and analyses.
 
 Yes, as long as they support WebGL.  For example, it runs great in Safari on an iPad running iOS 8.
 
-##Contact
+## Contact
 
 Please address any questions or concerns to [dkoes@pitt.edu](mailto:dkoes@pitt.edu).  
 You may also [submit an issue](https://github.com/3dmol/3Dmol.js/issues) on github.
 
-##Funding
+## Funding
 
 3DMol.js is funded  is funded through R01GM108340 from the National Institute of General Medical Sciences. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institute of General Medical Sciences or the National Institutes of Health. 
 
