@@ -219,7 +219,100 @@ Type
 
 Quarternion
 
+### Vector2 Class
 
+#### Short Description
+
+A 2D vector consists of 2 parameters x and y.
+It is used to represent points on a 2D plane. 
+
+#### Constructor for Vector2
+
+##### Vector2(x,y)
+
+Initializes a vector2 object.
+
+Parameters
+
+| Name 	|  Type  	|                 Description                 	|
+|:----:	|:------:	|:-------------------------------------------:	|
+|   x  	| Number 	| Multiplier of the imaginary basis vector i. 	|
+|   y  	| Number 	| Multiplier of the imaginary basis vector j. 	|
+
+Returns
+
+Type 
+
+Vector2
+
+#### Methods
+
+##### set(x,y)
+
+Used to set the values of x and y parameters for Vector2.
+
+Parameters
+
+| Name 	|  Type  	|                 Description                 	|
+|:----:	|:------:	|:-------------------------------------------:	|
+|   x  	| Number 	| Multiplier of the imaginary basis vector i. 	|
+|   y  	| Number 	| Multiplier of the imaginary basis vector j. 	|
+
+
+Returns
+
+Type 
+
+Vector2
+
+##### subVectors(a,b)
+
+Subtracts the two vectors a and b and returns a new vector(Performs a-b).
+
+Parameters
+
+| Name 	|  Type  	|                 Description                 	|
+|:----:	|:------:	|:-------------------------------------------:	|
+|   a  	| Vector 	| Vector a from which a vector is subtracted	|
+|   b  	| Vector 	| Vector b to be subtracted	|
+
+
+Returns
+
+Type 
+
+Vector2
+
+##### copy(v)
+
+Copies the contents of another vector2 to the current vector.
+
+Parameters
+
+| Name 	|  Type  	|                 Description                 	|
+|:----:	|:------:	|:-------------------------------------------:	|
+|   v  	| Vector 	| Vector v from which values are copied	|
+
+
+Returns
+
+Type 
+
+Vector2
+
+##### clone()
+
+Used to create a clone of the current vector.
+
+Parameters
+
+None
+
+Returns
+
+Type
+
+Vector2
 
 
 
