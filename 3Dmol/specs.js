@@ -247,8 +247,8 @@
 
 /**
  * Curve shape specification.  Extends {@link ShapeSpec}
- * @typedef CylinderSpec
- * @prop [{$3Dmol.Vector3}] points - list of (x,y,z) points to interpolate between to make curve
+ * @typedef CurveSpec
+ * @prop {$3Dmol.Vector3} points - list of (x,y,z) points to interpolate between to make curve
  * @prop {number} smooth - amount of interpolation
  * @prop {number} radius
  * @prop {boolean} fromArrow - if an arrow should be drawn at the start
