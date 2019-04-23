@@ -1,5 +1,5 @@
 // Specifications for various object types used in 3Dmol.js
-// This is primarily for documentation 
+// This is primarily for documentation
 (function() {
 /**
  * GLViewer input specification
@@ -8,7 +8,7 @@
  * @prop {boolean} nomouse - if true, disable handling of mouse events
  * @prop {ColorSpec} backgroundColor - color of background
  */
-    
+
 /**
  * Grid GLViewer input specification
  * @typedef ViewerGridSpec
@@ -35,7 +35,7 @@
  * @prop {number} serial - Atom's serial id number
  * @prop {string} atom - Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
  * @prop {Array.<number>} bonds - Array of atom ids this atom is bonded to
- * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix) 
+ * @prop {string} ss - Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
  * @prop {boolean} singleBonds - true if this atom forms only single bonds or no bonds at all
  * @prop {Array.<number>} bondOrder - Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
  * @prop {Object} properties - Optional mapping of additional properties
@@ -66,7 +66,7 @@
   */
 
 /**
-*3 dimensional vector 
+*3 dimensional vector
 *@typedef Vector3
 *@prop {number} x - x coordinate
 *@prop {number} y - y coordinate
@@ -77,10 +77,10 @@
 
 /**
  * Atom selection object. Used to specify what atoms should be selected.  Can include
- * any field from {@link AtomSpec} in which case atoms must equal the specified value.  
+ * any field from {@link AtomSpec} in which case atoms must equal the specified value.
  * All fields must match for the selection to hold. If values
  * are provided as a list, then only one value of the list must match.
- * 
+ *
  * @typedef AtomSelectionSpec
  * @prop {AtomSpec} ... - any field from {@link AtomSpec}, values may be singletons or lists. Integer numerical ranges are supported as strings.
  * @prop {GLModel} model - a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model).
@@ -95,15 +95,15 @@
  * @prop {AtomSelectionSpec} not - take the inverse of the provided {AtomSelectionSpec}
 
  * @example
- * $3Dmol.download("pdb:2EJ0",viewer,{},function(){                     
+ * $3Dmol.download("pdb:2EJ0",viewer,{},function(){
                   viewer.setStyle({chain:'B'},{cartoon:{color:'spectrum'}});
                   viewer.setStyle({chain:'B',invert:true},{cartoon:{}});
                   viewer.setStyle({bonds: 0},{sphere:{radius:0.5}}); //water molecules
                   viewer.setStyle({resn:'PMP',byres:true,expand:5},{stick:{colorscheme:"greenCarbon"}});
-                  viewer.setStyle({resi:["91-95","42-50"]},{cartoon:{color:"green",thickness:1.0}});                  
+                  viewer.setStyle({resi:["91-95","42-50"]},{cartoon:{color:"green",thickness:1.0}});
                   viewer.render();
 
-                  
+
                 });
  */
 
@@ -112,13 +112,13 @@
  * some distance from another atom selection. When added as a field of an {@link AtomSelectionSpec},
  * intersects the set of atoms in that selection with the set of atoms within a given
  * distance from the given {@link AtomSelectionSpec}.
- 
+
  * @typedef WithinSelectionSpec
  * @example
  $3Dmol.download("pdb:2EJ0",viewer,{},function(){
-                            
-                  viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}});                   
-                  viewer.render();                  
+
+                  viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}});
+                  viewer.render();
                 });// stylizes atoms in chain A that are within 10 angstroms of an atom in chain B
  *
  * @prop {number} distance - the distance in angstroms away from the atom selection to include atoms in the parent selection
@@ -128,7 +128,7 @@
 
 
 
-/** 
+/**
  * @typedef AtomStyleSpec
  * @prop {LineStyleSpec} line - draw bonds as lines
  * @prop {CrossStyleSpec} cross - draw atoms as crossed lines (aka stars)
@@ -137,7 +137,7 @@
  * @prop {CartoonStyleSpec} cartoon - draw cartoon representation of secondary structure
  */
 
-/** 
+/**
  * @typedef SurfaceStyleSpec
  * @prop {number} opacity - sets the transparency: 0 to hide, 1 for fully opaque
  * @prop {ColorschemeSpec} colorscheme - element based coloring
@@ -145,7 +145,7 @@
  * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring
  * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color
  * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead.
- * 
+ *
  * @example
  * var setStyles = function(volumedata){
                     var data = new $3Dmol.VolumeData(volumedata, "cube");
@@ -154,17 +154,17 @@
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.05,.05)}, opacity:1.0},{chain:'B'});
                     viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, color:'red'},{chain:'C'});
                     viewer.addSurface($3Dmol.SurfaceType.SAS, {opacity:0.85,voldata: data, colorscheme:'greenCarbon'},{chain:'D'});
-                 
+
               viewer.render();
               };
               $3Dmol.download("pdb:4DLN",viewer,{},function(){
-                  
+
                   $.get("data/1fas.cube",setStyles);
                 });
 
  */
 
-/** 
+/**
  * Isosurface style specification
  * @typedef IsoSurfaceSpec
  * @prop {number} isoval - specifies the isovalue to draw surface at
@@ -177,10 +177,10 @@
  * @prop {list} coords - coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates
  * @prop {number} seldist - distance around coords to include data [default = 2.0]
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
- * @prop {function} callback - function to call on click 
+ * @prop {function} callback - function to call on click
  */
 
-/** 
+/**
  * GLShape style specification
  * @typedef ShapeSpec
  * @prop {ColorSpec} color - solid color
@@ -189,7 +189,7 @@
  * @prop {boolean} hidden - if true, do not display object
  * @prop {number} linewidth - width of line for wireframe rendering **No longer supported by most browsers**
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
- * @prop {function} callback - function to call on click 
+ * @prop {function} callback - function to call on click
  */
 
 
@@ -204,27 +204,27 @@
  */
 
 /**
- * Sphere shape specification. Extends {@link ShapeSpec}  
- * 
- * @typedef SphereShapeSpec   
+ * Sphere shape specification. Extends {@link ShapeSpec}
+ *
+ * @typedef SphereShapeSpec
  * @prop {$3Dmol.Vector3} center
  * @prop {number} radius
- * 
+ *
  */
- 
+
 /**
- * Box shape specification. Extends {@link ShapeSpec}  
- * 
- * @typedef BoxSpec   
+ * Box shape specification. Extends {@link ShapeSpec}
+ *
+ * @typedef BoxSpec
  * @prop {$3Dmol.Vector3} corner - bottom corner of box
  * @prop {$3Dmol.Vector3} center - alternative to corner: center of box
  * @prop {Object} dimensions - {w:width, h:height, d:depth}; can be either scalars or vectors (for not-axis aligned boxes)
- * 
+ *
  */
 
 
 /**
- * Arrow shape specification.  Extends {@link ShapeSpec}  
+ * Arrow shape specification.  Extends {@link ShapeSpec}
  * @typedef ArrowSpec
  * @prop {$3Dmol.Vector3} start
  * @prop {$3Dmol.Vector3} end
@@ -235,19 +235,20 @@
 
 
 /**
- * Cylinder shape specification.  Extends {@link ShapeSpec}  
+ * Cylinder shape specification.  Extends {@link ShapeSpec}
  * @typedef CylinderSpec
  * @prop {$3Dmol.Vector3} start
  * @prop {$3Dmol.Vector3} end
  * @prop {number} radius
  * @prop {$3Dmol.CAP} fromCap - 0 for none, 1 for flat, 2 for round
- * @prop {$3Dmol.CAP} toCap - 0 for none, 1 for flat, 2 for round  
+ * @prop {$3Dmol.CAP} toCap - 0 for none, 1 for flat, 2 for round
+ * @prop {boolean} dashed
  */
 
 /**
- * Curve shape specification.  Extends {@link ShapeSpec}  
- * @typedef CylinderSpec
- * @prop [{$3Dmol.Vector3}] points - list of (x,y,z) points to interpolate between to make curve
+ * Curve shape specification.  Extends {@link ShapeSpec}
+ * @typedef CurveSpec
+ * @prop {$3Dmol.Vector3} points - list of (x,y,z) points to interpolate between to make curve
  * @prop {number} smooth - amount of interpolation
  * @prop {number} radius
  * @prop {boolean} fromArrow - if an arrow should be drawn at the start
@@ -270,7 +271,7 @@
 * @prop gro  Gromacs topology format, need to add coordinates to resulting model.
 * @prop mcif,cif Crystallographic Information File, the successor to PDB that makes you miss the PDB file format
 * @prop mmtf Macromolecular Transmission Format, the successor to PDB that is totally awesome
-* @prop mol2 Sybyl Mol2 format 
+* @prop mol2 Sybyl Mol2 format
 * @prop pdb The venerable Protein Data Bank format
 * @prop pqr Like PDB but with partial charges which are read into the partialcharge atom property
 * @prop prmtop Amber topology file, must add coordinates
@@ -278,5 +279,5 @@
 * @prop vasp VASP format (CONTCAR, POSCAR)
 * @prop xyz XYZ cartesian coordinates format
 */
-	
+
 });
