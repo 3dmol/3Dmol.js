@@ -1,0 +1,301 @@
+/*handle for dragging*/
+.ui-resizable-e {
+    width: 15px;
+}
+/*close button for sidenav*/
+.closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px !important;
+    margin-left: 50px;    
+}
+/*font, hamburger button, general styleing*/
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+}
+/*makes the side nav visible*/
+.ui-widget-content {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: rgba(230,230,230,.5);
+    transition: 0.5s;
+    padding:0;
+    text-align:center;
+}
+
+/* sub headings like file/pdb/url and selections*/
+h3{ 
+    text-align:left;
+    background-color:rgba(0,0,122,.5);
+    margin:5px;
+    padding-left:10px;
+    color:white;
+    border-radius: 15px 50px
+}
+/*gets the page header working*/
+#header{
+    text-align:left;
+    /*position : relative; does not seem necessary*/
+    color:white;
+    background-color:rgba(0,0,122,.5);
+    margin:8px;
+    margin-bottom:-20px;
+    padding-left:20px;
+    border-radius: 15px 50px;
+    display:none;
+}
+#model_type{
+    width: 70%;
+}
+/*add buttons styling
+this may change*/
+.add_model_spec{
+    width:100%;
+    height:30px;
+    margin-top:5px;
+}
+
+.add_style_spec{
+    margin-left:4%;
+    width:92%;
+    height: 25px;
+}
+#menu{
+    font-size:30px;
+    cursor:pointer;
+    position:absolute;
+    z-index:1;
+}
+
+.add_attribute{
+
+    width:92%;
+    margin-left:4%;
+    height: 25px;
+    margin-top:5px;
+}
+/* bottom buttons */
+#addStyle,#addSurface,#addLabelRes{
+    width:30%;
+    height:25px;
+    margin-top:10px;
+    display:none;
+}
+
+#savePng,#centerModel,#vrmlExport{
+    width:30%;
+    height:25px;
+    margin-top:10px;
+    display:none;
+}
+#createSession,#joinSession{
+    width:45%;
+    height:25px;
+    margin-top:5px;
+    display:none;
+}
+
+/* list elements*/
+li{
+    margin:10px;
+    padding:4px;
+    list-style:none;
+}
+/* attribute styleing*/
+.attribute_name,.attribute_value{
+    color:black;
+    width:42%;
+    height:20px;
+    padding:5px;
+    background-color: white;
+    display:inline-block;
+    white-space: pre;
+    overflow:hidden;
+}
+
+.attribute_name, select.attribute_value{
+    height:30px;
+}
+
+select.attribute_value{
+    width:46%;
+}
+.attribute_value{
+    float:right; 
+    height:16px;
+}
+
+.delete_attribute{
+    float:right;
+    color:white;
+    margin-left:10px;
+}
+
+.delete_style_spec{
+    float:right;
+}
+
+.attribute{
+    background-color:rgba(0,0,102,.9);
+    height:30px;
+    margin-right:0px;
+}
+/* 
+#selections{
+} */
+
+.style_spec{
+    color:black;
+    margin:5px;
+}
+
+#selection_list{
+    list-style: none;
+    margin-bottom: 70px;
+}
+
+#container{
+    text-align:left;
+    height:90%;
+}
+
+/* selection list element*/
+.selection{
+    border-color:gray;
+    border-style:solid;
+    background-color:white;
+    border-radius: 15px;
+    padding-top:7px;
+
+}
+
+#selection_list li .selection_spec{
+    border-radius:0px;
+    height:4%;
+    background-color:rgba(0,0,102,.9);
+    color:white;
+    padding:10px;
+}
+
+#selection_list li .selection_spec:hover,.delete_attribute:hover{
+    background-color:rgba(0,0,102,.5);
+}
+
+.fixed{
+    position: relative;
+    bottom:0%;
+    width:100%;
+}
+
+input{
+    width:80%;
+}
+
+.style{
+    color:white;
+    margin:0px;
+}
+.selection_div{
+    width:80%;
+    margin:0px;
+    display:inline;
+}
+.selection_type{
+    background-color: rgba(0,0,102,.9);
+    color:white;
+    height:4%;
+    width:25%;
+    text-align: center;
+    padding:10px;
+    margin:0px;
+    position:relative;
+    float:left;
+    margin-right:5px;
+}
+
+.selection_spec{
+    margin-bottom: 10px;
+    border-radius: 15px;
+    width:42%;
+    margin-left:10px;
+    margin:0px;
+    position:relative;
+}
+
+.delete_selection{
+    float:right;
+    position: relative;
+    height:4%;
+    margin-left:4%;
+    padding:10px;
+}
+
+.selection_header{
+    display:inline;
+    margin-bottom:10%;
+}
+
+select,input{
+    font-size:16px;
+}
+
+#fixed_bottom{
+    bottom:0;
+    background-color:white;
+    width:100%;
+    height:110px;
+    position: absolute;
+}
+.option{
+    margin:0px;
+}
+
+#list{
+    height:100%;
+    margin-top:40px;
+    overflow: hidden;
+    overflow-y:scroll;
+    margin-bottom:70px;
+}
+
+#header{
+    font-size: 32px;
+}
+
+.spinner {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none; 
+    user-select: none;
+}
+
+
+#selection_list li .selection_spec:hover,.delete_attribute:hover{
+    background-color:rgba(0,0,102,.5);
+}
+
+.delete_selection:hover{
+    background-color:rgba(0,0,102,.5);
+    border-radius:5px;
+    color:white;
+
+}
+.delete_selection{
+    background-color:rgba(0,0,102,.9);
+    border-radius:5px;
+    color:white;
+}
+
+.delete_style_spec{
+    padding:5px;
+}
