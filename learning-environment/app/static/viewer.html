@@ -4,15 +4,18 @@
 <title>3Dmol.js Viewer</title>
       <meta charset="UTF-8">
 <script src="http://3Dmol.csb.pitt.edu/build/3Dmol.js"></script>
-<script src="viewer.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-    <script src="socketio.js"></script>
+ 
 <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 <script src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.min.js"></script>
 
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="viewer.css">
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+  <script src="viewer.js"></script>
+  <script src="socketio.js"></script>
+  
 <script>
     (function(i, s, o, g, r, a, m) {
         i['GoogleAnalyticsObject'] = r;
@@ -269,8 +272,11 @@ $(document).ready(function(){
     <li id="sessions" class="option" style="pointer-events: auto">
             <h3>Sessions</h3>
             <div id="container">
-                <ul id="session_list">
-    
+                <ul id="session_list1">
+                    <form action="" method="POST" id="create_session_form"> Session Name: <input type="text" id="session_name1" name="sname1"><span id="check_name"></span><br>Password(Optional)<input type="password" id="session_password1" placeholder="Set it for collaboration"> <br><input id="create_button" type="submit" value="Submit"></form>
+                </ul>
+                <ul id="session_list2">
+                    <form action="" method="POST" id="join_session_form"> Session Name: <input type="text" id="session_name2" name="sname2"><br> Password(Optional) <input type="password" id="session_password2" placeholder="Type in if you want to colloborate"><br><input id="join_button" type="submit" value="Submit"></form>
                 </ul>
             </div>
     </li>

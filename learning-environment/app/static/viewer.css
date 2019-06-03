@@ -187,6 +187,16 @@ select.attribute_value{
 #selection_list li .selection_spec:hover,.delete_attribute:hover{
     background-color:rgba(0,0,102,.5);
 }
+/* selection list element*/
+#session_list1, #session_list2{
+    display: none;
+    border-color:gray;
+    border-style:solid;
+    background-color:white;
+    border-radius: 15px;
+    padding-top:7px;
+
+}
 
 .fixed{
     position: relative;

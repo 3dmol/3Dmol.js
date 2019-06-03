@@ -836,13 +836,14 @@ var initSide = function(url){
     buildHTMLTree(query);
 }
 var createSession = function(){
-    $('#session_list').empty();
-    $('#session_list').append('<form action="/sessions" method="post"> Session Name: <input type="text" name="sname1"><br><input type="submit" value="Submit"></form>').toggle();
+    $('#session_list2').hide();
+    $('#session_list1').toggle();
 }
 var joinSession = function(){
-    $('#session_list').empty();
-  $('#session_list').append('<form action="/sessions" method="post"> Session Name: <input type="text" name="sname2"><br> Session ID: <input type="text" name="sid"><br><input type="submit" value="Submit"></form>').toggle();
+    $('#session_list1').hide();
+  $('#session_list2').toggle();
 }
+
 var toggle = true;
 var width=420;
 var prev_in = $("#model_input").val();
