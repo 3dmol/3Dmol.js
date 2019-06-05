@@ -10,16 +10,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio =  SocketIO(app, async_mode='eventlet')
 
-json_list = []
-# def print_all_sessions():
-#     for dict in session_list:
-#         print(str)
+session_json_list = [] #stores session json
+session_name_list = [] #stores session name
+
 def check_session_present(session_json):
-    for i in range(len(json_list)):
-        print(i)
-        if (session_json.get("session_name") == json_list[i]['session_name']):
-            return True
-    return False
+    if session_json['session_name'] in session_name_list:
+        return True
+    else:        
+        return False
 
 @socketio.on('message')
 def handleMessage(msg):
@@ -37,10 +35,13 @@ def handleCheckName(session_json):
 def handleCreateSession(session_json):
     if (check_session_present(session_json) == True):
         print("Invalid name")
+        emit('create session response', "0")
     else: 
-        print("received my event: " + str(session_json))
-        json_list.append(session_json)
+        emit('create session response', "1")
+        print("Session Created: " + str(session_json))
+        session_json_list.append(session_json)
         session = session_json['session_name']
+        session_name_list.append(session)
         join_room(session)
    
     
