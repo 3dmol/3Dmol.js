@@ -5,7 +5,7 @@ $(document).ready(function() {
 	socket.on('connect', function() {
 		socket.send('User has connected!');
 	});
-
+	
 	function setCookie(exdays){
 		var d = new Date();
 		d.setTime(d.getTime() + (exdays*24*60*60*1000)) //Cookie stored for exDays
@@ -34,12 +34,12 @@ $(document).ready(function() {
 		var cookie_session_name = getCookie("Session_Name");
 		if(cookie_session_name != ""){
 			$('#session_name1').val(cookie_session_name);
-			console.log("Session Name: " + cookie_session_name);
+			console.log("Cookie Session Name: " + cookie_session_name);
 		}
 		var cookie_session_password = getCookie("Session_Password");
 		if(cookie_session_password != ""){
 			$('#session_password1').val(cookie_session_password);
-			console.log("Session Password:" + cookie_session_password);
+			console.log("Cookie Session Password:" + cookie_session_password);
 		}
 	} 
 
@@ -74,7 +74,7 @@ $(document).ready(function() {
 		else
 			alert("Session name was already taken/ could not be created. Try Again")
 	});
-	$()
+	
 	$( '#join_session_form' ).on( 'submit', function( e ) {
 		e.preventDefault();
 		
@@ -84,6 +84,15 @@ $(document).ready(function() {
 		});
 		
 	});
+	socket.on('join session response', function(msg){
+		if(msg==1){
+		$('#session_list2').hide();
+		$('#session_list4').show();
+		$('#createSession,#joinSession').prop('disabled', true);
+		}
+		else
+			alert("Session Doesn't Exist")
+	});
 	$( '#delete_session_form' ).on( 'submit', function( e ) {
 		e.preventDefault();
 		
@@ -92,5 +101,29 @@ $(document).ready(function() {
 			session_password : $( 'input#session_password1' ).val()
 		});
 		
+	});
+	socket.on('delete session response', function(){
+		$('#session_list3').hide();
+		$('#createSession,#joinSession').prop('disabled', false);
+	});
+	$( '#leave_session_form' ).on( 'submit', function( e ) {
+		e.preventDefault();
+		
+		socket.emit( 'leave session event', {
+			session_name : $( 'input#session_name1' ).val(),
+			session_password : $( 'input#session_password1' ).val()
+		});
+		
+	});
+	socket.on('leave session response', function(){
+		$('#session_list4').hide();
+		$('#createSession,#joinSession').prop('disabled', false);
+
+	});
+	socket.on('error: restart connection', function(){
+		location.reload();
+	})
+	socket.on('session count', function(count){
+		$('#people_joined').html('People Joined: '+count)
 	});
 });

@@ -188,7 +188,7 @@ select.attribute_value{
     background-color:rgba(0,0,102,.5);
 }
 /* selection list element*/
-#session_list1, #session_list2, #session_list3{
+#session_list1, #session_list2, #session_list3, #session_list4{
     display: none;
     border-color:gray;
     border-style:solid;
