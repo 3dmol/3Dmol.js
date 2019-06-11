@@ -1,6 +1,9 @@
 
 $(document).ready(function() {
 	checkCookie();
+	var initiator = false;
+	var joined = false;
+	var old_url = '';
 	var socket = io.connect('http://localhost:5000');
 	socket.on('connect', function() {
 		socket.send('User has connected!');
@@ -10,10 +13,10 @@ $(document).ready(function() {
 		var d = new Date();
 		d.setTime(d.getTime() + (exdays*24*60*60*1000)) //Cookie stored for exDays
 		var expires = "expires="+ d.toUTCString();
-		var session_name = $('#session_name1').val();
-		var session_password = $('#session_password1').val();
-		document.cookie = "Session_Name=" + session_name +";" + expires +";path=/";
-		document.cookie = "Session_Password=" + session_password + ";" + expires +";path=/";
+		var name = $('#session_name1').val();
+		var password = $('#session_password1').val();
+		document.cookie = "Session_Name=" + name +";" + expires +";path=/";
+		document.cookie = "Session_Password=" + password + ";" + expires +";path=/";
 	}
 	function getCookie(cname) {
 		var name = cname + "=";
@@ -45,7 +48,7 @@ $(document).ready(function() {
 
 	$('input#session_name1').on('input', function(){
 		socket.emit( 'check session name event', {
-			session_name : $( 'input#session_name1' ).val()
+			name : $( 'input#session_name1' ).val()
 		})
 	})	
 	socket.on('check session name response', function(msg){
@@ -58,9 +61,10 @@ $(document).ready(function() {
 		e.preventDefault();
 		
 		socket.emit( 'create session event', {
-			session_name : $( 'input#session_name1' ).val(),
-			session_password : $( 'input#session_password1' ).val()
+			name : $( 'input#session_name1' ).val(),
+			password : $( 'input#session_password1' ).val()
 		});
+		
 		
 	});
 	socket.on('create session response', function(msg){
@@ -70,6 +74,11 @@ $(document).ready(function() {
 			$('#session_list1').hide();
 			$('#session_list3').show();
 			$('#createSession,#joinSession').prop('disabled', true);
+			initiator = true;
+			socket.emit( 'URL state change event', {
+				name : $( 'input#session_name1' ).val(),
+				url : window.location.href.substring(window.location.href.indexOf("?")+1)
+		});
 		}
 		else
 			alert("Session name was already taken/ could not be created. Try Again")
@@ -79,16 +88,17 @@ $(document).ready(function() {
 		e.preventDefault();
 		
 		socket.emit( 'join session event', {
-			session_name : $( 'input#session_name2' ).val(),
-			session_password : $( 'input#session_password2' ).val()
+			name : $( 'input#session_name2' ).val(),
+			password : $( 'input#session_password2' ).val()
 		});
-		
+			
 	});
 	socket.on('join session response', function(msg){
 		if(msg==1){
 		$('#session_list2').hide();
 		$('#session_list4').show();
-		$('#createSession,#joinSession').prop('disabled', true);
+		$('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes').prop('disabled', true);
+		joined = true;
 		}
 		else
 			alert("Session Doesn't Exist")
@@ -97,33 +107,60 @@ $(document).ready(function() {
 		e.preventDefault();
 		
 		socket.emit( 'delete session event', {
-			session_name : $( 'input#session_name1' ).val(),
-			session_password : $( 'input#session_password1' ).val()
+			name : $( 'input#session_name1' ).val(),
+			password : $( 'input#session_password1' ).val()
 		});
 		
 	});
 	socket.on('delete session response', function(){
 		$('#session_list3').hide();
 		$('#createSession,#joinSession').prop('disabled', false);
+		initiator = false;
 	});
 	$( '#leave_session_form' ).on( 'submit', function( e ) {
 		e.preventDefault();
 		
 		socket.emit( 'leave session event', {
-			session_name : $( 'input#session_name1' ).val(),
-			session_password : $( 'input#session_password1' ).val()
+			name : $( 'input#session_name1' ).val(),
+			password : $( 'input#session_password1' ).val()
 		});
 		
 	});
 	socket.on('leave session response', function(){
 		$('#session_list4').hide();
-		$('#createSession,#joinSession').prop('disabled', false);
+		$('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes').prop('disabled', false);
+		joined = false;
 
 	});
 	socket.on('error: restart connection', function(){
 		location.reload();
 	})
 	socket.on('session count', function(count){
-		$('#people_joined').html('People Joined: '+count)
+		$('#people_joined').html('People Joined: ' + count)
+	});
+	window.setInterval(function (){
+		if(initiator==true){
+			var new_url=window.location.href.substring(window.location.href.indexOf("?")+1);
+			if(old_url != new_url){
+				old_url = new_url;
+				console.log(new_url);
+				socket.emit( 'URL state change event', {
+					name : $( 'input#session_name1' ).val(),
+					url : new_url
+			});
+		}
+		}
+	}, 1000);
+
+	socket.on('URL state change response', function(url){
+		if(initiator == false){
+		console.log("URL Response");
+		setURL(url)
+		var query = urlToQuery(window.location.search.substring(1));
+		buildHTMLTree(query);
+		render(true);
+		run();
+		glviewer.translate(width/2,0,0,false);
+		}
 	});
 });
