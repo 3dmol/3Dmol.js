@@ -180,7 +180,7 @@ $(document).ready(function() {
 			glviewer.setView(new_view);
 			render(true);
 			// glviewer.render();
-			glviewer.translate(0,0,0,false);
+			// glviewer.translate(0,0,0,false);
 		}
 	})
 });
