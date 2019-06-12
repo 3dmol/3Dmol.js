@@ -3,7 +3,9 @@ $(document).ready(function() {
 	checkCookie();
 	var initiator = false;
 	var joined = false;
-	var old_url = '';
+	var old_url = null;
+	var old_view = null;
+	var fps = 20;
 	var socket = io.connect('http://localhost:5000');
 	socket.on('connect', function() {
 		socket.send('User has connected!');
@@ -99,6 +101,7 @@ $(document).ready(function() {
 		$('#session_list4').show();
 		$('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes').prop('disabled', true);
 		joined = true;
+		// window.location.href.substring(window.location.href.indexOf("?"))='';
 		}
 		else
 			alert("Session Doesn't Exist")
@@ -150,7 +153,7 @@ $(document).ready(function() {
 			});
 		}
 		}
-	}, 1000);
+	}, 500);
 
 	socket.on('URL state change response', function(url){
 		if(initiator == false){
@@ -159,8 +162,25 @@ $(document).ready(function() {
 		var query = urlToQuery(window.location.search.substring(1));
 		buildHTMLTree(query);
 		render(true);
-		run();
-		glviewer.translate(width/2,0,0,false);
+		// glviewer.translate(width/2,0,0,false);		
 		}
 	});
+	window.setInterval(function(){
+		if(initiator == true){
+			var new_view = glviewer.getView();
+				socket.emit('viewer state change event', {
+					name : $( 'input#session_name1' ).val(),
+					viewer : new_view
+				});			
+	}
+	}, 1000/fps);
+
+	socket.on('viewer state change response', function(new_view){
+		if(initiator == false){
+			glviewer.setView(new_view);
+			render(true);
+			// glviewer.render();
+			glviewer.translate(0,0,0,false);
+		}
+	})
 });

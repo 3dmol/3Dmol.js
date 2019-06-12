@@ -13,6 +13,7 @@ socketio =  SocketIO(app, async_mode='eventlet')
 session_password = {} #stores name : password
 session_count = {} #stores name: count
 session_url = {}    #stores name: url
+session_viewer = {}
 
 def check_session_present(session_json):
     if session_json['name'] in session_password: #searches in O(1)
@@ -89,6 +90,13 @@ def handleURLChange(session_json_url):
     url = session_json_url['url']
     session_url[session] = url
     emit('URL state change response', url, room=session)
+
+@socketio.on('viewer state change event')
+def handleViewerChange(session_json_viewer):
+    session = session_json_viewer['name']
+    viewer = session_json_viewer['viewer']
+    session_viewer[session] = viewer
+    emit('viewer state change response', viewer, room=session)
 
 if __name__ == '__main__':
     socketio.run(app)
