@@ -889,6 +889,106 @@ $3Dmol.ShaderLib = {
             
         }
         
+    }, 
+    //raycasting volumetric rendering
+    'volumetric': {
+        fragmentShader: [
+            "uniform highp sampler3D volume;", 
+            "uniform highp sampler2D colormap;",
+            "uniform ivec3 volume_dims;", 
+            "uniform float dt_scale;", 
+            
+            "uniform float opacity;",
+            "uniform vec3 fogColor;", // not used yet
+            "uniform float fogNear;", // not used yet
+            "uniform float fogFar;", // not used yet
+
+            "in vec3 vray_dir;",
+            "flat in vec3 transformed_eye;",
+            "out vec4 color;",
+
+            "vec2 intersect_box(vec3 orig, vec3 dir) {",
+            "    const vec3 box_min = vec3(0);",
+            "    const vec3 box_max = vec3(1);",
+            "    vec3 inv_dir = 1.0 / dir;",
+            "    vec3 tmin_tmp = (box_min - orig) * inv_dir;",
+            "    vec3 tmax_tmp = (box_max - orig) * inv_dir;",
+            "    vec3 tmin = min(tmin_tmp, tmax_tmp);",
+            "    vec3 tmax = max(tmin_tmp, tmax_tmp);",
+            "    float t0 = max(tmin.x, max(tmin.y, tmin.z));",
+            "    float t1 = min(tmax.x, min(tmax.y, tmax.z));",
+            "    return vec2(t0, t1);",
+            "}",
+
+            "// Pseudo-random number gen from",
+            "// http://www.reedbeta.com/blog/quick-and-easy-gpu-random-numbers-in-d3d11/",
+            "// with some tweaks for the range of values",
+            "float wang_hash(int seed) {",
+            "    seed = (seed ^ 61) ^ (seed >> 16);",
+            "    seed *= 9;",
+            "    seed = seed ^ (seed >> 4);",
+            "    seed *= 0x27d4eb2d;",
+            "    seed = seed ^ (seed >> 15);",
+            "    return float(seed % 2147483647) / float(2147483647);",
+            "}",
+
+            "void main(void) {",
+            "    vec3 ray_dir = normalize(vray_dir);",
+            "    vec2 t_hit = intersect_box(transformed_eye, ray_dir);",
+            "    if (t_hit.x > t_hit.y) {",
+            "        discard;",
+            "    }",
+            "    t_hit.x = max(t_hit.x, 0.0);",
+            "    vec3 dt_vec = 1.0 / (vec3(256, 256, 180) * abs(ray_dir));",  // todo. this was volume_dims, shouldn't be hard coded but how will i get to know it? volume class? 
+            "    float dt = dt_scale * min(dt_vec.x, min(dt_vec.y, dt_vec.z));",
+            "    float offset = wang_hash(int(gl_FragCoord.x + 640.0 * gl_FragCoord.y));",
+            "    vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;",
+            "    for (float t = t_hit.x; t < t_hit.y; t += dt) {",
+            "        float val = texture(volume, p).r;",
+            "        vec4 val_color = vec4(vec3(val), val * opacity);",
+            "        // Opacity correction",
+            "        val_color.a = 1.0 - pow(1.0 - val_color.a, dt_scale);",
+            "        color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb;",
+            "        color.a += (1.0 - color.a) * val_color.a;",
+            "        if (color.a >= 0.95) {",
+            "            break;",
+            "        }",
+            "        p += ray_dir * dt;",
+            "    }",
+            "}"
+
+        ].join("\n"),
+
+        vertexShader: [
+            "layout(location=0) in vec3 position;",
+            "uniform vec3 eye_pos;",
+            "uniform vec3 volume_scale;",
+
+            "uniform mat4 modelMatrix;",
+            "uniform mat4 modelMatrixInverse;",
+            "uniform vec3 modelPos;",
+            "uniform mat4 projectionMatrix;",
+            "uniform mat4 viewMatrix;",
+            
+            "flat out vec3 transformed_eye;",
+            "out vec3 vray_dir;",
+
+            "void main(void) {",
+            "    transformed_eye = (modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos;", // eye position in unit cube space (should divide by scale)
+            "    vray_dir = position - modelPos - transformed_eye;", // el minus modelPos di 3shan hwa asln k2eno mdrob fl model matrix
+            "    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1);",
+            "}"
+        ].join("\n"),
+
+        uniforms: {
+            opacity: { type: 'f', value: 1.0 },
+            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogNear: { type: 'f', value: 1.0 },
+            fogFar: { type: 'f', value: 2000},
+            volume: { type: 'i', value: 3 },
+            colormap: { type: 'i', value: 1 },
+            dt_scale: { type: 'f', value: 1.0 }
+        }
     }
     
 };

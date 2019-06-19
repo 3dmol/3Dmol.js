@@ -821,7 +821,8 @@ $3Dmol.GLShape = (function() {
             faces.splice(faces.length,0, foff+0,foff+2,foff+1, foff+1,foff+2,foff+3); 
             foff += 4;  
             //left
-            verts.splice(verts.length, 0, uv[2],uv[0],uv[6],uv[4]);
+            verts.splice(verts.length, 0, uv[2],uv[6],uv[0],uv[4]); // fix: was 2 0 6 4 , was flipped! will this ruin anything?
+            // and is this the reason for having double sided lambert shading? the box had a flipped face
             faces.splice(faces.length,0, foff+0,foff+2,foff+1, foff+1,foff+2,foff+3); 
             foff += 4; 
                                     
@@ -1405,7 +1406,16 @@ $3Dmol.GLShape = (function() {
 
             shapeObj = new $3Dmol.Object3D();
             var material = null;
-            if(this.side == $3Dmol.DoubleSide) {
+            if(this.volumetricRenderer) {
+                var texture = new $3Dmol.Texture(this.volumetricdata, true);
+                texture.needsUpdate = true; 
+                var material = new $3Dmol.VolumetricMaterial({
+                    transferfn: this.transferfn,
+                    opacity: this.opacity,  // TODO: needs to be opacityfn
+                    map: texture
+                });
+            } 
+            else if(this.side == $3Dmol.DoubleSide) {
                 var material = new $3Dmol.MeshDoubleLambertMaterial({
                     wireframe : this.wireframe,
                     side : this.side,

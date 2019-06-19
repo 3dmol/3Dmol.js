@@ -269,6 +269,14 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
+        _gl.cullFace(_gl.BACK)  // fix, will this ruin anything? 
+
+        if (material.volumetric){
+            _gl.enable(_gl.CULL_FACE);
+            _gl.cullFace(_gl.FRONT);
+            _gl.enable(_gl.BLEND);
+            _gl.blendFunc(_gl.ONE, _gl.ONE_MINUS_SRC_ALPHA);
+        }
     };
 
     this.setDepthTest = function(depthTest) {
@@ -602,9 +610,12 @@ $3Dmol.Renderer = function(parameters) {
         var precision = _precision;
         var prefix = "precision " + precision + " float;";
 
-        var prefix_vertex = [ prefix ].join("\n");
+        var prefix_vertex = [ 
+                parameters.volumetric ? "#version 300 es" : "", prefix ]
+                .join("\n");
 
         var prefix_fragment = [
+                parameters.volumetric ? "#version 300 es" : "",
                 parameters.fragdepth ? "#extension GL_EXT_frag_depth: enable"
                         : "",
                 parameters.wireframe ? "#define WIREFRAME 1" : "", prefix ]
@@ -695,7 +706,8 @@ $3Dmol.Renderer = function(parameters) {
 
         parameters = {
             wireframe : material.wireframe,
-            fragdepth : material.imposter
+            fragdepth : material.imposter,
+            volumetric : material.volumetric
         };
 
         material.program = buildProgram(material.fragmentShader,
@@ -703,7 +715,7 @@ $3Dmol.Renderer = function(parameters) {
 
     };
 
-    function setProgram(camera, lights, fog, material, object) {
+    function setProgram(camera, lights, fog, material, object, renderer) {
 
         if (material.needsUpdate) {
 
@@ -784,6 +796,46 @@ $3Dmol.Renderer = function(parameters) {
                         object._normalMatrix.elements);
                 m_uniforms.directionalLightColor.value = _lights.directional.colors;
                 m_uniforms.directionalLightDirection.value = _lights.directional.positions;
+            } else if (material.shaderID === "volumetric") {
+                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
+                p_uniforms.eye_pos = _gl.getUniformLocation(program, "eye_pos");
+                _gl.uniform3fv(p_uniforms.eye_pos, Object.values(camera.position));
+                p_uniforms.modelMatrix = _gl.getUniformLocation(program, "modelMatrix");
+                _gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
+                p_uniforms.modelPos = _gl.getUniformLocation(program, "modelPos");
+                // hack to get box position because position is always 0,0,0 (box vertices are initialiez to their final position)
+                _gl.uniform3fv(p_uniforms.modelPos, object.geometry.geometryGroups[0].vertexArray.slice(0, 3));
+                // inverse model matrix
+                p_uniforms.modelMatrixInverse = _gl.getUniformLocation(program, "modelMatrixInverse");
+                _gl.uniformMatrix4fv(p_uniforms.modelMatrixInverse, false, object.matrix.getInverse(object.matrixWorld).elements);
+
+                /////////////////////////////////////////
+                // temp code for loading a model as Unsigned int 8 array
+                if (object.material.map.needsUpdate == true){
+                function stringToArrayBuffer(str) {
+                    var buf = new ArrayBuffer(str.length);
+                    var bufView = new Uint8Array(buf);
+                
+                    for (var i=0, strLen=str.length; i<strLen; i++) {
+                        bufView[i] = str.charCodeAt(i);
+                    }
+                    return buf;
+                }
+                var url = "bonsai_256x256x256_uint8.raw";
+                var req = new XMLHttpRequest();
+                req.open("GET", url, false);
+                req.send(null);
+                var data;
+                if (req.status === 200) 
+                    data = stringToArrayBuffer(req.response);
+                else 
+                    alert('Something bad happen!\n(' + req.status + ') ' + req.statusText);
+                dataBuffer = new Uint8Array(data);
+                object.material.map.image = dataBuffer;
+                }
+                // end of temp code
+                //////////////////////////////////////////////
+                renderer.setTexture(object.material.map, 3, true);
             }
 
             // opacity, diffuse, emissive, etc
@@ -812,6 +864,9 @@ $3Dmol.Renderer = function(parameters) {
             // single float
             if (type === 'f')
                 _gl.uniform1f(uniformLoc, uniformVal);
+            // single integer
+            else if (type === 'i')
+                _gl.uniform1i(uniformLoc, uniformVal);
             // array of floats
             else if (type === 'fv')
                 _gl.uniform3fv(uniformLoc, uniformVal);
@@ -838,7 +893,7 @@ $3Dmol.Renderer = function(parameters) {
         // Sets up proper vertex and fragment shaders and attaches them to webGL
         // program
         // Also sets appropriate uniform variables
-        program = setProgram(camera, lights, fog, material, object);
+        program = setProgram(camera, lights, fog, material, object, this);
 
         attributes = program.attributes;
 
@@ -1576,7 +1631,7 @@ $3Dmol.Renderer = function(parameters) {
         return aspect;
     }
 
-    this.setTexture = function(texture, slot) {
+    this.setTexture = function(texture, slot, is3D) {
 
         if (texture.needsUpdate) {
 
@@ -1593,20 +1648,23 @@ $3Dmol.Renderer = function(parameters) {
             }
 
             _gl.activeTexture(_gl.TEXTURE0 + slot);
-            _gl.bindTexture(_gl.TEXTURE_2D, texture.__webglTexture);
-
+            var gltextureType = is3D ? _gl.TEXTURE_3D : _gl.TEXTURE_2D;
+            _gl.bindTexture(gltextureType, texture.__webglTexture);
             _gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
-            _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-                    texture.premultiplyAlpha);
+            _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
             _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
+            
+            if (is3D){
+                // TODO: send customizable dimensions?
+                _gl.texStorage3D(_gl.TEXTURE_3D, 1, _gl.R8, 256, 256, 180); //_gl.R16F, width, height, depth
+            } 
+            else{ 
+                var image = texture.image, isImagePowerOfTwo = isPowerOfTwo(image.width)
+                        && isPowerOfTwo(image.height), glFormat = paramToGL(texture.format), glType = paramToGL(texture.type);
 
-            var image = texture.image, isImagePowerOfTwo = isPowerOfTwo(image.width)
-                    && isPowerOfTwo(image.height), glFormat = paramToGL(texture.format), glType = paramToGL(texture.type);
-
-            setTextureParameters(_gl.TEXTURE_2D, texture, isImagePowerOfTwo);
-
+                setTextureParameters(_gl.TEXTURE_2D, texture, isImagePowerOfTwo);
+            }
             var mipmap, mipmaps = texture.mipmaps;
-
             // regular Texture (image, video, canvas)
 
             // use manually created mipmaps if available
@@ -1625,6 +1683,11 @@ $3Dmol.Renderer = function(parameters) {
                 texture.generateMipmaps = false;
             }
 
+            else if (is3D){
+                // TODO: send customizable dimensions, and formatting parameters from texture class
+                _gl.texSubImage3D(_gl.TEXTURE_3D, 0, 0, 0, 0, 256, 256, 180, _gl.RED, _gl.UNSIGNED_BYTE, texture.image);
+            }
+
             else
                 _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, glFormat, glType,
                         texture.image);
@@ -1640,7 +1703,10 @@ $3Dmol.Renderer = function(parameters) {
         } else {
 
             _gl.activeTexture(_gl.TEXTURE0 + slot);
-            _gl.bindTexture(_gl.TEXTURE_2D, texture.__webglTexture);
+            if (is3D)
+                _gl.bindTexture(_gl.TEXTURE_3D, texture.__webglTexture);
+            else
+                _gl.bindTexture(_gl.TEXTURE_2D, texture.__webglTexture);
 
         }
 
@@ -1714,14 +1780,14 @@ $3Dmol.Renderer = function(parameters) {
 
         try {
 
-            if (!(_gl = _canvas.getContext('experimental-webgl', {
+            if (!(_gl = _canvas.getContext('webgl2', {
                 alpha : _alpha,
                 premultipliedAlpha : _premultipliedAlpha,
                 antialias : _antialias,
                 stencil : _stencil,
                 preserveDrawingBuffer : _preserveDrawingBuffer
             }))) {
-                if (!(_gl = _canvas.getContext('webgl', {
+                if (!(_gl = _canvas.getContext('webgl2', {
                     alpha : _alpha,
                     premultipliedAlpha : _premultipliedAlpha,
                     antialias : _antialias,

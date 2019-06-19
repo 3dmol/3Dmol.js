@@ -2503,6 +2503,45 @@ $3Dmol.GLViewer = (function() {
             return s;
         };
         
+        /**
+         * Create volumetric renderer for volumetricData
+         * @function $3Dmol.GLViewer#addVolumetricRenderer
+         * @param {$3Dmol.VolumeData} data - volumetric data
+         * @param {IsoSurfaceSpec} spec - Shape style specification
+         * @return {$3Dmol.GLShape}
+         * 
+         @example 
+         $.get('../test_structs/benzene-homo.cube', function(data){
+                  var voldata = new $3Dmol.VolumeData(data, "cube");
+                  viewer.addVolumetricRenderer(voldata, {
+                        transferfn:{ 
+                            1:{Color: "red", pos: 0.0}, 
+                            2:{Color: "blue", pos: 1.0}
+                        },
+                        pos: {x:0,y:0,z:0}, 
+                        dimensions: {w: 1, h: 1, d: 1}
+                    });
+                  viewer.zoomTo();
+                  viewer.render();
+                });
+         */
+        this.addVolumetricRenderer = function(data,  spec,callback) {
+            spec = spec || {};
+            var s = new $3Dmol.GLShape(spec);
+            s.shapePosition = shapes.length;
+            s.transferfn = spec.transferfn; //TODO bassem: need to check for if it is undefined or not to add a default fn
+            s.addBox({corner: spec.pos, dimensions: spec.dimensions});
+            s.volumetricRenderer = true;
+            s.volumetricdata = data;
+
+            // TODO:
+            // - the texture/img data array for the transfer function should be created here and appended to the shape 
+            // to be used to create 2d texture as done with the 3d texture
+
+            shapes.push(s);
+            return s;
+        };
+        
         this.enableFog = function(fog){
             if(fog){
                 scene.fog=new $3Dmol.Fog(bgColor, 100, 200);

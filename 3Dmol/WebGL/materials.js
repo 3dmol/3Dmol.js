@@ -535,6 +535,48 @@ $3Dmol.InstancedMaterial.prototype.clone = function() {
 };
 
 
+//Volumetric material
+/** @constructor */
+$3Dmol.VolumetricMaterial = function(parameters) {
+    
+    $3Dmol.Material.call(this);
+    
+    this.opacity = 1;
+    this.transparent = true;
+
+    this.color = new $3Dmol.Color(0xffffff);
+    this.transferfn = null;
+    this.map = null;
+    this.volumetric = true;
+
+    // this.fog = true; // TODO: to integrate the new shader with the fog stuff
+    
+    this.shaderID = "volumetric";
+
+    this.setValues(parameters);
+    
+};
+
+$3Dmol.VolumetricMaterial.prototype = Object.create($3Dmol.Material.prototype);
+
+$3Dmol.VolumetricMaterial.prototype.clone = function() {
+
+    var material = new $3Dmol.VolumetricMaterial();
+
+    $3Dmol.Material.prototype.clone.call(this, material);
+
+    material.opacity = this.opacity;
+    material.transparent = this.transparent;
+    material.color = this.color;
+    material.transferfn = this.transferfn;
+    material.shaderID = this.shaderID;
+    material.volumetric = this.volumetric;
+    material.map = this.map;
+
+    return material;
+
+};
+
 //Sprite material
 /** @constructor */
 $3Dmol.SpriteMaterial = function(parameters) {
@@ -606,8 +648,9 @@ $3Dmol.SpriteAlignment.bottomRight = new $3Dmol.Vector2(-1, 1);
 
 //Texture
 //We really only create textures from 2d rendering contexts (to display text labels)
+//edit: we can now create 3dtextures using volumetric data
 /** @constructor */
-$3Dmol.Texture = function(image) {
+$3Dmol.Texture = function(image, is3D) {
 
     $3Dmol.EventDispatcher.call(this);
     
@@ -628,16 +671,28 @@ $3Dmol.Texture = function(image) {
     
     this.anisotropy = 1;
     
-    this.format = $3Dmol.RGBAFormat;
-    this.type = $3Dmol.UnsignedByteType;
-    
-    this.offset = new $3Dmol.Vector2(0, 0);
-    this.repeat = new $3Dmol.Vector2(1, 1);
-    
-    this.generateMipmaps = true;
-    this.premultiplyAlpha = false;
-    this.flipY = true;
-    this.unpackAlignment = 4;
+    // most of the above parameters are not needed in 3d textures
+    // but they are left to not break the code
+    if (is3D){
+        this.format = $3Dmol.RFormat;
+        this.type = $3Dmol.UnsignedByteType; // will it always be the same format as output form the volume class? - i mean the Float not unsigned byte type 
+        this.generateMipmaps = false;
+        this.premultiplyAlpha = false;
+        this.flipY = false;
+        this.unpackAlignment = 4;    
+    } else{
+        this.format = $3Dmol.RGBAFormat;
+        this.type = $3Dmol.UnsignedByteType;
+        
+        this.offset = new $3Dmol.Vector2(0, 0);
+        this.repeat = new $3Dmol.Vector2(1, 1);
+
+        this.generateMipmaps = true;
+        this.premultiplyAlpha = false;
+        this.flipY = true;
+        this.unpackAlignment = 4;    
+    }
+
     
     this.needsUpdate = false;
     this.onUpdate = null;
@@ -729,3 +784,4 @@ $3Dmol.UnsignedByteType = 1009;
 
 //Pixel formats
 $3Dmol.RGBAFormat = 1021;
+$3Dmol.RFormat = 1022; //TODO: this is still not used, need to fix the 3d texture formatting first to use it
