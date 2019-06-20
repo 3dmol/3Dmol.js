@@ -809,32 +809,32 @@ $3Dmol.Renderer = function(parameters) {
                 p_uniforms.modelMatrixInverse = _gl.getUniformLocation(program, "modelMatrixInverse");
                 _gl.uniformMatrix4fv(p_uniforms.modelMatrixInverse, false, object.matrix.getInverse(object.matrixWorld).elements);
 
-                /////////////////////////////////////////
-                // temp code for loading a model as Unsigned int 8 array
-                if (object.material.map.needsUpdate == true){
-                function stringToArrayBuffer(str) {
-                    var buf = new ArrayBuffer(str.length);
-                    var bufView = new Uint8Array(buf);
+                // /////////////////////////////////////////
+                // // temp code for loading a model as Unsigned int 8 array
+                // if (object.material.map.needsUpdate == true){
+                // function stringToArrayBuffer(str) {
+                //     var buf = new ArrayBuffer(str.length);
+                //     var bufView = new Uint8Array(buf);
                 
-                    for (var i=0, strLen=str.length; i<strLen; i++) {
-                        bufView[i] = str.charCodeAt(i);
-                    }
-                    return buf;
-                }
-                var url = "bonsai_256x256x256_uint8.raw";
-                var req = new XMLHttpRequest();
-                req.open("GET", url, false);
-                req.send(null);
-                var data;
-                if (req.status === 200) 
-                    data = stringToArrayBuffer(req.response);
-                else 
-                    alert('Something bad happen!\n(' + req.status + ') ' + req.statusText);
-                dataBuffer = new Uint8Array(data);
-                object.material.map.image = dataBuffer;
-                }
-                // end of temp code
-                //////////////////////////////////////////////
+                //     for (var i=0, strLen=str.length; i<strLen; i++) {
+                //         bufView[i] = str.charCodeAt(i);
+                //     }
+                //     return buf;
+                // }
+                // var url = "bonsai_256x256x256_uint8.raw";
+                // var req = new XMLHttpRequest();
+                // req.open("GET", url, false);
+                // req.send(null);
+                // var data;
+                // if (req.status === 200) 
+                //     data = stringToArrayBuffer(req.response);
+                // else 
+                //     alert('Something bad happen!\n(' + req.status + ') ' + req.statusText);
+                // dataBuffer = new Uint8Array(data);
+                // object.material.map.image = dataBuffer;
+                // }
+                // // end of temp code
+                // //////////////////////////////////////////////
                 renderer.setTexture(object.material.map, 3, true);
             }
 
@@ -1656,7 +1656,7 @@ $3Dmol.Renderer = function(parameters) {
             
             if (is3D){
                 // TODO: send customizable dimensions?
-                _gl.texStorage3D(_gl.TEXTURE_3D, 1, _gl.R8, 256, 256, 180); //_gl.R16F, width, height, depth
+                _gl.texStorage3D(_gl.TEXTURE_3D, 1, _gl.R8, texture.image.size.x, texture.image.size.y, texture.image.size.z); //_gl.R32F, width, height, depth
             } 
             else{ 
                 var image = texture.image, isImagePowerOfTwo = isPowerOfTwo(image.width)
@@ -1672,6 +1672,26 @@ $3Dmol.Renderer = function(parameters) {
             // set 0 level mipmap and then use GL to generate other mipmap
             // levels
 
+            // temp code to convert float data to unsigned bytes
+            // let max = -1000;
+            // let min = 1000;
+            // texture.image.data.forEach(function (element, index, array) {
+            //     if (element > max) max = element;
+            //     if (element < min) min = element;
+            // })
+            min = 0, max = 1; 
+            const scale = (num, in_min, in_max, out_min, out_max) => {
+                return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+            }              
+            console.log("max: ", max, "min: ", min);
+            var arrr = []
+            texture.image.data.forEach(function (element, index, array) {
+                arrr.push(Math.floor(scale (element, min, max, 0, 255)))
+            })
+            var data = new Uint8Array(arrr);
+            // data = data.slice(0, texture.image.size.x* texture.image.size.y* texture.image.size.z)
+            /////
+            
             if (mipmaps.length > 0 && isImagePowerOfTwo) {
 
                 for (var i = 0, il = mipmaps.length; i < il; i++) {
@@ -1685,7 +1705,7 @@ $3Dmol.Renderer = function(parameters) {
 
             else if (is3D){
                 // TODO: send customizable dimensions, and formatting parameters from texture class
-                _gl.texSubImage3D(_gl.TEXTURE_3D, 0, 0, 0, 0, 256, 256, 180, _gl.RED, _gl.UNSIGNED_BYTE, texture.image);
+                _gl.texSubImage3D(_gl.TEXTURE_3D, 0, 0, 0, 0, texture.image.size.x, texture.image.size.y, texture.image.size.z, _gl.RED, _gl.UNSIGNED_BYTE, data); // _gl.RED, _gl.FLOAT, data
             }
 
             else
