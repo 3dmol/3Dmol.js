@@ -1553,6 +1553,7 @@ $3Dmol.GLModel = (function() {
          * @function $3Dmol.GLModel#vibrate
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
+         * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
          * 
          *@example
 
@@ -1565,19 +1566,32 @@ $3Dmol.GLModel = (function() {
                   viewer.render();
               });            
          */
-        this.vibrate = function(numFrames, amplitude) {
+        this.vibrate = function(numFrames, amplitude, bothWays) {
             var amplitude = amplitude || 1;
             var numFrames = numFrames || 10; 
-            numFrames--;
-            for (var i = 1; i <= numFrames; i++) {
+            var start = 0;
+            var end = numFrames;
+            if(bothWays) {
+              start = -numFrames;
+              end = numFrames;
+            }
+            
+            if(start < end) frames = []; //clear
+
+            for (var i = start; i < end; i++) {
                 var newAtoms = [];
+                if(i == 0) {
+                  frames.push(atoms);
+                  continue;
+                }
                 for (var j = 0; j < atoms.length; j++) {
                     var newVector = new $3Dmol.Vector3(
                                             $3Dmol.getAtomProperty(atoms[j],'dx'), 
                                             $3Dmol.getAtomProperty(atoms[j],'dy'), 
                                             $3Dmol.getAtomProperty(atoms[j],'dz'));
                     var starting = new $3Dmol.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
-                    newVector.multiplyScalar((i*amplitude)/numFrames);
+                    var mult = (i*amplitude)/numFrames;
+                    newVector.multiplyScalar(mult);
                     starting.add(newVector);
                     var newAtom = {};
                     for (var k in atoms[j]) {
@@ -1590,7 +1604,6 @@ $3Dmol.GLModel = (function() {
                 }
                 frames.push(newAtoms);
             }
-            frames.unshift(atoms); //add 1st frame
         };
         
         // set default style and colors for atoms
