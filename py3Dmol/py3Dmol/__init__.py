@@ -12,12 +12,12 @@ class view(object):
        The results are completely static which means there is no need for there
        to be an active kernel but also that there is no communication between
        the javascript viewer and ipython.
-       
+
        Optionally, a viewergrid tuple (rows,columns) can be passed to create
        a grid of viewers in a single canvas object.  Successive commands than need to
        specify which viewer they apply to (with viewer=(r,c)) or will apply to all
        viewers in the grid.
-       
+
        The API for the created object is exactly that for $3Dmol.GLViewer, with
        the exception that the functions all return None.
        http://3dmol.csb.pitt.edu/doc/$3Dmol.GLViewer.html
@@ -30,7 +30,7 @@ class view(object):
             options -- optional options to provide to $3Dmol.download
             js -- url for 3Dmol.js'''
         divid = "3dmolviewer_UNIQUEID"
-        warnid = "3dmolwarning_UNIQUEID" 
+        warnid = "3dmolwarning_UNIQUEID"
         self.uniqueid = None
         self.startjs = '''<div id="%s"  style="position: relative; width: %dpx; height: %dpx">
         <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab (or JavaScript failed to load for some other reason).  You need to install the 3dmol extension: <br>
@@ -38,7 +38,7 @@ class view(object):
         </div>\n''' % (divid,width,height,warnid)
         self.startjs += '<script>\n'
         self.endjs = '</script>'
-        
+
         self.updatejs = '' # code added since last show
         #load 3dmol, but only once, can't use jquery :-(
         #https://medium.com/@vschroeder/javascript-how-to-execute-code-from-an-asynchronously-loaded-script-although-when-it-is-not-bebcbd6da5ea
@@ -71,13 +71,13 @@ if(warn) {
         self.startjs += "$3Dmolpromise.then(function() {\n";
         self.endjs = "});\n" + self.endjs
         self.viewergrid = None
-        
+
         if viewergrid: #create split view
             if len(viewergrid) != 2:
                 raise ValueError("Incorrectly formated viewergrid arguments.  Must specify rows x columns",viewergrid)
             self.startjs += "var viewergrid_UNIQUEID = null;\n";
             self.startjs += 'viewergrid_UNIQUEID = $3Dmol.createViewerGrid($("#%s"),{rows: %d, cols: %d, control_all: %s},{backgroundColor:"white"});\n' % (divid, viewergrid[0],viewergrid[1],'true' if linked else 'false')
-            self.startjs += "viewer_UNIQUEID = viewergrid_UNIQUEID[0][0];\n" 
+            self.startjs += "viewer_UNIQUEID = viewergrid_UNIQUEID[0][0];\n"
             self.viewergrid = viewergrid
         else:
             self.startjs += 'viewer_UNIQUEID = $3Dmol.createViewer($("#%s"),{backgroundColor:"white"});\n' % divid
@@ -89,8 +89,8 @@ if(warn) {
                         self.endjs = "})\n" + self.endjs
             else:
                 self.startjs += '$3Dmol.download("%s", viewer_UNIQUEID, %s, function() {\n' % (query,json.dumps(options))
-                self.endjs = "})\n" + self.endjs        
-        
+                self.endjs = "})\n" + self.endjs
+
         if viewergrid:
             for r in range(viewergrid[0]):
                 for c in range(viewergrid[1]):
@@ -103,31 +103,31 @@ if(warn) {
         self.updatejs = ''
         html = self._make_html()
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
-        
+
     def insert(self, containerid):
         '''Instead of inserting into notebook here, insert html
         into existing container'''
         html = self._make_html()
         html += '''<script>$("#%s").append($("#3dmolviewer_%s")); </script>'''%(containerid,self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
-        
+
     def _make_html(self):
         self.uniqueid = str(time.time()).replace('.','')
         self.updatejs = ''
         html = (self.startjs+self.endjs).replace('UNIQUEID',self.uniqueid)
-        return html    
+        return html
 
     def _repr_html_(self):
         html = self._make_html()
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
-        
+
     def update(self):
         '''Apply commands to existing viewer (will auto-instantiate if necessary).'''
         script = ''
         if self.uniqueid == None:
             script = self._make_html()
         script += '''<script>
-            $3Dmolpromise.done(function() { //wrap in promise for non-interactive functionality
+            $3Dmolpromise.then(function() { //wrap in promise for non-interactive functionality
                 %s
                 viewer_%s.render();
             });
@@ -145,19 +145,19 @@ if(warn) {
             $('#img_{0}').attr('src', png)
             </script>'''.format(self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
-            
-    
+
+
     class model(object):
       '''Wrapper for referencing a model within a viewer'''
       def __init__(self, viewer, accesscmd):
         self.accesscmd = accesscmd
         self.viewer = viewer
-        
+
       def __getattr__(self,name):
         '''auto-instantiate javascript calls through model'''
         if name.startswith('_'): #object to ipython canary functions
             raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
-               
+
         def makejs(*args,**kwargs):
           cmd = '\t%s.%s(' % (self.accesscmd,name);
           for arg in args:
@@ -169,7 +169,7 @@ if(warn) {
           self.viewer.updatejs += cmd
           return self.viewer
         return makejs #return from getattr
-        
+
     def getModel(self,*args,**kwargs):
       if self.viewergrid:
         if kwargs and 'viewer' in kwargs:
@@ -180,7 +180,7 @@ if(warn) {
           for arg in args:
               cmd += '%s,' % json.dumps(arg)
           cmd = cmd.rstrip(',')
-          cmd += ')';   
+          cmd += ')';
         else:
           raise ValueError('Must specify specific viewer with getModel and viewergrid enabled')
       else:
@@ -190,13 +190,13 @@ if(warn) {
         cmd = cmd.rstrip(',')
         cmd += ')';
       return self.model(self,cmd)
-      
+
     def __getattr__(self,name):
         '''auto-instantiate javascript calls based on whatever the user provided'''
         if name.startswith('_'): #object to ipython canary functions
             raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
-                                                  
-        def makejs(*args,**kwargs):            
+
+        def makejs(*args,**kwargs):
             if self.viewergrid:
                 if kwargs and 'viewer' in kwargs:
                     coords = kwargs['viewer']
@@ -226,5 +226,5 @@ if(warn) {
             self.startjs += cmd
             self.updatejs += cmd
             return self
-            
+
         return makejs
