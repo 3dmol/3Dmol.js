@@ -9,8 +9,9 @@ $(document).ready(function() {
 	var socket = io.connect('http://localhost:5000');
 	socket.on('connect', function() {
 		socket.send('User has connected!');
+		if(checkCookie)
 	});
-	
+
 	function setCookie(exdays){
 		var d = new Date();
 		d.setTime(d.getTime() + (exdays*24*60*60*1000)) //Cookie stored for exDays
@@ -46,6 +47,7 @@ $(document).ready(function() {
 			$('#session_password1').val(cookie_session_password);
 			console.log("Cookie Session Password:" + cookie_session_password);
 		}
+		return true;
 	} 
 
 	$('input#session_name1').on('input', function(){
@@ -165,16 +167,24 @@ $(document).ready(function() {
 		// glviewer.translate(width/2,0,0,false);		
 		}
 	});
-	window.setInterval(function(){
+	// window.setInterval(function(){
+	// 	if(initiator == true){
+	// 		var new_view = glviewer.getView();
+	// 			socket.emit('viewer state change event', {
+	// 				name : $( 'input#session_name1' ).val(),
+	// 				viewer : new_view
+	// 			});			
+	// }
+	// }, 1000/fps);
+	setViewUpdateCallback = function(new_view){
 		if(initiator == true){
-			var new_view = glviewer.getView();
+				console.log("ok")
 				socket.emit('viewer state change event', {
 					name : $( 'input#session_name1' ).val(),
 					viewer : new_view
 				});			
 	}
-	}, 1000/fps);
-
+	}
 	socket.on('viewer state change response', function(new_view){
 		if(initiator == false){
 			glviewer.setView(new_view);
@@ -183,4 +193,7 @@ $(document).ready(function() {
 			// glviewer.translate(0,0,0,false);
 		}
 	})
+	socket.on('disconnect', function(){
+		
+	});
 });

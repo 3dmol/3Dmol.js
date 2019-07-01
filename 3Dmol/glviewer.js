@@ -519,6 +519,7 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
+           
         };
         
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
@@ -549,6 +550,8 @@ $3Dmol.GLViewer = (function() {
             }
             rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);            
             show();
+            if(typeof(setViewUpdateCallback)==='function')
+            setViewUpdateCallback(_viewer.getView())
         };        
         /**
          * Return image URI of viewer contents (base64 encoded).
@@ -668,6 +671,8 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.quaternion.multiply(cq);
             }
             show();
+            if(typeof(setViewUpdateCallback) === 'function')
+            setViewUpdateCallback(_viewer.getView())
         };
         
         var initContainer = function(element) {
@@ -997,8 +1002,10 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.x = arg[8];
                 rotationGroup.position.y = arg[9];
             }
+
             show(nolink);
             return this;
+
         };
 
         // apply styles, models, etc in viewer

@@ -2071,7 +2071,7 @@ $3Dmol.GLModel = (function() {
                   viewer.render();
               });
          */
-        this.setStyle = function(sel, style, add) {
+        this.setStyle = function(sel, style, add ) {
             
             if(typeof(style) === 'undefined' && typeof(add) == 'undefined') {
                 //if a single argument is provided, assume it is a style and select all
@@ -2130,7 +2130,10 @@ $3Dmol.GLModel = (function() {
             
             if (changedAtoms)
                 molObj = null; //force rebuild
-            
+
+            // if(server_callback)
+            //     server_callback(sel, style, add);
+
         };
 
         /** Set clickable and callback of selected atoms
