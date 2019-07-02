@@ -18,34 +18,59 @@
         
         var viewer = $3Dmol.createViewer("viewer");
         
-        //benzene-homo.cube
-        //o2h2_1_04.cube
-        //o2h2_1_08.cube
-        //ch3cl-esp.cube
-        $.get('../tests/test_structs/o2h2_1_04.cube', function(data){
-            var voldata = new $3Dmol.VolumeData(data, "cube");
-            viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 1.0, smoothness: 1}); 
+        // TODO
+        // scale / dimensions (scale related to other stuff) (dimensions as in non uniform cubes)
+        // seldist, coords, and the way to select part of the volume as the isosurface
+        // transfer function / opacity
+        // having multiple volumetric renderers in this file (even on the same volumedata)
+        // integrate shader with fog stuff
+
+        // var url = "lobster_301x324x56_uint8.raw"; 
+        // var req = new XMLHttpRequest();
+        // req.open("GET", url, true);
+        // req.responseType = "arraybuffer";    
+        // req.onload = function(evt) {
+        //     var dataBuffer = req.response;
+        //     dataBuffer = new Uint8Array(dataBuffer);
+        
+        // $.get('../tests/test_structs/benzene-homo.cube', function(data){
+        // $.get('../tests/auto/data/bohr.cube', function(data){
+        $3Dmol.getbin('../tests/auto/data/1lo6_2FOFC.ccp4', function(data) {
+            var voldata = new $3Dmol.VolumeData(data, "ccp4");
+            // viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 1.0, smoothness: 1}); 
             viewer.addVolumetricRenderer(voldata, {
                 color: "red", 
                 transferfn:{ 
                     1:{Color: "red", pos: 0.0}, 
                     2:{Color: "blue", pos: 1.0}
                 },
-                pos: {x:1,y:1,z:1}, 
-                dimensions: {w: 1, h: 1, d: 1}
+                pos: {x:3,y:1.2,z:2}, 
+                dimensions: {w: 1, h: 1, d: 1} // TODO: it should not be dimensions vector but a float value 'scale' to control the volume uniform scale/size
+                // as the dimensions are assigned by the dimensions of the volumeData itself
+                //- sol: this should be auto generated not user controlled, the user can only control their scale related to other objects  
             });
 
+            var voldata = new $3Dmol.VolumeData(data, 'ccp4');
+            
+            // viewer.addIsosurface(voldata, {isoval: 0.1,
+            //                            color: "green",
+            //                            opacity: .5,
+            //                            coords: [{x: 40.948, y: 78.96, z: 83.987}], // the coords of the center point that we need to select
+            //                            seldist: 3.0   // the selection distance around the center
+            //                         });
+                                    
             var rec1 = viewer.addModel($('#1udt').val(), "pdb");
             rec1.setStyle({resn:'VIA'},{stick:{color:'red', opacity:'1.0'}});
                
-            // viewer.addLabel("Aromatic", {position: {x:2.6, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+            viewer.addLabel("Aromatic", {position: {x:2.6, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
 
             var shape = viewer.addShape({color: 'red'});
-            shape.addBox({corner: {x:3,y:3,z:0}, dimensions: {w: 1, h: 1, d: 1}});
+            shape.addBox({corner: {x:3,y:3,z:0}, dimensions: {w: 1, h: 3, d: 3}});
 
             viewer.zoomTo();
             viewer.render();
         });
+        // req.send();
     });
     </script>
     </head>

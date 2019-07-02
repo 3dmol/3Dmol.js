@@ -939,7 +939,7 @@ $3Dmol.ShaderLib = {
             "        discard;",
             "    }",
             "    t_hit.x = max(t_hit.x, 0.0);",
-            "    vec3 dt_vec = 1.0 / (vec3(76, 64, 61) * abs(ray_dir));",  // todo. this was volume_dims, shouldn't be hard coded but how will i get to know it? volume class? 
+            "    vec3 dt_vec = 1.0 / (vec3(76, 64, 61) * 0.5 * abs(ray_dir));",  // todo. this was volume_dims, shouldn't be hard coded but how will i get to know it? volume class? 
             "    float dt = dt_scale * min(dt_vec.x, min(dt_vec.y, dt_vec.z));",
             "    float offset = wang_hash(int(gl_FragCoord.x + 640.0 * gl_FragCoord.y));",
             "    vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;",

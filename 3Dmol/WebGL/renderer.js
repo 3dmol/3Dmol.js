@@ -808,33 +808,6 @@ $3Dmol.Renderer = function(parameters) {
                 // inverse model matrix
                 p_uniforms.modelMatrixInverse = _gl.getUniformLocation(program, "modelMatrixInverse");
                 _gl.uniformMatrix4fv(p_uniforms.modelMatrixInverse, false, object.matrix.getInverse(object.matrixWorld).elements);
-
-                // /////////////////////////////////////////
-                // // temp code for loading a model as Unsigned int 8 array
-                // if (object.material.map.needsUpdate == true){
-                // function stringToArrayBuffer(str) {
-                //     var buf = new ArrayBuffer(str.length);
-                //     var bufView = new Uint8Array(buf);
-                
-                //     for (var i=0, strLen=str.length; i<strLen; i++) {
-                //         bufView[i] = str.charCodeAt(i);
-                //     }
-                //     return buf;
-                // }
-                // var url = "bonsai_256x256x256_uint8.raw";
-                // var req = new XMLHttpRequest();
-                // req.open("GET", url, false);
-                // req.send(null);
-                // var data;
-                // if (req.status === 200) 
-                //     data = stringToArrayBuffer(req.response);
-                // else 
-                //     alert('Something bad happen!\n(' + req.status + ') ' + req.statusText);
-                // dataBuffer = new Uint8Array(data);
-                // object.material.map.image = dataBuffer;
-                // }
-                // // end of temp code
-                // //////////////////////////////////////////////
                 renderer.setTexture(object.material.map, 3, true);
             }
 
@@ -1583,30 +1556,42 @@ $3Dmol.Renderer = function(parameters) {
 
     function setTextureParameters(textureType, texture, isImagePowerOfTwo) {
 
-        if (isImagePowerOfTwo) {
+        if (textureType == _gl.TEXTURE_2D){
+            if (isImagePowerOfTwo) {
 
+                _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
+                        paramToGL(texture.wrapS));
+                _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T,
+                        paramToGL(texture.wrapT));
+
+                _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,
+                        paramToGL(texture.magFilter));
+                _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
+                        paramToGL(texture.minFilter));
+
+            } else {
+
+                _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
+                        _gl.CLAMP_TO_EDGE);
+                _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T,
+                        _gl.CLAMP_TO_EDGE);
+                _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,
+                        filterFallback(texture.magFilter));
+                _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
+                        filterFallback(texture.minFilter));
+
+            }
+        } else { // 3Dtexture
             _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
-                    paramToGL(texture.wrapS));
+                _gl.CLAMP_TO_EDGE);
             _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T,
-                    paramToGL(texture.wrapT));
-
+                _gl.CLAMP_TO_EDGE);
+            _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_R,
+                _gl.CLAMP_TO_EDGE);
             _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,
-                    paramToGL(texture.magFilter));
+                paramToGL(texture.magFilter));
             _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
-                    paramToGL(texture.minFilter));
-
-        } else {
-
-            _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
-                    _gl.CLAMP_TO_EDGE);
-            _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T,
-                    _gl.CLAMP_TO_EDGE);
-
-            _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,
-                    filterFallback(texture.magFilter));
-            _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
-                    filterFallback(texture.minFilter));
-
+                paramToGL(texture.minFilter));
         }
 
     }
@@ -1647,22 +1632,42 @@ $3Dmol.Renderer = function(parameters) {
 
             }
 
+            // temp code
+            if (is3D){
+            let max = -1000;
+            let min = 1000;
+            texture.image.data.forEach(function (element, index, array) {
+                if (element > max) max = element;
+                if (element < min) min = element;
+            })
+            const scale = (num, in_min, in_max, out_min, out_max) => {
+                return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+            }              
+            console.log("max: ", max, "min: ", min);
+            texture.image.data.forEach(function (element, index, array) {
+                array[index] = scale(element, min, max, min/1000, max/1000)
+                // array[index] = element + 0.01;
+            })
+            }
+            ///// end of temp code
+
             _gl.activeTexture(_gl.TEXTURE0 + slot);
             var gltextureType = is3D ? _gl.TEXTURE_3D : _gl.TEXTURE_2D;
             _gl.bindTexture(gltextureType, texture.__webglTexture);
             _gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
             _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
             _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
-            
-            if (is3D){
-                // TODO: send customizable dimensions?
-                _gl.texStorage3D(_gl.TEXTURE_3D, 1, _gl.R8, texture.image.size.x, texture.image.size.y, texture.image.size.z); //_gl.R32F, width, height, depth
-            } 
-            else{ 
-                var image = texture.image, isImagePowerOfTwo = isPowerOfTwo(image.width)
-                        && isPowerOfTwo(image.height), glFormat = paramToGL(texture.format), glType = paramToGL(texture.type);
+            _gl.pixelStorei(_gl.PACK_ALIGNMENT, texture.unpackAlignment);  
 
+            var image = texture.image, isImagePowerOfTwo = isPowerOfTwo(image.width)
+                    && isPowerOfTwo(image.height), glFormat = paramToGL(texture.format), glType = paramToGL(texture.type);
+                    
+            if (!is3D) { 
                 setTextureParameters(_gl.TEXTURE_2D, texture, isImagePowerOfTwo);
+            } else {
+                setTextureParameters(_gl.TEXTURE_3D, texture, isImagePowerOfTwo && false);
+                // NOTE: the .cube and .dx (nearly all the text volume files) are saved into the file with the z as the major dimension (width), arranged z y x
+                _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.z, texture.image.size.y, texture.image.size.x, 0, _gl.RED, _gl.FLOAT, texture.image.data);
             }
             var mipmap, mipmaps = texture.mipmaps;
             // regular Texture (image, video, canvas)
@@ -1672,26 +1677,6 @@ $3Dmol.Renderer = function(parameters) {
             // set 0 level mipmap and then use GL to generate other mipmap
             // levels
 
-            // temp code to convert float data to unsigned bytes
-            // let max = -1000;
-            // let min = 1000;
-            // texture.image.data.forEach(function (element, index, array) {
-            //     if (element > max) max = element;
-            //     if (element < min) min = element;
-            // })
-            min = 0, max = 1; 
-            const scale = (num, in_min, in_max, out_min, out_max) => {
-                return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-            }              
-            console.log("max: ", max, "min: ", min);
-            var arrr = []
-            texture.image.data.forEach(function (element, index, array) {
-                arrr.push(Math.floor(scale (element, min, max, 0, 255)))
-            })
-            var data = new Uint8Array(arrr);
-            // data = data.slice(0, texture.image.size.x* texture.image.size.y* texture.image.size.z)
-            /////
-            
             if (mipmaps.length > 0 && isImagePowerOfTwo) {
 
                 for (var i = 0, il = mipmaps.length; i < il; i++) {
@@ -1702,13 +1687,7 @@ $3Dmol.Renderer = function(parameters) {
 
                 texture.generateMipmaps = false;
             }
-
-            else if (is3D){
-                // TODO: send customizable dimensions, and formatting parameters from texture class
-                _gl.texSubImage3D(_gl.TEXTURE_3D, 0, 0, 0, 0, texture.image.size.x, texture.image.size.y, texture.image.size.z, _gl.RED, _gl.UNSIGNED_BYTE, data); // _gl.RED, _gl.FLOAT, data
-            }
-
-            else
+            else if (!is3D)
                 _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, glFormat, glType,
                         texture.image);
 
@@ -1740,6 +1719,8 @@ $3Dmol.Renderer = function(parameters) {
             return _gl.UNSIGNED_BYTE;
         if (p === $3Dmol.RGBAFormat)
             return _gl.RGBA;
+        if (p === $3Dmol.NearestFilter)
+            return _gl.NEAREST;
 
         return 0;
 

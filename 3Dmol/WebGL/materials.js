@@ -665,22 +665,22 @@ $3Dmol.Texture = function(image, is3D) {
     
     this.wrapS = $3Dmol.ClampToEdgeWrapping;
     this.wrapT = $3Dmol.ClampToEdgeWrapping;
-    
-    this.magFilter = $3Dmol.LinearFilter;
-    this.minFilter = $3Dmol.LinearMipMapLinearFilter;
-    
+        
     this.anisotropy = 1;
     
-    // most of the above parameters are not needed in 3d textures
-    // but they are left to not break the code
     if (is3D){
         this.format = $3Dmol.RFormat;
-        this.type = $3Dmol.UnsignedByteType; // will it always be the same format as output form the volume class? - i mean the Float not unsigned byte type 
+        this.type = $3Dmol.FloatType;
+
         this.generateMipmaps = false;
         this.premultiplyAlpha = false;
         this.flipY = false;
-        this.unpackAlignment = 4;    
-    } else{
+        
+        this.unpackAlignment = 1;    
+        
+        this.magFilter = $3Dmol.NearestFilter;
+        this.minFilter = $3Dmol.NearestFilter;
+    } else {
         this.format = $3Dmol.RGBAFormat;
         this.type = $3Dmol.UnsignedByteType;
         
@@ -691,6 +691,9 @@ $3Dmol.Texture = function(image, is3D) {
         this.premultiplyAlpha = false;
         this.flipY = true;
         this.unpackAlignment = 4;    
+
+        this.magFilter = $3Dmol.LinearFilter;
+        this.minFilter = $3Dmol.LinearMipMapLinearFilter;    
     }
 
     
@@ -777,11 +780,14 @@ $3Dmol.ClampToEdgeWrapping = 1001;
 
 //Filters
 $3Dmol.LinearFilter = 1006;
+$3Dmol.NearestFilter = 1007;
 $3Dmol.LinearMipMapLinearFilter = 1008;
 
 //Data types
 $3Dmol.UnsignedByteType = 1009;
+$3Dmol.FloatType = 1010;
 
 //Pixel formats
 $3Dmol.RGBAFormat = 1021;
-$3Dmol.RFormat = 1022; //TODO: this is still not used, need to fix the 3d texture formatting first to use it
+$3Dmol.RFormat = 1022; 
+$3Dmol.R32Format = 1023;
