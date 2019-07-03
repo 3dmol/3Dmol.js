@@ -1554,7 +1554,8 @@ $3Dmol.GLModel = (function() {
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
          * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
-         * 
+         * @param {GLViewer} viewer - required if arrowSpec is provided
+         * @param {ArrowSpec} arrowSpec - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
          *@example
 
           $3Dmol.download("pdb:4UAA",viewer,{},function(){  
@@ -1566,7 +1567,7 @@ $3Dmol.GLModel = (function() {
                   viewer.render();
               });            
          */
-        this.vibrate = function(numFrames, amplitude, bothWays) {
+        this.vibrate = function(numFrames, amplitude, bothWays, viewer, arrowSpec) {
             var amplitude = amplitude || 1;
             var numFrames = numFrames || 10; 
             var start = 0;
@@ -1580,15 +1581,16 @@ $3Dmol.GLModel = (function() {
 
             for (var i = start; i < end; i++) {
                 var newAtoms = [];
-                if(i == 0) {
+                var currframe = frames.length;
+                if(i == 0 && !arrowSpec) { //still need to calculate if drawing arrows
                   frames.push(atoms);
                   continue;
                 }
                 for (var j = 0; j < atoms.length; j++) {
-                    var newVector = new $3Dmol.Vector3(
-                                            $3Dmol.getAtomProperty(atoms[j],'dx'), 
-                                            $3Dmol.getAtomProperty(atoms[j],'dy'), 
-                                            $3Dmol.getAtomProperty(atoms[j],'dz'));
+                    var dx = $3Dmol.getAtomProperty(atoms[j],'dx');
+                    var dy = $3Dmol.getAtomProperty(atoms[j],'dy');
+                    var dz = $3Dmol.getAtomProperty(atoms[j],'dz');
+                    var newVector = new $3Dmol.Vector3(dx,dy,dz);
                     var starting = new $3Dmol.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
                     var mult = (i*amplitude)/numFrames;
                     newVector.multiplyScalar(mult);
@@ -1601,6 +1603,23 @@ $3Dmol.GLModel = (function() {
                     newAtom.y = starting.y;
                     newAtom.z = starting.z;
                     newAtoms.push(newAtom);
+                    if(viewer && arrowSpec) {
+                       var spec = $.extend({},arrowSpec);
+                       var arrowend = new $3Dmol.Vector3(dx,dy,dz);
+                       arrowend.multiplyScalar(amplitude);
+                       arrowend.add(starting);
+                       
+                       spec.start = starting;
+                       spec.end = arrowend;
+                       spec.frame = currframe;
+                       if(!spec.color) {
+                           var s = newAtom.style.sphere;
+                           if(!s) s = newAtom.style.stick;
+                           if(!s) s = newAtom.style.line;
+                           spec.color = $3Dmol.getColorFromStyle(newAtom, s);
+                       }
+                       viewer.addArrow(spec);
+                    }
                 }
                 frames.push(newAtoms);
             }
@@ -2495,43 +2514,63 @@ $3Dmol.GLModel = (function() {
          * @param {AtomSelectionSpec} sel
          * @param {$3Dmol.GLViewer} viewer
          * @param {LabelSpec} options
+         * @param {boolean} byframe - if true, create labels for every individual frame, not just current; frames must be loaded already
          */
-        this.addResLabels = function(sel, viewer, style) {
-            var atoms = this.selectedAtoms(sel, atoms);
-            var bylabel = {}
-            //collect by chain:resn:resi
-            for(var i = 0; i < atoms.length; i++) {
-                var a = atoms[i];
-                var c = a.chain;
-                var resn = a.resn;
-                var resi = a.resi;
-                var label =  resn + '' + resi;
-                if(!bylabel[c]) bylabel[c] = {};
-                if(!bylabel[c][label]) bylabel[c][label] = []
-                bylabel[c][label].push(a);
-            }
+        this.addResLabels = function(sel, viewer, style, byframe) {
             
-            var mystyle = $.extend(true, {}, style);
-            //now compute centers of mass
-            for(var c in bylabel) {
-                if(bylabel.hasOwnProperty(c)) {
-                    var labels = bylabel[c];
-                    for(var label in labels) {
-                        if(labels.hasOwnProperty(label)) {
-                            var atoms = labels[label];
-                            var sum = new $3Dmol.Vector3(0,0,0);
-                            for(var i = 0; i < atoms.length; i++) {
-                                var a = atoms[i];
-                                sum.x += a.x;
-                                sum.y += a.y;
-                                sum.z += a.z;
-                            }
-                            sum.divideScalar(atoms.length);
-                            mystyle.position = sum;
-                            viewer.addLabel(label, mystyle);
-                        }                        
+            var helper = function(model, framenum) {
+                var atoms = model.selectedAtoms(sel, atoms);
+                var bylabel = {}
+                //collect by chain:resn:resi
+                for(var i = 0; i < atoms.length; i++) {
+                    var a = atoms[i];
+                    var c = a.chain;
+                    var resn = a.resn;
+                    var resi = a.resi;
+                    var label =  resn + '' + resi;
+                    if(!bylabel[c]) bylabel[c] = {};
+                    if(!bylabel[c][label]) bylabel[c][label] = []
+                    bylabel[c][label].push(a);
+                }
+                
+                var mystyle = $.extend(true, {}, style);
+                //now compute centers of mass
+                for(var c in bylabel) {
+                    if(bylabel.hasOwnProperty(c)) {
+                        var labels = bylabel[c];
+                        for(var label in labels) {
+                            if(labels.hasOwnProperty(label)) {
+                                var atoms = labels[label];
+                                var sum = new $3Dmol.Vector3(0,0,0);
+                                for(var i = 0; i < atoms.length; i++) {
+                                    var a = atoms[i];
+                                    sum.x += a.x;
+                                    sum.y += a.y;
+                                    sum.z += a.z;
+                                }
+                                sum.divideScalar(atoms.length);
+                                mystyle.position = sum;
+                                mystyle.frame = framenum;
+                                viewer.addLabel(label, mystyle, undefined, true);
+                            }                        
+                        }
                     }
                 }
+            }
+            
+            if(byframe) {
+                var n = this.getNumFrames();
+                var model = this;
+                let savedatoms = atoms;
+                for(let i = 0; i < n; i++) {
+                    if(frames[i]) {
+                        atoms = frames[i];
+                        helper(this,i);
+                    }
+                }
+                atoms = savedatoms;
+            } else {
+                helper(this);
             }
         }
 

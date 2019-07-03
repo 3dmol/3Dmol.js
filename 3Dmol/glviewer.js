@@ -66,6 +66,7 @@ $3Dmol.GLViewer = (function() {
         var popups = [];
         var current_hover = null;
         var hoverDuration = 500;
+        var viewer_frame = 0;
         if(typeof(config.hoverDuration) != undefined) {
             hoverDuration = config.hoverDuration;
         }
@@ -1023,10 +1024,24 @@ $3Dmol.GLViewer = (function() {
             }
 
             for (i = 0; i < shapes.length; i++) {
-                if (shapes[i]) {
-                    shapes[i].globj(modelGroup, exts);
+                if (shapes[i]) { //exists
+                    if ((typeof(shapes[i].frame) === 'undefined' || viewer_frame < 0 ||
+                                    shapes[i].frame < 0 || shapes[i].frame == viewer_frame)) {
+                        shapes[i].globj(modelGroup, exts);
+                    } else { //should not be displayed in current frame
+                        shapes[i].removegl(modelGroup);
+                    }
                 }
             }
+            
+            for (i = 0; i < labels.length; i++) {
+                if (labels[i] && typeof(labels[i].frame) != 'undefined' && labels[i].frame >= 0) { //exists and has frame specifier
+                    modelGroup.remove(labels[i].sprite);
+                    if (viewer_frame < 0 || labels[i].frame == viewer_frame) {
+                        modelGroup.add(labels[i].sprite);
+                    }
+                }
+            }            
             
             for (i in surfaces) { // this is an object with possible holes
                 if(!surfaces.hasOwnProperty(i)) continue;
@@ -1801,6 +1816,7 @@ $3Dmol.GLViewer = (function() {
          *            options - Label style specification
           @param {AtomSelection}
          *            sel - Set position of label to center of this selection
+         * @param {boolean} noshow - if true, do not immediately display label - when adding multiple labels this is more efficient
          * @return {$3Dmol.Label}
          * 
          * @example
@@ -1829,7 +1845,7 @@ $3Dmol.GLViewer = (function() {
                 });
             
          */
-        this.addLabel = function(text, options, sel) {
+        this.addLabel = function(text, options, sel, noshow) {
             options = options || {};
             if(sel) {
                 var extent = $3Dmol.getExtent(getAtomsFromSel(sel));
@@ -1841,7 +1857,8 @@ $3Dmol.GLViewer = (function() {
             if(options.fixed)
                 fixed_labels.push(labels.length);
             labels.push(label);
-            show();
+
+            if(!noshow) show();
             return label;
         };
         
@@ -1855,6 +1872,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addResLabels
          * @param {Object} sel
          * @param {Object} style
+         * @param {boolean} byframe - if true, create labels for every individual frame, not just current
          * 
          * * @example  
              $3Dmol.download("mmtf:2ll5",viewer,{},function(){
@@ -1864,8 +1882,8 @@ $3Dmol.GLViewer = (function() {
                   viewer.render();                  
                 });
          */
-        this.addResLabels = function(sel, style) {
-            applyToModels("addResLabels", sel, this, style);
+        this.addResLabels = function(sel, style, byframe) {
+            applyToModels("addResLabels", sel, this, style, byframe);
             show();
             return this;
         }
@@ -2514,7 +2532,8 @@ $3Dmol.GLViewer = (function() {
         }
 
         /**
-         * Sets the atomlists of all models in the viewer to specified frame
+         * Sets the atomlists of all models in the viewer to specified frame.
+         * Shapes and labels can also be displayed by frame.
          * Sets to last frame if framenum out of range
          * 
          * @function $3Dmol.GLViewer#setFrame
@@ -2522,6 +2541,7 @@ $3Dmol.GLViewer = (function() {
          * @return {Promise}
          */
         this.setFrame = function (framenum) {
+            viewer_frame = framenum;
             return new Promise(function (resolve, reject) {
                 var modelMap = models.map(function (model) {
                     return model.setFrame(framenum);
@@ -2532,6 +2552,15 @@ $3Dmol.GLViewer = (function() {
         }
         
         /**
+         * Gets the current viewer frame.
+         * 
+         * @function $3Dmol.GLViewer#getFrame
+         */
+        this.getFrame = function () {
+            return viewer_frame;
+        }
+                
+        /**
          * Returns the number of frames that the model with the most frames in the viewer has
          * 
          * @function $3Dmol.GLViewer#getNumFrames
@@ -2539,13 +2568,21 @@ $3Dmol.GLViewer = (function() {
          */
         this.getNumFrames = function() {
             var mostFrames = 0;
-            var modelNum = 0;
             for (var i = 0; i < models.length; i++) {
                 if (models[i].getNumFrames() > mostFrames) {
-                    modelNum = i;
                     mostFrames = models[i].getNumFrames();
                 }
             }
+            for (var i = 0; i < shapes.length; i++) {
+                if (shapes[i].frame && shapes[i].frame >= mostFrames) {
+                    mostFrames = shapes[i].frame+1;
+                }
+            }         
+            for (var i = 0; i < labels.length; i++) {
+                if (labels[i].frame && labels[i].frame >= mostFrames) {
+                    mostFrames = labels[i].frame+1;
+                }
+            }                     
             return mostFrames;
         };
         
@@ -2857,12 +2894,12 @@ $3Dmol.GLViewer = (function() {
             return m;
         };
 
-        function applyToModels(func, sel, value1, value2, value3) {
+        function applyToModels(func, sel, value1, value2, value3, value4, value5) {
             
             //apply func to all models that are selected by sel with value1 and 2
             var ms = getModelList(sel);
             for (var i = 0; i < ms.length; i++) {
-                ms[i][func](sel, value1, value2, value3);
+                ms[i][func](sel, value1, value2, value3, value4, value5);
             }
         }
 
@@ -2986,9 +3023,11 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#vibrate
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
+         * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
+         * @param {ArrowSpec} arrowSpec - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
          */
-        this.vibrate = function(numFrames, amplitude) {
-            applyToModels("vibrate", numFrames, amplitude);
+        this.vibrate = function(numFrames, amplitude, bothways, arrowSpec) {
+            applyToModels("vibrate", numFrames, amplitude, bothways, this, arrowSpec);
             return this;
         }
         /**
