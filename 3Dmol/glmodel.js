@@ -1611,7 +1611,7 @@ $3Dmol.GLModel = (function() {
             for ( var i = 0; i < atoms.length; i++) {
                 var atom = atoms[i];
                 if (atom) {
-                    atom.style = atom.style || defaultAtomStyle;
+                    atom.style = atom.style || $.extend(true, {}, defaultAtomStyle);
                     atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
                     atom.model = id;
                     if (atom.clickable || atom.hoverable)
@@ -2016,7 +2016,7 @@ $3Dmol.GLModel = (function() {
                 a.bonds = [];
                 a.bondOrder = [];
                 a.model = id;
-                a.style = a.style || defaultAtomStyle;
+                a.style = a.style || $.extend(true, {}, defaultAtomStyle);
                 if(typeof(a.color) == "undefined")
                     a.color = ElementColors[a.elem] || defaultColor;                
                 // copy over all bonds contained in selection,
@@ -2127,9 +2127,7 @@ $3Dmol.GLModel = (function() {
                     for(s in style) {
                         if(style.hasOwnProperty(s)) {
                             selected[i].style[s]=selected[i].style[s]||{}; //create distinct object for each atom
-                            for(var prop in style[s]){
-                                selected[i].style[s][prop]=style[s][prop];
-                            }
+                            Object.assign(selected[i].style[s],style[s]);
                         }
                     }
                 }
@@ -2755,7 +2753,7 @@ $3Dmol.GLModel = (function() {
         for ( var i = 0; i < atoms.length; i++) {
             var atom = atoms[i];
             if (atom) {
-                atom.style = atom.style || defaultAtomStyle;
+                atom.style = atom.style || $.extend(true, {}, defaultAtomStyle);
                 atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
                 atom.model = id;
                 if (atom.clickable || atom.hoverable)
