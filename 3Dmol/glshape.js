@@ -626,6 +626,7 @@ $3Dmol.GLShape = (function() {
                 : null;
 
         shape.hidden = stylespec.hidden;
+        shape.frame = stylespec.frame;
     };
 
     /**
