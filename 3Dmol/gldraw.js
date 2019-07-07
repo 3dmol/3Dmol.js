@@ -219,17 +219,17 @@ $3Dmol.GLDraw = (function() {
 
                         if (x < widthSegments) {
                             var vertex = new $3Dmol.Vector3();
-                            vertex.x = -radius
-                                    * Math.cos(phiStart + u * phiLength)
-                                    * Math.sin(thetaStart + v * thetaLength);
+                            vertex.x = -radius *
+                                    Math.cos(phiStart + u * phiLength) *
+                                    Math.sin(thetaStart + v * thetaLength);
                             if(cap==1)
                                 vertex.y=0;
                             else
                                 vertex.y=radius * Math.cos(thetaStart + v * thetaLength);
 
-                            vertex.z = radius
-                                    * Math.sin(phiStart + u * phiLength)
-                                    * Math.sin(thetaStart + v * thetaLength);
+                            vertex.z = radius *
+                                    Math.sin(phiStart + u * phiLength) *
+                                    Math.sin(thetaStart + v * thetaLength);
 
                             if (Math.abs(vertex.x) < 1e-5)
                                 vertex.x = 0;
@@ -354,10 +354,8 @@ $3Dmol.GLDraw = (function() {
 
             var vi = 2 * i;
 
-            x = e[0] * vertices[vi].x + e[3] * vertices[vi].y + e[6]
-                    * vertices[vi].z;
-            y = e[1] * vertices[vi].x + e[4] * vertices[vi].y + e[7]
-                    * vertices[vi].z;
+            x = e[0] * vertices[vi].x + e[3] * vertices[vi].y + e[6] * vertices[vi].z;
+            y = e[1] * vertices[vi].x + e[4] * vertices[vi].y + e[7] * vertices[vi].z;
             z = e[5] * vertices[vi].y + e[8] * vertices[vi].z;
 
             // var xn = x/radius, yn = y/radius, zn = z/radius;
@@ -421,9 +419,13 @@ $3Dmol.GLDraw = (function() {
                 var toObj = cylVertexCache.getVerticesForRadius(radius, toCap, "to");
                 var fromObj = cylVertexCache.getVerticesForRadius(radius, fromCap, "from");
                 if(cap===to){
-                    vertices = toObj.vertices, normals = toObj.normals, verticesRows = toObj.verticesRows;
+                    vertices = toObj.vertices;
+                    normals = toObj.normals;
+                    verticesRows = toObj.verticesRows;
                 }else if(cap==from){
-                    vertices = fromObj.vertices, normals = fromObj.normals, verticesRows = fromObj.verticesRows;
+                    vertices = fromObj.vertices;
+                    normals = fromObj.normals;
+                    verticesRows = fromObj.verticesRows;
                 }
                 for (x = 0; x < n; x++) {
 
@@ -439,23 +441,15 @@ $3Dmol.GLDraw = (function() {
                     v4offset = (v4 + start) * 3;
 
                     // rotate sphere vectors
-                    x1 = e[0] * vertices[v1].x + e[3] * vertices[v1].y + e[6]
-                            * vertices[v1].z;
-                    x2 = e[0] * vertices[v2].x + e[3] * vertices[v2].y + e[6]
-                            * vertices[v2].z;
-                    x3 = e[0] * vertices[v3].x + e[3] * vertices[v3].y + e[6]
-                            * vertices[v3].z;
-                    x4 = e[0] * vertices[v4].x + e[3] * vertices[v4].y + e[6]
-                            * vertices[v4].z;
+                    x1 = e[0] * vertices[v1].x + e[3] * vertices[v1].y + e[6] * vertices[v1].z;
+                    x2 = e[0] * vertices[v2].x + e[3] * vertices[v2].y + e[6] * vertices[v2].z;
+                    x3 = e[0] * vertices[v3].x + e[3] * vertices[v3].y + e[6] * vertices[v3].z;
+                    x4 = e[0] * vertices[v4].x + e[3] * vertices[v4].y + e[6] * vertices[v4].z;
 
-                    y1 = e[1] * vertices[v1].x + e[4] * vertices[v1].y + e[7]
-                            * vertices[v1].z;
-                    y2 = e[1] * vertices[v2].x + e[4] * vertices[v2].y + e[7]
-                            * vertices[v2].z;
-                    y3 = e[1] * vertices[v3].x + e[4] * vertices[v3].y + e[7]
-                            * vertices[v3].z;
-                    y4 = e[1] * vertices[v4].x + e[4] * vertices[v4].y + e[7]
-                            * vertices[v4].z;
+                    y1 = e[1] * vertices[v1].x + e[4] * vertices[v1].y + e[7] * vertices[v1].z;
+                    y2 = e[1] * vertices[v2].x + e[4] * vertices[v2].y + e[7] * vertices[v2].z;
+                    y3 = e[1] * vertices[v3].x + e[4] * vertices[v3].y + e[7] * vertices[v3].z;
+                    y4 = e[1] * vertices[v4].x + e[4] * vertices[v4].y + e[7] * vertices[v4].z;
 
                     z1 = e[5] * vertices[v1].y + e[8] * vertices[v1].z;
                     z2 = e[5] * vertices[v2].y + e[8] * vertices[v2].z;
@@ -492,23 +486,15 @@ $3Dmol.GLDraw = (function() {
                     colorArray[v3offset + 2] = color.b;
                     colorArray[v4offset + 2] = color.b;
 
-                    nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6]
-                            * normals[v1].z;
-                    nx2 = e[0] * normals[v2].x + e[3] * normals[v2].y + e[6]
-                            * normals[v2].z;
-                    nx3 = e[0] * normals[v3].x + e[3] * normals[v3].y + e[6]
-                            * normals[v3].z;
-                    nx4 = e[0] * normals[v4].x + e[3] * normals[v4].y + e[6]
-                            * normals[v4].z;
+                    nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6] * normals[v1].z;
+                    nx2 = e[0] * normals[v2].x + e[3] * normals[v2].y + e[6] * normals[v2].z;
+                    nx3 = e[0] * normals[v3].x + e[3] * normals[v3].y + e[6] * normals[v3].z;
+                    nx4 = e[0] * normals[v4].x + e[3] * normals[v4].y + e[6] * normals[v4].z;
 
-                    ny1 = e[1] * normals[v1].x + e[4] * normals[v1].y + e[7]
-                            * normals[v1].z;
-                    ny2 = e[1] * normals[v2].x + e[4] * normals[v2].y + e[7]
-                            * normals[v2].z;
-                    ny3 = e[1] * normals[v3].x + e[4] * normals[v3].y + e[7]
-                            * normals[v3].z;
-                    ny4 = e[1] * normals[v4].x + e[4] * normals[v4].y + e[7]
-                            * normals[v4].z;
+                    ny1 = e[1] * normals[v1].x + e[4] * normals[v1].y + e[7] * normals[v1].z;
+                    ny2 = e[1] * normals[v2].x + e[4] * normals[v2].y + e[7] * normals[v2].z;
+                    ny3 = e[1] * normals[v3].x + e[4] * normals[v3].y + e[7] * normals[v3].z;
+                    ny4 = e[1] * normals[v4].x + e[4] * normals[v4].y + e[7] * normals[v4].z;
 
                     nz1 = e[5] * normals[v1].y + e[8] * normals[v1].z;
                     nz2 = e[5] * normals[v2].y + e[8] * normals[v2].z;
@@ -612,7 +598,7 @@ $3Dmol.GLDraw = (function() {
         //this may just take a list of all of the selected 
         //atoms and generate an average coordinate and return that
 
-    }
+    };
 
     /** Create a cone 
      * @function $3Dmol.GLDraw.drawCone
@@ -630,8 +616,7 @@ $3Dmol.GLDraw = (function() {
     draw.drawCone = function(geo, from, to, radius, color) {
         if (!from || !to)
             return;
-        console.log(from)
-        console.log(to)
+
         //check if from and to do not contain x,y,z and if  so generate a center based on the passed selections
 
         color = color || {r:0, g:0, b:0};
@@ -660,7 +645,7 @@ $3Dmol.GLDraw = (function() {
         var colorArray = geoGroup.colorArray;
         var faceArray = geoGroup.faceArray;
         
-        var offset = start*3;
+        offset = start*3;
         var ndir = new $3Dmol.Vector3(dir[0],dir[1],dir[2]).normalize();
         //base point first vertex
         vertexArray[offset] = from.x;
@@ -691,10 +676,8 @@ $3Dmol.GLDraw = (function() {
         for (i = 0; i < n; ++i) {
             var vec = basis[i].clone();
             vec.multiplyScalar(radius);
-            x = e[0] * vec.x + e[3] * vec.y + e[6]
-                    * vec.z;
-            y = e[1] * vec.x + e[4] * vec.y + e[7]
-                    * vec.z;
+            x = e[0] * vec.x + e[3] * vec.y + e[6] * vec.z;
+            y = e[1] * vec.x + e[4] * vec.y + e[7] * vec.z;
             z = e[5] * vec.y + e[8] * vec.z;
 
             // from
@@ -717,7 +700,7 @@ $3Dmol.GLDraw = (function() {
         }
         geoGroup.vertices += (n+2);
         //faces
-        var faceoffset = geoGroup.faceidx;
+        faceoffset = geoGroup.faceidx;
         for( i = 0; i < n; i++) {
             //two neighboring circle vertices
             var v1 = start+2+i;
@@ -775,11 +758,11 @@ $3Dmol.GLDraw = (function() {
                     var v = y / heightSegments;
 
                     var vertex = {};
-                    vertex.x = -radius * Math.cos(phiStart + u * phiLength)
-                            * Math.sin(thetaStart + v * thetaLength);
+                    vertex.x = -radius * Math.cos(phiStart + u * phiLength) *
+                            Math.sin(thetaStart + v * thetaLength);
                     vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
-                    vertex.z = radius * Math.sin(phiStart + u * phiLength)
-                            * Math.sin(thetaStart + v * thetaLength);
+                    vertex.z = radius * Math.sin(phiStart + u * phiLength) *
+                            Math.sin(thetaStart + v * thetaLength);
 
                     var n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
                     n.normalize();

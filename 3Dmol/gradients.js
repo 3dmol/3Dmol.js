@@ -244,4 +244,4 @@ $3Dmol.Gradient.builtinGradients = {
     'rwb': $3Dmol.Gradient.RWB,
     'roygb': $3Dmol.Gradient.ROYGB,
     'sinebow': $3Dmol.Gradient.Sinebow
-}
+};

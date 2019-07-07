@@ -281,4 +281,4 @@
 * @prop xyz XYZ cartesian coordinates format
 */
 
-});
+})();
