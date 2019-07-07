@@ -29,7 +29,8 @@ $3Dmol.Renderer = function(parameters) {
             ;
     this.domElement = _canvas;    
     this.context = null;
-    this.devicePixelRatio = parameters.devicePixelRatio !== undefined ? parameters.devicePixelRatio : 1;
+    this.devicePixelRatio = parameters.devicePixelRatio !== undefined ? parameters.devicePixelRatio
+        : (window.devicePixelRatio !== undefined) ? window.devicePixelRatio : 1;
 
     // clearing
     _canvas.id=parameters.id;
