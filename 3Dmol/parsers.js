@@ -384,7 +384,6 @@ $3Dmol.Parsers = (function() {
 
         
         // assign to all atoms in residue, keep track of start
-        var curres = null;
         for (i = 0, il = atomsarray.length; i < il; i++) {
             atom = atomsarray[i];
             val = chres[atom.chain][atom.resi];
@@ -469,7 +468,7 @@ $3Dmol.Parsers = (function() {
      * @param {ParserOptionsSpec}
      *            options
      */
-    parsers.vasp = parsers.VASP = function (str, options) {
+    parsers.vasp = parsers.VASP = function (str /*,options*/) {
       var atoms = [[]];
       var lattice = {};
 
@@ -501,8 +500,6 @@ $3Dmol.Parsers = (function() {
                                       0,                             0,               0, 1);
       
       matrix.multiplyScalar(lattice.length);
-
-      var modelData = atoms.modelData = [{symmetries:[], cryst:{matrix:matrix}}];
   
       var atomSymbols=lines[5].replace(/\s+/, "").replace(/\s+$/,"").split(/\s+/);
       var atomSpeciesNumber=new Int16Array(lines[6].replace(/^\s+/, "").split(/\s+/));
@@ -564,7 +561,7 @@ $3Dmol.Parsers = (function() {
      * @param {ParserOptionsSpec}
      *            options
      */
-    parsers.cube = parsers.CUBE = function(str, options) {
+    parsers.cube = parsers.CUBE = function(str /*, options*/) {
         var atoms = [[]];
         var lines = str.replace(/^\s+/, "").split(/\n\r|\r+/);
 
@@ -1121,7 +1118,6 @@ $3Dmol.Parsers = (function() {
 
             // Pulls atom information out of the data
             atoms.push([]);
-            var currentIndex = 0;
             var atomCount = mmCIF._atom_site_id !== undefined ? mmCIF._atom_site_id.length
                 : mmCIF._atom_site_label.length;
             var sqr = function(n) {
@@ -1242,7 +1238,6 @@ $3Dmol.Parsers = (function() {
                     let matrix = new $3Dmol.Matrix4(0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1);
                     for (let coord = 0; coord < 3; coord++) {
                         var terms = componentStrings[coord].split('+');
-                        var constant = 0, xTerm = 0, yTerm = 0, zTerm = 0;
                         for (let t = 0; t < terms.length; t++) {
                             var term = terms[t];
                             if (term === "")
@@ -1464,10 +1459,10 @@ $3Dmol.Parsers = (function() {
 
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
-        var i, j, k, line;
+        var line;
         var seenbonds = {}; //sometimes connect records are duplicated as an unofficial means of relaying bond orders
         
-        for (i = 0; i < lines.length; i++) {
+        for (let i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
             var startChain, startResi, endChain, endResi;
@@ -1680,7 +1675,7 @@ $3Dmol.Parsers = (function() {
 
         // Assign secondary structures from pdb file
         if(!isEmpty(sslookup)) {
-            for (i = 0; i < atoms.length; i++) {
+            for (let i = 0; i < atoms.length; i++) {
                 atom = atoms[i];
                 if (atom === undefined)
                     continue;
@@ -1764,21 +1759,14 @@ $3Dmol.Parsers = (function() {
     parsers.pqr = parsers.PQR = function(str, options) {
 
         var atoms = [[]];
-        var atoms_cnt = 0;
-        var start = atoms[atoms.length-1].length;
-        var atom;
         var computeStruct = !options.noSecondaryStructure;
-        var noAssembly = !options.doAssembly; // don't assemble by default
-        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
-        var modelData = atoms.modelData = [{symmetries:[]}];
         
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
-        var i, j, k, line;
-        for (i = 0; i < lines.length; i++) {
+        var line;
+        for (let i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
-            var startChain, startResi, endChain, endResi;
             
             if (recordName.indexOf("END") == 0) {
                 if (options.multimodel) {
@@ -1849,7 +1837,7 @@ $3Dmol.Parsers = (function() {
                 // described in CONECT. But what about 2JYT???
                 var from = parseInt(line.substr(6, 5));
                 var fromAtom = atoms[atoms.length-1][serialToIndex[from]];
-                for (j = 0; j < 4; j++) {
+                for (let j = 0; j < 4; j++) {
                     var to = parseInt(line.substr([ 11, 16, 21, 26 ][j], 5));
                     var toAtom = atoms[atoms.length-1][serialToIndex[to]];
                     if (fromAtom !== undefined && toAtom !== undefined) {
@@ -1921,7 +1909,6 @@ $3Dmol.Parsers = (function() {
         var atomIndex = 0;
 
         // setup optional fields
-        var chainNameList = mmtfData.chainNameList;
         var secStructList = mmtfData.secStructList;
         var insCodeList = mmtfData.insCodeList;
         var sequenceIndexList = mmtfData.sequenceIndexList;
@@ -2158,7 +2145,7 @@ $3Dmol.Parsers = (function() {
     /**
      * Parse a prmtop file from str and create atoms
      */
-    parsers.prmtop = parsers.PRMTOP = function(str, options) {
+    parsers.prmtop = parsers.PRMTOP = function(str/*, options*/) {
       var atoms = [];
       var atomIndex;
       var count = 0;
@@ -2224,7 +2211,7 @@ $3Dmol.Parsers = (function() {
           for (let i = 0; i < atomCount/col[0]; i++){
             if (i == parseInt(atomCount/col[0]))
               noOfCol = atomCount % col[0];
-            for(j = 0; j < noOfCol; j++){
+            for(let j = 0; j < noOfCol; j++){
               atoms[count].properties.radii = parseFloat(lines[index+1].slice(col[1]*j, col[1]*(j+1)));
               count++;
             }
@@ -2303,7 +2290,7 @@ $3Dmol.Parsers = (function() {
     /**
      * Parse a gro file from str and create atoms
      */
-    parsers.gro = parsers.GRO = function(str, options) {
+    parsers.gro = parsers.GRO = function(str/*, options*/) {
         var allatoms = [];
         var lines = str.split(/\r?\n|\r/);
         while (lines.length > 0) {

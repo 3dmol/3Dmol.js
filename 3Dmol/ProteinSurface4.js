@@ -113,18 +113,17 @@ $3Dmol.ProteinSurface = function() {
 
     this.getFacesAndVertices = function(atomlist) {
         var atomsToShow = {};
-        var i, il;
-        for (i = 0, il = atomlist.length; i < il; i++)
+        for (let i = 0, il = atomlist.length; i < il; i++)
             atomsToShow[atomlist[i]] = true;
         var vertices = verts;
-        for (i = 0, il = vertices.length; i < il; i++) {
+        for (let i = 0, il = vertices.length; i < il; i++) {
             vertices[i].x = vertices[i].x / scaleFactor - ptranx;
             vertices[i].y = vertices[i].y / scaleFactor - ptrany;
             vertices[i].z = vertices[i].z / scaleFactor - ptranz;
         }
 
         var finalfaces = [];
-        for (i = 0, il = faces.length; i < il; i += 3) {
+        for (let i = 0, il = faces.length; i < il; i += 3) {
             //var f = faces[i];
             var fa = faces[i], fb = faces[i+1], fc = faces[i+2];
             var a = vertices[fa].atomid, b = vertices[fb].atomid, c = vertices[fc].atomid;
@@ -254,21 +253,20 @@ $3Dmol.ProteinSurface = function() {
         // seqterm,bool
         // atomtype,atom*
         // proseq,bool bcolor)
-        var i, il;
-        for (i = 0, il = vpBits.length; i < il; i++) {
+        for (let i = 0, il = vpBits.length; i < il; i++) {
             vpBits[i] = 0;
             vpDistance[i] = -1.0;
             vpAtomID[i] = -1;
         }
 
-        for (i in atomlist) {
+        for (let i in atomlist) {
             var atom = atoms[atomlist[i]];
             if (atom === undefined)
                 continue;
             this.fillAtom(atom, atoms);
         }
 
-        for (i = 0, il = vpBits.length; i < il; i++)
+        for (let i = 0, il = vpBits.length; i < il; i++)
             if (vpBits[i] & INOUT)
                 vpBits[i] |= ISDONE;
 
@@ -338,12 +336,11 @@ $3Dmol.ProteinSurface = function() {
     };
 
     this.fillvoxelswaals = function(atoms, atomlist) {
-        var i, il;
-        for (i = 0, il = vpBits.length; i < il; i++)
+        for (let i = 0, il = vpBits.length; i < il; i++)
             vpBits[i] &= ~ISDONE; // not isdone
 
-        for (i in atomlist) {
-            var atom = atoms[atomlist[i]];
+        for (let i in atomlist) {
+            let atom = atoms[atomlist[i]];
             if (atom === undefined)
                 continue;
 

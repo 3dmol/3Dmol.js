@@ -39,9 +39,9 @@ $3Dmol.GLDraw = (function() {
             var dx = d.x, dy = d.y, dz = d.z;
 
             var dxy = Math.sqrt(dx * dx + dy * dy);
-            var dxz, dyz;
+            var dyz;
 
-            var sinA, cosA, sinB, cosB, sinC, cosC;
+            var sinA, cosA, sinB, cosB;
 
             // about z axis - Phi
             if (dxy < 0.0001) {
@@ -92,11 +92,6 @@ $3Dmol.GLDraw = (function() {
     // Direction is j basis (0,1,0)
     var basisVectors = function() {
 
-        var ret = {
-            vertices : [],
-            norms : []
-        };
-
         var nvecs = [];
 
         var subdivisions = 4; // including the initial 2, eg. 4 => 16 subintervals
@@ -146,11 +141,9 @@ $3Dmol.GLDraw = (function() {
                 if(this.cache[radius][cap+capType] !== undefined)                                                      
                     return this.cache[radius][cap+capType];
 
-            var dir = new $3Dmol.Vector3(0, 1, 0);
             var w = basisVectors.length;
             var nvecs = [], norms = [];
             var n;
-
 
             for (var i = 0; i < w; i++) {
                 // bottom
@@ -332,7 +325,7 @@ $3Dmol.GLDraw = (function() {
         // w (n) corresponds to the number of orthonormal vectors for cylinder
         // (default 16)
         var n = vobj.w, h = vobj.h;
-        var w = n;
+        
         // get orthonormal vector
         var n_verts = (drawcaps) ? h * n + 2 : 2 * n;
 
@@ -592,13 +585,6 @@ $3Dmol.GLDraw = (function() {
         geoGroup.vertices += n_verts;
     };
 
-    //returns the center of the selection that is passed to this function
-    var getCenter = function(sel){
-        //todo: look in zoomto at how it is done there
-        //this may just take a list of all of the selected 
-        //atoms and generate an average coordinate and return that
-
-    };
 
     /** Create a cone 
      * @function $3Dmol.GLDraw.drawCone
@@ -747,7 +733,7 @@ $3Dmol.GLDraw = (function() {
             var thetaStart = 0;
             var thetaLength = Math.PI;
 
-            var x, y, vertices = [], uvs = [];
+            var x, y;
 
             for (y = 0; y <= heightSegments; y++) {
 
@@ -796,8 +782,6 @@ $3Dmol.GLDraw = (function() {
      *            color
      */
     draw.drawSphere = function(geo, pos, radius, color) {
-
-        var center = new $3Dmol.Vector3(pos.x, pos.y, pos.z);
 
         var x, y;
         var vobj = sphereVertexCache.getVerticesForRadius(radius);
@@ -848,7 +832,7 @@ $3Dmol.GLDraw = (function() {
                 var n2 = normals[v2 - start];
                 var n3 = normals[v3 - start];
                 var n4 = normals[v4 - start];
-                var face, norm;
+
                 if (Math.abs(vertices[v1 - start].y) === radius) {
                     // face = [v1, v3, v4];
                     // norm = [n1, n3, n4];

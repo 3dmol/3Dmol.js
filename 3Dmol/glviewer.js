@@ -53,7 +53,6 @@ $3Dmol.GLViewer = (function() {
         }
         var _viewer = this;
         var container = element;
-        var id = container.id;
         var glDOM = null;
 
         var models = []; // atomistic molecular models
@@ -63,7 +62,6 @@ $3Dmol.GLViewer = (function() {
         var fixed_labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
-        var popups = [];
         var current_hover = null;
         var hoverDuration = 500;
         var viewer_frame = 0;
@@ -119,7 +117,6 @@ $3Dmol.GLViewer = (function() {
         var raycaster = new $3Dmol.Raycaster(new $3Dmol.Vector3(0, 0, 0),
                 new $3Dmol.Vector3(0, 0, 0));
         var projector = new $3Dmol.Projector();
-        var mouseVector = new $3Dmol.Vector3(0, 0, 0);
 
         var scene = null;
         var rotationGroup = null; // which contains modelGroup
@@ -161,21 +158,6 @@ $3Dmol.GLViewer = (function() {
                 if(i > max) max = i;
             }
             return max+1;
-        };
-
-        //updates font size of labels based on camera zoom
-        var setLabelStyles = function(scaleFactor){
-            for(var l in labels){
-                var label = labels[l];
-                if(label.stylespec.scale){
-                    modelGroup.remove(label.sprite);
-                    label.dispose();
-                    //change font size here
-                    label.stylespec.fontSize*=(1+scaleFactor);
-                    label.setContext();
-                    modelGroup.add(label.sprite);
-                }
-            }
         };
 
         var setSlabAndFog = function() {
@@ -261,16 +243,15 @@ $3Dmol.GLViewer = (function() {
         var updateClickables = function() {
             clickables.splice(0,clickables.length);
             hoverables.splice(0,hoverables.length);
-            var i, il;
             
-            for (i = 0, il = models.length; i < il; i++) {
+            for (let i = 0, il = models.length; i < il; i++) {
                 var model = models[i];
                 if(model) {
-                    var atoms = model.selectedAtoms({
+                    let atoms = model.selectedAtoms({
                         clickable : true
                     });
                     
-                    var hoverable_atoms = model.selectedAtoms({
+                    let hoverable_atoms = model.selectedAtoms({
                         hoverable : true
                     });
                     Array.prototype.push.apply(hoverables,hoverable_atoms);
@@ -279,9 +260,9 @@ $3Dmol.GLViewer = (function() {
                     
                 }
             }
-            for (i = 0, il = shapes.length; i < il; i++) {
+            for (let i = 0, il = shapes.length; i < il; i++) {
 
-                var shape = shapes[i];
+                let shape = shapes[i];
                 if (shape && shape.clickable) {
                     clickables.push(shape);
                 }
@@ -325,7 +306,7 @@ $3Dmol.GLViewer = (function() {
         };
         
         //checks for selection intersects on hover
-        var handleHoverSelection = function(mouseX, mouseY, event){
+        var handleHoverSelection = function(mouseX, mouseY){
             if(hoverables.length == 0) return;
             var mouse = {
                 x : mouseX,
@@ -347,7 +328,7 @@ $3Dmol.GLViewer = (function() {
         };
         
         //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
-        var handleHoverContinue = function(mouseX,mouseY,event){
+        var handleHoverContinue = function(mouseX,mouseY){
             var mouse = {
                 x : mouseX,
                 y : mouseY,
@@ -1108,8 +1089,6 @@ $3Dmol.GLViewer = (function() {
                 return new $3Dmol.Quaternion(i, j, k, c).normalize();
             };
             
-
-            var wait_time = 20;
             var rangle = Math.PI * angle / 180.0;
             var q = qFromAngle(rangle);
             
@@ -1190,7 +1169,6 @@ $3Dmol.GLViewer = (function() {
          */
         this.render = function(callback, exts) {
             renderer.setViewport();
-            var time1 = new Date();
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();
             
@@ -1288,11 +1266,8 @@ $3Dmol.GLViewer = (function() {
             }
             
             this.setView(view); // Calls show() => renderer render
-            var time2 = new Date();
-            //console.log("render time: " + (time2 - time1));
             if(typeof callback ==='function'){
                 callback(this);
-               // console.log("render time: " + (time2 - time1));
             }
             return this;
         };
@@ -1794,7 +1769,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setSlab
          * @return {Object} near/far
          */
-        this.getSlab = function(sel) {
+        this.getSlab = function() {
             return {near: slabNear, far: slabFar};
         };
                 
@@ -2535,7 +2510,7 @@ $3Dmol.GLViewer = (function() {
          */
         this.setFrame = function (framenum) {
             viewer_frame = framenum;
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 var modelMap = models.map(function (model) {
                     return model.setFrame(framenum);
                 });
@@ -2845,7 +2820,7 @@ $3Dmol.GLViewer = (function() {
                     return model.toCDObject(includeStyles);
                 });
             } else {
-                object.m = [ model[modelID].toCDObject() ];
+                object.m = [ models[modelID].toCDObject() ];
             }
             return JSON.stringify(object);
         };
@@ -3199,7 +3174,7 @@ $3Dmol.GLViewer = (function() {
 
             // set colors for vertices
             var colors = [];
-            for (i = 0, il = atoms.length; i < il; i++) {
+            for (let i = 0, il = atoms.length; i < il; i++) {
                 var atom = atoms[i];
                 if (atom) {
                     if (typeof (atom.surfaceColor) != "undefined") {
@@ -3213,7 +3188,6 @@ $3Dmol.GLViewer = (function() {
 
             // reconstruct vertices and faces
             var v = VandF.vertices;
-            var offset;
             for (let i = 0, il = v.length; i < il; i++) {
                 let offset = geoGroup.vertices * 3;
                 vertexArray[offset] = v[i].x;
@@ -3259,14 +3233,10 @@ $3Dmol.GLViewer = (function() {
             var vA, vB, vC, norm;
 
             // Setup colors, faces, and normals
-            for (i = 0, il = faces.length; i < il; i += 3) {
+            for (let i = 0, il = faces.length; i < il; i += 3) {
 
                 // var a = faces[i].a, b = faces[i].b, c = faces[i].c;
                 var a = faces[i], b = faces[i + 1], c = faces[i + 2];
-                var A = v[a].atomid;
-                var B = v[b].atomid;
-                var C = v[c].atomid;
-
                 var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
                 // setup Normals
@@ -3321,16 +3291,16 @@ $3Dmol.GLViewer = (function() {
          */
         var generateMeshSyncHelper = function(type, expandedExtent,
                 extendedAtoms, atomsToShow, atoms, vol) {
-            var time = new Date();
+//            var time = new Date();
             var ps = new $3Dmol.ProteinSurface();
             ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
 
-            var time2 = new Date();
+//            var time2 = new Date();
             //console.log("initialize " + (time2 - time) + "ms");
 
             ps.fillvoxels(atoms, extendedAtoms);
 
-            var time3 = new Date();
+//            var time3 = new Date();
             //console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
 
             ps.buildboundary();
@@ -3341,12 +3311,12 @@ $3Dmol.GLViewer = (function() {
                 ps.fillvoxelswaals(atoms, extendedAtoms);
             }
 
-            var time4 = new Date();
+//            var time4 = new Date();
             //console.log("buildboundaryetc " + (time4 - time3) + "  " + (time4 - time) + "ms");
 
             ps.marchingcube(type);
 
-            var time5 = new Date();
+//            var time5 = new Date();
             //console.log("marching cube " + (time5 - time4) + "  "+ (time5 - time) + "ms");
 
             return ps.getFacesAndVertices(atomsToShow);
@@ -3487,9 +3457,8 @@ $3Dmol.GLViewer = (function() {
                 }
 
                 var atom;
-                var time = new Date();
+//                var time = new Date();
                 var extent = $3Dmol.getExtent(atomsToShow, true);
-                var i, il;
                 if (style.map && style.map.prop) {
                     // map color space using already set atom properties
                     /** @type {AtomSpec} */
@@ -3505,7 +3474,7 @@ $3Dmol.GLViewer = (function() {
                 }
                 
                 //cache surface color on each atom
-                for (i = 0, il = atomlist.length; i < il; i++) {
+                for (let i = 0, il = atomlist.length; i < il; i++) {
                     atom = atomlist[i];
                     atom.surfaceColor = $3Dmol.getColorFromStyle(atom, style);
                 }                
@@ -3545,7 +3514,7 @@ $3Dmol.GLViewer = (function() {
 
                 var reducedAtoms = [];
                 // to reduce amount data transfered, just pass x,y,z,serial and elem
-                for (i = 0, il = atomlist.length; i < il; i++) {
+                for (let i = 0, il = atomlist.length; i < il; i++) {
                     atom = atomlist[i];
                     reducedAtoms[i] = {
                         x : atom.x,
@@ -3561,7 +3530,7 @@ $3Dmol.GLViewer = (function() {
 
                     // to keep the browser from locking up, call through setTimeout
                     var callSyncHelper = function callSyncHelper(i) {
-                        return new Promise(function(resolve, reject) { 
+                        return new Promise(function(resolve) { 
                             var VandF = generateMeshSyncHelper(type, extents[i].extent,
                                     extents[i].atoms, extents[i].toshow, reducedAtoms,
                                     totalVol);
@@ -3631,7 +3600,7 @@ $3Dmol.GLViewer = (function() {
                             reject(event);
                         };
 
-                        for (i = 0; i < extents.length; i++) {
+                        for (let i = 0; i < extents.length; i++) {
                             var worker = workers[i % workers.length];
                             worker.onmessage = rfunction;
 

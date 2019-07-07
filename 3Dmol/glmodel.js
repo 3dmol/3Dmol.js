@@ -19,9 +19,6 @@ $3Dmol.GLModel = (function() {
         line : {}
     };
 
-    var Nucleotides = [ '  G', '  A', '  T', '  C', '  U', ' DG', ' DA', ' DT',
-            ' DC', ' DU' ];
-
     var defaultlineWidth = 1.0;
 
     // Reference: A. Bondi, J. Phys. Chem., 1964, 68, 441.
@@ -337,7 +334,6 @@ $3Dmol.GLModel = (function() {
         //it is appropraite to draw multiple bonds
         var getSideBondV = function(atom, atom2, i) {
           
-            var p1a, p1b, p2a, p2b;
             var i2, j2, atom3, p3, dir2;
             var p1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
             var p2 = new $3Dmol.Vector3(atom2.x, atom2.y, atom2.z);
@@ -419,24 +415,7 @@ $3Dmol.GLModel = (function() {
             
             //v.multiplyScalar(r * 1.5);
 
-        };
-        
-        var getTripleBondPoints = function() {
-            
-            v.cross(dir);
-            v.normalize();
-            v.multiplyScalar(r * 3);
-
-            p1a = p1.clone();
-            p1a.add(v);
-            p1b = p1.clone();
-            p1b.sub(v);
-
-            p2a = p1a.clone();
-            p2a.add(dir);
-            p2b = p1b.clone();
-            p2b.add(dir);
-        };
+        };      
         
         var addLine = function(vertexArray, colorArray, offset, p1, p2, c1) {
             //make line from p1 to p2, does not incremeant counts
@@ -519,7 +498,6 @@ $3Dmol.GLModel = (function() {
                     if(!bstyle.iswire) {
                         continue;
                     }
-                    if(bstyle.radius) bondR = bstyle.radius;
                     if(bstyle.singleBond) singleBond = true;
                     if(typeof(bstyle.color1) != "undefined") {
                         c1 = $3Dmol.CC.color(bstyle.color1);
@@ -648,7 +626,6 @@ $3Dmol.GLModel = (function() {
                                                                  
             var C = $3Dmol.getColorFromStyle(atom, style);
             
-            var x, y;
             var radius = getRadiusFromStyle(atom, style);
             
             if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
@@ -669,7 +646,6 @@ $3Dmol.GLModel = (function() {
             if (style.hidden)
                 return;
                                   
-            var x, y;
             var radius = getRadiusFromStyle(atom, style);
             
             if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
@@ -695,7 +671,6 @@ $3Dmol.GLModel = (function() {
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             var radiusArray = geoGroup.radiusArray;
-            var normalArray = geoGroup.normalArray;
 
             vertexArray[start] = atom.x;
             vertexArray[start+1] = atom.y ;
@@ -792,7 +767,7 @@ $3Dmol.GLModel = (function() {
         };
                 
           
-        var drawStickImposter =  function(geo, from, to, radius, color, fromCap, toCap) {
+        var drawStickImposter =  function(geo, from, to, radius, color) {
            //we need the four corners - two have from coord, two have to coord, the normal
             //is the opposing point, from which we can get the normal and length
             //also need the radius
@@ -881,7 +856,7 @@ $3Dmol.GLModel = (function() {
             
             var C1 = $3Dmol.getColorFromStyle(atom, style);
 
-            var mp, mp1, mp2, mp3;
+            var mp, mp2, mp3;
             
             if (!atom.capDrawn && atom.bonds.length < 4)
                 fromCap = 2;
@@ -1128,7 +1103,6 @@ $3Dmol.GLModel = (function() {
             }
            
             if (drawSphere) {
-                var savedstyle = atom.style;
                 bondR = atomBondR;
                 //do not use bond style as this can be variable, particularly
                 //with jmol export of double/triple bonds
@@ -2335,8 +2309,8 @@ $3Dmol.GLModel = (function() {
                 molObj = null; // force rebuild
             
             // now apply colorfun
-            for (i = 0; i < atoms.length; i++) {
-                a = atoms[i];
+            for (let i = 0; i < atoms.length; i++) {
+                let a = atoms[i];
                 a.color = colorfun(a);
             }
         };
@@ -2404,11 +2378,8 @@ $3Dmol.GLModel = (function() {
          * @param Object options
          */
         this.globj = function(group, options) {
-            var time = new Date();
             if(molObj === null || options.regen) { // have to regenerate
                 molObj = createMolObj(atoms, options);
-                var time2 = new Date();
-                //console.log("object creation time: " + (time2 - time));
                 if(renderedMolObj) { // previously rendered, remove
                     group.remove(renderedMolObj);
                     renderedMolObj = null;
@@ -2566,7 +2537,6 @@ $3Dmol.GLModel = (function() {
             
             if(byframe) {
                 var n = this.getNumFrames();
-                var model = this;
                 let savedatoms = atoms;
                 for(let i = 0; i < n; i++) {
                     if(frames[i]) {
@@ -2619,7 +2589,6 @@ $3Dmol.GLModel = (function() {
       * @return {Promise}
       */
         this.setCoordinatesFromURL = function (url, path) {
-            var atomCount = atoms.length;
             frames = [];
             var self = this;
             if(box) setupDFS();
@@ -2791,20 +2760,6 @@ $3Dmol.GLModel = (function() {
         return parsedAtoms;
     };
 
-
-    // set default style and colors for atoms
-    GLModel.setAtomDefaults = function(atoms, id) {
-        for ( var i = 0; i < atoms.length; i++) {
-            var atom = atoms[i];
-            if (atom) {
-                atom.style = atom.style || $.extend(true, {}, defaultAtomStyle);
-                atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
-                atom.model = id;
-                if (atom.clickable || atom.hoverable)
-                    atom.intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
-            }
-        }
-    };
 
     return GLModel;
     

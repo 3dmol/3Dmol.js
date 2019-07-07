@@ -159,7 +159,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
 
 
     // Assume atomic units 
-    var unittype = "bohr/hartree";
+//    var unittype = "bohr/hartree";
     var l_units = 1.889725992;
     var e_units = 0.036749309;
 

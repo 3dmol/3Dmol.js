@@ -186,7 +186,7 @@ $3Dmol.MarchingCubeInitializer = function() {
 
     my.laplacianSmooth = function(numiter, verts, faces) {
             var tps = new Array(verts.length);
-            var i, il, j, jl, k, kl;
+            var i, il, j, jl, k;
             for (i = 0, il = verts.length; i < il; i++)
                     tps[i] = {
                         x : 0,
@@ -273,9 +273,9 @@ $3Dmol.MarchingCubeInitializer = function() {
 
             var wt = 1.00;
             var wt2 = 0.50;
-            var ssign;
-            var scaleFactor = 1;
-            var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
+//            var ssign;
+//            var scaleFactor = 1;
+//            var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
             for (k = 0; k < numiter; k++) {
                     for (i = 0, il = verts.length; i < il; i++) {
                             if (vertdeg[0][i] < 3) {

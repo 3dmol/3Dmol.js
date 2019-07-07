@@ -34,7 +34,7 @@ $3Dmol.GLShape = (function() {
      */
     var updateColor = function(geo, color) {
 
-        var C = color || $3Dmol.CC.color(color);
+        color = color || $3Dmol.CC.color(color);
         geo.colorsNeedUpdate = true;
         
         var r,g,b;
@@ -133,7 +133,6 @@ $3Dmol.GLShape = (function() {
 
         var start = geoGroup.vertices;
         var vertexArray = geoGroup.vertexArray;
-        var colorArray = geoGroup.colorArray;
         var faceArray = geoGroup.faceArray;
         var normalArray = geoGroup.normalArray;
         var lineArray = geoGroup.lineArray;
@@ -197,7 +196,6 @@ $3Dmol.GLShape = (function() {
         var face, norm, faceoffset, lineoffset;
         var t1, t2, t2b, t3, t3b, t4, t1offset, t2offset, t2boffset, t3offset, t3boffset, t4offset;
         var n1, n2, n3, n4;
-        var n_vertices = 0;
         var fromi = geoGroup.vertices - 3, toi = geoGroup.vertices - 2, endi = geoGroup.vertices - 1;
         var fromoffset = fromi * 3, tooffset = toi * 3, endoffset = endi * 3;
         for (i = 0, n = nvecs.length - 1; i < n; ++i) {
@@ -566,8 +564,8 @@ $3Dmol.GLShape = (function() {
      */
     var drawCustom = function(shape, geo, customSpec) {
         var mesh = customSpec;
-        var vertexArr = mesh.vertexArr, normalArr = mesh.normalArr, 
-        faceArr = mesh.faceArr;
+        var vertexArr = mesh.vertexArr; 
+        var faceArr = mesh.faceArr;
         if (vertexArr.length === 0 || faceArr.length === 0) {
             console
                     .warn("Error adding custom shape component: No vertices and/or face indices supplied!");
@@ -690,7 +688,6 @@ $3Dmol.GLShape = (function() {
             customSpec.faceArr = customSpec.faceArr || [];
             customSpec.normalArr = customSpec.normalArr || [];
 
-            var firstgeo = geo.geometryGroups.length;
             // will split mesh as needed
             drawCustom(this, geo, customSpec);
         };
@@ -1116,9 +1113,9 @@ $3Dmol.GLShape = (function() {
             arrowSpec.start = new $3Dmol.Vector3(arrowSpec.start.x || 0,
                     arrowSpec.start.y || 0, arrowSpec.start.z || 0);
 
-            if (arrowSpec.dir instanceof $3Dmol.Vector3 && arrowSpec.length instanceof number) {
+            if (arrowSpec.dir instanceof $3Dmol.Vector3 && typeof(arrowSpec.length) === 'number') {
                 var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
-                        start);
+                        arrowSpec.start);
                 arrowSpec.end = end;
             }
 
@@ -1342,27 +1339,7 @@ $3Dmol.GLShape = (function() {
             this.boundingSphere.radius = Math.max(len1,len2);
             if(typeof callback =="function")
                 callback();
-          };
-          
-
-        /**
-         * @deprecated unnecesary
-
-        */
-        var convert=function(i,j,k,data){
-            var pt;
-            if(data.matrix) {
-                pt = new $3Dmol.Vector3(i,j,k);
-                pt = pt.applyMatrix4(data.matrix);
-                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
-
-            } else {
-                pt.x = data.origin.x+data.unit.x*i;
-                pt.y = data.origin.y+data.unit.y*j;
-                pt.z = data.origin.z+data.unit.z*k;
-            }
-            return pt;
-        };
+          };        
         
         /** 
          * @deprecated Use addIsosurface instead
@@ -1499,45 +1476,43 @@ $3Dmol.ShapeIDCount = 0;
 
 
 $3Dmol.splitMesh = function(mesh) {
-	    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
+    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
     //peel off 64k vertices rsvh into their own mesh
     //duplicating vertices and normals as necessary to preserve faces and lines
-	
-        if(mesh.vertexArr.length < MAXVERT) return [mesh]; //typical case
-        
-        var nverts = mesh.vertexArr.length;
-        var slices = [{vertexArr: [], normalArr: [], faceArr: []}];
-        if(mesh.colorArr) slices.colorArr = [];
-        var vertSlice = []; //indexed by original vertex to get current slice
-        var vertIndex =[]; //indexed by original vertex to get index within slice
-        var currentSlice = 0;
-        
-        //for each face, make sure all three vertices (or copies) are in the same slice
-        var faces = mesh.faceArr;
-        var vs = [0,0,0];
-        for(var i = 0, nf = faces.length; i < nf; i += 3) {
-            var slice = slices[currentSlice];
-            for(var j = 0; j < 3; j++) {
-                //process each vertex to make sure it is assigned a slice
-                //all vertices of a face must belong to the same slice
-                var v = faces[i+j];
-                if(vertSlice[v] !== currentSlice) { //true if undefined
-                    vertSlice[v] = currentSlice;
-                    vertIndex[v] = slice.vertexArr.length;
-                    slice.vertexArr.push(mesh.vertexArr[v]);
-                    if(mesh.normalArr && mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
-                    if(mesh.colorArr && mesh.colorArr[v]) slice.colorArr.push(mesh.colorArr[v]);
-                }
-                slice.faceArr.push(vertIndex[v]);
+
+    if(mesh.vertexArr.length < MAXVERT) return [mesh]; //typical case
+    
+    var slices = [{vertexArr: [], normalArr: [], faceArr: []}];
+    if(mesh.colorArr) slices.colorArr = [];
+    var vertSlice = []; //indexed by original vertex to get current slice
+    var vertIndex =[]; //indexed by original vertex to get index within slice
+    var currentSlice = 0;
+    
+    //for each face, make sure all three vertices (or copies) are in the same slice
+    var faces = mesh.faceArr;
+    for(let i = 0, nf = faces.length; i < nf; i += 3) {
+        let slice = slices[currentSlice];
+        for(let j = 0; j < 3; j++) {
+            //process each vertex to make sure it is assigned a slice
+            //all vertices of a face must belong to the same slice
+            var v = faces[i+j];
+            if(vertSlice[v] !== currentSlice) { //true if undefined
+                vertSlice[v] = currentSlice;
+                vertIndex[v] = slice.vertexArr.length;
+                slice.vertexArr.push(mesh.vertexArr[v]);
+                if(mesh.normalArr && mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
+                if(mesh.colorArr && mesh.colorArr[v]) slice.colorArr.push(mesh.colorArr[v]);
             }
-            
-            if(slice.vertexArr.length >= MAXVERT) {
-                //new slice
-                slices.push({vertexArr: [], normalArr: [], faceArr: []});
-                if(mesh.colorArr) slices.colorArr = [];
-                currentSlice++;
-            }
+            slice.faceArr.push(vertIndex[v]);
         }
-        return slices;
-    };
+        
+        if(slice.vertexArr.length >= MAXVERT) {
+            //new slice
+            slices.push({vertexArr: [], normalArr: [], faceArr: []});
+            if(mesh.colorArr) slices.colorArr = [];
+            currentSlice++;
+        }
+    }
+    return slices;
+};
 
