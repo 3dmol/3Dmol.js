@@ -8,7 +8,7 @@ $3Dmol.workerString = function(){
         {
             self.atomData = obj.atoms;
             self.volume = obj.volume;
-            self.ps = new $3Dmol.ProteinSurface();
+            self.ps = new ProteinSurface();  // jshint ignore:line
         } else {
             var ps = self.ps;
             ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);

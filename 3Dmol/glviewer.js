@@ -3693,11 +3693,11 @@ $3Dmol.GLViewer = (function() {
                         //convert volumetric data into colors
                         const scheme = mat.volscheme;
                         const voldata = mat.voldata;
-                        const colorfunc = $3Dmol.CC.color;
+                        const cc = $3Dmol.CC;
                         const range = scheme.range() || [-1,1];
                         surfArr[i].geo.setColors(function(x,y,z) {
                             let val = voldata.getVal(x,y,z);
-                            let col =  colorfunc(scheme.valueToHex(val, range));
+                            let col =  cc.color(scheme.valueToHex(val, range));
                             return col;
                         });
                     }

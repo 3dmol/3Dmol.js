@@ -500,7 +500,7 @@ $3Dmol.Parsers = (function() {
                                       0,                             0,               0, 1);
       
       matrix.multiplyScalar(lattice.length);
-  
+      atoms.modelData = [{symmetries:[], cryst:{matrix:matrix}}];  
       var atomSymbols=lines[5].replace(/\s+/, "").replace(/\s+$/,"").split(/\s+/);
       var atomSpeciesNumber=new Int16Array(lines[6].replace(/^\s+/, "").split(/\s+/));
       var vaspMode=lines[7].replace(/\s+/, "");
@@ -1760,7 +1760,7 @@ $3Dmol.Parsers = (function() {
 
         var atoms = [[]];
         var computeStruct = !options.noSecondaryStructure;
-        
+        atoms.modelData = [{symmetries:[]}];
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
         var line;
