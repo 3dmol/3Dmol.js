@@ -17,6 +17,8 @@ $3Dmol.MarchingCubeInitializer = function() {
     //to match with protein surface...
     var ISDONE = 2;
     var my = {};
+    var edgeTable, edgeTable2;
+    var triTable, triTable2;
     
     my.march = function(data, verts, faces, spec) {
 
@@ -184,7 +186,7 @@ $3Dmol.MarchingCubeInitializer = function() {
 
     my.laplacianSmooth = function(numiter, verts, faces) {
             var tps = new Array(verts.length);
-            var i, il, j, jl, k, kl;
+            var i, il, j, jl, k;
             for (i = 0, il = verts.length; i < il; i++)
                     tps[i] = {
                         x : 0,
@@ -271,9 +273,9 @@ $3Dmol.MarchingCubeInitializer = function() {
 
             var wt = 1.00;
             var wt2 = 0.50;
-            var ssign;
-            var scaleFactor = 1;
-            var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
+//            var ssign;
+//            var scaleFactor = 1;
+//            var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
             for (k = 0; k < numiter; k++) {
                     for (i = 0, il = verts.length; i < il; i++) {
                             if (vertdeg[0][i] < 3) {
@@ -361,9 +363,9 @@ $3Dmol.MarchingCubeInitializer = function() {
             0xf00, 0xe08, 0xd01, 0xc0a, 0x704, 0x605, 0x50f, 0x406, 0xb02, 0xa0f,
             0x905, 0x80c, 0x30a, 0x203, 0x109, 0x0 ];
     
-    var edgeTable = new Uint32Array(my.edgeTable);
+    edgeTable = new Uint32Array(my.edgeTable);
     
-    var triTable = my.triTable = [ [], [], [], [], [], [], [], [ 11, 9, 8 ], [], [], [],
+    triTable = my.triTable = [ [], [], [], [], [], [], [], [ 11, 9, 8 ], [], [], [],
             [ 8, 10, 9 ], [], [ 10, 8, 11 ], [ 9, 11, 10 ],
             [ 8, 10, 9, 8, 11, 10 ], [], [], [], [ 1, 7, 3 ], [], [ 4, 2, 0 ], [],
             [ 2, 1, 7 ], [], [], [], [ 2, 7, 3, 2, 9, 7 ], [],
@@ -440,7 +442,7 @@ $3Dmol.MarchingCubeInitializer = function() {
             [ 11, 3, 2, 0, 9, 1 ], [ 11, 0, 2, 11, 8, 0 ], [ 11, 3, 2 ],
             [ 8, 1, 3, 8, 9, 1 ], [ 9, 1, 0 ], [ 8, 0, 3 ], [] ];
      
-    var edgeTable2 = [ 0x0, 0x109, 0x203, 0x30a, 0x80c, 0x905, 0xa0f,
+    edgeTable2 = [ 0x0, 0x109, 0x203, 0x30a, 0x80c, 0x905, 0xa0f,
             0xb06, 0x406, 0x50f, 0x605, 0x70c, 0xc0a, 0xd03, 0xe09, 0xf00, 0x190,
             0x99, 0x393, 0x29a, 0x99c, 0x895, 0xb9f, 0xa96, 0x596, 0x49f, 0x795,
             0x69c, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339, 0x33, 0x13a, 0xa3c,
@@ -467,7 +469,7 @@ $3Dmol.MarchingCubeInitializer = function() {
             0x393, 0x99, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a, 0x70c, 0x605, 0x50f,
             0x406, 0xb06, 0xa0f, 0x905, 0x80c, 0x30a, 0x203, 0x109, 0x0 ];
      
-    var triTable2 = [ [], [ 8, 3, 0 ], [ 9, 0, 1 ], [ 8, 3, 1, 8, 1, 9 ],
+    triTable2 = [ [], [ 8, 3, 0 ], [ 9, 0, 1 ], [ 8, 3, 1, 8, 1, 9 ],
             [ 11, 2, 3 ], [ 11, 2, 0, 11, 0, 8 ], [ 11, 2, 3, 0, 1, 9 ],
             [ 2, 1, 11, 1, 9, 11, 11, 9, 8 ], [ 10, 1, 2 ], [ 8, 3, 0, 1, 2, 10 ],
             [ 9, 0, 2, 9, 2, 10 ], [ 3, 2, 8, 2, 10, 8, 8, 10, 9 ],

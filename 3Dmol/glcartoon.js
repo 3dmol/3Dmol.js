@@ -73,15 +73,15 @@ $3Dmol.subdivide_spline = function(_points, DIV) { // points as Vector3
 
         for (var j = 0; j < DIV; j++) {
             var t = 1.0 / DIV * j;
-            var x = p1.x + t * v0.x + t * t
-                    * (-3 * p1.x + 3 * p2.x - 2 * v0.x - v1.x) + t * t * t
-                    * (2 * p1.x - 2 * p2.x + v0.x + v1.x);
-            var y = p1.y + t * v0.y + t * t
-                    * (-3 * p1.y + 3 * p2.y - 2 * v0.y - v1.y) + t * t * t
-                    * (2 * p1.y - 2 * p2.y + v0.y + v1.y);
-            var z = p1.z + t * v0.z + t * t
-                    * (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t
-                    * (2 * p1.z - 2 * p2.z + v0.z + v1.z);
+            var x = p1.x + t * v0.x + t * t *
+                    (-3 * p1.x + 3 * p2.x - 2 * v0.x - v1.x) + t * t * t *
+                    (2 * p1.x - 2 * p2.x + v0.x + v1.x);
+            var y = p1.y + t * v0.y + t * t *
+                    (-3 * p1.y + 3 * p2.y - 2 * v0.y - v1.y) + t * t * t *
+                    (2 * p1.y - 2 * p2.y + v0.y + v1.y);
+            var z = p1.z + t * v0.z + t * t *
+                    (-3 * p1.z + 3 * p2.z - 2 * v0.z - v1.z) + t * t * t *
+                    (2 * p1.z - 2 * p2.z + v0.z + v1.z);
 
             var pt = new $3Dmol.Vector3(x, y, z);
             if(j < DIV/2) {
@@ -113,11 +113,10 @@ $3Dmol.drawCartoon = (function() {
     var coilWidth = 0.5;
     var helixSheetWidth = 1.3;
     var nucleicAcidWidth = 0.8;
-    var arrowTipWidth = 0.1;
     var defaultThickness = 0.4;
 
 
-    var drawThinStrip = function(geo, p1, p2, colors, div, opacity) {
+    var drawThinStrip = function(geo, p1, p2, colors) {
 
         var offset, vertoffset;
         var color, colori;
@@ -127,7 +126,7 @@ $3Dmol.drawCartoon = (function() {
             colori = Math.round(i * (colors.length - 1) / lim);
             color = $3Dmol.CC.color(colors[colori]);
 
-            geoGroup = geo.updateGeoGroup(2);
+            var geoGroup = geo.updateGeoGroup(2);
             var vertexArray = geoGroup.vertexArray;
             var colorArray = geoGroup.colorArray;
             var faceArray = geoGroup.faceArray;
@@ -177,10 +176,9 @@ $3Dmol.drawCartoon = (function() {
         if (num < 2 || points[0].length < 2)
             return;
 
-        div = div || axisDIV;
         for (i = 0; i < num; i++) { // spline to generate greater length-wise
                                     // resolution
-            points[i] = $3Dmol.subdivide_spline(points[i], div)
+            points[i] = $3Dmol.subdivide_spline(points[i], div);
         }
         len = points[0].length;
 
@@ -194,8 +192,8 @@ $3Dmol.drawCartoon = (function() {
         // cache the available cross-sectional shapes
         var cs_ellipse = [], cs_rectangle = [], cs_parabola = [];
         for (j = 0; j < num; j++) {
-            cs_ellipse.push(0.25 + 1.5
-                    * Math.sqrt((num - 1) * j - Math.pow(j, 2)) / (num - 1));
+            cs_ellipse.push(0.25 + 1.5 *
+                    Math.sqrt((num - 1) * j - Math.pow(j, 2)) / (num - 1));
             cs_rectangle.push(0.5);
             cs_parabola.push(2 * (Math.pow(j / num, 2) - j / num) + 0.6);
         }
@@ -228,11 +226,12 @@ $3Dmol.drawCartoon = (function() {
                 j - 2 * num ];
 
         var v_offset, va_offset, f_offset;
-        var currentAtom, lastAtom
+        var currentAtom, lastAtom;
         var color, colori;
         var geoGroup = geo.updateGeoGroup(2 * num * len); // ensure vertex
                                                             // capacity
-
+        var vertexArray,colorArray,faceArray, face;
+        
         for (i = 0; i < len; i++) {
 
             colori = Math.round(i * (colors.length - 1) / len);
@@ -297,9 +296,9 @@ $3Dmol.drawCartoon = (function() {
              * xyz or rgb component.
              */
 
-            var vertexArray = geoGroup.vertexArray;
-            var colorArray = geoGroup.colorArray;
-            var faceArray = geoGroup.faceArray;
+            vertexArray = geoGroup.vertexArray;
+            colorArray = geoGroup.colorArray;
+            faceArray = geoGroup.faceArray;
             v_offset = geoGroup.vertices;
             va_offset = v_offset * 3; // in case geoGroup already contains
                                         // vertices
@@ -315,12 +314,9 @@ $3Dmol.drawCartoon = (function() {
             // add these backwards, so that each cross-section's vertices are
             // added sequentially to vertexArray
             for (j = 0; j < num; j++) {
-                vertexArray[va_offset + 3 * j + 0 + 3 * num] = cs_top[num - 1
-                        - j].x;
-                vertexArray[va_offset + 3 * j + 1 + 3 * num] = cs_top[num - 1
-                        - j].y;
-                vertexArray[va_offset + 3 * j + 2 + 3 * num] = cs_top[num - 1
-                        - j].z;
+                vertexArray[va_offset + 3 * j + 0 + 3 * num] = cs_top[num-1-j].x;
+                vertexArray[va_offset + 3 * j + 1 + 3 * num] = cs_top[num-1-j].y;
+                vertexArray[va_offset + 3 * j + 2 + 3 * num] = cs_top[num-1-j].z;
             }
 
             for (j = 0; j < 2 * num; ++j) {
@@ -335,7 +331,7 @@ $3Dmol.drawCartoon = (function() {
 
                     // get VERTEX indices of the 4 points of a rectangular face
                     // (as opposed to literal vertexArray indices)
-                    var face = [ v_offset + face_refs[j][0],
+                    face = [ v_offset + face_refs[j][0],
                             v_offset + face_refs[j][1],
                             v_offset + face_refs[j][2],
                             v_offset + face_refs[j][3] ];
@@ -391,16 +387,16 @@ $3Dmol.drawCartoon = (function() {
         }
 
         // for terminal faces
-        var vertexArray = geoGroup.vertexArray;
-        var colorArray = geoGroup.colorArray;
-        var faceArray = geoGroup.faceArray;
+        vertexArray = geoGroup.vertexArray;
+        colorArray = geoGroup.colorArray;
+        faceArray = geoGroup.faceArray;
         v_offset = geoGroup.vertices;
         va_offset = v_offset * 3;
         f_offset = geoGroup.faceidx;
 
         for (i = 0; i < num - 1; i++) // "rear" face
         {
-            var face = [ i, i + 1, 2 * num - 2 - i, 2 * num - 1 - i ];
+            face = [ i, i + 1, 2 * num - 2 - i, 2 * num - 1 - i ];
 
             f_offset = geoGroup.faceidx;
 
@@ -417,7 +413,7 @@ $3Dmol.drawCartoon = (function() {
 
         for (i = 0; i < num - 1; i++) // "front" face
         {
-            var face = [ v_offset - 1 - i, v_offset - 2 - i,
+            face = [ v_offset - 1 - i, v_offset - 2 - i,
                     v_offset - 2 * num + i + 1, v_offset - 2 * num + i ];
 
             f_offset = geoGroup.faceidx;
@@ -443,14 +439,13 @@ $3Dmol.drawCartoon = (function() {
         p1 = points[0];
         p2 = points[points.length - 1];
 
-        div = div || axisDIV;
         p1 = $3Dmol.subdivide_spline(p1, div);
         p2 = $3Dmol.subdivide_spline(p2, div);
         if (!thickness)
             return drawThinStrip(geo, p1, p2, colors, div, opacity);
 
         // var vs = geo.vertices, fs = geo.faces;
-        var vs = [], fs = [];
+        var vs = [];
         var axis, p1v, p2v, a1v, a2v;
 
         var faces = [ [ 0, 2, -6, -8 ], [ -4, -2, 6, 4 ], [ 7, -1, -5, 3 ],
@@ -461,7 +456,7 @@ $3Dmol.drawCartoon = (function() {
         var currentAtom, lastAtom;
         var i, lim, j;
         var face1, face2, face3;
-        var geoGroup;
+        var geoGroup, vertexArray, colorArray, faceArray;
 
         for (i = 0, lim = p1.length; i < lim; i++) {
 
@@ -487,9 +482,9 @@ $3Dmol.drawCartoon = (function() {
                 currentAtom = p1v.atom;
 
             geoGroup = geo.updateGeoGroup(8);
-            var vertexArray = geoGroup.vertexArray;
-            var colorArray = geoGroup.colorArray;
-            var faceArray = geoGroup.faceArray;
+            vertexArray = geoGroup.vertexArray;
+            colorArray = geoGroup.colorArray;
+            faceArray = geoGroup.faceArray;
             offset = geoGroup.vertices;
             vertoffset = offset * 3;
 
@@ -636,9 +631,9 @@ $3Dmol.drawCartoon = (function() {
         var vsize = vs.length - 8; // Cap
 
         geoGroup = geo.updateGeoGroup(8);
-        var vertexArray = geoGroup.vertexArray;
-        var colorArray = geoGroup.colorArray;
-        var faceArray = geoGroup.faceArray;
+        vertexArray = geoGroup.vertexArray;
+        colorArray = geoGroup.colorArray;
+        faceArray = geoGroup.faceArray;
         offset = geoGroup.vertices;
         vertoffset = offset * 3;
         faceoffset = geoGroup.faceidx;
@@ -687,115 +682,6 @@ $3Dmol.drawCartoon = (function() {
         geoGroup.vertices += 8;
 
         // TODO: Add intersection planes for caps
-
-        // HalfEdgeRec used to store adjacency info of mesh
-        var HalfEdge = function(vertIdx) {
-            this.vert = vertIdx; // Vertex index at the end of this half-edge
-            this.twin = null; // Oppositely oriented adjacent half-edge
-            this.next = null; // Next half-edge around the face
-        };
-
-        var computeAdjacency = function(faces, faceCount, vertCount) {
-            // all pieces of the half-edge data structure
-            edges = [];
-
-            // a hash table to hold the adjacency info
-            // - Keys are pairs of vertex indices
-            // - Values are pointers to half-edge
-            var edgeTable = {};
-            var len = 0;
-
-            // Plow through faces and fill all half-edge info except twin
-            // pointers:
-            for (var i = 0; i < faceCount; i += 3) {
-                var A = faces[i];
-                var B = faces[i + 1];
-                var C = faces[i + 2];
-                // console.log("A="+A+ " B="+ B+ " C="+C);
-
-                // create the half-edge that goes from C to A
-                var CA = new HalfEdge(A);
-                edges.push(CA);
-                // create the half-edge that goes from A to B
-                var AB = new HalfEdge(B);
-                edges.push(AB);
-                // create the half-edge that goes from B to C
-                var BC = new HalfEdge(C);
-                edges.push(BC);
-
-                CA.next = AB;
-                AB.next = BC;
-                BC.next = CA;
-
-                edgeTable[C | (A << 16)] = CA;
-                edgeTable[A | (B << 16)] = AB;
-                edgeTable[B | (C << 16)] = BC;
-            }
-
-            // verify that the mesh is clean
-            for ( var key in edgeTable) {
-                if (edgeTable.hasOwnProperty(key)) {
-                    len++;
-                }
-            }
-            if (len != faceCount * 3) {
-                console
-                        .warn("Bad mesh: duplicated edges or inconsistent winding.len="
-                                + len
-                                + " faceCount="
-                                + faceCount
-                                + " vertCount=" + vertCount);
-            }
-
-            // Populate the twin pointers by iterating over the hash table
-            var boundaryCount = 0;
-            for ( var key in edgeTable) {
-                if (edgeTable.hasOwnProperty(key)) {
-                    var twinKey = ((key & 0xffff) << 16) | (key >> 16);
-                    if (edgeTable.hasOwnProperty(twinKey)) {
-                        edgeTable[key].twin = edgeTable[twinKey];
-                        edgeTable[twinKey].twin = edgeTable[key];
-                    } else {
-                        boundaryCount += 1;
-                    }
-                }
-            }
-
-            var ret = new Uint16Array(faceCount * 6);
-            // Now that we have a half-edge structure, it's easy to create
-            // adjacency info for WebGL
-            if (boundaryCount > 0) {
-                console.log("Mesh is not watertight. Contains " + boundaryCount
-                        + " edges");
-
-                for (var i = 0; i < faceCount; i += 3) {
-                    ret[i * 2 + 0] = edges[i + 2].vert;
-                    ret[i * 2 + 1] = edges[i + 0].twin == null ? ret[i * 2 + 0]
-                            : edges[i + 0].twin.next.vert;
-                    ret[i * 2 + 2] = edges[i + 0].vert;
-                    ret[i * 2 + 3] = edges[i + 1].twin == null ? ret[i * 2 + 1]
-                            : edges[i + 1].twin.next.vert;
-                    ret[i * 2 + 4] = edges[i + 1].vert;
-                    ret[i * 2 + 5] = edges[i + 2].twin == null ? ret[i * 2 + 2]
-                            : edges[i + 2].twin.next.vert;
-                }
-            } else {
-                for (var i = 0; i < faceCount; i += 3) {
-                    ret[i * 2 + 0] = edges[i + 2].vert;
-                    ret[i * 2 + 1] = edges[i + 0].twin.next.vert;
-                    ret[i * 2 + 2] = edges[i + 0].vert;
-                    ret[i * 2 + 3] = edges[i + 1].twin.next.vert;
-                    ret[i * 2 + 4] = edges[i + 1].vert;
-                    ret[i * 2 + 5] = edges[i + 2].twin.next.vert;
-                }
-            }
-
-            return ret;
-        };
-
-        // geoGroup.adjFaceArray =
-        // computeAdjacency(faceArray,faceArray.length,offset);
-
     };
 
     // TODO: Need to update this (will we ever use this?)
@@ -806,12 +692,6 @@ $3Dmol.drawCartoon = (function() {
         div = (div === undefined) ? 5 : div;
 
         var geo = new $3Dmol.Geometry();
-        var points = $3Dmol.subdivide_spline(_points, div);
-        /*
-         * for ( var i = 0; i < points.length; i++) {
-         * geo.vertices.push(points[i]); geo.colors.push($3Dmol.color(colors[(i ==
-         * 0) ? 0 : Math.round((i - 1) / div)])); }
-         */
         var lineMaterial = new $3Dmol.LineBasicMaterial({
             linewidth : width
         });
@@ -827,24 +707,22 @@ $3Dmol.drawCartoon = (function() {
             shape = "rectangle";
         if (shape === 'edged')
             drawPlainStrip(geo, points, colors, div, thickness, opacity);
-        else if (shape === "rectangle" || shape === "oval"
-                || shape === "parabola")
+        else if (shape === "rectangle" || shape === "oval" || shape === "parabola")
             drawShapeStrip(geo, points, colors, div, thickness, opacity, shape);
-    }
+    };
 
     // check if given atom is an alpha carbon
     var isAlphaCarbon = function(atom) {
         return atom && atom.elem === "C" && atom.atom === "CA"; // note that
                                                                 // calcium is
                                                                 // also CA
-    }
+    };
 
     // check whether two atoms are members of the same residue or subsequent,
     // connected residues (a before b)
     var inConnectedResidues = function(a, b) {
         if (a && b && a.chain === b.chain) {
-            if ((a.reschain === b.reschain)
-                    && (a.resi === b.resi || a.resi === b.resi - 1))
+            if ((a.reschain === b.reschain) && (a.resi === b.resi || a.resi === b.resi - 1))
                 return true;
             if (a.resi < b.resi) {
                 // some PDBs have gaps in the numbering but the residues are
@@ -861,7 +739,7 @@ $3Dmol.drawCartoon = (function() {
 
         return false;
 
-    }
+    };
 
     // add geo to the group
     var setGeo = function(group, geo, opacity, outline, setNormals) {
@@ -883,6 +761,128 @@ $3Dmol.drawCartoon = (function() {
         group.add(cartoonMesh);
     };
 
+    var addBackbonePoints = function(points, num, smoothen, backbonePt,
+            orientPt, prevOrientPt, backboneAtom, atoms, atomi) {
+        var widthScalar, i, delta, v, addArrowPoints, testStyle;
+
+
+        if (!backbonePt || !orientPt || !backboneAtom)
+            return;
+
+        // the side vector points along the axis from backbone atom to
+        // orientation atom (eg. CA to O, in peptides)
+        var sideVec = orientPt.sub(backbonePt);
+        sideVec.normalize();
+
+        //find next atom like this one
+        var forwardVec = atoms[atomi];
+        for(i = atomi+1; i < atoms.length; i++) {
+            forwardVec = atoms[i];
+            if(forwardVec.atom == backboneAtom.atom)
+                break;
+        }
+        // the forward vector points along the axis from backbone atom to next
+        // backbone atom
+        forwardVec = forwardVec ? new $3Dmol.Vector3(forwardVec.x,
+                forwardVec.y, forwardVec.z) : new $3Dmol.Vector3(0, 0, 0);
+        forwardVec.sub(backbonePt);
+
+        // adjustments for proper beta arrow appearance
+        if (backboneAtom.ss === "arrow start") {
+            var adjustment = forwardVec.clone().multiplyScalar(0.3).cross(
+                    orientPt); // adjust perpendicularly to strand face
+            backbonePt.add(adjustment);
+
+            var upVec = forwardVec.clone().cross(sideVec).normalize();
+            sideVec.rotateAboutVector(upVec, 0.43);
+        }
+
+        // determine from cartoon style or secondary structure how wide the
+        // strand should be here
+        // ribbon shape should have same width as thickness
+        if (backboneAtom.style.cartoon.ribbon) {
+            widthScalar = backboneAtom.style.cartoon.thickness || defaultThickness;
+
+        } else // depending on secondary structure, multiply the orientation
+                // vector by some scalar
+        {
+            if (!backboneAtom.style.cartoon.width) {
+                if (backboneAtom.ss === "c") {
+                    if (backboneAtom.atom === "P")
+                        widthScalar = nucleicAcidWidth;
+                    else
+                        widthScalar = coilWidth;
+                } else if (backboneAtom.ss === "arrow start") {
+                    widthScalar = helixSheetWidth;
+                    addArrowPoints = true;
+
+                } else if (backboneAtom.ss === "arrow end")
+                    widthScalar = coilWidth;
+
+                else if (backboneAtom.ss === "h" &&
+                        backboneAtom.style.cartoon.tubes ||
+                        backboneAtom.ss === "tube start")
+                    widthScalar = coilWidth;
+
+                else
+                    widthScalar = helixSheetWidth;
+            } else
+                widthScalar = backboneAtom.style.cartoon.width;
+        }
+
+        // make sure the strand orientation doesn't twist more than 90 degrees
+        if (prevOrientPt != null && sideVec.dot(prevOrientPt) < 0)
+            sideVec.negate();
+
+        sideVec.multiplyScalar(widthScalar);
+        for (i = 0; i < num; i++) {
+            // produces NUM incremental points from backbone atom minus
+            // orientation vector
+            // to backbone atom plus orientation vector
+            delta = -1 + i * 2 / (num - 1); // -1 to 1 incrementing by num
+            v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
+                    backbonePt.y + delta * sideVec.y, backbonePt.z + delta * sideVec.z);
+            v.atom = backboneAtom;
+            if (smoothen && backboneAtom.ss === "s")
+                v.smoothen = true;
+            points[i].push(v); // a num-length array of arrays, where each
+                                // inner array contains length-wise points
+            // along the backbone offset by some constant pertaining to its cell
+            // in the outer array
+        }
+
+        if (addArrowPoints) {
+
+            sideVec.multiplyScalar(2);
+            for (i = 0; i < num; i++) {
+                delta = -1 + i * 2 / (num - 1); // -1 to 1 incrementing by num
+                v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
+                        backbonePt.y + delta * sideVec.y, backbonePt.z + delta * sideVec.z);
+                v.atom = backboneAtom;
+                v.smoothen = false;
+                v.skip = true;
+                points[i].push(v);
+            }
+        }
+
+        // make sure the strand is all the same style
+        testStyle = backboneAtom.style.cartoon.style || 'default';
+        if (points.style) {
+            if (points.style != testStyle) {
+                console
+                        .log("Warning: a cartoon chain's strand-style is ambiguous");
+                points.style = 'default';
+            }
+
+        } else
+            points.style = testStyle;
+
+        // revert ss keywords used for arrow rendering back to original value
+        if (backboneAtom.ss === "arrow start" || backboneAtom.ss === "arrow end")
+            backboneAtom.ss = "s";
+
+        return addArrowPoints;
+    };
     
     // proteins na backbone na terminus nucleobases
     var cartoonAtoms = { "C":true, "CA":true, "O":true, "P":true, "OP2": true, 
@@ -898,7 +898,7 @@ $3Dmol.drawCartoon = (function() {
         num = num || defaultNum;
         div = div || defaultDiv;
 
-        var cartoon, prev, curr, next, currColor, nextColor, thickness, i, nextResAtom, arrow;
+        var cartoon, prev, curr, next, currColor, nextColor, thickness, i;
         var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
         var tubeStart, tubeEnd, drawingTube;
         var shapeGeo = new $3Dmol.Geometry(true); // for shapes that don't need normals computed
@@ -921,21 +921,20 @@ $3Dmol.drawCartoon = (function() {
                 if(cartoon.colorscheme in gradients) {
                     return gradients[cartoon.colorscheme].valueToHex(next.resi);
                 } else {
-                    return gradients['sinebow'].valueToHex(next.resi);
+                    return gradients.sinebow.valueToHex(next.resi);
                 }
             }
             else {
                 return $3Dmol.getColorFromStyle(next, cartoon).getHex();
             }
-        }
+        };
 
-        for (var i = 0; i < num; i++)
+        for ( i = 0; i < num; i++)
             points[i] = [];
 
         // first determine where beta sheet arrows and alpha helix tubes belong
         var inSheet = false;
         var inHelix = false; //only considering tube styled helices
-        i = 0;
         var atoms = [];
         for (i in atomList) {
             next = atomList[i];
@@ -946,8 +945,7 @@ $3Dmol.drawCartoon = (function() {
                 if (connected && next.ss === "s") {
                     inSheet = true;
                 } else if (inSheet) {
-                    if (curr && prev && curr.style.cartoon.arrows
-                            && prev.style.cartoon.arrows) {
+                    if (curr && prev && curr.style.cartoon.arrows && prev.style.cartoon.arrows) {
                         curr.ss = "arrow end";
                         prev.ss = "arrow start";
                     }
@@ -989,13 +987,13 @@ $3Dmol.drawCartoon = (function() {
                         points.style);
             }
             
+            var saved = [], savedc = null;
             if(connect) {
                 //recycle last point to first point of next points array
-                var saved = [];
                 for(i = 0; i < num; i++) {
                     saved[i] = points[i][points[i].length-1];
                 }
-                var savedc = colors[colors.length-1];
+                savedc = colors[colors.length-1];
             }
             points = [];
             for (i = 0; i < num; i++)
@@ -1052,8 +1050,7 @@ $3Dmol.drawCartoon = (function() {
                  */
                 if (next.hetflag) 
                     ; //ignore non-protein atoms
-                else if (next.elem === 'C' && next.atom === 'CA' || inNucleicAcid
-                        && next.atom === "P") {
+                else if (next.elem === 'C' && next.atom === 'CA' || inNucleicAcid && next.atom === "P") {
                     // determine cylinder color
                     nextColor = cartoonColor(next, cartoon);                    
 
@@ -1092,8 +1089,7 @@ $3Dmol.drawCartoon = (function() {
             } else // draw default-style cartoons based on secondary structure
             {
                 // draw backbone through these atoms
-                if (isAlphaCarbon(next) || inNucleicAcid
-                        && (next.atom === "P" || next.atom.indexOf('O5') == 0)) {
+                if (isAlphaCarbon(next) || inNucleicAcid && (next.atom === "P" || next.atom.indexOf('O5') == 0)) {
                     if (drawingTube) {
                         if (next.ss === "tube end") {
                             drawingTube = false;
@@ -1118,8 +1114,7 @@ $3Dmol.drawCartoon = (function() {
                     }
 
                     // end of a chain of connected residues (of same style)
-                    if (curr && (!inConnectedResidues(curr, next)
-                                    || curr.ss === "tube start")) {
+                    if (curr && (!inConnectedResidues(curr, next) || curr.ss === "tube start")) {
                         if (curr.ss === "tube start") {
                             drawingTube = true;
                             tubeStart = new $3Dmol.Vector3(curr.x, curr.y,
@@ -1164,8 +1159,7 @@ $3Dmol.drawCartoon = (function() {
                     }
 
                     // reached next residue (potentially the first residue)
-                    if (curr === undefined || curr.rescode != next.rescode
-                            || curr.resi != next.resi) {
+                    if (curr === undefined || curr.rescode != next.rescode || curr.resi != next.resi) {
                         if (baseEndPt) // draw last NA residue's base
                         {
                             // start the cylinder at the midpoint between
@@ -1201,8 +1195,8 @@ $3Dmol.drawCartoon = (function() {
                     }
 
                     // click handling
-                    if ((next.clickable === true || next.hoverable === true)
-                            && (next.intersectionShape === undefined || next.intersectionShape.triangle === undefined))
+                    if ((next.clickable === true || next.hoverable === true) &&
+                            (next.intersectionShape === undefined || next.intersectionShape.triangle === undefined))
                         next.intersectionShape = {
                             sphere : null,
                             cylinder : [],
@@ -1211,11 +1205,11 @@ $3Dmol.drawCartoon = (function() {
                         };
                 }
                 // atoms used to orient the backbone strand
-                else if (isAlphaCarbon(curr) && next.atom === "O"
-                        || inNucleicAcid && curr.atom === "P"
-                        && (next.atom === "OP2" || next.atom === "O2P")
-                        || inNucleicAcid && curr.atom.indexOf("O5") == 0
-                        && next.atom.indexOf("C5") == 0) {
+                else if (isAlphaCarbon(curr) && next.atom === "O" ||
+                        inNucleicAcid && curr.atom === "P" &&
+                        (next.atom === "OP2" || next.atom === "O2P") ||
+                        inNucleicAcid && curr.atom.indexOf("O5") == 0 &&
+                        next.atom.indexOf("C5") == 0) {
                     orientPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     orientPt.resi = next.resi;
                     if (next.atom === "OP2" || next.atom === "O2P") // for NA 3'
@@ -1232,8 +1226,8 @@ $3Dmol.drawCartoon = (function() {
 
                 // atoms used for drawing the NA base cylinders (diff for
                 // purines and pyramidines)
-                else if ((next.atom === "N1" && (nextresn in purResns))
-                        || (next.atom === "N3" && (nextresn in pyrResns))) {
+                else if ((next.atom === "N1" && (nextresn in purResns)) ||
+                         (next.atom === "N3" && (nextresn in pyrResns))) {
                     baseEndPt = new $3Dmol.Vector3(next.x, next.y, next.z);
                     baseEndPt.color = $3Dmol.getColorFromStyle(next, cartoon)
                             .getHex();
@@ -1273,138 +1267,11 @@ $3Dmol.drawCartoon = (function() {
         flushGeom();    
     };
 
-    var addBackbonePoints = function(points, num, smoothen, backbonePt,
-            orientPt, prevOrientPt, backboneAtom, atoms, atomi) {
-        var widthScalar, i, delta, v, addArrowPoints, testOpacity, testStyle;
-
-
-        if (!backbonePt || !orientPt || !backboneAtom)
-            return;
-
-        // the side vector points along the axis from backbone atom to
-        // orientation atom (eg. CA to O, in peptides)
-        var sideVec = orientPt.sub(backbonePt);
-        sideVec.normalize();
-
-        //find next atom like this one
-        var forwardVec = atoms[atomi];
-        for(var i = atomi+1; i < atoms.length; i++) {
-            forwardVec = atoms[i];
-            if(forwardVec.atom == backboneAtom.atom)
-                break;
-        }
-        // the forward vector points along the axis from backbone atom to next
-        // backbone atom
-        forwardVec = forwardVec ? new $3Dmol.Vector3(forwardVec.x,
-                forwardVec.y, forwardVec.z) : new $3Dmol.Vector3(0, 0, 0);
-        forwardVec.sub(backbonePt);
-
-        // adjustments for proper beta arrow appearance
-        if (backboneAtom.ss === "arrow start") {
-            var adjustment = forwardVec.clone().multiplyScalar(0.3).cross(
-                    orientPt); // adjust perpendicularly to strand face
-            backbonePt.add(adjustment);
-
-            var upVec = forwardVec.clone().cross(sideVec).normalize();
-            sideVec.rotateAboutVector(upVec, 0.43);
-        }
-
-        // determine from cartoon style or secondary structure how wide the
-        // strand should be here
-        // ribbon shape should have same width as thickness
-        if (backboneAtom.style.cartoon.ribbon) {
-            widthScalar = backboneAtom.style.cartoon.thickness
-                    || defaultThickness;
-
-        } else // depending on secondary structure, multiply the orientation
-                // vector by some scalar
-        {
-            if (!backboneAtom.style.cartoon.width) {
-                if (backboneAtom.ss === "c") {
-                    if (backboneAtom.atom === "P")
-                        widthScalar = nucleicAcidWidth;
-                    else
-                        widthScalar = coilWidth;
-                } else if (backboneAtom.ss === "arrow start") {
-                    widthScalar = helixSheetWidth;
-                    addArrowPoints = true;
-
-                } else if (backboneAtom.ss === "arrow end")
-                    widthScalar = coilWidth;
-
-                else if (backboneAtom.ss === "h"
-                        && backboneAtom.style.cartoon.tubes
-                        || backboneAtom.ss === "tube start")
-                    widthScalar = coilWidth;
-
-                else
-                    widthScalar = helixSheetWidth;
-            } else
-                widthScalar = backboneAtom.style.cartoon.width;
-        }
-
-        // make sure the strand orientation doesn't twist more than 90 degrees
-        if (prevOrientPt != null && sideVec.dot(prevOrientPt) < 0)
-            sideVec.negate();
-
-        sideVec.multiplyScalar(widthScalar);
-        for (i = 0; i < num; i++) {
-            // produces NUM incremental points from backbone atom minus
-            // orientation vector
-            // to backbone atom plus orientation vector
-            delta = -1 + i * 2 / (num - 1); // -1 to 1 incrementing by num
-            v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
-                    backbonePt.y + delta * sideVec.y, backbonePt.z + delta
-                            * sideVec.z);
-            v.atom = backboneAtom;
-            if (smoothen && backboneAtom.ss === "s")
-                v.smoothen = true;
-            points[i].push(v); // a num-length array of arrays, where each
-                                // inner array contains length-wise points
-            // along the backbone offset by some constant pertaining to its cell
-            // in the outer array
-        }
-
-        if (addArrowPoints) {
-
-            sideVec.multiplyScalar(2);
-            for (i = 0; i < num; i++) {
-                delta = -1 + i * 2 / (num - 1); // -1 to 1 incrementing by num
-                v = new $3Dmol.Vector3(backbonePt.x + delta * sideVec.x,
-                        backbonePt.y + delta * sideVec.y, backbonePt.z + delta
-                                * sideVec.z);
-                v.atom = backboneAtom;
-                v.smoothen = false;
-                v.skip = true;
-                points[i].push(v);
-            }
-        }
-
-        // make sure the strand is all the same style
-        testStyle = backboneAtom.style.cartoon.style || 'default';
-        if (points.style) {
-            if (points.style != testStyle) {
-                console
-                        .log("Warning: a cartoon chain's strand-style is ambiguous");
-                points.style = 'default';
-            }
-
-        } else
-            points.style = testStyle;
-
-        // revert ss keywords used for arrow rendering back to original value
-        if (backboneAtom.ss === "arrow start"
-                || backboneAtom.ss === "arrow end")
-            backboneAtom.ss = "s";
-
-        return addArrowPoints;
-    };
-
     var defaultDrawCartoon = function(group, atomList, gradientrange, quality) {
         quality = quality || 5;
         drawCartoon(group, atomList, gradientrange, true,
                 false, quality, quality);
-    }
+    };
 
     return defaultDrawCartoon;
 })();

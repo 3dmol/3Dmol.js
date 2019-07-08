@@ -380,9 +380,9 @@ $3Dmol.Vector3.prototype =  {
         t2.y = t.z * qx - t.x * qz;
         t2.z = t.x * qy - t.y * qx;
         
-        this.x = x + q.w*t.x + t2.x;
-        this.y = y + q.w*t.y + t2.y;
-        this.z = z + q.w*t.z + t2.z;
+        this.x = x + qw*t.x + t2.x;
+        this.y = y + qw*t.y + t2.y;
+        this.z = z + qw*t.z + t2.z;
         
         return this;
     },
@@ -447,8 +447,10 @@ $3Dmol.Vector3.prototype =  {
 
         var te = m.elements;
         var m11 = te[0], m12 = te[4], m13 = te[8];
-        var m21 = te[1], m22 = te[5], m23 = te[9];
-        var m31 = te[2], m32 = te[6], m33 = te[10];
+        //var m21 = te[1];
+        var m22 = te[5], m23 = te[9];
+        //var m31 = te[2];
+        var m32 = te[6], m33 = te[10];
 
         if ( order === undefined || order === 'XYZ' ) {
 
@@ -483,7 +485,7 @@ $3Dmol.Vector3.prototype =  {
         // Rodrigues' rotation formula, from wikipedia
 
         var term1 = this.clone().multiplyScalar(cosang);
-        var term2 = (axis.clone().cross(this)).multiplyScalar(sinang)
+        var term2 = (axis.clone().cross(this)).multiplyScalar(sinang);
         var term3 = axis.clone().multiplyScalar(axis.clone().dot(this)).multiplyScalar(1-cosang);
 
         var rot = term1.add(term2).add(term3);
@@ -1265,7 +1267,7 @@ $3Dmol.Ray.prototype = {
         
     },
     
-    distanceToPoint : function(point) {
+    distanceToPoint : function() {
         
         var v1 = new $3Dmol.Vector3();
         

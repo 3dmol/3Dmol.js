@@ -8,7 +8,7 @@ $3Dmol.workerString = function(){
         {
             self.atomData = obj.atoms;
             self.volume = obj.volume;
-            self.ps = new ProteinSurface();
+            self.ps = new ProteinSurface();  // jshint ignore:line
         } else {
             var ps = self.ps;
             ps.initparm(obj.expandedExtent, (type == 1) ? false : true, self.volume);
@@ -34,5 +34,5 @@ $3Dmol.workerString += ",MarchingCube=("+$3Dmol.MarchingCubeInitializer.toString
 
 $3Dmol.SurfaceWorker = window.URL ? window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'})) : {postMessage:function(){}};
 
-$3Dmol['workerString'] = $3Dmol.workerString;
-$3Dmol['SurfaceWorker'] = $3Dmol.SurfaceWorker;
+$3Dmol.workerString = $3Dmol.workerString;
+$3Dmol.SurfaceWorker = $3Dmol.SurfaceWorker;

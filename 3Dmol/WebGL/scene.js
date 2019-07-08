@@ -50,7 +50,7 @@ $3Dmol.Scene.prototype.__addObject = function(object) {
             var idx = this.__objectsRemoved.indexOf(object);
             
             if (idx !== -1)
-                this.__objectsRemoved.splice(i, 1);
+                this.__objectsRemoved.splice(idx, 1);
                 
         }
     }

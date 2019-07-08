@@ -178,7 +178,7 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
     if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
         if(atom.resn && atom.atom) {
             var key = atom.resn+":"+atom.atom;
-            atom.properties['partialCharge'] = $3Dmol.partialCharges[key];
+            atom.properties.partialCharge = $3Dmol.partialCharges[key];
         }
     }
 };
