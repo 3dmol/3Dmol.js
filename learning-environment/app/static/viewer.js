@@ -716,7 +716,6 @@ var render = function(surfaceEdited){
     glviewer.setStyle({},{line:{}});
     runcmds(url.split("&"),glviewer,surfaceEdited);
     glviewer.render();
-    // glviewer.setView(glviewer.getView(), undefined, update_callback)
 }
 //these functions all edit the query object 
 var addSelection = function(type){

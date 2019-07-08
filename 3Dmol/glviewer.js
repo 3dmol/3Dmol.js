@@ -1,7 +1,6 @@
 //a molecular viewer based on GLMol
 
 
-
 /**
  * WebGL-based 3Dmol.js viewer
  * Note: The preferred method of instantiating a GLViewer is through {@link $3Dmol.createViewer} 
@@ -75,7 +74,7 @@ $3Dmol.GLViewer = (function() {
         // set dimensions
         // $(container).width(WIDTH);
         // $(container).height(HEIGHT);
-
+        var setViewUpdateCallback = null;
        
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
@@ -322,8 +321,13 @@ $3Dmol.GLViewer = (function() {
                     && typeof (selected.hover_callback) === "function") {
                 selected.hover_callback(selected, _viewer, event, container);
             }  
+            
         };
         
+        this.setViewChangeCallback = function(callback) {
+            if(!setViewUpdateCallback) 
+                setViewUpdateCallback = callback;
+        };
         //checks for selection intersects on hover
         var handleHoverSelection = function(mouseX, mouseY, event){
             if(hoverables.length == 0) return;
@@ -550,8 +554,9 @@ $3Dmol.GLViewer = (function() {
             }
             rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);            
             show();
-            if(typeof(setViewUpdateCallback)==='function')
-            setViewUpdateCallback(_viewer.getView())
+            if(typeof(setViewUpdateCallback)==='function') {
+                setViewUpdateCallback(_viewer.getView());
+            }
         };        
         /**
          * Return image URI of viewer contents (base64 encoded).
@@ -671,8 +676,10 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.quaternion.multiply(cq);
             }
             show();
-            if(typeof(setViewUpdateCallback) === 'function')
-            setViewUpdateCallback(_viewer.getView())
+            if(typeof(setViewUpdateCallback) === 'function') {
+                setViewUpdateCallback(_viewer.getView());
+            }
+            
         };
         
         var initContainer = function(element) {
