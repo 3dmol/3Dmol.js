@@ -1917,6 +1917,16 @@ $3Dmol.GLViewer = (function() {
          * Remove all labels from viewer
          * 
          * @function $3Dmol.GLViewer#removeAllLabels
+         *         @example             
+        $3Dmol.download("pdb:1ubq",viewer,{},function(){
+                          
+               viewer.addResLabels();
+               viewer.setStyle({},{stick:{}}); 
+               viewer.render( ); //show labels
+
+               viewer.removeAllLabels();              
+               viewer.render(); //hide labels
+        });
          */
         this.removeAllLabels = function() {
             for (var i = 0; i < labels.length; i++) {
