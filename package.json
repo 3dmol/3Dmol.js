@@ -24,7 +24,7 @@
     "jshint": "^2.10.2"
   },
   "scripts": {
-    "build": "grunt build",
+    "build": "gulp",
     "prepublish": "npm run build"
   },
   "license": "BSD-3-Clause",
