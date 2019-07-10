@@ -1930,7 +1930,9 @@ $3Dmol.GLViewer = (function() {
          */
         this.removeAllLabels = function() {
             for (var i = 0; i < labels.length; i++) {
+              if(labels[i] && labels[i].sprite) {
                 modelGroup.remove(labels[i].sprite);
+              }
             }
             labels.splice(0,labels.length); //don't overwrite in case linked
             show();
