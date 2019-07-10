@@ -9,7 +9,7 @@ $(document).ready(function() {
 	var socket = io.connect('http://localhost:5000');
 	socket.on('connect', function() {
 		socket.send('User has connected!');
-		glviewer.setViewChangeCallback(setViewUpdateCallback);
+		glviewer.setViewUpdateCallback(viewUpdateCallback);
 	});
 
 	function setCookie(exdays){
@@ -176,7 +176,7 @@ $(document).ready(function() {
 	// 			});			
 	// }
 	// }, 1000/fps);
-	var setViewUpdateCallback = function(new_view){
+	var viewUpdateCallback = function(new_view){
 		if(initiator == true){
 				socket.emit('viewer state change event', {
 					name : $( 'input#session_name1' ).val(),

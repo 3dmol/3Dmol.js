@@ -74,7 +74,7 @@ $3Dmol.GLViewer = (function() {
         // set dimensions
         // $(container).width(WIDTH);
         // $(container).height(HEIGHT);
-        var setViewUpdateCallback = null;
+        var viewUpdateCallback = null;
        
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
@@ -324,9 +324,9 @@ $3Dmol.GLViewer = (function() {
             
         };
         
-        this.setViewChangeCallback = function(callback) {
-            if(!setViewUpdateCallback) 
-                setViewUpdateCallback = callback;
+        this.setViewUpdateCallback = function(callback) {
+            if(!viewUpdateCallback) 
+                viewUpdateCallback = callback;
         };
         //checks for selection intersects on hover
         var handleHoverSelection = function(mouseX, mouseY, event){
@@ -554,8 +554,8 @@ $3Dmol.GLViewer = (function() {
             }
             rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);            
             show();
-            if(typeof(setViewUpdateCallback)==='function') {
-                setViewUpdateCallback(_viewer.getView());
+            if(typeof(viewUpdateCallback)==='function') {
+                viewUpdateCallback(_viewer.getView());
             }
         };        
         /**
@@ -676,8 +676,8 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.quaternion.multiply(cq);
             }
             show();
-            if(typeof(setViewUpdateCallback) === 'function') {
-                setViewUpdateCallback(_viewer.getView());
+            if(typeof(viewUpdateCallback) === 'function') {
+                viewUpdateCallback(_viewer.getView());
             }
             
         };
