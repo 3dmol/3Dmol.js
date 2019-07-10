@@ -224,6 +224,9 @@ $3Dmol.GLViewer = (function() {
                     other.setView(view, true);
                 }
             }
+            if(typeof(viewUpdateCallback)==='function') {
+                viewUpdateCallback(_viewer.getView());
+            }
         };
 
         var initializeScene = function() {
