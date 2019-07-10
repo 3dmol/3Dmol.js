@@ -64,7 +64,7 @@ $3Dmol.Label.prototype = {
                 ret.a = parseFloat(stylealpha);
             }
             return ret;
-        }
+        };
 
         /**
          * Label type specification
@@ -166,7 +166,7 @@ $3Dmol.Label.prototype = {
             this.canvas.height = height;
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            var bold = "";
+            bold = "";
             if(style.bold)
                 bold = "bold ";
             this.context.font = bold+fontSize + "px  " + font;
@@ -186,9 +186,9 @@ $3Dmol.Label.prototype = {
             }
             
             if(style.backgroundImage) {
-                var img = style.backgroundImage;
-                var w = style.backgroundWidth ? style.backgroundWidth : img.width;
-                var h = style.backgroundHeight ? style.backgroundHeight : img.height;
+                let img = style.backgroundImage;
+                let w = style.backgroundWidth ? style.backgroundWidth : img.width;
+                let h = style.backgroundHeight ? style.backgroundHeight : img.height;
                 this.context.drawImage(img,0,0, w, h);
             }
             

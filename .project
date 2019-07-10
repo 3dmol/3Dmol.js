@@ -16,17 +16,12 @@
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>com.aptana.ide.core.unifiedBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
 			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
 			<triggers>full,incremental,</triggers>
 			<arguments>
 				<dictionary>
 					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/grunt.launch</value>
+					<value>&lt;project&gt;/.externalToolBuilders/gulp.launch</value>
 				</dictionary>
 			</arguments>
 		</buildCommand>

@@ -8,7 +8,7 @@
  * @namespace */
 $3Dmol = (function(window) {
     
-    var my = window['$3Dmol'] || {};
+    var my = window.$3Dmol || {};
     
     return my;
 
@@ -61,18 +61,19 @@ $.ajaxTransport(
                "+binary",
                function(options, originalOptions, jqXHR) {
                    // check for conditions and support for blob / arraybuffer response type
-                   if (window.FormData
-                           && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob))))) {
+                   if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || 
+                           (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || 
+                                   (window.Blob && options.data instanceof Blob))))) {
                        return {
                            // create new XMLHttpRequest
                            send : function(headers, callback) {
                                // setup all variables
                                var xhr = new XMLHttpRequest(), url = options.url, type = options.type, async = options.async || true,
                                // blob or arraybuffer. Default is blob
-                               dataType = options.responseType || "blob", data = options.data
-                                       || null, username = options.username
-                                       || null, password = options.password
-                                       || null;
+                               dataType = options.responseType || "blob", 
+                                           data = options.data || null, 
+                                           username = options.username || null, 
+                                           password = options.password || null;
 
                                var xhrret = function() {
                                    var data = {};
@@ -208,7 +209,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
       //try to create the  viewer
     try {  
       for(var r =0;r<config.rows;r++){
-        var row = new Array();
+        var row = [];
         for(var c = 0;c<config.cols;c++){
           viewer_config.row = r;
           viewer_config.col = c;
@@ -216,7 +217,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
           viewer_config.viewers = viewers;
           viewer_config.control_all = config.control_all;
           var viewer = $3Dmol.createViewer(element, viewer_config);
-          row.push(viewer)
+          row.push(viewer);
         }
         viewers.unshift(row); //compensate for weird ordering in renderer
       }
@@ -225,7 +226,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
     }
     
     return viewers;
-}
+};
    
 /**
  * Contains a dictionary of embedded viewers created from HTML elements
@@ -253,7 +254,7 @@ $3Dmol.getbin = function(uri, callback, request,postdata) {
             data: postdata,
             responseType: "arraybuffer",
             processData: false})
-        .done(function(ret, txt, response) {
+        .done(function(ret) {
             resolve(ret);
         })
         .fail(function(e,txt) { 
@@ -278,7 +279,7 @@ $3Dmol.base64ToArray = function(base64) {
         bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes;
-}
+};
 
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
@@ -300,20 +301,21 @@ $3Dmol.base64ToArray = function(base64) {
     });
  */ 
 $3Dmol.download = function(query, viewer, options, callback) {
-    var baseURL = '';
     var type = "";
     var pdbUri = "";
     var mmtfUri = "";
+    var uri = "";
+    var promise = null;
     var m = viewer.addModel();
     if (query.substr(0, 5) === 'mmtf:') {
         pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
-        var uri = pdbUri + query;        
+        uri = pdbUri + query;        
         if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
         }
-        var promise = new Promise(function(resolve, reject) {
+        promise = new Promise(function(resolve) {
             $3Dmol.getbin(uri)
             .then(function(ret) {
                 m.addMolData(ret, 'mmtf',options);
@@ -365,7 +367,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
             viewer.zoomTo();
             viewer.render();
         };
-        var promise = new Promise(function(resolve, reject) {
+        promise = new Promise(function(resolve) {
             if(type == 'mmtf') { //binary data
                 $3Dmol.getbin(uri)
                 .then(function(ret) {
@@ -489,7 +491,7 @@ $3Dmol.specStringToObject = function(str) {
             return false;
         }
         return val;
-    }
+    };
     
     var ret = {};
     if(str === 'all') return ret;
@@ -521,7 +523,7 @@ $3Dmol.specStringToObject = function(str) {
     }
 
   return ret;
-}
+};
 
 
 /**
@@ -578,11 +580,11 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
 
 
 //return the value of an atom property prop, or null if non existent
-//looks first in properties, then in the atom itself
+// looks first in properties, then in the atom itself
 $3Dmol.getAtomProperty = function(atom, prop) {
     var val = null;
-    if (atom.properties
-            && typeof (atom.properties[prop]) != "undefined") {
+    if (atom.properties &&
+            typeof (atom.properties[prop]) != "undefined") {
         val = atom.properties[prop];
     } else if(typeof(atom[prop]) != 'undefined') {
         val = atom[prop];
@@ -620,7 +622,7 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
         max = min;
 
     return [ min, max ];
-}
+};
 
 //hackish way to work with requirejs - doesn't actually work yet
 //since we don't use the require optimizer to combine modules
@@ -659,8 +661,8 @@ $3Dmol.createStereoViewer = function(element) {
     for (var i = 0; i < methods.length; i++) { //create methods of the same name
         this[methods[i]] = (function(method){
             return function(){
-                var m1=this['glviewer1'][method].apply(this['glviewer1'],arguments);
-                var m2=this['glviewer2'][method].apply(this['glviewer2'],arguments);
+                var m1=this.glviewer1[method].apply(this.glviewer1,arguments);
+                var m2=this.glviewer2[method].apply(this.glviewer2,arguments);
                 return [m1,m2];
             };
         })(methods[i]);
@@ -693,4 +695,4 @@ $3Dmol.createStereoViewer = function(element) {
         return this.glviewer1.getCanvas(); //same for both
     };
 
-}
+};

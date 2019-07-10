@@ -4,7 +4,7 @@ $3Dmol.ShaderUtils = {
     
     clone: function ( uniforms_src ) {
         
-        var u, p, parameter, parameter_src, uniforms_clone = {};
+        var u, uniforms_clone = {};
         
         for (u in uniforms_src) {
             uniforms_clone[u] = {};

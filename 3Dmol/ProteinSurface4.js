@@ -53,7 +53,6 @@ $3Dmol.ProteinSurface = function() {
     var vpBits = null; // uint8 array of bitmasks
     var vpDistance = null; // floatarray of _squared_ distances
     var vpAtomID = null; // intarray
-    var vertnumber = 0, facenumber = 0;
     var pminx = 0, pminy = 0, pminz = 0, pmaxx = 0, pmaxy = 0, pmaxz = 0;
 
     var vdwRadii = {
@@ -111,35 +110,23 @@ $3Dmol.ProteinSurface = function() {
                new Int32Array([ -1, 1, -1 ]),
                new Int32Array([ -1, -1, -1 ]) ];
 
-    var origextent;
-
-    var inOrigExtent = function(x, y, z) {
-        if (x < origextent[0][0] || x > origextent[1][0])
-            return false;
-        if (y < origextent[0][1] || y > origextent[1][1])
-            return false;
-        if (z < origextent[0][2] || z > origextent[1][2])
-            return false;
-        return true;
-    };
 
     this.getFacesAndVertices = function(atomlist) {
         var atomsToShow = {};
-        var i, il;
-        for (i = 0, il = atomlist.length; i < il; i++)
+        for (let i = 0, il = atomlist.length; i < il; i++)
             atomsToShow[atomlist[i]] = true;
         var vertices = verts;
-        for (i = 0, il = vertices.length; i < il; i++) {
+        for (let i = 0, il = vertices.length; i < il; i++) {
             vertices[i].x = vertices[i].x / scaleFactor - ptranx;
             vertices[i].y = vertices[i].y / scaleFactor - ptrany;
             vertices[i].z = vertices[i].z / scaleFactor - ptranz;
         }
 
         var finalfaces = [];
-        for (i = 0, il = faces.length; i < il; i += 3) {
+        for (let i = 0, il = faces.length; i < il; i += 3) {
             //var f = faces[i];
             var fa = faces[i], fb = faces[i+1], fc = faces[i+2];
-            var a = vertices[fa]['atomid'], b = vertices[fb]['atomid'], c = vertices[fc]['atomid'];
+            var a = vertices[fa].atomid, b = vertices[fb].atomid, c = vertices[fc].atomid;
 
             // must be a unique face for each atom
             var which = a;
@@ -150,9 +137,9 @@ $3Dmol.ProteinSurface = function() {
             if (!atomsToShow[which]) {
                 continue;
             }
-            var av = vertices[faces[i]];
-            var bv = vertices[faces[i+1]];
-            var cv = vertices[faces[i+2]];
+//            var av = vertices[faces[i]];
+//            var bv = vertices[faces[i+1]];
+//            var cv = vertices[faces[i+2]];
 
             if (fa !== fb && fb !== fc && fa !== fc){
                 finalfaces.push(fa); 
@@ -180,7 +167,6 @@ $3Dmol.ProteinSurface = function() {
         
         var margin = (1 / scaleFactor) * 5.5; // need margin to avoid
                                                 // boundary/round off effects
-        origextent = extent;
         pminx = extent[0][0]; pmaxx = extent[1][0];
         pminy = extent[0][1]; pmaxy = extent[1][1];
         pminz = extent[0][2]; pmaxz = extent[1][2];
@@ -233,8 +219,7 @@ $3Dmol.ProteinSurface = function() {
 
     this.boundingatom = function(btype) {
         var tradius = [];
-        var txz, tdept, sradius, idx;
-        flagradius = btype;
+        var txz, tdept, sradius;
 
         for ( var i in vdwRadii) {
             if(!vdwRadii.hasOwnProperty(i))
@@ -248,9 +233,9 @@ $3Dmol.ProteinSurface = function() {
             sradius = tradius[i] * tradius[i];
             widxz[i] = Math.floor(tradius[i]) + 1;
             depty[i] = new Int32Array(widxz[i] * widxz[i]);
-            indx = 0;
-            for (j = 0; j < widxz[i]; j++) {
-                for (k = 0; k < widxz[i]; k++) {
+            var indx = 0;
+            for (let j = 0; j < widxz[i]; j++) {
+                for (let k = 0; k < widxz[i]; k++) {
                     txz = j * j + k * k;
                     if (txz > sradius)
                         depty[i][indx] = -1; // outside
@@ -268,21 +253,20 @@ $3Dmol.ProteinSurface = function() {
         // seqterm,bool
         // atomtype,atom*
         // proseq,bool bcolor)
-        var i, il;
-        for (i = 0, il = vpBits.length; i < il; i++) {
+        for (let i = 0, il = vpBits.length; i < il; i++) {
             vpBits[i] = 0;
             vpDistance[i] = -1.0;
             vpAtomID[i] = -1;
         }
 
-        for (i in atomlist) {
+        for (let i in atomlist) {
             var atom = atoms[atomlist[i]];
             if (atom === undefined)
                 continue;
             this.fillAtom(atom, atoms);
         }
 
-        for (i = 0, il = vpBits.length; i < il; i++)
+        for (let i = 0, il = vpBits.length; i < il; i++)
             if (vpBits[i] & INOUT)
                 vpBits[i] |= ISDONE;
 
@@ -298,7 +282,6 @@ $3Dmol.ProteinSurface = function() {
 
         var at = getVDWIndex(atom);
         var nind = 0;
-        var cnt = 0;
         var pWH = pWidth*pHeight;
         
         for (i = 0, n = widxz[at]; i < n; i++) {
@@ -353,12 +336,11 @@ $3Dmol.ProteinSurface = function() {
     };
 
     this.fillvoxelswaals = function(atoms, atomlist) {
-        var i, il;
-        for (i = 0, il = vpBits.length; i < il; i++)
+        for (let i = 0, il = vpBits.length; i < il; i++)
             vpBits[i] &= ~ISDONE; // not isdone
 
-        for (i in atomlist) {
-            var atom = atoms[atomlist[i]];
+        for (let i in atomlist) {
+            let atom = atoms[atomlist[i]];
             if (atom === undefined)
                 continue;
 
@@ -426,12 +408,11 @@ $3Dmol.ProteinSurface = function() {
 
     this.buildboundary = function() {
         var pWH = pWidth*pHeight;
-        for (i = 0; i < pLength; i++) {
-            for (j = 0; j < pHeight; j++) {
-                for (k = 0; k < pWidth; k++) {
+        for (let i = 0; i < pLength; i++) {
+            for (let j = 0; j < pHeight; j++) {
+                for (let k = 0; k < pWidth; k++) {
                     var index = i * pWH + k * pHeight + j;
                     if (vpBits[index] & INOUT) {
-                        var flagbound = false;
                         var ii = 0;
                         while (ii < 26) {
                             var ti = i + nb[ii][0], tj = j + nb[ii][2], tk = k +
@@ -480,8 +461,6 @@ $3Dmol.ProteinSurface = function() {
     };
 
     this.fastdistancemap = function() {
-        var eliminate = 0;
-        var certificate;
         var i, j, k, n;
 
         var boundPoint = new PointGrid(pLength, pWidth, pHeight);
@@ -572,7 +551,7 @@ $3Dmol.ProteinSurface = function() {
         if (inarray.length === 0)
             return outarray;
 
-        tnv = {
+        var tnv = {
             ix : -1,
             iy : -1,
             iz : -1
@@ -767,70 +746,6 @@ $3Dmol.ProteinSurface = function() {
             }
         }
     };
-
-    // this code allows me to empirically prune the marching cubes code tables
-    // to more efficiently handle discrete data
-    var counter = function() {
-        var data = Array(256);
-        for ( var i = 0; i < 256; i++)
-            data[i] = [];
-
-        this.incrementUsed = function(i, j) {
-            if (typeof data[i][j] === 'undefined')
-                data[i][j] = {
-                    used : 0,
-                    unused : 0
-                };
-            data[i][j].used++;
-        };
-
-        this.incrementUnused = function(i, j) {
-            if (typeof data[i][j] === 'undefined')
-                data[i][j] = {
-                    used : 0,
-                    unused : 0
-                };
-            data[i][j].unused++;
-
-        };
-
-        var redoTable = function(triTable) {
-            var str = "[";
-            for ( var i = 0; i < triTable.length; i++) {
-                var code = 0;
-                var table = triTable[i];
-                for ( var j = 0; j < table.length; j++) {
-                    code |= (1 << (table[j]));
-                }
-                str += "0x" + code.toString(16) + ", ";
-            }
-            str += "]";
-            console.log(str);
-        };
-
-        this.print = function() {
-
-            var table = MarchingCube.triTable;
-            var str;
-            var newtable = [];
-            for ( var i = 0; i < table.length; i++) {
-                var newarr = [];
-                for ( var j = 0; j < table[i].length; j += 3) {
-                    var k = j / 3;
-                    if (typeof data[i][k] === 'undefined' || !data[i][k].unused) {
-                        newarr.push(table[i][j]);
-                        newarr.push(table[i][j + 1]);
-                        newarr.push(table[i][j + 2]);
-                    }
-                    if (typeof data[i][k] === 'undefined')
-                        console.log("undef " + i + "," + k);
-                }
-                newtable.push(newarr);
-            }
-            console.log(JSON.stringify(newtable));
-            redoTable(newtable);
-        };
-    };
     
     this.marchingcube = function(stype) {
         this.marchingcubeinit(stype);
@@ -844,7 +759,7 @@ $3Dmol.ProteinSurface = function() {
 
         var pWH = pWidth*pHeight;
         for (var i = 0, vlen = verts.length; i < vlen; i++) {
-            verts[i]['atomid'] = vpAtomID[verts[i].x * pWH + pHeight *
+            verts[i].atomid = vpAtomID[verts[i].x * pWH + pHeight *
                     verts[i].y + verts[i].z];
         }  
 
