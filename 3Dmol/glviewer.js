@@ -2026,7 +2026,7 @@ $3Dmol.GLViewer = (function() {
         this.removeAllShapes = function() {
             for (var i = 0; i < shapes.length; i++) {
                 var shape = shapes[i];
-                shape.removegl(modelGroup);
+                if(shape) shape.removegl(modelGroup);
             }
             shapes.splice(0,shapes.length);
             return this;
@@ -2812,7 +2812,7 @@ $3Dmol.GLViewer = (function() {
         this.removeAllModels = function() {
             for (var i = 0; i < models.length; i++) {
                 var model = models[i];
-                model.removegl(modelGroup);
+                if(model) model.removegl(modelGroup);
 
             }
             models.splice(0,models.length); //don't simply overwrite array in case linked
