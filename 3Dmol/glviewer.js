@@ -1858,9 +1858,10 @@ $3Dmol.GLViewer = (function() {
                 });
          */
         this.addResLabels = function(sel, style, byframe) {
+            let start = labels.length;
             applyToModels("addResLabels", sel, this, style, byframe);
             show();
-            return this;
+            return labels.slice(start);
         };
 
         /** Add property labels.  This will generate one label per a selected
@@ -1894,11 +1895,11 @@ $3Dmol.GLViewer = (function() {
          * 
          * @example // Remove labels created in 
          $3Dmol.download("pdb:2EJ0",viewer,{},function(){
-         *    viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  var toremove = viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                   viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
                                            borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
                                            position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
-                  viewer.remove
+                  viewer.removeLabel(toremove);
                   viewer.render();
 
                   
@@ -1925,10 +1926,22 @@ $3Dmol.GLViewer = (function() {
          * Remove all labels from viewer
          * 
          * @function $3Dmol.GLViewer#removeAllLabels
+         *         @example             
+        $3Dmol.download("pdb:1ubq",viewer,{},function(){
+                          
+               viewer.addResLabels();
+               viewer.setStyle({},{stick:{}}); 
+               viewer.render( ); //show labels
+
+               viewer.removeAllLabels();              
+               viewer.render(); //hide labels
+        });
          */
         this.removeAllLabels = function() {
             for (var i = 0; i < labels.length; i++) {
+              if(labels[i] && labels[i].sprite) {
                 modelGroup.remove(labels[i].sprite);
+              }
             }
             labels.splice(0,labels.length); //don't overwrite in case linked
             show();
@@ -2022,7 +2035,7 @@ $3Dmol.GLViewer = (function() {
         this.removeAllShapes = function() {
             for (var i = 0; i < shapes.length; i++) {
                 var shape = shapes[i];
-                shape.removegl(modelGroup);
+                if(shape) shape.removegl(modelGroup);
             }
             shapes.splice(0,shapes.length);
             return this;
@@ -2472,7 +2485,8 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Construct isosurface from volumetric data
+         * Construct isosurface from volumetric data.  This is more flexible
+	 * than addVolumetricData, but can not be used with py3Dmol.
          * @function $3Dmol.GLViewer#addIsosurface
          * @param {$3Dmol.VolumeData} data - volumetric data
          * @param {IsoSurfaceSpec} spec - Shape style specification
@@ -2807,7 +2821,7 @@ $3Dmol.GLViewer = (function() {
         this.removeAllModels = function() {
             for (var i = 0; i < models.length; i++) {
                 var model = models[i];
-                model.removegl(modelGroup);
+                if(model) model.removegl(modelGroup);
 
             }
             models.splice(0,models.length); //don't simply overwrite array in case linked
