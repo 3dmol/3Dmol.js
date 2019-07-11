@@ -24,10 +24,12 @@
     "jshint": "^2.10.2"
   },
   "scripts": {
-    "build": "grunt build",
+    "build": "gulp",
     "prepublish": "npm run build"
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",
-  "dependencies": {}
+  "dependencies": {
+    "gulp-cli": "^2.2.0"
+  }
 }
