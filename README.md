@@ -73,17 +73,17 @@ viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
 
 ## Building
 
-The code can be built using [grunt](http://gruntjs.com/).
-In order to install grunt you simply need to use npm.
-
-	npm install -g grunt-cli
+The code can be built using [gulp](https://gulpjs.com/).
+You should be able to install all dependencies using npm:
+	cd 3Dmol.js
+	npm install
+You probable want to install the gulp-cli globally:
+	npm install gulp-cli -g    
 
 Then you are ready to build the program.
+    gulp
 
-	cd 3Dmol.js
-    grunt build
-
-This will build the program and allow you to access the completely built file at 3Dmol.js/build/3Dmol-pre.js.
+This will build the program and allow you to access the completely built file at 3Dmol.js/build/3Dmol.js.
 
 ## Documentation
 Please check out our documentation at http://3dmol.csb.pitt.edu/doc/index.html we have tutorials as well as the stable release of the platform.
