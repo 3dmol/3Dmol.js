@@ -328,7 +328,7 @@ $3Dmol.GLViewer = (function() {
         };
         
         this.setViewUpdateCallback = function(callback) {
-            if(!viewUpdateCallback) 
+            if(typeof(viewUpdateCallback)==='function') 
                 viewUpdateCallback = callback;
         };
         //checks for selection intersects on hover
