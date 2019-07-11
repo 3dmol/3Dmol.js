@@ -2495,6 +2495,7 @@ $3Dmol.GLModel = (function() {
          */
         this.addResLabels = function(sel, viewer, style, byframe) {
             
+            var created_labels = [];
             var helper = function(model, framenum) {
                 var atoms = model.selectedAtoms(sel, atoms);
                 var bylabel = {};
@@ -2528,7 +2529,8 @@ $3Dmol.GLModel = (function() {
                                 sum.divideScalar(atoms.length);
                                 mystyle.position = sum;
                                 mystyle.frame = framenum;
-                                viewer.addLabel(label, mystyle, undefined, true);
+                                let l = viewer.addLabel(label, mystyle, undefined, true);
+                                created_labels.push(l);
                             }                        
                         }
                     }
@@ -2548,6 +2550,7 @@ $3Dmol.GLModel = (function() {
             } else {
                 helper(this);
             }
+            return created_labels;
       };
 
 

@@ -1850,9 +1850,10 @@ $3Dmol.GLViewer = (function() {
                 });
          */
         this.addResLabels = function(sel, style, byframe) {
+            let start = labels.length;
             applyToModels("addResLabels", sel, this, style, byframe);
             show();
-            return this;
+            return labels.slice(start);
         };
 
         /** Add property labels.  This will generate one label per a selected
