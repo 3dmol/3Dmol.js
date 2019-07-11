@@ -70,10 +70,7 @@ $3Dmol.GLViewer = (function() {
         var WIDTH = container.width();
         var HEIGHT = container.height();
 
-        // set dimensions
-        // $(container).width(WIDTH);
-        // $(container).height(HEIGHT);
-        var setViewUpdateCallback = null;
+        var viewUpdateCallback = null;
        
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
@@ -199,6 +196,9 @@ $3Dmol.GLViewer = (function() {
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
+            //have any scene change trigger a callback
+            if(viewUpdateCallback) viewUpdateCallback(_viewer.getView());
+
             if(!nolink && linkedViewers.length > 0) {                
                 var view = _viewer.getView();
                 for(var i = 0; i < linkedViewers.length; i++) {
@@ -306,9 +306,10 @@ $3Dmol.GLViewer = (function() {
         };
         
         this.setViewChangeCallback = function(callback) {
-            if(!setViewUpdateCallback) 
-                setViewUpdateCallback = callback;
+            if(typeof(callback) === 'function') 
+                viewUpdateCallback = callback;
         };
+        
         //checks for selection intersects on hover
         var handleHoverSelection = function(mouseX, mouseY){
             if(hoverables.length == 0) return;
@@ -532,10 +533,7 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.z -= mult * scaleFactor * ev.originalEvent.wheelDelta / 400;
             }
             rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);            
-            show();
-            if(typeof(setViewUpdateCallback)==='function') {
-                setViewUpdateCallback(_viewer.getView());
-            }
+            show();            
         };        
         /**
          * Return image URI of viewer contents (base64 encoded).
@@ -650,10 +648,6 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.quaternion.multiply(cq);
             }
             show();
-            if(typeof(setViewUpdateCallback) === 'function') {
-                setViewUpdateCallback(_viewer.getView());
-            }
-            
         };
         
         var initContainer = function(element) {
