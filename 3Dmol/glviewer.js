@@ -70,7 +70,7 @@ $3Dmol.GLViewer = (function() {
         var WIDTH = container.width();
         var HEIGHT = container.height();
 
-        var viewUpdateCallback = null;
+        var viewChangeCallback = null;
        
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
@@ -197,7 +197,7 @@ $3Dmol.GLViewer = (function() {
             // console.log("rendered in " + (+new Date() - time) + "ms");
             
             //have any scene change trigger a callback
-            if(viewUpdateCallback) viewUpdateCallback(_viewer.getView());
+            if(viewChangeCallback) viewChangeCallback(_viewer.getView());
 
             if(!nolink && linkedViewers.length > 0) {                
                 var view = _viewer.getView();
@@ -307,7 +307,7 @@ $3Dmol.GLViewer = (function() {
         
         this.setViewChangeCallback = function(callback) {
             if(typeof(callback) === 'function') 
-                viewUpdateCallback = callback;
+                viewChangeCallback = callback;
         };
         
         //checks for selection intersects on hover
