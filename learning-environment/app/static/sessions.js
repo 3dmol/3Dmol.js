@@ -105,9 +105,10 @@ var initSessions = function() {
     };
 
     socket.on('create session response',function(msg) {
-        if (msg == 1) {
+        if (msg) {
             console.log("session created successfully")
-    
+            $('.sessionname').html(session_name);
+
             // setup callbacks
             glviewer.setViewChangeCallback(viewUpdateCallback);
             glviewer.setStateChangeCallback(stateUpdateCallback);
@@ -129,7 +130,7 @@ var initSessions = function() {
             // close the connection create pane and open the connection
             // monitoring
             // disable the sidebar
-
+            $('.sessionname').html(session_name);
             $('#sessionbutton').hide();
             $('#sessionconnect').hide();
             $("#menu").hide();
@@ -349,13 +350,9 @@ var initSessions = function() {
 
     // update number of responses - result is list of {'cnt': N, 'position':
     // (x,y,z}
-    var num_results = 0; 
     socket.on('query update response', function(result) {
         if (initiator) {
-            if(num_results != result) {
-                num_results = result;
-                $('#responseinfo').html('Responses: ' + num_results);
-            }
+            $('#responseinfo').html('Responses: ' + result);            
         }
     });
     

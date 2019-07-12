@@ -406,7 +406,6 @@ var buildHTMLTree = function(query){
             
             render(true);
             run();
-            glviewer.translate(width/2,0,0,false);
         }
         prev_type = val
     })
@@ -416,11 +415,9 @@ var buildHTMLTree = function(query){
         var val =  $("#model_input").val().toUpperCase();
         if(prev_in != val){
             if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
-                glviewer.clear();
                 render(true);
                 run();
                 var width = $("#sidenav").width();
-                glviewer.translate(width/2,0,0,false);
             }else{
                 if(prev_in!= val)
                     alert("Invalid PDB")
@@ -914,175 +911,176 @@ var runcmds = function(cmds, viewer,renderSurface) {
 
 };
 function run() {
-        $("#undefined").remove();
-                    try {
-                        var url = window.location.search.substr(1);
-                        url= decodeURIComponent(url)
-                        var cmds = url.split("&");
-                        var first = cmds.splice(0, 1)[0];
-                        var pos = first.indexOf('=');
-                        var src = first.substring(0, pos), data = first
-                                .substring(pos + 1);
-                        var type = "pdb";
+        try {
+            var url = window.location.search.substr(1);
+            url= decodeURIComponent(url)
+            var cmds = url.split("&");
+            var first = cmds.splice(0, 1)[0];
+            var pos = first.indexOf('=');
+            var src = first.substring(0, pos), data = first
+                    .substring(pos + 1);
+            var type = "pdb";
 
-                        glviewer = $3Dmol.createViewer("gldiv", {
-                            defaultcolors : $3Dmol.rasmolElementColors
-                        });
-                        glviewer.setBackgroundColor(0xffffff);
+            if(glviewer === null) {
+                glviewer = $3Dmol.createViewer("gldiv", {
+                    defaultcolors : $3Dmol.rasmolElementColors
+                });
+                glviewer.setBackgroundColor(0xffffff);
+            } else {
+                glviewer.clear();
+            }
 
-                        if (src == 'session') {
-                            // join a session
-                            joinSession(data);
-                        }
-                        if (src == 'pdb') {
-                            console.log(data)
-                            data = data.toUpperCase();
-                            if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
-                                alert("Wrong PDB ID");
-                                return;
-                            }
-                            data = "http://files.rcsb.org/view/" + data
-                                    + ".pdb";
-                            type = "pdb";
-                        } if (src == 'cif') {
-                            data = data.toUpperCase();
-                            if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
-                                alert("Wrong PDB ID");
-                                return;
-                            }
-                            data = "http://files.rcsb.org/view/" + data
-                                    + ".cif";
-                            type = "cif";
-                        } else if (src == 'cid') {
-                            type = "sdf";
-                            data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
-                                    + data + "/SDF?record_type=3d";
-                        } else if (src == 'mmtf') {
-                            data = data.toUpperCase();
-                            data = 'http://mmtf.rcsb.org/full/' + data + '.mmtf';
-                            type = 'mmtf';
-                        } else { // url
-                            // try to extract extension
-                            type = data.substr(data.lastIndexOf('.') + 1);
-                            if(type == 'gz') {
-                                var base = data.substr(0,data.lastIndexOf('.'));
-                                type = base.substr(base.lastIndexOf('.')) + '.gz';
-                            }
-                        }
-                        if (cmds[0] && cmds[0].indexOf('type=') == 0) {
-                            type = cmds[0].split('=')[1];
-                        }
+            if (src == 'session') {
+                // join a session
+                joinSession(data);
+            }
+            if (src == 'pdb') {
+                console.log(data)
+                data = data.toUpperCase();
+                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                    return;
+                }
+                data = "http://files.rcsb.org/view/" + data
+                        + ".pdb";
+                type = "pdb";
+            } if (src == 'cif') {
+                data = data.toUpperCase();
+                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                    return;
+                }
+                data = "http://files.rcsb.org/view/" + data
+                        + ".cif";
+                type = "cif";
+            } else if (src == 'cid') {
+                type = "sdf";
+                data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
+                        + data + "/SDF?record_type=3d";
+            } else if (src == 'mmtf') {
+                data = data.toUpperCase();
+                data = 'http://mmtf.rcsb.org/full/' + data + '.mmtf';
+                type = 'mmtf';
+            } else { // url
+                // try to extract extension
+                type = data.substr(data.lastIndexOf('.') + 1);
+                if(type == 'gz') {
+                    var base = data.substr(0,data.lastIndexOf('.'));
+                    type = base.substr(base.lastIndexOf('.')) + '.gz';
+                }
+            }
+            if (cmds[0] && cmds[0].indexOf('type=') == 0) {
+                type = cmds[0].split('=')[1];
+            }
 
-                        var start = new Date();
+            var start = new Date();
 
-                        if (/\.gz$/.test(data) || type == 'mmtf') { // binary
-                                                                    // data
-                            $.ajax({url:data, 
-                                type: "GET",
-                                dataType: "binary",
-                                responseType: "arraybuffer",
-                                processData: false,
-                                success: function(ret, txt, response) {
-                                    console.log("mtf fetch " + (+new Date() - start) + "ms");
-                                    var time = new Date();
-                                    glviewer.addModel(ret, type);
-                                    runcmds(cmds, glviewer);
-                                    glviewer.zoomTo();
-                                    glviewer.render();
-                                    console.log("mtf load " + (+new Date() - time) + "ms");
+            if (/\.gz$/.test(data) || type == 'mmtf') { // binary
+                                                        // data
+                $.ajax({url:data, 
+                    type: "GET",
+                    dataType: "binary",
+                    responseType: "arraybuffer",
+                    processData: false,
+                    success: function(ret, txt, response) {
+                        console.log("mtf fetch " + (+new Date() - start) + "ms");
+                        var time = new Date();
+                        glviewer.addModel(ret, type);
+                        runcmds(cmds, glviewer);
+                        glviewer.zoomTo();
+                        glviewer.render();
+                        console.log("mtf load " + (+new Date() - time) + "ms");
 
-                            }}).fail(function() {
-                                // if couldn't get url natively, go through echo
-                                // server
-                                $.ajax({ url:"echo.cgi", 
-                                    data: { 'url' : data },
-                                    processData: false,
-                                    responseType: "arraybuffer",
-                                    dataType: "binary",
-                                    success: function(ret, txt, response) {
+                }}).fail(function() {
+                    // if couldn't get url natively, go through echo
+                    // server
+                    $.ajax({ url:"echo.cgi", 
+                        data: { 'url' : data },
+                        processData: false,
+                        responseType: "arraybuffer",
+                        dataType: "binary",
+                        success: function(ret, txt, response) {
 
-                                    glviewer.addModel(ret, type);
-                                    runcmds(cmds, glviewer);
-                                    glviewer.zoomTo();
-                                    glviewer.render();
-                                }})
-                            });
-                        } else {
-                            $.get(data, function(ret, txt, response) {
-                                console.log("alt fetch " + (+new Date() - start) + "ms");
-                                var time = new Date();
+                        glviewer.addModel(ret, type);
+                        runcmds(cmds, glviewer);
+                        glviewer.zoomTo();
+                        glviewer.render();
+                    }})
+                });
+            } else {
+                $.get(data, function(ret, txt, response) {
+                    console.log("alt fetch " + (+new Date() - start) + "ms");
+                    var time = new Date();
+                    glviewer.addModel(ret, type);
+                    runcmds(cmds, glviewer);
+                    glviewer.zoomTo();
+                    glviewer.render();
+                    console.log("alt load " + (+new Date() - time) + "ms");
+
+                }).fail(function() {
+                    // if couldn't get url natively, go through echo
+                    // server
+                    $.post("echo.cgi", {
+                        'url' : data
+                    }, function(ret, txt, response) {
+                        if(src == 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret == "")) {
+                            // really large files aren't available
+                            // in pdb format
+                            type = 'cif';
+                            data = data.replace(/pdb$/,'cif');
+                            $.post("echo.cgi",{
+                                'url' : data
+                            }, function(ret, txt, response) {
+
                                 glviewer.addModel(ret, type);
                                 runcmds(cmds, glviewer);
                                 glviewer.zoomTo();
                                 glviewer.render();
-                                console.log("alt load " + (+new Date() - time) + "ms");
-
-                            }).fail(function() {
-                                // if couldn't get url natively, go through echo
-                                // server
-                                $.post("echo.cgi", {
-                                    'url' : data
-                                }, function(ret, txt, response) {
-                                    if(src == 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret == "")) {
-                                        // really large files aren't available
-                                        // in pdb format
-                                        type = 'cif';
-                                        data = data.replace(/pdb$/,'cif');
-                                        $.post("echo.cgi",{
-                                            'url' : data
-                                        }, function(ret, txt, response) {
-
-                                            glviewer.addModel(ret, type);
-                                            runcmds(cmds, glviewer);
-                                            glviewer.zoomTo();
-                                            glviewer.render();
-                                        })
-                                    } else {
-                                        glviewer.addModel(ret, type);
-                                        runcmds(cmds, glviewer);
-                                        glviewer.zoomTo();
-                                        glviewer.render();
-                                    }
-                                });
-                            });
+                            })
+                        } else {
+                            glviewer.addModel(ret, type);
+                            runcmds(cmds, glviewer);
+                            glviewer.zoomTo();
+                            glviewer.render();
                         }
-                    }
+                    });
+                });
+            }
+        }
 
-                    catch (e) {
-                        console
-                                .error("Could not instantiate viewer from supplied url: '"
-                                        + e + "'");
-                        window.location = "http://get.webgl.org";
+        catch (e) {
+            console
+                    .error("Could not instantiate viewer from supplied url: '"
+                            + e + "'");
+            window.location = "http://get.webgl.org";
 
-                    }
-                }
+        }
+}
 
 $(document).ready(function(){
-var url=window.location.href.substring(window.location.href.indexOf("?")+1);
-initSessions(); 
-
-run();
-var start_width;
-$("#sidenav").resizable({
-    handles: 'e',
-    minWidth: 300,
-    maxWidth: 1000,
-    start:function(event,ui){
-        start_width=$("#sidenav").width();
-    },
-    resize:function(event,ui){
-        glviewer.center();
-        glviewer.translate(($("#sidenav").width()-start_width)/2,0,0,false);
-        start_width=$("#sidenav").width();
-    }
-});
-$( "#selection_list" ).sortable({
-  items: ".selection:not(#spacer)",
-  update:  function (event, ui) {
-        render(true);
-    },
-});// $("#selection_list").accordion();
-$("#selection_list").disableSelection();
-
-initSide(url);
+    var url=window.location.href.substring(window.location.href.indexOf("?")+1);
+    initSessions(); 
+    
+    run();
+    var start_width;
+    $("#sidenav").resizable({
+        handles: 'e',
+        minWidth: 300,
+        maxWidth: 1000,
+        start:function(event,ui){
+            start_width=$("#sidenav").width();
+        },
+        resize:function(event,ui){
+            glviewer.center();
+            glviewer.translate(($("#sidenav").width()-start_width)/2,0,0,false);
+            start_width=$("#sidenav").width();
+        }
+    });
+    $( "#selection_list" ).sortable({
+      items: ".selection:not(#spacer)",
+      update:  function (event, ui) {
+            render(true);
+        },
+    });// $("#selection_list").accordion();
+    $("#selection_list").disableSelection();
+    
+    initSide(url);
 });

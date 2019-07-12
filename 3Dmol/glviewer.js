@@ -458,7 +458,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setViewChangeCallback
         */
         this.setViewChangeCallback = function(callback) {
-            if(typeof(callback) === 'function') 
+            if(typeof(callback) === 'function' || callback == null) 
                 viewChangeCallback = callback;
         };
 
@@ -468,7 +468,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setStateChangeCallback
         */
         this.setStateChangeCallback = function(callback) {
-            if(typeof(callback) === 'function') 
+            if(typeof(callback) === 'function' || callback == null) 
                 stateChangeCallback = callback;
         };
 

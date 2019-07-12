@@ -32,9 +32,9 @@ def handleCreateSession(json):
     name = json['name']
     if name in sessions:
         print("Invalid name",name)
-        emit('create session response', "0")
+        emit('create session response', False)
     else: 
-        emit('create session response', "1")
+        emit('create session response', True)
         print("Session Created",name)
         sessions[name] = {'cnt': 0,
                           'sid': request.sid, # id of the controller
@@ -119,6 +119,7 @@ def handleViewerChange(json):
 def handleStateChange(json):
     name = json['name']
     state = json['state']
+    print("State change",name)
     if name not in sessions:
         return
     if request.sid != sessions[name]['sid']:
