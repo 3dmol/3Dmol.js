@@ -46,7 +46,12 @@
 
 <div id="sessioncontrol" class="rightdialog">
 <div>
-<span id = "sessioncontrolinfo"></span>
+    <button id="askbutton">Query Atoms</button>
+	<div id="sessioncontrolinfo">
+	    <div id = "userinfo" class="infotext">Users: 0</div>
+	    <div style="display:inline-block"><span id = "responseinfo" class="infotext"></span><span id="refreshresults">&#8635;</span></div>
+	</div>
+
 <span id="sessiondestroy" class="close">&times;</span>
 </div>
 </div>
@@ -58,6 +63,7 @@
 </div>
 </div>
 
+<div id="selectmessage">Select atom(s)</div>
 
 <div id="sidenav" class="ui-widget-content">
   <div class="header">

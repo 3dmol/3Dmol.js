@@ -336,9 +336,7 @@ select,input{
 }
 
 #sessionconnectbutton {
-	padding: 3px;
-	padding-left: 5px;
-	padding-right: 5px;
+	padding: 3px 5px;
 	width: 5em;
 }
 #sessionconnect {
@@ -373,6 +371,45 @@ select,input{
 
 .rightdialog > div {
 	padding: 1em;
+	vertical-align: middle;
 }
 
+
+#sessioncontrol > div > * {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+#sessioncontrolinfo {
+	text-align: left;
+	font-size: .75em;
+	width: 8em;
+}
+
+#refreshresults {
+	padding-left: .5em;
+	cursor: pointer;
+	display: none;
+}
+#askbutton {
+    padding: 3px 5px;
+    width: 8em;
+}
+
+#selectmessage {
+	position: absolute;
+	top: 5px;
+	left: 0;
+	right: 0;
+	width: 10em;
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: rgba(64,0,128,.5);
+	z-index: 1;  
+    border-radius: 15px;
+    padding: .5em;
+    color: white;	
+    display: none;
+}
 
