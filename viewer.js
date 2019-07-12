@@ -1,7 +1,7 @@
 
 //removes style,labelres, and surface from a copy of the selection object and returns it
 var augmentSelection = function(selection){
-    var copiedObject = jQuery.extend(true,{}, selection);//deep copy
+    var copiedObject = jQuery.extend(true,{}, selection);// deep copy
         
     if(copiedObject.style!=undefined){
         delete copiedObject.style;
@@ -14,7 +14,7 @@ var augmentSelection = function(selection){
     return copiedObject;
 }
 
-//removes eveyrhting but style,surface, and labelres
+// removes eveyrhting but style,surface, and labelres
 var removeAllButValid = function(object){
     var copy = jQuery.extend(true,{},object);
     for(var i in object){
@@ -53,7 +53,7 @@ var createAttribute = function(name,value,parent){
         validNames =$3Dmol.GLModel.validLabelResSpecs;
         other=true;
     }else if(name != ""){
-        //undefined name 
+        // undefined name
         return undefined;
     }
 
@@ -89,11 +89,11 @@ var createAttribute = function(name,value,parent){
         name = index;
 
         if(name == undefined)
-            return;//all of the attribute names are being used
+            return;// all of the attribute names are being used
         attribute_name.val(index)
     }
 
-    //delete button
+    // delete button
     var delete_selection = $("<span/>",{
         html:"&#x2715;",
         class:"delete_attribute",
@@ -336,9 +336,9 @@ var createModelSpecification = function(model_spec_type,model_spec_object,select
 
     return model_specification;
 }
-//this function creates the selection object
+// this function creates the selection object
 var createSelection = function(spec,object,index,type){
-    //creates container
+    // creates container
     var selection = $("<li/>",{
         class:"selection"
     });
@@ -349,7 +349,7 @@ var createSelection = function(spec,object,index,type){
             text:validNames[type],
         }).appendTo(selection);
 
-        //add together sub selections
+        // add together sub selections
         var attribute_pairs =[];
         for(var subselection in spec){
             var obj=spec[subselection];
@@ -371,7 +371,7 @@ var createSelection = function(spec,object,index,type){
         })
     }
 
-     //delete button
+     // delete button
     var delete_selection = $("<div/>",{
         html:"&#x2715;",
         class:"delete_selection",
@@ -381,7 +381,7 @@ var createSelection = function(spec,object,index,type){
     }).appendTo(selection); 
 
     createHeader()    
-    //check if style exists and if so create the object
+    // check if style exists and if so create the object
     var ret = createModelSpecification(type,object, index);
 
     delete_selection.attr("data-type",type);
@@ -390,14 +390,15 @@ var createSelection = function(spec,object,index,type){
     return selection;
 }
 /*
-builds an html tree that goes inside of the selection portion of the viewer page
-*/
+ * builds an html tree that goes inside of the selection portion of the viewer
+ * page
+ */
 var buildHTMLTree = function(query){
-    //get parent object for the html tree
+    // get parent object for the html tree
     var parent = $('#selection_list');
     parent.text("");
-    //list file type and path
-    //$("#model_type").attr("value",query.file.type); 
+    // list file type and path
+    // $("#model_type").attr("value",query.file.type);
     document.getElementById("model_type").value = query.file.type
     $("#model_type").change(function(){
         var val =  $("#model_type").val().toUpperCase();
@@ -405,7 +406,6 @@ var buildHTMLTree = function(query){
             
             render(true);
             run();
-            glviewer.translate(width/2,0,0,false);
         }
         prev_type = val
     })
@@ -415,11 +415,9 @@ var buildHTMLTree = function(query){
         var val =  $("#model_input").val().toUpperCase();
         if(prev_in != val){
             if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
-                glviewer.clear();
                 render(true);
                 run();
                 var width = $("#sidenav").width();
-                glviewer.translate(width/2,0,0,false);
             }else{
                 if(prev_in!= val)
                     alert("Invalid PDB")
@@ -428,7 +426,7 @@ var buildHTMLTree = function(query){
         prev_in = val;
     })
     var arr=[]
-    //loops through selections and creates a selection tree
+    // loops through selections and creates a selection tree
     for(var selection_index in query.selections){
         var selection_object = query.selections[selection_index];
         var aug = augmentSelection(selection_object);
@@ -447,10 +445,8 @@ var buildHTMLTree = function(query){
         if(arr[i]!= undefined)
             parent.append(arr[i])
     }
-    //this adds spinners to things with spinner as a class this is here because they need to ba  a part of the dom before this is called
-    $('<li id = "spacer"><br><br><br></li>').appendTo(parent)
 }
-//takes the queyr object and creates a url for it
+// takes the queyr object and creates a url for it
 var queryToURL = function(query){
 
     var isSame = function(obj1,obj2){
@@ -463,10 +459,10 @@ var queryToURL = function(query){
             if(obj2[key]==undefined || obj2[key] != obj1[key])
                 return false;
         }
-        return typeof(obj1) == typeof(obj2); //{} != 0
+        return typeof(obj1) == typeof(obj2); // {} != 0
     }
     var url = "";
-    //unpacks everything except for style which has multiple layers 
+    // unpacks everything except for style which has multiple layers
     var unpackOther = function (object){
         
 
@@ -474,9 +470,9 @@ var queryToURL = function(query){
         $.each(object, function(key,value){
             if(isSame(value,{}))
                 value = ""
-            //array values 
+            // array values
             if(Array.isArray(value)){
-                //sperate by commas
+                // sperate by commas
                 objs.push(key+":"+value.join(","));
             }else{
                 objs.push(key+":"+value);
@@ -519,7 +515,7 @@ var queryToURL = function(query){
         var select="select="+ unpacked
         if(select == "select=")
             select = "select=all"
-        objs.unshift(select);//prepend
+        objs.unshift(select);// prepend
         return objs.join("&");
     }
 
@@ -550,17 +546,22 @@ var Query = function(){
 function setURL(urlPath){
     window.history.pushState('page2',"Title", "viewer.html?"+urlPath);
 }
-//this function will look through the dictionaries defined in glmodel and validate if the types are correct and return a dictionary with flags for the types that are incorecct
+// this function will look through the dictionaries defined in glmodel and
+// validate if the types are correct and return a dictionary with flags for the
+// types that are incorecct
 
 var count = 0;
-//takes the search url string and makes a query object for it 
+// takes the search url string and makes a query object for it
 var urlToQuery = function(url){
-    //url= decodeURIComponent(url)
-    if(url == "")
+    // url= decodeURIComponent(url)
+    if(url == "" || url.startsWith('session='))
         return new Query();
+    
     var query = new Query();
     var tokens = url.split("&");
-    //still using indexOf because otherwise i would need to check to see if the first substring in the string is "select" and check to see if the string isnt to small
+    // still using indexOf because otherwise i would need to check to see if the
+    // first substring in the string is "select" and check to see if the string
+    // isnt to small
     function stringType(string){
         if(string ==  "select")
             return "select"
@@ -581,8 +582,8 @@ var urlToQuery = function(url){
 	var uri = decodeURIComponent(tokens[token]);
 	var i = uri.indexOf('=');
 	var left = uri.slice(0,i);
-        var type = stringType(left);//left side of first equals
-        var string = uri.slice(i+1);//right side of equals
+        var type = stringType(left);// left side of first equals
+        var string = uri.slice(i+1);// right side of equals
         var object = $3Dmol.specStringToObject(string);
         if(type == "file"){
             query.file = new File(string,left);
@@ -605,7 +606,7 @@ var urlToQuery = function(url){
 }
 
 var updateQueryFromHTML = function(){
-    //File/PDB/URL updating
+    // File/PDB/URL updating
     query.file.path= $("#model_input").val(); 
     query.file.type=$("#model_type").val();
 
@@ -662,7 +663,7 @@ var updateQueryFromHTML = function(){
             if(obj2[key]==undefined || obj2[key] != obj1[key])
                 return false;
         }
-        return typeof(obj1) == typeof(obj2); //0 != {}
+        return typeof(obj1) == typeof(obj2); // 0 != {}
     }
 
     function combine(obj1, src1) {
@@ -705,10 +706,10 @@ var updateQueryFromHTML = function(){
 }
 
 var query = urlToQuery(window.location.search.substring(1));
-//this function compresses the html object back into a url
+// this function compresses the html object back into a url
 var render = function(surfaceEdited){
     surfaceEdited = surfaceEdited == undefined ? false : surfaceEdited;
-    //calls update query
+    // calls update query
     updateQueryFromHTML();
     var url = queryToURL(query);
     setURL(url);
@@ -717,7 +718,7 @@ var render = function(surfaceEdited){
     runcmds(url.split("&"),glviewer,surfaceEdited);
     glviewer.render();
 }
-//these functions all edit the query object 
+// these functions all edit the query object
 var addSelection = function(type){
     var surface  = type == "surface"
     if(type == "style")      
@@ -747,7 +748,8 @@ var addModelSpec = function(type,selection){
         if(current_selection[type]==null)
             current_selection[type]={};
         else
-            console.err(type+" already defined for selection");//TODO error handling
+            console.err(type+" already defined for selection");// TODO error
+                                                                // handling
     }
     
     buildHTMLTree(query);
@@ -800,7 +802,7 @@ var deleteStyleAttribute = function(spec){
     buildHTMLTree(query);
     render();
 }
-//this function reads the form changes and upates the query accordingly
+// this function reads the form changes and upates the query accordingly
 var center = function(){
     glviewer.center({},1000,true);
 }
@@ -822,11 +824,11 @@ var savePng = function() {
     link.click();
     document.body.removeChild(link);
 }
-//initializes the sidebar based on the given url
+// initializes the sidebar based on the given url
 var initSide = function(url){
     var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
-    //updating on back button
+    // updating on back button
     $(window).on('popstate', function() {
         query = urlToQuery(window.location.search.substring(1));
         buildHTMLTree(query);
@@ -835,6 +837,15 @@ var initSide = function(url){
 
     buildHTMLTree(query);
 }
+var showCreateSession = function(){
+    $('#session_list2').hide();
+    $('#session_list1').toggle();
+}
+var showJoinSession = function(){
+    $('#session_list1').hide();
+  $('#session_list2').toggle();
+}
+
 var toggle = true;
 var width=420;
 var prev_in = $("#model_input").val();
@@ -843,13 +854,12 @@ var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
         $("#sidenav").css("width",width+"px");
-        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#vrmlExport').css("display","inline")
-        $('#header').css("display","block");
+        $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#vrmlExport').css("display","inline")
         glviewer.translate(width/2,0,400,false);
         glviewer.render();
     }else{
         $("#sidenav").css("width","0");
-        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#header,#vrmlExport').css("display","none")
+        $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#header,#vrmlExport').css("display","none")
         $("#menu").css("display","inline");
         width = $("#sidenav").width();
         glviewer.translate(-width/2,0,400,false);
@@ -857,3 +867,220 @@ var toggleHide =  function(){
     }
     toggle = !toggle;
 }
+
+var glviewer = null;
+// http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
+// Process commands, in order, and run on viewer (array of strings split on '&')
+var runcmds = function(cmds, viewer,renderSurface) {
+            console.log("rendering")
+    renderSurface = renderSurface == undefined ? true : renderSurface;
+    if(renderSurface)
+        viewer.removeAllSurfaces();
+    viewer.removeAllLabels();
+    var currentsel = {};
+
+    for (var i = 0; i < cmds.length; i++) {
+        var kv = cmds[i].split('=');
+        var cmdname = kv[0];
+        var cmdobj = $3Dmol.specStringToObject(kv[1]);
+
+        if (cmdname == 'select')
+            currentsel = cmdobj;
+        else if (cmdname == 'surface' && renderSurface){
+            viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel,
+                    currentsel);
+        } else if (cmdname == 'style'){
+            viewer.setStyle(currentsel, cmdobj);
+        } else if (cmdname == 'addstyle'){
+            viewer.addStyle(currentsel, cmdobj);
+        } else if (cmdname == 'labelres'){
+            viewer.addResLabels(currentsel, cmdobj);
+        } else if (cmdname == 'colorbyelement'){
+            if (typeof ($3Dmol.elementColors[cmdobj.colorscheme]) != "undefined")
+                viewer.setColorByElement(currentsel,
+                        $3Dmol.elementColors[cmdobj.colorscheme]);
+        } else if (cmdname == 'colorbyproperty'){
+            if (typeof (cmdobj.prop) != "undefined"
+                    && typeof ($3Dmol.Gradient[cmdobj.scheme]) != "undefined"){
+                viewer.setColorByProperty(currentsel, cmdobj.prop,
+                        new $3Dmol.Gradient[cmdobj.scheme]());
+            }
+        }
+
+    }
+
+};
+function run() {
+        try {
+            var url = window.location.search.substr(1);
+            url= decodeURIComponent(url)
+            var cmds = url.split("&");
+            var first = cmds.splice(0, 1)[0];
+            var pos = first.indexOf('=');
+            var src = first.substring(0, pos), data = first
+                    .substring(pos + 1);
+            var type = "pdb";
+
+            if(glviewer === null) {
+                glviewer = $3Dmol.createViewer("gldiv", {
+                    defaultcolors : $3Dmol.rasmolElementColors
+                });
+                glviewer.setBackgroundColor(0xffffff);
+            } else {
+                glviewer.clear();
+            }
+
+            if (src == 'session') {
+                // join a session
+                joinSession(data);
+            }
+            if (src == 'pdb') {
+                console.log(data)
+                data = data.toUpperCase();
+                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                    return;
+                }
+                data = "http://files.rcsb.org/view/" + data
+                        + ".pdb";
+                type = "pdb";
+            } if (src == 'cif') {
+                data = data.toUpperCase();
+                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                    return;
+                }
+                data = "http://files.rcsb.org/view/" + data
+                        + ".cif";
+                type = "cif";
+            } else if (src == 'cid') {
+                type = "sdf";
+                data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
+                        + data + "/SDF?record_type=3d";
+            } else if (src == 'mmtf') {
+                data = data.toUpperCase();
+                data = 'http://mmtf.rcsb.org/full/' + data + '.mmtf';
+                type = 'mmtf';
+            } else { // url
+                // try to extract extension
+                type = data.substr(data.lastIndexOf('.') + 1);
+                if(type == 'gz') {
+                    var base = data.substr(0,data.lastIndexOf('.'));
+                    type = base.substr(base.lastIndexOf('.')) + '.gz';
+                }
+            }
+            if (cmds[0] && cmds[0].indexOf('type=') == 0) {
+                type = cmds[0].split('=')[1];
+            }
+
+            var start = new Date();
+
+            if (/\.gz$/.test(data) || type == 'mmtf') { // binary
+                                                        // data
+                $.ajax({url:data, 
+                    type: "GET",
+                    dataType: "binary",
+                    responseType: "arraybuffer",
+                    processData: false,
+                    success: function(ret, txt, response) {
+                        console.log("mtf fetch " + (+new Date() - start) + "ms");
+                        var time = new Date();
+                        glviewer.addModel(ret, type);
+                        runcmds(cmds, glviewer);
+                        glviewer.zoomTo();
+                        glviewer.render();
+                        console.log("mtf load " + (+new Date() - time) + "ms");
+
+                }}).fail(function() {
+                    // if couldn't get url natively, go through echo
+                    // server
+                    $.ajax({ url:"echo.cgi", 
+                        data: { 'url' : data },
+                        processData: false,
+                        responseType: "arraybuffer",
+                        dataType: "binary",
+                        success: function(ret, txt, response) {
+
+                        glviewer.addModel(ret, type);
+                        runcmds(cmds, glviewer);
+                        glviewer.zoomTo();
+                        glviewer.render();
+                    }})
+                });
+            } else {
+                $.get(data, function(ret, txt, response) {
+                    console.log("alt fetch " + (+new Date() - start) + "ms");
+                    var time = new Date();
+                    glviewer.addModel(ret, type);
+                    runcmds(cmds, glviewer);
+                    glviewer.zoomTo();
+                    glviewer.render();
+                    console.log("alt load " + (+new Date() - time) + "ms");
+
+                }).fail(function() {
+                    // if couldn't get url natively, go through echo
+                    // server
+                    $.post("echo.cgi", {
+                        'url' : data
+                    }, function(ret, txt, response) {
+                        if(src == 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret == "")) {
+                            // really large files aren't available
+                            // in pdb format
+                            type = 'cif';
+                            data = data.replace(/pdb$/,'cif');
+                            $.post("echo.cgi",{
+                                'url' : data
+                            }, function(ret, txt, response) {
+
+                                glviewer.addModel(ret, type);
+                                runcmds(cmds, glviewer);
+                                glviewer.zoomTo();
+                                glviewer.render();
+                            })
+                        } else {
+                            glviewer.addModel(ret, type);
+                            runcmds(cmds, glviewer);
+                            glviewer.zoomTo();
+                            glviewer.render();
+                        }
+                    });
+                });
+            }
+        }
+
+        catch (e) {
+            console
+                    .error("Could not instantiate viewer from supplied url: '"
+                            + e + "'");
+            window.location = "http://get.webgl.org";
+
+        }
+}
+
+$(document).ready(function(){
+    var url=window.location.href.substring(window.location.href.indexOf("?")+1);
+    initSessions(); 
+    
+    run();
+    var start_width;
+    $("#sidenav").resizable({
+        handles: 'e',
+        minWidth: 300,
+        maxWidth: 1000,
+        start:function(event,ui){
+            start_width=$("#sidenav").width();
+        },
+        resize:function(event,ui){
+            glviewer.center();
+            glviewer.translate(($("#sidenav").width()-start_width)/2,0,0,false);
+            start_width=$("#sidenav").width();
+        }
+    });
+    $( "#selection_list" ).sortable({
+      items: ".selection:not(#spacer)",
+      update:  function (event, ui) {
+            render(true);
+        },
+    });// $("#selection_list").accordion();
+    $("#selection_list").disableSelection();
+    
+    initSide(url);
+});

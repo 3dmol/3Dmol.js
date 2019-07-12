@@ -1,20 +1,13 @@
 /node_modules
 /nbproject/private/
-/Jmol
-/js/Detector.js
-/js/Stats.js
-/js/OrbitControls.js
-/js/THREEx.FullScreen.js
-/js/THREEx.KeyboardState.js
-/js/THREEx.WindowResize.js
-/testlabel.htmlthree.js
-/three.js
 script.map
 my_pdbs/
 build
 doc
 doc/scripts/toc.js
 .DS_Store
+package-lock.json  #suppose to commit, but triggers security warning on github
+.settings
 
 #Ignoring Virtual Environments for the Active Learning Environment Project
 .env

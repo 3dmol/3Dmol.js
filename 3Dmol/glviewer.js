@@ -1547,7 +1547,7 @@ $3Dmol.GLViewer = (function() {
                         final_position);
             } else { //no animation
                 lookingAt = final_position;
-                camera.lookAt(lookingAt);
+                viewer(lookingAt);
                 show();
             }
             return this;
