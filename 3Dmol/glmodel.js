@@ -1371,7 +1371,36 @@ $3Dmol.GLModel = (function() {
             return ret;
         };
         
+      
+
+        /**
+         * Return object representing internal state of 
+         * the model appropriate for passing to setInternalState
+         * 
+         * @function $3Dmol.GLModel#getInternalState
+        */
+        this.getInternalState = function() {
+          return {'atoms': atoms,
+                  'frames': frames };          
+        };      
         
+        /**
+         * Overwrite the internal model state with the passed state.
+         * 
+         * @function $3Dmol.GLModel#setInternalState
+        */
+        this.setInternalState = function(state) {
+          atoms = state.atoms;
+          frames = state.frames;   
+          molObj = null;     
+        };         
+        
+        /**
+         * Returns crystallographic information if present.
+         *
+         * @function $3Dmol.GlModel#getCrystData
+         *
+         */
         this.getCrystData = function() {
             if (modelData.cryst) {
                 return modelData.cryst;

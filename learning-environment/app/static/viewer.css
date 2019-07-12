@@ -4,11 +4,9 @@
 }
 /*close button for sidenav*/
 .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px !important;
-    margin-left: 50px;    
+    font-size: 1em !important;
+    float: right;
+    margin-right: 15px;
 }
 /*font, hamburger button, general styleing*/
 * {
@@ -40,17 +38,7 @@ h3{
     border-radius: 15px 50px
 }
 /*gets the page header working*/
-#header{
-    text-align:left;
-    /*position : relative; does not seem necessary*/
-    color:white;
-    background-color:rgba(0,0,122,.5);
-    margin:8px;
-    margin-bottom:-20px;
-    padding-left:20px;
-    border-radius: 15px 50px;
-    display:none;
-}
+
 #model_type{
     width: 70%;
 }
@@ -71,6 +59,7 @@ this may change*/
     font-size:30px;
     cursor:pointer;
     position:absolute;
+    padding-left: 10px;
     z-index:1;
 }
 
@@ -158,7 +147,6 @@ select.attribute_value{
 
 #selection_list{
     list-style: none;
-    margin-bottom: 70px;
 }
 
 #container{
@@ -256,28 +244,50 @@ select,input{
     font-size:16px;
 }
 
-#fixed_bottom{
-    bottom:0;
-    background-color:white;
-    width:100%;
-    height:110px;
-    position: absolute;
+#sidenav {
+  display: flex;
+  flex-direction: column;
+    flex-wrap: nowrap;
+
 }
+
+.header {
+    height: 38px;
+    overflow: hidden;
+
+}
+
+.heading{
+    text-align:left;
+    /*position : relative; does not seem necessary*/
+    color:white;
+    background-color:rgba(0,0,122,.5);
+    padding-left:20px;
+    border-radius: 15px 50px;
+    font-size: 1.5em;
+}
+
+.footer {
+  background-color:white;
+  width: 100%;
+  padding-bottom: 10px;
+}
+
 .option{
     margin:0px;
 }
 
-#list{
-    height:100%;
-    margin-top:40px;
+.center{
     overflow: hidden;
     overflow-y:scroll;
-    margin-bottom:70px;
+    flex-grow: 1;
 }
 
-#header{
-    font-size: 32px;
+
+.container{
+    margin: 0 auto; /* Center the DIV horizontally */
 }
+
 
 .spinner {
     -webkit-touch-callout: none;
@@ -309,3 +319,60 @@ select,input{
 .delete_style_spec{
     padding:5px;
 }
+
+#sessionbutton {
+    cursor:pointer;
+    position:absolute;
+    padding-right: 10px;
+    padding-top: 5px;
+    height: 36px;
+    top: 0;
+    right: 0;
+    z-index:1;
+}
+
+#sessionbutton img {
+	opacity: 0.5;
+}
+
+#sessionconnectbutton {
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+	width: 5em;
+}
+#sessionconnect {
+	white-space: nowrap;
+}
+
+#sessionconnect input {
+	width: 8em;
+}
+
+.close {
+    cursor:pointer;	
+	font-size: 1.5em;
+}
+
+.rightdialog {
+	position:absolute;
+    margin-right: 10px;
+    margin-top: 5px;
+    top: 0;
+    right: 0;
+    z-index:1;
+    border-color:gray;
+    border-style:solid;
+    border-width: 1px;
+    background-color: rgba(255,255,255,.5);    
+    border-radius: 15px;
+    text-align: center;
+    vertical-align: middle;
+    display: none;
+}
+
+.rightdialog > div {
+	padding: 1em;
+}
+
+

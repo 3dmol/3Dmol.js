@@ -387,6 +387,10 @@ $3Dmol.Parsers = (function() {
         for (i = 0, il = atomsarray.length; i < il; i++) {
             atom = atomsarray[i];
             val = chres[atom.chain][atom.resi];
+            
+            //clear hbondOther to eliminate circular references that prohibit serialization
+            delete atom.hbondOther;
+            delete atom.hbondDistanceSq;
             if (typeof (val) == "undefined" || val == 'maybesheet')
                 continue;
             atom.ss = val;

@@ -71,7 +71,8 @@ $3Dmol.GLViewer = (function() {
         var HEIGHT = container.height();
 
         var viewChangeCallback = null;
-       
+        var stateChangeCallback = null;
+        
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
         var fov = 20;
@@ -184,7 +185,7 @@ $3Dmol.GLViewer = (function() {
                 scene.fog.near=scene.fog.far;
             }
         };
-
+        
         // display scene
         //if nolink is set/true, don't propagate changes to linked viewers
         var show = function(nolink) {
@@ -303,11 +304,6 @@ $3Dmol.GLViewer = (function() {
                 selected.hover_callback(selected, _viewer, event, container);
             }  
             
-        };
-        
-        this.setViewChangeCallback = function(callback) {
-            if(typeof(callback) === 'function') 
-                viewChangeCallback = callback;
         };
         
         //checks for selection intersects on hover
@@ -456,7 +452,69 @@ $3Dmol.GLViewer = (function() {
             return z;
         };
         
+        /**
+         * Set a callback to call when the view has potentially changed.
+         * 
+         * @function $3Dmol.GLViewer#setViewChangeCallback
+        */
+        this.setViewChangeCallback = function(callback) {
+            if(typeof(callback) === 'function') 
+                viewChangeCallback = callback;
+        };
+
+        /**
+         * Set a callback to call when the view has potentially changed.
+         * 
+         * @function $3Dmol.GLViewer#setStateChangeCallback
+        */
+        this.setStateChangeCallback = function(callback) {
+            if(typeof(callback) === 'function') 
+                stateChangeCallback = callback;
+        };
+
+        /**
+         * Return object representing internal state of 
+         * the viewer appropriate for passing to setInternalState
+         * 
+         * @function $3Dmol.GLViewer#getInternalState
+        */
+        this.getInternalState = function() {
+          var ret = {'models': [], 'surfaces': [], 'shapes': [], 'labels': [] };
+          for (let i = 0; i < models.length; i++) {
+            if (models[i]) {
+              ret.models[i] = models[i].getInternalState();
+            }
+          }
+          
+          //todo: labels, shapes, surfaces
+          
+          return ret;
+        };
         
+        /**
+         * Overwrite internal state of the viewer with passed  object
+         * which should come from getInternalState.
+         * 
+         * @function $3Dmol.GLViewer#setInternalState
+        */
+        this.setInternalState = function(state) {
+          
+          //clear out current viewer
+          this.clear();
+          
+          //set model state
+          var newm = state.models;          
+          for(let i = 0; i < newm.length; i++) {
+            if(newm[i]) {
+              models[i] = new $3Dmol.GLModel(i);
+              models[i].setInternalState(newm[i]);
+            }
+          }
+          
+          //todo: labels, shapes, surfaces
+          this.render();
+        };
+                                             
         /**
          * Set lower and upper limit stops for zoom.
          * 
@@ -1179,6 +1237,11 @@ $3Dmol.GLViewer = (function() {
             renderer.setViewport();
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();
+            
+            if(stateChangeCallback) {
+              //todo: have ability to only send delta updates
+              stateChangeCallback(this.getInternalState());
+            }
             
             var i, n;
             if(!exts) exts = renderer.supportedExtensions();
