@@ -2530,7 +2530,7 @@ $3Dmol.GLViewer = (function() {
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.transferfn = spec.transferfn; //TODO bassem: need to check for if it is undefined or not to add a default fn
-            s.addBox({corner: spec.pos, dimensions: spec.dimensions});
+            s.addBox({center: spec.pos, dimensions: {w: 1, h: 1, d: 1}}); //TODO: need to add way to set corner vs center parameters
             s.volumetricRenderer = true;
             s.volumetricdata = data;
 

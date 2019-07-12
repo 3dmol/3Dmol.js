@@ -895,7 +895,7 @@ $3Dmol.ShaderLib = {
         fragmentShader: [
             "uniform highp sampler3D volume;", 
             "uniform highp sampler2D colormap;",
-            "uniform ivec3 volume_dims;", 
+            "uniform vec3 volume_dims;", 
             "uniform float dt_scale;", 
             
             "uniform float opacity;",
@@ -963,6 +963,7 @@ $3Dmol.ShaderLib = {
             "layout(location=0) in vec3 position;",
             "uniform vec3 eye_pos;",
             "uniform vec3 volume_scale;",
+            "uniform vec3 volume_dims;", 
 
             "uniform mat4 modelMatrix;",
             "uniform mat4 modelMatrixInverse;",
@@ -974,9 +975,13 @@ $3Dmol.ShaderLib = {
             "out vec3 vray_dir;",
 
             "void main(void) {",
-            "    transformed_eye = (modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos;", // eye position in unit cube space (should divide by scale)
+            "    transformed_eye = ((modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos) / vec3(volume_scale.z, volume_scale.y, volume_scale.x);", // eye position in unit cube space (should divide by scale) (scale here between 0 and 1) for non uniform dimensions
             "    vray_dir = position - modelPos - transformed_eye;", // el minus modelPos di 3shan hwa asln k2eno mdrob fl model matrix
-            "    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1);",
+            // there is a small problem that happens on scaling up the volume, the sides of the box has some 
+            // white margin on viewing from certain angles ..
+            // mostly happens because scaling it up causes the vray-direction to slightly change on some angles .. ? 
+            // edit: something is not right near the edges even not the glitche, some pixels move while rotating camera!
+            "    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position * vec3(volume_dims.z, volume_dims.y, volume_dims.x), 1);", // should multiply by vol_dimens here inside vec4
             "}"
         ].join("\n"),
 

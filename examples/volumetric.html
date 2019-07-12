@@ -19,7 +19,7 @@
         var viewer = $3Dmol.createViewer("viewer");
         
         // TODO
-        // scale / dimensions (scale related to other stuff) (dimensions as in non uniform cubes)
+        // fix scaling problems of position/rotation and glitches (correct scale)
         // seldist, coords, and the way to select part of the volume as the isosurface
         // transfer function / opacity
         // having multiple volumetric renderers in this file (even on the same volumedata)
@@ -39,33 +39,30 @@
             var voldata = new $3Dmol.VolumeData(data, "ccp4");
             // viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 1.0, smoothness: 1}); 
             viewer.addVolumetricRenderer(voldata, {
-                color: "red", 
                 transferfn:{ 
                     1:{Color: "red", pos: 0.0}, 
                     2:{Color: "blue", pos: 1.0}
                 },
-                pos: {x:3,y:1.2,z:2}, 
-                dimensions: {w: 1, h: 1, d: 1} // TODO: it should not be dimensions vector but a float value 'scale' to control the volume uniform scale/size
-                // as the dimensions are assigned by the dimensions of the volumeData itself
-                //- sol: this should be auto generated not user controlled, the user can only control their scale related to other objects  
+                pos: {x:0,y:0,z:0}  // TODO: i can send corner or center as the pos. so?
             });
-
-            var voldata = new $3Dmol.VolumeData(data, 'ccp4');
             
-            // viewer.addIsosurface(voldata, {isoval: 0.1,
-            //                            color: "green",
-            //                            opacity: .5,
-            //                            coords: [{x: 40.948, y: 78.96, z: 83.987}], // the coords of the center point that we need to select
-            //                            seldist: 3.0   // the selection distance around the center
-            //                         });
+            viewer.addIsosurface(voldata, {isoval: 0.001,
+                                       color: "green",
+                                       opacity: 1.0,
+                                       // coords: [{x: 40.948, y: 78.96, z: 83.987}], // the coords of the center point that we need to select
+                                       // seldist: 3.0   // the selection distance around the center
+                                    });
                                     
-            var rec1 = viewer.addModel($('#1udt').val(), "pdb");
-            rec1.setStyle({resn:'VIA'},{stick:{color:'red', opacity:'1.0'}});
+            // var rec1 = viewer.addModel($('#1udt').val(), "pdb");
+            // rec1.setStyle({resn:'VIA'},{stick:{color:'red', opacity:'1.0'}});
                
-            viewer.addLabel("Aromatic", {position: {x:2.6, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+            // viewer.addLabel("Aromatic", {position: {x:2.6, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
 
             var shape = viewer.addShape({color: 'red'});
-            shape.addBox({corner: {x:3,y:3,z:0}, dimensions: {w: 1, h: 3, d: 3}});
+            // shape.addBox({corner:{x:0,y:0,z:0}, dimensions: {w: 1, h: 1, d: 1}});
+            // shape.addBox({center:{x:0,y:0,z:0}, dimensions: {w: 1, h: 1, d: 1}});
+            
+            // 117, 97, 110
 
             viewer.zoomTo();
             viewer.render();

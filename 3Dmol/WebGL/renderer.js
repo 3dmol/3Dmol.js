@@ -808,6 +808,16 @@ $3Dmol.Renderer = function(parameters) {
                 // inverse model matrix
                 p_uniforms.modelMatrixInverse = _gl.getUniformLocation(program, "modelMatrixInverse");
                 _gl.uniformMatrix4fv(p_uniforms.modelMatrixInverse, false, object.matrix.getInverse(object.matrixWorld).elements);
+                // scale stuff -- should this also be z y x ?????? 
+                var longestAxis = Math.max(material.map.image.size.x, Math.max(material.map.image.size.y, material.map.image.size.z));
+                var volScale = [material.map.image.size.x / longestAxis, material.map.image.size.y / longestAxis, material.map.image.size.z / longestAxis];
+                var volDims = [material.map.image.size.x, material.map.image.size.y, material.map.image.size.z];
+                // var volDims = [1, 1, 1];
+                p_uniforms.volScale = _gl.getUniformLocation(program, "volume_scale");
+                _gl.uniform3fv(p_uniforms.volScale, volScale);
+                p_uniforms.volDims = _gl.getUniformLocation(program, "volume_dims");
+                _gl.uniform3fv(p_uniforms.volDims, volDims);
+
                 renderer.setTexture(object.material.map, 3, true);
             }
 
@@ -1632,7 +1642,7 @@ $3Dmol.Renderer = function(parameters) {
 
             }
 
-            // temp code
+            // temp code to change scale of numbers in texture
             if (is3D){
             let max = -1000;
             let min = 1000;
@@ -1645,7 +1655,9 @@ $3Dmol.Renderer = function(parameters) {
             }              
             console.log("max: ", max, "min: ", min);
             texture.image.data.forEach(function (element, index, array) {
-                array[index] = scale(element, min, max, min/1000, max/1000)
+                array[index] = scale(element, min, max, 0, 0.2)  
+                // array[index] = scale(element, min, max, -0.15, 0.2)  // 0, 0.2 for ccp4
+                // array[index] = scale(element, min, max, min/1000, max/1000)
                 // array[index] = element + 0.01;
             })
             }
@@ -1668,6 +1680,7 @@ $3Dmol.Renderer = function(parameters) {
                 setTextureParameters(_gl.TEXTURE_3D, texture, isImagePowerOfTwo && false);
                 // NOTE: the .cube and .dx (nearly all the text volume files) are saved into the file with the z as the major dimension (width), arranged z y x
                 _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.z, texture.image.size.y, texture.image.size.x, 0, _gl.RED, _gl.FLOAT, texture.image.data);
+                // _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R8, 301, 324, 56, 0, _gl.RED, _gl.UNSIGNED_BYTE, texture.image);
             }
             var mipmap, mipmaps = texture.mipmaps;
             // regular Texture (image, video, canvas)
