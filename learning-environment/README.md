@@ -1,3 +1,7 @@
+Dependencies
+####
+pip3 install flask flask_socketio eventlet
+
 TODOs
 #####
 JSHint the session code
