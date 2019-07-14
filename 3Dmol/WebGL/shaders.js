@@ -973,15 +973,19 @@ $3Dmol.ShaderLib = {
             
             "flat out vec3 transformed_eye;",
             "out vec3 vray_dir;",
+            "vec3 positionWorldSpace;",
 
             "void main(void) {",
-            "    transformed_eye = ((modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos) / vec3(volume_scale.z, volume_scale.y, volume_scale.x);", // eye position in unit cube space (should divide by scale) (scale here between 0 and 1) for non uniform dimensions
-            "    vray_dir = position - modelPos - transformed_eye;", // el minus modelPos di 3shan hwa asln k2eno mdrob fl model matrix
-            // there is a small problem that happens on scaling up the volume, the sides of the box has some 
-            // white margin on viewing from certain angles ..
-            // mostly happens because scaling it up causes the vray-direction to slightly change on some angles .. ? 
-            // edit: something is not right near the edges even not the glitche, some pixels move while rotating camera!
-            "    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position * vec3(volume_dims.z, volume_dims.y, volume_dims.x), 1);", // should multiply by vol_dimens here inside vec4
+            "    // eye position in unit cube space for non uniform dimensions (should divide by scale) (scale here between 0 and 1) ",
+            "    // modelMatrix and ModelMatrixInverse don't include the scaling vector so as to not scaele the eye_pos",
+            "    transformed_eye = ((modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos) / volume_scale.yxz;", 
+            
+            "    // the position vector contains the model translation so it is removed before getting the ray vector",
+            "    vray_dir = (position - modelPos) - transformed_eye;", 
+            
+            "    // same here, translation is subtracted before multiplying by scale to keep transformations order correct",
+            "    positionWorldSpace = (modelMatrix * vec4( (position-modelPos) * volume_dims.yxz * 0.5 + modelPos, 1)).xyz;",
+            "    gl_Position = projectionMatrix * viewMatrix * vec4(positionWorldSpace, 1);", 
             "}"
         ].join("\n"),
 

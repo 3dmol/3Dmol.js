@@ -805,7 +805,7 @@ $3Dmol.Renderer = function(parameters) {
                 p_uniforms.modelPos = _gl.getUniformLocation(program, "modelPos");
                 // hack to get box position because position is always 0,0,0 (box vertices are initialiez to their final position)
                 _gl.uniform3fv(p_uniforms.modelPos, object.geometry.geometryGroups[0].vertexArray.slice(0, 3));
-                // inverse model matrix
+                // inverse model matrix (with unit scale, so as to not scale the eye_pos)
                 p_uniforms.modelMatrixInverse = _gl.getUniformLocation(program, "modelMatrixInverse");
                 _gl.uniformMatrix4fv(p_uniforms.modelMatrixInverse, false, object.matrix.getInverse(object.matrixWorld).elements);
                 // scale stuff -- should this also be z y x ?????? 

@@ -214,6 +214,8 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
         //all translation and scaling done by matrix, so reset origin and unit
         this.origin = new $3Dmol.Vector3(0,0,0);
         this.unit = new $3Dmol.Vector3(1,1,1);
+        var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
+        this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}  
     }
 
 
@@ -308,6 +310,9 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
     var raw = lines.splice(i).join(" ");
     raw = raw.split(/[\s\r]+/);
     this.data = new Float32Array(raw);
+    // TODO: needs testing ..
+    var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
+    this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}
 }
 
 // parse cube data
@@ -367,6 +372,8 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
         //all translation and scaling done by matrix, so reset origin and unit
         this.origin = new $3Dmol.Vector3(0,0,0);
         this.unit = new $3Dmol.Vector3(1,1,1);
+        var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
+        this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}  
     }
     
     var headerlines = 6;
@@ -559,6 +566,8 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
       this.origin = new $3Dmol.Vector3(0,0,0);
       this.unit = new $3Dmol.Vector3(1,1,1); 
       this.size = {x:header.NX, y:header.NY, z:header.NZ};
+      var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
+      this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}
       var data = new Float32Array(bin.buffer, 1024 + header.NSYMBT);
       //data must by (slowest changing) x,y,z (fastest changing)
 

@@ -43,10 +43,10 @@
                     1:{Color: "red", pos: 0.0}, 
                     2:{Color: "blue", pos: 1.0}
                 },
-                pos: {x:0,y:0,z:0}  // TODO: i can send corner or center as the pos. so?
+                // pos: {x:0,y:0,z:0}  // TODO: i can send corner or center as the pos. so?
             });
             
-            viewer.addIsosurface(voldata, {isoval: 0.001,
+            viewer.addIsosurface(voldata, {isoval: 0.3,
                                        color: "green",
                                        opacity: 1.0,
                                        // coords: [{x: 40.948, y: 78.96, z: 83.987}], // the coords of the center point that we need to select
@@ -58,8 +58,8 @@
                
             // viewer.addLabel("Aromatic", {position: {x:2.6, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
 
-            var shape = viewer.addShape({color: 'red'});
-            // shape.addBox({corner:{x:0,y:0,z:0}, dimensions: {w: 1, h: 1, d: 1}});
+            // var shape = viewer.addShape({color: 'red'});
+            // shape.addBox({corner:{x:2,y:0,z:0}, dimensions: {w: 1, h: 1, d: 1}});
             // shape.addBox({center:{x:0,y:0,z:0}, dimensions: {w: 1, h: 1, d: 1}});
             
             // 117, 97, 110
