@@ -15,7 +15,7 @@ var initSessions = function() {
 
     //webserver needs to have appropriate rules to forward to flask
     //https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root
-    socket = io.connect(window.location.hostname+":5000");
+    socket = io.connect(window.location.hostname);
     socket.on('connect', function() {
         socket.send('User has connected!');
     });
