@@ -1,178 +1,199 @@
-from flask import Flask, request
-from flask_socketio import SocketIO, send, emit, join_room, leave_room, close_room 
-import json
+"""
+A Flask-SocketIo based server for the active learning environment project
+"""
+from flask import Flask, request  # pylint: disable=import-error
+from flask_socketio import SocketIO, send, emit, join_room, leave_room, close_room  # pylint: disable=import-error
 
-# for socketio
-import eventlet
+# for SOCKETIO
+import eventlet  # pylint: disable=import-error
+
 eventlet.monkey_patch()
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
-socketio =  SocketIO(app, async_mode='eventlet')
+APP = Flask(__name__)
+APP.config['SECRET_KEY'] = 'secret!'
+SOCKETIO = SocketIO(APP, async_mode='eventlet')
 
-sessions = {} # indexed by session name
+SESSIONS = {}  # indexed by session name
 
 
-@socketio.on('message')
-def handleMessage(msg):
+@SOCKETIO.on('message')
+def handle_message(msg):
+    ''' Message Handler Function '''
     print('Message: ' + msg)
     send(msg, broadcast=True)
 
-@socketio.on('check session name event')
-def handleCheckName(json):
+
+@SOCKETIO.on('check session name event')
+def handle_check_name(json):
+    ''' A function that checks whether the session name exists '''
     name = json['name']
-    print("checking ",name,name in sessions)
-    if name in sessions:
+    print("checking ", name, name in SESSIONS)
+    if name in SESSIONS:
         emit('check session name response', "exists")
     else:
-        emit('check session name response', "free")    
+        emit('check session name response', "free")
 
-@socketio.on('create session event')
-def handleCreateSession(json):
+
+@SOCKETIO.on('create session event')
+def handle_create_session(json):
+    ''' A function that creates a session '''
     name = json['name']
-    if name in sessions:
-        print("Invalid name",name)
+    if name in SESSIONS:
+        print("Invalid name", name)
         emit('create session response', False)
-    else: 
+    else:
         emit('create session response', True)
-        print("Session Created",name)
-        sessions[name] = {'cnt': 0,
-                          'sid': request.sid, # id of the controller
+        print("Session Created", name)
+        SESSIONS[name] = {'cnt': 0,
+                          'sid': request.sid,  # id of the controller
                           'state': json['state'],
                           'view': json['view'],
-                          'query_updates': {}, # each clients individual selections
-                          'query_active' : False
-                             }        
+                          'query_updates': {},  # each clients individual selections
+                          'query_active': False
+                          }
         join_room(name)
         emit('session count', 0, room=request.sid)
 
-@socketio.on('join session event')
-def handleJoinSession(json):
+
+@SOCKETIO.on('join session event')
+def handle_join_session(json):
+    '''' Helps the user to join a session '''
     name = json['name']
-    print("Join",name)
-    if name not in sessions:
+    print("Join", name)
+    if name not in SESSIONS:
         emit('join session response', "0")
-    else: 
+    else:
         emit('join session response', "1")
         join_room(name)
         try:
-            sessions[name]['cnt'] += 1
-        except:
+            SESSIONS[name]['cnt'] += 1
+        except AttributeError:
             emit('error: restart connection')
-        emit('session count', sessions[name]['cnt'], room=sessions[name]['sid'])
-        #send session state to connecting client
-        if 'view' in sessions[name]:
-            emit('viewer view change response', sessions[name]['view'], room=request.sid)
-        if 'state' in sessions[name]:
-            emit('viewer state change response', sessions[name]['state'], room=request.sid)
+        emit('session count', SESSIONS[name]['cnt'], room=SESSIONS[name]['sid'])
+        # send session state to connecting client
+        if 'view' in SESSIONS[name]:
+            emit('viewer view change response', SESSIONS[name]['view'], room=request.sid)
+        if 'state' in SESSIONS[name]:
+            emit('viewer state change response', SESSIONS[name]['state'], room=request.sid)
         print("Joined Session: " + str(json))
-        
-        if sessions[name]['query_active']:
-            emit('query start response', sessions[name]['query_active'], room=request.sid)  
 
-@socketio.on('delete session event')
-def handleDeleteSession(json):
+        if SESSIONS[name]['query_active']:
+            emit('query start response', SESSIONS[name]['query_active'], room=request.sid)
+
+
+@SOCKETIO.on('delete session event')
+def handle_delete_session(json):
+    ''' Helps the initiator to delete the session '''
     name = json['name']
-    if name not in sessions:
+    if name not in SESSIONS:
         return
-    if request.sid != sessions[name]['sid']:
-        return #only the controller can send updates    
+    if request.sid != SESSIONS[name]['sid']:
+        return  # only the controller can send updates
     emit('leave session response', room=name)
     close_room(name)
     print("Session Deleted:" + str(json))
-    del sessions[name]
+    del SESSIONS[name]
     emit('delete session response')
 
 
-
-@socketio.on('leave session event')
-def handleLeaveSession(json):
+@SOCKETIO.on('leave session event')
+def handle_leave_session(json):
+    ''' Helps the joined person(non initiator) to leave the session '''
     name = json['name']
     leave_room(name)
-    if name not in sessions:
+    if name not in SESSIONS:
         return
-    sessions[name]['cnt'] -= 1
-    
-    updates = sessions[name]['query_updates']
+    SESSIONS[name]['cnt'] -= 1
+
+    updates = SESSIONS[name]['query_updates']
     if request.sid in updates:
         del updates[request.sid]
-        emit('query update response', len(updates), room=name)   
+        emit('query update response', len(updates), room=name)
 
-    emit('session count', sessions[name]['cnt'], room=sessions[name]['sid'])
+    emit('session count', SESSIONS[name]['cnt'], room=SESSIONS[name]['sid'])
     print("Session Left: " + str(json))
     emit('leave session response')
 
 
-@socketio.on('viewer view change event')
-def handleViewerChange(json):
+@SOCKETIO.on('viewer view change event')
+def handle_viewer_change(json):
+    ''' Handles View Change '''
     name = json['name']
     viewstate = json['view']
-    if name not in sessions:
+    if name not in SESSIONS:
         return
-    if request.sid != sessions[name]['sid']:
+    if request.sid != SESSIONS[name]['sid']:
         print("Incorrect sid for viewer change")
-        return #only the controller can send updates
-    sessions[name]['view'] = viewstate
+        return  # only the controller can send updates
+    SESSIONS[name]['view'] = viewstate
     emit('viewer view change response', viewstate, room=name)
-    
-@socketio.on('viewer state change event')
-def handleStateChange(json):
+
+
+@SOCKETIO.on('viewer state change event')
+def handle_state_change(json):
+    ''' Handles Model State Change '''
     name = json['name']
     state = json['state']
-    print("State change",name)
-    if name not in sessions:
+    print("State change", name)
+    if name not in SESSIONS:
         return
-    if request.sid != sessions[name]['sid']:
+    if request.sid != SESSIONS[name]['sid']:
         print("Incorrect sid for state change")
-        return #only the controller can send updates    
-    sessions[name]['state'] = state
-    emit('viewer state change response', state, room=name)    
+        return  # only the controller can send updates
+    SESSIONS[name]['state'] = state
+    emit('viewer state change response', state, room=name)
 
-@socketio.on('query start')
-def handleQueryStart(json):
-    name = json['name']
-    print("query start",name)
-    if name not in sessions:
-        return
-    if request.sid != sessions[name]['sid']:
-        return #only the controller can send updates    
-    sessions[name]['query_updates'] = {}
-    sessions[name]['query_active'] = json['kind']
 
-    emit('query start response', json['kind'], room=name)    
-    
-@socketio.on('query end')
-def handleQueryEnd(json):
+@SOCKETIO.on('query start')
+def handle_query_start(json):
+    ''' Function to start a query '''
     name = json['name']
-    if name not in sessions:
+    print("query start", name)
+    if name not in SESSIONS:
         return
-    if request.sid != sessions[name]['sid']:
-        return #only the controller can send updates    
-    sessions[name]['query_updates'] = {}
-    sessions[name]['query_active'] = False
-    emit('query end response', '', room=name) 
-    
-@socketio.on('query update')
-def handleQueryUpdate(json):
-    '''A single update from a client, respond with number unique responses'''
+    if request.sid != SESSIONS[name]['sid']:
+        return  # only the controller can send updates
+    SESSIONS[name]['query_updates'] = {}
+    SESSIONS[name]['query_active'] = json['kind']
+
+    emit('query start response', json['kind'], room=name)
+
+
+@SOCKETIO.on('query end')
+def handle_query_end(json):
+    ''' Function to end a query '''
+    name = json['name']
+    if name not in SESSIONS:
+        return
+    if request.sid != SESSIONS[name]['sid']:
+        return  # only the controller can send updates
+    SESSIONS[name]['query_updates'] = {}
+    SESSIONS[name]['query_active'] = False
+    emit('query end response', '', room=name)
+
+
+@SOCKETIO.on('query update')
+def handle_query_update(json):
+    ''' A single update from a client, respond with number unique responses '''
     name = json['name']
     sel = json['selected']
-    if name not in sessions:
+    if name not in SESSIONS:
         return
-    # process update     
-    updates = sessions[name]['query_updates']    
+    # process update
+    updates = SESSIONS[name]['query_updates']
     updates[request.sid] = sel
-    
-    emit('query update response', len(updates), room=sessions[name]['sid'])   
-    
-@socketio.on('query fetch')
-def handleQueryFetch(json):
-    '''Return the merged results'''
+
+    emit('query update response', len(updates), room=SESSIONS[name]['sid'])
+
+
+@SOCKETIO.on('query fetch')
+def handle_query_fetch(json):
+    ''' Return the merged results '''
     name = json['name']
-    if name not in sessions:
+    if name not in SESSIONS:
         return
-    # process update     
-    updates = sessions[name]['query_updates']
+    # process update
+    updates = SESSIONS[name]['query_updates']
     cnts = {}
     for positions in updates.values():
         for pos in positions:
@@ -182,7 +203,8 @@ def handleQueryFetch(json):
             else:
                 cnts[pos] = 1
     cnts = list(cnts.items())
-    emit('query fetch response', cnts, room=request.sid)   
-    
+    emit('query fetch response', cnts, room=request.sid)
+
+
 if __name__ == '__main__':
-    socketio.run(app)
+    SOCKETIO.run(APP)
