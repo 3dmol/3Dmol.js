@@ -945,7 +945,7 @@ $3Dmol.ShaderLib = {
             "    vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;",
             "    for (float t = t_hit.x; t < t_hit.y; t += dt) {",
             "        float val = texture(volume, p).r;",
-            "        vec4 val_color = vec4(vec3(val), val * opacity);",
+            "        vec4 val_color = vec4(texture(colormap, vec2(val, 0.5)).rgb, val * opacity);",
             "        // Opacity correction",
             "        val_color.a = 1.0 - pow(1.0 - val_color.a, dt_scale);",
             "        color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb;",
@@ -995,7 +995,7 @@ $3Dmol.ShaderLib = {
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
             volume: { type: 'i', value: 3 },
-            colormap: { type: 'i', value: 1 },
+            colormap: { type: 'i', value: 4 },
             dt_scale: { type: 'f', value: 1.0 }
         }
     }

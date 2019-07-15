@@ -811,12 +811,25 @@ $3Dmol.Renderer = function(parameters) {
                 // scale stuff -- should this also be z y x ?????? 
                 var longestAxis = Math.max(material.map.image.size.x, Math.max(material.map.image.size.y, material.map.image.size.z));
                 var volScale = [material.map.image.size.x / longestAxis, material.map.image.size.y / longestAxis, material.map.image.size.z / longestAxis];
-                var volDims = [material.map.image.size.x, material.map.image.size.y, material.map.image.size.z];
-                // var volDims = [1, 1, 1];
+                // var volDims = [material.map.image.size.x, material.map.image.size.y, material.map.image.size.z];
+                var volDims = [2, 2, 2];
                 p_uniforms.volScale = _gl.getUniformLocation(program, "volume_scale");
                 _gl.uniform3fv(p_uniforms.volScale, volScale);
                 p_uniforms.volDims = _gl.getUniformLocation(program, "volume_dims");
                 _gl.uniform3fv(p_uniforms.volDims, volDims);
+
+                // this shouldn't be here, the data upload , the creating the texture and all of that should 
+                // go inside the setTexture same as the 3d texture 
+                // -- it's only fast and didn't crash because of how small the data uploaded is
+                var colormap = _gl.createTexture();
+                _gl.activeTexture(_gl.TEXTURE4);
+                _gl.bindTexture(_gl.TEXTURE_2D, colormap);
+                _gl.texStorage2D(_gl.TEXTURE_2D, 1, _gl.RGB8, 256, 1);
+                _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
+                _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_R, _gl.CLAMP_TO_EDGE);
+                _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+                _gl.texSubImage2D(_gl.TEXTURE_2D, 0, 0, 0, 256, 1, _gl.RGB, _gl.UNSIGNED_BYTE, material.transferfn);
+
 
                 renderer.setTexture(object.material.map, 3, true);
             }
@@ -1655,8 +1668,8 @@ $3Dmol.Renderer = function(parameters) {
             }              
             console.log("max: ", max, "min: ", min);
             texture.image.data.forEach(function (element, index, array) {
-                array[index] = scale(element, min, max, 0, 0.2)  
-                // array[index] = scale(element, min, max, -0.15, 0.2)  // 0, 0.2 for ccp4
+                // array[index] = scale(element, min, max, 0, 0.2)  
+                array[index] = scale(element, min, max, -0.15, 0.2)  // 0, 0.2 for ccp4
                 // array[index] = scale(element, min, max, min/1000, max/1000)
                 // array[index] = element + 0.01;
             })

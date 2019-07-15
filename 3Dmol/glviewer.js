@@ -2529,14 +2529,61 @@ $3Dmol.GLViewer = (function() {
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
-            s.transferfn = spec.transferfn; //TODO bassem: need to check for if it is undefined or not to add a default fn
+            s.transferfn = spec.transferfn || [ { Color: "#ff0000", pos: 0.0 }, { Color: "#0000ff", pos: 1.0 } ];
             s.addBox({corner: data.translationFromOrigin, dimensions: {w: 1, h: 1, d: 1}});
             s.volumetricRenderer = true;
             s.volumetricdata = data;
 
-            // TODO:
-            // - the texture/img data array for the transfer function should be created here and appended to the shape 
-            // to be used to create 2d texture as done with the 3d texture
+            // 
+            // create the transfer function data buffer
+            //
+            function hexToRgb(hex) {
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                  r: parseInt(result[1], 16),
+                  g: parseInt(result[2], 16),
+                  b: parseInt(result[3], 16)
+                } : null;
+            }
+            // interpolation function used from http://hevi.info/do-it-yourself/interpolating-and-array-to-fit-another-size/
+            function interpolateArray(data, fitCount) {
+                // atPoint:[0,1]
+                function linearInterpolate(before, after, atPoint) {
+                    return before + (after - before) * atPoint;
+                };
+                var newData = new Array();
+                var springFactor = new Number((data.length - 1) / (fitCount - 1));
+                newData[0] = data[0]; // for new allocation
+                for ( var i = 1; i < fitCount - 1; i++) {
+                    var tmp = i * springFactor;
+                    var before = new Number(Math.floor(tmp)).toFixed();
+                    var after = new Number(Math.ceil(tmp)).toFixed();
+                    var atPoint = tmp - before;
+                    newData[i] = linearInterpolate(data[before], data[after], atPoint);
+                }
+                newData[fitCount - 1] = data[data.length - 1]; // for new allocation
+                return newData;
+            };
+            var transferfunctionbuffer = [];
+            s.transferfn.sort(function(a, b) { return a.pos - b.pos; });
+            // fill pos 0 and pos 1 if missing
+            if (s.transferfn[0].pos != 0) s.transferfn.unshift({Color: s.transferfn[0].Color, pos: 0.0});
+            if (s.transferfn[s.transferfn.length-1].pos != 1.0) s.transferfn.push({Color: s.transferfn[s.transferfn.length-1].Color, pos: 1.0})
+            // create and fill an array of interpolated values per 2 colors
+            for (var i = 0; i < s.transferfn.length-1; i++){
+                var color1 = hexToRgb(s.transferfn[i].Color), color2 = hexToRgb(s.transferfn[i+1].Color);
+                var pos1 = Math.floor(s.transferfn[i].pos * 256), pos2 = Math.floor(s.transferfn[i+1].pos * 256);
+                if (pos1 == pos2) continue;
+                var R = interpolateArray([color1.r, color2.r], pos2-pos1);
+                var G = interpolateArray([color1.g, color2.g], pos2-pos1);
+                var B = interpolateArray([color1.b, color2.b], pos2-pos1);
+                for (var j = 0; j < R.length; j++){
+                    transferfunctionbuffer.push(R[j]);
+                    transferfunctionbuffer.push(G[j]);
+                    transferfunctionbuffer.push(B[j]);
+                }
+            }
+            s.transferfn = new Uint8Array(transferfunctionbuffer);
 
             shapes.push(s);
             return s;
