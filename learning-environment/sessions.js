@@ -1,3 +1,6 @@
+/*jshint esversion: 6 */
+/*jshint unused: vars */
+
 var socket = null;
 var session_name = null;
 
@@ -15,7 +18,7 @@ var initSessions = function() {
 
     //webserver needs to have appropriate rules to forward to flask
     //https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root
-    socket = io.connect(window.location.hostname);
+    socket = io.connect("localhost:5000");
     socket.on('connect', function() {
         socket.send('User has connected!');
     });
@@ -37,7 +40,7 @@ var initSessions = function() {
     });
 
     var setNumConnections = function(count) {
-        $('#userinfo').html('Users: ' + count)
+        $('#userinfo').html('Users: ' + count);
     };
     setNumConnections(0);
 
@@ -108,12 +111,13 @@ var initSessions = function() {
 
     socket.on('create session response',function(msg) {
         if (msg) {
-            console.log("session created successfully")
+            console.log("session created successfully");
             $('.sessionname').html(session_name);
 
             // setup callbacks
             glviewer.setViewChangeCallback(viewUpdateCallback);
             glviewer.setStateChangeCallback(stateUpdateCallback);
+
             initiator = true;
     
             // close the connection create pane and open the
@@ -140,7 +144,7 @@ var initSessions = function() {
             $('#sessionmonitor').show();
 
         } else
-            alert("Session Doesn't Exist")
+            alert("Session Doesn't Exist");
     });
 
     var deleteSession = function() {
@@ -183,6 +187,7 @@ var initSessions = function() {
         // remove callbacks
         glviewer.setViewChangeCallback(null);
         glviewer.setStateChangeCallback(null);
+        
         resetUpperRight();
 
     });
@@ -192,7 +197,7 @@ var initSessions = function() {
 
     socket.on('error: restart connection', function() {
         location.reload();
-    })
+    });
     socket.on('session count', setNumConnections);
 
     socket.on('viewer view change response', function(new_view) {
