@@ -1,6 +1,6 @@
 const { series, parallel, src, watch, dest} = require('gulp');
-jshint = require('gulp-jshint'),
-concat = require('gulp-concat'),
+jshint = require('gulp-jshint');
+concat = require('gulp-concat');
 uglify = require('gulp-terser');
 rename = require('gulp-rename');
 merge = require('gulp-merge');
@@ -11,6 +11,7 @@ jsdoc = require('gulp-jsdoc3');
 coresrc = ['3Dmol/3dmol.js','3Dmol/WebGL/math.js','3Dmol/WebGL/shapes.js','3Dmol/WebGL/core.js','3Dmol/WebGL/**.js','3Dmol/**.js','!3Dmol/SurfaceWorker.js','3Dmol/SurfaceWorker.js'];
 extsrc = ['js/mmtf.js','js/pako_inflate.js','js/netcdfjs.js'];
 jqsrc = ['js/jquery-3.2.1.js'];
+sessionsrc = ['./learning-environment/sessions.js']
 
 function clean(cb) {
 
@@ -75,9 +76,26 @@ function tests(cb) {
 function build_quick() { //nomin
 	return src(jqsrc.concat(extsrc).concat(coresrc)).pipe(concat('3Dmol.js')).pipe(dest('build'));
 }
+
+function jshint_sessions() {
+	return src(sessionsrc).pipe(jshint({latedef:'nofunc',  esversion:6, laxbreak:true, undef:true, unused:true,
+		globals : {
+			'$':false,
+			'window':false,
+			'io': false,
+			'console': false,
+			'alert':false,
+			'location': false,
+			'glviewer': false,
+		}
+	}))
+		.pipe(jshint.reporter('default'));
+}
+
 exports.build = series(check, parallel(tests,
-                    minify, minify_nojquery));
+                    minify, minify_nojquery), jshint_sessions);
 exports.default = series(clean, parallel(exports.build, doc));
 exports.build_quick = parallel(build_quick,tests);
 exports.clean = clean;
 exports.doc = doc;
+
