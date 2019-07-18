@@ -1,11 +1,26 @@
-import IPython.display
-import time, json
+import time
+import json
+
+try:
+    import IPython.display
+    _has_IPython = True
+except ImportError:
+    _has_IPython = False
 
 #surface type constants
 VDW =1
 MS=2
 SAS=3
 SES=4
+
+def using_ipython(func):
+
+    def inner(*args, **kwargs):
+        if not _has_IPython:
+            raise ImportError("This function requires an active IPython notebook.")
+        return func(*args, **kwargs)
+
+    return inner
 
 class view(object):
     '''A class for constructing embedded 3Dmol.js views in ipython notebooks.
@@ -97,13 +112,16 @@ if(warn) {
                     self.endjs = "viewergrid_UNIQUEID[%d][%d].render();\n"%(r,c) + self.endjs;
         else:
             self.endjs = "viewer_UNIQUEID.render();\n" + self.endjs;
+            
 
+    @using_ipython
     def show(self):
         '''Instantiate a new viewer window. Calling this will orphan any previously instantiated viewer windows.'''
         self.updatejs = ''
         html = self._make_html()
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
 
+    @using_ipython
     def insert(self, containerid):
         '''Instead of inserting into notebook here, insert html
         into existing container'''
@@ -117,10 +135,12 @@ if(warn) {
         html = (self.startjs+self.endjs).replace('UNIQUEID',self.uniqueid)
         return html
 
+    @using_ipython
     def _repr_html_(self):
         html = self._make_html()
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
 
+    @using_ipython
     def update(self):
         '''Apply commands to existing viewer (will auto-instantiate if necessary).'''
         script = ''
@@ -135,6 +155,7 @@ if(warn) {
         self.updatejs = ''
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
 
+    @using_ipython
     def png(self):
         '''output png image of viewer, which must already be instantiated'''
         if not self.uniqueid:
@@ -145,7 +166,6 @@ if(warn) {
             $('#img_{0}').attr('src', png)
             </script>'''.format(self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
-
 
     class model(object):
       '''Wrapper for referencing a model within a viewer'''

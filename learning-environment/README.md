@@ -1,6 +1,10 @@
+Dependencies
+####
+pip3 install flask flask_socketio eventlet
+
 TODOs
 #####
-JSHint the session code
+JSHint the session code as part of the gulp build
 Implement save restore of state for labels, shapes, and surfaces.
 Improve efficiency of state updates
  - make sure updates are only sent if something has changed

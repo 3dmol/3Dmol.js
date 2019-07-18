@@ -18,7 +18,12 @@ var initSessions = function() {
 
     //webserver needs to have appropriate rules to forward to flask
     //https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root
-    socket = io.connect(window.location.hostname);
+    if(window.location.hostname == 'localhost') {
+      //for debugging on localhost go straight to port to avoid having to setup webserver
+      socket = io.connect(window.location.hostname+":5000");
+    } else {
+      socket = io.connect(window.location.hostname);
+    }
     socket.on('connect', function() {
         socket.send('User has connected!');
     });
@@ -366,10 +371,18 @@ var initSessions = function() {
     socket.on('query fetch response', function(query_result) {
             // first clear existing labels
             clearResultLabels();
+            var max = 1;
+            //calc max
+            for (let i = 0; i < query_result.length; i++) {
+              let val = parseInt(query_result[i][1]);
+              if(val > max) max = val;
+            }
+
             for (let i = 0; i < query_result.length; i++) {
                 let pos = query_result[i][0];
                 let p = {x: pos[0], y: pos[1], z: pos[2]};
-                let l = glviewer.addLabel(query_result[i][1], {position : p});                
+                let val = parseInt(query_result[i][1]);                
+                let l = glviewer.addLabel(val, {position : p,backgroundOpacity:0.5+(val/max)*.5});                
                 result_labels.push(l);                
             }
     });
