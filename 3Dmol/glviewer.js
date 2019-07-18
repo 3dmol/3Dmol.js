@@ -486,6 +486,14 @@ $3Dmol.GLViewer = (function() {
             }
           }
           
+          for(let i=0; i < labels.length; i++) {
+            if(labels[i]) {
+                ret.labels[i] = {
+                    position: labels[i].sprite.position,
+                    text : labels[i].text
+                  };
+            }
+          }
           //todo: labels, shapes, surfaces
           
           return ret;
@@ -508,6 +516,13 @@ $3Dmol.GLViewer = (function() {
             if(newm[i]) {
               models[i] = new $3Dmol.GLModel(i);
               models[i].setInternalState(newm[i]);
+            }
+          }
+          
+          var newl = state.labels;
+          for(let i=0; i < newl.length; i++) {
+            if(newl[i]) {
+                this.addLabel(newl[i].text, {position : newl[i].position});
             }
           }
           
