@@ -933,6 +933,8 @@ $3Dmol.ShaderLib = {
             "}",
 
             "void main(void) {",
+            // "		 color.rgba = vec4(1.0, 0.0, 0, 1.0);",
+            // "		 return;",						
             "    vec3 ray_dir = normalize(vray_dir);",
             "    vec2 t_hit = intersect_box(transformed_eye, ray_dir);",
             "    if (t_hit.x > t_hit.y) {",
@@ -978,13 +980,13 @@ $3Dmol.ShaderLib = {
             "void main(void) {",
             "    // eye position in unit cube space for non uniform dimensions (should divide by scale) (scale here between 0 and 1) ",
             "    // modelMatrix and ModelMatrixInverse don't include the scaling vector so as to not scaele the eye_pos",
-            "    transformed_eye = ((modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos) / volume_scale.yxz;", 
+            "    transformed_eye = ((modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos) / volume_scale.xyz;", 
             
             "    // the position vector contains the model translation so it is removed before getting the ray vector",
             "    vray_dir = (position - modelPos) - transformed_eye;", 
             
             "    // same here, translation is subtracted before multiplying by scale to keep transformations order correct",
-            "    positionWorldSpace = (modelMatrix * vec4( (position-modelPos) * volume_dims.yxz * 0.5 + modelPos, 1)).xyz;",
+            "    positionWorldSpace = (modelMatrix * vec4( (position-modelPos) * volume_dims.xyz + modelPos, 1)).xyz;",
             "    gl_Position = projectionMatrix * viewMatrix * vec4(positionWorldSpace, 1);", 
             "}"
         ].join("\n"),

@@ -808,11 +808,25 @@ $3Dmol.Renderer = function(parameters) {
                 // inverse model matrix (with unit scale, so as to not scale the eye_pos)
                 p_uniforms.modelMatrixInverse = _gl.getUniformLocation(program, "modelMatrixInverse");
                 _gl.uniformMatrix4fv(p_uniforms.modelMatrixInverse, false, object.matrix.getInverse(object.matrixWorld).elements);
-                // scale stuff -- should this also be z y x ?????? 
+                // scale stuff
                 var longestAxis = Math.max(material.map.image.size.x, Math.max(material.map.image.size.y, material.map.image.size.z));
                 var volScale = [material.map.image.size.x / longestAxis, material.map.image.size.y / longestAxis, material.map.image.size.z / longestAxis];
-                // var volDims = [material.map.image.size.x, material.map.image.size.y, material.map.image.size.z];
-                var volDims = [2, 2, 2];
+                // if volData has matrix, then it overrides size and unit scale, and translation is separate anyway
+                if (material.map.image.matrix){
+                    var scaleX = Math.sqrt(Math.pow(material.map.image.matrix.elements[0], 2) + Math.pow(material.map.image.matrix.elements[4], 2) + Math.pow(material.map.image.matrix.elements[8], 2) ) 
+                    var scaleY = Math.sqrt(Math.pow(material.map.image.matrix.elements[1], 2) + Math.pow(material.map.image.matrix.elements[5], 2) + Math.pow(material.map.image.matrix.elements[9], 2) ) 
+                    var scaleZ = Math.sqrt(Math.pow(material.map.image.matrix.elements[2], 2) + Math.pow(material.map.image.matrix.elements[6], 2) + Math.pow(material.map.image.matrix.elements[10], 2) ) 
+                    var volDims = [material.map.image.size.x * scaleX, 
+                        material.map.image.size.y * scaleY, 
+                        material.map.image.size.z * scaleZ]; 
+                    // ccp4 have a property that can change the dimensions order  
+                    if (material.map.image.dimensionorder)
+                        volDims = [volDims[material.map.image.dimensionorder[0]-1], volDims[material.map.image.dimensionorder[1]-1], volDims[material.map.image.dimensionorder[2]-1]]
+                } else {
+                    var volDims = [material.map.image.size.x * material.map.image.unit.x, 
+                        material.map.image.size.y * material.map.image.unit.y, 
+                        material.map.image.size.z * material.map.image.unit.z];
+                }
                 p_uniforms.volScale = _gl.getUniformLocation(program, "volume_scale");
                 _gl.uniform3fv(p_uniforms.volScale, volScale);
                 p_uniforms.volDims = _gl.getUniformLocation(program, "volume_dims");
@@ -1655,7 +1669,7 @@ $3Dmol.Renderer = function(parameters) {
 
             }
 
-            // temp code to change scale of numbers in texture
+            // temp code to change scale of numbers in texture - then re-order texture axis (zyx-> xyz)
             if (is3D){
             let max = -1000;
             let min = 1000;
@@ -1668,11 +1682,19 @@ $3Dmol.Renderer = function(parameters) {
             }              
             console.log("max: ", max, "min: ", min);
             texture.image.data.forEach(function (element, index, array) {
-                // array[index] = scale(element, min, max, 0, 0.2)  
-                array[index] = scale(element, min, max, -0.15, 0.2)  // 0, 0.2 for ccp4
-                // array[index] = scale(element, min, max, min/1000, max/1000)
-                // array[index] = element + 0.01;
-            })
+                // array[index] = scale(element, min, max, 0, 0.2)  // 0, 0.2 for ccp4
+                array[index] = scale(element, min, max, -0.15, 0.2)  
+            });
+            var majorindex = 0;
+            var dataarr = new Float32Array(texture.image.data.length);
+			for (var z= 0; z < texture.image.size.z; z++)
+			for (var y= 0; y < texture.image.size.y; y++)
+			for (var x= 0; x < texture.image.size.x; x++) {
+                var index = z + y * texture.image.size.z + x * texture.image.size.y * texture.image.size.z;                
+                dataarr[majorindex] = texture.image.data[index];
+                majorindex++;
+            }
+            texture.image.data = dataarr;
             }
             ///// end of temp code
 
@@ -1691,9 +1713,7 @@ $3Dmol.Renderer = function(parameters) {
                 setTextureParameters(_gl.TEXTURE_2D, texture, isImagePowerOfTwo);
             } else {
                 setTextureParameters(_gl.TEXTURE_3D, texture, isImagePowerOfTwo && false);
-                // NOTE: the .cube and .dx (nearly all the text volume files) are saved into the file with the z as the major dimension (width), arranged z y x
-                _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.z, texture.image.size.y, texture.image.size.x, 0, _gl.RED, _gl.FLOAT, texture.image.data);
-                // _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R8, 301, 324, 56, 0, _gl.RED, _gl.UNSIGNED_BYTE, texture.image);
+                _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.x, texture.image.size.y, texture.image.size.z, 0, _gl.RED, _gl.FLOAT, texture.image.data);
             }
             var mipmap, mipmaps = texture.mipmaps;
             // regular Texture (image, video, canvas)

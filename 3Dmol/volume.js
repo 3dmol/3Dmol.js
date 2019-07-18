@@ -310,7 +310,6 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
     var raw = lines.splice(i).join(" ");
     raw = raw.split(/[\s\r]+/);
     this.data = new Float32Array(raw);
-    // TODO: needs testing ..
     var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
     this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}
 }
@@ -382,6 +381,9 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
     raw = raw.replace(/^\s+/,'');
     raw = raw.split(/[\s\r]+/);
     this.data = new Float32Array(raw);
+
+
+    this.translationFromOrigin = {x:  origin.x, y:origin.y, z: origin.z }
 
 };
 
@@ -568,6 +570,7 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
       this.size = {x:header.NX, y:header.NY, z:header.NZ};
       var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
       this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}
+      this.dimensionorder = [header.MAPC, header.MAPR, header.MAPS];
       var data = new Float32Array(bin.buffer, 1024 + header.NSYMBT);
       //data must by (slowest changing) x,y,z (fastest changing)
 

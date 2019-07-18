@@ -20,7 +20,6 @@
         
         // TODO
         // seldist, coords, and the way to select part of the volume as the isosurface
-        // scale/positioning of .cube benzene-homo !
         // integrating volume renderer with molecule renderer (depth)!
         // having multiple volumetric renderers in this file (even on the same volumedata)
         // integrate shader with fog stuff
@@ -33,25 +32,27 @@
         //     var dataBuffer = req.response;
         //     dataBuffer = new Uint8Array(dataBuffer);
         
-        $.get('../tests/test_structs/benzene-homo.cube', function(data){
-        // $.get('../tests/auto/data/bohr.cube', function(data){
-        // $3Dmol.getbin('../tests/auto/data/1lo6_2FOFC.ccp4', function(data) {
+        
+        $.get('../tests/test_structs/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1
+        // $.get('../tests/test_structs/ch3cl-esp.cube', function(data){  // --iso 0.000001 
+        // $.get('../tests/auto/data/bohr.cube', function(data){ // --iso 1
+        // $.get('../tests/auto/data/test.cube', function(data){ // --iso 0.0001
+        // $3Dmol.getbin('../tests/auto/data/1lo6_2FOFC.ccp4', function(data) { // --iso 0.4
             var voldata = new $3Dmol.VolumeData(data, "cube");
             // viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 1.0, smoothness: 1}); 
             viewer.addVolumetricRenderer(voldata, {
                 transferfn:[
                     { Color: "#ff0000", pos: 0.0 }, 
-                    { Color: "#0000ff", pos: 0.16 },
+                    { Color: "#0000ff", pos: 0.4 },
                 ],
-                // pos: {x:0,y:0,z:0}  // TODO: i can send corner or center as the pos. so?
             });
             
-            // viewer.addIsosurface(voldata, {isoval: 0.5,
-            //                            color: "green",
-            //                            opacity: 1.0,
-            //                            // coords: [{x: 40.948, y: 78.96, z: 83.987}], // the coords of the center point that we need to select
-            //                            // seldist: 3.0   // the selection distance around the center
-            //                         });
+            viewer.addIsosurface(voldata, { isoval: 0.1,
+                                       color: "green",
+                                       opacity: 1.0,
+                                       // coords: [{x: 40.948, y: 78.96, z: 83.987}], // the coords of the center point that we need to select
+                                       // seldist: 3.0   // the selection distance around the center
+                                    });
                                     
             // var rec1 = viewer.addModel($('#1udt').val(), "pdb");
             // rec1.setStyle({resn:'VIA'},{stick:{color:'red', opacity:'1.0'}});
@@ -59,7 +60,7 @@
             // viewer.addLabel("Aromatic", {position: {x:2.6, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
 
             // var shape = viewer.addShape({color: 'red'});
-            // shape.addBox({corner:{x:2,y:0,z:0}, dimensions: {w: 1, h: 1, d: 1}});
+            // shape.addBox({center:{x:-4,y:-4,z:0}, dimensions: {w: 1, h:1, d: 1}});
             // shape.addBox({center:{x:0,y:0,z:0}, dimensions: {w: 1, h: 1, d: 1}});
             
             // 117, 97, 110
