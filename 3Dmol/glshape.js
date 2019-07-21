@@ -652,7 +652,7 @@ $3Dmol.GLShape = (function() {
         };
 
         updateFromStyle(this, stylespec);
-
+        var shapeOrder = [];
         // Keep track of shape components and their centroids
         var components = [];
         var shapeObj = null;
@@ -660,7 +660,40 @@ $3Dmol.GLShape = (function() {
 
         var geo = new $3Dmol.Geometry(true);
         var linegeo = new $3Dmol.Geometry(true);
+        
+        this.getInternalState = function(){
+            return {
+                styleSpec : stylespec,
+                shapeOrder : shapeOrder               
+            };
+        };
 
+        this.setInternalState = function(state) {  
+            this.updateStyle(state.styleSpec);
+            for (let i = 0; i < state.shapeOrder.length; i++) {
+                var func = state.shapeOrder[i].func;
+                var spec = state.shapeOrder[i].spec;
+                switch(func) {
+                    case 'addCustom'        : this.addCustom(spec);         break;
+                    case 'addSphere'        : this.addSphere(spec);         break;
+                    case 'addBox'           : this.addBox(spec);            break;
+                    case 'addCylinder'      : this.addCylinder(spec);       break;
+                    case 'addDashedCylinder': this.addDashedCylinder(spec); break;
+                    case 'addCurve'         : this.addCurve(spec);          break;
+                    case 'addLine'          : this.addLine(spec);           break;
+                    case 'addArrow'         : this.addArrow(spec);          break;
+                    case 'addIsoSurface'    : 
+                    var data = state.shapeOrder[i].data;
+                    var volSpec = state.shapeOrder[i].volSpec;
+                    var callback = state.shapeOrder[i].callback;
+                    this.addIsoSurface(data, volSpec, callback);
+                    break;
+                    default                 : console.log('Shape function' + func + 'does not exist/is not a part of setInternalState');
+                }
+                
+            }
+
+        };
         /** Update shape with new style specification
 	 * @function $3Dmol.GLShape#updateStyle
          * @param {ShapeSpec} newspec
@@ -690,6 +723,11 @@ $3Dmol.GLShape = (function() {
 
             // will split mesh as needed
             drawCustom(this, geo, customSpec);
+
+            shapeOrder.push({
+                func : 'addCustom',
+                spec: customSpec
+            });
         };
 
         /**
@@ -727,6 +765,11 @@ $3Dmol.GLShape = (function() {
             
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray, geoGroup.vertices);
+            
+            shapeOrder.push({
+                func : 'addSphere',
+                spec : sphereSpec
+            });
         };
 
 
@@ -836,6 +879,11 @@ $3Dmol.GLShape = (function() {
             });
             var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components, geoGroup.vertexArray, geoGroup.vertices);
+
+            shapeOrder.push({
+                func: 'addBox',
+                spec: boxSpec
+            });
         };
         
         /**
@@ -896,7 +944,11 @@ $3Dmol.GLShape = (function() {
             var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray, geoGroup.vertices);
-
+            
+            shapeOrder.push({
+                func : 'addCylinder',
+                spec : cylinderSpec
+            });
         };
 
         /**
@@ -949,6 +1001,11 @@ $3Dmol.GLShape = (function() {
             var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray, geoGroup.vertices);
+            
+            shapeOrder.push({
+                func : 'addDashedCylinder',
+                spec : cylinderSpec
+            });
         };
 
         /**
@@ -1026,7 +1083,10 @@ $3Dmol.GLShape = (function() {
                 this.addCylinder(middleSpec);
             }
             
-
+            shapeOrder.push({
+                func : 'addCurve',
+                spec : curveSpec
+            });
         };
         
         /**
@@ -1080,6 +1140,11 @@ $3Dmol.GLShape = (function() {
             geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray, geoGroup.vertices);            
+            
+            shapeOrder.push({
+                func : 'addLine',
+                spec : lineSpec
+            });
         };
         
         /**
@@ -1143,6 +1208,10 @@ $3Dmol.GLShape = (function() {
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray, geoGroup.vertices);
 
+            shapeOrder.push({
+                func : 'addArrow',
+                spec : arrowSpec
+            });
         };
 
 
@@ -1337,6 +1406,14 @@ $3Dmol.GLShape = (function() {
             var len2 = total.distanceTo(maxv);
             this.boundingSphere.center = total;
             this.boundingSphere.radius = Math.max(len1,len2);
+            
+            shapeOrder.push({
+                func : 'addIsoSurface',
+                data : data,
+                volSpec: volSpec,
+                callback: callback
+            });
+
             if(typeof callback =="function")
                 callback();
           };        

@@ -479,14 +479,14 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#getInternalState
         */
         this.getInternalState = function() {
-          var ret = {'models': [], 'surfaces': [], 'shapes': [], 'labels': [] };
+          var ret = {'models': [], 'surfaces': {}, 'shapes': [], 'labels': [] };
           for (let i = 0; i < models.length; i++) {
             if (models[i]) {
               ret.models[i] = models[i].getInternalState();
             }
           }
           
-          for(let i=0; i < labels.length; i++) {
+          for(let i = 0; i < labels.length; i++) {
             if(labels[i]) {
                 ret.labels[i] = {
                     position: labels[i].sprite.position,
@@ -494,6 +494,17 @@ $3Dmol.GLViewer = (function() {
                   };
             }
           }
+
+          for(let i = 0; i < shapes.length; i++) {
+            if(shapes[i]) {
+                ret.shapes[i] = shapes[i].getInternalState();
+            }
+          }
+          
+        //   for(var i in surfaces) {
+        //       ret.surfaces[i] = surfaces[i];
+        //   }
+          console.log(ret);
           //todo: labels, shapes, surfaces
           
           return ret;
@@ -525,7 +536,17 @@ $3Dmol.GLViewer = (function() {
                 this.addLabel(newl[i].text, {position : newl[i].position});
             }
           }
-          
+
+          var new_shape = state.shapes;
+          for(let i = 0; i < new_shape.length; i++) {
+            shapes[i]  = new $3Dmol.GLShape(i);
+            shapes[i].setInternalState(new_shape[i]);
+          }
+
+        // var new_surface = state.surfaces;
+        // for(let i = 0; i < new_surface.length; i++) {
+        //     surfaces[i] = new_surface[i];
+        // }
           //todo: labels, shapes, surfaces
           this.render();
         };
