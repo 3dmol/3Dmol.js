@@ -661,6 +661,13 @@ $3Dmol.GLShape = (function() {
         var geo = new $3Dmol.Geometry(true);
         var linegeo = new $3Dmol.Geometry(true);
         
+          /**
+         * Return object representing internal state of 
+         * the model appropriate for passing to setInternalState
+         * 
+         * @function $3Dmol.GLShape#getInternalState
+        */
+
         this.getInternalState = function(){
             return {
                 styleSpec : stylespec,
@@ -668,29 +675,33 @@ $3Dmol.GLShape = (function() {
             };
         };
 
+         /**
+         * Overwrite the internal shape state with the passed state.
+         * 
+         * @function $3Dmol.GLShape#setInternalState
+        */
+
         this.setInternalState = function(state) {  
             this.updateStyle(state.styleSpec);
             for (let i = 0; i < state.shapeOrder.length; i++) {
                 var func = state.shapeOrder[i].func;
-                var spec = state.shapeOrder[i].spec;
-                switch(func) {
-                    case 'addCustom'        : this.addCustom(spec);         break;
-                    case 'addSphere'        : this.addSphere(spec);         break;
-                    case 'addBox'           : this.addBox(spec);            break;
-                    case 'addCylinder'      : this.addCylinder(spec);       break;
-                    case 'addDashedCylinder': this.addDashedCylinder(spec); break;
-                    case 'addCurve'         : this.addCurve(spec);          break;
-                    case 'addLine'          : this.addLine(spec);           break;
-                    case 'addArrow'         : this.addArrow(spec);          break;
-                    case 'addIsoSurface'    : 
-                    var data = state.shapeOrder[i].data;
-                    var volSpec = state.shapeOrder[i].volSpec;
-                    var callback = state.shapeOrder[i].callback;
-                    this.addIsoSurface(data, volSpec, callback);
-                    break;
-                    default                 : console.log('Shape function' + func + 'does not exist/is not a part of setInternalState');
+
+                if(this[func]) {             
+                    if(func == 'addIsoSurface') {
+                        let data = state.shapeOrder[i].data;
+                        let volSpec = state.shapeOrder[i].volSpec;
+                        this[func](data, volSpec);
+                    }
+                    else {
+                        let spec = state.shapeOrder[i].spec;
+                        this[func](spec);
+                    }
                 }
                 
+                else {
+                    alert('Shape function' + func + 'does not exist/is not a part of setInternalState');
+                }
+
             }
 
         };

@@ -56,6 +56,7 @@ $3Dmol.GLViewer = (function() {
 
         var models = []; // atomistic molecular models
         var surfaces = {};
+        var surfaceOrder = [];
         var shapes = []; // Generic shapes
         var labels = [];
         var fixed_labels = [];
@@ -479,7 +480,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#getInternalState
         */
         this.getInternalState = function() {
-          var ret = {'models': [], 'surfaces': {}, 'shapes': [], 'labels': [] };
+          var ret = {'models': [], 'surfaces': [], 'shapes': [], 'labels': [] };
           for (let i = 0; i < models.length; i++) {
             if (models[i]) {
               ret.models[i] = models[i].getInternalState();
@@ -501,12 +502,10 @@ $3Dmol.GLViewer = (function() {
             }
           }
           
-        //   for(var i in surfaces) {
-        //       ret.surfaces[i] = surfaces[i];
-        //   }
-          console.log(ret);
-          //todo: labels, shapes, surfaces
-          
+          for(let i = 0; i < surfaceOrder.length; i++) {
+              ret.surfaces[i] = surfaceOrder[i];
+          }
+    
           return ret;
         };
         
@@ -543,11 +542,31 @@ $3Dmol.GLViewer = (function() {
             shapes[i].setInternalState(new_shape[i]);
           }
 
-        // var new_surface = state.surfaces;
-        // for(let i = 0; i < new_surface.length; i++) {
-        //     surfaces[i] = new_surface[i];
-        // }
-          //todo: labels, shapes, surfaces
+          var new_surfaceOrder = state.surfaces;
+          for(let i = 0; i < new_surfaceOrder.length; i++) {
+            var func = new_surfaceOrder[i].func;
+            if(func == 'addSurface') {
+                let type = new_surfaceOrder[i].type;
+                let style =  new_surfaceOrder[i].style;
+                let atomsel =  new_surfaceOrder[i].atomsel;
+                let allsel =  new_surfaceOrder[i].allsel;
+                let focus =  new_surfaceOrder[i].focus;
+                this[func](type, style, atomsel, allsel, focus);
+            }
+            else if(func == 'setSurfaceMaterialStyle') {
+                let surf = new_surfaceOrder[i].surf;
+                let style = new_surfaceOrder[i].style;
+                this[func](surf, style);
+            }
+            else if(func == 'removeSurface') {
+                let surf = new_surfaceOrder[i].surf;
+                this[func](surf);
+            }
+            else {
+                alert("Surface function" + func + "does not exist/ is not a part of setInternalState");
+            }
+          }
+          
           this.render();
         };
                                              
@@ -3781,6 +3800,14 @@ $3Dmol.GLViewer = (function() {
                 });
                 promise = addSurfaceHelper(surfobj[surfobj.length-1], atomlist, atomsToShow);
             }
+            surfaceOrder.push({
+                func : 'addSurface',
+                type : type,
+                style : style,
+                atomsel: atomsel,
+                allsel: allsel,
+                focus : focus
+            });
             surfaces[surfid] = surfobj;
             promise.surfid = surfid;
             if(surfacecallback && typeof(surfacecallback) == "function") {
@@ -3824,6 +3851,11 @@ $3Dmol.GLViewer = (function() {
                     }
                     surfArr[i].finished = false; // trigger redraw
                 }
+                surfaceOrder.push({
+                    func : 'setSurfaceMaterialStyle',
+                    surf : surf,
+                    style : style
+                });
             }
             return this;
         };
@@ -3844,6 +3876,10 @@ $3Dmol.GLViewer = (function() {
                     modelGroup.remove(surfArr[i].lastGL); // remove from scene
                 }
             }
+            surfaceOrder.push({
+                func : 'removeSurface',
+                surf : surf
+            });
             delete surfaces[surf];
             show();
             return this;
@@ -3866,6 +3902,7 @@ $3Dmol.GLViewer = (function() {
                 }
                 delete surfaces[n];
             }
+            surfaceOrder = [];
             show();
             return this;
         };
