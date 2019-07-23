@@ -59,6 +59,7 @@ $3Dmol.GLViewer = (function() {
         var surfaceOrder = [];
         var shapes = []; // Generic shapes
         var labels = [];
+        var labelOrder = [];
         var fixed_labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
@@ -481,31 +482,27 @@ $3Dmol.GLViewer = (function() {
         */
         this.getInternalState = function() {
           var ret = {'models': [], 'surfaces': [], 'shapes': [], 'labels': [] };
+          //get models state
           for (let i = 0; i < models.length; i++) {
             if (models[i]) {
               ret.models[i] = models[i].getInternalState();
             }
           }
-          
-          for(let i = 0; i < labels.length; i++) {
-            if(labels[i]) {
-                ret.labels[i] = {
-                    position: labels[i].sprite.position,
-                    text : labels[i].text
-                  };
-            }
+          //get labels state
+          for(let i = 0; i < labelOrder.length; i++) {
+                ret.labels[i] = labelOrder[i];
           }
-
+          //get shapes state
           for(let i = 0; i < shapes.length; i++) {
             if(shapes[i]) {
                 ret.shapes[i] = shapes[i].getInternalState();
             }
           }
-          
+          //get surfaces state
           for(let i = 0; i < surfaceOrder.length; i++) {
               ret.surfaces[i] = surfaceOrder[i];
           }
-    
+          
           return ret;
         };
         
@@ -520,7 +517,7 @@ $3Dmol.GLViewer = (function() {
           //clear out current viewer
           this.clear();
           
-          //set model state
+          //set models state
           var newm = state.models;          
           for(let i = 0; i < newm.length; i++) {
             if(newm[i]) {
@@ -528,39 +525,38 @@ $3Dmol.GLViewer = (function() {
               models[i].setInternalState(newm[i]);
             }
           }
-          
-          var newl = state.labels;
-          for(let i=0; i < newl.length; i++) {
-            if(newl[i]) {
-                this.addLabel(newl[i].text, {position : newl[i].position});
+          //set labels state
+          var new_labelOrder = state.labels;
+          for(let i=0; i < new_labelOrder.length; i++) {
+            let func = new_labelOrder[i].func;
+            if(this[func]){
+            let value1 = new_labelOrder[i].value1;
+            let value2 = new_labelOrder[i].value2;
+            let value3 = new_labelOrder[i].value3;
+            let value4 = new_labelOrder[i].value4;
+            this[func](value1, value2, value3, value4);
+            }
+            else {
+                alert("Label func" + func + "does not exist/ is not a part of setInternalState");
             }
           }
-
+          //set shapes state
           var new_shape = state.shapes;
           for(let i = 0; i < new_shape.length; i++) {
             shapes[i]  = new $3Dmol.GLShape(i);
             shapes[i].setInternalState(new_shape[i]);
           }
-
+          //set surfaces state
           var new_surfaceOrder = state.surfaces;
           for(let i = 0; i < new_surfaceOrder.length; i++) {
-            var func = new_surfaceOrder[i].func;
-            if(func == 'addSurface') {
-                let type = new_surfaceOrder[i].type;
-                let style =  new_surfaceOrder[i].style;
-                let atomsel =  new_surfaceOrder[i].atomsel;
-                let allsel =  new_surfaceOrder[i].allsel;
-                let focus =  new_surfaceOrder[i].focus;
-                this[func](type, style, atomsel, allsel, focus);
-            }
-            else if(func == 'setSurfaceMaterialStyle') {
-                let surf = new_surfaceOrder[i].surf;
-                let style = new_surfaceOrder[i].style;
-                this[func](surf, style);
-            }
-            else if(func == 'removeSurface') {
-                let surf = new_surfaceOrder[i].surf;
-                this[func](surf);
+            let func = new_surfaceOrder[i].func;
+            if(this[func]) {
+            let value1 = new_surfaceOrder[i].value1;
+            let value2 = new_surfaceOrder[i].value2;
+            let value3 = new_surfaceOrder[i].value3;
+            let value4 = new_surfaceOrder[i].value4;
+            let value5 = new_surfaceOrder[i].value5;
+            this[func](value1, value2, value3, value4, value5);    
             }
             else {
                 alert("Surface function" + func + "does not exist/ is not a part of setInternalState");
@@ -1951,6 +1947,13 @@ $3Dmol.GLViewer = (function() {
                 fixed_labels.push(labels.length);
             labels.push(label);
 
+            labelOrder.push({
+                func : 'addLabel',
+                value1 : text,
+                value2 : options,
+                value3 : sel,
+                value4 : noshow
+            });
             if(!noshow) show();
             return label;
         };
@@ -1978,6 +1981,12 @@ $3Dmol.GLViewer = (function() {
         this.addResLabels = function(sel, style, byframe) {
             let start = labels.length;
             applyToModels("addResLabels", sel, this, style, byframe);
+            labelOrder.push({
+                func : 'addResLabels',
+                value1 : sel,
+                value2 : style,
+                value3 : byframe
+            });
             show();
             return labels.slice(start);
         };
@@ -2000,6 +2009,12 @@ $3Dmol.GLViewer = (function() {
          */
         this.addPropertyLabels = function(prop, sel, style) {
             applyToModels("addPropertyLabels", prop, sel, this, style);
+            labelOrder.push({
+                func : 'addPropertyLabels',
+                value1 : prop,
+                value2 : sel,
+                value3 : style
+            });
             show();
             return this;
         };
@@ -2034,6 +2049,10 @@ $3Dmol.GLViewer = (function() {
                     break;
                 }
             }
+            labelOrder.push({
+                func : 'removeLabel',
+                value1 : label
+            });
             show();
             return this;
         };
@@ -2062,6 +2081,9 @@ $3Dmol.GLViewer = (function() {
               }
             }
             labels.splice(0,labels.length); //don't overwrite in case linked
+            labelOrder.push({
+                func : 'removeAllLabels'
+            });
             show();
             return this;
         };
@@ -3802,11 +3824,11 @@ $3Dmol.GLViewer = (function() {
             }
             surfaceOrder.push({
                 func : 'addSurface',
-                type : type,
-                style : style,
-                atomsel: atomsel,
-                allsel: allsel,
-                focus : focus
+                value1 : type,
+                value2 : style,
+                value3 : atomsel,
+                value4 : allsel,
+                value5 : focus
             });
             surfaces[surfid] = surfobj;
             promise.surfid = surfid;
@@ -3853,8 +3875,8 @@ $3Dmol.GLViewer = (function() {
                 }
                 surfaceOrder.push({
                     func : 'setSurfaceMaterialStyle',
-                    surf : surf,
-                    style : style
+                    value1 : surf,
+                    value2 : style
                 });
             }
             return this;
@@ -3878,7 +3900,7 @@ $3Dmol.GLViewer = (function() {
             }
             surfaceOrder.push({
                 func : 'removeSurface',
-                surf : surf
+                value1 : surf
             });
             delete surfaces[surf];
             show();
@@ -3902,7 +3924,9 @@ $3Dmol.GLViewer = (function() {
                 }
                 delete surfaces[n];
             }
-            surfaceOrder = [];
+            surfaceOrder.push({
+                func : 'removeAllSurfaces'
+            });
             show();
             return this;
         };
