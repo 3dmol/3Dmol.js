@@ -1408,9 +1408,13 @@ $3Dmol.GLShape = (function() {
             var material = null;
             if(this.volumetricRenderer) {
                 var texture = new $3Dmol.Texture(this.volumetricdata, true);
+                var transferfn = new $3Dmol.Texture(this.transferfn, false);
                 texture.needsUpdate = true; 
+                transferfn.needsUpdate = true;
+                transferfn.generateMipmaps = false;
+                transferfn.flipY = false;
                 var material = new $3Dmol.VolumetricMaterial({
-                    transferfn: this.transferfn,
+                    transferfn: transferfn,
                     opacity: this.opacity,  // TODO: needs to be opacityfn
                     map: texture
                 });

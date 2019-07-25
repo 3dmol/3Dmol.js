@@ -534,6 +534,33 @@ $3Dmol.InstancedMaterial.prototype.clone = function() {
 
 };
 
+var rearrangeVolumeData = function(material){
+    
+    // map the voxel data into the range 0->1 as it will be used to read from texture in frag shader
+    // and re-order texture axis (zyx-> xyz) as the output from the volumeData class is zyx
+    let max = -1000;
+    let min = 1000;
+    material.map.image.data.forEach(function (element, index, array) {
+        if (element > max) max = element;
+        if (element < min) min = element;
+    })
+    const scale = (num, in_min, in_max, out_min, out_max) => {
+        return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }              
+    material.map.image.data.forEach(function (element, index, array) {
+        array[index] = scale(element, min, max, 0, 1)  
+    });
+    var majorindex = 0;
+    var dataarr = new Float32Array(material.map.image.data.length);
+	for (var z= 0; z < material.map.image.size.z; z++)
+	for (var y= 0; y < material.map.image.size.y; y++)
+	for (var x= 0; x < material.map.image.size.x; x++) {
+        var index = z + y * material.map.image.size.z + x * material.map.image.size.y * material.map.image.size.z;                
+        dataarr[majorindex] = material.map.image.data[index];
+        majorindex++;
+    }
+    material.map.image.data = dataarr;
+}
 
 //Volumetric material
 /** @constructor */
@@ -554,7 +581,7 @@ $3Dmol.VolumetricMaterial = function(parameters) {
     this.shaderID = "volumetric";
 
     this.setValues(parameters);
-    
+    if (parameters) rearrangeVolumeData(this);
 };
 
 $3Dmol.VolumetricMaterial.prototype = Object.create($3Dmol.Material.prototype);

@@ -832,19 +832,7 @@ $3Dmol.Renderer = function(parameters) {
                 p_uniforms.volDims = _gl.getUniformLocation(program, "volume_dims");
                 _gl.uniform3fv(p_uniforms.volDims, volDims);
 
-                // this shouldn't be here, the data upload , the creating the texture and all of that should 
-                // go inside the setTexture same as the 3d texture 
-                // -- it's only fast and didn't crash because of how small the data uploaded is
-                var colormap = _gl.createTexture();
-                _gl.activeTexture(_gl.TEXTURE4);
-                _gl.bindTexture(_gl.TEXTURE_2D, colormap);
-                _gl.texStorage2D(_gl.TEXTURE_2D, 1, _gl.RGB8, 256, 1);
-                _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
-                _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_R, _gl.CLAMP_TO_EDGE);
-                _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-                _gl.texSubImage2D(_gl.TEXTURE_2D, 0, 0, 0, 256, 1, _gl.RGB, _gl.UNSIGNED_BYTE, material.transferfn);
-
-
+                renderer.setTexture(object.material.transferfn, 4, false);
                 renderer.setTexture(object.material.map, 3, true);
             }
 
@@ -1579,7 +1567,7 @@ $3Dmol.Renderer = function(parameters) {
 
     function isPowerOfTwo(value) {
 
-        return (value & (value - 1)) === 0;
+        return ((value & (value - 1)) === 0 ) && value != 1;
 
     }
 
@@ -1668,35 +1656,6 @@ $3Dmol.Renderer = function(parameters) {
                 _this.info.memory.textures++;
 
             }
-
-            // temp code to change scale of numbers in texture - then re-order texture axis (zyx-> xyz)
-            if (is3D){
-            let max = -1000;
-            let min = 1000;
-            texture.image.data.forEach(function (element, index, array) {
-                if (element > max) max = element;
-                if (element < min) min = element;
-            })
-            const scale = (num, in_min, in_max, out_min, out_max) => {
-                return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-            }              
-            console.log("max: ", max, "min: ", min);
-            texture.image.data.forEach(function (element, index, array) {
-                // array[index] = scale(element, min, max, 0, 0.2)  // 0, 0.2 for ccp4
-                array[index] = scale(element, min, max, -0.15, 0.2)  
-            });
-            var majorindex = 0;
-            var dataarr = new Float32Array(texture.image.data.length);
-			for (var z= 0; z < texture.image.size.z; z++)
-			for (var y= 0; y < texture.image.size.y; y++)
-			for (var x= 0; x < texture.image.size.x; x++) {
-                var index = z + y * texture.image.size.z + x * texture.image.size.y * texture.image.size.z;                
-                dataarr[majorindex] = texture.image.data[index];
-                majorindex++;
-            }
-            texture.image.data = dataarr;
-            }
-            ///// end of temp code
 
             _gl.activeTexture(_gl.TEXTURE0 + slot);
             var gltextureType = is3D ? _gl.TEXTURE_3D : _gl.TEXTURE_2D;

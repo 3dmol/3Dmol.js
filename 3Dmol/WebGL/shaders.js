@@ -933,21 +933,20 @@ $3Dmol.ShaderLib = {
             "}",
 
             "void main(void) {",
-            // "		 color.rgba = vec4(1.0, 0.0, 0, 1.0);",
-            // "		 return;",						
             "    vec3 ray_dir = normalize(vray_dir);",
             "    vec2 t_hit = intersect_box(transformed_eye, ray_dir);",
             "    if (t_hit.x > t_hit.y) {",
             "        discard;",
             "    }",
             "    t_hit.x = max(t_hit.x, 0.0);",
-            "    vec3 dt_vec = 1.0 / (vec3(76, 64, 61) * 0.5 * abs(ray_dir));",  // todo. this was volume_dims, shouldn't be hard coded but how will i get to know it? volume class? 
+            "    vec3 dt_vec = 1.0 / (vec3(76, 64, 61)*0.28* abs(ray_dir));",  // todo. this was volume_dims, shouldn't be hard coded but how will i get to know it? volume class? 
             "    float dt = dt_scale * min(dt_vec.x, min(dt_vec.y, dt_vec.z));",
             "    float offset = wang_hash(int(gl_FragCoord.x + 640.0 * gl_FragCoord.y));",
             "    vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;",
             "    for (float t = t_hit.x; t < t_hit.y; t += dt) {",
             "        float val = texture(volume, p).r;",
-            "        vec4 val_color = vec4(texture(colormap, vec2(val, 0.5)).rgb, val * opacity);",
+            "        vec4 val_color = texture(colormap, vec2(val, 0.5));", // this is wrong, the val should be 0->1 but it's -0.2->0.2 :/
+            "        val_color.a = val_color.a * opacity;",
             "        // Opacity correction",
             "        val_color.a = 1.0 - pow(1.0 - val_color.a, dt_scale);",
             "        color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb;",
