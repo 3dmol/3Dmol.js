@@ -70,10 +70,11 @@ $3Dmol.Renderer = function(parameters) {
 
     // internal properties
     var _this = this,
-    _programs = [], _programs_counter = 0,
+    _programs = [], _programs_counter = 0;
     
     // internal state cache
-    _currentProgram = null, _currentFramebuffer = null, _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
+    this._currentProgram = null;
+    _currentFramebuffer = null, _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
     _usedTextureUnits = 0,
 
     // GL state cache
@@ -130,6 +131,7 @@ $3Dmol.Renderer = function(parameters) {
     var _gl;
 
     initGL();
+    this.offscreen = initOffScreenRender();
     setDefaultGLState();
 
     this.context = _gl;
@@ -732,9 +734,9 @@ $3Dmol.Renderer = function(parameters) {
         // m_uniforms: uniformVarName => uniformJsVal
         var program = material.program, p_uniforms = program.uniforms, m_uniforms = material.uniforms;
 
-        if (program != _currentProgram) {
+        if (program != this._currentProgram) {
             _gl.useProgram(program);
-            _currentProgram = program;
+            this._currentProgram = program;
 
             refreshMaterial = true;
         }
@@ -1206,6 +1208,8 @@ $3Dmol.Renderer = function(parameters) {
         // Ensure depth buffer writing is enabled so it can be cleared on next
         // render
 
+        this.renderFrameBuffertoScreen();
+
         this.setDepthTest(true);
         this.setDepthWrite(true);
         // _gl.finish();
@@ -1250,6 +1254,36 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
+    }
+
+    this.renderFrameBuffertoScreen = function(){
+        // bind default framebuffer
+        _gl.bindFramebuffer(_gl.FRAMEBUFFER, null);
+        _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
+        _gl.frontFace(_gl.CCW);
+        _gl.cullFace(_gl.BACK);
+
+        // set screen shader and use it
+        _gl.useProgram(this.offscreen.screenshader);
+        this._currentProgram = this.offscreen.screenshader;
+        
+        // disable depth test
+        this.setDepthTest(-1);
+		this.setDepthWrite(-1);
+
+        // bind vertexarray buffer and texture
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.offscreen.screenQuadVBO);
+        _gl.enableVertexAttribArray(this.offscreen.vertexattribpos);
+        _gl.vertexAttribPointer(this.offscreen.vertexattribpos, 2, _gl.FLOAT, false, 0, 0);
+
+        _gl.activeTexture(_gl.TEXTURE0);
+        _gl.bindTexture(_gl.TEXTURE_2D, this.offscreen.targetTexture);
+
+        // Draw 6 vertexes => 2 triangles:
+        _gl.drawArrays(_gl.TRIANGLES, 0, 6);
+
+        // then set the offscreenframebuffer again here!?
+        _gl.bindFramebuffer(_gl.FRAMEBUFFER, this.offscreen.fb);
     }
 
     this.initWebGLObjects = function(scene) {
@@ -1807,6 +1841,66 @@ $3Dmol.Renderer = function(parameters) {
         } catch (error) {
 
             console.error(error);
+        }
+    }
+
+    function initOffScreenRender(){
+        var targetTexture = _gl.createTexture();
+        _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, innerWidth, innerHeight, 0,
+                _gl.RGBA, _gl.UNSIGNED_BYTE, null);
+	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
+	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+
+		// IMP: this requires an extension in webgl1, so if 2 is not available
+		// i'll have to not render to framebuffer at all and normally render to screen
+		// as it will already be of no use without the volumetric renderer
+		// i mean i can't leave it out here that easily
+		var depthTexture = _gl.createTexture();
+		_gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
+		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, innerWidth, innerHeight, 0,
+				_gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+
+        // Create and bind the framebuffer
+        var fb = _gl.createFramebuffer();
+        _gl.bindFramebuffer(_gl.FRAMEBUFFER, fb);
+        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, targetTexture, 0);
+				_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
+					
+        // build screenshader
+        var screenshader = $3Dmol.ShaderLib['screen'];
+        screenshader = buildProgram(screenshader.fragmentShader,
+            screenshader.vertexShader, screenshader.uniforms, {});  
+        var vertexattribpos = _gl.getAttribLocation(screenshader, 'vertexPosition');
+            
+        // create the vertex array and attrib array for the full screenquad
+        var verts = [
+            // First triangle:
+             1.0,  1.0,
+            -1.0,  1.0,
+            -1.0, -1.0,
+            // Second triangle:
+            -1.0, -1.0,
+             1.0, -1.0,
+             1.0,  1.0
+        ];
+        var screenQuadVBO = _gl.createBuffer();
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, screenQuadVBO);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(verts), _gl.STATIC_DRAW);
+ 
+        return {
+            targetTexture: targetTexture,
+            fb: fb,
+            depthTexture: depthTexture,
+            screenshader: screenshader,
+            screenQuadVBO: screenQuadVBO,
+            vertexattribpos: vertexattribpos
         }
     }
 

@@ -999,6 +999,32 @@ $3Dmol.ShaderLib = {
             colormap: { type: 'i', value: 4 },
             dt_scale: { type: 'f', value: 1.0 }
         }
+    },
+    // screen shader
+    'screen': {
+        fragmentShader: [
+            "uniform sampler2D colormap;",
+            "varying highp vec2 vTexCoords;",
+            // "float depth;",
+            "void main (void) {",
+            // "	depth = texture2D(colormap, vTexCoords).r;",
+            "   gl_FragColor = texture2D(colormap, vTexCoords);",
+            "}"
+        ].join("\n"),
+
+        vertexShader: [
+            'attribute vec2 vertexPosition;',
+            'varying highp vec2 vTexCoords;',
+            'const vec2 scale = vec2(0.5, 0.5);',
+
+            'void main() {',
+            '   vTexCoords  = vertexPosition * scale + scale; // scale vertex attribute to [0,1] range',
+            '   gl_Position = vec4(vertexPosition, 0.0, 1.0);',
+            '}'
+        ].join("\n"),
+
+        uniforms: {
+        }
     }
     
 };
