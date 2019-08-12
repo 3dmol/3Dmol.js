@@ -575,6 +575,7 @@ $3Dmol.VolumetricMaterial = function(parameters) {
     this.transferfn = null;
     this.map = null;
     this.volumetric = true;
+    this.depthTest = false;
 
     // this.fog = true; // TODO: to integrate the new shader with the fog stuff
     

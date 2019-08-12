@@ -836,6 +836,10 @@ $3Dmol.Renderer = function(parameters) {
 
                 renderer.setTexture(object.material.transferfn, 4, false);
                 renderer.setTexture(object.material.map, 3, true);
+
+                // depth texture from the renderbuffer, for volumetric integration with surfaces
+                _gl.activeTexture(_gl.TEXTURE5);
+                _gl.bindTexture(_gl.TEXTURE_2D, renderer.offscreen.depthTexture);
             }
 
             // opacity, diffuse, emissive, etc

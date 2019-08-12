@@ -19,10 +19,8 @@
         var viewer = $3Dmol.createViewer("viewer");
         
         // TODO
-        // integrating volume renderer with molecule renderer (depth)!
         // seldist, coords, and "deleting" the rest of the data not only hiding them
         // having multiple volumetric renderers in this file (even on the same volumedata)
-        // integrate shader with fog stuff        
         
         $.get('../tests/test_structs/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / -0.2->0.2
         // $.get('../tests/test_structs/ch3cl-esp.cube', function(data){  // --iso 0.000001 or 0.2 / -40->37
@@ -31,18 +29,19 @@
         // $3Dmol.getbin('../tests/auto/data/1lo6_2FOFC.ccp4', function(data) { // --iso 0.4
             var voldata = new $3Dmol.VolumeData(data, "cube");
 
+            // values outside data range causes error
             viewer.addVolumetricRenderer(voldata, {
                 transferfn:[
-                    { Color: "#0000ff", pos: -0.2 }, 
+                    { Color: "#0000ff", pos: -0.2 }, //-0.03
                     { Color: "#0000ff", pos: -0.005 }, 
                     { Color: "#ff0000", pos: 0.005 }, 
-                    { Color: "#ff0000", pos: 0.2 },
+                    { Color: "#ff0000", pos: 0.2 }, // 1
                 ],
                 opacityfn:[
-                    { opacity: 1.0, pos: -0.2 }, 
+                    { opacity: 1.0, pos: -0.2 }, //-0.03
                     { opacity: 0, pos: -0.005 }, 
                     { opacity: 0, pos: 0.005 }, 
-                    { opacity: 1.0, pos: 0.2 }, 
+                    { opacity: 1.0, pos: 0.2 }, //1
                 ],
                 // coords: [{x: 0, y: 1, z: 0.5}], 
                 // seldist: 1.5

@@ -895,13 +895,21 @@ $3Dmol.ShaderLib = {
         fragmentShader: [
             "uniform highp sampler3D volume;", 
             "uniform highp sampler2D colormap;",
+            "uniform highp sampler2D depthmap;",
             "uniform vec3 volume_dims;", 
-            "uniform float dt_scale;", 
-            
+            "uniform float dt_scale;",
+            "float depth;",
+
             "uniform float opacity;",
             "uniform vec3 fogColor;", // not used yet
             "uniform float fogNear;", // not used yet
             "uniform float fogFar;", // not used yet
+
+            "// inverse transformation for depth integration",
+            "uniform mat4 modelMatrix;",
+            "uniform mat4 viewMatrix;",
+            "uniform vec3 volume_scale;",
+            "uniform vec3 modelPos;",
 
             "in vec3 vray_dir;",
             "flat in vec3 transformed_eye;",
@@ -943,9 +951,13 @@ $3Dmol.ShaderLib = {
             "    float dt = dt_scale * min(dt_vec.x, min(dt_vec.y, dt_vec.z));",
             "    float offset = wang_hash(int(gl_FragCoord.x + 640.0 * gl_FragCoord.y));",
             "    vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;",
+            
+            "    // depth is the value in the depthMap from the renderbuffer",
+            "    depth = texture(depthmap, vec2(gl_FragCoord.x/951.0, gl_FragCoord.y/984.0)).r;", //TODO: send screen coords here or find another way to determine pixel pos
+            
             "    for (float t = t_hit.x; t < t_hit.y; t += dt) {",
             "        float val = texture(volume, p).r;",
-            "        vec4 val_color = texture(colormap, vec2(val, 0.5));", // this is wrong, the val should be 0->1 but it's -0.2->0.2 :/
+            "        vec4 val_color = texture(colormap, vec2(val, 0.5));",
             "        val_color.a = val_color.a * opacity;",
             "        // Opacity correction",
             "        val_color.a = 1.0 - pow(1.0 - val_color.a, dt_scale);",
@@ -955,6 +967,13 @@ $3Dmol.ShaderLib = {
             "            break;",
             "        }",
             "        p += ray_dir * dt;",
+            "        vec3 p_modelspace = (vec4(p * volume_scale + modelPos, 1.0)).xyz;", 
+            "        vec3 p_WorldSpace = (modelMatrix * vec4( (p_modelspace-modelPos) * volume_dims + modelPos, 1)).xyz;",
+            "        vec4 p_cameraSpace = viewMatrix * vec4(p_WorldSpace, 1);",
+            "        //mapping from camera space (near -> far) to screenspace (-1 -> 1) then to 0->1 from",
+            "        // https://en.wikipedia.org/wiki/Z-buffering with a minor edit",
+            "        float p_cameraSpace_perspective = 1.0 + (2.0*800.0)/(p_cameraSpace.z*799.0);",
+            "        if (p_cameraSpace_perspective * 0.5+0.5 > depth) break;",
             "    }",
             "}"
 
@@ -975,6 +994,7 @@ $3Dmol.ShaderLib = {
             "flat out vec3 transformed_eye;",
             "out vec3 vray_dir;",
             "vec3 positionWorldSpace;",
+            "out vec4 dummy;",
 
             "void main(void) {",
             "    // eye position in unit cube space for non uniform dimensions (should divide by scale) (scale here between 0 and 1) ",
@@ -986,6 +1006,7 @@ $3Dmol.ShaderLib = {
             
             "    // same here, translation is subtracted before multiplying by scale to keep transformations order correct",
             "    positionWorldSpace = (modelMatrix * vec4( (position-modelPos) * volume_dims.xyz + modelPos, 1)).xyz;",
+            "	 dummy =  viewMatrix * vec4(positionWorldSpace, 1);",
             "    gl_Position = projectionMatrix * viewMatrix * vec4(positionWorldSpace, 1);", 
             "}"
         ].join("\n"),
@@ -997,6 +1018,7 @@ $3Dmol.ShaderLib = {
             fogFar: { type: 'f', value: 2000},
             volume: { type: 'i', value: 3 },
             colormap: { type: 'i', value: 4 },
+            depthmap: { type: 'i', value: 5 },
             dt_scale: { type: 'f', value: 1.0 }
         }
     },
