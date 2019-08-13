@@ -896,7 +896,7 @@ $3Dmol.ShaderLib = {
             "uniform highp sampler3D volume;", 
             "uniform highp sampler2D colormap;",
             "uniform highp sampler2D depthmap;",
-            "uniform vec3 volume_dims;", 
+            "uniform vec3 volume_dims;",
             "uniform float dt_scale;",
             "float depth;",
 
@@ -910,6 +910,9 @@ $3Dmol.ShaderLib = {
             "uniform mat4 viewMatrix;",
             "uniform vec3 volume_scale;",
             "uniform vec3 modelPos;",
+            "uniform vec2 screenCoords;",
+            "uniform float cameraNear;",
+            "uniform float cameraFar;",
 
             "in vec3 vray_dir;",
             "flat in vec3 transformed_eye;",
@@ -947,13 +950,14 @@ $3Dmol.ShaderLib = {
             "        discard;",
             "    }",
             "    t_hit.x = max(t_hit.x, 0.0);",
-            "    vec3 dt_vec = 1.0 / (vec3(76, 64, 61)*0.28* abs(ray_dir));",  // todo. this was volume_dims, shouldn't be hard coded but how will i get to know it? volume class? 
+            "    // todo: the 1.5 value can be a value to control volume quality for low end devices",
+            "    vec3 dt_vec = 1.0 / (volume_dims * 1.5 * abs(ray_dir));", 
             "    float dt = dt_scale * min(dt_vec.x, min(dt_vec.y, dt_vec.z));",
             "    float offset = wang_hash(int(gl_FragCoord.x + 640.0 * gl_FragCoord.y));",
             "    vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;",
             
             "    // depth is the value in the depthMap from the renderbuffer",
-            "    depth = texture(depthmap, vec2(gl_FragCoord.x/951.0, gl_FragCoord.y/984.0)).r;", //TODO: send screen coords here or find another way to determine pixel pos
+            "    depth = texture(depthmap, vec2(gl_FragCoord.x/screenCoords.x, gl_FragCoord.y/screenCoords.y)).r;",
             
             "    for (float t = t_hit.x; t < t_hit.y; t += dt) {",
             "        float val = texture(volume, p).r;",
@@ -967,13 +971,15 @@ $3Dmol.ShaderLib = {
             "            break;",
             "        }",
             "        p += ray_dir * dt;",
+            "        //transforming new point p from unit cube space to camera space to get its z value",
             "        vec3 p_modelspace = (vec4(p * volume_scale + modelPos, 1.0)).xyz;", 
             "        vec3 p_WorldSpace = (modelMatrix * vec4( (p_modelspace-modelPos) * volume_dims + modelPos, 1)).xyz;",
             "        vec4 p_cameraSpace = viewMatrix * vec4(p_WorldSpace, 1);",
             "        //mapping from camera space (near -> far) to screenspace (-1 -> 1) then to 0->1 from",
             "        // https://en.wikipedia.org/wiki/Z-buffering with a minor edit",
-            "        float p_cameraSpace_perspective = 1.0 + (2.0*800.0)/(p_cameraSpace.z*799.0);",
-            "        if (p_cameraSpace_perspective * 0.5+0.5 > depth) break;",
+            "        float p_cameraSpace_perspective = ( (cameraFar+cameraNear)/(cameraFar+cameraNear) +", 
+            "                (2.0*cameraFar*cameraNear)/(p_cameraSpace.z* (cameraFar-cameraNear) ) ) * 0.5 + 0.5 ;",
+            "        if (p_cameraSpace_perspective > depth) break;",
             "    }",
             "}"
 
@@ -994,19 +1000,17 @@ $3Dmol.ShaderLib = {
             "flat out vec3 transformed_eye;",
             "out vec3 vray_dir;",
             "vec3 positionWorldSpace;",
-            "out vec4 dummy;",
 
             "void main(void) {",
             "    // eye position in unit cube space for non uniform dimensions (should divide by scale) (scale here between 0 and 1) ",
             "    // modelMatrix and ModelMatrixInverse don't include the scaling vector so as to not scaele the eye_pos",
             "    transformed_eye = ((modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos) / volume_scale.xyz;", 
             
-            "    // the position vector contains the model translation so it is removed before getting the ray vector",
+            "    // model translation is embedded into the vertex position so it is subtracted before getting the ray vector",
             "    vray_dir = (position - modelPos) - transformed_eye;", 
             
             "    // same here, translation is subtracted before multiplying by scale to keep transformations order correct",
             "    positionWorldSpace = (modelMatrix * vec4( (position-modelPos) * volume_dims.xyz + modelPos, 1)).xyz;",
-            "	 dummy =  viewMatrix * vec4(positionWorldSpace, 1);",
             "    gl_Position = projectionMatrix * viewMatrix * vec4(positionWorldSpace, 1);", 
             "}"
         ].join("\n"),
@@ -1027,9 +1031,7 @@ $3Dmol.ShaderLib = {
         fragmentShader: [
             "uniform sampler2D colormap;",
             "varying highp vec2 vTexCoords;",
-            // "float depth;",
             "void main (void) {",
-            // "	depth = texture2D(colormap, vTexCoords).r;",
             "   gl_FragColor = texture2D(colormap, vTexCoords);",
             "}"
         ].join("\n"),

@@ -19,9 +19,12 @@
         var viewer = $3Dmol.createViewer("viewer");
         
         // TODO
-        // seldist, coords, and "deleting" the rest of the data not only hiding them
+        // webgl2 fallback to webgl1 if not found and disbale render to framebuffer? 
         // having multiple volumetric renderers in this file (even on the same volumedata)
-        
+        // testing (my testing)
+        // seldist, coords, and "deleting" the rest of the data not only hiding them
+        // framebuffer antialiasing ?
+
         $.get('../tests/test_structs/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / -0.2->0.2
         // $.get('../tests/test_structs/ch3cl-esp.cube', function(data){  // --iso 0.000001 or 0.2 / -40->37
         // $.get('../tests/auto/data/bohr.cube', function(data){ // --iso 1

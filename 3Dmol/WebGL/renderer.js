@@ -214,6 +214,40 @@ $3Dmol.Renderer = function(parameters) {
         }
     };
 
+    this.setFrameBufferSize = function(width, height){
+        var targetTexture = _gl.createTexture();
+        _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0,
+                _gl.RGBA, _gl.UNSIGNED_BYTE, null);
+	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
+	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+
+		// IMP: this requires an extension in webgl1, so if 2 is not available
+		// i'll have to not render to framebuffer at all and normally render to screen
+		// as it will already be of no use without the volumetric renderer
+		// i mean it can't be left out here that easily
+		var depthTexture = _gl.createTexture();
+		_gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
+		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, width, height, 0,
+				_gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+
+        // Create and bind the framebuffer
+        var fb = _gl.createFramebuffer();
+        _gl.bindFramebuffer(_gl.FRAMEBUFFER, fb);
+        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, targetTexture, 0);
+		_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
+                
+        this.offscreen.targetTexture = targetTexture;
+        this.offscreen.fb = fb,
+        this.offscreen.depthTexture = depthTexture;
+    }
+
     this.clear = function(color, depth, stencil) {
 
         var bits = 0;
@@ -833,6 +867,9 @@ $3Dmol.Renderer = function(parameters) {
                 _gl.uniform3fv(p_uniforms.volScale, volScale);
                 p_uniforms.volDims = _gl.getUniformLocation(program, "volume_dims");
                 _gl.uniform3fv(p_uniforms.volDims, volDims);
+                _gl.uniform2fv(_gl.getUniformLocation(program, "screenCoords"), [innerWidth, innerHeight]);
+                _gl.uniform1f(_gl.getUniformLocation(program, "cameraNear"), camera.near);
+                _gl.uniform1f(_gl.getUniformLocation(program, "cameraFar"), camera.far);
 
                 renderer.setTexture(object.material.transferfn, 4, false);
                 renderer.setTexture(object.material.map, 3, true);
@@ -1861,7 +1898,7 @@ $3Dmol.Renderer = function(parameters) {
 		// IMP: this requires an extension in webgl1, so if 2 is not available
 		// i'll have to not render to framebuffer at all and normally render to screen
 		// as it will already be of no use without the volumetric renderer
-		// i mean i can't leave it out here that easily
+		// i mean it can't be left out here that easily
 		var depthTexture = _gl.createTexture();
 		_gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
 		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, innerWidth, innerHeight, 0,

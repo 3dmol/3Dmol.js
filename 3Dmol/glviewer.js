@@ -840,6 +840,7 @@ $3Dmol.GLViewer = (function() {
             HEIGHT = container.height();
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
+            renderer.setFrameBufferSize(innerWidth, innerHeight);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
             show();
