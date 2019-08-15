@@ -215,6 +215,9 @@ $3Dmol.Renderer = function(parameters) {
     };
 
     this.setFrameBufferSize = function(width, height){
+        // only needed/works with webgl2
+        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+        
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0,
@@ -637,6 +640,13 @@ $3Dmol.Renderer = function(parameters) {
                 return programInfo.program;
             }
         }
+
+        // check if program requires webgl2
+        if (_gl.getParameter(_gl.VERSION)[6] != "2"){
+            if (parameters.volumetric) 
+                throw new Error("Volumetric rendering requires webgl2 which is not supported by your hardware.")
+        }
+
 
         // Set up new program and compile shaders
 
@@ -1298,6 +1308,9 @@ $3Dmol.Renderer = function(parameters) {
     }
 
     this.renderFrameBuffertoScreen = function(){
+        // only needed/works with webgl2
+        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+
         // bind default framebuffer
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, null);
         _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
@@ -1860,7 +1873,6 @@ $3Dmol.Renderer = function(parameters) {
     function initGL() {
 
         try {
-
             if (!(_gl = _canvas.getContext('webgl2', {
                 alpha : _alpha,
                 premultipliedAlpha : _premultipliedAlpha,
@@ -1868,17 +1880,24 @@ $3Dmol.Renderer = function(parameters) {
                 stencil : _stencil,
                 preserveDrawingBuffer : _preserveDrawingBuffer
             }))) {
-                if (!(_gl = _canvas.getContext('webgl2', {
+                if (!(_gl = _canvas.getContext('experimental-webgl', {
                     alpha : _alpha,
                     premultipliedAlpha : _premultipliedAlpha,
                     antialias : _antialias,
                     stencil : _stencil,
                     preserveDrawingBuffer : _preserveDrawingBuffer
                 }))) {
-                    throw 'Error creating WebGL context.';
+                    if (!(_gl = _canvas.getContext('webgl', {
+                        alpha : _alpha,
+                        premultipliedAlpha : _premultipliedAlpha,
+                        antialias : _antialias,
+                        stencil : _stencil,
+                        preserveDrawingBuffer : _preserveDrawingBuffer
+                    }))) {
+                        throw 'Error creating WebGL context.';
+                    }
                 }
             }
-
         } catch (error) {
 
             console.error(error);
@@ -1886,6 +1905,9 @@ $3Dmol.Renderer = function(parameters) {
     }
 
     function initOffScreenRender(){
+        // only needed/works with webgl2
+        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, innerWidth, innerHeight, 0,

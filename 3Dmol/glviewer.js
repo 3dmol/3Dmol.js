@@ -2526,7 +2526,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.render();
                 });
          */
-        this.addVolumetricRenderer = function(data,  spec,callback) {
+        this.addVolumetricRenderer = function(data,  spec,callback) {            
             spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
@@ -2621,41 +2621,41 @@ $3Dmol.GLViewer = (function() {
             s.transferfn = canvas;
 
             // volume selectivity based on given coords and distance
-            // if (spec.coords !== undefined && spec.seldist !== undefined){
-            //     var delta, start;
-            //     var texelpos = new $3Dmol.Vector3(0,0,0);
-            //     if (!data.matrix){
-            //         delta = data.unit; start = data.origin;
-            //     } else { // matrix overrides unit and origin transformations 
-            //         var scaleX = Math.sqrt(Math.pow(data.matrix.elements[0], 2) + Math.pow(data.matrix.elements[4], 2) + Math.pow(data.matrix.elements[8], 2) ) 
-            //         var scaleY = Math.sqrt(Math.pow(data.matrix.elements[1], 2) + Math.pow(data.matrix.elements[5], 2) + Math.pow(data.matrix.elements[9], 2) ) 
-            //         var scaleZ = Math.sqrt(Math.pow(data.matrix.elements[2], 2) + Math.pow(data.matrix.elements[6], 2) + Math.pow(data.matrix.elements[10], 2) ) 
-            //         delta = new $3Dmol.Vector3(scaleX, scaleY, scaleZ);
-            //         start = $3Dmol.Vector3.prototype.getPositionFromMatrix(data.matrix);
-            //     }
-            //     var scaledProduct = new $3Dmol.Vector3(0,0,0);
-            //     // z is the fastest changing (major) coordinate as the volumeData module outputs the data as ZYX
-            //     for (var x = 0; x < data.size.x; x++)
-            //     for (var y = 0; y < data.size.y; y++)
-            //     for (var z = 0; z < data.size.z; z++){
-            //         scaledProduct.x = x * delta.x; scaledProduct.y = y * delta.y; scaledProduct.z = z * delta.z;
-            //         scaledProduct = [scaledProduct.x, scaledProduct.y, scaledProduct.z];
-            //         if (data.dimensionorder){
-            //             scaledProduct = [scaledProduct[data.dimensionorder[0]-1], scaledProduct[data.dimensionorder[1]-1], scaledProduct[data.dimensionorder[2]-1]]
-            //             scaledProduct.x = scaledProduct[0]; scaledProduct.y = scaledProduct[1]; scaledProduct.z = scaledProduct[2];
-            //         }
-            //         texelpos.x = start.x + scaledProduct.x; 
-            //         texelpos.y = start.y + scaledProduct.y;
-            //         texelpos.z = start.z + scaledProduct.z;
-            //         for (var i = 0; i < spec.coords.length; i++) {
-            //             var distance = texelpos.distanceTo(spec.coords[i]);
-            //             if (distance > spec.seldist){
-            //                 var index = z + y * data.size.z + x * data.size.y * data.size.z;                
-            //                 data.data[index] = -0.4112; // TODO: di tkon l minimum value
-            //             }
-            //         }
-            //     }
-            // }
+            if (spec.coords !== undefined && spec.seldist !== undefined){
+                var delta, start;
+                var texelpos = new $3Dmol.Vector3(0,0,0);
+                if (!data.matrix){
+                    delta = data.unit; start = data.origin;
+                } else { // matrix overrides unit and origin transformations 
+                    var scaleX = Math.sqrt(Math.pow(data.matrix.elements[0], 2) + Math.pow(data.matrix.elements[4], 2) + Math.pow(data.matrix.elements[8], 2) ) 
+                    var scaleY = Math.sqrt(Math.pow(data.matrix.elements[1], 2) + Math.pow(data.matrix.elements[5], 2) + Math.pow(data.matrix.elements[9], 2) ) 
+                    var scaleZ = Math.sqrt(Math.pow(data.matrix.elements[2], 2) + Math.pow(data.matrix.elements[6], 2) + Math.pow(data.matrix.elements[10], 2) ) 
+                    delta = new $3Dmol.Vector3(scaleX, scaleY, scaleZ);
+                    start = $3Dmol.Vector3.prototype.getPositionFromMatrix(data.matrix);
+                }
+                var scaledProduct = new $3Dmol.Vector3(0,0,0);
+                // z is the fastest changing (major) coordinate as the volumeData module outputs the data as ZYX
+                for (var x = 0; x < data.size.x; x++)
+                for (var y = 0; y < data.size.y; y++)
+                for (var z = 0; z < data.size.z; z++){
+                    scaledProduct.x = x * delta.x; scaledProduct.y = y * delta.y; scaledProduct.z = z * delta.z;
+                    scaledProduct[0] = scaledProduct.x; scaledProduct[1] = scaledProduct.y; scaledProduct[2] = scaledProduct.z; 
+                    if (data.dimensionorder){
+                        scaledProduct = [scaledProduct[data.dimensionorder[0]-1], scaledProduct[data.dimensionorder[1]-1], scaledProduct[data.dimensionorder[2]-1]]
+                        scaledProduct.x = scaledProduct[0]; scaledProduct.y = scaledProduct[1]; scaledProduct.z = scaledProduct[2];
+                    }
+                    texelpos.x = start.x + scaledProduct.x; 
+                    texelpos.y = start.y + scaledProduct.y;
+                    texelpos.z = start.z + scaledProduct.z;
+                    for (var i = 0; i < spec.coords.length; i++) {
+                        var distance = texelpos.distanceTo(spec.coords[i]);
+                        if (distance > spec.seldist){
+                            var index = z + y * data.size.z + x * data.size.y * data.size.z;                
+                            data.data[index] = 0; // should this always be set to 0? no special cases? 
+                        }
+                    }
+                }
+            }
 
             shapes.push(s);
             return s;

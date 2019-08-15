@@ -19,10 +19,8 @@
         var viewer = $3Dmol.createViewer("viewer");
         
         // TODO
-        // webgl2 fallback to webgl1 if not found and disbale render to framebuffer? 
         // having multiple volumetric renderers in this file (even on the same volumedata)
         // testing (my testing)
-        // seldist, coords, and "deleting" the rest of the data not only hiding them
         // framebuffer antialiasing ?
 
         $.get('../tests/test_structs/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / -0.2->0.2
@@ -46,27 +44,15 @@
                     { opacity: 0, pos: 0.005 }, 
                     { opacity: 1.0, pos: 0.2 }, //1
                 ],
-                // coords: [{x: 0, y: 1, z: 0.5}], 
-                // seldist: 1.5
+                // coords: [{x: 0, y: 0, z: 0}], 
+                // seldist: 1.7
             });
-            
-            // viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
-            // viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
-            // viewer.addIsosurface(voldata, { isoval: 0.1,
-            //                            color: "green",
-            //                            opacity: 1.0,
-            //                         //    coords: [{x: 0, y: 0, z: 0}], 
-            //                         //    seldist: 1.5
-            //                         });
-                                    
+                                                
             var rec1 = viewer.addModel($('#benzene').val(), "sdf");
             rec1.setStyle({stick:{color:'lightgray', opacity:'1.0'}, sphere:{color:'gray', radius: 0.4}});
                
             // viewer.addLabel("Aromatic", {position: {x:2.6, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
 
-            // var shape = viewer.addShape({color: 'red'});
-            // shape.addBox({center:{x: 0, y: 1, z: 0.5}, dimensions: {w: 1, h:1, d: 1}});
-            
             viewer.zoomTo();
             viewer.render();
         });
