@@ -73,7 +73,7 @@ $3Dmol.Renderer = function(parameters) {
     _programs = [], _programs_counter = 0;
     
     // internal state cache
-    this._currentProgram = null;
+    _currentProgram = null;
     _currentFramebuffer = null, _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
     _usedTextureUnits = 0,
 
@@ -778,9 +778,9 @@ $3Dmol.Renderer = function(parameters) {
         // m_uniforms: uniformVarName => uniformJsVal
         var program = material.program, p_uniforms = program.uniforms, m_uniforms = material.uniforms;
 
-        if (program != this._currentProgram) {
+        if (program != _currentProgram) {
             _gl.useProgram(program);
-            this._currentProgram = program;
+            _currentProgram = program;
 
             refreshMaterial = true;
         }
@@ -1319,7 +1319,7 @@ $3Dmol.Renderer = function(parameters) {
 
         // set screen shader and use it
         _gl.useProgram(this.offscreen.screenshader);
-        this._currentProgram = this.offscreen.screenshader;
+        _currentProgram = this.offscreen.screenshader;
         
         // disable depth test
         this.setDepthTest(-1);
