@@ -91,8 +91,6 @@ $3Dmol.SpritePlugin = function () {
         var attributes = _sprite.attributes,
             uniforms = _sprite.uniforms;
 
-        var invAspect = viewportHeight / viewportWidth;
-
         var halfViewportWidth = viewportWidth * 0.5,
             halfViewportHeight = viewportHeight * 0.5;
 
@@ -146,7 +144,7 @@ $3Dmol.SpritePlugin = function () {
 
         // update positions and sort
 
-        var i, sprite, material, screenPosition, size, fogType, scale = [];
+        var i, sprite, material, size, fogType, scale = [];
 
         for( i = 0; i < nSprites; i ++ ) {
 

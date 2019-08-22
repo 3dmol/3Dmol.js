@@ -219,7 +219,7 @@ $3Dmol.Object3D.prototype = {
         var theta = 2*Math.atan2(this.quaternion.lengthxyz(),this.quaternion.w);
         var x = 0, y = 0, z = 0;
         if(theta != 0) {
-            st = Math.sin(theta/2);
+            let st = Math.sin(theta/2);
             x = this.quaternion.x/st;
             y = this.quaternion.y/st;
             z = this.quaternion.z/st;
@@ -404,7 +404,7 @@ $3Dmol.Geometry = (function() {
             return;
         
         //vertex indices
-        var a, b, c, d,
+        var a, b, c, 
         //and actual vertices
         vA, vB, vC, norm;
             
@@ -482,9 +482,9 @@ $3Dmol.Geometry = (function() {
             indent+' colorPerVertex TRUE\n'+
             indent+' coord Coordinate {\n'+
             indent+'  point [\n';
-            var x,y,z;
-            for (var i = 0; i < this.vertices; ++i) {
-                var offset = i*3;                
+            let x,y,z;
+            for (let i = 0; i < this.vertices; ++i) {
+                let offset = i*3;                
                 x = this.vertexArray[offset]; y = this.vertexArray[offset+1]; z = this.vertexArray[offset+2];
                 ret += indent+'   '+x+' '+y+' '+z+',\n';
             }
@@ -494,8 +494,8 @@ $3Dmol.Geometry = (function() {
             if(this.colorArray) {
                 ret += indent+' color Color {\n'+
                     indent+'  color [\n';
-                for (var i = 0; i < this.vertices; ++i) {
-                    var offset = i*3;                
+                for (let i = 0; i < this.vertices; ++i) {
+                    let offset = i*3;                
                     x = this.colorArray[offset]; y = this.colorArray[offset+1]; z = this.colorArray[offset+2];
                     ret += indent+'   '+x+' '+y+' '+z+',\n';
                 }
@@ -504,7 +504,7 @@ $3Dmol.Geometry = (function() {
             }
             
             ret += indent+' coordIndex [\n';
-            for(var i = 0; i < this.vertices; i += 2) {
+            for(let i = 0; i < this.vertices; i += 2) {
                 ret += indent+'  '+i+', '+(i+1)+', -1,\n';
             }
             ret += indent+' ]\n';
@@ -519,9 +519,9 @@ $3Dmol.Geometry = (function() {
             //vertices
             ret += indent+' coord Coordinate {\n'+
             indent+'  point [\n';
-            var x,y,z;
-            for (var i = 0; i < this.vertices; ++i) {
-                var offset = i*3;                
+            let x,y,z;
+            for (let i = 0; i < this.vertices; ++i) {
+                let offset = i*3;                
                 x = this.vertexArray[offset]; y = this.vertexArray[offset+1]; z = this.vertexArray[offset+2];
                 ret += indent+'   '+x+' '+y+' '+z+',\n';
             }
@@ -531,8 +531,8 @@ $3Dmol.Geometry = (function() {
             //normals
             ret += indent+' normal Normal {\n'+
                    indent+'  vector [\n';
-            for (var i = 0; i < this.vertices; ++i) {
-                var offset = i*3;                
+            for (let i = 0; i < this.vertices; ++i) {
+                let offset = i*3;                
                 x = this.normalArray[offset]; y = this.normalArray[offset+1]; z = this.normalArray[offset+2];
                 ret += indent+'   '+x+' '+y+' '+z+',\n';
             }
@@ -543,8 +543,8 @@ $3Dmol.Geometry = (function() {
             if(this.colorArray) {
                 ret += indent+' color Color {\n'+
                     indent+'  color [\n';
-                for (var i = 0; i < this.vertices; ++i) {
-                    var offset = i*3;                
+                for (let i = 0; i < this.vertices; ++i) {
+                    let offset = i*3;                
                     x = this.colorArray[offset]; y = this.colorArray[offset+1]; z = this.colorArray[offset+2];
                     ret += indent+'   '+x+' '+y+' '+z+',\n';
                 }
@@ -564,7 +564,7 @@ $3Dmol.Geometry = (function() {
         
         ret += oldindent+'}'; //shape
         return ret;
-    },
+    };
     
     geometryGroup.prototype.truncateArrayBuffers = function(mesh, reallocatemem) {
         
@@ -609,8 +609,7 @@ $3Dmol.Geometry = (function() {
             if(this.colorArray) this.colorArray = new Float32Array(this.colorArray);
             if(this.radiusArray) this.radiusArray = new Float32Array(this.radiusArray);
         }
-        this.__inittedArrays = true;        
-        
+        this.__inittedArrays = true;                
     };
     
     var addGroup = function(geo) {
@@ -803,12 +802,8 @@ $3Dmol.Raycaster = (function() {
     var v2 = new $3Dmol.Vector3();
     var v3 = new $3Dmol.Vector3();
     //var facePlane = new $3Dmol.Plane();
-    var localRay = new $3Dmol.Ray();
-    var intersectPoint = new $3Dmol.Vector3();
     var matrixPosition = new $3Dmol.Vector3();
-    
-    var inverseMatrix = new $3Dmol.Matrix4();
-        
+            
     var descSort = function(a, b) {
         return a.distance - b.distance;
     };
@@ -835,7 +830,7 @@ $3Dmol.Raycaster = (function() {
             sphere.copy(clickable.boundingSphere);
             sphere.applyMatrix4(group.matrixWorld);          
             if (!raycaster.ray.isIntersectionSphere(sphere)) {             
-				return intersects;
+              return intersects;
             }
         }     
 
@@ -1065,7 +1060,7 @@ $3Dmol.Raycaster = (function() {
                 this.ray.direction.set( 0, 0, - 1 ).transformDirection( camera.matrixWorld );
     
             } 
-        }
+        };
     }();
     
     Raycaster.prototype.intersectObjects = function(group, objects) {     
@@ -1090,8 +1085,7 @@ $3Dmol.Raycaster = (function() {
 /** @constructor */
 $3Dmol.Projector = function () {
 
-    var _viewMatrix = new $3Dmol.Matrix4(),
-    _viewProjectionMatrix = new $3Dmol.Matrix4();
+    let _viewProjectionMatrix = new $3Dmol.Matrix4();
 
     this.projectVector = function ( vector, camera ) {
 

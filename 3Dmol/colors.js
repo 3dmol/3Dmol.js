@@ -39,7 +39,7 @@
  * @prop {function} colorfunc - Allows the user to provide a function for setting the colorshemes.See example #4.
  */
  
-});
+})();
 
 var htmlColors = $3Dmol.htmlColors = {
     "aliceblue" : 0xF0F8FF,
@@ -190,7 +190,7 @@ var htmlColors = $3Dmol.htmlColors = {
     "whitesmoke" : 0xF5F5F5,
     "yellow" : 0xFFFF00,
     "yellowgreen" : 0x9ACD32
-}
+};
 // in an attempt to reduce memory overhead, cache all $3Dmol.Colors
 // this makes things a little faster
 $3Dmol.CC = {
@@ -243,8 +243,8 @@ $3Dmol.CC = {
 };
 
 
-$3Dmol['CC'] = $3Dmol.CC;
-$3Dmol['CC']['color'] = $3Dmol.CC.color;
+$3Dmol.CC = $3Dmol.CC;
+$3Dmol.CC.color = $3Dmol.CC.color;
 
 
 
@@ -527,28 +527,28 @@ $3Dmol.elementColors.rasmol = {
 $3Dmol.elementColors.defaultColors = $3Dmol.elementColors.rasmol;
 
 $3Dmol.elementColors.greenCarbon = $.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.greenCarbon['C'] = 0x00ff00; //bright green
+$3Dmol.elementColors.greenCarbon.C = 0x00ff00; //bright green
 
 $3Dmol.elementColors.cyanCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.cyanCarbon['C'] = 0x00ffff;
+$3Dmol.elementColors.cyanCarbon.C = 0x00ffff;
 
 $3Dmol.elementColors.magentaCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.magentaCarbon['C'] = 0xff00ff;
+$3Dmol.elementColors.magentaCarbon.C = 0xff00ff;
 
 $3Dmol.elementColors.yellowCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.yellowCarbon['C'] = 0xffff00;
+$3Dmol.elementColors.yellowCarbon.C = 0xffff00;
 
 $3Dmol.elementColors.whiteCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.whiteCarbon['C'] = 0xffffff;
+$3Dmol.elementColors.whiteCarbon.C = 0xffffff;
 
 $3Dmol.elementColors.orangeCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.orangeCarbon['C'] = 0xffa500;
+$3Dmol.elementColors.orangeCarbon.C = 0xffa500;
 
 $3Dmol.elementColors.purpleCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.purpleCarbon['C'] = 0x800080;
+$3Dmol.elementColors.purpleCarbon.C = 0x800080;
 
 $3Dmol.elementColors.blueCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.blueCarbon['C'] = 0x0000ff;
+$3Dmol.elementColors.blueCarbon.C = 0x0000ff;
 
 
 $3Dmol.residues = {};
@@ -711,7 +711,7 @@ $3Dmol.getColorFromStyle = function(atom, style) {
         var ccolor = scheme.substring(0,scheme.lastIndexOf("Carbon")).toLowerCase();
         if(typeof(htmlColors[ccolor]) != "undefined") {
             var newscheme = $.extend({},$3Dmol.elementColors.defaultColors);
-            newscheme['C'] = htmlColors[ccolor];
+            newscheme.C = htmlColors[ccolor];
             $3Dmol.builtinColorSchemes[scheme] = {'prop': 'elem', map:newscheme};
             scheme = $3Dmol.builtinColorSchemes[scheme];
         }        
@@ -721,9 +721,10 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     if (typeof (style.color) != "undefined" && style.color != "spectrum")
         color = style.color;
     if(typeof(scheme) != "undefined") {
+        var prop, val;
         if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
             //name of builtin colorscheme
-            var scheme = $3Dmol.elementColors[scheme];
+            scheme = $3Dmol.elementColors[scheme];
             if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
                 color = scheme.map[atom[scheme.prop]];
             }
@@ -733,22 +734,22 @@ $3Dmol.getColorFromStyle = function(atom, style) {
         } else if(typeof(scheme.prop) != 'undefined' &&
                 typeof(scheme.gradient) != 'undefined') {         
             //apply a property mapping
-            var prop = scheme.prop;
+            prop = scheme.prop;
             var grad = scheme.gradient; //redefining scheme
             if(typeof($3Dmol.Gradient.builtinGradients[grad]) != "undefined") {
                 grad = new $3Dmol.Gradient.builtinGradients[grad](scheme.min, scheme.max, scheme.mid);
             }
             
             var range = grad.range() || [-1,1]; //sensible default
-            var val = $3Dmol.getAtomProperty(atom, prop);
+            val = $3Dmol.getAtomProperty(atom, prop);
             if(val != null) {
                 color = grad.valueToHex(val, range);
             }
         } else if(typeof(scheme.prop) != 'undefined' &&
                 typeof(scheme.map) != 'undefined') {         
             //apply a discrete property mapping
-            var prop = scheme.prop;
-            var val = $3Dmol.getAtomProperty(atom, prop);
+            prop = scheme.prop;
+            val = $3Dmol.getAtomProperty(atom, prop);
             if( typeof scheme.map[val] != 'undefined' ) {
                 color = scheme.map[val];
             }

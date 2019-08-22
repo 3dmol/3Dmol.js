@@ -96,9 +96,9 @@ The full source distribution is available [from github](https://github.com/3dmol
 ```
 git clone https://github.com/3dmol/3Dmol.js.git
 ``` 
-The checked out code can be built using [grunt](http://gruntjs.com/).
+The checked out code can be built using [gulp](http://gulpjs.com/).
 ```
-grunt build
+gulp
 ```
 
 

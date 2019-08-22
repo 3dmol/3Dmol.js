@@ -20,7 +20,7 @@ $3Dmol.Label = function(text, parameters) {
     this.context = this.canvas.getContext('2d');
     this.sprite = new $3Dmol.Sprite();
     this.text = text;
-
+    this.frame = this.stylespec.frame;
 };
 
 $3Dmol.Label.prototype = {
@@ -64,7 +64,7 @@ $3Dmol.Label.prototype = {
                 ret.a = parseFloat(stylealpha);
             }
             return ret;
-        }
+        };
 
         /**
          * Label type specification
@@ -85,6 +85,7 @@ $3Dmol.Label.prototype = {
          * @prop {boolean} fixed - sets the label to change with the model when zooming
          * @prop {Object} backgroundImage - An element to draw into the label.  Any CanvasImageSource is allowed.
          * @prop {string} alignment - how to orient the label w/respect to position: topLeft (default), topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight
+         * @prop {number} frame - if set, only display in this frame of an animation
          */
         return function() {
             
@@ -165,7 +166,7 @@ $3Dmol.Label.prototype = {
             this.canvas.height = height;
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            var bold = "";
+            bold = "";
             if(style.bold)
                 bold = "bold ";
             this.context.font = bold+fontSize + "px  " + font;
@@ -185,9 +186,9 @@ $3Dmol.Label.prototype = {
             }
             
             if(style.backgroundImage) {
-                var img = style.backgroundImage;
-                var w = style.backgroundWidth ? style.backgroundWidth : img.width;
-                var h = style.backgroundHeight ? style.backgroundHeight : img.height;
+                let img = style.backgroundImage;
+                let w = style.backgroundWidth ? style.backgroundWidth : img.width;
+                let h = style.backgroundHeight ? style.backgroundHeight : img.height;
                 this.context.drawImage(img,0,0, w, h);
             }
             

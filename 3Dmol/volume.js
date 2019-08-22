@@ -51,26 +51,26 @@ $3Dmol.VolumeData = function(str, format, options) {
     
     if(options) {
         if(options.negate) {
-            for(var i = 0, n = this.data.length; i < n; i++) {
+            for(let i = 0, n = this.data.length; i < n; i++) {
                 this.data[i] = -this.data[i];
             }
         }
         if(options.normalize) {
             var total = 0.0;
-            for(var i = 0, n = this.data.length; i < n; i++) {
+            for(let i = 0, n = this.data.length; i < n; i++) {
                 total += this.data[i];
             }
             var mean = total/this.data.length;
             console.log("computed mean: "+mean);
             total = 0;
-            for(var i = 0, n = this.data.length; i < n; i++) {
+            for(let i = 0, n = this.data.length; i < n; i++) {
                 var diff = this.data[i]-mean;
                 total += diff*diff; //variance is ave of squared difference with mean
             }
             var variance = total/this.data.length;
             //console.log("Computed variance: "+variance);
             //now normalize
-            for(var i = 0, n = this.data.length; i < n; i++) {
+            for(let i = 0, n = this.data.length; i < n; i++) {
                 this.data[i] = (this.data[i]-mean)/variance;
             }
         }
@@ -135,7 +135,7 @@ $3Dmol.VolumeData.prototype.getCoordinates = function(index){
     Y = (int)(index / Width)
     X = index - (Y * Width)
     */
-}
+};
 
 /*
  * parse vasp data
@@ -159,7 +159,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
 
 
     // Assume atomic units 
-    var unittype = "bohr/hartree";
+//    var unittype = "bohr/hartree";
     var l_units = 1.889725992;
     var e_units = 0.036749309;
 
@@ -576,9 +576,9 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
 
       var NX = header.NX, NY = header.NY, NZ = header.NZ;
       this.data = new Float32Array(NX*NY*NZ);
-      for(var i = 0; i < NX; i++) {
-          for(var j = 0; j < NY; j++) {
-              for(var k = 0; k < NZ; k++) {
+      for(let i = 0; i < NX; i++) {
+          for(let j = 0; j < NY; j++) {
+              for(let k = 0; k < NZ; k++) {
                   //should I be concerned that I'm not using mapc?
                   this.data[((i*NY)+j)*NZ+k] = data[((k*NY)+j)*NX+i];
               }

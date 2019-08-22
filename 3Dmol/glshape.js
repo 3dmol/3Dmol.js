@@ -34,11 +34,11 @@ $3Dmol.GLShape = (function() {
      */
     var updateColor = function(geo, color) {
 
-        var C = color || $3Dmol.CC.color(color);
+        color = color || $3Dmol.CC.color(color);
         geo.colorsNeedUpdate = true;
         
         var r,g,b;
-        if(! (color.constructor === Array)) {
+        if(color.constructor !== Array) {
             r = color.r;
             g = color.g;
             b = color.b;
@@ -133,7 +133,6 @@ $3Dmol.GLShape = (function() {
 
         var start = geoGroup.vertices;
         var vertexArray = geoGroup.vertexArray;
-        var colorArray = geoGroup.colorArray;
         var faceArray = geoGroup.faceArray;
         var normalArray = geoGroup.normalArray;
         var lineArray = geoGroup.lineArray;
@@ -197,7 +196,6 @@ $3Dmol.GLShape = (function() {
         var face, norm, faceoffset, lineoffset;
         var t1, t2, t2b, t3, t3b, t4, t1offset, t2offset, t2boffset, t3offset, t3boffset, t4offset;
         var n1, n2, n3, n4;
-        var n_vertices = 0;
         var fromi = geoGroup.vertices - 3, toi = geoGroup.vertices - 2, endi = geoGroup.vertices - 1;
         var fromoffset = fromi * 3, tooffset = toi * 3, endoffset = endi * 3;
         for (i = 0, n = nvecs.length - 1; i < n; ++i) {
@@ -420,6 +418,51 @@ $3Dmol.GLShape = (function() {
 
     };
 
+    // Update a bounding sphere's position and radius
+    // from list of centroids and new points
+    /**
+     * @param {$3Dmol.Sphere}
+     *            sphere
+     * @param {Object}
+     *            components, centroid of all objects in shape
+     * @param {Array}
+     *            points, flat array of all points in shape
+     * @param {int} numPoints, number of valid poitns in points
+     */
+    var updateBoundingFromPoints = function(sphere, components, points, numPoints) {
+
+        sphere.center.set(0, 0, 0);
+
+        var i, il;
+
+        if (components.length > 0) {
+
+            for (i = 0, il = components.length; i < il; ++i) {
+                var centroid = components[i].centroid;
+                sphere.center.add(centroid);
+            }
+
+            sphere.center.divideScalar(components.length);
+        }
+
+        var maxRadiusSq = sphere.radius * sphere.radius;
+        if(points.length/3 < numPoints)
+            numPoints = points.length/3;
+            
+        for (i = 0, il = numPoints; i < il; i++) {
+            var x = points[i * 3], y = points[i * 3 + 1], z = points[i * 3 + 2];
+            var radiusSq = sphere.center.distanceToSquared({
+                x : x,
+                y : y,
+                z : z
+            });
+            maxRadiusSq = Math.max(maxRadiusSq, radiusSq);
+        }
+
+        sphere.radius = Math.sqrt(maxRadiusSq);
+
+    };
+    
     //helper function for adding an appropriately sized mesh
     var addCustomGeo = function(shape, geo, mesh, color, clickable) {
         var geoGroup = geo.addGeoGroup();
@@ -429,14 +472,14 @@ $3Dmol.GLShape = (function() {
         geoGroup.vertices = vertexArr.length;
         geoGroup.faceidx = faceArr.length;
 
-        var offset, v, a, b, c, i, il;
+        var offset, v, a, b, c, i, il, r, g;
         var vertexArray = geoGroup.vertexArray;
         var colorArray = geoGroup.colorArray;
         
-        if(! (color.constructor === Array)) {
-            var r = color.r;
-            var g = color.g;
-            var b = color.b;
+        if(color.constructor !== Array) {
+            r = color.r;
+            g = color.g;
+            b = color.b;
         }
         for (i = 0, il = geoGroup.vertices; i < il; ++i) {
             offset = i * 3;
@@ -446,10 +489,10 @@ $3Dmol.GLShape = (function() {
             vertexArray[offset + 2] = v.z;
             
             if( color.constructor === Array) {
-                var c = color[i];
-                var r = c.r;
-                var g = c.g;
-                var b = c.b;
+                c = color[i];
+                r = c.r;
+                g = c.g;
+                b = c.b;
             }
             
             colorArray[offset] = r;
@@ -474,7 +517,7 @@ $3Dmol.GLShape = (function() {
             
             var center = new $3Dmol.Vector3(0,0,0);
             var cnt = 0;
-            for(var g = 0; g < geo.geometryGroups.length; g++) {
+            for(let g = 0; g < geo.geometryGroups.length; g++) {
                 center.add(geo.geometryGroups[g].getCentroid());
                 cnt++;
             }
@@ -521,8 +564,8 @@ $3Dmol.GLShape = (function() {
      */
     var drawCustom = function(shape, geo, customSpec) {
         var mesh = customSpec;
-        var vertexArr = mesh.vertexArr, normalArr = mesh.normalArr, 
-        faceArr = mesh.faceArr;
+        var vertexArr = mesh.vertexArr; 
+        var faceArr = mesh.faceArr;
         if (vertexArr.length === 0 || faceArr.length === 0) {
             console
                     .warn("Error adding custom shape component: No vertices and/or face indices supplied!");
@@ -541,50 +584,6 @@ $3Dmol.GLShape = (function() {
         } 
     }; 
 
-    // Update a bounding sphere's position and radius
-    // from list of centroids and new points
-    /**
-     * @param {$3Dmol.Sphere}
-     *            sphere
-     * @param {Object}
-     *            components, centroid of all objects in shape
-     * @param {Array}
-     *            points, flat array of all points in shape
-     * @param {int} numPoints, number of valid poitns in points
-     */
-    var updateBoundingFromPoints = function(sphere, components, points, numPoints) {
-
-        sphere.center.set(0, 0, 0);
-
-        var i, il;
-
-        if (components.length > 0) {
-
-            for (i = 0, il = components.length; i < il; ++i) {
-                var centroid = components[i].centroid;
-                sphere.center.add(centroid);
-            }
-
-            sphere.center.divideScalar(components.length);
-        }
-
-        var maxRadiusSq = sphere.radius * sphere.radius;
-        if(points.length/3 < numPoints)
-            numPoints = points.length/3;
-            
-        for (i = 0, il = numPoints; i < il; i++) {
-            var x = points[i * 3], y = points[i * 3 + 1], z = points[i * 3 + 2];
-            var radiusSq = sphere.center.distanceToSquared({
-                x : x,
-                y : y,
-                z : z
-            });
-            maxRadiusSq = Math.max(maxRadiusSq, radiusSq);
-        }
-
-        sphere.radius = Math.sqrt(maxRadiusSq);
-
-    };
 
     /**
      * 
@@ -626,6 +625,7 @@ $3Dmol.GLShape = (function() {
                 : null;
 
         shape.hidden = stylespec.hidden;
+        shape.frame = stylespec.frame;
     };
 
     /**
@@ -662,7 +662,7 @@ $3Dmol.GLShape = (function() {
         var linegeo = new $3Dmol.Geometry(true);
 
         /** Update shape with new style specification
-	 * @function $3Dmol.GLShape#updateStyle
+         * @function $3Dmol.GLShape#updateStyle
          * @param {ShapeSpec} newspec
          * @return {$3Dmol.GLShape}
          */
@@ -688,7 +688,6 @@ $3Dmol.GLShape = (function() {
             customSpec.faceArr = customSpec.faceArr || [];
             customSpec.normalArr = customSpec.normalArr || [];
 
-            var firstgeo = geo.geometryGroups.length;
             // will split mesh as needed
             drawCustom(this, geo, customSpec);
         };
@@ -766,13 +765,13 @@ $3Dmol.GLShape = (function() {
             }
             
             //can position using corner OR center
-            var c = boxSpec.corner
+            var c = boxSpec.corner;
             if(c == undefined) {
                 if(boxSpec.center !== undefined) {
                     
                     c  = {x: boxSpec.center.x - 0.5*(w.x+h.x+d.x),
                           y: boxSpec.center.y - 0.5*(w.y+h.y+d.y),
-                          z: boxSpec.center.z - 0.5*(w.z+h.z+d.z)}
+                          z: boxSpec.center.z - 0.5*(w.z+h.z+d.z)};
                 } else { // default to origin
                     c = {x:0,y:0,z:0};
                 }
@@ -910,8 +909,8 @@ $3Dmol.GLShape = (function() {
         this.addDashedCylinder = function(cylinderSpec){
             cylinderSpec.start = cylinderSpec.start || {};
             cylinderSpec.end = cylinderSpec.end || {};
-            cylinderSpec.dashLength=cylinderSpec.dashLength || .25;
-            cylinderSpec.gapLength=cylinderSpec.gapLength || .25;
+            cylinderSpec.dashLength=cylinderSpec.dashLength || 0.25;
+            cylinderSpec.gapLength=cylinderSpec.gapLength || 0.25;
 
             var start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
                     cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
@@ -951,7 +950,7 @@ $3Dmol.GLShape = (function() {
             var geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray, geoGroup.vertices);
-        }
+        };
 
         /**
          * Creates a curved shape
@@ -988,7 +987,7 @@ $3Dmol.GLShape = (function() {
             var npts = Math.ceil(2*radius/segmentlen);
             if(curveSpec.toArrow) {
                 end -= npts;
-                var arrowspec = { start: points[end],
+                let arrowspec = { start: points[end],
                                   end: points[points.length-1],
                                   radius: radius,
                                   color: color,
@@ -998,7 +997,7 @@ $3Dmol.GLShape = (function() {
             }
             if(curveSpec.fromArrow) {
                 start += npts;
-                var arrowspec = { start: points[start],
+                let arrowspec = { start: points[start],
                                   end: points[0],
                                   radius: radius,
                                   color: color,
@@ -1079,10 +1078,11 @@ $3Dmol.GLShape = (function() {
             components.push({
                 centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
             });
-            var geoGroup = geo.updateGeoGroup(0);
+            geoGroup = geo.updateGeoGroup(0);
             updateBoundingFromPoints(this.boundingSphere, components,
                     geoGroup.vertexArray, geoGroup.vertices);            
-        }
+        };
+        
         /**
          * Creates an arrow shape
          * @function $3Dmol.GLShape#addArrow        
@@ -1114,10 +1114,9 @@ $3Dmol.GLShape = (function() {
             arrowSpec.start = new $3Dmol.Vector3(arrowSpec.start.x || 0,
                     arrowSpec.start.y || 0, arrowSpec.start.z || 0);
 
-            if (arrowSpec.dir instanceof $3Dmol.Vector3
-                    && arrowSpec.length instanceof number) {
+            if (arrowSpec.dir instanceof $3Dmol.Vector3 && typeof(arrowSpec.length) === 'number') {
                 var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
-                        start);
+                        arrowSpec.start);
                 arrowSpec.end = end;
             }
 
@@ -1147,7 +1146,20 @@ $3Dmol.GLShape = (function() {
 
         };
 
+
+        var distance_from= function(c1,c2){
+            return Math.sqrt(Math.pow((c1.x-c2.x),2)+Math.pow((c1.y-c2.y),2)+Math.pow((c1.z-c2.z),2));
+        };
         
+        var inSelectedRegion=function(coordinate,selectedRegion,radius){
+            
+            for(var i=0;i<selectedRegion.length;i++){
+                if(distance_from(selectedRegion[i],coordinate)<=radius)
+                    return true;
+            }
+            return false;
+        };
+                
         /**
          * Create isosurface from voluemetric data.
          * @function $3Dmol.GLShape#addIsosurface         
@@ -1235,7 +1247,7 @@ $3Dmol.GLShape = (function() {
                     ymin = volSpec.coords[0].y, 
                     zmin = volSpec.coords[0].z;
 
-                for (var i = 0; i < volSpec.coords.length; i++) {
+                for (let i = 0; i < volSpec.coords.length; i++) {
                     if (volSpec.coords[i].x > xmax)
                         xmax = volSpec.coords[i].x;
                     else if (volSpec.coords[i].x < xmin)
@@ -1269,14 +1281,14 @@ $3Dmol.GLShape = (function() {
                 zmax += rad;
 
                 // accounts for radius
-                for (var i = 0; i < verts.length; i++) {
-                    if (verts[i].x > xmin
-                            && verts[i].x < xmax
-                            && verts[i].y > ymin
-                            && verts[i].y < ymax
-                            && verts[i].z > zmin
-                            && verts[i].z < zmax
-                            && inSelectedRegion(verts[i],
+                for (let i = 0; i < verts.length; i++) {
+                    if (verts[i].x > xmin &&
+                            verts[i].x < xmax &&
+                            verts[i].y > ymin &&
+                            verts[i].y < ymax &&
+                            verts[i].z > zmin &&
+                            verts[i].z < zmax &&
+                            inSelectedRegion(verts[i],
                                     volSpec.coords, rad)) {
                         vertexmapping.push(newvertices.length);
                         newvertices.push(verts[i]);
@@ -1286,16 +1298,13 @@ $3Dmol.GLShape = (function() {
                     }
 
                 }
-                for (var i = 0; i + 2 < faces.length; i += 3) {
-                    if (vertexmapping[faces[i]] !== -1
-                            && vertexmapping[faces[i + 1]] !== -1
-                            && vertexmapping[faces[i + 2]] !== -1) {
-                        newfaces.push(faces[i]
-                                - (faces[i] - vertexmapping[faces[i]]));
-                        newfaces.push(faces[i + 1]
-                                - (faces[i + 1] - vertexmapping[faces[i + 1]]));
-                        newfaces.push(faces[i + 2]
-                                - (faces[i + 2] - vertexmapping[faces[i + 2]]));
+                for (let i = 0; i + 2 < faces.length; i += 3) {
+                    if (vertexmapping[faces[i]] !== -1 &&
+                            vertexmapping[faces[i + 1]] !== -1 &&
+                            vertexmapping[faces[i + 2]] !== -1) {
+                        newfaces.push(faces[i] - (faces[i] - vertexmapping[faces[i]]));
+                        newfaces.push(faces[i + 1] - (faces[i + 1] - vertexmapping[faces[i + 1]]));
+                        newfaces.push(faces[i + 2] - (faces[i + 2] - vertexmapping[faces[i + 2]]));
                     }
                 }
                 verts = newvertices;
@@ -1319,7 +1328,7 @@ $3Dmol.GLShape = (function() {
             var total = new $3Dmol.Vector3(0,0,0);
             var maxv = origin.clone();
             var minv = origin.clone().add(size);
-            for(var i = 0; i < verts.length; i++) {
+            for(let i = 0; i < verts.length; i++) {
                 total.add(verts[i]);
                 maxv.max(verts[i]);
                 minv.min(verts[i]);
@@ -1331,36 +1340,8 @@ $3Dmol.GLShape = (function() {
             this.boundingSphere.radius = Math.max(len1,len2);
             if(typeof callback =="function")
                 callback();
-          }
-        var inSelectedRegion=function(coordinate,selectedRegion,radius){
-            
-            for(var i=0;i<selectedRegion.length;i++){
-                if(distance_from(selectedRegion[i],coordinate)<=radius)
-                    return true;
-            }
-            return false;
-        }
-        var distance_from= function(c1,c2){
-            return Math.sqrt(Math.pow((c1.x-c2.x),2)+Math.pow((c1.y-c2.y),2)+Math.pow((c1.z-c2.z),2));
-        }
-        /**
-         * @deprecated unnecesary
-
-        */
-        var convert=function(i,j,k,data){
-            var pt;
-            if(data.matrix) {
-                pt = new $3Dmol.Vector3(i,j,k);
-                pt = pt.applyMatrix4(data.matrix);
-                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
-
-            } else {
-                pt.x = data.origin.x+data.unit.x*i;
-                pt.y = data.origin.y+data.unit.y*j;
-                pt.z = data.origin.z+data.unit.z*k;
-            }
-            return pt;
-        }
+          };        
+        
         /** 
          * @deprecated Use addIsosurface instead
          * Creates custom shape from volumetric data 
@@ -1370,7 +1351,7 @@ $3Dmol.GLShape = (function() {
          * @return {$3Dmol.GLShape}
          */
         this.addVolumetricData = function(data, fmt, volSpec) {
-            var data = new $3Dmol.VolumeData(data, fmt);
+            data = new $3Dmol.VolumeData(data, fmt);
             this.addIsosurface(data, volSpec);
         };
 
@@ -1378,7 +1359,7 @@ $3Dmol.GLShape = (function() {
         this.finalize = function() {
             finalizeGeo(geo);
             geo.initTypedArrays();
-        }
+        };
         
         /**
          * Initialize webgl objects for rendering
@@ -1406,6 +1387,7 @@ $3Dmol.GLShape = (function() {
 
             shapeObj = new $3Dmol.Object3D();
             var material = null;
+
             if(this.volumetricRenderer) {
                 var texture = new $3Dmol.Texture(this.volumetricdata, true);
                 var transferfn = new $3Dmol.Texture(this.transferfn, false);
@@ -1428,7 +1410,7 @@ $3Dmol.GLShape = (function() {
                     wireframeLinewidth: this.linewidth
                 });
             } else {
-                var material = new $3Dmol.MeshLambertMaterial({
+                material = new $3Dmol.MeshLambertMaterial({
                     wireframe : this.wireframe,
                     side : this.side,
                     transparent : (this.opacity < 1) ? true : false,
@@ -1467,7 +1449,7 @@ $3Dmol.GLShape = (function() {
             shapeObj = null;
         };
 
-    };
+    }
 
     Object.defineProperty(GLShape.prototype, "position", {
 
@@ -1509,45 +1491,43 @@ $3Dmol.ShapeIDCount = 0;
 
 
 $3Dmol.splitMesh = function(mesh) {
-	    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
+    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
     //peel off 64k vertices rsvh into their own mesh
     //duplicating vertices and normals as necessary to preserve faces and lines
-	
-        if(mesh.vertexArr.length < MAXVERT) return [mesh]; //typical case
-        
-        var nverts = mesh.vertexArr.length;
-        var slices = [{vertexArr: [], normalArr: [], faceArr: []}];
-        if(mesh.colorArr) slices.colorArr = [];
-        var vertSlice = []; //indexed by original vertex to get current slice
-        var vertIndex =[]; //indexed by original vertex to get index within slice
-        var currentSlice = 0;
-        
-        //for each face, make sure all three vertices (or copies) are in the same slice
-        var faces = mesh.faceArr;
-        var vs = [0,0,0];
-        for(var i = 0, nf = faces.length; i < nf; i += 3) {
-            var slice = slices[currentSlice];
-            for(var j = 0; j < 3; j++) {
-                //process each vertex to make sure it is assigned a slice
-                //all vertices of a face must belong to the same slice
-                var v = faces[i+j];
-                if(vertSlice[v] !== currentSlice) { //true if undefined
-                    vertSlice[v] = currentSlice;
-                    vertIndex[v] = slice.vertexArr.length;
-                    slice.vertexArr.push(mesh.vertexArr[v]);
-                    if(mesh.normalArr && mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
-                    if(mesh.colorArr && mesh.colorArr[v]) slice.colorArr.push(mesh.colorArr[v]);
-                }
-                slice.faceArr.push(vertIndex[v]);
+
+    if(mesh.vertexArr.length < MAXVERT) return [mesh]; //typical case
+    
+    var slices = [{vertexArr: [], normalArr: [], faceArr: []}];
+    if(mesh.colorArr) slices.colorArr = [];
+    var vertSlice = []; //indexed by original vertex to get current slice
+    var vertIndex =[]; //indexed by original vertex to get index within slice
+    var currentSlice = 0;
+    
+    //for each face, make sure all three vertices (or copies) are in the same slice
+    var faces = mesh.faceArr;
+    for(let i = 0, nf = faces.length; i < nf; i += 3) {
+        let slice = slices[currentSlice];
+        for(let j = 0; j < 3; j++) {
+            //process each vertex to make sure it is assigned a slice
+            //all vertices of a face must belong to the same slice
+            var v = faces[i+j];
+            if(vertSlice[v] !== currentSlice) { //true if undefined
+                vertSlice[v] = currentSlice;
+                vertIndex[v] = slice.vertexArr.length;
+                slice.vertexArr.push(mesh.vertexArr[v]);
+                if(mesh.normalArr && mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
+                if(mesh.colorArr && mesh.colorArr[v]) slice.colorArr.push(mesh.colorArr[v]);
             }
-            
-            if(slice.vertexArr.length >= MAXVERT) {
-                //new slice
-                slices.push({vertexArr: [], normalArr: [], faceArr: []});
-                if(mesh.colorArr) slices.colorArr = [];
-                currentSlice++;
-            }
+            slice.faceArr.push(vertIndex[v]);
         }
-        return slices;
+        
+        if(slice.vertexArr.length >= MAXVERT) {
+            //new slice
+            slices.push({vertexArr: [], normalArr: [], faceArr: []});
+            if(mesh.colorArr) slices.colorArr = [];
+            currentSlice++;
+        }
     }
+    return slices;
+};
 
