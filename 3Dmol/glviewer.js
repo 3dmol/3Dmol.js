@@ -878,7 +878,7 @@ $3Dmol.GLViewer = (function() {
             HEIGHT = container.height();
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
-            renderer.setFrameBufferSize(innerWidth, innerHeight);
+            renderer.setFrameBufferSize(window.innerWidth, window.innerHeight);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
             show();
@@ -2600,7 +2600,7 @@ $3Dmol.GLViewer = (function() {
                 seldist: 1.7
             });
          */
-        this.addVolumetricRenderer = function(data,  spec,callback) {            
+        this.addVolumetricRenderer = function(data,  spec) {            
             spec = spec || {};
             var s = new $3Dmol.GLShape();
             s.shapePosition = shapes.length;
@@ -2624,42 +2624,43 @@ $3Dmol.GLViewer = (function() {
             function interpolateArray(data, fitCount) {
                 function linearInterpolate(before, after, atPoint) {
                     return before + (after - before) * atPoint;
-                };
-                var newData = new Array();
-                var springFactor = new Number((data.length - 1) / (fitCount - 1));
+                }
+                var newData = [];
+                var springFactor = (data.length - 1) / (fitCount - 1);
                 newData[0] = data[0]; // for new allocation
                 for ( var i = 1; i < fitCount - 1; i++) {
                     var tmp = i * springFactor;
-                    var before = new Number(Math.floor(tmp)).toFixed();
-                    var after = new Number(Math.ceil(tmp)).toFixed();
+                    var before = (Math.floor(tmp)).toFixed();
+                    var after = (Math.ceil(tmp)).toFixed();
                     var atPoint = tmp - before;
                     newData[i] = linearInterpolate(data[before], data[after], atPoint);
                 }
                 newData[fitCount - 1] = data[data.length - 1]; // for new allocation
                 return newData;
-            };
+            }
             var transferfunctionbuffer = [];
             let max = -1000, min = 1000;
-            data.data.forEach(function (element, index, array) {
+            data.data.forEach(function (element) {
                 if (element > max) max = element;
                 if (element < min) min = element;
-            })
+            });
             // console.log(min, max)
             // arrange points based on position property
             s.transferfn.sort(function(a, b) { return a.pos - b.pos; });
             // fill min and max positions
             if (s.transferfn[0].pos != min) s.transferfn.unshift({Color: s.transferfn[0].Color, pos: min});
-            if (s.transferfn[s.transferfn.length-1].pos != max) s.transferfn.push({Color: s.transferfn[s.transferfn.length-1].Color, pos: max})
+            if (s.transferfn[s.transferfn.length-1].pos != max) s.transferfn.push({Color: s.transferfn[s.transferfn.length-1].Color, pos: max});
             // create and fill an array of interpolated values per 2 colors
-            for (var i = 0; i < s.transferfn.length-1; i++){
-                var color1 = hexToRgb(s.transferfn[i].Color), color2 = hexToRgb(s.transferfn[i+1].Color);
-                var pos1 = Math.floor( (s.transferfn[i].pos - min) * 256 / (max - min) )
-                var pos2 = Math.floor( (s.transferfn[i+1].pos-min) * 256 / (max - min) );
+            var pos1, pos2, color1, color2, R, G, B, A;
+            for (let i = 0; i < s.transferfn.length-1; i++){
+                color1 = hexToRgb(s.transferfn[i].Color); color2 = hexToRgb(s.transferfn[i+1].Color);
+                pos1 = Math.floor( (s.transferfn[i].pos - min) * 256 / (max - min) );
+                pos2 = Math.floor( (s.transferfn[i+1].pos-min) * 256 / (max - min) );
                 if (pos1 == pos2) continue;
-                var R = interpolateArray([color1.r, color2.r], pos2-pos1);
-                var G = interpolateArray([color1.g, color2.g], pos2-pos1);
-                var B = interpolateArray([color1.b, color2.b], pos2-pos1);
-                for (var j = 0; j < R.length; j++){
+                R = interpolateArray([color1.r, color2.r], pos2-pos1);
+                G = interpolateArray([color1.g, color2.g], pos2-pos1);
+                B = interpolateArray([color1.b, color2.b], pos2-pos1);
+                for (let j = 0; j < R.length; j++){
                     transferfunctionbuffer.push(R[j]);
                     transferfunctionbuffer.push(G[j]);
                     transferfunctionbuffer.push(B[j]);
@@ -2673,16 +2674,16 @@ $3Dmol.GLViewer = (function() {
             // arrange points based on position property
             spec.opacityfn.sort(function(a, b) { return a.pos - b.pos; });
             if (spec.opacityfn[0].pos != min) spec.opacityfn.unshift({opacity: spec.opacityfn[0].opacity, pos: min});
-            if (spec.opacityfn[spec.opacityfn.length-1].pos != max) spec.opacityfn.push({opacity: spec.opacityfn[spec.opacityfn.length-1].opacity, pos: max})
-            for (var i = 0; i < spec.opacityfn.length-1; i++){
-                var pos1 = Math.floor( (spec.opacityfn[i].pos - min) * 255 / (max - min) )
-                var pos2 = Math.floor( (spec.opacityfn[i+1].pos-min) * 255 / (max - min) );
-                var A = interpolateArray([spec.opacityfn[i].opacity, spec.opacityfn[i+1].opacity], pos2-pos1);                
+            if (spec.opacityfn[spec.opacityfn.length-1].pos != max) spec.opacityfn.push({opacity: spec.opacityfn[spec.opacityfn.length-1].opacity, pos: max});
+            for (let i = 0; i < spec.opacityfn.length-1; i++){
+                pos1 = Math.floor( (spec.opacityfn[i].pos - min) * 255 / (max - min) );
+                pos2 = Math.floor( (spec.opacityfn[i+1].pos-min) * 255 / (max - min) );
+                A = interpolateArray([spec.opacityfn[i].opacity, spec.opacityfn[i+1].opacity], pos2-pos1);                
                 if (pos1 == pos2) continue;
-                for (var j = 0; j < A.length; j++)
+                for (let j = 0; j < A.length; j++)
                     opacityfunctionbuffer.push(A[j] * 255); // alpha value from 0 to 255
             }
-            for (var i = 0; i < opacityfunctionbuffer.length; i++)
+            for (let i = 0; i < opacityfunctionbuffer.length; i++)
                 transferfunctionbuffer[i*4+3] = opacityfunctionbuffer[i];
             
             var canvas = document.createElement('canvas');
@@ -2691,7 +2692,7 @@ $3Dmol.GLViewer = (function() {
             var context = canvas.getContext('2d');
 
             transferfunctionbuffer = new Uint8ClampedArray(transferfunctionbuffer);
-            context.putImageData(new ImageData(transferfunctionbuffer, 256, 1),0,0);
+            context.putImageData(new window.ImageData(transferfunctionbuffer, 256, 1),0,0);
             s.transferfn = canvas;
 
             // volume selectivity based on given coords and distance
@@ -2701,9 +2702,9 @@ $3Dmol.GLViewer = (function() {
                 if (!data.matrix){
                     delta = data.unit; start = data.origin;
                 } else { // matrix overrides unit and origin transformations 
-                    var scaleX = Math.sqrt(Math.pow(data.matrix.elements[0], 2) + Math.pow(data.matrix.elements[4], 2) + Math.pow(data.matrix.elements[8], 2) ) 
-                    var scaleY = Math.sqrt(Math.pow(data.matrix.elements[1], 2) + Math.pow(data.matrix.elements[5], 2) + Math.pow(data.matrix.elements[9], 2) ) 
-                    var scaleZ = Math.sqrt(Math.pow(data.matrix.elements[2], 2) + Math.pow(data.matrix.elements[6], 2) + Math.pow(data.matrix.elements[10], 2) ) 
+                    var scaleX = Math.sqrt(Math.pow(data.matrix.elements[0], 2) + Math.pow(data.matrix.elements[4], 2) + Math.pow(data.matrix.elements[8], 2) );
+                    var scaleY = Math.sqrt(Math.pow(data.matrix.elements[1], 2) + Math.pow(data.matrix.elements[5], 2) + Math.pow(data.matrix.elements[9], 2) );
+                    var scaleZ = Math.sqrt(Math.pow(data.matrix.elements[2], 2) + Math.pow(data.matrix.elements[6], 2) + Math.pow(data.matrix.elements[10], 2) ); 
                     delta = new $3Dmol.Vector3(scaleX, scaleY, scaleZ);
                     start = $3Dmol.Vector3.prototype.getPositionFromMatrix(data.matrix);
                 }
@@ -2715,7 +2716,7 @@ $3Dmol.GLViewer = (function() {
                     scaledProduct.x = x * delta.x; scaledProduct.y = y * delta.y; scaledProduct.z = z * delta.z;
                     scaledProduct[0] = scaledProduct.x; scaledProduct[1] = scaledProduct.y; scaledProduct[2] = scaledProduct.z; 
                     if (data.dimensionorder){
-                        scaledProduct = [scaledProduct[data.dimensionorder[0]-1], scaledProduct[data.dimensionorder[1]-1], scaledProduct[data.dimensionorder[2]-1]]
+                        scaledProduct = [scaledProduct[data.dimensionorder[0]-1], scaledProduct[data.dimensionorder[1]-1], scaledProduct[data.dimensionorder[2]-1]];
                         scaledProduct.x = scaledProduct[0]; scaledProduct.y = scaledProduct[1]; scaledProduct.z = scaledProduct[2];
                     }
                     texelpos.x = start.x + scaledProduct.x; 

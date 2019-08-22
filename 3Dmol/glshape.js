@@ -1395,14 +1395,14 @@ $3Dmol.GLShape = (function() {
                 transferfn.needsUpdate = true;
                 transferfn.generateMipmaps = false;
                 transferfn.flipY = false;
-                var material = new $3Dmol.VolumetricMaterial({
+                material = new $3Dmol.VolumetricMaterial({
                     transferfn: transferfn,
                     opacity: this.opacity,  // TODO: needs to be opacityfn
                     map: texture
                 });
             } 
             else if(this.side == $3Dmol.DoubleSide) {
-                var material = new $3Dmol.MeshDoubleLambertMaterial({
+                material = new $3Dmol.MeshDoubleLambertMaterial({
                     wireframe : this.wireframe,
                     side : this.side,
                     transparent : (this.opacity < 1) ? true : false,
