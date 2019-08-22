@@ -2508,29 +2508,31 @@ $3Dmol.GLViewer = (function() {
          * Create volumetric renderer for volumetricData
          * @function $3Dmol.GLViewer#addVolumetricRenderer
          * @param {$3Dmol.VolumeData} data - volumetric data
-         * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
          * 
          @example 
-         $.get('../test_structs/benzene-homo.cube', function(data){
-                  var voldata = new $3Dmol.VolumeData(data, "cube");
-                  viewer.addVolumetricRenderer(voldata, {
-                        transferfn:{ 
-                            1:{Color: "red", pos: 0.0}, 
-                            2:{Color: "blue", pos: 1.0}
-                        },
-                        pos: {x:0,y:0,z:0}, 
-                        dimensions: {w: 1, h: 1, d: 1}
-                    });
-                  viewer.zoomTo();
-                  viewer.render();
-                });
+         viewer.addVolumetricRenderer(voldata, {
+                transferfn:[
+                    { Color: "#0000ff", pos: -0.2 },
+                    { Color: "#0000ff", pos: -0.005 }, 
+                    { Color: "#ff0000", pos: 0.005 }, 
+                    { Color: "#ff0000", pos: 0.2 },
+                ],
+                opacityfn:[
+                    { opacity: 1.0, pos: -0.2 },
+                    { opacity: 0, pos: -0.005 }, 
+                    { opacity: 0, pos: 0.005 }, 
+                    { opacity: 1.0, pos: 0.2 },
+                ],
+                coords: [{x: 0, y: 0, z: 0}], 
+                seldist: 1.7
+            });
          */
         this.addVolumetricRenderer = function(data,  spec,callback) {            
             spec = spec || {};
-            var s = new $3Dmol.GLShape(spec);
+            var s = new $3Dmol.GLShape();
             s.shapePosition = shapes.length;
-            s.transferfn = spec.transferfn;// || [ { Color: "#ff0000", pos: 0.0 }, { Color: "#0000ff", pos: 1.0 } ];
+            s.transferfn = spec.transferfn;
             s.addBox({corner: data.translationFromOrigin, dimensions: {w: 1, h: 1, d: 1}});
             s.volumetricRenderer = true;
             s.volumetricdata = data;
