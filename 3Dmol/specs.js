@@ -181,6 +181,15 @@
  */
 
 /**
+ * VolumetricRenderer style specification
+ * @typedef VolumetricRendererSpec
+ * @prop {list} transferfn - list of objects containing @Color and @pos properties to specify color per voxel data value
+ * @prop {list} opacityfn - list of objects containing @opacity and @pos properties to specify opacity per voxel data value
+ * @prop {list} coords - coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates
+ * @prop {number} seldist - distance around coords to include data [default = 2.0]
+ */
+
+/**
  * GLShape style specification
  * @typedef ShapeSpec
  * @prop {ColorSpec} color - solid color
