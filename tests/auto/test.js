@@ -104,7 +104,8 @@ $(document).ready(function(){
         c.width = w;
         c.height = h;
         var drawctx = c.getContext("2d");
-        var ctx3d = canvas.getContext("webgl");
+        var ctx3d = canvas.getContext("webgl2");
+        if (!ctx3d) ctx3d = canvas.getContext("webgl");
         const webglPixels = new Uint8Array(4 * w * h);
 
         //in what was probably a horrible design decision,
