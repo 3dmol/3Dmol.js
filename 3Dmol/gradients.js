@@ -6,7 +6,7 @@ var $3Dmol = $3Dmol || {};
  * @param {number} min
  * @param {number} max
  */
-$3Dmol.Gradient = function(min, max) {};
+$3Dmol.Gradient = function(/* min, max*/) {};
 
 /**
  * Map value to hex color
@@ -14,7 +14,7 @@ $3Dmol.Gradient = function(min, max) {};
  * @param {number} range
  * @returns {number}
  */
-$3Dmol.Gradient.valueToHex = function(val, range) {};
+$3Dmol.Gradient.valueToHex = function(/*val, range*/) {};
 //return range used for color mapping, null if none set
 $3Dmol.Gradient.range = function() {};
 
@@ -244,4 +244,4 @@ $3Dmol.Gradient.builtinGradients = {
     'rwb': $3Dmol.Gradient.RWB,
     'roygb': $3Dmol.Gradient.ROYGB,
     'sinebow': $3Dmol.Gradient.Sinebow
-}
+};

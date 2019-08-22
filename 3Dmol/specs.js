@@ -190,6 +190,7 @@
  * @prop {number} linewidth - width of line for wireframe rendering **No longer supported by most browsers**
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click
+ * @prop {number} frame - if set, only display in this frame of an animation
  */
 
 
@@ -280,4 +281,4 @@
 * @prop xyz XYZ cartesian coordinates format
 */
 
-});
+})();

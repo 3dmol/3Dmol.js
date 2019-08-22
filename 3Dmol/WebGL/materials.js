@@ -649,7 +649,7 @@ $3Dmol.SpriteMaterial.prototype.clone = function() {
     material.color.copy(this.color);
     material.map = this.map;
     
-    material.useScreenCoordinates = useScreenCoordinates;
+    material.useScreenCoordinates = this.useScreenCoordinates;
     material.sizeAttenuation = this.sizeAttenuation;
     material.scaleByViewport = this.scaleByViewPort;
     material.alignment.copy(this.alignment);
