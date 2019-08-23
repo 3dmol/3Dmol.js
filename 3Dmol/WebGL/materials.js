@@ -534,6 +534,76 @@ $3Dmol.InstancedMaterial.prototype.clone = function() {
 
 };
 
+var rearrangeVolumeData = function(material){
+    
+    // map the voxel data into the range 0->1 as it will be used to read from texture in frag shader
+    // and re-order texture axis (zyx-> xyz) as the output from the volumeData class is zyx
+    let max = -1000;
+    let min = 1000;
+    material.map.image.data.forEach(function (element) {
+        if (element > max) max = element;
+        if (element < min) min = element;
+    });
+    const scale = (num, in_min, in_max, out_min, out_max) => {
+        return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    };            
+    material.map.image.data.forEach(function (element, index, array) {
+        array[index] = scale(element, min, max, 0, 1); 
+    });
+    var majorindex = 0;
+    var dataarr = new Float32Array(material.map.image.data.length);
+	for (var z= 0; z < material.map.image.size.z; z++)
+	for (var y= 0; y < material.map.image.size.y; y++)
+	for (var x= 0; x < material.map.image.size.x; x++) {
+        var index = z + y * material.map.image.size.z + x * material.map.image.size.y * material.map.image.size.z;                
+        dataarr[majorindex] = material.map.image.data[index];
+        majorindex++;
+    }
+    material.map.image.data = dataarr;
+};
+
+//Volumetric material
+/** @constructor */
+$3Dmol.VolumetricMaterial = function(parameters) {
+    
+    $3Dmol.Material.call(this);
+    
+    this.opacity = 1;
+    this.transparent = true;
+
+    this.color = new $3Dmol.Color(0xffffff);
+    this.transferfn = null;
+    this.map = null;
+    this.volumetric = true;
+    this.depthTest = false;
+
+    // this.fog = true; // TODO: to integrate the new shader with the fog stuff
+    
+    this.shaderID = "volumetric";
+
+    this.setValues(parameters);
+    if (parameters) rearrangeVolumeData(this);
+};
+
+$3Dmol.VolumetricMaterial.prototype = Object.create($3Dmol.Material.prototype);
+
+$3Dmol.VolumetricMaterial.prototype.clone = function() {
+
+    var material = new $3Dmol.VolumetricMaterial();
+
+    $3Dmol.Material.prototype.clone.call(this, material);
+
+    material.opacity = this.opacity;
+    material.transparent = this.transparent;
+    material.color = this.color;
+    material.transferfn = this.transferfn;
+    material.shaderID = this.shaderID;
+    material.volumetric = this.volumetric;
+    material.map = this.map;
+
+    return material;
+
+};
 
 //Sprite material
 /** @constructor */
@@ -606,8 +676,9 @@ $3Dmol.SpriteAlignment.bottomRight = new $3Dmol.Vector2(-1, 1);
 
 //Texture
 //We really only create textures from 2d rendering contexts (to display text labels)
+//edit: we can now create 3dtextures using volumetric data
 /** @constructor */
-$3Dmol.Texture = function(image) {
+$3Dmol.Texture = function(image, is3D) {
 
     $3Dmol.EventDispatcher.call(this);
     
@@ -622,22 +693,37 @@ $3Dmol.Texture = function(image) {
     
     this.wrapS = $3Dmol.ClampToEdgeWrapping;
     this.wrapT = $3Dmol.ClampToEdgeWrapping;
-    
-    this.magFilter = $3Dmol.LinearFilter;
-    this.minFilter = $3Dmol.LinearMipMapLinearFilter;
-    
+        
     this.anisotropy = 1;
     
-    this.format = $3Dmol.RGBAFormat;
-    this.type = $3Dmol.UnsignedByteType;
-    
-    this.offset = new $3Dmol.Vector2(0, 0);
-    this.repeat = new $3Dmol.Vector2(1, 1);
-    
-    this.generateMipmaps = true;
-    this.premultiplyAlpha = false;
-    this.flipY = true;
-    this.unpackAlignment = 4;
+    if (is3D){
+        this.format = $3Dmol.RFormat;
+        this.type = $3Dmol.FloatType;
+
+        this.generateMipmaps = false;
+        this.premultiplyAlpha = false;
+        this.flipY = false;
+        
+        this.unpackAlignment = 1;    
+        
+        this.magFilter = $3Dmol.NearestFilter;
+        this.minFilter = $3Dmol.NearestFilter;
+    } else {
+        this.format = $3Dmol.RGBAFormat;
+        this.type = $3Dmol.UnsignedByteType;
+        
+        this.offset = new $3Dmol.Vector2(0, 0);
+        this.repeat = new $3Dmol.Vector2(1, 1);
+
+        this.generateMipmaps = true;
+        this.premultiplyAlpha = false;
+        this.flipY = true;
+        this.unpackAlignment = 4;    
+
+        this.magFilter = $3Dmol.LinearFilter;
+        this.minFilter = $3Dmol.LinearMipMapLinearFilter;    
+    }
+
     
     this.needsUpdate = false;
     this.onUpdate = null;
@@ -722,10 +808,14 @@ $3Dmol.ClampToEdgeWrapping = 1001;
 
 //Filters
 $3Dmol.LinearFilter = 1006;
+$3Dmol.NearestFilter = 1007;
 $3Dmol.LinearMipMapLinearFilter = 1008;
 
 //Data types
 $3Dmol.UnsignedByteType = 1009;
+$3Dmol.FloatType = 1010;
 
 //Pixel formats
 $3Dmol.RGBAFormat = 1021;
+$3Dmol.RFormat = 1022; 
+$3Dmol.R32Format = 1023;

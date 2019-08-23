@@ -889,6 +889,166 @@ $3Dmol.ShaderLib = {
             
         }
         
+    }, 
+    //raycasting volumetric rendering
+    'volumetric': {
+        fragmentShader: [
+            "uniform highp sampler3D volume;", 
+            "uniform highp sampler2D colormap;",
+            "uniform highp sampler2D depthmap;",
+            "uniform vec3 volume_dims;",
+            "uniform float dt_scale;",
+            "float depth;",
+
+            "uniform float opacity;",
+            "uniform vec3 fogColor;", // not used yet
+            "uniform float fogNear;", // not used yet
+            "uniform float fogFar;", // not used yet
+
+            "// inverse transformation for depth integration",
+            "uniform mat4 modelMatrix;",
+            "uniform mat4 viewMatrix;",
+            "uniform vec3 volume_scale;",
+            "uniform vec3 modelPos;",
+            "uniform vec2 screenCoords;",
+            "uniform float cameraNear;",
+            "uniform float cameraFar;",
+
+            "in vec3 vray_dir;",
+            "flat in vec3 transformed_eye;",
+            "out vec4 color;",
+
+            "vec2 intersect_box(vec3 orig, vec3 dir) {",
+            "    const vec3 box_min = vec3(0);",
+            "    const vec3 box_max = vec3(1);",
+            "    vec3 inv_dir = 1.0 / dir;",
+            "    vec3 tmin_tmp = (box_min - orig) * inv_dir;",
+            "    vec3 tmax_tmp = (box_max - orig) * inv_dir;",
+            "    vec3 tmin = min(tmin_tmp, tmax_tmp);",
+            "    vec3 tmax = max(tmin_tmp, tmax_tmp);",
+            "    float t0 = max(tmin.x, max(tmin.y, tmin.z));",
+            "    float t1 = min(tmax.x, min(tmax.y, tmax.z));",
+            "    return vec2(t0, t1);",
+            "}",
+
+            "// Pseudo-random number gen from",
+            "// http://www.reedbeta.com/blog/quick-and-easy-gpu-random-numbers-in-d3d11/",
+            "// with some tweaks for the range of values",
+            "float wang_hash(int seed) {",
+            "    seed = (seed ^ 61) ^ (seed >> 16);",
+            "    seed *= 9;",
+            "    seed = seed ^ (seed >> 4);",
+            "    seed *= 0x27d4eb2d;",
+            "    seed = seed ^ (seed >> 15);",
+            "    return float(seed % 2147483647) / float(2147483647);",
+            "}",
+
+            "void main(void) {",
+            "    vec3 ray_dir = normalize(vray_dir);",
+            "    vec2 t_hit = intersect_box(transformed_eye, ray_dir);",
+            "    if (t_hit.x > t_hit.y) {",
+            "        discard;",
+            "    }",
+            "    t_hit.x = max(t_hit.x, 0.0);",
+            "    // todo: the 1.5 value can be a value to control volume quality for low end devices",
+            "    vec3 dt_vec = 1.0 / (volume_dims * 1.5 * abs(ray_dir));", 
+            "    float dt = dt_scale * min(dt_vec.x, min(dt_vec.y, dt_vec.z));",
+            "    float offset = wang_hash(int(gl_FragCoord.x + 640.0 * gl_FragCoord.y));",
+            "    vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;",
+            
+            "    // depth is the value in the depthMap from the renderbuffer",
+            "    depth = texture(depthmap, vec2(gl_FragCoord.x/screenCoords.x, gl_FragCoord.y/screenCoords.y)).r;",
+            
+            "    for (float t = t_hit.x; t < t_hit.y; t += dt) {",
+            "        float val = texture(volume, p).r;",
+            "        vec4 val_color = texture(colormap, vec2(val, 0.5));",
+            "        val_color.a = val_color.a * opacity;",
+            "        // Opacity correction",
+            "        val_color.a = 1.0 - pow(1.0 - val_color.a, dt_scale);",
+            "        color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb;",
+            "        color.a += (1.0 - color.a) * val_color.a;",
+            "        if (color.a >= 0.95) {",
+            "            break;",
+            "        }",
+            "        p += ray_dir * dt;",
+            "        //transforming new point p from unit cube space to camera space to get its z value",
+            "        vec3 p_modelspace = (vec4(p * volume_scale + modelPos, 1.0)).xyz;", 
+            "        vec3 p_WorldSpace = (modelMatrix * vec4( (p_modelspace-modelPos) * volume_dims + modelPos, 1)).xyz;",
+            "        vec4 p_cameraSpace = viewMatrix * vec4(p_WorldSpace, 1);",
+            "        //mapping from camera space (near -> far) to screenspace (-1 -> 1) then to 0->1 from",
+            "        // https://en.wikipedia.org/wiki/Z-buffering with a minor edit",
+            "        float p_cameraSpace_perspective = ( (cameraFar+cameraNear)/(cameraFar+cameraNear) +", 
+            "                (2.0*cameraFar*cameraNear)/(p_cameraSpace.z* (cameraFar-cameraNear) ) ) * 0.5 + 0.5 ;",
+            "        if (p_cameraSpace_perspective > depth) break;",
+            "    }",
+            "}"
+
+        ].join("\n"),
+
+        vertexShader: [
+            "layout(location=0) in vec3 position;",
+            "uniform vec3 eye_pos;",
+            "uniform vec3 volume_scale;",
+            "uniform vec3 volume_dims;", 
+
+            "uniform mat4 modelMatrix;",
+            "uniform mat4 modelMatrixInverse;",
+            "uniform vec3 modelPos;",
+            "uniform mat4 projectionMatrix;",
+            "uniform mat4 viewMatrix;",
+            
+            "flat out vec3 transformed_eye;",
+            "out vec3 vray_dir;",
+            "vec3 positionWorldSpace;",
+
+            "void main(void) {",
+            "    // eye position in unit cube space for non uniform dimensions (should divide by scale) (scale here between 0 and 1) ",
+            "    // modelMatrix and ModelMatrixInverse don't include the scaling vector so as to not scaele the eye_pos",
+            "    transformed_eye = ((modelMatrixInverse * vec4(eye_pos, 1)).xyz - modelPos) / volume_scale.xyz;", 
+            
+            "    // model translation is embedded into the vertex position so it is subtracted before getting the ray vector",
+            "    vray_dir = (position - modelPos) - transformed_eye;", 
+            
+            "    // same here, translation is subtracted before multiplying by scale to keep transformations order correct",
+            "    positionWorldSpace = (modelMatrix * vec4( (position-modelPos) * volume_dims.xyz + modelPos, 1)).xyz;",
+            "    gl_Position = projectionMatrix * viewMatrix * vec4(positionWorldSpace, 1);", 
+            "}"
+        ].join("\n"),
+
+        uniforms: {
+            opacity: { type: 'f', value: 1.0 },
+            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogNear: { type: 'f', value: 1.0 },
+            fogFar: { type: 'f', value: 2000},
+            volume: { type: 'i', value: 3 },
+            colormap: { type: 'i', value: 4 },
+            depthmap: { type: 'i', value: 5 },
+            dt_scale: { type: 'f', value: 1.0 }
+        }
+    },
+    // screen shader
+    'screen': {
+        fragmentShader: [
+            "uniform sampler2D colormap;",
+            "varying highp vec2 vTexCoords;",
+            "void main (void) {",
+            "   gl_FragColor = texture2D(colormap, vTexCoords);",
+            "}"
+        ].join("\n"),
+
+        vertexShader: [
+            'attribute vec2 vertexPosition;',
+            'varying highp vec2 vTexCoords;',
+            'const vec2 scale = vec2(0.5, 0.5);',
+
+            'void main() {',
+            '   vTexCoords  = vertexPosition * scale + scale; // scale vertex attribute to [0,1] range',
+            '   gl_Position = vec4(vertexPosition, 0.0, 1.0);',
+            '}'
+        ].join("\n"),
+
+        uniforms: {
+        }
     }
     
 };
