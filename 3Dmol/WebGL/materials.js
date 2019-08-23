@@ -540,15 +540,15 @@ var rearrangeVolumeData = function(material){
     // and re-order texture axis (zyx-> xyz) as the output from the volumeData class is zyx
     let max = -1000;
     let min = 1000;
-    material.map.image.data.forEach(function (element, index, array) {
+    material.map.image.data.forEach(function (element) {
         if (element > max) max = element;
         if (element < min) min = element;
-    })
+    });
     const scale = (num, in_min, in_max, out_min, out_max) => {
         return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-    }              
+    };            
     material.map.image.data.forEach(function (element, index, array) {
-        array[index] = scale(element, min, max, 0, 1)  
+        array[index] = scale(element, min, max, 0, 1); 
     });
     var majorindex = 0;
     var dataarr = new Float32Array(material.map.image.data.length);
@@ -560,7 +560,7 @@ var rearrangeVolumeData = function(material){
         majorindex++;
     }
     material.map.image.data = dataarr;
-}
+};
 
 //Volumetric material
 /** @constructor */

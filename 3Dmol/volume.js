@@ -215,7 +215,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
         this.origin = new $3Dmol.Vector3(0,0,0);
         this.unit = new $3Dmol.Vector3(1,1,1);
         var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
-        this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}  
+        this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z};
     }
 
 
@@ -311,8 +311,8 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
     raw = raw.split(/[\s\r]+/);
     this.data = new Float32Array(raw);
     var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
-    this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}
-}
+    this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z};
+};
 
 // parse cube data
 $3Dmol.VolumeData.prototype.cube = function(str) {
@@ -372,7 +372,7 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
         this.origin = new $3Dmol.Vector3(0,0,0);
         this.unit = new $3Dmol.Vector3(1,1,1);
         var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
-        this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}  
+        this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}; 
     }
     
     var headerlines = 6;
@@ -383,7 +383,7 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
     this.data = new Float32Array(raw);
 
 
-    this.translationFromOrigin = {x:  origin.x, y:origin.y, z: origin.z }
+    this.translationFromOrigin = {x:  origin.x, y:origin.y, z: origin.z };
 
 };
 
@@ -569,7 +569,7 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
       this.unit = new $3Dmol.Vector3(1,1,1); 
       this.size = {x:header.NX, y:header.NY, z:header.NZ};
       var matrixPosition = $3Dmol.Vector3.prototype.getPositionFromMatrix(this.matrix);
-      this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z}
+      this.translationFromOrigin = {x: matrixPosition.x, y: matrixPosition.y, z: matrixPosition.z};
       this.dimensionorder = [header.MAPC, header.MAPR, header.MAPS];
       var data = new Float32Array(bin.buffer, 1024 + header.NSYMBT);
       //data must by (slowest changing) x,y,z (fastest changing)

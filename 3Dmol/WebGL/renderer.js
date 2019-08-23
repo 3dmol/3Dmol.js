@@ -70,12 +70,11 @@ $3Dmol.Renderer = function(parameters) {
 
     // internal properties
     var _this = this,
-    _programs = [], _programs_counter = 0;
+    _programs = [], _programs_counter = 0,
     
     // internal state cache
-    _currentProgram = null;
-    _currentFramebuffer = null, _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
-    _usedTextureUnits = 0,
+    _currentProgram = null,
+    _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
       
     // GL state cache
     _oldDoubleSided = -1, _oldFlipSided = -1,
@@ -247,9 +246,9 @@ $3Dmol.Renderer = function(parameters) {
 		_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
                 
         this.offscreen.targetTexture = targetTexture;
-        this.offscreen.fb = fb,
+        this.offscreen.fb = fb;
         this.offscreen.depthTexture = depthTexture;
-    }
+    };
 
     this.clear = function(color, depth, stencil) {
 
@@ -308,7 +307,7 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
-        _gl.cullFace(_gl.BACK)  // fix, will this ruin anything? 
+        _gl.cullFace(_gl.BACK); 
 
         if (material.volumetric){
             _gl.enable(_gl.CULL_FACE);
@@ -637,7 +636,7 @@ $3Dmol.Renderer = function(parameters) {
         // check if program requires webgl2
         if (_gl.getParameter(_gl.VERSION)[6] != "2"){
             if (parameters.volumetric) 
-                throw new Error("Volumetric rendering requires webgl2 which is not supported by your hardware.")
+                throw new Error("Volumetric rendering requires webgl2 which is not supported by your hardware.");
         }
 
 
@@ -851,18 +850,19 @@ $3Dmol.Renderer = function(parameters) {
                 var longestAxis = Math.max(material.map.image.size.x, Math.max(material.map.image.size.y, material.map.image.size.z));
                 var volScale = [material.map.image.size.x / longestAxis, material.map.image.size.y / longestAxis, material.map.image.size.z / longestAxis];
                 // if volData has matrix, then it overrides size and unit scale, and translation is separate anyway
+                var volDims;
                 if (material.map.image.matrix){
-                    var scaleX = Math.sqrt(Math.pow(material.map.image.matrix.elements[0], 2) + Math.pow(material.map.image.matrix.elements[4], 2) + Math.pow(material.map.image.matrix.elements[8], 2) ) 
-                    var scaleY = Math.sqrt(Math.pow(material.map.image.matrix.elements[1], 2) + Math.pow(material.map.image.matrix.elements[5], 2) + Math.pow(material.map.image.matrix.elements[9], 2) ) 
-                    var scaleZ = Math.sqrt(Math.pow(material.map.image.matrix.elements[2], 2) + Math.pow(material.map.image.matrix.elements[6], 2) + Math.pow(material.map.image.matrix.elements[10], 2) ) 
-                    var volDims = [material.map.image.size.x * scaleX, 
+                    var scaleX = Math.sqrt(Math.pow(material.map.image.matrix.elements[0], 2) + Math.pow(material.map.image.matrix.elements[4], 2) + Math.pow(material.map.image.matrix.elements[8], 2) );
+                    var scaleY = Math.sqrt(Math.pow(material.map.image.matrix.elements[1], 2) + Math.pow(material.map.image.matrix.elements[5], 2) + Math.pow(material.map.image.matrix.elements[9], 2) );
+                    var scaleZ = Math.sqrt(Math.pow(material.map.image.matrix.elements[2], 2) + Math.pow(material.map.image.matrix.elements[6], 2) + Math.pow(material.map.image.matrix.elements[10], 2) ); 
+                    volDims = [material.map.image.size.x * scaleX, 
                         material.map.image.size.y * scaleY, 
                         material.map.image.size.z * scaleZ]; 
                     // ccp4 have a property that can change the dimensions order  
                     if (material.map.image.dimensionorder)
-                        volDims = [volDims[material.map.image.dimensionorder[0]-1], volDims[material.map.image.dimensionorder[1]-1], volDims[material.map.image.dimensionorder[2]-1]]
+                        volDims = [volDims[material.map.image.dimensionorder[0]-1], volDims[material.map.image.dimensionorder[1]-1], volDims[material.map.image.dimensionorder[2]-1]];
                 } else {
-                    var volDims = [material.map.image.size.x * material.map.image.unit.x, 
+                    volDims = [material.map.image.size.x * material.map.image.unit.x, 
                         material.map.image.size.y * material.map.image.unit.y, 
                         material.map.image.size.z * material.map.image.unit.z];
                 }
@@ -870,7 +870,7 @@ $3Dmol.Renderer = function(parameters) {
                 _gl.uniform3fv(p_uniforms.volScale, volScale);
                 p_uniforms.volDims = _gl.getUniformLocation(program, "volume_dims");
                 _gl.uniform3fv(p_uniforms.volDims, volDims);
-                _gl.uniform2fv(_gl.getUniformLocation(program, "screenCoords"), [innerWidth, innerHeight]);
+                _gl.uniform2fv(_gl.getUniformLocation(program, "screenCoords"), [window.innerWidth, window.innerHeight]);
                 _gl.uniform1f(_gl.getUniformLocation(program, "cameraNear"), camera.near);
                 _gl.uniform1f(_gl.getUniformLocation(program, "cameraFar"), camera.far);
 
@@ -1331,7 +1331,7 @@ $3Dmol.Renderer = function(parameters) {
 
         // then set the offscreenframebuffer again here!?
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, this.offscreen.fb);
-    }
+    };
 
     this.initWebGLObjects = function(scene) {
 
@@ -1904,7 +1904,7 @@ $3Dmol.Renderer = function(parameters) {
 
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, innerWidth, innerHeight, 0,
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, window.innerWidth, window.innerHeight, 0,
                 _gl.RGBA, _gl.UNSIGNED_BYTE, null);
 	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
 	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
@@ -1917,7 +1917,7 @@ $3Dmol.Renderer = function(parameters) {
 		// i mean it can't be left out here that easily
 		var depthTexture = _gl.createTexture();
 		_gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
-		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, innerWidth, innerHeight, 0,
+		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, window.innerWidth, window.innerHeight, 0,
 				_gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
 		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
 		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
@@ -1931,7 +1931,7 @@ $3Dmol.Renderer = function(parameters) {
 				_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
 					
         // build screenshader
-        var screenshader = $3Dmol.ShaderLib['screen'];
+        var screenshader = $3Dmol.ShaderLib.screen;
         screenshader = buildProgram(screenshader.fragmentShader,
             screenshader.vertexShader, screenshader.uniforms, {});  
         var vertexattribpos = _gl.getAttribLocation(screenshader, 'vertexPosition');
@@ -1958,7 +1958,7 @@ $3Dmol.Renderer = function(parameters) {
             screenshader: screenshader,
             screenQuadVBO: screenQuadVBO,
             vertexattribpos: vertexattribpos
-        }
+        };
     }
 
     function setDefaultGLState() {
