@@ -87,7 +87,9 @@ $3Dmol.GLViewer = (function() {
             col:config.col,
             rows:config.rows,
             cols:config.cols,
-            canvas:config.canvas
+            canvas:config.canvas,
+            containerWidth:WIDTH,
+            containerHeight:HEIGHT
         });
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
@@ -878,7 +880,7 @@ $3Dmol.GLViewer = (function() {
             HEIGHT = container.height();
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
-            renderer.setFrameBufferSize(window.innerWidth, window.innerHeight);
+            renderer.setFrameBufferSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
             show();

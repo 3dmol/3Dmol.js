@@ -129,7 +129,7 @@ $3Dmol.Renderer = function(parameters) {
     var _gl;
 
     initGL();
-    this.offscreen = initOffScreenRender();
+    this.offscreen = initOffScreenRender(parameters.containerWidth, parameters.containerHeight);
     setDefaultGLState();
 
     this.context = _gl;
@@ -1898,13 +1898,13 @@ $3Dmol.Renderer = function(parameters) {
         }
     }
 
-    function initOffScreenRender(){
+    function initOffScreenRender(width, height){
         // only needed/works with webgl2
         if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
 
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, window.innerWidth, window.innerHeight, 0,
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0,
                 _gl.RGBA, _gl.UNSIGNED_BYTE, null);
 	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
 	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
@@ -1917,7 +1917,7 @@ $3Dmol.Renderer = function(parameters) {
 		// i mean it can't be left out here that easily
 		var depthTexture = _gl.createTexture();
 		_gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
-		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, window.innerWidth, window.innerHeight, 0,
+		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, width, height, 0,
 				_gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
 		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
 		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
