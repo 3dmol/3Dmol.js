@@ -112,6 +112,7 @@ $.ajaxTransport(
  @function $3Dmol.createViewer
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer specification
+ * @param {Object} shared_viewer_resources shared resources between viewers' renderers
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
  * @example
    var viewer = $3Dmol.createViewer(
@@ -123,17 +124,18 @@ $.ajaxTransport(
    );
  *                        
  */
-$3Dmol.createViewer = function(element, config)
+$3Dmol.createViewer = function(element, config, shared_viewer_resources)
 {
     if($.type(element) === "string")
         element = $("#"+element);
     if(!element) return;
 
     config = config || {}; 
+    shared_viewer_resources = shared_viewer_resources || {};
 
     //try to create the  viewer
     try {
-        return new $3Dmol.GLViewer(element, config);
+        return new $3Dmol.GLViewer(element, config, shared_viewer_resources);
     }
     catch(e) {
         throw "error creating viewer: "+e;
@@ -197,7 +199,8 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
     viewer_config = viewer_config || {};
     
     var viewers = [];
-
+    // create a shared object between viewers to share resources created if needed in other viewers
+    var shared_viewer_resources = {};
     //create canvas
     var canvas = document.createElement('canvas');
 
@@ -216,7 +219,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
           viewer_config.canvas = canvas;
           viewer_config.viewers = viewers;
           viewer_config.control_all = config.control_all;
-          var viewer = $3Dmol.createViewer(element, viewer_config);
+          var viewer = $3Dmol.createViewer(element, viewer_config, shared_viewer_resources);
           row.push(viewer);
         }
         viewers.unshift(row); //compensate for weird ordering in renderer

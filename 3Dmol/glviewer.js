@@ -31,7 +31,7 @@ $3Dmol.GLViewer = (function() {
 
     // private class helper functions
 
-    function GLViewer(element, config) { 
+    function GLViewer(element, config, shared_viewer_resources) { 
         // set variables
         config = config || {};
         var callback = config.callback;
@@ -89,7 +89,8 @@ $3Dmol.GLViewer = (function() {
             cols:config.cols,
             canvas:config.canvas,
             containerWidth:WIDTH,
-            containerHeight:HEIGHT
+            containerHeight:HEIGHT,
+            sharedResources: shared_viewer_resources
         });
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
@@ -98,7 +99,18 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.top = "0px";
         renderer.domElement.style.left = "0px";
         renderer.domElement.style.zIndex = "0";
-
+        
+        // shared viewer resources is set here to be used in the next time this function is called 
+        // if there are more than one viewer, to share data among them
+        if (renderer.offscreen){
+        shared_viewer_resources.targetTexture = renderer.offscreen.targetTexture;
+        shared_viewer_resources.fb = renderer.offscreen.fb;
+        shared_viewer_resources.depthTexture = renderer.offscreen.depthTexture;
+        shared_viewer_resources.screenshader = renderer.offscreen.screenshader;
+        shared_viewer_resources.screenQuadVBO = renderer.offscreen.screenQuadVBO;
+        shared_viewer_resources.vertexattribpos = renderer.offscreen.vertexattribpos;
+        }
+        
         var row = config.row;
         var col = config.col;
         var cols = config.cols;

@@ -33,7 +33,7 @@ $$$$
         </textarea>
 */
 
-$.get('../test_structs/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
+$.get('data/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
     var voldata = new $3Dmol.VolumeData(data, "cube");
     viewer.addVolumetricRenderer(voldata, {
         transferfn:[
