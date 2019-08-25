@@ -129,7 +129,9 @@ $3Dmol.Renderer = function(parameters) {
     var _gl;
 
     initGL();
-    this.offscreen = initOffScreenRender(parameters.containerWidth, parameters.containerHeight);
+    // if shared resources is not empty object, use its shared buffers, else, create new
+    if (Object.getOwnPropertyNames(parameters.sharedResources).length != 0) this.offscreen = parameters.sharedResources;
+    else this.offscreen = initOffScreenRender(parameters.containerWidth, parameters.containerHeight);
     setDefaultGLState();
 
     this.context = _gl;
@@ -870,7 +872,7 @@ $3Dmol.Renderer = function(parameters) {
                 _gl.uniform3fv(p_uniforms.volScale, volScale);
                 p_uniforms.volDims = _gl.getUniformLocation(program, "volume_dims");
                 _gl.uniform3fv(p_uniforms.volDims, volDims);
-                _gl.uniform2fv(_gl.getUniformLocation(program, "screenCoords"), [window.innerWidth, window.innerHeight]);
+                _gl.uniform2fv(_gl.getUniformLocation(program, "screenCoords"), [_gl.canvas.width, _gl.canvas.height]);
                 _gl.uniform1f(_gl.getUniformLocation(program, "cameraNear"), camera.near);
                 _gl.uniform1f(_gl.getUniformLocation(program, "cameraFar"), camera.far);
 
@@ -1322,6 +1324,9 @@ $3Dmol.Renderer = function(parameters) {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.offscreen.screenQuadVBO);
         _gl.enableVertexAttribArray(this.offscreen.vertexattribpos);
         _gl.vertexAttribPointer(this.offscreen.vertexattribpos, 2, _gl.FLOAT, false, 0, 0);
+
+        _gl.disable(_gl.SCISSOR_TEST);
+		_gl.viewport(0 , 0, _gl.canvas.width, _gl.canvas.height);
 
         _gl.activeTexture(_gl.TEXTURE0);
         _gl.bindTexture(_gl.TEXTURE_2D, this.offscreen.targetTexture);
