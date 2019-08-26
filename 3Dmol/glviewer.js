@@ -892,7 +892,6 @@ $3Dmol.GLViewer = (function() {
             HEIGHT = container.height();
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
-            renderer.setFrameBufferSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
             show();
@@ -2564,7 +2563,7 @@ $3Dmol.GLViewer = (function() {
         
         /**
          * Construct isosurface from volumetric data.  This is more flexible
-	 * than addVolumetricData, but can not be used with py3Dmol.
+     * than addVolumetricData, but can not be used with py3Dmol.
          * @function $3Dmol.GLViewer#addIsosurface
          * @param {$3Dmol.VolumeData} data - volumetric data
          * @param {IsoSurfaceSpec} spec - Shape style specification
