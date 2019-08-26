@@ -213,10 +213,12 @@ $3Dmol.Renderer = function(parameters) {
 
             _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
         }
+    };
 
+    this.setFrameBufferSize = function(width, height){
         // this part is only needed/works with webgl2
         if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
-        
+            
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width * this.devicePixelRatio, 
@@ -1313,7 +1315,9 @@ $3Dmol.Renderer = function(parameters) {
         // set screen shader and use it
         _gl.useProgram(this.offscreen.screenshader);
         _currentProgram = this.offscreen.screenshader;
-        
+        _gl.uniform2fv(_gl.getUniformLocation(_currentProgram, "dimensions"), 
+            [_gl.canvas.width, _gl.canvas.height]);
+
         // disable depth test
         this.setDepthTest(-1);
         this.setDepthWrite(-1);
