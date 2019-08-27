@@ -216,36 +216,36 @@ $3Dmol.Renderer = function(parameters) {
     };
 
     this.setFrameBufferSize = function(width, height){
-        // only needed/works with webgl2
+        // this part is only needed/works with webgl2
         if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
-        
+            
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0,
-                _gl.RGBA, _gl.UNSIGNED_BYTE, null);
-	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
-	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width * this.devicePixelRatio, 
+            height * this.devicePixelRatio, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, null);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
 
-		// IMP: this requires an extension in webgl1, so if 2 is not available
-		// i'll have to not render to framebuffer at all and normally render to screen
-		// as it will already be of no use without the volumetric renderer
-		// i mean it can't be left out here that easily
-		var depthTexture = _gl.createTexture();
-		_gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
-		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, width, height, 0,
-				_gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+        // IMP: this requires an extension in webgl1, so if 2 is not available
+        // i'll have to not render to framebuffer at all and normally render to screen
+        // as it will already be of no use without the volumetric renderer
+        // i mean it can't be left out here that easily
+        var depthTexture = _gl.createTexture();
+        _gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, width * this.devicePixelRatio, 
+            height * this.devicePixelRatio, 0, _gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
 
         // Create and bind the framebuffer
         var fb = _gl.createFramebuffer();
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, fb);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, targetTexture, 0);
-		_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
+        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
                 
         this.offscreen.targetTexture = targetTexture;
         this.offscreen.fb = fb;
@@ -1315,10 +1315,12 @@ $3Dmol.Renderer = function(parameters) {
         // set screen shader and use it
         _gl.useProgram(this.offscreen.screenshader);
         _currentProgram = this.offscreen.screenshader;
-        
+        _gl.uniform2fv(_gl.getUniformLocation(_currentProgram, "dimensions"), 
+            [_gl.canvas.width, _gl.canvas.height]);
+
         // disable depth test
         this.setDepthTest(-1);
-		this.setDepthWrite(-1);
+        this.setDepthWrite(-1);
 
         // bind vertexarray buffer and texture
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.offscreen.screenQuadVBO);
@@ -1326,7 +1328,7 @@ $3Dmol.Renderer = function(parameters) {
         _gl.vertexAttribPointer(this.offscreen.vertexattribpos, 2, _gl.FLOAT, false, 0, 0);
 
         _gl.disable(_gl.SCISSOR_TEST);
-		_gl.viewport(0 , 0, _gl.canvas.width, _gl.canvas.height);
+        _gl.viewport(0 , 0, _gl.canvas.width, _gl.canvas.height);
 
         _gl.activeTexture(_gl.TEXTURE0);
         _gl.bindTexture(_gl.TEXTURE_2D, this.offscreen.targetTexture);
@@ -1909,32 +1911,32 @@ $3Dmol.Renderer = function(parameters) {
 
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0,
-                _gl.RGBA, _gl.UNSIGNED_BYTE, null);
-	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
-	    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width * this.devicePixelRatio, 
+            height * this.devicePixelRatio, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, null);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
 
-		// IMP: this requires an extension in webgl1, so if 2 is not available
-		// i'll have to not render to framebuffer at all and normally render to screen
-		// as it will already be of no use without the volumetric renderer
-		// i mean it can't be left out here that easily
-		var depthTexture = _gl.createTexture();
-		_gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
-		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, width, height, 0,
-				_gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+        // IMP: this requires an extension in webgl1, so if 2 is not available
+        // i'll have to not render to framebuffer at all and normally render to screen
+        // as it will already be of no use without the volumetric renderer
+        // i mean it can't be left out here that easily
+        var depthTexture = _gl.createTexture();
+        _gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, width * this.devicePixelRatio, 
+            height * this.devicePixelRatio, 0, _gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
 
         // Create and bind the framebuffer
         var fb = _gl.createFramebuffer();
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, fb);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, targetTexture, 0);
-				_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
-					
+                _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
+                    
         // build screenshader
         var screenshader = $3Dmol.ShaderLib.screen;
         screenshader = buildProgram(screenshader.fragmentShader,

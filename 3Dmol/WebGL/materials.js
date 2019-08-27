@@ -552,9 +552,9 @@ var rearrangeVolumeData = function(material){
     });
     var majorindex = 0;
     var dataarr = new Float32Array(material.map.image.data.length);
-	for (var z= 0; z < material.map.image.size.z; z++)
-	for (var y= 0; y < material.map.image.size.y; y++)
-	for (var x= 0; x < material.map.image.size.x; x++) {
+    for (var z= 0; z < material.map.image.size.z; z++)
+    for (var y= 0; y < material.map.image.size.y; y++)
+    for (var x= 0; x < material.map.image.size.x; x++) {
         var index = z + y * material.map.image.size.z + x * material.map.image.size.y * material.map.image.size.z;                
         dataarr[majorindex] = material.map.image.data[index];
         majorindex++;

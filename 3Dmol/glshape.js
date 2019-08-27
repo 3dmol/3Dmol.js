@@ -881,7 +881,7 @@ $3Dmol.GLShape = (function() {
                     cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
             var end = new $3Dmol.Vector3(cylinderSpec.end.x,
                     cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
-        	if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
+            if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
 
             var radius = cylinderSpec.radius || 0.1;
             var color = $3Dmol.CC.color(cylinderSpec.color);
@@ -1123,7 +1123,7 @@ $3Dmol.GLShape = (function() {
             else {
                 arrowSpec.end = new $3Dmol.Vector3(arrowSpec.end.x,
                         arrowSpec.end.y || 0, arrowSpec.end.z || 0);
-            	if(typeof(arrowSpec.end.x) == 'undefined') arrowSpec.end.x = 3; //show something even if undefined
+                if(typeof(arrowSpec.end.x) == 'undefined') arrowSpec.end.x = 3; //show something even if undefined
             }
 
             arrowSpec.radius = arrowSpec.radius || 0.1;
