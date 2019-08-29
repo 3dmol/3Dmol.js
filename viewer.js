@@ -565,7 +565,7 @@ var urlToQuery = function(url){
     function stringType(string){
         if(string ==  "select")
             return "select"
-        else if(string =="pdb" || string == "cid" || string == "url")
+        else if(string =="pdb" || string == "cid" || string == "url" || string =='opm')
             return "file"
         else if(string == "style" || string == "surface" || string == "labelres"){
             count++;
@@ -854,12 +854,12 @@ var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
         $("#sidenav").css("width",width+"px");
-        $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#vrmlExport').css("display","inline")
+        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#vrmlExport').css("display","inline")
         glviewer.translate(width/2,0,400,false);
         glviewer.render();
     }else{
         $("#sidenav").css("width","0");
-        $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#header,#vrmlExport').css("display","none")
+        $('#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#header,#vrmlExport').css("display","none")
         $("#menu").css("display","inline");
         width = $("#sidenav").width();
         glviewer.translate(-width/2,0,400,false);
@@ -943,6 +943,17 @@ function run() {
                 data = "http://files.rcsb.org/view/" + data
                         + ".pdb";
                 type = "pdb";
+            }else if(src=='opm'){
+                console.log(data)
+                data = data.toLowerCase();
+                if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                    return;
+                }
+                data = "https://opm-assets.storage.googleapis.com/pdb/" + data
+                + ".pdb";
+                type = "pdb";
+                glviewer.setStyle({},{sphere:{}});
+
             } if (src == 'cif') {
                 data = data.toUpperCase();
                 if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
@@ -1057,7 +1068,7 @@ function run() {
 
 $(document).ready(function(){
     var url=window.location.href.substring(window.location.href.indexOf("?")+1);
-    initSessions(); 
+    // initSessions(); 
     
     run();
     var start_width;
