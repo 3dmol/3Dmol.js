@@ -8,12 +8,13 @@ $3Dmol.Session = function (hostname) {
     this.state = null; //Stores the current state
     this.view = null; //Stores the current view
     this.viewer = null;
-
+    this.count = 0;
     var clicked_labels = []; // Contains the List of all the clicked labels
     var current_hover_label = null; // The current label displayed on hover
 
 
     var viewChangeCallback = function (new_view) {
+        console.log(new_view);
         socket.emit('viewer view change event', {
             name: this.name,
             view: new_view
@@ -35,6 +36,16 @@ $3Dmol.Session = function (hostname) {
     var unregisterCallbacks = function (viewer) {
         viewer.setViewChangeCallback(null);
         viewer.setViewChangeCallback(null);
+    };
+    var registerResponses = function (viewer) {
+        socket.on('viewer view change response', function (new_view) {
+            console.log(new_view);
+            viewer.setView(new_view);
+        });
+
+        socket.on('viewer state change response', function (new_state) {
+            viewer.setInternalState(new_state);
+        });
     };
     //Clears the labels clicked or the one which is on hover (query labels)
     var clearQueryLabels = function (viewer) {
@@ -148,15 +159,15 @@ $3Dmol.Session = function (hostname) {
     };
 
     /**
-         * Connect to the server located at the session's hostname by creating a socket.
-        *  @function $3Dmol.Session#connect
-        * @return {Promise} promise - Returns a promise that resolves to the socket, and on error rejects to the error.
-        * @example
-        * var session = new $3Dmol.Session("localhost");
-        * session.connect()
-        *       .then((socket)=>console.log("Connected at socket", socket))
-        *       .catch((Error)=>console.log("Cannot Connect", Error));    
-         */
+     * Connect to the server located at the session's hostname by creating a socket.
+     *  @function $3Dmol.Session#connect
+     * @return {Promise} promise - Returns a promise that resolves to the socket, and on error rejects to the error.
+     * @example
+     * var session = new $3Dmol.Session("localhost");
+     * session.connect()
+     *       .then((socket)=>console.log("Connected at socket", socket))
+     *       .catch((Error)=>console.log("Cannot Connect", Error));    
+     */
     this.connect = function () {
         // console.log(this.viewer);
         //webserver needs to have appropriate rules to forward to flask
@@ -185,18 +196,18 @@ $3Dmol.Session = function (hostname) {
     };
 
     /**
-         * Checks whether the session can be created with the given name. 
-        *  @function $3Dmol.Session#checkName
-        * @param {name} - session's name a unique ID to represent each session.
-        * @return {Promise} promise - If the name exists, then promise is rejected. If the name is free, then it is resolved.
-        * @example
-        * 
-        * session.checkName()
-        *           .then(//Join the session//)
-        *           .catch((Error)=>{Create the Session})
-        *         
-        * 
-    */
+     * Checks whether the session can be created with the given name. 
+     *  @function $3Dmol.Session#checkName
+     * @param {name} - session's name a unique ID to represent each session.
+     * @return {Promise} promise - If the name exists, then promise is rejected. If the name is free, then it is resolved.
+     * @example
+     * 
+     * session.checkName()
+     *           .then(//Join the session//)
+     *           .catch((Error)=>{Create the Session})
+     *         
+     * 
+     */
     this.checkName = function (name) {
 
         socket.emit('check session name event', {
@@ -213,18 +224,18 @@ $3Dmol.Session = function (hostname) {
             });
         });
     };
-     /**
-         * Creates the session with the given name. 
-        *  @function $3Dmol.Session#create
-        * @param {name} - session's name a unique ID to represent each session.
-        * @return {Promise} promise - Resolves if the session has been succesfully created, else rejected with the error message.
-        * @example
-        * 
-        * session.create("Session#1")
-        *           .then(console.log("Session is created, do your stuff"))
-        *           .catch((Error)=>{console.log(Error);});
-        *         
-    */
+    /**
+     * Creates the session with the given name. 
+     *  @function $3Dmol.Session#create
+     * @param {name} - session's name a unique ID to represent each session.
+     * @return {Promise} promise - Resolves if the session has been succesfully created, else rejected with the error message.
+     * @example
+     * 
+     * session.create("Session#1")
+     *           .then(console.log("Session is created, do your stuff"))
+     *           .catch((Error)=>{console.log(Error);});
+     *         
+     */
     this.create = function (name) {
         socket.emit('create session event', {
             name: name,
@@ -233,6 +244,9 @@ $3Dmol.Session = function (hostname) {
         });
         this.name = name;
         registerCallbacks(this.viewer);
+        socket.on('session count', function(count){
+            this.count = count;
+        });
         return new Promise(function (resolve, reject) {
             socket.on('create session response', (msg) => {
                 if (msg) {
@@ -243,36 +257,30 @@ $3Dmol.Session = function (hostname) {
             });
         });
     };
-      /**
-         * Join the session with the given name. 
-        *  @function $3Dmol.Session#join
-        * @param {name} - session's name a unique ID to represent each session.
-        * @return {Promise} promise - Resolves if joined succesfully, else rejected with the error message.
-        * @example
-        * 
-        * session.join("Session#1")
-        *           .then(console.log("Joined Session, do your stuff"))
-        *           .catch((Error)=>{console.log(Error);});
-        *         
-    */
+    /**
+     * Join the session with the given name. 
+     *  @function $3Dmol.Session#join
+     * @param {name} - session's name a unique ID to represent each session.
+     * @return {Promise} promise - Resolves if joined succesfully, else rejected with the error message.
+     * @example
+     * 
+     * session.join("Session#1")
+     *           .then(console.log("Joined Session, do your stuff"))
+     *           .catch((Error)=>{console.log(Error);});
+     *         
+     */
     this.join = function (name) {
 
         socket.emit('join session event', {
             name: name
         });
         this.name = name;
-
+        registerResponses(this.viewer);
         return new Promise(function (resolve, reject) {
 
             socket.on('join session response', (msg) => {
                 if (msg) {
-                    socket.on('viewer view change response', function (new_view) {
-                        this.viewer.setView(new_view);
-                    });
 
-                    socket.on('viewer state change response', function (new_state) {
-                        this.viewer.setInternalState(new_state);
-                    });
                     resolve();
                 } else {
                     reject(Error("Session does not exist/Could not be joined"));
@@ -280,16 +288,16 @@ $3Dmol.Session = function (hostname) {
             });
         });
     };
-  /**
-         * Delete the session(Generally performed by the creator of the session)
-        *  @function $3Dmol.Session#delete
-        * @return {Promise} promise - Resolves if the session has been succesfully deleted
-        * @example
-        * 
-        * session.delete()
-        *           .then(console.log("Session is deleted"));
-        *         
-    */
+    /**
+     * Delete the session(Generally performed by the creator of the session)
+     *  @function $3Dmol.Session#delete
+     * @return {Promise} promise - Resolves if the session has been succesfully deleted
+     * @example
+     * 
+     * session.delete()
+     *           .then(console.log("Session is deleted"));
+     *         
+     */
     this.delete = function () {
         socket.emit('delete session event', {
             name: this.name
@@ -303,16 +311,16 @@ $3Dmol.Session = function (hostname) {
             });
         });
     };
-     /**
-         * Leave the session(Generally performed by those who have joined the session)
-        *  @function $3Dmol.Session#leave
-        * @return {Promise} promise - Resolves if the session has been succesfully left.
-        * @example
-        * 
-        * session.leave()
-        *           .then(console.log("Left session"));
-        *         
-    */
+    /**
+     * Leave the session(Generally performed by those who have joined the session)
+     *  @function $3Dmol.Session#leave
+     * @return {Promise} promise - Resolves if the session has been succesfully left.
+     * @example
+     * 
+     * session.leave()
+     *           .then(console.log("Left session"));
+     *         
+     */
     this.leave = function () {
         socket.emit('leave session event', {
             name: this.name
@@ -326,17 +334,17 @@ $3Dmol.Session = function (hostname) {
             });
         });
     };
-     /**
-        * Ask query
-        *  @function $3Dmol.Session#ask
-        * @param {update_function} - Takes in the update function
-        * @return {Promise} promise - Resolves if the query has been started from the server side.
-        * @example
-        * 
-        * session.ask(update_func)
-        *           .then(console.log("Asked query"));
-        *         
-    */
+    /**
+     * Ask query
+     *  @function $3Dmol.Session#ask
+     * @param {update_function} - Takes in the update function
+     * @return {Promise} promise - Resolves if the query has been started from the server side.
+     * @example
+     * 
+     * session.ask(update_func)
+     *           .then(console.log("Asked query"));
+     *         
+     */
     this.ask = function (update_function) {
 
         // tell server to query clients
@@ -358,17 +366,17 @@ $3Dmol.Session = function (hostname) {
         });
 
     };
-     /**
-        * Show the results of the query
-        *  @function $3Dmol.Session#showResults
-        * @param {labelStyle}
-        * @return {Promise} promise - Resolves if the results are obtained
-        * @example
-        * 
-        * session.showResults()
-        *           .then(console.log("Results are displayed"));
-        *         
-    */
+    /**
+     * Show the results of the query
+     *  @function $3Dmol.Session#showResults
+     * @param {labelStyle}
+     * @return {Promise} promise - Resolves if the results are obtained
+     * @example
+     * 
+     * session.showResults()
+     *           .then(console.log("Results are displayed"));
+     *         
+     */
     this.showResults = function (labelStyle) {
         socket.emit('query fetch', {
             name: this.name
@@ -381,16 +389,16 @@ $3Dmol.Session = function (hostname) {
         });
 
     };
- /**
-        * Clears the results of the query.
-        *  @function $3Dmol.Session#clearResults
-        * @return {Promise} promise - Resolves if the results are cleared and query is ended
-        * @example
-        * 
-        * session.clearResults()
-        *           .then(console.log("Results are cleared"));
-        *         
-    */
+    /**
+     * Clears the results of the query.
+     *  @function $3Dmol.Session#clearResults
+     * @return {Promise} promise - Resolves if the results are cleared and query is ended
+     * @example
+     * 
+     * session.clearResults()
+     *           .then(console.log("Results are cleared"));
+     *         
+     */
     this.clearResults = function () {
         socket.emit('query end', {
             name: this.name
