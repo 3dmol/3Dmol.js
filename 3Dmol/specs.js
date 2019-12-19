@@ -135,6 +135,7 @@
  * @prop {StickStyleSpec} stick  - draw bonds as capped cylinders
  * @prop {SphereStyleSpec} sphere - draw atoms as spheres
  * @prop {CartoonStyleSpec} cartoon - draw cartoon representation of secondary structure
+ * @prop {ClickSphereStyleSpec} clicksphere - invisible style for click handling only
  */
 
 /**

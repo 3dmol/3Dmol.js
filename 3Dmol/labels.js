@@ -55,10 +55,7 @@ $3Dmol.Label.prototype = {
             var ret = init;
             if(typeof(style) != 'undefined') {
                 //convet regular colors
-                 if(style instanceof $3Dmol.Color) 
-                     ret = style.scaled();
-                 else //hex or name
-                    ret = $3Dmol.CC.color(style).scaled();                    
+                ret = $3Dmol.CC.color(style);                    
             }
             if(typeof(stylealpha) != 'undefined') {
                 ret.a = parseFloat(stylealpha);

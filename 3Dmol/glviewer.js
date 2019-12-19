@@ -2937,6 +2937,8 @@ $3Dmol.GLViewer = (function() {
         this.addModel =  function(data, format, options) {
             if(options && !options.defaultcolors) {
                 options.defaultcolors = defaultcolors;
+            } else if(typeof(options) === 'undefined') {
+                options = {defaultcolors:defaultcolors};
             }
             var m = new $3Dmol.GLModel(models.length, options);
             m.addMolData(data, format, options);

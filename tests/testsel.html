@@ -59,7 +59,7 @@
             else{
 
                 if (atom.clicked) {
-                    var newstyle = {fontSize: atom.clickLabel.fontSize, position: atom.clickLabel.position,
+                    var newstyle = {fontSize: atom.clickLabel.fontSize, position: atom.clickLabel.stylespec.position,
                                     backgroundColor: {r: 100, g: 0, b: 255, a: 0.8}};
                                 
                     viewer.setLabelStyle(atom.clickLabel, newstyle);
@@ -109,7 +109,7 @@
                     
             for (var i in atoms) {
                 var atom = atoms[i];
-                atom.clickable = false;
+                atom.clickable = true;
                 atom.callback = atomcallback;
             }
 
@@ -132,8 +132,8 @@
         <input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
         <input type="button" value="Cross" onclick="glviewer.setStyle({},{cross:{linewidth:5}}); glviewer.render();"></input>
         <input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(glviewer.selectedAtoms(),'b'))}}}); glviewer.render();"></input>
-        <input type="button" value="SphereI" onclick="glviewer.setStyle({},{spherei:{}}); glviewer.render();"></input>
         <input type="button" value="Cartoon" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum'}}); glviewer.render();"></input>
+        <input type="button" value="Trace" onclick="glviewer.setStyle({hetflag:false},{cartoon:{color: 'spectrum',style:'trace'}}); glviewer.render();"></input>
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
