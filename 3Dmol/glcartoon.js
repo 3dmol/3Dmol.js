@@ -1082,6 +1082,12 @@ $3Dmol.drawCartoon = (function() {
                         } // note that an atom object can be duck-typed as a
                             // $3Dmol.Vector3 in this case
                     }
+                    
+                    if ((next.clickable === true || next.hoverable) && (next.intersectionShape !== undefined)) {
+                        //can click on joints to get alpha carbons
+                        var center = new $3Dmol.Vector3(next.x, next.y, next.z);
+                        next.intersectionShape.sphere.push(new $3Dmol.Sphere(center, thickness));
+                    }
 
                     curr = next;
                     currColor = nextColor;
