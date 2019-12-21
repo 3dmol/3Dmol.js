@@ -4,6 +4,8 @@
 
 $3Dmol.Renderer = function(parameters) {
 
+    var SKIPFRAMEBUFFER = false;
+
     parameters = parameters || {};
     this.row = parameters.row;
     this.col = parameters.col;
@@ -142,7 +144,7 @@ $3Dmol.Renderer = function(parameters) {
     
     this.supportedExtensions = function() {
         return {supportsAIA: Boolean(_extInstanced),
-            supportsImposters:  Boolean(_extFragDepth)
+            supportsImposters:  Boolean(_extFragDepth) || _gl.getParameter(_gl.VERSION)[6] == "2"
             };
     };
     
@@ -215,9 +217,10 @@ $3Dmol.Renderer = function(parameters) {
         }
     };
 
+
     this.setFrameBufferSize = function(width, height){
         // this part is only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+        if (_gl.getParameter(_gl.VERSION)[6] == "1" || SKIPFRAMEBUFFER) return; 
             
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
@@ -234,8 +237,8 @@ $3Dmol.Renderer = function(parameters) {
         // i mean it can't be left out here that easily
         var depthTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, width * this.devicePixelRatio, 
-            height * this.devicePixelRatio, 0, _gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT32F, width * this.devicePixelRatio, 
+            height * this.devicePixelRatio, 0, _gl.DEPTH_COMPONENT, _gl.FLOAT, null);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
@@ -584,6 +587,20 @@ $3Dmol.Renderer = function(parameters) {
 
         var shader;
 
+        if(_gl.getParameter(_gl.VERSION)[6] == "2") {
+            //convert webgl1 to webgl2
+            str = str.replace(/gl_FragDepthEXT/g,"gl_FragDepth");
+            if(type == "fragment") {
+                str = str.replace(/varying/g,"in");
+            } else {
+                str = str.replace(/varying/g,"out");
+            }
+            str = str.replace(/attribute/g,"in");
+            str = str.replace(/texture2D/g,"texture");
+            str = str.replace(/\/\/DEFINEFRAGCOLOR/g,'out vec4 glFragColor;');
+            str = str.replace(/gl_FragColor/g,"glFragColor");
+            str = "#version 300 es\n"+str;           
+        }
         if (type === "fragment")
             shader = _gl.createShader(_gl.FRAGMENT_SHADER);
         else if (type === "vertex")
@@ -656,7 +673,7 @@ $3Dmol.Renderer = function(parameters) {
 
         var prefix_fragment = [
                 parameters.volumetric ? "#version 300 es" : "",
-                parameters.fragdepth ? "#extension GL_EXT_frag_depth: enable"
+                parameters.fragdepth &&_gl.getParameter(_gl.VERSION)[6] == "1" ? "#extension GL_EXT_frag_depth: enable"
                         : "",
                 parameters.wireframe ? "#define WIREFRAME 1" : "", prefix ]
                 .join("\n");
@@ -1304,7 +1321,7 @@ $3Dmol.Renderer = function(parameters) {
 
     this.renderFrameBuffertoScreen = function(){
         // only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+        if (_gl.getParameter(_gl.VERSION)[6] == "1" || SKIPFRAMEBUFFER) return; 
 
         // bind default framebuffer
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, null);
@@ -1907,7 +1924,7 @@ $3Dmol.Renderer = function(parameters) {
 
     function initOffScreenRender(width, height){
         // only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+        if (_gl.getParameter(_gl.VERSION)[6] == "1" || SKIPFRAMEBUFFER) return; 
 
         var targetTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
@@ -1924,8 +1941,8 @@ $3Dmol.Renderer = function(parameters) {
         // i mean it can't be left out here that easily
         var depthTexture = _gl.createTexture();
         _gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT16, width * this.devicePixelRatio, 
-            height * this.devicePixelRatio, 0, _gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT32F, width * this.devicePixelRatio, 
+            height * this.devicePixelRatio, 0, _gl.DEPTH_COMPONENT, _gl.FLOAT, null);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);

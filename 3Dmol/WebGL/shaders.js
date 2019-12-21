@@ -41,6 +41,7 @@ $3Dmol.ShaderUtils = {
      "varying vec3 p2;",
      "varying float r;",
 
+     "//DEFINEFRAGCOLOR",
 
      //cylinder-ray intersection testing taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf
      //also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
@@ -112,6 +113,7 @@ $3Dmol.ShaderLib = {
 "uniform float fogFar;",
 
 "varying vec3 vColor;",
+"//DEFINEFRAGCOLOR",
 
 "void main() {",
     
@@ -175,6 +177,7 @@ $3Dmol.ShaderLib = {
 "varying vec3 vLight;",
 "varying vec3 center;",
 
+"//DEFINEFRAGCOLOR",
 
 "void main() {",
 "    float lensqr = dot(mapping,mapping);",
@@ -259,6 +262,7 @@ $3Dmol.ShaderLib = {
 
 "varying vec3 vLightFront;",
 "varying vec3 vColor;",
+"//DEFINEFRAGCOLOR",
 
 "void main() {",
     
@@ -344,6 +348,7 @@ $3Dmol.ShaderLib = {
 
 "varying vec3 vLightFront;",
 "varying vec3 vColor;",
+"//DEFINEFRAGCOLOR",
 
 "void main() {",
 
@@ -427,6 +432,7 @@ $3Dmol.ShaderLib = {
 "uniform vec3 fogColor;",
 "uniform float fogNear;",
 "uniform float fogFar;",
+"//DEFINEFRAGCOLOR",
 
 "void main() {",
     
@@ -487,6 +493,7 @@ $3Dmol.ShaderLib = {
 
 "uniform float outlinePushback;",
 
+"//DEFINEFRAGCOLOR",
 
 "void main() {",
 "    float lensqr = dot(mapping,mapping);",
@@ -714,6 +721,7 @@ $3Dmol.ShaderLib = {
 "varying vec3 vLightBack;",
 
 "varying vec3 vColor;",
+"//DEFINEFRAGCOLOR",
 
 "void main() {",
     
@@ -810,6 +818,7 @@ $3Dmol.ShaderLib = {
 "uniform float alphaTest;",
 
 "varying vec2 vUV;",
+"//DEFINEFRAGCOLOR",
 
 "void main() {",
     
@@ -1083,7 +1092,7 @@ $3Dmol.ShaderLib = {
             "        color = vec4(rgbB, 1.0);",
             "    return color;",
             "}",
-
+            "//DEFINEFRAGCOLOR",
             "void main (void) {",
             "   gl_FragColor = applyFXAA(vTexCoords, colormap);",
             "}"
