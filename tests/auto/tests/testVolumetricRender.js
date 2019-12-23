@@ -1,5 +1,5 @@
 /* @data
-<textarea id="benzene" style="visibility:false">
+<textarea id="benzene" style="display: none;">
 
  OpenBabel05131411233D
 

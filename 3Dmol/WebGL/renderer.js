@@ -587,8 +587,8 @@ $3Dmol.Renderer = function(parameters) {
 
         var shader;
 
-        if(_gl.getParameter(_gl.VERSION)[6] == "2") {
-            //convert webgl1 to webgl2
+        if(_gl.getParameter(_gl.VERSION)[6] == "2" && !str.startsWith("#version")) {
+            //convert webgl1 to webgl2, unless a version is already explicit
             str = str.replace(/gl_FragDepthEXT/g,"gl_FragDepth");
             if(type == "fragment") {
                 str = str.replace(/varying/g,"in");
@@ -599,7 +599,7 @@ $3Dmol.Renderer = function(parameters) {
             str = str.replace(/texture2D/g,"texture");
             str = str.replace(/\/\/DEFINEFRAGCOLOR/g,'out vec4 glFragColor;');
             str = str.replace(/gl_FragColor/g,"glFragColor");
-            str = "#version 300 es\n"+str;           
+            str = "#version 300 es\n"+str;            
         }
         if (type === "fragment")
             shader = _gl.createShader(_gl.FRAGMENT_SHADER);
@@ -1952,7 +1952,7 @@ $3Dmol.Renderer = function(parameters) {
         var fb = _gl.createFramebuffer();
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, fb);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, targetTexture, 0);
-                _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
+        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
                     
         // build screenshader
         var screenshader = $3Dmol.ShaderLib.screen;
