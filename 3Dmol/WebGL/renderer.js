@@ -833,9 +833,9 @@ $3Dmol.Renderer = function(parameters) {
 
                 renderer.setTexture(object.material.transferfn, 4, false);
                 renderer.setTexture(object.material.map, 3, true);
-                // depth texture from the renderbuffer, for volumetric integration with surfaces
-                //_gl.activeTexture(_gl.TEXTURE5);
-                //_gl.bindTexture(_gl.TEXTURE_2D, _depthTexture);
+                //depth texture from the renderbuffer, for volumetric integration with surfaces
+                _gl.activeTexture(_gl.TEXTURE5);
+                _gl.bindTexture(_gl.TEXTURE_2D, _depthTexture);
 
             }
 
@@ -1166,7 +1166,7 @@ $3Dmol.Renderer = function(parameters) {
         // set matrices for regular objects (frustum culled)
 
         renderList = scene.__webglObjects;
-
+        var hasvolumetric = false;
         for (i = 0, il = renderList.length; i < il; i++) {
 
             webglObject = renderList[i];
@@ -1178,6 +1178,7 @@ $3Dmol.Renderer = function(parameters) {
                 setupMatrices(object, camera);
                 unrollBufferMaterial(webglObject);
                 webglObject.render = true;
+                if(webglObject.volumetric) hasvolumetric = true;
             }
         }
 
@@ -1201,6 +1202,14 @@ $3Dmol.Renderer = function(parameters) {
         renderObjects(scene.__webglObjects, false, "transparent", camera,
                 lights, fog, true, material);
 
+        //volumetric is separate
+        if(hasvolumetric && _fb) {
+            //disconnect framebuffer to get depth texture
+            this.reinitFrameBuffer();
+            renderObjects(scene.__webglObjects, false, "volumetric", camera,
+                    lights, fog, true, material);
+        }
+        
         // Render plugins (e.g. sprites), and reset state
 
         renderPlugins(this.renderPluginsPost, scene, camera);
@@ -1251,6 +1260,18 @@ $3Dmol.Renderer = function(parameters) {
 
     }
 
+    //reinitialize framebuffer without the depth texture attached so we can read to it
+    //do not allocate new textures
+    this.reinitFrameBuffer = function() {
+        // only needed/works with webgl2
+        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+
+        // Create and bind the framebuffer
+        _fb = _gl.createFramebuffer();
+        _gl.bindFramebuffer(_gl.FRAMEBUFFER, _fb);
+        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);                                      
+    };    
+    
     this.initFrameBuffer = function() {
         // only needed/works with webgl2
         if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
@@ -1534,20 +1555,24 @@ $3Dmol.Renderer = function(parameters) {
         var object = globject.object;
         var material = object.material;
 
-        if (material.transparent) {
+        if (material.volumetric) {
             globject.opaque = null;
+            globject.transparent = null;
+            globject.volumetric = material;
+        }
+        else if (material.transparent) {
+            globject.opaque = null;
+            globject.volumetric = null;
             globject.transparent = material;
             if (!material.wireframe) {
                 var blankMaterial = material.clone();
                 blankMaterial.opacity = 0.0;
                 globject.blank = blankMaterial;
             }
-        }
-
-        else {
+        } else {
             globject.opaque = material;
             globject.transparent = null;
-
+            globject.volumetric = null;
         }
 
     }

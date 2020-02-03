@@ -904,7 +904,7 @@ $3Dmol.ShaderLib = {
         fragmentShader: [
             "uniform highp sampler3D data;",
             "uniform highp sampler2D colormap;",
-        //    "uniform highp sampler2D depthmap;",
+            "uniform highp sampler2D depthmap;",
 
             "uniform mat4 textmat;",
             "uniform mat4 projinv;",
@@ -934,8 +934,6 @@ $3Dmol.ShaderLib = {
             // convert to projection
             "   maxpos = projectionMatrix*maxpos;",
             "   vec4 startp = projectionMatrix*pos;",
-            //get depth from depthmap
-          //  "   float depth = texture(depthmap, startp.xy).r;",
             // homogonize
             "   maxpos /= maxpos.w;",
             "   startp /= startp.w;",
@@ -945,11 +943,18 @@ $3Dmol.ShaderLib = {
             "   maxpos = projinv*maxpos;",
             "   maxpos /= maxpos.w;",
             "   float incr = step/subsamples;",
+            //get depth from depthmap
+            //startp is apparently [-1,1]
+            "   vec2 tpos = startp.xy/2.0+0.5;",
+            "   float depth = texture(depthmap, tpos).r;",
             //compute vector between start and end
             "   vec4 direction = maxpos-pos;",            
             "   for( i = 0.0; i <= maxsteps; i++) {",
             "      vec4 pt = (pos+(i/maxsteps)*direction);",      
-            //"      if(pt.z < depth) break;",
+            "      vec4 ppt = projectionMatrix*pt;",
+            "      float ptdepth = ppt.z/ppt.w;",
+            "      ptdepth = ((gl_DepthRange.diff * ptdepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
+            "      if(ptdepth > depth) break;",
             "      pt = textmat*pt;",
             "      if(pt.x >= -0.01 && pt.y >= -0.01 && pt.z >= -0.01 && pt.x <= 1.01 && pt.y <= 1.01 && pt.z <= 1.01) {",
             "         seengood = true;",
@@ -957,6 +962,7 @@ $3Dmol.ShaderLib = {
             "         break;",
             "      }",
             "      float val = texture(data, pt.zyx).r;",
+            "      if(isinf(val)) continue;", //masked out
             "      float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
             "      vec4 val_color = texture(colormap, vec2(cval,0.5));",
             "      color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",

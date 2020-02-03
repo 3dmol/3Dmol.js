@@ -541,7 +541,8 @@ $3Dmol.VolumetricMaterial = function(parameters) {
     
     $3Dmol.Material.call(this);
     
-    this.transparent = true;
+    this.transparent = false;
+    this.volumetric = true;
 
     this.color = new $3Dmol.Color(0xffffff);
     this.transferfn = null;
