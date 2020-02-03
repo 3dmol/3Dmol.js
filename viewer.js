@@ -953,7 +953,7 @@ function run() {
                 type = "cif";
             } else if (src == 'cid') {
                 type = "sdf";
-                data = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
+                data = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
                         + data + "/SDF?record_type=3d";
             } else if (src == 'mmtf') {
                 data = data.toUpperCase();

@@ -1359,6 +1359,7 @@ $3Dmol.GLShape = (function() {
         this.finalize = function() {
             finalizeGeo(geo);
             geo.initTypedArrays();
+            return geo;
         };
         
         /**
@@ -1388,20 +1389,7 @@ $3Dmol.GLShape = (function() {
             shapeObj = new $3Dmol.Object3D();
             var material = null;
 
-            if(this.volumetricRenderer) {
-                var texture = new $3Dmol.Texture(this.volumetricdata, true);
-                var transferfn = new $3Dmol.Texture(this.transferfn, false);
-                texture.needsUpdate = true; 
-                transferfn.needsUpdate = true;
-                transferfn.generateMipmaps = false;
-                transferfn.flipY = false;
-                material = new $3Dmol.VolumetricMaterial({
-                    transferfn: transferfn,
-                    opacity: this.opacity,  // TODO: needs to be opacityfn
-                    map: texture
-                });
-            } 
-            else if(this.side == $3Dmol.DoubleSide) {
+            if(this.side == $3Dmol.DoubleSide) {
                 material = new $3Dmol.MeshDoubleLambertMaterial({
                     wireframe : this.wireframe,
                     side : this.side,

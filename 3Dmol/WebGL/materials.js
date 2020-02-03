@@ -534,33 +534,6 @@ $3Dmol.InstancedMaterial.prototype.clone = function() {
 
 };
 
-var rearrangeVolumeData = function(material){
-    
-    // map the voxel data into the range 0->1 as it will be used to read from texture in frag shader
-    // and re-order texture axis (zyx-> xyz) as the output from the volumeData class is zyx
-    let max = -1000;
-    let min = 1000;
-    material.map.image.data.forEach(function (element) {
-        if (element > max) max = element;
-        if (element < min) min = element;
-    });
-    const scale = (num, in_min, in_max, out_min, out_max) => {
-        return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-    };            
-    material.map.image.data.forEach(function (element, index, array) {
-        array[index] = scale(element, min, max, 0, 1); 
-    });
-    var majorindex = 0;
-    var dataarr = new Float32Array(material.map.image.data.length);
-    for (var z= 0; z < material.map.image.size.z; z++)
-    for (var y= 0; y < material.map.image.size.y; y++)
-    for (var x= 0; x < material.map.image.size.x; x++) {
-        var index = z + y * material.map.image.size.z + x * material.map.image.size.y * material.map.image.size.z;                
-        dataarr[majorindex] = material.map.image.data[index];
-        majorindex++;
-    }
-    material.map.image.data = dataarr;
-};
 
 //Volumetric material
 /** @constructor */
@@ -568,39 +541,34 @@ $3Dmol.VolumetricMaterial = function(parameters) {
     
     $3Dmol.Material.call(this);
     
-    this.opacity = 1;
     this.transparent = true;
 
     this.color = new $3Dmol.Color(0xffffff);
     this.transferfn = null;
     this.map = null;
     this.volumetric = true;
-    this.depthTest = false;
+    this.extent = [];
+    this.maxdepth = 100.0;
+    this.unit = 0;
+    this.texmatrix = null;
+    this.transfermin = -1.0;
+    this.transfermax = 1.0;
 
     // this.fog = true; // TODO: to integrate the new shader with the fog stuff
     
     this.shaderID = "volumetric";
+    this.side = $3Dmol.FrontSide;    
 
     this.setValues(parameters);
-    if (parameters) rearrangeVolumeData(this);
 };
 
 $3Dmol.VolumetricMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.VolumetricMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.VolumetricMaterial();
+    var material = Object.assign(new $3Dmol.VolumetricMaterial(),this);
 
     $3Dmol.Material.prototype.clone.call(this, material);
-
-    material.opacity = this.opacity;
-    material.transparent = this.transparent;
-    material.color = this.color;
-    material.transferfn = this.transferfn;
-    material.shaderID = this.shaderID;
-    material.volumetric = this.volumetric;
-    material.map = this.map;
-
     return material;
 
 };
@@ -687,7 +655,6 @@ $3Dmol.Texture = function(image, is3D) {
     this.name = "";
     
     this.image = image;
-    this.mipmaps = [];
     
     this.mapping = new $3Dmol.UVMapping();
     
@@ -700,7 +667,6 @@ $3Dmol.Texture = function(image, is3D) {
         this.format = $3Dmol.RFormat;
         this.type = $3Dmol.FloatType;
 
-        this.generateMipmaps = false;
         this.premultiplyAlpha = false;
         this.flipY = false;
         
@@ -715,13 +681,13 @@ $3Dmol.Texture = function(image, is3D) {
         this.offset = new $3Dmol.Vector2(0, 0);
         this.repeat = new $3Dmol.Vector2(1, 1);
 
-        this.generateMipmaps = true;
         this.premultiplyAlpha = false;
         this.flipY = true;
         this.unpackAlignment = 4;    
 
         this.magFilter = $3Dmol.LinearFilter;
         this.minFilter = $3Dmol.LinearMipMapLinearFilter;    
+        
     }
 
     
@@ -740,7 +706,6 @@ $3Dmol.Texture.prototype = {
             texture = new $3Dmol.Texture();
         
         texture.image = this.image;
-        texture.mipmaps = this.mipmaps.slice(0);
         
         texture.mapping = this.mapping;
         
@@ -758,7 +723,6 @@ $3Dmol.Texture.prototype = {
         texture.offset.copy(this.offset);
         texture.repeat.copy(this.repeat);
         
-        texture.generateMipmaps = this.generateMipmaps;
         texture.premultiplyAlpha = this.premultiplyAlpha;
         texture.flipY = this.flipY;
         texture.unpackAlignment = this.unpackAlignment;

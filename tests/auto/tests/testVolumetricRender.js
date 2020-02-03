@@ -35,26 +35,21 @@ $$$$
 
 $.get('data/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
     var voldata = new $3Dmol.VolumeData(data, "cube");
-    viewer.addVolumetricRenderer(voldata, {
+    viewer.addVolumetricRender(voldata, {
         transferfn:[
-            { Color: "#0000ff", pos: -0.2 }, //-0.03
-            { Color: "#0000ff", pos: -0.005 }, 
-            { Color: "#ff0000", pos: 0.005 }, 
-            { Color: "#ff0000", pos: 0.2 }, // 1
-        ],
-        opacityfn:[
-            { opacity: 1.0, pos: -0.2 }, //-0.03
-            { opacity: 0, pos: -0.005 }, 
-            { opacity: 0, pos: 0.005 }, 
-            { opacity: 1.0, pos: 0.2 }, //1
-        ],
+            { color: "#0000ff", opacity: .1, pos: -0.2 }, //-0.03
+            { color: "#ffffff", opacity: 0, pos: -0.005 }, 
+            { color: "#ffffff", opacity: 0, pos: 0.005 }, 
+            { color: "#ff0000", opacity: .1, pos: 0.2 }, // 1
+        ],        
         // coords: [{x: 0, y: 0, z: 0}], 
         // seldist: 1.7
     });
     
     var rec1 = viewer.addModel($('#benzene').val(), "sdf");
     rec1.setStyle({stick:{color:'lightgray', opacity:'1.0'}, sphere:{color:'gray', radius: 0.4}});
-
+    viewer.addBox({color: "grey", wireframe: true, corner: {x: -4.774222722929, y: -4.7993401092340005, z: -3.446414440414},
+       dimensions: {w: 9.701568631755, h: 9.701568631755, d: 7.05568627764}});
     viewer.zoomTo();
     viewer.render();
 });

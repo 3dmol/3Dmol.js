@@ -199,8 +199,6 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
     viewer_config = viewer_config || {};
     
     var viewers = [];
-    // create a shared object between viewers to share resources created if needed in other viewers
-    var shared_viewer_resources = {};
     //create canvas
     var canvas = document.createElement('canvas');
 
@@ -219,7 +217,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
           viewer_config.canvas = canvas;
           viewer_config.viewers = viewers;
           viewer_config.control_all = config.control_all;
-          var viewer = $3Dmol.createViewer(element, viewer_config, shared_viewer_resources);
+          var viewer = $3Dmol.createViewer(element, viewer_config);
           row.push(viewer);
         }
         viewers.unshift(row); //compensate for weird ordering in renderer

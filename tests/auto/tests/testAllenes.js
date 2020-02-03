@@ -153,12 +153,13 @@ $$$$
      viewer.zoomTo();
      viewer.render( );
 
+
      viewer = viewers[1][0];
      viewer.addModel(mol2);
      viewer.setStyle({stick:{}});
      viewer.zoomTo();
      viewer.rotate(90);
      viewer.render( );
-     
+  
 
 

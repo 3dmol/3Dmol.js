@@ -4,8 +4,6 @@
 
 $3Dmol.Renderer = function(parameters) {
 
-    var SKIPFRAMEBUFFER = false;
-
     parameters = parameters || {};
     this.row = parameters.row;
     this.col = parameters.col;
@@ -92,6 +90,9 @@ $3Dmol.Renderer = function(parameters) {
     _projScreenMatrix = new $3Dmol.Matrix4(),
     _vector3 = new $3Dmol.Vector3(),
 
+    _worldInverse = new $3Dmol.Matrix4(),
+    _projInverse = new $3Dmol.Matrix4(),
+    _textureMatrix = new $3Dmol.Matrix4(),
     // light arrays cache
     _direction = new $3Dmol.Vector3(),
     _lightsNeedUpdate = true,
@@ -127,13 +128,20 @@ $3Dmol.Renderer = function(parameters) {
 
     };
 
+    //antialias related variables
+    var _aa_screenshader = null;
+    var _aa_vertexattribpos = null;
+    var _aa_screenQuadVBO = null;
+    
+    //framebuffer variables
+    var _fb = null;
+    var _targetTexture = null;
+    var _depthTexture = null;
+    
     // initialize
     var _gl;
 
     initGL();
-    // if shared resources is not empty object, use its shared buffers, else, create new
-    if (Object.getOwnPropertyNames(parameters.sharedResources).length != 0) this.offscreen = parameters.sharedResources;
-    else this.offscreen = initOffScreenRender(parameters.containerWidth, parameters.containerHeight);
     setDefaultGLState();
 
     this.context = _gl;
@@ -180,11 +188,9 @@ $3Dmol.Renderer = function(parameters) {
             var wid = _canvas.width/this.cols;
             var hei = _canvas.height/this.rows;
            
-            _viewportWidth =  wid * this.devicePixelRatio;
-            _viewportHeight = hei * this.devicePixelRatio;
+            _viewportWidth =  wid;
+            _viewportHeight = hei;
 
-             _gl.drawingBufferWidth = _viewportWidth*3;
-              _gl.drawingBufferHeight = _viewportHeight;
             _gl.enable(_gl.SCISSOR_TEST);
             _gl.scissor(wid*this.col,hei * this.row, wid, hei);
             _gl.viewport(wid * this.col , hei * this.row, wid, hei);
@@ -215,44 +221,6 @@ $3Dmol.Renderer = function(parameters) {
 
             _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
         }
-    };
-
-
-    this.setFrameBufferSize = function(width, height){
-        // this part is only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1" || SKIPFRAMEBUFFER) return; 
-            
-        var targetTexture = _gl.createTexture();
-        _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width * this.devicePixelRatio, 
-            height * this.devicePixelRatio, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, null);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
-
-        // IMP: this requires an extension in webgl1, so if 2 is not available
-        // i'll have to not render to framebuffer at all and normally render to screen
-        // as it will already be of no use without the volumetric renderer
-        // i mean it can't be left out here that easily
-        var depthTexture = _gl.createTexture();
-        _gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT32F, width * this.devicePixelRatio, 
-            height * this.devicePixelRatio, 0, _gl.DEPTH_COMPONENT, _gl.FLOAT, null);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
-
-        // Create and bind the framebuffer
-        var fb = _gl.createFramebuffer();
-        _gl.bindFramebuffer(_gl.FRAMEBUFFER, fb);
-        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, targetTexture, 0);
-        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
-                
-        this.offscreen.targetTexture = targetTexture;
-        this.offscreen.fb = fb;
-        this.offscreen.depthTexture = depthTexture;
     };
 
     this.clear = function(color, depth, stencil) {
@@ -314,12 +282,6 @@ $3Dmol.Renderer = function(parameters) {
 
         _gl.cullFace(_gl.BACK); 
 
-        if (material.volumetric){
-            _gl.enable(_gl.CULL_FACE);
-            _gl.cullFace(_gl.FRONT);
-            _gl.enable(_gl.BLEND);
-            _gl.blendFunc(_gl.ONE, _gl.ONE_MINUS_SRC_ALPHA);
-        }
     };
 
     this.setDepthTest = function(depthTest) {
@@ -849,56 +811,32 @@ $3Dmol.Renderer = function(parameters) {
             } else if (material.shaderID === "sphereimposter") {
                 _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false,
                         camera.matrixWorldInverse.elements);
-                _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false,
-                        object._normalMatrix.elements);
                 m_uniforms.directionalLightColor.value = _lights.directional.colors;
                 m_uniforms.directionalLightDirection.value = _lights.directional.positions;
             } else if (material.shaderID === "volumetric") {
-                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false, camera.matrixWorldInverse.elements);
-                p_uniforms.eye_pos = _gl.getUniformLocation(program, "eye_pos");
-                _gl.uniform3fv(p_uniforms.eye_pos, Object.values(camera.position));
-                p_uniforms.modelMatrix = _gl.getUniformLocation(program, "modelMatrix");
-                _gl.uniformMatrix4fv(p_uniforms.modelMatrix, false, object.matrixWorld.elements);
-                p_uniforms.modelPos = _gl.getUniformLocation(program, "modelPos");
-                // hack to get box position because position is always 0,0,0 (box vertices are initialiez to their final position)
-                _gl.uniform3fv(p_uniforms.modelPos, object.geometry.geometryGroups[0].vertexArray.slice(0, 3));
-                // inverse model matrix (with unit scale, so as to not scale the eye_pos)
-                p_uniforms.modelMatrixInverse = _gl.getUniformLocation(program, "modelMatrixInverse");
-                _gl.uniformMatrix4fv(p_uniforms.modelMatrixInverse, false, object.matrix.getInverse(object.matrixWorld).elements);
-                // scale stuff
-                var longestAxis = Math.max(material.map.image.size.x, Math.max(material.map.image.size.y, material.map.image.size.z));
-                var volScale = [material.map.image.size.x / longestAxis, material.map.image.size.y / longestAxis, material.map.image.size.z / longestAxis];
-                // if volData has matrix, then it overrides size and unit scale, and translation is separate anyway
-                var volDims;
-                if (material.map.image.matrix){
-                    var scaleX = Math.sqrt(Math.pow(material.map.image.matrix.elements[0], 2) + Math.pow(material.map.image.matrix.elements[4], 2) + Math.pow(material.map.image.matrix.elements[8], 2) );
-                    var scaleY = Math.sqrt(Math.pow(material.map.image.matrix.elements[1], 2) + Math.pow(material.map.image.matrix.elements[5], 2) + Math.pow(material.map.image.matrix.elements[9], 2) );
-                    var scaleZ = Math.sqrt(Math.pow(material.map.image.matrix.elements[2], 2) + Math.pow(material.map.image.matrix.elements[6], 2) + Math.pow(material.map.image.matrix.elements[10], 2) ); 
-                    volDims = [material.map.image.size.x * scaleX, 
-                        material.map.image.size.y * scaleY, 
-                        material.map.image.size.z * scaleZ]; 
-                    // ccp4 have a property that can change the dimensions order  
-                    if (material.map.image.dimensionorder)
-                        volDims = [volDims[material.map.image.dimensionorder[0]-1], volDims[material.map.image.dimensionorder[1]-1], volDims[material.map.image.dimensionorder[2]-1]];
-                } else {
-                    volDims = [material.map.image.size.x * material.map.image.unit.x, 
-                        material.map.image.size.y * material.map.image.unit.y, 
-                        material.map.image.size.z * material.map.image.unit.z];
-                }
-                p_uniforms.volScale = _gl.getUniformLocation(program, "volume_scale");
-                _gl.uniform3fv(p_uniforms.volScale, volScale);
-                p_uniforms.volDims = _gl.getUniformLocation(program, "volume_dims");
-                _gl.uniform3fv(p_uniforms.volDims, volDims);
-                _gl.uniform2fv(_gl.getUniformLocation(program, "screenCoords"), [_gl.canvas.width, _gl.canvas.height]);
-                _gl.uniform1f(_gl.getUniformLocation(program, "cameraNear"), camera.near);
-                _gl.uniform1f(_gl.getUniformLocation(program, "cameraFar"), camera.far);
+                
+                //need a matrix that maps back from model coordinates to texture coordinates
+                //  textureMat*modelInv*position
+                object._modelViewMatrix.getScale(_direction); //scale factor of conversion
+                _worldInverse.getInverse(object._modelViewMatrix);
+                _projInverse.getInverse(camera.projectionMatrix);
+                _textureMatrix.multiplyMatrices(object.material.texmatrix,_worldInverse);
+                _gl.uniformMatrix4fv(p_uniforms.textmat, false, _textureMatrix.elements);
+                _gl.uniformMatrix4fv(p_uniforms.projinv, false, _projInverse.elements);
+                
+                //  need the resolution (step size of ray in viewer coordinates)
+                let invscale = Math.min(Math.min(_direction.x,_direction.y),_direction.z);
+                m_uniforms.step.value = object.material.unit*invscale;
+                m_uniforms.maxdepth.value = object.material.maxdepth*invscale;
+                m_uniforms.transfermax.value = object.material.transfermax;
+                m_uniforms.transfermin.value = object.material.transfermin;
 
                 renderer.setTexture(object.material.transferfn, 4, false);
                 renderer.setTexture(object.material.map, 3, true);
-
                 // depth texture from the renderbuffer, for volumetric integration with surfaces
-                _gl.activeTexture(_gl.TEXTURE5);
-                _gl.bindTexture(_gl.TEXTURE_2D, renderer.offscreen.depthTexture);
+                //_gl.activeTexture(_gl.TEXTURE5);
+                //_gl.bindTexture(_gl.TEXTURE_2D, _depthTexture);
+
             }
 
             // opacity, diffuse, emissive, etc
@@ -1218,14 +1156,13 @@ $3Dmol.Renderer = function(parameters) {
         _currentWidth = _viewportWidth;
         _currentHeight = _viewportHeight;
         this.setViewport();
+        this.initFrameBuffer();
         if (this.autoClear || forceClear) {
-            _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b,
-                _clearAlpha);
-            this.clear(this.autoClearColor, this.autoClearDepth,
-                    this.autoClearStencil);
-
+            _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha);
+            this.clear(this.autoClearColor, this.autoClearDepth, this.autoClearStencil);
         }
-
+        
+        
         // set matrices for regular objects (frustum culled)
 
         renderList = scene.__webglObjects;
@@ -1267,16 +1204,11 @@ $3Dmol.Renderer = function(parameters) {
         // Render plugins (e.g. sprites), and reset state
 
         renderPlugins(this.renderPluginsPost, scene, camera);
-
-        // Ensure depth buffer writing is enabled so it can be cleared on next
-        // render
-
+        // _gl.finish();
+        
         this.renderFrameBuffertoScreen();
-
         this.setDepthTest(true);
         this.setDepthWrite(true);
-        // _gl.finish();
-
     };
 
     function renderPlugins(plugins, scene, camera) {
@@ -1319,9 +1251,73 @@ $3Dmol.Renderer = function(parameters) {
 
     }
 
+    this.initFrameBuffer = function() {
+        // only needed/works with webgl2
+        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+        let width = _viewportWidth;
+        let height = _viewportHeight;
+        
+        //when using framebuffer, always draw from origin, will shift the viewport when we render
+        _gl.enable(_gl.SCISSOR_TEST);
+        _gl.scissor(0,0, width, height);
+        _gl.viewport(0,0, width, height);
+        
+        
+        _targetTexture = _gl.createTexture();
+        _gl.bindTexture(_gl.TEXTURE_2D, _targetTexture);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, null);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+
+        // IMP: this requires an extension in webgl1, so if 2 is not available
+        // i'll have to not render to framebuffer at all and normally render to screen
+        // as it will already be of no use without the volumetric renderer
+        // i mean it can't be left out here that easily
+        _depthTexture = _gl.createTexture();
+        _gl.bindTexture(_gl.TEXTURE_2D, _depthTexture);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT32F, width, height, 0, _gl.DEPTH_COMPONENT, _gl.FLOAT, null);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
+
+        // Create and bind the framebuffer
+        _fb = _gl.createFramebuffer();
+        _gl.bindFramebuffer(_gl.FRAMEBUFFER, _fb);
+        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);
+        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, _depthTexture, 0);
+                            
+        // build screenshader
+        var screenshader = $3Dmol.ShaderLib.screenaa;
+        if(!_antialias) screenshader = $3Dmol.ShaderLib.screen;
+        
+        _aa_screenshader = buildProgram(screenshader.fragmentShader,
+            screenshader.vertexShader, screenshader.uniforms, {});  
+        _aa_vertexattribpos = _gl.getAttribLocation(_aa_screenshader, 'vertexPosition');
+        // create the vertex array and attrib array for the full screenquad
+        var verts = [
+            // First triangle:
+             1.0,  1.0,
+            -1.0,  1.0,
+            -1.0, -1.0,
+            // Second triangle:
+            -1.0, -1.0,
+             1.0, -1.0,
+             1.0,  1.0
+        ];
+        _aa_screenQuadVBO = _gl.createBuffer();
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, _aa_screenQuadVBO);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(verts), _gl.STATIC_DRAW);
+          
+    };    
+    
     this.renderFrameBuffertoScreen = function(){
         // only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1" || SKIPFRAMEBUFFER) return; 
+        if (_gl.getParameter(_gl.VERSION)[6] == "1" || _fb === null) return; 
+        
+        this.setViewport(); //draw texture in correct viewport
 
         // bind default framebuffer
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, null);
@@ -1330,33 +1326,27 @@ $3Dmol.Renderer = function(parameters) {
         _gl.cullFace(_gl.BACK);
 
         // set screen shader and use it
-        _gl.useProgram(this.offscreen.screenshader);
-        _currentProgram = this.offscreen.screenshader;
-        _gl.uniform2fv(_gl.getUniformLocation(_currentProgram, "dimensions"), 
-            [_gl.canvas.width, _gl.canvas.height]);
-
+        _gl.useProgram(_aa_screenshader);
+        _currentProgram = _aa_screenshader;
+        _gl.uniform2fv(_gl.getUniformLocation(_currentProgram, "dimensions"),  [_viewportWidth, _viewportHeight]);            
         // disable depth test
         this.setDepthTest(-1);
         this.setDepthWrite(-1);
 
         // bind vertexarray buffer and texture
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.offscreen.screenQuadVBO);
-        _gl.enableVertexAttribArray(this.offscreen.vertexattribpos);
-        _gl.vertexAttribPointer(this.offscreen.vertexattribpos, 2, _gl.FLOAT, false, 0, 0);
-
-        _gl.disable(_gl.SCISSOR_TEST);
-        _gl.viewport(0 , 0, _gl.canvas.width, _gl.canvas.height);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, _aa_screenQuadVBO);
+        _gl.enableVertexAttribArray(_aa_vertexattribpos);
+        _gl.vertexAttribPointer(_aa_vertexattribpos, 2, _gl.FLOAT, false, 0, 0);
 
         _gl.activeTexture(_gl.TEXTURE0);
-        _gl.bindTexture(_gl.TEXTURE_2D, this.offscreen.targetTexture);
+        _gl.bindTexture(_gl.TEXTURE_2D, _targetTexture);
 
         // Draw 6 vertexes => 2 triangles:
         _gl.drawArrays(_gl.TRIANGLES, 0, 6);
-
-        // then set the offscreenframebuffer again here!?
-        _gl.bindFramebuffer(_gl.FRAMEBUFFER, this.offscreen.fb);
+        
     };
 
+    
     this.initWebGLObjects = function(scene) {
 
         if (!scene.__webglObjects) {
@@ -1670,47 +1660,24 @@ $3Dmol.Renderer = function(parameters) {
 
     }
 
-    function isPowerOfTwo(value) {
-
-        return ((value & (value - 1)) === 0 ) && value != 1;
-
-    }
-
     // Fallback filters for non-power-of-2 textures
-
     function filterFallback() {
 
         return _gl.LINEAR;
-
     }
 
-    function setTextureParameters(textureType, texture, isImagePowerOfTwo) {
+    function setTextureParameters(textureType, texture) {
 
         if (textureType == _gl.TEXTURE_2D){
-            if (isImagePowerOfTwo) {
-
-                _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
-                        paramToGL(texture.wrapS));
-                _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T,
-                        paramToGL(texture.wrapT));
-
-                _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,
-                        paramToGL(texture.magFilter));
-                _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
-                        paramToGL(texture.minFilter));
-
-            } else {
-
-                _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
-                        _gl.CLAMP_TO_EDGE);
-                _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T,
-                        _gl.CLAMP_TO_EDGE);
-                _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,
-                        filterFallback(texture.magFilter));
-                _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
-                        filterFallback(texture.minFilter));
-
-            }
+            _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
+                    _gl.CLAMP_TO_EDGE);
+            _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T,
+                    _gl.CLAMP_TO_EDGE);
+            _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,
+                    filterFallback(texture.magFilter));
+            _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
+                    filterFallback(texture.minFilter));
+            
         } else { // 3Dtexture
             _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
                 _gl.CLAMP_TO_EDGE);
@@ -1752,13 +1719,9 @@ $3Dmol.Renderer = function(parameters) {
         if (texture.needsUpdate) {
 
             if (!texture.__webglInit) {
-
                 texture.__webglInit = true;
-
                 texture.addEventListener('dispose', onTextureDispose);
-
                 texture.__webglTexture = _gl.createTexture();
-
                 _this.info.memory.textures++;
 
             }
@@ -1770,41 +1733,32 @@ $3Dmol.Renderer = function(parameters) {
             _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
             _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
             _gl.pixelStorei(_gl.PACK_ALIGNMENT, texture.unpackAlignment);  
+            
+            var glFormat = paramToGL(texture.format), glType = paramToGL(texture.type);
 
-            var image = texture.image, isImagePowerOfTwo = isPowerOfTwo(image.width)
-                    && isPowerOfTwo(image.height), glFormat = paramToGL(texture.format), glType = paramToGL(texture.type);
-                    
-            if (!is3D) { 
-                setTextureParameters(_gl.TEXTURE_2D, texture, isImagePowerOfTwo);
-            } else {
-                setTextureParameters(_gl.TEXTURE_3D, texture, isImagePowerOfTwo && false);
-                _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.x, texture.image.size.y, texture.image.size.z, 0, _gl.RED, _gl.FLOAT, texture.image.data);
-            }
-            var mipmap, mipmaps = texture.mipmaps;
-            // regular Texture (image, video, canvas)
-
-            // use manually created mipmaps if available
-            // if there are no manual mipmaps
-            // set 0 level mipmap and then use GL to generate other mipmap
-            // levels
-
-            if (mipmaps.length > 0 && isImagePowerOfTwo) {
-
-                for (var i = 0, il = mipmaps.length; i < il; i++) {
-                    mipmap = mipmaps[i];
-                    _gl.texImage2D(_gl.TEXTURE_2D, i, glFormat, glFormat,
-                            glType, mipmap);
+            if(!is3D) {
+              var image = texture.image;
+              var width = image.width; //might not be defined
+              var height = image.height;
+              if(typeof(width) === 'undefined') { //if no width,
+                width = image.length;
+                if(glFormat == _gl.RGBA) {
+                    width /= 4; //each element takes up 4 bytes
                 }
-
-                texture.generateMipmaps = false;
+                height = 1;
+              }
+              setTextureParameters(_gl.TEXTURE_2D, texture);
+              if(_gl.getParameter(_gl.VERSION)[6] == "2") { //webgl2
+                _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, glType, texture.image);
+              } else {
+                _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, glFormat, glType, texture.image);
+              }
+            } else { //3D
+              setTextureParameters(_gl.TEXTURE_3D, texture);
+              _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.z, texture.image.size.y, 
+                  texture.image.size.x, 0, _gl.RED, _gl.FLOAT, texture.image.data);
             }
-            else if (!is3D)
-                _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, glFormat, glType,
-                        texture.image);
-
-            if (texture.generateMipmaps && isImagePowerOfTwo)
-                _gl.generateMipmap(_gl.TEXTURE_2D);
-
+                      
             texture.needsUpdate = false;
 
             if (texture.onUpdate)
@@ -1919,71 +1873,11 @@ $3Dmol.Renderer = function(parameters) {
         } catch (error) {
 
             console.error(error);
-        }
-    }
-
-    function initOffScreenRender(width, height){
-        // only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1" || SKIPFRAMEBUFFER) return; 
-
-        var targetTexture = _gl.createTexture();
-        _gl.bindTexture(_gl.TEXTURE_2D, targetTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width * this.devicePixelRatio, 
-            height * this.devicePixelRatio, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, null);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
-
-        // IMP: this requires an extension in webgl1, so if 2 is not available
-        // i'll have to not render to framebuffer at all and normally render to screen
-        // as it will already be of no use without the volumetric renderer
-        // i mean it can't be left out here that easily
-        var depthTexture = _gl.createTexture();
-        _gl.bindTexture(_gl.TEXTURE_2D, depthTexture);
-        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT32F, width * this.devicePixelRatio, 
-            height * this.devicePixelRatio, 0, _gl.DEPTH_COMPONENT, _gl.FLOAT, null);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
-        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
-
-        // Create and bind the framebuffer
-        var fb = _gl.createFramebuffer();
-        _gl.bindFramebuffer(_gl.FRAMEBUFFER, fb);
-        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, targetTexture, 0);
-        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, depthTexture, 0);
-                    
-        // build screenshader
-        var screenshader = $3Dmol.ShaderLib.screen;
-        screenshader = buildProgram(screenshader.fragmentShader,
-            screenshader.vertexShader, screenshader.uniforms, {});  
-        var vertexattribpos = _gl.getAttribLocation(screenshader, 'vertexPosition');
-            
-        // create the vertex array and attrib array for the full screenquad
-        var verts = [
-            // First triangle:
-             1.0,  1.0,
-            -1.0,  1.0,
-            -1.0, -1.0,
-            // Second triangle:
-            -1.0, -1.0,
-             1.0, -1.0,
-             1.0,  1.0
-        ];
-        var screenQuadVBO = _gl.createBuffer();
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, screenQuadVBO);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(verts), _gl.STATIC_DRAW);
+        }              
  
-        return {
-            targetTexture: targetTexture,
-            fb: fb,
-            depthTexture: depthTexture,
-            screenshader: screenshader,
-            screenQuadVBO: screenQuadVBO,
-            vertexattribpos: vertexattribpos
-        };
     }
+
+    
 
     function setDefaultGLState() {
 
