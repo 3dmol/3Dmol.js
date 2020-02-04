@@ -120,7 +120,9 @@ $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
  * @returns - value closest to provided coordinate; zero if coordinate invalid
  */
 $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
-    return this.data[this.getIndex(x,y,z)];   
+    let i = this.getIndex(x,y,z);
+    if(i < 0) return 0;
+    return this.data[i];   
 };
 
 $3Dmol.VolumeData.prototype.getCoordinates = function(index){
