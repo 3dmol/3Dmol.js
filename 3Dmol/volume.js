@@ -629,11 +629,11 @@ $3Dmol.GLVolumetricRender = (function() {
         let TRANSFER_BUFFER_SIZE = 256;
         var transferfunctionbuffer = [];
         // arrange points based on position property
-        transferfn.forEach(function(a) {a.pos = parseFloat(a.pos);});
-        transferfn.sort(function(a, b) { return a.pos - b.pos;});
-        let min = transferfn[0].pos;
+        transferfn.forEach(function(a) {a.value = parseFloat(a.value);});
+        transferfn.sort(function(a, b) { return a.value - b.value;});
+        let min = transferfn[0].value;
         if(transferfn.length == 0) transferfn.push(transferfn[0]); //need at least two
-        let max = transferfn[transferfn.length-1].pos;
+        let max = transferfn[transferfn.length-1].value;
 
         // create and fill an array of interpolated values per 2 colors
         var pos1, pos2, color1, color2, R, G, B, A, alpha1, alpha2;
@@ -642,8 +642,8 @@ $3Dmol.GLVolumetricRender = (function() {
             color2 = $3Dmol.CC.color(transferfn[i+1].color);
             alpha1 = transferfn[i].opacity;
             alpha2 = transferfn[i+1].opacity;
-            pos1 = Math.floor( (transferfn[i].pos - min) * TRANSFER_BUFFER_SIZE / (max - min) );
-            pos2 = Math.floor( (transferfn[i+1].pos-min) * TRANSFER_BUFFER_SIZE / (max - min) );
+            pos1 = Math.floor( (transferfn[i].value - min) * TRANSFER_BUFFER_SIZE / (max - min) );
+            pos2 = Math.floor( (transferfn[i+1].value-min) * TRANSFER_BUFFER_SIZE / (max - min) );
             if (pos1 == pos2) 
                 continue;
             R = interpolateArray([color1.r*255, color2.r*255], pos2-pos1);
@@ -664,6 +664,10 @@ $3Dmol.GLVolumetricRender = (function() {
         //need to create transformation matrix that maps model points into
         //texture space
         //TODO: support non-orthnombic boxes
+        if(data.matrix) {
+          console.log("ERROR: Non-orthonombic boxes (or file formats that specify transformation matrices) are not supported with volumetric rendering yet.");
+          return;
+        }
         var texmatrix = new $3Dmol.Matrix4().identity();
         var xoff = data.unit.x*data.size.x;
         var yoff = data.unit.y*data.size.y;

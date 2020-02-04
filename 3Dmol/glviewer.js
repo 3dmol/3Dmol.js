@@ -2584,18 +2584,6 @@ $3Dmol.GLViewer = (function() {
          * 
          * @return {$3Dmol.GLShape}
          * 
-         @example 
-         viewer.addVolumetricRender(voldata, {
-                transferfn:[
-                    { color: "#0000ff", opacity: 1.0, pos: -0.2 },
-                    { color: "#0000ff", opacity: 0, pos: -0.005 }, 
-                    { color: "#ff0000", opacity: 0, pos: 0.005 }, 
-                    { color: "#ff0000", opacity: 1.0, pos: 0.2 },
-                ]
-                ],
-                coords: [{x: 0, y: 0, z: 0}], 
-                seldist: 1.7
-            });
          */
         this.addVolumetricRender = function(data,  spec) {            
             spec = spec || {};

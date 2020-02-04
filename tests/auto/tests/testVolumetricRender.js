@@ -37,10 +37,10 @@ $.get('data/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / data
     var voldata = new $3Dmol.VolumeData(data, "cube");
     viewer.addVolumetricRender(voldata, {
         transferfn:[
-            { color: "#0000ff", opacity: .1, pos: -0.1 }, //-0.03
-            { color: "#ffffff", opacity: 0, pos: -0.005 }, 
-            { color: "#ffffff", opacity: 0, pos: 0.005 }, 
-            { color: "#ff0000", opacity: .1, pos: 0.1 }, // 1
+            { color: "#0000ff", opacity: .1, value: -0.1 }, 
+            { color: "#ffffff", opacity: 0, value: -0.005 }, 
+            { color: "#ffffff", opacity: 0, value: 0.005 }, 
+            { color: "#ff0000", opacity: .1, value: 0.1 }, 
         ],        
         // coords: [{x: 0, y: 0, z: 0}], 
         // seldist: 1.7
