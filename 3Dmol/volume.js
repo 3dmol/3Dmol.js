@@ -138,14 +138,8 @@ $3Dmol.VolumeData.prototype.getCoordinates = function(index){
     x += this.origin.x;
     y += this.origin.y;
     z += this.origin.z;
-    //console.log("getCoordinates : "+x+" , "+y+" , "+z);
-    //console.log("val : "+data.getVal(x,y,z));
-    //console.log("actual : "+data.data[index]);
+
     return {x:x,y:y,z:z};
-    /*
-    Y = (int)(index / Width)
-    X = index - (Y * Width)
-    */
 };
 
 /*
@@ -663,13 +657,6 @@ $3Dmol.GLVolumetricRender = (function() {
 
         transferfunctionbuffer = new Uint8ClampedArray(transferfunctionbuffer);
 
-        //need to create transformation matrix that maps model points into
-        //texture space
-        //TODO: support non-orthnombic boxes
-        if(data.matrix) {
-          console.log("ERROR: Non-orthonombic boxes (or file formats that specify transformation matrices) are not supported with volumetric rendering yet.");
-          return;
-        }
         var texmatrix = new $3Dmol.Matrix4().identity();
         var xoff = data.unit.x*data.size.x;
         var yoff = data.unit.y*data.size.y;
@@ -686,15 +673,15 @@ $3Dmol.GLVolumetricRender = (function() {
         var maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);
         //use GLShape to construct box
         var shape = new $3Dmol.GLShape();
-        shape.addBox({corner: data.origin, dimensions: {w: xoff, h: yoff, d: zoff}});
-     /*   shape.addCustom({vertexArr: [ {x:data.origin.x, y:data.origin.y,z:data.origin.z+zoff},
-                            {x:data.origin.x+xoff,y:data.origin.y,z:data.origin.z+zoff},
-                            {x:data.origin.x,y:data.origin.y+yoff,z:data.origin.z+zoff},
-                            {x:data.origin.x, y:data.origin.y,z:data.origin.z},
-                            {x:data.origin.x+xoff,y:data.origin.y,z:data.origin.z},
-                            {x:data.origin.x,y:data.origin.y+yoff,z:data.origin.z}
-                            ],
-          faceArr: [0,2,1,3,5,4]});*/
+        
+        //need to create transformation matrix that maps model points into
+        //texture space
+        //TODO: support non-orthnombic boxes
+        if(data.matrix) {
+          console.log("ERROR: Non-orthonombic boxes (or file formats that specify transformation matrices) are not supported with volumetric rendering yet.");         
+        } else {
+            shape.addBox({corner: data.origin, dimensions: {w: xoff, h: yoff, d: zoff}});
+        }
         var geo = shape.finalize();
 
 
