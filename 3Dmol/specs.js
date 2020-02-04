@@ -185,9 +185,11 @@
  * VolumetricRenderer style specification
  * @typedef VolumetricRendererSpec
  * @prop {list} transferfn - list of objects containing @color, @opacity and @value properties to specify color per voxel data value
- * @prop {list} coords - coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates
- * @prop {number} seldist - distance around coords to include data [default = 2.0]
+ * @prop {number} subsamples - number of times to sample each voxel approximately (default 5)
  */
+    //TODO: implement pruning of data, should start with box
+    // @prop {list} coords - coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates
+    // @prop {number} seldist - distance around coords to include data [default = 2.0]
 
 /**
  * GLShape style specification

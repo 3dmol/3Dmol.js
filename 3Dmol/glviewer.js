@@ -19,8 +19,9 @@
  * @param config.col
  * @param config.rows
  * @param config.cols
- * @param config.canvases
+ * @param config.canvas
  * @param config.viewers
+ * @param {boolean} config.antialias
  * @param {boolean} config.control_all
  * @param {boolean} config.orthographic
  */
@@ -79,7 +80,7 @@ $3Dmol.GLViewer = (function() {
 
         var linkedViewers = [];
         var renderer = new $3Dmol.Renderer({
-            antialias : true,
+            antialias : config.antialias,
             preserveDrawingBuffer: true, //so we can export images
             premultipliedAlpha : false,/* more traditional compositing with background */
             id:config.id,
