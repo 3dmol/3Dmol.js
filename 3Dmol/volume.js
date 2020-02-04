@@ -624,6 +624,7 @@ $3Dmol.GLVolumetricRender = (function() {
         var transferfn = Object.assign([],spec.transferfn);
         var shapeObj = null;
         var renderedShapeObj = null;
+        var subsamples = spec.subsamples || 5.0;
 
         let TRANSFER_BUFFER_SIZE = 256;
         var transferfunctionbuffer = [];
@@ -728,7 +729,8 @@ $3Dmol.GLVolumetricRender = (function() {
                 extent: extent,
                 maxdepth: maxdepth,
                 texmatrix: texmatrix,
-                unit: minunit
+                unit: minunit,
+                subsamples: subsamples
             });                         
             
             var mesh = new $3Dmol.Mesh(geo, material);

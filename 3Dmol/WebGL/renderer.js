@@ -147,6 +147,8 @@ $3Dmol.Renderer = function(parameters) {
     this.context = _gl;
     var _extInstanced = _gl.getExtension("ANGLE_instanced_arrays");
     var _extFragDepth = _gl.getExtension("EXT_frag_depth");
+    var _extFloatLinear = _gl.getExtension('OES_texture_float_linear');
+    var _extColorBufferFloat = _gl.getExtension('EXT_color_buffer_float');
 
     // API
     
@@ -830,6 +832,7 @@ $3Dmol.Renderer = function(parameters) {
                 m_uniforms.maxdepth.value = object.material.maxdepth*invscale;
                 m_uniforms.transfermax.value = object.material.transfermax;
                 m_uniforms.transfermin.value = object.material.transfermin;
+                m_uniforms.subsamples.value = object.material.subsamples;
 
                 renderer.setTexture(object.material.transferfn, 4, false);
                 renderer.setTexture(object.material.map, 3, true);
@@ -1710,10 +1713,16 @@ $3Dmol.Renderer = function(parameters) {
                 _gl.CLAMP_TO_EDGE);
             _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_R,
                 _gl.CLAMP_TO_EDGE);
-            _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,
-                paramToGL(texture.magFilter));
-            _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
-                paramToGL(texture.minFilter));
+                
+            if(_extColorBufferFloat && _extFloatLinear) {
+              //linear interpolation isn't supported by default (despite being the default??)
+              _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,_gl.LINEAR);
+              _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,_gl.LINEAR);
+            } else {
+              _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,_gl.NEAREST);
+              _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,_gl.NEAREST);
+            }
+                
         }
 
     }
