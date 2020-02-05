@@ -29,10 +29,8 @@ $3Dmol.Renderer = function(parameters) {
             ;
     this.domElement = _canvas;    
     this.context = null;
-    this.devicePixelRatio = parameters.devicePixelRatio !== undefined ? parameters.devicePixelRatio
-        : (window.devicePixelRatio !== undefined) ? window.devicePixelRatio : 1;
-
-    // clearing
+    this.devicePixelRatio = 1.0; //set in setSize
+        
     _canvas.id=parameters.id;
     this.autoClear = true;
     this.autoClearColor = true;
@@ -128,10 +126,10 @@ $3Dmol.Renderer = function(parameters) {
 
     };
 
-    //antialias related variables
-    var _aa_screenshader = null;
-    var _aa_vertexattribpos = null;
-    var _aa_screenQuadVBO = null;
+    //screensshader related variables
+    var _screenshader = null;
+    var _vertexattribpos = null;
+    var _screenQuadVBO = null;
     
     //framebuffer variables
     var _fb = null;
@@ -154,7 +152,7 @@ $3Dmol.Renderer = function(parameters) {
     
     this.supportedExtensions = function() {
         return {supportsAIA: Boolean(_extInstanced),
-            supportsImposters:  Boolean(_extFragDepth) || _gl.getParameter(_gl.VERSION)[6] == "2"
+            supportsImposters:  Boolean(_extFragDepth) || !isWebGL1()
             };
     };
     
@@ -199,8 +197,13 @@ $3Dmol.Renderer = function(parameters) {
 
         }
     };
-    
+        
     this.setSize = function(width, height) {
+        //zooming (in the browser) changes the pixel ratio and width/height
+        this.devicePixelRatio = (window.devicePixelRatio !== undefined) ? window.devicePixelRatio : 1;
+        //with antialiasing on (which doesn't seem to do much), render at double rsolution to eliminate jaggies
+        if(_antialias) this.devicePixelRatio *= 2.0;
+        
         if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
             var wid = width/this.cols;
             var hei = height/this.rows;
@@ -301,9 +304,7 @@ $3Dmol.Renderer = function(parameters) {
             }
 
             _oldDepthTest = depthTest;
-
         }
-
     };
 
     this.setDepthWrite = function(depthWrite) {
@@ -312,9 +313,7 @@ $3Dmol.Renderer = function(parameters) {
 
             _gl.depthMask(depthWrite);
             _oldDepthWrite = depthWrite;
-
         }
-
     };
 
     this.setBlending = function(blending) {
@@ -327,30 +326,23 @@ $3Dmol.Renderer = function(parameters) {
             _gl.blendEquationSeparate(_gl.FUNC_ADD, _gl.FUNC_ADD);
             _gl.blendFuncSeparate(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA,
                     _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA);
-
         }
-
         _oldBlending = blending;
     };
 
     // Plugins
 
     this.addPostPlugin = function(plugin) {
-
         plugin.init(this);
         this.renderPluginsPost.push(plugin);
-
     };
 
     function enableAttribute(attribute) {
 
         if (!_enabledAttributes[attribute]) {
-
             _gl.enableVertexAttribArray(attribute);
             _enabledAttributes[attribute] = true;
-
         }
-
     }
 
     function disableAttributes() {
@@ -361,11 +353,8 @@ $3Dmol.Renderer = function(parameters) {
 
                 _gl.disableVertexAttribArray(attribute);
                 _enabledAttributes[attribute] = false;
-
             }
-
         }
-
     }
 
     function setPolygonOffset(polygonOffset) {
@@ -385,7 +374,6 @@ $3Dmol.Renderer = function(parameters) {
             _gl.lineWidth(width);
             _oldLineWidth = width;
         }
-
     }
     
     var deallocateGeometry = function(geometry) {
@@ -551,7 +539,7 @@ $3Dmol.Renderer = function(parameters) {
 
         var shader;
 
-        if(_gl.getParameter(_gl.VERSION)[6] == "2" && !str.startsWith("#version")) {
+        if(!isWebGL1() && !str.startsWith("#version")) {
             //convert webgl1 to webgl2, unless a version is already explicit
             str = str.replace(/gl_FragDepthEXT/g,"gl_FragDepth");
             if(type == "fragment") {
@@ -617,7 +605,7 @@ $3Dmol.Renderer = function(parameters) {
         }
 
         // check if program requires webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] != "2"){
+        if (isWebGL1()){
             if (parameters.volumetric) 
                 throw new Error("Volumetric rendering requires webgl2 which is not supported by your hardware.");
         }
@@ -637,7 +625,7 @@ $3Dmol.Renderer = function(parameters) {
 
         var prefix_fragment = [
                 parameters.volumetric ? "#version 300 es" : "",
-                parameters.fragdepth &&_gl.getParameter(_gl.VERSION)[6] == "1" ? "#extension GL_EXT_frag_depth: enable"
+                parameters.fragdepth && isWebGL1() ? "#extension GL_EXT_frag_depth: enable"
                         : "",
                 parameters.wireframe ? "#define WIREFRAME 1" : "", prefix ]
                 .join("\n");
@@ -1267,7 +1255,7 @@ $3Dmol.Renderer = function(parameters) {
     //do not allocate new textures
     this.reinitFrameBuffer = function() {
         // only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+        if (isWebGL1()) return; 
 
         // Create and bind the framebuffer
         _fb = _gl.createFramebuffer();
@@ -1277,7 +1265,7 @@ $3Dmol.Renderer = function(parameters) {
     
     this.initFrameBuffer = function() {
         // only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1") return; 
+        if (isWebGL1()) return; 
         let width = _viewportWidth;
         let height = _viewportHeight;
         
@@ -1314,12 +1302,11 @@ $3Dmol.Renderer = function(parameters) {
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, _depthTexture, 0);
                             
         // build screenshader
-        var screenshader = $3Dmol.ShaderLib.screenaa;
-        if(!_antialias) screenshader = $3Dmol.ShaderLib.screen;
+        var screenshader = $3Dmol.ShaderLib.screen;
         
-        _aa_screenshader = buildProgram(screenshader.fragmentShader,
+        _screenshader = buildProgram(screenshader.fragmentShader,
             screenshader.vertexShader, screenshader.uniforms, {});  
-        _aa_vertexattribpos = _gl.getAttribLocation(_aa_screenshader, 'vertexPosition');
+        _vertexattribpos = _gl.getAttribLocation(_screenshader, 'vertexPosition');
         // create the vertex array and attrib array for the full screenquad
         var verts = [
             // First triangle:
@@ -1331,15 +1318,15 @@ $3Dmol.Renderer = function(parameters) {
              1.0, -1.0,
              1.0,  1.0
         ];
-        _aa_screenQuadVBO = _gl.createBuffer();
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, _aa_screenQuadVBO);
+        _screenQuadVBO = _gl.createBuffer();
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, _screenQuadVBO);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(verts), _gl.STATIC_DRAW);
           
     };    
     
     this.renderFrameBuffertoScreen = function(){
         // only needed/works with webgl2
-        if (_gl.getParameter(_gl.VERSION)[6] == "1" || _fb === null) return; 
+        if (isWebGL1() || _fb === null) return; 
         
         this.setViewport(); //draw texture in correct viewport
 
@@ -1350,17 +1337,16 @@ $3Dmol.Renderer = function(parameters) {
         _gl.cullFace(_gl.BACK);
 
         // set screen shader and use it
-        _gl.useProgram(_aa_screenshader);
-        _currentProgram = _aa_screenshader;
-        _gl.uniform2fv(_gl.getUniformLocation(_currentProgram, "dimensions"),  [_viewportWidth, _viewportHeight]);            
+        _gl.useProgram(_screenshader);
+        _currentProgram = _screenshader;
         // disable depth test
         this.setDepthTest(-1);
         this.setDepthWrite(-1);
 
         // bind vertexarray buffer and texture
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, _aa_screenQuadVBO);
-        _gl.enableVertexAttribArray(_aa_vertexattribpos);
-        _gl.vertexAttribPointer(_aa_vertexattribpos, 2, _gl.FLOAT, false, 0, 0);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, _screenQuadVBO);
+        _gl.enableVertexAttribArray(_vertexattribpos);
+        _gl.vertexAttribPointer(_vertexattribpos, 2, _gl.FLOAT, false, 0, 0);
 
         _gl.activeTexture(_gl.TEXTURE0);
         _gl.bindTexture(_gl.TEXTURE_2D, _targetTexture);
@@ -1782,7 +1768,7 @@ $3Dmol.Renderer = function(parameters) {
                 height = 1;
               }
               setTextureParameters(_gl.TEXTURE_2D, texture);
-              if(_gl.getParameter(_gl.VERSION)[6] == "2") { //webgl2
+              if(!isWebGL1()) { //webgl2
                 _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, glType, texture.image);
               } else {
                 _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, glFormat, glType, texture.image);
@@ -1911,7 +1897,11 @@ $3Dmol.Renderer = function(parameters) {
  
     }
 
-    
+    function isWebGL1() {
+      var vers = _gl.getParameter(_gl.VERSION);
+      if(vers == null) return true; //lost context
+      return vers[6] == "1"; //indexing into string
+    }
 
     function setDefaultGLState() {
 

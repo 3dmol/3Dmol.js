@@ -68,6 +68,7 @@ $3Dmol.GLViewer = (function() {
         if(config.hoverDuration != undefined) {
             hoverDuration = config.hoverDuration;
         }
+        if(config.antialias === undefined) config.antialias = true;
         var WIDTH = container.width();
         var HEIGHT = container.height();
 
