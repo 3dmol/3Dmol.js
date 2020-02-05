@@ -54,7 +54,7 @@ $(document).ready(function(){
     function createRow(key){
 
         var tr = $('<tr class="examplerow">').prop('id',key+"_row");
-        $('<td class="label">').appendTo(tr).append('<p>'+key+'</p>');
+        $('<td class="label">').appendTo(tr).append('<a class="testname">'+key+'</a>');
         $('<td class="rendered">').appendTo(tr);
         $('<td class="reference">').appendTo(tr).append('<img src="imgs/'+key+'.png">');
         $('<td class="difference">').appendTo(tr);
@@ -177,7 +177,7 @@ $(document).ready(function(){
                 var canvas=viewer.getCanvas(); //$("canvas#"+key).get(0);
                 //creates an image for the canvas
                 var canvasImageData = imageFromWebGlCanvas(canvas);
-                var canvasImage=$("<img class='renderedImage'>").attr('src',canvasImageData);
+                var canvasImage=$("<img name="+key+" class='renderedImage'>").attr('src',canvasImageData);
 
                 //click event for canvas
                 canvasImage.click(function(){
@@ -185,6 +185,8 @@ $(document).ready(function(){
                     win.location="generate_test.cgi?test="+key;
                 });
                 tableRow.find('.rendered').append(canvasImage);
+                tableRow.find('a.testname').attr('href',canvasImageData);
+                tableRow.find('a.testname').attr('download',key+".png");
 
                 var differenceImage=$('<img>');
                 var differ=0;
