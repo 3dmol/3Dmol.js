@@ -65,7 +65,7 @@ $3Dmol.GLViewer = (function() {
         var current_hover = null;
         var hoverDuration = 500;
         var viewer_frame = 0;
-        if(typeof(config.hoverDuration) != undefined) {
+        if(config.hoverDuration != undefined) {
             hoverDuration = config.hoverDuration;
         }
         var WIDTH = container.width();
