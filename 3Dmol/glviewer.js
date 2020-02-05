@@ -2595,6 +2595,13 @@ $3Dmol.GLViewer = (function() {
             return s;
         };
         
+        /**
+         * Return true if volumetric rendering is supported (WebGL 2.0 required)
+         */
+        this.hasVolumetricRender = function() {
+          return renderer.supportsVolumetric();  
+        };
+        
         this.enableFog = function(fog){
             if(fog){
                 scene.fog=new $3Dmol.Fog(bgColor, 100, 200);

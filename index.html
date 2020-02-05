@@ -6,7 +6,7 @@
 	<title>3Dmol.js - A modern, object-oriented JavaScript library for visualizing molecular data</title>
 
 	<link type="text/css" rel="stylesheet" href="css/index.css">
-	<script src="build/3Dmol-min.js"></script>
+	<script src="build/3Dmol.js"></script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -23,17 +23,17 @@
             var initSDF = function(viewer) {
                 var s1 = viewer.addSphere({radius: 1.25, center: {x:-6.89, y:0.75, z:0.35}});
                 s1.wireframe = true; s1.color = $3Dmol.CC.color("purple");
-		viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                 var s2 = viewer.addSphere({radius: 1.25, center: {x:1.32, y:2.91, z:-1.49}});
                 s2.wireframe = true; s2.color = $3Dmol.CC.color("purple");
-		viewer.addLabel("Aromatic", {position: {x:1.32, y:2.91, z:-1.49}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                viewer.addLabel("Aromatic", {position: {x:1.32, y:2.91, z:-1.49}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
 
                 var s3 = viewer.addSphere({radius: 0.5, center: {x:-0.42, y:-0.48, z:0.64}});
                 s3.wireframe = true; s3.color = $3Dmol.CC.color(0xbbbbbb);
 
                 var a = viewer.addArrow({start: {x:-0.4217, y:-0.4795, z:0.6395}, end: {x:-0.613, y:-0.891, z:-0.198},
                                            radius: 0.1});
- 		viewer.addLabel("Hydrogen Donor", {position: {x:-0.4217, y:-0.4795, z:0.6395}, backgroundColor: 0x808080, backgroundOpacity:0.8});
+                viewer.addLabel("Hydrogen Donor", {position: {x:-0.4217, y:-0.4795, z:0.6395}, backgroundColor: 0x808080, backgroundOpacity:0.8});
                 a.color = $3Dmol.CC.color(0xeeeeee);
 
                 viewer.render();
@@ -43,20 +43,27 @@
             var initShapes = function(viewer) {
                 $.get('tests/test_structs/benzene-homo.cube', function(data){
                     var voldata = new $3Dmol.VolumeData(data, "cube");
-                    viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
-                    viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
+                    if(viewer.hasVolumetricRender()) {
+                        viewer.addVolumetricRender(voldata, {transferfn: [{color: "blue", opacity: .075, value: 0.1},
+                                                                        {color: "blue", opacity: .001, value: 0.01},
+                                                                        {color: "white", opacity: 0, value: 0},
+                                                                        {color: "red", opacity: .001, value: -0.01},
+                                                                        {color: "red", opacity: .075, value: -0.1}]});
+                    } else {
+                        viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
+                        viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
+                    }
                     viewer.setStyle({}, {stick:{}});
                     viewer.zoomTo();
-                    //viewer.zoom(.75);
                     viewer.render();
                 }, 'text');
             };
             
             var init1YCR = function(viewer) {
-            	viewer.addStyle({}, {"line":{}});
-            	viewer.addSurface($3Dmol.SurfaceType.VDW, {'opacity':0.8, colorscheme: 'whiteCarbon'}, {"chain":"A"},{"chain":"A"});
-            	viewer.addStyle({"chain":"B"}, {"stick":{colorscheme:'Jmol'}});
-            	viewer.zoomTo({"chain":"B"});
+                viewer.addStyle({}, {"line":{}});
+                viewer.addSurface($3Dmol.SurfaceType.VDW, {'opacity':0.8, colorscheme: 'whiteCarbon'}, {"chain":"A"},{"chain":"A"});
+                viewer.addStyle({"chain":"B"}, {"stick":{colorscheme:'Jmol'}});
+                viewer.zoomTo({"chain":"B"});
             };
 
             var addSurf = function(viewer) {

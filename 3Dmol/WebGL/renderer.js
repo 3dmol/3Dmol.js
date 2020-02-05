@@ -1903,6 +1903,8 @@ $3Dmol.Renderer = function(parameters) {
       if(vers == null) return true; //lost context
       return vers[6] == "1"; //indexing into string
     }
+    
+    this.supportsVolumetric = function() { return !isWebGL1(); }
 
     function setDefaultGLState() {
 
