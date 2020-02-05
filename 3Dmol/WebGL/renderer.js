@@ -202,7 +202,8 @@ $3Dmol.Renderer = function(parameters) {
         //zooming (in the browser) changes the pixel ratio and width/height
         this.devicePixelRatio = (window.devicePixelRatio !== undefined) ? window.devicePixelRatio : 1;
         //with antialiasing on (which doesn't seem to do much), render at double rsolution to eliminate jaggies
-        if(_antialias) this.devicePixelRatio *= 2.0;
+	//my iphone crashes if we do though, so as a hacky workaround, don't do it with retina displays
+        if(_antialias && this.devicePixelRatio < 2.0) this.devicePixelRatio *= 2.0;
         
         if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
             var wid = width/this.cols;
