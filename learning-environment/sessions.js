@@ -328,14 +328,13 @@ var initSessions = function() {
                        glviewer.removeLabel(atom.hoverlabel);
                        if(current_hover_label == atom.hoverlabel) current_hover_label = null;
                        delete atom.hoverlabel;
-                   }
-                   
-                   //send clicked atom to server
-                   socket.emit('query update', {
-                       name : session_name,
-                       selected : getClicked()
-                   });
+                   }                  
                }
+               //send clicked atoms to server
+               socket.emit('query update', {
+                   name : session_name,
+                   selected : getClicked()
+               });               
             });
             
             glviewer.render(); //calling render is required to register clickables - should probably fix that
