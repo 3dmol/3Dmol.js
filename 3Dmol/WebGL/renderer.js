@@ -69,7 +69,7 @@ $3Dmol.Renderer = function(parameters) {
     // internal properties
     var _this = this,
     _programs = [], _programs_counter = 0,
-    
+    _webglversion = 1,
     // internal state cache
     _currentProgram = null,
     _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
@@ -227,6 +227,7 @@ $3Dmol.Renderer = function(parameters) {
 
             _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
         }
+        this.initFrameBuffer();
     };
 
     this.clear = function(color, depth, stencil) {
@@ -348,7 +349,7 @@ $3Dmol.Renderer = function(parameters) {
 
     function disableAttributes() {
 
-        for ( var attribute in _enabledAttributes) {
+        for ( let attribute in _enabledAttributes) {
 
             if (_enabledAttributes[attribute]) {
 
@@ -1148,7 +1149,8 @@ $3Dmol.Renderer = function(parameters) {
         _currentWidth = _viewportWidth;
         _currentHeight = _viewportHeight;
         this.setViewport();
-        this.initFrameBuffer();
+        this.setFrameBuffer();
+        
         if (this.autoClear || forceClear) {
             _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha);
             this.clear(this.autoClearColor, this.autoClearDepth, this.autoClearStencil);
@@ -1264,9 +1266,9 @@ $3Dmol.Renderer = function(parameters) {
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);                                      
     };    
     
-    this.initFrameBuffer = function() {
-        // only needed/works with webgl2
-        if (isWebGL1()) return; 
+    //setup framebuffer for drawing into, assumes buffers already allocated
+    this.setFrameBuffer = function() {
+        if (isWebGL1() || !_fb) return; 
         let width = _viewportWidth;
         let height = _viewportHeight;
         
@@ -1275,33 +1277,48 @@ $3Dmol.Renderer = function(parameters) {
         _gl.scissor(0,0, width, height);
         _gl.viewport(0,0, width, height);
         
-        
-        _targetTexture = _gl.createTexture();
+        //color texture
         _gl.bindTexture(_gl.TEXTURE_2D, _targetTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, null);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
-
-        // IMP: this requires an extension in webgl1, so if 2 is not available
-        // i'll have to not render to framebuffer at all and normally render to screen
-        // as it will already be of no use without the volumetric renderer
-        // i mean it can't be left out here that easily
-        _depthTexture = _gl.createTexture();
+        
+        //depth texture
         _gl.bindTexture(_gl.TEXTURE_2D, _depthTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT32F, width, height, 0, _gl.DEPTH_COMPONENT, _gl.FLOAT, null);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
-
-        // Create and bind the framebuffer
-        _fb = _gl.createFramebuffer();
+        
+        //bind fb
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, _fb);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, _depthTexture, 0);
-                            
+          
+    };
+
+    //allocate buffers for framebuffer, needs to be called with every resize
+    this.initFrameBuffer = function() {
+        // only needed/works with webgl2
+        if (isWebGL1()) return; 
+        
+        
+        let width = _viewportWidth;
+        let height = _viewportHeight;
+        
+        //when using framebuffer, always draw from origin, will shift the viewport when we render
+        _gl.enable(_gl.SCISSOR_TEST);
+        _gl.scissor(0,0, width, height);
+        _gl.viewport(0,0, width, height);
+        
+        //create textures and frame buffer, will be initialized in setFrameBuffer
+        _targetTexture = _gl.createTexture();
+        _depthTexture = _gl.createTexture();
+        _fb = _gl.createFramebuffer();
+       
         // build screenshader
         var screenshader = $3Dmol.ShaderLib.screen;
         
@@ -1713,13 +1730,16 @@ $3Dmol.Renderer = function(parameters) {
         }
 
     }
-    this.getXYRatio = function(){
-       if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
-            return [this.cols,this.rows];
-       }else{
-            return [1,1];
-       }
+    
+    this.getYRatio = function() {
+      if(this.rows !== undefined && this.row !== undefined) return this.rows;
+      return 1;
     };
+    
+    this.getXRatio = function() {
+        if(this.cols !== undefined && this.col !== undefined) return this.cols;
+        return 1;
+    };     
     
     this.getAspect = function(width,height){
         if(width == undefined || height == undefined){
@@ -1891,6 +1911,8 @@ $3Dmol.Renderer = function(parameters) {
                     }
                 }
             }
+            var vers = _gl.getParameter(_gl.VERSION);
+            _webglversion = parseInt(vers[6]);
         } catch (error) {
 
             console.error(error);
@@ -1899,9 +1921,7 @@ $3Dmol.Renderer = function(parameters) {
     }
 
     function isWebGL1() {
-      var vers = _gl.getParameter(_gl.VERSION);
-      if(vers == null) return true; //lost context
-      return vers[6] == "1"; //indexing into string
+      return _webglversion == 1;
     }
     
     this.supportsVolumetric = function() { return !isWebGL1(); };

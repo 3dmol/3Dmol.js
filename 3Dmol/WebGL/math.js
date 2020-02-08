@@ -1069,7 +1069,26 @@ $3Dmol.Matrix4.prototype = {
     },
 
     isReflected : function() {
-        return this.matrix3FromTopLeft().getDeterminant() < 0;
+        let te = this.elements;                
+        
+        let m0 = te[0],
+            m3 = te[4],
+            m6 = te[8],
+            m1 = te[1],
+            m4 = te[5],
+            m7 = te[9],
+            m2 = te[2],
+            m5 = te[6],
+            m8 = te[10];                
+        
+        let determinant = m0 * m4 * m8 // +aei
+                + m1 * m5 * m6 // +bfg
+                + m2 * m3 * m7 // +cdh
+                - m2 * m4 * m6 // -ceg
+                - m1 * m3 * m8 // -bdi
+                - m0 * m5 * m7;// -afh
+                
+        return determinant < 0;
     },
 
     compose : function() {

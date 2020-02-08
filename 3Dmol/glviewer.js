@@ -69,8 +69,35 @@ $3Dmol.GLViewer = (function() {
             hoverDuration = config.hoverDuration;
         }
         if(config.antialias === undefined) config.antialias = true;
-        var WIDTH = container.width();
-        var HEIGHT = container.height();
+        
+        //reimplement jquery getwidth/height        
+        var getRect = function() {
+          let div = container[0];
+          let rect = div.getBoundingClientRect();
+          if(rect.width == 0 && rect.height == 0 && div.style.display === 'none' ) {
+            let oldpos = div.style.position;
+            let oldvis = div.style.visibility;
+            div.style.display = 'block';
+            div.style.visibility = 'hidden';
+            div.style.position = 'absolute';
+            rect = div.getBoundingClientRect();
+            div.style.display = 'none';
+            div.style.visibility = oldvis;
+            div.style.position = oldpos;
+          }
+          return rect;          
+        };
+        
+        var getWidth = function() {
+          return getRect().width;
+        };
+        
+        var getHeight = function() {
+          return getRect().height;
+        };
+        
+        var WIDTH = getWidth();
+        var HEIGHT = getHeight();
 
         var viewChangeCallback = null;
         var stateChangeCallback = null;
@@ -362,21 +389,32 @@ $3Dmol.GLViewer = (function() {
         };
         
         //check targetTouches as well
-        var getXY = function(ev) {
-            var x = ev.pageX, y = ev.pageY;
+        var getX = function(ev) {
+            var x = ev.pageX;
             if(x == undefined) x = ev.originalEvent.pageX; //firefox
-            if(y == undefined) y = ev.originalEvent.pageY;
             if (ev.originalEvent.targetTouches &&
                     ev.originalEvent.targetTouches[0]) {
                 x = ev.originalEvent.targetTouches[0].pageX;
-                y = ev.originalEvent.targetTouches[0].pageY;
             }
             else if (ev.originalEvent.changedTouches &&
                     ev.originalEvent.changedTouches[0]) {
                 x = ev.originalEvent.changedTouches[0].pageX;
+            }            
+            return x;
+        };
+        
+        var getY = function(ev) {
+            var y = ev.pageY;
+            if(y == undefined) y = ev.originalEvent.pageY;
+            if (ev.originalEvent.targetTouches &&
+                    ev.originalEvent.targetTouches[0]) {
+                y = ev.originalEvent.targetTouches[0].pageY;
+            }
+            else if (ev.originalEvent.changedTouches &&
+                    ev.originalEvent.changedTouches[0]) {
                 y = ev.originalEvent.changedTouches[0].pageY;
             }            
-            return [x,y];
+            return y;
         };
 
         //for a given screen (x,y) displacement return model displacement 
@@ -393,16 +431,27 @@ $3Dmol.GLViewer = (function() {
             t.z = 0;                            
             t.applyQuaternion(q);
             return t;
+        };        
+        
+        //return offset of container
+        var canvasOffset = function() {
+          let canvas = glDOM.get(0);
+          let rect = canvas.getBoundingClientRect();
+          let doc = canvas.ownerDocument;
+          let docElem = doc.documentElement;
+          let win = doc.defaultView;
+          return {
+            top: rect.top + win.pageYOffset - docElem.clientTop,
+            left: rect.left + win.pageXOffset - docElem.clientLeft
+          };
         };
         
         //for grid viewers, return true if point is in this viewer
         var isInViewer = function(x,y) {
-            var WIDTH = container.width();
-            var HEIGHT = container.height(); 
             if(viewers != undefined && !control_all){
                 var width = WIDTH/cols;
                 var height = HEIGHT/rows;
-                var offset = $('canvas',container).offset();
+                var offset = canvasOffset();
                 var relx = (x - offset.left);
                 var rely = (y - offset.top) ;
                     
@@ -420,11 +469,10 @@ $3Dmol.GLViewer = (function() {
         $('body').bind('mouseup touchend', function(ev) {
             // handle selection
             if(isDragging && scene) { //saw mousedown, haven't moved
-                var xy = getXY(ev);
-                var x = xy[0];
-                var y = xy[1];
+                var x = getX(ev);
+                var y = getY(ev);
                 if(x == mouseStartX && y == mouseStartY) {
-                    var offset = $('canvas',container).offset();
+                    var offset = canvasOffset();
                     var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
                     handleClickSelection(mouseX, mouseY, ev, container);
@@ -547,9 +595,8 @@ $3Dmol.GLViewer = (function() {
             ev.preventDefault();
             if (!scene)
                 return;
-            var xy = getXY(ev);
-            var x = xy[0];
-            var y = xy[1];
+            var x = getX(ev);
+            var y = getY(ev);
             if (x === undefined)
                 return;
             isDragging = true;
@@ -562,7 +609,7 @@ $3Dmol.GLViewer = (function() {
                     ev.originalEvent.targetTouches.length == 2) {
                 touchDistanceStart = calcTouchDistance(ev);
             }
-            cq = rotationGroup.quaternion;
+            cq = rotationGroup.quaternion.clone();
             cz = rotationGroup.position.z;
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
@@ -575,9 +622,8 @@ $3Dmol.GLViewer = (function() {
             if (!scene)
                 return;
 
-            var xy = getXY(ev);
-            var x = xy[0];
-            var y = xy[1];
+            var x = getX(ev);
+            var y = getY(ev);
             if (x === undefined)
                 return;
             if(!isInViewer(x,y)) {
@@ -628,22 +674,23 @@ $3Dmol.GLViewer = (function() {
         var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
 
-            WIDTH = container.width();
-            HEIGHT = container.height();
-
             clearTimeout(hoverTimeout);
-            var offset = $('canvas',container).offset();
-            var mouseX = ((getXY(ev)[0] - offset.left) / WIDTH) * 2 - 1;
-            var mouseY = -((getXY(ev)[1] - offset.top) / HEIGHT) * 2 + 1;
+            var offset = canvasOffset();
+            var mouseX = ((getX(ev) - offset.left) / WIDTH) * 2 - 1;
+            var mouseY = -((getY(ev) - offset.top) / HEIGHT) * 2 + 1;
             
-            //hover timeout
-            if(current_hover !== null)
+            // hover timeout
+            if(current_hover !== null) {
                 handleHoverContinue(mouseX,mouseY,ev);
+            }
+            
+            if(hoverables.length > 0) {
                 hoverTimeout=setTimeout(
-                    function(){
-                        handleHoverSelection(mouseX,mouseY,ev);
-                    },
-                hoverDuration);
+                        function(){
+                            handleHoverSelection(mouseX,mouseY);
+                        },
+                    hoverDuration);
+            }
 
             ev.preventDefault();
             if (!scene)
@@ -652,9 +699,8 @@ $3Dmol.GLViewer = (function() {
                 return;
             var mode = 0;
 
-            var xy = getXY(ev);
-            var x = xy[0];
-            var y = xy[1];
+            var x = getX(ev);
+            var y = getY(ev);
             if (x === undefined)
                 return;
 
@@ -678,9 +724,8 @@ $3Dmol.GLViewer = (function() {
                 // translate
                 mode = 1;
             }
-            var xyRatio = renderer.getXYRatio();
-            var ratioX = xyRatio[0];
-            var ratioY = xyRatio[1];
+            var ratioX = renderer.getXRatio();
+            var ratioY = renderer.getYRatio();
             dx*=ratioX;
             dy*=ratioY;
             var r = Math.sqrt(dx * dx + dy * dy);
@@ -704,8 +749,7 @@ $3Dmol.GLViewer = (function() {
                 dq.y = 0;
                 dq.z = rs * dx;
                 dq.w = -rs * dy;
-                rotationGroup.quaternion = new $3Dmol.Quaternion(
-                        1, 0, 0, 0);
+                rotationGroup.quaternion.set(1, 0, 0, 0);
                 rotationGroup.quaternion.multiply(dq);
                 rotationGroup.quaternion.multiply(cq);
             }
@@ -714,8 +758,8 @@ $3Dmol.GLViewer = (function() {
         
         var initContainer = function(element) {
             container = element;
-            WIDTH = container.width();
-            HEIGHT = container.height();
+            WIDTH = getWidth();
+            HEIGHT = getHeight();
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             container.append(renderer.domElement);
@@ -878,8 +922,8 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#resize
          */
         this.resize = function() {
-            WIDTH = container.width();
-            HEIGHT = container.height();
+            WIDTH = getWidth();
+            HEIGHT = getHeight();
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
@@ -1485,8 +1529,9 @@ $3Dmol.GLViewer = (function() {
     $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
-      viewer.zoomTo();
-      viewer.render(callback);
+      viewer.zoomTo()
+      viewer.zoom(2,1000);
+      viewer.render();
     });
     
              */
