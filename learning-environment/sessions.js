@@ -119,7 +119,7 @@ var initSessions = function() {
             // setup callbacks
             glviewer.setViewChangeCallback(viewUpdateCallback);
             glviewer.setStateChangeCallback(stateUpdateCallback);
-            initiator = true;
+            initiator = parseInt(msg);
     
             // close the connection create pane and open the
             // connection monitoring
@@ -128,12 +128,13 @@ var initSessions = function() {
             $('#sessioncontrol').show();
         } else {
             alert("Session name was already taken/ could not be created. Try Again");
+            initiator = 0;
         }
     });
 
     socket.on('join session response', function(msg) {
-        if (msg == 1) {
-            joined = true;
+        if (msg != "0") {
+            joined = msg;
             // close the connection create pane and open the connection
             // monitoring
             // disable the sidebar
@@ -176,7 +177,7 @@ var initSessions = function() {
             leaveSession();
     });
 
-    var sessionEnded = function() {
+    var sessionEnded = function(reason) {
         joined = false;
         resetUpperRight();
         clientFinishQuery();
@@ -184,7 +185,7 @@ var initSessions = function() {
 
     socket.on('delete session response', function() {
         $('#createSession,#joinSession').prop('disabled', false);
-        initiator = false;
+        initiator = 0;
         // remove callbacks
         glviewer.setViewChangeCallback(null);
         glviewer.setStateChangeCallback(null);
@@ -193,11 +194,32 @@ var initSessions = function() {
     });
 
     socket.on('leave session response', sessionEnded);
-    socket.on('disconnect', sessionEnded);
+    socket.on('disconnect', function(reason) {
+      console.log("disconnect: "+reason);
+      //do NOT end session since we will attempt to reconnect
+    });
 
     socket.on('error: restart connection', function() {
-        location.reload();
-    })
+        console.log("error: restart connection");
+    });
+    
+    socket.on('error', (error) => {
+        console.log('error: '+error);
+    });
+    
+    socket.on("reconnect", function() {
+      console.log("Reconnected");
+      if(initiator) {
+        socket.emit('reconnection', {name: session_name, secret: initiator, sid: null});
+      } else if(joined) {
+        socket.emit('reconnection', {name: session_name, secret: null, sid: joined});        
+      }
+    });    
+    
+    socket.on("connect_timeout", function() {
+      console.log("Connect timeout");
+    });    
+    
     socket.on('session count', setNumConnections);
 
     socket.on('viewer view change response', function(new_view) {
@@ -380,4 +402,5 @@ var initSessions = function() {
                 result_labels.push(l);                
             }
     });
+    
 };
