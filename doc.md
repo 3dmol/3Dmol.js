@@ -109,7 +109,7 @@ Next, use this import line in your code:
 ```
 {@lang javascript}import jquery;
 // note the different capitalization of 3dmol
-import 3dmol/release/3Dmol-nojquery.js';
+import { $3Dmol } from 3dmol/build/3Dmol-nojquery.js';
 ```
 
 ### Using the source code
