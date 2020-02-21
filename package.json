@@ -30,6 +30,8 @@
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",
   "dependencies": {
-    "gulp-cli": "^2.2.0"
+    "gulp-cli": "^2.2.0",
+    "jquery": "^3.4.1",
+    "netcdfjs": "^1.0.0"
   }
 }
