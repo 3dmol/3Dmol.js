@@ -32,6 +32,7 @@
   "dependencies": {
     "gulp-cli": "^2.2.0",
     "jquery": "^3.4.1",
-    "netcdfjs": "^1.0.0"
+    "netcdfjs": "^1.0.0",
+    "pako": "^1.0.11"
   }
 }
