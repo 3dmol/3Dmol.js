@@ -1,7 +1,6 @@
-#!/usr/bin/python
-#fetchs a file - workaround for cross site scripting prevention
-import cgi,requests,sys
-
+#!/usr/bin/env python2
+# fetchs a file - workaround for cross site scripting prevention
+import cgi, requests, sys
 
 form = cgi.FieldStorage()
 url = form["url"].value
@@ -11,4 +10,3 @@ print "Content-Type: text/text"
 print ""
 
 sys.stdout.write(response.text)
-
