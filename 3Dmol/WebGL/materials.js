@@ -557,7 +557,7 @@ $3Dmol.VolumetricMaterial = function(parameters) {
     this.subsamples = 5.0;
 
     // this.fog = true; // TODO: to integrate the new shader with the fog stuff
-    
+
     this.shaderID = "volumetric";
     this.side = $3Dmol.FrontSide;    
 

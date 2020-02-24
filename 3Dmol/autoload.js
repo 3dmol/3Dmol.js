@@ -135,8 +135,11 @@ $3Dmol.autoload=function(viewer,callback){
             
             var glviewer = viewer;
             try {
-                if(glviewer==null)
-                    glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, {defaultcolors: $3Dmol.rasmolElementColors});
+                if(glviewer==null) {
+                    var config = viewerdiv.data('config') || {};
+                    config.defaultcolors = config.defaultcolors || $3Dmol.rasmolElementColors;
+                    glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, config);
+                }
                 glviewer.setBackgroundColor(bgcolor);                            
             } catch ( error ) {
                 console.log(error);

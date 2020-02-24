@@ -21,6 +21,9 @@
  * @param config.cols
  * @param config.canvas
  * @param config.viewers
+ * @param config.minimumZoomToDistance
+ * @param config.lowerZoomLimit
+ * @param config.upperZoomLimit
  * @param {boolean} config.antialias
  * @param {boolean} config.control_all
  * @param {boolean} config.orthographic
@@ -1831,16 +1834,18 @@ $3Dmol.GLViewer = (function() {
                 slabFar = 999999;
             }
 
+            // keep at least this much space in view
+            var MAXD = config.minimumZoomToDistance || 5;
             // for zoom, use selection box
             x = tmp[1][0] - tmp[0][0];
             y = tmp[1][1] - tmp[0][1];
             z = tmp[1][2] - tmp[0][2];
-            maxD = Math.sqrt(x * x + y * y + z * z);
-            if (maxD < 5)
-                maxD = 5;
+            maxD = Math.sqrt(x * x + y * y + z * z);           
+            if (maxD < MAXD)
+                maxD = MAXD;
             
             //find the farthest atom from center to get max distance needed for view
-            var maxDsq = 25;
+            var maxDsq = MAXD*MAXD;
             for (var i = 0; i < atoms.length; i++) {
                 if(atoms[i]) {
                     var dsq = center.distanceToSquared(atoms[i]);

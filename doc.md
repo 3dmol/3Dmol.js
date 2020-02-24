@@ -68,7 +68,7 @@ There is also an unminified version provided without jQuery for use when compili
 {@lang xml}<script src="https://3Dmol.csb.pitt.edu/build/3Dmol-nojquery.js"></script>
 ```
 
-#### Method 2: using a CDN (recommended)
+#### Method 2: using a CDN 
 
 The files hosted by 3Dmol.csb.pitt.edu closely track the development version and so will change frequently. If you desire more stability you may copy the files into your own project or, alternatively, we host release snapshots on the <a href="https://cdnjs.com/libraries/3Dmol">cdnjs</a> content delivery network (note that you must specify the release version).
 ```
