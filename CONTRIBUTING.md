@@ -7,7 +7,7 @@
  
  ## Feature Request
  
- 1. Please go through the 3Dmol.js [documentation](http://3dmol.csb.pitt.edu/doc/index.html) to check whether the feature is alreadyb present.
+ 1. Please go through the 3Dmol.js [documentation](http://3dmol.csb.pitt.edu/doc/index.html) to check whether the feature is already present.
  2. Ensure that the feature request is new and is not already proposed.
  3. If the feature request is new, follow the feature request template to submit an issue.
  

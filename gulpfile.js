@@ -9,7 +9,7 @@ del = require('del');
 jsdoc = require('gulp-jsdoc3');
 
 coresrc = ['3Dmol/3dmol.js','3Dmol/WebGL/math.js','3Dmol/WebGL/shapes.js','3Dmol/WebGL/core.js','3Dmol/WebGL/**.js','3Dmol/**.js','!3Dmol/SurfaceWorker.js','3Dmol/SurfaceWorker.js'];
-extsrc = ['js/mmtf.js','js/pako_inflate.js','node_modules/netcdfjs/dist/netcdfjs.js'];
+extsrc = ['js/mmtf.js','node_modules/pako/dist/pako_inflate.js','node_modules/netcdfjs/dist/netcdfjs.js'];
 jqsrc = ['node_modules/jquery/dist/jquery.js'];
 
 function clean(cb) {
