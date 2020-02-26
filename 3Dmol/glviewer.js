@@ -1017,7 +1017,17 @@ $3Dmol.GLViewer = (function() {
             ret.normalize();
             return ret;
         };
+        
         var spinInterval;
+        /**
+         * Continuously rotate a scene around the specified axis.
+         * 
+         * @function $3Dmol.GLViewer#spin
+         * @param {string}
+         *            [axis] - Axis ("x", "y", "z", "vx", "vy", or "vz") to rotate around.
+         *            Default "y".  View relative (rather than model relative) axes are prefixed with v.        
+         *  
+         */        
         this.spin = function(axis){
             clearInterval(spinInterval);
             if(typeof axis == 'undefined')
@@ -1162,8 +1172,9 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [angle] - Angle, in degrees, to rotate by.
          * @param {string}
-         *            [axis] - Axis ("x", "y", or "z") to rotate around.
-         *            Default "y"
+         *            [axis] - Axis ("x", "y", "z", "vx", "vy", or "vz") to rotate around.
+         *            Default "y".  View relative (rather than model relative) axes are prefixed with v.
+         *            Axis can also be specified as a vector.
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of the rotation animation. Default 0 (no animation)
@@ -1192,6 +1203,22 @@ $3Dmol.GLViewer = (function() {
             }else if(axis =="z"){
                 axis = {x:0,y:0,z:1};
             }
+            
+            //support rotating with respect to view axis, not model
+            if(axis == "vx"){
+                axis = {vx:1,vy:0,vz:0};
+            }else if(axis =="vy"){
+                axis = {vx:0,vy:1,vz:0};
+            }else if(axis =="vz"){
+                axis = {vx:0,vy:0,vz:1};
+            }
+            
+            if(typeof(axis.vx) !== 'undefined') {
+              var vaxis = new $3Dmol.Vector3(axis.vx,axis.vy,axis.vz);
+              vaxis.applyQuaternion(rotationGroup.quaternion);
+              axis = {x:vaxis.x, y:vaxis.y, z: vaxis.z};
+            }
+                        
             var qFromAngle = function(rangle) {
                 var s = Math.sin(rangle / 2.0);
                 var c = Math.cos(rangle / 2.0);
