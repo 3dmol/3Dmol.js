@@ -31,8 +31,8 @@
           
            $3Dmol.download("pdb:1YCR",viewers[0][2],{},function(){
               viewers[0][2].setStyle({},{line:{}});
-              viewers[0][2].spin(true,{x:0,y:1,z:1});
               viewers[0][2].setBackgroundColor("000000");
+              viewers[0][2].spin("vz");
               viewers[0][2].render();
            });
 
