@@ -856,14 +856,12 @@ var toggleHide =  function(){
         $("#sidenav").css("width",width+"px");
         $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#vrmlExport').css("display","inline")
         glviewer.translate(width/2,0,400,false);
-        glviewer.render();
     }else{
         $("#sidenav").css("width","0");
         $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#header,#vrmlExport').css("display","none")
         $("#menu").css("display","inline");
         width = $("#sidenav").width();
         glviewer.translate(-width/2,0,400,false);
-        glviewer.render();
     }
     toggle = !toggle;
 }
