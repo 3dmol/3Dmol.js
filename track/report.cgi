@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #registers the use of 3Dmol.js in a database
 #this script gets pinged everytime 3dmol.js is loaded,
 #this allows us to report usage to our funding agencies
@@ -16,6 +16,6 @@ conn.commit()
 cursor.close()
 conn.close()
 
-print "Content-Type: text/html"     # HTML is following
+print("Content-Type: text/html")     # HTML is following
 #print "Access-Control-Allow-Origin: *" # allow cross-site scripting - disabled since enabled on server
-print                               # blank line, end of headers
+print()                               # blank line, end of headers
