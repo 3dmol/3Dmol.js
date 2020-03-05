@@ -157,6 +157,10 @@ def handleStateChange(json):
         return #only the controller can send updates    
     sessions[name]['state'] = state
     emit('viewer state change response', state, room=name)    
+    #state change might make labels meaningless, so clear
+    sessions[name]['query_updates'] = {}
+    sessions[name]['query_active'] = False
+    emit('query end response', '', room=name) 
 
 @socketio.on('query start')
 def handleQueryStart(json):
