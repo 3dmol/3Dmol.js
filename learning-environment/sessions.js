@@ -154,6 +154,7 @@ var initSessions = function() {
             socket.emit('delete session event', {
                 name : session_name
             });
+        clearResultLabels();
         session_name = null;
     };
 
