@@ -554,7 +554,7 @@ var count = 0;
 // takes the search url string and makes a query object for it
 var urlToQuery = function(url){
     // url= decodeURIComponent(url)
-    if(url == "" || url.startsWith('session='))
+    if(url == "" || url.startsWith('session=') || url.startsWith('SESSION='))
         return new Query();
     
     var query = new Query();
@@ -928,7 +928,7 @@ function run() {
                 glviewer.clear();
             }
 
-            if (src == 'session') {
+            if (src == 'session' || src == 'SESSION') {
                 // join a session
                 joinSession(data);
             }
