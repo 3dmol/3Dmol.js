@@ -55,7 +55,7 @@ $3Dmol.GLViewer = (function() {
             camerax = parseFloat(config.camerax);
         }
         var _viewer = this;
-        var container = element;
+        var container = $(element); //we expect container to be jquery
         var glDOM = null;
 
         var models = []; // atomistic molecular models
