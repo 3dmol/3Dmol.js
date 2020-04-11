@@ -161,6 +161,7 @@ $3Dmol.GLViewer = (function() {
         var cq = new $3Dmol.Quaternion(0, 0, 0, 1);
         var dq = new $3Dmol.Quaternion(0, 0, 0, 1);
         var animated = 0;
+        var animationTimers = new Set();
         var isDragging = false;
         var mouseStartX = 0;
         var mouseStartY = 0;
@@ -2808,16 +2809,20 @@ $3Dmol.GLViewer = (function() {
                 that.render();
                 if (++displayCount == displayMax || !that.isAnimated()) {
                     clearTimeout(intervalID);
+                    animationTimers.delete(intervalID);
                     decAnim(); 
                 }
                 else {
                     var newInterval = interval - (new Date() - time);
                     newInterval = (newInterval>0)?newInterval:0;
-                    setTimeout(display, newInterval, loop);
+                    animationTimers.delete(intervalID);
+                    intervalID = setTimeout(display, newInterval, loop);
+                    animationTimers.add(intervalID);
                 }
             };
 
             intervalID = setTimeout(display, 0, loop);
+            animationTimers.add(intervalID);
             return this;
         };
         
@@ -2827,6 +2832,8 @@ $3Dmol.GLViewer = (function() {
          */
         this.stopAnimate = function() {
             animated = 0;
+            animationTimers.forEach(function(timer) { clearTimeout(timer);});
+            animationTimers = new Set();
             return this;
         };
         
