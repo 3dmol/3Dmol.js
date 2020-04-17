@@ -5,6 +5,9 @@ pip3 install flask flask_socketio eventlet
 TODOs
 #####
 JSHint the session code as part of the gulp build
+Provide viewergrid functionality with the ablity to query molecules
+Add support for volumetric data in viewer
+Add support for uploading your own files (nontrivial)
 Implement save restore of state for labels, shapes, and surfaces.
 Improve efficiency of state updates
  - make sure updates are only sent if something has changed
@@ -12,7 +15,6 @@ Improve efficiency of state updates
  - could record and playback a history (this is most efficient)
 Add ability to select residues
   -Query Atoms button becomes a pulldown button that can be either Query Atoms or Residues
-Change style of clicked label on hover
 Refactor code to be general and module
   - interface shoudl be separate from sessions information
   - create a Session class

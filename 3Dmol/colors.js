@@ -35,8 +35,8 @@
  * @prop {string} chainHetatm - chain Hetatm colorscheme
  * @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
  * @prop {Gradient} gradient - Allows the user to provide a gradient to the colorsheme. See example #3.
- * @prop {object} map - map of a certain AtomSpec propery to a color.: {}} elementMap - Allows the user to provide a mapping of elements to colors to the colorscheme. This is shown in example #2 and it should be noted that this can be done with any properties, and not just 'elem'.
- * @prop {function} colorfunc - Allows the user to provide a function for setting the colorshemes.See example #4.
+ * @prop {object} map - map of a certain AtomSpec propery to a color.: {}} elementMap - Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
+ * @prop {function} colorfunc - Allows the user to provide a function for setting the colorshemes.
  */
  
 })();
