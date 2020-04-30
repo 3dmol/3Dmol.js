@@ -20,7 +20,7 @@
     "gulp-shell": "^0.7.1",
     "gulp-terser": "^1.2.0",
     "gulp-uglify": "^3.0.2",
-    "jsdoc": ">=3.5.5",
+    "jsdoc": "^3.6.4",
     "jshint": "^2.10.2"
   },
   "scripts": {
@@ -31,7 +31,7 @@
   "main": "build/3Dmol-min.js",
   "dependencies": {
     "gulp-cli": "^2.2.0",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "netcdfjs": "^1.0.0",
     "pako": "^1.0.11"
   }

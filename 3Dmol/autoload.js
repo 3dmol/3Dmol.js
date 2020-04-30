@@ -75,7 +75,7 @@ $3Dmol.autoload=function(viewer,callback){
             var reslabre = /labelres(.*)/;
             var keys = [];
             for(dataname in d) {
-                if(d.hasOwnProperty(dataname)) {
+                if(Object.prototype.hasOwnProperty.call(d,dataname)) {
                     keys.push(dataname);
                 }
             }
