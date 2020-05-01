@@ -901,7 +901,7 @@ $3Dmol.GLModel = (function() {
                     var p2 = new $3Dmol.Vector3(atom2.x, atom2.y, atom2.z);
 
                     // draw cylinders
-                    if (atom.bondOrder[i] === 1 || singleBond) {
+                    if (atom.bondOrder[i] === 1 || singleBond || atom.bondOrder[i] > 3) { //TODO: aromatics at 4
 
                         if (!atom2.capDrawn && atom2.bonds.length < 4)
                             toCap = 2;       
