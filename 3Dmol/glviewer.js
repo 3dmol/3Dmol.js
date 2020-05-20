@@ -15,6 +15,7 @@
  * @param {number} config.camerax
  * @param {number} config.hoverDuration
  * @param {string} config.id - id of the canvas
+ * @param {number} config.cartoonQuality - default 5
  * @param config.row
  * @param config.col
  * @param config.rows
@@ -72,6 +73,7 @@ $3Dmol.GLViewer = (function() {
             hoverDuration = config.hoverDuration;
         }
         if(config.antialias === undefined) config.antialias = true;
+        if(config.cartoonQuality === undefined) config.cartoonQuality = 5;
         
         //reimplement jquery getwidth/height        
         var getRect = function() {
@@ -2873,8 +2875,9 @@ $3Dmol.GLViewer = (function() {
         this.addModel =  function(data, format, options) {
             if(options && !options.defaultcolors) {
                 options.defaultcolors = defaultcolors;
+                options.cartoonQuality = config.cartoonQuality;
             } else if(typeof(options) === 'undefined') {
-                options = {defaultcolors:defaultcolors};
+                options = {defaultcolors:defaultcolors, cartoonQuality:config.cartoonQuality};
             }
             var m = new $3Dmol.GLModel(models.length, options);
             m.addMolData(data, format, options);
@@ -4073,6 +4076,16 @@ $3Dmol.GLViewer = (function() {
                 camera.position.x = -dist*Math.tan(Math.PI / 180.0 * 5.0);
             camera.lookAt(new $3Dmol.Vector3(0,0,rotationGroup.position.z));
             return camera.position.x;
+        };
+        
+        /**
+         * Set the default cartoon quality for newly created models.  Default is 5.
+         * Current models are not affected.
+         * @number quality, higher results in higher resolution renders
+         * @function $3Dmol.GLViewer#setDefaultCartoonQuality
+         */
+        this.setDefaultCartoonQuality = function(val) {
+            config.cartoonQuality = val;
         };
 
     }
