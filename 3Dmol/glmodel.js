@@ -955,7 +955,6 @@ $3Dmol.GLModel = (function() {
                         
                         if (atom.bondOrder[i] == 2) {
                             r = bondR/2.5;
-                            v = getSideBondV(atom, atom2, i);
                             
                             v.multiplyScalar(r*1.5);
                             p1a = p1.clone();

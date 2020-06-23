@@ -4,7 +4,7 @@ The viewer will be styled according to the containing `div`, so be sure to set a
 The code below is all that is needed to create the displayed viewer.
 
 ```
-{@lang xml} <script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script> </head>    
+{@lang xml} <script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js" async></script>     
          <div style="height: 400px; width: 400px; position: relative;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='stick'></div>       
 ```
 
