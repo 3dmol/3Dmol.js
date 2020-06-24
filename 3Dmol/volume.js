@@ -684,7 +684,10 @@ $3Dmol.GLVolumetricRender = (function() {
         }
         var geo = shape.finalize();
 
-
+        this.boundingSphere = new $3Dmol.Sphere();
+        this.boundingSphere.center = {x: data.origin.x+xoff/2.0, y: data.origin.y+yoff/2.0, z: data.origin.z+zoff/2.0};
+        this.boundingSphere.radius = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff)/2.0;
+        
         // volume selectivity based on given coords and distance
         if (spec.coords !== undefined && spec.seldist !== undefined){
             //TODO: create mask buffer

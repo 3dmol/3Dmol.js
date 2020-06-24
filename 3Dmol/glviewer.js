@@ -2601,11 +2601,10 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Construct isosurface from volumetric data in gaussian cube format
-         * @deprecated
          * @function $3Dmol.GLViewer#addVolumetricData
          * @param {String} data - Input file contents 
-         * @param {String} format - Input file format (currently only supports "cube")
-         * @param {IsoSurfaceSpec} spec - Shape style specification
+         * @param {String} format - Input file format 
+         * @param {IsoSurfaceSpec} or {VolumetricRenderSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
          * 
          * @example
@@ -2623,11 +2622,13 @@ $3Dmol.GLViewer = (function() {
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};
-            var s = new $3Dmol.GLShape(spec);
-            s.shapePosition = shapes.length;
-            s.addVolumetricData(data, format, spec);
-            shapes.push(s);
-            return s;
+            
+            var voldata = new $3Dmol.VolumeData(data, format);
+            if(spec.transferfn) { //volumetric rendering
+                return this.addVolumetricRender(voldata, spec);
+            } else {
+                return this.addIsosurface(voldata, spec);
+            }
         };
         
         /**
