@@ -49,7 +49,7 @@
  /**
   * Parser options specification. Used to specify the options of a GLModel.  Depending on the input file format, not all fields may be defined.
   * @typedef ParserOptionsSpec
-  * @prop {boolean} duplicateAssemblyAtoms- Set to true if you wish to diplicate assembly atoms otherwise false ; supported by all
+  * @prop {boolean} duplicateAssemblyAtoms- Set to true if you wish to duplicate assembly atoms otherwise false ; supported by all
   * @prop {boolean} frames - true if you want to add to a new frame and false otherwise ; supported by all
   * @prop {object} vibrate - object specifying the vibration behavior ; supported by all
   * @prop {number} vibrate.frames - number of frames to be created, default to 10 ; supported by all
@@ -287,7 +287,7 @@
 * @prop pdb The venerable Protein Data Bank format
 * @prop pqr Like PDB but with partial charges which are read into the partialcharge atom property
 * @prop prmtop Amber topology file, must add coordinates
-* @prop sdf MDL MOL format, supports muliple models and meta data
+* @prop sdf MDL MOL format, supports multiple models and meta data
 * @prop vasp VASP format (CONTCAR, POSCAR)
 * @prop xyz XYZ cartesian coordinates format
 */
