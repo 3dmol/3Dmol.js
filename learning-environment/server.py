@@ -1,6 +1,6 @@
-from flask import Flask, request
+from flask import Flask, request, redirect
 from flask_socketio import SocketIO, send, emit, join_room, leave_room, close_room 
-import json, random, datetime
+import json, random, datetime, argparse
 
 # for socketio
 import eventlet
@@ -218,5 +218,12 @@ def handleQueryFetch(json):
     cnts = list(cnts.items())
     emit('query fetch response', cnts, room=request.sid)   
     
+@app.route('/')
+def home():
+    return redirect('static/viewer.html')
+    
 if __name__ == '__main__':
-    socketio.run(app)
+    parser = argparse.ArgumentParser(description='Run 3Dmol.js learning environment server.')
+    parser.add_argument('-p','--port', type=int, default=5000, help='Port to run on (default 5000)')
+    args = parser.parse_args()
+    socketio.run(app,port=args.port)
