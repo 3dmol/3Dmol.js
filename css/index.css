@@ -129,7 +129,7 @@ a:hover{
 }
 
 .titlefont {
-		font-size: 24px;
+   font-size: 22px;
    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
    font-weight: 100;
 
@@ -150,6 +150,7 @@ a:hover{
 }
 
 #infotext {
+    font-size: 12px;
 	margin-top: 8px;
 	font-style:oblique;
 	float:left;
@@ -179,16 +180,24 @@ a:hover{
 }
 
 #view {
-	width: 3em;
+	width: 2.5em;
 }
 
 
 #embed {
-	width: 4em;
+	width: 3.5em;
 }
 
 #develop {
-	width: 5em;
+	width: 4.5em;
+}
+
+#teach {
+    width: 3em;
+}
+
+#jupyter {
+    width: 3.75em;
 }
 
 #issues {

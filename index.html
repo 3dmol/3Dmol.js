@@ -76,6 +76,7 @@ $( document ).ready(function() {
 	  $("#text3Dmol").hide();
 	    $("#viewtext").hide();
 	    $("#embedtext").hide();
+	    $("#teachtext").hide();
 	    $("#jupytertext").hide();
 	    $("#developtext").hide();
   };
@@ -97,6 +98,17 @@ $( document ).ready(function() {
 	    hidetext();
 		$("#text3Dmol").show();
   });
+  
+    $('#teach').hover(
+  function () {
+	    hidetext();
+    $("#teachtext").show();
+  }, 
+  function () {
+	    hidetext();
+		$("#text3Dmol").show();
+  });
+    
     $('#jupyter').hover(
   function () {
 	    hidetext();
@@ -128,13 +140,15 @@ $( document ).ready(function() {
    <div id="strip" class = "titlefont">
     <a href="doc/tutorial-url.html" id="view" class="titletext">View</a>
     <a href="doc/tutorial-embeddable.html" id="embed" class="titletext">Embed</a>
-    <a href="http://nbviewer.jupyter.org/github/3dmol/3Dmol.js/blob/9050b97144e81f065df7eecc87ba9a16723ab14b/py3Dmol/examples.ipynb" id="jupyter" class="titletext">Jupyter&nbsp;&nbsp</a>
+    <a href="doc/tutorial-learning_environment.html" id="teach" class="titletext">Teach</a>
+    <a href="http://nbviewer.jupyter.org/github/3dmol/3Dmol.js/blob/9050b97144e81f065df7eecc87ba9a16723ab14b/py3Dmol/examples.ipynb" id="jupyter" class="titletext">Jupyter</a>
     <a href="doc/index.html" id="develop" class="titletext">Develop</a>
    </div>
    <div id="infotext">
     <span id="text3Dmol" class="floattext">A modern, object-oriented JavaScript library for visualizing molecular data</span>
     <span id="viewtext" class="floattext">View structures through a declarative URL interface</span>
     <span id="embedtext" class="floattext">Embed molecular viewers in webpages with two lines of code</span>
+    <span id="teachtext" class="floattext">Engage students while teaching molecular structures</span>
     <span id="jupytertext" class="floattext">Include interactive 3D structures in Jupyter notebooks</span>
     <span id="developtext" class="floattext">Develop web applications using a full featured API</span>
 
