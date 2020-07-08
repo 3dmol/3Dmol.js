@@ -13,12 +13,15 @@ The easiest way to use the 3Dmol.js active learning environment is through the h
 
 ```
 {@lang bash}#install dependencies
-apt install npm python3-pip
+apt install npm python3-pip git
 pip3 install flask flask_socketio eventlet
-#use npm to install and build 3Dmol.js
-npm install 3dmol
+#get latest version from git
+git clone https://github.com/3dmol/3Dmol.js.git
+#build with npm
+cd 3Dmol.js
+npm install
 #run a standalone flask server
-cd node_modules/3dmol/learning-environment
+cd learning-environment
 #can optionally specify a port with -p <PORT>, default is 5000
 python3 server.py
 ```
