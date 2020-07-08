@@ -23,7 +23,11 @@ cd node_modules/3dmol/learning-environment
 python3 server.py
 ```
 
-By default, this will launch a server on port 5000, e.g. <tt>http://HOSTNAME:5000/</tt>.  Do <b>not</b> run this command as superuser to run the server on the privileged default webserver port 80 without consulting with a network security specialist.
+By default, this will launch a server on port 5000, e.g. `http://HOSTNAME:5000/`.  The viewer is at `http://HOSTNAME:5000/static/viewer.html`.
+Your network must allow external connections to the specified port.
+Do <b>not</b> run this command as superuser to run the server on the privileged default webserver port 80 without consulting with a network security specialist.
+
+Note that files put in the `3dmol` directory can be referenced as relative paths within the `url=` component.  For example: `http://localhost:5000/static/viewer.html?url=molecule.sdf&style=stick`
 
 
 If you already have a webserver running, you can redirect the websocket requests used by 3Dmol.js to the server running on port 5000.  For example, for apache the following is added to the configuration (see [here](https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root)</a>):
