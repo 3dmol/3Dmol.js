@@ -171,6 +171,14 @@ $3Dmol.Parsers = (function() {
         }
     };
 
+    var standardResidues = new Set(['ABU','ACD','ALA','ALB','ALI','ARG','AR0','ASN',
+                                    'ASP','ASX','BAS','CYS','CYH','CYX','CSS','CSH',
+                                    'GLN','GLU','GLX','GLY','HIS','HIE','HID','HIP','HYP',
+                                    'ILE','ILU','LEU','LYS','MET','PCA','PGA','PHE',
+                                    'PR0','PRO','PRZ','SAR','THR','TYR','VAL',
+                                    'A','1MA','C','5MC','OMC','G','1MG','2MG','M2G',
+                                    '7MG','OMG','YG','I','T','U','+U','H2U','5MU',
+                                    'PSU','ACE','F0R','H2O','HOH','WAT']);
     // this is optimized for proteins where it is assumed connected
     // atoms are on the same or next residue
     /**
@@ -185,7 +193,7 @@ $3Dmol.Parsers = (function() {
         for (i = 0, n = atomsarray.length; i < n; i++) {
             var atom = atomsarray[i];
             atom.index = i;
-            if (atom.hetflag)
+            if (atom.hetflag || !standardResidues.has(atom.resn))
                 hetatoms.push(atom);
             else
                 protatoms.push(atom);
@@ -1789,7 +1797,7 @@ $3Dmol.Parsers = (function() {
                 var hetflag;
                 let serial = parseInt(line.substr(6, 5));
                 let atom = line.substr(12, 4).replace(/ /g, "");
-                let resn = line.substr(17, 3);
+                let resn = line.substr(17, 3).trim();
                 let chain = line.substr(21, 1);
                 let resi = parseInt(line.substr(22, 4));
                 // however let's split the coordinates, charge and radius by

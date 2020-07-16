@@ -2613,7 +2613,7 @@ $3Dmol.GLModel = (function() {
       };
 
       /**
-      * Set coordinates for the atoms parsed from various topology files. 
+      * Set coordinates from remote trajectory file. 
       * @function $3Dmol.GLModel#setCoordinatesFromURL
       * @param {string} url - contains the url where mdsrv has been hosted
       * @param {string} path - contains the path of the file (<root>/filename)
@@ -2642,7 +2642,7 @@ $3Dmol.GLModel = (function() {
         };
 
     /**
-    * Set coordinates for the atoms parsed from the prmtop file. 
+    * Set coordinates for the atoms from provided trajectory file. 
     * @function $3Dmol.GLModel#setCoordinates
     * @param {string} str - contains the data of the file
     * @param {string} format - contains the format of the file
