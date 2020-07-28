@@ -1592,8 +1592,8 @@ $3Dmol.GLViewer = (function() {
          * This pans the camera rather than translating the model.
          * 
          * @function $3Dmol.GLViewer#translate
-         * @param {number} x
-         * @param {number} y
+         * @param {number} x Relative change in view coordinates of camera
+         * @param {number} y Relative change in view coordinates of camera
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
@@ -1603,8 +1603,8 @@ $3Dmol.GLViewer = (function() {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
-      viewer.translate(100,10);         
-
+      viewer.translate(200,50);         
+      viewer.rotate(90,'z');
       viewer.render(callback);
     });
          */
@@ -1635,6 +1635,46 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         
+        /**
+         * Translate current models by x,y screen coordinates
+         * This translates the models relative to the current view. It does
+         * not change the center of rotation.
+         * 
+         * @function $3Dmol.GLViewer#translateScene
+         * @param {number} x Relative change in x screen coordinate
+         * @param {number} y Relative change in y screen coordinate
+         * @param {number}
+         *            [animationDuration] - an optional parameter that denotes
+         *            the duration of a zoom animation
+         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         *      requested motion, overriding updates that happen during the animation         *            
+         * @example     $.get('data/4csv.pdb', function(data) {
+      viewer.addModel(data,'pdb');
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.translateScene(200,50);         
+      viewer.rotate(90,'z'); // will no longer be around model center
+      viewer.render(callback);
+    });
+         */
+        this.translateScene = function(x, y, animationDuration, fixedPath) {
+            animationDuration = animationDuration!==undefined ? animationDuration : 0;
+            
+            var t = screenXY2model(x,y);
+            var final_position=modelGroup.position.clone().add(t);
+                
+            if(animationDuration>0){
+                animateMotion(animationDuration,fixedPath,
+                        modelGroup.position,
+                        rotationGroup.position.z, 
+                        rotationGroup.quaternion,
+                        lookingAt);
+            } else { //no animation
+                modelGroup.position = final_position;
+                show();
+            }
+            return this;
+        };
 
         /**
          * Adjust slab to fully enclose selection (default everything).
