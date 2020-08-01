@@ -435,8 +435,11 @@ $3Dmol.Parsers = (function() {
         var offset = end;
         var t, l, n; // Used in for loops
         if (!copyMatrix) { // do full assembly
+            for (n = 0; n < end; n++) {
+               atoms[n].sym = -1; //if identity matrix is present, original labeled -1
+            }
             for (t = 0; t < copyMatrices.length; t++) {
-                if (!copyMatrices[t].isIdentity()) {
+                if (!copyMatrices[t].isNearlyIdentity()) {
                     var xyz = new $3Dmol.Vector3();
                     for (n = 0; n < end; n++) {
                         var bondsArr = [];
@@ -453,9 +456,14 @@ $3Dmol.Parsers = (function() {
                         newAtom.y = xyz.y;
                         newAtom.z = xyz.z;
                         newAtom.bonds = bondsArr;
+                        newAtom.sym = t; //so symmetries can be selected
                         atoms.push(newAtom);
                     }
                     offset = atoms.length;
+                } else {
+                    for (n = 0; n < end; n++) {
+                        atoms[n].sym = t;
+                    }
                 }
             }
         }
@@ -463,7 +471,7 @@ $3Dmol.Parsers = (function() {
             for (t = 0; t < atoms.length; t++) {
                 var symmetries = [];
                 for (l = 0; l < copyMatrices.length; l++) {
-                    if (!copyMatrices[l].isIdentity()) {
+                    if (!copyMatrices[l].isNearlyIdentity()) {
                         var newXYZ = new $3Dmol.Vector3();
                         newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
                         newXYZ.applyMatrix4(copyMatrices[l]);
@@ -1186,7 +1194,14 @@ $3Dmol.Parsers = (function() {
                 atom.resn = mmCIF._atom_site_auth_comp_id ? mmCIF._atom_site_auth_comp_id[i].trim() : undefined;
                 atom.atom = mmCIF._atom_site_auth_atom_id ? mmCIF._atom_site_auth_atom_id[i].replace(/"/gm,'')  : undefined; //"primed" names are in quotes
                 atom.hetflag = !mmCIF._atom_site_group_pdb || mmCIF._atom_site_group_pdb[i] === "HETA" || mmCIF._atom_site_group_pdb[i] === "HETATM";
-                var elem = mmCIF._atom_site_type_symbol[i];
+                var elem = 'X';
+                if(mmCIF._atom_site_type_symbol) {
+                    elem = mmCIF._atom_site_type_symbol[i];
+                } else if(mmCIF._atom_site_label) {
+                    //first two components are concatenated, then separated by underscore
+                    //best I can do is assume second component, if present, starts with a number
+                   elem = mmCIF._atom_site_label[i].split('_')[0].replace(/\d+.*/,'');
+                } 
                 atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
                 atom.bonds = [];
                 atom.ss = 'c';
@@ -1240,7 +1255,7 @@ $3Dmol.Parsers = (function() {
                 }
                 return numerator / denominator * (negative ? -1 : 1);
             };
-            if (mmCIF._symmetry_equiv_pos_as_xyz !== undefined) {
+            if (mmCIF._symmetry_equiv_pos_as_xyz !== undefined && !noAssembly) {
                 for (var sym = 0; sym < mmCIF._symmetry_equiv_pos_as_xyz.length; sym++) {
                     var transform = mmCIF._symmetry_equiv_pos_as_xyz[sym].replace(/["' ]/g,"");
                     var componentStrings = transform.split(',').map(

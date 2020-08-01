@@ -22,31 +22,62 @@ $3Dmol.GLModel = (function() {
     var defaultlineWidth = 1.0;
 
     // Reference: A. Bondi, J. Phys. Chem., 1964, 68, 441.
+    // https://en.wikipedia.org/wiki/Van_der_Waals_radius
     var vdwRadii = {
         "H" : 1.2,
+        "He" : 1.4,
         "Li" : 1.82,
-        "LI" : 1.82,
-        "Na" : 2.27,
-        "NA" : 2.27,
-        "K" : 2.75,
+        "Be" : 1.53,
+        "B" : 1.92,
         "C" : 1.7,
         "N" : 1.55,
         "O" : 1.52,
         "F" : 1.47,
-        "P" : 1.80,
-        "S" : 1.80,
-        "CL" : 1.75,
-        "Cl" : 1.75,
-        "BR" : 1.85,
-        "Br" : 1.85,
-        "SE" : 1.90,
-        "Se" : 1.90,
-        "ZN" : 1.39,
-        "Zn" : 1.39,
-        "CU" : 1.4,
+        "Ne" :1.54,        
+        "Na" : 2.27,
+        "Mg" : 1.73,
+        "Al" : 1.84,
+        "Si" : 2.1,
+        "P" : 1.8,
+        "S" : 1.8,
+        "Cl": 1.75,
+        "Ar": 1.88,
+        "K" : 2.75,
+        "Ca" : 2.31,
+        "Ni" : 1.63,
         "Cu" : 1.4,
-        "NI" : 1.63,
-        "Ni" : 1.63
+        "Zn" : 1.39,
+        "Ga" : 1.87,
+        "Ge" : 2.11,
+        "As" : 1.85,
+        "Se" : 1.9,
+        "Br" : 1.85,
+        "Kr" : 2.02,
+        "Rb" : 3.03,
+        "Sr" : 2.49,
+        "Pd" : 1.63,
+        "Ag" : 1.72,
+        "Cd" : 1.58,
+        "In" : 1.93,
+        "Sn" : 2.17,
+        "Sb" : 2.06,
+        "Te" : 2.06,
+        "I"  : 1.98,
+        "Xe" : 2.16,
+        "Cs" : 3.43,
+        "Ba" : 2.68,
+        "Pt" : 1.75,
+        "Au" : 1.66,
+        "Hg" : 1.55,
+        "Tl" : 1.96,
+        "Pb" : 2.02,
+        "Bi" : 2.07,
+        "Po" : 1.97,
+        "At" : 2.02,
+        "Rn" : 2.20,
+        "Fr" : 3.48,
+        "Ra" : 2.83,
+        "U"  : 1.86
     };
     /*
         The dictioanries are for dropdown menus and validation of the viewer
@@ -106,7 +137,8 @@ $3Dmol.GLModel = (function() {
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
         "reflectivity":{type:"number",gui:true,step:0.1}, //for describing the reflectivity of a model
-        "altLoc":{type:"invalid",valid:false}
+        "altLoc":{type:"invalid",valid:false}, //alternative location, e.g. in PDB
+        "sym":{type:'number',gui:false}, //which symmetry
     };
     function extend(obj1, src1) {
         for (var key in src1) {
@@ -159,6 +191,7 @@ $3Dmol.GLModel = (function() {
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
         "radius":{type:"number",gui:true,step:0.1,default:1.5,min:0},
+        "scale":{type:"number",gui:true,step:0.1,default:1.0,min:0.1}
     };
 
     var validCartoonSpec = {
@@ -259,6 +292,11 @@ $3Dmol.GLModel = (function() {
                 r = style.radius;
             else if (vdwRadii[atom.elem])
                 r = vdwRadii[atom.elem];
+            else if(atom.elem.length > 1) { //see if adjusting case helps
+                let e = atom.elem;
+                e[1] = e[1].toLowerCase();
+                if(vdwRadii[e]) r = vdwRadii[e];
+            } 
 
             if (typeof (style.scale) != "undefined")
                 r *= style.scale;
@@ -1397,7 +1435,7 @@ $3Dmol.GLModel = (function() {
         /**
          * Returns crystallographic information if present.
          *
-         * @function $3Dmol.GlModel#getCrystData
+         * @function $3Dmol.GLModel#getCrystData
          *
          */
         this.getCrystData = function() {
@@ -1413,7 +1451,7 @@ $3Dmol.GLModel = (function() {
          * Returns list of rotational/translational matrices if there is BIOMT data
          * Otherwise returns a list of just the ID matrix
          *
-         * @function $3Dmol.GlModel#getSymmetries
+         * @function $3Dmol.GLModel#getSymmetries
          * @return {Array<$3Dmol.Matrix4>}
          *
          */
@@ -1428,7 +1466,7 @@ $3Dmol.GLModel = (function() {
         /**
          * Sets symmetries based on specified matrices in list
          *
-         * @function $3Dmol.GlModel#setSymmetries
+         * @function $3Dmol.GLModel#setSymmetries
          * @param {Array<$3Dmol.Matrix4>} list
          *
          */

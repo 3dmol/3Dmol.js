@@ -947,6 +947,21 @@ $3Dmol.Matrix4.prototype = {
         return this;
 
     },
+    
+    //snap values close to integers to their integer value
+    //useful and identifying identity matrices
+    snap : function(digits) {
+        if(!digits) digits = 4;
+        let mult = Math.pow(10,4);
+        let te = this.elements;
+        for(let i = 0; i < 16; i++) {
+            let rounded = Math.round(te[i]);
+            if(rounded == Math.round(te[i]*mult)/mult) {
+                te[i] = rounded;
+            }
+        }
+        return this;
+    },
 
     transpose : function() {
         var te = this.elements;
@@ -1327,6 +1342,12 @@ $3Dmol.Matrix4.prototype = {
         } else {
             return false;
         }
+    },
+    
+    //return true if elements are with digits of identity
+    isNearlyIdentity : function(digits) {
+        let snapped = this.clone().snap(digits);
+        return snapped.isIdentity();
     }
 
 };
