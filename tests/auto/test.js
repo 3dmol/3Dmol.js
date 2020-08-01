@@ -129,12 +129,38 @@ $(document).ready(function(){
         useCrossOrigin: false
     });
     
+    //https://stackoverflow.com/questions/19327749/javascript-blob-filename-without-link
+    function saveFile(blob, filename) {
+      if (window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveOrOpenBlob(blob, filename);
+      } else {
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        const url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = filename;
+        a.click();
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 0)
+      }
+    }
+    
     function runTest(i){
         if(i == keys.length) {
             //finished
             var endTime = Date.now();
             $('#summary_list').append('<li class="totaltime">Total time: '+(endTime-beginTime)/1000+'s'+'</p>');
             $('#summary_list').append('<li class="failures">Total failures: '+failures+'</p>');
+            
+            zip.generateAsync({type:'blob'})
+                .then(function(content) {
+                    $('#download').prop('disabled',false);
+                    $('#download').click(function() {
+                        saveFile(content,'images.zip');
+                    });
+                });
             return;
         }
         console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
@@ -177,6 +203,7 @@ $(document).ready(function(){
                 var canvas=viewer.getCanvas(); //$("canvas#"+key).get(0);
                 //creates an image for the canvas
                 var canvasImageData = imageFromWebGlCanvas(canvas);
+                zip.file(key+'.png',canvasImageData.split('base64,')[1], {base64: true});
                 var canvasImage=$("<img name="+key+" class='renderedImage'>").attr('src',canvasImageData);
 
                 //click event for canvas
@@ -228,6 +255,7 @@ $(document).ready(function(){
     //initialize a viewer since jquery adds some event handling stuff to the window
     //that we don't want to caught by the global tester
     $3Dmol.createViewer($("#gldiv"));    
+    zip = new JSZip();
     GlobalTester.before(window);     
     
     runTest(0);

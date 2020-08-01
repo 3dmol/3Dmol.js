@@ -43,6 +43,10 @@ h3 {
 	float: right;
 }
 
+#download {
+    float: right;
+}
+
 #summary_list {
 	width:100%;
     list-style: none;
