@@ -429,18 +429,81 @@ $3Dmol.Parsers = (function() {
         }
     };
         
+        
+    var sqr = function(n) {
+        return n*n;
+    };
+    
     //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
-    var processSymmetries = function(copyMatrices, copyMatrix, atoms) {
+    //matrices may be modified if normalization is requested
+    var processSymmetries = function(copyMatrices, atoms, options, cryst) {
+        var copyMatrix = !options.duplicateAssemblyAtoms;
         var end = atoms.length;
         var offset = end;
         var t, l, n; // Used in for loops
+        
+        let modifiedIdentity = -1; 
+        if(options.normalizeAssembly && cryst) {
+            //to normalize, translate every symmetry so that the centroid is
+            //in the unit cell.  To do this, convert back to fractional coordinates,
+            //compute the centroid, calculate any adjustment needed to get it in [0,1],
+            //convert the adjustment to a cartesian translation, and then add it to
+            //the symmetry matrix
+            let a = cryst.a, b = cryst.b, c = cryst.c;
+            let alpha = cryst.alpha * Math.PI / 180;
+            let beta = cryst.beta * Math.PI / 180;
+            let gamma = cryst.gamma * Math.PI / 180;
+            let cos_alpha = Math.cos(alpha);
+            let cos_beta = Math.cos(beta);
+            let cos_gamma = Math.cos(gamma);
+            let sin_gamma = Math.sin(gamma);
+            let conversionMatrix = new $3Dmol.Matrix3(
+                    a, b*cos_gamma, c*cos_beta,
+                    0, b*sin_gamma, c*(cos_alpha-cos_beta*cos_gamma)/sin_gamma,
+                    0, 0, c*Math.sqrt(1-sqr(cos_alpha)-sqr(cos_beta)-sqr(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma)/sin_gamma);
+            let toFrac = new $3Dmol.Matrix3();
+            toFrac.getInverse3(conversionMatrix);
+            
+            for (t = 0; t < copyMatrices.length; t++) {
+                //transform with the symmetry, and then back to fractional coordinates
+                let center = new $3Dmol.Vector3(0,0,0);
+                for (n = 0; n < end; n++) {
+                    let xyz = new $3Dmol.Vector3(atoms[n].x,atoms[n].y,atoms[n].z);
+                    xyz.applyMatrix4(copyMatrices[t]);
+                    xyz.applyMatrix3(toFrac);
+                    //figure out 
+                    center.add(xyz);
+                }
+                center.divideScalar(end); 
+                center = [center.x,center.y,center.z];
+                let adjustment = [0.0, 0.0, 0.0];
+                for(let i = 0; i < 3; i++) {
+                    while(center[i] < -0.001 ) {
+                        center[i] += 1.0;
+                        adjustment[i] += 1.0;
+                    }
+                    while(center[i] > 1.001 ) {
+                        center[i] -= 1.0;
+                        adjustment[i] -= 1.0;
+                    }
+                }
+                //convert adjustment to non-fractional
+                adjustment = new $3Dmol.Vector3(adjustment[0],adjustment[1],adjustment[2]);
+                adjustment.applyMatrix3(conversionMatrix);
+                //modify symmetry matrix to include translation
+                if(copyMatrices[t].isNearlyIdentity() && adjustment.lengthSq() > 0.001) {
+                    modifiedIdentity = t; //keep track of which matrix was identity
+                }
+                copyMatrices[t].translate(adjustment);
+            }
+        }
         if (!copyMatrix) { // do full assembly
             for (n = 0; n < end; n++) {
                atoms[n].sym = -1; //if identity matrix is present, original labeled -1
             }
             for (t = 0; t < copyMatrices.length; t++) {
-                if (!copyMatrices[t].isNearlyIdentity()) {
-                    var xyz = new $3Dmol.Vector3();
+                if (!copyMatrices[t].isNearlyIdentity() && modifiedIdentity != t) {
+                    let xyz = new $3Dmol.Vector3();
                     for (n = 0; n < end; n++) {
                         var bondsArr = [];
                         for (l = 0; l < atoms[n].bonds.length; l++) {
@@ -448,6 +511,7 @@ $3Dmol.Parsers = (function() {
                         }
                         xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
                         xyz.applyMatrix4(copyMatrices[t]);
+                        
                         var newAtom = {};
                         for (var i in atoms[n]) {
                             newAtom[i] = atoms[n][i];
@@ -457,13 +521,24 @@ $3Dmol.Parsers = (function() {
                         newAtom.z = xyz.z;
                         newAtom.bonds = bondsArr;
                         newAtom.sym = t; //so symmetries can be selected
-                        atoms.push(newAtom);
+                        atoms.push(newAtom);                        
                     }
                     offset = atoms.length;
                 } else {
                     for (n = 0; n < end; n++) {
                         atoms[n].sym = t;
                     }
+                }
+            }
+            if(modifiedIdentity >= 0) {
+                //after applying the other transformations, apply this one in place
+                let xyz = new $3Dmol.Vector3();
+                for (n = 0; n < end; n++) {
+                    xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+                    xyz.applyMatrix4(copyMatrices[modifiedIdentity]);
+                    atoms[n].x = xyz.x;
+                    atoms[n].y = xyz.y;
+                    atoms[n].z = xyz.z;
                 }
             }
         }
@@ -669,7 +744,7 @@ $3Dmol.Parsers = (function() {
                 var atom = {};
                 atom.serial = i;
                 var elem = tokens[0];
-                atom.atom = atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+                atom.atom = atom.elem = elem[0].toUpperCase() + elem.substr(1,1).toLowerCase();
                 atom.x = parseFloat(tokens[1]);
                 atom.y = parseFloat(tokens[2]);
                 atom.z = parseFloat(tokens[3]);
@@ -986,7 +1061,6 @@ $3Dmol.Parsers = (function() {
     parsers.mcif = parsers.cif = function(str, options) {
         var atoms = [];
         var noAssembly = !options.doAssembly; // don't assemble by default
-        var copyMatrix = !options.duplicateAssemblyAtoms;
         var modelData = atoms.modelData = [];
 
         // Used to handle quotes correctly
@@ -1140,9 +1214,7 @@ $3Dmol.Parsers = (function() {
             atoms.push([]);
             var atomCount = mmCIF._atom_site_id !== undefined ? mmCIF._atom_site_id.length
                 : mmCIF._atom_site_label.length;
-            var sqr = function(n) {
-                return n*n;
-            };
+
             var conversionMatrix;
             if (mmCIF._cell_length_a !== undefined) {
                 var a = parseFloat(mmCIF._cell_length_a);
@@ -1196,13 +1268,13 @@ $3Dmol.Parsers = (function() {
                 atom.hetflag = !mmCIF._atom_site_group_pdb || mmCIF._atom_site_group_pdb[i] === "HETA" || mmCIF._atom_site_group_pdb[i] === "HETATM";
                 var elem = 'X';
                 if(mmCIF._atom_site_type_symbol) {
-                    elem = mmCIF._atom_site_type_symbol[i];
+                    elem = mmCIF._atom_site_type_symbol[i].replace(/\(?\+?\d+.*/,'');
                 } else if(mmCIF._atom_site_label) {
                     //first two components are concatenated, then separated by underscore
                     //best I can do is assume second component, if present, starts with a number
-                   elem = mmCIF._atom_site_label[i].split('_')[0].replace(/\d+.*/,'');
+                   elem = mmCIF._atom_site_label[i].split('_')[0].replace(/\(?\d+.*/,'');
                 } 
-                atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+                atom.elem = elem[0].toUpperCase() + elem.substr(1,1).toLowerCase();
                 atom.bonds = [];
                 atom.ss = 'c';
                 atom.serial = i;
@@ -1230,9 +1302,6 @@ $3Dmol.Parsers = (function() {
                                                     matrix21, matrix22, matrix23, vector2,
                                                     matrix31, matrix32, matrix33, vector3);
                     modelData[modelData.length-1].symmetries.push(matrix);
-                }
-                for (let i = 0; i < atoms.length; i++) {
-                    processSymmetries(modelData[modelData.length-1].symmetries, copyMatrix, atoms[i]);
                 }
             }
             var parseTerm = function(term){
@@ -1298,7 +1367,7 @@ $3Dmol.Parsers = (function() {
         for (let i = 0; i < atoms.length; i++) {
             assignBonds(atoms[i]);
             computeSecondaryStructure(atoms[i]);
-            processSymmetries(modelData[i].symmetries, copyMatrix, atoms[i]);
+            processSymmetries(modelData[i].symmetries, atoms[i], options, modelData[i].cryst);
         }
 
         return atoms;
@@ -1451,7 +1520,7 @@ $3Dmol.Parsers = (function() {
     //attempts to infer atomic element from an atom name
     var atomNameToElem = function(name, nothetero) {
         var elem = name.replace(/ /g, "");
-        if(elem.length > 0 && elem[0] == 'H' && elem != 'Hg') {
+        if(elem.length > 0 && elem[0] == 'H' && elem != 'Hg' && elem != 'He' && elem != 'Hf' && elem != 'Hs' && elem != 'Ho') {
             elem = 'H'; //workaround weird hydrogen names from MD, note mercury must use lowercase
         }
         if(elem.length > 1) {
@@ -1478,7 +1547,6 @@ $3Dmol.Parsers = (function() {
         var ignoreStruct = !!options.noSecondaryStructure; 
         var computeStruct = !options.noComputeSecondaryStructure;
         var noAssembly = !options.doAssembly; // don't assemble by default
-        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
         var selAltLoc = options.altLoc ? options.altLoc : 'A'; //default alternate location to select if present
         var modelData  = {symmetries:[]};
         var atom;
@@ -1691,7 +1759,7 @@ $3Dmol.Parsers = (function() {
        // console.log("bond connecting " + ((new Date()).getTime() -starttime));
 
         if (!noAssembly)
-            processSymmetries(modelData.symmetries, copyMatrix, atoms);
+            processSymmetries(modelData.symmetries, atoms, options, modelData.cryst);
 
         if (computeStruct  && !ignoreStruct) {
             starttime = (new Date()).getTime();
@@ -1916,7 +1984,6 @@ $3Dmol.Parsers = (function() {
         var computeStruct = !options.noComputeSecondaryStructure;
         //extract symmetries - only take first assembly, apply to all models (ignoring changes for now)
         var noAssembly = !options.doAssembly; // don't assemble by default
-        var copyMatrix = !options.duplicateAssemblyAtoms; //default true
         var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0; 
         
         if(typeof(bindata) == "string") {
@@ -2153,14 +2220,14 @@ $3Dmol.Parsers = (function() {
                 if (!options.onemol) atoms.push([]);
             }
 
-            if(!noAssembly) {
-                for (let n = 0; n < atoms.length; n++) {        
-                    processSymmetries(modelData[modelIndex].symmetries, copyMatrix, atoms[n]);
-                }
-            }
             modelIndex += 1;
         } 
-                
+
+        if(!noAssembly) {
+            for (let n = 0; n < atoms.length; n++) {        
+                processSymmetries(modelData[n].symmetries, atoms[n], options,modelData[n].cryst);
+            }
+        }                
         
         if (computeStruct  && !ignoreStruct) {
             computeSecondaryStructure(atoms);

@@ -2470,18 +2470,42 @@ $3Dmol.GLViewer = (function() {
             return s;
         };
         
+        /**
+         * Unit Cell shape specification. 
+         * @typedef UnitCellStyleSpec
+         * @prop {LineStyleSpec} box - line style used to draw box
+         * @prop {ArrowSpec} astyle - arrow specification of "a" axis
+         * @prop {ArrowSpec} bstyle - arrow specification of "b" axis
+         * @prop {ArrowSpec} cstyle - arrow specification of "c" axis
+         * @prop {string} alabel - label for a axis
+         * @prop {LabelSpec} alabel - label style for a axis
+         * @prop {string} blabel - label for b axis
+         * @prop {LabelSpec} blabel - label style for a axis         
+         * @prop {string} clabel - label for c axis
+         * @prop {LabelSpec} clabel - label style for a axis
+         
+         */
         
         /**
-         * Create and add unit cell
+         * Create and add unit cell visualization.
          *
          * @function $3Dmol.GLViewer#addUnitCell
-         * @param {GLModel} Model with unit cell information (e.g., pdb derived).
-         * @return {$3Dmol.GLShape}  Line shape delineating unit cell.
+         * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
+         * @param {UnitCellStyleSpec} spec - visualization style
          */
-        this.addUnitCell = function(model) {
+        this.addUnitCell = function(model, spec) {
             if(!model) model = this.getModel();
-            var s = new $3Dmol.GLShape({'wireframe' : true});
-            s.shapePosition = shapes.length;
+            spec = spec || {alabel: 'a', blabel: 'b', clabel: 'c'};
+            
+            spec.box = spec.box || {};
+            spec.astyle = spec.astyle || {color: 'red', radius: 0.1,midpos: -1};
+            spec.bstyle = spec.bstyle || {color: 'green', radius: 0.1,midpos: -1};
+            spec.cstyle = spec.cstyle || {color: 'blue', radius: 0.1,midpos: -1};
+            spec.alabelstyle = spec.alabelstyle || {fontColor: 'red',showBackground: false, alignment: 'center',inFront:false};
+            spec.blabelstyle = spec.blabelstyle || {fontColor: 'green',showBackground: false, alignment: 'center',inFront:false};
+            spec.clabelstyle = spec.clabelstyle || {fontColor: 'blue',showBackground: false, alignment: 'center',inFront:false};
+
+            //calculate points
             var data = model.getCrystData();
             var matrix = null;
             if (data) {
@@ -2519,27 +2543,66 @@ $3Dmol.GLViewer = (function() {
                     points[i] = points[i].applyMatrix4(matrix);
                 }
             
-                s.addLine({start: points[0], end: points[1]});
-                s.addLine({start: points[0], end: points[2]});
-                s.addLine({start: points[1], end: points[4]});
-                s.addLine({start: points[2], end: points[4]});
+                //draw box
+                if(spec.box && !spec.box.hidden) {
+                    spec.box.wireframe = true;
+                    var s = new $3Dmol.GLShape(spec.box);
+                    s.shapePosition = shapes.length;
+                
+                    s.addLine({start: points[0], end: points[1]});
+                    s.addLine({start: points[0], end: points[2]});
+                    s.addLine({start: points[1], end: points[4]});
+                    s.addLine({start: points[2], end: points[4]});
+                
+                    s.addLine({start: points[0], end: points[3]});
+                    s.addLine({start: points[3], end: points[5]});
+                    s.addLine({start: points[2], end: points[5]});
+                
+                    s.addLine({start: points[1], end: points[6]});
+                    s.addLine({start: points[4], end: points[7]});
+                    s.addLine({start: points[6], end: points[7]});
+                
+                    s.addLine({start: points[3], end: points[6]});
+                    s.addLine({start: points[5], end: points[7]});
             
-                s.addLine({start: points[0], end: points[3]});
-                s.addLine({start: points[3], end: points[5]});
-                s.addLine({start: points[2], end: points[5]});
-            
-                s.addLine({start: points[1], end: points[6]});
-                s.addLine({start: points[4], end: points[7]});
-                s.addLine({start: points[6], end: points[7]});
-            
-                s.addLine({start: points[3], end: points[6]});
-                s.addLine({start: points[5], end: points[7]});
+                    shapes.push(s);
+                    s.finalize(); //finalize shape for memory efficiency, assume shape won't be extended
+                }
+                
+                //draw arrows
+                if(!spec.astyle.hidden) {
+                    spec.astyle.start = points[0];
+                    spec.astyle.end = points[1];
+                    this.addArrow(spec.astyle);
+                }
+
+                if(!spec.bstyle.hidden) {
+                    spec.bstyle.start = points[0];
+                    spec.bstyle.end = points[2];
+                    this.addArrow(spec.bstyle);
+                }
+                
+                if(!spec.cstyle.hidden) {
+                    spec.cstyle.start = points[0];
+                    spec.cstyle.end = points[3];
+                    this.addArrow(spec.cstyle);
+                }
+                
+                if(spec.alabel) {
+                    spec.alabelstyle.position = points[1];
+                    this.addLabel(spec.alabel, spec.alabelstyle);
+                }
+                if(spec.blabel) {
+                    spec.blabelstyle.position = points[2];
+                    this.addLabel(spec.blabel, spec.blabelstyle);
+                }
+                if(spec.clabel) {
+                    spec.clabelstyle.position = points[3];
+                    this.addLabel(spec.clabel, spec.clabelstyle);
+                }
+
             }
             
-            shapes.push(s);
-            s.finalize(); //finalize shape for memory efficiency, assume shape won't be extended
-            
-            return s;
         };
 
         function addLineDashed(spec, s) {
@@ -3887,7 +3950,7 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        promises.append(addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]));
+                        promises.push(addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]));
                     }
                 }
                 promise = Promise.all(promises);

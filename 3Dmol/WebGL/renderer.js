@@ -253,7 +253,9 @@ $3Dmol.Renderer = function(parameters) {
 
         var doubleSided = material.side === $3Dmol.DoubleSide;
         var flipSided = material.side === $3Dmol.BackSide;
-        flipSided = reflected ? !flipSided : flipSided;
+        
+        if(!material.imposter) //ignore reflection with imposters
+            flipSided = reflected ? !flipSided : flipSided;
 
         if (_oldDoubleSided !== doubleSided) {
 

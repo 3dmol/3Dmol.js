@@ -243,6 +243,7 @@
  * @prop {number} radius
  * @prop {number} radiusRatio - ratio of arrow base to cylinder (1.618034 default)
  * @prop {number} mid - relative position of arrow base (0.618034 default)
+ * @prop {number} midpos - position of arrow base in length units, if negative positioned from end instead of start.  Overrides mid.
  */
 
 

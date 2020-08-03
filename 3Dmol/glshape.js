@@ -78,7 +78,8 @@ $3Dmol.GLShape = (function() {
      */
     var drawArrow = function(shape, geo, spec) {
 
-        var from = spec.start, end = spec.end, radius = spec.radius, radiusRatio = spec.radiusRatio, mid = spec.mid;
+        var from = spec.start, end = spec.end, radius = spec.radius, 
+        radiusRatio = spec.radiusRatio, mid = spec.mid, midoffset = spec.midpos;
 
         if (!(from && end))
             return;
@@ -87,8 +88,15 @@ $3Dmol.GLShape = (function() {
 
         // vertices
 
-        var dir = end.clone();
-        dir.sub(from).multiplyScalar(mid);
+        var dir = end.clone().sub(from);
+        if(midoffset) { //absolute offset, convert to relative
+            let length = dir.length();
+            if(midoffset > 0) mid = midoffset/length;
+            else mid = (length+midoffset)/length;
+        } 
+        
+        dir.multiplyScalar(mid);
+        
         var to = from.clone().add(dir);
         var negDir = dir.clone().negate();
 
@@ -1129,9 +1137,9 @@ $3Dmol.GLShape = (function() {
             arrowSpec.radius = arrowSpec.radius || 0.1;
 
             arrowSpec.radiusRatio = arrowSpec.radiusRatio || 1.618034;
+            
             arrowSpec.mid = (0 < arrowSpec.mid && arrowSpec.mid < 1) ? arrowSpec.mid
                     : 0.618034;
-
 
             drawArrow(this, geo, arrowSpec);
 

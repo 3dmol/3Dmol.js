@@ -323,6 +323,19 @@ $3Dmol.Vector3.prototype = {
         return dx * dx + dy * dy + dz * dz;
     },
 
+    applyMatrix3 : function(m) {
+        
+       var x = this.x, y = this.y, z = this.z;
+
+        var e = m.elements;
+        //column major ordering
+        this.x = e[0] * x + e[3] * y + e[6] * z;
+        this.y = e[1] * x + e[4] * y + e[7] * z;
+        this.z = e[2] * x + e[5] * y + e[8] * z;
+
+        return this;       
+    },
+    
     applyMatrix4 : function(m) {
 
         var x = this.x, y = this.y, z = this.z;
@@ -596,6 +609,28 @@ $3Dmol.Matrix3.prototype = {
         return this;
     },
 
+    getInverse3 : function(matrix) {
+        // input: Matrix3
+
+        let me = matrix.elements;
+        let te = this.elements;
+        
+        te[0] = me[4] * me[8] - me[5] * me[7];
+        te[3] = me[6] * me[5] - me[3] * me[8];
+        te[6] = me[3] * me[7] - me[6] * me[4];
+        te[1] = me[7] * me[2] - me[1] * me[8];
+        te[4] = me[0] * me[8] - me[6] * me[2];
+        te[7] = me[1] * me[6] - me[0] * me[7];
+        te[2] = me[1] * me[5] - me[2] * me[4];
+        te[5] = me[2] * me[3] - me[0] * me[5];
+        te[8] = me[0] * me[4] - me[1] * me[3];
+
+        let det = me[0] * te[0] + me[3]* te[1] + me[6]*te[2];
+        this.multiplyScalar(1.0 / det);
+
+        return this;
+    },
+    
     getInverse : function(matrix, throwOnInvertible) {
         // input: Matrix4
 
@@ -1010,6 +1045,16 @@ $3Dmol.Matrix4.prototype = {
         te[12] = v.x;
         te[13] = v.y;
         te[14] = v.z;
+
+        return this;
+    },
+    
+    translate : function(v) {
+        var te = this.elements;
+
+        te[12] += v.x;
+        te[13] += v.y;
+        te[14] += v.z;
 
         return this;
     },

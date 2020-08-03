@@ -1,0 +1,103 @@
+###############################################################################
+# McPherson, G.L.;McPherson, A.M.;Atwood, J.L. (1980)
+# Journal of Physics and Chemistry of Solids 41, 495-499
+# Structures of Cs Mg Br3, Cs Cd Br3 and Cs Mg I3 - diamagnetic linear chain \
+# lattices
+# 
+# CIF by ICSD-for-WWW,  Copyright 2003 FIZ-Karlsruhe & A.W.Hewat (hewat@ill.fr)
+# NOT TO BE PUBLISHED IN ANY FORM. See http://icsd.ill.fr/icsd/conditions.html
+###############################################################################
+
+data_87262-ICSD
+_database_code_ICSD                87262
+_audit_creation_date               2000-12-16
+_chemical_name_systematic
+'Caesium magnesium iodide'
+_chemical_formula_structural       
+'Cs Mg I3'
+_chemical_formula_sum              
+'Cs1 I3 Mg1'
+_publ_section_title                
+'Cs1 I3 Mg1'
+loop_
+_citation_id
+_citation_journal_abbrev
+_citation_year
+_citation_journal_volume
+_citation_page_first
+_citation_page_last
+_citation_journal_id_ASTM
+primary 'Journal of Physics and Chemistry of Soli' 1980 41 495 499 JPCSAW
+loop_
+_publ_author_name
+McPherson, G.L.;McPherson, A.M.;Atwood, J.L.
+_cell_length_a                     8.198(3)
+_cell_length_b                     8.198(3)
+_cell_length_c                     7.004(3)
+_cell_angle_alpha                  90.
+_cell_angle_beta                   90.
+_cell_angle_gamma                  120.
+_cell_volume                       407.6607
+_cell_formula_units_Z              2
+_symmetry_space_group_name_H-M     'P 63/m m c'
+_symmetry_Int_Tables_number        194
+_refine_ls_R_factor_all            0.0794
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+   1   'x, x-y, -z+1/2'
+   2   '-x+y, y, -z+1/2'
+   3   '-y, -x, -z+1/2'
+   4   '-x+y, -x, -z+1/2'
+   5   '-y, x-y, -z+1/2'
+   6   'x, y, -z+1/2'
+   7   '-x, -x+y, z+1/2'
+   8   'x-y, -y, z+1/2'
+   9   'y, x, z+1/2'
+  10   'x-y, x, z+1/2'
+  11   'y, -x+y, z+1/2'
+  12   '-x, -y, z+1/2'
+  13   '-x, -x+y, -z'
+  14   'x-y, -y, -z'
+  15   'y, x, -z'
+  16   'x-y, x, -z'
+  17   'y, -x+y, -z'
+  18   '-x, -y, -z'
+  19   'x, x-y, z'
+  20   '-x+y, y, z'
+  21   '-y, -x, z'
+  22   '-x+y, -x, z'
+  23   '-y, x-y, z'
+  24   'x, y, z'
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+Cs1+     1.
+Mg2+     2.
+I1-     -1.
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_B_iso_or_equiv
+_atom_site_occupancy
+Cs1 Cs1+ 2 d 0.3333 0.6667 0.75 0. 1.
+Mg1 Mg2+ 2 a 0 0 0 0. 1.
+I1 I1- 6 h 0.1628(8) 0.8372(8) 0.25 0. 1.
+loop_
+_atom_site_aniso_label
+_atom_site_aniso_type_symbol
+_atom_site_aniso_Beta_11
+_atom_site_aniso_Beta_22
+_atom_site_aniso_Beta_33
+_atom_site_aniso_Beta_12
+_atom_site_aniso_Beta_13
+_atom_site_aniso_Beta_23
+Cs1 Cs1+ 0.0083(13) 0.0083(13) 0.0131(22) 0.0041(7) 0 0
+Mg1 Mg2+ 0.0152(77) 0.0152(77) 0.0084(67) 0.0076(38) 0 0
+I1 I1- 0.0105(12) 0.0105(12) 0.0220(13) 0.0038(9) 0 0
+#End of data_87262-ICSD
