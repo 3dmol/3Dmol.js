@@ -437,7 +437,7 @@ $3Dmol.Parsers = (function() {
     //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
     //matrices may be modified if normalization is requested
     var processSymmetries = function(copyMatrices, atoms, options, cryst) {
-        var copyMatrix = !options.duplicateAssemblyAtoms;
+        var dontDuplicate = !options.duplicateAssemblyAtoms;
         var end = atoms.length;
         var offset = end;
         var t, l, n; // Used in for loops
@@ -497,7 +497,7 @@ $3Dmol.Parsers = (function() {
                 copyMatrices[t].translate(adjustment);
             }
         }
-        if (!copyMatrix) { // do full assembly
+        if (!dontDuplicate) { // do full assembly
             for (n = 0; n < end; n++) {
                atoms[n].sym = -1; //if identity matrix is present, original labeled -1
             }
@@ -521,6 +521,7 @@ $3Dmol.Parsers = (function() {
                         newAtom.z = xyz.z;
                         newAtom.bonds = bondsArr;
                         newAtom.sym = t; //so symmetries can be selected
+                        newAtom.index = atoms.length;
                         atoms.push(newAtom);                        
                     }
                     offset = atoms.length;
@@ -541,6 +542,8 @@ $3Dmol.Parsers = (function() {
                     atoms[n].z = xyz.z;
                 }
             }
+            //we have explicitly duplicated the atoms, remove model symmetry information
+            copyMatrices.length = 0;
         }
         else if(copyMatrices.length > 1) {
             for (t = 0; t < atoms.length; t++) {
@@ -1368,6 +1371,7 @@ $3Dmol.Parsers = (function() {
             assignBonds(atoms[i]);
             computeSecondaryStructure(atoms[i]);
             processSymmetries(modelData[i].symmetries, atoms[i], options, modelData[i].cryst);
+            if(options.duplicateAssemblyAtoms && !options.dontConnectDuplicatedAtoms) assignBonds(atoms[i]);
         }
 
         return atoms;

@@ -504,7 +504,7 @@ $3Dmol.GLModel = (function() {
                 if (!atom2.style.line)
                     continue; // don't sweat the details
 
-                if (atom.serial >= atom2.serial) // only draw if less, this way we can do multi bonds correctly
+                if (atom.index >= atom2.index) // only draw if less, this way we can do multi bonds correctly
                     continue;
                 var p1 = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
                 var p2 = new $3Dmol.Vector3(atom2.x, atom2.y, atom2.z);                
@@ -908,7 +908,7 @@ $3Dmol.GLModel = (function() {
                 var j = atom.bonds[i]; // our neighbor
                 var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
                 
-                if (atom.serial < atom2.serial) {// only draw if less, this
+                if (atom.index < atom2.index) {// only draw if less, this
                     // lets us combine
                     // cylinders of the same
                     // color
