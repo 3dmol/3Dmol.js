@@ -2,7 +2,7 @@
 <div style="width: 400px; height: 400px; position: relative;"
                class='viewer_3Dmoljs'
                data-pdb='4DLN'
-               data-href1='http://files.rcsb.org/view/5LMB.pdb'
+               data-href1='https://files.rcsb.org/view/5LMB.pdb'
                data-backgroundcolor='0xffffff'
                data-select1='chain:A' data-style1='stick:singleBonds=true'
                data-select2='chain:B' data-style2='stick:colorscheme=greenCarbon,outline=true'
