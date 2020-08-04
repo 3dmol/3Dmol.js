@@ -1188,7 +1188,9 @@ $3Dmol.Renderer = function(parameters) {
 
         renderObjects(scene.__webglObjects, true, "opaque", camera, lights,
                 fog, false, material);
-
+        // Render plugins (e.g. sprites - labels)
+        renderPlugins(this.renderPluginsPost, scene, camera);
+        
         // prime depth buffer
         renderObjects(scene.__webglObjects, true, "blank", camera, lights, fog,
                 true, material);
@@ -1206,11 +1208,7 @@ $3Dmol.Renderer = function(parameters) {
                     lights, fog, true, material);
         }
         
-        // Render plugins (e.g. sprites), and reset state
 
-        renderPlugins(this.renderPluginsPost, scene, camera);
-        // _gl.finish();
-        
         this.renderFrameBuffertoScreen();
         this.setDepthTest(true);
         this.setDepthWrite(true);
