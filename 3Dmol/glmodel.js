@@ -2809,6 +2809,8 @@ $3Dmol.GLModel = (function() {
                     format = "mmtf"; //currently only supported binary format?
                 } else if (data.match(/^@<TRIPOS>MOLECULE/gm)) {
                     format = "mol2";
+                } else if (data.match(/^data_/gm) && data.match(/^loop_/gm)) {
+                    format = "cif";                
                 } else if (data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
                     format = "pdb";
                 } else if (data.match(/ITEM: TIMESTEP/gm)) {

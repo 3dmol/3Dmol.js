@@ -961,6 +961,12 @@ $3Dmol.GLViewer = (function() {
               });     
          */
         this.getModel = function(id) {
+            if(id === undefined) {
+                return models.length == 0 ? null : models[models.length-1];
+            } 
+            if(id instanceof $3Dmol.GLModel) {
+                return id;
+            }
             if(!(id in models)) {
                 if(models.length == 0) 
                     return null;
@@ -2492,9 +2498,17 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#addUnitCell
          * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
          * @param {UnitCellStyleSpec} spec - visualization style
+           @example
+
+                $.get('data/1jpy.cif', function(data) {
+                  let m = viewer.addModel(data);
+                  viewer.addUnitCell(m, {box:{color:'purple'},alabel:'X',blabel:'Y',clabel:'Z',alabelstyle: {fontColor: 'black',backgroundColor:'white',inFront:true,fontSize:40},astyle:{color:'darkred', radius:5,midpos: -10}});
+                  viewer.zoomTo();
+                  viewer.render();
+    });         
          */
         this.addUnitCell = function(model, spec) {
-            if(!model) model = this.getModel();
+            model = this.getModel(model);
             spec = spec || {alabel: 'a', blabel: 'b', clabel: 'c'};
             
             spec.box = spec.box || {};
@@ -2505,6 +2519,11 @@ $3Dmol.GLViewer = (function() {
             spec.blabelstyle = spec.blabelstyle || {fontColor: 'green',showBackground: false, alignment: 'center',inFront:false};
             spec.clabelstyle = spec.clabelstyle || {fontColor: 'blue',showBackground: false, alignment: 'center',inFront:false};
 
+            //clear any previous box
+            if(model.unitCellObjects) {
+                this.removeUnitCell(model);
+            }
+            model.unitCellObjects = {shapes:[],labels:[]};
             //calculate points
             var data = model.getCrystData();
             var matrix = null;
@@ -2566,6 +2585,7 @@ $3Dmol.GLViewer = (function() {
                     s.addLine({start: points[5], end: points[7]});
             
                     shapes.push(s);
+                    model.unitCellObjects.shapes.push(s);
                     s.finalize(); //finalize shape for memory efficiency, assume shape won't be extended
                 }
                 
@@ -2573,36 +2593,68 @@ $3Dmol.GLViewer = (function() {
                 if(!spec.astyle.hidden) {
                     spec.astyle.start = points[0];
                     spec.astyle.end = points[1];
-                    this.addArrow(spec.astyle);
+                    let arrow = this.addArrow(spec.astyle);
+                    model.unitCellObjects.shapes.push(arrow);
                 }
 
                 if(!spec.bstyle.hidden) {
                     spec.bstyle.start = points[0];
                     spec.bstyle.end = points[2];
-                    this.addArrow(spec.bstyle);
+                    let arrow = this.addArrow(spec.bstyle);
+                    model.unitCellObjects.shapes.push(arrow);
                 }
                 
                 if(!spec.cstyle.hidden) {
                     spec.cstyle.start = points[0];
                     spec.cstyle.end = points[3];
-                    this.addArrow(spec.cstyle);
+                    let arrow = this.addArrow(spec.cstyle);
+                    model.unitCellObjects.shapes.push(arrow);
                 }
                 
                 if(spec.alabel) {
                     spec.alabelstyle.position = points[1];
-                    this.addLabel(spec.alabel, spec.alabelstyle);
+                    let label = this.addLabel(spec.alabel, spec.alabelstyle);
+                    model.unitCellObjects.labels.push(label);
+
                 }
                 if(spec.blabel) {
                     spec.blabelstyle.position = points[2];
-                    this.addLabel(spec.blabel, spec.blabelstyle);
+                    let label = this.addLabel(spec.blabel, spec.blabelstyle);
+                    model.unitCellObjects.labels.push(label);
                 }
                 if(spec.clabel) {
                     spec.clabelstyle.position = points[3];
-                    this.addLabel(spec.clabel, spec.clabelstyle);
+                    let label = this.addLabel(spec.clabel, spec.clabelstyle);
+                    model.unitCellObjects.labels.push(label);
                 }
 
             }
             
+        };
+        
+         /**
+         * Remove unit cell visualization from model.
+         *
+         * @function $3Dmol.GLViewer#removeUnitCell
+         * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
+           @example
+                $.get('data/icsd_200866.cif', function(data) {
+                  let m = viewer.addModel(data);
+                  viewer.setStyle({sphere:{}})
+                  viewer.addUnitCell();
+                  viewer.zoomTo();
+                  viewer.removeUnitCell();
+                  viewer.render();
+            });                  
+         */
+        this.removeUnitCell = function(model) {
+            model = this.getModel(model);
+            if(model.unitCellObjects) {
+                let viewer = this;
+                model.unitCellObjects.shapes.forEach(function(s) {viewer.removeShape(s);});
+                model.unitCellObjects.labels.forEach(function(l) {viewer.removeLabel(l);});
+            }
+            delete model.unitCellObjects;
         };
 
         function addLineDashed(spec, s) {
@@ -3086,6 +3138,7 @@ $3Dmol.GLViewer = (function() {
          * @param {$3Dmol.GLModel} model
          */
         this.removeModel = function(model) {
+            model = this.getModel(model);
             if (!model)
                 return;
             model.removegl(modelGroup);
