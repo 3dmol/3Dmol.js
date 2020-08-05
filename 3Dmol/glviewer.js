@@ -2656,6 +2656,66 @@ $3Dmol.GLViewer = (function() {
             }
             delete model.unitCellObjects;
         };
+        
+         /**
+         * Replicate atoms in model to form a super cell of the specified dimensions.
+         * Original cell will be centered as much as possible.
+         *
+         * @function $3Dmol.GLViewer#replicateUnitCell
+         * @param {integer} A - number of times to replicate cell in X dimension.
+         * @param {integer} B - number of times to replicate cell in Y dimension.  If absent, X value is used.
+         * @param {integer} C - number of times to replicate cell in Z dimension.  If absent, Y value is used.
+         * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
+           @example
+                $.get('data/icsd_200866.cif', function(data) {
+                  let m = viewer.addModel(data);
+                  viewer.setStyle({sphere:{scale:.25}})
+                  viewer.addUnitCell();
+                  viewer.zoomTo();
+                  viewer.replicateUnitCell(3,2,1,m);
+                  viewer.render();
+            });                  
+         */
+        this.replicateUnitCell = function(A,B,C,model) {
+            model = this.getModel(model);
+            A = A || 3;
+            B = B || A;
+            C = C || B;
+            let cryst = model.getCrystData();
+            if(cryst) {
+                let atoms = model.selectedAtoms({});
+                let cmat =  $3Dmol.conversionMatrix3(cryst.a, cryst.b, cryst.c, 
+                                            cryst.alpha, cryst.beta, cryst.gamma);
+                let makeoff = function(I) {
+                    //alternate around zero: 1,-1,2,-2...
+                    if(I%2 == 0) return -I/2;
+                    else return Math.ceil(I/2);
+                };
+
+                for(let i = 0; i < A; i++) {
+                    for(let j = 0; j < B; j++) {
+                        for(let k = 0; k < C; k++) {
+                            if(i == 0 && j == 0 && k == 0) continue; //actual unit cell
+                            let offset = new $3Dmol.Vector3(makeoff(i),makeoff(j),makeoff(k));
+                            offset.applyMatrix3(cmat);
+                            
+                            let newatoms = [];
+                            for(let a = 0; a < atoms.length; a++) {
+                                let newAtom = {};
+                                for (let p in atoms[a]) {
+                                    newAtom[p] = atoms[a][p];
+                                }
+                                newAtom.x += offset.x;
+                                newAtom.y += offset.y;
+                                newAtom.z += offset.z;
+                                newatoms.push(newAtom);     
+                            }
+                            model.addAtoms(newatoms);
+                         }
+                    }
+                }
+            }
+        };
 
         function addLineDashed(spec, s) {
             spec.dashLength = spec.dashLength || 0.5;
