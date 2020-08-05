@@ -429,11 +429,7 @@ $3Dmol.Parsers = (function() {
         }
     };
         
-        
-    var sqr = function(n) {
-        return n*n;
-    };
-    
+            
     //adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
     //matrices may be modified if normalization is requested
     var processSymmetries = function(copyMatrices, atoms, options, cryst) {
@@ -449,18 +445,8 @@ $3Dmol.Parsers = (function() {
             //compute the centroid, calculate any adjustment needed to get it in [0,1],
             //convert the adjustment to a cartesian translation, and then add it to
             //the symmetry matrix
-            let a = cryst.a, b = cryst.b, c = cryst.c;
-            let alpha = cryst.alpha * Math.PI / 180;
-            let beta = cryst.beta * Math.PI / 180;
-            let gamma = cryst.gamma * Math.PI / 180;
-            let cos_alpha = Math.cos(alpha);
-            let cos_beta = Math.cos(beta);
-            let cos_gamma = Math.cos(gamma);
-            let sin_gamma = Math.sin(gamma);
-            let conversionMatrix = new $3Dmol.Matrix3(
-                    a, b*cos_gamma, c*cos_beta,
-                    0, b*sin_gamma, c*(cos_alpha-cos_beta*cos_gamma)/sin_gamma,
-                    0, 0, c*Math.sqrt(1-sqr(cos_alpha)-sqr(cos_beta)-sqr(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma)/sin_gamma);
+            let conversionMatrix = $3Dmol.conversionMatrix3(cryst.a, cryst.b, cryst.c, 
+                                            cryst.alpha, cryst.beta, cryst.gamma);
             let toFrac = new $3Dmol.Matrix3();
             toFrac.getInverse3(conversionMatrix);
             
@@ -1066,6 +1052,11 @@ $3Dmol.Parsers = (function() {
         var noAssembly = !options.doAssembly; // don't assemble by default
         var modelData = atoms.modelData = [];
 
+        //coordinate conversion
+        var fractionalToCartesian = function(cmat, x, y, z) {
+            return new $3Dmol.Vector3(x,y,z).applyMatrix3(cmat);
+        };
+            
         // Used to handle quotes correctly
         function splitRespectingQuotes(string, separator) {
             var sections = [];
@@ -1226,26 +1217,11 @@ $3Dmol.Parsers = (function() {
                 var alpha_deg = parseFloat(mmCIF._cell_angle_alpha) || 90;
                 var beta_deg = parseFloat(mmCIF._cell_angle_beta) || 90;
                 var gamma_deg = parseFloat(mmCIF._cell_angle_gamma) || 90;
-                var alpha = alpha_deg * Math.PI / 180;
-                var beta = beta_deg * Math.PI / 180;
-                var gamma = gamma_deg * Math.PI / 180;
-                var cos_alpha = Math.cos(alpha);
-                var cos_beta = Math.cos(beta);
-                var cos_gamma = Math.cos(gamma);
-                var sin_gamma = Math.sin(gamma);
-                conversionMatrix = [
-                    [a, b*cos_gamma, c*cos_beta],
-                    [0, b*sin_gamma, c*(cos_alpha-cos_beta*cos_gamma)/sin_gamma],
-                    [0, 0, c*Math.sqrt(1-sqr(cos_alpha)-sqr(cos_beta)-sqr(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma)/sin_gamma]
-                ];
+                
+                conversionMatrix = $3Dmol.conversionMatrix3(a,b,c,alpha_deg,beta_deg,gamma_deg);                
                 modelData[modelData.length-1].cryst = {'a' : a, 'b' : b, 'c' : c, 'alpha' : alpha_deg, 'beta' : beta_deg, 'gamma' : gamma_deg};
             }
-            var fractionalToCartesian = function(conversionMatrix, a, b, c) {
-                var x = conversionMatrix[0][0]*a + conversionMatrix[0][1]*b + conversionMatrix[0][2]*c;
-                var y = conversionMatrix[1][0]*a + conversionMatrix[1][1]*b + conversionMatrix[1][2]*c;
-                var z = conversionMatrix[2][0]*a + conversionMatrix[2][1]*b + conversionMatrix[2][2]*c;
-                return {x:x, y:y, z:z};
-            };
+
             for (var i = 0; i < atomCount; i++) {
                 if (mmCIF._atom_site_group_pdb !== undefined && mmCIF._atom_site_group_pdb[i] === "TER")
                     continue;
@@ -1356,10 +1332,7 @@ $3Dmol.Parsers = (function() {
                             }
                         }
                     }
-                    var conversionMatrix4 = new $3Dmol.Matrix4(
-                        conversionMatrix[0][0], conversionMatrix[0][1], conversionMatrix[0][2], 0,
-                        conversionMatrix[1][0], conversionMatrix[1][1], conversionMatrix[1][2], 0,
-                        conversionMatrix[2][0], conversionMatrix[2][1], conversionMatrix[2][2], 0);
+                    var conversionMatrix4 = conversionMatrix.getMatrix4();
                     var conversionInverse = (new $3Dmol.Matrix4()).getInverse(conversionMatrix4, true);
                     matrix = (new $3Dmol.Matrix4()).multiplyMatrices(matrix, conversionInverse);
                     matrix = (new $3Dmol.Matrix4()).multiplyMatrices(conversionMatrix4, matrix);

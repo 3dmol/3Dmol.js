@@ -561,6 +561,28 @@ $3Dmol.Matrix3 = function(n11, n12, n13, n21, n22, n23, n31, n32, n33) {
 
 };
 
+$3Dmol.square = function(n) {
+        return n*n;
+};
+    
+//return conversion matrix given crystal unit cell parameters
+$3Dmol.conversionMatrix3 = function(a, b, c, alpha, beta, gamma) {
+    //convert to radians
+    alpha = alpha * Math.PI / 180;
+    beta = beta * Math.PI / 180;
+    gamma = gamma * Math.PI / 180;
+    let sqr = $3Dmol.square;
+    let cos_alpha = Math.cos(alpha);
+    let cos_beta = Math.cos(beta);
+    let cos_gamma = Math.cos(gamma);
+    let sin_gamma = Math.sin(gamma);
+    let conversionMatrix = new $3Dmol.Matrix3(
+            a, b*cos_gamma, c*cos_beta,
+            0, b*sin_gamma, c*(cos_alpha-cos_beta*cos_gamma)/sin_gamma,
+            0, 0, c*Math.sqrt(1-sqr(cos_alpha)-sqr(cos_beta)-sqr(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma)/sin_gamma);
+    return conversionMatrix;
+};
+
 $3Dmol.Matrix3.prototype = {
 
     constructor : $3Dmol.Matrix3,
@@ -608,6 +630,7 @@ $3Dmol.Matrix3.prototype = {
 
         return this;
     },
+    
 
     getInverse3 : function(matrix) {
         // input: Matrix3
@@ -693,6 +716,11 @@ $3Dmol.Matrix3.prototype = {
         return determinant;
     },
 
+    getMatrix4 : function() {
+      var m = this.elements;
+      return new $3Dmol.Matrix4(m[0],m[3],m[6],0,m[1],m[4],m[7],0,m[2],m[5],m[8],0);
+    },
+    
     transpose : function() {
         var tmp, m = this.elements;
 
