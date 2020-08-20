@@ -148,8 +148,8 @@ $3Dmol.createViewer = function(element, config, shared_viewer_resources)
  * Create and initialize an appropriate a grid of viewers that share a WebGL canvas
  @function $3Dmol.createViewerGrid
  * @param {Object | string} element - Either HTML element or string identifier
- * @param {GridSpec} grid configuration
- * @param {ViewerGridSpec} config Viewer specification to apply to all subviewers
+ * @param {GridSpec} config - grid configuration
+ * @param {ViewerGridSpec} viewer_config - Viewer specification to apply to all subviewers
  * @return [[$3Dmol.GLViewer]] 2D array of GLViewers
  * @example                    
    var viewers = $3Dmol.createViewerGrid(
