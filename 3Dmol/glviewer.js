@@ -664,6 +664,13 @@ $3Dmol.GLViewer = (function() {
         this.getCanvas = function() {
             return glDOM.get(0);
         };
+        
+        /**
+         * Return renderer element.
+         */
+        this.getRenderer = function() {
+            return renderer;
+        };
       /**
            * Set the duration of the hover delay
            * 
