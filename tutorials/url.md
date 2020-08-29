@@ -4,7 +4,7 @@ You can view a PDB structure immediately by visiting the 3Dmol.js server.  Simpl
 
 A 3Dmol viewer URL takes the form `3Dmol.csb.pitt.edu/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific 3Dmol styles to apply.  Click the URL below for an example.
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=stick&labelres=backgroundOpacity:0.8;fontSize:14`](../viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick&labelres=backgroundOpacity:0.8;fontSize:14)
+[`https://3Dmol.org/viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=stick&labelres=backgroundOpacity:0.8;fontSize:14`](../viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick&labelres=backgroundOpacity:0.8;fontSize:14)
 
 ####Mouse Controls####
 
@@ -35,11 +35,11 @@ For this example, we'll use the crystal structure with PDB ID 4KW4.
 
 So, the structure identifier portion of the url is `pdb=4KW4`, and the url to view the structure on the 3Dmol.js server is:
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4`](../viewer.html?pdb=4KW4)
+[`https://3Dmol.org/viewer.html?pdb=4KW4`](../viewer.html?pdb=4KW4)
 
 Arbitrary URLs can also be provided.
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?url=http://3dmol.csb.pitt.edu/tests/test_structs/benzene.sdf&type=sdf`](../viewer.html?url=http://3dmol.csb.pitt.edu/tests/test_structs/benzene.sdf&type=sdf)
+[`https://3Dmol.org/viewer.html?url=http://3dmol.csb.pitt.edu/tests/test_structs/benzene.sdf&type=sdf`](../viewer.html?url=http://3dmol.csb.pitt.edu/tests/test_structs/benzene.sdf&type=sdf)
 
 Be default, the file format will be inferred by any extension (e.g., `.sdf`) present in the URL.  The file format may be
 manually specified using the type parameter, as shown above.
@@ -56,11 +56,11 @@ You can choose to apply styles to select groups of atoms by adding **atom select
 
 Atoms can be selected based upon properties defined in the {@link AtomSpec}.  They are formated with atom properties in a semi-colon separated list and the atom property values following a colon.  All specified properties must hold for an atom to be selected.  For example, to select all tryptophans on chain B you would use `select=resn:TRP;chain:B&style=stick`:
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=1YCR&select=resn:TRP;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=resn:TRP;chain:B&style=stick)
+[`https://3Dmol.org/viewer.html?pdb=1YCR&select=resn:TRP;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=resn:TRP;chain:B&style=stick)
 
 Some atom properties, such as residue ids and names, can be specified in a comma separated list.  In this case, *any* property may match to select the atom. For example, `select=resi:19,23,26;chain:B` selects the three residues 19, 23, and 26 on chain B:
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&style=stick)
+[`https://3Dmol.org/viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&style=stick)
 
 Selections and styles are processed in the order they are specified in the URL.  These directives can be chained together to produce complex scenes.
 
@@ -74,15 +74,15 @@ The available molecular styles are **line** (default), **cross**, **cartoon**, *
 
 To render GFP with a **cartoon** representation, enter
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon`](http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon)
+[`https://3Dmol.org/viewer.html?pdb=4KW4&style=cartoon`](http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon)
 
 You can apply multiple styles at once to the selected atoms using a semi-colon separated list:
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon;stick`](../viewer.html?pdb=4KW4&style=cartoon;stick)
+[`https://3Dmol.org/viewer.html?pdb=4KW4&style=cartoon;stick`](../viewer.html?pdb=4KW4&style=cartoon;stick)
 
 Characteristics of each style, such as line width and color, may also be set.  These key-value pairs take the form of a comma separated list after a colon.  Since `=` has special meaning within a URL, `~` is used to associate the key-value pairs:
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&style=cartoon:color~spectrum;stick:radius~0.25,colorscheme~greenCarbon&select=bonds:0&style=sphere:radius~0.5`](../viewer.html?pdb=4KW4&style=cartoon:color~spectrum;stick:radius~0.25,colorscheme~greenCarbon&select=bonds:0&style=sphere:radius~0.5)
+[`https://3Dmol.org/viewer.html?pdb=4KW4&style=cartoon:color~spectrum;stick:radius~0.25,colorscheme~greenCarbon&select=bonds:0&style=sphere:radius~0.5`](../viewer.html?pdb=4KW4&style=cartoon:color~spectrum;stick:radius~0.25,colorscheme~greenCarbon&select=bonds:0&style=sphere:radius~0.5)
 
 
 {@link AtomStyleSpec} provides for a list of possible atom style specification options.
@@ -91,11 +91,11 @@ Characteristics of each style, such as line width and color, may also be set.  T
 
 A surface style specification draws the Van der Waals surface of the currently selected atoms.  It can specify the opacity and color of the surface.
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=4KW4&select=resn:HOH;invert:1&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon`](../viewer.html?pdb=4KW4&select=resn:HOH;invert:1&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon)
+[`https://3Dmol.org/viewer.html?pdb=4KW4&select=resn:HOH;invert:1&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon`](../viewer.html?pdb=4KW4&select=resn:HOH;invert:1&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon)
 
 ##### Labeling Residues #####
 
 A single label per a unique residue can be generated for an atom selection.  The label is positioned at the center of the selected atoms within each residue and displays the residue name and number.  The label can be styled according to the {@link LabelSpec}.  For example, `labelres=backgroundOpacity:0.8;fontSize:14` sets the font size to 14 and makes the background slightly transparent.
 
-[`http://3Dmol.csb.pitt.edu/viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&labelres=backgroundOpacity:0.8;fontSize:14`](../viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&labelres=backgroundOpacity:0.8;fontSize:14)
+[`https://3Dmol.org/viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&labelres=backgroundOpacity:0.8;fontSize:14`](../viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&labelres=backgroundOpacity:0.8;fontSize:14)
 
