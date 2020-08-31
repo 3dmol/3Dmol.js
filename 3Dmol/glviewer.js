@@ -28,6 +28,7 @@
  * @param {boolean} config.antialias
  * @param {boolean} config.control_all
  * @param {boolean} config.orthographic
+ * @param {boolean} config.disableFog - Disable fog, default to false
  */
 $3Dmol.GLViewer = (function() {
     // private class variables
@@ -1959,12 +1960,12 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Set slab of view (contents outside of slab are clipped). M
+         * Set slab of view (contents outside of slab are clipped).
          * Must call render to update.
          * 
          * @function $3Dmol.GLViewer#setSlab
-         * @param {near}
-         * @param {far}
+         * @param {number} near near clipping plane distance
+         * @param {number} far far clipping plane distance
          */
         this.setSlab = function(near, far) {
             slabNear = near;
@@ -1974,8 +1975,10 @@ $3Dmol.GLViewer = (function() {
         /**
          * Get slab of view (contents outside of slab are clipped).
          * 
-         * @function $3Dmol.GLViewer#setSlab
-         * @return {Object} near/far
+         * @function $3Dmol.GLViewer#getSlab
+         * @return {Object}
+         *      @property {number} near - near clipping plane distance
+         *      @property {number} far - far clipping plane distance
          */
         this.getSlab = function() {
             return {near: slabNear, far: slabFar};
@@ -2900,16 +2903,25 @@ $3Dmol.GLViewer = (function() {
         
         /**
          * Return true if volumetric rendering is supported (WebGL 2.0 required)
+         *
+         * @function $3Dmol.GLViewer#hasVolumetricRender
+         * @return {boolean}
          */
         this.hasVolumetricRender = function() {
           return renderer.supportsVolumetric();  
         };
         
+        /**
+         * Enable/disable fog for content far from the camera
+         *
+         * @function $3Dmol.GLViewer#enableFog
+         * @param {boolean} fog whether to enable or disable the fog
+         */
         this.enableFog = function(fog){
-            if(fog){
-                scene.fog=new $3Dmol.Fog(bgColor, 100, 200);
-            }else{
-                config.disableFog=true;
+            if (fog) {
+                scene.fog = new $3Dmol.Fog(bgColor, 100, 200);
+            } else {
+                config.disableFog = true;
                 show();
             }
         };
@@ -3781,7 +3793,7 @@ $3Dmol.GLViewer = (function() {
          *            mesh
          * @param {Object}
          *            style
-         * @returns {Number} surfid
+         * @returns {number} surfid
          */
         this.addMesh = function(mesh) {
             var surfobj = {
