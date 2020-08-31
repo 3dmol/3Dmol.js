@@ -7,27 +7,7 @@
  * 
  * @constructor 
  * @param {Object} element HTML element within which to create viewer
- * @param {Object} config Object containing optional configuration for the viewer including:
- * @param {function} config.callback - Callback function to be immediately executed on this viewer
- * @param {Object} config.defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
- * @param {boolean} config.nomouse - Whether to disable mouse handlers
- * @param {string} config.backgroundColor - Color of the canvas' background
- * @param {number} config.camerax
- * @param {number} config.hoverDuration
- * @param {string} config.id - id of the canvas
- * @param {number} config.cartoonQuality - default 5
- * @param config.row
- * @param config.col
- * @param config.rows
- * @param config.cols
- * @param config.canvas
- * @param config.viewers
- * @param config.minimumZoomToDistance
- * @param config.lowerZoomLimit
- * @param config.upperZoomLimit
- * @param {boolean} config.antialias
- * @param {boolean} config.control_all
- * @param {boolean} config.orthographic
+ * @param {ViewerSpec} config Object containing optional configuration for the viewer
  */
 $3Dmol.GLViewer = (function() {
     // private class variables
@@ -1959,12 +1939,12 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Set slab of view (contents outside of slab are clipped). M
+         * Set slab of view (contents outside of slab are clipped).
          * Must call render to update.
          * 
          * @function $3Dmol.GLViewer#setSlab
-         * @param {near}
-         * @param {far}
+         * @param {number} near near clipping plane distance
+         * @param {number} far far clipping plane distance
          */
         this.setSlab = function(near, far) {
             slabNear = near;
@@ -1974,8 +1954,10 @@ $3Dmol.GLViewer = (function() {
         /**
          * Get slab of view (contents outside of slab are clipped).
          * 
-         * @function $3Dmol.GLViewer#setSlab
-         * @return {Object} near/far
+         * @function $3Dmol.GLViewer#getSlab
+         * @return {Object}
+         *      @property {number} near - near clipping plane distance
+         *      @property {number} far - far clipping plane distance
          */
         this.getSlab = function() {
             return {near: slabNear, far: slabFar};
@@ -2900,16 +2882,25 @@ $3Dmol.GLViewer = (function() {
         
         /**
          * Return true if volumetric rendering is supported (WebGL 2.0 required)
+         *
+         * @function $3Dmol.GLViewer#hasVolumetricRender
+         * @return {boolean}
          */
         this.hasVolumetricRender = function() {
           return renderer.supportsVolumetric();  
         };
         
+        /**
+         * Enable/disable fog for content far from the camera
+         *
+         * @function $3Dmol.GLViewer#enableFog
+         * @param {boolean} fog whether to enable or disable the fog
+         */
         this.enableFog = function(fog){
-            if(fog){
-                scene.fog=new $3Dmol.Fog(bgColor, 100, 200);
-            }else{
-                config.disableFog=true;
+            if (fog) {
+                scene.fog = new $3Dmol.Fog(bgColor, 100, 200);
+            } else {
+                config.disableFog = true;
                 show();
             }
         };
@@ -3781,7 +3772,7 @@ $3Dmol.GLViewer = (function() {
          *            mesh
          * @param {Object}
          *            style
-         * @returns {Number} surfid
+         * @returns {number} surfid
          */
         this.addMesh = function(mesh) {
             var surfobj = {

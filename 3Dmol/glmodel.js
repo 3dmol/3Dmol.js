@@ -311,6 +311,7 @@ $3Dmol.GLModel = (function() {
          * @prop {number} scale - scale radius by specified amount
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
+         * @prop {number} opacity - opacity, must be the same for all atoms in the model
          */
         /**
          * 
@@ -468,6 +469,7 @@ $3Dmol.GLModel = (function() {
          * @prop {number} linewidth *deprecated due to vanishing browser support* 
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
+         * @prop {number} opacity - opacity, must be the same for all atoms in the model
          */
         
         // bonds - both atoms must match bond style
@@ -645,6 +647,7 @@ $3Dmol.GLModel = (function() {
          * @prop {number} scale - scale radius by specified amount
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
+         * @prop {number} opacity - opacity, must be the same for all atoms in the model
          */
         
         //sphere drawing
@@ -875,6 +878,7 @@ $3Dmol.GLModel = (function() {
          * @prop {boolean} singleBonds - draw all bonds as single bonds if set
          * @prop {ColorschemeSpec} colorscheme - element based coloring
          * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
+         * @prop {number} opacity - opacity, must be the same for all atoms in the model
          */
         
         // draws cylinders and small spheres (at bond radius)
