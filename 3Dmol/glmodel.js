@@ -1448,6 +1448,31 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
+         * Returns crystallographic information if present.
+         *
+         * @function $3Dmol.GLModel#setCrystData
+         * @param {number} a - length of unit cell side
+         * @param {number} b - length of unit cell side
+         * @param {number} c - length of unit cell side
+         * @param {number} alpha - unit cell angle in degrees (default 90)
+         * @param {number} beta - unit cell angle in degrees (default 90)
+         * @param {number} gamma - unit cell angle in degrees (default 90)
+         
+         */
+        this.setCrystData = function(a, b, c, alpha, beta, gamma) {
+            //I am assuming these
+            a = a || 1.0;
+            b = b || 1.0;
+            c = c || 1.0;
+            alpha = alpha || 90;
+            beta = beta || 90;
+            gamma = gamma || 90;
+            
+            modelData.cryst = {'a' : a, 'b' : b, 'c' : c, 
+                'alpha' : alpha, 'beta' : beta, 'gamma' : gamma};
+        };
+        
+        /**
          * Returns list of rotational/translational matrices if there is BIOMT data
          * Otherwise returns a list of just the ID matrix
          *
