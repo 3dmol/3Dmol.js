@@ -4,9 +4,27 @@
 /**
  * GLViewer input specification
  * @typedef ViewerSpec
- * @prop {Object} defaultcolors - map of elements to colors
- * @prop {boolean} nomouse - if true, disable handling of mouse events
- * @prop {ColorSpec} backgroundColor - color of background
+ * @prop {function} callback - Callback function to be immediately executed on this viewer
+ * @prop {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
+ * @prop {boolean} nomouse - Whether to disable disable handling of mouse events
+ * @prop {string} backgroundColor - Color of the canvas' background
+ * @prop {number} camerax
+ * @prop {number} hoverDuration
+ * @prop {string} id - id of the canvas
+ * @prop {number} cartoonQuality - default 5
+ * @prop {number} row
+ * @prop {number} col
+ * @prop {number} rows
+ * @prop {number} cols
+ * @prop canvas
+ * @prop viewers
+ * @prop minimumZoomToDistance
+ * @prop lowerZoomLimit
+ * @prop upperZoomLimit
+ * @prop {boolean} antialias
+ * @prop {boolean} control_all
+ * @prop {boolean} orthographic
+ * @prop {boolean} disableFog - Disable fog, default to false
  */
 
 /**

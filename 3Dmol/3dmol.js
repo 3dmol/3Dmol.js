@@ -111,7 +111,7 @@ $.ajaxTransport(
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
  @function $3Dmol.createViewer
  * @param {Object | string} element - Either HTML element or string identifier
- * @param {ViewerSpec} config Viewer specification
+ * @param {ViewerSpec} config Viewer configuration
  * @param {Object} shared_viewer_resources shared resources between viewers' renderers
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
  * @example
