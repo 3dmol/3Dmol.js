@@ -1022,6 +1022,8 @@ $3Dmol.GLViewer = (function() {
         var spinInterval;
         /**
          * Continuously rotate a scene around the specified axis.
+         *
+         * Call `$3Dmol.GLViewer.spin(false)` to stop spinning.
          * 
          * @function $3Dmol.GLViewer#spin
          * @param {string}
@@ -2478,11 +2480,11 @@ $3Dmol.GLViewer = (function() {
          * @prop {ArrowSpec} bstyle - arrow specification of "b" axis
          * @prop {ArrowSpec} cstyle - arrow specification of "c" axis
          * @prop {string} alabel - label for a axis
-         * @prop {LabelSpec} alabel - label style for a axis
+         * @prop {LabelSpec} alabelstyle - label style for a axis
          * @prop {string} blabel - label for b axis
-         * @prop {LabelSpec} blabel - label style for a axis         
+         * @prop {LabelSpec} blabelstyle - label style for b axis
          * @prop {string} clabel - label for c axis
-         * @prop {LabelSpec} clabel - label style for a axis
+         * @prop {LabelSpec} clabelstyle - label style for c axis
          
          */
         

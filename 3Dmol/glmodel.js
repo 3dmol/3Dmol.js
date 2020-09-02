@@ -1453,7 +1453,7 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
-         * Returns crystallographic information if present.
+         * Set crystallographic information using three angles and three lengths
          *
          * @function $3Dmol.GLModel#setCrystData
          * @param {number} a - length of unit cell side
@@ -2220,7 +2220,6 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#removeAtoms
          * @param {type} badatoms - list of atoms
-         * @return {removeAtoms}
          */
         this.removeAtoms = function(badatoms) {
             molObj = null;

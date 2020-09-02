@@ -78,7 +78,7 @@
   * @prop {boolean} doAssembly - boolean dictating weather or not to do assembly ; supported by mcif
   * @prop {boolean} duplicateAssemblyAtoms- Set to true if you wish to duplicate assembly atoms otherwise false ; supported by all formats with symmetries.  Not duplicating will result in faster rendering but it will not be possible to individually style symmetries.
   * @prop {boolean} normalizeAssembly - shift symmetry mates so their centroid is in the unit cell
-  * @prop {boolean} dontConnectDuplicatedAtoms - do not detect bonds between symmetries generated with duplicateAssemblyAtoms (cif only - other formats never make bonds between symmetries) 
+  * @prop {boolean} dontConnectDuplicatedAtoms - do not detect bonds between symmetries generated with duplicateAssemblyAtoms (cif only - other formats never make bonds between symmetries)
   * @prop {boolean} noSecondaryStructure - boolean dictating the presence of a secondary structure ; supported by pdb
   * @prop {boolean} noComputeSecondaryStructure - do not compute ss ; supported by pdb
   * @prop {string} altLoc -which alternate location to select, if present; '*' to load all ; supported by pdb
@@ -262,6 +262,8 @@
  * @prop {$3Dmol.Vector3} start
  * @prop {$3Dmol.Vector3} end
  * @prop {number} radius
+ * @prop {ColorSpec} color
+ * @prop {boolean} hidden
  * @prop {number} radiusRatio - ratio of arrow base to cylinder (1.618034 default)
  * @prop {number} mid - relative position of arrow base (0.618034 default)
  * @prop {number} midpos - position of arrow base in length units, if negative positioned from end instead of start.  Overrides mid.

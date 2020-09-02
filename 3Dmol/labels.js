@@ -83,7 +83,7 @@ $3Dmol.Label.prototype = {
          * @prop {string} borderOpacity - color of border
          * @prop {ColorSpec} backgroundColor - color of background, default black
          * @prop {string} backgroundOpacity - opacity of background, default 1
-         * @prop {Object} position - x,y,z coordinates for label
+         * @prop {$3Dmol.Vector3} position - x,y,z coordinates for label
          * @prop {boolean} inFront - always put labels in from of model
          * @prop {boolean} showBackground - show background rounded rectangle, default true
          * @prop {boolean} fixed - sets the label to change with the model when zooming
