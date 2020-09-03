@@ -1799,7 +1799,8 @@ $3Dmol.GLModel = (function() {
             return false;
         };
         
-        /** given a selection specification, return true if atom is selected
+        /** given a selection specification, return true if atom is selected.
+         * Does not support context-aware selectors like expand/within/byres.
          * 
          * @function $3Dmol.GLModel#atomIsSelected
          * @param {AtomSpec} atom
@@ -2768,7 +2769,7 @@ $3Dmol.GLModel = (function() {
 
         this.addAtomSpecs = function(customAtomSpecs) {
             for (var i = 0; i < customAtomSpecs.length; i++) {
-                if (GLModel.validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
+                if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
                     GLModel.validAtomSelectionSpecs.push(customAtomSpecs[i]);
                 }
             }
