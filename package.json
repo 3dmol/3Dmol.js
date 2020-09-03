@@ -11,6 +11,7 @@
   "devDependencies": {
     "del": "^5.0.0",
     "gulp": "^4.0.2",
+    "gulp-cli": "^2.2.0",
     "gulp-clean": "^0.4.0",
     "gulp-concat": "^2.6.1",
     "gulp-jsdoc3": "^2.0.0",
@@ -25,12 +26,11 @@
   },
   "scripts": {
     "build": "gulp",
-    "prepublish": "npm run build"
+    "prepare": "npm run build"
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",
   "dependencies": {
-    "gulp-cli": "^2.2.0",
     "jquery": "^3.5.0",
     "netcdfjs": "^1.0.0",
     "pako": "^1.0.11"
