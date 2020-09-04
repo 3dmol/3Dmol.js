@@ -163,8 +163,9 @@
  * @prop {number} opacity - sets the transparency: 0 to hide, 1 for fully opaque
  * @prop {ColorschemeSpec} colorscheme - element based coloring
  * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
- * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring
+ * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified
  * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color
+ * @prop {string} volformat - format of voldata if not a $3Dmol.VolumeData object
  * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead.
  *
  * @example

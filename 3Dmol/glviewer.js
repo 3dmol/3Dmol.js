@@ -3852,6 +3852,10 @@ $3Dmol.GLViewer = (function() {
                 atomlist = shallowCopy(getAtomsFromSel(allsel));
             }
             
+            if(style.volformat && !(style.voldata instanceof $3Dmol.VolumeData)) {
+                style.voldata = new $3Dmol.VolumeData(style.voldata, style.volformat);
+            }
+            
             var symmetries = false;
             var n;
             for (n = 0; n < models.length; n++) { 
@@ -4094,6 +4098,9 @@ $3Dmol.GLViewer = (function() {
          * @param {SurfaceStyleSpec} style - new material style specification
          */ 
         this.setSurfaceMaterialStyle = function(surf, style) {
+            if(style.volformat && !(style.voldata instanceof $3Dmol.VolumeData)) {
+                style.voldata = new $3Dmol.VolumeData(style.voldata, style.volformat);
+            }
             if (surfaces[surf]) {
                 var surfArr = surfaces[surf];
                 for (var i = 0; i < surfArr.length; i++) {
