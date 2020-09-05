@@ -5,7 +5,8 @@
       viewer.zoomTo();
       //viewer.render( /*no callback*/);
       $3Dmol.getbin('data/4csv.ccp4.gz', function(data) {
-        viewer.addSurface("SAS", {opacity:0.9, voldata: data, volformat: 'ccp4.gz', volscheme: new $3Dmol.Gradient.RWB(-.25,.25)});
+        viewer.addSurface("SAS", {opacity:0.9, voldata: data, volformat: 'ccp4.gz', 
+          volscheme: {gradient:'rwb', min:-.25, max:.25}});
         viewer.render();
       });
     });

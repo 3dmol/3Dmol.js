@@ -164,7 +164,7 @@
  * @prop {ColorschemeSpec} colorscheme - element based coloring
  * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
  * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified
- * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color
+ * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields.
  * @prop {string} volformat - format of voldata if not a $3Dmol.VolumeData object
  * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead.
  *

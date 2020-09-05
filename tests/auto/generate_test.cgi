@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #output a single python test that is specified as a cgi argument
 
@@ -18,45 +18,45 @@ for file in testsys.files:
 form = cgi.FieldStorage()
 test = form.getvalue("test","test49")
 
-print "Content-Type: text/html"     # HTML is following
-print                               # blank line, end of headers
+print("Content-Type: text/html")     # HTML is following
+print()                               # blank line, end of headers
 
 if test not in testinfo:
-    print """<html ><head>
+    print("""<html ><head>
     <title>Error</title></head>
     
     <body>
     <h1>%s does not exist</h1>
     </body>
-</html>""" % test
+</html>""" % test)
 else:
     ex = testinfo[test]
-    print """<html><head>
+    print("""<html><head>
         <title>%s</title>
         <script src="../../build/3Dmol.js"></script>               
         </head>
         
         <body style="margin:0;padding:0">
-    """ % test
+    """ % test)
     
     if ex.prescripts:
         for prescript in ex.prescripts:
-            print "<script>\n%s</script>\n" % prescript
+            print("<script>\n%s</script>\n" % prescript)
         
     if ex.datas:
         for d in ex.datas:
-            print d
+            print(d)
     
     if ex.divs:
         for div in ex.divs:
-            print div        
+            print(div)
     else:
-        print "<div id='gldiv' style='width: 100vw; height: 100vh; position: relative;'></div>"
-        print '<script>var viewer=$3Dmol.createViewer($("#gldiv"));</script>'
+        print("<div id='gldiv' style='width: 100vw; height: 100vh; position: relative;'></div>")
+        print('<script>var viewer=$3Dmol.createViewer($("#gldiv"));</script>')
         
-    print """<script>
+    print("""<script>
         var callback = function() {};
         %s
         </script>        
         </body>
-    </html>""" % (ex.script)
+    </html>""" % (ex.script))
