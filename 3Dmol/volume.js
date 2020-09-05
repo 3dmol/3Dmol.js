@@ -35,6 +35,10 @@ $3Dmol.VolumeData = function(str, format, options) {
         format = format.replace(/\.gz$/,'');
         try {
             if(this[format] && this[format].isbinary) {
+                if(typeof(str) == "string") {
+                    //assume base64 encoded
+                    str = $3Dmol.base64ToArray(str);
+                }
                 str = pako.inflate(str);
             }
             else {
@@ -46,6 +50,9 @@ $3Dmol.VolumeData = function(str, format, options) {
     }
     
     if (this[format]) {
+        if(this[format].isbinary && typeof(str) == "string") {
+            str = $3Dmol.base64ToArray(str);
+        }
         this[format](str);
     }
     
