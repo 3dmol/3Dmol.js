@@ -926,6 +926,11 @@ $3Dmol.GLViewer = (function() {
         };
 
         $(window).resize(this.resize);
+        
+        if(typeof(window.ResizeObserver) !== undefined) {
+            var divwatcher = new window.ResizeObserver(this.resize);
+            divwatcher.observe(container[0]);
+        }
 
         /**
          * Return specified model
