@@ -1812,36 +1812,59 @@ $3Dmol.GLModel = (function() {
                 return true; // undef gets all
             var invert = !!sel.invert;
             var ret = true;
-            for ( var key in sel) {
-                if(key == "and" || key == "or" || key == "not"){//boolean fields
-                    if(key == "not"){
-                        if(this.atomIsSelected(atom,sel[key])){
-                            ret=false;
+            for (var key in sel) {
+                if (key == "and" || key == "or" || key == "not") {  //boolean operators
+                    if (key == "not") {
+                        if (this.atomIsSelected(atom, sel[key])) {
+                            ret = false;
                             break;
                         }
-                    }else{//"or" and "and"
-                        if(key == "and"){
-                            var and=sel[key];//array format
-                            for(var i=0;i<and.length;i++){
-                                if(!this.atomIsSelected(atom,and[i])){
-                                    ret=false;
-                                    break;
+                    } else { //"or" and "and"
+                        // cache the evaluation of the selection for better performance
+                        if (sel[key].__cached_results === undefined) {
+                            // create a list of sets of matching atoms indexes for
+                            // each sub-selection
+                            const results = [];
+                            for (const subSelection of sel[key]) {
+                                const set = new Set();
+                                for (const match of this.selectedAtoms(subSelection)) {
+                                    set.add(match.index);
                                 }
+                                results.push(set);
                             }
-                        }else if(key =="or"){
-                            var or=sel[key];
-                            var condition=true;
-                            for(let i=0;i<or.length;i++){
-                                if(this.atomIsSelected(atom,or[i])){
-                                    condition=true;
-                                    break;
+                            
+                            if (key == "and") {
+                                // get the intersection of two sets
+                                const intersect = function(first, other) {
+                                    const result = new Set();
+                                    for (const elem of other) {
+                                        if (first.has(elem)) {
+                                            result.add(elem);
+                                        }
+                                    }
+                                    return result;
+                                };
+                                
+                                let intersection = new Set(results[0]);
+                                for (const set of results.splice(1)) {
+                                    intersection = intersect(intersection, set);
                                 }
-                                else{
-                                    condition=false;
+                                sel[key].__cached_results = intersection;
+                                
+                            } else if (key =="or") {
+                                const union = new Set();
+                                for (const set of results) {
+                                    for (const elem of set) {
+                                        union.add(elem);
+                                    }
                                 }
+                                
+                                sel[key].__cached_results = union;
                             }
-                            ret=condition;
                         }
+                        
+                        ret = sel[key].__cached_results.has(atom.index);
+                        break;
                     }
 
                 }else if(key === 'predicate') { //a user supplied function for evaluating atoms
