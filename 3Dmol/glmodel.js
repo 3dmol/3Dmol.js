@@ -1993,7 +1993,35 @@ $3Dmol.GLModel = (function() {
          */
         this.selectedAtoms = function(sel, from) {
             var ret = [];
-            sel = sel || {};
+
+            // make a deep copy of an object. This does not support arbitrary
+            // javascript objects, but support enough for eveything that is
+            // used in selections: number, string, boolean, functions; as well
+            // as arrays and nested objects with values of the aformentioned
+            // types.
+            const deepCopy = function(object) {
+                const copy = {};
+                for (const key in object) {
+                    const item = object[key];
+                    if (Array.isArray(item)) {
+                        // handle array separatly from other typeof == "object"
+                        // elements
+                        copy[key] = [];
+                        for (let i=0; i<item.length; i++) {
+                            copy[key].push(deepCopy(item[i]));
+                        }
+                    } else if (typeof item === "object") {
+                        copy[key] = deepCopy(item);
+                    } else {
+                        copy[key] = item;
+                    }
+                }
+                return copy;
+            };
+            // make a copy of the selection to allow caching results without
+            // the possibility for the user to change the selection and this
+            // code not noticing the changes
+            sel = deepCopy(sel || {});
 
             if (!from) from = atoms;
             var aLength = from.length;
