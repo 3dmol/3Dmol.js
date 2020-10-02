@@ -2,6 +2,9 @@
 
 #output a single python test that is specified as a cgi argument
 
+print("Content-Type: text/html")     # HTML is following
+print()                               # blank line, end of headers
+
 import generate_tests
 import cgi, cgitb, sys
 
@@ -18,8 +21,6 @@ for file in testsys.files:
 form = cgi.FieldStorage()
 test = form.getvalue("test","test49")
 
-print("Content-Type: text/html")     # HTML is following
-print()                               # blank line, end of headers
 
 if test not in testinfo:
     print("""<html ><head>
