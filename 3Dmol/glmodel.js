@@ -80,7 +80,7 @@ $3Dmol.GLModel = (function() {
         "U"  : 1.86
     };
     /*
-        The dictioanries are for dropdown menus and validation of the viewer
+        The dictionaries are for dropdown menus and validation of the viewer
     */
 
      GLModel.validElements = [
@@ -263,6 +263,7 @@ $3Dmol.GLModel = (function() {
         var renderedMolObj = null;
         var lastColors = null;
         var modelData = {};
+        var modelDatas = null; //if there is different modelData per frame
         var idMatrix = new $3Dmol.Matrix4();
         var dontDuplicateAtoms = true;
         var defaultColor = $3Dmol.elementColors.defaultColor;
@@ -1572,8 +1573,9 @@ $3Dmol.GLModel = (function() {
          * @param {number} framenum - model's atoms are set to this index in frames list
          * @return {Promise}
          */
-        this.setFrame = function(framenum) {
+        this.setFrame = function(framenum, viewer) { //viewer only passed internally for unit cell 
             var numFrames = this.getNumFrames();
+            let model = this;
             return new Promise(function(resolve, reject) {
                 if (numFrames == 0) {
                     //return;
@@ -1604,6 +1606,13 @@ $3Dmol.GLModel = (function() {
                     resolve();
                 }
                 molObj = null;
+                if(modelDatas && framenum < modelDatas.length) {
+                    modelData = modelDatas[framenum];
+                    if(model.unitCellObjects && viewer) {
+                        viewer.removeUnitCell(model);
+                        viewer.addUnitCell(model);
+                    } 
+                } 
             });
         };
         
@@ -1726,6 +1735,9 @@ $3Dmol.GLModel = (function() {
             if (mData) {
                 if (Array.isArray(mData)) {
                     modelData = mData[0];
+                    if(options.frames) {
+                        modelDatas = mData;
+                    }
                 } else {
                     modelData = mData;
                 }

@@ -2921,9 +2921,10 @@ $3Dmol.GLViewer = (function() {
          */
         this.setFrame = function (framenum) {
             viewer_frame = framenum;
+            let viewer = this;
             return new Promise(function (resolve) {
                 var modelMap = models.map(function (model) {
-                    return model.setFrame(framenum);
+                    return model.setFrame(framenum,viewer);
                 });
                 Promise.all(modelMap)
                     .then(function() {resolve();});

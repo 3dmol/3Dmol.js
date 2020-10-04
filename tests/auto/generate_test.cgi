@@ -8,9 +8,6 @@ print()                               # blank line, end of headers
 import generate_tests
 import cgi, cgitb, sys
 
-print("Content-Type: text/html")     # HTML is following
-print()                               # blank line, end of headers
-
 cgitb.enable()
 
 testsys = generate_tests.TestSystem('../..') # hardcoded directory paths :-(
