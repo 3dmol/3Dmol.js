@@ -5,6 +5,9 @@
 import generate_tests
 import cgi, cgitb, sys
 
+print("Content-Type: text/html")     # HTML is following
+print()                               # blank line, end of headers
+
 cgitb.enable()
 
 testsys = generate_tests.TestSystem('../..') # hardcoded directory paths :-(
@@ -17,9 +20,6 @@ for file in testsys.files:
 #get name of user specified test
 form = cgi.FieldStorage()
 test = form.getvalue("test","test49")
-
-print("Content-Type: text/html")     # HTML is following
-print()                               # blank line, end of headers
 
 if test not in testinfo:
     print("""<html ><head>

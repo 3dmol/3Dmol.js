@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #this program will parse through all of the tests as well as all of the examples and create an html page from that
 #the page will have referance images on the right corresponding to the canvas snapshots on the left
@@ -99,7 +99,7 @@ class File():
     def getExamples(self):
         nearests=[]
         filename=self.filename
-        file=open(filename,'r')
+        file=open(filename,'r', encoding="utf-8")
         text=file.read()
         example_indices=find_all(text,"@example")
         typedef_decorators=find_all(text,"@typedef")
@@ -174,11 +174,11 @@ class TestSystem():
         files=[]
         #these are the files with examples in them
         for filename in glob.glob(examples_path+'/*.js')+glob.glob(examples_path+'/WebGL/*.js'):
-            text=open(filename,'r')
+            text=open(filename,'r', encoding="utf-8")
             files.append(File(filename,"generated",text.read()))
-        #these are the build in tests
+        #these are the built in tests
         for filename in glob.glob(manual_tests_path+'/*.js'):
-            file=open(filename,"r")
+            file=open(filename,"r", encoding="utf-8")
             files.append(File(filename,"builtin",file.read()))
         
         return files

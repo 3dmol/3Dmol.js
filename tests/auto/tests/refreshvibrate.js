@@ -1,7 +1,5 @@
-
 var vib_viewer = viewer;
 vib_viewer.setBackgroundColor(0xffffff);
-
 
 function refresh(data,N) {
     vib_viewer.stopAnimate();
