@@ -2,6 +2,9 @@
 
 #output a single python test that is specified as a cgi argument
 
+print("Content-Type: text/html")     # HTML is following
+print()                               # blank line, end of headers
+
 import generate_tests
 import cgi, cgitb, sys
 
