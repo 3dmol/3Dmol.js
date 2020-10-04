@@ -1808,6 +1808,7 @@ $3Dmol.GLModel = (function() {
         // as arrays and nested objects with values of the aformentioned
         // types.
         const deepCopyAndCache = function(selobject, model) {
+            if(typeof selobject != 'object') return selobject; 
             if(selobject.__cache_created) return selobject; //already done
             const copy = {};
             for (const key in selobject) {
