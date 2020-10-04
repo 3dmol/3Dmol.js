@@ -1799,6 +1799,81 @@ $3Dmol.GLModel = (function() {
             return false;
         };
         
+        // make a deep copy of a selection object and create caches of expensive
+        // selections.  We create a copy so caches are not attached to user 
+        // supplied objects where the user might change them invalidating the cache. 
+        // This does not support arbitrary
+        // javascript objects, but support enough for eveything that is
+        // used in selections: number, string, boolean, functions; as well
+        // as arrays and nested objects with values of the aformentioned
+        // types.
+        const deepCopyAndCache = function(selobject, model) {
+            if(selobject.__cache_created) return selobject; //already done
+            const copy = {};
+            for (const key in selobject) {
+                const item = selobject[key];
+                if (Array.isArray(item)) {
+                    // handle array separatly from other typeof == "object"
+                    // elements
+                    copy[key] = [];
+                    for (let i=0; i<item.length; i++) {
+                        copy[key].push(deepCopyAndCache(item[i], model));
+                    }
+                } else if (typeof item === "object" && key != "properties") {
+                    copy[key] = deepCopyAndCache(item, model);
+                } else {
+                    copy[key] = item;
+                }
+                
+                //create caches of expensive selection types - the cache
+                //stores the atoms matching the selection type
+                if (key == "and" || key == "or") {
+                    // create a list of sets of matching atoms indexes for
+                    // each sub-selection
+                    const results = [];
+                    for (const subSelection of copy[key]) {
+                        const set = new Set();
+                        for (const match of model.selectedAtoms(subSelection)) {
+                            set.add(match.index);
+                        }
+                        results.push(set);
+                    }
+                    
+                    if (key == "and") {
+                        // get the intersection of two sets
+                        const intersect = function(first, other) {
+                            const result = new Set();
+                            for (const elem of other) {
+                                if (first.has(elem)) {
+                                    result.add(elem);
+                                }
+                            }
+                            return result;
+                        };
+                        
+                        let intersection = new Set(results[0]);
+                        for (const set of results.splice(1)) {
+                            intersection = intersect(intersection, set);
+                        }
+                        copy[key].__cached_results = intersection;
+                        
+                    } else if (key =="or") {
+                        const union = new Set();
+                        for (const set of results) {
+                            for (const elem of set) {
+                                union.add(elem);
+                            }
+                        }
+                        
+                        copy[key].__cached_results = union;
+                    }
+                }                
+                
+            }
+            copy.__cache_created = true;
+            return copy;
+        };                        
+        
         /** given a selection specification, return true if atom is selected.
          * Does not support context-aware selectors like expand/within/byres.
          * 
@@ -1820,51 +1895,17 @@ $3Dmol.GLModel = (function() {
                             break;
                         }
                     } else { //"or" and "and"
-                        // cache the evaluation of the selection for better performance
+                        // these selections are expensive so when called via
+                        //selectedAtoms shoudl be cached - but if atomIsSelected
+                        //is called directly create the cache
                         if (sel[key].__cached_results === undefined) {
-                            // create a list of sets of matching atoms indexes for
-                            // each sub-selection
-                            const results = [];
-                            for (const subSelection of sel[key]) {
-                                const set = new Set();
-                                for (const match of this.selectedAtoms(subSelection)) {
-                                    set.add(match.index);
-                                }
-                                results.push(set);
-                            }
-                            
-                            if (key == "and") {
-                                // get the intersection of two sets
-                                const intersect = function(first, other) {
-                                    const result = new Set();
-                                    for (const elem of other) {
-                                        if (first.has(elem)) {
-                                            result.add(elem);
-                                        }
-                                    }
-                                    return result;
-                                };
-                                
-                                let intersection = new Set(results[0]);
-                                for (const set of results.splice(1)) {
-                                    intersection = intersect(intersection, set);
-                                }
-                                sel[key].__cached_results = intersection;
-                                
-                            } else if (key =="or") {
-                                const union = new Set();
-                                for (const set of results) {
-                                    for (const elem of set) {
-                                        union.add(elem);
-                                    }
-                                }
-                                
-                                sel[key].__cached_results = union;
-                            }
+                            sel = deepCopyAndCache(sel, this);                            
                         }
                         
                         ret = sel[key].__cached_results.has(atom.index);
-                        break;
+                        if(!ret) {
+                            break;
+                        }
                     }
 
                 }else if(key === 'predicate') { //a user supplied function for evaluating atoms
@@ -1875,6 +1916,7 @@ $3Dmol.GLModel = (function() {
                 }
                 else if(key == "properties" && atom[key]) {
                     for (var propkey in sel.properties) {
+                        if(propkey.startsWith("__cache")) continue;
                         if(typeof(atom.properties[propkey]) === 'undefined') {
                             ret = false;
                             break;
@@ -1885,7 +1927,10 @@ $3Dmol.GLModel = (function() {
                         }
                     }
                 }
-                else if (sel.hasOwnProperty(key) && key != "props" && key != "invert" && key != "model" && key != "byres" && key != "expand" && key != "within"  && key != "and" && key != "or" && key != "not") {
+                else if (sel.hasOwnProperty(key) && key != "props" && 
+                    key != "invert" && key != "model" && key != "byres" && 
+                    key != "expand" && key != "within"  && key != "and" && 
+                    key != "or" && key != "not" && !key.startsWith('__cache')) {
 
                     // if something is in sel, atom must have it                    
                     if (typeof (atom[key]) === "undefined") {
@@ -1929,11 +1974,11 @@ $3Dmol.GLModel = (function() {
         };
 
 
-        var squaredDistance = function(atom1, atom2) {
+        const squaredDistance = function(atom1, atom2) {
             var xd = atom2.x - atom1.x;
             var yd = atom2.y - atom1.y;
             var zd = atom2.z - atom1.z;
-            return (Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
+            return xd*xd + yd*yd + zd*zd;
         };
 
         /** returns a list of atoms in the expanded bounding box, but not in the current one
@@ -1976,6 +2021,8 @@ $3Dmol.GLModel = (function() {
             return expand;
         };
                 
+
+                
         /** return list of atoms selected by sel, this is specific to glmodel
          * 
          * @function $3Dmol.GLModel#selectedAtoms
@@ -1994,34 +2041,11 @@ $3Dmol.GLModel = (function() {
         this.selectedAtoms = function(sel, from) {
             var ret = [];
 
-            // make a deep copy of an object. This does not support arbitrary
-            // javascript objects, but support enough for eveything that is
-            // used in selections: number, string, boolean, functions; as well
-            // as arrays and nested objects with values of the aformentioned
-            // types.
-            const deepCopy = function(object) {
-                const copy = {};
-                for (const key in object) {
-                    const item = object[key];
-                    if (Array.isArray(item)) {
-                        // handle array separatly from other typeof == "object"
-                        // elements
-                        copy[key] = [];
-                        for (let i=0; i<item.length; i++) {
-                            copy[key].push(deepCopy(item[i]));
-                        }
-                    } else if (typeof item === "object") {
-                        copy[key] = deepCopy(item);
-                    } else {
-                        copy[key] = item;
-                    }
-                }
-                return copy;
-            };
+
             // make a copy of the selection to allow caching results without
             // the possibility for the user to change the selection and this
             // code not noticing the changes
-            sel = deepCopy(sel || {});
+            sel = deepCopyAndCache(sel || {}, this);
 
             if (!from) from = atoms;
             var aLength = from.length;
@@ -2035,16 +2059,15 @@ $3Dmol.GLModel = (function() {
 
             // expand selection by some distance
             if (sel.hasOwnProperty("expand")) {
-
                 // get atoms in expanded bounding box
-
-                var expand = expandAtomList(ret, parseFloat(sel.expand));
-                var retlen = ret.length;
+                const exdist = parseFloat(sel.expand);
+                let expand = expandAtomList(ret, exdist);
+                let retlen = ret.length;
+                const thresh = exdist*exdist;
                 for (let i = 0; i < expand.length; i++) {
                     for (let j = 0; j < retlen; j++) {
 
                         var dist = squaredDistance(expand[i], ret[j]);
-                        var thresh = Math.pow(sel.expand, 2);
                         if (dist < thresh && dist > 0) {
                             ret.push(expand[i]);
                         }
@@ -2053,16 +2076,18 @@ $3Dmol.GLModel = (function() {
             }
 
             // selection within distance of sub-selection
-            if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && sel.within.hasOwnProperty("distance")) {
+            if (sel.hasOwnProperty("within") && sel.within.hasOwnProperty("sel") && 
+                   sel.within.hasOwnProperty("distance")) {
 
                 // get atoms in second selection
                 var sel2 = this.selectedAtoms(sel.within.sel, atoms);
                 var within = {};
+                const dist = parseFloat(sel.within.distance);
+                const thresh = dist*dist;
                 for (let i = 0; i < sel2.length; i++) {
                     for (let j = 0; j < ret.length; j++) {
 
                         let dist = squaredDistance(sel2[i], ret[j]);
-                        let thresh = Math.pow(parseFloat(sel.within.distance), 2);
                         if (dist < thresh && dist > 0) {
                           within[j] = 1;
                         }
