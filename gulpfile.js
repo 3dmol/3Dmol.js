@@ -68,7 +68,7 @@ function minify_nojquery() {
 }
 
 function tests(cb) {
-  src('tests/auto/generate_tests.py',{read:false}).pipe(shell('python <%= file.path %>'));
+  src('tests/auto/generate_tests.py',{read:false}).pipe(shell('python3 <%= file.path %>'));
   cb();
 }
 
