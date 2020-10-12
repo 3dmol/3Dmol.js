@@ -4234,11 +4234,23 @@ $3Dmol.GLViewer = (function() {
         // props is a list of objects that select certain atoms and enumerate
         // properties for those atoms
         /**
-         * @function $3Dmol.GLViewer#mapAtomProperties
          * Add specified properties to all atoms matching input argument
          * @function $3Dmol.GLViewer#mapAtomProperties
          * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
          * @param {AtomSelectionSpec} sel  - subset of atoms to work on - model selection must be specified here
+             @example 
+             $.get('../test_structs/b.sdf', function(data){
+                      viewer.addModel(data,'sdf');
+                      let props = [];
+                      //make the atom index a property x
+                      for(let i = 0; i < 8; i++) {
+                        props.push({index:i,props:{'x':i}});
+                      }
+                      viewer.mapAtomProperties(props);
+                      viewer.setStyle({sphere:{colorscheme:{gradient:'roygb',prop:'x',min:0,max:8}}});
+                      viewer.zoomTo();
+                      viewer.render();
+                    });         
          */
         this.mapAtomProperties = function(props, sel) {
             sel = sel || {};
