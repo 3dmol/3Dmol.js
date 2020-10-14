@@ -2858,7 +2858,7 @@ $3Dmol.GLModel = (function() {
         this.addAtomSpecs = function(customAtomSpecs) {
             for (var i = 0; i < customAtomSpecs.length; i++) {
                 if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
-                    GLModel.validAtomSelectionSpecs.push(customAtomSpecs[i]);
+                    GLModel.validAtomSelectionSpecs[customAtomSpecs[i]] = {};
                 }
             }
         };
