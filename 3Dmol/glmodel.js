@@ -1489,6 +1489,27 @@ $3Dmol.GLModel = (function() {
         };
         
         /**
+         * Set the crystallographic matrix to the given matrix.
+         *
+         * This function removes `a`, `b`, `c`, `alpha`, `beta`, `gamma` from 
+         * the crystal data.
+         *
+         * @function $3Dmol.GLModel#setCrystMatrix
+         * @param {$3Dmol.Matrix3} matrix - unit cell matrix
+         */
+        this.setCrystMatrix = function(matrix) {
+            matrix = matrix || new $3Dmol.Matrix3(
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1
+            );
+            
+            modelData.cryst = {
+                'matrix': matrix
+            };
+        };
+        
+        /**
          * Returns list of rotational/translational matrices if there is BIOMT data
          * Otherwise returns a list of just the ID matrix
          *
