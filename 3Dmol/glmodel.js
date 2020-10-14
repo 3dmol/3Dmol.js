@@ -1445,9 +1445,16 @@ $3Dmol.GLModel = (function() {
          */
         this.getCrystData = function() {
             if (modelData.cryst) {
+                // add the matrix if it is missing
+                if (!modelData.cryst.matrix) {
+                    const cryst = modelData.cryst;
+                    modelData.cryst.matrix = $3Dmol.conversionMatrix3(
+                        cryst.a, cryst.b, cryst.c,
+                        cryst.alpha, cryst.beta, cryst.gamma
+                    );
+                }
                 return modelData.cryst;
-            }
-            else {
+            } else {
                 return null;
             }
         };
@@ -1473,8 +1480,12 @@ $3Dmol.GLModel = (function() {
             beta = beta || 90;
             gamma = gamma || 90;
             
-            modelData.cryst = {'a' : a, 'b' : b, 'c' : c, 
-                'alpha' : alpha, 'beta' : beta, 'gamma' : gamma};
+            const matrix = $3Dmol.conversionMatrix3(a, b, c, alpha, beta, gamma);
+            modelData.cryst = {
+                'a' : a, 'b' : b, 'c' : c, 
+                'alpha' : alpha, 'beta' : beta, 'gamma' : gamma,
+                'matrix': matrix
+            };
         };
         
         /**

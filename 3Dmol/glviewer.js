@@ -2678,9 +2678,8 @@ $3Dmol.GLViewer = (function() {
             C = C || B;
             let cryst = model.getCrystData();
             if(cryst) {
-                let atoms = model.selectedAtoms({});
-                let cmat =  $3Dmol.conversionMatrix3(cryst.a, cryst.b, cryst.c, 
-                                            cryst.alpha, cryst.beta, cryst.gamma);
+                const atoms = model.selectedAtoms({});
+                const matrix = cryst.matrix;
                 let makeoff = function(I) {
                     //alternate around zero: 1,-1,2,-2...
                     if(I%2 == 0) return -I/2;
@@ -2692,7 +2691,7 @@ $3Dmol.GLViewer = (function() {
                         for(let k = 0; k < C; k++) {
                             if(i == 0 && j == 0 && k == 0) continue; //actual unit cell
                             let offset = new $3Dmol.Vector3(makeoff(i),makeoff(j),makeoff(k));
-                            offset.applyMatrix3(cmat);
+                            offset.applyMatrix3(matrix);
                             
                             let newatoms = [];
                             for(let a = 0; a < atoms.length; a++) {
