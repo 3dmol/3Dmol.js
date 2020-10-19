@@ -109,7 +109,8 @@ Next, use this import line in your code:
 ```
 {@lang javascript}import jquery;
 // note the different capitalization of 3dmol
-import * as $3Dmol from 3dmol/build/3Dmol-nojquery.js';
+import * as $3Dmol from '3dmol/build/3Dmol-nojquery.js';
+window.$ = $; //export jquery to the global scope so 3Dmol can use it
 ```
 
 ### Using the source code
