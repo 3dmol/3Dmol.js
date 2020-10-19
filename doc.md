@@ -104,13 +104,27 @@ First add the library to your dependencies:
 # or yarn add 3dmol
 ```
 
-Next, use this import line in your code:
+Next, you need to import jquery followed by 3dmol (which has jquery as a dependency).
 
 ```
-{@lang javascript}import jquery;
-// note the different capitalization of 3dmol
+{@lang javascript}import('jquery').then(($) => {
+import("3dmol/build/3Dmol-nojquery.js").then( ($3Dmol) => {
+console.log($3Dmol);
+//can do things with $3Dmol here
+})});
+```
+or if you use an expose-loader to make jquery globally visible you can use flat imports.
+
+```{@lang javascript}
+import 'jquery';
 import * as $3Dmol from '3dmol/build/3Dmol-nojquery.js';
-window.$ = $; //export jquery to the global scope so 3Dmol can use it
+```
+with the following in your webpack config file:
+```        test: require.resolve('jquery'),
+        loader: 'expose-loader',
+        options: {
+          exposes: ['$', 'jQuery'],
+        },
 ```
 
 ### Using the source code
