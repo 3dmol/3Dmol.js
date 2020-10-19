@@ -2539,10 +2539,9 @@ $3Dmol.GLViewer = (function() {
                     v = (Math.cos(alpha) - Math.cos(beta)*Math.cos(gamma))/Math.sin(gamma);
                     w = Math.sqrt(Math.max(0, 1-u*u-v*v));
             
-                    matrix = new $3Dmol.Matrix4(a, b*Math.cos(gamma), c*u, 0, 
-                                                    0, b*Math.sin(gamma), c*v, 0,
-                                                    0, 0,                 c*w, 0,
-                                                    0, 0,                 0,   1); 
+                    matrix = new $3Dmol.Matrix3(a, b*Math.cos(gamma), c*u, 
+                                                0, b*Math.sin(gamma), c*v,
+                                                0, 0,                 c*w); 
                 }  
          
                 var points = [  new $3Dmol.Vector3(0, 0, 0),
@@ -2555,7 +2554,7 @@ $3Dmol.GLViewer = (function() {
                                 new $3Dmol.Vector3(1, 1, 1)  ];
                             
                 for (var i = 0; i < points.length; i++) {
-                    points[i] = points[i].applyMatrix4(matrix);
+                    points[i] = points[i].applyMatrix3(matrix);
                 }
             
                 //draw box
