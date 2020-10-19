@@ -1022,6 +1022,8 @@ $3Dmol.GLViewer = (function() {
         var spinInterval;
         /**
          * Continuously rotate a scene around the specified axis.
+         *
+         * Call `$3Dmol.GLViewer.spin(false)` to stop spinning.
          * 
          * @function $3Dmol.GLViewer#spin
          * @param {string}
@@ -2478,11 +2480,11 @@ $3Dmol.GLViewer = (function() {
          * @prop {ArrowSpec} bstyle - arrow specification of "b" axis
          * @prop {ArrowSpec} cstyle - arrow specification of "c" axis
          * @prop {string} alabel - label for a axis
-         * @prop {LabelSpec} alabel - label style for a axis
+         * @prop {LabelSpec} alabelstyle - label style for a axis
          * @prop {string} blabel - label for b axis
-         * @prop {LabelSpec} blabel - label style for a axis         
+         * @prop {LabelSpec} blabelstyle - label style for b axis
          * @prop {string} clabel - label for c axis
-         * @prop {LabelSpec} clabel - label style for a axis
+         * @prop {LabelSpec} clabelstyle - label style for c axis
          
          */
         
@@ -2537,10 +2539,9 @@ $3Dmol.GLViewer = (function() {
                     v = (Math.cos(alpha) - Math.cos(beta)*Math.cos(gamma))/Math.sin(gamma);
                     w = Math.sqrt(Math.max(0, 1-u*u-v*v));
             
-                    matrix = new $3Dmol.Matrix4(a, b*Math.cos(gamma), c*u, 0, 
-                                                    0, b*Math.sin(gamma), c*v, 0,
-                                                    0, 0,                 c*w, 0,
-                                                    0, 0,                 0,   1); 
+                    matrix = new $3Dmol.Matrix3(a, b*Math.cos(gamma), c*u, 
+                                                0, b*Math.sin(gamma), c*v,
+                                                0, 0,                 c*w); 
                 }  
          
                 var points = [  new $3Dmol.Vector3(0, 0, 0),
@@ -2553,7 +2554,7 @@ $3Dmol.GLViewer = (function() {
                                 new $3Dmol.Vector3(1, 1, 1)  ];
                             
                 for (var i = 0; i < points.length; i++) {
-                    points[i] = points[i].applyMatrix4(matrix);
+                    points[i] = points[i].applyMatrix3(matrix);
                 }
             
                 //draw box
@@ -2677,9 +2678,8 @@ $3Dmol.GLViewer = (function() {
             C = C || B;
             let cryst = model.getCrystData();
             if(cryst) {
-                let atoms = model.selectedAtoms({});
-                let cmat =  $3Dmol.conversionMatrix3(cryst.a, cryst.b, cryst.c, 
-                                            cryst.alpha, cryst.beta, cryst.gamma);
+                const atoms = model.selectedAtoms({});
+                const matrix = cryst.matrix;
                 let makeoff = function(I) {
                     //alternate around zero: 1,-1,2,-2...
                     if(I%2 == 0) return -I/2;
@@ -2691,7 +2691,7 @@ $3Dmol.GLViewer = (function() {
                         for(let k = 0; k < C; k++) {
                             if(i == 0 && j == 0 && k == 0) continue; //actual unit cell
                             let offset = new $3Dmol.Vector3(makeoff(i),makeoff(j),makeoff(k));
-                            offset.applyMatrix3(cmat);
+                            offset.applyMatrix3(matrix);
                             
                             let newatoms = [];
                             for(let a = 0; a < atoms.length; a++) {

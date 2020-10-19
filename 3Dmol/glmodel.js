@@ -1445,15 +1445,22 @@ $3Dmol.GLModel = (function() {
          */
         this.getCrystData = function() {
             if (modelData.cryst) {
+                // add the matrix if it is missing
+                if (!modelData.cryst.matrix) {
+                    const cryst = modelData.cryst;
+                    modelData.cryst.matrix = $3Dmol.conversionMatrix3(
+                        cryst.a, cryst.b, cryst.c,
+                        cryst.alpha, cryst.beta, cryst.gamma
+                    );
+                }
                 return modelData.cryst;
-            }
-            else {
+            } else {
                 return null;
             }
         };
         
         /**
-         * Returns crystallographic information if present.
+         * Set crystallographic information using three angles and three lengths
          *
          * @function $3Dmol.GLModel#setCrystData
          * @param {number} a - length of unit cell side
@@ -1473,8 +1480,33 @@ $3Dmol.GLModel = (function() {
             beta = beta || 90;
             gamma = gamma || 90;
             
-            modelData.cryst = {'a' : a, 'b' : b, 'c' : c, 
-                'alpha' : alpha, 'beta' : beta, 'gamma' : gamma};
+            const matrix = $3Dmol.conversionMatrix3(a, b, c, alpha, beta, gamma);
+            modelData.cryst = {
+                'a' : a, 'b' : b, 'c' : c, 
+                'alpha' : alpha, 'beta' : beta, 'gamma' : gamma,
+                'matrix': matrix
+            };
+        };
+        
+        /**
+         * Set the crystallographic matrix to the given matrix.
+         *
+         * This function removes `a`, `b`, `c`, `alpha`, `beta`, `gamma` from 
+         * the crystal data.
+         *
+         * @function $3Dmol.GLModel#setCrystMatrix
+         * @param {$3Dmol.Matrix3} matrix - unit cell matrix
+         */
+        this.setCrystMatrix = function(matrix) {
+            matrix = matrix || new $3Dmol.Matrix3(
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1
+            );
+            
+            modelData.cryst = {
+                'matrix': matrix
+            };
         };
         
         /**
@@ -2220,7 +2252,6 @@ $3Dmol.GLModel = (function() {
          * 
          * @function $3Dmol.GLModel#removeAtoms
          * @param {type} badatoms - list of atoms
-         * @return {removeAtoms}
          */
         this.removeAtoms = function(badatoms) {
             molObj = null;
@@ -2859,7 +2890,7 @@ $3Dmol.GLModel = (function() {
         this.addAtomSpecs = function(customAtomSpecs) {
             for (var i = 0; i < customAtomSpecs.length; i++) {
                 if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
-                    GLModel.validAtomSelectionSpecs.push(customAtomSpecs[i]);
+                    GLModel.validAtomSelectionSpecs[customAtomSpecs[i]] = {};
                 }
             }
         };
