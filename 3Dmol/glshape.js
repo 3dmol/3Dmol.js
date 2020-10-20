@@ -833,7 +833,7 @@ $3Dmol.GLShape = (function() {
             faces.splice(faces.length,0, foff+0,foff+2,foff+1, foff+1,foff+2,foff+3); 
             foff += 4; 
                                     
-            var spec = $.extend({},boxSpec);
+            var spec = $3Dmol.extend({},boxSpec);
             spec.vertexArr = verts;
             spec.faceArr = faces;
             spec.normalArr = [];

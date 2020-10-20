@@ -128,7 +128,7 @@ $.ajaxTransport(
  */
 $3Dmol.createViewer = function(element, config, shared_viewer_resources)
 {
-    if($.type(element) === "string")
+    if(typeof(element) === "string")
         element = $("#"+element);
     if(!element) return;
 
@@ -193,7 +193,7 @@ $3Dmol.createViewer = function(element, config, shared_viewer_resources)
      
  */
 $3Dmol.createViewerGrid  = function(element,config,viewer_config){
-    if($.type(element) === "string")
+    if(typeof(element) === "string")
         element = $("#"+element);
     if(!element) return;
 
@@ -474,7 +474,7 @@ $3Dmol.specStringToObject = function(str) {
     str = str.replace(/%7E/,'~'); //copy/pasting urls sometimes does this
     //convert things that look like numbers into numbers
     var massage = function(val) {
-        if($.isNumeric(val)) {
+        if($3Dmol.isNumeric(val)) {
            //hexadecimal does not parse as float
            if(Math.floor(parseFloat(val)) == parseInt(val)) {
               return parseFloat(val);
@@ -641,7 +641,7 @@ if( typeof(define) === 'function' && define.amd) {
 
 $3Dmol.createStereoViewer = function(element) {
     var that = this;
-    if($.type(element) === "string")
+    if(typeof(element) === "string")
         element = $("#"+element);
     if(!element) return;
     
@@ -698,4 +698,53 @@ $3Dmol.createStereoViewer = function(element) {
         return this.glviewer1.getCanvas(); //same for both
     };
 
+};
+
+//simplified version of $.extend
+$3Dmol.extend = function (obj1, src1) {
+    for (var key in src1) {
+        if(src1.hasOwnProperty(key) && src1[key] !== undefined) {
+            obj1[key] = src1[key];            
+        }
+    }   
+    return obj1;
+}; 
+
+//deep copy, cannot deal with circular refs; undefined input becomes an empty object
+//https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
+$3Dmol.deepCopy = function(inObject)  {
+  let outObject, value, key;
+
+  if ( inObject == undefined) {
+    return {};
+  }
+  if (typeof inObject !== "object" || inObject === null) {
+    return inObject; // Return the value if inObject is not an object
+  }
+
+  // Create an array or object to hold the values
+  outObject = Array.isArray(inObject) ? [] : {};
+
+  for (key in inObject) {
+    value = inObject[key];
+    // Recursively (deep) copy for nested objects, including arrays
+    outObject[key] = $3Dmol.deepCopy(value);
+  }
+
+  return outObject;
+};
+
+$3Dmol.isNumeric = function( obj ) {
+
+    var type = typeof( obj );
+    return ( type === "number" || type === "string" ) &&
+        !isNaN( obj - parseFloat( obj ) );
+};
+
+$3Dmol.isEmptyObject = function( obj ) {
+    var name;
+    for ( name in obj ) {
+        return false;
+    }
+    return true;
 };

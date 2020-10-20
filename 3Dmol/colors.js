@@ -529,28 +529,28 @@ $3Dmol.elementColors.rasmol = {
 
 $3Dmol.elementColors.defaultColors = $3Dmol.elementColors.rasmol;
 
-$3Dmol.elementColors.greenCarbon = $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.greenCarbon = $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.greenCarbon.C = 0x00ff00; //bright green
 
-$3Dmol.elementColors.cyanCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.cyanCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.cyanCarbon.C = 0x00ffff;
 
-$3Dmol.elementColors.magentaCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.magentaCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.magentaCarbon.C = 0xff00ff;
 
-$3Dmol.elementColors.yellowCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.yellowCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.yellowCarbon.C = 0xffff00;
 
-$3Dmol.elementColors.whiteCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.whiteCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.whiteCarbon.C = 0xffffff;
 
-$3Dmol.elementColors.orangeCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.orangeCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.orangeCarbon.C = 0xffa500;
 
-$3Dmol.elementColors.purpleCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.purpleCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.purpleCarbon.C = 0x800080;
 
-$3Dmol.elementColors.blueCarbon =  $.extend({},$3Dmol.elementColors.defaultColors);
+$3Dmol.elementColors.blueCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.blueCarbon.C = 0x0000ff;
 
 
@@ -713,7 +713,7 @@ $3Dmol.getColorFromStyle = function(atom, style) {
         //any color you want of carbon
         var ccolor = scheme.substring(0,scheme.lastIndexOf("Carbon")).toLowerCase();
         if(typeof(htmlColors[ccolor]) != "undefined") {
-            var newscheme = $.extend({},$3Dmol.elementColors.defaultColors);
+            var newscheme = $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
             newscheme.C = htmlColors[ccolor];
             $3Dmol.builtinColorSchemes[scheme] = {'prop': 'elem', map:newscheme};
             scheme = $3Dmol.builtinColorSchemes[scheme];

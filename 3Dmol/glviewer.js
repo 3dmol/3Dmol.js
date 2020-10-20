@@ -784,7 +784,7 @@ $3Dmol.GLViewer = (function() {
 
          */
         this.setContainer = function(element) {
-            if($.type(element) === "string")
+            if(typeof(element) === "string")
                 element = $("#"+element);
             if(!element) {
                 element = container;
@@ -1436,7 +1436,7 @@ $3Dmol.GLViewer = (function() {
                 }
             } else { // specific to some models
                 ms = sel.model;
-                if (!$.isArray(ms))
+                if (!Array.isArray(ms))
                     ms = [ ms ];
                 
                 for (let i = 0; i < ms.length; i++) {
@@ -1737,10 +1737,10 @@ $3Dmol.GLViewer = (function() {
             var atoms = getAtomsFromSel(sel);
             var tmp = $3Dmol.getExtent(atoms);
 
-            if($.isEmptyObject(sel)) {
+            if($3Dmol.isEmptyObject(sel)) {
                 //include shapes when zooming to full scene
                 //TODO: figure out a good way to specify shapes as part of a selection
-                $.each(shapes, function(i, shape) {
+                shapes.forEach((shape) => {
                     if(shape && shape.boundingSphere && shape.boundingSphere.center) {
                         var c = shape.boundingSphere.center;
                         var r = shape.boundingSphere.radius;
@@ -1852,10 +1852,10 @@ $3Dmol.GLViewer = (function() {
             var atoms = getAtomsFromSel(sel);
             var tmp = $3Dmol.getExtent(atoms);
 
-            if($.isEmptyObject(sel)) {
+            if($3Dmol.isEmptyObject(sel)) {
                 //include shapes when zooming to full scene
                 //TODO: figure out a good way to specify shapes as part of a selection
-                $.each(shapes, function(i, shape) {
+                shapes.forEach((shape) => {
                 if(shape && shape.boundingSphere && shape.boundingSphere.center) {
                     var c = shape.boundingSphere.center;
                     var r = shape.boundingSphere.radius;
@@ -3797,9 +3797,10 @@ $3Dmol.GLViewer = (function() {
         //while we're surface building
         var shallowCopy = function(l) {
             var ret = [];
-            $.each(l, function(k,v) {
-                ret[k] = $.extend({},v);
-            });
+            let length = l.length;
+            for(let i = 0; i < length; i++) {
+                ret[i] = $3Dmol.extend({},l[i]);
+            }
             return ret;
         };
 

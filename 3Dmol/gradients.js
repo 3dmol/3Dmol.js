@@ -44,7 +44,7 @@ $3Dmol.Gradient.normalizeValue = function(lo, hi, val) {
 $3Dmol.Gradient.RWB = function(min, max,mid) {
 
     var mult = 1.0;
-    if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
+    if(typeof(max) == 'undefined' && Array.isArray(min) && min.length >= 2) {
         //we were passed a single range
         max = min[1];
         min = min[0];
@@ -112,7 +112,7 @@ $3Dmol.Gradient.RWB = function(min, max,mid) {
  */
 $3Dmol.Gradient.ROYGB = function(min, max) {
     var mult = 1.0;
-    if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
+    if(typeof(max) == 'undefined' && Array.isArray(min) && min.length >= 2) {
         //we were passed a single range
         max = min[1];
         min = min[0];
@@ -185,7 +185,7 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
  */
 $3Dmol.Gradient.Sinebow = function(min, max) {
     var mult = 1.0;
-    if(typeof(max) == 'undefined' && $.isArray(min) && min.length >= 2) {
+    if(typeof(max) == 'undefined' && Array.isArray(min) && min.length >= 2) {
         //we were passed a single range
         max = min[1];
         min = min[0];

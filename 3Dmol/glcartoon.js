@@ -1055,7 +1055,7 @@ $3Dmol.drawCartoon = (function() {
                     nextColor = cartoonColor(next, cartoon);                    
 
                     // determine cylinder thickness
-                    if ($.isNumeric(cartoon.thickness))
+                    if ($3Dmol.isNumeric(cartoon.thickness))
                         thickness = cartoon.thickness;
                     else
                         thickness = defaultThickness;
@@ -1189,7 +1189,7 @@ $3Dmol.drawCartoon = (function() {
                         // segment
                         nextColor = cartoonColor(next, cartoon); 
                         colors.push(nextColor);
-                        if ($.isNumeric(cartoon.thickness))
+                        if ($3Dmol.isNumeric(cartoon.thickness))
                             thickness = cartoon.thickness;
                         else
                             thickness = defaultThickness;

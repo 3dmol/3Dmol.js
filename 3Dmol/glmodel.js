@@ -140,12 +140,7 @@ $3Dmol.GLModel = (function() {
         "altLoc":{type:"invalid",valid:false}, //alternative location, e.g. in PDB
         "sym":{type:'number',gui:false}, //which symmetry
     };
-    function extend(obj1, src1) {
-        for (var key in src1) {
-            if (src1.hasOwnProperty(key)) obj1[key] = src1[key];
-        }   
-        return obj1;
-    }   
+
     //type is irrelivent here becuase htey are are invalid
     var validExtras ={  // valid atom specs are ok too
         "model":{type:"string",valid :false}, // a single model or list of models from which atoms should be selected
@@ -159,7 +154,7 @@ $3Dmol.GLModel = (function() {
         "or":{type:"string",valid :false}, // or boolean logic
         "not":{type:"string",valid :false}, // not boolean logic
     };
-    GLModel.validAtomSelectionSpecs = extend(GLModel.validAtomSpecs,validExtras);
+    GLModel.validAtomSelectionSpecs = $3Dmol.extend(GLModel.validAtomSpecs,validExtras);
 
     var validLineSpec = {
         "hidden":{type:"boolean",gui:true},
@@ -1717,7 +1712,7 @@ $3Dmol.GLModel = (function() {
                     newAtom.z = starting.z;
                     newAtoms.push(newAtom);
                     if(viewer && arrowSpec) {
-                       var spec = $.extend({},arrowSpec);
+                       var spec = $3Dmol.extend({},arrowSpec);
                        var arrowend = new $3Dmol.Vector3(dx,dy,dz);
                        arrowend.multiplyScalar(amplitude);
                        arrowend.add(starting);
@@ -1743,7 +1738,7 @@ $3Dmol.GLModel = (function() {
             for ( var i = 0; i < atoms.length; i++) {
                 var atom = atoms[i];
                 if (atom) {
-                    atom.style = atom.style || $.extend(true, {}, defaultAtomStyle);
+                    atom.style = atom.style || $3Dmol.deepCopy(defaultAtomStyle);
                     atom.color = atom.color || ElementColors[atom.elem] || defaultColor;
                     atom.model = id;
                     if (atom.clickable || atom.hoverable)
@@ -1991,7 +1986,7 @@ $3Dmol.GLModel = (function() {
                             break;
                         }
                     }
-                    else if ($.isArray(sel[key])) {
+                    else if (Array.isArray(sel[key])) {
                         // can be any of the listed values
                         var valarr = sel[key];
                         var atomval = atom[key];
@@ -2226,12 +2221,12 @@ $3Dmol.GLModel = (function() {
             for(i = 0; i < newatoms.length; i++) {
                 var olda = newatoms[i];
                 var nindex = indexmap[olda.index];
-                var a = $.extend(false, {}, olda);
+                var a = $3Dmol.extend({}, olda);
                 a.index = nindex;
                 a.bonds = [];
                 a.bondOrder = [];
                 a.model = id;
-                a.style = a.style || $.extend(true, {}, defaultAtomStyle);
+                a.style = a.style || $3Dmol.deepCopy(defaultAtomStyle);
                 if(typeof(a.color) == "undefined")
                     a.color = ElementColors[a.elem] || defaultColor;                
                 // copy over all bonds contained in selection,
@@ -2681,7 +2676,7 @@ $3Dmol.GLModel = (function() {
          */
         this.addPropertyLabels = function(prop, sel, viewer, style) {
             var atoms = this.selectedAtoms(sel, atoms);
-            var mystyle = $.extend(true, {}, style);
+            var mystyle = $3Dmol.deepCopy(style);
             for(var i = 0; i < atoms.length; i++) {
                 var a = atoms[i];
                 var label = null;
@@ -2727,7 +2722,7 @@ $3Dmol.GLModel = (function() {
                     bylabel[c][label].push(a);
                 }
                 
-                var mystyle = $.extend(true, {}, style);
+                var mystyle = $3Dmol.deepCopy(style);
                 //now compute centers of mass
                 for(let c in bylabel) {
                     if(bylabel.hasOwnProperty(c)) {
