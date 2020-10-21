@@ -1952,6 +1952,17 @@ $3Dmol.Parsers = (function() {
         return 'c';
     };
 
+    let mmtfHETATMtypes = new Set([
+    "D-SACCHARIDE",
+    "D-SACCHARIDE 1,4 AND 1,4 LINKING",
+    "D-SACCHARIDE 1,4 AND 1,6 LINKING",
+    "L-SACCHARIDE",
+    "L-SACCHARIDE 1,4 AND 1,4 LINKING",
+    "L-SACCHARIDE 1,4 AND 1,6 LINKING",
+    "NON-POLYMER",
+    "OTHER",
+    "PEPTIDE-LIKE",
+    "SACCHARIDE" ]);
     
     //mmtf shoul be passed as a binary UInt8Array buffer or a base64 encoded string
     parsers.mmtf = parsers.MMTF = function(bindata, options) {
@@ -2014,6 +2025,12 @@ $3Dmol.Parsers = (function() {
             unitCell = {'a' : u[0], 'b' : u[1], 'c' : u[2], 'alpha' : u[3], 'beta' : u[4], 'gamma' : u[5]};
         }
 
+        let chainIsPolymer = [];
+        mmtfData.entityList.forEach(entity => {
+            entity.chainIndexList.forEach(ch => {
+                chainIsPolymer[ch] = entity.type == "polymer";
+            });
+        });
         var bondAtomListStart = 0; //for current model
         //loop over models, 
         for (m = 0; m < numModels; m++ ) {
@@ -2067,7 +2084,11 @@ $3Dmol.Parsers = (function() {
 
                     var groupId = mmtfData.groupIdList[ groupIndex ];
                     var groupName = groupData.groupName;
+                    let groupType = groupData.chemCompType;
                     var startAtom = atomIndex;
+                    //note the following is not identical to respecting HETATM records
+                    //this information isn't available in MMTF.  
+                    let isHETATM =  mmtfHETATMtypes.has(groupType) || !chainIsPolymer[chainIndex];
                     
                     for( k = 0; k < groupAtomCount; ++k ){
 
@@ -2110,7 +2131,7 @@ $3Dmol.Parsers = (function() {
                             'y' : yCoord,
                             'z' : zCoord,
                             'elem' : element,
-                            'hetflag' : secStruct < 0,
+                            'hetflag' : isHETATM,
                             'chain' : chainId,
                             'resi' : groupId,
                             'icode' : altLoc,

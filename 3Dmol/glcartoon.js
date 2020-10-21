@@ -722,7 +722,8 @@ $3Dmol.drawCartoon = (function() {
     // connected residues (a before b)
     var inConnectedResidues = function(a, b) {
         if (a && b && a.chain === b.chain) {
-            if ((a.reschain === b.reschain) && (a.resi === b.resi || a.resi === b.resi - 1))
+            if (!a.hetflag && !b.hetflag && (a.reschain === b.reschain) && 
+                     (a.resi === b.resi || a.resi === b.resi - 1))
                 return true;
             if (a.resi < b.resi) {
                 // some PDBs have gaps in the numbering but the residues are
@@ -732,8 +733,10 @@ $3Dmol.drawCartoon = (function() {
                 var dy = a.y - b.y;
                 var dz = a.z - b.z;
                 var dist = dx * dx + dy * dy + dz * dz;
-                if (dist < 16.0)
+                if (a.atom == "CA" && b.atom == "CA" && dist < 16.0) //protein residues not connected
                     return true; // calpha dist
+                else if((a.atom == "P" || b.atom == "P") && dist < 64.0) //dna
+                    return true;
             }
         }
 
