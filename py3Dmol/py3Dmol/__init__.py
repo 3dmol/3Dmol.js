@@ -37,11 +37,14 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.org/doc/$3Dmol.GLViewer.html
     '''
-    def __init__(self,width=640,height=480,query='',viewergrid=None,linked=True,options=dict(),js='http://3dmol.org/build/3Dmol.js'):
+    def __init__(self,width=640,height=480,query='',viewergrid=None,data=None,style=None,linked=True,options=dict(),js='http://3dmol.org/build/3Dmol.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
             query -- optional argument to provide to $3Dmol.download
+            viewergrid -- optional tuple (rows,columns) to define grid
+            data -- molecular data to provide to addModel, wit viewer grid can be indexed (r,c)
+            style -- style to apply, with viewer grid can be indexed (r,c)
             options -- optional options to provide to $3Dmol.download
             js -- url for 3Dmol.js'''
         divid = "3dmolviewer_UNIQUEID"
@@ -105,13 +108,31 @@ if(warn) {
             else:
                 self.startjs += '$3Dmol.download("%s", viewer_UNIQUEID, %s, function() {\n' % (query,json.dumps(options))
                 self.endjs = "})\n" + self.endjs
-
+                
         if viewergrid:
             for r in range(viewergrid[0]):
                 for c in range(viewergrid[1]):
-                    self.endjs = "viewergrid_UNIQUEID[%d][%d].render();\n"%(r,c) + self.endjs;
+                    cmds = ''
+                    if data:
+                        try:
+                            d = data[r][c]
+                        except:
+                            d = data
+                        cmds = "viewergrid_UNIQUEID[%d][%d].addModel(%s);\n"%(r,c,json.dumps(d))
+                    if style:
+                        try:
+                            s = style[r][c]
+                        except:
+                            s = style
+                        cmds += "viewergrid_UNIQUEID[%d][%d].setStyle(%s);\n"%(r,c,json.dumps(s))
+                    self.endjs = cmds+"viewergrid_UNIQUEID[%d][%d].zoomTo(); viewergrid_UNIQUEID[%d][%d].render();\n"%(r,c,r,c) + self.endjs;
         else:
-            self.endjs = "viewer_UNIQUEID.render();\n" + self.endjs;
+            cmds = ''
+            if data:
+                cmds = "viewer_UNIQUEID.addModel(%s);\n"%json.dumps(data)
+            if style:
+                cmds += "viewer_UNIQUEID.setStyle(%s);\n"%json.dumps(style)
+            self.endjs = cmds + "viewer_UNIQUEID.zoomTo();\nviewer_UNIQUEID.render();\n" + self.endjs;
             
 
     @using_ipython
