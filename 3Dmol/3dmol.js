@@ -325,6 +325,8 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 viewer.zoomTo();
                 viewer.render();
                 resolve(m);
+            }, () => { //on error revert to pdb
+                $3Dmol.download("pdb:"+query, viewer, options, callback);
             });
         });
     }
