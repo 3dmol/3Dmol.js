@@ -144,7 +144,7 @@ $3Dmol.autoload=function(viewer,callback){
             } catch ( error ) {
                 console.log(error);
                 //for autoload, provide a useful error message
-                window.location = "http://get.webgl.org";                    
+                viewerdiv.text("WebGL appears to be disabled.");
             }           
             
             if (datauri.length!=0) {
