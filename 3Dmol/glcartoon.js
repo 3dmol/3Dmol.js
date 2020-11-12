@@ -7,6 +7,7 @@
 var $3Dmol = $3Dmol || {};
 
 /**
+ * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
  * @typedef CartoonStyleSpec
  * @prop {ColorSpec} color - strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number
  * @prop {string} style - style of cartoon rendering (trace, oval, rectangle
