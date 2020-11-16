@@ -1025,12 +1025,11 @@ $3Dmol.Raycaster = (function() {
                         distance = distanceToCenter - Math.sqrt(discriminant);
     
                     intersects.push({clickable : clickable, 
-                                     distance : distance});
-                    return intersects;
+                                     distance : distance});                    
                 }
             }        
        }
-        
+       return intersects; 
     };   
        
     Raycaster.prototype.precision = 0.0001;

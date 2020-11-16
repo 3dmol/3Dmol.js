@@ -907,7 +907,7 @@ $3Dmol.GLModel = (function() {
             for ( i = 0; i < atom.bonds.length; i++) {
                 var j = atom.bonds[i]; // our neighbor
                 var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
-                
+                mp = mp2 = mp3 = null;
                 if (atom.index < atom2.index) {// only draw if less, this
                     // lets us combine
                     // cylinders of the same
