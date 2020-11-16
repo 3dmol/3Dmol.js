@@ -1,6 +1,6 @@
 {
   "name": "3dmol",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Object oriented Javascript molecular visualization library",
   "repository": {
     "type": "git",
