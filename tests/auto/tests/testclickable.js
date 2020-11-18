@@ -63,4 +63,7 @@ viewer.setClickable({},true,function(atom) {
     viewer.render( );
 });
 viewer.zoomTo()
+screen = viewer.modelToScreen({x:-4.70712, y: -6.95903, z: 1.24283});
+console.log(screen);
+console.log(viewer.modelToScreen(viewer.selectedAtoms()));
 viewer.render()

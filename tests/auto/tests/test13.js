@@ -9,7 +9,7 @@ var v = viewer;
                                   clickable:true,
                                   callback:function(){ this.color.setHex(0x00FFFF00);v.render();},
                                   hover_callback: function(){ v.render();},
-                                  unhover_callback: function(){ this.color.setHex(0xFF000000);v.render();}
+                                  unhover_callback: function(){ this.color.setHex(0xFF0000);v.render();}
                                  });
               viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
                                   end:{x:0.0,y:10.0,z:-15.0},

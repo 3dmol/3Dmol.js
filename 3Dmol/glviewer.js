@@ -288,20 +288,71 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
-        // Checks for selection intersects on mousedown
-        var handleClickSelection = function(mouseX, mouseY, event) {
-
-            if(clickables.length == 0) return;
+        
+         /**
+         * Return a list of objects that intersect that at the specified viewer position.
+         * 
+         * @function $3Dmol.GLViewer#targetedObjects
+         * @param {x} - x position in screen coordinates
+         * @param {y} - y position in screen coordinates
+         * @param {objects} - list of objects or selection object specifying what object to check for targeting 
+        */
+        let targetedObjects = this.targetedObjects = function(x,y,objects) {
             var mouse = {
-                x : mouseX,
-                y : mouseY,
+                x : x,
+                y : y,
                 z : -1.0
             };
-
+            if(!Array.isArray(objects)) { //assume selection object
+                objects = this.selectedAtoms(objects);
+            }
+            if(objects.length == 0) return [];
             raycaster.setFromCamera(mouse,camera);
+            return raycaster.intersectObjects(modelGroup, objects);
+        };
+        
+        //return offset of container
+        var canvasOffset = function() {
+          let canvas = glDOM.get(0);
+          let rect = canvas.getBoundingClientRect();
+          let doc = canvas.ownerDocument;
+          let docElem = doc.documentElement;
+          let win = doc.defaultView;
+          return {
+            top: rect.top + win.pageYOffset - docElem.clientTop,
+            left: rect.left + win.pageXOffset - docElem.clientLeft
+          };
+        };
+        
+        /** Convert model coordinates to screen coordinates.
+         * @function $3Dmol.GLViewer#modelToScreen
+         * @param {object or list} - an object or list of objects with x,y,z attributes (e.g. an atom)
+         * @return {object or list} - and object or list of {x: screenX, y: screenY}
+         */
+        this.modelToScreen = function(coords) {
+            let returnsingle = false;
+            if(!Array.isArray(coords)) {
+                coords = [coords];
+                returnsingle = true;
+            }
             
-            var intersects = [];
-            intersects = raycaster.intersectObjects(modelGroup, clickables);
+            let results = [];
+            coords.forEach(coord => {
+                let t = new $3Dmol.Vector3(coord.x,coord.y,coord.z);
+                t.applyMatrix4(modelGroup.matrixWorld);   
+                projector.projectVector(t, camera);       
+                let offset = canvasOffset();
+                let screenX = WIDTH*(t.x+1)/2.0+offset.left;
+                let screenY = -HEIGHT*(t.y-1)/2.0+offset.top;
+                results.push({x:screenX,y:screenY});
+            }); 
+            if(returnsingle) results = results[0];
+            return results;
+        };
+        
+        // Checks for selection intersects on mousedown
+        var handleClickSelection = function(mouseX, mouseY, event) {            
+            let intersects = targetedObjects(mouseX,mouseY,clickables);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined &&
@@ -326,15 +377,7 @@ $3Dmol.GLViewer = (function() {
         //checks for selection intersects on hover
         var handleHoverSelection = function(mouseX, mouseY){
             if(hoverables.length == 0) return;
-            var mouse = {
-                x : mouseX,
-                y : mouseY,
-                z : -1.0
-            };
-            raycaster.setFromCamera(mouse,camera);
-
-            var intersects = [];
-            intersects = raycaster.intersectObjects(modelGroup, hoverables);
+            let intersects = targetedObjects(mouseX,mouseY,hoverables);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 setHover(selected);
@@ -347,16 +390,7 @@ $3Dmol.GLViewer = (function() {
         
         //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
         var handleHoverContinue = function(mouseX,mouseY){
-            var mouse = {
-                x : mouseX,
-                y : mouseY,
-                z : -1.0
-            };
-
-            raycaster.setFromCamera(mouse,camera);
-
-            var intersects = [];
-            intersects = raycaster.intersectObjects(modelGroup, hoverables);
+            let intersects = targetedObjects(mouseX,mouseY,hoverables);
             if(intersects.length == 0 || intersects[0] === undefined){
                 setHover(null);
             }
@@ -417,20 +451,7 @@ $3Dmol.GLViewer = (function() {
             t.z = 0;                            
             t.applyQuaternion(q);
             return t;
-        };        
-        
-        //return offset of container
-        var canvasOffset = function() {
-          let canvas = glDOM.get(0);
-          let rect = canvas.getBoundingClientRect();
-          let doc = canvas.ownerDocument;
-          let docElem = doc.documentElement;
-          let win = doc.defaultView;
-          return {
-            top: rect.top + win.pageYOffset - docElem.clientTop,
-            left: rect.left + win.pageXOffset - docElem.clientLeft
-          };
-        };
+        };                
         
         //for grid viewers, return true if point is in this viewer
         var isInViewer = function(x,y) {

@@ -1079,8 +1079,7 @@ $3Dmol.Raycaster = (function() {
 })();
 
 
-//$3Dmol Projecion 
-//TODO: can probably strip this down a lot (only used for selection handling)
+//$3Dmol Projection 
 /** @constructor */
 $3Dmol.Projector = function () {
 
