@@ -326,8 +326,8 @@ $3Dmol.GLViewer = (function() {
         
         /** Convert model coordinates to screen coordinates.
          * @function $3Dmol.GLViewer#modelToScreen
-         * @param {object or list} - an object or list of objects with x,y,z attributes (e.g. an atom)
-         * @return {object or list} - and object or list of {x: screenX, y: screenY}
+         * @param {object | list} - an object or list of objects with x,y,z attributes (e.g. an atom)
+         * @return {object | list} - and object or list of {x: screenX, y: screenY}
          */
         this.modelToScreen = function(coords) {
             let returnsingle = false;

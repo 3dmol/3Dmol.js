@@ -6,7 +6,12 @@
  * @typedef ViewerSpec
  * @prop {function} callback - Callback function to be immediately executed on this viewer
  * @prop {Object} defaultcolors - Object defining default atom colors as atom => color property value pairs for all models within this viewer
- * @prop {boolean} nomouse - Whether to disable disable handling of mouse events
+ * @prop {boolean} nomouse - Whether to disable disable handling of mouse events.  
+                If you want to use your own mouse handlers, set this then bind your handlers to the canvas object.  
+                The default 3Dmol.js handlers are available for use: 
+                'mousedown touchstart': viewer._handleMouseDown,
+                'DOMMouseScroll mousewheel': viewer._handleMouseScroll
+                'mousemove touchmove': viewer._handleMouseMove                
  * @prop {string} backgroundColor - Color of the canvas' background
  * @prop {number} camerax
  * @prop {number} hoverDuration
