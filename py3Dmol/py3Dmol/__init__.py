@@ -118,21 +118,23 @@ if(warn) {
                             d = data[r][c]
                         except:
                             d = data
-                        cmds = "viewergrid_UNIQUEID[%d][%d].addModel(%s);\n"%(r,c,json.dumps(d))
+                        self.startjs += "viewergrid_UNIQUEID[%d][%d].addModel(%s);\n"%(r,c,json.dumps(d))
                     if style:
                         try:
                             s = style[r][c]
                         except:
                             s = style
                         cmds += "viewergrid_UNIQUEID[%d][%d].setStyle(%s);\n"%(r,c,json.dumps(s))
-                    self.endjs = cmds+"viewergrid_UNIQUEID[%d][%d].zoomTo(); viewergrid_UNIQUEID[%d][%d].render();\n"%(r,c,r,c) + self.endjs;
+                    self.startjs += cmds+"viewergrid_UNIQUEID[%d][%d].zoomTo();"%(r,c) 
+                    self.endjs = "viewergrid_UNIQUEID[%d][%d].render();\n"%(r,c)+self.endjs;
         else:
             cmds = ''
             if data:
                 cmds = "viewer_UNIQUEID.addModel(%s);\n"%json.dumps(data)
             if style:
                 cmds += "viewer_UNIQUEID.setStyle(%s);\n"%json.dumps(style)
-            self.endjs = cmds + "viewer_UNIQUEID.zoomTo();\nviewer_UNIQUEID.render();\n" + self.endjs;
+            self.startjs += cmds + "viewer_UNIQUEID.zoomTo();\n"
+            self.endjs = "viewer_UNIQUEID.render();\n" + self.endjs;
             
 
     @using_ipython
