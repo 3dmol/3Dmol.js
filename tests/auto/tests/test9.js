@@ -8,7 +8,7 @@ $3Dmol.download("pdb:2EJ0",viewer,{},function(){
                   viewer.setStyle({chain:'B'},{cross:{hidden:false,
                                                       linewidth:1.0,
                                                       colorscheme:'greenCarbon'}});
-                  viewer.setStyle({chain:'C'},{cross:{hidden:false,
+                  viewer.setStyle({chain:'C'},{sphere:{hidden:false,
                                                       radius:0.5}});
                   viewer.setStyle({chain:'D'},{cross:{hidden:false}});
                   viewer.setStyle({chain:'E'},{cross:{hidden:false,
