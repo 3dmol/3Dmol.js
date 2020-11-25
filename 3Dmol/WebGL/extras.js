@@ -82,9 +82,16 @@ $3Dmol.SpritePlugin = function () {
     };
 
     this.render = function ( scene, camera, viewportWidth, viewportHeight, inFront ) {
+        let sprites = [];
+        scene.__webglSprites.forEach(sprite => {
+            if(inFront && sprite.material.depthTest == false) {
+                sprites.push(sprite);
+            } else if(!inFront && sprite.material.depthTest) {
+                sprites.push(sprite);
+            }
+        });
 
-        var sprites = scene.__webglSprites,
-            nSprites = sprites.length;
+        let nSprites = sprites.length;
 
         if ( ! nSprites ) return;
 

@@ -1012,7 +1012,7 @@ END
             var atoms= viewer.selectedAtoms({});
             for(var i=0;i<atoms.length;i++){
           
-                viewer.addLabel(atoms[i].elem,{position: atoms[i], backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                viewer.addLabel(atoms[i].elem,{position: atoms[i], backgroundColor: 0x800080, backgroundOpacity: 0.8},null,true);
             }
             viewer.zoomTo();
             viewer.render();
