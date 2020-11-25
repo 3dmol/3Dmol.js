@@ -81,7 +81,7 @@ $3Dmol.SpritePlugin = function () {
 
     };
 
-    this.render = function ( scene, camera, viewportWidth, viewportHeight ) {
+    this.render = function ( scene, camera, viewportWidth, viewportHeight, inFront ) {
 
         var sprites = scene.__webglSprites,
             nSprites = sprites.length;
@@ -138,7 +138,6 @@ $3Dmol.SpritePlugin = function () {
             _gl.uniform1i( uniforms.fogType, 0 );
             oldFogType = 0;
             sceneFogType = 0;
-
         }
 
 
@@ -150,7 +149,8 @@ $3Dmol.SpritePlugin = function () {
 
             sprite = sprites[ i ];
             material = sprite.material;
-
+            if(material.depthTest == false && !inFront) continue;
+            
             if ( ! sprite.visible || material.opacity === 0 ) continue;
 
             if ( ! material.useScreenCoordinates ) {

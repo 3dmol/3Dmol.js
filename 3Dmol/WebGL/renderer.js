@@ -44,8 +44,6 @@ $3Dmol.Renderer = function(parameters) {
     this.autoUpdateObjects = true;
     this.autoUpdateScene = true;
 
-    this.renderPluginsPost = [];
-
     // info
 
     this.info = {
@@ -125,6 +123,8 @@ $3Dmol.Renderer = function(parameters) {
         }
 
     };
+
+    var sprites = new $3Dmol.SpritePlugin();
 
     //screensshader related variables
     var _screenshader = null;
@@ -332,13 +332,6 @@ $3Dmol.Renderer = function(parameters) {
                     _gl.ONE, _gl.ONE_MINUS_SRC_ALPHA);
         }
         _oldBlending = blending;
-    };
-
-    // Plugins
-
-    this.addPostPlugin = function(plugin) {
-        plugin.init(this);
-        this.renderPluginsPost.push(plugin);
     };
 
     function enableAttribute(attribute) {
@@ -1188,8 +1181,9 @@ $3Dmol.Renderer = function(parameters) {
 
         renderObjects(scene.__webglObjects, true, "opaque", camera, lights,
                 fog, false, material);
-        // Render plugins (e.g. sprites - labels)
-        renderPlugins(this.renderPluginsPost, scene, camera);
+                
+        // Render embedded labels (sprites)
+        renderSprites(scene, camera, false);
         
         // prime depth buffer
         renderObjects(scene.__webglObjects, true, "blank", camera, lights, fog,
@@ -1212,9 +1206,12 @@ $3Dmol.Renderer = function(parameters) {
         this.renderFrameBuffertoScreen();
         this.setDepthTest(true);
         this.setDepthWrite(true);
+        
+        // Render floating labels (sprites)
+        renderSprites(scene, camera, true);        
     };
 
-    function renderPlugins(plugins, scene, camera) {
+    function renderSprites(scene, camera, inFront) {
 
         // Reset state once regardless
         // This should also fix cartoon render bug (after transparent surface
@@ -1229,29 +1226,20 @@ $3Dmol.Renderer = function(parameters) {
         _oldDoubleSided = -1;
         _currentMaterialId = -1;
         _oldFlipSided = -1;
+        _lightsNeedUpdate = true;
 
-        if (!plugins.length)
-            return;
-
-        for (var i = 0, il = plugins.length; i < il; i++) {
-
-            _lightsNeedUpdate = true;
-
-            plugins[i].render(scene, camera, _currentWidth, _currentHeight);
-
-            // Reset state after plugin render
-            _currentGeometryGroupHash = -1;
-            _currentProgram = null;
-            _currentCamera = null;
-            _oldBlending = -1;
-            _oldDepthWrite = -1;
-            _oldDepthTest = -1;
-            _oldDoubleSided = -1;
-            _currentMaterialId = -1;
-            _oldFlipSided = -1;
-
-        }
-
+        sprites.render(scene, camera, _currentWidth, _currentHeight, inFront);
+        
+        // Reset state a
+        _currentGeometryGroupHash = -1;
+        _currentProgram = null;
+        _currentCamera = null;
+        _oldBlending = -1;
+        _oldDepthWrite = -1;
+        _oldDepthTest = -1;
+        _oldDoubleSided = -1;
+        _currentMaterialId = -1;
+        _oldFlipSided = -1;       
     }
 
     //reinitialize framebuffer without the depth texture attached so we can read to it
@@ -1947,6 +1935,6 @@ $3Dmol.Renderer = function(parameters) {
                         _clearAlpha);
     }
 
-    this.addPostPlugin(new $3Dmol.SpritePlugin());
+    sprites.init(this);
 
 };

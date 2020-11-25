@@ -56,10 +56,10 @@ H         -0.57470       -7.29915        1.13071
 */
 
 viewer.addModel($('#mol').val(),'xyz');
-viewer.setStyle({'sphere':{radius:0.5},'stick':{}});
+viewer.setStyle({'sphere':{radius:0.5,opacity:.9},'stick':{opacity:.9}});
 
 viewer.selectedAtoms().forEach(atom => {
-viewer.addLabel(atom.serial, {fontSize: 11.5, inFront: true,backgroundOpacity: .5,borderColor:'white',borderThickness:2,backgroundColor:'blue'}, {serial: atom.serial});
+viewer.addLabel(atom.serial, {fontSize: 11.5, inFront: true,backgroundOpacity: .9,borderColor:'white',borderThickness:2,backgroundColor:'blue'}, {serial: atom.serial});
 });
 
 
