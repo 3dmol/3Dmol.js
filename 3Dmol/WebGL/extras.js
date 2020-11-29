@@ -84,6 +84,7 @@ $3Dmol.SpritePlugin = function () {
     this.render = function ( scene, camera, viewportWidth, viewportHeight, inFront ) {
         let sprites = [];
         scene.__webglSprites.forEach(sprite => {
+           //depthTest is false for inFront labels
             if(inFront && sprite.material.depthTest == false) {
                 sprites.push(sprite);
             } else if(!inFront && sprite.material.depthTest) {

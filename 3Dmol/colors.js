@@ -38,7 +38,7 @@
  * @prop {min} - min value for gradient
  * @prop {max} - max value for gradient
  * @prop {mid} - mid point value for gradient (for rwb)
- * @prop {object} map - map of a certain AtomSpec property to a color.: {}} elementMap - Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
+ * @prop {object} map - map of a certain AtomSpec property to a color of the form `{'prop': 'elem', map:$3Dmol.elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
  * @prop {function} colorfunc - Allows the user to provide a function for setting the colorschemes.
  */
  
