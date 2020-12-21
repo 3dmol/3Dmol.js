@@ -2373,6 +2373,12 @@ $3Dmol.GLModel = (function() {
             // make sure clickable is a boolean
             clickable = !!clickable;
 
+            //for py3dmol let users provide callback as string
+            if (callback && typeof callback === "string") {
+            /*ignore jslint start*/
+                callback = eval("("+callback+")");
+            /*ignore jslint end*/
+            }
             // report to console if callback is not a valid function
             if (callback && typeof callback != "function") {
                 console.log("Callback is not a function");
@@ -2410,6 +2416,19 @@ $3Dmol.GLModel = (function() {
 
             // make sure hoverable is a boolean
             hoverable = !!hoverable;
+
+            //for py3dmol let users provide callback as string
+            if (hover_callback && typeof hover_callback === "string") {
+            /*ignore jslint start*/
+                hover_callback = eval("("+hover_callback+")");
+            /*ignore jslint end*/
+            }
+            //for py3dmol let users provide callback as string
+            if (unhover_callback && typeof unhover_callback === "string") {
+            /*ignore jslint start*/
+                unhover_callback = eval("("+unhover_callback+")");
+            /*ignore jslint end*/
+            }            
 
             // report to console if hover_callback is not a valid function
             if (hover_callback && typeof hover_callback != "function") {
