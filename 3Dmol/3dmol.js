@@ -748,3 +748,17 @@ $3Dmol.isEmptyObject = function( obj ) {
     }
     return true;
 };
+
+$3Dmol.makeFunction = function(callback) {
+    //for py3dmol let users provide callback as string
+    if (callback && typeof callback === "string") {
+    /* jshint ignore:start */
+        callback = eval("("+callback+")");
+    /* jshint ignore:end */
+    }
+    // report to console if callback is not a valid function
+    if (callback && typeof callback != "function") {
+        return null;
+    }    
+    return callback;
+};

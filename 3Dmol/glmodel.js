@@ -2372,19 +2372,12 @@ $3Dmol.GLModel = (function() {
 
             // make sure clickable is a boolean
             clickable = !!clickable;
-
-            //for py3dmol let users provide callback as string
-            if (callback && typeof callback === "string") {
-            /* jshint ignore:start */
-                callback = eval("("+callback+")");
-            /* jshint ignore:end */
-            }
-            // report to console if callback is not a valid function
-            if (callback && typeof callback != "function") {
+            callback = $3Dmol.makeFunction(callback);            
+            if (callback === null) {
                 console.log("Callback is not a function");
                 return;
             }
-
+            
             var i;
             var selected = this.selectedAtoms(sel, atoms);
             var len = selected.length;
@@ -2416,27 +2409,16 @@ $3Dmol.GLModel = (function() {
 
             // make sure hoverable is a boolean
             hoverable = !!hoverable;
-
-            //for py3dmol let users provide callback as string
-            if (hover_callback && typeof hover_callback === "string") {
-            /* jshint ignore:start */
-                hover_callback = eval("("+hover_callback+")");
-            /* jshint ignore:end */
-            }
-            //for py3dmol let users provide callback as string
-            if (unhover_callback && typeof unhover_callback === "string") {
-            /* jshint ignore:start */
-                unhover_callback = eval("("+unhover_callback+")");
-            /* jshint ignore:end */
-            }            
+            hover_callback = $3Dmol.makeFunction(hover_callback);
+            unhover_callback = $3Dmol.makeFunction(unhover_callback);            
 
             // report to console if hover_callback is not a valid function
-            if (hover_callback && typeof hover_callback != "function") {
+            if (hover_callback === null) {
                 console.log("Hover_callback is not a function");
                 return;
             }
             // report to console if unhover_callback is not a valid function
-            if (unhover_callback && typeof unhover_callback != "function") {
+            if (unhover_callback === null) {
                 console.log("Unhover_callback is not a function");
                 return;
             }

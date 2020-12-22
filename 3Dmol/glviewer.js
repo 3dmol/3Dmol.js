@@ -355,9 +355,13 @@ $3Dmol.GLViewer = (function() {
             let intersects = targetedObjects(mouseX,mouseY,clickables);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
-                if (selected.callback !== undefined &&
-                        typeof (selected.callback) === "function") {
-                    selected.callback(selected, _viewer, event, container);
+                if (selected.callback !== undefined) {
+	                 if(typeof (selected.callback) != "function") {
+	                    selected.callback = $3Dmol.makeFunction(selected.callback);
+	                }
+                    if(typeof (selected.callback) === "function") {
+                        selected.callback(selected, _viewer, event, container);
+                    }
                 }
             }
         };
@@ -365,11 +369,21 @@ $3Dmol.GLViewer = (function() {
         //set current_hover to sel (which can be null), calling appropraite callbacks
         var setHover = function(selected, event) {
             if(current_hover == selected) return;
-            if(current_hover) current_hover.unhover_callback(current_hover, _viewer, event, container);
+            if(current_hover) {
+                if(typeof (current_hover.unhover_callback) != "function") {
+                    current_hover.unhover_callback = $3Dmol.makeFunction(current_hover.unhover_callback);
+                } 
+                current_hover.unhover_callback(current_hover, _viewer, event, container);
+            }
             current_hover=selected;
-            if (selected && selected.hover_callback !== undefined &&
-                    typeof (selected.hover_callback) === "function") {
-                selected.hover_callback(selected, _viewer, event, container);
+            
+            if (selected && selected.hover_callback !== undefined) {
+                if(typeof (selected.hover_callback) != "function") {
+                    selected.hover_callback = $3Dmol.makeFunction(selected.hover_callback);
+                }
+                if(typeof (selected.hover_callback) === "function") {
+                    selected.hover_callback(selected, _viewer, event, container);
+                }
             }  
             
         };
