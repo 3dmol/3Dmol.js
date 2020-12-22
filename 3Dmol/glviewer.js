@@ -4375,6 +4375,21 @@ $3Dmol.GLViewer = (function() {
             camera.lookAt(new $3Dmol.Vector3(0,0,rotationGroup.position.z));
             return camera.position.x;
         };
+	    
+	/**
+         * Used for setting a custom value of eyeSeparation. Created for calling by StereoViewer object
+         * @function $3Dmol.GLViewer#setEyeSeparation
+         * @return {number} camera x position
+         */
+        this.setEyeSeparation = function(x, isright) {
+          var dist = this.getPerceivedDistance();
+            if (isright || camera.position.x > 0) //setting a value of dist*tan(5)
+                camera.position.x = dist*Math.tan(Math.PI / 180.0 * x);
+            else
+                camera.position.x = -dist*Math.tan(Math.PI / 180.0 * x);
+            camera.lookAt(new $3Dmol.Vector3(0,0,rotationGroup.position.z));
+            return camera.position.x;
+        }
         
         /**
          * Set the default cartoon quality for newly created models.  Default is 5.
