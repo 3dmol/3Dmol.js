@@ -622,15 +622,10 @@ $3Dmol.GLShape = (function() {
         shape.linewidth = typeof(stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
         // Click handling
         shape.clickable = stylespec.clickable ? true : false;
-        shape.callback = typeof (stylespec.callback) === "function" ? stylespec.callback
-                : null;
-
+        shape.callback =  $3Dmol.makeFunction(stylespec.callback);
         shape.hoverable = stylespec.hoverable ? true : false;
-        shape.hover_callback = typeof (stylespec.hover_callback) === "function" ? stylespec.hover_callback
-                : null;
-
-        shape.unhover_callback = typeof (stylespec.unhover_callback) === "function" ? stylespec.unhover_callback
-                : null;
+        shape.hover_callback = $3Dmol.makeFunction(stylespec.hover_callback);
+        shape.unhover_callback = $3Dmol.makeFunction(stylespec.unhover_callback);
 
         shape.hidden = stylespec.hidden;
         shape.frame = stylespec.frame;
