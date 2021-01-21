@@ -648,7 +648,7 @@ $3Dmol.Parsers = (function() {
      */
     parsers.cube = parsers.CUBE = function(str /*, options*/) {
         var atoms = [[]];
-        var lines = str.replace(/^\s+/, "").split(/\n\r|\r+/);
+        var lines = str.replace(/^\s+/, "").split(/\n\r|\r+|\n/);
 
         if (lines.length < 6)
             return atoms;

@@ -762,3 +762,13 @@ $3Dmol.makeFunction = function(callback) {
     }    
     return callback;
 };
+
+//standardize voldata/volscheme in style
+$3Dmol.adjustVolumeStyle = function(style) {
+    if(style.volformat && !(style.voldata instanceof $3Dmol.VolumeData)) {
+        style.voldata = new $3Dmol.VolumeData(style.voldata, style.volformat);
+    }
+    if(style.volscheme) {
+        style.volscheme = $3Dmol.Gradient.getGradient(style.volscheme);
+    }
+};

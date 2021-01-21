@@ -3846,21 +3846,6 @@ $3Dmol.GLViewer = (function() {
             "SES":$3Dmol.SurfaceType.SES
         };
 
-        //return a Gradient object, even if what is specified is descriptive
-        var getGradient = function(grad) {
-            if(grad instanceof $3Dmol.Gradient) {
-                return grad;
-            } else if(grad.gradient !== undefined &&  $3Dmol.Gradient.builtinGradients[grad.gradient]){
-                let min = grad.min === undefined ? -1 : grad.min;
-                let max = grad.max === undefined ? 1 : grad.max;
-                if(grad.mid === undefined) {
-                    return new $3Dmol.Gradient.builtinGradients[grad.gradient](min,max);
-                } else {
-                    return new $3Dmol.Gradient.builtinGradients[grad.gradient](min,max, grad.mid);
-                }                
-            }
-            return grad;
-        };
         
         /**
          * Add surface representation to atoms
@@ -3910,13 +3895,7 @@ $3Dmol.GLViewer = (function() {
                 atomlist = shallowCopy(getAtomsFromSel(allsel));
             }
             
-            if(style && style.volformat && !(style.voldata instanceof $3Dmol.VolumeData)) {
-                style.voldata = new $3Dmol.VolumeData(style.voldata, style.volformat);
-            }
-            if(style && style.volscheme) {
-                style.volscheme = getGradient(style.volscheme);
-            }
-            
+            $3Dmol.adjustVolumeStyle(style);
             var symmetries = false;
             var n;
             for (n = 0; n < models.length; n++) { 
@@ -4159,12 +4138,7 @@ $3Dmol.GLViewer = (function() {
          * @param {SurfaceStyleSpec} style - new material style specification
          */ 
         this.setSurfaceMaterialStyle = function(surf, style) {
-            if(style.volformat && !(style.voldata instanceof $3Dmol.VolumeData)) {
-                style.voldata = new $3Dmol.VolumeData(style.voldata, style.volformat);
-            }
-            if(style.volscheme) {
-                style.volscheme = getGradient(style.volscheme);
-            }
+            $3Dmol.adjustVolumeStyle(style);
             if (surfaces[surf]) {
                 var surfArr = surfaces[surf];
                 for (var i = 0; i < surfArr.length; i++) {
