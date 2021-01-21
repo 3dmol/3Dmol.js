@@ -203,6 +203,9 @@
  * @prop {number} smoothness - amount to smooth surface (default 1)
  * @prop {list} coords - coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates
  * @prop {number} seldist - distance around coords to include data [default = 2.0]
+ * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified
+ * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields.
+ * @prop {string} volformat - format of voldata if not a $3Dmol.VolumeData object 
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click
  */
