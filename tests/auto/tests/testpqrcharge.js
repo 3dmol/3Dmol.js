@@ -1,4 +1,4 @@
-/* @data <textarea style="display: none;" id="mol">REMARK
+/* @data <textarea style="display: none;" id="pqrmol">REMARK
 HETATM    1  O   MOL A   1      -2.030   0.000  -0.000  -0.33957515   1.5200 O
 HETATM    2  C   MOL A   1      -0.845  -0.000   0.000   0.36693862   1.7000 C
 HETATM    3  O   MOL A   1      -0.068   1.100   0.105  -0.19657335   1.5200 O
@@ -12,9 +12,10 @@ HETATM   10  H   MOL A   1       1.923  -1.308  -0.588   0.12702678   1.2000 H
 END
 </textarea>
 */
-
-let mol = viewer.addModel($('#mol').val(),'pqr');
+let data = $('#pqrmol').val();
+let mol = viewer.addModel(data,'pqr');
 let grad =  new $3Dmol.Gradient.RWB(-.3,0.3);
 mol.setStyle({},{stick:{radius:0.075,colorscheme:{prop:'partialCharge',gradient:grad}},sphere:{radius:0.35,colorscheme:{prop:'partialCharge',gradient:grad}}});
 mol.setStyle({elem:'H'},{sphere:{radius:0.25,colorscheme:{prop:'partialCharge',gradient:grad}}},true);
 viewer.zoomTo();
+viewer.render();
