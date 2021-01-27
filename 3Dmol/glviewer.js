@@ -603,12 +603,38 @@ $3Dmol.GLViewer = (function() {
                 viewer.zoom(10); //will not zoom all the way
                 viewer.render();
             });
-     */
+        */
         this.setZoomLimits = function(lower, upper) {
             if(typeof(lower) !== 'undefined') config.lowerZoomLimit = lower;
             if(upper) config.upperZoomLimit = upper;
             rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
             show();
+        };
+
+        /**
+         * Set camera parameters (distance to the origin and field of view)
+         * 
+         * @function $3Dmol.GLViewer#setCameraParameters
+         * @param {parameters} - new camera parameters, with possible fields 
+         *                       being fov for the field of view and z for the 
+         *                       distance to the origin.
+         * @example
+          $.get("data/set1_122_complex.mol2", function(data) {
+                var m = viewer.addModel(data);
+                viewer.setCameraParameters({ fov: 10 , z: 300 });
+                viewer.render();
+            });
+        */
+        this.setCameraParameters = function(parameters) {
+            if (parameters.fov !== undefined) {
+                fov = parameters.fov;
+                camera.fov = fov;
+            }
+
+            if (parameters.z !== undefined) {
+                CAMERA_Z = parameters.z;
+                camera.z = CAMERA_Z;
+            }
         };
 
         var mouseButton;
