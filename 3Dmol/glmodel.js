@@ -1685,7 +1685,15 @@ $3Dmol.GLModel = (function() {
               end = numFrames;
             }
             
+            //to enable multiple setting of vibrate with bothWays, must record original position
+            if(frames !== undefined && frames.origIndex !== undefined) {
+                this.setFrame(frames.origIndex);
+            } else {
+                this.setFrame(0);
+            }
+            
             if(start < end) frames = []; //clear
+            if(bothWays) frames.origIndex = numFrames;
 
             for (var i = start; i < end; i++) {
                 var newAtoms = [];

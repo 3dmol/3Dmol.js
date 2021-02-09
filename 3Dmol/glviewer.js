@@ -621,6 +621,8 @@ $3Dmol.GLViewer = (function() {
          * @example
           $.get("data/set1_122_complex.mol2", function(data) {
                 var m = viewer.addModel(data);
+                viewer.setStyle({stick:{}});
+                viewer.zoomTo();
                 viewer.setCameraParameters({ fov: 10 , z: 300 });
                 viewer.render();
             });
