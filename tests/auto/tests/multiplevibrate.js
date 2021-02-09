@@ -25,7 +25,6 @@ viewer.render(/* no callback */ );
 
 function demonstration(ind) {
   viewer.stopAnimate(); 
-  viewer.setFrame(10);
   viewer.vibrate(10, 0.8, true, null);
   //Without the above line, there does not seem to be a problem
   //However, the amplitude cannot be updated otherwise
