@@ -450,12 +450,18 @@ $3Dmol.GLViewer = (function() {
             }            
             return y;
         };
-
-        //for a given screen (x,y) displacement return model displacement 
-        var screenXY2model = function(x,y) {
+        
+        /**
+         * For a given screen (x,y) displacement return model displacement
+         * @param{x} x displacement in screen coordinates
+         * @param{y} y displacement in screen corodinates
+         * @param{modelz} z coordinate in model coordinates to compute offset for, default is model axis 
+         * @function $3Dmol.GLViewer#screenOffsetToModel
+        */        
+        var screenOffsetToModel = this.screenOffsetToModel = function(x,y,modelz) {
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
-            var zpos = rotationGroup.position.z; 
+            var zpos = (modelz === undefined ? rotationGroup.position.z : modelz); 
             var q = rotationGroup.quaternion;                        
             var t = new $3Dmol.Vector3(0,0,zpos);
             projector.projectVector(t, camera);
@@ -796,7 +802,7 @@ $3Dmol.GLViewer = (function() {
                 rotationGroup.position.z = cz + dy * scaleFactor;
                 rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z); 
             } else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
-                var t = screenXY2model(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
+                var t = screenOffsetToModel(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
                 modelGroup.position.addVectors(currentModelPos,t);
                 
             } else if ((mode === 0 || mouseButton == 1) && r !== 0) { // Rotate
@@ -1723,7 +1729,7 @@ $3Dmol.GLViewer = (function() {
         this.translateScene = function(x, y, animationDuration, fixedPath) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
             
-            var t = screenXY2model(x,y);
+            var t = screenOffsetToModel(x,y);
             var final_position=modelGroup.position.clone().add(t);
                 
             if(animationDuration>0){
