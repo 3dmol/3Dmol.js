@@ -1097,10 +1097,13 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#spin
          * @param {string}
          *            [axis] - Axis ("x", "y", "z", "vx", "vy", or "vz") to rotate around.
-         *            Default "y".  View relative (rather than model relative) axes are prefixed with v.        
+         *            Default "y".  View relative (rather than model relative) axes are prefixed with v. 
+         * @param {number}
+         *            [speed] - Speed multiplier for spinning the viewer. 1 is default and a negative
+         *             value reverses the direction of the spin.        
          *  
          */        
-        this.spin = function(axis){
+        this.spin = function(axis, speed){
             clearInterval(spinInterval);
             if(typeof axis == 'undefined')
                 axis = 'y';
@@ -1109,6 +1112,9 @@ $3Dmol.GLViewer = (function() {
                     return;
                 else
                     axis = 'y';
+            }
+            if(typeof speed != 'number'){
+                speed = 1
             }
 
             if(Array.isArray(axis)){
@@ -1120,10 +1126,10 @@ $3Dmol.GLViewer = (function() {
 
             spinInterval = setInterval(
                 function(){
-                    viewer.rotate(1,axis);
+                    viewer.rotate(1 * speed,axis);
                 }, 25);            
             
-        };        
+        };         
 
         //animate motion between current position and passed position
         // can set some parameters to null
