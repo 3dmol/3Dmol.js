@@ -1114,7 +1114,7 @@ $3Dmol.GLViewer = (function() {
                     axis = 'y';
             }
             if(typeof speed != 'number'){
-                speed = 1
+                speed = 1;
             }
 
             if(Array.isArray(axis)){
