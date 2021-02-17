@@ -724,6 +724,19 @@ $3Dmol.Parsers = (function() {
                 break;
             if (lines.length < atomCount + 2)
                 break;
+
+            var lattice_re = /Lattice\s*=\s*["\{\}]([^"\{\}]+)["\{\}]\s*/gi;
+            var lattice_match = lattice_re.exec(lines[1]);
+            if ((lattice_match != null) && (lattice_match.length > 1)) {
+                var lattice = new Float32Array(lattice_match[1].split(/\s+/));
+                var matrix = new $3Dmol.Matrix3(
+                    lattice[0], lattice[1], lattice[2],
+                    lattice[3], lattice[4], lattice[5],
+                    lattice[6], lattice[7], lattice[8]
+                );
+                atoms.modelData = [{cryst:{matrix:matrix}}];
+            }
+
             var offset = 2;
             var start = atoms[atoms.length-1].length;
             var end = start + atomCount;
