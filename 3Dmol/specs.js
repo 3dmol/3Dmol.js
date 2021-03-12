@@ -12,7 +12,8 @@
                 'mousedown touchstart': viewer._handleMouseDown,
                 'DOMMouseScroll mousewheel': viewer._handleMouseScroll
                 'mousemove touchmove': viewer._handleMouseMove                
- * @prop {string} backgroundColor - Color of the canvas' background
+ * @prop {string} backgroundColor - Color of the canvas background
+ * @prop {number} backgroundAlpha - Alpha transparency of canvas background
  * @prop {number} camerax
  * @prop {number} hoverDuration
  * @prop {string} id - id of the canvas

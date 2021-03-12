@@ -16,6 +16,7 @@ The contents of the viewer can be set and manipulated through the use of `data-`
  - **data-element** The value is the id of an HTML element on the current page that has molecular data embedded in it.
  - **data-type** The value is the file format (default pdb; can be pdb, sdf, xyz, mol2, or cube).  
  - **data-backgroundcolor** The background color (default black).
+ - **data-backgroundalpha** The background alpha (default opaque: 1.0).
  - **data-select** The value is an {@link AtomSpec} selection specification.
  - **data-style** The value is a style specification.
  - **data-surface** A surface style specification.

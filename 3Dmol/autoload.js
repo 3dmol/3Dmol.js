@@ -57,7 +57,10 @@ $3Dmol.autoload=function(viewer,callback){
             if(viewerdiv.data("options"))
                 options = $3Dmol.specStringToObject(viewerdiv.data("options"));
                 
+            //note that data tags must be lowercase
             var bgcolor = $3Dmol.CC.color(viewerdiv.data("backgroundcolor"));
+            var bgalpha = viewerdiv.data("backgroundalpha");
+            bgalpha = bgalpha == undefined ? 1.0 : parseFloat(bgalpha);
             var style = {line:{}};
             if(viewerdiv.data("style")) style = $3Dmol.specStringToObject(viewerdiv.data("style"));
             var select = {};
@@ -138,9 +141,12 @@ $3Dmol.autoload=function(viewer,callback){
                 if(glviewer==null) {
                     var config = viewerdiv.data('config') || {};
                     config.defaultcolors = config.defaultcolors || $3Dmol.rasmolElementColors;
+                    if(config.backgroundColor === undefined) config.backgroundColor = bgcolor;
+                    if(config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;                     
                     glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, config);
-                }
-                glviewer.setBackgroundColor(bgcolor);                            
+                } else {
+                    glviewer.setBackgroundColor(bgcolor, bgalpha);
+                } 
             } catch ( error ) {
                 console.log(error);
                 //for autoload, provide a useful error message

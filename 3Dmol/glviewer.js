@@ -30,6 +30,8 @@ $3Dmol.GLViewer = (function() {
         if(typeof(config.backgroundColor) != undefined) {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
         }
+        config.backgroundAlpha = config.backgroundAlpha == undefined ? 1.0 : config.backgroundAlpha;
+        
 
         var camerax = 0;
         if(typeof(config.camerax) != undefined) {
@@ -248,7 +250,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         initializeScene();
-        renderer.setClearColorHex(bgColor, 1.0);
+        renderer.setClearColorHex(bgColor, config.backgroundAlpha);
         scene.fog.color = $3Dmol.CC.color(bgColor);
 
         var clickedAtom = null;
