@@ -19,10 +19,10 @@
     "gulp-merge": "^0.1.1",
     "gulp-rename": "^1.4.0",
     "gulp-shell": "^0.7.1",
-    "gulp-terser": "^1.2.0",
+    "gulp-terser": "^1.4.1",
     "gulp-uglify": "^3.0.2",
-    "jsdoc": "^3.6.4",
-    "jshint": "^2.10.2"
+    "jsdoc": "^3.6.6",
+    "jshint": "^2.12.0"
   },
   "scripts": {
     "build": "gulp",
@@ -31,8 +31,10 @@
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",
   "dependencies": {
-    "jquery": "^3.5.0",
+    "ini": "^2.0.0",
+    "jquery": "^3.6.0",
     "netcdfjs": "^1.0.0",
-    "pako": "^1.0.11"
+    "pako": "^1.0.11",
+    "yargs-parser": "^20.2.7"
   }
 }
