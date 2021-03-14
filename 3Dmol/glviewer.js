@@ -339,11 +339,11 @@ $3Dmol.GLViewer = (function() {
             }
             
             let results = [];
+            let offset = canvasOffset();
             coords.forEach(coord => {
                 let t = new $3Dmol.Vector3(coord.x,coord.y,coord.z);
                 t.applyMatrix4(modelGroup.matrixWorld);   
                 projector.projectVector(t, camera);       
-                let offset = canvasOffset();
                 let screenX = WIDTH*(t.x+1)/2.0+offset.left;
                 let screenY = -HEIGHT*(t.y-1)/2.0+offset.top;
                 results.push({x:screenX,y:screenY});
@@ -473,7 +473,29 @@ $3Dmol.GLViewer = (function() {
             t.z = 0;                            
             t.applyQuaternion(q);
             return t;
-        };                
+        };
+        
+        /**
+         * Distance from screen coordinate to model coordinate assuming screen point
+         * is projected to the same depth as model coordinate
+         * @param{screen} xy screen coordinate
+         * @param{model} xyz model coordinate
+         * @function $3Dmol.GLViewer#screenToModelDistance
+        */   
+        this.screenToModelDistance = function(screen,model) {
+            let offset = canvasOffset();
+            
+            //convert model to screen to get screen z                     
+            let mvec = new $3Dmol.Vector3(model.x,model.y,model.z);
+            mvec.applyMatrix4(modelGroup.matrixWorld);   
+            let m = mvec.clone();
+            projector.projectVector(mvec, camera);
+            
+            let t = new $3Dmol.Vector3((screen.x-offset.left)*2/WIDTH-1,(screen.y-offset.top)*2/-HEIGHT+1,mvec.z);
+            projector.unprojectVector(t, camera);
+            
+            return t.distanceTo(m);
+        };                         
         
         //for grid viewers, return true if point is in this viewer
         var isInViewer = function(x,y) {
