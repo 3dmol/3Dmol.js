@@ -962,7 +962,7 @@ $3Dmol.ShaderLib = {
             "      }",
             // Adding texture mapping so that basis vectors are followed
             "      vec4 mappedCoords = textmap*pt;",
-            // "      mappedCoords /= mappedCoords.w;",
+            "      mappedCoords /= mappedCoords.w;",
             "      float val = texture(data, mappedCoords.zyx).r;",
             "      if(isinf(val)) continue;", //masked out
             "      float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
@@ -970,7 +970,6 @@ $3Dmol.ShaderLib = {
             "      color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",
             "      color.a += (1.0 - color.a) * val_color.a; ",
             "      if(color.a > 0.0) color.rgb /= color.a;",
-            // "     color = vec4(mappedCoords.x, mappedCoords.y, mappedCoords.z, 0.8);",
             "    }",
             "}"
 

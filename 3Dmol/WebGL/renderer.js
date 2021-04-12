@@ -802,7 +802,6 @@ $3Dmol.Renderer = function(parameters) {
                 m_uniforms.directionalLightDirection.value = _lights.directional.positions;
             } else if (material.shaderID === "volumetric") {
 
-                //need a matrix that maps back from model coordinates to texture coordinates
                 //  textureMat*modelInv*position
                 object._modelViewMatrix.getScale(_direction); //scale factor of conversion
                 _worldInverse.getInverse(object._modelViewMatrix);
@@ -810,7 +809,7 @@ $3Dmol.Renderer = function(parameters) {
                 _textureMatrix.multiplyMatrices(object.material.texmatrix,_worldInverse);
                 _gl.uniformMatrix4fv(p_uniforms.textmat, false, _textureMatrix.elements);
                 _gl.uniformMatrix4fv(p_uniforms.projinv, false, _projInverse.elements);
-                // console.log('Getting to know object', object);
+                // Matrix that maps back from model coordinates to texture coordinates
                 _gl.uniformMatrix4fv(p_uniforms.textmap, false, object.material.textmap.elements);
                 //  need the resolution (step size of ray in viewer coordinates)
                 let invscale = Math.min(Math.min(_direction.x,_direction.y),_direction.z);
