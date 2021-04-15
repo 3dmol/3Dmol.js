@@ -19,6 +19,18 @@ $3Dmol.Parsers = (function() {
 
             // None of the bottom row or any of the Lanthanides have bond lengths
     };
+    var anumToSymbol = {
+            1: 'H',                                                                                                                                2: 'He',
+            3:'Li',4:'Be',                                                                                  5: 'B', 6: 'C', 7:'N', 8:'O', 9:'F',  10: 'Ne',
+            11: 'Na',12:'Mg',                                                                               13: 'Al',14:'Si',15:'P',16:'S',17:'Cl',18:'Ar',
+            19: 'K',20:'Ca',21:'Sc',22:'Ti',23:'V',24:'Cr',25:'Mn',26:'Fe',27:'Co',28:'Ni',29:'Cu',30:'Zn',31:'Ga',32:'Ge',33:'As',34:'Se',35:'Br',36:'Kr',
+            37:'Rb',38:'Sr',39:'Y',40:'Zr',41:'Nb',42:'Mo',43:'Tc',44:'Ru',45:'Rh',46:'Pd',47:'Ag',48:'Cd',49:'In',50:'Sn',51:'Sb',52:'Te',53:'I', 54:'Xe',
+            55:'Cs',56:'Ba',71:'Lu',72:'Hf',73:'Ta',74:'W',75:'Re',76:'Os',77:'Ir',78:'Pt',79:'Au',80:'Hg',81:'Tl',82:'Pb',83:'Bi',84:'Po',85:'At',86:'Rn',
+            87:'Fr',88:'Ra',104:'Rf',105:'Db',106:'Sg',107:'Bh',108:'Hs',109:'Mt',110:'Ds',111:'Rg',112:'Cn',113:'Nh',114:'Fl',115:'Mc',116:'Lv',117:'Ts',118:'Og',
+            
+            57:'La',58:'Ce',59:'Pr',60:'Nd',61:'Pm',62:'Sm',63:'Eu',64:'Gd',65:'Tb',66:'Dy',67:'Ho',68:'Er',69:'Tm',70:'Yb',
+            89:'Ac',90:'Th',91:'Pa',92:'U',93:'Np',94:'Pu',95:'Am',96:'Cm',97:'Bk',98:'Cf',99:'Es',100:'Fm',101:'Md',102:'No',
+    };
     var bondLength = function(elem) {
         return bondTable[elem] || 1.6;
     };
@@ -648,20 +660,67 @@ $3Dmol.Parsers = (function() {
      */
     parsers.cube = parsers.CUBE = function(str /*, options*/) {
         var atoms = [[]];
-        var lines = str.replace(/^\s+/, "").split(/\n\r|\r+|\n/);
-
+        var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
+ 
         if (lines.length < 6)
             return atoms;
 
-        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(
-                " ");
+        var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
 
         var natoms = Math.abs(parseFloat(lineArr[0]));
 
-        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        let cryst = {};
+        var origin = cryst.origin = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+                parseFloat(lineArr[2]), parseFloat(lineArr[3]));
 
+        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+       
         // might have to convert from bohr units to angstroms
-        var convFactor = (parseFloat(lineArr[0]) > 0) ? 0.529177 : 1;
+        // there is a great deal of confusion here:
+        // n>0 means angstroms: http://www.gaussian.com/g_tech/g_ur/u_cubegen.htm
+        // n<0 means angstroms: http://paulbourke.net/dataformats/cube/
+        // always assume bohr: openbabel source code
+        // always assume angstrom: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
+        // we are going to go with n<0 means angstrom - note this is just the first n
+        var convFactor = (lineArr[0] > 0) ? 0.529177 : 1;
+        origin.multiplyScalar(convFactor);
+
+        var nX = Math.abs(lineArr[0]);
+        var xVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
+                .multiplyScalar(convFactor);
+    
+        lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        var nY = Math.abs(lineArr[0]);
+        var yVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
+                .multiplyScalar(convFactor);
+    
+        lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        var nZ = Math.abs(lineArr[0]);
+        var zVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+                parseFloat(lineArr[2]), parseFloat(lineArr[3]))
+                .multiplyScalar(convFactor);
+
+        cryst.size = {x:nX, y:nY, z:nZ};
+        cryst.unit = new $3Dmol.Vector3(xVec.x, yVec.y, zVec.z);
+    
+        if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
+                || zVec.y != 0) {
+            //need a transformation matrix
+            cryst.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
+            // include translation in matrix
+            cryst.matrix = cryst.matrix.multiplyMatrices(cryst.matrix,
+                    new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
+            // all translation and scaling done by matrix, so reset origin and unit
+            // this.origin = new $3Dmol.Vector3(0,0,0);
+            // this.basis = [xVec, yVec, zVec];
+            cryst.unit = new $3Dmol.Vector3(1,1,1);
+        }
+
+        atoms.modelData = [{cryst:cryst}];
+
 
         // Extract atom portion; send to new GLModel...
         lines = lines.splice(6, natoms);
@@ -675,19 +734,7 @@ $3Dmol.Parsers = (function() {
             var line = lines[i - start];
             var tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(
                     " ");
-
-            if (tokens[0] == 6)
-                atom.elem = "C";
-
-            else if (tokens[0] == 1)
-                atom.elem = "H";
-
-            else if (tokens[0] == 8)
-                atom.elem = "O";
-
-            else if (tokens[0] == 17)
-                atom.elem = "Cl";
-
+            atom.elem = anumToSymbol[tokens[0]];
             atom.x = parseFloat(tokens[2]) * convFactor;
             atom.y = parseFloat(tokens[3]) * convFactor;
             atom.z = parseFloat(tokens[4]) * convFactor;

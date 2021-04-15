@@ -376,13 +376,28 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 .then(function(ret) {
                     handler(ret);
                     resolve(m);
-                },function() {console.log("fetch of "+uri+" failed.");});
+                }).catch(function(){
+                    //if mmtf server is being annoying, fallback to text
+                    pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
+                    uri = pdbUri + query + "." + type;
+                    console.log("falling back to pdb format");
+                    $.get(uri, function(ret) {
+                        handler(ret);
+                        resolve(m);
+                    }).fail(function(e) {
+                       handler("");
+                       resolve(m);
+                       console.log("fetch of "+uri+" failed: "+e.statusText);
+                       });
+                }); //an error msg has already been printed
             }
             else {        
                $.get(uri, function(ret) {
                    handler(ret);
                    resolve(m);
                }).fail(function(e) {
+                   handler("");
+                   resolve(m);
                    console.log("fetch of "+uri+" failed: "+e.statusText);
                });
             }

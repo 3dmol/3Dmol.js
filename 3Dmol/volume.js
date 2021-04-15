@@ -329,58 +329,18 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
     if (lines.length < 6)
         return;
 
+    var cryst = $3Dmol.Parsers.cube(str).modelData[0].cryst;
+    
     var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
 
     var atomsnum = parseFloat(lineArr[0]); //includes sign, which indicates presence of oribital line in header
     var natoms = Math.abs(atomsnum);
 
-    var origin = this.origin = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-            parseFloat(lineArr[2]), parseFloat(lineArr[3]));
+    this.origin = cryst.origin;
+    this.size = cryst.size;
+    this.unit = cryst.unit;
+    this.matrix = cryst.matrix;
 
-    lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-
-    // might have to convert from bohr units to angstroms
-    // there is a great deal of confusion here:
-    // n>0 means angstroms: http://www.gaussian.com/g_tech/g_ur/u_cubegen.htm
-    // n<0 means angstroms: http://paulbourke.net/dataformats/cube/
-    // always assume bohr: openbabel source code
-    // always assume angstrom: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
-    // we are going to go with n<0 means angstrom - note this is just the first n
-    var convFactor = (lineArr[0] > 0) ? 0.529177 : 1;
-    origin.multiplyScalar(convFactor);
-
-    var nX = Math.abs(lineArr[0]);
-    var xVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-            parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-            .multiplyScalar(convFactor);
-
-    lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-    var nY = Math.abs(lineArr[0]);
-    var yVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-            parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-            .multiplyScalar(convFactor);
-
-    lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-    var nZ = Math.abs(lineArr[0]);
-    var zVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
-            parseFloat(lineArr[2]), parseFloat(lineArr[3]))
-            .multiplyScalar(convFactor);
-
-    this.size = {x:nX, y:nY, z:nZ};
-    this.unit = new $3Dmol.Vector3(xVec.x, yVec.y, zVec.z);
-    
-    if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
-            || zVec.y != 0) {
-        //need a transformation matrix
-        this.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
-        //include translation in matrix
-        this.matrix = this.matrix.multiplyMatrices(this.matrix, 
-                new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
-        //all translation and scaling done by matrix, so reset origin and unit
-        this.origin = new $3Dmol.Vector3(0,0,0);
-        this.unit = new $3Dmol.Vector3(1,1,1);
-    }
-    
     var headerlines = 6;
     if(atomsnum < 0) headerlines++; //see: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
     var raw = lines.splice(natoms + headerlines).join(" ");
