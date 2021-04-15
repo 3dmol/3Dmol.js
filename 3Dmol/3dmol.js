@@ -325,7 +325,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 viewer.zoomTo();
                 viewer.render();
                 resolve(m);
-            });
+            },function() {console.log("fetch of "+uri+" failed.");});
         });
     }
     else {
@@ -376,7 +376,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 .then(function(ret) {
                     handler(ret);
                     resolve(m);
-                });
+                },function() {console.log("fetch of "+uri+" failed.");});
             }
             else {        
                $.get(uri, function(ret) {
