@@ -709,13 +709,13 @@ $3Dmol.Parsers = (function() {
         if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
                 || zVec.y != 0) {
             //need a transformation matrix
-            cryst.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
+            cryst.matrix4 =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
             // include translation in matrix
-            cryst.matrix = cryst.matrix.multiplyMatrices(cryst.matrix,
-                    new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
+            let t = new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z);
+            cryst.matrix4 = cryst.matrix4.multiplyMatrices(t,cryst.matrix4);
+            cryst.matrix = cryst.matrix4.matrix3FromTopLeft();
             // all translation and scaling done by matrix, so reset origin and unit
-            // this.origin = new $3Dmol.Vector3(0,0,0);
-            // this.basis = [xVec, yVec, zVec];
+            cryst.origin = new $3Dmol.Vector3(0,0,0);
             cryst.unit = new $3Dmol.Vector3(1,1,1);
         }
 

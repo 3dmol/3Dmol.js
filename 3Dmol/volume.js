@@ -339,7 +339,7 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
     this.origin = cryst.origin;
     this.size = cryst.size;
     this.unit = cryst.unit;
-    this.matrix = cryst.matrix;
+    this.matrix = cryst.matrix4;
 
     var headerlines = 6;
     if(atomsnum < 0) headerlines++; //see: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html

@@ -248,6 +248,13 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
+    multiplyVectors: function(a, b) { //elementwise
+        this.x = a.x * b.x;
+        this.y = a.y * b.y;
+        this.z = a.z * b.z;
+
+        return this;
+    },
     sub : function(v) {
 
         this.x -= v.x;

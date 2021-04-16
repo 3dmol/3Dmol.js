@@ -440,35 +440,33 @@ $3Dmol.GLShape = (function() {
     var updateBoundingFromPoints = function(sphere, components, points, numPoints) {
 
         sphere.center.set(0, 0, 0);
-
-        var i, il;
-
-        if (components.length > 0) {
-
-            for (i = 0, il = components.length; i < il; ++i) {
-                var centroid = components[i].centroid;
-                sphere.center.add(centroid);
-            }
-
-            sphere.center.divideScalar(components.length);
+        
+        //previously I weighted each component's center equally, but I think
+        //it is better to use all points
+        let xmin = Infinity, ymin = Infinity, zmin = Infinity;
+        let xmax = -Infinity, ymax = -Infinity, zmax = -Infinity;
+        if(sphere.box) {
+            xmin = sphere.box.min.x;
+            xmax = sphere.box.max.x;
+            ymin = sphere.box.min.y;
+            ymax = sphere.box.max.y;
+            zmin = sphere.box.min.z;
+            zmax = sphere.box.max.z;
         }
 
-        var maxRadiusSq = sphere.radius * sphere.radius;
-        if (points.length / 3 < numPoints)
-            numPoints = points.length / 3;
-
-        for (i = 0, il = numPoints; i < il; i++) {
+        for (let i = 0, il = numPoints; i < il; i++) {
             var x = points[i * 3], y = points[i * 3 + 1], z = points[i * 3 + 2];
-            var radiusSq = sphere.center.distanceToSquared({
-                x: x,
-                y: y,
-                z: z
-            });
-            maxRadiusSq = Math.max(maxRadiusSq, radiusSq);
+            if(x < xmin) xmin = x;
+            if(y < ymin) ymin = y;
+            if(z < zmin) zmin = z;
+            if(x > xmax) xmax = x;
+            if(y > ymax) ymax = y;
+            if(z > zmax) zmax = z;
         }
 
-        sphere.radius = Math.sqrt(maxRadiusSq);
-
+        sphere.center.set((xmax+xmin)/2,(ymax+ymin)/2,(zmax+zmin)/2);        
+        sphere.radius = sphere.center.distanceTo({x:xmax,y:ymax,z:zmax});
+        sphere.box = {min:{x:xmin,y:ymin,z:zmin},max:{x:xmax,y:ymax,z:zmax}};
     };
 
     //helper function for adding an appropriately sized mesh
