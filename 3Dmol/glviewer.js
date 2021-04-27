@@ -273,9 +273,15 @@ $3Dmol.GLViewer = (function() {
                     let hoverable_atoms = model.selectedAtoms({
                         hoverable : true
                     });
-                    Array.prototype.push.apply(hoverables,hoverable_atoms);
+                    // Array.prototype.push.apply(hoverables,hoverable_atoms);
+                    for (let n = 0; n < hoverable_atoms.length; n++) {
+                        hoverables.push(hoverable_atoms[n]);
+                    }
 
-                    Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
+                    // Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
+                    for (let m = 0; m < atoms.length; m++) {
+                        clickables.push(atoms[m]);
+                    }
                     
                 }
             }
