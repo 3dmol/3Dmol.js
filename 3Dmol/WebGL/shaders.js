@@ -955,21 +955,29 @@ $3Dmol.ShaderLib = {
             "      ptdepth = ((gl_DepthRange.diff * ptdepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
             "      if(ptdepth > depth) break;",
             "      pt = textmat*pt;",
+            // Adding texture mapping so that basis vectors are followed
+            "      pt = textmap*pt;",
+            // "      pt /= pt.w;",
             "      if(pt.x >= -0.01 && pt.y >= -0.01 && pt.z >= -0.01 && pt.x <= 1.01 && pt.y <= 1.01 && pt.z <= 1.01) {",
             "         seengood = true;",
             "      } else if(seengood) {",
             "         break;",
             "      }",
-            // Adding texture mapping so that basis vectors are followed
-            "      vec4 mappedCoords = textmap*pt;",
-            "      mappedCoords /= mappedCoords.w;",
-            "      float val = texture(data, mappedCoords.zyx).r;",
-            "      if(isinf(val)) continue;", //masked out
-            "      float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
-            "      vec4 val_color = texture(colormap, vec2(cval,0.5));",
-            "      color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",
-            "      color.a += (1.0 - color.a) * val_color.a; ",
-            "      if(color.a > 0.0) color.rgb /= color.a;",
+            "      if( pt.x < -0.01 || pt.x > 1.01 || pt.y < -0.01 || pt.y > 1.01 || pt.z < -0.01 || pt.z > 1.01  ){",
+            "          color.a = 0.0;",
+            "          continue;",
+            "      }",
+            "      else {",
+            // "         float val = texture(data, pt.zyx).r;",
+            // "         if(isinf(val)) continue;", //masked out
+            // "         float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
+            // "         vec4 val_color = texture(colormap, vec2(cval,0.5));",
+            // "         color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",
+            // "         color.a += (1.0 - color.a) * val_color.a; ",
+            // "         if(color.a > 0.0) color.rgb /= color.a;",
+            "         color = vec4(pt.x, pt.y, pt.z, 1.0);",
+            "      }",
+            // "      color = vec4(pt.x, pt.y, pt.z, 0.0)",
             "    }",
             "}"
 

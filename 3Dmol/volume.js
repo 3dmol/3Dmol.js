@@ -629,6 +629,7 @@ $3Dmol.GLVolumetricRender = (function() {
         var yoff = data.unit.y*data.size.y;
         var zoff = data.unit.z*data.size.z;
 
+        var reset_origin = new $3Dmol.Vector3();
         if(data.matrix){
           data.basis = [
             new $3Dmol.Vector3(data.matrix.elements[0], data.matrix.elements[4], data.matrix.elements[8]).multiplyScalar(data.size.x),
@@ -669,9 +670,14 @@ $3Dmol.GLVolumetricRender = (function() {
           xoff = (xmax - xmin) ;
           yoff = (ymax - ymin) ;
           zoff = (zmax - zmin) ;
+          // xoff = 60;
+          // yoff = 44;
+          // zoff = 44;
 
+          console.log(data.size, data.basis, xoff, yoff, zoff, xmin, ymin, zmin, corners);
+
+          reset_origin = new $3Dmol.Vector3(-1*xmin, -1*ymin, -1*zmin);
           // data.origin.addVectors(data.origin, new $3Dmol.Vector3(xmin, ymin, zmin));
-
         }
         //scale doesn't apply to the translation vector, so preapply it
         texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
@@ -694,10 +700,11 @@ $3Dmol.GLVolumetricRender = (function() {
         var textmap =new $3Dmol.Matrix4().identity();
         if(data.matrix) {
           textmap = new $3Dmol.Matrix4(
-            data.basis[0].x, data.basis[0].y, data.basis[0].z, 0,
-            data.basis[1].x, data.basis[1].y, data.basis[1].z, 0,
-            data.basis[2].x, data.basis[2].y, data.basis[2].z, 0,
+            data.basis[0].x/2, data.basis[0].y/2, data.basis[0].z/2, 0,
+            data.basis[1].x/2, data.basis[1].y/2, data.basis[1].z/2, 0,
+            data.basis[2].x/2, data.basis[2].y/2, data.basis[2].z/2, 0,
             0, 0, 0, 1); // textture map matrix : tmm
+          // textmap.makeTranslation(reset_origin.x, reset_origin.y, reset_origin.z);
           textmap.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
           textmap = new $3Dmol.Matrix4().getInverse(textmap);
         } else {
