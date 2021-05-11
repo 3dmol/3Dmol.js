@@ -666,6 +666,10 @@ $3Dmol.GLShape = (function() {
          * @function $3Dmol.GLShape#updateStyle
          * @param {ShapeSpec} newspec
          * @return {$3Dmol.GLShape}
+           @example 
+            let sphere = viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
+            sphere.updateStyle({color:'yellow',opacity:0.5});
+            viewer.render();
          */
         this.updateStyle = function(newspec) {
 

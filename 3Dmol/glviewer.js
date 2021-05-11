@@ -4220,6 +4220,16 @@ $3Dmol.GLViewer = (function() {
         *  @function $3Dmol.GLViewer#setSurfaceMaterialStyle
          * @param {number} surf - Surface ID to apply changes to
          * @param {SurfaceStyleSpec} style - new material style specification
+         @example
+         $.get("data/9002806.cif",function(data){
+            viewer.addModel(data);
+            viewer.setStyle({stick:{}});
+            let surf = viewer.addSurface("SAS");
+            surf.then(function() {
+                viewer.setSurfaceMaterialStyle(surf.surfid, {color:'blue',opacity:0.5});
+                viewer.render();
+                });
+           });
          */ 
         this.setSurfaceMaterialStyle = function(surf, style) {
             $3Dmol.adjustVolumeStyle(style);
