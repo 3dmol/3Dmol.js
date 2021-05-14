@@ -324,7 +324,7 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
 
 // parse cube data
 $3Dmol.VolumeData.prototype.cube = function(str) {
-    var lines = str.replace(/^\s+/, "").split(/[\n\r]+/);
+    var lines = str.split(/\r?\n/);
 
     if (lines.length < 6)
         return;

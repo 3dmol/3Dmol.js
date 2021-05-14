@@ -197,6 +197,7 @@ var htmlColors = $3Dmol.htmlColors = {
 // in an attempt to reduce memory overhead, cache all $3Dmol.Colors
 // this makes things a little faster
 $3Dmol.CC = {
+    rgbRegEx : /rgb(a?)\(\s*([^ ,\)\t]+)\s*,\s*([^ ,\)\t]+)\s*,\s*([^ ,\)\t]+)/i,
     cache : {0:new $3Dmol.Color(0)},
     color : function color_(hex) {
         // Undefined values default to black
@@ -236,9 +237,22 @@ $3Dmol.CC = {
             if(hex.length == 7 && hex[0] == '#') {
                 return parseInt(hex.substring(1),16);
             } 
-            else {
-                return htmlColors[hex.toLowerCase()] || 0x000000;
+            
+            let m = this.rgbRegEx.exec(hex);
+            if(m) {
+                if(m[1] != "") {
+                    console.log("WARNING: Opacity value in rgba ignored.  Specify separately as opacity attribute.");
+                }
+                let ret = 0;
+                for(let i = 2; i < 5; i++) {
+                    ret *= 256;
+                    let val = m[i].endsWith("%") ? 255*parseFloat(m[i])/100 : parseFloat(m[i]);
+                    ret += Math.round(val);
+                }
+                return ret;
             }
+            return htmlColors[hex.toLowerCase()] || 0x000000;
+            
         }
         return hex;
     }
