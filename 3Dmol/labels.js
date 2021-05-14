@@ -84,10 +84,11 @@ $3Dmol.Label.prototype = {
          * @prop {ColorSpec} backgroundColor - color of background, default black
          * @prop {string} backgroundOpacity - opacity of background, default 1
          * @prop {$3Dmol.Vector3} position - x,y,z coordinates for label
+         * @prop {$3Dmol.Vector2} screenOffset - x,y _pixel_ offset of label from position
          * @prop {boolean} inFront - always put labels in from of model
          * @prop {boolean} showBackground - show background rounded rectangle, default true
          * @prop {boolean} fixed - sets the label to change with the model when zooming
-         * @prop {boolean} useScreen - position is in screen (not model) coordinates
+         * @prop {boolean} useScreen - position is in screen (not model) coordinates which are pixel offsets from upper left corner.
          * @prop {Object} backgroundImage - An element to draw into the label.  Any CanvasImageSource is allowed.
          * @prop {string} alignment - how to orient the label w/respect to position: topLeft (default), topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight
          * @prop {number} frame - if set, only display in this frame of an animation
@@ -213,7 +214,8 @@ $3Dmol.Label.prototype = {
                 map : texture,
                 useScreenCoordinates : useScreen,
                 alignment : spriteAlignment,
-                depthTest : !inFront
+                depthTest : !inFront,
+                screenOffset : style.screenOffset
             });
 
             this.sprite.scale.set(1,1,1);
