@@ -2153,7 +2153,7 @@ $3Dmol.GLViewer = (function() {
          * * @example  
              $3Dmol.download("mmtf:2ll5",viewer,{},function(){
                   viewer.setStyle({stick:{radius:0.15},cartoon:{}});
-                  viewer.addResLabels({hetflag:false}, {font: 'Arial', fontColor:'black',showBackground:false});
+                  viewer.addResLabels({hetflag:false}, {font: 'Arial', fontColor:'black',showBackground:false, screenOffset: {x:0,y:0}});
                   viewer.zoomTo();
                   viewer.render();                  
                 });
