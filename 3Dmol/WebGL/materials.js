@@ -587,6 +587,7 @@ $3Dmol.SpriteMaterial = function(parameters) {
     this.useScreenCoordinates = true;
     this.depthTest = !this.useScreenCoordinates;
     this.sizeAttenuation = !this.useScreenCoordinates;
+    this.screenOffset = this.screenOffset;
     this.scaleByViewPort = !this.sizeAttenuation;
     this.alignment = $3Dmol.SpriteAlignment.center.clone();
     
@@ -604,8 +605,7 @@ $3Dmol.SpriteMaterial = function(parameters) {
     if (parameters.sizeAttenuation === undefined)
         this.sizeAttenuation = !this.useScreenCoordinates;
     if (parameters.scaleByViewPort === undefined)
-        this.scaleByViewPort = !this.sizeAttenuation;
-    
+        this.scaleByViewPort = !this.sizeAttenuation;    
 };
 
 $3Dmol.SpriteMaterial.prototype = Object.create($3Dmol.Material.prototype);
@@ -620,6 +620,7 @@ $3Dmol.SpriteMaterial.prototype.clone = function() {
     material.map = this.map;
     
     material.useScreenCoordinates = this.useScreenCoordinates;
+    material.screenOffset = this.screenOffset;
     material.sizeAttenuation = this.sizeAttenuation;
     material.scaleByViewport = this.scaleByViewPort;
     material.alignment.copy(this.alignment);

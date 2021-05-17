@@ -162,14 +162,10 @@ $3Dmol.SpritePlugin = function () {
             if ( ! sprite.visible || material.opacity === 0 ) continue;
 
             if ( ! material.useScreenCoordinates ) {
-
                 sprite._modelViewMatrix.multiplyMatrices( camera.matrixWorldInverse, sprite.matrixWorld );
                 sprite.z = - sprite._modelViewMatrix.elements[ 14 ];
-
             } else {
-
-                sprite.z = - sprite.position.z;
-
+                sprite.z = -sprite.position.z;
             }
 
         }
@@ -177,7 +173,6 @@ $3Dmol.SpritePlugin = function () {
         sprites.sort( painterSortStable );
 
         // render all sprites
-
         for( i = 0; i < nSprites; i ++ ) {
 
             sprite = sprites[ i ];
@@ -231,10 +226,16 @@ $3Dmol.SpritePlugin = function () {
 
                 scale[ 0 ] *= size * sprite.scale.x;
                 scale[ 1 ] *= size * sprite.scale.y;
+                
+                let alignx = material.alignment.x, aligny = material.alignment.y; 
+                if(material.screenOffset) { //adjust alignment offset by screenOffset adjusted to sprite coords
+                    alignx += 2.0*material.screenOffset.x/w;
+                    aligny += 2.0*material.screenOffset.y/h;
+                }
 
                 _gl.uniform2f( uniforms.uvScale, material.uvScale.x, material.uvScale.y );
                 _gl.uniform2f( uniforms.uvOffset, material.uvOffset.x, material.uvOffset.y );
-                _gl.uniform2f( uniforms.alignment, material.alignment.x, material.alignment.y );
+                _gl.uniform2f( uniforms.alignment, alignx, aligny );
 
                 _gl.uniform1f( uniforms.opacity, material.opacity );
                 _gl.uniform3f( uniforms.color, material.color.r, material.color.g, material.color.b );
@@ -254,7 +255,6 @@ $3Dmol.SpritePlugin = function () {
         }
 
         // restore gl
-
         _gl.enable( _gl.CULL_FACE );
 
     };
