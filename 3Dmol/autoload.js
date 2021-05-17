@@ -69,6 +69,7 @@ $3Dmol.autoload=function(viewer,callback){
             var surfaces = [];
             var labels = [];
             var zoomto = {};
+            var spin = null;
             var d = viewerdiv.data();
             
             //let users specify individual but matching select/style tags, eg.
@@ -110,6 +111,9 @@ $3Dmol.autoload=function(viewer,callback){
                 if(dataname == "zoomto") {
                     zoomto = $3Dmol.specStringToObject(d[dataname]);
                 }
+                if(dataname == "spin") {
+                    spin = $3Dmol.specStringToObject(d[dataname]);
+                }
             }
             
             //apply all the selections/styles parsed out above to the passed viewer
@@ -133,6 +137,9 @@ $3Dmol.autoload=function(viewer,callback){
                 }               
                 
                 glviewer.zoomTo(zoomto);
+                if(spin) {
+                    glviewer.spin(spin.axis,spin.speed);
+                }
                 glviewer.render();             
             };
             
