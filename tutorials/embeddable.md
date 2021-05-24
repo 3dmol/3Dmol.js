@@ -22,6 +22,7 @@ The contents of the viewer can be set and manipulated through the use of `data-`
  - **data-surface** A surface style specification.
  - **data-labelres** A residue label style specification.
  - **data-zoomto** An {@link AtomSpec} selection specification to zoom to.
+ - **data-spin** If set will spin the model using {@link $3Dmol.GLViewer#spin}. Can specify axis and speed (e.g. data-spin='axis:z;speed:10')
  
  Multiple selections, styles, residue labels, and surfaces can be provided by appending a suffix
  each tag.  For example.
