@@ -4434,12 +4434,13 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setAutoEyeSeparation
          * @return {number} camera x position
          */
-        this.setAutoEyeSeparation = function(isright) {
+        this.setAutoEyeSeparation = function(isright, x) {          
             var dist = this.getPerceivedDistance();
-            if (isright || camera.position.x > 0) //setting a value of dist*tan(5)
-                camera.position.x = dist*Math.tan(Math.PI / 180.0 * 5.0);
+            if(!x) x = 5.0;
+            if (isright || camera.position.x > 0) //setting a value of dist*tan(x)
+                camera.position.x = dist*Math.tan(Math.PI / 180.0 * x);
             else
-                camera.position.x = -dist*Math.tan(Math.PI / 180.0 * 5.0);
+                camera.position.x = -dist*Math.tan(Math.PI / 180.0 * x);
             camera.lookAt(new $3Dmol.Vector3(0,0,rotationGroup.position.z));
             return camera.position.x;
         };
