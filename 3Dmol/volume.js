@@ -629,55 +629,105 @@ $3Dmol.GLVolumetricRender = (function() {
         var yoff = data.unit.y*data.size.y;
         var zoff = data.unit.z*data.size.z;
 
-        var reset_origin = new $3Dmol.Vector3();
+        // var reset_origin = new $3Dmol.Vector3();
         if(data.matrix){
           data.basis = [
             new $3Dmol.Vector3(data.matrix.elements[0], data.matrix.elements[4], data.matrix.elements[8]).multiplyScalar(data.size.x),
             new $3Dmol.Vector3(data.matrix.elements[1], data.matrix.elements[5], data.matrix.elements[9]).multiplyScalar(data.size.y),
             new $3Dmol.Vector3(data.matrix.elements[2], data.matrix.elements[6], data.matrix.elements[10]).multiplyScalar(data.size.z)
           ];
+          //
+          // // console.log("data.basis:",data.basis)
+          // var corners = [
+          //   new $3Dmol.Vector3(0,0,0),
+          //   data.basis[0],
+          //   data.basis[1],
+          //   data.basis[2],
+          //   new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[1]),
+          //   new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[2]),
+          //   new $3Dmol.Vector3().addVectors(data.basis[1], data.basis[2]),
+          //   new $3Dmol.Vector3().addVectors(new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[1]), data.basis[2]),
+          // ];
+          //
+          // var xmin = corners[0].x;
+          // var ymin = corners[0].y;
+          // var zmin = corners[0].z;
+          //
+          // var xmax = corners[0].x;
+          // var ymax = corners[0].y;
+          // var zmax = corners[0].z;
+          //
+          // for(var i=1; i<8; i++){
+          //   xmin = (xmin > corners[i].x ) ? corners[i].x : xmin;
+          //   ymin = (ymin > corners[i].y ) ? corners[i].y : ymin;
+          //   zmin = (zmin > corners[i].z ) ? corners[i].z : zmin;
+          //
+          //   xmax = (xmax < corners[i].x ) ? corners[i].x : xmax;
+          //   ymax = (ymax < corners[i].y ) ? corners[i].y : ymax;
+          //   zmax = (zmax < corners[i].z ) ? corners[i].z : zmax;
+          // }
+          //
+          // xoff = 2*(xmax - xmin) ;
+          // yoff = 2*(ymax - ymin) ;
+          // zoff = 2*(zmax - zmin) ;
+          // // xoff = 60;
+          // // yoff = 44;
+          // // zoff = 44;
+          //
+          // console.log(data.size, data.basis, xoff, yoff, zoff, xmin, ymin, zmin, corners);
+          //
+          // reset_origin = new $3Dmol.Vector3(-1*xmin, -1*ymin, -1*zmin);
+          // // data.origin.addVectors(data.origin, new $3Dmol.Vector3(xmin, ymin, zmin));
 
-          // console.log("data.basis:",data.basis)
-          var corners = [
-            new $3Dmol.Vector3(0,0,0),
-            data.basis[0],
-            data.basis[1],
-            data.basis[2],
-            new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[1]),
-            new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[2]),
-            new $3Dmol.Vector3().addVectors(data.basis[1], data.basis[2]),
-            new $3Dmol.Vector3().addVectors(new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[1]), data.basis[2]),
+          // Making corner points
+
+          var points = [
+              new $3Dmol.Vector3(0, 0, 0),
+              new $3Dmol.Vector3(1, 0, 0),
+              new $3Dmol.Vector3(0, 1, 0),
+              new $3Dmol.Vector3(0, 0, 1),
+              new $3Dmol.Vector3(1, 1, 0),
+              new $3Dmol.Vector3(0, 1, 1),
+              new $3Dmol.Vector3(1, 0, 1),
+              new $3Dmol.Vector3(1, 1, 1)
           ];
 
-          var xmin = corners[0].x;
-          var ymin = corners[0].y;
-          var zmin = corners[0].z;
+          for (let i = 0; i < points.length; i++) {
+              if(data.size) points[i].multiplyVectors(points[i],data.size);
+              console.log(`Point ${i} before transformation`, points[i]); //matrix is for unit vectors, not whole box
+              console.log(`Matrix for multiplication`, data.matrix);
+              points[i] = points[i].applyMatrix4(data.matrix.transpose());
+              console.log(`Point ${i} after transformation`, points[i]);
+          }
 
-          var xmax = corners[0].x;
-          var ymax = corners[0].y;
-          var zmax = corners[0].z;
 
-          for(var i=1; i<8; i++){
-            xmin = (xmin > corners[i].x ) ? corners[i].x : xmin;
-            ymin = (ymin > corners[i].y ) ? corners[i].y : ymin;
-            zmin = (zmin > corners[i].z ) ? corners[i].z : zmin;
+          data.points = points;
+          // Finding the extrement points in the space
+          console.log('Points -->', data.points);
+          console.log('Basis -->', data.basis);
 
-            xmax = (xmax < corners[i].x ) ? corners[i].x : xmax;
-            ymax = (ymax < corners[i].y ) ? corners[i].y : ymax;
-            zmax = (zmax < corners[i].z ) ? corners[i].z : zmax;
+          var xmin = points[0].x;
+          var ymin = points[0].y;
+          var zmin = points[0].z;
+
+          var xmax = points[0].x;
+          var ymax = points[0].y;
+          var zmax = points[0].z;
+
+          for (let i = 1; i < points.length; i++) {
+              xmin = (xmin > points[i].x ) ? points[i].x : xmin;
+              ymin = (ymin > points[i].y ) ? points[i].y : ymin;
+              zmin = (zmin > points[i].z ) ? points[i].z : zmin;
+
+              xmax = (xmax < points[i].x ) ? points[i].x : xmax;
+              ymax = (ymax < points[i].y ) ? points[i].y : ymax;
+              zmax = (zmax < points[i].z ) ? points[i].z : zmax;
           }
 
           xoff = (xmax - xmin) ;
           yoff = (ymax - ymin) ;
           zoff = (zmax - zmin) ;
-          // xoff = 60;
-          // yoff = 44;
-          // zoff = 44;
 
-          console.log(data.size, data.basis, xoff, yoff, zoff, xmin, ymin, zmin, corners);
-
-          reset_origin = new $3Dmol.Vector3(-1*xmin, -1*ymin, -1*zmin);
-          // data.origin.addVectors(data.origin, new $3Dmol.Vector3(xmin, ymin, zmin));
         }
         //scale doesn't apply to the translation vector, so preapply it
         texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
@@ -699,12 +749,16 @@ $3Dmol.GLVolumetricRender = (function() {
 
         var textmap =new $3Dmol.Matrix4().identity();
         if(data.matrix) {
+          // let ascale = data.basis[0].length()*data.size.x;
+          // let bscale = data.basis[1].length()*data.size.y;
+          // let cscale = data.basis[2].length()*data.size.z;
           textmap = new $3Dmol.Matrix4(
-            data.basis[0].x/2, data.basis[0].y/2, data.basis[0].z/2, 0,
-            data.basis[1].x/2, data.basis[1].y/2, data.basis[1].z/2, 0,
-            data.basis[2].x/2, data.basis[2].y/2, data.basis[2].z/2, 0,
+            data.points[1].x, data.points[2].x, data.points[3].x, 0,
+            data.points[1].y, data.points[2].y, data.points[3].y, 0,
+            data.points[1].z, data.points[2].z, data.points[3].z, 0,
             0, 0, 0, 1); // textture map matrix : tmm
-          // textmap.makeTranslation(reset_origin.x, reset_origin.y, reset_origin.z);
+
+          console.log('Points :: ', data.points, data.basis, textmap);
           textmap.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
           textmap = new $3Dmol.Matrix4().getInverse(textmap);
         } else {

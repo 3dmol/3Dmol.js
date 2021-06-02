@@ -968,14 +968,14 @@ $3Dmol.ShaderLib = {
             "          continue;",
             "      }",
             "      else {",
-            // "         float val = texture(data, pt.zyx).r;",
-            // "         if(isinf(val)) continue;", //masked out
-            // "         float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
-            // "         vec4 val_color = texture(colormap, vec2(cval,0.5));",
-            // "         color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",
-            // "         color.a += (1.0 - color.a) * val_color.a; ",
-            // "         if(color.a > 0.0) color.rgb /= color.a;",
-            "         color = vec4(pt.x, pt.y, pt.z, 1.0);",
+            "         float val = texture(data, pt.zyx).r;",
+            "         if(isinf(val)) continue;", //masked out
+            "         float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
+            "         vec4 val_color = texture(colormap, vec2(cval,0.5));",
+            "         color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",
+            "         color.a += (1.0 - color.a) * val_color.a; ",
+            "         if(color.a > 0.0) color.rgb /= color.a;",
+            // "         color = vec4(pt.x, pt.y, pt.z, 1.0);",
             "      }",
             // "      color = vec4(pt.x, pt.y, pt.z, 0.0)",
             "    }",
