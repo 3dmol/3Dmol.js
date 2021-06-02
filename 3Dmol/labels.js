@@ -215,7 +215,7 @@ $3Dmol.Label.prototype = {
                 useScreenCoordinates : useScreen,
                 alignment : spriteAlignment,
                 depthTest : !inFront,
-                screenOffset : style.screenOffset
+                screenOffset : style.screenOffset || { x: 0, y: 0 },
             });
 
             this.sprite.scale.set(1,1,1);
