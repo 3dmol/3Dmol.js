@@ -5,10 +5,18 @@
     <title>3dmol UI</title>
   </head>
   <body>
-    <script src="../build/" async></script>
+    <script src="../build/3Dmol.js" async></script>
     <div style="height: 400px; width: 400px; position: relative;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='stick'></div>
 
     <script type="text/javascript">
+      $3Dmol = (function(window) {
+
+          var my = window.$3Dmol || {};
+
+          return my;
+
+      })(window);
+
       $3Dmol.UI = (function(){
         function UI(element, config){
           var container = $(element);
@@ -20,7 +28,7 @@
 
           function toolbar(){
             var toolbar = $('<div></div>');
-            var toolbar.text()
+            toolbar.text()
           }
 
           function styleList(){
@@ -117,20 +125,19 @@
 
       $3Dmol.UI.States = (function(){
         function State(startState){
-          this.position.x =
-          this.position.y =
-          this.height =
-          this.width =
-          this.viewerState =
-          this.viewToolbar =
-          this.viewSidebar =
-          this.viewDialogBox =
-          this.viewAnimationControl =
-          this.viewSelectionBox =
-          this.viewStyleBox =
-          this.controlTyle =
-          this.toolTip =
-          this.
+          this.position.x ;
+          this.position.y ; //=
+          this.height; // =
+          this.width ; //=
+          this.viewerState ; //=
+          this.viewToolbar ; //=
+          this.viewSidebar ; //=
+          this.viewDialogBox ; //=
+          this.viewAnimationControl ; //=
+          this.viewSelectionBox ; //=
+          this.viewStyleBox ; //=
+          this.controlTyle ; //=
+          this.toolTip ; //=
 
         }
       })()
