@@ -606,7 +606,16 @@ $3Dmol.SpriteMaterial = function(parameters) {
     if (parameters.sizeAttenuation === undefined)
         this.sizeAttenuation = !this.useScreenCoordinates;
     if (parameters.scaleByViewPort === undefined)
+<<<<<<< HEAD
         this.scaleByViewPort = !this.sizeAttenuation;
+=======
+<<<<<<< HEAD
+        this.scaleByViewPort = !this.sizeAttenuation;    
+=======
+        this.scaleByViewPort = !this.sizeAttenuation;
+
+>>>>>>> Rebased and added non-orthogonal volumetric rendering code
+>>>>>>> eb8099b5f014b7f512339810fa414179dd811fff
 };
 
 $3Dmol.SpriteMaterial.prototype = Object.create($3Dmol.Material.prototype);

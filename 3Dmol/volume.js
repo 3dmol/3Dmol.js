@@ -629,7 +629,7 @@ $3Dmol.GLVolumetricRender = (function() {
         var yoff = data.unit.y*data.size.y;
         var zoff = data.unit.z*data.size.z;
 
-        var reset_origin = new $3Dmol.Vector3();
+        // var reset_origin = new $3Dmol.Vector3();
         if(data.matrix){
           data.basis = [
             new $3Dmol.Vector3(data.matrix.elements[0], data.matrix.elements[4], data.matrix.elements[8]).multiplyScalar(data.size.x),
@@ -670,14 +670,7 @@ $3Dmol.GLVolumetricRender = (function() {
           xoff = (xmax - xmin) ;
           yoff = (ymax - ymin) ;
           zoff = (zmax - zmin) ;
-          // xoff = 60;
-          // yoff = 44;
-          // zoff = 44;
 
-          console.log(data.size, data.basis, xoff, yoff, zoff, xmin, ymin, zmin, corners);
-
-          reset_origin = new $3Dmol.Vector3(-1*xmin, -1*ymin, -1*zmin);
-          // data.origin.addVectors(data.origin, new $3Dmol.Vector3(xmin, ymin, zmin));
         }
         //scale doesn't apply to the translation vector, so preapply it
         texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
