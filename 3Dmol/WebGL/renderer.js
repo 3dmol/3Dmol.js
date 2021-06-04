@@ -201,21 +201,11 @@ $3Dmol.Renderer = function(parameters) {
     this.setSize = function(width, height) {
         //zooming (in the browser) changes the pixel ratio and width/height
         this.devicePixelRatio = (window.devicePixelRatio !== undefined) ? window.devicePixelRatio : 1;
-<<<<<<< HEAD
-        //with antialiasing on, render at double rsolution to eliminate jaggies
-        //my iphone crashes if we do this and set the antialias property on the canvas
-        if(_antialias) this.devicePixelRatio *= 2.0;
-<<<<<<< HEAD
-
-=======
-
-=======
         //with antialiasing on (which doesn't seem to do much), render at double rsolution to eliminate jaggies
-	//my iphone crashes if we do though, so as a hacky workaround, don't do it with retina displays
+	      //my iphone crashes if we do though, so as a hacky workaround, don't do it with retina displays
         if(_antialias && this.devicePixelRatio < 2.0) this.devicePixelRatio *= 2.0;
 
->>>>>>> Rebased and added non-orthogonal volumetric rendering code
->>>>>>> eb8099b5f014b7f512339810fa414179dd811fff
+
         if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
             var wid = width/this.cols;
             var hei = height/this.rows;

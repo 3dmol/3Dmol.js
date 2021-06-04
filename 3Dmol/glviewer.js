@@ -278,16 +278,11 @@ $3Dmol.GLViewer = (function() {
                         hoverables.push(hoverable_atoms[n]);
                     }
 
-<<<<<<< HEAD
                     // Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
                     for (let m = 0; m < atoms.length; m++) {
                         clickables.push(atoms[m]);
                     }
-                    
-=======
-                    Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
 
->>>>>>> Fixing non-ortho-box matrix problem still persists
                 }
             }
             for (let i = 0, il = shapes.length; i < il; i++) {
@@ -4226,7 +4221,6 @@ $3Dmol.GLViewer = (function() {
         *  @function $3Dmol.GLViewer#setSurfaceMaterialStyle
          * @param {number} surf - Surface ID to apply changes to
          * @param {SurfaceStyleSpec} style - new material style specification
-<<<<<<< HEAD
          @example
          $.get("data/9002806.cif",function(data){
             viewer.addModel(data);
@@ -4237,10 +4231,7 @@ $3Dmol.GLViewer = (function() {
                 viewer.render();
                 });
            });
-         */ 
-=======
          */
->>>>>>> Fixing non-ortho-box matrix problem still persists
         this.setSurfaceMaterialStyle = function(surf, style) {
             $3Dmol.adjustVolumeStyle(style);
             if (surfaces[surf]) {
@@ -4444,7 +4435,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setAutoEyeSeparation
          * @return {number} camera x position
          */
-        this.setAutoEyeSeparation = function(isright, x) {          
+        this.setAutoEyeSeparation = function(isright, x) {
             var dist = this.getPerceivedDistance();
             if(!x) x = 5.0;
             if (isright || camera.position.x > 0) //setting a value of dist*tan(x)

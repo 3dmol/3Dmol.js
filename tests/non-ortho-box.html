@@ -16,30 +16,11 @@
         }
     </style>
     <script type="text/javascript">
-<<<<<<< HEAD
-=======
 
-
-
->>>>>>> eb8099b5f014b7f512339810fa414179dd811fff
       $(function(){
         var element = $('#boxi');
         var config = { backgroundColor: 'lightgrey'}
         var viewer = $3Dmol.createViewer(element, config);
-<<<<<<< HEAD
-
-
-        $.get('test_structs/info_box.cube', function(data){
-        //$.get('test_structs/benzene-homo.cube', function(data){
-          var voldata = new $3Dmol.VolumeData(data, "cube");
-          if(viewer.hasVolumetricRender()) {
-            viewer.addVolumetricRender(voldata, {transferfn: [
-                                                              {color: "blue", opacity: .075, value: 0.1},
-                                                              {color: "blue", opacity: .001, value: 0.01},
-                                                              {color: "white", opacity: 0, value: 0},
-                                                              {color: "red", opacity: .001, value: -0.01},
-                                                              {color: "red", opacity: .075, value: -0.1}
-=======
         // $.get('test_structs/h-bn.xyz', function(data){
         //   viewer.addModel(data, "xyz");
         //   viewer.setStyle({}, {stick:{}});
@@ -68,7 +49,6 @@
                                                               {color: "blue", opacity: 0.01, value: 0.01},
                                                               {color: "blue", opacity: .5, value: 0.1},
 
->>>>>>> eb8099b5f014b7f512339810fa414179dd811fff
                                                             ]
                                                 }
                                        );
@@ -78,14 +58,10 @@
           }
 
           viewer.setStyle({}, {stick:{}});
-<<<<<<< HEAD
-          viewer.zoomTo();
-          viewer.render();
-=======
           viewer.addUnitCell();
           viewer.zoomTo();
           viewer.render(callback);
->>>>>>> eb8099b5f014b7f512339810fa414179dd811fff
+
         }, 'text');
       });
 
