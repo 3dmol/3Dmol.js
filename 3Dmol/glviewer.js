@@ -39,6 +39,7 @@ $3Dmol.GLViewer = (function() {
         }
         var _viewer = this;
         var container = $(element); //we expect container to be jquery
+        var ui =new $3Dmol.UI(element, config); // <-- This line adds the ui probe to the viewer
         var glDOM = null;
 
         var models = []; // atomistic molecular models
