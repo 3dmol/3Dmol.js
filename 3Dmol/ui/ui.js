@@ -26,8 +26,7 @@ $3Dmol.UI = (function(){
     generateUI();
 
     function generateUI(){
-      var ui_overlay = new UI_Overlay();
-
+      var body = $('body');
       var padding = 10;
       var top = getTop(container) + padding;
       var left = getLeft(container) + padding;
@@ -35,18 +34,21 @@ $3Dmol.UI = (function(){
       var bottom = getTop(container) + getHeight(container) - 10;
       console.log('Get position', left, top, right, bottom);
 
-      $('body').append(ui_overlay);
+      var ui_overlay = new UI_Overlay();
+      body.append(ui_overlay);
 
 
       var topbar =new Toolbar();
-      ui_overlay.append(topbar);
+      setLocation(ui_overlay, topbar, 'left', 'top');
+      body.append(topbar);
 
-      var selectionBox = new SelectionBox();
-      setLocation(ui_overlay, selectionBox, 'right', 'top', -15, 15);
-      // selectionBox.css('position', 'absolute');
-      // selectionBox.css('right', 0);
-      // selectionBox.css('top', top);
-      ui_overlay.append(selectionBox);
+      var selectionBox = new SelectionBox(icons.select);
+      setLocation(ui_overlay, selectionBox, 'right', 'top', 10, 50);
+      body.append(selectionBox);
+
+      var styleBox = new SelectionBox(icons.paintbrush);
+      setLocation(ui_overlay, styleBox, 'left', 'top', 0, 50);
+      body.append(styleBox);
     }
 
     function UI_Overlay(config){
@@ -62,6 +64,8 @@ $3Dmol.UI = (function(){
       ui_overlay.width(width);
       setPosition(ui_overlay, left, top);
       ui_overlay.css('border', '1px solid black');
+      ui_overlay.css('background', 'rbga(0,0,0,0)');
+      ui_overlay.css('pointer-events', 'none');
 
       return ui_overlay;
     }
@@ -122,23 +126,40 @@ $3Dmol.UI = (function(){
      *
      * @return {Object}  Jquery element of div
      */
-    function SelectionBox() {
+    function SelectionBox(icon, side='left') {
       var selectionBox = $('<div></div>')
       var selections = $('<div></div>');
+      var showArea = $('<div></div>');
       var addArea = $('<div></div>');
       var plusButton = new button(icons.plus, 20);
+      var hideButton = new button(icon, 20);
+
       // Content
-      selectionBox.append(selections);
+      selectionBox.append(hideButton);
+      selectionBox.append(showArea);
+
+      showArea.append(selections);
       addArea.append(plusButton);
-      selectionBox.append(addArea);
+      showArea.append(addArea);
 
       // CSS
-      selectionBox.css('box-sizing', 'border-box');
-      selectionBox.css('padding', '3px');
-      selectionBox.css('width', '120px');
-      selectionBox.css('height', '300px');
-      selectionBox.css('border-radius', '6px');
-      selectionBox.css('background', 'rgb(214, 214, 214)');
+      if(side == 'left'){
+        selectionBox.css('text-align', 'left');
+      }
+      else if(side == 'right') {
+        selectionBox.css('text-align', 'right');
+      }
+      else {
+        // Add alert box code
+        selectionBox.css('text-align', 'right');
+      }
+
+      showArea.css('box-sizing', 'border-box');
+      showArea.css('padding', '3px');
+      showArea.css('width', '120px');
+      showArea.css('height', '300px');
+      showArea.css('border-radius', '6px');
+      showArea.css('background', 'rgb(214, 214, 214)');
       selections.css('margin-bottom', '10px');
       addArea.css('text-align', 'center');
 
@@ -281,8 +302,8 @@ $3Dmol.UI = (function(){
        var p_height = parent.height();
 
        // c_ stand for child
-       var c_width = child.outerWidth();
-       var c_height = child.outerHeight();
+       var c_width = getHeight(child);
+       var c_height = getWidth(child);
 
        var p_top = p_position.top + parseInt(parent.css('margin'));
        var p_left = p_position.left + parseInt(parent.css('margin')) ;
@@ -295,7 +316,7 @@ $3Dmol.UI = (function(){
          top: (y_type == 'top' )? p_top + padding + y_offset : (y_type == 'bottom')? p_height - c_height - padding + y_offset : y_offset
        };
 
-       console.log('setting parent child location', c_position, padding);
+       console.log('setting parent child location', c_position, padding, c_width, c_height);
        setPosition(child, c_position.left, c_position.top);
      }
 
