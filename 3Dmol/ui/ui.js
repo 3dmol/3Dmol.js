@@ -163,6 +163,22 @@ $3Dmol.UI = (function(){
       selections.css('margin-bottom', '10px');
       addArea.css('text-align', 'center');
 
+      // Action
+      var hidden = true;
+      showArea.hide();
+
+      hideButton.click(toggleHide);
+
+      function toggleHide(){
+        if(hidden){
+          showArea.show(100);
+        }
+        else {
+          showArea.hide(100);
+        }
+        hidden = !hidden;
+      }
+
       // Selection Box modification function
 
       /**
