@@ -51,8 +51,9 @@ $3Dmol.UI = (function(){
       body.append(styleBox.ui);
 
       var movieControl = new MovieBar();
-      setLocation(ui_overlay.ui, movieControl.ui, 'left', 'bottom');
       body.append(movieControl.ui);
+      setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
+
     }
 
     function UI_Overlay(config){
@@ -215,10 +216,10 @@ $3Dmol.UI = (function(){
 
     function MovieBar(){
       var boundingBox = this.ui = $('<div></div>');
-      var slide = $('<div></div>');
+      var slide = new slider({width: 120 });
       var controlButtons = $('<div></div>');
 
-      boundingBox.append(slide);
+      boundingBox.append(slide.ui);
       boundingBox.append(controlButtons);
 
       var play = new button(icons.movie.play, 20);
@@ -230,8 +231,12 @@ $3Dmol.UI = (function(){
       controlButtons.append(play.ui);
       controlButtons.append(stop.ui);
       controlButtons.append(next.ui);
+
       // Style
       boundingBox.css('position','absolute');
+      boundingBox.css('padding','3px');
+      boundingBox.css('text-align', 'center');
+      // boundingBox.css('width','');
 
 
 
@@ -349,6 +354,46 @@ $3Dmol.UI = (function(){
       });
     }
 
+
+    function slider(config){
+      config = config || {}
+      var boundingBox = this.ui = $('<div></div>');
+      var sliderBox = $('<div></div>');
+      var slide = $('<div></div>');
+      var marker = $('<div></div>');
+
+      var height = config.height = config.height || 12;
+      var width = config.width = config.width || 100;
+      sliderBox.css('box-sizing', 'border-box');
+
+      marker.css('height', height + 'px');
+      marker.css('width', height + 'px');
+      marker.css('background', 'rgb(68, 90, 235)');
+      marker.css('border-radius', height/2 + 'px');
+
+      slide.css('height', '3px');
+      slide.css('width', width + 'px');
+      slide.css('background', 'grey');
+      slide.css('border-radius', '1.5px');
+
+      sliderBox.append(slide);
+      sliderBox.append(marker);
+
+      sliderBox.css('height', height + 'px');
+      sliderBox.css('position', 'relative');
+
+      slide.css('position', 'absolute');
+      slide.css('top', height/2 - 1.5 + 'px');
+      marker.css('position', 'absolute');
+
+      boundingBox.append(sliderBox);
+      boundingBox.css('width', width);
+      // boundingBox.css('position','absolute');
+
+      //vertically centering the slide
+
+      this.demo = sliderBox;
+    }
 
     /**
      * position : Sets the css position property : absolute
@@ -489,8 +534,13 @@ $3Dmol.UI = (function(){
        button.css('background', 'rgb(177, 194, 203)');
 
        // content
-       var formatted_content = $(svg).height(height-6);
-       button.append(formatted_content);
+       this.setSVG = function(svg){
+         button.empty();
+         var formatted_content = $(svg).height(height-6);
+         button.append(formatted_content);
+       }
+
+       this.setSVG(svg);
 
        // Hover
        button.hover(
