@@ -35,20 +35,24 @@ $3Dmol.UI = (function(){
       console.log('Get position', left, top, right, bottom);
 
       var ui_overlay = new UI_Overlay();
-      body.append(ui_overlay);
+      body.append(ui_overlay.ui);
 
 
       var topbar =new Toolbar();
-      setLocation(ui_overlay, topbar, 'left', 'top');
-      body.append(topbar);
+      body.append(topbar.ui);
+      setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
 
       var selectionBox = new SelectionBox(icons.select);
-      setLocation(ui_overlay, selectionBox, 'right', 'top', 10, 50);
-      body.append(selectionBox);
+      setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 0, topbar.ui.outerHeight());
+      body.append(selectionBox.ui);
 
       var styleBox = new SelectionBox(icons.paintbrush);
-      setLocation(ui_overlay, styleBox, 'left', 'top', 0, 50);
-      body.append(styleBox);
+      setLocation(ui_overlay.ui, styleBox.ui, 'left', 'top', 0, topbar.ui.outerHeight() + selectionBox.ui.outerHeight());
+      body.append(styleBox.ui);
+
+      var movieControl = new MovieBar();
+      setLocation(ui_overlay.ui, movieControl.ui, 'left', 'bottom');
+      body.append(movieControl.ui);
     }
 
     function UI_Overlay(config){
@@ -59,15 +63,17 @@ $3Dmol.UI = (function(){
       var width = config.width || '400px';
       var height = config.height || '400px';
 
-      var ui_overlay = $('<div></div>');
+      var ui_overlay = this.ui = $('<div></div>');
       ui_overlay.height(height);
       ui_overlay.width(width);
       setPosition(ui_overlay, left, top);
+      ui_overlay.css('box-sizing','border-box');
       ui_overlay.css('border', '1px solid black');
       ui_overlay.css('background', 'rbga(0,0,0,0)');
+      ui_overlay.css('padding', '0px');
       ui_overlay.css('pointer-events', 'none');
+      ui_overlay.css('position', 'absolute');
 
-      return ui_overlay;
     }
 
 
@@ -81,43 +87,44 @@ $3Dmol.UI = (function(){
 
       var top = config.top || 10;
       var left = config.left || 10;
-      var width = config.width || '300px';
+      // var width = config.width || '300px';
       var padding = config.padding || '3px';
       // var height = config.height || '20';
 
-      var toolbar = $('<div></div>');
+      var toolbar = this.ui = $('<div></div>');
 
       // Toolbar content
 
       var optionButton = new button(icons.option, 20)
       var moveButton = new button(icons.move, 20);
       var rotateButton = new button(icons.rotate, 20);
-      toolbar.append(optionButton);
-      toolbar.append(moveButton);
-      toolbar.append(rotateButton);
+      toolbar.append(optionButton.ui);
+      toolbar.append(moveButton.ui);
+      toolbar.append(rotateButton.ui);
 
       // Toolbar design
       toolbar.css('border', 'none');
       toolbar.css('padding', padding);
       toolbar.css('background', 'none');
       toolbar.css('color', 'white');
-      toolbar.css('width', width);
+      // toolbar.css('width', width);
       toolbar.css('box-sizing', 'border-box');
+      toolbar.css('position', 'absolute');
+
+      rotateButton.ui.css('margin-right', '0px');
 
       // Button Action
-      optionButton.click(()=>{
+      optionButton.ui.click(()=>{
         console.log('option button clicked');
       });
 
-      moveButton.click(()=>{
+      moveButton.ui.click(()=>{
         console.log('move button clicked');
       });
 
-      rotateButton.click(()=>{
+      rotateButton.ui.click(()=>{
         console.log('click button clicked');
       });
-
-      return toolbar;
     }
 
     /**
@@ -127,7 +134,7 @@ $3Dmol.UI = (function(){
      * @return {Object}  Jquery element of div
      */
     function SelectionBox(icon, side='left') {
-      var selectionBox = $('<div></div>')
+      var selectionBox = this.ui = $('<div></div>')
       var selections = $('<div></div>');
       var showArea = $('<div></div>');
       var addArea = $('<div></div>');
@@ -135,11 +142,12 @@ $3Dmol.UI = (function(){
       var hideButton = new button(icon, 20);
 
       // Content
-      selectionBox.append(hideButton);
+      selectionBox.append(hideButton.ui);
       selectionBox.append(showArea);
+      selectionBox.css('position', 'absolute');
 
       showArea.append(selections);
-      addArea.append(plusButton);
+      addArea.append(plusButton.ui);
       showArea.append(addArea);
 
       // CSS
@@ -154,6 +162,8 @@ $3Dmol.UI = (function(){
         selectionBox.css('text-align', 'right');
       }
 
+      selectionBox.css('padding', '3px');
+
       showArea.css('box-sizing', 'border-box');
       showArea.css('padding', '3px');
       showArea.css('width', '120px');
@@ -167,7 +177,7 @@ $3Dmol.UI = (function(){
       var hidden = true;
       showArea.hide();
 
-      hideButton.click(toggleHide);
+      hideButton.ui.click(toggleHide);
 
       function toggleHide(){
         if(hidden){
@@ -201,7 +211,56 @@ $3Dmol.UI = (function(){
         // Add code for different types of input property
       }
 
-      return selectionBox;
+    }
+
+    function MovieBar(){
+      var boundingBox = this.ui = $('<div></div>');
+      var slide = $('<div></div>');
+      var controlButtons = $('<div></div>');
+
+      boundingBox.append(slide);
+      boundingBox.append(controlButtons);
+
+      var play = new button(icons.movie.play, 20);
+      var stop = new button(icons.movie.stop, 20);
+      var previous = new button(icons.movie.previous, 20);
+      var next = new button(icons.movie.next, 20);
+
+      controlButtons.append(previous.ui);
+      controlButtons.append(play.ui);
+      controlButtons.append(stop.ui);
+      controlButtons.append(next.ui);
+      // Style
+      boundingBox.css('position','absolute');
+
+
+
+      // state variable
+      var playing = false;
+
+      play.ui.click(()=>{
+        console.log('trying to change the background', play);
+        if(playing){
+          play.setSVG(icons.movie.play);
+        }
+        else {
+          play.setSVG(icons.movie.pause);
+        }
+        playing = !playing;
+      });
+
+      stop.ui.click(()=>{
+
+      });
+
+      previous.ui.click(()=>{
+
+      });
+
+      next.ui.click(()=>{
+
+      });
+
     }
 
 
@@ -246,7 +305,7 @@ $3Dmol.UI = (function(){
 
     function button(svg, height){
       // Button instance
-      var button = $('<div></div>');
+      var button = this.ui = $('<div></div>');
 
       // CSS
       button.css('box-sizing', 'border-box');
@@ -257,11 +316,18 @@ $3Dmol.UI = (function(){
       button.css('border-radius', (height/2) + 'px');
       button.css('padding', '3px');
       button.css('color', 'black');
+      button.css('vertical-align', 'middle');
+      button.css('text-align', 'center');
       button.css('background', 'rgb(177, 194, 203)');
 
-      // content
-      var formatted_content = $(svg).height(height-6);
-      button.append(formatted_content);
+      // Content Manipulation
+      this.setSVG = function(svg){
+        button.empty();
+        var formatted_content = $(svg).height(height-6);
+        button.append(formatted_content);
+      }
+
+      // this.setSVG(svg);
 
       // Hover
       button.hover(
@@ -281,8 +347,6 @@ $3Dmol.UI = (function(){
       button.mouseup(()=>{
         button.css('box-shadow', '0px 0px 3px black');
       });
-
-      return button;
     }
 
 
@@ -293,7 +357,7 @@ $3Dmol.UI = (function(){
      * @param {number} top : css top peroperty
      */
      function setPosition(ele, left, top){
-       ele.css('position', 'absolute');
+       // ele.css('position', 'absolute');
        ele.css('left', left);
        ele.css('top', top);
      }
@@ -314,25 +378,58 @@ $3Dmol.UI = (function(){
 
        // p_ stands for parent
        var p_position = parent.position();
-       var p_width = parent.width();
-       var p_height = parent.height();
+       var p_width = getWidth(parent);
+       var p_height = getHeight(parent);
 
        // c_ stand for child
-       var c_width = getHeight(child);
-       var c_height = getWidth(child);
-
-       var p_top = p_position.top + parseInt(parent.css('margin'));
-       var p_left = p_position.left + parseInt(parent.css('margin')) ;
+       var c_width = child.outerWidth(); // includes padding and margin
+       var c_height = child.outerHeight(); // includes padding and margin
 
        var padding = parseInt(parent.css('padding').replace('px', ''));
 
-      // Setting position
-       var c_position = {
-         left: (x_type == 'left' )? p_left + padding + x_offset : (x_type == 'right')? p_width - c_width - padding + x_offset : x_offset,
-         top: (y_type == 'top' )? p_top + padding + y_offset : (y_type == 'bottom')? p_height - c_height - padding + y_offset : y_offset
-       };
+       var p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
+       var p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
 
-       console.log('setting parent child location', c_position, padding, c_width, c_height);
+
+      // Setting position
+      var c_position = {
+        left: 0,
+        top: 0
+      };
+
+      if(x_type == 'left'){
+        console.log('left is called');
+        c_position.left = p_left + padding + x_offset;
+      }
+      else if(x_type == 'center'){
+        c_position.left = p_left + p_width/2 - c_width/2 + x_offset;
+      }
+      else if(x_type == 'right'){
+        c_position.left = p_left + p_width  - c_width - padding + x_offset;
+      }
+      else {
+        c_position.left = p_left + x_offset + padding;
+      }
+
+      if(y_type == 'top'){
+        c_position.top = p_top + y_offset + padding;
+      }
+      else if(y_type == 'center'){
+        c_position.top = p_top + p_height/2 - c_height/2 + y_offset;
+      }
+      else if(y_type == 'bottom'){
+        c_position.top = p_top + p_height - c_height + y_offset - padding;
+      }
+      else {
+        c_position.top = p_top + y_offset + padding;
+      }
+
+       // var c_position = {
+       //   left: (x_type == 'left' )? p_left + padding + x_offset : (x_type == 'right')? p_width - c_width - padding + x_offset : x_offset,
+       //   top: (y_type == 'top' )? p_top + padding + y_offset : (y_type == 'bottom')? p_height - c_height - padding + y_offset : y_offset
+       // };
+
+       console.log('setting parent child location',p_position,  c_position, padding, p_width, p_height, c_width, c_height);
        setPosition(child, c_position.left, c_position.top);
      }
 
@@ -379,8 +476,7 @@ $3Dmol.UI = (function(){
       */
      function button(svg, height){
        // Button instance
-       var button = $('<div></div>');
-
+       var button = this.ui = $('<div></div>');
        // CSS
        button.css('box-sizing', 'border-box');
        button.css('display', 'inline-block');
@@ -415,7 +511,6 @@ $3Dmol.UI = (function(){
          button.css('box-shadow', '0px 0px 3px black');
        });
 
-       return button;
      }
 
   }
