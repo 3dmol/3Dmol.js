@@ -51,6 +51,7 @@ $3Dmol.GLViewer = (function() {
         var current_hover = null;
         var hoverDuration = 500;
         var viewer_frame = 0;
+        
         if(config.hoverDuration != undefined) {
             hoverDuration = config.hoverDuration;
         }
@@ -868,6 +869,7 @@ $3Dmol.GLViewer = (function() {
                 });
                 
             }
+            
         };
         initContainer(container);
 
@@ -3148,7 +3150,11 @@ $3Dmol.GLViewer = (function() {
             };            
             resolve = function() {
                 that.render();
-                if (++displayCount == displayMax || !that.isAnimated()) {
+                if(!that.getCanvas().isConnected && renderer.isLost()) {
+                    //we no longer exist
+                    that.stopAnimate();                    
+                }
+                else if (++displayCount == displayMax || !that.isAnimated()) {
                     clearTimeout(intervalID);
                     animationTimers.delete(intervalID);
                     decAnim(); 

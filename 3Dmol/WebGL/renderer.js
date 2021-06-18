@@ -160,6 +160,10 @@ $3Dmol.Renderer = function(parameters) {
         return _gl;
     };
 
+    this.isLost = function() {
+        return _gl.isContextLost;
+    };
+    
     this.getPrecision = function() {
         return _precision;
     };
