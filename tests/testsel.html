@@ -137,9 +137,9 @@
         <input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
         <br>
         <input type="button" value="Surface1" onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false},{hetflag:false},{chain:'B'});"></input>
-        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'},true);"></input>
-       <input type="button" value="RM Surface1" onclick="glviewer.removeSurface(surf1), lastsurfstyle = 1;"></input>
-        <input type="button" value="RM Surface2" onclick="glviewer.removeSurface(surf2), lastsurfstyle = 1;"></input>
+        <input type="button" value="Surface2" onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:1}, {chain:'B'}, {chain:'B'},{chain:'A'},true);"></input>
+        <input type="button" value="RM Surface1" onclick="try{glviewer.removeSurface(surf1.surfid), lastsurfstyle = 1;}catch(e){};surf1 = undefined;"></input>
+        <input type="button" value="RM Surface2" onclick="try{glviewer.removeSurface(surf2.surfid), lastsurfstyle = 1;}catch(e){};surf2 = undefined;"></input>
         <input type="button" value="T" onclick="toggleSurfTrans(surf1);"></input>
         <br>
         <input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
