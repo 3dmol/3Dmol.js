@@ -268,6 +268,11 @@ $3Dmol.UI = (function(){
 
     }
 
+    function AlertBox(){
+      var boundingBox = this.ui = $('<div></div>');
+      
+    }
+
 
     /**
      * parseSelection - generate markup using the selection list
