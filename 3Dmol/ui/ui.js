@@ -36,6 +36,7 @@ $3Dmol.UI = (function(){
 
       var ui_overlay = new UI_Overlay();
       body.append(ui_overlay.ui);
+      // body = ui_overlay.ui;
 
 
       var topbar =new Toolbar();
@@ -362,6 +363,12 @@ $3Dmol.UI = (function(){
 
     function slider(config){
       config = config || {}
+      var step = config.step || 1;
+      var min = config.min || 0;
+      var max = config.max || 100;
+      var markerPosition = 0;
+      var current = config.default || min;
+
       var boundingBox = this.ui = $('<div></div>');
       var sliderBox = $('<div></div>');
       var slide = $('<div></div>');
@@ -398,7 +405,74 @@ $3Dmol.UI = (function(){
       //vertically centering the slide
 
       this.demo = sliderBox;
+
+      // Adding Mouse move 
+      var mousemove = false;
+      var startPos = {
+        x: 0,
+        y: 0
+      };
+
+      var newPos = {
+        x: 0,
+        y: 0
+      };
+
+      function updateSlider(){
+        marker.css('left', markerPosition + 'px');
+      };
+
+      marker.on('mousedown', (e)=>{
+        mousemove = true;
+        startPos.x = e.clientX;
+        startPos.y = e.clientY;
+      });
+      
+      boundingBox.on('mousemove', (e)=>{
+        if(mousemove) {
+          newPos.x = e.clientX;
+          newPos.y = e.clientY;
+          
+          if (current < min){
+            current = min;
+          }
+
+          if (current > max) {
+            current = max;
+          }
+
+          change = newPos.x - slide.offset().left;
+          markerPosition = change;
+
+          current = (max - min) * markerPosition/width + min
+          console.log('Changing Current', markerPosition, current, );
+          if(markerPosition > width){
+            markerPosition = width;
+          }
+
+          if (markerPosition < 0){
+            markerPosition = 0;
+          }
+          updateSlider();
+          
+        }
+
+        // console.log(e.pageX - slide.offset().left, width);
+      });
+
+      marker.on('mouseleave', (e)=>{
+        mousemove = false;
+        startPos.x = 0;
+        startPos.y = 0;
+      });
+
+      marker.on('mouseup', (e)=>{
+        mousemove = false;
+        startPos.x = 0;
+        startPos.y = 0;
+      })
     }
+
 
     /**
      * position : Sets the css position property : absolute
