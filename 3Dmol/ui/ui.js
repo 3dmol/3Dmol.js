@@ -55,6 +55,9 @@ $3Dmol.UI = (function(){
       body.append(movieControl.ui);
       setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
 
+      // Testing form
+      $3Dmol.UI.form();
+
     }
 
     function UI_Overlay(config){
