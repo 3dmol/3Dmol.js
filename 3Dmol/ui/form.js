@@ -2,6 +2,12 @@
         function form(specs){
             specs = specs || {};
 
+            // Test area
+            body = $('body');
+            var changingColor = new Color();
+
+
+
             // Parse Specs and create array of inputs 
             var inputs = [];
             
@@ -12,19 +18,32 @@
 
             });
 
-            function property(key, type){
+            function Property(key, type){
                 config = config || {};
                 
                 
             }
 
-            function color(){
-                var R = 0;
-                var G = 0;
-                var B = 0;
+            function Color(){
+                var control = {
+                    R : { value : 0, min : 0, max : 255 },
+                    G : { value : 0, min : 0, max : 255 },
+                    B : { value : 0, min : 0, max : 255 },
+                }
 
                 var boundingBox = $('<div></div>');
-                var RValue = new 
+                var RValue = new slider(control.R);
+                var GValue = new slider(control.G);
+                var BValue = new slider(control.B);
+
+                var sliders = $('<div></div>');
+                slider.append(RValue, GValue, BValue);
+
+                var color = $('<div></div>');
+                color.width(10);
+                color.height(color.width());
+                boundingBox.append(slider);
+                boundingBox.append(color);
             }
 
             function list(control, listElements){
@@ -57,63 +76,35 @@
             }
             
             function checkbox(control){
-                var checkbox = this.ui = $('<input type="checkbox" />');
+                var boundingBox = this.ui = $('<input type="checkbox" />');
 
-                checkbox.on('click', ()=>{
+                boundingBox.on('click', ()=>{
                     control.value = checkbox.prop('checked');
 
                 });
             }
 
-            function slider(config){
-                config = config || {}
-                var step = config.step || 1;
-                var min = config.min || 0;
-                var max = config.max || 100;
-                var current = config.default || min;
+            function slider(control){
+                var boundingBox = this.ui = $('<input type="range">');
+                var setValue = false;
+                
+                this.update = ()=>{};
+                
+                boundingBox.on('mousedown', ()=>{
+                    setValue = true;
+                });
 
-                var boundingBox = this.ui = $('<div></div>');
-                var sliderBox = $('<div></div>');
-                var slide = $('<div></div>');
-                var marker = $('<div></div>');
-        
-                var height = config.height = config.height || 12;
-                var width = config.width = config.width || 100;
-                sliderBox.css('box-sizing', 'border-box');
-        
-                marker.css('height', height + 'px');
-                marker.css('width', height + 'px');
-                marker.css('background', 'rgb(68, 90, 235)');
-                marker.css('border-radius', height/2 + 'px');
-        
-                slide.css('height', '3px');
-                slide.css('width', width + 'px');
-                slide.css('background', 'grey');
-                slide.css('border-radius', '1.5px');
-        
-                sliderBox.append(slide);
-                sliderBox.append(marker);
-        
-                sliderBox.css('height', height + 'px');
-                sliderBox.css('position', 'relative');
-        
-                slide.css('position', 'absolute');
-                slide.css('top', height/2 - 1.5 + 'px');
-                marker.css('position', 'absolute');
-        
-                boundingBox.append(sliderBox);
-                boundingBox.css('width', width);
-                // boundingBox.css('position','absolute');
-        
-                //vertically centering the slide
-        
-                this.demo = sliderBox;
+                boundingBox.on('mousemove', ()=>{
+                    if(setValue){
+                        control.value = boundingBox.val();
+                        this.update();
+                    }
+                });
 
-                this.updateSlider = function(control){
-                    control.value = current;
-                }
+                boundingBox.on('mouseup', ()=>{
+                    setValue = false;
+                });
 
-                // Adding Mouse move 
             }
 
             function submit(control){

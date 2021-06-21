@@ -244,7 +244,7 @@ $3Dmol.UI = (function(){
       // state variable
       var playing = false;
 
-      play.ui.click(()=>{
+      play.ui.on('click', ()=>{
         console.log('trying to change the background', play);
         if(playing){
           play.setSVG(icons.movie.play);
@@ -255,7 +255,7 @@ $3Dmol.UI = (function(){
         playing = !playing;
       });
 
-      stop.ui.click(()=>{
+      stop.ui.on('click', ()=>{
 
       });
 
@@ -360,119 +360,17 @@ $3Dmol.UI = (function(){
       });
     }
 
-
     function slider(config){
-      config = config || {}
-      var step = config.step || 1;
-      var min = config.min || 0;
-      var max = config.max || 100;
-      var markerPosition = 0;
-      var current = config.default || min;
-
-      var boundingBox = this.ui = $('<div></div>');
-      var sliderBox = $('<div></div>');
-      var slide = $('<div></div>');
-      var marker = $('<div></div>');
-
-      var height = config.height = config.height || 12;
-      var width = config.width = config.width || 100;
-      sliderBox.css('box-sizing', 'border-box');
-
-      marker.css('height', height + 'px');
-      marker.css('width', height + 'px');
-      marker.css('background', 'rgb(68, 90, 235)');
-      marker.css('border-radius', height/2 + 'px');
-
-      slide.css('height', '3px');
-      slide.css('width', width + 'px');
-      slide.css('background', 'grey');
-      slide.css('border-radius', '1.5px');
-
-      sliderBox.append(slide);
-      sliderBox.append(marker);
-
-      sliderBox.css('height', height + 'px');
-      sliderBox.css('position', 'relative');
-
-      slide.css('position', 'absolute');
-      slide.css('top', height/2 - 1.5 + 'px');
-      marker.css('position', 'absolute');
-
-      boundingBox.append(sliderBox);
-      boundingBox.css('width', width);
-      // boundingBox.css('position','absolute');
-
-      //vertically centering the slide
-
-      this.demo = sliderBox;
-
-      // Adding Mouse move 
-      var mousemove = false;
-      var startPos = {
-        x: 0,
-        y: 0
-      };
-
-      var newPos = {
-        x: 0,
-        y: 0
-      };
-
-      function updateSlider(){
-        marker.css('left', markerPosition + 'px');
-      };
-
-      marker.on('mousedown', (e)=>{
-        mousemove = true;
-        startPos.x = e.clientX;
-        startPos.y = e.clientY;
-      });
+      config = config || {};
+      min = config.min || 0;
+      max = config.max || 100;
+      width = config.width || 400;
       
-      boundingBox.on('mousemove', (e)=>{
-        if(mousemove) {
-          newPos.x = e.clientX;
-          newPos.y = e.clientY;
-          
-          if (current < min){
-            current = min;
-          }
+      var boundingBox = this.ui = $('<div></div>');
+      var slide = $('<input type="range" min="0">');
 
-          if (current > max) {
-            current = max;
-          }
-
-          change = newPos.x - slide.offset().left;
-          markerPosition = change;
-
-          current = (max - min) * markerPosition/width + min
-          console.log('Changing Current', markerPosition, current, );
-          if(markerPosition > width){
-            markerPosition = width;
-          }
-
-          if (markerPosition < 0){
-            markerPosition = 0;
-          }
-          updateSlider();
-          
-        }
-
-        // console.log(e.pageX - slide.offset().left, width);
-      });
-
-      marker.on('mouseleave', (e)=>{
-        mousemove = false;
-        startPos.x = 0;
-        startPos.y = 0;
-      });
-
-      marker.on('mouseup', (e)=>{
-        mousemove = false;
-        startPos.x = 0;
-        startPos.y = 0;
-      })
+      boundingBox.append(slide);
     }
-
 
     /**
      * position : Sets the css position property : absolute
