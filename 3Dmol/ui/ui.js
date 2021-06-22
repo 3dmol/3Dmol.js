@@ -47,16 +47,16 @@ $3Dmol.UI = (function(){
       setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 0, topbar.ui.outerHeight());
       body.append(selectionBox.ui);
 
-      var styleBox = new SelectionBox(icons.paintbrush);
-      setLocation(ui_overlay.ui, styleBox.ui, 'left', 'top', 0, topbar.ui.outerHeight() + selectionBox.ui.outerHeight());
-      body.append(styleBox.ui);
+      // var styleBox = new SelectionBox(icons.paintbrush);
+      // setLocation(ui_overlay.ui, styleBox.ui, 'left', 'top', 0, topbar.ui.outerHeight() + selectionBox.ui.outerHeight());
+      // body.append(styleBox.ui);
 
       var movieControl = new MovieBar();
       body.append(movieControl.ui);
       setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
 
       // Testing form
-      $3Dmol.UI.form();
+      // $3Dmol.UI.form($3Dmol.GLModel.validAtomSelectionSpecs);
 
     }
 
