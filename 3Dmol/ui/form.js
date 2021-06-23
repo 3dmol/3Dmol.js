@@ -30,8 +30,8 @@
                 if(specs[key].type == 'string'){
 					this.placeholder = new Input(control);
                     this.placeholder.ui.attr('type', 'text');
-                    console.log('String type')
-                    console.log('string input', this.placeholder);
+                    // console.log('String type')   
+                    // console.log('string input', this.placeholder);
 				}
 				else if(specs[key].type == 'number'){
                     this.placeholder = new Input(control);
@@ -70,7 +70,7 @@
 					this.placeholder.text('Unknown property type');
 				}
 
-                console.log("Checking placeholder", this.placeholder);
+                // console.log("Checking placeholder", this.placeholder);
                 
                 this.getValue = function(){
                     return {   
@@ -124,7 +124,7 @@
                 
                 
                 // CSS
-                boundingBox.width(400);
+                // boundingBox.width(400);
                 // label.css('width', '100%');
                 boundingBox.css('display', 'flex');
                 boundingBox.css('align-items', 'center');
@@ -271,7 +271,7 @@
                     if(setValue){
                         control.value = slide.val();
                         this.update();
-                        console.log('working');
+                        // console.log('working');
                     }
                 });
 

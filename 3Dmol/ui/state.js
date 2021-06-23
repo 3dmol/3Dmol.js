@@ -6,7 +6,7 @@
 // This will also help in migrating the controls from to different
 
 $3Dmol.UI.States = (function(){
-  function State(startState){
+  function States(startState){
     this.position.x ;
     this.position.y ; //=
     this.height; // =
@@ -22,4 +22,6 @@ $3Dmol.UI.States = (function(){
     this.toolTip ; //=
 
   }
+
+  return States;
 })()

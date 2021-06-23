@@ -16,13 +16,11 @@ $3Dmol.UI = (function(){
   function UI(element, config){
     // Extract the viewer and then render it
     var container = $(element);
-
-
+    var icons =new $3Dmol.UI.Icons();
     console.log('Container for viewer', container);
 
 
     // Generates the necessary UI elements
-    var icons =new $3Dmol.UI.Icons();
     generateUI();
 
     function generateUI(){
@@ -30,8 +28,8 @@ $3Dmol.UI = (function(){
       var padding = 10;
       var top = getTop(container) + padding;
       var left = getLeft(container) + padding;
-      var right = getLeft(container) + getWidth(container) - 10;
-      var bottom = getTop(container) + getHeight(container) - 10;
+      var right = getLeft(container) + getWidth(container) - padding;
+      var bottom = getTop(container) + getHeight(container) - padding;
       console.log('Get position', left, top, right, bottom);
 
       var ui_overlay = new UI_Overlay();
@@ -55,9 +53,22 @@ $3Dmol.UI = (function(){
       body.append(movieControl.ui);
       setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
 
-      // Testing form
-      // $3Dmol.UI.form($3Dmol.GLModel.validAtomSelectionSpecs);
 
+      var dialog = new DiaglogBox({ height: 300, width: 300 });
+      body.append(dialog.ui);
+      setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
+      
+      // Testing form
+      var selectionForm = new $3Dmol.UI.form($3Dmol.GLModel.validAtomSelectionSpecs);
+      dialog.addForm(selectionForm);
+
+      this.alertBox = new AlertBox({ width : 100 });
+      console.log(this.alertBox);
+      body.append(this.alertBox.ui);
+      setLocation(ui_overlay.ui, this.alertBox.ui, 'right', 'top');
+
+      this.alertBox.alert('success', 'everything is fine');
+      
     }
 
     function UI_Overlay(config){
@@ -272,12 +283,185 @@ $3Dmol.UI = (function(){
 
     }
 
-    function AlertBox(){
+    function AlertBox(config){
+      config = config || {};
+      var width = config.width || 400;
+      var timeout = config.timeout || 5000;
+  
       var boundingBox = this.ui = $('<div></div>');
+      var displayBox = $('<div></div>');
+      boundingBox.append(displayBox);
+  
+      boundingBox.css('border-radius', '2px');
+      // boundingBox.height(100);
+      boundingBox.width(100);
+      displayBox.css('border-radius', '2px');
+      boundingBox.css('position', 'absolute');
+      boundingBox.css('padding', '10px');
+      displayBox.css('padding', '10px');
+      boundingBox.hide();
       
+      this.alert = function(type, message){
+        boundingBox.show();
+
+        if(type=='success'){
+          displayBox.css('border', '1px solid green');
+          displayBox.css('background', 'lightgreen');
+          displayBox.css('color', 'green');
+        } else if( type == 'warning'){
+          displayBox.css('border', '1px solid orange');
+          displayBox.css('background', 'yellow');
+          displayBox.css('color', 'orange');
+        } else if(type == 'error'){
+          displayBox.css('border', '1px solid red');
+          displayBox.css('background', 'lightred');
+          displayBox.css('color', 'red');
+        }
+
+        displayBox.text(message);
+  
+        setTimeout(()=>{ 
+          boundingBox.hide(); 
+          console.log('Hiding');
+        }, timeout);
+      }
+  
     }
-
-
+  
+    function DiaglogBox(config){
+      config = config || {};
+      var height = config.height || 400;
+      var width = config.width || 400;
+  
+      var boundingBox = this.ui = $('<div></div>');
+      var displayBox = $('<div></div>');
+      boundingBox.append(displayBox);
+  
+      var controlBar = $('<div></div>');
+      displayBox.append(controlBar);
+  
+      var done = new button(icons.tick, 20);
+      var drop = new button(icons.cross, 20);
+      controlBar.width(20);
+      controlBar.append(done.ui);
+      controlBar.append(drop.ui);
+      done.ui.css('display', 'block');
+      done.ui.css('background', 'green');
+      done.ui.css('margin-bottom', '5px');
+      done.ui.css('margin-top', '5px');
+      
+      drop.ui.css('display', 'block');
+      drop.ui.css('background', 'red');
+      // drop.ui.css('background', 'red');
+      
+      controlBar.css('position', 'absolute');
+      controlBar.css('top', '0px');
+      // controlBar.css('display', 'flex');
+      // controlBar.css('flex-direction', 'row');
+  
+      boundingBox.css('background', 'lightgrey');
+      boundingBox.height(height);
+      boundingBox.width(width);
+      boundingBox.css('position', 'absolute');
+      boundingBox.css('overflow-y', 'auto');
+      boundingBox.css('border-radius', '4px');
+      boundingBox.css('opacity', '0.4');
+      boundingBox.css('padding', '6px');
+  
+      displayBox.css('display', 'flex');
+      displayBox.css('flex-direction', 'row');
+      displayBox.css('align-items', 'center');
+      displayBox.css('position', 'relative');
+  
+      boundingBox.on('mouseenter', ()=>{
+        boundingBox.css('opacity', '0.8');
+      });
+  
+      boundingBox.on('mouseleave', ()=>{
+        boundingBox.css('opacity', '0.4');
+      });
+  
+      done.ui.on('click', ()=>{
+        boundingBox.hide();
+      });
+  
+      drop.ui.on('click', ()=>{
+        boundingBox.hide();
+      });
+  
+      this.addForm = function(form){
+        displayBox.append(form.ui);
+        form.ui.css('margin', 'auto');
+      }
+  
+    }
+  
+    // HTML Elements for the viewer
+      /**
+       * button - generates button with the given markup as contents
+       * @param {string} SVG markup string that contains the content of the button
+       * @param {number} Height of the content
+       * @param {}
+       * @return {object}  Returns the jquery object for button
+       */
+  
+       function button(svg, height){
+        // Button instance
+        var button = this.ui = $('<div></div>');
+  
+        // CSS
+        button.css('box-sizing', 'border-box');
+        button.css('display', 'inline-block');
+        button.css('margin-right', '5px');
+        button.css('height', height);
+        button.css('width', height);
+        button.css('border-radius', (height/2) + 'px');
+        button.css('padding', '3px');
+        button.css('color', 'black');
+        button.css('vertical-align', 'middle');
+        button.css('text-align', 'center');
+        button.css('background', 'rgb(177, 194, 203)');
+  
+        // Content Manipulation
+        this.setSVG = function(svg){
+          button.empty();
+          var formatted_content = $(svg).height(height-6);
+          button.append(formatted_content);
+        }
+  
+        // this.setSVG(svg);
+  
+        // Hover
+        button.hover(
+          ()=>{
+              button.css('box-shadow', '0px 0px 3px black');
+          },
+          ()=>{
+            button.css('box-shadow', 'none');
+          }
+        )
+  
+        // click
+        button.mousedown(()=>{
+          button.css('box-shadow', '0px 0px 1px black');
+        });
+  
+        button.mouseup(()=>{
+          button.css('box-shadow', '0px 0px 3px black');
+        });
+      }
+  
+      function slider(config){
+        config = config || {};
+        min = config.min || 0;
+        max = config.max || 100;
+        width = config.width || 400;
+        
+        var boundingBox = this.ui = $('<div></div>');
+        var slide = $('<input type="range" min="0">');
+  
+        boundingBox.append(slide);
+      }
     /**
      * parseSelection - generate markup using the selection list
      *
@@ -308,72 +492,7 @@ $3Dmol.UI = (function(){
       ];
     }
 
-    // HTML Elements for the viewer
-    /**
-     * button - generates button with the given markup as contents
-     * @param {string} SVG markup string that contains the content of the button
-     * @param {number} Height of the content
-     * @param {}
-     * @return {object}  Returns the jquery object for button
-     */
-
-    function button(svg, height){
-      // Button instance
-      var button = this.ui = $('<div></div>');
-
-      // CSS
-      button.css('box-sizing', 'border-box');
-      button.css('display', 'inline-block');
-      button.css('margin-right', '5px');
-      button.css('height', height);
-      button.css('width', height);
-      button.css('border-radius', (height/2) + 'px');
-      button.css('padding', '3px');
-      button.css('color', 'black');
-      button.css('vertical-align', 'middle');
-      button.css('text-align', 'center');
-      button.css('background', 'rgb(177, 194, 203)');
-
-      // Content Manipulation
-      this.setSVG = function(svg){
-        button.empty();
-        var formatted_content = $(svg).height(height-6);
-        button.append(formatted_content);
-      }
-
-      // this.setSVG(svg);
-
-      // Hover
-      button.hover(
-        ()=>{
-            button.css('box-shadow', '0px 0px 3px black');
-        },
-        ()=>{
-          button.css('box-shadow', 'none');
-        }
-      )
-
-      // click
-      button.mousedown(()=>{
-        button.css('box-shadow', '0px 0px 1px black');
-      });
-
-      button.mouseup(()=>{
-        button.css('box-shadow', '0px 0px 3px black');
-      });
-    }
-
-    function slider(config){
-      config = config || {};
-      min = config.min || 0;
-      max = config.max || 100;
-      width = config.width || 400;
-      
-      var boundingBox = this.ui = $('<div></div>');
-      var slide = $('<input type="range" min="0">');
-
-      boundingBox.append(slide);
-    }
+    
 
     /**
      * position : Sets the css position property : absolute
