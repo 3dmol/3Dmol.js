@@ -1,5 +1,5 @@
     $3Dmol.UI.form = (function(){
-        function form(specs){
+        function form(specs, specName=''){
             specs = specs || {};
 
             // Test area
@@ -10,7 +10,10 @@
 
             // Parse Specs and create array of inputs 
             var boundingBox = this.ui = $('<div></div>');
+
+            boundingBox.append($(`<p><b>${specName}</b></p><div style="border-top:1px solid black"></div>`));
             boundingBox.addClass('form');
+            
             var inputs = this.inputs = [];
             // body.append(boundingBox);
             
@@ -18,14 +21,31 @@
             keys.forEach((key)=>{
                 var prop = new Property(key, specs[key].type);
                 inputs.push(prop);
-                boundingBox.append(prop.placeholder.ui);
+                boundingBox.append(prop.ui);
 
                 // console.log('Checking Specs', prop.placeholder, key, specs[key]);
             });
 
+            this.getValues = function(){
+                var config = {}
+
+                inputs.forEach((input)=>{
+                    var value = input.getValue();
+                    if(value.control.active){
+                        config[value.key] = value.control.value;
+                    }
+                });
+
+
+                return config;
+            }
+
             function Property(key, type){
-                var control = { value : null, type : type, key : key };
-                this.placeholder = $('<div></div>'); // default value for ui element 
+                var control = { value : null, type : type, key : key, active: false };
+                var boundingBox = this.ui = $('<div></div>');
+                this.placeholder = { ui : $('<div></div>') }; // default value for ui element 
+                this.active = new Checkbox({value: false, key:key});
+
 
                 if(specs[key].type == 'string'){
 					this.placeholder = new Input(control);
@@ -67,7 +87,7 @@
                         this.placeholder = new ListInput(control, specs[key].validItems);
 					}
 				}else {
-					this.placeholder.text('Unknown property type');
+					this.placeholder.ui.text('Unknown property type');
 				}
 
                 // console.log("Checking placeholder", this.placeholder);
@@ -78,11 +98,29 @@
                         control : control,
                     }
                 }
+
+
+                // Adding active control for the property
+                var placeholder = this.placeholder;
+                placeholder.ui.hide();
+                this.active.ui.width(200);
+
+
+                if(type !='boolean') {
+                    boundingBox.append(this.active.ui);
+                    this.active.click = function(active){
+                        (active)? placeholder.ui.show() : placeholder.ui.hide();
+                        control.active = active;
+                    }
+                }
+                boundingBox.append(this.placeholder.ui);
+
+
             }
 
             function Color(outerControl){
-                var label = $('<div></div>');
-                label.text(outerControl.key);
+                // var label = $('<div></div>');
+                // label.text(outerControl.key);
 
                 var redDot = $('<div></div>');
                 redDot.height(10);
@@ -105,7 +143,7 @@
 
                 var surroundingBox = this.ui = $('<div></div>')
                 var boundingBox = $('<div></div>');
-                surroundingBox.append(label);
+                // surroundingBox.append(label);
                 surroundingBox.append(boundingBox);
                 
                 var RValue = new Slider(control.R);
@@ -161,12 +199,12 @@
             }
 
             function ListInput(control, listElements){
-                var label = $('<div></div>');
-                label.text(control.key);
+                // var label = $('<div></div>');
+                // label.text(control.key);
 
                 var surroundingBox = this.ui = $('<div></div>');
                 var boundingBox = $('<div></div>');
-                surroundingBox.append(label);
+                // surroundingBox.append(label);
                 surroundingBox.append(boundingBox);
 
                 var select = $('<select></select>');
@@ -192,12 +230,12 @@
             }
             
             function Input(control){
-                var label = $('<div></div>');
-                label.text(control.key);    
+                // var label = $('<div></div>');
+                // label.text(control.key);    
                 
                 var surroundingBox = this.ui = $('<div></div>');
                 var boundingBox = $('<div></div>');
-                surroundingBox.append(label);
+                // surroundingBox.append(label);
                 surroundingBox.append(boundingBox);
 
                 var input =  $('<input type="text">');
@@ -214,14 +252,17 @@
 
                 var surroundingBox = this.ui = $('<div></div>');
                 var boundingBox = $('<div></div>');
-                surroundingBox.append(label);
                 surroundingBox.append(boundingBox);
+                surroundingBox.append(label);
 
                 var checkbox = $('<input type="checkbox" />');
                 boundingBox.append(checkbox);
 
+                this.click = ()=>{};
+
                 checkbox.on('click', ()=>{
                     control.value = checkbox.prop('checked');
+                    this.click(control.value);
                 });
 
                 // CSS
@@ -230,11 +271,11 @@
             }
 
             function Slider(control){
-                var label = $('<div></div>');
-                label.text(control.key); 
+                // var label = $('<div></div>');
+                // label.text(control.key); 
 
                 var surroundingBox = this.ui = $('<div></div>');
-                surroundingBox.append(label);
+                // surroundingBox.append(label);
                 
                 var boundingBox = $('<div></div>');
                 surroundingBox.append(boundingBox);

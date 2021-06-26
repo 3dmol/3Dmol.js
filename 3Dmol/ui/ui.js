@@ -13,31 +13,23 @@
  * different sets of controls
  */
 $3Dmol.UI = (function(){
-  function UI(element, config){
+  function UI(stateManager, config){
     // Extract the viewer and then render it
-    var container = $(element);
     var icons =new $3Dmol.UI.Icons();
-    console.log('Container for viewer', container);
-
-
+    var body = $('body');
+    
     // Generates the necessary UI elements
-    generateUI();
-
-    function generateUI(){
-      var body = $('body');
-      var padding = 10;
-      var top = getTop(container) + padding;
-      var left = getLeft(container) + padding;
-      var right = getLeft(container) + getWidth(container) - padding;
-      var bottom = getTop(container) + getHeight(container) - padding;
-      console.log('Get position', left, top, right, bottom);
-
-      var ui_overlay = new UI_Overlay();
+    var uiElements = this.tools = generateUI(config);
+    
+    function generateUI(config){
+      
+      
+      var ui_overlay = new UI_Overlay(config);
       body.append(ui_overlay.ui);
       // body = ui_overlay.ui;
 
 
-      var topbar =new Toolbar();
+      var topbar = new Toolbar();
       body.append(topbar.ui);
       setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
 
@@ -54,28 +46,35 @@ $3Dmol.UI = (function(){
       setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
 
 
-      var dialog = new DiaglogBox({ height: 300, width: 300 });
+      var dialog = new DialogBox({ height: 300, width: 300 });
       body.append(dialog.ui);
       setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
+      dialog.ui.hide();
       
       // Testing form
-      var selectionForm = new $3Dmol.UI.form($3Dmol.GLModel.validAtomSelectionSpecs);
-      dialog.addForm(selectionForm);
+      // var selectionForm = new $3Dmol.UI.form($3Dmol.GLModel.validAtomSelectionSpecs, 'Atom Selection');
+      // dialog.addForm(selectionForm);
 
-      this.alertBox = new AlertBox({ width : 100 });
-      console.log(this.alertBox);
-      body.append(this.alertBox.ui);
-      setLocation(ui_overlay.ui, this.alertBox.ui, 'right', 'top');
+      var alertBox = new AlertBox({ width : 100 });
+      // console.log(alertBox);
+      body.append(alertBox.ui);
+      setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
 
-      this.alertBox.alert('success', 'everything is fine');
-      
+      return {
+        uiOverlay : ui_overlay,
+        topbar : topbar,
+        selectionBox : selectionBox,
+        dialog : dialog,
+        alertBox : alertBox,
+        movieControl : movieControl
+      } 
     }
 
     function UI_Overlay(config){
       config = config || {};
 
-      var top = config.top || 10;
-      var left = config.left || 10;
+      var top = (config.offset.top !=undefined) ? config.offset.top : 10;
+      var left = (config.offset.left !=undefined) ? config.offset.left : 10;
       var width = config.width || '400px';
       var height = config.height || '400px';
 
@@ -84,13 +83,48 @@ $3Dmol.UI = (function(){
       ui_overlay.width(width);
       setPosition(ui_overlay, left, top);
       ui_overlay.css('box-sizing','border-box');
-      ui_overlay.css('border', '1px solid black');
+      // ui_overlay.css('border', '1px solid black');
       ui_overlay.css('background', 'rbga(0,0,0,0)');
       ui_overlay.css('padding', '0px');
       ui_overlay.css('pointer-events', 'none');
       ui_overlay.css('position', 'absolute');
 
+      this.resize = function(config){
+        var top = (config.offset.top !=undefined) ? config.offset.top : 10;
+        var left = (config.offset.left !=undefined) ? config.offset.left : 10;
+        var width = config.width || '400px';
+        var height = config.height || '400px';
+        ui_overlay.height(height);
+        ui_overlay.width(width);
+        setPosition(ui_overlay, left, top);
+      }
+
     }
+
+    this.resize = function(config){
+      uiElements.uiOverlay.resize(config);
+      this.orient();
+    }
+
+    this.orient = function(){
+      // Position of the UI elements can later be orgnazided by using a config
+
+
+      var ui_overlay = uiElements.uiOverlay;
+      var topbar = uiElements.topbar;
+      var dialog = uiElements.dialog;
+      var alertBox = uiElements.alertBox;
+      var selectionBox = uiElements.selectionBox;
+      var movieControl = uiElements.movieControl;
+
+
+      setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
+      setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
+      setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
+      setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 0, topbar.ui.outerHeight());
+      setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
+    }
+
 
 
     /**
@@ -156,6 +190,7 @@ $3Dmol.UI = (function(){
       var addArea = $('<div></div>');
       var plusButton = new button(icons.plus, 20);
       var hideButton = new button(icon, 20);
+      var selectionObjects = [];
 
       // Content
       selectionBox.append(hideButton.ui);
@@ -210,22 +245,49 @@ $3Dmol.UI = (function(){
       /**
        * Add a selection input to the list
        */
-      this.addSelection = function(ParsedSelectionObject){
-        var selectionContainer = $('<div></div>');
+      this.appendSelection = function(selectionSpec){
+        var selection = $('<div></div>');
+        var controls = $('<div></div>');
+        var styleName = $('<div></div>');
+        var selectionName = $('<div></div>');
+        selectionName.text(selectionSpec.id);
+        selection.append(selectionName);
 
-        var selectionNameContainer = $('<div></div>');
-        var removeButton = new button(icons.minux, 20);
-        var selectionName = $('<div></div>').text(ParsedSelectionObject['selection-name']);
-        selectionName.css('display', 'inline-block');
+        selection.append(controls);
+        selection.append(controls);
 
-        selectionNameContainer.append(removeButton);
-        selectionNameContainer.append(selectionName);
-        selectionContainer.append(selectionNameContainer);
-        // Add event hander for selection remove
+        var editButton = new button(icons.edit, 20);
+        var removeButton = new button(icons.remove, 20);
+        var hideButton = new button(icons.list, 20);
+        var showButton = new button(icons.style, 20);
 
-        var selectionProperties = $('<div></div>');
-        // Add code for different types of input property
+        controls.append(editButton.ui);
+        controls.append(removeButton.ui);
+        controls.append(hideButton.ui);
+        controls.append(showButton.ui);
+
+
+        spec = selectionSpec.spec;
+        var keys = Object.keys(spec);
+        keys.forEach((key)=>{
+          var text = `${key} : ${spec[key]}`
+          var div = $('<div></div>');
+          div.text(text);
+          selection.append(div);
+          console.log(spec[key])
+        });
+
+        selections.append(selection);
+        selection.data('sel-id', selectionSpec.id);
+        
+        selectionObjects.push(selection);
       }
+
+      plusButton.ui.on('click', ()=>{
+        stateManager.addSelection();
+      });
+
+      
 
     }
 
@@ -328,7 +390,7 @@ $3Dmol.UI = (function(){
   
     }
   
-    function DiaglogBox(config){
+    function DialogBox(config){
       config = config || {};
       var height = config.height || 400;
       var width = config.width || 400;
@@ -338,7 +400,7 @@ $3Dmol.UI = (function(){
       boundingBox.append(displayBox);
   
       var controlBar = $('<div></div>');
-      displayBox.append(controlBar);
+      boundingBox.append(controlBar);
   
       var done = new button(icons.tick, 20);
       var drop = new button(icons.cross, 20);
@@ -383,15 +445,22 @@ $3Dmol.UI = (function(){
   
       done.ui.on('click', ()=>{
         boundingBox.hide();
+        stateManager.finalize(this.form.getValues());
+        // stateManager.
       });
   
       drop.ui.on('click', ()=>{
         boundingBox.hide();
+        stateManager.cancel();
       });
   
       this.addForm = function(form){
+        displayBox.empty();
         displayBox.append(form.ui);
         form.ui.css('margin', 'auto');
+        boundingBox.show();
+
+        this.form = form;
       }
   
     }
