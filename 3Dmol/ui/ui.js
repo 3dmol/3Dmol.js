@@ -34,12 +34,13 @@ $3Dmol.UI = (function(){
       setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
 
       var selectionBox = new SelectionBox(icons.select);
-      setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 0, topbar.ui.outerHeight());
       body.append(selectionBox.ui);
+      setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 0, topbar.ui.outerHeight());
 
-      // var styleBox = new SelectionBox(icons.paintbrush);
-      // setLocation(ui_overlay.ui, styleBox.ui, 'left', 'top', 0, topbar.ui.outerHeight() + selectionBox.ui.outerHeight());
-      // body.append(styleBox.ui);
+      var styleBox = new StyleBox(icons.paintbrush);
+      body.append(styleBox.ui);
+      setLocation(ui_overlay.ui, styleBox.ui, 'right', 'top', 0, topbar.ui.outerHeight());
+      styleBox.adjustSidebar();
 
       var movieControl = new MovieBar();
       body.append(movieControl.ui);
@@ -64,6 +65,7 @@ $3Dmol.UI = (function(){
         uiOverlay : ui_overlay,
         topbar : topbar,
         selectionBox : selectionBox,
+        styleBox : styleBox,
         dialog : dialog,
         alertBox : alertBox,
         movieControl : movieControl
@@ -116,13 +118,14 @@ $3Dmol.UI = (function(){
       var alertBox = uiElements.alertBox;
       var selectionBox = uiElements.selectionBox;
       var movieControl = uiElements.movieControl;
-
+      var styleBox = uiElements.styleBox;
 
       setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
       setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
       setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
       setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 0, topbar.ui.outerHeight());
       setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
+      setLocation(ui_overlay.ui, styleBox.ui, 'right', 'top', 0, topbar.ui.outerHeight());
     }
 
 
@@ -190,7 +193,7 @@ $3Dmol.UI = (function(){
       var addArea = $('<div></div>');
       var plusButton = new button(icons.plus, 20);
       var hideButton = new button(icon, 20);
-      var selectionObjects = [];
+      this.selectionObjects = [];
 
       // Content
       selectionBox.append(hideButton.ui);
@@ -250,45 +253,172 @@ $3Dmol.UI = (function(){
         var controls = $('<div></div>');
         var styleName = $('<div></div>');
         var selectionName = $('<div></div>');
+        var parameters = $('<div></div>');
         selectionName.text(selectionSpec.id);
         selection.append(selectionName);
-
+        
         selection.append(controls);
-        selection.append(controls);
-
-        var editButton = new button(icons.edit, 20);
-        var removeButton = new button(icons.remove, 20);
-        var hideButton = new button(icons.list, 20);
-        var showButton = new button(icons.style, 20);
+        
+        selection.append(parameters);
+        
+        var editButton = new button(icons.edit, 16);
+        var removeButton = new button(icons.remove, 16);
+        var hideButton = new button(icons.list, 16);
+        var showButton = new button(icons.style, 16);
 
         controls.append(editButton.ui);
         controls.append(removeButton.ui);
         controls.append(hideButton.ui);
         controls.append(showButton.ui);
 
+        var hidden = true;
+        parameters.hide();
+        hideButton.ui.on('click', ()=>{
+          if(hidden){
+            parameters.show();
+            hidden = false;
+          }
+          else {
+            hidden = true;
+            parameters.hide();
+          }
+        });
 
         spec = selectionSpec.spec;
         var keys = Object.keys(spec);
         keys.forEach((key)=>{
           var text = `${key} : ${spec[key]}`
-          var div = $('<div></div>');
+          var div = $('<div></div>')
           div.text(text);
-          selection.append(div);
-          console.log(spec[key])
+          parameters.append(div);
         });
 
         selections.append(selection);
         selection.data('sel-id', selectionSpec.id);
         
-        selectionObjects.push(selection);
+        this.selectionObjects.push(selection);
+
+        selection.on('click', ()=>{
+          stateManager.setCurrentSelection(selectionSpec.id);
+        });
+
       }
 
       plusButton.ui.on('click', ()=>{
         stateManager.addSelection();
+      });   
+    }
+
+    function StyleBox(svg) {  
+      var boundingBox = this.ui = $('<div></div>');
+      var styles = $('<div></div>');
+      var showArea = $('<div></div>');
+      var addArea = $('<div></div>');
+      var hideButton = new button(svg, 20);
+      var addButton = new button(icons.plus, 20);
+      this.styleObjects = [];
+
+      boundingBox.append(hideButton.ui);
+      boundingBox.append(showArea);
+
+      showArea.append(styles);
+      showArea.append(addArea);
+      addArea.append(addButton.ui); 
+
+      boundingBox.css('text-align', 'right');
+
+      showArea.css('background', 'lightgrey'); 
+      showArea.width(120);
+      showArea.height(200);
+      showArea.css('position', 'absolute');
+      showArea.css('padding', '3px');
+      showArea.css('border-radius', '4px');
+
+      addArea.css('text-align', 'center');
+
+      this.adjustSidebar = function(){
+        showArea.css('left', hideButton.ui.outerWidth() - showArea.outerWidth() );
+      }
+
+      boundingBox.css('position', 'absolute');
+
+      hidden = true;
+      showArea.hide();
+      hideButton.ui.on('click', ()=>{
+        if(hidden){
+          showArea.show(100);
+          hidden = false;
+        }
+        else {
+          showArea.hide(100);
+          hidden = true;
+        }
       });
 
-      
+      addButton.ui.on('click', ()=>{
+        stateManager.addStyle();
+      });
 
+      this.updateStyles = function(styleSpecs){
+        styles.empty();
+
+        styleSpecs.forEach((s)=>{
+
+          var styleBox = $('<div></div>');
+          var controls = $('<div></div>');
+          var styleName = $('<div></div>');
+          var selectionName = $('<div></div>');
+          var parameters = $('<div></div>');
+
+          styleName.text(s.id);
+          styleBox.append(styleName);
+  
+          styleBox.append(controls);
+          styleBox.append(parameters);
+
+          var editButton = new button(icons.edit, 16);
+          var removeButton = new button(icons.remove, 16);
+          var hideButton = new button(icons.list, 16);
+          var showButton = new button(icons.style, 16);
+  
+          controls.append(editButton.ui);
+          controls.append(removeButton.ui);
+          controls.append(hideButton.ui);
+          controls.append(showButton.ui);
+
+          var hidden = true;
+          parameters.hide();
+          hideButton.ui.on('click', ()=>{
+            if(hidden){
+              parameters.show();
+              hidden = false;
+            }
+            else {
+              hidden = true;
+              parameters.hide();
+            }
+          });
+
+          spec = s.spec;
+          var keys = Object.keys(spec);
+          keys.forEach((key)=>{
+            var text = `${key} : ${spec[key]}`
+            var div = $('<div></div>');
+            div.text(text);
+            parameters.append(div);
+          });
+
+          styles.append(styleBox);
+          styleBox.data('sel-id', s.id);
+          
+          this.styleObjects.push(styleBox);
+
+          styleBox.on('click', ()=>{
+            // stateManager.setCurrentSelection(selectionSpec.id);
+          });
+        });
+
+      }
     }
 
     function MovieBar(){
@@ -395,10 +525,16 @@ $3Dmol.UI = (function(){
       var height = config.height || 400;
       var width = config.width || 400;
   
+      
       var boundingBox = this.ui = $('<div></div>');
+      var mainForm = null;
+
+      var semiDisplayBox = $('<div></div>');
+      boundingBox.append(semiDisplayBox);
+      
       var displayBox = $('<div></div>');
       boundingBox.append(displayBox);
-  
+
       var controlBar = $('<div></div>');
       boundingBox.append(controlBar);
   
@@ -435,6 +571,11 @@ $3Dmol.UI = (function(){
       displayBox.css('align-items', 'center');
       displayBox.css('position', 'relative');
   
+      // semiDisplayBox.css('display', 'flex');
+      // semiDisplayBox.css('flex-direction', 'row');
+      semiDisplayBox.css('text-align', 'center');
+      // semiDisplayBox.css('position', 'relative');
+  
       boundingBox.on('mouseenter', ()=>{
         boundingBox.css('opacity', '0.8');
       });
@@ -445,80 +586,85 @@ $3Dmol.UI = (function(){
   
       done.ui.on('click', ()=>{
         boundingBox.hide();
-        stateManager.finalize(this.form.getValues());
+        stateManager.finalize(mainForm.getValues());
+        semiDisplayBox.empty();
+        displayBox.empty();
         // stateManager.
       });
   
       drop.ui.on('click', ()=>{
         boundingBox.hide();
         stateManager.cancel();
+        semiDisplayBox.empty();
+        displayBox.empty();
       });
   
-      this.addForm = function(form){
-        displayBox.empty();
-        displayBox.append(form.ui);
-        form.ui.css('margin', 'auto');
-        boundingBox.show();
+      var addForm = this.addForm = function(form, formType=null){
+        if(formType == null){
+          displayBox.empty();
+          displayBox.append(form.ui);
+          form.ui.css('margin', 'auto');
+          boundingBox.show();
+  
+          mainForm = form;
+          console.log("Form", this.form);
+        }
+        else {
+          semiDisplayBox.empty();
 
-        this.form = form;
+          var inputList = form.map((f)=>{return f.formName});
+          console.log(inputList);
+
+          control = {value: null, type: String}
+          var formSelect = new ListInput(control, inputList);
+          semiDisplayBox.append(formSelect.ui);
+          formSelect.callback = function(){
+            var f = form.find(e => e.formName == control.value);
+            if(f){
+              console.log("Final Form", f, control, form);
+              addForm(f.form);
+              mainForm = f.form;
+            }
+          }
+
+          boundingBox.show();
+        }
       }
   
     }
-  
-    // HTML Elements for the viewer
-      /**
-       * button - generates button with the given markup as contents
-       * @param {string} SVG markup string that contains the content of the button
-       * @param {number} Height of the content
-       * @param {}
-       * @return {object}  Returns the jquery object for button
-       */
-  
-       function button(svg, height){
-        // Button instance
-        var button = this.ui = $('<div></div>');
-  
-        // CSS
-        button.css('box-sizing', 'border-box');
-        button.css('display', 'inline-block');
-        button.css('margin-right', '5px');
-        button.css('height', height);
-        button.css('width', height);
-        button.css('border-radius', (height/2) + 'px');
-        button.css('padding', '3px');
-        button.css('color', 'black');
-        button.css('vertical-align', 'middle');
-        button.css('text-align', 'center');
-        button.css('background', 'rgb(177, 194, 203)');
-  
-        // Content Manipulation
-        this.setSVG = function(svg){
-          button.empty();
-          var formatted_content = $(svg).height(height-6);
-          button.append(formatted_content);
-        }
-  
-        // this.setSVG(svg);
-  
-        // Hover
-        button.hover(
-          ()=>{
-              button.css('box-shadow', '0px 0px 3px black');
-          },
-          ()=>{
-            button.css('box-shadow', 'none');
-          }
-        )
-  
-        // click
-        button.mousedown(()=>{
-          button.css('box-shadow', '0px 0px 1px black');
-        });
-  
-        button.mouseup(()=>{
-          button.css('box-shadow', '0px 0px 3px black');
-        });
-      }
+
+    function ListInput(control, listElements){
+      // var label = $('<div></div>');
+      // label.text(control.key);
+
+      var surroundingBox = this.ui = $('<div></div>');
+      var boundingBox = $('<div></div>');
+      // surroundingBox.append(label);
+      surroundingBox.append(boundingBox);
+
+      var select = $('<select></select>');
+
+      boundingBox.append(select);
+      
+      // Elements of the list 
+      var defaultOption = $('<option></option>');
+      defaultOption.text('select');
+
+      select.append(defaultOption);
+
+      listElements.forEach((listElement)=>{
+          var option = $('<option></option>');
+          option.text(listElement);
+          option.attr('value', listElement);
+          select.append(option);
+      });
+
+      this.callback = function(){};
+      select.on('click', ()=>{
+          control.value = boundingBox.find(":selected").val();
+          this.callback();
+      });
+  }
   
       function slider(config){
         config = config || {};
@@ -690,23 +836,32 @@ $3Dmol.UI = (function(){
      function button(svg, height){
        // Button instance
        var button = this.ui = $('<div></div>');
+       var innerButton = $('<div></div>');
+       button.append(innerButton);
+
        // CSS
        button.css('box-sizing', 'border-box');
        button.css('display', 'inline-block');
-       button.css('margin-right', '5px');
+       button.css('margin', '3px');
        button.css('height', height);
        button.css('width', height);
-       button.css('border-radius', (height/2) + 'px');
-       button.css('padding', '3px');
+       button.css('border-radius', (height/4) + 'px');
+      //  button.css('padding', '3px');
        button.css('color', 'black');
        button.css('background', 'rgb(177, 194, 203)');
 
+       innerButton.css('display', 'flex');
+       innerButton.css('justify-content','center');
+       innerButton.css('align-items', 'center');
+       innerButton.css('padding', '2px');
+       
        // content
        this.setSVG = function(svg){
-         button.empty();
-         var formatted_content = $(svg).height(height-6);
-         button.append(formatted_content);
-       }
+         innerButton.empty();
+         var formatted_content = $(svg);
+         innerButton.append(formatted_content);
+
+        }
 
        this.setSVG(svg);
 

@@ -7,8 +7,6 @@
 $3Dmol.StateManager = (function(){
 
   function States(glviewer, config){
-    var currentForm = '';
-
 
     console.log('State Manager Initiated For the viewer', glviewer);
     console.log('Viewer Configuration', );
@@ -42,31 +40,69 @@ $3Dmol.StateManager = (function(){
 
     // Selection Handlers
     var selections = [];
+    var currentSelection = null;
+    var currentForm = '';
+    var currentStyles = null;
+
+    this.setCurrentSelection = function(selectionId){
+      currentSelection = selections.find(  sel => sel.id == selectionId);
+      currentStyles = currentSelection.styles;
+      ui.tools.styleBox.updateStyles(currentSelection.styles);
+      console.log('Updating Current Style', selections, currentSelection, currentStyles);
+    }
+    
     this.addSelection = function(){
       // console.log('Add Selection Called');
-
       var form =new $3Dmol.UI.form($3Dmol.GLModel.validAtomSelectionSpecs, "Atom Selection");
       ui.tools.dialog.addForm(form);
-      currentForm = "Selection";
-    }
-
-    // Style Handlers
-    var styles = [];
-
-    this.finalize = function(formSpecs){
-      console.log('Generated Config File', currentForm, formSpecs);
-      if( Object.keys(formSpecs).length != 0) {
-        spec = { id : makeid(6), spec : formSpecs };
-        ui.tools.selectionBox.appendSelection(spec);
-      }
-    }
-
-    this.cancel = function(){
-      console.log('Current Form Cancelled', currentForm);
+      currentForm = "new_selection";
     }
 
     this.addStyle = function(){
-      console.log('Add Style Called');
+      var formList = [];
+
+      var validStyles = $3Dmol.GLModel.validAtomStyleSpecs;
+      var forms = Object.keys(validStyles);
+      forms.forEach( (form)=>{
+        let f = new $3Dmol.UI.form(validStyles[form].validItems, form);
+        formList.push({formName: form, form : f});
+      });
+
+
+      ui.tools.dialog.addForm(formList, 'list');
+      currentForm = "new_style";
+    }
+
+    // Style Handlers
+
+    this.finalize = function(formSpecs){
+      console.log('Generated Config File', currentForm, formSpecs);
+      if(currentForm == 'new_selection'){
+        if( Object.keys(formSpecs).length != 0) {
+          selectionSpec = { id : makeid(6), spec : formSpecs , styles : []};
+          ui.tools.selectionBox.appendSelection(selectionSpec);
+          selections.push(selectionSpec);
+          this.setCurrentSelection(selectionSpec.id);
+
+          // console.log(selectionSpec, selections);
+        }
+      }
+      if( currentForm == "new_style"){
+        if( Object.keys(formSpecs).length != 0) {
+          if( currentSelection != null ){
+            styleSpec = { id : makeid(6), spec : formSpecs , styles : []};
+            currentSelection.styles.push(styleSpec);
+            ui.tools.styleBox.updateStyles(currentSelection.styles);
+            // this.setCurrentSelection(selectionSpec.id);
+          }
+          console.log(currentSelection);
+        }
+      }
+    }
+
+    
+    this.cancel = function(){
+      console.log('Current Form Cancelled', currentForm);
     }
 
     function makeid(length) {
