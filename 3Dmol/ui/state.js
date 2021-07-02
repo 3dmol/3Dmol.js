@@ -7,7 +7,8 @@
 $3Dmol.StateManager = (function(){
 
   function States(glviewer, config){
-
+    config = config || {};
+    config.ui = config.ui || false;
     console.log('State Manager Initiated For the viewer', glviewer);
     console.log('Viewer Configuration', );
 
@@ -23,20 +24,27 @@ $3Dmol.StateManager = (function(){
       ui : config.ui || undefined
     }
 
-    var ui = new $3Dmol.UI(this, uiOverlayConfig);
+    this.showUI = function(){
+      this.ui = new $3Dmol.UI(this, uiOverlayConfig);  
+      $(window).on('resize', ()=>{
+        var height = canvas.height();
+        var width = canvas.width();
+        var offset = canvas.offset();
+        var config = {
+          height : height,
+          width : width,
+          offset : offset,
+        }
+        this.ui.resize(config);
+        console.log('Resizing');
+      });
+
+    }
+
+    if(config.ui == true){
+     this.ui = new $3Dmol.UI(this, uiOverlayConfig);
+    }
     // UI changes
-    $(window).on('resize', ()=>{
-      var height = canvas.height();
-      var width = canvas.width();
-      var offset = canvas.offset();
-      var config = {
-        height : height,
-        width : width,
-        offset : offset,
-      }
-      ui.resize(config);
-      console.log('Resizing');
-    });
 
     // Selection Handlers
     var selections = [];
@@ -47,14 +55,14 @@ $3Dmol.StateManager = (function(){
     this.setCurrentSelection = function(selectionId){
       currentSelection = selections.find(  sel => sel.id == selectionId);
       currentStyles = currentSelection.styles;
-      ui.tools.styleBox.updateStyles(currentSelection.styles);
+      this.ui.tools.selectionBox.styleBox.updateStyles(currentSelection.styles);
       console.log('Updating Current Style', selections, currentSelection, currentStyles);
     }
     
     this.addSelection = function(){
       // console.log('Add Selection Called');
-      var form =new $3Dmol.UI.form($3Dmol.GLModel.validAtomSelectionSpecs, "Atom Selection");
-      ui.tools.dialog.addForm(form);
+      var form =new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, "Atom Selection");
+      this.ui.tools.dialog.addForm(form);
       currentForm = "new_selection";
     }
 
@@ -64,12 +72,12 @@ $3Dmol.StateManager = (function(){
       var validStyles = $3Dmol.GLModel.validAtomStyleSpecs;
       var forms = Object.keys(validStyles);
       forms.forEach( (form)=>{
-        let f = new $3Dmol.UI.form(validStyles[form].validItems, form);
+        let f = new $3Dmol.UI.Form(validStyles[form].validItems, form);
         formList.push({formName: form, form : f});
       });
 
 
-      ui.tools.dialog.addForm(formList, 'list');
+      this.ui.tools.dialog.addForm(formList, 'list');
       currentForm = "new_style";
     }
 
@@ -80,7 +88,7 @@ $3Dmol.StateManager = (function(){
       if(currentForm == 'new_selection'){
         if( Object.keys(formSpecs).length != 0) {
           selectionSpec = { id : makeid(6), spec : formSpecs , styles : []};
-          ui.tools.selectionBox.appendSelection(selectionSpec);
+          this.ui.tools.selectionBox.appendSelection(selectionSpec);
           selections.push(selectionSpec);
           this.setCurrentSelection(selectionSpec.id);
 
@@ -92,7 +100,7 @@ $3Dmol.StateManager = (function(){
           if( currentSelection != null ){
             styleSpec = { id : makeid(6), spec : formSpecs , styles : []};
             currentSelection.styles.push(styleSpec);
-            ui.tools.styleBox.updateStyles(currentSelection.styles);
+            this.ui.tools.selectionBox.styleBox.updateStyles(currentSelection.styles);
             // this.setCurrentSelection(selectionSpec.id);
           }
           console.log(currentSelection);

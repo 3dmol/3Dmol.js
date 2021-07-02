@@ -29,8 +29,11 @@
         var ui_overlay = new UI_Overlay(config);
         body.append(ui_overlay.ui);
         // body = ui_overlay.ui;
-
-
+        
+        var movieControl = new MovieBar();
+        body.append(movieControl.ui);
+        setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
+        
         var topbar = new Toolbar();
         body.append(topbar.ui);
         setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
@@ -39,14 +42,11 @@
         body.append(selectionBox.ui);
         setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 2, topbar.ui.outerHeight());
 
-        var styleBox = new StyleBox(icons.paintbrush);
-        body.append(styleBox.ui);
-        setLocation(ui_overlay.ui, styleBox.ui, 'right', 'top', 0, topbar.ui.outerHeight());
-        styleBox.adjustSidebar();
+        // var styleBox = new StyleBox(icons.paintbrush);
+        // body.append(styleBox.ui);
+        // setLocation(ui_overlay.ui, styleBox.ui, 'right', 'top', 0, topbar.ui.outerHeight());
+        // styleBox.adjustSidebar();
 
-        var movieControl = new MovieBar();
-        body.append(movieControl.ui);
-        setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
 
 
         var dialog = new DialogBox({ height: 300, width: 300 });
@@ -67,7 +67,7 @@
           uiOverlay : ui_overlay,
           topbar : topbar,
           selectionBox : selectionBox,
-          styleBox : styleBox,
+          // styleBox : styleBox,
           dialog : dialog,
           alertBox : alertBox,
           movieControl : movieControl
@@ -120,14 +120,14 @@
         var alertBox = uiElements.alertBox;
         var selectionBox = uiElements.selectionBox;
         var movieControl = uiElements.movieControl;
-        var styleBox = uiElements.styleBox;
+        // var styleBox = uiElements.styleBox;
 
         setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
         setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
         setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
         setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 2, topbar.ui.outerHeight());
         setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
-        setLocation(ui_overlay.ui, styleBox.ui, 'right', 'top', 0, topbar.ui.outerHeight());
+        // setLocation(ui_overlay.ui, styleBox.ui, 'right', 'top', 0, topbar.ui.outerHeight());
       }
 
 
@@ -191,13 +191,17 @@
       function SelectionBox(icon, side='left') {
         var selectionBox = this.ui = $('<div></div>')
         var selections = $('<div></div>');
-        selections.css('opacity', '0.8');
+        var styleBox = this.styleBox = new StyleBox();
+        var scrollBox = $('<div></div>');
 
+        selections.css('opacity', '0.9');
+        
         var showArea = $('<div></div>');
         var addArea = $('<div></div>');
         var plusButton = new button(icons.plus, 20);
         plusButton.ui.css('margin','0px');
-
+        // showArea.append(styleBox.ui);
+        
         var hideButton = new button(icon, 20);
         this.selectionObjects = [];
 
@@ -205,8 +209,10 @@
         selectionBox.append(hideButton.ui);
         selectionBox.append(showArea);
         selectionBox.css('position', 'absolute');
+        // selectionBox.css('max-height', config.height);
 
-        showArea.append(selections);
+        scrollBox.append(selections);
+        showArea.append(scrollBox);
         addArea.append(plusButton.ui);
         showArea.append(addArea);
 
@@ -226,7 +232,18 @@
 
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
-        showArea.css('width', '140px');
+        showArea.css('width', '162px');
+        // showArea.css('max-height', parseInt(config.height.replace('px', '')) - hideButton.ui.offset().top);
+        console.log(config.height);
+        scrollBox.css('max-height', 300);
+        scrollBox.css('overflow', 'hidden');
+        selections.css('max-height', 300);
+        selections.css('overflow', 'auto');
+        // selections.css({
+        //   '-webkit'
+        // });
+        // selections.css('padding-right', '17px');
+        selections.css('box-sizing', 'content-box');
         // showArea.css('height', '300px');
         // showArea.css('border-radius', '6px');
         // showArea.css('background', 'rgb(214, 214, 214)');
@@ -290,6 +307,7 @@
           selection.append(heading);
           selection.append(parameters);
 
+          
           var hidden = true;
           parameters.hide();
           hideButton.ui.on('click', ()=>{
@@ -308,7 +326,7 @@
           spec = selectionSpec.spec;
           var keys = Object.keys(spec);
 
-          var table = $('<table></table>')
+          var table = $('<table></table>');
           keys.forEach((key)=>{
             var tr = $('<tr></tr>')
             var k = $('<td></td>').text(key);
@@ -330,10 +348,43 @@
           selection.data('sel-id', selectionSpec.id);
           
           this.selectionObjects.push(selection);
+          
+          var mouseIncideStyle = false;
 
-          selection.on('click', ()=>{
-            stateManager.setCurrentSelection(selectionSpec.id);
+          styleBox.ui.on('mouseenter', ()=>{
+            mouseIncideStyle = true;
           });
+
+          styleBox.ui.on('mouseleave', ()=>{
+            mouseIncideStyle = false;
+          });
+
+
+          // selection.on('click', ()=>{
+          //   // console.log(mouseIncideStyle);
+          // });
+          
+          selection.on('mouseenter', ()=>{
+            if(!mouseIncideStyle){
+              stateManager.setCurrentSelection(selectionSpec.id);
+            }
+
+            styleBox.ui.show();
+            // parameters.show();
+            console.log('Shape of selection', selection.height(), selection.width(), selection.offset());
+            selection.append(styleBox.ui);
+            styleBox.ui.css('left', selection.outerWidth());
+            // console.log(selectionWidth)
+            styleBox.ui.css('top', selection.offset().top  - 40);
+            // parameters.hide();
+
+          });
+
+          selection.on('mouseleave', ()=>{
+            styleBox.ui.hide();
+            selection.remove(styleBox);
+          });
+
 
           // CSS
           
@@ -345,50 +396,50 @@
       }
 
       function StyleBox(svg) {  
-        var boundingBox = this.ui = $('<div></div>');
+        // var boundingBox = this.ui = $('<div></div>');
+        var showArea = this.ui = $('<div></div>');
         var styles = $('<div></div>');
-        var showArea = $('<div></div>');
         var addArea = $('<div></div>');
-        var hideButton = new button(svg, 20);
+        // var hideButton = new button(svg, 20);
         var addButton = new button(icons.plus, 20);
         this.styleObjects = [];
 
-        boundingBox.append(hideButton.ui);
-        boundingBox.append(showArea);
+        // boundingBox.append(hideButton.ui);
+        // boundingBox.append(showArea);
 
         showArea.append(styles);
         showArea.append(addArea);
         addArea.append(addButton.ui); 
 
-        boundingBox.css('text-align', 'right');
+        // boundingBox.css('text-align', 'right');
 
-        showArea.css('background', 'lightgrey'); 
-        showArea.width(120);
-        showArea.height(200);
+        showArea.css('background', '#a4a4a4'); 
+        showArea.width(158);
+        // showArea.height(200);
         showArea.css('position', 'absolute');
         showArea.css('padding', '3px');
         showArea.css('border-radius', '4px');
 
         addArea.css('text-align', 'center');
 
-        this.adjustSidebar = function(){
-          showArea.css('left', hideButton.ui.outerWidth() - showArea.outerWidth() );
-        }
+        // this.adjustSidebar = function(){
+        //   showArea.css('left', hideButton.ui.outerWidth() - showArea.outerWidth() );
+        // }
 
-        boundingBox.css('position', 'absolute');
+        // boundingBox.css('position', 'absolute');
 
         hidden = true;
         showArea.hide();
-        hideButton.ui.on('click', ()=>{
-          if(hidden){
-            showArea.show(100);
-            hidden = false;
-          }
-          else {
-            showArea.hide(100);
-            hidden = true;
-          }
-        });
+        // hideButton.ui.on('click', ()=>{
+        //   if(hidden){
+        //     showArea.show(100);
+        //     hidden = false;
+        //   }
+        //   else {
+        //     showArea.hide(100);
+        //     hidden = true;
+        //   }
+        // });
 
         addButton.ui.on('click', ()=>{
           stateManager.addStyle();
@@ -396,30 +447,40 @@
 
         this.updateStyles = function(styleSpecs){
           styles.empty();
-
+          // showArea.show();
           styleSpecs.forEach((s)=>{
 
+            
             var styleBox = $('<div></div>');
             var controls = $('<div></div>');
+            var heading = $('<div></div>');
             var styleName = $('<div></div>');
-            var selectionName = $('<div></div>');
             var parameters = $('<div></div>');
 
-            styleName.text(s.id);
-            styleBox.append(styleName);
-    
-            styleBox.append(controls);
-            styleBox.append(parameters);
 
-            var editButton = new button(icons.edit, 16);
-            var removeButton = new button(icons.remove, 16);
-            var hideButton = new button(icons.list, 16);
-            var showButton = new button(icons.style, 16);
-    
+            styleName.text(s.id);
+            
+
+            var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
+            var editButton = new button(icons.pencil, 16);
+
+            controls.append(removeButton.ui)
             controls.append(editButton.ui);
-            controls.append(removeButton.ui);
-            controls.append(hideButton.ui);
-            controls.append(showButton.ui);
+            controls.css('display', 'inline-block');
+
+            heading.append(controls);
+            styleName.text("sel#" + s.id.slice(0,4));
+            styleName.css('display','inline-block');
+            styleName.css('font-family', 'Arial');
+            styleName.css('font-size', '12px');
+            styleName.css('font-weight', 'bold');
+            heading.append(styleName);
+
+            var hideButton = new button(icons.listArrow, 16, { bgColor: 'none', hoverable: 'false' });
+
+            heading.append(hideButton.ui);
+            styleBox.append(heading);
+            styleBox.append(parameters);
 
             var hidden = true;
             parameters.hide();
@@ -427,29 +488,45 @@
               if(hidden){
                 parameters.show();
                 hidden = false;
+                hideButton.ui.css('transform', 'rotate(90deg)');
               }
               else {
                 hidden = true;
                 parameters.hide();
+                hideButton.ui.css('transform', 'rotate(0deg)');
               }
             });
 
             spec = s.spec;
             var keys = Object.keys(spec);
+
+            var table = $('<table></table>');
             keys.forEach((key)=>{
-              var text = `${key} : ${spec[key]}`
-              var div = $('<div></div>');
-              div.text(text);
-              parameters.append(div);
+              var tr = $('<tr></tr>')
+              var k = $('<td></td>').text(key);
+              k.css('font-family', 'Arial');
+              k.css('font-weight', 'bold');
+              k.css('font-size', '12px');
+
+              var v = $('<td></td>').text(spec[key]);
+              v.css('font-family', 'Arial');
+              v.css('font-size', '12px');
+              
+
+              tr.append(k,v);
+              table.append(tr);
             });
 
+            parameters.append(table)
             styles.append(styleBox);
             styleBox.data('sel-id', s.id);
             
+            styleBox.append($('<hr />'));
+
             this.styleObjects.push(styleBox);
 
             styleBox.on('click', ()=>{
-              // stateManager.setCurrentSelection(selectionSpec.id);
+              
             });
           });
 
