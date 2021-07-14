@@ -120,7 +120,7 @@ $3Dmol.GLModel = (function() {
         "elem":{type:"element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
         "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
         "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
-        "resi":{type:"number",gui:true}, // Residue number 
+        "resi":{type:"array_range",gui:true}, // Residue number 
         "icode":{type:"number",valid:false,step:0.1},
         "rescode":{type:"number",valid:false,step:0.1},
         "serial":{type:"number",valid:false,step:0.1}, // Atom's serial id numbermodels
@@ -132,7 +132,7 @@ $3Dmol.GLModel = (function() {
         "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
         "b":{type:"number",valid:false,step:0.1}, // Atom b factor data
         "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
-        "clickable":{type:"boolean",valid:false}, // Set this flag to true to enable click selection handling for this atom
+        "clickable":{type:"boolean",valid:false, gui:true}, // Set this flag to true to enable click selection handling for this atom
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
@@ -144,11 +144,11 @@ $3Dmol.GLModel = (function() {
     //type is irrelivent here becuase htey are are invalid
     var validExtras ={  // valid atom specs are ok too
         "model":{type:"string",valid :false}, // a single model or list of models from which atoms should be selected
-        "bonds":{type:"string",valid :false}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
+        "bonds":{type:"number",valid :false, gui:true}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
         "predicate":{type:"string",valid :false}, // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
-        "invert":{type:"string",valid :false}, // if set, inverts the meaning of the selection
-        "byres":{type:"string",valid :false}, // if set, expands the selection to include all atoms of any residue that has any atom selected
-        "expand":{type:"string",valid :false}, // expands the selection to include all atoms within a given distance from the selection
+        "invert":{type:"boolean",valid :false, gui:true}, // if set, inverts the meaning of the selection
+        "byres":{type:"boolean",valid :false, gui:true}, // if set, expands the selection to include all atoms of any residue that has any atom selected
+        "expand":{type:"number",valid :false, gui:true}, // expands the selection to include all atoms within a given distance from the selection
         "within":{type:"string",valid :false}, // intersects the selection with the set of atoms within a given distance from another selection
         "and":{type:"string",valid :false}, // and boolean logic
         "or":{type:"string",valid :false}, // or boolean logic
@@ -202,13 +202,13 @@ $3Dmol.GLModel = (function() {
     };
 
     GLModel.validAtomStyleSpecs = {
-        "line":{validItems:validLineSpec,gui:true}, // draw bonds as lines
-        "cross":{validItems:validCrossSpec,gui:true}, // draw atoms as crossed lines (aka stars)
-        "stick":{validItems:validStickSpec,gui:true}, // draw bonds as capped cylinders
-        "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
-        "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
-        "colorfunc":{validItems:null,valid:false},
-        "clicksphere":{validItems:validSphereSpec} //invisible style for click handling
+        "line":{validItems:validLineSpec,type:"form",gui:true}, // draw bonds as lines
+        "cross":{validItems:validCrossSpec,type:"form",gui:true}, // draw atoms as crossed lines (aka stars)
+        "stick":{validItems:validStickSpec,type:"form",gui:true}, // draw bonds as capped cylinders
+        "sphere":{validItems:validSphereSpec,type:"form",gui:true}, // draw atoms as spheres
+        "cartoon":{validItems:validCartoonSpec,type:"form",gui:true}, // draw cartoon representation of secondary structure
+        "colorfunc":{validItems:null,type:"js",valid:false},
+        "clicksphere":{validItems:validSphereSpec,type:"form"} //invisible style for click handling
     };
 
     GLModel.validSurfaceSpecs = {

@@ -12,6 +12,8 @@ $3Dmol.StateManager = (function(){
     console.log('State Manager Initiated For the viewer', glviewer);
     console.log('Viewer Configuration', );
 
+    this.currentFormValue = null;
+
     var canvas = $(glviewer.getRenderer().domElement);
     var height = canvas.height();
     var width = canvas.width();
@@ -56,40 +58,50 @@ $3Dmol.StateManager = (function(){
       currentSelection = selections.find(  sel => sel.id == selectionId);
       currentStyles = currentSelection.styles;
       this.ui.tools.selectionBox.styleBox.updateStyles(currentSelection.styles);
-      console.log('Updating Current Style', selections, currentSelection, currentStyles);
+      // console.log('Updating Current Style', selections, currentSelection, currentStyles);
     }
     
     this.addSelection = function(){
       // console.log('Add Selection Called');
-      var form =new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, "Atom Selection");
+      this.currentFormValue = { value: null, type: 'form', key: "Atom Selection"}
+      var form =new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, this.currentFormValue);
       this.ui.tools.dialog.addForm(form);
       currentForm = "new_selection";
     }
 
     this.addStyle = function(){
-      var formList = [];
+      // var formList = [];
 
       var validStyles = $3Dmol.GLModel.validAtomStyleSpecs;
-      var forms = Object.keys(validStyles);
-      forms.forEach( (form)=>{
-        let f = new $3Dmol.UI.Form(validStyles[form].validItems, form);
-        formList.push({formName: form, form : f});
-      });
-
-
-      this.ui.tools.dialog.addForm(formList, 'list');
+      this.currentFormValue = { value: null, type: 'form', key: "Atom Style"}
+      // var forms = Object.keys(validStyles);
+      // forms.forEach( (form)=>{
+      //   let f = new $3Dmol.UI.Form(validStyles[form].validItems, form);
+      //   formList.push({formName: form, form : f});
+      // });
+      let form = new $3Dmol.UI.Form(validStyles, this.currentFormValue);
+      this.ui.tools.dialog.addForm(form);
       currentForm = "new_style";
     }
 
     // Style Handlers
 
     this.finalize = function(formSpecs){
-      console.log('Generated Config File', currentForm, formSpecs);
+      // console.log('Generated Config File', currentForm, formSpecs);
       if(currentForm == 'new_selection'){
         if( Object.keys(formSpecs).length != 0) {
-          selectionSpec = { id : makeid(6), spec : formSpecs , styles : []};
+          selectionSpec = { id : makeid(6), spec : formSpecs.value, hidden: false , styles : []};
+
+          
+          // Value Sanitization
+          if(selectionSpec.spec.resi){
+            selectionSpec.spec.resi = selectionSpec.spec.resi.split(",");
+          }
+          console.log('Form:Specs:Value', selectionSpec);
+          
           this.ui.tools.selectionBox.appendSelection(selectionSpec);
           selections.push(selectionSpec);
+
           this.setCurrentSelection(selectionSpec.id);
 
           // console.log(selectionSpec, selections);
@@ -98,16 +110,33 @@ $3Dmol.StateManager = (function(){
       if( currentForm == "new_style"){
         if( Object.keys(formSpecs).length != 0) {
           if( currentSelection != null ){
-            styleSpec = { id : makeid(6), spec : formSpecs , styles : []};
+            styleSpec = { id : makeid(6), spec : formSpecs.value, hidden : false , styles : []};
             currentSelection.styles.push(styleSpec);
             this.ui.tools.selectionBox.styleBox.updateStyles(currentSelection.styles);
+
+            console.log(currentSelection.spec, styleSpec.spec);
+
+            currentSelection.styles.forEach((style)=>{
+              console.log("Adding Styles Yay");
+              glviewer.addStyle(currentSelection.spec, style.spec);
+
+            });
+            // glviewer.setStyle(currentSelection.spec, styleSpec.spec);
+            glviewer.render();
             // this.setCurrentSelection(selectionSpec.id);
           }
-          console.log(currentSelection);
+          // console.log(currentSelection);
         }
       }
     }
 
+    this.removeStyle = function(styleSpec){
+      console.log('StateManager::removeStyle', styleSpec)
+    }
+
+    this.removeSelection = function(selectionSpec) {
+      console.log('StateManager::removeSelection', selectionSpec)
+    }
     
     this.cancel = function(){
       console.log('Current Form Cancelled', currentForm);

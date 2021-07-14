@@ -234,7 +234,7 @@
         showArea.css('padding', '3px');
         showArea.css('width', '162px');
         // showArea.css('max-height', parseInt(config.height.replace('px', '')) - hideButton.ui.offset().top);
-        console.log(config.height);
+        // console.log(config.height);
         scrollBox.css('max-height', 300);
         scrollBox.css('overflow', 'hidden');
         selections.css('max-height', 300);
@@ -323,6 +323,11 @@
             }
           });
 
+          removeButton.on('click', function(){
+            remove(selection);
+            stateManager.removeSelection(selectionSpec);
+          });
+
           spec = selectionSpec.spec;
           var keys = Object.keys(spec);
 
@@ -371,7 +376,7 @@
 
             styleBox.ui.show();
             // parameters.show();
-            console.log('Shape of selection', selection.height(), selection.width(), selection.offset());
+            // console.log('Shape of selection', selection.height(), selection.width(), selection.offset());
             selection.append(styleBox.ui);
             styleBox.ui.css('left', selection.outerWidth());
             // console.log(selectionWidth)
@@ -496,28 +501,46 @@
                 hideButton.ui.css('transform', 'rotate(0deg)');
               }
             });
-
-            spec = s.spec;
-            var keys = Object.keys(spec);
-
-            var table = $('<table></table>');
-            keys.forEach((key)=>{
-              var tr = $('<tr></tr>')
-              var k = $('<td></td>').text(key);
-              k.css('font-family', 'Arial');
-              k.css('font-weight', 'bold');
-              k.css('font-size', '12px');
-
-              var v = $('<td></td>').text(spec[key]);
-              v.css('font-family', 'Arial');
-              v.css('font-size', '12px');
+            
+            function makeTableFromKeys(spec){
+              var boundingBox = $('<div></div>');            
+              var keys = Object.keys(spec);
+              var table = $('<table></table>');
               
+              keys.forEach((key)=>{
+                console.log("StyleBox:MakeTableFromKeys", spec, spec[key], key);
+                if(typeof spec[key] == "object"){
+                  var subData = makeTableFromKeys(spec[key])
+                  var head = $('<div></div>').text(key);
+                  boundingBox.append(head);
+                  boundingBox.append(subData);
+                  boundingBox.append($('<hr />'));
+                }
+                else {
+                  var tr = $('<tr></tr>')
+                  var k = $('<td></td>').text(key);
+                  k.css('font-family', 'Arial');
+                  k.css('font-weight', 'bold');
+                  k.css('font-size', '12px');
+    
+                  var v = $('<td></td>').text(spec[key]);
+                  v.css('font-family', 'Arial');
+                  v.css('font-size', '12px');
+                  
+                  tr.append(k,v);
+                  table.append(tr);
+                  
+                }
+              });
 
-              tr.append(k,v);
-              table.append(tr);
-            });
+              boundingBox.append(table);
 
-            parameters.append(table)
+              return boundingBox;
+            }
+
+            var data = makeTableFromKeys(s.spec);
+            // console.log(s.spec);
+            parameters.append(data);
             styles.append(styleBox);
             styleBox.data('sel-id', s.id);
             
@@ -563,7 +586,7 @@
         var playing = false;
 
         play.ui.on('click', ()=>{
-          console.log('trying to change the background', play);
+          // console.log('trying to change the background', play);
           if(playing){
             play.setSVG(icons.movie.play);
           }
@@ -626,7 +649,7 @@
     
           setTimeout(()=>{ 
             boundingBox.hide(); 
-            console.log('Hiding');
+            // console.log('Hiding');
           }, timeout);
         }
     
@@ -697,11 +720,18 @@
         });
     
         done.ui.on('click', ()=>{
-          boundingBox.hide();
-          stateManager.finalize(mainForm.getValues());
-          semiDisplayBox.empty();
-          displayBox.empty();
-          // stateManager.
+          if(mainForm.validate()){
+            boundingBox.hide();
+            console.log("Form Validated in the UI", mainForm.validate());
+            // console.log("UI:DialogBox:Finalize", mainForm)
+            stateManager.finalize(mainForm.getValue());
+            semiDisplayBox.empty();
+            displayBox.empty();
+          }
+          else{
+            $(document).trigger('Error', ['Incorrect Input', 'Please check the input provided for selection, and resubmit the form']);
+          }
+
         });
     
         drop.ui.on('click', ()=>{
@@ -719,13 +749,13 @@
             boundingBox.show();
     
             mainForm = form;
-            console.log("Form", this.form);
+            // console.log("Form", mainForm);
           }
           else {
             semiDisplayBox.empty();
 
             var inputList = form.map((f)=>{return f.formName});
-            console.log(inputList);
+            // console.log(inputList);
 
             control = {value: null, type: String}
             var formSelect = new ListInput(control, inputList);
@@ -733,7 +763,7 @@
             formSelect.callback = function(){
               var f = form.find(e => e.formName == control.value);
               if(f){
-                console.log("Final Form", f, control, form);
+                // console.log("Final Form", f, control, form);
                 addForm(f.form);
                 mainForm = f.form;
               }
@@ -845,7 +875,7 @@
         *
         */
       function setLocation(parent, child, x_type='left', y_type='top', x_offset=0, y_offset=0){
-        console.log('Setting location', parent.offset(), child.offset(), parent.height(), parent.width(), child.height(), child.width());
+        // console.log('Setting location', parent.offset(), child.offset(), parent.height(), parent.width(), child.height(), child.width());
 
         // p_ stands for parent
         var p_position = parent.position();
@@ -869,7 +899,7 @@
         };
 
         if(x_type == 'left'){
-          console.log('left is called');
+          // console.log('left is called');
           c_position.left = p_left + padding + x_offset;
         }
         else if(x_type == 'center'){
@@ -900,7 +930,7 @@
         //   top: (y_type == 'top' )? p_top + padding + y_offset : (y_type == 'bottom')? p_height - c_height - padding + y_offset : y_offset
         // };
 
-        console.log('setting parent child location',p_position,  c_position, padding, p_width, p_height, c_width, c_height);
+        // console.log('setting parent child location',p_position,  c_position, padding, p_width, p_height, c_width, c_height);
         setPosition(child, c_position.left, c_position.top);
       }
 

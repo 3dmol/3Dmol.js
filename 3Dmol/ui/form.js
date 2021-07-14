@@ -66,24 +66,27 @@
             color.css('border','1px solid black');
             color.css('border-radius', '2px');
 
-            var update = ()=>{};
-            this.update = (callback)=>{
-                update = callback;
-            }
+            this.update = function(control){};
+            var self = this;
             // Functionality
-            function updatePreview(){
+            function updatePreview(c){
                 var c = `rgb(${control.R.value}, ${control.G.value}, ${control.B.value})`;
                 color.css('background', c);
                 outerControl.value = c;
                 // console.log('rn');
-
-                update();
+                self.update(control);
             }
 
             RValue.update = GValue.update = BValue.update = updatePreview;
             updatePreview();
 
+            this.getValue = function(){
+                return outerControl;
+            }
 
+            this.validate = function(){
+                return true;                
+            }
         }
 
         Form.ListInput = function(control, listElements){
@@ -102,19 +105,37 @@
             // Elements of the list 
             var defaultOption = $('<option></option>');
             defaultOption.text('select');
+            defaultOption.attr('value', 'default');
 
             select.append(defaultOption);
-
+            
+            
             listElements.forEach((listElement)=>{
                 var option = $('<option></option>');
                 option.text(listElement);
                 option.attr('value', 'value');
                 select.append(option);
             });
-
-            select.on('click', ()=>{
-                control.value = boundingBox.find(":selected").val();
+            
+            this.update = function(control){
+                console.log("From::Input:update", "Default Update", control);
+            }
+            
+            select.on('click', {parent: this}, (event)=>{
+                control.value = select.children('option:selected').val();
+                event.data.parent.update(control);
             });
+
+            this.getValue = ()=>{
+                return control;
+            }
+
+            this.validate = function(){
+                if(control.value == 'default')
+                    return false;
+                else 
+                    return true;
+            }
         }
         
         Form.Input = function(control){
@@ -126,12 +147,161 @@
             // surroundingBox.append(label);
             surroundingBox.append(boundingBox);
 
-            var input =  $('<input type="text">');
+            var input = this.domElement = $('<input type="text">');
             boundingBox.append(input);
 
-            input.on('change', ()=>{
+            this.update = function(control){
+                console.log("From::Input:update", "Default Update", control);
+            }
+
+            // $(document).on('ready', ()=>{
+            input.on('change', { parent:this, control: control }, (event)=>{
                 control.value = input.val();
+                
+                // calling update function 
+                event.data.parent.update(control);
             });
+            // });
+            
+            
+            this.getValue = ()=>{
+                // console.log("Form Inut", control);
+                return control;
+            }
+            
+            this.error = function(){
+                $(document).trigger('Error', ["Incorrect Input", "Please enter the input as per the direction"]);  
+            }
+
+            this.validateOnlyNumber = function(){
+                var decimalEntered = false;
+
+                input.on('keydown', function(event){
+                    event.preventDefault();
+
+                    if((event.key.charCodeAt(0) >= "0".charCodeAt(0) && event.key.charCodeAt(0) <= "9".charCodeAt(0)) || event.key == ".") {
+
+                        if(decimalEntered && event.key == ".") {
+                            console.log('Again Entering decimal');
+                            return;
+                        }
+                        $(this).val( $(this).val() + event.key);
+                        // event.preventDefault();
+                        console.log("Input Number Only", event.key.charCodeAt(), event.key);
+                        if(event.key == ".")
+                            decimalEntered = true;
+                    }
+                    else if(event.key == "Backspace"){
+                        var val = $(this).val();
+                        var toRemove = val.slice(-1);
+                        if(toRemove == '.')
+                            decimalEntered = false;
+                        $(this).val(val.slice(0,-1));
+                    }
+                    else{
+                        console.log('Not a number in the input');
+                    }
+
+                    //  var text = $(this).val().replace(/[^\d]+/, "");
+                    // $(this).val(text);
+                    input.trigger('change')
+                    console.log("Text", control.value);
+                });
+            }
+
+            this.validateInputRange = function(){
+                var dashEntered = false;
+                var commaEntered = false;
+                input.on('keydown', function(event){
+                    event.preventDefault();
+                    
+                    if( $(this).val().length <= 1 && (event.key == '-' || event.key == ',')){
+                        console.log('Cannnot Enter "-" or "," at the beginning');
+                        return;
+                    }
+
+                    if((event.key.charCodeAt(0) >= "0".charCodeAt(0) && event.key.charCodeAt(0) <= "9".charCodeAt(0)) || event.key == '-' || event.key == ',') {
+
+                        if(dashEntered && event.key == "-") {
+                            console.log('Again dash entered');
+                            return;
+                        }
+                        else if(dashEntered && event.key != "-" && event.key != ","){
+                            dashEntered = false;
+                        }
+                        else if(dashEntered && event.key == ",") {
+                            return;
+                        }
+
+                        if(commaEntered && event.key == ",") {
+                            console.log('Again comma entered');
+                            return;
+                        }
+                        else if(commaEntered && event.key != "," && event.key != "-"){
+                            commaEntered = false;
+                        }
+                        else if(commaEntered && event.key == "-") {
+                            return;
+                        }
+
+                        $(this).val( $(this).val() + event.key);
+                        // event.preventDefault();
+                        console.log("Input Number Only", event.key.charCodeAt(), event.key);
+                        if(event.key == "-")
+                            dashEntered = true;
+
+                        if(event.key == ",")
+                            commaEntered = true;
+                    }
+                    else if(event.key == "Backspace"){
+                        var val = $(this).val();
+                        var toRemove = val.slice(-1);
+                        var beforeToRemove = val.slice(-2);
+
+                        if(beforeToRemove == '-')
+                            dashEntered = true;
+                        else if (toRemove == '-')
+                            dashEntered = false;
+
+                        if(beforeToRemove == ',')
+                            commaEntered = true;
+                        else if (toRemove == ',')
+                            commaEntered = false;
+
+
+                        $(this).val(val.slice(0,-1));
+                    }
+                    else{
+                        console.log('Not a number in the input');
+                    }
+
+                    //  var text = $(this).val().replace(/[^\d]+/, "");
+                    // $(this).val(text);
+                    input.trigger('change')
+                    console.log("Text", control.value);
+
+                });
+            }
+
+            this.isEmpty = function(){
+                if(control.value == ""){
+                    return true;
+                }
+            }
+
+            this.validate = function(){
+                if((control.active == true && (control.value != null && control.value != "")) || (control.active == false)){
+                    input.css('box-shadonw', 'none');
+                    console.log("Form::Input:validate", 'success', control);
+                    return true
+                }
+                else {
+                    input.css('box-shadow', '0px 0px 2px red');
+                    console.log("Form::Input:validate", 'failure', control);
+                    return false;
+                }
+            }
+
         }
         
         Form.Checkbox = function(control){
@@ -148,14 +318,26 @@
 
             this.click = ()=>{};
 
-            checkbox.on('click', ()=>{
+            this.update = function(control){
+                console.log("From::Input:Checkbox", "Default Update", control);
+            }
+
+            this.getValue = ()=>{
+                return control;
+            }
+
+            checkbox.on('click',{ parent: this}, (event)=>{
                 control.value = checkbox.prop('checked');
-                this.click(control.value);
+                event.data.parent.update(control);
             });
 
             // CSS
             label.css('display', 'inline-block');
             boundingBox.css('display', 'inline-block')
+
+            this.validate = function(){
+                return true;
+            }
         }
 
         Form.Slider = function(control){
@@ -190,16 +372,22 @@
 
             var setValue = false;
             
-            this.update = ()=>{};
-            
+            this.update = function(control){
+                console.log("Form::Slider:update", "Default Update", control);
+            };
+
+            this.getValue = ()=>{
+                return control;
+            }
+
             slide.on('mousedown', ()=>{
                 setValue = true;
             });
 
-            slide.on('mousemove', ()=>{
+            slide.on('mousemove', { parent: this } ,(event)=>{
                 if(setValue){
                     control.value = slide.val();
-                    this.update();
+                    event.data.parent.update(control);
                     // console.log('working');
                 }
             });
@@ -216,14 +404,39 @@
             slide.css('padding', '0px');
             slide.css('margin', '0px');
             
+            this.validate = function(){
+                return true;
+            }
 
         }
 
-        function Form(specs, specName=''){
-            specs = specs || {};
+        Form.EmptyElement = function(control){
+            this.ui = $('<div></div>');
 
+            var update = ()=>{};
+            
+            this.onUpdate = (callback)=>{
+                update = callback;
+            }
+
+            this.getValue = ()=>{
+                return control;
+            }
+
+            this.validate = function(){
+                return true;
+            }
+        }
+
+        // mainControl param will be used to take in specName
+        // in the form of key 
+        // type will be 'form'
+        // active will be used to activate deactivate form if more than one form
+        function Form(specs, mainControl ){
+            specs = specs || {};
+            // var control = { value : null, type : type, key : key, active: false };
             // Test area
-            body = $('body');
+            // body = $('body');
             // var changingColor = new Color();
             // body.append(changingColor.ui);
             // console.log('added changing color', changingColor);
@@ -231,7 +444,7 @@
             // Parse Specs and create array of inputs 
             var boundingBox = this.ui = $('<div></div>');
 
-            boundingBox.append($(`<p><b>${specName}</b></p><div style="border-top:1px solid black"></div>`));
+            boundingBox.append($(`<p><b>${mainControl.key}</b></p><div style="border-top:1px solid black"></div>`));
             boundingBox.addClass('form');
             
             var inputs = this.inputs = [];
@@ -239,43 +452,69 @@
             
             var keys = Object.keys(specs);
             keys.forEach((key)=>{
-                var prop = new Property(key, specs[key].type);
-                inputs.push(prop);
-                boundingBox.append(prop.ui);
+                if(specs[key].gui){
+                    var prop = new Property(key, specs[key].type);
+                    inputs.push(prop);
+                    boundingBox.append(prop.ui);
+                }
 
                 // console.log('Checking Specs', prop.placeholder, key, specs[key]);
             });
 
-            this.getValues = function(){
-                var config = {}
-
+            var update = ()=>{};
+            
+            this.onUpdate = (callback)=>{
+                update = callback;
+            }
+            
+            this.getValue = function(){
+                mainControl.value = mainControl.value || {};
+                // console.log("Form Inputs", inputs);
                 inputs.forEach((input)=>{
-                    var value = input.getValue();
-                    if(value.control.active){
-                        config[value.key] = value.control.value;
+                    var inputValue = input.getValue();
+                    // console.log("Current Input Value", inputValue)
+                    if(inputValue.active){
+                        mainControl.value[inputValue.key] = inputValue.value;
                     }
                 });
 
-
-                return config;
+                return mainControl
+            }
+            
+            var updateValues = function(inputControl){
+                mainControl.value[inputControl.key] = control.value;
+                update(mainControl);     
             }
 
-            function Property(key, type){
+            this.validate = function(){
+                var validations = inputs.map((i)=>{
+                    return i.placeholder.validate();
+                });
+
+                if(validations.find( e => e == false) == undefined )
+                    return true;
+            }
+            
+            function Property(key, type) {
                 var control = { value : null, type : type, key : key, active: false };
                 var boundingBox = this.ui = $('<div></div>');
                 this.placeholder = { ui : $('<div></div>') }; // default value for ui element 
                 this.active = new Form.Checkbox({value: false, key:key});
 
 
-                if(specs[key].type == 'string'){
+                if(specs[key].type == 'string' || specs[key].type == 'element'){
 					this.placeholder = new Form.Input(control);
                     this.placeholder.ui.attr('type', 'text');
-                    // console.log('String type')   
-                    // console.log('string input', this.placeholder);
 				}
 				else if(specs[key].type == 'number'){
                     this.placeholder = new Form.Input(control);
                     this.placeholder.ui.attr('type', 'text');
+                    this.placeholder.validateOnlyNumber();
+				}
+                else if(specs[key].type == 'array_range'){
+                    this.placeholder = new Form.Input(control);
+                    this.placeholder.ui.attr('type', 'text');
+                    this.placeholder.validateInputRange();
 				}
 				else if(specs[key].type == 'color'){
                     this.placeholder = new Form.Color(control);
@@ -283,60 +522,60 @@
 				}else if(specs[key].type == 'boolean'){
                     this.placeholder = new Form.Checkbox(control);
 
-				}else if(specs[key].type == 'array'){
-					console.log('Form Generation ERROR: Arrays will be implemented later');
-
 				}else if(specs[key].type == 'properties'){
 					this.placeholder = new Form.Input(control);
                     this.placeholder.ui.attr('type', 'text');
 
-				}else if(specs[key].type == 'callback'){
-                    console.log('Form Generation ERROR: Callback will be implemented later');
-					
-				}else if(specs[key].type == 'function'){
-					console.log('Form Generation ERROR: Function will be implemented later');
-					
-				}else if(specs[key].type == 'invalid'){
-                    console.log('Form Generation ERROR: Invalid will be implemented later');
-					
 				}else if(specs[key].type == 'colorscheme'){
 					this.placeholder = new Form.Input(control);
                     this.placeholder.ui.attr('type', 'text');
+                
                 }else if(specs[key].type == undefined){
 					if( specs[key].validItems) {
                         this.placeholder = new Form.ListInput(control, specs[key].validItems);
 					}
-				}else {
-					this.placeholder.ui.text('Unknown property type');
+				
+                }else if(specs[key].type == 'form'){
+                    this.placeholder = new Form(specs[key].validItems, control);
+                    this.placeholder.ui.append($('<hr />'));
+                }
+                else {
+					this.placeholder = new Form.EmptyElement(control);
+                    // return new Form.EmptyElement(control);
 				}
 
                 // console.log("Checking placeholder", this.placeholder);
                 
                 this.getValue = function(){
-                    return {   
-                        key : key,
-                        control : control,
-                    }
+                    // console.log("Property Input", key ,this.placeholder);
+                    if(this.placeholder.getValue)
+                        return this.placeholder.getValue();
+                    else
+                        return null;
                 }
 
 
                 // Adding active control for the property
                 var placeholder = this.placeholder;
+                // console.log("Property", placeholder);
                 placeholder.ui.hide();
                 this.active.ui.width(200);
 
 
                 if(type !='boolean') {
                     boundingBox.append(this.active.ui);
-                    this.active.click = function(active){
-                        (active)? placeholder.ui.show() : placeholder.ui.hide();
-                        control.active = active;
+                    this.active.update = function(c){
+                        (c.value)? placeholder.ui.show() : placeholder.ui.hide();
+                        control.active = c.value;
                     }
                 }
+                
                 boundingBox.append(this.placeholder.ui);
 
-
+                if(this.placeholder.onUpdate)
+                    this.placeholder.onUpdate(updateValues);
             }
+            
 
         }
 
