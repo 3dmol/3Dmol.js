@@ -115,16 +115,16 @@ $3Dmol.GLModel = (function() {
         "x":{type:"number",valid:false,step:0.1}, // Atom's x coordinate
         "y":{type:"number",valid:false,step:0.1}, // Atom's y coordinate
         "z":{type:"number",valid:false,step:0.1}, // Atom's z coordinate
-        "color":{type:"color",gui:true}, // Atom's color, as hex code
-        "surfaceColor":{type:"color",gui:true}, // Hex code for color to be used for surface patch over this atom
+        "color":{type:"color",gui:false}, // Atom's color, as hex code
+        "surfaceColor":{type:"color",gui:false}, // Hex code for color to be used for surface patch over this atom
         "elem":{type:"element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
-        "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
+        "hetflag":{type:"boolean",valid:false, gui:true}, // Set to true if atom is a heteroatom
         "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
         "resi":{type:"array_range",gui:true}, // Residue number 
         "icode":{type:"number",valid:false,step:0.1},
         "rescode":{type:"number",valid:false,step:0.1},
         "serial":{type:"number",valid:false,step:0.1}, // Atom's serial id numbermodels
-        "atom":{type:"string",valid:false}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+        "atom":{type:"string",valid:false, gui:true}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds":{type:"array",valid:false}, // Array of atom ids this atom is bonded to
         "ss":{type:"string",valid:false}, // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
         "singleBonds":{type:"boolean",valid:false}, // true if this atom forms only single bonds or no bonds at all
@@ -136,7 +136,7 @@ $3Dmol.GLModel = (function() {
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
-        "reflectivity":{type:"number",gui:true,step:0.1}, //for describing the reflectivity of a model
+        "reflectivity":{type:"number",gui:false,step:0.1}, //for describing the reflectivity of a model
         "altLoc":{type:"invalid",valid:false}, //alternative location, e.g. in PDB
         "sym":{type:'number',gui:false}, //which symmetry
     };
@@ -148,7 +148,7 @@ $3Dmol.GLModel = (function() {
         "predicate":{type:"string",valid :false}, // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
         "invert":{type:"boolean",valid :false, gui:true}, // if set, inverts the meaning of the selection
         "byres":{type:"boolean",valid :false, gui:true}, // if set, expands the selection to include all atoms of any residue that has any atom selected
-        "expand":{type:"number",valid :false, gui:true}, // expands the selection to include all atoms within a given distance from the selection
+        "expand":{type:"number",valid :false, gui:false}, // expands the selection to include all atoms within a given distance from the selection
         "within":{type:"string",valid :false}, // intersects the selection with the set of atoms within a given distance from another selection
         "and":{type:"string",valid :false}, // and boolean logic
         "or":{type:"string",valid :false}, // or boolean logic

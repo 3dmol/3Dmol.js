@@ -286,9 +286,11 @@
           var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
           // var removeButton = new button(icons.minus, 18);
           var editButton = new button(icons.pencil, 16);
+          var visibleButton = new button(icons.visible, 16);
 
           controls.append(removeButton.ui)
           controls.append(editButton.ui);
+          controls.append(visibleButton.ui);
           controls.css('display', 'inline-block');
 
           heading.append(controls);
@@ -323,32 +325,57 @@
             }
           });
 
-          removeButton.on('click', function(){
-            remove(selection);
+          removeButton.ui.on('click', function(){
+            selection.detach();
             stateManager.removeSelection(selectionSpec);
           });
 
-          spec = selectionSpec.spec;
-          var keys = Object.keys(spec);
-
-          var table = $('<table></table>');
-          keys.forEach((key)=>{
-            var tr = $('<tr></tr>')
-            var k = $('<td></td>').text(key);
-            k.css('font-family', 'Arial');
-            k.css('font-weight', 'bold');
-            k.css('font-size', '12px');
-
-            var v = $('<td></td>').text(spec[key]);
-            v.css('font-family', 'Arial');
-            v.css('font-size', '12px');
-            
-
-            tr.append(k,v);
-            table.append(tr);
+          editButton.ui.on('click', function(){
+            stateManager.editSelection();
           });
+
+          var visible = true;
+
+          visibleButton.ui.on('click', ()=>{
+            if(visible)
+            {
+              stateManager.hideSelection();
+              visibleButton.setSVG(icons.invisible);
+              visible = false;
+            }  
+            else{
+              stateManager.showSelection();
+              visibleButton.setSVG(icons.visible);
+              visible = true;
+            }
+          });
+
+
+
+          selection.setAttributes = function(selectionSpec){
+            spec = selectionSpec.spec;
+            var keys = Object.keys(spec);
+            parameters.empty();
+
+            var table = $('<table></table>');
+            keys.forEach((key)=>{
+              var tr = $('<tr></tr>')
+              var k = $('<td></td>').text(key);
+              k.css('font-family', 'Arial');
+              k.css('font-weight', 'bold');
+              k.css('font-size', '12px');
+  
+              var v = $('<td></td>').text(spec[key]);
+              v.css('font-family', 'Arial');
+              v.css('font-size', '12px');
+              
+              tr.append(k,v);
+              table.append(tr);
+            });
+
+            parameters.append(table);
+          }
           
-          parameters.append(table);
           selections.append(selection);
           selection.data('sel-id', selectionSpec.id);
           
@@ -387,12 +414,22 @@
 
           selection.on('mouseleave', ()=>{
             styleBox.ui.hide();
-            selection.remove(styleBox);
+            selection.detach(styleBox);
           });
 
 
           // CSS
           
+        }
+
+        this.editSelection = function(sel){
+          var selection = selections.children().find((e)=>{
+            if(e.data('sel-id') == sel.id){
+              return e;
+            }
+          });
+
+          selection.setAttributes(sel);
         }
 
         plusButton.ui.on('click', ()=>{
@@ -462,15 +499,16 @@
             var styleName = $('<div></div>');
             var parameters = $('<div></div>');
 
-
             styleName.text(s.id);
             
-
             var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
             var editButton = new button(icons.pencil, 16);
+            var visibleButton = new button(icons.visible, 16);
 
             controls.append(removeButton.ui)
             controls.append(editButton.ui);
+            controls.append(visibleButton.ui);
+
             controls.css('display', 'inline-block');
 
             heading.append(controls);
@@ -502,13 +540,37 @@
               }
             });
             
+            removeButton.ui.on('click', function(){
+              styleBox.detach();
+              stateManager.removeStyle(s);
+            });
+
+            editButton.ui.on("click", function(){
+              stateManager.editStyle(s);
+            });
+
+            var visible = true;
+
+            visibleButton.ui.on('click', function(){
+              if(visible){
+                visibleButton.setSVG(icons.invisible);
+                visible = false;
+                stateManager.hideStyle(s);
+              }
+              else {
+                visibleButton.setSVG(icons.visible);
+                visible = true;
+                stateManager.showStyle(s);
+              }
+            });
+
             function makeTableFromKeys(spec){
               var boundingBox = $('<div></div>');            
               var keys = Object.keys(spec);
               var table = $('<table></table>');
               
               keys.forEach((key)=>{
-                console.log("StyleBox:MakeTableFromKeys", spec, spec[key], key);
+                // console.log("StyleBox:MakeTableFromKeys", spec, spec[key], key);
                 if(typeof spec[key] == "object"){
                   var subData = makeTableFromKeys(spec[key])
                   var head = $('<div></div>').text(key);
@@ -534,7 +596,6 @@
               });
 
               boundingBox.append(table);
-
               return boundingBox;
             }
 
@@ -724,9 +785,11 @@
             boundingBox.hide();
             console.log("Form Validated in the UI", mainForm.validate());
             // console.log("UI:DialogBox:Finalize", mainForm)
-            stateManager.finalize(mainForm.getValue());
-            semiDisplayBox.empty();
-            displayBox.empty();
+            stateManager.finalize(mainForm.getValue(), mainForm);
+            // semiDisplayBox.html(null);
+            // displayBox.html(null);
+            mainForm.ui.detach();
+            console.log("UI::DialogBox:done.ui.on->click:mainForm", mainForm, mainForm.getValue());
           }
           else{
             $(document).trigger('Error', ['Incorrect Input', 'Please check the input provided for selection, and resubmit the form']);
@@ -742,35 +805,13 @@
         });
     
         var addForm = this.addForm = function(form, formType=null){
-          if(formType == null){
-            displayBox.empty();
+            displayBox.html(null);
             displayBox.append(form.ui);
             form.ui.css('margin', 'auto');
             boundingBox.show();
-    
             mainForm = form;
             // console.log("Form", mainForm);
-          }
-          else {
-            semiDisplayBox.empty();
-
-            var inputList = form.map((f)=>{return f.formName});
-            // console.log(inputList);
-
-            control = {value: null, type: String}
-            var formSelect = new ListInput(control, inputList);
-            semiDisplayBox.append(formSelect.ui);
-            formSelect.callback = function(){
-              var f = form.find(e => e.formName == control.value);
-              if(f){
-                // console.log("Final Form", f, control, form);
-                addForm(f.form);
-                mainForm = f.form;
-              }
-            }
-
-            boundingBox.show();
-          }
+          
         }
     
       }

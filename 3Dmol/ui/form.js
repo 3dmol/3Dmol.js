@@ -113,7 +113,7 @@
             listElements.forEach((listElement)=>{
                 var option = $('<option></option>');
                 option.text(listElement);
-                option.attr('value', 'value');
+                option.attr('value', listElement );
                 select.append(option);
             });
             
@@ -135,6 +135,12 @@
                     return false;
                 else 
                     return true;
+            }
+
+            this.setValue = function(val){
+                if( listElements.indexOf(val) != -1){
+
+                }
             }
         }
         
@@ -171,6 +177,10 @@
             
             this.error = function(){
                 $(document).trigger('Error', ["Incorrect Input", "Please enter the input as per the direction"]);  
+            }
+
+            this.setValue = function(val){
+                input.val(val)
             }
 
             this.validateOnlyNumber = function(){
@@ -215,7 +225,7 @@
                 input.on('keydown', function(event){
                     event.preventDefault();
                     
-                    if( $(this).val().length <= 1 && (event.key == '-' || event.key == ',')){
+                    if( $(this).val().length < 1 && (event.key == '-' || event.key == ',')){
                         console.log('Cannnot Enter "-" or "," at the beginning');
                         return;
                     }
@@ -338,6 +348,10 @@
             this.validate = function(){
                 return true;
             }
+
+            this.setValue = function(val){
+                checkbox.prop('checked', val);
+            }
         }
 
         Form.Slider = function(control){
@@ -408,6 +422,9 @@
                 return true;
             }
 
+            this.setValue = function(val){
+                slider.val(val);
+            }
         }
 
         Form.EmptyElement = function(control){
@@ -478,7 +495,7 @@
                     }
                 });
 
-                return mainControl
+                return mainControl;
             }
             
             var updateValues = function(inputControl){
@@ -494,9 +511,23 @@
                 if(validations.find( e => e == false) == undefined )
                     return true;
             }
+
+            this.setValue = function(val){
+                var keys = Object.keys(val);
+                for(var i = 0; i < keys.length; i++){
+                    var input = inputs.find((e)=>{
+                        if(e.control.key == keys[i])
+                            return e;
+                    });
+
+                    e.placeholder.setValue(val[key[i]]);
+                }
+
+                console.log('Setting Key Value', val, inputs);
+            }
             
             function Property(key, type) {
-                var control = { value : null, type : type, key : key, active: false };
+                var control = this.control = { value : null, type : type, key : key, active: false };
                 var boundingBox = this.ui = $('<div></div>');
                 this.placeholder = { ui : $('<div></div>') }; // default value for ui element 
                 this.active = new Form.Checkbox({value: false, key:key});
@@ -527,7 +558,7 @@
                     this.placeholder.ui.attr('type', 'text');
 
 				}else if(specs[key].type == 'colorscheme'){
-					this.placeholder = new Form.Input(control);
+					this.placeholder = new Form.ListInput(control, Object.keys($3Dmol.builtinColorSchemes));
                     this.placeholder.ui.attr('type', 'text');
                 
                 }else if(specs[key].type == undefined){

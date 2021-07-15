@@ -53,6 +53,7 @@ $3Dmol.StateManager = (function(){
     var currentSelection = null;
     var currentForm = '';
     var currentStyles = null;
+    var tempStyle = null;
 
     this.setCurrentSelection = function(selectionId){
       currentSelection = selections.find(  sel => sel.id == selectionId);
@@ -86,11 +87,11 @@ $3Dmol.StateManager = (function(){
 
     // Style Handlers
 
-    this.finalize = function(formSpecs){
+    this.finalize = function(formSpecs, form){
       // console.log('Generated Config File', currentForm, formSpecs);
       if(currentForm == 'new_selection'){
         if( Object.keys(formSpecs).length != 0) {
-          selectionSpec = { id : makeid(6), spec : formSpecs.value, hidden: false , styles : []};
+          selectionSpec = { id : makeid(6), spec : formSpecs.value, hidden: false , styles : [], form : form};
 
           
           // Value Sanitization
@@ -107,39 +108,135 @@ $3Dmol.StateManager = (function(){
           // console.log(selectionSpec, selections);
         }
       }
-      if( currentForm == "new_style"){
+      else if( currentForm == "new_style"){
         if( Object.keys(formSpecs).length != 0) {
           if( currentSelection != null ){
-            styleSpec = { id : makeid(6), spec : formSpecs.value, hidden : false , styles : []};
+            styleSpec = { id : makeid(6), spec : formSpecs.value, hidden : false , styles : [], form : form};
             currentSelection.styles.push(styleSpec);
             this.ui.tools.selectionBox.styleBox.updateStyles(currentSelection.styles);
 
             console.log(currentSelection.spec, styleSpec.spec);
 
-            currentSelection.styles.forEach((style)=>{
-              console.log("Adding Styles Yay");
-              glviewer.addStyle(currentSelection.spec, style.spec);
-
-            });
-            // glviewer.setStyle(currentSelection.spec, styleSpec.spec);
-            glviewer.render();
+            render();
             // this.setCurrentSelection(selectionSpec.id);
           }
           // console.log(currentSelection);
         }
       }
+
+      else if(currentForm == "edit_selection") {
+        currentSelection.spec = formSpecs.value;
+        currentSelection.form = form;
+        render();
+      }
+      else if(currentForm == "edit_style"){
+        var currentStyle = tempStyle;
+        var index = currentSelection.styles.indexOf(currentSelection.styles.find((e)=>{
+          if(e == currentStyle){
+            return e;
+          }
+        }));
+
+        currentSelection.styles[index].spec = formSpecs.spec;
+        
+      }
     }
 
     this.removeStyle = function(styleSpec){
-      console.log('StateManager::removeStyle', styleSpec)
+      var styleToRemove = currentSelection.styles.indexOf(styleSpec);
+      currentSelection.styles.splice(styleToRemove,1);
+      console.log('StateManager::removeStyle', styleToRemove, currentSelection.styles);
+
+      render();
     }
 
     this.removeSelection = function(selectionSpec) {
-      console.log('StateManager::removeSelection', selectionSpec)
+      // glviewer.clear();
+
+      var selectionToRemove = selections.indexOf(selections.find((sel)=>{
+        console.log("index of selection", sel);
+        if(sel.id == selectionSpec.id)
+          return sel
+        }));
+      // glviewer.setStyle(currentSelection)
+
+      selections.splice(selectionToRemove, 1);
+      console.log('StateManager::removeSelection', selectionToRemove, selectionSpec, selections);
+
+      // glviewer.clear();
+      clear(selectionSpec);
+      render();
     }
     
     this.cancel = function(){
       console.log('Current Form Cancelled', currentForm);
+    }
+
+    this.showSelection = function(){
+      var index = selections.indexOf(currentSelection);
+      selections[index].hidden = false;
+      console.log('StateManger::showSelection', selections.map((s)=>{return s.hidden}), currentSelection);
+      render();
+    }
+
+    this.hideSelection = function(){
+      currentSelection.hidden = true;
+      console.log('StateManger::hideSelection', selections.map((s)=>{return s.hidden}), currentSelection);
+      render();
+    }
+
+    this.hideStyle = function(styleSpec){
+      var index = currentSelection.styles.indexOf(styleSpec);
+      currentSelection.styles[index].hidden = true;
+
+      render();
+    }
+
+    this.showStyle = function(styleSpec){
+      var index = currentSelection.styles.indexOf(styleSpec);
+      currentSelection.styles[index].hidden = false;
+
+      render();
+    }
+
+    this.editSelection = function(){
+      this.ui.tools.dialog.addForm(currentSelection.form);
+      currentForm = "edit_selection";
+      console.log("StateManager::editSelection", currentSelection.form);
+    }
+
+    this.editStyle = function(style){
+      this.ui.tools.dialog.addForm(style.form);
+      tempStyle = style;
+      currentForm = "edit_style";
+      console.log("StateManager::editStyle", currentSelection.form);
+    }
+
+    function render(){
+      console.log('RENDER::', selections.map((s)=>{return s.hidden}));
+      // glviewer.();
+
+      selections.forEach((sel)=>{
+        if(!sel.hidden){
+          clear(sel);
+
+          // var renderStyle = {};
+          sel.styles.forEach((style)=>{
+            if(!style.hidden){
+              glviewer.addStyle(sel.spec, style.spec);
+            }
+          })
+        }
+        else{
+          glviewer.setStyle(sel.spec, {});
+        }
+      });
+
+      glviewer.render();
+    }
+
+    function clear(selectionSpec){
+      glviewer.setStyle(selectionSpec.spec, {});
     }
 
     function makeid(length) {
