@@ -1,11 +1,19 @@
 import time
 import json
+import sys
 
 try:
     import IPython.display
     _has_IPython = True
 except ImportError:
     _has_IPython = False
+
+if sys.version_info >= (3, 8):
+    from importlib import metadata
+else:
+    import importlib_metadata as metadata
+
+__version__ = metadata.version('py3Dmol')
 
 #surface type constants
 VDW =1
@@ -142,7 +150,7 @@ if(warn) {
         '''Instantiate a new viewer window. Calling this will orphan any previously instantiated viewer windows.'''
         self.updatejs = ''
         html = self._make_html()
-        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html},metadata={})
 
     @using_ipython
     def insert(self, containerid):
@@ -150,7 +158,7 @@ if(warn) {
         into existing container'''
         html = self._make_html()
         html += '''<script>$("#%s").append($("#3dmolviewer_%s")); </script>'''%(containerid,self.uniqueid)
-        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html},metadata={})
 
     def _make_html(self):
         self.uniqueid = str(time.time()).replace('.','')
@@ -161,7 +169,7 @@ if(warn) {
     @using_ipython
     def _repr_html_(self):
         html = self._make_html()
-        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html})
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html},metadata={})
 
     @using_ipython
     def update(self):
@@ -176,7 +184,7 @@ if(warn) {
             });
             </script>''' % (self.updatejs.replace('UNIQUEID',self.uniqueid),self.uniqueid)
         self.updatejs = ''
-        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
 
     @using_ipython
     def png(self):
@@ -188,7 +196,7 @@ if(warn) {
             var png = viewer_{0}.pngURI()
             $('#img_{0}').attr('src', png)
             </script>'''.format(self.uniqueid)
-        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script})
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
 
     class model(object):
       '''Wrapper for referencing a model within a viewer'''
