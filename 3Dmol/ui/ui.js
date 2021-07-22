@@ -8,9 +8,8 @@
    * $3Dmol.UI - UI creates panels of viewer to assist control of the viewport in
    * 3dmol.js
    *
-   * @param  {object} contains selector for viewer element
-   * @return {object} contains the configuration for making the viewer with
-   * different sets of controls
+   * @param  {$3Dmol.StateManager} Manages states of the UI
+   * @return {object} configuration for the UI
    */
   $3Dmol.UI = (function(){
     function UI(stateManager, config){
@@ -23,8 +22,12 @@
       // Generates the necessary UI elements
       var uiElements = this.tools = generateUI(config);
       
-      function generateUI(config){
-        
+      
+      /**
+       * @function generateUI creates all the jquery object of different UI features
+       * @param  {object} config
+       */
+      function generateUI(config){  
         
         var ui_overlay = new UI_Overlay(config);
         body.append(ui_overlay.ui);
@@ -42,38 +45,37 @@
         body.append(selectionBox.ui);
         setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 2, topbar.ui.outerHeight());
 
-        // var styleBox = new StyleBox(icons.paintbrush);
-        // body.append(styleBox.ui);
-        // setLocation(ui_overlay.ui, styleBox.ui, 'right', 'top', 0, topbar.ui.outerHeight());
-        // styleBox.adjustSidebar();
-
-
-
         var dialog = new DialogBox({ height: 300, width: 300 });
         body.append(dialog.ui);
         setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
         dialog.ui.hide();
         
-        // Testing form
-        // var selectionForm = new $3Dmol.UI.form($3Dmol.GLModel.validAtomSelectionSpecs, 'Atom Selection');
-        // dialog.addForm(selectionForm);
-
         var alertBox = new AlertBox({ width : 100 });
         // console.log(alertBox);
         body.append(alertBox.ui);
         setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
 
+        var contextMenu = new ContextMenu();
+        body.append(contextMenu.ui);
+        
+        // var surfaceMenu = new SurfaceMenu();
+        // body.append(surfaceMenu.ui);
+
         return {
           uiOverlay : ui_overlay,
           topbar : topbar,
           selectionBox : selectionBox,
-          // styleBox : styleBox,
           dialog : dialog,
           alertBox : alertBox,
-          movieControl : movieControl
+          movieControl : movieControl,
+          // contextMenu : contextMenu,
+          // surfaceMenu : surfaceMenu
         } 
       }
-
+      /**
+       * @function UI_Overlay adds overlay on the glviewer to assists placement of different UI elements on the viewer.
+       * @param  {object} config
+       */
       function UI_Overlay(config){
         config = config || {};
 
@@ -93,6 +95,7 @@
         ui_overlay.css('pointer-events', 'none');
         ui_overlay.css('position', 'absolute');
 
+        // Handles configuration changes on resize
         this.resize = function(config){
           var top = (config.offset.top !=undefined) ? config.offset.top : 10;
           var left = (config.offset.left !=undefined) ? config.offset.left : 10;
@@ -105,51 +108,46 @@
 
       }
 
+      // Handles resize event 
       this.resize = function(config){
         uiElements.uiOverlay.resize(config);
         this.orient();
       }
 
+      // Reorients the UI on window changes 
       this.orient = function(){
-        // Position of the UI elements can later be orgnazided by using a config
-
-
         var ui_overlay = uiElements.uiOverlay;
         var topbar = uiElements.topbar;
         var dialog = uiElements.dialog;
         var alertBox = uiElements.alertBox;
         var selectionBox = uiElements.selectionBox;
         var movieControl = uiElements.movieControl;
-        // var styleBox = uiElements.styleBox;
 
         setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
         setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
         setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
         setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 2, topbar.ui.outerHeight());
         setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
-        // setLocation(ui_overlay.ui, styleBox.ui, 'right', 'top', 0, topbar.ui.outerHeight());
+
       }
 
 
 
       /**
-      * function to make the html toolbar div
-      * @param {object} config : Stores the top, left, width, padding property1
-      * for the toolbar
+      * @function Toobar creates horizontal toolbar for the UI
+      * @param {Object} config : Stores the top, left, width, padding property for the toolbar
+      * @return {Object} Jquery div object
       **/
       function Toolbar(config){
         config = config || {};
 
         var top = config.top || 10;
         var left = config.left || 10;
-        // var width = config.width || '300px';
         var padding = config.padding || '3px';
-        // var height = config.height || '20';
 
         var toolbar = this.ui = $('<div></div>');
 
         // Toolbar content
-
         var optionButton = new button(icons.option, 20)
         var moveButton = new button(icons.move, 20);
         var rotateButton = new button(icons.rotate, 20);
@@ -162,7 +160,6 @@
         toolbar.css('padding', padding);
         toolbar.css('background', 'none');
         toolbar.css('color', 'white');
-        // toolbar.css('width', width);
         toolbar.css('box-sizing', 'border-box');
         toolbar.css('position', 'absolute');
 
@@ -183,9 +180,9 @@
       }
 
       /**
-       * SelectionBox - Draws the box where all the selections on atoms are listed
+       * @function SelectionBox - Draws the box where all the selections on atoms are listed
        * This will be used to modify style for specific set of selection
-       *
+       * @param {SVG} $3Dmol.UI.Icons stores all the SVG elements needed of the UI 
        * @return {Object}  Jquery element of div
        */
       function SelectionBox(icon, side='left') {
@@ -200,7 +197,6 @@
         var addArea = $('<div></div>');
         var plusButton = new button(icons.plus, 20);
         plusButton.ui.css('margin','0px');
-        // showArea.append(styleBox.ui);
         
         var hideButton = new button(icon, 20);
         this.selectionObjects = [];
@@ -209,8 +205,7 @@
         selectionBox.append(hideButton.ui);
         selectionBox.append(showArea);
         selectionBox.css('position', 'absolute');
-        // selectionBox.css('max-height', config.height);
-
+        
         scrollBox.append(selections);
         showArea.append(scrollBox);
         addArea.append(plusButton.ui);
@@ -228,27 +223,14 @@
           selectionBox.css('text-align', 'right');
         }
 
-        // selectionBox.css('padding', '3px');
-
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
         showArea.css('width', '162px');
-        // showArea.css('max-height', parseInt(config.height.replace('px', '')) - hideButton.ui.offset().top);
-        // console.log(config.height);
         scrollBox.css('max-height', 300);
         scrollBox.css('overflow', 'hidden');
         selections.css('max-height', 300);
         selections.css('overflow', 'auto');
-        // selections.css({
-        //   '-webkit'
-        // });
-        // selections.css('padding-right', '17px');
         selections.css('box-sizing', 'content-box');
-        // showArea.css('height', '300px');
-        // showArea.css('border-radius', '6px');
-        // showArea.css('background', 'rgb(214, 214, 214)');
-        // selections.css('margin-bottom', '10px');
-        // addArea.css('text-align', 'center');
 
         // Action
         var hidden = true;
@@ -266,10 +248,9 @@
           hidden = !hidden;
         }
 
-        // Selection Box modification function
-
         /**
-         * Add a selection input to the list
+         * @function $3Dmol.UI#SelectionBox.appendSelection adds new selection to the ui
+         * @param  {$3Dmol.GLModel.validSelectionSpec} selectionSpec
          */
         this.appendSelection = function(selectionSpec){
           var selection = $('<div></div>');
@@ -284,7 +265,6 @@
           selection.css('margin-bottom', '3px');
 
           var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
-          // var removeButton = new button(icons.minus, 18);
           var editButton = new button(icons.pencil, 16);
           var visibleButton = new button(icons.visible, 16);
 
@@ -292,9 +272,7 @@
           controls.append(editButton.ui);
           controls.append(visibleButton.ui);
           controls.css('display', 'inline-block');
-
           heading.append(controls);
-          
           selectionName.text("sel#" + selectionSpec.id.slice(0,4));
           selectionName.css('display','inline-block');
           selectionName.css('font-family', 'Arial');
@@ -304,12 +282,10 @@
           
           var hideButton = new button(icons.listArrow, 16, { bgColor: 'none', hoverable: 'false' });
           heading.append(hideButton.ui);
-          // selection.append(controls);
           
           selection.append(heading);
           selection.append(parameters);
 
-          
           var hidden = true;
           parameters.hide();
           hideButton.ui.on('click', ()=>{
@@ -351,6 +327,7 @@
           });
 
 
+          // Sets attributes for a particular selection 
 
           selection.setAttributes = function(selectionSpec){
             spec = selectionSpec.spec;
@@ -375,7 +352,8 @@
 
             parameters.append(table);
           }
-          
+         
+          selection.setAttributes(selectionSpec);
           selections.append(selection);
           selection.data('sel-id', selectionSpec.id);
           
@@ -390,11 +368,6 @@
           styleBox.ui.on('mouseleave', ()=>{
             mouseIncideStyle = false;
           });
-
-
-          // selection.on('click', ()=>{
-          //   // console.log(mouseIncideStyle);
-          // });
           
           selection.on('mouseenter', ()=>{
             if(!mouseIncideStyle){
@@ -402,19 +375,14 @@
             }
 
             styleBox.ui.show();
-            // parameters.show();
-            // console.log('Shape of selection', selection.height(), selection.width(), selection.offset());
             selection.append(styleBox.ui);
             styleBox.ui.css('left', selection.outerWidth());
-            // console.log(selectionWidth)
             styleBox.ui.css('top', selection.offset().top  - 40);
-            // parameters.hide();
 
           });
 
           selection.on('mouseleave', ()=>{
             styleBox.ui.hide();
-            selection.detach(styleBox);
           });
 
 
@@ -423,12 +391,12 @@
         }
 
         this.editSelection = function(sel){
-          var selection = selections.children().find((e)=>{
+          var selection = this.selectionObjects.find((e)=>{
+            console.log('Editing Selection', e)
             if(e.data('sel-id') == sel.id){
               return e;
             }
-          });
-
+          })
           selection.setAttributes(sel);
         }
 
@@ -437,12 +405,15 @@
         });   
       }
 
-      function StyleBox(svg) {  
-        // var boundingBox = this.ui = $('<div></div>');
+      
+      /**
+       * @function StyleBox creates styleBox for listing out different styles for a particular selection
+       * @return {Object} Jquery dom object
+       */
+      function StyleBox() {  
         var showArea = this.ui = $('<div></div>');
         var styles = $('<div></div>');
         var addArea = $('<div></div>');
-        // var hideButton = new button(svg, 20);
         var addButton = new button(icons.plus, 20);
         this.styleObjects = [];
 
@@ -463,25 +434,8 @@
         showArea.css('border-radius', '4px');
 
         addArea.css('text-align', 'center');
-
-        // this.adjustSidebar = function(){
-        //   showArea.css('left', hideButton.ui.outerWidth() - showArea.outerWidth() );
-        // }
-
-        // boundingBox.css('position', 'absolute');
-
         hidden = true;
         showArea.hide();
-        // hideButton.ui.on('click', ()=>{
-        //   if(hidden){
-        //     showArea.show(100);
-        //     hidden = false;
-        //   }
-        //   else {
-        //     showArea.hide(100);
-        //     hidden = true;
-        //   }
-        // });
 
         addButton.ui.on('click', ()=>{
           stateManager.addStyle();
@@ -489,9 +443,7 @@
 
         this.updateStyles = function(styleSpecs){
           styles.empty();
-          // showArea.show();
           styleSpecs.forEach((s)=>{
-
             
             var styleBox = $('<div></div>');
             var controls = $('<div></div>');
@@ -541,11 +493,13 @@
             });
             
             removeButton.ui.on('click', function(){
-              styleBox.detach();
+              //styleBox.detach();
+              console.log('StyleBox::removeButton.ui.click', s);
               stateManager.removeStyle(s);
             });
 
             editButton.ui.on("click", function(){
+              console.log('StyleBox::editButton.ui.click', s);
               stateManager.editStyle(s);
             });
 
@@ -800,12 +754,13 @@
         drop.ui.on('click', ()=>{
           boundingBox.hide();
           stateManager.cancel();
-          semiDisplayBox.empty();
-          displayBox.empty();
+          mainForm.ui.detach();
+          mainForm = null;
         });
     
         var addForm = this.addForm = function(form, formType=null){
-            displayBox.html(null);
+            form.ui.detach();  
+            // displayBox.children().detach();
             displayBox.append(form.ui);
             form.ui.css('margin', 'auto');
             boundingBox.show();
@@ -860,37 +815,146 @@
     
           boundingBox.append(slide);
         }
-      /**
-       * parseSelection - generate markup using the selection list
-       *
-       * @param {list} Takes in the list of objects that are to selected
-       * @return {Objects}  Returns list of selection after preprocessing the
-       * SelectionSpec and StyleSpec. This is called `ParsedSelectionObject`
-       */
-      function parseSelection(Selections){
-        return [
-          { 'selection-name': 'Name 1',
-            'properties':[
-              { 'name':'property1', 'value':'value1', 'type':'input' },
-              { 'name':'property2', 'value':'value2', 'type':'radio' },
-              { 'name':'property3', 'value':'value3', 'type':'checkbox' },
-              { 'name':'property4', 'value':'value4', 'type':'list' },
-            ],
-            'style' : { 'name':'StyleType1', 'value':'value1', 'type':'input' }
-          },
-          { 'selection-name': 'Name 2',
-            'properties':[
-              { 'name':'property1', 'value':'value1', 'type':'input' },
-              { 'name':'property2', 'value':'value2', 'type':'radio' },
-              { 'name':'property3', 'value':'value3', 'type':'checkbox' },
-              { 'name':'property4', 'value':'value4', 'type':'list' },
-            ],
-            'style' : { 'name':'StyleType1', 'value':'value1', 'type':'input' }
-          },
-        ];
-      }
+    
 
       
+      function ContextMenu(){
+        var boundingBox = this.ui = $('<div></div>');
+
+        boundingBox.css('position', 'absolute');
+        boundingBox.css('border', '1px solid black');
+        // boundingBox.hide();
+
+        var value = {
+          labelText: {
+            key: 'Label Text',
+            value: null,
+          },
+          style: {
+            key: 'Label Style',
+            value: null
+          },
+          selection: {
+            key: 'Label For', 
+            value: null
+          }
+        }
+
+        var form = this.form = [];
+        
+        var labelText = new $3Dmol.UI.Form.Input(value.labelText);
+        form.push(labelText);
+        
+        var style = new $3Dmol.UI.Form($3Dmol.GLModel.validLabelResSpecs, value.style);
+        form.push(style);
+        
+        console.log('stateManger', stateManager);
+        // var selectionList = stateManager.getSelectionList();
+        
+        // var selectionInput = new $3Dmol.UI.Form.ListInput(value.selection, selectionList.map((sel)=>{ return sel.id }));
+        // form.push(selectionInput);
+        
+
+        var formUI = $('<div></div>');
+        
+        form.forEach((e)=>{
+          formUI.append(e.ui);
+        });
+
+        boundingBox.append(formUI);
+
+        // var buttons = $('<div></div>');
+        // var submit = new button(icons.tick, 20);
+        // var cancel = new button(icons.cross, 20);
+
+        // buttons.append(submit.ui);
+        // buttons.append(cancel.ui);
+
+        // submit.ui.css('background', 'green');
+        // submit.ui.css('margin-bottom', '5px');
+        // submit.ui.css('margin-top', '5px')
+
+        // cancel.ui.css('background', 'red');
+        // cancel.ui.css('margin-bottom', '5px');
+        // cancel.ui.css('margin-top', '5px')
+
+        // boundingBox.append(buttons);
+
+        this.show = function(pos){
+          boundingBox.show();
+          boundingBox.css('left', pos.x);
+          boundingBox.css('top', pos.y);
+        }
+
+        this.hide = function(){
+          boundingBox.hide();
+        } 
+
+      }
+
+
+      function SurfaceMenu(){
+        var boundingBox = this.ui = $('<div></div>');
+
+        boundingBox.css('position', 'absolute');
+        boundingBox.css('border', '1px solid black');
+        boundingBox.css('width', 150);
+        // boundingBox.hide();
+
+        var surfacesHolder = $('<div></div>');
+        
+        // Form to edit fields 
+        var value = this.value = {
+          surfaceType: {
+            key : 'Surface Type',
+            value : null
+          },
+          surfaceStyle: {
+            key: 'Surface Style',
+            value: null
+          },
+          surfaceFor: {
+            key: 'Selection Atoms',
+            value: null
+          },
+          surfaceOf: {
+            key: 'Surface Generating Atoms',
+            value: null,
+          },
+          surfaceFocus: {
+            key: 'Surface Atoms(Focused)',
+            value: null
+          }
+        };
+
+        var surfaceType = new $3Dmol.UI.Form.ListInput(value.surfaceType, Object.keys($3Dmol.SurfaceType));
+        var surfaceStyle = new $3Dmol.UI.Form($3Dmol.GLModel.SurfaceStyleSpec, value.surfaceStyle);
+        var selectionList = stateManager.getSelectionList();
+        var surfaceFor = new $3Dmol.UI.Form.ListInput(value.surfaceFor, selectionList.map((sel)=>{return sel.id}));
+        var surfaceOf = new $3Dmol.UI.Form.ListInput(value.surfaceOf, selectionList.map((sel)=>{return sel.id}));
+        var surfaceFocus = new $3Dmol.UI.Form.ListInput(value.surfaceFocus, selectionList.map((sel)=>{return sel.id}));
+
+        var form = this.form = [
+          surfaceType, surfaceStyle, surfaceFor, surfaceOf, surfaceFocus
+        ];
+
+        var fromUI = $('<div></div>');
+        form.forEach((input)=>{
+          formUI.append(input.ui);
+        })
+
+        var buttons = $('<div></div>');
+        var submit = new button(icons.tick, 20);
+        var cancel = new button(icons.cross, 20);
+        
+        submit.ui.css('background-color', 'green');
+        cancel.ui.css('background-color', 'red');
+
+        buttons.append(submit.ui);
+        buttons.append(cancel.ui);
+
+        formUI.append(buttons);
+      }
 
       /**
        * position : Sets the css position property : absolute
