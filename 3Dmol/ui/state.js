@@ -12,7 +12,6 @@ $3Dmol.StateManager = (function(){
     console.log('State Manager Initiated For the viewer', glviewer);
     console.log('Viewer Configuration', );
 
-    this.currentFormValue = null;
 
     var canvas = $(glviewer.getRenderer().domElement);
     var height = canvas.height();
@@ -64,8 +63,8 @@ $3Dmol.StateManager = (function(){
     
     this.addSelection = function(){
       // console.log('Add Selection Called');
-      this.currentFormValue = { value: null, type: 'form', key: "Atom Selection"}
-      var form =new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, this.currentFormValue);
+      var currentFormValue = { value: null, type: 'form', key: "Atom Selection"}
+      var form =new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, currentFormValue);
       this.ui.tools.dialog.addForm(form);
       currentForm = "new_selection";
     }
@@ -74,13 +73,13 @@ $3Dmol.StateManager = (function(){
       // var formList = [];
 
       var validStyles = $3Dmol.GLModel.validAtomStyleSpecs;
-      this.currentFormValue = { value: null, type: 'form', key: "Atom Style"}
+      var currentFormValue = { value: null, type: 'form', key: "Atom Style"}
       // var forms = Object.keys(validStyles);
       // forms.forEach( (form)=>{
       //   let f = new $3Dmol.UI.Form(validStyles[form].validItems, form);
       //   formList.push({formName: form, form : f});
       // });
-      let form = new $3Dmol.UI.Form(validStyles, this.currentFormValue);
+      let form = new $3Dmol.UI.Form(validStyles, currentFormValue);
       this.ui.tools.dialog.addForm(form);
       currentForm = "new_style";
     }
@@ -126,29 +125,41 @@ $3Dmol.StateManager = (function(){
 
       else if(currentForm == "edit_selection") {
         currentSelection.spec = formSpecs.value;
-        currentSelection.form = form;
+        // currentSelection.form = form;
+        this.ui.tools.selectionBox.editSelection(currentSelection);
+        console.log("Edit_Selection", currentSelection.spec);
         render();
       }
       else if(currentForm == "edit_style"){
         var currentStyle = tempStyle;
         var index = currentSelection.styles.indexOf(currentSelection.styles.find((e)=>{
-          if(e == currentStyle){
+          console.log("Checking Style on Edit",e, currentStyle)
+          if(e.id == currentStyle.id){
             return e;
           }
         }));
 
-        currentSelection.styles[index].spec = formSpecs.spec;
+        currentSelection.styles[index].spec = formSpecs.value;
+        render();
         
       }
     }
 
     this.removeStyle = function(styleSpec){
       var styleToRemove = currentSelection.styles.indexOf(styleSpec);
-      currentSelection.styles.splice(styleToRemove,1);
-      console.log('StateManager::removeStyle', styleToRemove, currentSelection.styles);
-
-      render();
+      if(styleToRemove != -1){
+        currentSelection.styles.splice(styleToRemove,1);
+        console.log('StateManager::removeStyle', styleToRemove, currentSelection.styles);
+        this.ui.tools.selectionBox.styleBox.updateStyles(currentSelection.styles);
+        render();
+      }
     }
+
+    // Context menu display test function 
+    // $(document).on('click', { ui: this.ui.tools }, function(e){
+    //   console.log('GLobal event', e);
+    //   e.data.ui.contextMenu.show({ x: e.clientX, y:e.clientY });
+    // });
 
     this.removeSelection = function(selectionSpec) {
       // glviewer.clear();
@@ -160,15 +171,18 @@ $3Dmol.StateManager = (function(){
         }));
       // glviewer.setStyle(currentSelection)
 
-      selections.splice(selectionToRemove, 1);
-      console.log('StateManager::removeSelection', selectionToRemove, selectionSpec, selections);
+      if(selectionToRemove != -1){
+        selections.splice(selectionToRemove, 1);
+        console.log('StateManager::removeSelection', selectionToRemove, selectionSpec, selections);
 
-      // glviewer.clear();
-      clear(selectionSpec);
-      render();
+        // glviewer.clear();
+        clear(selectionSpec);
+        render();
+      }
     }
     
     this.cancel = function(){
+      currentForm = "";
       console.log('Current Form Cancelled', currentForm);
     }
 
@@ -188,14 +202,12 @@ $3Dmol.StateManager = (function(){
     this.hideStyle = function(styleSpec){
       var index = currentSelection.styles.indexOf(styleSpec);
       currentSelection.styles[index].hidden = true;
-
       render();
     }
 
     this.showStyle = function(styleSpec){
       var index = currentSelection.styles.indexOf(styleSpec);
       currentSelection.styles[index].hidden = false;
-
       render();
     }
 
@@ -212,13 +224,22 @@ $3Dmol.StateManager = (function(){
       console.log("StateManager::editStyle", currentSelection.form);
     }
 
+    this.getSelectionList = function(){
+      return selections.map((selection)=>{
+        return { id: selection.id, spec: selection.spec};
+      })
+    }
+
+    console.log('GetSelectionList', this.getSelectionList());
+
     function render(){
       console.log('RENDER::', selections.map((s)=>{return s.hidden}));
       // glviewer.();
+      glviewer.setStyle({});
 
       selections.forEach((sel)=>{
         if(!sel.hidden){
-          clear(sel);
+          // clear(sel);
 
           // var renderStyle = {};
           sel.styles.forEach((style)=>{
@@ -226,9 +247,6 @@ $3Dmol.StateManager = (function(){
               glviewer.addStyle(sel.spec, style.spec);
             }
           })
-        }
-        else{
-          glviewer.setStyle(sel.spec, {});
         }
       });
 
