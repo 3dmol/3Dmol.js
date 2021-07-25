@@ -55,11 +55,12 @@
         body.append(alertBox.ui);
         setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
 
-        var contextMenu = new ContextMenu();
-        body.append(contextMenu.ui);
+        // var contextMenu = new ContextMenu();
+        // body.append(contextMenu.ui);
         
-        // var surfaceMenu = new SurfaceMenu();
-        // body.append(surfaceMenu.ui);
+        var surfaceMenu = new SurfaceMenu();
+        body.append(surfaceMenu.ui);
+        setLocation(ui_overlay.ui, surfaceMenu.ui, 'right', 'top');
 
         return {
           uiOverlay : ui_overlay,
@@ -896,64 +897,255 @@
       function SurfaceMenu(){
         var boundingBox = this.ui = $('<div></div>');
 
+        // Selection Layout
+
         boundingBox.css('position', 'absolute');
         boundingBox.css('border', '1px solid black');
         boundingBox.css('width', 150);
-        // boundingBox.hide();
+        
+        var heading = $('<div></div>');
+        heading.text('Surfaces');
+        boundingBox.append(heading);
 
         var surfacesHolder = $('<div></div>');
+        boundingBox.append(surfacesHolder);
+
+        var newSurfaceSpace = $('<div></div>');
         
-        // Form to edit fields 
-        var value = this.value = {
-          surfaceType: {
-            key : 'Surface Type',
-            value : null
-          },
-          surfaceStyle: {
-            key: 'Surface Style',
-            value: null
-          },
-          surfaceFor: {
-            key: 'Selection Atoms',
-            value: null
-          },
-          surfaceOf: {
-            key: 'Surface Generating Atoms',
-            value: null,
-          },
-          surfaceFocus: {
-            key: 'Surface Atoms(Focused)',
-            value: null
+        // newSurfaceSpace.append(controlButton);
+        // controlButton.hide();
+
+        boundingBox.append(newSurfaceSpace);
+
+        var addArea = $('<div></div>');
+        var addButton = new button(icons.plus, 20);
+        addArea.append(addButton.ui);
+        boundingBox.append(addArea);
+
+        boundingBox.css('width', 210);
+        boundingBox.css('background-color', '#f2f2f2');
+        // boundingBox.css('text-align', 'right');
+        newSurfaceSpace.css('text-align', 'center');
+        addArea.css('text-align', 'center');
+
+
+        var surfaces = this.surfaces = [];
+        var currentSurface = this.currentSurface = null;
+
+        this.initNewSurface = function(){
+          var control = {
+            surfaceType: {
+              key : 'Surface Type',
+              value : null
+            },
+            surfaceStyle: {
+              key: 'Surface Style',
+              value: null
+            },
+            surfaceFor: {
+              key: 'Selection Atoms',
+              value: null
+            },
+            surfaceOf: {
+              key: 'Surface Generating Atoms',
+              value: null,
+            },
+          };
+  
+          var surfaceBox = $('<div></div>');
+          var heading = $('<div></div>');
+          var header = $('<div></div>');
+          heading.text('surf#1234');
+          surfaceBox.append(heading);
+          
+          // Control Buttons
+          var toolButtons = $('<div></div>');
+          
+          var editButton = new button(icons.pencil, 20);
+          var removeButton = new button(icons.minus, 20);
+          
+          toolButtons.append(removeButton.ui);
+          toolButtons.append(editButton.ui);
+
+          toolButtons.editButton = editButton;
+          toolButtons.removeButton = removeButton;
+          toolButtons.editMode = false;
+          
+          header.append(heading, toolButtons);
+          surfaceBox.append(header);
+
+          // toolButtons.hide();
+
+          var surfacePropertyBox = $('<div></div>');
+          surfaceBox.append(surfacePropertyBox);
+          // Surface Type
+          var surfaceType = $('<div></div>');
+
+          var labelSurfaceType = $('<div></div>');
+          labelSurfaceType.text('Surface Type');
+
+          var listSurfaceType =new $3Dmol.UI.Form.ListInput(control.surfaceType, Object.keys($3Dmol.SurfaceType));
+
+          surfaceType.append(labelSurfaceType, listSurfaceType.ui);
+          surfacePropertyBox.append(surfaceType);
+          
+          // Surface Style
+          var surfaceStyle = $('<div></div>');
+
+          var labelSurfaceStyle = $('<div></div>');
+          // labelSurfaceStyle.text('Surface Style');
+
+          var formSurfaceStyle = new $3Dmol.UI.Form($3Dmol.GLModel.validSurfaceSpecs, control.surfaceStyle);
+          
+          surfaceStyle.append(labelSurfaceStyle, formSurfaceStyle.ui);
+          surfacePropertyBox.append(surfaceStyle);
+          
+          // Surface Of
+          var surfaceOf = $('<div></div>');
+          
+          var labelSurfaceOf = $('<div></div>');
+          labelSurfaceOf.text('Surface Atoms');
+          
+          var selections = stateManager.getSelectionList();
+          var selectionListElement = selections.map( (m)=>{
+            return m.id;
+          });
+          var listSurfaceOf = new $3Dmol.UI.Form.ListInput(control.surfaceOf, selectionListElement);
+          
+          surfaceOf.append(labelSurfaceOf, listSurfaceOf.ui);
+          surfacePropertyBox.append(surfaceOf);
+          
+          // Surface For
+          var surfaceFor = $('<div></div>');
+          
+          var labelSurfaceFor = $('<div></div>');
+          labelSurfaceFor.text('Show Atoms');
+      
+          var listSurfaceFor = new $3Dmol.UI.Form.ListInput(control.surfaceFor, selectionListElement);
+          
+          surfaceFor.append(labelSurfaceFor, listSurfaceFor.ui);
+          surfacePropertyBox.append(surfaceFor);
+          
+          // Control Button
+          var controlButton = $('<div></div>');
+          var submit = new button(icons.tick, 20);
+          var cancel = new button(icons.cross, 20);
+          controlButton.append(submit.ui);
+          controlButton.append(cancel.ui);
+          surfacePropertyBox.append(controlButton);
+
+          // Functionality 
+          removeButton.ui.on('click', { surfaceBox : surfaceBox }, function(e){
+            var id = e.data.surfaceBox.data('surf-id');
+            surfaceBox.remove();
+            stateManager.removeSurface(id);
+          });
+
+          editButton.ui.on('click', function(){
+            surfacePropertyBox.toggle();
+            if(toolButtons.editMode){
+              toolButtons.editMode = false;
+              controlButton.hide();
+            }
+            else{
+              toolButtons.editMode = true;
+              surfaceBox.append(controlButton);
+              controlButton.show();
+            }
+          });
+
+          // Form Validation 
+
+          function validateInput(){
+            var validated = true;
+            
+            if( listSurfaceType.getValue().value == 'default'){
+              validated = false;
+              console.log('Surface::InvalidSurfaceType');
+            }
+
+            if( listSurfaceOf.getValue().value == 'default'){
+              validated = false;
+              console.log('Surface::InvalidSurfaceAtom Selected');
+            }
+
+            if(listSurfaceFor.getValue().value == 'default'){
+              validate = false;
+              console.log('Surface::InvalidSurfaceGenerationAtom Selected');
+            }
+
+            return validated;
           }
-        };
 
-        var surfaceType = new $3Dmol.UI.Form.ListInput(value.surfaceType, Object.keys($3Dmol.SurfaceType));
-        var surfaceStyle = new $3Dmol.UI.Form($3Dmol.GLModel.SurfaceStyleSpec, value.surfaceStyle);
-        var selectionList = stateManager.getSelectionList();
-        var surfaceFor = new $3Dmol.UI.Form.ListInput(value.surfaceFor, selectionList.map((sel)=>{return sel.id}));
-        var surfaceOf = new $3Dmol.UI.Form.ListInput(value.surfaceOf, selectionList.map((sel)=>{return sel.id}));
-        var surfaceFocus = new $3Dmol.UI.Form.ListInput(value.surfaceFocus, selectionList.map((sel)=>{return sel.id}));
+          // UI_Saver 
+          var surfaceObject = {
+            surfaceBox : surfaceBox,
+            surfaceTitle : heading,
+            surfaceType : listSurfaceType,
+            surfaceStyle : formSurfaceStyle,
+            surfaceFor : listSurfaceFor,
+            surfaceOf : listSurfaceOf,
+            tools : toolButtons,
+            properties: surfacePropertyBox
+          } 
+          
+          // Submit 
+          submit.ui.on('click', {}, function(){
+            if(validateInput()){ 
+              if(toolButtons.editMode == false){
+                var id = stateManager.addSurface(control);
+                control.id = id;
+                surfaceBox.data('surf-id', id);
+                surfaces.push(surfaceObject);
+                newSurfaceSpace.append(surfaceBox);
+                surfacePropertyBox.hide();
+              }
+              else{
+                control.id = surfaceBox.data('surf-id');
+                stateManager.editSurface(control);
+                surfacePropertyBox.hide();
+              }
+            }
+          });
 
-        var form = this.form = [
-          surfaceType, surfaceStyle, surfaceFor, surfaceOf, surfaceFocus
-        ];
+          // Cancel Edit
+          cancel.ui.on('click', {}, function(){
+            if(toolButtons.editMode == false){
+              surfaceBox.detach();
+              surfaceBox.remove();
+            }
+            else {
+              surfacePropertyBox.hide();
+              toolButtons.editMode = false;
+            }
+          });
 
-        var fromUI = $('<div></div>');
-        form.forEach((input)=>{
-          formUI.append(input.ui);
-        })
+          boundingBox.on('mouseenter', function(){
+            selections = stateManager.getSelectionList();
+            selectionListElement = selections.map( (m)=>{
+              return m.id;
+            });
+            listSurfaceFor.updateList(selectionListElement);
+            listSurfaceOf.updateList(selectionListElement);
+          });
 
-        var buttons = $('<div></div>');
-        var submit = new button(icons.tick, 20);
-        var cancel = new button(icons.cross, 20);
-        
-        submit.ui.css('background-color', 'green');
-        cancel.ui.css('background-color', 'red');
+          // CSS
+          surfaceBox.css('width', 200);
+          surfaceBox.css('background-color', 'lightgrey');
 
-        buttons.append(submit.ui);
-        buttons.append(cancel.ui);
+          return surfaceObject;
+        }
 
-        formUI.append(buttons);
+        // Functionality
+
+        // Surface addition
+
+        addButton.ui.on('click', { surfaces: this }, function(e){
+          var newSurface = e.data.surfaces.initNewSurface();
+          newSurfaceSpace.append(newSurface.surfaceBox);
+        });
+
+
       }
 
       /**

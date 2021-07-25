@@ -54,6 +54,9 @@ $3Dmol.StateManager = (function(){
     var currentStyles = null;
     var tempStyle = null;
 
+    // Surface Handling
+    var surfaces = [];
+
     this.setCurrentSelection = function(selectionId){
       currentSelection = selections.find(  sel => sel.id == selectionId);
       currentStyles = currentSelection.styles;
@@ -228,6 +231,28 @@ $3Dmol.StateManager = (function(){
       return selections.map((selection)=>{
         return { id: selection.id, spec: selection.spec};
       })
+    }
+
+    this.addSurface = function(property){
+      var id = 123456;
+      property.id = id;
+      surfaces.push(property);
+      console.log("StateManager::Surfaces", surfaces);
+      return id;
+    }
+
+    this.removeSurface = function(id){
+      var index = surfaces.indexOf((surf)=>{
+        if(surf.id == id){
+          return true
+        }
+      });
+      console.log('StateManager::removeSurface', index, surfaces);
+
+    }
+
+    this.editSurface = function(surfaceProperty){
+      console.log('StateManager::editSurface#Updating Surface', surfaceProperty)
     }
 
     console.log('GetSelectionList', this.getSelectionList());
