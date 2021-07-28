@@ -12,13 +12,15 @@
    * @return {object} configuration for the UI
    */
   $3Dmol.UI = (function(){
-    function UI(stateManager, config){
+    function UI(stateManager, config, parentElement){
       config = config || {}
 
       // Extract the viewer and then render it
       var icons =new $3Dmol.UI.Icons();
       var body = $('body');
       
+      var mainParent = $(parentElement[0]);
+      console.log("Main Parent", mainParent.css('position'));
       // Generates the necessary UI elements
       var uiElements = this.tools = generateUI(config);
       
@@ -34,33 +36,39 @@
         // body = ui_overlay.ui;
         
         var movieControl = new MovieBar();
-        body.append(movieControl.ui);
-        setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
+        mainParent.append(movieControl.ui);
+        // movieControl.ui.css('top', 200);
+        // movieControl.ui.css('z-index', 99);
+        setLocation(mainParent, movieControl.ui, 'center', 'bottom');
+        movieControl.ui.hide();
         
         var topbar = new Toolbar();
-        body.append(topbar.ui);
-        setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
+        mainParent.append(topbar.ui);
+        setLocation(mainParent, topbar.ui, 'left', 'top');
+        topbar.ui.hide();
 
         var selectionBox = new SelectionBox(icons.select);
-        body.append(selectionBox.ui);
-        setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 2, topbar.ui.outerHeight());
+        mainParent.append(selectionBox.ui);
+        setLocation(mainParent, selectionBox.ui, 'left', 'top');
 
         var dialog = new DialogBox({ height: 300, width: 300 });
-        body.append(dialog.ui);
-        setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
+        mainParent.append(dialog.ui);
+        setLocation(mainParent, dialog.ui, 'center', 'center');
         dialog.ui.hide();
         
         var alertBox = new AlertBox({ width : 100 });
         // console.log(alertBox);
-        body.append(alertBox.ui);
-        setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
+        mainParent.append(alertBox.ui);
+        setLocation(mainParent, alertBox.ui, 'right', 'top');
 
-        // var contextMenu = new ContextMenu();
-        // body.append(contextMenu.ui);
+        var contextMenu = new ContextMenu();
+        mainParent.append(contextMenu.ui);
+        // setLocation(mainParent, contextMenu.ui, 'center', 'center');
+        setPosition(contextMenu.ui, 100, 100)
         
         var surfaceMenu = new SurfaceMenu();
-        body.append(surfaceMenu.ui);
-        setLocation(ui_overlay.ui, surfaceMenu.ui, 'right', 'top');
+        mainParent.append(surfaceMenu.ui);
+        setLocation(mainParent, surfaceMenu.ui, 'right', 'top');
 
         return {
           uiOverlay : ui_overlay,
@@ -69,8 +77,8 @@
           dialog : dialog,
           alertBox : alertBox,
           movieControl : movieControl,
-          // contextMenu : contextMenu,
-          // surfaceMenu : surfaceMenu
+          contextMenu : contextMenu,
+          surfaceMenu : surfaceMenu
         } 
       }
       /**
@@ -123,12 +131,14 @@
         var alertBox = uiElements.alertBox;
         var selectionBox = uiElements.selectionBox;
         var movieControl = uiElements.movieControl;
+        var surfaceMenu = uiElements.surfaceMenu;
 
         setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
         setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
         setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
         setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 2, topbar.ui.outerHeight());
         setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
+        setLocation(ui_overlay.ui, surfaceMenu.ui, 'right', 'top');
 
       }
 
@@ -268,10 +278,18 @@
           var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
           var editButton = new button(icons.pencil, 16);
           var visibleButton = new button(icons.visible, 16);
+          var toggleMouseInteraction = new button(icons.nomouse, 16);
+          toggleMouseInteraction.interactions = false;
+          var toggleResLabel = new button(icons.nolabel, 16);
+          toggleResLabel.visible = false;
+
 
           controls.append(removeButton.ui)
           controls.append(editButton.ui);
           controls.append(visibleButton.ui);
+          controls.append(toggleMouseInteraction.ui);
+          controls.append(toggleResLabel.ui);
+
           controls.css('display', 'inline-block');
           heading.append(controls);
           selectionName.text("sel#" + selectionSpec.id.slice(0,4));
@@ -310,6 +328,31 @@
           editButton.ui.on('click', function(){
             stateManager.editSelection();
           });
+
+          toggleMouseInteraction.ui.on('click', function(){
+            if(toggleMouseInteraction.interactions){
+              toggleMouseInteraction.interactions = false;
+              toggleMouseInteraction.setSVG(icons.nomouse);
+            }
+            else{
+              toggleMouseInteraction.interactions = true;
+              toggleMouseInteraction.setSVG(icons.mouse);
+            }
+
+            stateManager.toggleMouseInteraction();
+          });
+
+          toggleResLabel.ui.on('click', function(){
+            if(toggleMouseInteraction.visible){
+              toggleResLabel.visible = false;
+              toggleResLabel.setSVG(icons.nolabel);
+            }
+            else{
+              toggleResLabel.visible = true;
+              toggleResLabel.setSVG(icons.label);
+            }
+            stateManager.toggleResLabel();
+          })
 
           var visible = true;
 
@@ -378,7 +421,7 @@
             styleBox.ui.show();
             selection.append(styleBox.ui);
             styleBox.ui.css('left', selection.outerWidth());
-            styleBox.ui.css('top', selection.offset().top  - 40);
+            styleBox.ui.css('top', selection.offset().top - 8  );
 
           });
 
@@ -772,50 +815,17 @@
     
       }
 
-      function ListInput(control, listElements){
-        // var label = $('<div></div>');
-        // label.text(control.key);
-
-        var surroundingBox = this.ui = $('<div></div>');
-        var boundingBox = $('<div></div>');
-        // surroundingBox.append(label);
-        surroundingBox.append(boundingBox);
-
-        var select = $('<select></select>');
-
-        boundingBox.append(select);
+      function slider(config){
+        config = config || {};
+        min = config.min || 0;
+        max = config.max || 100;
+        width = config.width || 400;
         
-        // Elements of the list 
-        var defaultOption = $('<option></option>');
-        defaultOption.text('select');
-
-        select.append(defaultOption);
-
-        listElements.forEach((listElement)=>{
-            var option = $('<option></option>');
-            option.text(listElement);
-            option.attr('value', listElement);
-            select.append(option);
-        });
-
-        this.callback = function(){};
-        select.on('click', ()=>{
-            control.value = boundingBox.find(":selected").val();
-            this.callback();
-        });
-    }
-    
-        function slider(config){
-          config = config || {};
-          min = config.min || 0;
-          max = config.max || 100;
-          width = config.width || 400;
-          
-          var boundingBox = this.ui = $('<div></div>');
-          var slide = $('<input type="range" min="0">');
-    
-          boundingBox.append(slide);
-        }
+        var boundingBox = this.ui = $('<div></div>');
+        var slide = $('<input type="range" min="0">');
+  
+        boundingBox.append(slide);
+      }
     
 
       
@@ -823,74 +833,314 @@
         var boundingBox = this.ui = $('<div></div>');
 
         boundingBox.css('position', 'absolute');
-        boundingBox.css('border', '1px solid black');
-        // boundingBox.hide();
+        // boundingBox.css('border', '1px solid black');
+        boundingBox.css('border-radius', '3px');
+        boundingBox.css('background', '#f1f1f1');
+        boundingBox.css('z-index', 99);
+        var contentBox = $('<div></div>');
+        contentBox.css('position', 'relative');
 
-        var value = {
-          labelText: {
-            key: 'Label Text',
-            value: null,
-          },
-          style: {
-            key: 'Label Style',
-            value: null
-          },
-          selection: {
-            key: 'Label For', 
-            value: null
+        boundingBox.append(contentBox);
+        contentBox.css({
+          'background':  '#f1f1f1',
+          'border-radius': '4px',
+          'padding': '4px'
+        });
+        // Context Box
+
+        // Previous Labels 
+        var labelHolder = $('<div></div>');
+        contentBox.append(labelHolder);
+
+        this.addLabel = function(){
+
+        }
+
+        this.addAtomLabel = function(){
+
+        }
+
+        // Add Menu 
+        var addMenu = $('<div></div>');
+        contentBox.append(addMenu);
+        addMenu.css('width', 100);
+
+        var addLabelMenu = $('<div></div>');
+        addMenu.append(addLabelMenu);
+
+        var addAtomLabelMenu = $('<div></div>');
+        addMenu.append(addAtomLabelMenu);
+
+        var labelMenuStyle = {
+          'background' : '#d3e2ee',
+          'padding' : '2px',
+          'font-family':'Arial',
+          'font-weight':'bold',
+          'font-size':'12px',
+          'border-radius':'2px',
+          // 'margin-top':'3px'
+        }
+
+        addLabelMenu.text('Add Label');
+        addLabelMenu.css(labelMenuStyle);
+        addLabelMenu.css('margin-bottom', '3px');
+        
+        addAtomLabelMenu.text('Add Atom Label');
+        addAtomLabelMenu.css(labelMenuStyle);
+        
+        // Edit Menu
+        var editMenu = $('<div></div>');
+        contentBox.append(editMenu);
+
+        editMenu.css({
+          'background':'#dfdfdf',
+          'border-radius':'3px',
+          'font-family':'Arial',
+          'font-weight':'bold',
+          'font-size':'12px',
+          'position': 'absolute',
+          'left' : addMenu.width() + 10,
+          'top' : 0,
+          'min-width' : 120
+        });
+        editMenu.hide();
+
+        // Add Label Inputs 
+
+        function generateAddLabelForm(){
+          var addLabelForm = $('<div></div>');
+
+          var addLabelValue = {
+            text : {
+              key : 'Label Text',
+              value : null,
+              active : true,
+            },
+  
+            style : {
+              key : 'Style',
+              value : null,
+              active : true,
+            },
+  
+            sel : {
+              key : 'Selection',
+              value : null,
+              active : true,
+            }
+          }
+          var formModifierControl = $('<div></div>');
+          var removeButton = new button(icons.minus, 16);
+          var tick = new button(icons.tick, 16);
+          var cross = new button(icons.cross, 16);
+          formModifierControl.append(removeButton.ui, tick.ui, cross.ui);
+          removeButton.ui.hide();
+          addLabelForm.append(formModifierControl);
+  
+          var addLabelTextBox = $('<div></div>');
+          var lt = $('<div></div>').text('Label Text');
+          var addLabelTextInput = new $3Dmol.UI.Form.Input(addLabelValue.text);
+          addLabelTextBox.append(lt, addLabelTextInput.ui);
+          addLabelForm.append(addLabelTextBox);
+
+          var addLabelStyleBox = $('<div></div>');
+          var ls = $('<div></div>').text('Label Style');
+          var addLabelStyleInput = new $3Dmol.UI.Form.ListInput(addLabelValue.style, Object.keys($3Dmol.labelStyles));
+          addLabelStyleBox.append(ls, addLabelStyleInput.ui);
+          addLabelForm.append(addLabelStyleBox);
+
+          var selections = stateManager.getSelectionList();
+          var selectionList = selections.map( (sel)=>{ return sel.id });
+          
+          var addLabelSelectionBox = $('<div></div>');
+          var lsl = $('<div></div>').text('Label Selection');
+          var addLabelSelectionInput = new $3Dmol.UI.Form.ListInput(addLabelValue.sel, selectionList);
+          addLabelSelectionBox.append(lsl, addLabelSelectionInput.ui);
+          addLabelForm.append(addLabelSelectionBox);
+
+          // CSS 
+          addLabelForm.css({
+            'padding' : '2px',
+            
+          });
+
+          tick.ui.on('click', ()=>{
+            var validate = true;
+
+            if(!addLabelStyleInput.validate())
+              validate = false;
+            
+            if(!addLabelTextInput.validate())
+              validate = false;
+            
+            if(validate){
+              stateManager.addLabel(addLabelValue);
+            } else {
+              console.log('Please Check the input');
+            }       
+          });
+
+          cross.ui.on('click', ()=>{
+            stateManager.exitContextMenu();
+          });
+
+          removeButton.ui.on('click', ()=>{
+            stateManager.removeLabel()
+          });
+      
+          return {
+            boundingBox : addLabelForm,
+            text : addLabelTextInput,
+            style : addLabelStyleInput,
+            selection: addLabelSelectionInput,
+            editMode : function(){
+              removeButton.ui.show();
+            }
           }
         }
 
-        var form = this.form = [];
-        
-        var labelText = new $3Dmol.UI.Form.Input(value.labelText);
-        form.push(labelText);
-        
-        var style = new $3Dmol.UI.Form($3Dmol.GLModel.validLabelResSpecs, value.style);
-        form.push(style);
-        
-        console.log('stateManger', stateManager);
-        // var selectionList = stateManager.getSelectionList();
-        
-        // var selectionInput = new $3Dmol.UI.Form.ListInput(value.selection, selectionList.map((sel)=>{ return sel.id }));
-        // form.push(selectionInput);
-        
+        function generateAddAtomForm(){
+          var addAtomLabelForm = $('<div></div>');
+          
+          var addAtomLabelValue = {
+            style : {
+              key : 'Style',
+              value : null
+            }
+          }
 
-        var formUI = $('<div></div>');
-        
-        form.forEach((e)=>{
-          formUI.append(e.ui);
-        });
+          // Form Modifier
+          var formModifierControl = $('<div></div>');
+          var removeButton = new button(icons.minus, 16);
+          var tick = new button(icons.tick, 16);
+          var cross = new button(icons.cross, 16);
+          formModifierControl.append(removeButton.ui, tick.ui, cross.ui);
+          // removeButton.ui.hide();
+          addAtomLabelForm.append(formModifierControl);
+          
+          // Style 
+          var addLabelStyleBox = $('<div></div>');
+          var ls = $('<div></div>').text('Label Style');
+          var addLabelStyleInput = new $3Dmol.UI.Form.ListInput(addAtomLabelValue.style, Object.keys($3Dmol.labelStyles));
+          addLabelStyleBox.append(ls, addLabelStyleInput.ui);
+          addAtomLabelForm.append(addLabelStyleBox);
 
-        boundingBox.append(formUI);
+          var validAtomSpecs = $3Dmol.GLModel.validAtomSpecs
+          var atomProperties = Object.keys(validAtomSpecs);
+          var properties = [];
 
-        // var buttons = $('<div></div>');
-        // var submit = new button(icons.tick, 20);
-        // var cancel = new button(icons.cross, 20);
+          for(var i = 0; i < atomProperties.length; i++){
+            if(validAtomSpecs[atomProperties[i]].prop){
+              properties.push(atomProperties[i]);
+            }
+          }
 
-        // buttons.append(submit.ui);
-        // buttons.append(cancel.ui);
+          properties = properties.map((prop)=>{
+            return {
+              key : prop,
+              value : null
+            }
+          });
 
-        // submit.ui.css('background', 'green');
-        // submit.ui.css('margin-bottom', '5px');
-        // submit.ui.css('margin-top', '5px')
+          var propertyCheckboxDisplayBox = $('<div></div>');
+          var propertyCheckboxes = [];
+          properties.forEach( (propControl)=>{
+            var cb = new $3Dmol.UI.Form.Checkbox(propControl);
+            propertyCheckboxes.push(cb);
+            propertyCheckboxDisplayBox.append(cb.ui);
+          });
 
-        // cancel.ui.css('background', 'red');
-        // cancel.ui.css('margin-bottom', '5px');
-        // cancel.ui.css('margin-top', '5px')
+          addAtomLabelForm.append(propertyCheckboxDisplayBox);
 
-        // boundingBox.append(buttons);
+          tick.ui.on('click', ()=>{
+            var validate = true;
 
-        this.show = function(pos){
+            if(!addLabelStyleInput.validate())
+              validate = false;
+
+            var atLeastOneProp = false;
+            var props = [];
+            propertyCheckboxes.forEach( (propCb)=>{
+              control = propCb.getValue();
+              if(control.value)
+              {  
+                props.push(control.key);
+                atLeastOneProp = true;
+              }
+            });
+
+            if(atLeastOneProp && validate){
+              stateManager.addAtomLabel({ style : addAtomLabelValue.style, props: props});
+            }
+            else {
+              console.log('Please check input');
+            }
+          });
+
+          cross.ui.on('click', ()=>{
+            stateManager.exitContextMenu();
+          });
+
+          removeButton.ui.on('click', ()=>{
+            stateManager.removeAtomLabel();
+          });
+
+          return {
+            boundingBox : addAtomLabelForm,
+            style : addLabelStyleInput,
+            props : propertyCheckboxes
+          }
+        }
+
+        // Testing UI
+        // var addLabelFormTest = generateAddAtomForm();
+        // editMenu.append(addLabelFormTest.boundingBox);
+
+        // Context Menu UI Funciton 
+        boundingBox.hide();
+        this.hidden = true;
+
+        this.show = function(x, y, atom){
+          unsetForm();
+          setPosition(boundingBox, x, y);
+          console.log('CONTEXT MENU::Atom Selected', atom);
           boundingBox.show();
-          boundingBox.css('left', pos.x);
-          boundingBox.css('top', pos.y);
+          this.hidden = false;
+
+          if(atom){
+            addAtomLabelMenu.show();
+          }
+          else{
+            addAtomLabelMenu.hide();
+          }
         }
 
         this.hide = function(){
           boundingBox.hide();
-        } 
+          this.hidden = true;
+          unsetForm();
+        }
 
+        addLabelMenu.on('click', function(){
+          var addLabelMenuForm = generateAddLabelForm();
+          setForm(addLabelMenuForm);
+        });
+
+        addAtomLabelMenu.on('click', function(){
+          var addAtomLabelMenuForm = generateAddAtomForm();
+          setForm(addAtomLabelMenuForm);
+        });
+
+        function setForm(form){
+          editMenu.children().detach();
+          editMenu.append(form.boundingBox);
+          editMenu.show();
+        }
+
+        function unsetForm(){
+          editMenu.children().detach();
+          editMenu.hide();
+        }
       }
 
 
@@ -899,35 +1149,31 @@
 
         // Selection Layout
 
-        boundingBox.css('position', 'absolute');
-        boundingBox.css('border', '1px solid black');
-        boundingBox.css('width', 150);
+        boundingBox.css({
+          'position': 'absolute',
+        });
         
-        var heading = $('<div></div>');
-        heading.text('Surfaces');
-        boundingBox.append(heading);
+        var surfaceButton = new button(icons.surface, 20);
+        boundingBox.append(surfaceButton.ui);
 
         var surfacesHolder = $('<div></div>');
         boundingBox.append(surfacesHolder);
+
+        var displayBox = $('<div></div>');
+        boundingBox.append(displayBox);
 
         var newSurfaceSpace = $('<div></div>');
         
         // newSurfaceSpace.append(controlButton);
         // controlButton.hide();
 
-        boundingBox.append(newSurfaceSpace);
+        displayBox.append(newSurfaceSpace);
 
         var addArea = $('<div></div>');
         var addButton = new button(icons.plus, 20);
         addArea.append(addButton.ui);
-        boundingBox.append(addArea);
-
-        boundingBox.css('width', 210);
-        boundingBox.css('background-color', '#f2f2f2');
-        // boundingBox.css('text-align', 'right');
-        newSurfaceSpace.css('text-align', 'center');
-        addArea.css('text-align', 'center');
-
+        displayBox.append(addArea);
+        displayBox.hide();
 
         var surfaces = this.surfaces = [];
         var currentSurface = this.currentSurface = null;
@@ -953,6 +1199,17 @@
           };
   
           var surfaceBox = $('<div></div>');
+          surfaceBox.css({
+            'margin':'3px',
+            'padding':'3px',
+            'border-radius':'3px',
+            'background-color': '#d3e2ee',
+            'position':'relative',
+            'left': -186
+          });
+        
+
+
           var heading = $('<div></div>');
           var header = $('<div></div>');
           heading.text('surf#1234');
@@ -1045,12 +1302,12 @@
             surfacePropertyBox.toggle();
             if(toolButtons.editMode){
               toolButtons.editMode = false;
-              controlButton.hide();
+              // controlButton.hide();
             }
             else{
               toolButtons.editMode = true;
-              surfaceBox.append(controlButton);
-              controlButton.show();
+              // surfaceBox.append(controlButton);
+              // controlButton.show();
             }
           });
 
@@ -1145,6 +1402,11 @@
           newSurfaceSpace.append(newSurface.surfaceBox);
         });
 
+        surfaceButton.ui.on('click', ()=>{
+          displayBox.toggle();
+
+        })
+
 
       }
 
@@ -1175,6 +1437,9 @@
         // console.log('Setting location', parent.offset(), child.offset(), parent.height(), parent.width(), child.height(), child.width());
 
         // p_ stands for parent
+        child.css('z-index', 99);
+
+
         var p_position = parent.position();
         var p_width = getWidth(parent);
         var p_height = getHeight(parent);
@@ -1184,7 +1449,8 @@
         var c_height = child.outerHeight(); // includes padding and margin
 
         var padding = parseInt(parent.css('padding').replace('px', ''));
-
+        padding = (padding)? padding: 0;
+        console.log("Checking Padding", padding == NaN, padding)
         var p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
         var p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
 
@@ -1197,38 +1463,33 @@
 
         if(x_type == 'left'){
           // console.log('left is called');
-          c_position.left = p_left + padding + x_offset;
+          c_position.left = padding + x_offset;
         }
         else if(x_type == 'center'){
-          c_position.left = p_left + p_width/2 - c_width/2 + x_offset;
+          c_position.left = p_width/2 - c_width/2 + x_offset;
         }
         else if(x_type == 'right'){
-          c_position.left = p_left + p_width  - c_width - padding + x_offset;
+          c_position.left = p_width  - c_width - padding + x_offset;
         }
         else {
-          c_position.left = p_left + x_offset + padding;
+          c_position.left = x_offset + padding;
         }
 
         if(y_type == 'top'){
-          c_position.top = p_top + y_offset + padding;
+          c_position.top = y_offset + padding;
         }
         else if(y_type == 'center'){
-          c_position.top = p_top + p_height/2 - c_height/2 + y_offset;
+          c_position.top = p_height/2 - c_height/2 + y_offset;
         }
         else if(y_type == 'bottom'){
-          c_position.top = p_top + p_height - c_height + y_offset - padding;
+          c_position.top = p_height - c_height - y_offset - padding;
         }
         else {
-          c_position.top = p_top + y_offset + padding;
+          c_position.top = y_offset + padding;
         }
 
-        // var c_position = {
-        //   left: (x_type == 'left' )? p_left + padding + x_offset : (x_type == 'right')? p_width - c_width - padding + x_offset : x_offset,
-        //   top: (y_type == 'top' )? p_top + padding + y_offset : (y_type == 'bottom')? p_height - c_height - padding + y_offset : y_offset
-        // };
-
-        // console.log('setting parent child location',p_position,  c_position, padding, p_width, p_height, c_width, c_height);
         setPosition(child, c_position.left, c_position.top);
+        console.log('Setting Location', c_position, p_height, c_height, y_offset, padding);
       }
 
       // Copied from glviewer.js

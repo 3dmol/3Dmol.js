@@ -14,6 +14,8 @@ $3Dmol.StateManager = (function(){
 
 
     var canvas = $(glviewer.getRenderer().domElement);
+    var parentElement = glviewer.container;
+    console.log('Container', parentElement);
     var height = canvas.height();
     var width = canvas.width();
     var offset = canvas.offset();
@@ -24,29 +26,6 @@ $3Dmol.StateManager = (function(){
       offset : offset,
       ui : config.ui || undefined
     }
-
-    this.showUI = function(){
-      this.ui = new $3Dmol.UI(this, uiOverlayConfig);  
-      $(window).on('resize', ()=>{
-        var height = canvas.height();
-        var width = canvas.width();
-        var offset = canvas.offset();
-        var config = {
-          height : height,
-          width : width,
-          offset : offset,
-        }
-        this.ui.resize(config);
-        console.log('Resizing');
-      });
-
-    }
-
-    if(config.ui == true){
-     this.ui = new $3Dmol.UI(this, uiOverlayConfig);
-    }
-    // UI changes
-
     // Selection Handlers
     var selections = [];
     var currentSelection = null;
@@ -54,8 +33,11 @@ $3Dmol.StateManager = (function(){
     var currentStyles = null;
     var tempStyle = null;
 
-    // Surface Handling
+    // Surface handlers
     var surfaces = [];
+
+    // Label Handlers
+    var labels = [];
 
     this.setCurrentSelection = function(selectionId){
       currentSelection = selections.find(  sel => sel.id == selectionId);
@@ -93,7 +75,7 @@ $3Dmol.StateManager = (function(){
       // console.log('Generated Config File', currentForm, formSpecs);
       if(currentForm == 'new_selection'){
         if( Object.keys(formSpecs).length != 0) {
-          selectionSpec = { id : makeid(6), spec : formSpecs.value, hidden: false , styles : [], form : form};
+          selectionSpec = { id : makeid(6), spec : formSpecs.value, hidden: false , styles : [], form : form, mouseInteraction: false, showResLabel: false};
 
           
           // Value Sanitization
@@ -220,6 +202,43 @@ $3Dmol.StateManager = (function(){
       console.log("StateManager::editSelection", currentSelection.form);
     }
 
+    this.toggleMouseInteraction = function(){
+      if(currentSelection.mouseInteraction){
+        currentSelection.mouseInteraction = false;
+        glviewer.setHoverable(currentSelection.spec, false);
+        glviewer.setClickable(currentSelection.spec, false);
+      }
+      else{
+        currentSelection.mouseInteraction = true;
+        glviewer.setHoverable(currentSelection.spec, true, ()=>{
+          console.log('Hovering Over Spheres', this);
+        },
+        ()=>{
+          console.log('UnHovering Over Spheres', this);
+        });
+
+        glviewer.setClickable(currentSelection.spec, true, 
+        (atom)=>{
+          console.log('Clicking', atom, this);
+        });
+
+        
+      }
+      console.log("Toggle Mouse Interaction", currentSelection.spec, currentSelection.mouseInteraction);
+      glviewer.render();
+    }
+
+    this.toggleResLabel = function(){
+      if(currentSelection.showResLabel){
+        currentSelection.showResLabel = false;
+      }
+      else {
+        currentSelection.showResLabel = true;
+      }
+
+      // render();
+    }
+
     this.editStyle = function(style){
       this.ui.tools.dialog.addForm(style.form);
       tempStyle = style;
@@ -255,7 +274,70 @@ $3Dmol.StateManager = (function(){
       console.log('StateManager::editSurface#Updating Surface', surfaceProperty)
     }
 
-    console.log('GetSelectionList', this.getSelectionList());
+    this.openContextMenu = function(atom, x, y){
+      console.log('Open Context Menu', atom, x, y);  
+      this.ui.tools.contextMenu.show(x, y, atom);    
+    }
+
+    this.addLabel = function(labelValue){
+      console.log('Label Added', labelValue);
+      this.ui.tools.contextMenu.hide();
+    }
+
+    this.addAtomLabel = function(labelValue){
+      console.log('Add Atom Label Value', labelValue);
+      this.ui.tools.contextMenu.hide();
+    }
+
+    this.exitContextMenu = function(){
+      console.log('Unfinished Labeling');
+      this.ui.tools.contextMenu.hide();
+    }
+
+    this.removeLabel = function(){
+      // Add code to remove label 
+      console.log('Remove Label')
+      this.ui.tools.contextMenu.hide();
+    }
+
+    this.removeAtomLabel = function(){
+      console.log('Removing atom label');
+      this.ui.tools.contextMenu.hide();
+    }
+
+    canvas.on('click', ()=>{
+      if(this.ui.tools.contextMenu.hidden == false){
+        this.ui.tools.contextMenu.hide();
+      }
+    });
+
+    
+    // Setting up UI generation 
+    this.showUI = function(){
+      var ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);  
+      $(window).on('resize', ()=>{
+        var height = canvas.height();
+        var width = canvas.width();
+        var offset = canvas.offset();
+        var config = {
+          height : height,
+          width : width,
+          offset : offset,
+        }
+        ui.resize(config);
+        console.log('Resizing');
+      });
+
+      return ui;
+    }
+
+    if(config.ui == true){
+     this.ui = this.showUI();
+    }
+    // UI changes
+
+
+    // console.log('GetSelectionList', this.getSelectionList());
 
     function render(){
       console.log('RENDER::', selections.map((s)=>{return s.hidden}));
@@ -271,7 +353,20 @@ $3Dmol.StateManager = (function(){
             if(!style.hidden){
               glviewer.addStyle(sel.spec, style.spec);
             }
-          })
+          });
+
+          // glviewer.setHoverable(sel.spec, true, ()=>{
+          //   console.log('hovering', arguments);
+          // },
+          // ()=>{
+          //   console.log('unhovering', arguments);
+          // }
+          // );
+
+          // glviewer.setClickable(sel.spec, true, (atom, viewer, event, container)=>{
+          //   console.log('Clickable', arguments, atom, viewer, event, container);
+          // });
+          // console.log('List of selected Atom', sel.id, glviewer.selectedAtoms(sel.spec));
         }
       });
 

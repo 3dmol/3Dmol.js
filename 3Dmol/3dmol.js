@@ -127,8 +127,6 @@ $.ajaxTransport(
  *                        
  */
 
-$3Dmol.StateManagers = [];
-
 $3Dmol.createViewer = function(element, config, shared_viewer_resources)
 {
     if(typeof(element) === "string")
@@ -141,11 +139,6 @@ $3Dmol.createViewer = function(element, config, shared_viewer_resources)
     //try to create the  viewer
     try {
         var viewer = new $3Dmol.GLViewer(element, config, shared_viewer_resources);
-        
-        var StateManager = new $3Dmol.StateManager(viewer, config);
-        
-        $3Dmol.StateManagers.push(StateManager);
-        
         return viewer;
     }
     catch(e) {

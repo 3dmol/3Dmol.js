@@ -131,7 +131,7 @@
 
                 this.updateList = function(newList){
                   select.empty();
-                  
+
                   var defaultOption = $('<option></option>');
                   defaultOption.text('select');
                   defaultOption.attr('value', 'default');
@@ -544,7 +544,8 @@
                         this.placeholder.ui.attr('type', 'text');
                     }
                     else if(specs[key].type == 'number'){
-                        if( specs[key].min && spec[key].max){
+                        if(false){
+                        // if( specs[key].min && spec[key].max){
                             control.min = specs[key].min;
                             control.max = specs[key].max;
                             control.default = specs[key].default;

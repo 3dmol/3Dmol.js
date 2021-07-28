@@ -38,8 +38,7 @@ $3Dmol.GLViewer = (function() {
             camerax = parseFloat(config.camerax);
         }
         var _viewer = this;
-        var container = $(element); //we expect container to be jquery
-        // var ui =new $3Dmol.UI(element, config); // <-- This line adds the ui probe to the viewer
+        var container = this.container = $(element); //we expect container to be jquery
         var glDOM = null;
 
         var models = []; // atomistic molecular models
@@ -151,6 +150,7 @@ $3Dmol.GLViewer = (function() {
         var mouseStartX = 0;
         var mouseStartY = 0;
         var touchDistanceStart = 0;
+        var touchHold = false;
         var currentModelPos = 0;
         var cz = 0;
         var cslabNear = 0;
@@ -362,6 +362,7 @@ $3Dmol.GLViewer = (function() {
         // Checks for selection intersects on mousedown
         var handleClickSelection = function(mouseX, mouseY, event) {
             let intersects = targetedObjects(mouseX,mouseY,clickables);
+            console.log('handleClickSelection', mouseX, mouseY, intersects);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined) {
@@ -374,6 +375,8 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
+
+        
 
         //set current_hover to sel (which can be null), calling appropraite callbacks
         var setHover = function(selected, event) {
@@ -524,7 +527,10 @@ $3Dmol.GLViewer = (function() {
 
         // this event is bound to the body element, not the container,
         // so no need to put it inside initContainer()
-        $('body').bind('mouseup touchend', function(ev) {
+        $('body').on('mouseup touchend', function(ev) {
+            // handle touch 
+            touchHold = false;
+
             // handle selection
             if(isDragging && scene) { //saw mousedown, haven't moved
                 var x = getX(ev);
@@ -676,6 +682,8 @@ $3Dmol.GLViewer = (function() {
             }
         };
 
+        
+
         var mouseButton;
         var _handleMouseDown = this._handleMouseDown = function(ev) {
             ev.preventDefault();
@@ -690,6 +698,7 @@ $3Dmol.GLViewer = (function() {
             mouseButton = ev.which;
             mouseStartX = x;
             mouseStartY = y;
+            touchHold = true;
             touchDistanceStart = 0;
             if (ev.originalEvent.targetTouches &&
                     ev.originalEvent.targetTouches.length == 2) {
@@ -701,6 +710,19 @@ $3Dmol.GLViewer = (function() {
             cslabNear = slabNear;
             cslabFar = slabFar;
 
+            setTimeout(function(){
+                if(ev.originalEvent.targetTouches) {
+                    if(touchHold == true){
+                        console.log('Touch hold', x,y);
+                        glDOM = $(renderer.domElement);
+                        glDOM.trigger('contextmenu');
+                    }
+                    else {
+                        console.log('Touch hold ended earlier');
+    
+                    }
+                }
+            }, 1000);
         };
 
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
@@ -751,6 +773,8 @@ $3Dmol.GLViewer = (function() {
         this.getRenderer = function() {
             return renderer;
         };
+
+        var _stateManager =new $3Dmol.StateManager(_viewer, config); // Creates the UI state management tool
       /**
            * Set the duration of the hover delay
            *
@@ -849,6 +873,31 @@ $3Dmol.GLViewer = (function() {
             show();
         };
 
+        var handleContextMenuSelection = function(mouseX, mouseY){
+            let intersects = targetedObjects(mouseX,mouseY,clickables);
+            console.log('Intersected Objects',mouseX, mouseY, intersects[0]);
+            var selected = null;
+            if(intersects.length) {
+                selected = intersects[0].clickable;
+            }
+            
+            var offset = canvasOffset();
+            var x = mouseStartX - offset.left;
+            var y = mouseStartY - offset.top;
+            _stateManager.openContextMenu(selected, x, y);
+        };
+
+        var _handleContextMenu = this._handleContextMenu = function(ev){
+            ev.preventDefault();
+            console.log('Context Menu Called', ev);
+            var x = mouseStartX;
+            var y = mouseStartY;
+            var offset = canvasOffset();
+            var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
+            var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
+            handleContextMenuSelection(mouseX, mouseY, _viewer, ev);
+        };
+
         var initContainer = function(element) {
             container = element;
             WIDTH = getWidth();
@@ -860,12 +909,14 @@ $3Dmol.GLViewer = (function() {
 
             if (!nomouse) {
                 // user can request that the mouse handlers not be installed
-                glDOM.bind('mousedown touchstart', _handleMouseDown);
-                glDOM.bind('DOMMouseScroll mousewheel', _handleMouseScroll);
-                glDOM.bind('mousemove touchmove', _handleMouseMove);
+                glDOM.on('mousedown touchstart', _handleMouseDown);
+                glDOM.on('DOMMouseScroll mousewheel', _handleMouseScroll);
+                glDOM.on('mousemove touchmove', _handleMouseMove);
 
-                glDOM.bind("contextmenu", function(ev) {
-                    ev.preventDefault();
+                glDOM.on("contextmenu", _handleContextMenu);
+
+                glDOM.on('taphold', function(e){
+                    console.log('touchandhold successful', e);
                 });
 
             }

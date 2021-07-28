@@ -111,26 +111,26 @@ $3Dmol.GLModel = (function() {
     ];
 
     GLModel.validAtomSpecs = {
-        "resn":{type:"string",valid :true}, // Parent residue name
-        "x":{type:"number",valid:false,step:0.1}, // Atom's x coordinate
-        "y":{type:"number",valid:false,step:0.1}, // Atom's y coordinate
-        "z":{type:"number",valid:false,step:0.1}, // Atom's z coordinate
+        "resn":{type:"string",valid :true, prop: true}, // Parent residue name
+        "x":{type:"number",valid:false,step:0.1, prop: true}, // Atom's x coordinate
+        "y":{type:"number",valid:false,step:0.1, prop: true}, // Atom's y coordinate
+        "z":{type:"number",valid:false,step:0.1, prop: true}, // Atom's z coordinate
         "color":{type:"color",gui:false}, // Atom's color, as hex code
         "surfaceColor":{type:"color",gui:false}, // Hex code for color to be used for surface patch over this atom
-        "elem":{type:"element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
+        "elem":{type:"element",gui:true, prop: true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
         "hetflag":{type:"boolean",valid:false, gui:true}, // Set to true if atom is a heteroatom
-        "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+        "chain":{type:"string",gui:true, prop: true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
         "resi":{type:"array_range",gui:true}, // Residue number 
         "icode":{type:"number",valid:false,step:0.1},
-        "rescode":{type:"number",valid:false,step:0.1},
+        "rescode":{type:"number",valid:false,step:0.1, prop: true},
         "serial":{type:"number",valid:false,step:0.1}, // Atom's serial id numbermodels
-        "atom":{type:"string",valid:false, gui:true}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+        "atom":{type:"string",valid:false, gui:true, prop: true}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds":{type:"array",valid:false}, // Array of atom ids this atom is bonded to
         "ss":{type:"string",valid:false}, // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
         "singleBonds":{type:"boolean",valid:false}, // true if this atom forms only single bonds or no bonds at all
         "bondOrder":{type:"array",valid:false}, // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
         "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
-        "b":{type:"number",valid:false,step:0.1}, // Atom b factor data
+        "b":{type:"number",valid:false,step:0.1, prop: true}, // Atom b factor data
         "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
         "clickable":{type:"boolean",valid:false, gui:true}, // Set this flag to true to enable click selection handling for this atom
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
