@@ -2783,7 +2783,7 @@ $3Dmol.GLViewer = (function() {
 
                 if(!spec.cstyle.hidden) {
                     spec.cstyle.start = points[0];
-                    spec.cstyle.end = points[3];
+                    spec.cstyle.end = pxoints[3];
                     let arrow = this.addArrow(spec.cstyle);
                     model.unitCellObjects.shapes.push(arrow);
                 }
