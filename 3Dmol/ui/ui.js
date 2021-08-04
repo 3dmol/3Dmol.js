@@ -429,7 +429,6 @@
             styleBox.ui.hide();
           });
 
-
           // CSS
           
         }
@@ -848,6 +847,62 @@
         });
         // Context Box
 
+        // Label Property List 
+        var propertyKeys = Object.keys($3Dmol.GLModel.validAtomSpecs);
+        var propertyList = [];
+        var propertyObjectList = [];
+
+        propertyKeys.forEach((prop)=>{
+          var propObj = $3Dmol.GLModel.validAtomSpecs;
+          if(propObj[prop].prop === true){
+            propertyList.push(prop);
+          }
+        });
+
+        // Property Menu 
+        var propertyMenu = $('<div></div>');
+        contentBox.append(propertyMenu);
+        
+        function Property(key, value){
+          this.row = $('<tr></tr>');
+          var propLabelValue = this.control = {
+            key : '',
+            value : null,
+            active : true,
+            name : key,
+          }
+
+          this.key = key;
+          this.value = value;
+
+          var checkbox = new $3Dmol.UI.Form.Checkbox(propLabelValue);
+          var checkboxHolder = $('<td></td>');
+          checkboxHolder.append(checkbox.ui); 
+          var keyHolder = $('<td></td>');
+          var separatorHolder = $('<td></td>').text(':');
+          var valueHolder = $('<td></td>');
+
+          this.row.append(checkboxHolder, keyHolder, separatorHolder, valueHolder);
+
+          keyHolder.text(key);
+          valueHolder.text(value);
+        }
+
+        function setProperties(atom){        
+          propertyMenu.empty();
+          propertyObjectList = [];
+          
+          var propertyTable = $('<table></table>');
+          
+          propertyList.forEach((prop)=>{
+            var propObj = new Property(prop, atom[prop]);
+            propertyTable.append(propObj.row);
+            propertyObjectList.push(propObj);
+          });
+
+          propertyMenu.append(propertyTable);
+        }
+
         // Previous Labels 
         var labelHolder = $('<div></div>');
         contentBox.append(labelHolder);
@@ -1092,6 +1147,23 @@
           }
         }
 
+
+        function processPropertyList(){
+          var propsForLabel = {};
+          
+          propertyObjectList.forEach((propObj)=>{
+            if(propObj.control.value === true){
+              propsForLabel[propObj.key] = propObj.value;
+            }
+          });
+
+          if(Object.keys(propsForLabel).length != 0){
+            return propsForLabel
+          }
+          else{
+            return null;
+          }
+        }
         // Testing UI
         // var addLabelFormTest = generateAddAtomForm();
         // editMenu.append(addLabelFormTest.boundingBox);
@@ -1101,21 +1173,29 @@
         this.hidden = true;
 
         this.show = function(x, y, atom){
+          
           unsetForm();
           setPosition(boundingBox, x, y);
           console.log('CONTEXT MENU::Atom Selected', atom);
           boundingBox.show();
           this.hidden = false;
-
+          
           if(atom){
             addAtomLabelMenu.show();
+            setProperties(atom);
           }
           else{
             addAtomLabelMenu.hide();
+            propertyMenu.empty();
           }
         }
-
+        
         this.hide = function(){
+          var propsForLabel = processPropertyList();
+          if(propsForLabel != null){
+            console.log("These property will be used to add label", propsForLabel);
+          }
+
           boundingBox.hide();
           this.hidden = true;
           unsetForm();

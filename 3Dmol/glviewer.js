@@ -48,6 +48,7 @@ $3Dmol.GLViewer = (function() {
         var fixed_labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
+        var contextMenuEnabledAtoms = []; // atoms with context menu 
         var current_hover = null;
         var hoverDuration = 500;
         var viewer_frame = 0;
@@ -263,6 +264,7 @@ $3Dmol.GLViewer = (function() {
         var updateClickables = function() {
             clickables.splice(0,clickables.length);
             hoverables.splice(0,hoverables.length);
+            contextMenuEnabledAtoms.splice(0, contextMenuEnabledAtoms.length);
 
             for (let i = 0, il = models.length; i < il; i++) {
                 var model = models[i];
@@ -274,6 +276,8 @@ $3Dmol.GLViewer = (function() {
                     let hoverable_atoms = model.selectedAtoms({
                         hoverable : true
                     });
+
+                    let contextMenuEnabled_atom = model.selectedAtoms({ contextMenuEnabled : true });
                     // Array.prototype.push.apply(hoverables,hoverable_atoms);
                     for (let n = 0; n < hoverable_atoms.length; n++) {
                         hoverables.push(hoverable_atoms[n]);
@@ -282,6 +286,11 @@ $3Dmol.GLViewer = (function() {
                     // Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
                     for (let m = 0; m < atoms.length; m++) {
                         clickables.push(atoms[m]);
+                    }
+
+                    // add atoms into contextMenuEnabledAtoms
+                    for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
+                        contextMenuEnabledAtoms.push(contextMenuEnabled_atom[m]);
                     }
 
                 }
@@ -874,11 +883,12 @@ $3Dmol.GLViewer = (function() {
         };
 
         var handleContextMenuSelection = function(mouseX, mouseY){
-            let intersects = targetedObjects(mouseX,mouseY,clickables);
-            console.log('Intersected Objects',mouseX, mouseY, intersects[0]);
+            let intersects = targetedObjects(mouseX,mouseY,contextMenuEnabledAtoms);
+            console.log('Intersected Objects',mouseX, mouseY, contextMenuEnabledAtoms,  intersects[0]);
             var selected = null;
             if(intersects.length) {
                 selected = intersects[0].clickable;
+                console.log('intersects and selected', selected);
             }
             
             var offset = canvasOffset();
@@ -3577,6 +3587,18 @@ $3Dmol.GLViewer = (function() {
          */
         this.setHoverable = function(sel,hoverable,hover_callback,unhover_callback){
             applyToModels("setHoverable", sel,hoverable, hover_callback,unhover_callback);
+            return this;
+        };
+
+        /** enable context menu and callback of selected atoms
+         *
+         * @function $3Dmol.GLViewer#enableContextMenu
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
+
+         */
+        this.enableContextMenu = function(sel,contextMenuEnabled){
+            applyToModels("enableContextMenu", sel, contextMenuEnabled);
             return this;
         };
 

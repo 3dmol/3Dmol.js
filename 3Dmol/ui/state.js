@@ -147,14 +147,12 @@ $3Dmol.StateManager = (function(){
     // });
 
     this.removeSelection = function(selectionSpec) {
-      // glviewer.clear();
 
       var selectionToRemove = selections.indexOf(selections.find((sel)=>{
         console.log("index of selection", sel);
         if(sel.id == selectionSpec.id)
           return sel
-        }));
-      // glviewer.setStyle(currentSelection)
+      }));
 
       if(selectionToRemove != -1){
         selections.splice(selectionToRemove, 1);
@@ -174,13 +172,14 @@ $3Dmol.StateManager = (function(){
     this.showSelection = function(){
       var index = selections.indexOf(currentSelection);
       selections[index].hidden = false;
-      console.log('StateManger::showSelection', selections.map((s)=>{return s.hidden}), currentSelection);
+      // console.log('StateManger::showSelection', selections.map((s)=>{return s.hidden}), currentSelection);
       render();
     }
 
     this.hideSelection = function(){
       currentSelection.hidden = true;
-      console.log('StateManger::hideSelection', selections.map((s)=>{return s.hidden}), currentSelection);
+      // console.log('StateManger::hideSelection', selections.map((s)=>{return s.hidden}), currentSelection);
+
       render();
     }
 
@@ -355,25 +354,23 @@ $3Dmol.StateManager = (function(){
             }
           });
 
-          // glviewer.setHoverable(sel.spec, true, ()=>{
-          //   console.log('hovering', arguments);
-          // },
-          // ()=>{
-          //   console.log('unhovering', arguments);
-          // }
-          // );
-
-          // glviewer.setClickable(sel.spec, true, (atom, viewer, event, container)=>{
-          //   console.log('Clickable', arguments, atom, viewer, event, container);
-          // });
-          // console.log('List of selected Atom', sel.id, glviewer.selectedAtoms(sel.spec));
+          glviewer.setClickable(sel.spec, true, ()=>{});
+          glviewer.enableContextMenu(sel.spec, true);
         }
+        else {
+          glviewer.setClickable(sel.spec, false, ()=>{});
+          glviewer.enableContextMenu(sel.spec, false);
+        }
+
+        console.log( "Context Menu Status", !sel.hidden);
+
       });
 
       glviewer.render();
     }
 
     function clear(selectionSpec){
+      glviewer.enableContextMenu(sel.spec, false);
       glviewer.setStyle(selectionSpec.spec, {});
     }
 

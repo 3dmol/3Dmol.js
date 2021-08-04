@@ -133,6 +133,7 @@ $3Dmol.GLModel = (function() {
         "b":{type:"number",valid:false,step:0.1, prop: true}, // Atom b factor data
         "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
         "clickable":{type:"boolean",valid:false, gui:true}, // Set this flag to true to enable click selection handling for this atom
+        "contextMenuEnabled":{type:"boolean",valid:false, gui:false}, // Set this flag to true to enable click selection handling for this atom
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
@@ -2441,6 +2442,35 @@ $3Dmol.GLModel = (function() {
                 if (hover_callback) selected[i].hover_callback = hover_callback;
                 if (unhover_callback) selected[i].unhover_callback = unhover_callback;
 
+            }
+
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
+        };
+
+        /** enable context menu of selected atoms
+         * 
+         * @function $3Dmol.GLModel#enableContextMenu
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
+         */
+         this.enableContextMenu = function(sel, contextMenuEnabled){
+            var s;
+            for (s in sel) {
+                if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure contextMenuEnabled is a boolean
+            contextMenuEnabled = !!contextMenuEnabled;
+            
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].contextMenuEnabled = contextMenuEnabled;
             }
 
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
