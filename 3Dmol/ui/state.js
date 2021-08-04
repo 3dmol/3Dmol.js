@@ -3,6 +3,7 @@
 // Everytime UI state is changed this state is updated so that this can
 // preserve the changes in case error happens
 
+
 // This will also help in migrating the controls from to different
 $3Dmol.StateManager = (function(){
 
@@ -37,7 +38,9 @@ $3Dmol.StateManager = (function(){
     var surfaces = [];
 
     // Label Handlers
-    var labels = [];
+    var labels = {};
+
+    var atomLabel = {};
 
     this.setCurrentSelection = function(selectionId){
       currentSelection = selections.find(  sel => sel.id == selectionId);
@@ -275,17 +278,80 @@ $3Dmol.StateManager = (function(){
 
     this.openContextMenu = function(atom, x, y){
       console.log('Open Context Menu', atom, x, y);  
-      this.ui.tools.contextMenu.show(x, y, atom);    
+      var atomExist = false;
+
+      if(atom){
+        atomExist = Object.keys(atomLabel).find((i)=>{
+          if (i == atom.index)
+            return true;
+          else 
+            return false;
+        });
+  
+        if(atomExist != undefined )
+          atomExist = true;
+        else 
+          atomExist = false;
+        
+      }
+
+      this.ui.tools.contextMenu.show(x, y, atom, atomExist);    
     }
 
     this.addLabel = function(labelValue){
       console.log('Label Added', labelValue);
+      labels[labelValue.sel.value] = labels[labelValue.sel.value] || [];
+
+      var labelProp = $3Dmol.labelStyles[labelValue.style.value];
+      var selection = selections.find((sel)=>{
+        if(sel.id == labelValue.sel.value)
+          return true;
+      });
+
+      var offset = labels[labelValue.sel.value].length;
+      labelProp['screenOffset'] = new $3Dmol.Vector2(0, -1*offset*35);
+
+      labels[labelValue.sel.value].push(glviewer.addLabel(labelValue.text.value, labelProp, selection.spec));
+
       this.ui.tools.contextMenu.hide();
     }
 
-    this.addAtomLabel = function(labelValue){
+    this.addAtomLabel = function(labelValue, atom){
+      var atomExist = Object.keys(atomLabel).find((i)=>{
+        if (i == atom.index)
+          return true;
+        else 
+          return false;
+      });
+
+      if(atomExist != undefined )
+        atomExist = true;
+      else 
+        atomExist = false;
+
+
+      if(atomExist){
+        this.removeAtomLabel(atom);
+      }
+
       console.log('Add Atom Label Value', labelValue);
-      this.ui.tools.contextMenu.hide();
+      
+      atomLabel[atom.index] = atomLabel[atom.index] || null;
+      
+      var labelProp = $3Dmol.deepCopy($3Dmol.labelStyles['milk']);
+      labelProp.position = {
+        x : atom.x, y : atom.y, z : atom.z
+      }
+
+      var labelText = [];
+      for ( key in labelValue){
+        labelText.push(`${key} : ${labelValue[key]}`);
+      }
+      labelText = labelText.join('\n');
+
+      atomLabel[atom.index] = glviewer.addLabel(labelText, labelProp);
+      
+      console.log('Getting Atom Label', labelText, labelProp);
     }
 
     this.exitContextMenu = function(){
@@ -299,8 +365,13 @@ $3Dmol.StateManager = (function(){
       this.ui.tools.contextMenu.hide();
     }
 
-    this.removeAtomLabel = function(){
-      console.log('Removing atom label');
+    this.removeAtomLabel = function(atom){
+      var label = atomLabel[atom.index];
+      console.log("Stuff", label, atomLabel);
+      glviewer.removeLabel(label);
+      delete atomLabel[atom.index]; 
+      
+      console.log("Stuff After removal", label, atomLabel);
       this.ui.tools.contextMenu.hide();
     }
 

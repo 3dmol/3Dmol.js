@@ -846,6 +846,25 @@
           'padding': '4px'
         });
         // Context Box
+        // Remove Label Button 
+        
+        var labelMenuStyle = {
+          'background' : '#d3e2ee',
+          'padding' : '2px',
+          'font-family':'Arial',
+          'font-weight':'bold',
+          'font-size':'12px',
+          'border-radius':'2px',
+          // 'margin-top':'3px'
+        }
+
+        var removeLabelMenu = $('<div></div>');
+        removeLabelMenu.text('Remove Label');
+        removeLabelMenu.css(labelMenuStyle);
+        removeLabelMenu.css('margin-bottom', '3px');
+
+        contentBox.append(removeLabelMenu);
+        removeLabelMenu.hide();
 
         // Label Property List 
         var propertyKeys = Object.keys($3Dmol.GLModel.validAtomSpecs);
@@ -925,16 +944,7 @@
 
         var addAtomLabelMenu = $('<div></div>');
         addMenu.append(addAtomLabelMenu);
-
-        var labelMenuStyle = {
-          'background' : '#d3e2ee',
-          'padding' : '2px',
-          'font-family':'Arial',
-          'font-weight':'bold',
-          'font-size':'12px',
-          'border-radius':'2px',
-          // 'margin-top':'3px'
-        }
+        
 
         addLabelMenu.text('Add Label');
         addLabelMenu.css(labelMenuStyle);
@@ -1164,16 +1174,30 @@
             return null;
           }
         }
-        // Testing UI
-        // var addLabelFormTest = generateAddAtomForm();
-        // editMenu.append(addLabelFormTest.boundingBox);
 
         // Context Menu UI Funciton 
         boundingBox.hide();
         this.hidden = true;
+        this.atom = null;
 
-        this.show = function(x, y, atom){
-          
+        removeLabelMenu.on('click', { atom : this.atom }, function(e){
+          stateManager.removeAtomLabel(removeLabelMenu.atom);
+          // console.log(removeLabelMenu.atom, "Atom to remove");
+        });
+
+
+        this.show = function(x, y, atom, atomExist){
+          console.log('Context Menu open and atom Exist', atomExist);
+
+          if(atomExist){
+            removeLabelMenu.show();
+            removeLabelMenu.atom = atom;
+          }
+          else {
+            removeLabelMenu.hide();
+            removeLabelMenu.atom = null;
+          }
+
           unsetForm();
           setPosition(boundingBox, x, y);
           console.log('CONTEXT MENU::Atom Selected', atom);
@@ -1181,8 +1205,8 @@
           this.hidden = false;
           
           if(atom){
-            addAtomLabelMenu.show();
             setProperties(atom);
+            this.atom = atom;
           }
           else{
             addAtomLabelMenu.hide();
@@ -1193,7 +1217,8 @@
         this.hide = function(){
           var propsForLabel = processPropertyList();
           if(propsForLabel != null){
-            console.log("These property will be used to add label", propsForLabel);
+            stateManager.addAtomLabel(propsForLabel, this.atom);
+            // console.log("These property will be used to add label", propsForLabel);
           }
 
           boundingBox.hide();
@@ -1258,7 +1283,7 @@
         var surfaces = this.surfaces = [];
         var currentSurface = this.currentSurface = null;
 
-        this.initNewSurface = function(){
+        function Surface(){
           var control = {
             surfaceType: {
               key : 'Surface Type',
@@ -1278,7 +1303,7 @@
             },
           };
   
-          var surfaceBox = $('<div></div>');
+          var surfaceBox = this.ui = $('<div></div>');
           surfaceBox.css({
             'margin':'3px',
             'padding':'3px',
@@ -1288,12 +1313,9 @@
             'left': -186
           });
         
-
-
-          var heading = $('<div></div>');
+          var heading = this.heading = $('<div></div>');
           var header = $('<div></div>');
-          heading.text('surf#1234');
-          surfaceBox.append(heading);
+
           
           // Control Buttons
           var toolButtons = $('<div></div>');
@@ -1308,11 +1330,21 @@
           toolButtons.removeButton = removeButton;
           toolButtons.editMode = false;
           
+          
+          heading.css('display', 'inline-block');
+          heading.css({
+            'font-weight': 'bold',
+            'font-family' : 'Arial',
+            'font-size' : '14px'
+          });
+          
+          toolButtons.css('display', 'inline-block');
+          toolButtons.hide();
+          
           header.append(heading, toolButtons);
           surfaceBox.append(header);
 
           // toolButtons.hide();
-
           var surfacePropertyBox = $('<div></div>');
           surfaceBox.append(surfacePropertyBox);
           // Surface Type
@@ -1347,6 +1379,7 @@
           var selectionListElement = selections.map( (m)=>{
             return m.id;
           });
+
           var listSurfaceOf = new $3Dmol.UI.Form.ListInput(control.surfaceOf, selectionListElement);
           
           surfaceOf.append(labelSurfaceOf, listSurfaceOf.ui);
@@ -1393,7 +1426,7 @@
 
           // Form Validation 
 
-          function validateInput(){
+          var validateInput = this.validateInput = function(){
             var validated = true;
             
             if( listSurfaceType.getValue().value == 'default'){
@@ -1414,32 +1447,47 @@
             return validated;
           }
 
-          // UI_Saver 
-          var surfaceObject = {
-            surfaceBox : surfaceBox,
-            surfaceTitle : heading,
-            surfaceType : listSurfaceType,
-            surfaceStyle : formSurfaceStyle,
-            surfaceFor : listSurfaceFor,
-            surfaceOf : listSurfaceOf,
-            tools : toolButtons,
-            properties: surfacePropertyBox
-          } 
           
+
+          // boundingBox.on('mouseenter', function(){
+          //   selections = stateManager.getSelectionList();
+          //   selectionListElement = selections.map( (m)=>{
+          //     return m.id;
+          //   });
+          //   listSurfaceFor.updateList(selectionListElement);
+          //   listSurfaceOf.updateList(selectionListElement);
+          // });
+
+          var updateSelection = this.updateSelection = function(){
+            selections = stateManager.getSElectionList();
+            selectionListElement = selections.map( (m)=>{
+              return m.id;
+            });
+            listSurfaceFor.updateList(selectionListElement);
+            listSurfaceOf.updateList(selectionListElement);
+          }
+
           // Submit 
           submit.ui.on('click', {}, function(){
             if(validateInput()){ 
-              if(toolButtons.editMode == false){
+              if(toolButtons.editMode === false){
                 var id = stateManager.addSurface(control);
                 control.id = id;
+
+                // element properties
                 surfaceBox.data('surf-id', id);
-                surfaces.push(surfaceObject);
-                newSurfaceSpace.append(surfaceBox);
+                
+                heading.text('surf#' + id);
+
+                toolButtons.show();
+                
                 surfacePropertyBox.hide();
+
+                surfaces.push(this);
               }
               else{
                 control.id = surfaceBox.data('surf-id');
-                stateManager.editSurface(control);
+                stateManager.editSurface(control); // -> add updateSurface funciton to surfaceMenu
                 surfacePropertyBox.hide();
               }
             }
@@ -1450,6 +1498,8 @@
             if(toolButtons.editMode == false){
               surfaceBox.detach();
               surfaceBox.remove();
+              
+              // Add statemanager handle to remove the object itself
             }
             else {
               surfacePropertyBox.hide();
@@ -1457,20 +1507,9 @@
             }
           });
 
-          boundingBox.on('mouseenter', function(){
-            selections = stateManager.getSelectionList();
-            selectionListElement = selections.map( (m)=>{
-              return m.id;
-            });
-            listSurfaceFor.updateList(selectionListElement);
-            listSurfaceOf.updateList(selectionListElement);
-          });
-
           // CSS
           surfaceBox.css('width', 200);
           surfaceBox.css('background-color', 'lightgrey');
-
-          return surfaceObject;
         }
 
         // Functionality
@@ -1478,15 +1517,13 @@
         // Surface addition
 
         addButton.ui.on('click', { surfaces: this }, function(e){
-          var newSurface = e.data.surfaces.initNewSurface();
-          newSurfaceSpace.append(newSurface.surfaceBox);
+          var newSurface = new Surface();
+          newSurfaceSpace.append(newSurface.ui);
         });
 
         surfaceButton.ui.on('click', ()=>{
           displayBox.toggle();
-
-        })
-
+        });
 
       }
 
