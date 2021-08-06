@@ -1413,15 +1413,8 @@
 
           editButton.ui.on('click', function(){
             surfacePropertyBox.toggle();
-            if(toolButtons.editMode){
-              toolButtons.editMode = false;
-              // controlButton.hide();
-            }
-            else{
-              toolButtons.editMode = true;
-              // surfaceBox.append(controlButton);
-              // controlButton.show();
-            }
+            
+            // After creation of the surface box all the changes will be edit to the surfaces so on first submit toolButtons.editMode == true;
           });
 
           // Form Validation 
@@ -1481,7 +1474,7 @@
                 heading.text('surf#' + id);
 
                 toolButtons.show();
-                
+                toolButtons.editMode = true;
                 surfacePropertyBox.hide();
 
                 surfaces.push(this);

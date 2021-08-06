@@ -275,11 +275,11 @@ $3Dmol.StateManager = (function(){
         sel.spec
       ).then((surfId)=>{
         surfaces[id] = surfId;
+        console.log("StateManager::Surfaces", surfaces);
       }, (err)=>{
         console.log('It failed', err);
       });
 
-      console.log("StateManager::Surfaces", surfaces);
       return id;
     }
 
