@@ -1258,7 +1258,7 @@
           // 'background' : '#d3e2ee',          
         });
         
-        var surfaceButton = new button(icons.surface, 20);
+        var surfaceButton = new button(icons.surface, 20, { tooltip : 'Open Surface Menu'});
         boundingBox.append(surfaceButton.ui);
 
         var surfacesHolder = $('<div></div>');
@@ -1310,9 +1310,9 @@
             'border-radius':'3px',
             'background-color': '#e8e8e8',
             'position':'relative',
-            'left': -186,
+            'left': -106,
             'opacity' : 0.9,
-            'width':'200'
+            'width':'120'
           });
         
           var heading = this.heading = $('<div></div>');
@@ -1660,6 +1660,8 @@
         var bgColor = config.bgColor || 'rgb(177, 194, 203)';
         var color = config.color || 'black'; 
         var hoverable = config.hoverable || 'true';
+        var tooltipText = config.tooltip || null;
+
         // Button instance
         var button = this.ui = $('<div></div>');
         var innerButton = $('<div></div>');
@@ -1693,25 +1695,109 @@
         this.setSVG(svg);
 
         // Hover
+        
+        // Setting up tool tip
+        button.css({
+          'position' : 'relative'
+        });
+
+
+        // Tool tips will only be created if tooltip description is set during creation
+        var tooltipBox = null
+
+        if(tooltipText != null ){
+          tooltipBox = $('<div></div>');
+          tooltipBox.text(tooltipText);
+  
+          button.append(tooltipBox);
+          tooltipBox.css({
+            'background-color': 'black',
+            'color': '#fff',
+            'text-align': 'center',
+            'border-radius': '6px',
+            'padding': '4px', 
+            'width' : '120px',
+
+            'font-size':'10px',
+            'font-family':'Arial',
+            
+            'position' : 'absolute',
+            'top': '0%',
+            'left':'110%',
+            'z-index':'100'
+          });
+
+          tooltipBox.hide();
+
+          button.on('hover', ()=>{
+            tooltipBox.toggle();
+          })
+        }
+
         if(hoverable == 'true'){
           button.on('mouseenter',
             ()=>{
-                button.css('box-shadow', '0px 0px 3px black');
+              button.css('box-shadow', '0px 0px 3px black');
+              if(tooltipText != null){
+                tooltipBox.show();
+
+                setTimeout(()=>{
+                  tooltipBox.hide();
+                }, 3000);
+              }
             }).on('mouseleave', 
             ()=>{
               button.css('box-shadow', 'none');
+              if(tooltipText != null) {
+                tooltipBox.hide();
+              }
             }
           );
-        
+            
+          var longPressTime = 0;
+          var mouseX = 0;
+          var mouseY = 0;
+
           // click
-          button.on('mousedown', ()=>{
+          button.on('mousedown', (e)=>{
             button.css('box-shadow', '0px 0px 1px black');
+            // var startX = e.clientX;
+            // var startY = e.clientY;
+
+            // setTimeout(()=>{
+            //   if(mouseX == startX && mouseY == startY){
+            //     console.log('Show tooltip');
+            //   }
+            //   else{
+            //     console.log('mouse moved');
+            //   }
+            // }, $3Dmol.longPressDuration);
           });
   
           button.on('mouseup', ()=>{
             button.css('box-shadow', '0px 0px 3px black');
           });
+
+          button.on('mousemove', (e)=>{
+            // mouseX = e.clientX;
+            // mouseY = e.clientY;
+          });
+
+          var timer;
+          button.on('touchstart', (e)=>{
+            timer = setTimeout(()=>{
+              (tooltipText != null)? tooltipBox.show() : null;
+            }, $3Dmol.longPressTime)
+          });
+
+          button.on('touchend', ()=>{
+            (tooltipText != null)? tooltipBox.hide() : null;
+            if(timer)
+              clearTimeout(timer);
+          })
+
         }
+
 
 
       }

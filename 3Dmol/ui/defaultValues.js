@@ -4,3 +4,5 @@ $3Dmol.labelStyles = {
     backgroundOpacity: 0.8
   }
 };
+
+$3Dmol.longPressDuration = 1500;

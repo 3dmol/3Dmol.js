@@ -18,8 +18,8 @@
 
                 var control = this.control = {
                     R : { value : 0, min : 0, max : 255, label : redDot },
-                    G : { value : 0, min : 0, max : 255, label : blueDot },
-                    B : { value : 0, min : 0, max : 255, label : greenDot },
+                    G : { value : 0, min : 0, max : 255, label : greenDot },
+                    B : { value : 0, min : 0, max : 255, label : blueDot },
                 };
 
                 var surroundingBox = this.ui = $('<div></div>')
@@ -45,8 +45,8 @@
                 // CSS
                 // boundingBox.width(400);
                 // label.css('width', '100%');
-                boundingBox.css('display', 'flex');
-                boundingBox.css('align-items', 'center');
+                // boundingBox.css('display', 'flex');
+                // boundingBox.css('align-items', 'center');
                 
                 // RValue.ui.css('display', 'block');
                 RValue.slide.css('color', 'red');
@@ -57,14 +57,15 @@
                 // BValue.ui.css('display', 'block');
                 BValue.slide.css('color', 'blue');
                 
-                color.css('display', 'inline-block');
-                sliders.css('display', 'inline-block');
+                // color.css('display', 'inline-block');
+                // sliders.css('display', 'inline-block');
 
-                color.height(50);
-                color.width(50);
-                color.css('margin-left', '6px');
-                color.css('border','1px solid black');
-                color.css('border-radius', '2px');
+                color.height(15);
+                // color.width(50);
+                color.css('margin-top', '6px');
+                color.css('margin-bottom', '6px');
+                color.css('border','1px solid grey');
+                color.css('border-radius', '500px');
 
                 this.update = function(control){};
                 var self = this;
@@ -360,7 +361,7 @@
                 }
             }
 
-            Form.Slider = function(control){
+            Form.Slider = function(control, style = {}){
                 // var label = $('<div></div>');
                 // label.text(control.key); 
 
@@ -372,8 +373,8 @@
                 
                 boundingBox.css('display', 'flex');
                 var slide = this.slide = $('<input type="range">');
+                slide.css('width' , '100%');
                 
-
                 var min = control.min || 0;
                 var max = control.max || 100;
                 var step = control.step || 1;
