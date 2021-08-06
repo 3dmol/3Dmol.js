@@ -29,12 +29,7 @@
        * @function generateUI creates all the jquery object of different UI features
        * @param  {object} config
        */
-      function generateUI(config){  
-        
-        var ui_overlay = new UI_Overlay(config);
-        body.append(ui_overlay.ui);
-        // body = ui_overlay.ui;
-        
+      function generateUI(config){    
         var movieControl = new MovieBar();
         mainParent.append(movieControl.ui);
         // movieControl.ui.css('top', 200);
@@ -68,10 +63,9 @@
         
         var surfaceMenu = new SurfaceMenu();
         mainParent.append(surfaceMenu.ui);
-        setLocation(mainParent, surfaceMenu.ui, 'right', 'top');
+        setLocation(mainParent, surfaceMenu.ui, 'right', 'top', );
 
         return {
-          uiOverlay : ui_overlay,
           topbar : topbar,
           selectionBox : selectionBox,
           dialog : dialog,
@@ -85,64 +79,6 @@
        * @function UI_Overlay adds overlay on the glviewer to assists placement of different UI elements on the viewer.
        * @param  {object} config
        */
-      function UI_Overlay(config){
-        config = config || {};
-
-        var top = (config.offset.top !=undefined) ? config.offset.top : 10;
-        var left = (config.offset.left !=undefined) ? config.offset.left : 10;
-        var width = config.width || '400px';
-        var height = config.height || '400px';
-
-        var ui_overlay = this.ui = $('<div></div>');
-        ui_overlay.height(height);
-        ui_overlay.width(width);
-        setPosition(ui_overlay, left, top);
-        ui_overlay.css('box-sizing','border-box');
-        // ui_overlay.css('border', '1px solid black');
-        ui_overlay.css('background', 'rbga(0,0,0,0)');
-        ui_overlay.css('padding', '0px');
-        ui_overlay.css('pointer-events', 'none');
-        ui_overlay.css('position', 'absolute');
-
-        // Handles configuration changes on resize
-        this.resize = function(config){
-          var top = (config.offset.top !=undefined) ? config.offset.top : 10;
-          var left = (config.offset.left !=undefined) ? config.offset.left : 10;
-          var width = config.width || '400px';
-          var height = config.height || '400px';
-          ui_overlay.height(height);
-          ui_overlay.width(width);
-          setPosition(ui_overlay, left, top);
-        }
-
-      }
-
-      // Handles resize event 
-      this.resize = function(config){
-        uiElements.uiOverlay.resize(config);
-        this.orient();
-      }
-
-      // Reorients the UI on window changes 
-      this.orient = function(){
-        var ui_overlay = uiElements.uiOverlay;
-        var topbar = uiElements.topbar;
-        var dialog = uiElements.dialog;
-        var alertBox = uiElements.alertBox;
-        var selectionBox = uiElements.selectionBox;
-        var movieControl = uiElements.movieControl;
-        var surfaceMenu = uiElements.surfaceMenu;
-
-        setLocation(ui_overlay.ui, alertBox.ui, 'right', 'top');
-        setLocation(ui_overlay.ui, dialog.ui, 'center', 'center');
-        setLocation(ui_overlay.ui, movieControl.ui, 'center', 'bottom');
-        setLocation(ui_overlay.ui, selectionBox.ui, 'left', 'top', 2, topbar.ui.outerHeight());
-        setLocation(ui_overlay.ui, topbar.ui, 'left', 'top');
-        setLocation(ui_overlay.ui, surfaceMenu.ui, 'right', 'top');
-
-      }
-
-
 
       /**
       * @function Toobar creates horizontal toolbar for the UI
@@ -1253,16 +1189,27 @@
         var boundingBox = this.ui = $('<div></div>');
         // Selection Layout
 
+        // var contentBox = $('<div></div>');
+        // contentBox.css('background', 'red');
+        // boundingBox.append(contentBox);
+
         boundingBox.css({
           'position': 'absolute',
-          // 'background' : '#d3e2ee',          
+          'width': '120px',
+          'text-align': 'right'   
         });
+
+        // contentBox.css({
+        //   'position':'relative',
+        //   'right':'100%',
+        //   'text-align':'right'
+        // })
+
         
         var surfaceButton = new button(icons.surface, 20, { tooltip : 'Open Surface Menu'});
+
         boundingBox.append(surfaceButton.ui);
 
-        var surfacesHolder = $('<div></div>');
-        boundingBox.append(surfacesHolder);
 
         var displayBox = $('<div></div>');
         boundingBox.append(displayBox);
@@ -1305,14 +1252,16 @@
   
           var surfaceBox = this.ui = $('<div></div>');
           surfaceBox.css({
-            'margin':'3px',
+            'margin-top':'3px',
             'padding':'6px',
             'border-radius':'3px',
             'background-color': '#e8e8e8',
-            'position':'relative',
-            'left': -106,
+            // 'position':'relative',
+            'width':'100%',
+            'box-sizing':'border-box',
+            // 'left': "-100%",
             'opacity' : 0.9,
-            'width':'120'
+            'text-align':'left'
           });
         
           var heading = this.heading = $('<div></div>');

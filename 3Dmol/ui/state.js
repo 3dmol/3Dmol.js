@@ -420,18 +420,6 @@ $3Dmol.StateManager = (function(){
     // Setting up UI generation 
     this.showUI = function(){
       var ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);  
-      $(window).on('resize', ()=>{
-        var height = canvas.height();
-        var width = canvas.width();
-        var offset = canvas.offset();
-        var config = {
-          height : height,
-          width : width,
-          offset : offset,
-        }
-        ui.resize(config);
-        console.log('Resizing');
-      });
 
       return ui;
     }
