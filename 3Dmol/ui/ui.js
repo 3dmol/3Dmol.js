@@ -1471,6 +1471,7 @@
           submit.ui.on('click', {}, function(){
             if(validateInput()){ 
               if(toolButtons.editMode === false){
+                formSurfaceStyle.getValue();
                 var id = stateManager.addSurface(control);
                 control.id = id;
 
@@ -1486,6 +1487,9 @@
                 surfaces.push(this);
               }
               else{
+                console.log('Edit Surface called');
+
+                formSurfaceStyle.getValue();
                 control.id = surfaceBox.data('surf-id');
                 stateManager.editSurface(control); // -> add updateSurface funciton to surfaceMenu
                 surfacePropertyBox.hide();

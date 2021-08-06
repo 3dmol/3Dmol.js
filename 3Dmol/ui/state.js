@@ -267,7 +267,7 @@ $3Dmol.StateManager = (function(){
           return true;
       });
 
-      console.log('StateManager::addSurface', property);
+      console.log('StateManager::addSurface', property, style);
 
       glviewer.addSurface(
         $3Dmol.SurfaceType[property.surfaceType.value],
@@ -275,6 +275,8 @@ $3Dmol.StateManager = (function(){
         sel.spec
       ).then((surfId)=>{
         surfaces[id] = surfId;
+      }, (err)=>{
+        console.log('It failed', err);
       });
 
       console.log("StateManager::Surfaces", surfaces);
