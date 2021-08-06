@@ -387,6 +387,7 @@
                 slide.attr('min', min);
                 slide.attr('max', max);
                 slide.attr('step', step);
+                console.log('step::', step);
                 slide.attr('value', defaultValue);
                 boundingBox.append(slide);
 
@@ -544,11 +545,19 @@
                         this.placeholder.ui.attr('type', 'text');
                     }
                     else if(specs[key].type == 'number'){
-                        if(false){
+                        console.log('Form::Property', specs[key]);
+                        var slider = false;
+                        
+                        if(specs[key].min != undefined && specs[key].max != undefined && specs[key].default != undefined){
+                            slider = true;
+                        }
+
+                        if(slider){
                         // if( specs[key].min && spec[key].max){
                             control.min = specs[key].min;
                             control.max = specs[key].max;
                             control.default = specs[key].default;
+                            control.step = specs[key].step || ((control.max - control.max )/ 1000);
                             this.placeholder = new Form.Slider(control);
                         }
                         else{
