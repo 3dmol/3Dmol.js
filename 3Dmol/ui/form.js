@@ -460,7 +460,20 @@
                 specs = specs || {};
                 var boundingBox = this.ui = $('<div></div>');
 
-                boundingBox.append($(`<p><b>${mainControl.key}</b></p><div style="border-top:1px solid black"></div>`));
+                var heading = $('<div></div>');
+                heading.text(mainControl.key);
+
+                // Styling heading 
+                heading.css({
+                    'border-bottom':'1px solid black',
+                    'font-family':'Arial',
+                    'font-size':'14px',
+                    'font-weight':'bold',
+                    'padding-top':'2px',
+                    'padding-bottom':'4px'
+                });
+
+                boundingBox.append(heading);
                 boundingBox.addClass('form');
                 
                 var inputs = this.inputs = [];

@@ -1251,11 +1251,11 @@
 
       function SurfaceMenu(){
         var boundingBox = this.ui = $('<div></div>');
-
         // Selection Layout
 
         boundingBox.css({
           'position': 'absolute',
+          // 'background' : '#d3e2ee',          
         });
         
         var surfaceButton = new button(icons.surface, 20);
@@ -1306,22 +1306,27 @@
           var surfaceBox = this.ui = $('<div></div>');
           surfaceBox.css({
             'margin':'3px',
-            'padding':'3px',
+            'padding':'6px',
             'border-radius':'3px',
-            'background-color': '#d3e2ee',
+            'background-color': '#e8e8e8',
             'position':'relative',
-            'left': -186
+            'left': -186,
+            'opacity' : 0.9,
+            'width':'200'
           });
         
           var heading = this.heading = $('<div></div>');
           var header = $('<div></div>');
 
-          
+          header.css({
+            'text-align' : 'right'
+          })
+
           // Control Buttons
           var toolButtons = $('<div></div>');
           
-          var editButton = new button(icons.pencil, 20);
-          var removeButton = new button(icons.minus, 20);
+          var editButton = new button(icons.pencil, 16);
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
           
           toolButtons.append(removeButton.ui);
           toolButtons.append(editButton.ui);
@@ -1330,16 +1335,17 @@
           toolButtons.removeButton = removeButton;
           toolButtons.editMode = false;
           
-          
-          heading.css('display', 'inline-block');
-          heading.css({
+          var defaultTextStyle = {
             'font-weight': 'bold',
             'font-family' : 'Arial',
-            'font-size' : '14px'
-          });
+            'font-size' : '12px'
+          }
+          
+          heading.css('display', 'inline-block');
+          heading.css(defaultTextStyle);
           
           toolButtons.css('display', 'inline-block');
-          toolButtons.hide();
+          header.hide();
           
           header.append(heading, toolButtons);
           surfaceBox.append(header);
@@ -1347,11 +1353,13 @@
           // toolButtons.hide();
           var surfacePropertyBox = $('<div></div>');
           surfaceBox.append(surfacePropertyBox);
+
           // Surface Type
           var surfaceType = $('<div></div>');
 
           var labelSurfaceType = $('<div></div>');
           labelSurfaceType.text('Surface Type');
+          labelSurfaceType.css(defaultTextStyle);
 
           var listSurfaceType =new $3Dmol.UI.Form.ListInput(control.surfaceType, Object.keys($3Dmol.SurfaceType));
 
@@ -1374,6 +1382,7 @@
           
           var labelSurfaceOf = $('<div></div>');
           labelSurfaceOf.text('Surface Atoms');
+          labelSurfaceOf.css(defaultTextStyle);
           
           var selections = stateManager.getSelectionList();
           var selectionListElement = selections.map( (m)=>{
@@ -1390,7 +1399,8 @@
           
           var labelSurfaceFor = $('<div></div>');
           labelSurfaceFor.text('Show Atoms');
-      
+          labelSurfaceFor.css(defaultTextStyle);
+
           var listSurfaceFor = new $3Dmol.UI.Form.ListInput(control.surfaceFor, selectionListElement);
           
           surfaceFor.append(labelSurfaceFor, listSurfaceFor.ui);
@@ -1473,7 +1483,7 @@
                 
                 heading.text('surf#' + id);
 
-                toolButtons.show();
+                header.show();
                 toolButtons.editMode = true;
                 surfacePropertyBox.hide();
 
@@ -1504,9 +1514,6 @@
             }
           });
 
-          // CSS
-          surfaceBox.css('width', 200);
-          surfaceBox.css('background-color', 'lightgrey');
         }
 
         // Functionality
