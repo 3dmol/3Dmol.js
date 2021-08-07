@@ -211,7 +211,7 @@
           selection.css('border-radius', '6px');
           selection.css('margin-bottom', '3px');
 
-          var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
           var editButton = new button(icons.pencil, 16);
           var visibleButton = new button(icons.visible, 16);
           var toggleMouseInteraction = new button(icons.nomouse, 16);
@@ -235,7 +235,7 @@
           selectionName.css('font-weight', 'bold');
           heading.append(selectionName);
           
-          var hideButton = new button(icons.listArrow, 16, { bgColor: 'none', hoverable: 'false' });
+          var hideButton = new button(icons.listArrow, 16, { backgroundColor: 'none', hoverable: 'false' });
           heading.append(hideButton.ui);
           
           selection.append(heading);
@@ -432,7 +432,7 @@
 
             styleName.text(s.id);
             
-            var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
+            var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
             var editButton = new button(icons.pencil, 16);
             var visibleButton = new button(icons.visible, 16);
 
@@ -450,7 +450,7 @@
             styleName.css('font-weight', 'bold');
             heading.append(styleName);
 
-            var hideButton = new button(icons.listArrow, 16, { bgColor: 'none', hoverable: 'false' });
+            var hideButton = new button(icons.listArrow, 16, { backgroundColor: 'none', hoverable: 'false' });
 
             heading.append(hideButton.ui);
             styleBox.append(heading);
@@ -774,6 +774,7 @@
         boundingBox.css('z-index', 99);
         var contentBox = $('<div></div>');
         contentBox.css('position', 'relative');
+        boundingBox.css('opacity', '0.85');
 
         boundingBox.append(contentBox);
         contentBox.css({
@@ -856,6 +857,48 @@
           });
 
           propertyMenu.append(propertyTable);
+          
+          var submit = new button(icons.tick, 18, { backgroundColor: 'lightgreen'});
+          var cancel = new button(icons.cross, 18, { backgroundColor: 'indianred'});
+
+          var controlButtons = $('<div></div>');
+          controlButtons.append(submit.ui, cancel.ui);
+          // controlButtons.css('text-align', 'center');
+
+          var alertBox = $('<div></div>');
+          propertyMenu.append(alertBox);
+          alertBox.css({
+            'color': 'darkred',
+            'border':'1px solid darkred',
+            'border-radius': '3px',
+            'background-color':'lightcoral',
+            'padding':'3px',
+            'text-align':'center',
+            'font-family':'Arial',
+            'font-size':'12px',
+            'font-weight':'bold'
+          });
+
+          alertBox.hide();
+
+          propertyMenu.append(controlButtons);
+
+
+          submit.ui.on('click', ()=>{
+            var props = processPropertyList();
+            if(props !=null){
+              stateManager.addAtomLabel(props, atom);
+              stateManager.exitContextMenu(false);
+            }
+            else {
+              alertBox.show();
+              alertBox.text('No value selected for label');
+            }
+          });
+
+          cancel.ui.on('click', ()=>{
+            stateManager.exitContextMenu();
+          });
         }
 
         // Previous Labels 
@@ -1150,11 +1193,13 @@
           }
         }
         
-        this.hide = function(){
-          var propsForLabel = processPropertyList();
-          if(propsForLabel != null){
-            stateManager.addAtomLabel(propsForLabel, this.atom);
-            // console.log("These property will be used to add label", propsForLabel);
+        this.hide = function(processContextMenu){
+          if(processContextMenu){
+            var propsForLabel = processPropertyList();
+            if(propsForLabel != null){
+              stateManager.addAtomLabel(propsForLabel, this.atom);
+              // console.log("These property will be used to add label", propsForLabel);
+            }
           }
 
           boundingBox.hide();
@@ -1165,11 +1210,6 @@
         addLabelMenu.on('click', function(){
           var addLabelMenuForm = generateAddLabelForm();
           setForm(addLabelMenuForm);
-        });
-
-        addAtomLabelMenu.on('click', function(){
-          var addAtomLabelMenuForm = generateAddAtomForm();
-          setForm(addAtomLabelMenuForm);
         });
 
         function setForm(form){
@@ -1275,7 +1315,7 @@
           var toolButtons = $('<div></div>');
           
           var editButton = new button(icons.pencil, 16);
-          var removeButton = new button(icons.minus, 16, { bfr:0.5, bgColor:'#f06f6f'});
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
           
           toolButtons.append(removeButton.ui);
           toolButtons.append(editButton.ui);
@@ -1606,7 +1646,7 @@
       function button(svg, height, config){
         config = config || {};
         var borderRadius = config.bfr*height || (height/4); // body radius factor
-        var bgColor = config.bgColor || 'rgb(177, 194, 203)';
+        var bgColor = config.backgroundColor || 'rgb(177, 194, 203)';
         var color = config.color || 'black'; 
         var hoverable = config.hoverable || 'true';
         var tooltipText = config.tooltip || null;

@@ -389,9 +389,9 @@ $3Dmol.StateManager = (function(){
       console.log('Getting Atom Label', labelText, labelProp);
     }
 
-    this.exitContextMenu = function(){
+    this.exitContextMenu = function(processContextMenu = false){
       console.log('Unfinished Labeling');
-      this.ui.tools.contextMenu.hide();
+      this.ui.tools.contextMenu.hide(processContextMenu);
     }
 
     this.removeLabel = function(){
