@@ -160,8 +160,21 @@
                 // surroundingBox.append(label);
                 surroundingBox.append(boundingBox);
 
+                surroundingBox.css({
+                    'width' : '100%',
+                    'box-sizing':'border-box'
+                })
+
                 var input = this.domElement = $('<input type="text">');
                 boundingBox.append(input);
+
+                input.css({
+                    'width' : '100%'
+                });
+
+                this.setWidth = function(width){
+                    input.width(width);
+                }
 
                 this.update = function(control){
                     console.log("From::Input:update", "Default Update", control);

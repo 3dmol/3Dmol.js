@@ -20,10 +20,11 @@
       var body = $('body');
       
       var mainParent = $(parentElement[0]);
-      console.log("Main Parent", mainParent.css('position'));
+      console.log("Main Parent", mainParent.css('position'), config);
       // Generates the necessary UI elements
+      var HEIGHT = config.height;
+      var WIDTH = config.width;
       var uiElements = this.tools = generateUI(config);
-      
       
       /**
        * @function generateUI creates all the jquery object of different UI features
@@ -780,7 +781,8 @@
         contentBox.css({
           'background':  '#f1f1f1',
           'border-radius': '4px',
-          'padding': '4px'
+          'padding': '4px',
+          'width':'140px'
         });
         // Context Box
         // Remove Label Button 
@@ -905,36 +907,26 @@
         var labelHolder = $('<div></div>');
         contentBox.append(labelHolder);
 
-        this.addLabel = function(){
-
-        }
-
-        this.addAtomLabel = function(){
-
-        }
-
         // Add Menu 
         var addMenu = $('<div></div>');
         contentBox.append(addMenu);
-        addMenu.css('width', 100);
+        addMenu.css('width', '100%');
 
         var addLabelMenu = $('<div></div>');
         addMenu.append(addLabelMenu);
 
-        var addAtomLabelMenu = $('<div></div>');
-        addMenu.append(addAtomLabelMenu);
-        
 
         addLabelMenu.text('Add Label');
         addLabelMenu.css(labelMenuStyle);
         addLabelMenu.css('margin-bottom', '3px');
         
-        addAtomLabelMenu.text('Add Atom Label');
-        addAtomLabelMenu.css(labelMenuStyle);
-        
         // Edit Menu
         var editMenu = $('<div></div>');
         contentBox.append(editMenu);
+
+        contentBox.css({
+          'position' : 'relative',
+        });
 
         editMenu.css({
           'background':'#dfdfdf',
@@ -942,10 +934,12 @@
           'font-family':'Arial',
           'font-weight':'bold',
           'font-size':'12px',
-          'position': 'absolute',
-          'left' : addMenu.width() + 10,
-          'top' : 0,
-          'min-width' : 120
+          // 'position': 'absolute',
+          // 'left' : '105%',
+          // 'top' : '0',,
+          'box-sizing' : 'border-box',
+          'width' : '100%',
+          
         });
         editMenu.hide();
 
@@ -985,6 +979,8 @@
           var lt = $('<div></div>').text('Label Text');
           var addLabelTextInput = new $3Dmol.UI.Form.Input(addLabelValue.text);
           addLabelTextBox.append(lt, addLabelTextInput.ui);
+          var width = 126//editMenu.innerWidth()*0.8;
+          addLabelTextInput.setWidth(width);
           addLabelForm.append(addLabelTextBox);
 
           var addLabelStyleBox = $('<div></div>');
@@ -1043,99 +1039,6 @@
           }
         }
 
-        function generateAddAtomForm(){
-          var addAtomLabelForm = $('<div></div>');
-          
-          var addAtomLabelValue = {
-            style : {
-              key : 'Style',
-              value : null
-            }
-          }
-
-          // Form Modifier
-          var formModifierControl = $('<div></div>');
-          var removeButton = new button(icons.minus, 16);
-          var tick = new button(icons.tick, 16);
-          var cross = new button(icons.cross, 16);
-          formModifierControl.append(removeButton.ui, tick.ui, cross.ui);
-          // removeButton.ui.hide();
-          addAtomLabelForm.append(formModifierControl);
-          
-          // Style 
-          var addLabelStyleBox = $('<div></div>');
-          var ls = $('<div></div>').text('Label Style');
-          var addLabelStyleInput = new $3Dmol.UI.Form.ListInput(addAtomLabelValue.style, Object.keys($3Dmol.labelStyles));
-          addLabelStyleBox.append(ls, addLabelStyleInput.ui);
-          addAtomLabelForm.append(addLabelStyleBox);
-
-          var validAtomSpecs = $3Dmol.GLModel.validAtomSpecs
-          var atomProperties = Object.keys(validAtomSpecs);
-          var properties = [];
-
-          for(var i = 0; i < atomProperties.length; i++){
-            if(validAtomSpecs[atomProperties[i]].prop){
-              properties.push(atomProperties[i]);
-            }
-          }
-
-          properties = properties.map((prop)=>{
-            return {
-              key : prop,
-              value : null
-            }
-          });
-
-          var propertyCheckboxDisplayBox = $('<div></div>');
-          var propertyCheckboxes = [];
-          properties.forEach( (propControl)=>{
-            var cb = new $3Dmol.UI.Form.Checkbox(propControl);
-            propertyCheckboxes.push(cb);
-            propertyCheckboxDisplayBox.append(cb.ui);
-          });
-
-          addAtomLabelForm.append(propertyCheckboxDisplayBox);
-
-          tick.ui.on('click', ()=>{
-            var validate = true;
-
-            if(!addLabelStyleInput.validate())
-              validate = false;
-
-            var atLeastOneProp = false;
-            var props = [];
-            propertyCheckboxes.forEach( (propCb)=>{
-              control = propCb.getValue();
-              if(control.value)
-              {  
-                props.push(control.key);
-                atLeastOneProp = true;
-              }
-            });
-
-            if(atLeastOneProp && validate){
-              stateManager.addAtomLabel({ style : addAtomLabelValue.style, props: props});
-            }
-            else {
-              console.log('Please check input');
-            }
-          });
-
-          cross.ui.on('click', ()=>{
-            stateManager.exitContextMenu();
-          });
-
-          removeButton.ui.on('click', ()=>{
-            stateManager.removeAtomLabel();
-          });
-
-          return {
-            boundingBox : addAtomLabelForm,
-            style : addLabelStyleInput,
-            props : propertyCheckboxes
-          }
-        }
-
 
         function processPropertyList(){
           var propsForLabel = {};
@@ -1188,7 +1091,7 @@
             this.atom = atom;
           }
           else{
-            addAtomLabelMenu.hide();
+
             propertyMenu.empty();
           }
         }
@@ -1235,7 +1138,7 @@
 
         boundingBox.css({
           'position': 'absolute',
-          'width': '120px',
+          'width': '140px',
           'text-align': 'right'   
         });
 
@@ -1253,6 +1156,19 @@
 
         var displayBox = $('<div></div>');
         boundingBox.append(displayBox);
+
+        // Overflow fix 
+        boundingBox.css({
+          'overflow':'hidden',
+        });
+
+        console.log('Surface box display box height', HEIGHT);
+
+        displayBox.css({
+          'max-height' : HEIGHT*0.8,
+          'overflow-y': 'auto',
+          'overflow-x' : 'hidden'
+        });
 
         var newSurfaceSpace = $('<div></div>');
         

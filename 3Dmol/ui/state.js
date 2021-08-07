@@ -16,9 +16,9 @@ $3Dmol.StateManager = (function(){
 
     var canvas = $(glviewer.getRenderer().domElement);
     var parentElement = glviewer.container;
-    console.log('Container', parentElement);
-    var height = canvas.height();
-    var width = canvas.width();
+    console.log('Container', parentElement, canvas.height(), canvas.width(), parentElement.height(), parentElement.width());
+    var height = parentElement.height();
+    var width = parentElement.width();
     var offset = canvas.offset();
 
     var uiOverlayConfig = {
@@ -27,6 +27,8 @@ $3Dmol.StateManager = (function(){
       offset : offset,
       ui : config.ui || undefined
     }
+
+    // console.log('')
     // Selection Handlers
     var selections = [];
     var currentSelection = null;
