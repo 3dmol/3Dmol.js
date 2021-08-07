@@ -1373,17 +1373,15 @@
           labelSurfaceOf.text('Surface Atoms');
           labelSurfaceOf.css(defaultTextStyle);
           
-          var selections = stateManager.getSelectionList();
-          var selectionListElement = selections.map( (m)=>{
-            return m.id;
-          });
-
-          var listSurfaceOf = new $3Dmol.UI.Form.ListInput(control.surfaceOf, selectionListElement);
+          var surfaceGeneratorAtomType = ['self', 'all'];
+          
+          var listSurfaceOf = new $3Dmol.UI.Form.ListInput(control.surfaceOf, surfaceGeneratorAtomType);
           
           surfaceOf.append(labelSurfaceOf, listSurfaceOf.ui);
           surfacePropertyBox.append(surfaceOf);
           
           // Surface For
+          var selectionListElement = stateManager.getSelectionList();
           var surfaceFor = $('<div></div>');
           
           var labelSurfaceFor = $('<div></div>');

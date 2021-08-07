@@ -118,6 +118,11 @@ $3Dmol.StateManager = (function(){
       // render();
     }
 
+    this.toggleHideStyle = function(sid, stid){
+      selections[sid].styles[stid].hidden = !selections[sid].styles[stid].hidden;
+      // render();
+    }
+    
     this.addSurface = function(property){
       var id = makeid(4);
       property.id = id;
@@ -126,14 +131,17 @@ $3Dmol.StateManager = (function(){
       if(style == null)
         style = {};
 
-      var sel = selections[property.surfaceOf.value];
+      var sel = selections[property.surfaceFor.value];
+
+      var generatorAtom = (property.surfaceOf.value == 'self')? sel.spec : {};
 
       console.log('StateManager::addSurface', property, style);
 
       glviewer.addSurface(
         $3Dmol.SurfaceType[property.surfaceType.value],
         style,
-        sel.spec
+        sel.spec,
+        generatorAtom
       ).then((surfId)=>{
         surfaces[id] = surfId;
         console.log("StateManager::Surfaces", surfaces);
@@ -151,14 +159,10 @@ $3Dmol.StateManager = (function(){
 
     }
 
-    this.toggleHideStyle = function(sid, stid){
-      selections[sid].styles[stid].hidden = !selections[sid].styles[stid].hidden;
-      // render();
-    }
 
     this.editSurface = function(surfaceProperty){
       var style = surfaceProperty.surfaceStyle.value || {}
-      var sel = selections[surfaceProperty.surfaceOf.value];
+      var sel = selections[surfaceProperty.surfaceFor.value];
 
       console.log('Surfaces edited', surfaceProperty.id, surfaces, surfaces[surfaceProperty.id]);
       glviewer.removeSurface(surfaces[surfaceProperty.id]);
@@ -175,6 +179,7 @@ $3Dmol.StateManager = (function(){
     }
 
     this.getSelectionList = function(){
+      console.log(Object.keys(selections))
       return Object.keys(selections);
     }
 
