@@ -767,6 +767,17 @@
       function ContextMenu(){
         var boundingBox = this.ui = $('<div></div>');
 
+        // Clearing all possible mouse events
+        boundingBox.on('mouseup mousedown', (ev)=>{
+          ev.preventDefault();
+          console.log('Prevent Default For Context Menu');
+        });
+
+        boundingBox.on('contextMenu', (ev)=>{
+          ev.preventDefault();
+          console.log('Prevent Default For Context Menu');
+        })
+
         boundingBox.css('position', 'absolute');
         // boundingBox.css('border', '1px solid black');
         boundingBox.css('border-radius', '3px');
