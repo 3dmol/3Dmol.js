@@ -30,7 +30,7 @@ $3Dmol.StateManager = (function(){
 
     // console.log('')
     // Selection Handlers
-    var selections = [];
+    var selections = {};
     var currentSelection = null;
     var currentForm = '';
     var currentStyles = null;
@@ -51,12 +51,22 @@ $3Dmol.StateManager = (function(){
       // console.log('Updating Current Style', selections, currentSelection, currentStyles);
     }
     
-    this.addSelection = function(){
+    this.addSelection = function(spec){
       // console.log('Add Selection Called');
-      var currentFormValue = { value: null, type: 'form', key: "Atom Selection"}
-      var form =new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, currentFormValue);
-      this.ui.tools.dialog.addForm(form);
-      currentForm = "new_selection";
+      var id = makeid(4);
+      var selectionSpec = {
+        spec : spec,
+        styles : []
+      }
+      selections[id] = selectionSpec;
+
+      console.log("StateManager::addSelection", selections);
+      return id;
+    }
+
+    this.checkAtoms = function(sel){
+      var atoms = glviewer.selectedAtoms(sel);
+      return atoms;
     }
 
     this.addStyle = function(){
