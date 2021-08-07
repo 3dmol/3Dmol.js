@@ -415,6 +415,12 @@
             }
           });
 
+          boundingBox.on('keyup', (e)=>{
+            if(e.key == 'Enter'){
+              submit.ui.trigger('click');
+            }
+          });
+
 
         }
 
@@ -637,6 +643,13 @@
               delete this;
             }
           });
+
+          boundingBox.on('keyup', (e)=>{
+            if(e.key == 'Enter'){
+              submit.ui.trigger('click');
+            }
+          });
+
         }
 
         plusButton.ui.on('click', ()=>{
@@ -1123,6 +1136,12 @@
           removeButton.ui.on('click', ()=>{
             stateManager.removeLabel()
           });
+
+          addLabelForm.on('keyup', (e)=>{
+            if(e.key == 'Enter'){
+              tick.ui.trigger('click');
+            }
+          });
       
           return {
             boundingBox : addLabelForm,
@@ -1427,6 +1446,9 @@
             // After creation of the surface box all the changes will be edit to the surfaces so on first submit toolButtons.editMode == true;
           });
 
+          
+
+
           // Form Validation 
 
           var validateInput = this.validateInput = function(){
@@ -1512,6 +1534,12 @@
             else {
               surfacePropertyBox.hide();
               toolButtons.editMode = false;
+            }
+          });
+
+          surfaceBox.on('keyup', (e)=>{
+            if(e.key == 'Enter'){
+              submit.ui.trigger('click');
             }
           });
 
