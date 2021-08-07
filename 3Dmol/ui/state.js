@@ -80,12 +80,12 @@ $3Dmol.StateManager = (function(){
     this.toggleHide = function(sid){
       selections[sid].hidden = !selections[sid].hidden;
       console.log('toggle hide', selections, selections[sid]);
-      // render();
+      render();
     }
 
     this.removeSelection = function(id) {
       delete selections[id];
-      // render();
+      render();
     }
 
     this.addStyle = function( spec, sid, stid = null){
@@ -109,20 +109,22 @@ $3Dmol.StateManager = (function(){
       }
       
       console.log("StateManager::addStyle", selections, sid, stid, spec);
+      render();
+
       return id;
     }
 
     this.removeStyle = function(sid, stid){
       console.log(selections, stid, sid)
       delete selections[sid].styles[stid];
-      // render();
+      render();
     }
 
     this.toggleHideStyle = function(sid, stid){
       selections[sid].styles[stid].hidden = !selections[sid].styles[stid].hidden;
-      // render();
+      render();
     }
-    
+
     this.addSurface = function(property){
       var id = makeid(4);
       property.id = id;
@@ -210,10 +212,7 @@ $3Dmol.StateManager = (function(){
       labels[labelValue.sel.value] = labels[labelValue.sel.value] || [];
 
       var labelProp = $3Dmol.labelStyles[labelValue.style.value];
-      var selection = selections.find((sel)=>{
-        if(sel.id == labelValue.sel.value)
-          return true;
-      });
+      var selection = selections[labelValue.sel.value];
 
       var offset = labels[labelValue.sel.value].length;
       labelProp['screenOffset'] = new $3Dmol.Vector2(0, -1*offset*35);
@@ -305,17 +304,22 @@ $3Dmol.StateManager = (function(){
     // console.log('GetSelectionList', this.getSelectionList());
 
     function render(){
-      console.log('RENDER::', selections.map((s)=>{return s.hidden}));
+      console.log('RENDER::', selections);
       // glviewer.();
       glviewer.setStyle({});
 
-      selections.forEach((sel)=>{
-        if(!sel.hidden){
-          // clear(sel);
+      let selList = Object.keys(selections);
 
-          // var renderStyle = {};
-          sel.styles.forEach((style)=>{
-            if(!style.hidden){
+      selList.forEach( (selKey) =>{
+        var sel = selections[selKey];
+
+        if( !sel.hidden ) {
+          var styleList = Object.keys(sel.styles);
+          
+          styleList.forEach((styleKey)=>{
+            var style = sel.styles[styleKey];
+
+            if( !style.hidden){
               glviewer.addStyle(sel.spec, style.spec);
             }
           });
@@ -328,9 +332,7 @@ $3Dmol.StateManager = (function(){
           glviewer.enableContextMenu(sel.spec, false);
         }
 
-        console.log( "Context Menu Status", !sel.hidden);
-
-      });
+      })
 
       glviewer.render();
     }

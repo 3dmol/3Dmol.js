@@ -135,7 +135,7 @@
        */
       function SelectionBox(icon, side='left') {
         var selectionBox = this.ui = $('<div></div>');
-
+        _editingForm = false;
 
         var selections = $('<div></div>');
         var scrollBox = $('<div></div>');
@@ -346,6 +346,7 @@
               if(checkAtoms){
                 var id = stateManager.addSelection(selectionFormControl.value, sid);
                 finalizeSelection(id);
+                if(sid == null ) _editingForm = false;
               }
               else {
                 alertBox.text('No atom selected');
@@ -365,14 +366,16 @@
           }
 
           submit.ui.on('click', ()=>{
-            if(controls.editMode != true){
+            if(controls.editMode == false){
               if(allControl.value){
                 var id = stateManager.addSelection({});
                 finalizeSelection(id);
+                _editingForm = false;
               }
               else{
                 checkAndAddSelection(); 
               }
+
             }
             else {
               if(allControl.value){
@@ -394,6 +397,7 @@
             else {
               boundingBox.detach();
               delete this;
+              _editingForm = false;
             }
           });
 
@@ -415,8 +419,12 @@
         }
 
         plusButton.ui.on('click', ()=>{
-          var newSelection = new Selection();
-          selections.append(newSelection.ui);
+          if(!_editingForm){
+            var newSelection = new Selection();
+            selections.append(newSelection.ui);
+            _editingForm = true;
+          }
+          
         });   
       }
 
@@ -427,6 +435,7 @@
        */
        function StyleBox(selId, side='left') {
         var styleBox = this.ui = $('<div></div>');
+        _editingForm = false;
         var sid = this.sid = selId; // selection id
 
         this.setSid = function(id){
@@ -596,6 +605,7 @@
               console.log('Style Form Value', styleFormControl, sid, stid);
               var id = stateManager.addStyle(styleFormControl.value, sid, stid);
               finalizeStyle(id);
+              if(stid == null) _editingForm = false;
             }
             else {
               alertBox.text('Invalid Input');
@@ -630,8 +640,11 @@
         }
 
         plusButton.ui.on('click', ()=>{
-          var newStyle = new Style(sid);
-          styles.append(newStyle.ui);
+          if( !_editingForm){
+            var newStyle = new Style(sid);
+            styles.append(newStyle.ui);
+            _editingForm = true;
+          }
         });   
       }
 
@@ -1073,8 +1086,7 @@
           addLabelStyleBox.append(ls, addLabelStyleInput.ui);
           addLabelForm.append(addLabelStyleBox);
 
-          var selections = stateManager.getSelectionList();
-          var selectionList = selections.map( (sel)=>{ return sel.id });
+          var selectionList = stateManager.getSelectionList();
           
           var addLabelSelectionBox = $('<div></div>');
           var lsl = $('<div></div>').text('Label Selection');
@@ -1214,6 +1226,7 @@
 
       function SurfaceMenu(){
         var boundingBox = this.ui = $('<div></div>');
+        var _editingForm = false;
         // Selection Layout
 
         // var contentBox = $('<div></div>');
@@ -1475,6 +1488,7 @@
                 surfacePropertyBox.hide();
 
                 surfaces.push(this);
+                _editingForm = false;
               }
               else{
                 console.log('Edit Surface called');
@@ -1492,7 +1506,7 @@
             if(toolButtons.editMode == false){
               surfaceBox.detach();
               surfaceBox.remove();
-              
+              _editingForm = false;
               // Add statemanager handle to remove the object itself
             }
             else {
@@ -1508,8 +1522,11 @@
         // Surface addition
 
         addButton.ui.on('click', { surfaces: this }, function(e){
-          var newSurface = new Surface();
-          newSurfaceSpace.append(newSurface.ui);
+          if(!_editingForm){
+            var newSurface = new Surface();
+            newSurfaceSpace.append(newSurface.ui);
+            _editingForm = true;
+          }
         });
 
         surfaceButton.ui.on('click', ()=>{
