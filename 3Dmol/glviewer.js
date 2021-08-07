@@ -40,7 +40,7 @@ $3Dmol.GLViewer = (function() {
         var _viewer = this;
         var container = this.container = $(element); //we expect container to be jquery
         var glDOM = null;
-        var _stateManager = null;
+
         var models = []; // atomistic molecular models
         var surfaces = {};
         var shapes = []; // Generic shapes
@@ -549,13 +549,7 @@ $3Dmol.GLViewer = (function() {
                     var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
                     handleClickSelection(mouseX, mouseY, ev, container);
-                    
-                    if(ev.which == 3){
-                        ev.preventDefault();
-                        glDOM.trigger('contextMenuEvent');
-                    }
                 }
-
             }
 
             isDragging = false;
@@ -730,7 +724,7 @@ $3Dmol.GLViewer = (function() {
                     if(touchHold == true){
                         console.log('Touch hold', x,y);
                         glDOM = $(renderer.domElement);
-                        glDOM.trigger('contextMenuEvent');
+                        glDOM.trigger('contextmenu');
                     }
                     else {
                         console.log('Touch hold ended earlier');
@@ -738,9 +732,6 @@ $3Dmol.GLViewer = (function() {
                     }
                 }
             }, 1000);
-
-            // Exits the contextMenu
-            _stateManager.exitContextMenu();
         };
 
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
@@ -768,9 +759,6 @@ $3Dmol.GLViewer = (function() {
             }
             rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
             show();
-
-            // hideContextMenu on mouseScroll
-            _stateManager.exitContextMenu();
         };
         /**
          * Return image URI of viewer contents (base64 encoded).
@@ -795,7 +783,7 @@ $3Dmol.GLViewer = (function() {
             return renderer;
         };
 
-        _stateManager =new $3Dmol.StateManager(_viewer, config); // Creates the UI state management tool
+        var _stateManager =new $3Dmol.StateManager(_viewer, config); // Creates the UI state management tool
       /**
            * Set the duration of the hover delay
            *
@@ -935,13 +923,7 @@ $3Dmol.GLViewer = (function() {
                 glDOM.on('DOMMouseScroll mousewheel', _handleMouseScroll);
                 glDOM.on('mousemove touchmove', _handleMouseMove);
 
-                // Custom contextMenuEvent
-                glDOM.on("contextMenuEvent", _handleContextMenu);
-
-                glDOM.on("contextmenu ", (ev)=>{
-                    ev.preventDefault();
-                    console.log('Context Menu Default Event');
-                });
+                glDOM.on("contextmenu", _handleContextMenu);
 
                 glDOM.on('taphold', function(e){
                     console.log('touchandhold successful', e);
