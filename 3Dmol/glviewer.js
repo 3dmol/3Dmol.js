@@ -40,6 +40,7 @@ $3Dmol.GLViewer = (function() {
         var _viewer = this;
         var container = this.container = $(element); //we expect container to be jquery
         var glDOM = null;
+        var _stateManager = null;
 
         var models = []; // atomistic molecular models
         var surfaces = {};
@@ -732,6 +733,9 @@ $3Dmol.GLViewer = (function() {
                     }
                 }
             }, 1000);
+
+            // Exiting context menu on next mouse event
+            _stateManager.exitContextMenu();
         };
 
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
@@ -759,6 +763,9 @@ $3Dmol.GLViewer = (function() {
             }
             rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
             show();
+
+            // Exiting context menu on next mouse event 
+            _stateManager.exitContextMenu();
         };
         /**
          * Return image URI of viewer contents (base64 encoded).
@@ -783,7 +790,7 @@ $3Dmol.GLViewer = (function() {
             return renderer;
         };
 
-        var _stateManager =new $3Dmol.StateManager(_viewer, config); // Creates the UI state management tool
+        _stateManager =new $3Dmol.StateManager(_viewer, config); // Creates the UI state management tool
       /**
            * Set the duration of the hover delay
            *
@@ -899,13 +906,21 @@ $3Dmol.GLViewer = (function() {
 
         var _handleContextMenu = this._handleContextMenu = function(ev){
             ev.preventDefault();
-            console.log('Context Menu Called', ev);
-            var x = mouseStartX;
-            var y = mouseStartY;
-            var offset = canvasOffset();
-            var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
-            var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
-            handleContextMenuSelection(mouseX, mouseY, _viewer, ev);
+            var newX = getX(ev);
+            var newY = getY(ev);
+
+            if(newX != mouseStartX || newY != mouseStartY){
+                return;
+            }else{
+                console.log('Context Menu Called', ev);
+                var x = mouseStartX;
+                var y = mouseStartY;
+                var offset = canvasOffset();
+                var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
+                var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
+                handleContextMenuSelection(mouseX, mouseY, _viewer, ev);
+            }
+            
         };
 
         var initContainer = function(element) {
