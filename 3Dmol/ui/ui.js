@@ -136,10 +136,8 @@
       function SelectionBox(icon, side='left') {
         var selectionBox = this.ui = $('<div></div>');
 
-        var selectionObjects = [];
 
         var selections = $('<div></div>');
-        var styleBox = this.styleBox = new StyleBox();
         var scrollBox = $('<div></div>');
 
         selections.css('opacity', '0.9');
@@ -176,13 +174,14 @@
 
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
-        showArea.css('width', '162px');
+        // showArea.css('width', '162px');
 
-        scrollBox.css('max-height', HEIGHT*0.8);
-        scrollBox.css('overflow', 'hidden');
+        // scrollBox.css('max-height', HEIGHT*0.8);
+        // scrollBox.css('overflow', 'hidden');
         
-        selections.css('max-height', HEIGHT*0.8);
-        selections.css('overflow', 'auto');
+        // selections.css('max-height', HEIGHT*0.8);
+        // selections.css('overflow', 'auto');
+        // selections.css('overflow-x', 'visible');
         selections.css('box-sizing', 'content-box');
 
         // Action
@@ -245,17 +244,40 @@
           boundingBox.append(parameters);
 
           removeButton.ui.on('click', function(){
+            stateManager.removeSelection(sid);
+            boundingBox.detach();
+            delete this;
           });
 
           editButton.ui.on('click', function(){
             parameters.toggle();
           });
 
+          var hidden = false;
           visibleButton.ui.on('click', ()=>{
-            stateManager.toggleHide(boundingBox.data('sel-id'));
+            stateManager.toggleHide(sid);
+            if(hidden){
+              hidden = false;
+              visibleButton.setSVG(icons.visible);
+            }
+            else {
+              hidden = true;
+              visibleButton.setSVG(icons.invisible);
+            }
           });
 
           var styleBox = new StyleBox();
+
+          var showStyle = false;
+          boundingBox.append(styleBox.ui);
+          styleBox.ui.css({
+            'position' : 'absolute',
+            'left' : '100%',
+            'top' : 0,
+            'border-radius' : '4px'
+          });
+
+          styleBox.ui.hide();
 
           var allControl = this.allSelector = {
             key : 'Select All Atom',
@@ -278,8 +300,8 @@
 
           var submitControls = $('<div></div>');
           var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen'});
-          var cross = new button(icons.cross, 16, { backgroundColor : 'lightcoral'});
-          submitControls.append(submit.ui, cross.ui);
+          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral'});
+          submitControls.append(submit.ui, cancel.ui);
 
           
           var alertBox = $('<div></div>');
@@ -310,6 +332,7 @@
             sid = id;
             heading.text('Sel#' + id);
             parameters.hide();
+            showStyle = true;
           }
 
           function checkAndAddSelection(sid = null){
@@ -361,7 +384,32 @@
                 checkAndAddSelection(id);
               }
             }
-          })
+          });
+
+          cancel.ui.on('click', ()=>{
+            if(controls.editMode){
+              parameters.hide();
+            }
+            else {
+              boundingBox.detach();
+              delete this;
+            }
+          });
+
+          boundingBox.on('mouseenter', ()=>{
+            if(showStyle){
+              styleBox.ui.show();
+              console.log("entering", showStyle)
+            }
+          });
+
+          boundingBox.on('mouseleave', ()=>{
+            if(showStyle){
+              styleBox.ui.hide();
+              console.log("exiting", showStyle)
+            }
+          });
+
 
         }
 
@@ -376,165 +424,208 @@
        * @function StyleBox creates styleBox for listing out different styles for a particular selection
        * @return {Object} Jquery dom object
        */
-      function StyleBox() {  
-        var showArea = this.ui = $('<div></div>');
+       function StyleBox(sid, side='left') {
+        var styleBox = this.ui = $('<div></div>');
+        this.sid = sid; // selection id
         var styles = $('<div></div>');
+        var scrollBox = $('<div></div>');
+
+        styles.css('opacity', '0.9');
+        
+        var showArea = $('<div></div>');
         var addArea = $('<div></div>');
-        var addButton = new button(icons.plus, 20);
-        this.styleObjects = [];
+        addArea.css('text-align' , 'center');
 
-        // boundingBox.append(hideButton.ui);
-        // boundingBox.append(showArea);
+        var plusButton = new button(icons.plus, 20);
+        plusButton.ui.css('margin','0px');
+      
+        this.selectionObjects = [];
 
-        showArea.append(styles);
+        // Content
+        styleBox.append(showArea);
+        styleBox.css('position', 'absolute');
+        
+        scrollBox.append(styles);
+        showArea.append(scrollBox);
+        addArea.append(plusButton.ui);
         showArea.append(addArea);
-        addArea.append(addButton.ui); 
 
-        // boundingBox.css('text-align', 'right');
+        // CSS
+        if(side == 'left'){
+          styleBox.css('text-align', 'left');
+        }
+        else if(side == 'right') {
+          styleBox.css('text-align', 'right');
+        }
+        else {
+          // Add alert box code
+          styleBox.css('text-align', 'right');
+        }
 
-        showArea.css('background', '#a4a4a4'); 
-        showArea.width(158);
-        // showArea.height(200);
-        showArea.css('position', 'absolute');
+        showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
+        showArea.css('width', '162px');
+        showArea.css('background-color', '#a4a4a4')
         showArea.css('border-radius', '4px');
 
-        addArea.css('text-align', 'center');
-        hidden = true;
-        showArea.hide();
+        scrollBox.css('max-height', HEIGHT*0.8);
+        scrollBox.css('overflow', 'hidden');
+        
+        styles.css('max-height', HEIGHT*0.8);
+        styles.css('overflow', 'auto');
+        styles.css('box-sizing', 'content-box');
 
-        addButton.ui.on('click', ()=>{
-          stateManager.addStyle();
-        });
 
-        this.updateStyles = function(styleSpecs){
-          styles.empty();
-          styleSpecs.forEach((s)=>{
-            
-            var styleBox = $('<div></div>');
-            var controls = $('<div></div>');
-            var heading = $('<div></div>');
-            var styleName = $('<div></div>');
-            var parameters = $('<div></div>');
-
-            styleName.text(s.id);
-            
-            var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
-            var editButton = new button(icons.pencil, 16);
-            var visibleButton = new button(icons.visible, 16);
-
-            controls.append(removeButton.ui)
-            controls.append(editButton.ui);
-            controls.append(visibleButton.ui);
-
-            controls.css('display', 'inline-block');
-
-            heading.append(controls);
-            styleName.text("sel#" + s.id.slice(0,4));
-            styleName.css('display','inline-block');
-            styleName.css('font-family', 'Arial');
-            styleName.css('font-size', '12px');
-            styleName.css('font-weight', 'bold');
-            heading.append(styleName);
-
-            var hideButton = new button(icons.listArrow, 16, { backgroundColor: 'none', hoverable: 'false' });
-
-            heading.append(hideButton.ui);
-            styleBox.append(heading);
-            styleBox.append(parameters);
-
-            var hidden = true;
-            parameters.hide();
-            hideButton.ui.on('click', ()=>{
-              if(hidden){
-                parameters.show();
-                hidden = false;
-                hideButton.ui.css('transform', 'rotate(90deg)');
-              }
-              else {
-                hidden = true;
-                parameters.hide();
-                hideButton.ui.css('transform', 'rotate(0deg)');
-              }
-            });
-            
-            removeButton.ui.on('click', function(){
-              //styleBox.detach();
-              console.log('StyleBox::removeButton.ui.click', s);
-              stateManager.removeStyle(s);
-            });
-
-            editButton.ui.on("click", function(){
-              console.log('StyleBox::editButton.ui.click', s);
-              stateManager.editStyle(s);
-            });
-
-            var visible = true;
-
-            visibleButton.ui.on('click', function(){
-              if(visible){
-                visibleButton.setSVG(icons.invisible);
-                visible = false;
-                stateManager.hideStyle(s);
-              }
-              else {
-                visibleButton.setSVG(icons.visible);
-                visible = true;
-                stateManager.showStyle(s);
-              }
-            });
-
-            function makeTableFromKeys(spec){
-              var boundingBox = $('<div></div>');            
-              var keys = Object.keys(spec);
-              var table = $('<table></table>');
-              
-              keys.forEach((key)=>{
-                // console.log("StyleBox:MakeTableFromKeys", spec, spec[key], key);
-                if(typeof spec[key] == "object"){
-                  var subData = makeTableFromKeys(spec[key])
-                  var head = $('<div></div>').text(key);
-                  boundingBox.append(head);
-                  boundingBox.append(subData);
-                  boundingBox.append($('<hr />'));
-                }
-                else {
-                  var tr = $('<tr></tr>')
-                  var k = $('<td></td>').text(key);
-                  k.css('font-family', 'Arial');
-                  k.css('font-weight', 'bold');
-                  k.css('font-size', '12px');
-    
-                  var v = $('<td></td>').text(spec[key]);
-                  v.css('font-family', 'Arial');
-                  v.css('font-size', '12px');
-                  
-                  tr.append(k,v);
-                  table.append(tr);
-                  
-                }
-              });
-
-              boundingBox.append(table);
-              return boundingBox;
-            }
-
-            var data = makeTableFromKeys(s.spec);
-            // console.log(s.spec);
-            parameters.append(data);
-            styles.append(styleBox);
-            styleBox.data('sel-id', s.id);
-            
-            styleBox.append($('<hr />'));
-
-            this.styleObjects.push(styleBox);
-
-            styleBox.on('click', ()=>{
-              
-            });
+        function Style(sid){
+          var boundingBox = this.ui = $('<div></div>');
+          var stid = this.id = null; // style id 
+          boundingBox.css({
+            'background' : '#e8e8e8',
+            'padding' : '4px 4px 2px 4px',
+            'border-radius' : '6px',
+            'margin-bottom' : '3px',
+            'position':'relative'
           });
 
+          var header = $('<div></div>');
+          boundingBox.append(header);
+          var heading = $('<div></div>');
+          var controls = $('<div></div>');
+
+          header.append(heading, controls);
+          heading.css({
+            'font-family' : 'Arial',
+            'font-weight': 'bold',
+            'font-size':'12px',
+            'display':'inline-block',
+            'width' : '60px'
+          });
+
+          controls.css({
+            'display' : 'inline-block'
+          });
+
+          header.hide();
+          controls.editMode = false;
+
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
+          var editButton = new button(icons.pencil, 16);
+          var visibleButton = new button(icons.visible, 16);
+
+          controls.append(removeButton.ui)
+          controls.append(editButton.ui);
+          controls.append(visibleButton.ui);
+
+          var parameters = $('<div></div>');
+          boundingBox.append(parameters);
+
+          removeButton.ui.on('click', function(){
+            stateManager.removeStyle(sid);
+            boundingBox.detach();
+            delete this;
+          });
+
+          editButton.ui.on('click', function(){
+            parameters.toggle();
+          });
+
+          var hidden = false;
+          visibleButton.ui.on('click', ()=>{
+            stateManager.toggleHideStyle(sid, stid);
+            if(hidden){
+              hidden = false;
+              visibleButton.setSVG(icons.visible);
+            }
+            else {
+              hidden = true;
+              visibleButton.setSVG(icons.invisible);
+            }
+          });
+
+          var styleFormControl = this.selectionValue = {
+            key : 'Selection Spec',
+            value : null,
+            active : true
+          }
+          
+          var styleSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomStyleSpecs, styleFormControl);
+          parameters.append(styleSpecForm.ui);
+
+          var submitControls = $('<div></div>');
+          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen'});
+          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral'});
+          submitControls.append(submit.ui, cancel.ui);
+
+          
+          var alertBox = $('<div></div>');
+          parameters.append(alertBox);
+          alertBox.css({
+            'color': 'darkred',
+            'border':'1px solid darkred',
+            'border-radius': '3px',
+            'background-color':'lightcoral',
+            'padding':'3px',
+            'text-align':'center',
+            'font-family':'Arial',
+            'font-size':'12px',
+            'font-weight':'bold'
+          });
+          alertBox.hide();
+          
+          parameters.append(submitControls);
+
+          function finalizeSelection(id){
+            header.show();
+            controls.editMode = true;
+            stid = id;
+            heading.text('Sty#' + id);
+            parameters.hide();
+          }
+
+          function checkAndAddSelection(stid = null){
+            var validate = selectionSpecForm.validate();
+            if(validate){
+              styleSpecForm.getValue();
+              console.log('Style Form Value', styleFormControl, sid, stid);
+            
+              var id = stateManager.addStyle(selectionFormControl.value, sid, stid);
+              finalizeSelection(id);
+            }
+            else {
+              alertBox.text('Invalid Input');
+              alertBox.show();
+              setTimeout(()=>{
+                alertBox.hide();
+              }, 5000);
+            }
+          }
+
+          submit.ui.on('click', ()=>{
+            if(controls.editMode != true){
+              checkAndAddSelection(); 
+            }
+            else {
+              var id = stid
+              stateManager.addStyle({}, sid, stid);
+              finalizeSelection(id);
+            }
+          });
+
+          cancel.ui.on('click', ()=>{
+            if(controls.editMode){
+              parameters.hide();
+            }
+            else {
+              boundingBox.detach();
+              delete this;
+            }
+          });
         }
+
+        plusButton.ui.on('click', ()=>{
+          var newStyle = new Style();
+          styles.append(newStyle.ui);
+        });   
       }
 
       function MovieBar(){
