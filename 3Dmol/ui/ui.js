@@ -134,7 +134,10 @@
        * @return {Object}  Jquery element of div
        */
       function SelectionBox(icon, side='left') {
-        var selectionBox = this.ui = $('<div></div>')
+        var selectionBox = this.ui = $('<div></div>');
+
+        var selectionObjects = [];
+
         var selections = $('<div></div>');
         var styleBox = this.styleBox = new StyleBox();
         var scrollBox = $('<div></div>');
@@ -174,9 +177,11 @@
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
         showArea.css('width', '162px');
-        scrollBox.css('max-height', 300);
+
+        scrollBox.css('max-height', HEIGHT*0.8);
         scrollBox.css('overflow', 'hidden');
-        selections.css('max-height', 300);
+        
+        selections.css('max-height', HEIGHT*0.8);
         selections.css('overflow', 'auto');
         selections.css('box-sizing', 'content-box');
 
@@ -196,192 +201,173 @@
           hidden = !hidden;
         }
 
-        /**
-         * @function $3Dmol.UI#SelectionBox.appendSelection adds new selection to the ui
-         * @param  {$3Dmol.GLModel.validSelectionSpec} selectionSpec
-         */
-        this.appendSelection = function(selectionSpec){
-          var selection = $('<div></div>');
-          var controls = $('<div></div>');
+        function Selection(){
+          var boundingBox = this.ui = $('<div></div>');
+          var sid = this.id = null;
+          boundingBox.css({
+            'background' : '#e8e8e8',
+            'padding' : '4px 4px 2px 4px',
+            'border-radius' : '6px',
+            'margin-bottom' : '3px',
+            'position':'relative'
+          });
+
+          var header = $('<div></div>');
+          boundingBox.append(header);
           var heading = $('<div></div>');
-          var selectionName = $('<div></div>');
-          var parameters = $('<div></div>');
-          
-          selection.css('background', '#e8e8e8');
-          selection.css('padding', '4px 4px 2px 4px');
-          selection.css('border-radius', '6px');
-          selection.css('margin-bottom', '3px');
+          var controls = $('<div></div>');
+
+          header.append(heading, controls);
+          heading.css({
+            'font-family' : 'Arial',
+            'font-weight': 'bold',
+            'font-size':'12px',
+            'display':'inline-block',
+            'width' : '60px'
+          });
+
+          controls.css({
+            'display' : 'inline-block'
+          });
+
+          header.hide();
+          controls.editMode = false;
 
           var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
           var editButton = new button(icons.pencil, 16);
           var visibleButton = new button(icons.visible, 16);
-          var toggleMouseInteraction = new button(icons.nomouse, 16);
-          toggleMouseInteraction.interactions = false;
-          var toggleResLabel = new button(icons.nolabel, 16);
-          toggleResLabel.visible = false;
-
 
           controls.append(removeButton.ui)
           controls.append(editButton.ui);
           controls.append(visibleButton.ui);
-          controls.append(toggleMouseInteraction.ui);
-          controls.append(toggleResLabel.ui);
 
-          controls.css('display', 'inline-block');
-          heading.append(controls);
-          selectionName.text("sel#" + selectionSpec.id.slice(0,4));
-          selectionName.css('display','inline-block');
-          selectionName.css('font-family', 'Arial');
-          selectionName.css('font-size', '12px');
-          selectionName.css('font-weight', 'bold');
-          heading.append(selectionName);
-          
-          var hideButton = new button(icons.listArrow, 16, { backgroundColor: 'none', hoverable: 'false' });
-          heading.append(hideButton.ui);
-          
-          selection.append(heading);
-          selection.append(parameters);
-
-          var hidden = true;
-          parameters.hide();
-          hideButton.ui.on('click', ()=>{
-            if(hidden){
-              parameters.show();
-              hidden = false;
-              hideButton.ui.css('transform', 'rotate(90deg)');
-            }
-            else {
-              hidden = true;
-              parameters.hide();
-              hideButton.ui.css('transform', 'rotate(0deg)');
-            }
-          });
+          var parameters = $('<div></div>');
+          boundingBox.append(parameters);
 
           removeButton.ui.on('click', function(){
-            selection.detach();
-            stateManager.removeSelection(selectionSpec);
           });
 
           editButton.ui.on('click', function(){
-            stateManager.editSelection();
+            parameters.toggle();
           });
-
-          toggleMouseInteraction.ui.on('click', function(){
-            if(toggleMouseInteraction.interactions){
-              toggleMouseInteraction.interactions = false;
-              toggleMouseInteraction.setSVG(icons.nomouse);
-            }
-            else{
-              toggleMouseInteraction.interactions = true;
-              toggleMouseInteraction.setSVG(icons.mouse);
-            }
-
-            stateManager.toggleMouseInteraction();
-          });
-
-          toggleResLabel.ui.on('click', function(){
-            if(toggleMouseInteraction.visible){
-              toggleResLabel.visible = false;
-              toggleResLabel.setSVG(icons.nolabel);
-            }
-            else{
-              toggleResLabel.visible = true;
-              toggleResLabel.setSVG(icons.label);
-            }
-            stateManager.toggleResLabel();
-          })
-
-          var visible = true;
 
           visibleButton.ui.on('click', ()=>{
-            if(visible)
-            {
-              stateManager.hideSelection();
-              visibleButton.setSVG(icons.invisible);
-              visible = false;
-            }  
-            else{
-              stateManager.showSelection();
-              visibleButton.setSVG(icons.visible);
-              visible = true;
-            }
+            stateManager.toggleHide(boundingBox.data('sel-id'));
           });
 
+          var styleBox = new StyleBox();
 
-          // Sets attributes for a particular selection 
-
-          selection.setAttributes = function(selectionSpec){
-            spec = selectionSpec.spec;
-            var keys = Object.keys(spec);
-            parameters.empty();
-
-            var table = $('<table></table>');
-            keys.forEach((key)=>{
-              var tr = $('<tr></tr>')
-              var k = $('<td></td>').text(key);
-              k.css('font-family', 'Arial');
-              k.css('font-weight', 'bold');
-              k.css('font-size', '12px');
-  
-              var v = $('<td></td>').text(spec[key]);
-              v.css('font-family', 'Arial');
-              v.css('font-size', '12px');
-              
-              tr.append(k,v);
-              table.append(tr);
-            });
-
-            parameters.append(table);
+          var allControl = this.allSelector = {
+            key : 'Select All Atom',
+            value : null,
+            active : true
           }
-         
-          selection.setAttributes(selectionSpec);
-          selections.append(selection);
-          selection.data('sel-id', selectionSpec.id);
-          
-          this.selectionObjects.push(selection);
-          
-          var mouseIncideStyle = false;
 
-          styleBox.ui.on('mouseenter', ()=>{
-            mouseIncideStyle = true;
-          });
+          var allCheckBox = new $3Dmol.UI.Form.Checkbox(allControl);
+          parameters.append(allCheckBox.ui);
 
-          styleBox.ui.on('mouseleave', ()=>{
-            mouseIncideStyle = false;
-          });
+
+          var selectionFormControl = this.selectionValue = {
+            key : 'Selection Spec',
+            value : null,
+            active : true
+          }
           
-          selection.on('mouseenter', ()=>{
-            if(!mouseIncideStyle){
-              stateManager.setCurrentSelection(selectionSpec.id);
+          var selectionSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, selectionFormControl);
+          parameters.append(selectionSpecForm.ui);
+
+          var submitControls = $('<div></div>');
+          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen'});
+          var cross = new button(icons.cross, 16, { backgroundColor : 'lightcoral'});
+          submitControls.append(submit.ui, cross.ui);
+
+          
+          var alertBox = $('<div></div>');
+          parameters.append(alertBox);
+          alertBox.css({
+            'color': 'darkred',
+            'border':'1px solid darkred',
+            'border-radius': '3px',
+            'background-color':'lightcoral',
+            'padding':'3px',
+            'text-align':'center',
+            'font-family':'Arial',
+            'font-size':'12px',
+            'font-weight':'bold'
+          });
+          alertBox.hide();
+          
+          parameters.append(submitControls);
+
+          
+          allCheckBox.update = function(){
+            selectionSpecForm.ui.toggle();
+          }
+
+          function finalizeSelection(id){
+            header.show();
+            controls.editMode = true;
+            sid = id;
+            heading.text('Sel#' + id);
+            parameters.hide();
+          }
+
+          function checkAndAddSelection(sid = null){
+            var validate = selectionSpecForm.validate();
+            if(validate){
+              selectionSpecForm.getValue();
+              console.log('Selection Form Value', selectionFormControl, sid);
+              var checkAtoms = stateManager.checkAtoms(selectionFormControl.value);
+              
+              if(checkAtoms){
+                var id = stateManager.addSelection(selectionFormControl.value, sid);
+                finalizeSelection(id);
+              }
+              else {
+                alertBox.text('No atom selected');
+                alertBox.show();
+                setTimeout(()=>{
+                  alertBox.hide();
+                }, 5000);
+              }
             }
+            else {
+              alertBox.text('Invalid Input');
+              alertBox.show();
+              setTimeout(()=>{
+                alertBox.hide();
+              }, 5000);
+            }
+          }
 
-            styleBox.ui.show();
-            selection.append(styleBox.ui);
-            styleBox.ui.css('left', selection.outerWidth());
-            styleBox.ui.css('top', selection.offset().top - 8  );
-
-          });
-
-          selection.on('mouseleave', ()=>{
-            styleBox.ui.hide();
-          });
-
-          // CSS
-          
-        }
-
-        this.editSelection = function(sel){
-          var selection = this.selectionObjects.find((e)=>{
-            console.log('Editing Selection', e)
-            if(e.data('sel-id') == sel.id){
-              return e;
+          submit.ui.on('click', ()=>{
+            if(controls.editMode != true){
+              if(allControl.value){
+                var id = stateManager.addSelection({});
+                finalizeSelection(id);
+              }
+              else{
+                checkAndAddSelection(); 
+              }
+            }
+            else {
+              if(allControl.value){
+                var id = sid
+                stateManager.addSelection({}, id);
+                finalizeSelection(id);
+              }
+              else{
+                var id = sid;
+                checkAndAddSelection(id);
+              }
             }
           })
-          selection.setAttributes(sel);
+
         }
 
         plusButton.ui.on('click', ()=>{
-          stateManager.addSelection();
+          var newSelection = new Selection();
+          selections.append(newSelection.ui);
         });   
       }
 

@@ -51,22 +51,30 @@ $3Dmol.StateManager = (function(){
       // console.log('Updating Current Style', selections, currentSelection, currentStyles);
     }
     
-    this.addSelection = function(spec){
+    this.addSelection = function(spec, sid = null){
       // console.log('Add Selection Called');
-      var id = makeid(4);
+      var id = sid || makeid(4);
       var selectionSpec = {
         spec : spec,
-        styles : []
+        styles : [],
+        hidden : false
       }
-      selections[id] = selectionSpec;
 
-      console.log("StateManager::addSelection", selections);
+      if(sid == null)
+        selections[id] = selectionSpec;
+      else 
+        selections[id].spec = selectionSpec.spec;
+
+      console.log("StateManager::addSelection", selections, sid);
       return id;
     }
 
     this.checkAtoms = function(sel){
       var atoms = glviewer.selectedAtoms(sel);
-      return atoms;
+      if( atoms.length > 0)
+        return true
+
+      return false;
     }
 
     this.addStyle = function(){

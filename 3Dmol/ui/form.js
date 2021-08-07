@@ -168,13 +168,15 @@
                 var input = this.domElement = $('<input type="text">');
                 boundingBox.append(input);
 
-                input.css({
-                    'width' : '100%'
-                });
-
                 this.setWidth = function(width){
                     input.width(width);
                 }
+
+                this.setWidth(75);
+
+                input.css({
+                    'margin-left' : '4px'
+                });
 
                 this.update = function(control){
                     console.log("From::Input:update", "Default Update", control);
@@ -641,7 +643,7 @@
                     var placeholder = this.placeholder;
                     // console.log("Property", placeholder);
                     placeholder.ui.hide();
-                    this.active.ui.width(200);
+                    // this.active.ui.width(200);
 
 
                     if(type !='boolean') {
