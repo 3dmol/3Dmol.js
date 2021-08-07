@@ -333,6 +333,7 @@
             heading.text('Sel#' + id);
             parameters.hide();
             showStyle = true;
+            styleBox.setSid(id);
           }
 
           function checkAndAddSelection(sid = null){
@@ -424,9 +425,14 @@
        * @function StyleBox creates styleBox for listing out different styles for a particular selection
        * @return {Object} Jquery dom object
        */
-       function StyleBox(sid, side='left') {
+       function StyleBox(selId, side='left') {
         var styleBox = this.ui = $('<div></div>');
-        this.sid = sid; // selection id
+        var sid = this.sid = selId; // selection id
+
+        this.setSid = function(id){
+          sid = this.sid = id;
+        }
+
         var styles = $('<div></div>');
         var scrollBox = $('<div></div>');
 
@@ -519,8 +525,9 @@
           var parameters = $('<div></div>');
           boundingBox.append(parameters);
 
-          removeButton.ui.on('click', function(){
-            stateManager.removeStyle(sid);
+          removeButton.ui.on('click', { parent: this, stid : stid }, function(e){
+            console.log(e.data.parent, e.data.stid, stid)
+            stateManager.removeStyle(sid, stid);
             boundingBox.detach();
             delete this;
           });
@@ -574,7 +581,7 @@
           
           parameters.append(submitControls);
 
-          function finalizeSelection(id){
+          function finalizeStyle(id){
             header.show();
             controls.editMode = true;
             stid = id;
@@ -582,14 +589,13 @@
             parameters.hide();
           }
 
-          function checkAndAddSelection(stid = null){
-            var validate = selectionSpecForm.validate();
+          function checkAndAddStyle(stid = null){
+            var validate = styleSpecForm.validate();
             if(validate){
               styleSpecForm.getValue();
               console.log('Style Form Value', styleFormControl, sid, stid);
-            
-              var id = stateManager.addStyle(selectionFormControl.value, sid, stid);
-              finalizeSelection(id);
+              var id = stateManager.addStyle(styleFormControl.value, sid, stid);
+              finalizeStyle(id);
             }
             else {
               alertBox.text('Invalid Input');
@@ -601,13 +607,14 @@
           }
 
           submit.ui.on('click', ()=>{
-            if(controls.editMode != true){
-              checkAndAddSelection(); 
+            if(controls.editMode == false){
+              checkAndAddStyle(); 
             }
             else {
               var id = stid
-              stateManager.addStyle({}, sid, stid);
-              finalizeSelection(id);
+              styleSpecForm.getValue();
+              stateManager.addStyle(styleFormControl.value, sid, stid);
+              finalizeStyle(id);
             }
           });
 
@@ -623,7 +630,7 @@
         }
 
         plusButton.ui.on('click', ()=>{
-          var newStyle = new Style();
+          var newStyle = new Style(sid);
           styles.append(newStyle.ui);
         });   
       }

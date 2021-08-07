@@ -88,38 +88,35 @@ $3Dmol.StateManager = (function(){
       // render();
     }
 
-    this.addStyle = function(){
-      // var formList = [];
-
-      var validStyles = $3Dmol.GLModel.validAtomStyleSpecs;
-      var currentFormValue = { value: null, type: 'form', key: "Atom Style"}
-      // var forms = Object.keys(validStyles);
-      // forms.forEach( (form)=>{
-      //   let f = new $3Dmol.UI.Form(validStyles[form].validItems, form);
-      //   formList.push({formName: form, form : f});
-      // });
-      let form = new $3Dmol.UI.Form(validStyles, currentFormValue);
-      this.ui.tools.dialog.addForm(form);
-      currentForm = "new_style";
-    }
-
-    this.removeStyle = function(styleSpec){
-      var styleToRemove = currentSelection.styles.indexOf(styleSpec);
-      if(styleToRemove != -1){
-        currentSelection.styles.splice(styleToRemove,1);
-        console.log('StateManager::removeStyle', styleToRemove, currentSelection.styles);
-        this.ui.tools.selectionBox.styleBox.updateStyles(currentSelection.styles);
-        render();
+    this.addStyle = function( spec, sid, stid = null){
+      var selection = selections[sid];
+      
+      
+      var styleSpec = {
+        spec : spec,
+        hidden : false
       }
+      
+      var id = null; 
+      
+      if(stid == null) {
+        id = makeid(4);
+        selection.styles[id] = styleSpec
+      }
+      else {
+        id = stid;
+        selection.styles[id].spec = spec;
+      }
+      
+      console.log("StateManager::addStyle", selections, sid, stid, spec);
+      return id;
     }
 
-    // Context menu display test function 
-    // $(document).on('click', { ui: this.ui.tools }, function(e){
-    //   console.log('GLobal event', e);
-    //   e.data.ui.contextMenu.show({ x: e.clientX, y:e.clientY });
-    // });
-
-    
+    this.removeStyle = function(sid, stid){
+      console.log(selections, stid, sid)
+      delete selections[sid].styles[stid];
+      // render();
+    }
 
     this.addSurface = function(property){
       var id = makeid(4);
@@ -129,10 +126,7 @@ $3Dmol.StateManager = (function(){
       if(style == null)
         style = {};
 
-      var sel = selections.find((sel)=>{
-        if(sel.id == property.surfaceOf.value)
-          return true;
-      });
+      var sel = selections[property.surfaceOf.value];
 
       console.log('StateManager::addSurface', property, style);
 
@@ -157,12 +151,14 @@ $3Dmol.StateManager = (function(){
 
     }
 
+    this.toggleHideStyle = function(sid, stid){
+      selections[sid].styles[stid].hidden = !selections[sid].styles[stid].hidden;
+      // render();
+    }
+
     this.editSurface = function(surfaceProperty){
       var style = surfaceProperty.surfaceStyle.value || {}
-      var sel = selections.find((sel)=>{
-        if(sel.id ==  surfaceProperty.surfaceOf.value)
-          return true;
-      })
+      var sel = selections[surfaceProperty.surfaceOf.value];
 
       console.log('Surfaces edited', surfaceProperty.id, surfaces, surfaces[surfaceProperty.id]);
       glviewer.removeSurface(surfaces[surfaceProperty.id]);
@@ -176,6 +172,10 @@ $3Dmol.StateManager = (function(){
       });
 
       console.log('StateManager::editSurface#Updating Surface', surfaceProperty)
+    }
+
+    this.getSelectionList = function(){
+      return Object.keys(selections);
     }
 
     this.openContextMenu = function(atom, x, y){
