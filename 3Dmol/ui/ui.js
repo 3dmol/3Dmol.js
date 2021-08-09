@@ -30,11 +30,7 @@
        * @function generateUI creates all the jquery object of different UI features
        * @param  {object} config
        */
-      function generateUI(config){    
-        var selectionBox = new SelectionBox(icons.select);
-        mainParent.append(selectionBox.ui);
-        setLocation(mainParent, selectionBox.ui, 'left', 'top');
-
+      function generateUI(config){
         var contextMenu = new ContextMenu();
         mainParent.append(contextMenu.ui);
         setPosition(contextMenu.ui, 100, 100)
@@ -42,6 +38,11 @@
         var surfaceMenu = new SurfaceMenu();
         mainParent.append(surfaceMenu.ui);
         setLocation(mainParent, surfaceMenu.ui, 'right', 'top', );
+        
+
+        var selectionBox = new SelectionBox(icons.select);
+        mainParent.append(selectionBox.ui);
+        setLocation(mainParent, selectionBox.ui, 'left', 'top');
 
           // Fixing Context Menu Behaviour
         selectionBox.ui.on('mousedown', ()=>{
@@ -123,10 +124,10 @@
         
         var showArea = $('<div></div>');
         var addArea = $('<div></div>');
-        var plusButton = new button(icons.plus, 20);
+        var plusButton = new button(icons.plus, 20, { tooltip : 'Add New Selection'});
         plusButton.ui.css('margin','0px');
         
-        var hideButton = new button(icon, 20);
+        var hideButton = new button(icon, 20, { tooltip : 'Toggle Selection Menu'});
         this.selectionObjects = [];
 
         // Content
@@ -423,7 +424,7 @@
         var showArea = $('<div></div>');
         var addArea = $('<div></div>');
         addArea.css('text-align' , 'center');
-        var plusButton = new button(icons.plus, 20);
+        var plusButton = new button(icons.plus, 20, { tooltip : 'Add New Style'});
         plusButton.ui.css('margin','0px');
       
         this.selectionObjects = [];
@@ -1258,7 +1259,7 @@
         // })
 
         
-        var surfaceButton = new button(icons.surface, 20, { tooltip : 'Open Surface Menu'});
+        var surfaceButton = new button(icons.surface, 20, { tooltip : 'Toggle Surface Menu'});
 
         boundingBox.append(surfaceButton.ui);
 
@@ -1268,19 +1269,19 @@
 
         // Overflow fix 
         boundingBox.css({
-          'overflow':'hidden',
+          'overflow':'visible',
         });
 
         console.log('Surface box display box height', HEIGHT);
 
-        displayBox.css({
+        
+
+        var newSurfaceSpace = $('<div></div>');
+        newSurfaceSpace.css({
           'max-height' : HEIGHT*0.8,
           'overflow-y': 'auto',
           'overflow-x' : 'hidden'
         });
-
-        var newSurfaceSpace = $('<div></div>');
-        
         // newSurfaceSpace.append(controlButton);
         // controlButton.hide();
 
@@ -1290,13 +1291,12 @@
         displayBox.append(alertBox.ui);
 
         var addArea = $('<div></div>');
-        var addButton = new button(icons.plus, 20);
+        var addButton = new button(icons.plus, 20, { tooltip : 'Add New Surface'});
         addArea.append(addButton.ui);
         displayBox.append(addArea);
         displayBox.hide();
 
         var surfaces = this.surfaces = [];
-        var currentSurface = this.currentSurface = null;
 
         function Surface(){
           var control = {
