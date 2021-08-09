@@ -103,7 +103,18 @@
                 var select = $('<select></select>');
 
                 boundingBox.append(select);
-                
+
+                var failMessage = $('<div></div>');
+                failMessage.text('Please select some value');
+                failMessage.css({
+                    'color' : 'crimson',
+                    'font-family': 'Arial',
+                    'font-weight' : 'bold',
+                    'font-size' : '10px'
+                });
+                failMessage.hide();
+                boundingBox.append(failMessage);
+
                 this.update = function(control){
                     console.log("From::Input:update", "Default Update", control);
                 }
@@ -118,10 +129,14 @@
                 }
 
                 this.validate = function(){
-                    if(control.value == 'default')
+                    if(control.value == 'select' || control.value == null){
+                        failMessage.show();
                         return false;
-                    else 
+                    }
+                    else{
+                        failMessage.hide();
                         return true;
+                    }
                 }
 
                 this.setValue = function(val){
@@ -135,7 +150,7 @@
 
                   var defaultOption = $('<option></option>');
                   defaultOption.text('select');
-                  defaultOption.attr('value', 'default');
+                  defaultOption.attr('value', 'select');
 
                   select.append(defaultOption);
 
@@ -541,11 +556,23 @@
 
                 this.validate = function(){
                     var validations = inputs.map((i)=>{
-                        return i.placeholder.validate();
+                        // console.log("Checking inputs", i)
+                        if(i.active.getValue().value){
+                            return i.placeholder.validate();
+                        }
+                        else {
+                            return true;
+                        }
                     });
+
+                    console.log('Checking Validation', validations);
 
                     if(validations.find( e => e == false) == undefined )
                         return true;
+                    else {
+                        return false;
+                    }
+
                 }
 
                 this.setValue = function(val){

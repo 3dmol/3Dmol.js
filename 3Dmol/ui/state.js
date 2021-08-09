@@ -20,6 +20,7 @@ $3Dmol.StateManager = (function(){
     var height = parentElement.height();
     var width = parentElement.width();
     var offset = canvas.offset();
+    var stateManager = this;
 
     var uiOverlayConfig = {
       height : height,
@@ -291,15 +292,14 @@ $3Dmol.StateManager = (function(){
     // Setting up UI generation 
     this.showUI = function(){
       var ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);  
-
       return ui;
     }
 
     if(config.ui == true){
-     this.ui = this.showUI();
+     this.ui = this.showUI(); 
     }
+    
     // UI changes
-
 
     // console.log('GetSelectionList', this.getSelectionList());
 

@@ -31,55 +31,34 @@
        * @param  {object} config
        */
       function generateUI(config){    
-        var movieControl = new MovieBar();
-        mainParent.append(movieControl.ui);
-        // movieControl.ui.css('top', 200);
-        // movieControl.ui.css('z-index', 99);
-        setLocation(mainParent, movieControl.ui, 'center', 'bottom');
-        movieControl.ui.hide();
-        
-        var topbar = new Toolbar();
-        mainParent.append(topbar.ui);
-        setLocation(mainParent, topbar.ui, 'left', 'top');
-        topbar.ui.hide();
-
         var selectionBox = new SelectionBox(icons.select);
         mainParent.append(selectionBox.ui);
         setLocation(mainParent, selectionBox.ui, 'left', 'top');
 
-        var dialog = new DialogBox({ height: 300, width: 300 });
-        mainParent.append(dialog.ui);
-        setLocation(mainParent, dialog.ui, 'center', 'center');
-        dialog.ui.hide();
-        
-        var alertBox = new AlertBox({ width : 100 });
-        // console.log(alertBox);
-        mainParent.append(alertBox.ui);
-        setLocation(mainParent, alertBox.ui, 'right', 'top');
-
         var contextMenu = new ContextMenu();
         mainParent.append(contextMenu.ui);
-        // setLocation(mainParent, contextMenu.ui, 'center', 'center');
         setPosition(contextMenu.ui, 100, 100)
         
         var surfaceMenu = new SurfaceMenu();
         mainParent.append(surfaceMenu.ui);
         setLocation(mainParent, surfaceMenu.ui, 'right', 'top', );
 
+          // Fixing Context Menu Behaviour
+        selectionBox.ui.on('mousedown', ()=>{
+          stateManager.exitContextMenu();
+        });
+
+        surfaceMenu.ui.on('mousedown', ()=>{
+          stateManager.exitContextMenu();
+        });
+
         return {
-          topbar : topbar,
           selectionBox : selectionBox,
-          dialog : dialog,
-          alertBox : alertBox,
-          movieControl : movieControl,
           contextMenu : contextMenu,
           surfaceMenu : surfaceMenu
         } 
       }
-      /**
-       * @function UI_Overlay adds overlay on the glviewer to assists placement of different UI elements on the viewer.
-       * @param  {object} config
-       */
+
 
       /**
       * @function Toobar creates horizontal toolbar for the UI
@@ -158,8 +137,11 @@
         scrollBox.append(selections);
         showArea.append(scrollBox);
         addArea.append(plusButton.ui);
-        showArea.append(addArea);
 
+        var alertBox = new AlertBox();
+        showArea.append(alertBox.ui);
+        showArea.append(addArea);
+        
         // CSS
         if(side == 'left'){
           selectionBox.css('text-align', 'left');
@@ -174,7 +156,7 @@
 
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
-        // showArea.css('width', '162px');
+        showArea.css('width', '162px');
 
         // scrollBox.css('max-height', HEIGHT*0.8);
         // scrollBox.css('overflow', 'hidden');
@@ -208,7 +190,7 @@
             'padding' : '4px 4px 2px 4px',
             'border-radius' : '6px',
             'margin-bottom' : '3px',
-            'position':'relative'
+            'position':'relative',
           });
 
           var header = $('<div></div>');
@@ -304,20 +286,8 @@
           submitControls.append(submit.ui, cancel.ui);
 
           
-          var alertBox = $('<div></div>');
-          parameters.append(alertBox);
-          alertBox.css({
-            'color': 'darkred',
-            'border':'1px solid darkred',
-            'border-radius': '3px',
-            'background-color':'lightcoral',
-            'padding':'3px',
-            'text-align':'center',
-            'font-family':'Arial',
-            'font-size':'12px',
-            'font-weight':'bold'
-          });
-          alertBox.hide();
+          var alertBox = new AlertBox();
+          parameters.append(alertBox.ui);
           
           parameters.append(submitControls);
 
@@ -342,26 +312,23 @@
               selectionSpecForm.getValue();
               console.log('Selection Form Value', selectionFormControl, sid);
               var checkAtoms = stateManager.checkAtoms(selectionFormControl.value);
-              
-              if(checkAtoms){
-                var id = stateManager.addSelection(selectionFormControl.value, sid);
-                finalizeSelection(id);
-                if(sid == null ) _editingForm = false;
+
+              if(Object.keys(selectionFormControl.value).length == 0){
+                alertBox.error('Please enter some input');
               }
-              else {
-                alertBox.text('No atom selected');
-                alertBox.show();
-                setTimeout(()=>{
-                  alertBox.hide();
-                }, 5000);
+              else{
+                if(checkAtoms){
+                  var id = stateManager.addSelection(selectionFormControl.value, sid);
+                  finalizeSelection(id);
+                  if(sid == null ) _editingForm = false;
+                }
+                else {
+                  alertBox.error('No atom selected');
+                }
               }
             }
             else {
-              alertBox.text('Invalid Input');
-              alertBox.show();
-              setTimeout(()=>{
-                alertBox.hide();
-              }, 5000);
+              alertBox.error('Invalid Input');
             }
           }
 
@@ -404,14 +371,12 @@
           boundingBox.on('mouseenter', ()=>{
             if(showStyle){
               styleBox.ui.show();
-              console.log("entering", showStyle)
             }
           });
 
           boundingBox.on('mouseleave', ()=>{
             if(showStyle){
               styleBox.ui.hide();
-              console.log("exiting", showStyle)
             }
           });
 
@@ -429,6 +394,8 @@
             var newSelection = new Selection();
             selections.append(newSelection.ui);
             _editingForm = true;
+          }else {
+            alertBox.warning('Please complete the previous form');
           }
           
         });   
@@ -456,7 +423,6 @@
         var showArea = $('<div></div>');
         var addArea = $('<div></div>');
         addArea.css('text-align' , 'center');
-
         var plusButton = new button(icons.plus, 20);
         plusButton.ui.css('margin','0px');
       
@@ -468,6 +434,10 @@
         
         scrollBox.append(styles);
         showArea.append(scrollBox);
+
+        var alertBox = new AlertBox();
+        showArea.append(alertBox.ui);
+        
         addArea.append(plusButton.ui);
         showArea.append(addArea);
 
@@ -579,20 +549,8 @@
           submitControls.append(submit.ui, cancel.ui);
 
           
-          var alertBox = $('<div></div>');
-          parameters.append(alertBox);
-          alertBox.css({
-            'color': 'darkred',
-            'border':'1px solid darkred',
-            'border-radius': '3px',
-            'background-color':'lightcoral',
-            'padding':'3px',
-            'text-align':'center',
-            'font-family':'Arial',
-            'font-size':'12px',
-            'font-weight':'bold'
-          });
-          alertBox.hide();
+          var alertBox = new AlertBox();
+          parameters.append(alertBox.ui);
           
           parameters.append(submitControls);
 
@@ -609,16 +567,19 @@
             if(validate){
               styleSpecForm.getValue();
               console.log('Style Form Value', styleFormControl, sid, stid);
-              var id = stateManager.addStyle(styleFormControl.value, sid, stid);
-              finalizeStyle(id);
-              if(stid == null) _editingForm = false;
+              
+              if(Object.keys(styleFormControl.value).length == 0){
+                alertBox.error('Please enter some value');
+              }
+              else{  
+                var id = stateManager.addStyle(styleFormControl.value, sid, stid);
+                finalizeStyle(id);
+                if(stid == null) _editingForm = false;
+              }
+
             }
             else {
-              alertBox.text('Invalid Input');
-              alertBox.show();
-              setTimeout(()=>{
-                alertBox.hide();
-              }, 5000);
+              alertBox.error('Invalid Input');
             }
           }
 
@@ -629,8 +590,14 @@
             else {
               var id = stid
               styleSpecForm.getValue();
-              stateManager.addStyle(styleFormControl.value, sid, stid);
-              finalizeStyle(id);
+
+              if(Object.keys(styleFormControl.value).length == 0){
+                alertBox.error('Please enter some value');
+              }
+              else{
+                checkAndAddStyle(id);
+              }
+
             }
           });
 
@@ -657,6 +624,9 @@
             var newStyle = new Style(sid);
             styles.append(newStyle.ui);
             _editingForm = true;
+          }
+          else {
+            alertBox.warning('Please complete editing the current form');
           }
         });   
       }
@@ -716,48 +686,70 @@
       }
 
       function AlertBox(config){
-        config = config || {};
-        var width = config.width || 400;
-        var timeout = config.timeout || 5000;
-    
         var boundingBox = this.ui = $('<div></div>');
-        var displayBox = $('<div></div>');
-        boundingBox.append(displayBox);
-    
-        boundingBox.css('border-radius', '2px');
-        // boundingBox.height(100);
-        boundingBox.width(100);
-        displayBox.css('border-radius', '2px');
-        boundingBox.css('position', 'absolute');
-        boundingBox.css('padding', '10px');
-        displayBox.css('padding', '10px');
+        config = config || {}
+        var delay = config.delay || 5000;
+        var autohide = (config.autohide == undefined )? true : config.autohide;
+
+        boundingBox.css({
+          'font-family' : 'Arial',
+          'font-size' : '14px',
+          'padding' : '3px',
+          'border-radius' : '4px',
+          'margin-top' : '2px',
+          'margin-bottm' : '2px',
+          'font-weight' : 'bold',
+          'text-align' : 'center',
+        });
+
         boundingBox.hide();
-        
-        this.alert = function(type, message){
+
+        function hide(){
+          if(autohide){
+            setTimeout(()=>{
+              boundingBox.hide();
+            }, delay);
+          }
+        }
+
+        this.error = function(msg){
+          boundingBox.css({
+            'background' : 'lightcoral',
+            'color' : 'darkred',
+            'border' : '1px solid darkred'
+          });
+
+          boundingBox.text(msg);
           boundingBox.show();
 
-          if(type=='success'){
-            displayBox.css('border', '1px solid green');
-            displayBox.css('background', 'lightgreen');
-            displayBox.css('color', 'green');
-          } else if( type == 'warning'){
-            displayBox.css('border', '1px solid orange');
-            displayBox.css('background', 'yellow');
-            displayBox.css('color', 'orange');
-          } else if(type == 'error'){
-            displayBox.css('border', '1px solid red');
-            displayBox.css('background', 'lightred');
-            displayBox.css('color', 'red');
-          }
-
-          displayBox.text(message);
-    
-          setTimeout(()=>{ 
-            boundingBox.hide(); 
-            // console.log('Hiding');
-          }, timeout);
+          hide();
         }
-    
+
+        this.warning = function(msg){
+          boundingBox.css({
+            'background' : 'yellow',
+            'color' : 'orange',
+            'border' : '1px solid orange'
+          });
+
+          boundingBox.text(msg);
+          boundingBox.show();
+          
+          hide();
+        }
+
+        this.message = function(msg){
+          boundingBox.css({
+            'background' : 'lightgreen',
+            'color' : 'green',
+            'border' : '1px solid green'
+          });
+
+          boundingBox.text(msg);
+          boundingBox.show();
+
+          hide();
+        }
       }
     
       function DialogBox(config){
@@ -977,21 +969,8 @@
           controlButtons.append(submit.ui, cancel.ui);
           // controlButtons.css('text-align', 'center');
 
-          var alertBox = $('<div></div>');
-          propertyMenu.append(alertBox);
-          alertBox.css({
-            'color': 'darkred',
-            'border':'1px solid darkred',
-            'border-radius': '3px',
-            'background-color':'lightcoral',
-            'padding':'3px',
-            'text-align':'center',
-            'font-family':'Arial',
-            'font-size':'12px',
-            'font-weight':'bold'
-          });
-
-          alertBox.hide();
+          var alertBox = new AlertBox();
+          propertyMenu.append(alertBox.ui);   
 
           propertyMenu.append(controlButtons);
 
@@ -1003,8 +982,7 @@
               stateManager.exitContextMenu(false);
             }
             else {
-              alertBox.show();
-              alertBox.text('No value selected for label');
+              alertBox.error('No value selected for label');
             }
           });
 
@@ -1029,7 +1007,8 @@
         addLabelMenu.text('Add Label');
         addLabelMenu.css(labelMenuStyle);
         addLabelMenu.css('margin-bottom', '3px');
-        
+        addLabelMenu.hide();
+
         // Edit Menu
         var editMenu = $('<div></div>');
         contentBox.append(editMenu);
@@ -1052,6 +1031,9 @@
           
         });
         editMenu.hide();
+
+        var alertBox = new AlertBox({ autohide : false });
+        contentBox.append(alertBox.ui);
 
         // Add Label Inputs 
 
@@ -1120,6 +1102,9 @@
               validate = false;
             
             if(!addLabelTextInput.validate())
+              validate = false;
+            
+            if(!addLabelSelectionInput.validate())
               validate = false;
             
             if(validate){
@@ -1195,6 +1180,15 @@
             removeLabelMenu.atom = null;
           }
 
+          alertBox.ui.hide();
+          addLabelMenu.hide();
+
+          if( stateManager.getSelectionList().length == 0){
+            alertBox.message('Please create selections before adding label');
+          } else {
+            addLabelMenu.show();
+          }
+
           unsetForm();
           setPosition(boundingBox, x, y);
           console.log('CONTEXT MENU::Atom Selected', atom);
@@ -1206,7 +1200,6 @@
             this.atom = atom;
           }
           else{
-
             propertyMenu.empty();
           }
         }
@@ -1292,6 +1285,9 @@
         // controlButton.hide();
 
         displayBox.append(newSurfaceSpace);
+
+        var alertBox = new AlertBox();
+        displayBox.append(alertBox.ui);
 
         var addArea = $('<div></div>');
         var addButton = new button(icons.plus, 20);
@@ -1425,6 +1421,9 @@
           surfaceFor.append(labelSurfaceFor, listSurfaceFor.ui);
           surfacePropertyBox.append(surfaceFor);
           
+          var alertBox = new AlertBox();
+          surfacePropertyBox.append(alertBox.ui);
+
           // Control Button
           var controlButton = $('<div></div>');
           var submit = new button(icons.tick, 20);
@@ -1454,20 +1453,23 @@
           var validateInput = this.validateInput = function(){
             var validated = true;
             
-            if( listSurfaceType.getValue().value == 'default'){
+            if( !listSurfaceFor.validate()){
               validated = false;
-              console.log('Surface::InvalidSurfaceType');
             }
 
-            if( listSurfaceOf.getValue().value == 'default'){
+            if( !listSurfaceOf.validate()){
               validated = false;
-              console.log('Surface::InvalidSurfaceAtom Selected');
             }
 
-            if(listSurfaceFor.getValue().value == 'default'){
-              validate = false;
-              console.log('Surface::InvalidSurfaceGenerationAtom Selected');
+            if( !listSurfaceType.validate()){
+              validated = false;
             }
+
+            if( !formSurfaceStyle.validate()){
+              validated = false;
+            }
+
+            console.log('Surface Menu Validation', control, validated, listSurfaceFor.validate(), listSurfaceOf.validate(), listSurfaceType.validate(), formSurfaceStyle.validate()   )
 
             return validated;
           }
@@ -1494,9 +1496,13 @@
 
           // Submit 
           submit.ui.on('click', {}, function(){
+            listSurfaceFor.getValue();
+            listSurfaceOf.getValue();
+            listSurfaceType.getValue();
+            formSurfaceStyle.getValue();
+
             if(validateInput()){ 
               if(toolButtons.editMode === false){
-                formSurfaceStyle.getValue();
                 var id = stateManager.addSurface(control);
                 control.id = id;
 
@@ -1520,6 +1526,9 @@
                 stateManager.editSurface(control); // -> add updateSurface funciton to surfaceMenu
                 surfacePropertyBox.hide();
               }
+            }
+            else {
+              alertBox.error('Invalid Input');
             }
           });
 
@@ -1550,11 +1559,19 @@
         // Surface addition
 
         addButton.ui.on('click', { surfaces: this }, function(e){
-          if(!_editingForm){
-            var newSurface = new Surface();
-            newSurfaceSpace.append(newSurface.ui);
-            _editingForm = true;
+          if(stateManager.getSelectionList().length == 0){
+            alertBox.error('Please create some selections first');
           }
+          else {
+            if(!_editingForm){
+              var newSurface = new Surface();
+              newSurfaceSpace.append(newSurface.ui);
+              _editingForm = true;
+            }else {
+              alertBox.warning('Please complete the previous form first');
+            }
+          }
+          
         });
 
         surfaceButton.ui.on('click', ()=>{
