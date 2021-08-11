@@ -44,13 +44,6 @@ $3Dmol.StateManager = (function(){
     var labels = {};
 
     var atomLabel = {};
-
-    this.setCurrentSelection = function(selectionId){
-      currentSelection = selections.find(  sel => sel.id == selectionId);
-      currentStyles = currentSelection.styles;
-      this.ui.tools.selectionBox.styleBox.updateStyles(currentSelection.styles);
-      // console.log('Updating Current Style', selections, currentSelection, currentStyles);
-    }
     
     this.addSelection = function(spec, sid = null){
       // console.log('Add Selection Called');

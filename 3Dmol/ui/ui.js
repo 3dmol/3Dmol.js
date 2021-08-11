@@ -1544,19 +1544,11 @@
           button.on('mouseenter',
             ()=>{
               button.css('box-shadow', '0px 0px 3px black');
-              if(tooltipText != null){
-                tooltipBox.show();
-
-                setTimeout(()=>{
-                  tooltipBox.hide();
-                }, 3000);
-              }
+              
             }).on('mouseleave', 
             ()=>{
               button.css('box-shadow', 'none');
-              if(tooltipText != null) {
-                tooltipBox.hide();
-              }
+              
             }
           );
             

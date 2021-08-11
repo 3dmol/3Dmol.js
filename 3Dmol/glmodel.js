@@ -213,7 +213,7 @@ $3Dmol.GLModel = (function() {
     };
 
     GLModel.validSurfaceSpecs = {
-        "opacity":{type:"number",gui:true,step:0.01,default:1,min:0,max:1},
+        "opacity":{type:"number",gui:true,step:0.01,default:0.8,min:0,max:1},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
         "voldata":{type:"number",gui:false},

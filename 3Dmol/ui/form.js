@@ -408,7 +408,7 @@
                 var min = control.min || 0;
                 var max = control.max || 100;
                 var step = control.step || 1;
-                var defaultValue = control.value || 0;
+                var defaultValue = control.default || min;
                 var labelContent = control.label || '';
 
                 var label = $('<div></div>');
@@ -420,6 +420,7 @@
                 slide.attr('step', step);
                 console.log('step::', step);
                 slide.attr('value', defaultValue);
+                control.value = defaultValue;
                 boundingBox.append(slide);
 
                 var setValue = false;
@@ -462,7 +463,10 @@
 
                 this.setValue = function(val){
                     slider.val(val);
+                    control.value = slider.val();
                 }
+
+
             }
 
             Form.EmptyElement = function(control){
