@@ -60,6 +60,14 @@
         } 
       }
 
+      this.resize = function(){
+        var selectionBox = this.tools.selectionBox;
+        var surfaceMenu = this.tools.surfaceMenu;
+
+        setLocation(mainParent, selectionBox.ui, 'left', 'top');
+        setLocation(mainParent, surfaceMenu.ui, 'right', 'top', );
+      }
+
       /**
        * @function SelectionBox - Draws the box where all the selections on atoms are listed
        * This will be used to modify style for specific set of selection
@@ -489,7 +497,7 @@
           });
 
           var styleFormControl = this.selectionValue = {
-            key : 'Selection Spec',
+            key : 'Style Spec',
             value : null,
             active : true
           }

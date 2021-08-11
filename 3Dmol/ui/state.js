@@ -292,6 +292,10 @@ $3Dmol.StateManager = (function(){
     if(config.ui == true){
      this.ui = this.showUI(); 
     }
+
+    this.updateUI = function(){
+      this.ui.resize();
+    }
     
     // UI changes
 

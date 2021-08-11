@@ -1098,6 +1098,9 @@ $3Dmol.GLViewer = (function() {
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
             show();
+
+            // UI Edition 
+            _stateManager.updateUI();
             return this;
         };
 
