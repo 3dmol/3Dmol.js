@@ -60,53 +60,6 @@
         } 
       }
 
-
-      /**
-      * @function Toobar creates horizontal toolbar for the UI
-      * @param {Object} config : Stores the top, left, width, padding property for the toolbar
-      * @return {Object} Jquery div object
-      **/
-      function Toolbar(config){
-        config = config || {};
-
-        var top = config.top || 10;
-        var left = config.left || 10;
-        var padding = config.padding || '3px';
-
-        var toolbar = this.ui = $('<div></div>');
-
-        // Toolbar content
-        var optionButton = new button(icons.option, 20)
-        var moveButton = new button(icons.move, 20);
-        var rotateButton = new button(icons.rotate, 20);
-        toolbar.append(optionButton.ui);
-        toolbar.append(moveButton.ui);
-        toolbar.append(rotateButton.ui);
-
-        // Toolbar design
-        toolbar.css('border', 'none');
-        toolbar.css('padding', padding);
-        toolbar.css('background', 'none');
-        toolbar.css('color', 'white');
-        toolbar.css('box-sizing', 'border-box');
-        toolbar.css('position', 'absolute');
-
-        rotateButton.ui.css('margin-right', '0px');
-
-        // Button Action
-        optionButton.ui.click(()=>{
-          console.log('option button clicked');
-        });
-
-        moveButton.ui.click(()=>{
-          console.log('move button clicked');
-        });
-
-        rotateButton.ui.click(()=>{
-          console.log('click button clicked');
-        });
-      }
-
       /**
        * @function SelectionBox - Draws the box where all the selections on atoms are listed
        * This will be used to modify style for specific set of selection
@@ -215,9 +168,9 @@
           header.hide();
           controls.editMode = false;
 
-          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
-          var editButton = new button(icons.pencil, 16);
-          var visibleButton = new button(icons.visible, 16);
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f', tooltip : 'Remove Selection'});
+          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Selection'});
+          var visibleButton = new button(icons.visible, 16, { tooltip : 'Show / Hide Selection'});
 
           controls.append(removeButton.ui)
           controls.append(editButton.ui);
@@ -282,8 +235,8 @@
           parameters.append(selectionSpecForm.ui);
 
           var submitControls = $('<div></div>');
-          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen'});
-          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral'});
+          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral', tooltip : 'Cancel'});
           submitControls.append(submit.ui, cancel.ui);
 
           
@@ -500,9 +453,9 @@
           header.hide();
           controls.editMode = false;
 
-          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
-          var editButton = new button(icons.pencil, 16);
-          var visibleButton = new button(icons.visible, 16);
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f', tooltip : 'Remove Style'});
+          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Style'});
+          var visibleButton = new button(icons.visible, 16, { tooltip : 'Show / Hide Style'});
 
           controls.append(removeButton.ui)
           controls.append(editButton.ui);
@@ -545,8 +498,8 @@
           parameters.append(styleSpecForm.ui);
 
           var submitControls = $('<div></div>');
-          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen'});
-          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral'});
+          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral', tooltip : 'Cancel'});
           submitControls.append(submit.ui, cancel.ui);
 
           
@@ -632,60 +585,6 @@
         });   
       }
 
-      function MovieBar(){
-        var boundingBox = this.ui = $('<div></div>');
-        var slide = new slider({width: 120 });
-        var controlButtons = $('<div></div>');
-
-        boundingBox.append(slide.ui);
-        boundingBox.append(controlButtons);
-
-        var play = new button(icons.movie.play, 20);
-        var stop = new button(icons.movie.stop, 20);
-        var previous = new button(icons.movie.previous, 20);
-        var next = new button(icons.movie.next, 20);
-
-        controlButtons.append(previous.ui);
-        controlButtons.append(play.ui);
-        controlButtons.append(stop.ui);
-        controlButtons.append(next.ui);
-
-        // Style
-        boundingBox.css('position','absolute');
-        boundingBox.css('padding','3px');
-        boundingBox.css('text-align', 'center');
-        // boundingBox.css('width','');
-
-
-
-        // state variable
-        var playing = false;
-
-        play.ui.on('click', ()=>{
-          // console.log('trying to change the background', play);
-          if(playing){
-            play.setSVG(icons.movie.play);
-          }
-          else {
-            play.setSVG(icons.movie.pause);
-          }
-          playing = !playing;
-        });
-
-        stop.ui.on('click', ()=>{
-
-        });
-
-        previous.ui.click(()=>{
-
-        });
-
-        next.ui.click(()=>{
-
-        });
-
-      }
-
       function AlertBox(config){
         var boundingBox = this.ui = $('<div></div>');
         config = config || {}
@@ -752,122 +651,7 @@
           hide();
         }
       }
-    
-      function DialogBox(config){
-        config = config || {};
-        var height = config.height || 400;
-        var width = config.width || 400;
-    
-        
-        var boundingBox = this.ui = $('<div></div>');
-        var mainForm = null;
 
-        var semiDisplayBox = $('<div></div>');
-        boundingBox.append(semiDisplayBox);
-        
-        var displayBox = $('<div></div>');
-        boundingBox.append(displayBox);
-
-        var controlBar = $('<div></div>');
-        boundingBox.append(controlBar);
-    
-        var done = new button(icons.tick, 20);
-        var drop = new button(icons.cross, 20);
-        controlBar.width(20);
-        controlBar.append(done.ui);
-        controlBar.append(drop.ui);
-        done.ui.css('display', 'block');
-        done.ui.css('background', 'green');
-        done.ui.css('margin-bottom', '5px');
-        done.ui.css('margin-top', '5px');
-        
-        drop.ui.css('display', 'block');
-        drop.ui.css('background', 'red');
-        // drop.ui.css('background', 'red');
-        
-        controlBar.css('position', 'absolute');
-        controlBar.css('top', '0px');
-        // controlBar.css('display', 'flex');
-        // controlBar.css('flex-direction', 'row');
-    
-        boundingBox.css('background', 'lightgrey');
-        boundingBox.height(height);
-        boundingBox.width(width);
-        boundingBox.css('position', 'absolute');
-        boundingBox.css('overflow-y', 'auto');
-        boundingBox.css('border-radius', '4px');
-        boundingBox.css('opacity', '0.4');
-        boundingBox.css('padding', '6px');
-    
-        displayBox.css('display', 'flex');
-        displayBox.css('flex-direction', 'row');
-        displayBox.css('align-items', 'center');
-        displayBox.css('position', 'relative');
-    
-        // semiDisplayBox.css('display', 'flex');
-        // semiDisplayBox.css('flex-direction', 'row');
-        semiDisplayBox.css('text-align', 'center');
-        // semiDisplayBox.css('position', 'relative');
-    
-        boundingBox.on('mouseenter', ()=>{
-          boundingBox.css('opacity', '0.8');
-        });
-    
-        boundingBox.on('mouseleave', ()=>{
-          boundingBox.css('opacity', '0.4');
-        });
-    
-        done.ui.on('click', ()=>{
-          if(mainForm.validate()){
-            boundingBox.hide();
-            console.log("Form Validated in the UI", mainForm.validate());
-            // console.log("UI:DialogBox:Finalize", mainForm)
-            stateManager.finalize(mainForm.getValue(), mainForm);
-            // semiDisplayBox.html(null);
-            // displayBox.html(null);
-            mainForm.ui.detach();
-            console.log("UI::DialogBox:done.ui.on->click:mainForm", mainForm, mainForm.getValue());
-          }
-          else{
-            $(document).trigger('Error', ['Incorrect Input', 'Please check the input provided for selection, and resubmit the form']);
-          }
-
-        });
-    
-        drop.ui.on('click', ()=>{
-          boundingBox.hide();
-          stateManager.cancel();
-          mainForm.ui.detach();
-          mainForm = null;
-        });
-    
-        var addForm = this.addForm = function(form, formType=null){
-            form.ui.detach();  
-            // displayBox.children().detach();
-            displayBox.append(form.ui);
-            form.ui.css('margin', 'auto');
-            boundingBox.show();
-            mainForm = form;
-            // console.log("Form", mainForm);
-          
-        }
-    
-      }
-
-      function slider(config){
-        config = config || {};
-        min = config.min || 0;
-        max = config.max || 100;
-        width = config.width || 400;
-        
-        var boundingBox = this.ui = $('<div></div>');
-        var slide = $('<input type="range" min="0">');
-  
-        boundingBox.append(slide);
-      }
-    
-
-      
       function ContextMenu(){
         var boundingBox = this.ui = $('<div></div>');
 
@@ -963,8 +747,8 @@
 
           propertyMenu.append(propertyTable);
           
-          var submit = new button(icons.tick, 18, { backgroundColor: 'lightgreen'});
-          var cancel = new button(icons.cross, 18, { backgroundColor: 'indianred'});
+          var submit = new button(icons.tick, 18, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 18, { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
 
           var controlButtons = $('<div></div>');
           controlButtons.append(submit.ui, cancel.ui);
@@ -1062,8 +846,8 @@
           }
           var formModifierControl = $('<div></div>');
           var removeButton = new button(icons.minus, 16);
-          var tick = new button(icons.tick, 16);
-          var cross = new button(icons.cross, 16);
+          var tick = new button(icons.tick, 16, { tooltip : 'Submit'});
+          var cross = new button(icons.cross, 16,  { tooltip : 'Cancel'});
           formModifierControl.append(removeButton.ui, tick.ui, cross.ui);
           removeButton.ui.hide();
           addLabelForm.append(formModifierControl);
@@ -1342,7 +1126,7 @@
           // Control Buttons
           var toolButtons = $('<div></div>');
           
-          var editButton = new button(icons.pencil, 16);
+          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Surface'});
           var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
           
           toolButtons.append(removeButton.ui);
@@ -1426,8 +1210,8 @@
 
           // Control Button
           var controlButton = $('<div></div>');
-          var submit = new button(icons.tick, 20);
-          var cancel = new button(icons.cross, 20);
+          var submit = new button(icons.tick, 20, { tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 20, { tooltip: 'Cancel'});
           controlButton.append(submit.ui);
           controlButton.append(cancel.ui);
           surfacePropertyBox.append(controlButton);
@@ -1739,7 +1523,7 @@
           var formatted_content = $(svg);
           innerButton.append(formatted_content);
 
-          }
+        }
 
         this.setSVG(svg);
 
@@ -1751,36 +1535,9 @@
         });
 
 
-        // Tool tips will only be created if tooltip description is set during creation
-        var tooltipBox = null
-
+        // setting up tool tip
         if(tooltipText != null ){
-          tooltipBox = $('<div></div>');
-          tooltipBox.text(tooltipText);
-  
-          button.append(tooltipBox);
-          tooltipBox.css({
-            'background-color': 'black',
-            'color': '#fff',
-            'text-align': 'center',
-            'border-radius': '6px',
-            'padding': '4px', 
-            'width' : '120px',
-
-            'font-size':'10px',
-            'font-family':'Arial',
-            
-            'position' : 'absolute',
-            'top': '0%',
-            'left':'110%',
-            'z-index':'100'
-          });
-
-          tooltipBox.hide();
-
-          button.on('hover', ()=>{
-            tooltipBox.toggle();
-          })
+          button.attr('title', tooltipText);
         }
 
         if(hoverable == 'true'){
