@@ -592,7 +592,7 @@ $3Dmol.Parsers = (function() {
       var atoms = [[]];
       var lattice = {};
 
-      var lines = str.replace(/^\s+/, "").split(/[\n\r]/);
+      var lines = str.replace(/^\s+/, "").split(/\r?\n/);
 
       if (lines.length < 3){
         return atoms;
