@@ -67,6 +67,7 @@ $3Dmol.StateManager = (function(){
         selections[id].spec = selectionSpec.spec;
 
       console.log("StateManager::addSelection", selections, sid);
+      render();
       return id;
     }
 
