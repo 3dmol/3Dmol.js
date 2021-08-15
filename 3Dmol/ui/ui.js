@@ -31,18 +31,23 @@
        * @param  {object} config
        */
       function generateUI(config){
+        var modelToolBar = new ModelToolbar();
+        mainParent.append(modelToolBar.ui);
+        setLocation(mainParent, modelToolBar.ui, 'left', 'top');
+        modelToolBar.updateInputLength();
+
         var contextMenu = new ContextMenu();
         mainParent.append(contextMenu.ui);
         setPosition(contextMenu.ui, 100, 100)
         
         var surfaceMenu = new SurfaceMenu();
         mainParent.append(surfaceMenu.ui);
-        setLocation(mainParent, surfaceMenu.ui, 'right', 'top', );
+        setLocation(mainParent, surfaceMenu.ui, 'right', 'top', 0, modelToolBar.ui.height() + 5 );
         
 
         var selectionBox = new SelectionBox(icons.select);
         mainParent.append(selectionBox.ui);
-        setLocation(mainParent, selectionBox.ui, 'left', 'top');
+        setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
 
           // Fixing Context Menu Behaviour
         selectionBox.ui.on('mousedown', ()=>{
@@ -54,6 +59,7 @@
         });
 
         return {
+          modelToolBar : modelToolBar,
           selectionBox : selectionBox,
           contextMenu : contextMenu,
           surfaceMenu : surfaceMenu
@@ -63,11 +69,86 @@
       this.resize = function(){
         var selectionBox = this.tools.selectionBox;
         var surfaceMenu = this.tools.surfaceMenu;
+        var modelToolBar = this.tools.modelToolBar;
 
-        setLocation(mainParent, selectionBox.ui, 'left', 'top');
-        setLocation(mainParent, surfaceMenu.ui, 'right', 'top', );
+        setLocation(mainParent, modelToolBar.ui, 'left', 'top');
+        modelToolBar.updateInputLength();
+        setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
+        setLocation(mainParent, surfaceMenu.ui, 'right', 'top',  0, modelToolBar.ui.height() + 5);
       }
 
+      function ModelToolbar(){
+        var boundingBox = this.ui = $('<div></div>');
+
+        boundingBox.css({
+          'position' : 'relative',
+          'min-width' : '250px'
+        });
+
+        var modelButton = new button(icons.molecule, 20, 'Toggle Model Selection Bar');
+        boundingBox.append(modelButton.ui);
+
+        modelButton.ui.css({
+          'display' : 'inline-block',
+          'top':'3px'
+        });
+
+        var control = {
+          urlType : {
+            active : true,
+            value : null,
+            key : 'Model type'
+          },
+
+          url : {
+            active : true,
+            value : null,
+            key : 'Url'
+          },
+        };
+
+        var surroundingBox = $('<div></div>');
+
+        surroundingBox.css({
+          'display' : 'inline-block',
+          'background' : '#e4e4e4',
+          'padding' : '2px',
+          'border-radius' : '3px'
+        });
+
+        boundingBox.append(surroundingBox);
+
+        var dbs = 'pdb,mmtf,cid'.split(',');
+        var list = this.list = new $3Dmol.UI.Form.ListInput(control.urlType, dbs);
+
+        list.ui.css({
+          'display' : 'inline-block',
+        })
+
+        surroundingBox.append(list.ui);
+
+        var input = this.url = new $3Dmol.UI.Form.Input(control.url);
+        surroundingBox.append(input.ui);
+
+        input.ui.css({
+          'display' : 'inline-block',
+          'min-width' : '100px',
+          'max-width' : '400px',
+          'width' : '50vw',
+        });
+
+        var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'})
+        surroundingBox.append(submitButton.ui);
+
+        this.updateInputLength = function(){
+          var width = input.ui.width();
+          input.setWidth(width - 12);
+        }
+
+        modelButton.ui.on('click', ()=>{
+          surroundingBox.toggle();
+        })
+      }
       /**
        * @function SelectionBox - Draws the box where all the selections on atoms are listed
        * This will be used to modify style for specific set of selection
@@ -1194,10 +1275,43 @@
           labelSurfaceOf.css(defaultTextStyle);
           
           var surfaceGeneratorAtomType = ['self', 'all'];
+          var surfaceGeneratorDesc = {
+            'self' : 'Atoms in the selections will be used to generate the surface',
+            'all' : 'All the atoms will be used to generate the surface'
+          }
           
           var listSurfaceOf = new $3Dmol.UI.Form.ListInput(control.surfaceOf, surfaceGeneratorAtomType);
           
-          surfaceOf.append(labelSurfaceOf, listSurfaceOf.ui);
+          var hintbox = $('<div></div>');
+          hintbox.css({
+            'background-color' : '#e4e4e4',
+            'border' : '1px solid grey',
+            'color' : 'grey',
+            'padding' : '2px',
+            'border-radius' : '3px',
+            'font-family' : 'Arial',
+            'font-size' : '12px',
+            'font-weight' : 'bold',
+            'margin-top' : '3px'
+          });
+
+          hintbox.hide();
+
+          listSurfaceOf.update = function(control){
+            if(control.value == 'self'){
+              hintbox.show();
+              hintbox.text(surfaceGeneratorDesc['self']);
+            }
+            else if( control.value == 'all'){
+              hintbox.show();
+              hintbox.text(surfaceGeneratorDesc['all']);
+            }
+            else {
+              hintbox.hide();
+            }
+          }
+
+          surfaceOf.append(labelSurfaceOf, listSurfaceOf.ui, hintbox);
           surfacePropertyBox.append(surfaceOf);
           
           // Surface For
