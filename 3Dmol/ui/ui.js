@@ -854,8 +854,8 @@
           }
           var formModifierControl = $('<div></div>');
           var removeButton = new button(icons.minus, 16);
-          var tick = new button(icons.tick, 16, { tooltip : 'Submit'});
-          var cross = new button(icons.cross, 16,  { tooltip : 'Cancel'});
+          var tick = new button(icons.tick, 16, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          var cross = new button(icons.cross, 16,  { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
           formModifierControl.append(removeButton.ui, tick.ui, cross.ui);
           removeButton.ui.hide();
           addLabelForm.append(formModifierControl);
@@ -1218,8 +1218,8 @@
 
           // Control Button
           var controlButton = $('<div></div>');
-          var submit = new button(icons.tick, 20, { tooltip : 'Submit'});
-          var cancel = new button(icons.cross, 20, { tooltip: 'Cancel'});
+          var submit = new button(icons.tick, 16, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 16, { backgroundColor: 'lightcoral', tooltip: 'Cancel'});
           controlButton.append(submit.ui);
           controlButton.append(cancel.ui);
           surfacePropertyBox.append(controlButton);
