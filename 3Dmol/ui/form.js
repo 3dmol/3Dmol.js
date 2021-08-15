@@ -205,9 +205,9 @@
                     event.data.parent.update(control);
                 });
 
-                input.on('select', (e)=>{
-                    console.log('Selection in input', e, input, e.target.selectionStart, e.target.selectionEnd, input.val().substring(e.target.selectionStart, e.target.selectionEnd) );
-                });
+                // input.on('select', (e)=>{
+                //     console.log('Selection in input', e, input, e.target.selectionStart, e.target.selectionEnd, input.val().substring(e.target.selectionStart, e.target.selectionEnd) );
+                // });
                 // });
                 
                 
@@ -228,7 +228,7 @@
                     var decimalEntered = false;
 
                     input.on('keydown', function(event){
-                        // event.preventDefault();
+                        event.preventDefault();
 
                         if((event.key.charCodeAt(0) >= "0".charCodeAt(0) && event.key.charCodeAt(0) <= "9".charCodeAt(0)) || event.key == ".") {
 

@@ -162,6 +162,7 @@ $3Dmol.GLModel = (function() {
         "linewidth":{type:"number",gui:true,step:0.1,default:defaultlineWidth},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
+        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validCrossSpec = {
@@ -171,6 +172,7 @@ $3Dmol.GLModel = (function() {
         "color":{type:"color",gui:true},
         "radius":{type:"number",gui:true,step:0.1,default:1,min:0.1},
         "scale":{type:"number",gui:true,step:0.1,default:1,min:0},
+        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validStickSpec = {
@@ -179,6 +181,7 @@ $3Dmol.GLModel = (function() {
         "color":{type:"color",gui:true},
         "radius":{type:"number",gui:true,step:0.1,default:0.25,min:0.1},
         "singleBonds":{type:"boolean",gui:true},
+        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validSphereSpec = {
@@ -187,7 +190,8 @@ $3Dmol.GLModel = (function() {
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
         "radius":{type:"number",gui:true,step:0.1,default:1.5,min:0},
-        "scale":{type:"number",gui:true,step:0.1,default:1.0,min:0.1}
+        "scale":{type:"number",gui:true,step:0.1,default:1.0,min:0.1},
+        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validCartoonSpec = {
