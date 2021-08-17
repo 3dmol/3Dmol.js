@@ -183,6 +183,27 @@
                 var input = this.domElement = $('<input type="text">');
                 boundingBox.append(input);
 
+                var alertBox = $('<div></div>');
+                alertBox.css({
+                    'border' : '1px solid darkred',
+                    'border-radius' : '3px',
+                    'font-family' : 'Arial',
+                    'font-size' : '10px',
+                    'font-weight' : 'bold',
+                    'margin' : '2px',
+                    'margin-left' : '4px',
+                    'padding' : '2px',
+                    'color' : 'darkred',
+                    'background' : 'lightcoral'
+                });
+
+                var alertMessage = {
+                    'invalid-input' : 'Invalid input please check the value entered',
+                }
+                
+                boundingBox.append(alertBox);
+                alertBox.hide();
+
                 this.setWidth = function(width){
                     input.width(width);
                 }
@@ -199,16 +220,25 @@
 
                 // $(document).on('ready', ()=>{
                 input.on('change', { parent:this, control: control }, (event)=>{
-                    control.value = input.val();
+                    inputString = input.val();
+                    
+                    if(inputString[inputString.length - 1] == ',') {
+                        inputString = inputString.slice(0,-1);
+                    }
+
+                    control.value = inputString.split(',');
                     
                     // calling update function 
                     event.data.parent.update(control);
                 });
 
-                // input.on('select', (e)=>{
-                //     console.log('Selection in input', e, input, e.target.selectionStart, e.target.selectionEnd, input.val().substring(e.target.selectionStart, e.target.selectionEnd) );
-                // });
-                // });
+                var selectedText = null;
+                
+                input.on('select', (e)=>{
+                    console.log('Selection in input', e, input, e.target.selectionStart, e.target.selectionEnd, input.val().substring(e.target.selectionStart, e.target.selectionEnd) );
+                    
+                    selectedText = input.val().substring(e.target.selectionStart, e.target.selectionEnd);
+                });
                 
                 
                 this.getValue = ()=>{
@@ -216,122 +246,181 @@
                     return control;
                 }
                 
-                this.error = function(){
-                    $(document).trigger('Error', ["Incorrect Input", "Please enter the input as per the direction"]);  
+                var error = this.error = function(msg){
+                    alertBox.show();
+                    alertBox.text(msg)
                 }
 
                 this.setValue = function(val){
                     input.val(val)
                 }
 
-                this.validateOnlyNumber = function(){
-                    var decimalEntered = false;
+                var validationType = this.validationType = 'text';
 
-                    input.on('keydown', function(event){
-                        event.preventDefault();
+                function checkInputFloat(){
+                    var inputString = input.val();
+                    
+                    var dots = inputString.match(/\./g) || [];
+                    var checkString = inputString.replaceAll(/\./g, '').replaceAll(/[0-9]/g, '');
 
-                        if((event.key.charCodeAt(0) >= "0".charCodeAt(0) && event.key.charCodeAt(0) <= "9".charCodeAt(0)) || event.key == ".") {
+                    console.log('Check Float', dots, checkString)
+                    if(dots.length > 1){ return false };
 
-                            if(decimalEntered && event.key == ".") {
-                                console.log('Again Entering decimal');
-                                return;
-                            }
-                            $(this).val( $(this).val() + event.key);
-                            // event.preventDefault();
-                            console.log("Input Number Only", event.key.charCodeAt(), event.key);
-                            if(event.key == ".")
-                                decimalEntered = true;
+                    if(checkString != '') return false;
+
+                    if(isNaN(parseFloat(inputString))){
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+
+                function checkInputNumber(){
+                    var inputString = input.val();
+
+                    var checkString = inputString.replaceAll(/[0-9]/g, '');
+
+                    if(checkString != '') return false;
+
+                    if(isNaN(parseInt(inputString))){
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+
+                // Parse Input Range Functions
+
+                // Checks only number, comma and hyphen present
+                function checkRangeTokens(inputString){
+                    var finalString = inputString.replaceAll(',','').replaceAll('-','').replaceAll(/[0-9]/g, '').replaceAll(' ', '');
+
+                    console.log('Check string in input range', finalString );
+
+                    if(finalString == '')
+                        return true;
+                    else 
+                        return false;
+                }
+
+                function checkList(inputString, submit=false){
+                    inputString = inputString.replaceAll(' ', '');
+                    
+                    if(inputString[inputString.length - 1] == ',') {
+                        inputString = inputString.slice(0,-1);
+                    }
+
+
+                    var rangeList = inputString.split(',');
+
+                    // If dublicate comma return false;
+                    if(/,,/g.exec(inputString)) return false;
+
+                    // If first element not a number return false;
+                    if(isNaN(parseInt(rangeList[0]))) return false;
+
+                    var validRangeList = rangeList.map((rangeInput)=>{
+                        return checkRangeInput(rangeInput);
+                    });
+
+                    console.log("Checking Range List", rangeList, validRangeList);
+                    return validRangeList.find( (e)=>{ return e == false}) == undefined ? true : false; 
+                }
+
+                function checkRangeInput(inputString, submit=false){  
+                    var rangeInputs = inputString.split('-');
+                    if(rangeInputs.length > 2){
+                        return false;
+                    }
+                    else {
+                        if(rangeInputs.length == 0){
+                            return true;
                         }
-                        else if(event.key == "Backspace"){
-                            var val = $(this).val();
-                            var toRemove = val.slice(-1);
-                            if(toRemove == '.')
-                                decimalEntered = false;
-                            $(this).val(val.slice(0,-1));
+                        else if (rangeInputs.length == 1){
+                            if(isNaN(parseInt(rangeInputs[0])))
+                                return false;
+                            else 
+                                return true;
+                        }
+                        else if (rangeInputs.length == 2){
+                            if(isNaN(parseInt(rangeInputs[0])) || isNaN(parseInt(rangeInputs[1])))
+                                return false;
+                            else 
+                                return true;
+                        }
+                        else 
+                            return false;
+                    }
+                }
+
+                var checkInput = this.checkInput = function(){
+                    var inputString = input.val();
+                    console.log("CheckInput", this.validationType, validationType)
+                    
+                    if(validationType == 'number'){
+                        if(checkInputNumber()){
+                            alertBox.hide();
+                            return true;
+                        }else{
+                            error(alertMessage['invalid-input']);
+                            return false;
+                        }
+                    }
+                    else if(validationType == 'float'){
+                        if(checkInputFloat()){
+                            alertBox.hide();
+                            return true;
+                        }else{
+                            error(alertMessage['invalid-input']);
+                            return false;
+                        }
+                    }
+                    else if(validationType == 'range') {
+                        if(checkRangeTokens(inputString)){
+                            if(checkList(inputString)){
+                                alertBox.hide();
+                                return true;
+                            }
+                            else {
+                                error(alertMessage['invalid-input']);
+                                return false;   
+                            }
                         }
                         else{
-                            console.log('Not a number in the input');
+                            error(alertMessage['invalid-input']);
+                            return false;
                         }
 
-                        //  var text = $(this).val().replace(/[^\d]+/, "");
-                        // $(this).val(text);
-                        input.trigger('change')
-                        console.log("Text", control.value);
+                    }
+                    else {
+                        return true;
+                    }
+                }
+
+                this.validateOnlyNumber = function(floatType=false){
+                    if(floatType){
+                        validationType = 'float';
+                    } else {
+                        validationType = 'number';
+                    }
+
+                    input.on('keydown keyup paste cut', function(event){
+                        console.log('Validation Type', validationType);
+                        checkInput();
                     });
                 }
 
+
                 this.validateInputRange = function(){
-                    var dashEntered = false;
-                    var commaEntered = false;
-                    input.on('keydown', function(event){
-                        // event.preventDefault();
-                        
-                        if( $(this).val().length < 1 && (event.key == '-' || event.key == ',')){
-                            console.log('Cannnot Enter "-" or "," at the beginning');
-                            return;
-                        }
+                    validationType = 'range';
 
-                        if((event.key.charCodeAt(0) >= "0".charCodeAt(0) && event.key.charCodeAt(0) <= "9".charCodeAt(0)) || event.key == '-' || event.key == ',') {
-
-                            if(dashEntered && event.key == "-") {
-                                console.log('Again dash entered');
-                                return;
-                            }
-                            else if(dashEntered && event.key != "-" && event.key != ","){
-                                dashEntered = false;
-                            }
-                            else if(dashEntered && event.key == ",") {
-                                return;
-                            }
-
-                            if(commaEntered && event.key == ",") {
-                                console.log('Again comma entered');
-                                return;
-                            }
-                            else if(commaEntered && event.key != "," && event.key != "-"){
-                                commaEntered = false;
-                            }
-                            else if(commaEntered && event.key == "-") {
-                                return;
-                            }
-
-                            $(this).val( $(this).val() + event.key);
-                            // event.preventDefault();
-                            console.log("Input Number Only", event.key.charCodeAt(), event.key);
-                            if(event.key == "-")
-                                dashEntered = true;
-
-                            if(event.key == ",")
-                                commaEntered = true;
-                        }
-                        else if(event.key == "Backspace"){
-                            var val = $(this).val();
-                            var toRemove = val.slice(-1);
-                            var beforeToRemove = val.slice(-2);
-
-                            if(beforeToRemove == '-')
-                                dashEntered = true;
-                            else if (toRemove == '-')
-                                dashEntered = false;
-
-                            if(beforeToRemove == ',')
-                                commaEntered = true;
-                            else if (toRemove == ',')
-                                commaEntered = false;
-
-
-                            $(this).val(val.slice(0,-1));
-                        }
-                        else{
-                            console.log('Not a number in the input');
-                        }
-
-                        //  var text = $(this).val().replace(/[^\d]+/, "");
-                        // $(this).val(text);
-                        input.trigger('change')
-                        console.log("Text", control.value);
-
+                    input.on('keydown keyup paste cut', ()=>{
+                        console.log('Validation Type', validationType);
+                        checkInput();
                     });
+
                 }
 
                 this.isEmpty = function(){
@@ -341,7 +430,7 @@
                 }
 
                 this.validate = function(){
-                    if((control.active == true && (control.value != null && control.value != "")) || (control.active == false)){
+                    if( (control.active == true && control.value != null && control.value != "" && checkInput()) || (control.active == false)){
                         input.css('box-shadonw', 'none');
                         console.log("Form::Input:validate", 'success', control);
                         return true
@@ -627,7 +716,7 @@
                         else{
                             this.placeholder = new Form.Input(control);
                             this.placeholder.ui.attr('type', 'text');
-                            this.placeholder.validateOnlyNumber();
+                            this.placeholder.validateOnlyNumber(specs[key].floatType);
                         }
                     }
                     else if(specs[key].type == 'array_range'){

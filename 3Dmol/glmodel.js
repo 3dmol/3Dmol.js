@@ -112,9 +112,9 @@ $3Dmol.GLModel = (function() {
 
     GLModel.validAtomSpecs = {
         "resn":{type:"string",valid :true, prop: true}, // Parent residue name
-        "x":{type:"number",valid:false,step:0.1, prop: true}, // Atom's x coordinate
-        "y":{type:"number",valid:false,step:0.1, prop: true}, // Atom's y coordinate
-        "z":{type:"number",valid:false,step:0.1, prop: true}, // Atom's z coordinate
+        "x":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's x coordinate
+        "y":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's y coordinate
+        "z":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's z coordinate
         "color":{type:"color",gui:false}, // Atom's color, as hex code
         "surfaceColor":{type:"color",gui:false}, // Hex code for color to be used for surface patch over this atom
         "elem":{type:"element",gui:true, prop: true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
@@ -130,14 +130,14 @@ $3Dmol.GLModel = (function() {
         "singleBonds":{type:"boolean",valid:false}, // true if this atom forms only single bonds or no bonds at all
         "bondOrder":{type:"array",valid:false}, // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
         "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
-        "b":{type:"number",valid:false,step:0.1, prop: true}, // Atom b factor data
+        "b":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom b factor data
         "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
         "clickable":{type:"boolean",valid:false, gui:true}, // Set this flag to true to enable click selection handling for this atom
         "contextMenuEnabled":{type:"boolean",valid:false, gui:false}, // Set this flag to true to enable click selection handling for this atom
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
-        "reflectivity":{type:"number",gui:false,step:0.1}, //for describing the reflectivity of a model
+        "reflectivity":{type:"number", floatType : true,gui:false,step:0.1}, //for describing the reflectivity of a model
         "altLoc":{type:"invalid",valid:false}, //alternative location, e.g. in PDB
         "sym":{type:'number',gui:false}, //which symmetry
     };
@@ -145,7 +145,7 @@ $3Dmol.GLModel = (function() {
     //type is irrelivent here becuase htey are are invalid
     var validExtras ={  // valid atom specs are ok too
         "model":{type:"string",valid :false}, // a single model or list of models from which atoms should be selected
-        "bonds":{type:"number",valid :false, gui:true}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
+        "bonds":{type:"number", valid :false, gui:true}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
         "predicate":{type:"string",valid :false}, // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
         "invert":{type:"boolean",valid :false, gui:true}, // if set, inverts the meaning of the selection
         "byres":{type:"boolean",valid :false, gui:true}, // if set, expands the selection to include all atoms of any residue that has any atom selected
@@ -159,29 +159,29 @@ $3Dmol.GLModel = (function() {
 
     var validLineSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:true,step:0.1,default:defaultlineWidth},
+        "linewidth":{type:"number", floatType : true,gui:true,step:0.1,default:defaultlineWidth},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validCrossSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:false,step:0.1,default:defaultlineWidth,min:0},//deprecated
+        "linewidth":{type:"number", floatType : true,gui:false,step:0.1,default:defaultlineWidth,min:0},//deprecated
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:1,min:0.1},
-        "scale":{type:"number",gui:true,step:0.1,default:1,min:0},
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0.1},
+        "scale":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validStickSpec = {
         "hidden":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:0.25,min:0.1},
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:0.25,min:0.1},
         "singleBonds":{type:"boolean",gui:true},
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validSphereSpec = {
@@ -189,9 +189,9 @@ $3Dmol.GLModel = (function() {
         "singleBonds":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:1.5,min:0},
-        "scale":{type:"number",gui:true,step:0.1,default:1.0,min:0.1},
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:1.5,min:0},
+        "scale":{type:"number", floatType : true,gui:true,step:0.1,default:1.0,min:0.1},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validCartoonSpec = {
@@ -201,9 +201,9 @@ $3Dmol.GLModel = (function() {
         "ribbon":{type:"boolean",gui:true},
         "hidden":{type:"boolean",gui:true},
         "tubes":{type:"boolean",gui:true},
-        "thickness":{type:"number",gui:true,step:0.1,default:1,min:0},
-        "width":{type:"number",gui:true,step:0.1,default:1,min:0},
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "thickness":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "width":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     GLModel.validAtomStyleSpecs = {
@@ -217,24 +217,24 @@ $3Dmol.GLModel = (function() {
     };
 
     GLModel.validSurfaceSpecs = {
-        "opacity":{type:"number",gui:true,step:0.01,default:1,min:0,max:1},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.01,default:1,min:0,max:1},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "voldata":{type:"number",gui:false},
-        "volscheme":{type:"number",gui:false},
+        "voldata":{type:"number", floatType : true,gui:false},
+        "volscheme":{type:"number", floatType : true,gui:false},
         "map":{type:"number",gui:false}
     };
 
     GLModel.validLabelResSpecs = {
         "font":{type:"string",gui:true},
-        "fontSize":{type:"number",gui:true,step:1,default:12,min:1},
+        "fontSize":{type:"number", floatType : true,gui:true,step:1,default:12,min:1},
         "fontColor":{type:"color",gui:true},
-        "fontOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
-        "borderThickness":{type:"number",gui:true,step:0.1,default:1,min:0},
+        "fontOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
+        "borderThickness":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
         "borderColor":{type:"color",gui:true},
-        "borderOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "borderOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
         "backgroundColor":{type:"color",gui:true},
-        "backgroundOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "backgroundOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
         "position":{type:"array",valid:false},
         "inFront":{type:"boolean",gui:true},
         "showBackground":{type:"boolean",gui:true},
