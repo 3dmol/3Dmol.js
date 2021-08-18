@@ -1,7 +1,9 @@
 <style>
 .page-title {visibility: hidden; height: 0px; width: 0px;} //hack to get rid of Index
 </style>
+
 <script src="https://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+
 # 3Dmol.js
 
 <div  style="float: right; height: 250px; width: 250px; position: relative;" class='viewer_3Dmoljs' data-pdb='1UBQ' data-backgroundcolor='0xffffff' data-style='{"cartoon":{"color": "spectrum"}}'></div>
@@ -14,18 +16,18 @@
   }, 50);
 </script>
 
-
 ## Overview
 
 3Dmol.js is an object-oriented, WebGL based JavaScript library for online molecular visualization - No Java required!
 With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications. Features include:
- * support for pdb, sdf, mol2, xyz, and cube formats
- * parallelized molecular surface computation
- * sphere, stick, line, cross, cartoon, and surface styles
- * atom property based selection and styling
- * labels
- * clickable interactivity with molecular data
- * geometric shapes including spheres and arrows
+
+* support for pdb, sdf, mol2, xyz, and cube formats
+* parallelized molecular surface computation
+* sphere, stick, line, cross, cartoon, and surface styles
+* atom property based selection and styling
+* labels
+* clickable interactivity with molecular data
+* geometric shapes including spheres and arrows
 
 ## Getting Started
 
@@ -36,13 +38,12 @@ Viewers can be quickly embedded in any HTML document using just two lines of sou
 
 #### Mouse Controls
 
-Movement | Mouse Input | Touch Input
----------------|----------------|----------------
-Rotation |    Primary Mouse Button |  Single touch
-Translation |     Middle Mouse Button or Ctrl+Primary |  Triple touch
-Zoom |  Scroll Wheel or Second Mouse Button or Shift+Primary |  Pinch (double touch)
-Slab |  Ctrl+Second |  Not Available
-
+| Movement    | Mouse Input                                          | Touch Input          |
+| ----------- | ---------------------------------------------------- | -------------------- |
+| Rotation    | Primary Mouse Button                                 | Single touch         |
+| Translation | Middle Mouse Button or Ctrl+Primary                  | Triple touch         |
+| Zoom        | Scroll Wheel or Second Mouse Button or Shift+Primary | Pinch (double touch) |
+| Slab        | Ctrl+Second                                          | Not Available        |
 
 ## Using 3Dmol.js
 
@@ -59,18 +60,21 @@ The library is available as a single minified JavaScript file bundled with jQuer
 ```
 
 An un-minified file is also provided for debugging purposes:
+
 ```
 {@lang xml}<script src="https://3Dmol.csb.pitt.edu/build/3Dmol.js"></script>
 ```
 
 There is also an unminified version provided without jQuery for use when compiling your own minified libraries:
+
 ```
 {@lang xml}<script src="https://3Dmol.csb.pitt.edu/build/3Dmol-nojquery.js"></script>
 ```
 
-#### Method 2: using a CDN 
+#### Method 2: using a CDN
 
 The files hosted by 3Dmol.csb.pitt.edu closely track the development version and so will change frequently. If you desire more stability you may copy the files into your own project or, alternatively, we host release snapshots on the <a href="https://cdnjs.com/libraries/3Dmol">cdnjs</a> content delivery network (note that you must specify the release version).
+
 ```
 {@lang xml}<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.4.0/3Dmol-min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.4.0/3Dmol-nojquery.js"></script>
@@ -113,14 +117,17 @@ console.log($3Dmol);
 //can do things with $3Dmol here
 })});
 ```
+
 or if you use an expose-loader to make jquery globally visible you can use flat imports.
 
-```{@lang javascript}
+```{@lang
 import 'jquery';
 import * as $3Dmol from '3dmol/build/3Dmol-nojquery.js';
 ```
+
 with the following in your webpack config file:
-```        test: require.resolve('jquery'),
+
+```test:
         loader: 'expose-loader',
         options: {
           exposes: ['$', 'jQuery'],

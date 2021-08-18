@@ -16,10 +16,14 @@ $3Dmol.autoload=function(viewer,callback){
             var datauri = [];
             var datatypes = [];
             var uri = '';
+            var showUI = false;
             if(viewerdiv.css('position') == 'static') {
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
             }
+
+            if(viewerdiv.data('ui'))
+                showUI = viewerdiv.data('ui');
 
             type = null;
             if (viewerdiv.data("pdb")) {
@@ -150,7 +154,9 @@ $3Dmol.autoload=function(viewer,callback){
                     config.defaultcolors = config.defaultcolors || $3Dmol.rasmolElementColors;
                     if(config.backgroundColor === undefined) config.backgroundColor = bgcolor;
                     if(config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;                     
+                    config.ui = showUI;
                     glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, config);
+
                 } else {
                     glviewer.setBackgroundColor(bgcolor, bgalpha);
                 } 

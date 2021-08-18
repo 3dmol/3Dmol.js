@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>3dmol UI</title>
+  </head>
+  <body>
+    <script src="../build/3Dmol.js" async></script>
+    <div style="height: 90vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true'></div>
+
+    <script type="text/javascript">
+      $3Dmol = (function(window) {
+
+          var my = window.$3Dmol || {};
+
+          return my;
+
+      })(window);
+
+
+
+    </script>
+  </body>
+</html>

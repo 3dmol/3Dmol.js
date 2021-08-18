@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Testing 3D for non-orthogonal boxes</title>
+    <script src="../build/3Dmol.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div class="viewer" id="boxi"></div>
+    <style media="screen">
+        .viewer {
+          position: relative;
+          height: 400px;
+          width: 400px;
+
+        }
+    </style>
+    <script type="text/javascript">
+
+      $(function(){
+        var element = $('#boxi');
+        var config = { backgroundColor: 'lightgrey'}
+        var viewer = $3Dmol.createViewer(element, config);
+        // $.get('test_structs/h-bn.xyz', function(data){
+        //   viewer.addModel(data, "xyz");
+        //   viewer.setStyle({}, {stick:{}});
+        //   viewer.zoomTo();
+        //   viewer.render();
+        // });
+        var callback = function() {};
+
+        $.get('test_structs/info_box.cube', function(data){
+          viewer.addModel(data, "cube");
+          viewer.setStyle({}, {stick:{}});
+          viewer.addUnitCell();
+          var voldata = new $3Dmol.VolumeData(data, "cube");
+          viewer.addIsosurface(voldata, {isoval: 0.05, color: "blue", alpha: 0.95, smoothness: 10});
+          // viewer.rotate(90);
+          viewer.zoomTo();
+          viewer.render(callback);
+        }, 'text');
+
+        // $.get('test_structs/h-bn.cube', function(data){
+        $.get('test_structs/info_box.cube', function(data){
+        // //$.get('test_structs/benzene-homo.cube', function(data){
+          var voldata = new $3Dmol.VolumeData(data, "cube");
+          if(viewer.hasVolumetricRender()) {
+            viewer.addVolumetricRender(voldata, {transferfn: [
+                                                              {color: "blue", opacity: 0.01, value: 0.01},
+                                                              {color: "blue", opacity: .5, value: 0.1},
+
+                                                            ]
+                                                }
+                                       );
+          } else {
+            viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});
+            viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10});
+          }
+
+          viewer.setStyle({}, {stick:{}});
+          viewer.addUnitCell();
+          viewer.zoomTo();
+          viewer.render(callback);
+
+        }, 'text');
+      });
+
+    </script>
+
+  </body>
+</html>
