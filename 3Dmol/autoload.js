@@ -186,6 +186,11 @@ $3Dmol.autoload=function(viewer,callback){
                     uri = datauri[i]; //this is where the moldata came from
                     var type = viewerdiv.data("type") || viewerdiv.data("datatype") || datatypes[i]; 
                     glviewer.addModel(moldata, type, options);
+                    if(showUI){
+                        var modelName = viewerdiv.data(datatypes[i]);
+
+                        glviewer.setModelTitle(modelName);
+                    }
                     i += 1;
                     if(i < datauri.length) {
                         $.get(datauri[i], process, 'text');

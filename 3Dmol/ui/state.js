@@ -384,6 +384,10 @@ $3Dmol.StateManager = (function(){
       // Create Surface UI
     };
 
+    this.setModelTitle = function(title){
+      this.ui.tools.modelToolBar.setModel(title);
+    }
+
     canvas.on('click', ()=>{
       if(this.ui.tools.contextMenu.hidden == false){
         this.ui.tools.contextMenu.hide();
