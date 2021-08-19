@@ -143,6 +143,7 @@ $3Dmol.autoload=function(viewer,callback){
                     glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
                     if(showUI){
                         glviewer.loadSurface('VDW', sel, sty);
+                        console.log(sty);
                     }
                 }
                 for(i = 0; i < labels.length; i++) {

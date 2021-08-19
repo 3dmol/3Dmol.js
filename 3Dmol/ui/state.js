@@ -333,12 +333,18 @@ $3Dmol.StateManager = (function(){
         selId = this.addSelection(selSpec);
         
       }
-      var styleId = this.addStyle(styleSpec, selId);
 
+      var styleId = null;
+
+      if(Object.keys(styleSpec).length != 0){
+        styleId = this.addStyle(styleSpec, selId);
+      }
+
+      this.ui.tools.selectionBox.editSelection(selId, selSpec, styleId, styleSpec);
+      
       console.log('StateManager::Creating Selection and Style', selId, styleId, selections);
 
       // creating selection and style 
-      this.ui.tools.selectionBox.editSelection(selId, selSpec, styleId, styleSpec);
     };
 
     this.createSurface = function(surfaceType, sel, style){
@@ -347,8 +353,10 @@ $3Dmol.StateManager = (function(){
       if(selId == null){
         selId = this.addSelection(selSpec);
 
-        // Create UI for selection 
       }
+      this.ui.tools.selectionBox.editSelection(selId, sel, null);
+
+      var surfaceType = Object.keys(style)[0];
 
       var surfaceInput = {
         surfaceType : {
@@ -356,7 +364,7 @@ $3Dmol.StateManager = (function(){
         },
 
         surfaceStyle : {
-          value : style,
+          value : style[surfaceType],
         },
 
         surfaceOf : {
@@ -370,7 +378,9 @@ $3Dmol.StateManager = (function(){
 
       var surfId = this.addSurface(surfaceInput)
 
-      console.log('StateManager::Creating Surface', surfId, selId, surfaces);
+      this.ui.tools.surfaceMenu.addSurface(surfId, surfaceInput);
+
+      console.log('StateManager::Creating Surface', style, surfId, selId, surfaces);
       // Create Surface UI
     };
 

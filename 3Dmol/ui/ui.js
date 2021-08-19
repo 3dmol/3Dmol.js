@@ -536,13 +536,15 @@
             selections.append(selection.ui);
           }
 
-          selection.addStyle(id, styleId, styleSpec);
+          if(styleId != null){
+            selection.addStyle(id, styleId, styleSpec);
+          }
+
           console.log(id, selSpec, styleId, styleSpec, selections.children());
 
         }
       }
-
-      
+   
       /**
        * @function StyleBox creates styleBox for listing out different styles for a particular selection
        * @return {Object} Jquery dom object
@@ -1536,6 +1538,16 @@
           //   listSurfaceFor.updateList(selectionListElement);
           //   listSurfaceOf.updateList(selectionListElement);
           // });
+          function finalize(id){
+            // element properties
+            surfaceBox.data('surf-id', id);
+                
+            heading.text('surf#' + id);
+
+            header.show();
+            toolButtons.editMode = true;
+            surfacePropertyBox.hide();
+          }
 
           // Submit 
           submit.ui.on('click', {}, function(){
@@ -1549,14 +1561,7 @@
                 var id = stateManager.addSurface(control);
                 control.id = id;
 
-                // element properties
-                surfaceBox.data('surf-id', id);
-                
-                heading.text('surf#' + id);
-
-                header.show();
-                toolButtons.editMode = true;
-                surfacePropertyBox.hide();
+                finalize(id);
 
                 surfaces.push(this);
                 _editingForm = false;
@@ -1595,6 +1600,22 @@
             }
           });
 
+          this.editSurface = function(id, surfaceSpec){
+            finalize(id);
+            listSurfaceType.setValue(surfaceSpec.surfaceType.value);
+            formSurfaceStyle.setValue(surfaceSpec.surfaceStyle.value);
+            listSurfaceOf.setValue(surfaceSpec.surfaceOf.value);
+            listSurfaceFor.setValue(surfaceSpec.surfaceFor.value);
+
+            listSurfaceFor.getValue();
+            listSurfaceOf.getValue();
+            listSurfaceType.getValue();
+            formSurfaceStyle.getValue();
+
+            console.log('New Value', control, listSurfaceFor.getValue(), listSurfaceOf.getValue(), listSurfaceType.getValue(), formSurfaceStyle.getValue());
+
+          }
+
         }
 
         // Functionality
@@ -1624,6 +1645,16 @@
         this.empty = function(){
           newSurfaceSpace.empty();
           _editingForm = false;
+        }
+
+        this.addSurface = function(id, surfaceSpec){
+          console.log('Addting surface', id, surfaceSpec);
+          
+          var newSurface = new Surface();
+          newSurfaceSpace.append(newSurface.ui);
+
+          newSurface.editSurface(id, surfaceSpec);
+
         }
       }
 

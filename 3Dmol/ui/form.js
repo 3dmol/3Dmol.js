@@ -183,7 +183,7 @@
                 this.validate = function(){
                     if(control.value == 'select' || control.value == null){
                         (this.showAlertBox)? failMessage.show() : null ;
-                        boundingBox.css({
+                        select.css({
                             'box-shadow' : '0px 0px 2px red'
                         });
                         return false;
@@ -199,7 +199,26 @@
 
                 this.setValue = function(val){
                   if( listElements.indexOf(val) != -1){
+                    select.empty();
+                    var defaultOption = $('<option></option>');
+                    defaultOption.text('select');
+
+                    itemList.forEach((item)=>{
+                        var option = $('<option></option>');
+                        option.text(item);
+                        option.attr('value', item );
+                        select.append(option);
+
+                        if(val == item){
+                            option.prop('selected', true);
+                        }
+                    });
                     
+                    control.value = select.children('option:selected').val();
+                    console.log("List Type Input", control);
+                  }
+                  else {
+                      console.log('Incorrect value used to set', val);
                   }
                 }
 
