@@ -199,10 +199,11 @@
 
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
-        showArea.css('width', '162px');
+        // showArea.css('width', '162px');
 
-        // scrollBox.css('max-height', HEIGHT*0.8);
-        // scrollBox.css('overflow', 'hidden');
+        scrollBox.css('max-height', HEIGHT*0.8);
+        scrollBox.css('overflow-y', 'auto');
+        scrollBox.css('overflow-x', 'visible');
         
         // selections.css('max-height', HEIGHT*0.8);
         // selections.css('overflow', 'auto');
@@ -234,6 +235,7 @@
             'border-radius' : '6px',
             'margin-bottom' : '3px',
             'position':'relative',
+            'width':'156px'
           });
 
           var header = $('<div></div>');
@@ -268,6 +270,8 @@
           var parameters = $('<div></div>');
           boundingBox.append(parameters);
 
+          var styleHolder = $('<div></div>');
+          
           removeButton.ui.on('click', function(){
             stateManager.removeSelection(sid);
             boundingBox.detach();
@@ -294,11 +298,11 @@
           var styleBox = new StyleBox();
 
           var showStyle = false;
-          boundingBox.append(styleBox.ui);
+          styleHolder.append(styleBox.ui);
           styleBox.ui.css({
-            'position' : 'absolute',
-            'left' : '100%',
-            'top' : 0,
+            'position' : 'static',
+            // 'left' : '0',
+            'width' : 'px',
             'border-radius' : '4px'
           });
 
@@ -333,7 +337,7 @@
           parameters.append(alertBox.ui);
           
           parameters.append(submitControls);
-
+          boundingBox.append(styleHolder);
           
           allCheckBox.update = function(){
             selectionSpecForm.ui.toggle();
@@ -347,6 +351,7 @@
             parameters.hide();
             showStyle = true;
             styleBox.setSid(id);
+            styleBox.ui.show();
           }
 
           function checkAndAddSelection(sid = null){
@@ -411,17 +416,36 @@
             }
           });
 
-          boundingBox.on('mouseenter', ()=>{
+          boundingBox.on('mouseenter', (e)=>{
             if(showStyle){
-              styleBox.ui.show();
+              // styleBox.ui.show();
+              // console.log('show style box',e, e.target);
+              // xparent = boundingBox.offset().left - parseInt(boundingBox.css('padding')) - 2 + boundingBox.width();
+              // yparent = boundingBox.offset().top - parseInt(boundingBox.css('padding')) - parseInt(boundingBox.css('margin-bottom')) - 1;
+              
+              // setPosition(styleBox.ui, xparent, yparent);
+              // console.log('Entering Selection');
             }
           });
 
-          boundingBox.on('mouseleave', ()=>{
-            if(showStyle){
-              styleBox.ui.hide();
-            }
-          });
+          // styleBox.ui.on('mouseenter', (e)=>{
+          //   if(showStyle){
+          //     console.log('Entering Style');
+          //   }
+          // });
+
+          // styleBox.ui.on('mouseleave', (e)=>{
+          //   if(showStyle){
+          //     styleBox.ui.hide();
+          //     console.log('Exiting Style')
+          //   }
+          // });
+
+          // styleBox.ui.on('mouseleave', (e)=>{
+          //   if(showStyle){
+          //     console.log('Exiting Selection');
+          //   }
+          // });
 
           boundingBox.on('keyup', (e)=>{
             if(e.key == 'Enter'){
@@ -498,15 +522,15 @@
 
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
-        showArea.css('width', '162px');
+        // showArea.css('width', '162px');
         showArea.css('background-color', '#a4a4a4')
         showArea.css('border-radius', '4px');
 
-        scrollBox.css('max-height', HEIGHT*0.8);
+        // scrollBox.css('max-height', HEIGHT*0.8);
         scrollBox.css('overflow', 'hidden');
         
-        styles.css('max-height', HEIGHT*0.8);
-        styles.css('overflow', 'auto');
+        // styles.css('max-height', HEIGHT*0.8);
+        // styles.css('overflow', 'auto');
         styles.css('box-sizing', 'content-box');
 
 
