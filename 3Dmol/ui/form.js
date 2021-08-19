@@ -104,6 +104,7 @@
 
                 boundingBox.append(select);
 
+                var showAlertBox = this.showAlertBox = true;
                 var failMessage = $('<div></div>');
                 failMessage.text('Please select some value');
                 failMessage.css({
@@ -128,13 +129,23 @@
                     return control;
                 }
 
+                // this.preventAlertBox = function(){
+                //     show
+                // }
+
                 this.validate = function(){
                     if(control.value == 'select' || control.value == null){
-                        failMessage.show();
+                        (this.showAlertBox)? failMessage.show() : null ;
+                        boundingBox.css({
+                            'box-shadow' : '0px 0px 2px red'
+                        });
                         return false;
                     }
                     else{
                         failMessage.hide();
+                        boundingBox.css({
+                            'box-shadow' : 'none'
+                        });
                         return true;
                     }
                 }
@@ -174,6 +185,8 @@
                 var boundingBox = $('<div></div>');
                 // surroundingBox.append(label);
                 surroundingBox.append(boundingBox);
+
+                var validationType = this.validationType = 'text';
 
                 surroundingBox.css({
                     'width' : '100%',
@@ -226,7 +239,12 @@
                         inputString = inputString.slice(0,-1);
                     }
 
-                    control.value = inputString.split(',');
+                    if(validationType == 'range'){
+                        control.value = inputString.split(',');
+                    }
+                    else {
+                        control.value = inputString;
+                    }
                     
                     // calling update function 
                     event.data.parent.update(control);
@@ -255,7 +273,7 @@
                     input.val(val)
                 }
 
-                var validationType = this.validationType = 'text';
+                
 
                 function checkInputFloat(){
                     var inputString = input.val();
@@ -431,7 +449,7 @@
 
                 this.validate = function(){
                     if( (control.active == true && control.value != null && control.value != "" && checkInput()) || (control.active == false)){
-                        input.css('box-shadonw', 'none');
+                        input.css('box-shadow', 'none');
                         console.log("Form::Input:validate", 'success', control);
                         return true
                     }

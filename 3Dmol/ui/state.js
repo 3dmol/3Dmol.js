@@ -32,10 +32,6 @@ $3Dmol.StateManager = (function(){
     // console.log('')
     // Selection Handlers
     var selections = {};
-    var currentSelection = null;
-    var currentForm = '';
-    var currentStyles = null;
-    var tempStyle = null;
 
     // Surface handlers
     var surfaces = {};
@@ -276,12 +272,33 @@ $3Dmol.StateManager = (function(){
       this.ui.tools.contextMenu.hide();
     }
 
+    this.addModel = function(modelDesc){
+      glviewer.removeAllModels();
+      glviewer.removeAllSurfaces();
+      glviewer.removeAllLabels();
+      glviewer.removeAllShapes();
+
+      var query = modelDesc.urlType.value + ':' + modelDesc.url.value;
+      $3Dmol.download(query, glviewer, {}, ()=>{
+        this.ui.tools.modelToolBar.setModel(modelDesc.url.value.toUpperCase());
+      });
+
+      // Remove all Selections
+      selections = {};
+      surfaces = {};
+      atomLabel = {};
+      labels = {};
+
+      // Reset UI
+      this.ui.tools.selectionBox.empty();
+      this.ui.tools.surfaceMenu.empty();
+    }
+
     canvas.on('click', ()=>{
       if(this.ui.tools.contextMenu.hidden == false){
         this.ui.tools.contextMenu.hide();
       }
     });
-
     
     // Setting up UI generation 
     this.showUI = function(){

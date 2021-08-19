@@ -49,7 +49,7 @@
         mainParent.append(selectionBox.ui);
         setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
 
-          // Fixing Context Menu Behaviour
+        // Fixing Context Menu Behaviour
         selectionBox.ui.on('mousedown', ()=>{
           stateManager.exitContextMenu();
         });
@@ -80,12 +80,15 @@
       function ModelToolbar(){
         var boundingBox = this.ui = $('<div></div>');
 
+        
+
         boundingBox.css({
           'position' : 'relative',
           'min-width' : '250px'
         });
 
-        var modelButton = new button(icons.molecule, 20, 'Toggle Model Selection Bar');
+        
+        var modelButton = new button(icons.molecule, 20, {tooltip : 'Toggle Model Selection Bar'} );
         boundingBox.append(modelButton.ui);
 
         modelButton.ui.css({
@@ -118,17 +121,47 @@
 
         boundingBox.append(surroundingBox);
 
+        var currentModelBox = $('<div></div>');
+        currentModelBox.css({
+          
+        });
+
+        var currentModel = $('<div></div>');
+        currentModel.css({
+          'display' : 'inline-block',
+          'font-family':'Arial',
+          'font-size':'16px',
+          'font-weight': 'bold',
+          'padding' : '3px'
+        });
+
+        currentModelBox.append(currentModel);
+
+        var changeButton = new button(icons.change, 20, { tooltip : 'Change Model', backgroundColor : 'white', bfr : 0.5});
+        changeButton.ui.css({
+          'display' : 'inline-block',
+          'margin-left' : '4px',
+        });
+        currentModelBox.append(changeButton.ui);
+
+        currentModelBox.hide();
+        surroundingBox.append(currentModelBox);
+
+        var formBox = $('<div></div>');
+        surroundingBox.append(formBox);
+
         var dbs = 'pdb,mmtf,cid'.split(',');
         var list = this.list = new $3Dmol.UI.Form.ListInput(control.urlType, dbs);
+        list.showAlertBox = false;
 
         list.ui.css({
           'display' : 'inline-block',
         })
 
-        surroundingBox.append(list.ui);
+        formBox.append(list.ui);
 
         var input = this.url = new $3Dmol.UI.Form.Input(control.url);
-        surroundingBox.append(input.ui);
+        formBox.append(input.ui);
 
         input.ui.css({
           'display' : 'inline-block',
@@ -138,7 +171,7 @@
         });
 
         var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'})
-        surroundingBox.append(submitButton.ui);
+        formBox.append(submitButton.ui);
 
         this.updateInputLength = function(){
           var width = input.ui.width();
@@ -147,7 +180,38 @@
 
         modelButton.ui.on('click', ()=>{
           surroundingBox.toggle();
-        })
+        });
+
+        submitButton.ui.on('click', function(){
+          var validateDb = list.validate();
+          var validateId = input.validate();
+
+          if(validateId && validateDb){
+            console.log("Add Model", control);
+            stateManager.addModel(control);
+          }
+          else {
+            console.log('Please enter correct value');
+          }
+        });
+
+        this.setModel = function(heading){
+          currentModel.text(heading);
+          currentModelBox.show();
+          formBox.hide();
+        }
+
+        changeButton.ui.on('click', function(){
+          currentModelBox.hide();
+          formBox.show();
+          input.setValue('');
+        });
+
+        boundingBox.on('keypress', function(e){
+          if(e.key == 'Enter' || e.key == 'Return'){
+            submitButton.ui.trigger('click')
+          }
+        });
       }
       /**
        * @function SelectionBox - Draws the box where all the selections on atoms are listed
@@ -205,9 +269,6 @@
         scrollBox.css('overflow-y', 'auto');
         scrollBox.css('overflow-x', 'visible');
         
-        // selections.css('max-height', HEIGHT*0.8);
-        // selections.css('overflow', 'auto');
-        // selections.css('overflow-x', 'visible');
         selections.css('box-sizing', 'content-box');
 
         // Action
@@ -416,36 +477,6 @@
             }
           });
 
-          boundingBox.on('mouseenter', (e)=>{
-            if(showStyle){
-              // styleBox.ui.show();
-              // console.log('show style box',e, e.target);
-              // xparent = boundingBox.offset().left - parseInt(boundingBox.css('padding')) - 2 + boundingBox.width();
-              // yparent = boundingBox.offset().top - parseInt(boundingBox.css('padding')) - parseInt(boundingBox.css('margin-bottom')) - 1;
-              
-              // setPosition(styleBox.ui, xparent, yparent);
-              // console.log('Entering Selection');
-            }
-          });
-
-          // styleBox.ui.on('mouseenter', (e)=>{
-          //   if(showStyle){
-          //     console.log('Entering Style');
-          //   }
-          // });
-
-          // styleBox.ui.on('mouseleave', (e)=>{
-          //   if(showStyle){
-          //     styleBox.ui.hide();
-          //     console.log('Exiting Style')
-          //   }
-          // });
-
-          // styleBox.ui.on('mouseleave', (e)=>{
-          //   if(showStyle){
-          //     console.log('Exiting Selection');
-          //   }
-          // });
 
           boundingBox.on('keyup', (e)=>{
             if(e.key == 'Enter'){
@@ -465,7 +496,12 @@
             alertBox.warning('Please complete the previous form');
           }
           
-        });   
+        });
+
+        this.empty = function(){
+          selections.empty();
+          _editingForm = false;
+        }
       }
 
       
@@ -859,6 +895,31 @@
           });
 
           propertyMenu.append(propertyTable);
+
+          var labelStyle = {
+            value : null,
+            key : 'Atom Label Style'
+          }
+          
+          var labelStyleHolder = $('<div><div>');
+
+          var labelStyle = $('<div><div>');
+          labelStyle.text('Style');
+          labelStyle.css({
+            'display' : 'inline-block',
+            'font-family' : 'Arial',
+            'font-size' : '14px',
+            'margin-right' : '6px',
+            'margin-left' : '6px'
+          });
+
+          var stylesForLabel = new $3Dmol.UI.Form.ListInput(labelStyle, Object.keys($3Dmol.labelStyles));
+          stylesForLabel.ui.css({
+            'display' : 'inline-block'
+          });
+
+          labelStyleHolder.append(labelStyle, stylesForLabel.ui);
+          propertyMenu.append(labelStyleHolder);
           
           var submit = new button(icons.tick, 18, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
           var cancel = new button(icons.cross, 18, { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
@@ -875,9 +936,17 @@
 
           submit.ui.on('click', ()=>{
             var props = processPropertyList();
+            var labelStyleValidation = stylesForLabel.validate();
+            console.log(labelStyleValidation);
+
             if(props !=null){
-              stateManager.addAtomLabel(props, atom);
-              stateManager.exitContextMenu(false);
+              if(labelStyleValidation){
+                stateManager.addAtomLabel(props, atom);
+                stateManager.exitContextMenu(false);
+              }
+              else {
+                alertBox.error('Select style for label');
+              }
             }
             else {
               alertBox.error('No value selected for label');
@@ -1415,15 +1484,6 @@
           //   listSurfaceOf.updateList(selectionListElement);
           // });
 
-          var updateSelection = this.updateSelection = function(){
-            selections = stateManager.getSElectionList();
-            selectionListElement = selections.map( (m)=>{
-              return m.id;
-            });
-            listSurfaceFor.updateList(selectionListElement);
-            listSurfaceOf.updateList(selectionListElement);
-          }
-
           // Submit 
           submit.ui.on('click', {}, function(){
             listSurfaceFor.getValue();
@@ -1508,6 +1568,10 @@
           displayBox.toggle();
         });
 
+        this.empty = function(){
+          newSurfaceSpace.empty();
+          _editingForm = false;
+        }
       }
 
       /**
