@@ -218,7 +218,7 @@
                 alertBox.hide();
 
                 this.setWidth = function(width){
-                    input.width(width);
+                    input.width(width - 6);
                 }
 
                 this.setWidth(75);

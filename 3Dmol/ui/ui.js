@@ -34,7 +34,7 @@
         var modelToolBar = new ModelToolbar();
         mainParent.append(modelToolBar.ui);
         setLocation(mainParent, modelToolBar.ui, 'left', 'top');
-        modelToolBar.updateInputLength();
+        // modelToolBar.updateInputLength();
 
         var contextMenu = new ContextMenu();
         mainParent.append(contextMenu.ui);
@@ -72,7 +72,7 @@
         var modelToolBar = this.tools.modelToolBar;
 
         setLocation(mainParent, modelToolBar.ui, 'left', 'top');
-        modelToolBar.updateInputLength();
+        // modelToolBar.updateInputLength();
         setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
         setLocation(mainParent, surfaceMenu.ui, 'right', 'top',  0, modelToolBar.ui.height() + 5);
       }
@@ -80,11 +80,9 @@
       function ModelToolbar(){
         var boundingBox = this.ui = $('<div></div>');
 
-        
-
         boundingBox.css({
           'position' : 'relative',
-          'min-width' : '250px'
+          'min-width' : '150px'
         });
 
         
@@ -93,7 +91,8 @@
 
         modelButton.ui.css({
           'display' : 'inline-block',
-          'top':'3px'
+          'top':'3px',
+
         });
 
         var control = {
@@ -116,7 +115,8 @@
           'display' : 'inline-block',
           'background' : '#e4e4e4',
           'padding' : '2px',
-          'border-radius' : '3px'
+          'border-radius' : '3px',
+          // 'width' : '90%'
         });
 
         boundingBox.append(surroundingBox);
@@ -165,17 +165,18 @@
 
         input.ui.css({
           'display' : 'inline-block',
-          'min-width' : '100px',
-          'max-width' : '400px',
-          'width' : '50vw',
+          'width' : '125px'
         });
+
+        input.setWidth(125);
 
         var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'})
         formBox.append(submitButton.ui);
 
         this.updateInputLength = function(){
-          var width = input.ui.width();
-          input.setWidth(width - 12);
+          // var width = parentElement.width()*0.3;
+          // boundingBox.width(width);
+          // input.setWidth(width - 12);
         }
 
         modelButton.ui.on('click', ()=>{

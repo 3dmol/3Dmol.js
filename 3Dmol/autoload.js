@@ -76,7 +76,7 @@ $3Dmol.autoload=function(viewer,callback){
             var spin = null;
             var d = viewerdiv.data();
             
-            //let users specify individual but matching select/style tags, eg.
+            //let users specify individual but matching select/style/surface tags, eg.
             //data-select1 data-style1
             var stylere = /style(.+)/;
             var surfre = /surface(.*)/;
@@ -124,20 +124,26 @@ $3Dmol.autoload=function(viewer,callback){
             var applyStyles = function(glviewer) {
                 var sel, sty;
                 glviewer.setStyle(select,style);
-                glviewer.loadSelectionStyle(select, style);
-                console.log('dingoo');
+
+                if(showUI){
+                    glviewer.loadSelectionStyle(select, style);
+                }
+
                 for(i = 0; i < selectstylelist.length; i++) {
                     sel = selectstylelist[i][0] || {};
                     sty = selectstylelist[i][1] || {"line":{}};
                     glviewer.setStyle(sel, sty);
-                    glviewer.loadSelectionStyle(sel, sty);
-                    console.log('dingoo');
+                    if(showUI){
+                        glviewer.loadSelectionStyle(sel, sty);
+                    }
                 }
                 for(i = 0; i < surfaces.length; i++) {
                     sel = surfaces[i][0] || {};
                     sty = surfaces[i][1] || {};
                     glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
-                    glviewer.loadSurface('VDW', sel, sty);
+                    if(showUI){
+                        glviewer.loadSurface('VDW', sel, sty);
+                    }
                 }
                 for(i = 0; i < labels.length; i++) {
                     sel = labels[i][0] || {};

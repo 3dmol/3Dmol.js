@@ -341,9 +341,9 @@ $3Dmol.StateManager = (function(){
     };
 
     this.createSurface = function(surfaceType, sel, style){
-      var selId = findSelectionBySpec(selSpec);
+      var selId = findSelectionBySpec(sel);
       
-      if(selIdExist == null){
+      if(selId == null){
         selId = this.addSelection(selSpec);
 
         // Create UI for selection 
@@ -369,7 +369,7 @@ $3Dmol.StateManager = (function(){
 
       var surfId = this.addSurface(surfaceInput)
 
-      console.log('StateManager::Creating Surface', surfId, selId, selections);
+      console.log('StateManager::Creating Surface', surfId, selId, surfaces);
       // Create Surface UI
     };
 
@@ -390,7 +390,9 @@ $3Dmol.StateManager = (function(){
     };
 
     this.updateUI = function(){
-      this.ui.resize();
+      if(this.ui){
+        this.ui.resize();
+      }
     };
     
     // UI changes
