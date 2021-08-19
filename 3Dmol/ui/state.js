@@ -105,6 +105,8 @@ $3Dmol.StateManager = (function(){
       return id;
     }
 
+    
+
     this.removeStyle = function(sid, stid){
       console.log(selections, stid, sid)
       delete selections[sid].styles[stid];
@@ -294,6 +296,83 @@ $3Dmol.StateManager = (function(){
       this.ui.tools.surfaceMenu.empty();
     }
 
+    // State Management helper function 
+    function findSelectionBySpec(spec){
+      var ids = Object.keys(selections);
+      var matchingObjectIds = null;
+      for(var i = 0; i < ids.length; i++){
+        var lookSelection = selections[ids[i]].spec;
+
+        var match = true;
+        
+        // looking for same parameters length 
+        var parameters = Object.keys(spec);
+        if( Object.keys(lookSelection).length == parameters.length){
+          for(var j = 0; j < parameters.length; j++){
+            if( lookSelection[parameters[j]] != spec[parameters[j]]){
+              match = false;
+              break;
+            }
+          }
+        }
+
+        if(match){
+          matchingObjectIds = ids[i];
+          break;
+        }
+      }
+
+      return matchingObjectIds;
+    }
+
+    // State managment function 
+    this.createSelectionAndStyle = function(selSpec, styleSpec){
+
+      var selId = findSelectionBySpec(selSpec);
+      if(selId == null){
+        selId = this.addSelection(selSpec);
+
+        // Create UI for selection
+      }
+      var styleId = this.addStyle(styleSpec, selId);
+
+      console.log('StateManager::Creating Selection and Style', selId, styleId, selections);
+      // Create UI for style
+    };
+
+    this.createSurface = function(surfaceType, sel, style){
+      var selId = findSelectionBySpec(selSpec);
+      
+      if(selIdExist == null){
+        selId = this.addSelection(selSpec);
+
+        // Create UI for selection 
+      }
+
+      var surfaceInput = {
+        surfaceType : {
+          value : surfaceType
+        },
+
+        surfaceStyle : {
+          value : style,
+        },
+
+        surfaceOf : {
+          value : 'self'
+        },
+
+        surfaceFor : {
+          value : selId
+        }
+      }
+
+      var surfId = this.addSurface(surfaceInput)
+
+      console.log('StateManager::Creating Surface', surfId, selId, selections);
+      // Create Surface UI
+    };
+
     canvas.on('click', ()=>{
       if(this.ui.tools.contextMenu.hidden == false){
         this.ui.tools.contextMenu.hide();
@@ -304,15 +383,15 @@ $3Dmol.StateManager = (function(){
     this.showUI = function(){
       var ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);  
       return ui;
-    }
+    };
 
     if(config.ui == true){
      this.ui = this.showUI(); 
-    }
+    };
 
     this.updateUI = function(){
       this.ui.resize();
-    }
+    };
     
     // UI changes
 

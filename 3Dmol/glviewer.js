@@ -4548,6 +4548,15 @@ $3Dmol.GLViewer = (function() {
             config.cartoonQuality = val;
         };
 
+        // State Management function 
+        this.loadSelectionStyle = function(sel, style){
+            _stateManager.createSelectionAndStyle(sel, style);
+        };
+
+        this.loadSurface = function(surfaceType, sel, style){
+            _stateManager.createSurface(surfaceType, sel, style);
+        };
+
     }
 
     return GLViewer;
