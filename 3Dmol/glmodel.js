@@ -196,7 +196,7 @@ $3Dmol.GLModel = (function() {
 
     var validCartoonSpec = {
         "style":{validItems:["trace","oval","rectangle","parabola","edged"],gui:true},
-        "color":{type:"color",gui:true},
+        "color":{type:"color",gui:true, spectrum : true},
         "arrows":{type:"boolean",gui:true},
         "ribbon":{type:"boolean",gui:true},
         "hidden":{type:"boolean",gui:true},

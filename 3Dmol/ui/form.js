@@ -26,6 +26,20 @@
                 var boundingBox = $('<div></div>');
                 // surroundingBox.append(label);
                 surroundingBox.append(boundingBox);
+
+                var spectrumControl = {
+                    key : 'Spectrum',
+                    value : null
+                }
+
+                var spectrum = new Form.Checkbox(spectrumControl);
+
+                boundingBox.append(spectrum.ui);
+
+                spectrum.ui.css({
+                    'margin-left'  : '2px'
+                })
+               
                 
                 var RValue = new Form.Slider(control.R);
                 var GValue = new Form.Slider(control.G);
@@ -81,12 +95,45 @@
                 RValue.update = GValue.update = BValue.update = updatePreview;
                 updatePreview();
 
+                spectrum.update = function(v){
+                    sliders.toggle();
+
+                    if(v.value){
+                        color.css({
+                            'background' :  'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)'
+                        });
+                        outerControl.value = 'spectrum';
+                    }
+                    else {
+                        updatePreview();
+                    }
+
+                    console.log(v);
+                }
+
                 this.getValue = function(){
                     return outerControl;
                 }
 
                 this.validate = function(){
                     return true;                
+                }
+
+                this.setValue = function(colorValue){
+                    console.log('Color Value to set', colorValue);
+                    if(colorValue == 'spectrum'){
+                        spectrum.setValue(true);
+                        spectrum.update(spectrumControl);
+                        sliders.hide();
+
+                        outerControl.value = 'spectrum';
+                    }
+                }
+
+                spectrum.ui.hide();
+
+                this.enableSpectrum = function(){
+                    spectrum.ui.show();
                 }
             }
 
@@ -270,7 +317,16 @@
                 }
 
                 this.setValue = function(val){
-                    input.val(val)
+
+                    if(validationType == 'range'){
+                        var text = val.join(',');
+                        input.val(text);
+                    }
+                    else {
+                        input.val(val);
+                    }
+                    
+                    control.value = val;
                 }
 
                 
@@ -499,6 +555,8 @@
 
                 this.setValue = function(val){
                     checkbox.prop('checked', val);
+                    this.update(control);
+                    control.value = val;
                 }
             }
 
@@ -652,7 +710,7 @@
                 
                 this.getValue = function(){
                     mainControl.value = {};
-                    // console.log("Form Inputs", inputs);
+                    console.log("Form Inputs", inputs);
                     inputs.forEach((input)=>{
                         var inputValue = input.getValue();
                         // console.log("Current Input Value", inputValue)
@@ -698,10 +756,22 @@
                                 return e;
                         });
 
-                        e.placeholder.setValue(val[key[i]]);
+                        console.log(input);
+
+                        input.placeholder.setValue(val[keys[i]]);
+                        input.active.setValue(true);
+                        input.placeholder.ui.show();
+                        input.control.active = true;
                     }
 
-                    console.log('Setting Key Value', val, inputs);
+                    // mainControl.value = val;
+                    this.update(mainControl);
+                    var v = this.getValue();
+                    console.log('Setting Key Value', mainControl, v, val, input);
+                }
+
+                this.getInputs = function(){
+                    return inputs;
                 }
                 
                 function Property(key, type) {
@@ -744,6 +814,9 @@
                     }
                     else if(specs[key].type == 'color'){
                         this.placeholder = new Form.Color(control);
+                        if(specs[key].spectrum){
+                            this.placeholder.enableSpectrum();
+                        }
 
                     }else if(specs[key].type == 'boolean'){
                         this.placeholder = new Form.Checkbox(control);

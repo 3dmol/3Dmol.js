@@ -92,7 +92,6 @@
         modelButton.ui.css({
           'display' : 'inline-block',
           'top':'3px',
-
         });
 
         var control = {
@@ -410,6 +409,7 @@
             controls.editMode = true;
             sid = id;
             heading.text('Sel#' + id);
+            boundingBox.data('sel-id', id);
             parameters.hide();
             showStyle = true;
             styleBox.setSid(id);
@@ -485,7 +485,21 @@
             }
           });
 
+          this.setProperty = function(id, specs){            
+            // check for all selection
+            if(Object.keys(specs).length == 0){
+              allCheckBox.setValue(true)
+            }else{
+              selectionSpecForm.setValue(specs);
+            }
 
+            // finalize the selection 
+            finalizeSelection(id);
+          }
+
+          this.addStyle = function(selId, styleId, styleSpecs){
+            styleBox.addStyle(selId, styleId, styleSpecs);
+          }
         }
 
         plusButton.ui.on('click', ()=>{
@@ -502,6 +516,29 @@
         this.empty = function(){
           selections.empty();
           _editingForm = false;
+        }
+
+        this.editSelection = function(id, selSpec, styleId, styleSpec){
+          // if selection does not exist create new 
+
+          // Search selection with id 
+          var selection = selections.children().find("[data-id='" + id + "']");
+          
+          console.log('dsfasdf', selection);
+
+          if(selection.length != 0) {
+            console.log('Editing Selection')
+          }
+          else {
+            console.log('Creating Selection');
+            selection = new Selection();
+            selection.setProperty(id, selSpec);
+            selections.append(selection.ui);
+          }
+
+          selection.addStyle(id, styleId, styleSpec);
+          console.log(id, selSpec, styleId, styleSpec, selections.children());
+
         }
       }
 
@@ -673,6 +710,7 @@
               console.log('Style Form Value', styleFormControl, sid, stid);
               
               if(Object.keys(styleFormControl.value).length == 0){
+                
                 alertBox.error('Please enter some value');
               }
               else{  
@@ -696,6 +734,7 @@
               styleSpecForm.getValue();
 
               if(Object.keys(styleFormControl.value).length == 0){
+                console.log(styleSpecForm.getValue());
                 alertBox.error('Please enter some value');
               }
               else{
@@ -721,6 +760,12 @@
             }
           });
 
+          this.updateStyle = function(styleId, styleSpec){
+            styleSpecForm.setValue(styleSpec);
+            
+            finalizeStyle(styleId);
+          }
+
         }
 
         plusButton.ui.on('click', ()=>{
@@ -733,6 +778,12 @@
             alertBox.warning('Please complete editing the current form');
           }
         });   
+
+        this.addStyle = function(selectionId, styleId, styleSpecs){
+          var style = new Style(selectionId);
+          styles.append(style.ui);
+          style.updateStyle(styleId, styleSpecs);
+        }
       }
 
       function AlertBox(config){
@@ -1346,6 +1397,7 @@
           labelSurfaceType.css(defaultTextStyle);
 
           var listSurfaceType =new $3Dmol.UI.Form.ListInput(control.surfaceType, Object.keys($3Dmol.SurfaceType));
+          
 
           surfaceType.append(labelSurfaceType, listSurfaceType.ui);
           surfacePropertyBox.append(surfaceType);
@@ -1357,7 +1409,7 @@
           // labelSurfaceStyle.text('Surface Style');
 
           var formSurfaceStyle = new $3Dmol.UI.Form($3Dmol.GLModel.validSurfaceSpecs, control.surfaceStyle);
-          
+
           surfaceStyle.append(labelSurfaceStyle, formSurfaceStyle.ui);
           surfacePropertyBox.append(surfaceStyle);
           

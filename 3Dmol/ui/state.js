@@ -331,13 +331,14 @@ $3Dmol.StateManager = (function(){
       var selId = findSelectionBySpec(selSpec);
       if(selId == null){
         selId = this.addSelection(selSpec);
-
-        // Create UI for selection
+        
       }
       var styleId = this.addStyle(styleSpec, selId);
 
       console.log('StateManager::Creating Selection and Style', selId, styleId, selections);
-      // Create UI for style
+
+      // creating selection and style 
+      this.ui.tools.selectionBox.editSelection(selId, selSpec, styleId, styleSpec);
     };
 
     this.createSurface = function(surfaceType, sel, style){
