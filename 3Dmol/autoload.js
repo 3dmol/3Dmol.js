@@ -40,6 +40,12 @@ $3Dmol.autoload=function(viewer,callback){
                 datauri.push(uri);
                 type = uri.substr(uri.lastIndexOf('.')+1);                
                 datatypes.push(type);
+
+                var molName = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
+                if(molName == '/') 
+                    molName = uri.substring(uri.lastIndexOf('/') + 1);
+
+                viewerdiv.data(datatypes[datatypes.length -1 ], molName);
             }
             
             var divdata=viewerdiv.data();
