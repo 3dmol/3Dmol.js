@@ -146,11 +146,14 @@ $3Dmol.autoload=function(viewer,callback){
                 for(i = 0; i < surfaces.length; i++) {
                     sel = surfaces[i][0] || {};
                     sty = surfaces[i][1] || {};
-                    glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
-                    if(showUI){
-                        glviewer.loadSurface('VDW', sel, sty);
-                        console.log(sty);
-                    }
+
+                    glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel).then((id)=>{
+                        if(showUI){
+                            glviewer.loadSurface('VDW', sel, sty, id);
+                            console.log(sty);
+                        }
+                    });
+                    
                 }
                 for(i = 0; i < labels.length; i++) {
                     sel = labels[i][0] || {};
