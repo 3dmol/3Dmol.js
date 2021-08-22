@@ -4583,7 +4583,7 @@ $3Dmol.GLViewer = (function() {
         };
         
         /**
-         * Calls StateManager to start the UI
+         * Calls StateManager to start the
          * @function $3Dmol.GLViewer#initiateUI
          */
         this.initiateUI = function(){
