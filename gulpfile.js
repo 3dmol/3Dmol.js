@@ -22,7 +22,7 @@ function clean(cb) {
 
 function doc(cb) {
     var config = require('./jsdoc.conf.json');
-    return src(['3Dmol/*.js', 'doc.md'], {read: false})
+    return src(['3Dmol/*.js', '3Dmol/ui/*', 'doc.md'], {read: false})
         .pipe(jsdoc(config, cb));
 }
 
