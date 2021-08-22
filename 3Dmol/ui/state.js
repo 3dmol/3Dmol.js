@@ -1,10 +1,10 @@
-// @param {startState} object it store the initial values to initiliaze the
-// UI state
-// Everytime UI state is changed this state is updated so that this can
-// preserve the changes in case error happens
 
-
-// This will also help in migrating the controls from to different
+/**
+ * $3Dmol.StateManager - StateManager creates the space to preserve the state of the ui and sync it with the GLViewer
+ * @constructor 
+ * @param {$3Dmol.GLViewer} glviewer StateManager is required to have interaction between glviewer and the ui. 
+ * @param {Object} config Loads the user defined parameters to generate the ui and handle state
+ */
 $3Dmol.StateManager = (function(){
 
   function States(glviewer, config){
@@ -40,7 +40,15 @@ $3Dmol.StateManager = (function(){
     var labels = {};
 
     var atomLabel = {};
-    
+
+    /**
+     * Add Selection from the ui to glviewer
+     * 
+     * @function $3Dmol.StateManager#addSelection
+     * @param {Object} spec Object that contains the output from the form 
+     * @param {String} sid If surface id being edited then sid is set to some string
+     * @returns String
+     */
     this.addSelection = function(spec, sid = null){
       // console.log('Add Selection Called');
       var id = sid || makeid(4);
@@ -60,6 +68,13 @@ $3Dmol.StateManager = (function(){
       return id;
     }
 
+    /**
+     * Return true if the selections contain at least one atom
+     * 
+     * @function $3Dmol.StateManager#checkAtoms
+     * @param {AtomSelectionSpec} sel Atom selection spec
+     * @returns Boolean
+     */
     this.checkAtoms = function(sel){
       var atoms = glviewer.selectedAtoms(sel);
       if( atoms.length > 0)
@@ -68,17 +83,35 @@ $3Dmol.StateManager = (function(){
       return false;
     }
 
+    /**
+     * Toggle the hidden property of the selection 
+     * @function $3Dmol.StateManager#toggleHide
+     * @param {String} sid Selection id
+     */
     this.toggleHide = function(sid){
       selections[sid].hidden = !selections[sid].hidden;
       console.log('toggle hide', selections, selections[sid]);
       render();
     }
 
+    /**
+     * Removes the selection
+     * @param {String} id Selection id
+     */
     this.removeSelection = function(id) {
       delete selections[id];
       render();
     }
 
+    /**
+     * Add style and renders it into the viewport
+     * 
+     * @function $3Dmol.StateManager#addStyle 
+     * @param {String} spec Output object of style form 
+     * @param {String} sid Selection Id
+     * @param {String} stid Style Id
+     * @returns String
+     */
     this.addStyle = function( spec, sid, stid = null){
       var selection = selections[sid];
       
@@ -106,18 +139,40 @@ $3Dmol.StateManager = (function(){
     }
 
     
-
+    /**
+     * Removes the style specified by stid
+     * 
+     * @function $3Dmol.StateManager#removeStyle 
+     * @param {String} sid Selection id
+     * @param {String} stid Style Id
+     */
     this.removeStyle = function(sid, stid){
       console.log(selections, stid, sid)
       delete selections[sid].styles[stid];
       render();
     }
 
+
+    /**
+     * Toggle hidden property of a style 
+     * 
+     * @function $3Dmol.StateManager#toggleHideStyle
+     * @param {String} sid Selection Id
+     * @param {String} stid Style Id 
+     */
     this.toggleHideStyle = function(sid, stid){
       selections[sid].styles[stid].hidden = !selections[sid].styles[stid].hidden;
       render();
     }
 
+    /**
+     * Adds surface to the viewport
+     * 
+     * @function $3Dmol.StateManager#addSurface
+     * @param {Object} property Surface output object
+     * @param {Function} callback callback
+     * @returns String
+     */
     this.addSurface = function(property, callback){
       var id = makeid(4);
       property.id = id;
@@ -148,6 +203,11 @@ $3Dmol.StateManager = (function(){
       return id;
     }
 
+    /**
+     * Removes surface from the viewport 
+     * @function $3Dmol.StateManager#removeSurface
+     * @param {String} id Surface Id
+     */
     this.removeSurface = function(id){
       
       glviewer.removeSurface(surfaces[id])
@@ -155,7 +215,12 @@ $3Dmol.StateManager = (function(){
 
     }
 
-
+    /**
+     * Edit the exisiting surface in the viewport
+     * 
+     * @function $3Dmol.StateManager#editSurface
+     * @param {Object} surfaceProperty Surface Style
+     */
     this.editSurface = function(surfaceProperty){
       var style = surfaceProperty.surfaceStyle.value || {}
       var sel = selections[surfaceProperty.surfaceFor.value];
@@ -174,11 +239,24 @@ $3Dmol.StateManager = (function(){
       console.log('StateManager::editSurface#Updating Surface', surfaceProperty)
     }
 
+    /**
+     * Returns the list of ids of selections that are created so far
+     * @function $3Dmol.StateManager#getSelectionList
+     * @returns <Array of selection ids>
+     */
     this.getSelectionList = function(){
       console.log(Object.keys(selections))
       return Object.keys(selections);
     }
 
+    /**
+     * Opens context menu when called from glviewer
+     * 
+     * @function $3Dmol.StateManager#openContextMenu
+     * @param {AtomSpec} atom Atom spec obtained from context menu event
+     * @param {Number} x x coordinate of mouse on viewport
+     * @param {Number} y y coordinate of mouse on the viewport
+     */
     this.openContextMenu = function(atom, x, y){
       console.log('Open Context Menu', atom, x, y);  
       var atomExist = false;
@@ -201,6 +279,11 @@ $3Dmol.StateManager = (function(){
       this.ui.tools.contextMenu.show(x, y, atom, atomExist);    
     }
 
+    /**
+     * Adds Label to the viewport specific to the selection
+     * @function $3Dmol.StateManager#addLabel
+     * @param {Object} labelValue Output object from label form of Context Menu
+     */
     this.addLabel = function(labelValue){
       console.log('Label Added', labelValue);
       labels[labelValue.sel.value] = labels[labelValue.sel.value] || [];
@@ -216,6 +299,13 @@ $3Dmol.StateManager = (function(){
       this.ui.tools.contextMenu.hide();
     }
 
+    /**
+     * Adds atom label to the viewport
+     * 
+     * @function $3Dmol.StateManager#addAtomLabel
+     * @param {Object} labelValue Output object from propertyMenu form of Context Menu
+     * @param {AtomSpec} atom Atom spec that are to be added in the label 
+     */
     this.addAtomLabel = function(labelValue, atom){
       var atomExist = Object.keys(atomLabel).find((i)=>{
         if (i == atom.index)
@@ -254,17 +344,33 @@ $3Dmol.StateManager = (function(){
       console.log('Getting Atom Label', labelText, labelProp);
     }
 
+    /**
+     * Executes hide context menu and process the label if needed
+     * 
+     * @function $3Dmol.StateManager#exitContextMenu
+     * @param {Boolean} processContextMenu Specify the need to process the values in the context menu
+     */
     this.exitContextMenu = function(processContextMenu = false){
       console.log('Unfinished Labeling');
       this.ui.tools.contextMenu.hide(processContextMenu);
     }
 
+    /**
+     * Removes the label specific to the selection 
+     * 
+     * (under development)
+     */
     this.removeLabel = function(){
       // Add code to remove label 
       console.log('Remove Label')
       this.ui.tools.contextMenu.hide();
     }
 
+    /**
+     * Removes the atom label from the viewpoer 
+     * @function $3Dmol.StateManager#removeAtomLabel
+     * @param {AtomSpec} atom Atom spec
+     */
     this.removeAtomLabel = function(atom){
       var label = atomLabel[atom.index];
       console.log("Stuff", label, atomLabel);
@@ -275,6 +381,11 @@ $3Dmol.StateManager = (function(){
       this.ui.tools.contextMenu.hide();
     }
 
+    /**
+     * Add model to the viewport
+     * @function $3Dmol.StateManager#addModel
+     * @param {Object} modelDesc Model Toolbar output
+     */
     this.addModel = function(modelDesc){
       glviewer.removeAllModels();
       glviewer.removeAllSurfaces();
@@ -327,6 +438,15 @@ $3Dmol.StateManager = (function(){
     }
 
     // State managment function 
+
+    /**
+     * Updates the state variable for selections and styles and trigger ui to show the 
+     * ui elements for these selections and styles.
+     * 
+     * @function $3Dmol.StateManager#createSelectionAndStyle
+     * @param {AtomSelectionSpec} selSpec Atom Selection Spec
+     * @param {AtomStyleSpec} styleSpec Atom Style Spec
+     */
     this.createSelectionAndStyle = function(selSpec, styleSpec){
 
       var selId = findSelectionBySpec(selSpec);
@@ -349,6 +469,15 @@ $3Dmol.StateManager = (function(){
  
     };
 
+    /**
+     * Creates selection and add surface with reference to that selection 
+     * and triggers updates in the ui
+     * @function $3Dmol.StateManager#createSurface
+     * @param {String} surfaceType Type of surface to be created
+     * @param {AtomSelectionSpec} sel Atom selection spec
+     * @param {AtomStyleSpec} style Atom style spec
+     * @param {String} sid selection id
+     */
     this.createSurface = function(surfaceType, sel, style, sid){
       var selId = findSelectionBySpec(sel);
       
@@ -391,6 +520,11 @@ $3Dmol.StateManager = (function(){
       // Create Surface UI
     };
 
+    /**
+     * Sets the value of title in ModelToolBar
+     * @function $3Dmol.StateManager#setModelTitle
+     * @param {String} title Model title
+     */
     this.setModelTitle = function(title){
       this.ui.tools.modelToolBar.setModel(title);
     }
@@ -402,6 +536,10 @@ $3Dmol.StateManager = (function(){
     });
     
     // Setting up UI generation 
+    /**
+     * Generates the ui and returns its reference
+     * @returns $3Dmol.UI
+     */
     this.showUI = function(){
       var ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);  
       return ui;
@@ -411,6 +549,11 @@ $3Dmol.StateManager = (function(){
      this.ui = this.showUI(); 
     };
 
+    /**
+     * Updates the UI on viewport change 
+     * 
+     * @function $3Dmol.StateManager#updateUI
+     */
     this.updateUI = function(){
       if(this.ui){
         this.ui.resize();
@@ -453,11 +596,6 @@ $3Dmol.StateManager = (function(){
       })
 
       glviewer.render();
-    }
-
-    function clear(selectionSpec){
-      glviewer.enableContextMenu(sel.spec, false);
-      glviewer.setStyle(selectionSpec.spec, {});
     }
 
     function makeid(length) {

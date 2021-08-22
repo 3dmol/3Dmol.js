@@ -1,10 +1,12 @@
-/*
-* 3Dmol.UI.Icons holds the icons for different applicatioin
-*
-*/
-
-$3Dmol.UI.Icons = (function(){
-  function Icons(){
+/**
+ * Generates the object to hold different icons present 
+ * @function $3Dmol.UI#Icons
+ * 
+ * Icons : move, rotate, pencil, listArrow, option, minus, plus, painbrush, select, movie.play, move.pause, movie.stop, movie.next, move.previous, tick, cross, edit
+ * remove, list, style, visible, invisible, mouse, nomouse, label, surface, molecule, change
+ */
+$3Dmol.UI.Icons = (function () {
+  function Icons() {
     this.move = `<svg  id="Layer_1" style="enable-background:new 0 0 32 32;" version="1.1" viewBox="0 0 32 32"  xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <path d="M31.338,14.538L27.38,10.58C26.994,10.193,26.531,10,26,10c-1.188,0-2,1.016-2,2c0,0.516,0.186,0.986,0.58,1.38L25.2,14H18  V6.8l0.62,0.62C19.014,7.814,19.484,8,20,8c0.984,0,2-0.813,2-2c0-0.531-0.193-0.994-0.58-1.38l-3.973-3.974  C17.08,0.279,16.729,0,16,0s-1.135,0.334-1.463,0.662L10.58,4.62C10.193,5.006,10,5.469,10,6c0,1.188,1.016,2,2,2  c0.516,0,0.986-0.186,1.38-0.58L14,6.8V14H6.8l0.62-0.62C7.814,12.986,8,12.516,8,12c0-0.984-0.813-2-2-2  c-0.531,0-0.994,0.193-1.38,0.58l-3.958,3.958C0.334,14.866,0,15.271,0,16s0.279,1.08,0.646,1.447L4.62,21.42  C5.006,21.807,5.469,22,6,22c1.188,0,2-1.016,2-2c0-0.516-0.186-0.986-0.58-1.38L6.8,18H14v7.2l-0.62-0.62  C12.986,24.186,12.516,24,12,24c-0.984,0-2,0.813-2,2c0,0.531,0.193,0.994,0.58,1.38l3.957,3.958C14.865,31.666,15.271,32,16,32  s1.08-0.279,1.447-0.646l3.973-3.974C21.807,26.994,22,26.531,22,26c0-1.188-1.016-2-2-2c-0.516,0-0.986,0.186-1.38,0.58L18,25.2V18  h7.2l-0.62,0.62C24.186,19.014,24,19.484,24,20c0,0.984,0.813,2,2,2c0.531,0,0.994-0.193,1.38-0.58l3.974-3.973  C31.721,17.08,32,16.729,32,16S31.666,14.866,31.338,14.538z"/>
     </svg>
@@ -755,7 +757,7 @@ $3Dmol.UI.Icons = (function(){
 
     `;
 
-   this.list = `
+    this.list = `
    <?xml version="1.0" encoding="iso-8859-1"?>
    <!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -812,7 +814,7 @@ $3Dmol.UI.Icons = (function(){
    </svg>
    `;
 
-   this.style = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    this.style = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
    <path fill-rule="evenodd" clip-rule="evenodd" d="M13 21V13H21V21H13ZM15 15H19L19 19H15V15Z" fill="black"/>
    <path fill-rule="evenodd" clip-rule="evenodd" d="M3 11L3 3L11 3V11H3ZM5 5L9 5V9L5 9L5 5Z" fill="black"/>
    <path d="M18 6V12H16V8L12 8V6L18 6Z" fill="black"/>
@@ -821,7 +823,7 @@ $3Dmol.UI.Icons = (function(){
    `;
 
 
-   this.visible = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    this.visible = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
   viewBox="0 0 98.48 98.48" style="enable-background:new 0 0 98.48 98.48;" xml:space="preserve"
  >
 <g>
@@ -864,7 +866,7 @@ $3Dmol.UI.Icons = (function(){
 <g>
 </g></svg>`;
 
-this.invisible = `<svg
+    this.invisible = `<svg
 version="1.1"
 id="Capa_1"
 x="0px"
@@ -957,7 +959,7 @@ id="g38">
 <g
 id="g40">
 </g></svg>`;
-  this.mouse = `<svg
+    this.mouse = `<svg
   version="1.1"
   id="Capa_1"
   x="0px"
@@ -1043,7 +1045,7 @@ id="g40">
   d="m 176.25727,198.8633 c -23.68772,-23.64674 -24.49906,-24.41991 -26.7503,-25.49175 -4.55216,-2.16733 -9.11388,-2.17055 -13.60334,-0.01 -2.22046,1.06878 -3.10891,1.90403 -20.87257,19.62262 L 96.477662,211.49087 67.898364,125.92225 C 52.17975,78.859514 39.258366,40.178943 39.184177,39.965428 39.077696,39.658977 210.191,96.551715 210.7197,96.998548 c 0.0763,0.06445 -7.87234,8.148712 -17.66356,17.965012 -11.29533,11.32428 -18.11231,18.38875 -18.65061,19.32772 -2.62177,4.57321 -2.71438,10.25944 -0.24786,15.21817 0.59716,1.20053 6.23919,7.02408 25.242,26.05407 l 24.47294,24.50796 -11.59335,11.5891 -11.59335,11.58911 z"
   id="path1252" /></svg>`;
 
-  this.nomouse = `<svg
+    this.nomouse = `<svg
   version="1.1"
   id="Capa_1"
   x="0px"
@@ -1139,7 +1141,7 @@ id="g40">
     d="M 175.54224,197.81395 C 141.49161,163.76332 143.2267,163.93691 115.08233,191.76514 L 96.477662,210.16082 68.362417,125.87737 C 52.899031,79.521474 40.41104,41.430054 40.611324,41.22977 40.811607,41.029486 78.915195,53.517478 125.28596,68.980863 l 84.31049,28.115246 -17.78399,17.934951 c -19.09866,19.26078 -21.49193,23.16051 -19.17388,31.24308 0.79101,2.75809 8.75682,11.60498 25.8883,28.75178 l 24.74573,24.76783 -11.46147,11.41381 -11.46147,11.41382 z"
     id="path1058" /></g></svg>`;
 
-  this.nolabel = `<svg
+    this.nolabel = `<svg
   version="1.1"
   id="Capa_1"
   x="0px"
@@ -1232,7 +1234,7 @@ id="g40">
   transform="matrix(0.68940354,0.7243775,-0.72076393,0.69318061,0,0)" /></svg>
   `;
 
-  this.label = `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+    this.label = `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
   <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
     viewBox="0 0 37.628 37.628" style="enable-background:new 0 0 37.628 37.628;"
     xml:space="preserve">
@@ -1278,7 +1280,7 @@ id="g40">
   </g>
   </svg>`;
 
-  this.surface = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    this.surface = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
   viewBox="0 0 512.011 512.011" style="enable-background:new 0 0 512.011 512.011;" xml:space="preserve">
 <g>
  <g>
@@ -1325,8 +1327,8 @@ id="g40">
 </g>
 </svg>
 `;
-  
-this.molecule = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+
+    this.molecule = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 viewBox="0 0 512.002 512.002" style="enable-background:new 0 0 512.002 512.002;" xml:space="preserve">
 <g>
 <g>
@@ -1385,7 +1387,7 @@ viewBox="0 0 512.002 512.002" style="enable-background:new 0 0 512.002 512.002;"
 </g>
 </svg>`;
 
-  this.change = `<svg
+    this.change = `<svg
   version="1.1"
   id="Layer_1"
   x="0px"
@@ -1474,7 +1476,7 @@ viewBox="0 0 512.002 512.002" style="enable-background:new 0 0 512.002 512.002;"
     d="m 409.84573,392.3046 -76.00859,76.01051 -0.15658,-38.00576 -0.1566,-38.00577 H 179.98934 26.454715 V 354.29883 316.29408 H 256.15452 485.85431 Z"
     id="path1796" /></g></svg>`;
 
-};
+  };
 
   return Icons;
 })();

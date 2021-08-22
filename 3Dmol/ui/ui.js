@@ -1,16 +1,10 @@
-  /*
-  * This is ui that we are trying to draw at the time of generationo
-  * of viewer.
-  * Refer to line number 43 of the glViewer to see the viewer code
-  */
-
-  /**
-   * $3Dmol.UI - UI creates panels of viewer to assist control of the viewport in
-   * 3dmol.js
-   *
-   * @param  {$3Dmol.StateManager} Manages states of the UI
-   * @return {object} configuration for the UI
-   */
+/**
+ * $3Dmol.UI - UI creates panels in the viewer to assist control of the viewport
+ * @constructor 
+ * @param {$3Dmol.StateManager} stateManager StateManager is required to have interaction between glviewer and the ui. 
+ * @param {Object} config Loads the user defined parameters to generate the ui
+ * @param {Object} parentElement Refers the parent division used to hold the canvas for 3Dmol.js 
+ */
   $3Dmol.UI = (function(){
     function UI(stateManager, config, parentElement){
       config = config || {}
@@ -27,8 +21,8 @@
       var uiElements = this.tools = generateUI(config);
       
       /**
-       * @function generateUI creates all the jquery object of different UI features
-       * @param  {object} config
+       * Creates all the jquery object of different UI features
+       * @param  {Object} config
        */
       function generateUI(config){
         var modelToolBar = new ModelToolbar();
@@ -66,6 +60,11 @@
         } 
       }
 
+      /**
+       * Resize the panel with respect to the new viewport
+       * 
+       * @function $3Dmol.UI#resize
+       */
       this.resize = function(){
         var selectionBox = this.tools.selectionBox;
         var surfaceMenu = this.tools.surfaceMenu;
@@ -77,6 +76,11 @@
         setLocation(mainParent, surfaceMenu.ui, 'right', 'top',  0, modelToolBar.ui.height() + 5);
       }
 
+      /**
+       * ModelToolbar is part of $3Dmol.UI to edit or change the model loaded into the viewer
+       * 
+       * @function ModelToolbar
+       */
       function ModelToolbar(){
         var boundingBox = this.ui = $('<div></div>');
 
@@ -198,6 +202,12 @@
           }
         });
 
+        /**
+         * Sets the title in the ui with specified value
+         * 
+         * @function ModelToolbar#setModel 
+         * @param {String} heading Name of the molecule that is to be displayed on the title
+         */
         this.setModel = function(heading){
           currentModel.text(heading);
           currentModelBox.show();
@@ -216,10 +226,15 @@
           }
         });
       }
+
+
       /**
-       * @function SelectionBox - Draws the box where all the selections on atoms are listed
-       * This will be used to modify style for specific set of selection
-       * @param {SVG} $3Dmol.UI.Icons stores all the SVG elements needed of the UI 
+       * Selection box creates the UI panel to manipulate selections and style that are drawn 
+       * on the viewport
+       * 
+       * @function SelectionBox  
+       * @param {$3Dmol.UI.Icons} icon takes the svg code for the icon that is to be used to display
+       * selection box
        * @return {Object}  Jquery element of div
        */
       function SelectionBox(icon, side='left') {
@@ -290,6 +305,11 @@
           hidden = !hidden;
         }
 
+        /**
+         * Card for manipulation of a selection form and related styles
+         * 
+         * @function Selection
+         */
         function Selection(){
           var boundingBox = this.ui = $('<div></div>');
           var sid = this.id = null;
@@ -489,6 +509,12 @@
             }
           });
 
+          /**
+           * @function Selection#setProperty
+           * @param {string} id Id of the selection created in StateManager 
+           * @param {Object} specs Defination of the selection that will be used to set default 
+           * values in the form
+           */
           this.setProperty = function(id, specs){            
             // check for all selection
             if(Object.keys(specs).length == 0){
@@ -501,6 +527,14 @@
             finalizeSelection(id);
           }
 
+          /**
+           * Adds style to the given selection 
+           * 
+           * @function Selection#addStyle 
+           * @param {String} selId Id of the selection to inititate the StyleBox
+           * @param {String} styleId Id of the style that is created through StateManager
+           * @param {AtomStyleSpecs} styleSpecs 
+           */
           this.addStyle = function(selId, styleId, styleSpecs){
             styleBox.addStyle(selId, styleId, styleSpecs);
           }
@@ -517,11 +551,24 @@
           
         });
 
+
+        /**
+         * Remove all the selection card from the ui
+         */
         this.empty = function(){
           selections.empty();
           _editingForm = false;
         }
 
+        /**
+         * Adds or create new selection card
+         * 
+         * @function SelectionBox#editSelection
+         * @param {String} id Id created in StateManager and passed down to this function during call
+         * @param {AtomSelectionSpec} selSpec Selection spec that is used to generate the selection form
+         * @param {String} styleId Id of style created in StateManager
+         * @param {AtomStyleSpecs} styleSpec Style spec if specified add the selection to the current selection 
+         */
         this.editSelection = function(id, selSpec, styleId, styleSpec){
           // if selection does not exist create new 
 
@@ -550,8 +597,15 @@
       }
    
       /**
-       * @function StyleBox creates styleBox for listing out different styles for a particular selection
-       * @return {Object} Jquery dom object
+       * 
+       * @param {Object} Jquery dom object
+       */
+      /**
+       * Creates StyleBox for listing out different styles inside the selection
+       * 
+       * @function StyleBox 
+       * @param {String} selId Id of the selection for which the style box is created 
+       * @param {String} side Alignment of text inside the box
        */
        function StyleBox(selId, side='left') {
         var styleBox = this.ui = $('<div></div>');
@@ -614,6 +668,12 @@
         styles.css('box-sizing', 'content-box');
 
 
+        /**
+         * Style card to define the value of the style 
+         * 
+         * @param {string} sid Id of the selction for which the style box is created
+         * and this stye will be added under that selection
+         */
         function Style(sid){
           var boundingBox = this.ui = $('<div></div>');
           var stid = this.id = null; // style id 
@@ -766,6 +826,11 @@
             }
           });
 
+          /**
+           * @function Style#updateStyle 
+           * @param {String} styleId Id of the style created by StateManager 
+           * @param {AtomStyleSpecs} styleSpec Specs for defining the style and setting default values
+           */
           this.updateStyle = function(styleId, styleSpec){
             styleSpecForm.setValue(styleSpec);
             
@@ -785,6 +850,13 @@
           }
         });   
 
+        /**
+         * @function StyleBox#addStyle
+         * @param {String} selectionId Id of the selection for which styles will be created   
+         * @param {String} styleId Id of the style part of the selection 
+         * @param {AtomStyleSpecs} styleSpecs Style specs that will be used to create 
+         * style for the specified selection and set default values in the Style card
+         */
         this.addStyle = function(selectionId, styleId, styleSpecs){
           var style = new Style(selectionId);
           styles.append(style.ui);
@@ -792,6 +864,13 @@
         }
       }
 
+
+      /**
+       * Add alert messages to different panels 
+       * 
+       * @function AlertBox
+       * @param {Object} config Configuraiton for alert box display
+       */
       function AlertBox(config){
         var boundingBox = this.ui = $('<div></div>');
         config = config || {}
@@ -819,6 +898,10 @@
           }
         }
 
+        /**
+         * Generate Internal alert message  
+         * @param {String} msg Error Message 
+         */
         this.error = function(msg){
           boundingBox.css({
             'background' : 'lightcoral',
@@ -832,6 +915,10 @@
           hide();
         }
 
+        /**
+         * Generates Internal warning message
+         * @param {String} msg Warming message 
+         */
         this.warning = function(msg){
           boundingBox.css({
             'background' : 'yellow',
@@ -845,6 +932,10 @@
           hide();
         }
 
+        /**
+         * Generates Internal Info message 
+         * @param {String} msg Info message
+         */
         this.message = function(msg){
           boundingBox.css({
             'background' : 'lightgreen',
@@ -859,6 +950,11 @@
         }
       }
 
+      /**
+       * Creates the panel for manipulation of labels on the viewport
+       * 
+       * @function ContextMenu
+       */
       function ContextMenu(){
         var boundingBox = this.ui = $('<div></div>');
 
@@ -915,6 +1011,13 @@
         var propertyMenu = $('<div></div>');
         contentBox.append(propertyMenu);
         
+        /**
+         * Property object used in property menu 
+         * 
+         * @function Property 
+         * @param {String} key Name of the atom property
+         * @param {*} value Value of the property 
+         */
         function Property(key, value){
           this.row = $('<tr></tr>');
           var propLabelValue = this.control = {
@@ -940,6 +1043,10 @@
           valueHolder.text(value);
         }
 
+        /**
+         * @param {AtomSpec} atom Value of different property of the atom, if the atom has prop : true
+         * then that option is made visible in the context menu
+         */
         function setProperties(atom){        
           propertyMenu.empty();
           propertyObjectList = [];
@@ -1062,6 +1169,10 @@
 
         // Add Label Inputs 
 
+        /**
+         * Generate input elements that are used as form values in the context menu under addLabelForm
+         * @returns {Object} that holds different input elements
+         */
         function generateAddLabelForm(){
           var addLabelForm = $('<div></div>');
 
@@ -1193,6 +1304,16 @@
         });
 
 
+        /**
+         * Shows the context menu 
+         * 
+         * @function ContextMenu#show 
+         * 
+         * @param {Number} x x coordinate of the mouse
+         * @param {Number} y y coordinate of the mouse in the viewport in pixels
+         * @param {AtomSpec} atom Value of the atoms that is selected 
+         * @param {Boolean} atomExist if atom label is previously added it is set true else false
+         */
         this.show = function(x, y, atom, atomExist){
           console.log('Context Menu open and atom Exist', atomExist);
 
@@ -1229,6 +1350,13 @@
           }
         }
         
+        /**
+         * Hides the context menu and if needed process the propertyMenu
+         * 
+         * @function ContextMenu#hide
+         * @param {Boolean} processContextMenu If true then submission of the property to add label is executed
+         */
+
         this.hide = function(processContextMenu){
           if(processContextMenu){
             var propsForLabel = processPropertyList();
@@ -1260,28 +1388,21 @@
         }
       }
 
-
+      /**
+       * Creates UI panel for surface manipulations
+       * 
+       * @function SurfaceMenu 
+       */
       function SurfaceMenu(){
         var boundingBox = this.ui = $('<div></div>');
         var _editingForm = false;
         // Selection Layout
-
-        // var contentBox = $('<div></div>');
-        // contentBox.css('background', 'red');
-        // boundingBox.append(contentBox);
 
         boundingBox.css({
           'position': 'absolute',
           'width': '140px',
           'text-align': 'right'   
         });
-
-        // contentBox.css({
-        //   'position':'relative',
-        //   'right':'100%',
-        //   'text-align':'right'
-        // })
-
         
         var surfaceButton = new button(icons.surface, 20, { tooltip : 'Toggle Surface Menu'});
 
@@ -1322,6 +1443,11 @@
 
         var surfaces = this.surfaces = [];
 
+        /**
+         * Creates cards for manipulation of surface
+         * 
+         * @function Surface 
+         */
         function Surface(){
           var control = {
             surfaceType: {
@@ -1503,9 +1629,6 @@
             // After creation of the surface box all the changes will be edit to the surfaces so on first submit toolButtons.editMode == true;
           });
 
-          
-
-
           // Form Validation 
 
           var validateInput = this.validateInput = function(){
@@ -1531,8 +1654,7 @@
 
             return validated;
           }
-
-          
+        
           // edit this code to add on edit selection option to work
           // boundingBox.on('mouseenter', function(){
           //   selections = stateManager.getSelectionList();
@@ -1591,7 +1713,6 @@
               surfaceBox.detach();
               surfaceBox.remove();
               _editingForm = false;
-              // Add statemanager handle to remove the object itself
             }
             else {
               surfacePropertyBox.hide();
@@ -1605,6 +1726,13 @@
             }
           });
 
+          /**
+           * Finalizes the surface card with value specified in the surfaceSpec
+           * 
+           * @function Surface#editSurface 
+           * @param {String} id Id of the surface generated by StateManager
+           * @param {Object} surfaceSpec Different value of the surface menu
+           */
           this.editSurface = function(id, surfaceSpec){
             finalize(id);
             listSurfaceType.setValue(surfaceSpec.surfaceType.value);
@@ -1647,11 +1775,23 @@
           displayBox.toggle();
         });
 
+        /**
+         * Clear all the surface cards 
+         * @function SurfaceMenu#empty
+         */
+
         this.empty = function(){
           newSurfaceSpace.empty();
           _editingForm = false;
         }
 
+        /**
+         * Add Surface in the Surface Menu 
+         * 
+         * @function SurfaceMenu#addSurface
+         * @param {String} id Id of the surface generated in the StateManager
+         * @param {Object} surfaceSpec Values of different property required for setting values in surface menu
+         */
         this.addSurface = function(id, surfaceSpec){
           console.log('Addting surface', id, surfaceSpec);
           
@@ -1664,27 +1804,32 @@
       }
 
       /**
-       * position : Sets the css position property : absolute
+       * Sets the css position property left and top for the element
+       * 
+       * @function setPosition
+       * 
        * @param {object} jquery html element
        * @param {number} left : css left property
        * @param {number} top : css top peroperty
        */
       function setPosition(ele, left, top){
-        // ele.css('position', 'absolute');
+
         ele.css('left', left);
         ele.css('top', top);
       }
 
 
       /**
-        * setLocation - Sets the location of the element relative to the parseInt
+        * Sets the location of the element relative to the parseInt
         * as per position types
-        *
-        * @param  {object} parent jquery object
-        * @param  {object} child  jquery object
-        * @param  {string}   x_type 'left|right'
-        * @param  {string}   y_type 'top|bottm'
-        *
+        * @function setLocation
+        * 
+        * @param  {Object} parent jquery object
+        * @param  {Object} child  jquery object
+        * @param  {String} x_type 'left|right'
+        * @param  {String} y_type 'top|bottom'
+        * @param  {Number} x_offset Offset x values in pixels
+        * @param  {Number} y_offset Offset y values in pixels 
         */
       function setLocation(parent, child, x_type='left', y_type='top', x_offset=0, y_offset=0){
         // console.log('Setting location', parent.offset(), child.offset(), parent.height(), parent.width(), child.height(), child.width());
@@ -1781,10 +1926,10 @@
 
       /**
         * button - generates button with the given markup as contents
-        * @param {string} SVG markup string that contains the content of the button
-        * @param {number} Height of the content
-        * @param {}
-        * @return {object}  Returns the jquery object for button
+        * @param {String} svg SVG markup string that contains the content of the button
+        * @param {Number} height Height of the content
+        * @param {Object} config Various properties to define the button 
+        * 
         */
       function button(svg, height, config){
         config = config || {};
@@ -1858,17 +2003,6 @@
           // click
           button.on('mousedown', (e)=>{
             button.css('box-shadow', '0px 0px 1px black');
-            // var startX = e.clientX;
-            // var startY = e.clientY;
-
-            // setTimeout(()=>{
-            //   if(mouseX == startX && mouseY == startY){
-            //     console.log('Show tooltip');
-            //   }
-            //   else{
-            //     console.log('mouse moved');
-            //   }
-            // }, $3Dmol.longPressDuration);
           });
   
           button.on('mouseup', ()=>{
