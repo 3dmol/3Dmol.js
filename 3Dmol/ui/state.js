@@ -118,7 +118,7 @@ $3Dmol.StateManager = (function(){
       render();
     }
 
-    this.addSurface = function(property){
+    this.addSurface = function(property, callback){
       var id = makeid(4);
       property.id = id;
 
@@ -140,6 +140,7 @@ $3Dmol.StateManager = (function(){
       ).then((surfId)=>{
         surfaces[id] = surfId;
         console.log("StateManager::Surfaces", surfaces);
+        callback(id, surfId);
       }, (err)=>{
         console.log('It failed', err);
       });
@@ -329,6 +330,8 @@ $3Dmol.StateManager = (function(){
     this.createSelectionAndStyle = function(selSpec, styleSpec){
 
       var selId = findSelectionBySpec(selSpec);
+
+
       if(selId == null){
         selId = this.addSelection(selSpec);
         
@@ -343,11 +346,10 @@ $3Dmol.StateManager = (function(){
       this.ui.tools.selectionBox.editSelection(selId, selSpec, styleId, styleSpec);
       
       console.log('StateManager::Creating Selection and Style', selId, styleId, selections);
-
-      // creating selection and style 
+ 
     };
 
-    this.createSurface = function(surfaceType, sel, style){
+    this.createSurface = function(surfaceType, sel, style, sid){
       var selId = findSelectionBySpec(sel);
       
       if(selId == null){
@@ -376,11 +378,16 @@ $3Dmol.StateManager = (function(){
         }
       }
 
-      var surfId = this.addSurface(surfaceInput)
+      var surfId = makeid(4);
+      surfaces[surfId] = sid;
 
       this.ui.tools.surfaceMenu.addSurface(surfId, surfaceInput);
 
-      console.log('StateManager::Creating Surface', style, surfId, selId, surfaces);
+      // this.addSurface(surfaceInput, (id, sfid)=>{
+      //   console.log('StateManager::Creating Surface', style, id, sfid, selId, surfaces);
+      // });
+
+
       // Create Surface UI
     };
 

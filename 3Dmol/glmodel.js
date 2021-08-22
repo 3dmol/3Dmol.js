@@ -110,6 +110,12 @@ $3Dmol.GLModel = (function() {
         "Ni"
     ];
 
+    // prop : It is used to add the option for property in context menu in the 3dmol ui
+    // the code for prop can be found under /ui/ui.js -> UI -> ContextMenu -> setProperties -> submit.ui.on 
+    // gui : It is used to generate forms for different features in the 3dmol ui
+    // the code for gui can be found under /ui/form.js -> Form (Form defination)
+    // floatType : separates integer from float since these are used in 
+    // input validation of the 3dmol ui
     GLModel.validAtomSpecs = {
         "resn":{type:"string",valid :true, prop: true}, // Parent residue name
         "x":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's x coordinate
@@ -132,7 +138,7 @@ $3Dmol.GLModel = (function() {
         "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
         "b":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom b factor data
         "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
-        "clickable":{type:"boolean",valid:false, gui:true}, // Set this flag to true to enable click selection handling for this atom
+        "clickable":{type:"boolean",valid:false, gui:false}, // Set this flag to true to enable click selection handling for this atom
         "contextMenuEnabled":{type:"boolean",valid:false, gui:false}, // Set this flag to true to enable click selection handling for this atom
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
@@ -185,7 +191,7 @@ $3Dmol.GLModel = (function() {
     };
 
     var validSphereSpec = {
-        "hidden":{type:"boolean",gui:true},
+        "hidden":{type:"boolean",gui:false}, // needed in the new gui it has separate function to hide the spheres
         "singleBonds":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},

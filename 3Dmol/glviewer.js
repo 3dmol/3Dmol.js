@@ -4553,8 +4553,8 @@ $3Dmol.GLViewer = (function() {
             _stateManager.createSelectionAndStyle(sel, style);
         };
 
-        this.loadSurface = function(surfaceType, sel, style){
-            _stateManager.createSurface(surfaceType, sel, style);
+        this.loadSurface = function(surfaceType, sel, style, sid){
+            _stateManager.createSurface(surfaceType, sel, style, sid);
         };
 
         this.setModelTitle = function(title){

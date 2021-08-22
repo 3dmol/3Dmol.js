@@ -1385,52 +1385,94 @@ viewBox="0 0 512.002 512.002" style="enable-background:new 0 0 512.002 512.002;"
 </g>
 </svg>`;
 
-  this.change = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-  viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
-<g>
- <g>
-   <g>
-     <path d="M438.5,174.25l-128-85.333c-14.177-9.451-33.167,0.712-33.167,17.75v64H170.667C111.717,170.667,64,218.383,64,277.333
-       c0,11.782,9.551,21.333,21.333,21.333c11.782,0,21.333-9.551,21.333-21.333c0-35.386,28.614-64,64-64h106.667v64
-       c0,17.039,18.99,27.202,33.167,17.75l128-85.333C451.167,201.306,451.167,182.694,438.5,174.25z M320,237.472v-90.943
-       L388.207,192L320,237.472z"/>
-     <path d="M256,0C114.618,0,0,114.618,0,256s114.618,256,256,256s256-114.618,256-256S397.382,0,256,0z M256,469.333
-       c-117.818,0-213.333-95.515-213.333-213.333S138.182,42.667,256,42.667S469.333,138.182,469.333,256S373.818,469.333,256,469.333
-       z"/>
-   </g>
- </g>
+  this.change = `<svg
+  version="1.1"
+  id="Layer_1"
+  x="0px"
+  y="0px"
+  viewBox="0 0 512 512"
+  style="enable-background:new 0 0 512 512;"
+  xml:space="preserve"
+  sodipodi:docname="change.svg"
+  inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg"><defs
+  id="defs47" /><sodipodi:namedview
+  id="namedview45"
+  pagecolor="#ffffff"
+  bordercolor="#666666"
+  borderopacity="1.0"
+  inkscape:pageshadow="2"
+  inkscape:pageopacity="0.0"
+  inkscape:pagecheckerboard="0"
+  showgrid="false"
+  inkscape:zoom="1"
+  inkscape:cx="226"
+  inkscape:cy="256.5"
+  inkscape:window-width="1920"
+  inkscape:window-height="1027"
+  inkscape:window-x="-8"
+  inkscape:window-y="-8"
+  inkscape:window-maximized="1"
+  inkscape:current-layer="Layer_1" />
+
+
+<g
+  id="g14">
 </g>
-<g>
+<g
+  id="g16">
 </g>
-<g>
+<g
+  id="g18">
 </g>
-<g>
+<g
+  id="g20">
 </g>
-<g>
+<g
+  id="g22">
 </g>
-<g>
+<g
+  id="g24">
 </g>
-<g>
+<g
+  id="g26">
 </g>
-<g>
+<g
+  id="g28">
 </g>
-<g>
+<g
+  id="g30">
 </g>
-<g>
+<g
+  id="g32">
 </g>
-<g>
+<g
+  id="g34">
 </g>
-<g>
+<g
+  id="g36">
 </g>
-<g>
+<g
+  id="g38">
 </g>
-<g>
+<g
+  id="g40">
 </g>
-<g>
+<g
+  id="g42">
 </g>
-<g>
-</g>
-</svg>`;
+<g
+  id="g1800"
+  transform="translate(-0.1537225,-4.3038075)"><path
+    style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:22.416;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+    d="m 102.46172,128.30302 76.00859,-76.010515 0.15658,38.005766 0.1566,38.005769 h 153.53462 153.53462 v 38.00475 38.00475 H 256.15293 26.453131 Z"
+    id="path1171" /><path
+    style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:22.416;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+    d="m 409.84573,392.3046 -76.00859,76.01051 -0.15658,-38.00576 -0.1566,-38.00577 H 179.98934 26.454715 V 354.29883 316.29408 H 256.15452 485.85431 Z"
+    id="path1796" /></g></svg>`;
 
 };
 

@@ -129,14 +129,14 @@
         currentModel.css({
           'display' : 'inline-block',
           'font-family':'Arial',
-          'font-size':'16px',
+          'font-size':'12px',
           'font-weight': 'bold',
-          'padding' : '3px'
+          // 'padding' : '3px'
         });
 
         currentModelBox.append(currentModel);
 
-        var changeButton = new button(icons.change, 20, { tooltip : 'Change Model', backgroundColor : 'white', bfr : 0.5});
+        var changeButton = new button(icons.change, 16, { tooltip : 'Change Model', backgroundColor : 'white', bfr : 0.5});
         changeButton.ui.css({
           'display' : 'inline-block',
           'margin-left' : '4px',
@@ -169,7 +169,10 @@
 
         input.setWidth(125);
 
-        var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'})
+        var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'});
+        submitButton.ui.css({
+          'margin-left' : '10px'
+        })
         formBox.append(submitButton.ui);
 
         this.updateInputLength = function(){
@@ -387,6 +390,7 @@
           
           var selectionSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, selectionFormControl);
           parameters.append(selectionSpecForm.ui);
+          console.log('Selection Form Inputs', selectionSpecForm);
 
           var submitControls = $('<div></div>');
           var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
@@ -1529,7 +1533,7 @@
           }
 
           
-
+          // edit this code to add on edit selection option to work
           // boundingBox.on('mouseenter', function(){
           //   selections = stateManager.getSelectionList();
           //   selectionListElement = selections.map( (m)=>{
@@ -1538,10 +1542,11 @@
           //   listSurfaceFor.updateList(selectionListElement);
           //   listSurfaceOf.updateList(selectionListElement);
           // });
+
           function finalize(id){
             // element properties
             surfaceBox.data('surf-id', id);
-                
+            console.log('Setting up id for surface', id);
             heading.text('surf#' + id);
 
             header.show();

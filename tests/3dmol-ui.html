@@ -3,10 +3,27 @@
   <head>
     <meta charset="utf-8">
     <title>3dmol UI</title>
+    <style>
+      .viewer_3Dmoljs {
+        border-bottom : 1px solid black;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        padding : 0;
+        margin : 0;
+      }
+    </style>
   </head>
   <body>
     <script src="../build/3Dmol.js" async></script>
-    <div style="height: 90vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain": "A"}' data-style='{"cartoon":{"color":"spectrum"}}'></div>
+
+    <!-- Different divs to test out different input to ui -->
+    <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain": "A"}' data-style='{ "cartoon" : { "color" : "spectrum"} }' data-surface="VDW"></div>
+
+    <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain": "A", "hetflag" : true}' data-style='{"sphere":{"radius": 0.4}, "stick" : {}}' data-select1='{"chain" : "A"}' data-style1='{ "cartoon" : { "color" : "spectrum"}}'></div>
+
+    <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain": "A", "hetflag" : true}' data-style='{"sphere":{"radius": 0.4}, "stick" : {}}'></div>
 
     <script type="text/javascript">
       $3Dmol = (function(window) {
