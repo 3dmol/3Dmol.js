@@ -4549,16 +4549,45 @@ $3Dmol.GLViewer = (function() {
         };
 
         // State Management function 
+        /**
+         * Calls StateManager to add selection and style on the ui
+         * @function $3Dmol.GLViewer#loadSelectionStyle
+         * @param {AtomSelectionSpec} sel Atom Selection spec
+         * @param {AtomStyleSpec} style Atom Style spec
+         */
         this.loadSelectionStyle = function(sel, style){
             _stateManager.createSelectionAndStyle(sel, style);
         };
 
+        /**
+         * Calls StateManager to add surface and selection on the ui
+         * 
+         * @function $3Dmol.GLViewer#loadSurface
+         * @param {String} surfaceType Name of the surface type
+         * @param {AtomSelectionSpec} sel Atom Selection Spec
+         * @param {AtomStyleSpec} style Atom Style Spec
+         * @param {Number} sid Id of the surface that is already added
+         */
         this.loadSurface = function(surfaceType, sel, style, sid){
             _stateManager.createSurface(surfaceType, sel, style, sid);
         };
 
+        /**
+         * Sets the name of the file as title in the ui
+         * 
+         * @function $3Dmol.GlViewer#setModelTitle
+         * @param {String} title Name of file loaded
+         */
         this.setModelTitle = function(title){
             _stateManager.setModelTitle(title);
+        };
+        
+        /**
+         * Calls StateManager to start the UI
+         * @function $3Dmol.GLViewer#initiateUI
+         */
+        this.initiateUI = function(){
+            _stateManager.initiateUI();
         };
 
     }
