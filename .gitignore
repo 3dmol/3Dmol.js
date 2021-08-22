@@ -8,6 +8,9 @@ doc/scripts/toc.js
 .DS_Store
 package-lock.json  #suppose to commit, but triggers security warning on github
 .settings
+/assets
+/'design concepts'
+
 
 #Ignoring Virtual Environments for the Active Learning Environment Project
 .env
