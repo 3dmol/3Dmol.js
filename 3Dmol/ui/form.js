@@ -1,8 +1,5 @@
         $3Dmol.UI.Form = (function(){
             Form.Color = function(outerControl){
-                // var label = $('<div></div>');
-                // label.text(outerControl.key);
-
                 var redDot = $('<div></div>');
                 redDot.height(10);
                 redDot.width(10);
@@ -24,7 +21,7 @@
 
                 var surroundingBox = this.ui = $('<div></div>')
                 var boundingBox = $('<div></div>');
-                // surroundingBox.append(label);
+
                 surroundingBox.append(boundingBox);
 
                 var spectrumControl = {
@@ -49,20 +46,13 @@
                 sliders.append(RValue.ui, GValue.ui, BValue.ui);
                 
                 var color = $('<div></div>');
-                // color.width(50);
-                // color.height(color.width());
-                
+
                 boundingBox.append(sliders);
                 boundingBox.append(color);
                 
                 
                 // CSS
-                // boundingBox.width(400);
-                // label.css('width', '100%');
-                // boundingBox.css('display', 'flex');
-                // boundingBox.css('align-items', 'center');
-                
-                // RValue.ui.css('display', 'block');
+
                 RValue.slide.css('color', 'red');
                 
                 // GValue.ui.css('display', 'block');
@@ -71,9 +61,6 @@
                 // BValue.ui.css('display', 'block');
                 BValue.slide.css('color', 'blue');
                 
-                // color.css('display', 'inline-block');
-                // sliders.css('display', 'inline-block');
-
                 color.height(15);
                 // color.width(50);
                 color.css('margin-top', '6px');
@@ -88,7 +75,6 @@
                     var c = `rgb(${control.R.value}, ${control.G.value}, ${control.B.value})`;
                     color.css('background', c);
                     outerControl.value = c;
-                    // console.log('rn');
                     self.update(control);
                 }
 
@@ -107,8 +93,6 @@
                     else {
                         updatePreview();
                     }
-
-                    console.log(v);
                 }
 
                 this.getValue = function(){
@@ -120,7 +104,7 @@
                 }
 
                 this.setValue = function(colorValue){
-                    console.log('Color Value to set', colorValue);
+
                     if(colorValue == 'spectrum'){
                         spectrum.setValue(true);
                         spectrum.update(spectrumControl);
@@ -164,7 +148,6 @@
                 boundingBox.append(failMessage);
 
                 this.update = function(control){
-                    console.log("From::Input:update", "Default Update", control);
                 }
                 
                 select.on('click', {parent: this}, (event)=>{
@@ -215,10 +198,9 @@
                     });
                     
                     control.value = select.children('option:selected').val();
-                    console.log("List Type Input", control);
                   }
                   else {
-                      console.log('Incorrect value used to set', val);
+                      console.error('UI::Form::ListInput:incorrect value', val);
                   }
                 }
 
@@ -244,9 +226,6 @@
             }
             
             Form.Input = function(control){
-                // var label = $('<div></div>');
-                // label.text(control.key);    
-                
                 var surroundingBox = this.ui = $('<div></div>');
                 var boundingBox = $('<div></div>');
                 // surroundingBox.append(label);
@@ -294,10 +273,9 @@
                 });
 
                 this.update = function(control){
-                    console.log("From::Input:update", "Default Update", control);
+
                 }
 
-                // $(document).on('ready', ()=>{
                 input.on('change', { parent:this, control: control }, (event)=>{
                     inputString = input.val();
                     
@@ -318,15 +296,12 @@
 
                 var selectedText = null;
                 
-                input.on('select', (e)=>{
-                    console.log('Selection in input', e, input, e.target.selectionStart, e.target.selectionEnd, input.val().substring(e.target.selectionStart, e.target.selectionEnd) );
-                    
+                input.on('select', (e)=>{               
                     selectedText = input.val().substring(e.target.selectionStart, e.target.selectionEnd);
                 });
                 
                 
                 this.getValue = ()=>{
-                    // console.log("Form Inut", control);
                     return control;
                 }
                 
@@ -356,7 +331,6 @@
                     var dots = inputString.match(/\./g) || [];
                     var checkString = inputString.replaceAll(/\./g, '').replaceAll(/[0-9]/g, '');
 
-                    console.log('Check Float', dots, checkString)
                     if(dots.length > 1){ return false };
 
                     if(checkString != '') return false;
@@ -388,9 +362,7 @@
 
                 // Checks only number, comma and hyphen present
                 function checkRangeTokens(inputString){
-                    var finalString = inputString.replaceAll(',','').replaceAll('-','').replaceAll(/[0-9]/g, '').replaceAll(' ', '');
-
-                    console.log('Check string in input range', finalString );
+                    var finalString = inputString.replaceAll(',','').replaceAll('-','').replaceAll(/[0-9]/g, '').replaceAll(' ', '');;
 
                     if(finalString == '')
                         return true;
@@ -418,7 +390,6 @@
                         return checkRangeInput(rangeInput);
                     });
 
-                    console.log("Checking Range List", rangeList, validRangeList);
                     return validRangeList.find( (e)=>{ return e == false}) == undefined ? true : false; 
                 }
 
@@ -450,7 +421,6 @@
 
                 var checkInput = this.checkInput = function(){
                     var inputString = input.val();
-                    console.log("CheckInput", this.validationType, validationType)
                     
                     if(validationType == 'number'){
                         if(checkInputNumber()){
@@ -500,7 +470,6 @@
                     }
 
                     input.on('keydown keyup paste cut', function(event){
-                        console.log('Validation Type', validationType);
                         checkInput();
                     });
                 }
@@ -510,7 +479,6 @@
                     validationType = 'range';
 
                     input.on('keydown keyup paste cut', ()=>{
-                        console.log('Validation Type', validationType);
                         checkInput();
                     });
 
@@ -525,12 +493,10 @@
                 this.validate = function(){
                     if( (control.active == true && control.value != null && control.value != "" && checkInput()) || (control.active == false)){
                         input.css('box-shadow', 'none');
-                        console.log("Form::Input:validate", 'success', control);
                         return true
                     }
                     else {
                         input.css('box-shadow', '0px 0px 2px red');
-                        console.log("Form::Input:validate", 'failure', control);
                         return false;
                     }
                 }
@@ -552,7 +518,7 @@
                 this.click = ()=>{};
 
                 this.update = function(control){
-                    console.log("From::Input:Checkbox", "Default Update", control);
+
                 }
 
                 this.getValue = ()=>{
@@ -580,11 +546,7 @@
             }
 
             Form.Slider = function(control, style = {}){
-                // var label = $('<div></div>');
-                // label.text(control.key); 
-
                 var surroundingBox = this.ui = $('<div></div>');
-                // surroundingBox.append(label);
                 
                 var boundingBox = $('<div></div>');
                 surroundingBox.append(boundingBox);
@@ -606,7 +568,6 @@
                 slide.attr('min', min);
                 slide.attr('max', max);
                 slide.attr('step', step);
-                console.log('step::', step);
                 slide.attr('value', defaultValue);
                 control.value = defaultValue;
                 boundingBox.append(slide);
@@ -614,7 +575,7 @@
                 var setValue = false;
                 
                 this.update = function(control){
-                    console.log("Form::Slider:update", "Default Update", control);
+
                 };
 
                 this.getValue = ()=>{
@@ -629,7 +590,6 @@
                     if(setValue){
                         control.value = slide.val();
                         event.data.parent.update(control);
-                        // console.log('working');
                     }
                 });
 
@@ -710,7 +670,6 @@
                         boundingBox.append(prop.ui);
                     }
 
-                    // console.log('Checking Specs', prop.placeholder, key, specs[key]);
                 });
                 var self = this;
 
@@ -718,8 +677,7 @@
                 }
 
                 var update = (control)=>{
-                    console.log("Updated Form Values", this.getValue());
-                    this.update();
+
                 };
 
 
@@ -729,10 +687,10 @@
                 
                 this.getValue = function(){
                     mainControl.value = {};
-                    console.log("Form Inputs", inputs);
+
                     inputs.forEach((input)=>{
                         var inputValue = input.getValue();
-                        // console.log("Current Input Value", inputValue)
+
                         if(inputValue.active){
                             mainControl.value[inputValue.key] = inputValue.value;
                         }
@@ -748,7 +706,7 @@
 
                 this.validate = function(){
                     var validations = inputs.map((i)=>{
-                        // console.log("Checking inputs", i)
+
                         if(i.active.getValue().value){
                             return i.placeholder.validate();
                         }
@@ -757,7 +715,6 @@
                         }
                     });
 
-                    console.log('Checking Validation', validations);
 
                     if(validations.find( e => e == false) == undefined )
                         return true;
@@ -775,7 +732,7 @@
                                 return e;
                         });
 
-                        console.log(input);
+
 
                         input.placeholder.setValue(val[keys[i]]);
                         input.active.setValue(true);
@@ -786,7 +743,7 @@
                     // mainControl.value = val;
                     this.update(mainControl);
                     var v = this.getValue();
-                    console.log('Setting Key Value', mainControl, v, val, input);
+
                 }
 
                 this.getInputs = function(){
@@ -805,7 +762,7 @@
                         this.placeholder.ui.attr('type', 'text');
                     }
                     else if(specs[key].type == 'number'){
-                        console.log('Form::Property', specs[key]);
+
                         var slider = false;
                         
                         if(specs[key].min != undefined && specs[key].max != undefined && specs[key].default != undefined){
@@ -861,11 +818,10 @@
                         this.placeholder = new Form.EmptyElement(control);
                                 // return new Form.EmptyElement(control);
                     }
-
-                    // console.log("Checking placeholder", this.placeholder);
+;
                     
                     this.getValue = function(){
-                        // console.log("Property Input", key ,this.placeholder);
+
                         if(this.placeholder.getValue)
                             return this.placeholder.getValue();
                         else
@@ -875,15 +831,17 @@
 
                     // Adding active control for the property
                     var placeholder = this.placeholder;
-                    // console.log("Property", placeholder);
-                    placeholder.ui.hide();
-                    // this.active.ui.width(200);
-
-
+                    
                     if(type !='boolean') {
+                        placeholder.ui.hide();
                         boundingBox.append(this.active.ui);
                         this.active.update = function(c){
                             (c.value)? placeholder.ui.show() : placeholder.ui.hide();
+                            control.active = c.value;
+                        }
+                    }
+                    else {
+                        this.placeholder.update = function(c){
                             control.active = c.value;
                         }
                     }
