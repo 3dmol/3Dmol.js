@@ -306,7 +306,7 @@ $3Dmol.StateManager = (function(){
      * @param {Object} labelValue Output object from propertyMenu form of Context Menu
      * @param {AtomSpec} atom Atom spec that are to be added in the label 
      */
-    this.addAtomLabel = function(labelValue, atom){
+    this.addAtomLabel = function(labelValue, atom, styleName='milk'){
       var atomExist = Object.keys(atomLabel).find((i)=>{
         if (i == atom.index)
           return true;
@@ -324,11 +324,11 @@ $3Dmol.StateManager = (function(){
         this.removeAtomLabel(atom);
       }
 
-      console.log('Add Atom Label Value', labelValue);
+      console.log('Add Atom Label Value', labelValue, styleName);
       
       atomLabel[atom.index] = atomLabel[atom.index] || null;
       
-      var labelProp = $3Dmol.deepCopy($3Dmol.labelStyles['milk']);
+      var labelProp = $3Dmol.deepCopy($3Dmol.labelStyles[styleName]);
       labelProp.position = {
         x : atom.x, y : atom.y, z : atom.z
       }

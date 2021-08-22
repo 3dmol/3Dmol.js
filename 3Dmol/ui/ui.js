@@ -1106,7 +1106,7 @@
 
             if(props !=null){
               if(labelStyleValidation){
-                stateManager.addAtomLabel(props, atom);
+                stateManager.addAtomLabel(props, atom, stylesForLabel.getValue().value);
                 stateManager.exitContextMenu(false);
               }
               else {
