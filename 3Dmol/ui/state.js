@@ -549,6 +549,10 @@ $3Dmol.StateManager = (function(){
      this.ui = this.showUI(); 
     };
 
+    this.inititateUI = function(){
+      this.ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);
+      render();
+    }
     /**
      * Updates the UI on viewport change 
      * 
