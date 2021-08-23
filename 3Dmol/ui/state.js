@@ -401,8 +401,6 @@ $3Dmol.StateManager = (function(){
         // looking for same parameters length 
         var parameters = Object.keys(spec);
 
-        console.log('Comparing to two objects', Object.keys(lookSelection).length , parameters.length);
-
         if( Object.keys(lookSelection).length == parameters.length){
           for(var j = 0; j < parameters.length; j++){
             if( lookSelection[parameters[j]] != spec[parameters[j]]){

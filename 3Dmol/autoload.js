@@ -132,7 +132,7 @@ $3Dmol.autoload=function(viewer,callback){
                 glviewer.setStyle(select,style);
 
                 if(showUI){
-                    glviewer.loadSelectionStyle(select, style);
+                    glviewer.ui.loadSelectionStyle(select, style);
                 }
 
                 for(i = 0; i < selectstylelist.length; i++) {
@@ -140,19 +140,28 @@ $3Dmol.autoload=function(viewer,callback){
                     sty = selectstylelist[i][1] || {"line":{}};
                     glviewer.setStyle(sel, sty);
                     if(showUI){
-                        glviewer.loadSelectionStyle(sel, sty);
+                        glviewer.ui.loadSelectionStyle(sel, sty);
                     }
                 }
                 for(i = 0; i < surfaces.length; i++) {
                     sel = surfaces[i][0] || {};
                     sty = surfaces[i][1] || {};
 
-                    glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel).then((id)=>{
-                        if(showUI){
-                            glviewer.loadSurface('VDW', sel, sty, id);
-                            console.log(sty);
-                        }
-                    });
+                    if(showUI){
+                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel).then((param)=>{
+                            var surfid = param[0];
+                            var viewer = param[1];
+                            var style = param[2];
+                            var atomSel = param[3];
+                            // var allsel = param[4];
+                            // var focus = param[5];
+
+                            viewer.ui.loadSurface("VDW", atomSel, style, surfid);
+                        });
+                    }
+                    else {
+                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                    }
                     
                 }
                 for(i = 0; i < labels.length; i++) {
@@ -198,7 +207,7 @@ $3Dmol.autoload=function(viewer,callback){
                     if(showUI){
                         var modelName = viewerdiv.data(datatypes[i]);
 
-                        glviewer.setModelTitle(modelName);
+                        glviewer.ui.setModelTitle(modelName);
                     }
                     i += 1;
                     if(i < datauri.length) {

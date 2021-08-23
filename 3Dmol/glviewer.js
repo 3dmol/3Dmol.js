@@ -4033,7 +4033,7 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
          * @param {function} surfacecallback - function to be called after setting the surface
-         * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a surfid field for immediate access.
+         * @return {Promise} promise - Returns a promise that ultimately resovles to the [surfid, GLViewer, style, atomsel, allsel, focus].  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -4190,7 +4190,7 @@ $3Dmol.GLViewer = (function() {
                     return Promise.all(promises)
                     .then(function() {
                         surfobj.done = true;
-                        return Promise.resolve(surfid);
+                        return Promise.resolve([surfid, _viewer, style, atomsel, allsel, focus]);
                     });
 
                     // TODO: Asynchronously generate geometryGroups (not separate
@@ -4228,7 +4228,7 @@ $3Dmol.GLViewer = (function() {
                             cnt++;
                             if (cnt == extents.length) {
                                 surfobj.done = true;
-                                resolve(surfid); //caller of helper will resolve callback if present
+                                resolve([surfid, _viewer, style, atomsel, allsel, focus]); //caller of helper will resolve callback if present
                             }
                         };
 
@@ -4299,9 +4299,10 @@ $3Dmol.GLViewer = (function() {
             }
             surfaces[surfid] = surfobj;
             promise.surfid = surfid;
+            
             if(surfacecallback && typeof(surfacecallback) == "function") {
-                promise.then(function(surfid) {
-                    surfacecallback(surfid);
+                promise.then(function(surfaceParam) {
+                    surfacecallback(surfaceParam);
                 });
                 return surfid;
             }
@@ -4538,55 +4539,58 @@ $3Dmol.GLViewer = (function() {
             return camera.position.x;
         };
 
+
+        this.ui = {};
+
         /**
          * Set the default cartoon quality for newly created models.  Default is 5.
          * Current models are not affected.
          * @number quality, higher results in higher resolution renders
-         * @function $3Dmol.GLViewer#setDefaultCartoonQuality
+         * @function $3Dmol.GLViewer#ui.setDefaultCartoonQuality
          */
-        this.setDefaultCartoonQuality = function(val) {
+        this.ui.setDefaultCartoonQuality = function(val) {
             config.cartoonQuality = val;
         };
 
         // State Management function 
         /**
          * Calls StateManager to add selection and style on the ui
-         * @function $3Dmol.GLViewer#loadSelectionStyle
+         * @function $3Dmol.GLViewer#ui.loadSelectionStyle
          * @param {AtomSelectionSpec} sel Atom Selection spec
          * @param {AtomStyleSpec} style Atom Style spec
          */
-        this.loadSelectionStyle = function(sel, style){
+        this.ui.loadSelectionStyle = function(sel, style){
             _stateManager.createSelectionAndStyle(sel, style);
         };
 
         /**
          * Calls StateManager to add surface and selection on the ui
          * 
-         * @function $3Dmol.GLViewer#loadSurface
+         * @function $3Dmol.GLViewer#ui.loadSurface
          * @param {String} surfaceType Name of the surface type
          * @param {AtomSelectionSpec} sel Atom Selection Spec
          * @param {AtomStyleSpec} style Atom Style Spec
          * @param {Number} sid Id of the surface that is already added
          */
-        this.loadSurface = function(surfaceType, sel, style, sid){
+        this.ui.loadSurface = function(surfaceType, sel, style, sid){
             _stateManager.createSurface(surfaceType, sel, style, sid);
         };
 
         /**
          * Sets the name of the file as title in the ui
          * 
-         * @function $3Dmol.GlViewer#setModelTitle
+         * @function $3Dmol.GlViewer#ui.setModelTitle
          * @param {String} title Name of file loaded
          */
-        this.setModelTitle = function(title){
+        this.ui.setModelTitle = function(title){
             _stateManager.setModelTitle(title);
         };
         
         /**
          * Calls StateManager to start the
-         * @function $3Dmol.GLViewer#initiateUI
+         * @function $3Dmol.GLViewer#ui.initiateUI
          */
-        this.initiateUI = function(){
+        this.ui.initiateUI = function(){
             _stateManager.initiateUI();
         };
 
