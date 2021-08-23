@@ -10,13 +10,10 @@ $3Dmol.StateManager = (function(){
   function States(glviewer, config){
     config = config || {};
     config.ui = config.ui || false;
-    console.log('State Manager Initiated For the viewer', glviewer);
-    console.log('Viewer Configuration', );
-
 
     var canvas = $(glviewer.getRenderer().domElement);
     var parentElement = glviewer.container;
-    console.log('Container', parentElement, canvas.height(), canvas.width(), parentElement.height(), parentElement.width());
+
     var height = parentElement.height();
     var width = parentElement.width();
     var offset = canvas.offset();
@@ -29,7 +26,6 @@ $3Dmol.StateManager = (function(){
       ui : config.ui || undefined
     }
 
-    // console.log('')
     // Selection Handlers
     var selections = {};
 
@@ -50,7 +46,7 @@ $3Dmol.StateManager = (function(){
      * @returns String
      */
     this.addSelection = function(spec, sid = null){
-      // console.log('Add Selection Called');
+
       var id = sid || makeid(4);
       var selectionSpec = {
         spec : spec,
@@ -63,7 +59,6 @@ $3Dmol.StateManager = (function(){
       else 
         selections[id].spec = selectionSpec.spec;
 
-      console.log("StateManager::addSelection", selections, sid);
       render();
       return id;
     }
@@ -90,7 +85,6 @@ $3Dmol.StateManager = (function(){
      */
     this.toggleHide = function(sid){
       selections[sid].hidden = !selections[sid].hidden;
-      console.log('toggle hide', selections, selections[sid]);
       render();
     }
 
@@ -132,7 +126,6 @@ $3Dmol.StateManager = (function(){
         selection.styles[id].spec = spec;
       }
       
-      console.log("StateManager::addStyle", selections, sid, stid, spec);
       render();
 
       return id;
@@ -147,7 +140,6 @@ $3Dmol.StateManager = (function(){
      * @param {String} stid Style Id
      */
     this.removeStyle = function(sid, stid){
-      console.log(selections, stid, sid)
       delete selections[sid].styles[stid];
       render();
     }
@@ -185,7 +177,6 @@ $3Dmol.StateManager = (function(){
 
       var generatorAtom = (property.surfaceOf.value == 'self')? sel.spec : {};
 
-      console.log('StateManager::addSurface', property, style);
 
       glviewer.addSurface(
         $3Dmol.SurfaceType[property.surfaceType.value],
@@ -194,10 +185,9 @@ $3Dmol.StateManager = (function(){
         generatorAtom
       ).then((surfId)=>{
         surfaces[id] = surfId;
-        console.log("StateManager::Surfaces", surfaces);
         callback(id, surfId);
       }, (err)=>{
-        console.log('It failed', err);
+
       });
 
       return id;
@@ -225,7 +215,6 @@ $3Dmol.StateManager = (function(){
       var style = surfaceProperty.surfaceStyle.value || {}
       var sel = selections[surfaceProperty.surfaceFor.value];
 
-      console.log('Surfaces edited', surfaceProperty.id, surfaces, surfaces[surfaceProperty.id]);
       glviewer.removeSurface(surfaces[surfaceProperty.id]);
 
       glviewer.addSurface(
@@ -235,8 +224,6 @@ $3Dmol.StateManager = (function(){
       ).then((surfId)=>{
         surfaces[surfaceProperty.id] = surfId;
       });
-
-      console.log('StateManager::editSurface#Updating Surface', surfaceProperty)
     }
 
     /**
@@ -245,7 +232,6 @@ $3Dmol.StateManager = (function(){
      * @returns <Array of selection ids>
      */
     this.getSelectionList = function(){
-      console.log(Object.keys(selections))
       return Object.keys(selections);
     }
 
@@ -257,8 +243,7 @@ $3Dmol.StateManager = (function(){
      * @param {Number} x x coordinate of mouse on viewport
      * @param {Number} y y coordinate of mouse on the viewport
      */
-    this.openContextMenu = function(atom, x, y){
-      console.log('Open Context Menu', atom, x, y);  
+    this.openContextMenu = function(atom, x, y){ 
       var atomExist = false;
 
       if(atom){
@@ -285,7 +270,6 @@ $3Dmol.StateManager = (function(){
      * @param {Object} labelValue Output object from label form of Context Menu
      */
     this.addLabel = function(labelValue){
-      console.log('Label Added', labelValue);
       labels[labelValue.sel.value] = labels[labelValue.sel.value] || [];
 
       var labelProp = $3Dmol.labelStyles[labelValue.style.value];
@@ -324,7 +308,6 @@ $3Dmol.StateManager = (function(){
         this.removeAtomLabel(atom);
       }
 
-      console.log('Add Atom Label Value', labelValue, styleName);
       
       atomLabel[atom.index] = atomLabel[atom.index] || null;
       
@@ -341,7 +324,6 @@ $3Dmol.StateManager = (function(){
 
       atomLabel[atom.index] = glviewer.addLabel(labelText, labelProp);
       
-      console.log('Getting Atom Label', labelText, labelProp);
     }
 
     /**
@@ -351,7 +333,6 @@ $3Dmol.StateManager = (function(){
      * @param {Boolean} processContextMenu Specify the need to process the values in the context menu
      */
     this.exitContextMenu = function(processContextMenu = false){
-      console.log('Unfinished Labeling');
       this.ui.tools.contextMenu.hide(processContextMenu);
     }
 
@@ -362,7 +343,6 @@ $3Dmol.StateManager = (function(){
      */
     this.removeLabel = function(){
       // Add code to remove label 
-      console.log('Remove Label')
       this.ui.tools.contextMenu.hide();
     }
 
@@ -373,11 +353,9 @@ $3Dmol.StateManager = (function(){
      */
     this.removeAtomLabel = function(atom){
       var label = atomLabel[atom.index];
-      console.log("Stuff", label, atomLabel);
       glviewer.removeLabel(label);
       delete atomLabel[atom.index]; 
       
-      console.log("Stuff After removal", label, atomLabel);
       this.ui.tools.contextMenu.hide();
     }
 
@@ -465,7 +443,6 @@ $3Dmol.StateManager = (function(){
 
       this.ui.tools.selectionBox.editSelection(selId, selSpec, styleId, styleSpec);
       
-      console.log('StateManager::Creating Selection and Style', selId, styleId, selections);
  
     };
 
@@ -511,11 +488,6 @@ $3Dmol.StateManager = (function(){
       surfaces[surfId] = sid;
 
       this.ui.tools.surfaceMenu.addSurface(surfId, surfaceInput);
-
-      // this.addSurface(surfaceInput, (id, sfid)=>{
-      //   console.log('StateManager::Creating Surface', style, id, sfid, selId, surfaces);
-      // });
-
 
       // Create Surface UI
     };
@@ -566,10 +538,7 @@ $3Dmol.StateManager = (function(){
     
     // UI changes
 
-    // console.log('GetSelectionList', this.getSelectionList());
-
     function render(){
-      console.log('RENDER::', selections);
       // glviewer.();
       glviewer.setStyle({});
 

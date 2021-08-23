@@ -14,7 +14,6 @@
       var body = $('body');
       
       var mainParent = $(parentElement[0]);
-      console.log("Main Parent", mainParent.css('position'), config);
       // Generates the necessary UI elements
       var HEIGHT = config.height;
       var WIDTH = config.width;
@@ -194,11 +193,9 @@
           var validateId = input.validate();
 
           if(validateId && validateDb){
-            console.log("Add Model", control);
             stateManager.addModel(control);
           }
           else {
-            console.log('Please enter correct value');
           }
         });
 
@@ -410,7 +407,6 @@
           
           var selectionSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, selectionFormControl);
           parameters.append(selectionSpecForm.ui);
-          console.log('Selection Form Inputs', selectionSpecForm);
 
           var submitControls = $('<div></div>');
           var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
@@ -444,7 +440,6 @@
             var validate = selectionSpecForm.validate();
             if(validate){
               selectionSpecForm.getValue();
-              console.log('Selection Form Value', selectionFormControl, sid);
               var checkAtoms = stateManager.checkAtoms(selectionFormControl.value);
 
               if(Object.keys(selectionFormControl.value).length == 0){
@@ -575,13 +570,11 @@
           // Search selection with id 
           var selection = selections.children().find("[data-id='" + id + "']");
           
-          console.log('dsfasdf', selection);
 
           if(selection.length != 0) {
-            console.log('Editing Selection')
+
           }
           else {
-            console.log('Creating Selection');
             selection = new Selection();
             selection.setProperty(id, selSpec);
             selections.append(selection.ui);
@@ -590,8 +583,6 @@
           if(styleId != null){
             selection.addStyle(id, styleId, styleSpec);
           }
-
-          console.log(id, selSpec, styleId, styleSpec, selections.children());
 
         }
       }
@@ -718,7 +709,6 @@
           boundingBox.append(parameters);
 
           removeButton.ui.on('click', { parent: this, stid : stid }, function(e){
-            console.log(e.data.parent, e.data.stid, stid)
             stateManager.removeStyle(sid, stid);
             boundingBox.detach();
             delete this;
@@ -773,7 +763,6 @@
             var validate = styleSpecForm.validate();
             if(validate){
               styleSpecForm.getValue();
-              console.log('Style Form Value', styleFormControl, sid, stid);
               
               if(Object.keys(styleFormControl.value).length == 0){
                 
@@ -800,7 +789,6 @@
               styleSpecForm.getValue();
 
               if(Object.keys(styleFormControl.value).length == 0){
-                console.log(styleSpecForm.getValue());
                 alertBox.error('Please enter some value');
               }
               else{
@@ -1102,7 +1090,6 @@
           submit.ui.on('click', ()=>{
             var props = processPropertyList();
             var labelStyleValidation = stylesForLabel.validate();
-            console.log(labelStyleValidation);
 
             if(props !=null){
               if(labelStyleValidation){
@@ -1246,7 +1233,7 @@
             if(validate){
               stateManager.addLabel(addLabelValue);
             } else {
-              console.log('Please Check the input');
+
             }       
           });
 
@@ -1300,7 +1287,6 @@
 
         removeLabelMenu.on('click', { atom : this.atom }, function(e){
           stateManager.removeAtomLabel(removeLabelMenu.atom);
-          // console.log(removeLabelMenu.atom, "Atom to remove");
         });
 
 
@@ -1315,7 +1301,6 @@
          * @param {Boolean} atomExist if atom label is previously added it is set true else false
          */
         this.show = function(x, y, atom, atomExist){
-          console.log('Context Menu open and atom Exist', atomExist);
 
           if(atomExist){
             removeLabelMenu.show();
@@ -1337,7 +1322,6 @@
 
           unsetForm();
           setPosition(boundingBox, x, y);
-          console.log('CONTEXT MENU::Atom Selected', atom);
           boundingBox.show();
           this.hidden = false;
           
@@ -1362,7 +1346,6 @@
             var propsForLabel = processPropertyList();
             if(propsForLabel != null){
               stateManager.addAtomLabel(propsForLabel, this.atom);
-              // console.log("These property will be used to add label", propsForLabel);
             }
           }
 
@@ -1416,10 +1399,6 @@
         boundingBox.css({
           'overflow':'visible',
         });
-
-        console.log('Surface box display box height', HEIGHT);
-
-        
 
         var newSurfaceSpace = $('<div></div>');
         newSurfaceSpace.css({
@@ -1650,8 +1629,6 @@
               validated = false;
             }
 
-            console.log('Surface Menu Validation', control, validated, listSurfaceFor.validate(), listSurfaceOf.validate(), listSurfaceType.validate(), formSurfaceStyle.validate()   )
-
             return validated;
           }
         
@@ -1668,7 +1645,6 @@
           function finalize(id){
             // element properties
             surfaceBox.data('surf-id', id);
-            console.log('Setting up id for surface', id);
             heading.text('surf#' + id);
 
             header.show();
@@ -1694,8 +1670,6 @@
                 _editingForm = false;
               }
               else{
-                console.log('Edit Surface called');
-
                 formSurfaceStyle.getValue();
                 control.id = surfaceBox.data('surf-id');
                 stateManager.editSurface(control); // -> add updateSurface funciton to surfaceMenu
@@ -1745,8 +1719,6 @@
             listSurfaceType.getValue();
             formSurfaceStyle.getValue();
 
-            console.log('New Value', control, listSurfaceFor.getValue(), listSurfaceOf.getValue(), listSurfaceType.getValue(), formSurfaceStyle.getValue());
-
           }
 
         }
@@ -1792,14 +1764,11 @@
          * @param {String} id Id of the surface generated in the StateManager
          * @param {Object} surfaceSpec Values of different property required for setting values in surface menu
          */
-        this.addSurface = function(id, surfaceSpec){
-          console.log('Addting surface', id, surfaceSpec);
-          
+        this.addSurface = function(id, surfaceSpec){          
           var newSurface = new Surface();
           newSurfaceSpace.append(newSurface.ui);
 
           newSurface.editSurface(id, surfaceSpec);
-
         }
       }
 
@@ -1813,7 +1782,6 @@
        * @param {number} top : css top peroperty
        */
       function setPosition(ele, left, top){
-
         ele.css('left', left);
         ele.css('top', top);
       }
@@ -1832,7 +1800,6 @@
         * @param  {Number} y_offset Offset y values in pixels 
         */
       function setLocation(parent, child, x_type='left', y_type='top', x_offset=0, y_offset=0){
-        // console.log('Setting location', parent.offset(), child.offset(), parent.height(), parent.width(), child.height(), child.width());
 
         // p_ stands for parent
         child.css('z-index', 99);
@@ -1848,7 +1815,6 @@
 
         var padding = parseInt(parent.css('padding').replace('px', ''));
         padding = (padding)? padding: 0;
-        console.log("Checking Padding", padding == NaN, padding)
         var p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
         var p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
 
@@ -1860,7 +1826,6 @@
         };
 
         if(x_type == 'left'){
-          // console.log('left is called');
           c_position.left = padding + x_offset;
         }
         else if(x_type == 'center'){
@@ -1887,7 +1852,6 @@
         }
 
         setPosition(child, c_position.left, c_position.top);
-        console.log('Setting Location', c_position, p_height, c_height, y_offset, padding);
       }
 
       // Copied from glviewer.js
@@ -2028,11 +1992,7 @@
           })
 
         }
-
-
-
       }
-
     }
 
     return UI;

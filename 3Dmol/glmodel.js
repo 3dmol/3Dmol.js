@@ -117,7 +117,7 @@ $3Dmol.GLModel = (function() {
     // floatType : separates integer from float since these are used in 
     // input validation of the 3dmol ui
     GLModel.validAtomSpecs = {
-        "resn":{type:"string",valid :true, prop: true}, // Parent residue name
+        "resn":{type:"string",valid :true, prop: true, gui: true}, // Parent residue name
         "x":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's x coordinate
         "y":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's y coordinate
         "z":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's z coordinate
