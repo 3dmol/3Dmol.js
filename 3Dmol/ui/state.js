@@ -48,11 +48,12 @@ $3Dmol.StateManager = (function(){
     this.addSelection = function(spec, sid = null){
 
       var id = sid || makeid(4);
+
       var selectionSpec = {
         spec : spec,
         styles : {},
         hidden : false
-      }
+      };
 
       if(sid == null)
         selections[id] = selectionSpec;
@@ -185,7 +186,9 @@ $3Dmol.StateManager = (function(){
         generatorAtom
       ).then((surfId)=>{
         surfaces[id] = surfId;
-        callback(id, surfId);
+
+        if(callback != undefined)
+          callback(id, surfId);
       }, (err)=>{
 
       });
@@ -397,6 +400,9 @@ $3Dmol.StateManager = (function(){
         
         // looking for same parameters length 
         var parameters = Object.keys(spec);
+
+        console.log('Comparing to two objects', Object.keys(lookSelection).length , parameters.length);
+
         if( Object.keys(lookSelection).length == parameters.length){
           for(var j = 0; j < parameters.length; j++){
             if( lookSelection[parameters[j]] != spec[parameters[j]]){
@@ -404,6 +410,8 @@ $3Dmol.StateManager = (function(){
               break;
             }
           }
+        } else {
+          match = false;
         }
 
         if(match){
@@ -429,10 +437,8 @@ $3Dmol.StateManager = (function(){
 
       var selId = findSelectionBySpec(selSpec);
 
-
       if(selId == null){
         selId = this.addSelection(selSpec);
-        
       }
 
       var styleId = null;
@@ -443,7 +449,6 @@ $3Dmol.StateManager = (function(){
 
       this.ui.tools.selectionBox.editSelection(selId, selSpec, styleId, styleSpec);
       
- 
     };
 
     /**

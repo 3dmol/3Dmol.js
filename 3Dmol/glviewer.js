@@ -372,7 +372,7 @@ $3Dmol.GLViewer = (function() {
         // Checks for selection intersects on mousedown
         var handleClickSelection = function(mouseX, mouseY, event) {
             let intersects = targetedObjects(mouseX,mouseY,clickables);
-            console.log('handleClickSelection', mouseX, mouseY, intersects);
+            // console.log('handleClickSelection', mouseX, mouseY, intersects);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined) {
@@ -723,12 +723,12 @@ $3Dmol.GLViewer = (function() {
             setTimeout(function(){
                 if(ev.originalEvent.targetTouches) {
                     if(touchHold == true){
-                        console.log('Touch hold', x,y);
+                        // console.log('Touch hold', x,y);
                         glDOM = $(renderer.domElement);
                         glDOM.trigger('contextmenu');
                     }
                     else {
-                        console.log('Touch hold ended earlier');
+                        // console.log('Touch hold ended earlier');
     
                     }
                 }
@@ -891,11 +891,11 @@ $3Dmol.GLViewer = (function() {
 
         var handleContextMenuSelection = function(mouseX, mouseY){
             let intersects = targetedObjects(mouseX,mouseY,contextMenuEnabledAtoms);
-            console.log('Intersected Objects',mouseX, mouseY, contextMenuEnabledAtoms,  intersects[0]);
+            // console.log('Intersected Objects',mouseX, mouseY, contextMenuEnabledAtoms,  intersects[0]);
             var selected = null;
             if(intersects.length) {
                 selected = intersects[0].clickable;
-                console.log('intersects and selected', selected);
+                // console.log('intersects and selected', selected);
             }
             
             var offset = canvasOffset();
@@ -912,7 +912,7 @@ $3Dmol.GLViewer = (function() {
             if(newX != mouseStartX || newY != mouseStartY){
                 return;
             }else{
-                console.log('Context Menu Called', ev);
+                // console.log('Context Menu Called', ev);
                 var x = mouseStartX;
                 var y = mouseStartY;
                 var offset = canvasOffset();
@@ -940,9 +940,9 @@ $3Dmol.GLViewer = (function() {
 
                 glDOM.on("contextmenu", _handleContextMenu);
 
-                glDOM.on('taphold', function(e){
-                    console.log('touchandhold successful', e);
-                });
+                // glDOM.on('taphold', function(e){
+                //     // console.log('touchandhold successful', e);
+                // });
 
             }
         };
@@ -2745,7 +2745,7 @@ $3Dmol.GLViewer = (function() {
                                 new $3Dmol.Vector3(1, 0, 1),
                                 new $3Dmol.Vector3(1, 1, 1)  ];
 
-                console.log('Matrix4', data.matrix4, data.matrix);
+                // console.log('Matrix4', data.matrix4, data.matrix);
                 if(data.matrix4) {
                     for (let i = 0; i < points.length; i++) {
                         if(data.size) points[i].multiplyVectors(points[i],data.size); //matrix is for unit vectors, not whole box

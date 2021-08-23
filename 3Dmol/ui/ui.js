@@ -237,6 +237,7 @@
       function SelectionBox(icon, side='left') {
         var selectionBox = this.ui = $('<div></div>');
         _editingForm = false;
+        var selectionObjects = [];
 
         var selections = $('<div></div>');
         var scrollBox = $('<div></div>');
@@ -310,6 +311,7 @@
         function Selection(){
           var boundingBox = this.ui = $('<div></div>');
           var sid = this.id = null;
+          selectionObjects.push(this);
           boundingBox.css({
             'background' : '#e8e8e8',
             'padding' : '4px 4px 2px 4px',
@@ -427,9 +429,9 @@
           function finalizeSelection(id){
             header.show();
             controls.editMode = true;
-            sid = id;
+            sid = this.id = id;
             heading.text('Sel#' + id);
-            boundingBox.data('sel-id', id);
+            boundingBox.attr('data-id', id);
             parameters.hide();
             showStyle = true;
             styleBox.setSid(id);
@@ -461,6 +463,17 @@
             }
           }
 
+          function removeSelf(selection){
+            var selectionToRemove = selectionObjects.find((sel)=>{
+              if(selection == sel){
+                console.log('Selection found', selection);
+                return true;
+              }
+            });
+
+            // delete selectionToRemove;
+          }
+
           submit.ui.on('click', ()=>{
             if(controls.editMode == false){
               if(allControl.value){
@@ -486,13 +499,15 @@
             }
           });
 
+          var self = this;
+
           cancel.ui.on('click', ()=>{
             if(controls.editMode){
               parameters.hide();
             }
             else {
               boundingBox.detach();
-              delete this;
+              removeSelf(self);
               _editingForm = false;
             }
           });
@@ -567,12 +582,13 @@
         this.editSelection = function(id, selSpec, styleId, styleSpec){
           // if selection does not exist create new 
 
+          // This thing works but I am not sure how!
+
           // Search selection with id 
-          var selection = selections.children().find("[data-id='" + id + "']");
-          
+          var selectionUI = selections.children('[data-id='+ id +']');
 
-          if(selection.length != 0) {
-
+          if(selectionUI.length != 0) {
+            
           }
           else {
             selection = new Selection();
