@@ -925,9 +925,9 @@
          */
         this.warning = function(msg){
           boundingBox.css({
-            'background' : 'yellow',
-            'color' : 'orange',
-            'border' : '1px solid orange'
+            'background' : '#fff3cd',
+            'color' : '#856409',
+            'border' : '1px solid #856409'
           });
 
           boundingBox.text(msg);
