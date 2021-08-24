@@ -1748,18 +1748,15 @@
         // Surface addition
 
         addButton.ui.on('click', { surfaces: this }, function(e){
-          if(stateManager.getSelectionList().length == 0){
-            alertBox.error('Please create some selections first');
+          
+          if(!_editingForm){
+            var newSurface = new Surface();
+            newSurfaceSpace.append(newSurface.ui);
+            _editingForm = true;
+          }else {
+            alertBox.warning('Please complete the previous form first');
           }
-          else {
-            if(!_editingForm){
-              var newSurface = new Surface();
-              newSurfaceSpace.append(newSurface.ui);
-              _editingForm = true;
-            }else {
-              alertBox.warning('Please complete the previous form first');
-            }
-          }
+          
           
         });
 
