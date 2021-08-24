@@ -1529,6 +1529,7 @@
           surfaceType.append(labelSurfaceType, listSurfaceType.ui);
           surfacePropertyBox.append(surfaceType);
           
+          listSurfaceType.setValue(Object.keys($3Dmol.SurfaceType)[0]);
           // Surface Style
           var surfaceStyle = $('<div></div>');
 
@@ -1584,11 +1585,13 @@
             }
           }
 
+          listSurfaceOf.setValue('all');
+
           surfaceOf.append(labelSurfaceOf, listSurfaceOf.ui, hintbox);
           surfacePropertyBox.append(surfaceOf);
           
           // Surface For
-          var selectionListElement = stateManager.getSelectionList();
+          var selectionListElement = ['all'].concat(stateManager.getSelectionList());
           var surfaceFor = $('<div></div>');
           
           var labelSurfaceFor = $('<div></div>');
@@ -1596,7 +1599,8 @@
           labelSurfaceFor.css(defaultTextStyle);
 
           var listSurfaceFor = new $3Dmol.UI.Form.ListInput(control.surfaceFor, selectionListElement);
-          
+          listSurfaceFor.setValue('all');
+
           surfaceFor.append(labelSurfaceFor, listSurfaceFor.ui);
           surfacePropertyBox.append(surfaceFor);
           

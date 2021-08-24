@@ -174,7 +174,7 @@ $3Dmol.StateManager = (function(){
       if(style == null)
         style = {};
 
-      var sel = selections[property.surfaceFor.value];
+      var sel = (property.surfaceFor.value == 'all') ? {} : selections[property.surfaceFor.value];
 
       var generatorAtom = (property.surfaceOf.value == 'self')? sel.spec : {};
 
@@ -184,11 +184,11 @@ $3Dmol.StateManager = (function(){
         style,
         sel.spec,
         generatorAtom
-      ).then((surfId)=>{
-        surfaces[id] = surfId;
+      ).then((surfParam)=>{
+        surfaces[id] = surfParam[0];
 
         if(callback != undefined)
-          callback(id, surfId);
+          callback(id, surfParam[0]);
       }, (err)=>{
 
       });
@@ -202,8 +202,8 @@ $3Dmol.StateManager = (function(){
      * @param {String} id Surface Id
      */
     this.removeSurface = function(id){
-      
       glviewer.removeSurface(surfaces[id])
+
       delete surfaces[id];
 
     }
