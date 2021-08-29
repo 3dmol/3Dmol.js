@@ -524,7 +524,7 @@ $3Dmol.StateManager = (function(){
      this.ui = this.showUI(); 
     };
 
-    this.inititateUI = function(){
+    this.initiateUI = function(){
       this.ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);
       render();
     }

@@ -68,3 +68,45 @@ $3Dmol.labelStyles = {
 };
 
 $3Dmol.longPressDuration = 1500;
+
+$3Dmol.defaultCSS = {
+  ListInput : {
+    select : {
+      'width' : 'auto',
+      'border' : 'none',
+      'margin' : '0px',
+      'font-family' : 'Arial',
+      'padding' : '0px',
+      'height' : '20px',
+      'border-radius' : '4px',
+      'box-sizing' : 'border-box'
+    }
+  },
+  Input : {
+    input : {
+      'margin-bottom' : '0px',
+      'padding' : '0px',
+      'border-radius' : '4px',
+      'font-family' : 'Arial',
+      'width' : '96%'
+    },
+
+    boundingBox : {
+      'margin-left' : '4px',
+      'margin-right' : '',
+    }
+  },
+  Checkbox : {},
+  Slider : {},
+  Color : {},
+  TextDefault : {
+    'font-family' : 'Arial',
+    'margin-left' : '4px'
+  },
+
+  LinkBreak : {
+    'height' : '3px',
+    'border-bottom' : '1px solid #687193'
+  }
+
+}

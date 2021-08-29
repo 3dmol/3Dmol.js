@@ -68,11 +68,15 @@
         var selectionBox = this.tools.selectionBox;
         var surfaceMenu = this.tools.surfaceMenu;
         var modelToolBar = this.tools.modelToolBar;
+        var HEIGHT = mainParent.height();
 
+        console.log('New Height', HEIGHT);
         setLocation(mainParent, modelToolBar.ui, 'left', 'top');
         // modelToolBar.updateInputLength();
         setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
+        selectionBox.updateScrollBox(HEIGHT);
         setLocation(mainParent, surfaceMenu.ui, 'right', 'top',  0, modelToolBar.ui.height() + 5);
+        surfaceMenu.updateScrollBox(HEIGHT);
       }
 
       /**
@@ -170,11 +174,11 @@
           'width' : '125px'
         });
 
-        input.setWidth(125);
+        // input.setWidth(125);
 
         var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'});
         submitButton.ui.css({
-          'margin-left' : '10px'
+          'margin' : '0px'
         })
         formBox.append(submitButton.ui);
 
@@ -286,6 +290,10 @@
         scrollBox.css('overflow-x', 'visible');
         
         selections.css('box-sizing', 'content-box');
+
+        this.updateScrollBox = function(height){
+          scrollBox.css('max-height', height*0.8);
+        }
 
         // Action
         var hidden = true;
@@ -1422,6 +1430,10 @@
           'overflow-y': 'auto',
           'overflow-x' : 'hidden'
         });
+
+        this.updateScrollBox = function(height){
+          newSurfaceSpace.css('max-height', height*0.8);
+        }
         // newSurfaceSpace.append(controlButton);
         // controlButton.hide();
 
@@ -1994,19 +2006,6 @@
             // mouseX = e.clientX;
             // mouseY = e.clientY;
           });
-
-          var timer;
-          button.on('touchstart', (e)=>{
-            timer = setTimeout(()=>{
-              (tooltipText != null)? tooltipBox.show() : null;
-            }, $3Dmol.longPressTime)
-          });
-
-          button.on('touchend', ()=>{
-            (tooltipText != null)? tooltipBox.hide() : null;
-            if(timer)
-              clearTimeout(timer);
-          })
 
         }
       }

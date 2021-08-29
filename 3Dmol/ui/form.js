@@ -161,6 +161,7 @@ $3Dmol.UI.Form = (function () {
         surroundingBox.append(boundingBox);
 
         var select = $('<select></select>');
+        select.css($3Dmol.defaultCSS.ListInput.select);
 
         boundingBox.append(select);
 
@@ -302,7 +303,7 @@ $3Dmol.UI.Form = (function () {
         this.setWidth(75);
 
         input.css({
-            'margin-left': '4px'
+            // 'margin-left': '4px'
         });
 
         this.update = function (control) {
@@ -527,6 +528,11 @@ $3Dmol.UI.Form = (function () {
             }
         }
 
+        // CSS 
+
+        input.css($3Dmol.defaultCSS.Input.input);
+        boundingBox.css($3Dmol.defaultCSS.Input.boundingBox);
+
     }
 
     /**
@@ -537,6 +543,7 @@ $3Dmol.UI.Form = (function () {
     Form.Checkbox = function (control) {
         var label = $('<div></div>');
         label.text(control.key);
+        label.css($3Dmol.defaultCSS.TextDefault);
 
         var surroundingBox = this.ui = $('<div></div>');
         var boundingBox = $('<div></div>');
@@ -868,7 +875,7 @@ $3Dmol.UI.Form = (function () {
 
             } else if (specs[key].type == 'form') {
                 this.placeholder = new Form(specs[key].validItems, control);
-                this.placeholder.ui.append($('<hr />'));
+                this.placeholder.ui.append($('<div></div>').css($3Dmol.defaultCSS.LinkBreak));
             } else {
                 this.placeholder = new Form.EmptyElement(control);
                 // return new Form.EmptyElement(control);

@@ -8,7 +8,7 @@ The code below is all that is needed to create the displayed viewer.
          <div style="height: 400px; width: 400px; position: relative;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='stick' ></div>       
 ```
 
-<div style="height: 500px; width: 500px; position: relative;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='stick'></div>       
+<div style="height: 500px; width: 500px; position: relative;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='stick' data-ui="true"></div>       
 
 The contents of the viewer can be set and manipulated through the use of `data-` tags, as shown above.  Supported tags include:
  - **data-pdb** The value describes a PDB ID to be loaded into the viewer.
