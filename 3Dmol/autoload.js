@@ -40,6 +40,12 @@ $3Dmol.autoload=function(viewer,callback){
                 datauri.push(uri);
                 type = uri.substr(uri.lastIndexOf('.')+1);                
                 datatypes.push(type);
+
+                var molName = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
+                if(molName == '/') 
+                    molName = uri.substring(uri.lastIndexOf('/') + 1);
+
+                viewerdiv.data(datatypes[datatypes.length -1 ], molName);
             }
             
             var divdata=viewerdiv.data();
@@ -76,7 +82,7 @@ $3Dmol.autoload=function(viewer,callback){
             var spin = null;
             var d = viewerdiv.data();
             
-            //let users specify individual but matching select/style tags, eg.
+            //let users specify individual but matching select/style/surface tags, eg.
             //data-select1 data-style1
             var stylere = /style(.+)/;
             var surfre = /surface(.*)/;
@@ -124,15 +130,39 @@ $3Dmol.autoload=function(viewer,callback){
             var applyStyles = function(glviewer) {
                 var sel, sty;
                 glviewer.setStyle(select,style);
+
+                if(showUI){
+                    glviewer.ui.loadSelectionStyle(select, style);
+                }
+
                 for(i = 0; i < selectstylelist.length; i++) {
                     sel = selectstylelist[i][0] || {};
                     sty = selectstylelist[i][1] || {"line":{}};
                     glviewer.setStyle(sel, sty);
+                    if(showUI){
+                        glviewer.ui.loadSelectionStyle(sel, sty);
+                    }
                 }
                 for(i = 0; i < surfaces.length; i++) {
                     sel = surfaces[i][0] || {};
                     sty = surfaces[i][1] || {};
-                    glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+
+                    if(showUI){
+                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel).then((param)=>{
+                            var surfid = param[0];
+                            var viewer = param[1];
+                            var style = param[2];
+                            var atomSel = param[3];
+                            // var allsel = param[4];
+                            // var focus = param[5];
+
+                            viewer.ui.loadSurface("VDW", atomSel, style, surfid);
+                        });
+                    }
+                    else {
+                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                    }
+                    
                 }
                 for(i = 0; i < labels.length; i++) {
                     sel = labels[i][0] || {};
@@ -174,6 +204,11 @@ $3Dmol.autoload=function(viewer,callback){
                     uri = datauri[i]; //this is where the moldata came from
                     var type = viewerdiv.data("type") || viewerdiv.data("datatype") || datatypes[i]; 
                     glviewer.addModel(moldata, type, options);
+                    if(showUI){
+                        var modelName = viewerdiv.data(datatypes[i]);
+
+                        glviewer.ui.setModelTitle(modelName);
+                    }
                     i += 1;
                     if(i < datauri.length) {
                         $.get(datauri[i], process, 'text');

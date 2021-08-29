@@ -1,16 +1,10 @@
-  /*
-  * This is ui that we are trying to draw at the time of generationo
-  * of viewer.
-  * Refer to line number 43 of the glViewer to see the viewer code
-  */
-
-  /**
-   * $3Dmol.UI - UI creates panels of viewer to assist control of the viewport in
-   * 3dmol.js
-   *
-   * @param  {$3Dmol.StateManager} Manages states of the UI
-   * @return {object} configuration for the UI
-   */
+/**
+ * $3Dmol.UI - UI creates panels in the viewer to assist control of the viewport
+ * @constructor 
+ * @param {$3Dmol.StateManager} stateManager StateManager is required to have interaction between glviewer and the ui. 
+ * @param {Object} config Loads the user defined parameters to generate the ui
+ * @param {Object} parentElement Refers the parent division used to hold the canvas for 3Dmol.js 
+ */
   $3Dmol.UI = (function(){
     function UI(stateManager, config, parentElement){
       config = config || {}
@@ -20,21 +14,20 @@
       var body = $('body');
       
       var mainParent = $(parentElement[0]);
-      console.log("Main Parent", mainParent.css('position'), config);
       // Generates the necessary UI elements
       var HEIGHT = config.height;
       var WIDTH = config.width;
       var uiElements = this.tools = generateUI(config);
       
       /**
-       * @function generateUI creates all the jquery object of different UI features
-       * @param  {object} config
+       * Creates all the jquery object of different UI features
+       * @param  {Object} config
        */
       function generateUI(config){
         var modelToolBar = new ModelToolbar();
         mainParent.append(modelToolBar.ui);
         setLocation(mainParent, modelToolBar.ui, 'left', 'top');
-        modelToolBar.updateInputLength();
+        // modelToolBar.updateInputLength();
 
         var contextMenu = new ContextMenu();
         mainParent.append(contextMenu.ui);
@@ -49,7 +42,7 @@
         mainParent.append(selectionBox.ui);
         setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
 
-          // Fixing Context Menu Behaviour
+        // Fixing Context Menu Behaviour
         selectionBox.ui.on('mousedown', ()=>{
           stateManager.exitContextMenu();
         });
@@ -66,31 +59,45 @@
         } 
       }
 
+      /**
+       * Resize the panel with respect to the new viewport
+       * 
+       * @function $3Dmol.UI#resize
+       */
       this.resize = function(){
         var selectionBox = this.tools.selectionBox;
         var surfaceMenu = this.tools.surfaceMenu;
         var modelToolBar = this.tools.modelToolBar;
+        var HEIGHT = mainParent.height();
 
         setLocation(mainParent, modelToolBar.ui, 'left', 'top');
-        modelToolBar.updateInputLength();
+        // modelToolBar.updateInputLength();
         setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
+        selectionBox.updateScrollBox(HEIGHT);
         setLocation(mainParent, surfaceMenu.ui, 'right', 'top',  0, modelToolBar.ui.height() + 5);
+        surfaceMenu.updateScrollBox(HEIGHT);
       }
 
+      /**
+       * ModelToolbar is part of $3Dmol.UI to edit or change the model loaded into the viewer
+       * 
+       * @function ModelToolbar
+       */
       function ModelToolbar(){
         var boundingBox = this.ui = $('<div></div>');
 
         boundingBox.css({
           'position' : 'relative',
-          'min-width' : '250px'
+          'min-width' : '150px'
         });
 
-        var modelButton = new button(icons.molecule, 20, 'Toggle Model Selection Bar');
+        
+        var modelButton = new button(icons.molecule, 20, {tooltip : 'Toggle Model Selection Bar'} );
         boundingBox.append(modelButton.ui);
 
         modelButton.ui.css({
           'display' : 'inline-block',
-          'top':'3px'
+          'top':'3px',
         });
 
         var control = {
@@ -113,51 +120,127 @@
           'display' : 'inline-block',
           'background' : '#e4e4e4',
           'padding' : '2px',
-          'border-radius' : '3px'
+          'border-radius' : '3px',
+          // 'width' : '90%'
         });
 
         boundingBox.append(surroundingBox);
 
+        var currentModelBox = $('<div></div>');
+        currentModelBox.css({
+          
+        });
+
+        var currentModel = $('<div></div>');
+        currentModel.css({
+          'display' : 'inline-block',
+          'font-family':'Arial',
+          'font-size':'12px',
+          'font-weight': 'bold',
+          // 'padding' : '3px'
+        });
+
+        currentModelBox.append(currentModel);
+
+        var changeButton = new button(icons.change, 16, { tooltip : 'Change Model', backgroundColor : 'white', bfr : 0.5});
+        changeButton.ui.css({
+          'display' : 'inline-block',
+          'margin-left' : '4px',
+        });
+        currentModelBox.append(changeButton.ui);
+
+        currentModelBox.hide();
+        surroundingBox.append(currentModelBox);
+
+        var formBox = $('<div></div>');
+        surroundingBox.append(formBox);
+
         var dbs = 'pdb,mmtf,cid'.split(',');
         var list = this.list = new $3Dmol.UI.Form.ListInput(control.urlType, dbs);
+        list.showAlertBox = false;
 
         list.ui.css({
           'display' : 'inline-block',
         })
 
-        surroundingBox.append(list.ui);
+        formBox.append(list.ui);
 
         var input = this.url = new $3Dmol.UI.Form.Input(control.url);
-        surroundingBox.append(input.ui);
+        formBox.append(input.ui);
 
         input.ui.css({
           'display' : 'inline-block',
-          'min-width' : '100px',
-          'max-width' : '400px',
-          'width' : '50vw',
+          'width' : '125px'
         });
 
-        var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'})
-        surroundingBox.append(submitButton.ui);
+        // input.setWidth(125);
+
+        var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'});
+        submitButton.ui.css({
+          'margin' : '0px'
+        })
+        formBox.append(submitButton.ui);
 
         this.updateInputLength = function(){
-          var width = input.ui.width();
-          input.setWidth(width - 12);
+          // var width = parentElement.width()*0.3;
+          // boundingBox.width(width);
+          // input.setWidth(width - 12);
         }
 
         modelButton.ui.on('click', ()=>{
           surroundingBox.toggle();
-        })
+        });
+
+        submitButton.ui.on('click', function(){
+          var validateDb = list.validate();
+          var validateId = input.validate();
+
+          if(validateId && validateDb){
+            stateManager.addModel(control);
+          }
+          else {
+          }
+        });
+
+        /**
+         * Sets the title in the ui with specified value
+         * 
+         * @function ModelToolbar#setModel 
+         * @param {String} heading Name of the molecule that is to be displayed on the title
+         */
+        this.setModel = function(heading){
+          currentModel.text(heading);
+          currentModelBox.show();
+          formBox.hide();
+        }
+
+        changeButton.ui.on('click', function(){
+          currentModelBox.hide();
+          formBox.show();
+          input.setValue('');
+        });
+
+        boundingBox.on('keypress', function(e){
+          if(e.key == 'Enter' || e.key == 'Return'){
+            submitButton.ui.trigger('click')
+          }
+        });
       }
+
+
       /**
-       * @function SelectionBox - Draws the box where all the selections on atoms are listed
-       * This will be used to modify style for specific set of selection
-       * @param {SVG} $3Dmol.UI.Icons stores all the SVG elements needed of the UI 
+       * Selection box creates the UI panel to manipulate selections and style that are drawn 
+       * on the viewport
+       * 
+       * @function SelectionBox  
+       * @param {$3Dmol.UI.Icons} icon takes the svg code for the icon that is to be used to display
+       * selection box
        * @return {Object}  Jquery element of div
        */
       function SelectionBox(icon, side='left') {
         var selectionBox = this.ui = $('<div></div>');
         _editingForm = false;
+        var selectionObjects = [];
 
         var selections = $('<div></div>');
         var scrollBox = $('<div></div>');
@@ -184,6 +267,7 @@
         var alertBox = new AlertBox();
         showArea.append(alertBox.ui);
         showArea.append(addArea);
+        alertBox.ui.css('width', 162);
         
         // CSS
         if(side == 'left'){
@@ -199,15 +283,17 @@
 
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
-        showArea.css('width', '162px');
+        // showArea.css('width', '162px');
 
-        // scrollBox.css('max-height', HEIGHT*0.8);
-        // scrollBox.css('overflow', 'hidden');
+        scrollBox.css('max-height', HEIGHT*0.8);
+        scrollBox.css('overflow-y', 'auto');
+        scrollBox.css('overflow-x', 'visible');
         
-        // selections.css('max-height', HEIGHT*0.8);
-        // selections.css('overflow', 'auto');
-        // selections.css('overflow-x', 'visible');
         selections.css('box-sizing', 'content-box');
+
+        this.updateScrollBox = function(height){
+          scrollBox.css('max-height', height*0.8);
+        }
 
         // Action
         var hidden = true;
@@ -225,15 +311,22 @@
           hidden = !hidden;
         }
 
+        /**
+         * Card for manipulation of a selection form and related styles
+         * 
+         * @function Selection
+         */
         function Selection(){
           var boundingBox = this.ui = $('<div></div>');
           var sid = this.id = null;
+          selectionObjects.push(this);
           boundingBox.css({
             'background' : '#e8e8e8',
             'padding' : '4px 4px 2px 4px',
             'border-radius' : '6px',
             'margin-bottom' : '3px',
             'position':'relative',
+            'width':'156px'
           });
 
           var header = $('<div></div>');
@@ -268,6 +361,8 @@
           var parameters = $('<div></div>');
           boundingBox.append(parameters);
 
+          var styleHolder = $('<div></div>');
+          
           removeButton.ui.on('click', function(){
             stateManager.removeSelection(sid);
             boundingBox.detach();
@@ -294,11 +389,11 @@
           var styleBox = new StyleBox();
 
           var showStyle = false;
-          boundingBox.append(styleBox.ui);
+          styleHolder.append(styleBox.ui);
           styleBox.ui.css({
-            'position' : 'absolute',
-            'left' : '100%',
-            'top' : 0,
+            'position' : 'static',
+            // 'left' : '0',
+            'width' : 'px',
             'border-radius' : '4px'
           });
 
@@ -333,7 +428,7 @@
           parameters.append(alertBox.ui);
           
           parameters.append(submitControls);
-
+          boundingBox.append(styleHolder);
           
           allCheckBox.update = function(){
             selectionSpecForm.ui.toggle();
@@ -342,18 +437,19 @@
           function finalizeSelection(id){
             header.show();
             controls.editMode = true;
-            sid = id;
+            sid = this.id = id;
             heading.text('Sel#' + id);
+            boundingBox.attr('data-id', id);
             parameters.hide();
             showStyle = true;
             styleBox.setSid(id);
+            styleBox.ui.show();
           }
 
           function checkAndAddSelection(sid = null){
             var validate = selectionSpecForm.validate();
             if(validate){
               selectionSpecForm.getValue();
-              console.log('Selection Form Value', selectionFormControl, sid);
               var checkAtoms = stateManager.checkAtoms(selectionFormControl.value);
 
               if(Object.keys(selectionFormControl.value).length == 0){
@@ -373,6 +469,17 @@
             else {
               alertBox.error('Invalid Input');
             }
+          }
+
+          function removeSelf(selection){
+            var selectionToRemove = selectionObjects.find((sel)=>{
+              if(selection == sel){
+                console.log('Selection found', selection);
+                return true;
+              }
+            });
+
+            // delete selectionToRemove;
           }
 
           submit.ui.on('click', ()=>{
@@ -400,28 +507,19 @@
             }
           });
 
+          var self = this;
+
           cancel.ui.on('click', ()=>{
             if(controls.editMode){
               parameters.hide();
             }
             else {
               boundingBox.detach();
-              delete this;
+              removeSelf(self);
               _editingForm = false;
             }
           });
 
-          boundingBox.on('mouseenter', ()=>{
-            if(showStyle){
-              styleBox.ui.show();
-            }
-          });
-
-          boundingBox.on('mouseleave', ()=>{
-            if(showStyle){
-              styleBox.ui.hide();
-            }
-          });
 
           boundingBox.on('keyup', (e)=>{
             if(e.key == 'Enter'){
@@ -429,7 +527,35 @@
             }
           });
 
+          /**
+           * @function Selection#setProperty
+           * @param {string} id Id of the selection created in StateManager 
+           * @param {Object} specs Defination of the selection that will be used to set default 
+           * values in the form
+           */
+          this.setProperty = function(id, specs){            
+            // check for all selection
+            if(Object.keys(specs).length == 0){
+              allCheckBox.setValue(true)
+            }else{
+              selectionSpecForm.setValue(specs);
+            }
 
+            // finalize the selection 
+            finalizeSelection(id);
+          }
+
+          /**
+           * Adds style to the given selection 
+           * 
+           * @function Selection#addStyle 
+           * @param {String} selId Id of the selection to inititate the StyleBox
+           * @param {String} styleId Id of the style that is created through StateManager
+           * @param {AtomStyleSpecs} styleSpecs 
+           */
+          this.addStyle = function(selId, styleId, styleSpecs){
+            styleBox.addStyle(selId, styleId, styleSpecs);
+          }
         }
 
         plusButton.ui.on('click', ()=>{
@@ -441,13 +567,60 @@
             alertBox.warning('Please complete the previous form');
           }
           
-        });   
-      }
+        });
 
-      
+
+        /**
+         * Remove all the selection card from the ui
+         */
+        this.empty = function(){
+          selections.empty();
+          _editingForm = false;
+        }
+
+        /**
+         * Adds or create new selection card
+         * 
+         * @function SelectionBox#editSelection
+         * @param {String} id Id created in StateManager and passed down to this function during call
+         * @param {AtomSelectionSpec} selSpec Selection spec that is used to generate the selection form
+         * @param {String} styleId Id of style created in StateManager
+         * @param {AtomStyleSpecs} styleSpec Style spec if specified add the selection to the current selection 
+         */
+        this.editSelection = function(id, selSpec, styleId, styleSpec){
+          // if selection does not exist create new 
+
+          // This thing works but I am not sure how!
+
+          // Search selection with id 
+          var selectionUI = selections.children('[data-id='+ id +']');
+
+          if(selectionUI.length != 0) {
+            
+          }
+          else {
+            selection = new Selection();
+            selection.setProperty(id, selSpec);
+            selections.append(selection.ui);
+          }
+
+          if(styleId != null){
+            selection.addStyle(id, styleId, styleSpec);
+          }
+
+        }
+      }
+   
       /**
-       * @function StyleBox creates styleBox for listing out different styles for a particular selection
-       * @return {Object} Jquery dom object
+       * 
+       * @param {Object} Jquery dom object
+       */
+      /**
+       * Creates StyleBox for listing out different styles inside the selection
+       * 
+       * @function StyleBox 
+       * @param {String} selId Id of the selection for which the style box is created 
+       * @param {String} side Alignment of text inside the box
        */
        function StyleBox(selId, side='left') {
         var styleBox = this.ui = $('<div></div>');
@@ -498,18 +671,24 @@
 
         showArea.css('box-sizing', 'border-box');
         showArea.css('padding', '3px');
-        showArea.css('width', '162px');
+        // showArea.css('width', '162px');
         showArea.css('background-color', '#a4a4a4')
         showArea.css('border-radius', '4px');
 
-        scrollBox.css('max-height', HEIGHT*0.8);
+        // scrollBox.css('max-height', HEIGHT*0.8);
         scrollBox.css('overflow', 'hidden');
         
-        styles.css('max-height', HEIGHT*0.8);
-        styles.css('overflow', 'auto');
+        // styles.css('max-height', HEIGHT*0.8);
+        // styles.css('overflow', 'auto');
         styles.css('box-sizing', 'content-box');
 
 
+        /**
+         * Style card to define the value of the style 
+         * 
+         * @param {string} sid Id of the selction for which the style box is created
+         * and this stye will be added under that selection
+         */
         function Style(sid){
           var boundingBox = this.ui = $('<div></div>');
           var stid = this.id = null; // style id 
@@ -554,7 +733,6 @@
           boundingBox.append(parameters);
 
           removeButton.ui.on('click', { parent: this, stid : stid }, function(e){
-            console.log(e.data.parent, e.data.stid, stid)
             stateManager.removeStyle(sid, stid);
             boundingBox.detach();
             delete this;
@@ -609,9 +787,9 @@
             var validate = styleSpecForm.validate();
             if(validate){
               styleSpecForm.getValue();
-              console.log('Style Form Value', styleFormControl, sid, stid);
               
               if(Object.keys(styleFormControl.value).length == 0){
+                
                 alertBox.error('Please enter some value');
               }
               else{  
@@ -660,6 +838,17 @@
             }
           });
 
+          /**
+           * @function Style#updateStyle 
+           * @param {String} styleId Id of the style created by StateManager 
+           * @param {AtomStyleSpecs} styleSpec Specs for defining the style and setting default values
+           */
+          this.updateStyle = function(styleId, styleSpec){
+            styleSpecForm.setValue(styleSpec);
+            
+            finalizeStyle(styleId);
+          }
+
         }
 
         plusButton.ui.on('click', ()=>{
@@ -672,8 +861,28 @@
             alertBox.warning('Please complete editing the current form');
           }
         });   
+
+        /**
+         * @function StyleBox#addStyle
+         * @param {String} selectionId Id of the selection for which styles will be created   
+         * @param {String} styleId Id of the style part of the selection 
+         * @param {AtomStyleSpecs} styleSpecs Style specs that will be used to create 
+         * style for the specified selection and set default values in the Style card
+         */
+        this.addStyle = function(selectionId, styleId, styleSpecs){
+          var style = new Style(selectionId);
+          styles.append(style.ui);
+          style.updateStyle(styleId, styleSpecs);
+        }
       }
 
+
+      /**
+       * Add alert messages to different panels 
+       * 
+       * @function AlertBox
+       * @param {Object} config Configuraiton for alert box display
+       */
       function AlertBox(config){
         var boundingBox = this.ui = $('<div></div>');
         config = config || {}
@@ -701,6 +910,10 @@
           }
         }
 
+        /**
+         * Generate Internal alert message  
+         * @param {String} msg Error Message 
+         */
         this.error = function(msg){
           boundingBox.css({
             'background' : 'lightcoral',
@@ -714,11 +927,15 @@
           hide();
         }
 
+        /**
+         * Generates Internal warning message
+         * @param {String} msg Warming message 
+         */
         this.warning = function(msg){
           boundingBox.css({
-            'background' : 'yellow',
-            'color' : 'orange',
-            'border' : '1px solid orange'
+            'background' : '#fff3cd',
+            'color' : '#856409',
+            'border' : '1px solid #856409'
           });
 
           boundingBox.text(msg);
@@ -727,6 +944,10 @@
           hide();
         }
 
+        /**
+         * Generates Internal Info message 
+         * @param {String} msg Info message
+         */
         this.message = function(msg){
           boundingBox.css({
             'background' : 'lightgreen',
@@ -741,6 +962,11 @@
         }
       }
 
+      /**
+       * Creates the panel for manipulation of labels on the viewport
+       * 
+       * @function ContextMenu
+       */
       function ContextMenu(){
         var boundingBox = this.ui = $('<div></div>');
 
@@ -797,6 +1023,13 @@
         var propertyMenu = $('<div></div>');
         contentBox.append(propertyMenu);
         
+        /**
+         * Property object used in property menu 
+         * 
+         * @function Property 
+         * @param {String} key Name of the atom property
+         * @param {*} value Value of the property 
+         */
         function Property(key, value){
           this.row = $('<tr></tr>');
           var propLabelValue = this.control = {
@@ -819,9 +1052,20 @@
           this.row.append(checkboxHolder, keyHolder, separatorHolder, valueHolder);
 
           keyHolder.text(key);
-          valueHolder.text(value);
+
+          if(typeof(value) == "number"){
+            valueHolder.text(value.toFixed(2));
+          }else {
+            valueHolder.text(value.replace(/\^/g, ''));
+          }
+
+          console.log('Type of value', typeof(value), value);
         }
 
+        /**
+         * @param {AtomSpec} atom Value of different property of the atom, if the atom has prop : true
+         * then that option is made visible in the context menu
+         */
         function setProperties(atom){        
           propertyMenu.empty();
           propertyObjectList = [];
@@ -835,6 +1079,31 @@
           });
 
           propertyMenu.append(propertyTable);
+
+          var labelStyle = {
+            value : null,
+            key : 'Atom Label Style'
+          }
+          
+          var labelStyleHolder = $('<div><div>');
+
+          var labelStyle = $('<div><div>');
+          labelStyle.text('Style');
+          labelStyle.css({
+            'display' : 'inline-block',
+            'font-family' : 'Arial',
+            'font-size' : '14px',
+            'margin-right' : '6px',
+            'margin-left' : '6px'
+          });
+
+          var stylesForLabel = new $3Dmol.UI.Form.ListInput(labelStyle, Object.keys($3Dmol.labelStyles));
+          stylesForLabel.ui.css({
+            'display' : 'inline-block'
+          });
+
+          labelStyleHolder.append(labelStyle, stylesForLabel.ui);
+          propertyMenu.append(labelStyleHolder);
           
           var submit = new button(icons.tick, 18, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
           var cancel = new button(icons.cross, 18, { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
@@ -851,9 +1120,16 @@
 
           submit.ui.on('click', ()=>{
             var props = processPropertyList();
+            var labelStyleValidation = stylesForLabel.validate();
+
             if(props !=null){
-              stateManager.addAtomLabel(props, atom);
-              stateManager.exitContextMenu(false);
+              if(labelStyleValidation){
+                stateManager.addAtomLabel(props, atom, stylesForLabel.getValue().value);
+                stateManager.exitContextMenu(false);
+              }
+              else {
+                alertBox.error('Select style for label');
+              }
             }
             else {
               alertBox.error('No value selected for label');
@@ -911,6 +1187,10 @@
 
         // Add Label Inputs 
 
+        /**
+         * Generate input elements that are used as form values in the context menu under addLabelForm
+         * @returns {Object} that holds different input elements
+         */
         function generateAddLabelForm(){
           var addLabelForm = $('<div></div>');
 
@@ -984,7 +1264,7 @@
             if(validate){
               stateManager.addLabel(addLabelValue);
             } else {
-              console.log('Please Check the input');
+
             }       
           });
 
@@ -1038,12 +1318,20 @@
 
         removeLabelMenu.on('click', { atom : this.atom }, function(e){
           stateManager.removeAtomLabel(removeLabelMenu.atom);
-          // console.log(removeLabelMenu.atom, "Atom to remove");
         });
 
 
+        /**
+         * Shows the context menu 
+         * 
+         * @function ContextMenu#show 
+         * 
+         * @param {Number} x x coordinate of the mouse
+         * @param {Number} y y coordinate of the mouse in the viewport in pixels
+         * @param {AtomSpec} atom Value of the atoms that is selected 
+         * @param {Boolean} atomExist if atom label is previously added it is set true else false
+         */
         this.show = function(x, y, atom, atomExist){
-          console.log('Context Menu open and atom Exist', atomExist);
 
           if(atomExist){
             removeLabelMenu.show();
@@ -1065,7 +1353,6 @@
 
           unsetForm();
           setPosition(boundingBox, x, y);
-          console.log('CONTEXT MENU::Atom Selected', atom);
           boundingBox.show();
           this.hidden = false;
           
@@ -1078,12 +1365,18 @@
           }
         }
         
+        /**
+         * Hides the context menu and if needed process the propertyMenu
+         * 
+         * @function ContextMenu#hide
+         * @param {Boolean} processContextMenu If true then submission of the property to add label is executed
+         */
+
         this.hide = function(processContextMenu){
           if(processContextMenu){
             var propsForLabel = processPropertyList();
             if(propsForLabel != null){
               stateManager.addAtomLabel(propsForLabel, this.atom);
-              // console.log("These property will be used to add label", propsForLabel);
             }
           }
 
@@ -1109,28 +1402,21 @@
         }
       }
 
-
+      /**
+       * Creates UI panel for surface manipulations
+       * 
+       * @function SurfaceMenu 
+       */
       function SurfaceMenu(){
         var boundingBox = this.ui = $('<div></div>');
         var _editingForm = false;
         // Selection Layout
-
-        // var contentBox = $('<div></div>');
-        // contentBox.css('background', 'red');
-        // boundingBox.append(contentBox);
 
         boundingBox.css({
           'position': 'absolute',
           'width': '140px',
           'text-align': 'right'   
         });
-
-        // contentBox.css({
-        //   'position':'relative',
-        //   'right':'100%',
-        //   'text-align':'right'
-        // })
-
         
         var surfaceButton = new button(icons.surface, 20, { tooltip : 'Toggle Surface Menu'});
 
@@ -1145,16 +1431,16 @@
           'overflow':'visible',
         });
 
-        console.log('Surface box display box height', HEIGHT);
-
-        
-
         var newSurfaceSpace = $('<div></div>');
         newSurfaceSpace.css({
           'max-height' : HEIGHT*0.8,
           'overflow-y': 'auto',
           'overflow-x' : 'hidden'
         });
+
+        this.updateScrollBox = function(height){
+          newSurfaceSpace.css('max-height', height*0.8);
+        }
         // newSurfaceSpace.append(controlButton);
         // controlButton.hide();
 
@@ -1171,6 +1457,11 @@
 
         var surfaces = this.surfaces = [];
 
+        /**
+         * Creates cards for manipulation of surface
+         * 
+         * @function Surface 
+         */
         function Surface(){
           var control = {
             surfaceType: {
@@ -1252,10 +1543,12 @@
           labelSurfaceType.css(defaultTextStyle);
 
           var listSurfaceType =new $3Dmol.UI.Form.ListInput(control.surfaceType, Object.keys($3Dmol.SurfaceType));
+          
 
           surfaceType.append(labelSurfaceType, listSurfaceType.ui);
           surfacePropertyBox.append(surfaceType);
           
+          listSurfaceType.setValue(Object.keys($3Dmol.SurfaceType)[0]);
           // Surface Style
           var surfaceStyle = $('<div></div>');
 
@@ -1263,7 +1556,7 @@
           // labelSurfaceStyle.text('Surface Style');
 
           var formSurfaceStyle = new $3Dmol.UI.Form($3Dmol.GLModel.validSurfaceSpecs, control.surfaceStyle);
-          
+
           surfaceStyle.append(labelSurfaceStyle, formSurfaceStyle.ui);
           surfacePropertyBox.append(surfaceStyle);
           
@@ -1311,11 +1604,13 @@
             }
           }
 
+          listSurfaceOf.setValue('all');
+
           surfaceOf.append(labelSurfaceOf, listSurfaceOf.ui, hintbox);
           surfacePropertyBox.append(surfaceOf);
           
           // Surface For
-          var selectionListElement = stateManager.getSelectionList();
+          var selectionListElement = ['all'].concat(stateManager.getSelectionList());
           var surfaceFor = $('<div></div>');
           
           var labelSurfaceFor = $('<div></div>');
@@ -1323,7 +1618,8 @@
           labelSurfaceFor.css(defaultTextStyle);
 
           var listSurfaceFor = new $3Dmol.UI.Form.ListInput(control.surfaceFor, selectionListElement);
-          
+          listSurfaceFor.setValue('all');
+
           surfaceFor.append(labelSurfaceFor, listSurfaceFor.ui);
           surfacePropertyBox.append(surfaceFor);
           
@@ -1351,9 +1647,6 @@
             // After creation of the surface box all the changes will be edit to the surfaces so on first submit toolButtons.editMode == true;
           });
 
-          
-
-
           // Form Validation 
 
           var validateInput = this.validateInput = function(){
@@ -1375,13 +1668,10 @@
               validated = false;
             }
 
-            console.log('Surface Menu Validation', control, validated, listSurfaceFor.validate(), listSurfaceOf.validate(), listSurfaceType.validate(), formSurfaceStyle.validate()   )
-
             return validated;
           }
-
-          
-
+        
+          // edit this code to add on edit selection option to work
           // boundingBox.on('mouseenter', function(){
           //   selections = stateManager.getSelectionList();
           //   selectionListElement = selections.map( (m)=>{
@@ -1391,13 +1681,14 @@
           //   listSurfaceOf.updateList(selectionListElement);
           // });
 
-          var updateSelection = this.updateSelection = function(){
-            selections = stateManager.getSElectionList();
-            selectionListElement = selections.map( (m)=>{
-              return m.id;
-            });
-            listSurfaceFor.updateList(selectionListElement);
-            listSurfaceOf.updateList(selectionListElement);
+          function finalize(id){
+            // element properties
+            surfaceBox.data('surf-id', id);
+            heading.text('surf#' + id);
+
+            header.show();
+            toolButtons.editMode = true;
+            surfacePropertyBox.hide();
           }
 
           // Submit 
@@ -1412,23 +1703,15 @@
                 var id = stateManager.addSurface(control);
                 control.id = id;
 
-                // element properties
-                surfaceBox.data('surf-id', id);
-                
-                heading.text('surf#' + id);
-
-                header.show();
-                toolButtons.editMode = true;
-                surfacePropertyBox.hide();
+                finalize(id);
 
                 surfaces.push(this);
                 _editingForm = false;
               }
               else{
-                console.log('Edit Surface called');
-
                 formSurfaceStyle.getValue();
                 control.id = surfaceBox.data('surf-id');
+                console.log('Edit surface called')
                 stateManager.editSurface(control); // -> add updateSurface funciton to surfaceMenu
                 surfacePropertyBox.hide();
               }
@@ -1444,7 +1727,6 @@
               surfaceBox.detach();
               surfaceBox.remove();
               _editingForm = false;
-              // Add statemanager handle to remove the object itself
             }
             else {
               surfacePropertyBox.hide();
@@ -1458,6 +1740,27 @@
             }
           });
 
+          /**
+           * Finalizes the surface card with value specified in the surfaceSpec
+           * 
+           * @function Surface#editSurface 
+           * @param {String} id Id of the surface generated by StateManager
+           * @param {Object} surfaceSpec Different value of the surface menu
+           */
+          this.editSurface = function(id, surfaceSpec){
+            finalize(id);
+            listSurfaceType.setValue(surfaceSpec.surfaceType.value);
+            formSurfaceStyle.setValue(surfaceSpec.surfaceStyle.value);
+            listSurfaceOf.setValue(surfaceSpec.surfaceOf.value);
+            listSurfaceFor.setValue(surfaceSpec.surfaceFor.value);
+
+            listSurfaceFor.getValue();
+            listSurfaceOf.getValue();
+            listSurfaceType.getValue();
+            formSurfaceStyle.getValue();
+
+          }
+
         }
 
         // Functionality
@@ -1465,18 +1768,15 @@
         // Surface addition
 
         addButton.ui.on('click', { surfaces: this }, function(e){
-          if(stateManager.getSelectionList().length == 0){
-            alertBox.error('Please create some selections first');
+          
+          if(!_editingForm){
+            var newSurface = new Surface();
+            newSurfaceSpace.append(newSurface.ui);
+            _editingForm = true;
+          }else {
+            alertBox.warning('Please complete the previous form first');
           }
-          else {
-            if(!_editingForm){
-              var newSurface = new Surface();
-              newSurfaceSpace.append(newSurface.ui);
-              _editingForm = true;
-            }else {
-              alertBox.warning('Please complete the previous form first');
-            }
-          }
+          
           
         });
 
@@ -1484,33 +1784,59 @@
           displayBox.toggle();
         });
 
+        /**
+         * Clear all the surface cards 
+         * @function SurfaceMenu#empty
+         */
+
+        this.empty = function(){
+          newSurfaceSpace.empty();
+          _editingForm = false;
+        }
+
+        /**
+         * Add Surface in the Surface Menu 
+         * 
+         * @function SurfaceMenu#addSurface
+         * @param {String} id Id of the surface generated in the StateManager
+         * @param {Object} surfaceSpec Values of different property required for setting values in surface menu
+         */
+        this.addSurface = function(id, surfaceSpec){          
+          var newSurface = new Surface();
+          newSurfaceSpace.append(newSurface.ui);
+
+          newSurface.editSurface(id, surfaceSpec);
+        }
       }
 
       /**
-       * position : Sets the css position property : absolute
+       * Sets the css position property left and top for the element
+       * 
+       * @function setPosition
+       * 
        * @param {object} jquery html element
        * @param {number} left : css left property
        * @param {number} top : css top peroperty
        */
       function setPosition(ele, left, top){
-        // ele.css('position', 'absolute');
         ele.css('left', left);
         ele.css('top', top);
       }
 
 
       /**
-        * setLocation - Sets the location of the element relative to the parseInt
+        * Sets the location of the element relative to the parseInt
         * as per position types
-        *
-        * @param  {object} parent jquery object
-        * @param  {object} child  jquery object
-        * @param  {string}   x_type 'left|right'
-        * @param  {string}   y_type 'top|bottm'
-        *
+        * @function setLocation
+        * 
+        * @param  {Object} parent jquery object
+        * @param  {Object} child  jquery object
+        * @param  {String} x_type 'left|right'
+        * @param  {String} y_type 'top|bottom'
+        * @param  {Number} x_offset Offset x values in pixels
+        * @param  {Number} y_offset Offset y values in pixels 
         */
       function setLocation(parent, child, x_type='left', y_type='top', x_offset=0, y_offset=0){
-        // console.log('Setting location', parent.offset(), child.offset(), parent.height(), parent.width(), child.height(), child.width());
 
         // p_ stands for parent
         child.css('z-index', 99);
@@ -1526,7 +1852,6 @@
 
         var padding = parseInt(parent.css('padding').replace('px', ''));
         padding = (padding)? padding: 0;
-        console.log("Checking Padding", padding == NaN, padding)
         var p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
         var p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
 
@@ -1538,7 +1863,6 @@
         };
 
         if(x_type == 'left'){
-          // console.log('left is called');
           c_position.left = padding + x_offset;
         }
         else if(x_type == 'center'){
@@ -1565,7 +1889,6 @@
         }
 
         setPosition(child, c_position.left, c_position.top);
-        console.log('Setting Location', c_position, p_height, c_height, y_offset, padding);
       }
 
       // Copied from glviewer.js
@@ -1604,10 +1927,10 @@
 
       /**
         * button - generates button with the given markup as contents
-        * @param {string} SVG markup string that contains the content of the button
-        * @param {number} Height of the content
-        * @param {}
-        * @return {object}  Returns the jquery object for button
+        * @param {String} svg SVG markup string that contains the content of the button
+        * @param {Number} height Height of the content
+        * @param {Object} config Various properties to define the button 
+        * 
         */
       function button(svg, height, config){
         config = config || {};
@@ -1681,17 +2004,6 @@
           // click
           button.on('mousedown', (e)=>{
             button.css('box-shadow', '0px 0px 1px black');
-            // var startX = e.clientX;
-            // var startY = e.clientY;
-
-            // setTimeout(()=>{
-            //   if(mouseX == startX && mouseY == startY){
-            //     console.log('Show tooltip');
-            //   }
-            //   else{
-            //     console.log('mouse moved');
-            //   }
-            // }, $3Dmol.longPressDuration);
           });
   
           button.on('mouseup', ()=>{
@@ -1703,25 +2015,8 @@
             // mouseY = e.clientY;
           });
 
-          var timer;
-          button.on('touchstart', (e)=>{
-            timer = setTimeout(()=>{
-              (tooltipText != null)? tooltipBox.show() : null;
-            }, $3Dmol.longPressTime)
-          });
-
-          button.on('touchend', ()=>{
-            (tooltipText != null)? tooltipBox.hide() : null;
-            if(timer)
-              clearTimeout(timer);
-          })
-
         }
-
-
-
       }
-
     }
 
     return UI;

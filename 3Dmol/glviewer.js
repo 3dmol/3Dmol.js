@@ -373,7 +373,7 @@ $3Dmol.GLViewer = (function() {
         // Checks for selection intersects on mousedown
         var handleClickSelection = function(mouseX, mouseY, event) {
             let intersects = targetedObjects(mouseX,mouseY,clickables);
-            console.log('handleClickSelection', mouseX, mouseY, intersects);
+            // console.log('handleClickSelection', mouseX, mouseY, intersects);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined) {
@@ -724,12 +724,12 @@ $3Dmol.GLViewer = (function() {
             setTimeout(function(){
                 if(ev.originalEvent.targetTouches) {
                     if(touchHold == true){
-                        console.log('Touch hold', x,y);
+                        // console.log('Touch hold', x,y);
                         glDOM = $(renderer.domElement);
                         glDOM.trigger('contextmenu');
                     }
                     else {
-                        console.log('Touch hold ended earlier');
+                        // console.log('Touch hold ended earlier');
     
                     }
                 }
@@ -892,11 +892,11 @@ $3Dmol.GLViewer = (function() {
 
         var handleContextMenuSelection = function(mouseX, mouseY){
             let intersects = targetedObjects(mouseX,mouseY,contextMenuEnabledAtoms);
-            console.log('Intersected Objects',mouseX, mouseY, contextMenuEnabledAtoms,  intersects[0]);
+            // console.log('Intersected Objects',mouseX, mouseY, contextMenuEnabledAtoms,  intersects[0]);
             var selected = null;
             if(intersects.length) {
                 selected = intersects[0].clickable;
-                console.log('intersects and selected', selected);
+                // console.log('intersects and selected', selected);
             }
             
             var offset = canvasOffset();
@@ -913,7 +913,7 @@ $3Dmol.GLViewer = (function() {
             if(newX != mouseStartX || newY != mouseStartY){
                 return;
             }else{
-                console.log('Context Menu Called', ev);
+                // console.log('Context Menu Called', ev);
                 var x = mouseStartX;
                 var y = mouseStartY;
                 var offset = canvasOffset();
@@ -941,9 +941,9 @@ $3Dmol.GLViewer = (function() {
 
                 glDOM.on("contextmenu", _handleContextMenu);
 
-                glDOM.on('taphold', function(e){
-                    console.log('touchandhold successful', e);
-                });
+                // glDOM.on('taphold', function(e){
+                //     // console.log('touchandhold successful', e);
+                // });
 
             }
             
@@ -2747,7 +2747,7 @@ $3Dmol.GLViewer = (function() {
                                 new $3Dmol.Vector3(1, 0, 1),
                                 new $3Dmol.Vector3(1, 1, 1)  ];
 
-                console.log('Matrix4', data.matrix4, data.matrix);
+                // console.log('Matrix4', data.matrix4, data.matrix);
                 if(data.matrix4) {
                     for (let i = 0; i < points.length; i++) {
                         if(data.size) points[i].multiplyVectors(points[i],data.size); //matrix is for unit vectors, not whole box
@@ -4039,7 +4039,7 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
          * @param {function} surfacecallback - function to be called after setting the surface
-         * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a surfid field for immediate access.
+         * @return {Promise} promise - Returns a promise that ultimately resovles to the [surfid, GLViewer, style, atomsel, allsel, focus].  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -4196,7 +4196,7 @@ $3Dmol.GLViewer = (function() {
                     return Promise.all(promises)
                     .then(function() {
                         surfobj.done = true;
-                        return Promise.resolve(surfid);
+                        return Promise.resolve([surfid, _viewer, style, atomsel, allsel, focus]);
                     });
 
                     // TODO: Asynchronously generate geometryGroups (not separate
@@ -4234,7 +4234,7 @@ $3Dmol.GLViewer = (function() {
                             cnt++;
                             if (cnt == extents.length) {
                                 surfobj.done = true;
-                                resolve(surfid); //caller of helper will resolve callback if present
+                                resolve([surfid, _viewer, style, atomsel, allsel, focus]); //caller of helper will resolve callback if present
                             }
                         };
 
@@ -4305,9 +4305,10 @@ $3Dmol.GLViewer = (function() {
             }
             surfaces[surfid] = surfobj;
             promise.surfid = surfid;
+            
             if(surfacecallback && typeof(surfacecallback) == "function") {
-                promise.then(function(surfid) {
-                    surfacecallback(surfid);
+                promise.then(function(surfaceParam) {
+                    surfacecallback(surfaceParam);
                 });
                 return surfid;
             }
@@ -4544,14 +4545,59 @@ $3Dmol.GLViewer = (function() {
             return camera.position.x;
         };
 
+
+        this.ui = {};
+
         /**
          * Set the default cartoon quality for newly created models.  Default is 5.
          * Current models are not affected.
          * @number quality, higher results in higher resolution renders
-         * @function $3Dmol.GLViewer#setDefaultCartoonQuality
+         * @function $3Dmol.GLViewer#ui.setDefaultCartoonQuality
          */
-        this.setDefaultCartoonQuality = function(val) {
+        this.ui.setDefaultCartoonQuality = function(val) {
             config.cartoonQuality = val;
+        };
+
+        // State Management function 
+        /**
+         * Calls StateManager to add selection and style on the ui
+         * @function $3Dmol.GLViewer#ui.loadSelectionStyle
+         * @param {AtomSelectionSpec} sel Atom Selection spec
+         * @param {AtomStyleSpec} style Atom Style spec
+         */
+        this.ui.loadSelectionStyle = function(sel, style){
+            _stateManager.createSelectionAndStyle(sel, style);
+        };
+
+        /**
+         * Calls StateManager to add surface and selection on the ui
+         * 
+         * @function $3Dmol.GLViewer#ui.loadSurface
+         * @param {String} surfaceType Name of the surface type
+         * @param {AtomSelectionSpec} sel Atom Selection Spec
+         * @param {AtomStyleSpec} style Atom Style Spec
+         * @param {Number} sid Id of the surface that is already added
+         */
+        this.ui.loadSurface = function(surfaceType, sel, style, sid){
+            _stateManager.createSurface(surfaceType, sel, style, sid);
+        };
+
+        /**
+         * Sets the name of the file as title in the ui
+         * 
+         * @function $3Dmol.GlViewer#ui.setModelTitle
+         * @param {String} title Name of file loaded
+         */
+        this.ui.setModelTitle = function(title){
+            _stateManager.setModelTitle(title);
+        };
+        
+        /**
+         * Calls StateManager to start the
+         * @function $3Dmol.GLViewer#ui.initiateUI
+         */
+        this.ui.initiateUI = function(){
+            _stateManager.initiateUI();
         };
 
     }
