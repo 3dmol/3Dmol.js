@@ -1101,6 +1101,8 @@
           stylesForLabel.ui.css({
             'display' : 'inline-block'
           });
+        
+          stylesForLabel.setValue('milk');
 
           labelStyleHolder.append(labelStyle, stylesForLabel.ui);
           propertyMenu.append(labelStyleHolder);
@@ -1232,6 +1234,7 @@
           var addLabelStyleBox = $('<div></div>');
           var ls = $('<div></div>').text('Label Style');
           var addLabelStyleInput = new $3Dmol.UI.Form.ListInput(addLabelValue.style, Object.keys($3Dmol.labelStyles));
+          addLabelStyleInput.setValue('milk');
           addLabelStyleBox.append(ls, addLabelStyleInput.ui);
           addLabelForm.append(addLabelStyleBox);
 
