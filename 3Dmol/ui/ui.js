@@ -70,7 +70,6 @@
         var modelToolBar = this.tools.modelToolBar;
         var HEIGHT = mainParent.height();
 
-        console.log('New Height', HEIGHT);
         setLocation(mainParent, modelToolBar.ui, 'left', 'top');
         // modelToolBar.updateInputLength();
         setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
@@ -268,6 +267,7 @@
         var alertBox = new AlertBox();
         showArea.append(alertBox.ui);
         showArea.append(addArea);
+        alertBox.ui.css('width', 162);
         
         // CSS
         if(side == 'left'){
@@ -1052,7 +1052,14 @@
           this.row.append(checkboxHolder, keyHolder, separatorHolder, valueHolder);
 
           keyHolder.text(key);
-          valueHolder.text(value);
+
+          if(typeof(value) == "number"){
+            valueHolder.text(value.toFixed(2));
+          }else {
+            valueHolder.text(value.replace(/\^/g, ''));
+          }
+
+          console.log('Type of value', typeof(value), value);
         }
 
         /**
@@ -1704,6 +1711,7 @@
               else{
                 formSurfaceStyle.getValue();
                 control.id = surfaceBox.data('surf-id');
+                console.log('Edit surface called')
                 stateManager.editSurface(control); // -> add updateSurface funciton to surfaceMenu
                 surfacePropertyBox.hide();
               }

@@ -174,7 +174,7 @@ $3Dmol.StateManager = (function(){
       if(style == null)
         style = {};
 
-      var sel = (property.surfaceFor.value == 'all') ? {} : selections[property.surfaceFor.value];
+      var sel = (property.surfaceFor.value == 'all') ? { spec : {} } : selections[property.surfaceFor.value];
 
       var generatorAtom = (property.surfaceOf.value == 'self')? sel.spec : {};
 
@@ -216,16 +216,20 @@ $3Dmol.StateManager = (function(){
      */
     this.editSurface = function(surfaceProperty){
       var style = surfaceProperty.surfaceStyle.value || {}
-      var sel = selections[surfaceProperty.surfaceFor.value];
+
+      var sel = (surfaceProperty.surfaceFor.value == 'all') ? { spec : {} } : selections[surfaceProperty.surfaceFor.value];
+      var generatorAtom = (surfaceProperty.surfaceOf.value == 'self')? sel.spec : {};
 
       glviewer.removeSurface(surfaces[surfaceProperty.id]);
 
+      console.log(surfaceProperty);
       glviewer.addSurface(
         $3Dmol.SurfaceType[surfaceProperty.surfaceType.value],
         style,
-        sel.spec
+        sel.spec,
+        generatorAtom
       ).then((surfId)=>{
-        surfaces[surfaceProperty.id] = surfId;
+        surfaces[surfaceProperty.id] = surfId[0];
       });
     }
 
