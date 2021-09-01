@@ -861,7 +861,7 @@ $3Dmol.GLViewer = (function() {
             if (!nomouse) {
                 // user can request that the mouse handlers not be installed
                 glDOM.bind('mousedown touchstart', _handleMouseDown);
-                glDOM.bind('DOMMouseScroll mousewheel', _handleMouseScroll);
+                glDOM.bind('wheel', _handleMouseScroll);
                 glDOM.bind('mousemove touchmove', _handleMouseMove);
                 
                 glDOM.bind("contextmenu", function(ev) {
