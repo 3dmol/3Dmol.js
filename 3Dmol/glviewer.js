@@ -4540,18 +4540,17 @@ $3Dmol.GLViewer = (function() {
             return camera.position.x;
         };
 
-
-        this.ui = {};
-
         /**
          * Set the default cartoon quality for newly created models.  Default is 5.
          * Current models are not affected.
          * @number quality, higher results in higher resolution renders
          * @function $3Dmol.GLViewer#ui.setDefaultCartoonQuality
          */
-        this.ui.setDefaultCartoonQuality = function(val) {
+        this.setDefaultCartoonQuality = function(val) {
             config.cartoonQuality = val;
         };
+        
+        this.ui = {};
 
         // State Management function 
         /**
