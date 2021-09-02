@@ -703,14 +703,21 @@ $3Dmol.builtinColorSchemes = {
         'ssPyMol' : {'prop':'ss', map:$3Dmol.ssColors.pyMol},
         'ssJmol' :{'prop':'ss', map:$3Dmol.ssColors.Jmol},
         'Jmol' :{'prop':'elem', map:$3Dmol.elementColors.Jmol},
-        'greenCarbon': {'prop': 'elem', map:$3Dmol.elementColors.greenCarbon},
-        'default' : {'prop': 'elem', map:$3Dmol.elementColors.defaultColors},
         'amino' : {'prop':'resn', map:$3Dmol.residues.amino},
         'shapely' :{'prop':'resn', map:$3Dmol.residues.shapely},
         'nucleic' :{'prop':'resn', map:$3Dmol.residues.nucleic},
         'chain' :{'prop':'chain', map:$3Dmol.chains.atom},
+        'rasmol' : {'prop':'elem', map:$3Dmol.elementColors.rasmol},
+        'default' : {'prop': 'elem', map:$3Dmol.elementColors.defaultColors},
+        'greenCarbon': {'prop': 'elem', map:$3Dmol.elementColors.greenCarbon},
         'chainHetatm' :{'prop':'chain', map:$3Dmol.chains.hetatm},
-        
+        'cyanCarbon' : {'prop':'elem', map:$3Dmol.elementColors.cyanCarbon},
+        'magentaCarbon' : {'prop':'elem', map:$3Dmol.elementColors.magentaCarbon},
+        'purpleCarbon' : {'prop':'elem', map:$3Dmol.elementColors.purpleCarbon},
+        'whiteCarbon' : {'prop':'elem', map:$3Dmol.elementColors.whiteCarbon},
+        'orangeCarbon' : {'prop':'elem', map:$3Dmol.elementColors.orangeCarbon},
+        'yellowCarbon' : {'prop':'elem', map:$3Dmol.elementColors.yellowCarbon},
+        'blueCaron' : {'prop':'elem', map:$3Dmol.elementColors.blueCarbon},
 };
 
 /** Return proper color for atom given style

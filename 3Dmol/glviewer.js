@@ -3,9 +3,9 @@
 
 /**
  * WebGL-based 3Dmol.js viewer
- * Note: The preferred method of instantiating a GLViewer is through {@link $3Dmol.createViewer} 
- * 
- * @constructor 
+ * Note: The preferred method of instantiating a GLViewer is through {@link $3Dmol.createViewer}
+ *
+ * @constructor
  * @param {Object} element HTML element within which to create viewer
  * @param {ViewerSpec} config Object containing optional configuration for the viewer
  */
@@ -16,11 +16,11 @@ $3Dmol.GLViewer = (function() {
 
     // private class helper functions
 
-    function GLViewer(element, config) { 
+    function GLViewer(element, config) {
         // set variables
         config = config || {};
         var callback = config.callback;
-        var defaultcolors = config.defaultcolors;       
+        var defaultcolors = config.defaultcolors;
         if(!defaultcolors)
             defaultcolors = $3Dmol.elementColors.defaultColors;
         var nomouse = config.nomouse;
@@ -31,15 +31,16 @@ $3Dmol.GLViewer = (function() {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
         }
         config.backgroundAlpha = config.backgroundAlpha == undefined ? 1.0 : config.backgroundAlpha;
-        
+
 
         var camerax = 0;
         if(typeof(config.camerax) != undefined) {
             camerax = parseFloat(config.camerax);
         }
         var _viewer = this;
-        var container = $(element); //we expect container to be jquery
+        var container = this.container = $(element); //we expect container to be jquery
         var glDOM = null;
+        var _stateManager = null;
 
         var models = []; // atomistic molecular models
         var surfaces = {};
@@ -48,6 +49,7 @@ $3Dmol.GLViewer = (function() {
         var fixed_labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
+        var contextMenuEnabledAtoms = []; // atoms with context menu 
         var current_hover = null;
         var hoverDuration = 500;
         var viewer_frame = 0;
@@ -57,8 +59,8 @@ $3Dmol.GLViewer = (function() {
         }
         if(config.antialias === undefined) config.antialias = true;
         if(config.cartoonQuality === undefined) config.cartoonQuality = 5;
-        
-        //reimplement jquery getwidth/height        
+
+        //reimplement jquery getwidth/height
         var getRect = function() {
           let div = container[0];
           let rect = div.getBoundingClientRect();
@@ -73,23 +75,23 @@ $3Dmol.GLViewer = (function() {
             div.style.visibility = oldvis;
             div.style.position = oldpos;
           }
-          return rect;          
+          return rect;
         };
-        
+
         var getWidth = function() {
           return getRect().width;
         };
-        
+
         var getHeight = function() {
           return getRect().height;
         };
-        
+
         var WIDTH = getWidth();
         var HEIGHT = getHeight();
 
         var viewChangeCallback = null;
         var stateChangeCallback = null;
-        
+
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
         var fov = 20;
@@ -114,8 +116,8 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.position = "absolute"; //TODO: get rid of this
         renderer.domElement.style.top = "0px";
         renderer.domElement.style.left = "0px";
-        renderer.domElement.style.zIndex = "0";       
-        
+        renderer.domElement.style.zIndex = "0";
+
         var row = config.row;
         var col = config.col;
         var cols = config.cols;
@@ -151,11 +153,12 @@ $3Dmol.GLViewer = (function() {
         var mouseStartX = 0;
         var mouseStartY = 0;
         var touchDistanceStart = 0;
+        var touchHold = false;
         var currentModelPos = 0;
         var cz = 0;
         var cslabNear = 0;
-        var cslabFar = 0;      
-        
+        var cslabFar = 0;
+
         var decAnim = function() {
             //decrement the number of animations currently
             animated--;
@@ -178,7 +181,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         var setSlabAndFog = function() {
-            
+
             var center = camera.position.z - rotationGroup.position.z;
             if (center < 1)
                 center = 1;
@@ -194,18 +197,18 @@ $3Dmol.GLViewer = (function() {
             camera.left = -camera.right;
             camera.top = camera.right / ASPECT;
             camera.bottom = -camera.top;
-            
+
             camera.updateProjectionMatrix();
 
             scene.fog.near = camera.near + fogStart * (camera.far - camera.near);
             // if (scene.fog.near > center) scene.fog.near = center;
             scene.fog.far = camera.far;
-            
+
             if(config.disableFog){
                 scene.fog.near=scene.fog.far;
             }
         };
-        
+
         // display scene
         //if nolink is set/true, don't propagate changes to linked viewers
         var show = function(nolink) {
@@ -216,11 +219,11 @@ $3Dmol.GLViewer = (function() {
             setSlabAndFog();
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
-            
+
             //have any scene change trigger a callback
             if(viewChangeCallback) viewChangeCallback(_viewer.getView());
 
-            if(!nolink && linkedViewers.length > 0) {                
+            if(!nolink && linkedViewers.length > 0) {
                 var view = _viewer.getView();
                 for(var i = 0; i < linkedViewers.length; i++) {
                     var other = linkedViewers[i];
@@ -263,17 +266,20 @@ $3Dmol.GLViewer = (function() {
         var updateClickables = function() {
             clickables.splice(0,clickables.length);
             hoverables.splice(0,hoverables.length);
-            
+            contextMenuEnabledAtoms.splice(0, contextMenuEnabledAtoms.length);
+
             for (let i = 0, il = models.length; i < il; i++) {
                 var model = models[i];
                 if(model) {
                     let atoms = model.selectedAtoms({
                         clickable : true
                     });
-                    
+
                     let hoverable_atoms = model.selectedAtoms({
                         hoverable : true
                     });
+
+                    let contextMenuEnabled_atom = model.selectedAtoms({ contextMenuEnabled : true });
                     // Array.prototype.push.apply(hoverables,hoverable_atoms);
                     for (let n = 0; n < hoverable_atoms.length; n++) {
                         hoverables.push(hoverable_atoms[n]);
@@ -283,7 +289,12 @@ $3Dmol.GLViewer = (function() {
                     for (let m = 0; m < atoms.length; m++) {
                         clickables.push(atoms[m]);
                     }
-                    
+
+                    // add atoms into contextMenuEnabledAtoms
+                    for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
+                        contextMenuEnabledAtoms.push(contextMenuEnabled_atom[m]);
+                    }
+
                 }
             }
             for (let i = 0, il = shapes.length; i < il; i++) {
@@ -297,14 +308,14 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
-        
+
          /**
          * Return a list of objects that intersect that at the specified viewer position.
-         * 
+         *
          * @function $3Dmol.GLViewer#targetedObjects
          * @param {x} - x position in screen coordinates
          * @param {y} - y position in screen coordinates
-         * @param {objects} - list of objects or selection object specifying what object to check for targeting 
+         * @param {objects} - list of objects or selection object specifying what object to check for targeting
         */
         let targetedObjects = this.targetedObjects = function(x,y,objects) {
             var mouse = {
@@ -319,7 +330,7 @@ $3Dmol.GLViewer = (function() {
             raycaster.setFromCamera(mouse,camera);
             return raycaster.intersectObjects(modelGroup, objects);
         };
-        
+
         //return offset of container
         var canvasOffset = function() {
           let canvas = glDOM.get(0);
@@ -332,7 +343,7 @@ $3Dmol.GLViewer = (function() {
             left: rect.left + win.pageXOffset - docElem.clientLeft
           };
         };
-        
+
         /** Convert model coordinates to screen coordinates.
          * @function $3Dmol.GLViewer#modelToScreen
          * @param {object | list} - an object or list of objects with x,y,z attributes (e.g. an atom)
@@ -344,24 +355,25 @@ $3Dmol.GLViewer = (function() {
                 coords = [coords];
                 returnsingle = true;
             }
-            
+
             let results = [];
             let offset = canvasOffset();
             coords.forEach(coord => {
                 let t = new $3Dmol.Vector3(coord.x,coord.y,coord.z);
-                t.applyMatrix4(modelGroup.matrixWorld);   
-                projector.projectVector(t, camera);       
+                t.applyMatrix4(modelGroup.matrixWorld);
+                projector.projectVector(t, camera);
                 let screenX = WIDTH*(t.x+1)/2.0+offset.left;
                 let screenY = -HEIGHT*(t.y-1)/2.0+offset.top;
                 results.push({x:screenX,y:screenY});
-            }); 
+            });
             if(returnsingle) results = results[0];
             return results;
         };
-        
+
         // Checks for selection intersects on mousedown
-        var handleClickSelection = function(mouseX, mouseY, event) {            
+        var handleClickSelection = function(mouseX, mouseY, event) {
             let intersects = targetedObjects(mouseX,mouseY,clickables);
+            // console.log('handleClickSelection', mouseX, mouseY, intersects);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined) {
@@ -374,18 +386,20 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
+
         
+
         //set current_hover to sel (which can be null), calling appropraite callbacks
         var setHover = function(selected, event) {
             if(current_hover == selected) return;
             if(current_hover) {
                 if(typeof (current_hover.unhover_callback) != "function") {
                     current_hover.unhover_callback = $3Dmol.makeFunction(current_hover.unhover_callback);
-                } 
+                }
                 current_hover.unhover_callback(current_hover, _viewer, event, container);
             }
             current_hover=selected;
-            
+
             if (selected && selected.hover_callback !== undefined) {
                 if(typeof (selected.hover_callback) != "function") {
                     selected.hover_callback = $3Dmol.makeFunction(selected.hover_callback);
@@ -393,10 +407,10 @@ $3Dmol.GLViewer = (function() {
                 if(typeof (selected.hover_callback) === "function") {
                     selected.hover_callback(selected, _viewer, event, container);
                 }
-            }  
-            
+            }
+
         };
-        
+
         //checks for selection intersects on hover
         var handleHoverSelection = function(mouseX, mouseY){
             if(hoverables.length == 0) return;
@@ -410,7 +424,7 @@ $3Dmol.GLViewer = (function() {
                 setHover(null);
             }
         };
-        
+
         //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
         var handleHoverContinue = function(mouseX,mouseY){
             let intersects = targetedObjects(mouseX,mouseY,hoverables);
@@ -430,7 +444,7 @@ $3Dmol.GLViewer = (function() {
                     ev.originalEvent.targetTouches[1].pageY;
             return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
         };
-        
+
         //check targetTouches as well
         var getX = function(ev) {
             var x = ev.pageX;
@@ -442,10 +456,10 @@ $3Dmol.GLViewer = (function() {
             else if (ev.originalEvent.changedTouches &&
                     ev.originalEvent.changedTouches[0]) {
                 x = ev.originalEvent.changedTouches[0].pageX;
-            }            
+            }
             return x;
         };
-        
+
         var getY = function(ev) {
             var y = ev.pageY;
             if(y == undefined) y = ev.originalEvent.pageY;
@@ -456,54 +470,54 @@ $3Dmol.GLViewer = (function() {
             else if (ev.originalEvent.changedTouches &&
                     ev.originalEvent.changedTouches[0]) {
                 y = ev.originalEvent.changedTouches[0].pageY;
-            }            
+            }
             return y;
         };
-        
+
         /**
          * For a given screen (x,y) displacement return model displacement
          * @param{x} x displacement in screen coordinates
          * @param{y} y displacement in screen corodinates
-         * @param{modelz} z coordinate in model coordinates to compute offset for, default is model axis 
+         * @param{modelz} z coordinate in model coordinates to compute offset for, default is model axis
          * @function $3Dmol.GLViewer#screenOffsetToModel
-        */        
+        */
         var screenOffsetToModel = this.screenOffsetToModel = function(x,y,modelz) {
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
-            var zpos = (modelz === undefined ? rotationGroup.position.z : modelz); 
-            var q = rotationGroup.quaternion;                        
+            var zpos = (modelz === undefined ? rotationGroup.position.z : modelz);
+            var q = rotationGroup.quaternion;
             var t = new $3Dmol.Vector3(0,0,zpos);
             projector.projectVector(t, camera);
             t.x += dx*2;
             t.y -= dy*2;
             projector.unprojectVector(t, camera);
-            t.z = 0;                            
+            t.z = 0;
             t.applyQuaternion(q);
             return t;
         };
-        
+
         /**
          * Distance from screen coordinate to model coordinate assuming screen point
          * is projected to the same depth as model coordinate
          * @param{screen} xy screen coordinate
          * @param{model} xyz model coordinate
          * @function $3Dmol.GLViewer#screenToModelDistance
-        */   
+        */
         this.screenToModelDistance = function(screen,model) {
             let offset = canvasOffset();
-            
-            //convert model to screen to get screen z                     
+
+            //convert model to screen to get screen z
             let mvec = new $3Dmol.Vector3(model.x,model.y,model.z);
-            mvec.applyMatrix4(modelGroup.matrixWorld);   
+            mvec.applyMatrix4(modelGroup.matrixWorld);
             let m = mvec.clone();
             projector.projectVector(mvec, camera);
-            
+
             let t = new $3Dmol.Vector3((screen.x-offset.left)*2/WIDTH-1,(screen.y-offset.top)*2/-HEIGHT+1,mvec.z);
             projector.unprojectVector(t, camera);
-            
+
             return t.distanceTo(m);
-        };                         
-        
+        };
+
         //for grid viewers, return true if point is in this viewer
         var isInViewer = function(x,y) {
             if(viewers != undefined && !control_all){
@@ -512,7 +526,7 @@ $3Dmol.GLViewer = (function() {
                 var offset = canvasOffset();
                 var relx = (x - offset.left);
                 var rely = (y - offset.top) ;
-                    
+
                 var r = rows-Math.floor(rely/height)-1;
                 var c = Math.floor(relx/width);
 
@@ -524,7 +538,10 @@ $3Dmol.GLViewer = (function() {
 
         // this event is bound to the body element, not the container,
         // so no need to put it inside initContainer()
-        $('body').bind('mouseup touchend', function(ev) {
+        $('body').on('mouseup touchend', function(ev) {
+            // handle touch 
+            touchHold = false;
+
             // handle selection
             if(isDragging && scene) { //saw mousedown, haven't moved
                 var x = getX(ev);
@@ -536,12 +553,12 @@ $3Dmol.GLViewer = (function() {
                     handleClickSelection(mouseX, mouseY, ev, container);
                 }
             }
-            
+
             isDragging = false;
 
         });
 
-        
+
         //if the user has specify zoom limits, readjust to fit within them
         //also, make sure we don't go past CAMERA_Z
         var adjustZoomToLimits = function(z) {
@@ -550,42 +567,42 @@ $3Dmol.GLViewer = (function() {
                 var lower = CAMERA_Z-config.lowerZoomLimit;
                 if(z > lower) z = lower;
             }
-            
+
             if(config.upperZoomLimit && config.upperZoomLimit > 0) {
                 var upper = CAMERA_Z-config.upperZoomLimit;
                 if(z < upper) z = upper;
             }
-            
+
             if(z > CAMERA_Z) {
                 z = CAMERA_Z*0.999; //avoid getting stuck
             }
             return z;
         };
-        
+
         /**
          * Set a callback to call when the view has potentially changed.
-         * 
+         *
          * @function $3Dmol.GLViewer#setViewChangeCallback
         */
         this.setViewChangeCallback = function(callback) {
-            if(typeof(callback) === 'function' || callback == null) 
+            if(typeof(callback) === 'function' || callback == null)
                 viewChangeCallback = callback;
         };
 
         /**
          * Set a callback to call when the view has potentially changed.
-         * 
+         *
          * @function $3Dmol.GLViewer#setStateChangeCallback
         */
         this.setStateChangeCallback = function(callback) {
-            if(typeof(callback) === 'function' || callback == null) 
+            if(typeof(callback) === 'function' || callback == null)
                 stateChangeCallback = callback;
         };
 
         /**
-         * Return object representing internal state of 
+         * Return object representing internal state of
          * the viewer appropriate for passing to setInternalState
-         * 
+         *
          * @function $3Dmol.GLViewer#getInternalState
         */
         this.getInternalState = function() {
@@ -595,39 +612,39 @@ $3Dmol.GLViewer = (function() {
               ret.models[i] = models[i].getInternalState();
             }
           }
-          
+
           //todo: labels, shapes, surfaces
-          
+
           return ret;
         };
-        
+
         /**
          * Overwrite internal state of the viewer with passed  object
          * which should come from getInternalState.
-         * 
+         *
          * @function $3Dmol.GLViewer#setInternalState
         */
         this.setInternalState = function(state) {
-          
+
           //clear out current viewer
           this.clear();
-          
+
           //set model state
-          var newm = state.models;          
+          var newm = state.models;
           for(let i = 0; i < newm.length; i++) {
             if(newm[i]) {
               models[i] = new $3Dmol.GLModel(i);
               models[i].setInternalState(newm[i]);
             }
           }
-          
+
           //todo: labels, shapes, surfaces
           this.render();
         };
-                                             
+
         /**
          * Set lower and upper limit stops for zoom.
-         * 
+         *
          * @function $3Dmol.GLViewer#setZoomLimits
          * @param {lower} - limit on zoom in (positive number).  Default 0.
          * @param {upper} - limit on zoom out (positive number).  Default infinite.
@@ -650,10 +667,10 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set camera parameters (distance to the origin and field of view)
-         * 
+         *
          * @function $3Dmol.GLViewer#setCameraParameters
-         * @param {parameters} - new camera parameters, with possible fields 
-         *                       being fov for the field of view and z for the 
+         * @param {parameters} - new camera parameters, with possible fields
+         *                       being fov for the field of view and z for the
          *                       distance to the origin.
          * @example
           $.get("data/set1_122_complex.mol2", function(data) {
@@ -676,6 +693,8 @@ $3Dmol.GLViewer = (function() {
             }
         };
 
+        
+
         var mouseButton;
         var _handleMouseDown = this._handleMouseDown = function(ev) {
             ev.preventDefault();
@@ -690,6 +709,7 @@ $3Dmol.GLViewer = (function() {
             mouseButton = ev.which;
             mouseStartX = x;
             mouseStartY = y;
+            touchHold = true;
             touchDistanceStart = 0;
             if (ev.originalEvent.targetTouches &&
                     ev.originalEvent.targetTouches.length == 2) {
@@ -700,9 +720,25 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
-           
+
+            setTimeout(function(){
+                if(ev.originalEvent.targetTouches) {
+                    if(touchHold == true){
+                        // console.log('Touch hold', x,y);
+                        glDOM = $(renderer.domElement);
+                        glDOM.trigger('contextmenu');
+                    }
+                    else {
+                        // console.log('Touch hold ended earlier');
+    
+                    }
+                }
+            }, 1000);
+
+            // Exiting context menu on next mouse event
+            _stateManager.exitContextMenu();
         };
-        
+
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
             ev.preventDefault();
             if (!scene)
@@ -721,49 +757,54 @@ $3Dmol.GLViewer = (function() {
             if(ev.originalEvent.ctrlKey) {
                 mult = -1.0; //this is a pinch event turned into a wheel event (or they're just holding down the ctrl)
             }
-            if (ev.originalEvent.detail) { 
+            if (ev.originalEvent.detail) {
                 rotationGroup.position.z += mult * scaleFactor * ev.originalEvent.detail / 10;
-            } else if (ev.originalEvent.wheelDelta) { 
+            } else if (ev.originalEvent.wheelDelta) {
                 rotationGroup.position.z -= mult * scaleFactor * ev.originalEvent.wheelDelta / 400;
             }
-            rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);            
-            show();            
-        };        
+            rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
+            show();
+
+            // Exiting context menu on next mouse event 
+            _stateManager.exitContextMenu();
+        };
         /**
          * Return image URI of viewer contents (base64 encoded).
          * @function $3Dmol.GLViewer#pngURI
-         * 
+         *
          */
         this.pngURI = function() {
             return this.getCanvas().toDataURL('image/png');
         };
-        
+
         /**
-         * Return underlying canvas element.         
+         * Return underlying canvas element.
          */
         this.getCanvas = function() {
             return glDOM.get(0);
         };
-        
+
         /**
          * Return renderer element.
          */
         this.getRenderer = function() {
             return renderer;
         };
+
+        _stateManager =new $3Dmol.StateManager(_viewer, config); // Creates the UI state management tool
       /**
            * Set the duration of the hover delay
-           * 
+           *
            * @function $3Dmol.GLViewer#setHoverDuration
            * @param {number}
            *            [hoverDuration] - an optional parameter that denotes
            *            the duration of the hover delay (in milliseconds) before the hover action is called
-           * 
+           *
        */
         this.setHoverDuration = function(duration) {
             hoverDuration = duration;
         };
-        
+
         var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
 
@@ -771,12 +812,12 @@ $3Dmol.GLViewer = (function() {
             var offset = canvasOffset();
             var mouseX = ((getX(ev) - offset.left) / WIDTH) * 2 - 1;
             var mouseY = -((getY(ev) - offset.top) / HEIGHT) * 2 + 1;
-            
+
             // hover timeout
             if(current_hover !== null) {
                 handleHoverContinue(mouseX,mouseY,ev);
             }
-            
+
             if(hoverables.length > 0) {
                 hoverTimeout=setTimeout(
                         function(){
@@ -831,11 +872,11 @@ $3Dmol.GLViewer = (function() {
                 if (scaleFactor < 80)
                     scaleFactor = 80;
                 rotationGroup.position.z = cz + dy * scaleFactor;
-                rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z); 
+                rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
             } else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
                 var t = screenOffsetToModel(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
                 modelGroup.position.addVectors(currentModelPos,t);
-                
+
             } else if ((mode === 0 || mouseButton == 1) && r !== 0) { // Rotate
                 var rs = Math.sin(r * Math.PI) / r;
                 dq.x = Math.cos(r * Math.PI);
@@ -848,7 +889,41 @@ $3Dmol.GLViewer = (function() {
             }
             show();
         };
-        
+
+        var handleContextMenuSelection = function(mouseX, mouseY){
+            let intersects = targetedObjects(mouseX,mouseY,contextMenuEnabledAtoms);
+            // console.log('Intersected Objects',mouseX, mouseY, contextMenuEnabledAtoms,  intersects[0]);
+            var selected = null;
+            if(intersects.length) {
+                selected = intersects[0].clickable;
+                // console.log('intersects and selected', selected);
+            }
+            
+            var offset = canvasOffset();
+            var x = mouseStartX - offset.left;
+            var y = mouseStartY - offset.top;
+            _stateManager.openContextMenu(selected, x, y);
+        };
+
+        var _handleContextMenu = this._handleContextMenu = function(ev){
+            ev.preventDefault();
+            var newX = getX(ev);
+            var newY = getY(ev);
+
+            if(newX != mouseStartX || newY != mouseStartY){
+                return;
+            }else{
+                // console.log('Context Menu Called', ev);
+                var x = mouseStartX;
+                var y = mouseStartY;
+                var offset = canvasOffset();
+                var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
+                var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
+                handleContextMenuSelection(mouseX, mouseY, _viewer, ev);
+            }
+            
+        };
+
         var initContainer = function(element) {
             container = element;
             WIDTH = getWidth();
@@ -860,14 +935,11 @@ $3Dmol.GLViewer = (function() {
 
             if (!nomouse) {
                 // user can request that the mouse handlers not be installed
-                glDOM.bind('mousedown touchstart', _handleMouseDown);
-                glDOM.bind('wheel', _handleMouseScroll);
-                glDOM.bind('mousemove touchmove', _handleMouseMove);
-                
-                glDOM.bind("contextmenu", function(ev) {
-                    ev.preventDefault();
-                });
-                
+                glDOM.on('mousedown touchstart', _handleMouseDown);
+                glDOM.on('wheel', _handleMouseScroll);
+                glDOM.on('mousemove touchmove', _handleMouseMove);
+
+                glDOM.on("contextmenu", _handleContextMenu);
             }
             
         };
@@ -875,9 +947,9 @@ $3Dmol.GLViewer = (function() {
 
         // public methods
         /**
-         * Change the viewer's container element 
+         * Change the viewer's container element
          * Also useful if the original container element was removed from the DOM.
-         * 
+         *
          * @function $3Dmol.GLViewer#setContainer
          *
          * @param {Object | string} element
@@ -893,22 +965,22 @@ $3Dmol.GLViewer = (function() {
             initContainer(element);
             return this;
         };
-        
+
         /**
          * Set the background color (default white)
-         * 
+         *
          * @function $3Dmol.GLViewer#setBackgroundColor
          * @param {number}
          *            hex Hexcode specified background color, or standard color spec
          * @param {number}
          *            a Alpha level (default 1.0)
-         * 
+         *
          * @example
-         * 
+         *
          * viewer.setBackgroundColor(0x000000);
 
 
-         * 
+         *
          */
         this.setBackgroundColor = function(hex, a) {
             if(typeof(a) == "undefined") {
@@ -922,17 +994,17 @@ $3Dmol.GLViewer = (function() {
             bgColor = c.getHex();
             renderer.setClearColorHex(c.getHex(), a);
             show();
-            
+
             return this;
         };
-        
+
         /**
-         * Set view projection scheme.  Either orthographic or perspective.  
+         * Set view projection scheme.  Either orthographic or perspective.
          * Default is perspective.  Orthographic can also be enabled on viewer creation
          * by setting orthographic to true in the config object.
-         * 
+         *
          * @function $3Dmol.GLViewer#setProjection
-         * 
+         *
          * @example
          viewer.setViewStyle({style:"outline"});
               $.get('data/1fas.pqr', function(data){
@@ -945,17 +1017,17 @@ $3Dmol.GLViewer = (function() {
                   viewer.setProjection("orthographic");
                   viewer.render(callback);
               });
-         * 
+         *
          */
         this.setProjection = function(proj) {
             camera.ortho = (proj === "orthographic");
-            setSlabAndFog();            
+            setSlabAndFog();
         };
-        
+
         /**
-         * Set global view styles.  
+         * Set global view styles.
          * @function $3Dmol.GLViewer#setViewStyle
-         * 
+         *
          * @example
          *   viewer.setViewStyle({style:"outline"});
               $.get('data/1fas.pqr', function(data){
@@ -966,7 +1038,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.zoomTo();
                   viewer.render(callback);
               });
-         * 
+         *
          */
          this.setViewStyle = function(parameters) {
             if (parameters.style === "outline") {
@@ -976,17 +1048,17 @@ $3Dmol.GLViewer = (function() {
                 renderer.enableOutline(params);
             } else {
                 renderer.disableOutline();
-            }           
+            }
             return this;
         };
-         
+
         if(config.style) { //enable setting style in constructor
              this.setViewStyle(config);
         }
 
         /**
          * Set viewer width
-         * 
+         *
          * @function $3Dmol.GLViewer#setWidth
          * @param {number}
          *            w Width in pixels
@@ -999,7 +1071,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set viewer height
-         * 
+         *
          * @function $3Dmol.GLViewer#setHeight
          * @param {number}
          *            h Height in pixels
@@ -1012,7 +1084,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Resize viewer according to containing HTML element's dimensions
-         * 
+         *
          * @function $3Dmol.GLViewer#resize
          */
         this.resize = function() {
@@ -1023,11 +1095,14 @@ $3Dmol.GLViewer = (function() {
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
             show();
+
+            // UI Edition 
+            _stateManager.updateUI();
             return this;
         };
 
         $(window).resize(this.resize);
-        
+
         if(typeof(window.ResizeObserver) !== undefined) {
             var divwatcher = new window.ResizeObserver(this.resize);
             divwatcher.observe(container[0]);
@@ -1035,13 +1110,13 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Return specified model
-         * 
+         *
          * @function $3Dmol.GLViewer#getModel
          * @param {number}
          *            [id=last model id] - Retrieve model with specified id
          * @default Returns last model added to viewer or null if there are no models
          * @return {GLModel}
-         * 
+         *
          * @example // Retrieve reference to first GLModel added var m =
          *    $3Dmol.download("pdb:1UBQ",viewer,{},function(m1){
                   $3Dmol.download("pdb:1UBI", viewer,{}, function(m2) {
@@ -1051,24 +1126,24 @@ $3Dmol.GLViewer = (function() {
                     viewer.getModel().setStyle({cartoon: {color:'blue'}});
                     viewer.render();
                 })
-              });     
+              });
          */
         this.getModel = function(id) {
             if(id === undefined) {
                 return models.length == 0 ? null : models[models.length-1];
-            } 
+            }
             if(id instanceof $3Dmol.GLModel) {
                 return id;
             }
             if(!(id in models)) {
-                if(models.length == 0) 
+                if(models.length == 0)
                     return null;
                 else
                     return models[models.length-1]; //get last model if no (or invalid) id specified
             }
             return models[id];
         };
-        
+
         //interpolate between two normalized quaternions (t between 0 and 1)
         //https://en.wikipedia.org/wiki/Slerp
         var slerp = function(v0, v1, t) {
@@ -1085,7 +1160,7 @@ $3Dmol.GLViewer = (function() {
                         v0.y+t*(v1.y-v0.y),
                         v0.z+t*(v1.z-v0.z),
                         v0.w+t*(v1.w-v0.w));
-                        
+
                 result.normalize();
                 return result;
             }
@@ -1096,13 +1171,13 @@ $3Dmol.GLViewer = (function() {
             if (dot < 0.0) {
                 v1 = v1.clone().multiplyScalar(-1);
                 dot = -dot;
-            }  
+            }
 
             if(dot > 1) dot = 1.0;
             else if(dot < -1) dot = -1.0;
 
             var theta_0 = Math.acos(dot);  // theta_0 = angle between input vectors
-            var theta = theta_0*t;    // theta = angle between v0 and result 
+            var theta = theta_0*t;    // theta = angle between v0 and result
 
             var v2 = v1.clone();
             v2.sub(v0.clone().multiplyScalar(dot));
@@ -1119,22 +1194,22 @@ $3Dmol.GLViewer = (function() {
             ret.normalize();
             return ret;
         };
-        
+
         var spinInterval;
         /**
          * Continuously rotate a scene around the specified axis.
          *
          * Call `$3Dmol.GLViewer.spin(false)` to stop spinning.
-         * 
+         *
          * @function $3Dmol.GLViewer#spin
          * @param {string}
          *            [axis] - Axis ("x", "y", "z", "vx", "vy", or "vz") to rotate around.
-         *            Default "y".  View relative (rather than model relative) axes are prefixed with v. 
+         *            Default "y".  View relative (rather than model relative) axes are prefixed with v.
          * @param {number}
          *            [speed] - Speed multiplier for spinning the viewer. 1 is default and a negative
-         *             value reverses the direction of the spin.        
-         *  
-         */        
+         *             value reverses the direction of the spin.
+         *
+         */
         this.spin = function(axis, speed){
             clearInterval(spinInterval);
             if(typeof axis == 'undefined')
@@ -1159,9 +1234,9 @@ $3Dmol.GLViewer = (function() {
             spinInterval = setInterval(
                 function(){
                     viewer.rotate(1 * speed,axis);
-                }, 25);            
-            
-        };         
+                }, 25);
+
+        };
 
         //animate motion between current position and passed position
         // can set some parameters to null
@@ -1169,19 +1244,19 @@ $3Dmol.GLViewer = (function() {
         //does relative updates
         //positions objects have modelggroup position, rotation group position.z,
         //and rotationgroup quaternion
-        //return array includes final position, but not current 
+        //return array includes final position, but not current
         //the returned array includes an animate method
         var animateMotion = function(duration, fixed, mpos, rz, rot, cam) {
             var interval = 20;
             var steps = Math.ceil(duration/interval);
             if(steps < 1) steps = 1;
             incAnim();
-            
+
             var curr = {mpos:modelGroup.position.clone(),
                     rz: rotationGroup.position.z,
                     rot: rotationGroup.quaternion.clone(),
                     cam: lookingAt.clone()};
-            
+
             if(fixed) { //precompute path and stick to it
                 steps = new Array(steps);
                 var n = steps.length;
@@ -1200,10 +1275,10 @@ $3Dmol.GLViewer = (function() {
                     if(cam) {
                         next.cam = cam.clone().sub(curr.cam).multiplyScalar(frac).add(curr.cam);
                     }
-                    
+
                     steps[i] = next;
                 }
-                
+
                 let step = 0;
                 let callback = function() {
                     var p = steps[step];
@@ -1220,7 +1295,7 @@ $3Dmol.GLViewer = (function() {
                     if(p.cam) {
                         camera.lookAt(p.cam);
                     }
-                    
+
                     if(step < steps.length) {
                         setTimeout(callback, interval);
                     } else {
@@ -1229,7 +1304,7 @@ $3Dmol.GLViewer = (function() {
                     show();
                 };
                 setTimeout(callback, interval);
-               
+
             } else { //relative update
                 var delta = {};
                 let frac = 1.0/steps;
@@ -1263,7 +1338,7 @@ $3Dmol.GLViewer = (function() {
                         lookingAt.add(delta.cam);
                         camera.lookAt(lookingAt);
                     }
-                    
+
                     if(step < steps) {
                         setTimeout(callback, interval);
                     } else {
@@ -1274,10 +1349,10 @@ $3Dmol.GLViewer = (function() {
                 setTimeout(callback, interval);
             }
         };
-        
+
         /**
          * Rotate scene by angle degrees around axis
-         * 
+         *
          * @function $3Dmol.GLViewer#rotate
          * @param {number}
          *            [angle] - Angle, in degrees, to rotate by.
@@ -1288,8 +1363,8 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of the rotation animation. Default 0 (no animation)
-         * @param {boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
+         * @param {boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
          * @example     $3Dmol.download('cid:4000', viewer, {}, function() {
       viewer.setStyle({stick:{}});
       viewer.zoomTo();
@@ -1297,7 +1372,7 @@ $3Dmol.GLViewer = (function() {
       viewer.render(callback);
     });
 
-         *  
+         *
          */
         this.rotate = function(angle, axis, animationDuration, fixedPath) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
@@ -1313,7 +1388,7 @@ $3Dmol.GLViewer = (function() {
             }else if(axis =="z"){
                 axis = {x:0,y:0,z:1};
             }
-            
+
             //support rotating with respect to view axis, not model
             if(axis == "vx"){
                 axis = {vx:1,vy:0,vz:0};
@@ -1322,13 +1397,13 @@ $3Dmol.GLViewer = (function() {
             }else if(axis =="vz"){
                 axis = {vx:0,vy:0,vz:1};
             }
-            
+
             if(typeof(axis.vx) !== 'undefined') {
               var vaxis = new $3Dmol.Vector3(axis.vx,axis.vy,axis.vz);
               vaxis.applyQuaternion(rotationGroup.quaternion);
               axis = {x:vaxis.x, y:vaxis.y, z: vaxis.z};
             }
-                        
+
             var qFromAngle = function(rangle) {
                 var s = Math.sin(rangle / 2.0);
                 var c = Math.cos(rangle / 2.0);
@@ -1340,17 +1415,17 @@ $3Dmol.GLViewer = (function() {
 
                 return new $3Dmol.Quaternion(i, j, k, c).normalize();
             };
-            
+
             var rangle = Math.PI * angle / 180.0;
             var q = qFromAngle(rangle);
-            
+
             if(animationDuration ){
                 var final = new $3Dmol.Quaternion().copy(rotationGroup.quaternion).multiply(q);//final
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position,
-                        rotationGroup.position.z, 
+                        rotationGroup.position.z,
                         final,
-                        lookingAt);              
+                        lookingAt);
             } else { //not animated
                 rotationGroup.quaternion.multiply(q);
                 show();
@@ -1371,7 +1446,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /** Returns an array representing the current viewpoint.
-         * Translation, zoom, and rotation quaternion. 
+         * Translation, zoom, and rotation quaternion.
          * @function $3Dmol.GLViewer#getView
          * @returns {Array.<number>} [ pos.x, pos.y, pos.z, rotationGroup.position.z, q.x, q.y, q.z, q.w ]
          *  */
@@ -1385,7 +1460,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /** Sets the view to the specified translation, zoom, and rotation.
-         * 
+         *
          * @function $3Dmol.GLViewer#setView
          * @param {Array.<number>} arg Array formatted identically to the return value of getView */
         this.setView = function(arg, nolink) {
@@ -1416,21 +1491,21 @@ $3Dmol.GLViewer = (function() {
 
         // apply styles, models, etc in viewer
         /**
-         * Render current state of viewer, after 
+         * Render current state of viewer, after
          * adding/removing models, applying styles, etc.
-         * 
+         *
          * @function $3Dmol.GLViewer#render
          */
         this.render = function(callback, exts) {
             renderer.setViewport();
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();
-            
+
             if(stateChangeCallback) {
               //todo: have ability to only send delta updates
               stateChangeCallback(this.getInternalState());
             }
-            
+
             var i, n;
             if(!exts) exts = renderer.supportedExtensions();
             for (i = 0; i < models.length; i++) {
@@ -1449,7 +1524,7 @@ $3Dmol.GLViewer = (function() {
                     }
                 }
             }
-            
+
             for (i = 0; i < labels.length; i++) {
                 if (labels[i] && typeof(labels[i].frame) != 'undefined' && labels[i].frame >= 0) { //exists and has frame specifier
                     modelGroup.remove(labels[i].sprite);
@@ -1457,8 +1532,8 @@ $3Dmol.GLViewer = (function() {
                         modelGroup.add(labels[i].sprite);
                     }
                 }
-            }            
-            
+            }
+
             for (i in surfaces) { // this is an object with possible holes
                 if(!surfaces.hasOwnProperty(i)) continue;
                 var surfArr = surfaces[i];
@@ -1501,8 +1576,8 @@ $3Dmol.GLViewer = (function() {
                             } else {
                                 smesh.visible = true;
                             }
-                            if (surfArr[n].symmetries.length > 1 || 
-                            (surfArr[n].symmetries.length == 1 && 
+                            if (surfArr[n].symmetries.length > 1 ||
+                            (surfArr[n].symmetries.length == 1 &&
                             !(surfArr[n].symmetries[n].isIdentity()))) {
                                 var j;
                                 var tmeshes = new $3Dmol.Object3D(); //transformed meshes
@@ -1523,7 +1598,7 @@ $3Dmol.GLViewer = (function() {
                     }
                 }
             }
-            
+
             this.setView(view); // Calls show() => renderer render
             if(typeof callback ==='function'){
                 callback(this);
@@ -1545,7 +1620,7 @@ $3Dmol.GLViewer = (function() {
                 ms = sel.model;
                 if (!Array.isArray(ms))
                     ms = [ ms ];
-                
+
                 for (let i = 0; i < ms.length; i++) {
                         //allow referencing models by order of creation
                     if(typeof ms[i] === 'number') {
@@ -1553,14 +1628,14 @@ $3Dmol.GLViewer = (function() {
                         //support python backward indexing
                         if(index < 0) index += models.length;
                         ms[i] = models[index];
-                    }             
+                    }
                 }
             }
-            
-            return ms;            
+
+            return ms;
         }
         /**
-         * 
+         *
          * @param {AtomSelectionSpec}
          *            sel
          * @return {AtomSpec[]}
@@ -1580,7 +1655,7 @@ $3Dmol.GLViewer = (function() {
         }
 
         /**
-         * 
+         *
          * @param {AtomSpec}
          *            atom
          * @param {AtomSpec}
@@ -1592,7 +1667,7 @@ $3Dmol.GLViewer = (function() {
                 sel = {};
 
             var ms = getModelList(sel);
-            
+
             for (var i = 0; i < ms.length; i++) {
                 if (ms[i].atomIsSelected(atom, sel))
                     return true;
@@ -1603,7 +1678,7 @@ $3Dmol.GLViewer = (function() {
 
 
         /** return list of atoms selected by sel
-         * 
+         *
          * @function $3Dmol.GLViewer#selectedAtoms
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
@@ -1614,7 +1689,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
         * Returns valid values for the specified attribute in the given selection
-        * @function $3Dmol.GlViewer#getUniqueValues 
+        * @function $3Dmol.GlViewer#getUniqueValues
         * @param {string} attribute
         * @param {AtomSelectionSpec} sel
         * @return {Array.<Object>}
@@ -1622,7 +1697,7 @@ $3Dmol.GLViewer = (function() {
         */
         this.getUniqueValues = function(attribute, sel){
             if (typeof (sel) === "undefined")
-                sel = {};            
+                sel = {};
             var atoms = getAtomsFromSel(sel);
             var values = {};
 
@@ -1635,11 +1710,11 @@ $3Dmol.GLViewer = (function() {
 
             return Object.keys(values);
         };
-        
+
         /**
          * Return pdb output of selected atoms (if atoms from pdb input)
-         * 
-         * @function $3Dmol.GLViewer#pdbData  
+         *
+         * @function $3Dmol.GLViewer#pdbData
          * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
          * @return {string} PDB string of selected atoms
          */
@@ -1651,11 +1726,11 @@ $3Dmol.GLViewer = (function() {
             }
             return ret;
         };
-        
+
 
         /**
          * Zoom current view by a constant factor
-         * 
+         *
          * @function $3Dmol.GLViewer#zoom
          * @param {number}
          *            [factor] - Magnification factor. Values greater than 1
@@ -1663,9 +1738,9 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
          *      requested motion, overriding updates that happen during the animation
-         * @example   
+         * @example
     $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
@@ -1673,7 +1748,7 @@ $3Dmol.GLViewer = (function() {
       viewer.zoom(2,1000);
       viewer.render();
     });
-    
+
              */
         this.zoom = function(factor,animationDuration,fixedPath) {
             factor = factor || 2;
@@ -1683,8 +1758,8 @@ $3Dmol.GLViewer = (function() {
 
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
-                        modelGroup.position, 
-                        adjustZoomToLimits(final_z), 
+                        modelGroup.position,
+                        adjustZoomToLimits(final_z),
                         rotationGroup.quaternion,
                         lookingAt);
             } else { //no animation
@@ -1693,24 +1768,24 @@ $3Dmol.GLViewer = (function() {
             }
             return this;
         };
-        
+
         /**
          * Translate current view by x,y screen coordinates
          * This pans the camera rather than translating the model.
-         * 
+         *
          * @function $3Dmol.GLViewer#translate
          * @param {number} x Relative change in view coordinates of camera
          * @param {number} y Relative change in view coordinates of camera
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
          * @example     $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
-      viewer.translate(200,50);         
+      viewer.translate(200,50);
       viewer.rotate(90,'z');
       viewer.render(callback);
     });
@@ -1720,18 +1795,18 @@ $3Dmol.GLViewer = (function() {
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
             var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
-            
+
             projector.projectVector(v, camera);
             v.x -= dx;
             v.y -= dy;
             projector.unprojectVector(v, camera);
-            v.z = 0;            
+            v.z = 0;
 
             var final_position=lookingAt.clone().add(v);
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position,
-                        rotationGroup.position.z, 
+                        rotationGroup.position.z,
                         rotationGroup.quaternion,
                         final_position);
             } else { //no animation
@@ -1741,39 +1816,39 @@ $3Dmol.GLViewer = (function() {
             }
             return this;
         };
-        
+
         /**
          * Translate current models by x,y screen coordinates
          * This translates the models relative to the current view. It does
          * not change the center of rotation.
-         * 
+         *
          * @function $3Dmol.GLViewer#translateScene
          * @param {number} x Relative change in x screen coordinate
          * @param {number} y Relative change in y screen coordinate
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
          * @example     $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
-      viewer.translateScene(200,50);         
+      viewer.translateScene(200,50);
       viewer.rotate(90,'z'); // will no longer be around model center
       viewer.render(callback);
     });
          */
         this.translateScene = function(x, y, animationDuration, fixedPath) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
-            
+
             var t = screenOffsetToModel(x,y);
             var final_position=modelGroup.position.clone().add(t);
-                
+
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position,
-                        rotationGroup.position.z, 
+                        rotationGroup.position.z,
                         rotationGroup.quaternion,
                         lookingAt);
             } else { //no animation
@@ -1785,7 +1860,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Adjust slab to fully enclose selection (default everything).
-         * 
+         *
          * @function $3Dmol.GLViewer#fitSlab
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
@@ -1797,8 +1872,8 @@ $3Dmol.GLViewer = (function() {
             var tmp = $3Dmol.getExtent(atoms);
 
             // fit to bounding box
-            var x = tmp[1][0] - tmp[0][0], 
-                y = tmp[1][1] - tmp[0][1], 
+            var x = tmp[1][0] - tmp[0][0],
+                y = tmp[1][1] - tmp[0][1],
                 z = tmp[1][2] - tmp[0][2];
 
             var maxD = Math.sqrt(x * x + y * y + z * z);
@@ -1810,11 +1885,11 @@ $3Dmol.GLViewer = (function() {
             slabFar = maxD / 2;
 
             return this;
-        };        
-        
+        };
+
         /**
          * Re-center the viewer around the provided selection (unlike zoomTo, does not zoom).
-         * 
+         *
          * @function $3Dmol.GLViewer#center
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
@@ -1822,11 +1897,11 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
-         * @example // if the user were to pass the animationDuration value to 
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
+         * @example // if the user were to pass the animationDuration value to
          *           // the function like so viewer.zoomTo({resn:'STI'},1000);
-         *         //   the program would center on resn 'STI' over the course 
+         *         //   the program would center on resn 'STI' over the course
          *         //   of 1 second(1000 milleseconds).
          *  // Reposition to centroid of all atoms of all models in this
          * //viewer glviewer.center();
@@ -1896,7 +1971,7 @@ $3Dmol.GLViewer = (function() {
             maxD = Math.sqrt(x * x + y * y + z * z);
             if (maxD < 5)
                 maxD = 5;
-            
+
             //find the farthest atom from center to get max distance needed for view
             var maxDsq = 25;
             for (var i = 0; i < atoms.length; i++) {
@@ -1906,26 +1981,26 @@ $3Dmol.GLViewer = (function() {
                         maxDsq = dsq;
                 }
             }
-            
+
             maxD = Math.sqrt(maxDsq)*2;
             var finalpos = center.clone().multiplyScalar(-1);
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
-                        finalpos, 
-                        rotationGroup.position.z, 
+                        finalpos,
+                        rotationGroup.position.z,
                         rotationGroup.quaternion,
                         lookingAt);
-            } else { //no animation 
+            } else { //no animation
                 modelGroup.position = finalpos;
                 show();
             }
             return this;
         };
-        
+
         /**
          * Zoom to center of atom selection.  The slab will be set appropriately for
          * the selection, unless an empty selection is provided, in which case there will be no slab.
-         * 
+         *
          * @function $3Dmol.GLViewer#zoomTo
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
@@ -1933,10 +2008,10 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
-          * @example   
-    
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
+          * @example
+
 
               $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -1946,7 +2021,7 @@ $3Dmol.GLViewer = (function() {
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"),
                           volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'charge'))
                       },{});
-                      
+
                   viewer.render();
                   });
                   viewer.zoomTo();
@@ -1968,7 +2043,7 @@ $3Dmol.GLViewer = (function() {
                     if(shape.boundingSphere.box) {
                         let box = shape.boundingSphere.box;
                         atoms.push(new $3Dmol.Vector3(box.min.x,box.min.y,box.min.z));
-                        atoms.push(new $3Dmol.Vector3(box.max.x,box.max.y,box.max.z));                        
+                        atoms.push(new $3Dmol.Vector3(box.max.x,box.max.y,box.max.z));
                     } else if(shape.boundingSphere.center) {
                         var c = shape.boundingSphere.center;
                         var r = shape.boundingSphere.radius;
@@ -1989,17 +2064,17 @@ $3Dmol.GLViewer = (function() {
                 allbox = $3Dmol.getExtent(atoms);
                 if(!natoms) { //if no atoms, use shapes for center
                     for(let i = 0; i < 3; i++) { //center of bounding box
-                        atombox[2][i] = (allbox[0][i]+allbox[1][i])/2; 
+                        atombox[2][i] = (allbox[0][i]+allbox[1][i])/2;
                      }
                 }
             } else { //include all atoms in slab calculation
                 let allatoms = getAtomsFromSel({});
-                allbox = $3Dmol.getExtent(allatoms);  
+                allbox = $3Dmol.getExtent(allatoms);
             }
 
             // use selection for center
             var center = new $3Dmol.Vector3(atombox[2][0], atombox[2][1], atombox[2][2]);
-            
+
             // but all for bounding box
             var x = allbox[1][0] - allbox[0][0], y = allbox[1][1]
                     - allbox[0][1], z = allbox[1][2] - allbox[0][2];
@@ -2011,7 +2086,7 @@ $3Dmol.GLViewer = (function() {
             // use full bounding box for slab/fog
             slabNear = -maxD / 1.9;
             slabFar = maxD / 2;
-            
+
             //if we are selecting everything, do not slab
             if(Object.keys(sel).length === 0) {
                 slabNear = -999999;
@@ -2024,10 +2099,10 @@ $3Dmol.GLViewer = (function() {
             x = atombox[1][0] - atombox[0][0];
             y = atombox[1][1] - atombox[0][1];
             z = atombox[1][2] - atombox[0][2];
-            maxD = Math.sqrt(x * x + y * y + z * z);           
+            maxD = Math.sqrt(x * x + y * y + z * z);
             if (maxD < MAXD)
                 maxD = MAXD;
-            
+
             //find the farthest atom from center to get max distance needed for view
             var maxDsq = MAXD*MAXD;
             for (var i = 0; i < atoms.length; i++) {
@@ -2037,32 +2112,32 @@ $3Dmol.GLViewer = (function() {
                         maxDsq = dsq;
                 }
             }
-            
+
             maxD = Math.sqrt(maxDsq)*2;
             var finalpos = center.clone().multiplyScalar(-1);
             var finalz =  -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
-                    
+
             finalz = adjustZoomToLimits(finalz);
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         finalpos,
-                        finalz, 
+                        finalz,
                         rotationGroup.quaternion,
-                        lookingAt);                
+                        lookingAt);
             } else {
                 modelGroup.position = finalpos;
                 rotationGroup.position.z = finalz;
                 show();
             }
             return this;
-        
+
         };
 
         /**
          * Set slab of view (contents outside of slab are clipped).
          * Must call render to update.
-         * 
+         *
          * @function $3Dmol.GLViewer#setSlab
          * @param {number} near near clipping plane distance
          * @param {number} far far clipping plane distance
@@ -2071,10 +2146,10 @@ $3Dmol.GLViewer = (function() {
             slabNear = near;
             slabFar = far;
         };
-        
+
         /**
          * Get slab of view (contents outside of slab are clipped).
-         * 
+         *
          * @function $3Dmol.GLViewer#getSlab
          * @return {Object}
          *      @property {number} near - near clipping plane distance
@@ -2083,10 +2158,10 @@ $3Dmol.GLViewer = (function() {
         this.getSlab = function() {
             return {near: slabNear, far: slabFar};
         };
-                
+
         /**
          * Add label to viewer
-         * 
+         *
          * @function $3Dmol.GLViewer#addLabel
          * @param {string}
          *            text - Label text
@@ -2096,10 +2171,10 @@ $3Dmol.GLViewer = (function() {
          *            sel - Set position of label to center of this selection
          * @param {boolean} noshow - if true, do not immediately display label - when adding multiple labels this is more efficient
          * @return {$3Dmol.Label}
-         * 
+         *
          * @example
          *  $3Dmol.download("pdb:2EJ0",viewer,{},function(){
-                  
+
                   viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                   viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
                                            borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
@@ -2116,12 +2191,12 @@ $3Dmol.GLViewer = (function() {
                   viewer.setStyle({chain:'E'},{cross:{hidden:false,
                                                       linewidth:1.0,
                                                       color:'black'}});
-                  
+
                   viewer.render();
 
-                  
+
                 });
-            
+
          */
         this.addLabel = function(text, options, sel, noshow) {
             options = options || {};
@@ -2139,25 +2214,25 @@ $3Dmol.GLViewer = (function() {
             if(!noshow) show();
             return label;
         };
-        
+
 
 
         /** Add residue labels.  This will generate one label per a
          * residue within the selected atoms.  The label will be at the
          * centroid of the atoms and styled according to the passed style.
          * The label text will be [resn][resi]
-         * 
+         *
          * @function $3Dmol.GLViewer#addResLabels
          * @param {Object} sel
          * @param {Object} style
          * @param {boolean} byframe - if true, create labels for every individual frame, not just current
-         * 
-         * * @example  
+         *
+         * * @example
              $3Dmol.download("mmtf:2ll5",viewer,{},function(){
                   viewer.setStyle({stick:{radius:0.15},cartoon:{}});
                   viewer.addResLabels({hetflag:false}, {font: 'Arial', fontColor:'black',showBackground:false, screenOffset: {x:0,y:0}});
                   viewer.zoomTo();
-                  viewer.render();                  
+                  viewer.render();
                 });
          */
         this.addResLabels = function(sel, style, byframe) {
@@ -2169,18 +2244,18 @@ $3Dmol.GLViewer = (function() {
 
         /** Add property labels.  This will generate one label per a selected
          * atom at the atom's coordinates with the property value as the label text.
-         * 
+         *
          * @function $3Dmol.GLViewer#addPropertyLabels
          * @param {string} prop - property name
          * @param {Object} sel
          * @param {Object} style
-         * 
-         * * @example  
+         *
+         * * @example
              $3Dmol.download("cid:5291",viewer,{},function(){
                   viewer.setStyle({stick: {radius:.2}});
                   viewer.addPropertyLabels("index",{not:{elem:'H'}}, {fontColor:'black',font: 'sans-serif', fontSize: 28, showBackground:false,alignment:'center'});
                   viewer.zoomTo();
-                  viewer.render();                  
+                  viewer.render();
                 });
          */
         this.addPropertyLabels = function(prop, sel, style) {
@@ -2188,15 +2263,15 @@ $3Dmol.GLViewer = (function() {
             show();
             return this;
         };
-        
+
         /**
          * Remove label from viewer
-         * 
+         *
          * @function $3Dmol.GLViewer#removeLabel
          * @param {$3Dmol.Label}
          *            label - $3Dmol label
-         * 
-         * @example // Remove labels created in 
+         *
+         * @example // Remove labels created in
          $3Dmol.download("pdb:2EJ0",viewer,{},function(){
                   var toremove = viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                   viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
@@ -2205,7 +2280,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.removeLabel(toremove);
                   viewer.render();
 
-                  
+
                 });
 
          */
@@ -2227,16 +2302,16 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Remove all labels from viewer
-         * 
+         *
          * @function $3Dmol.GLViewer#removeAllLabels
-         *         @example             
+         *         @example
         $3Dmol.download("pdb:1ubq",viewer,{},function(){
-                          
+
                viewer.addResLabels();
-               viewer.setStyle({},{stick:{}}); 
+               viewer.setStyle({},{stick:{}});
                viewer.render( ); //show labels
 
-               viewer.removeAllLabels();              
+               viewer.removeAllLabels();
                viewer.render(); //hide labels
         });
          */
@@ -2250,11 +2325,11 @@ $3Dmol.GLViewer = (function() {
             show();
             return this;
         };
-        
+
         // Modify label style
         /**
          * Modify existing label's style
-         * 
+         *
          * @function $3Dmol.GLViewer#setLabelStyle
          * @param {$3Dmol.Label}
          *            label - $3Dmol label
@@ -2276,7 +2351,7 @@ $3Dmol.GLViewer = (function() {
         // Change label text
         /**
          * Modify existing label's text
-         * 
+         *
          * @function $3Dmol.GLViewer#setLabelText
          * @param {$3Dmol.Label}
          *            label - $3Dmol label
@@ -2296,9 +2371,9 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Add shape object to viewer 
+         * Add shape object to viewer
          * @see {@link $3Dmol.GLShape}
-         * 
+         *
          * @function $3Dmol.GLViewer#addShape
          * @param {ShapeSpec} shapeSpec - style specification for label
          * @return {$3Dmol.GLShape}
@@ -2330,7 +2405,7 @@ $3Dmol.GLViewer = (function() {
                 shapes.pop();
             return this;
         };
-        
+
         /**
          * Remove all shape objects from viewer
          * @function $3Dmol.GLViewer#removeAllShapes
@@ -2344,7 +2419,7 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
-        //gets the center of the selection 
+        //gets the center of the selection
         var getSelectionCenter = function(spec){
             if(spec.hasOwnProperty("x") && spec.hasOwnProperty("y") && spec.hasOwnProperty("z"))
                 return spec;
@@ -2357,16 +2432,16 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Create and add sphere shape. This method provides a shorthand 
+         * Create and add sphere shape. This method provides a shorthand
          * way to create a spherical shape object
-         * 
+         *
          * @function $3Dmol.GLViewer#addSphere
          * @param {SphereShapeSpec} spec - Sphere shape style specification
          * @return {$3Dmol.GLShape}
          @example
-         
+
          viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
-         
+
          viewer.render();
          */
         this.addSphere = function(spec) {
@@ -2383,14 +2458,14 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Create and add box shape. This method provides a shorthand 
+         * Create and add box shape. This method provides a shorthand
          * way to create a box shape object
-         * 
+         *
          * @function $3Dmol.GLViewer#addBox
          * @param {BoxSpec} spec - Box shape style specification
          * @return {$3Dmol.GLShape}
          @example
-         
+
          viewer.addLine({color:'red',start:{x:0,y:0,z:0},end:{x:5,y:0,z:0}});
          viewer.addLine({color:'blue',start:{x:0,y:0,z:0},end:{x:0,y:5,z:0}});
          viewer.addLine({color:'green',start:{x:0,y:0,z:0},end:{x:0,y:0,z:5}});
@@ -2418,10 +2493,10 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
-        
+
         /**
          * Create and add arrow shape
-         * 
+         *
          * @function $3Dmol.GLViewer#addArrow
          * @param {ArrowSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
@@ -2446,10 +2521,10 @@ $3Dmol.GLViewer = (function() {
          */
         this.addArrow = function(spec) {
             spec = spec || {};
-            
+
             spec.start = getSelectionCenter(spec.start);
-            spec.end = getSelectionCenter(spec.end);      
-            
+            spec.end = getSelectionCenter(spec.end);
+
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addArrow(spec);
@@ -2458,10 +2533,10 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
-        
+
         /**
          * Create and add cylinder shape
-         * 
+         *
          * @function $3Dmol.GLViewer#addCylinder
          * @param {CylinderSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
@@ -2514,7 +2589,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Create and add Curve shape
-         * 
+         *
          * @function $3Dmol.GLViewer#addCurve
          * @param {CurveSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
@@ -2525,19 +2600,19 @@ $3Dmol.GLViewer = (function() {
                                   smooth: 10,
                                   fromArrow:false,
                                   toArrow: true,
-                                  color:'orange',                                  
+                                  color:'orange',
                                   });
               viewer.addCurve({points: [{x:-1,y:0.0,z:0.0}, {x:-5.0,y:5.0,z:0.0}, {x:-2,y:10.0,z:0.0}],
                                   radius:1,
                                   fromArrow:true,
                                   toArrow: false,
-                                  color:'purple',                                  
+                                  color:'purple',
                                   });
               viewer.zoomTo();
               viewer.render();
          */
         this.addCurve = function(spec) {
-            spec = spec || {};            
+            spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addCurve(spec);
@@ -2550,13 +2625,13 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Create and add line shape
-         * 
+         *
          * @function $3Dmol.GLViewer#addLine
          * @param {LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
          * @return {$3Dmol.GLShape}
          @example
          $3Dmol.download("pdb:2ABJ",viewer,{},function(){
-                  
+
                   viewer.setViewStyle({style:"outline"});
                   viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
                   viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
@@ -2585,9 +2660,9 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
-        
+
         /**
-         * Unit Cell shape specification. 
+         * Unit Cell shape specification.
          * @typedef UnitCellStyleSpec
          * @prop {LineStyleSpec} box - line style used to draw box
          * @prop {ArrowSpec} astyle - arrow specification of "a" axis
@@ -2599,9 +2674,9 @@ $3Dmol.GLViewer = (function() {
          * @prop {LabelSpec} blabelstyle - label style for b axis
          * @prop {string} clabel - label for c axis
          * @prop {LabelSpec} clabelstyle - label style for c axis
-         
+
          */
-        
+
         /**
          * Create and add unit cell visualization.
          *
@@ -2615,12 +2690,12 @@ $3Dmol.GLViewer = (function() {
                   viewer.addUnitCell(m, {box:{color:'purple'},alabel:'X',blabel:'Y',clabel:'Z',alabelstyle: {fontColor: 'black',backgroundColor:'white',inFront:true,fontSize:40},astyle:{color:'darkred', radius:5,midpos: -10}});
                   viewer.zoomTo();
                   viewer.render();
-    });         
+    });
          */
         this.addUnitCell = function(model, spec) {
             model = this.getModel(model);
             spec = spec || {alabel: 'a', blabel: 'b', clabel: 'c'};
-            
+
             spec.box = spec.box || {};
             spec.astyle = spec.astyle || {color: 'red', radius: 0.1,midpos: -1};
             spec.bstyle = spec.bstyle || {color: 'green', radius: 0.1,midpos: -1};
@@ -2646,18 +2721,18 @@ $3Dmol.GLViewer = (function() {
                     alpha = alpha * Math.PI/180.0;
                     beta = beta * Math.PI/180.0;
                     gamma = gamma * Math.PI/180.0;
-            
+
                     var u, v, w;
-            
+
                     u = Math.cos(beta);
                     v = (Math.cos(alpha) - Math.cos(beta)*Math.cos(gamma))/Math.sin(gamma);
                     w = Math.sqrt(Math.max(0, 1-u*u-v*v));
-            
-                    matrix = new $3Dmol.Matrix3(a, b*Math.cos(gamma), c*u, 
+
+                    matrix = new $3Dmol.Matrix3(a, b*Math.cos(gamma), c*u,
                                                 0, b*Math.sin(gamma), c*v,
-                                                0, 0,                 c*w); 
-                }  
-         
+                                                0, 0,                 c*w);
+                }
+
                 var points = [  new $3Dmol.Vector3(0, 0, 0),
                                 new $3Dmol.Vector3(1, 0, 0),
                                 new $3Dmol.Vector3(0, 1, 0),
@@ -2666,7 +2741,8 @@ $3Dmol.GLViewer = (function() {
                                 new $3Dmol.Vector3(0, 1, 1),
                                 new $3Dmol.Vector3(1, 0, 1),
                                 new $3Dmol.Vector3(1, 1, 1)  ];
-                            
+
+                // console.log('Matrix4', data.matrix4, data.matrix);
                 if(data.matrix4) {
                     for (let i = 0; i < points.length; i++) {
                         if(data.size) points[i].multiplyVectors(points[i],data.size); //matrix is for unit vectors, not whole box
@@ -2677,34 +2753,34 @@ $3Dmol.GLViewer = (function() {
                         points[i] = points[i].applyMatrix3(matrix);
                     }
                 }
-            
+
                 //draw box
                 if(spec.box && !spec.box.hidden) {
                     spec.box.wireframe = true;
                     var s = new $3Dmol.GLShape(spec.box);
                     s.shapePosition = shapes.length;
-                
+
                     s.addLine({start: points[0], end: points[1]});
                     s.addLine({start: points[0], end: points[2]});
                     s.addLine({start: points[1], end: points[4]});
                     s.addLine({start: points[2], end: points[4]});
-                
+
                     s.addLine({start: points[0], end: points[3]});
                     s.addLine({start: points[3], end: points[5]});
                     s.addLine({start: points[2], end: points[5]});
-                
+
                     s.addLine({start: points[1], end: points[6]});
                     s.addLine({start: points[4], end: points[7]});
                     s.addLine({start: points[6], end: points[7]});
-                
+
                     s.addLine({start: points[3], end: points[6]});
                     s.addLine({start: points[5], end: points[7]});
-            
+
                     shapes.push(s);
                     model.unitCellObjects.shapes.push(s);
                     s.finalize(); //finalize shape for memory efficiency, assume shape won't be extended
                 }
-                
+
                 //draw arrows
                 if(!spec.astyle.hidden) {
                     spec.astyle.start = points[0];
@@ -2719,14 +2795,14 @@ $3Dmol.GLViewer = (function() {
                     let arrow = this.addArrow(spec.bstyle);
                     model.unitCellObjects.shapes.push(arrow);
                 }
-                
+
                 if(!spec.cstyle.hidden) {
                     spec.cstyle.start = points[0];
                     spec.cstyle.end = points[3];
                     let arrow = this.addArrow(spec.cstyle);
                     model.unitCellObjects.shapes.push(arrow);
                 }
-                
+
                 if(spec.alabel) {
                     spec.alabelstyle.position = points[1];
                     let label = this.addLabel(spec.alabel, spec.alabelstyle);
@@ -2745,9 +2821,9 @@ $3Dmol.GLViewer = (function() {
                 }
 
             }
-            
+
         };
-        
+
          /**
          * Remove unit cell visualization from model.
          *
@@ -2761,7 +2837,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.zoomTo();
                   viewer.removeUnitCell();
                   viewer.render();
-            });                  
+            });
          */
         this.removeUnitCell = function(model) {
             model = this.getModel(model);
@@ -2772,7 +2848,7 @@ $3Dmol.GLViewer = (function() {
             }
             delete model.unitCellObjects;
         };
-        
+
          /**
          * Replicate atoms in model to form a super cell of the specified dimensions.
          * Original cell will be centered as much as possible.
@@ -2790,7 +2866,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.zoomTo();
                   viewer.replicateUnitCell(3,2,1,m);
                   viewer.render();
-            });                  
+            });
          */
         this.replicateUnitCell = function(A,B,C,model) {
             model = this.getModel(model);
@@ -2813,7 +2889,7 @@ $3Dmol.GLViewer = (function() {
                             if(i == 0 && j == 0 && k == 0) continue; //actual unit cell
                             let offset = new $3Dmol.Vector3(makeoff(i),makeoff(j),makeoff(k));
                             offset.applyMatrix3(matrix);
-                            
+
                             let newatoms = [];
                             for(let a = 0; a < atoms.length; a++) {
                                 let newAtom = {};
@@ -2823,7 +2899,7 @@ $3Dmol.GLViewer = (function() {
                                 newAtom.x += offset.x;
                                 newAtom.y += offset.y;
                                 newAtom.z += offset.z;
-                                newatoms.push(newAtom);     
+                                newatoms.push(newAtom);
                             }
                             model.addAtoms(newatoms);
                          }
@@ -2837,12 +2913,12 @@ $3Dmol.GLViewer = (function() {
             spec.gapLength = spec.gapLength || 0.5;
             spec.start = spec.start || {};
             spec.end = spec.end || {};
-            
+
             var p1 = new $3Dmol.Vector3(spec.start.x || 0,
                     spec.start.y || 0, spec.start.z || 0);
             var p2 = new $3Dmol.Vector3(spec.end.x,
                     spec.end.y || 0, spec.end.z || 0);
-                    
+
             var dir = new $3Dmol.Vector3();
             var dash = new $3Dmol.Vector3();
             var gap = new $3Dmol.Vector3();
@@ -2861,13 +2937,13 @@ $3Dmol.GLViewer = (function() {
             gapAmt = gap.length();
 
             while (drawn < length) {
-                if ((drawn + dashAmt) > length) { 
+                if ((drawn + dashAmt) > length) {
                     spec.start = p1;
                     spec.end = p2;
                     s.addLine(spec);
                     break;
                 }
-                temp.addVectors(p1, dash); 
+                temp.addVectors(p1, dash);
                 spec.start = p1;
                 spec.end = temp;
                 s.addLine(spec);
@@ -2875,19 +2951,19 @@ $3Dmol.GLViewer = (function() {
                 drawn += dashAmt;
 
                 temp.addVectors(p1, gap);
-                p1 = temp.clone();   
+                p1 = temp.clone();
                 drawn += gapAmt;
             }
             s.finalize(); //finalize shape for memory efficiency, assume shape won't be extended
-                    
+
             return s;
         }
 
-        
+
 
         /**
          * Add custom shape component from user supplied function
-         * 
+         *
          * @function $3Dmol.GLViewer#addCustom
          * @param {CustomSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
@@ -2901,17 +2977,17 @@ $3Dmol.GLViewer = (function() {
     vertices.push(new $3Dmol.Vector3(0,0,0));
     vertices.push(new $3Dmol.Vector3(r,0,0));
     vertices.push(new $3Dmol.Vector3(0,r,0));
-    
+
     normals.push(new $3Dmol.Vector3(0,0,1));
     normals.push(new $3Dmol.Vector3(0,0,1));
     normals.push(new $3Dmol.Vector3(0,0,1));
-    
+
     colors.push({r:1,g:0,b:0});
     colors.push({r:0,g:1,b:0});
     colors.push({r:0,g:0,b:1});
 
     var faces = [ 0,1,2 ];
-    
+
     var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
     viewer.addCustom(spec);
 }
@@ -2932,27 +3008,27 @@ $3Dmol.GLViewer = (function() {
         /**
          * Construct isosurface from volumetric data in gaussian cube format
          * @function $3Dmol.GLViewer#addVolumetricData
-         * @param {String} data - Input file contents 
-         * @param {String} format - Input file format 
+         * @param {String} data - Input file contents
+         * @param {String} format - Input file format
          * @param {IsoSurfaceSpec} or {VolumetricRenderSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
-         * 
+         *
          * @example
 
-    
+
     $.get('data/bohr.cube', function(data) {
-      
-      viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
+
+      viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95});
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
       viewer.render();
     });
 
-                
+
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};
-            
+
             var voldata = new $3Dmol.VolumeData(data, format);
             if(spec.transferfn) { //volumetric rendering
                 return this.addVolumetricRender(voldata, spec);
@@ -2960,7 +3036,7 @@ $3Dmol.GLViewer = (function() {
                 return this.addIsosurface(voldata, spec);
             }
         };
-        
+
         /**
          * Construct isosurface from volumetric data.  This is more flexible
      * than addVolumetricData, but can not be used with py3Dmol.
@@ -2968,8 +3044,8 @@ $3Dmol.GLViewer = (function() {
          * @param {$3Dmol.VolumeData} data - volumetric data
          * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
-         * 
-         @example 
+         *
+         @example
          $.get('../test_structs/benzene-homo.cube', function(data){
                   var voldata = new $3Dmol.VolumeData(data, "cube");
                   viewer.addIsosurface(voldata, {isoval: 0.01,
@@ -2988,24 +3064,24 @@ $3Dmol.GLViewer = (function() {
             shapes.push(s);
             return s;
         };
-        
+
         /**
          * Create volumetric renderer for volumetricData
          * @function $3Dmol.GLViewer#addVolumetricRender
          * @param {$3Dmol.VolumeData} data - volumetric data
-         * @param {VolumetricRenderSpec} spec - specification of volumetric render 
-         * 
+         * @param {VolumetricRenderSpec} spec - specification of volumetric render
+         *
          * @return {$3Dmol.GLShape}
-         * 
+         *
          */
-        this.addVolumetricRender = function(data,  spec) {            
+        this.addVolumetricRender = function(data,  spec) {
             spec = spec || {};
             var s = new $3Dmol.GLVolumetricRender(data, spec);
-            s.shapePosition = shapes.length;     
+            s.shapePosition = shapes.length;
             shapes.push(s);
             return s;
         };
-        
+
         /**
          * Return true if volumetric rendering is supported (WebGL 2.0 required)
          *
@@ -3013,9 +3089,9 @@ $3Dmol.GLViewer = (function() {
          * @return {boolean}
          */
         this.hasVolumetricRender = function() {
-          return renderer.supportsVolumetric();  
+          return renderer.supportsVolumetric();
         };
-        
+
         /**
          * Enable/disable fog for content far from the camera
          *
@@ -3035,7 +3111,7 @@ $3Dmol.GLViewer = (function() {
          * Sets the atomlists of all models in the viewer to specified frame.
          * Shapes and labels can also be displayed by frame.
          * Sets to last frame if framenum out of range
-         * 
+         *
          * @function $3Dmol.GLViewer#setFrame
          * @param {number} framenum - fame index to use, starts at zero
          * @return {Promise}
@@ -3051,19 +3127,19 @@ $3Dmol.GLViewer = (function() {
                     .then(function() {resolve();});
             });
         };
-        
+
         /**
          * Gets the current viewer frame.
-         * 
+         *
          * @function $3Dmol.GLViewer#getFrame
          */
         this.getFrame = function () {
             return viewer_frame;
         };
-                
+
         /**
          * Returns the number of frames that the model with the most frames in the viewer has
-         * 
+         *
          * @function $3Dmol.GLViewer#getNumFrames
          * @return {number}
          */
@@ -3078,24 +3154,24 @@ $3Dmol.GLViewer = (function() {
                 if (shapes[i].frame && shapes[i].frame >= mostFrames) {
                     mostFrames = shapes[i].frame+1;
                 }
-            }         
+            }
             for (let i = 0; i < labels.length; i++) {
                 if (labels[i].frame && labels[i].frame >= mostFrames) {
                     mostFrames = labels[i].frame+1;
                 }
-            }                     
+            }
             return mostFrames;
         };
-        
+
 
         /**
          * Animate all models in viewer from their respective frames
          * @function $3Dmol.GLViewer#animate
          * @param {Object} options - can specify interval (speed of animation), loop (direction
          * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), and reps (numer of repetitions, 0 indicates infinite loop)
-         *      
+         *
          */
-         
+
         this.animate = function(options) {
             incAnim();
             var interval = 100;
@@ -3145,9 +3221,9 @@ $3Dmol.GLViewer = (function() {
                         currFrame += inc;
                         inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
                         resolve();
-                    });          
+                    });
                 }
-            };            
+            };
             resolve = function() {
                 that.render();
                 if(!that.getCanvas().isConnected && renderer.isLost()) {
@@ -3157,7 +3233,7 @@ $3Dmol.GLViewer = (function() {
                 else if (++displayCount == displayMax || !that.isAnimated()) {
                     clearTimeout(intervalID);
                     animationTimers.delete(intervalID);
-                    decAnim(); 
+                    decAnim();
                 }
                 else {
                     var newInterval = interval - (new Date() - time);
@@ -3172,7 +3248,7 @@ $3Dmol.GLViewer = (function() {
             animationTimers.add(intervalID);
             return this;
         };
-        
+
         /**
          * Stop animation of all models in viewer
          * @function $3Dmol.GLViewer#stopAnimate
@@ -3183,7 +3259,7 @@ $3Dmol.GLViewer = (function() {
             animationTimers = new Set();
             return this;
         };
-        
+
         /**
          * Return true if viewer is currently being animated, false otherwise
          * @function $3Dmol.GLViewer#isAnimated
@@ -3192,30 +3268,30 @@ $3Dmol.GLViewer = (function() {
         this.isAnimated = function() {
             return animated > 0;
         };
-        
+
 
         /**
-         * Create and add model to viewer, given molecular data and its format 
-         * 
+         * Create and add model to viewer, given molecular data and its format
+         *
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
          * @param {string} format - Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')
          * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
          * @example
-         
+
 
               viewer.setViewStyle({style:"outline"});
               $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
                   $.get("data/1fas.cube",function(volumedata){
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
-                      
+
                   viewer.render();
                   });
                   viewer.zoomTo();
               });
          *
-         * @return {$3Dmol.GLModel} 
+         * @return {$3Dmol.GLModel}
          */
         this.addModel =  function(data, format, options) {
             if(options && !options.defaultcolors) {
@@ -3230,11 +3306,11 @@ $3Dmol.GLViewer = (function() {
 
             return m;
         };
-        
+
         /**
          * Given multimodel file and its format, add atom data to the viewer as separate models
          * and return list of these models
-         * 
+         *
          * @function $3Dmol.GLViewer#addModels
          * @param {string} data - Input data
          * @param {string} format - Input format (see {@link FileFormats})
@@ -3257,20 +3333,20 @@ $3Dmol.GLViewer = (function() {
                 newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
                 models.push(newModel);
             }
-            
+
             return models;
         };
-        
+
         /**
-         * Create and add model to viewer. Given multimodel file and its format, 
+         * Create and add model to viewer. Given multimodel file and its format,
          * different atomlists are stored in model's frame
          * property and model's atoms are set to the 0th frame
-         * 
+         *
          * @function $3Dmol.GLViewer#addModelsAsFrames
          * @param {string} data - Input data
          * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
-         * 
+         *
          * @example
                 $.get('../test_structs/multiple2.xyz', function(data){
                   viewer.addModelsAsFrames(data, "xyz");
@@ -3290,17 +3366,17 @@ $3Dmol.GLViewer = (function() {
 
             return m;
         };
-        
+
         /**
          * Create and add model to viewer. Given multimodel file and its format,
          * all atoms are added to one model
-         * 
+         *
          * @function $3Dmol.GLViewer#addAsOneMolecule
          * @param {string} data - Input data
          * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
          @example
-          
+
 
               $.get('../test_structs/multiple.sdf', function(data){
                   viewer.addAsOneMolecule(data, "sdf");
@@ -3315,14 +3391,14 @@ $3Dmol.GLViewer = (function() {
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
             models.push(m);
-            
+
             return m;
         };
-        
+
 
         /**
          * Delete specified model from viewer
-         * 
+         *
          * @function $3Dmol.GLViewer#removeModel
          * @param {$3Dmol.GLModel} model
          */
@@ -3339,7 +3415,7 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
-        /** 
+        /**
          * Delete all existing models
          * @function $3Dmol.GLViewer#removeAllModels
          */
@@ -3387,11 +3463,11 @@ $3Dmol.GLViewer = (function() {
             modelGroup = savedmodelGroup;
             return ret;
         };
-        
+
         /**
          * Create a new model from atoms specified by sel.
-         * If extract, removes selected atoms from existing models 
-         * 
+         * If extract, removes selected atoms from existing models
+         *
          * @function $3Dmol.GLViewer#createModelFrom
          * @param {Object} sel - Atom selection specification
          * @param {boolean=} extract - If true, remove selected atoms from existing models
@@ -3412,7 +3488,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         function applyToModels(func, sel, value1, value2, value3, value4, value5) {
-            
+
             //apply func to all models that are selected by sel with value1 and 2
             var ms = getModelList(sel);
             for (var i = 0; i < ms.length; i++) {
@@ -3422,11 +3498,11 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set style properties to all selected atoms
-         * 
+         *
          * @function $3Dmol.GLViewer#setStyle
          * @param {AtomSelectionSpec} sel - Atom selection specification
          * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
-         * 
+         *
          * @example
          viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
@@ -3447,19 +3523,19 @@ $3Dmol.GLViewer = (function() {
                 style = sel;
                 sel = {};
             }
-            
+
             applyToModels("setStyle", sel, style, false);
             return this;
         };
 
         /**
          * Add style properties to all selected atoms
-         * 
+         *
          * @function $3Dmol.GLViewer#addStyle
          * @param {AtomSelectionSpec} sel - Atom selection specification
          * @param {AtomStyleSpec} style - style spec to add to specified atoms
          @example
-         
+
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
        viewer.setStyle({cartoon:{}});
        //keep cartoon style, but show thick sticks for chain A
@@ -3481,16 +3557,16 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set click-handling properties to all selected atomsthis.
-         * 
+         *
          * @function $3Dmol.GLViewer#setClickable
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
-         * 
-         * @example       
+         *
+         * @example
             $3Dmol.download("cid:307900",viewer,{},function(){
-                              
-                   viewer.setStyle({},{sphere:{}});                
+
+                   viewer.setStyle({},{sphere:{}});
                    viewer.setClickable({},true,function(atom,viewer,event,container) {
                        viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'darkgreen', backgroundOpacity: 0.8});
                    });
@@ -3502,28 +3578,28 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         /** Set hoverable and callback of selected atoms
-         * 
+         *
          * @function $3Dmol.GLViewer#setHoverable
          * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
          * @param {boolean} hoverable - whether hover-handling is enabled for the selection
          * @param {function} hover_callback - function called when an atom in the selection is hovered over
-         * @param {function} unhover_callback - function called when the mouse moves out of the hover area  
-        @example             
+         * @param {function} unhover_callback - function called when the mouse moves out of the hover area
+        @example
         $3Dmol.download("pdb:1ubq",viewer,{},function(){
-                          
+
                viewer.setHoverable({},true,function(atom,viewer,event,container) {
                    if(!atom.label) {
                     atom.label = viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'mintcream', fontColor:'black'});
                    }
                },
-               function(atom) { 
+               function(atom) {
                    if(atom.label) {
                     viewer.removeLabel(atom.label);
                     delete atom.label;
                    }
                 }
                );
-               viewer.setStyle({},{stick:{}});               
+               viewer.setStyle({},{stick:{}});
                viewer.render();
         });
 
@@ -3532,11 +3608,23 @@ $3Dmol.GLViewer = (function() {
             applyToModels("setHoverable", sel,hoverable, hover_callback,unhover_callback);
             return this;
         };
-        
+
+        /** enable context menu and callback of selected atoms
+         *
+         * @function $3Dmol.GLViewer#enableContextMenu
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
+
+         */
+        this.enableContextMenu = function(sel,contextMenuEnabled){
+            applyToModels("enableContextMenu", sel, contextMenuEnabled);
+            return this;
+        };
+
         /**
          * If  atoms have dx, dy, dz properties (in some xyz files), vibrate populates each model's frame property based on parameters.
          * Models can then be animated
-         * 
+         *
          * @function $3Dmol.GLViewer#vibrate
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
@@ -3547,7 +3635,7 @@ $3Dmol.GLViewer = (function() {
             applyToModels("vibrate", numFrames, amplitude, bothways, this, arrowSpec);
             return this;
         };
-        
+
         /**
          * @function $3Dmol.GLViewer#setColorByProperty
          * @param {AtomSelectionSpec} sel
@@ -3570,7 +3658,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * 
+         *
          * @param {AtomSpec[]} atomlist
          * @param {Array}
          *            extent
@@ -3609,7 +3697,7 @@ $3Dmol.GLViewer = (function() {
          * are expanded by 4 angstroms on each side.
          */
         /**
-         * 
+         *
          * @param {Array}
          *            extent
          * @param {AtomSpec[]} atomlist
@@ -3623,7 +3711,7 @@ $3Dmol.GLViewer = (function() {
             for(var i = 0, n = atomlist.length; i < n; i++) {
                 index2atomlist[atomlist[i].index] = i;
             }
-            
+
             var atomsToListIndex = function(atoms) {
             //return a list of indices into atomlist
                 var ret = [];
@@ -3705,7 +3793,7 @@ $3Dmol.GLViewer = (function() {
         // create a mesh defined from the passed vertices and faces and material
         // Just create a single geometry chunk - broken up whether sync or not
         /**
-         * 
+         *
          * @param {AtomSpec[]} atoms
          * @param {{vertices:number,faces:number}}
          *            VandF
@@ -3730,7 +3818,7 @@ $3Dmol.GLViewer = (function() {
                         colors[i] = $3Dmol.CC.color(atom.color);
                 }
             }
-            
+
             var vertexArray = geoGroup.vertexArray;
 
             // reconstruct vertices and faces
@@ -3740,12 +3828,12 @@ $3Dmol.GLViewer = (function() {
                 vertexArray[offset] = v[i].x;
                 vertexArray[offset + 1] = v[i].y;
                 vertexArray[offset + 2] = v[i].z;
-                geoGroup.vertices++;                
+                geoGroup.vertices++;
             }
 
             //set colorArray of there are per-atom colors
             var colorArray = geoGroup.colorArray;
-            
+
             if(mat.voldata && mat.volscheme) {
                 //convert volumetric data into colors
                 var scheme = mat.volscheme;
@@ -3770,7 +3858,7 @@ $3Dmol.GLViewer = (function() {
                     colorArray[offsetA + 2] = colors[A].b;
                 }
             }
-            
+
             var faces = VandF.faces;
             geoGroup.faceidx = faces.length;// *3;
             geo.initTypedArrays();
@@ -3816,13 +3904,13 @@ $3Dmol.GLViewer = (function() {
             }
             geoGroup.faceArray = new Uint16Array(faces);
             var mesh = new $3Dmol.Mesh(geo, mat);
-            mesh.doubleSided = true;        
+            mesh.doubleSided = true;
             return mesh;
         };
 
         // do same thing as worker in main thread
         /**
-         * 
+         *
          * @param {$3Dmol.SurfaceType}
          *            type
          * @param {Array}
@@ -3870,7 +3958,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * 
+         *
          * @param {matSpec}
          *            style
          * @return {$3Dmol.MeshLambertMaterial}
@@ -3895,7 +3983,7 @@ $3Dmol.GLViewer = (function() {
             return mat;
         }
 
-        
+
         /**
          * Adds an explicit mesh as a surface object.
          * @function $3Dmol.GLViewer#addMesh
@@ -3936,17 +4024,17 @@ $3Dmol.GLViewer = (function() {
             "SES":$3Dmol.SurfaceType.SES
         };
 
-        
+
         /**
          * Add surface representation to atoms
          * @function $3Dmol.GLViewer#addSurface
          * @param {$3Dmol.SurfaceType|string} type - Surface type (VDW, MS, SAS, or SES)
          * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
-         * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
+         * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
          * @param {function} surfacecallback - function to be called after setting the surface
-         * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a surfid field for immediate access.
+         * @return {Promise} promise - Returns a promise that ultimately resovles to the [surfid, GLViewer, style, atomsel, allsel, focus].  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -3959,7 +4047,7 @@ $3Dmol.GLViewer = (function() {
             // surfaces
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
-            
+
             //surfacecallback gets called when done
             var surfid = nextSurfID();
             var mat = null;
@@ -3968,7 +4056,7 @@ $3Dmol.GLViewer = (function() {
                     type = surfaceTypeMap[type];
                 else{
                     console.log("Surface type : " + type + " is not recognized");
-                } 
+                }
             }
             else if(type===undefined){
                 type = $3Dmol.SurfaceType.VDW; //default
@@ -3984,11 +4072,11 @@ $3Dmol.GLViewer = (function() {
             else {
                 atomlist = shallowCopy(getAtomsFromSel(allsel));
             }
-            
+
             $3Dmol.adjustVolumeStyle(style);
             var symmetries = false;
             var n;
-            for (n = 0; n < models.length; n++) { 
+            for (n = 0; n < models.length; n++) {
                 if(models[n]) {
                     var symMatrices = models[n].getSymmetries();
                     if (symMatrices.length > 1 || (symMatrices.length == 1 && !(symMatrices[0].isIdentity()))) {
@@ -4022,12 +4110,12 @@ $3Dmol.GLViewer = (function() {
                     style.colorscheme = {prop: prop, gradient: scheme};
 
                 }
-                
+
                 //cache surface color on each atom
                 for (let i = 0, il = atomlist.length; i < il; i++) {
                     atom = atomlist[i];
                     atom.surfaceColor = $3Dmol.getColorFromStyle(atom, style);
-                }                
+                }
 
                 var totalVol = volume(extent); // used to scale resolution
                 var extents = carveUpExtent(extent, atomlist, atomsToShow);
@@ -4080,7 +4168,7 @@ $3Dmol.GLViewer = (function() {
 
                     // to keep the browser from locking up, call through setTimeout
                     var callSyncHelper = function callSyncHelper(i) {
-                        return new Promise(function(resolve) { 
+                        return new Promise(function(resolve) {
                             var VandF = generateMeshSyncHelper(type, extents[i].extent,
                                     extents[i].atoms, extents[i].toshow, reducedAtoms,
                                     totalVol);
@@ -4088,7 +4176,7 @@ $3Dmol.GLViewer = (function() {
                             var VandFs = $3Dmol.splitMesh({vertexArr:VandF.vertices, faceArr:VandF.faces});
                             for(var vi=0,vl=VandFs.length;vi<vl;vi++){
                                 VandF={vertices:VandFs[vi].vertexArr,
-                                        faces:VandFs[vi].faceArr};                            
+                                        faces:VandFs[vi].faceArr};
                                 var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                                 $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
@@ -4103,7 +4191,7 @@ $3Dmol.GLViewer = (function() {
                     return Promise.all(promises)
                     .then(function() {
                         surfobj.done = true;
-                        return Promise.resolve(surfid);
+                        return Promise.resolve([surfid, _viewer, style, atomsel, allsel, focus]);
                     });
 
                     // TODO: Asynchronously generate geometryGroups (not separate
@@ -4122,7 +4210,7 @@ $3Dmol.GLViewer = (function() {
                             'volume' : totalVol
                         });
                     }
-                    
+
                     return new Promise(function(resolve,reject) {
                         var cnt = 0;
 
@@ -4141,7 +4229,7 @@ $3Dmol.GLViewer = (function() {
                             cnt++;
                             if (cnt == extents.length) {
                                 surfobj.done = true;
-                                resolve(surfid); //caller of helper will resolve callback if present
+                                resolve([surfid, _viewer, style, atomsel, allsel, focus]); //caller of helper will resolve callback if present
                             }
                         };
 
@@ -4164,9 +4252,9 @@ $3Dmol.GLViewer = (function() {
                             });
                         }
                     });
-                }                
+                }
             };
-            
+
             style = style || {};
             mat = getMatWithStyle(style);
             var surfobj = [];
@@ -4212,9 +4300,10 @@ $3Dmol.GLViewer = (function() {
             }
             surfaces[surfid] = surfobj;
             promise.surfid = surfid;
+            
             if(surfacecallback && typeof(surfacecallback) == "function") {
-                promise.then(function(surfid) {
-                    surfacecallback(surfid);
+                promise.then(function(surfaceParam) {
+                    surfacecallback(surfaceParam);
                 });
                 return surfid;
             }
@@ -4236,7 +4325,7 @@ $3Dmol.GLViewer = (function() {
                 viewer.render();
                 });
            });
-         */ 
+         */
         this.setSurfaceMaterialStyle = function(surf, style) {
             $3Dmol.adjustVolumeStyle(style);
             if (surfaces[surf]) {
@@ -4288,7 +4377,7 @@ $3Dmol.GLViewer = (function() {
             show();
             return this;
         };
-        
+
         /** Remove all surfaces.
          * @function $3Dmol.GLViewer#removeAllSurfaces */
         this.removeAllSurfaces = function() {
@@ -4329,7 +4418,7 @@ $3Dmol.GLViewer = (function() {
             return ret;
         };
 
-        /** Clear scene of all objects 
+        /** Clear scene of all objects
          * @function $3Dmol.GLViewer#clear
          * */
         this.clear = function() {
@@ -4348,7 +4437,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#mapAtomProperties
          * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
          * @param {AtomSelectionSpec} sel  - subset of atoms to work on - model selection must be specified here
-             @example 
+             @example
              $.get('../test_structs/b.sdf', function(data){
                       viewer.addModel(data,'sdf');
                       let props = [];
@@ -4360,12 +4449,12 @@ $3Dmol.GLViewer = (function() {
                       viewer.setStyle({sphere:{colorscheme:{gradient:'roygb',prop:'x',min:0,max:8}}});
                       viewer.zoomTo();
                       viewer.render();
-                    });         
+                    });
          */
         this.mapAtomProperties = function(props, sel) {
             sel = sel || {};
             var atoms = getAtomsFromSel(sel);
-            
+
             if(typeof(props) == "function") {
                 for (let a = 0, numa = atoms.length; a < numa; a++) {
                     let atom = atoms[a];
@@ -4401,13 +4490,13 @@ $3Dmol.GLViewer = (function() {
          * When the viewpoint of this viewer changes, the other viewer will
          * be set to this viewer's view.
          * @function $3Dmol.GLViewer#linkViewer
-         * @param {$3Dmol.GLViewer} otherview 
+         * @param {$3Dmol.GLViewer} otherview
          */
         this.linkViewer = function(otherviewer) {
            linkedViewers.push(otherviewer);
            return this;
         };
-        
+
 
         try {
             if (typeof (callback) === "function")
@@ -4440,7 +4529,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setAutoEyeSeparation
          * @return {number} camera x position
          */
-        this.setAutoEyeSeparation = function(isright, x) {          
+        this.setAutoEyeSeparation = function(isright, x) {
             var dist = this.getPerceivedDistance();
             if(!x) x = 5.0;
             if (isright || camera.position.x > 0) //setting a value of dist*tan(x)
@@ -4450,15 +4539,60 @@ $3Dmol.GLViewer = (function() {
             camera.lookAt(new $3Dmol.Vector3(0,0,rotationGroup.position.z));
             return camera.position.x;
         };
-        
+
+
+        this.ui = {};
+
         /**
          * Set the default cartoon quality for newly created models.  Default is 5.
          * Current models are not affected.
          * @number quality, higher results in higher resolution renders
-         * @function $3Dmol.GLViewer#setDefaultCartoonQuality
+         * @function $3Dmol.GLViewer#ui.setDefaultCartoonQuality
          */
-        this.setDefaultCartoonQuality = function(val) {
+        this.ui.setDefaultCartoonQuality = function(val) {
             config.cartoonQuality = val;
+        };
+
+        // State Management function 
+        /**
+         * Calls StateManager to add selection and style on the ui
+         * @function $3Dmol.GLViewer#ui.loadSelectionStyle
+         * @param {AtomSelectionSpec} sel Atom Selection spec
+         * @param {AtomStyleSpec} style Atom Style spec
+         */
+        this.ui.loadSelectionStyle = function(sel, style){
+            _stateManager.createSelectionAndStyle(sel, style);
+        };
+
+        /**
+         * Calls StateManager to add surface and selection on the ui
+         * 
+         * @function $3Dmol.GLViewer#ui.loadSurface
+         * @param {String} surfaceType Name of the surface type
+         * @param {AtomSelectionSpec} sel Atom Selection Spec
+         * @param {AtomStyleSpec} style Atom Style Spec
+         * @param {Number} sid Id of the surface that is already added
+         */
+        this.ui.loadSurface = function(surfaceType, sel, style, sid){
+            _stateManager.createSurface(surfaceType, sel, style, sid);
+        };
+
+        /**
+         * Sets the name of the file as title in the ui
+         * 
+         * @function $3Dmol.GlViewer#ui.setModelTitle
+         * @param {String} title Name of file loaded
+         */
+        this.ui.setModelTitle = function(title){
+            _stateManager.setModelTitle(title);
+        };
+        
+        /**
+         * Calls StateManager to start the
+         * @function $3Dmol.GLViewer#ui.initiateUI
+         */
+        this.ui.initiateUI = function(){
+            _stateManager.initiateUI();
         };
 
     }
@@ -4468,4 +4602,3 @@ $3Dmol.GLViewer = (function() {
 })();
 
 $3Dmol.glmolViewer = $3Dmol.GLViewer;
-
