@@ -127,6 +127,7 @@ var createAttribute = function(name,value,parent){
             validItemsValue =  Object.keys($3Dmol.builtinColorSchemes).concat(['greenCarbon','cyanCarbon','yellowCarbon','whiteCarbon','magentaCarbon']);
         }else if(type == "color"){
             validItemsValue =  Object.keys($3Dmol.htmlColors);
+            if(parent.type == 'cartoon') validItemsValue.unshift('spectrum');            
         }else if(type == undefined){
             validItemsValue = validNames[name].validItems;
         }
