@@ -1,7 +1,7 @@
 /**
  * $3Dmol.VolumeData stores volumetric data. This includes file parsing
  * functionality.
- * 
+ *
  * @class
  * @param {string} str - volumetric data
  * @param {string} format - format of supplied data (cube, dx, vasp); append .gz if compressed
@@ -29,7 +29,7 @@ $3Dmol.VolumeData = function(str, format, options) {
 
     this.matrix = null; //if set must transform data
     format = format.toLowerCase();
-    
+
     if(/\.gz$/.test(format)) {
         //unzip gzipped files
         format = format.replace(/\.gz$/,'');
@@ -48,14 +48,14 @@ $3Dmol.VolumeData = function(str, format, options) {
             console.log(err);
         }
     }
-    
+
     if (this[format]) {
         if(this[format].isbinary && typeof(str) == "string") {
             str = $3Dmol.base64ToArray(str);
         }
         this[format](str);
     }
-    
+
     if(options) {
         if(options.negate) {
             for(let i = 0, n = this.data.length; i < n; i++) {
@@ -90,7 +90,7 @@ $3Dmol.VolumeData = function(str, format, options) {
  * @returns - index into flat array closest to provided coordinate; -1 if invalid
  */
 $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
-    
+
     if(this.matrix) {
         //all transformation is done through matrix multiply
         if(!this.inversematrix) {
@@ -100,12 +100,12 @@ $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
         pt = pt.applyMatrix4(this.inversematrix);
         x = pt.x;
         y = pt.y;
-        z = pt.z;        
-    } else { //use simple origin/unit transform            
+        z = pt.z;
+    } else { //use simple origin/unit transform
         x -= this.origin.x;
         y -= this.origin.y;
         z -= this.origin.z;
-        
+
         x /= this.unit.x;
         y /= this.unit.y;
         z /= this.unit.z;
@@ -113,12 +113,12 @@ $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
     x = Math.round(x);
     y = Math.round(y);
     z = Math.round(z);
-    
+
     if(x < 0 || x >= this.size.x) return -1;
     if(y < 0 || y >= this.size.y) return -1;
     if(z < 0 || z >= this.size.z) return -1;
-    
-    return x*this.size.y*this.size.z + y*this.size.z + z;    
+
+    return x*this.size.y*this.size.z + y*this.size.z + z;
 };
 
 /**
@@ -129,11 +129,11 @@ $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
 $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     let i = this.getIndex(x,y,z);
     if(i < 0) return 0;
-    return this.data[i];   
+    return this.data[i];
 };
 
 $3Dmol.VolumeData.prototype.getCoordinates = function(index){
-    
+
     var x = index/(this.size.y*this.size.z);
     var y = index % (this.size.y*this.size.z);
     var z = index % this.size.z;
@@ -170,7 +170,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
 
 
 
-    // Assume atomic units 
+    // Assume atomic units
 //    var unittype = "bohr/hartree";
     var l_units = 1.889725992;
     var e_units = 0.036749309;
@@ -196,7 +196,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
     var vol_scale = 1.0/(vol); //This Only for CHGCAR files
 
     // We splice the structure information
-    // 2 (header) + 3 (vectors) + 2 (atoms) + 1 (vaspMode) + natoms (coords) + 1 (blank line) 
+    // 2 (header) + 3 (vectors) + 2 (atoms) + 1 (vaspMode) + natoms (coords) + 1 (blank line)
     lines.splice(0,2+3+2+1+natoms+1);
 
 
@@ -221,7 +221,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
         //need a transformation matrix
         this.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
         //include translation in matrix
-        this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+        this.matrix = this.matrix.multiplyMatrices(this.matrix,
                 new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
         //all translation and scaling done by matrix, so reset origin and unit
         this.origin = new $3Dmol.Vector3(0,0,0);
@@ -229,7 +229,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
     }
 
 
-    lines.splice(0,1); //Remove the dimension line 
+    lines.splice(0,1); //Remove the dimension line
     var raw = lines.join(" ");
 
     raw = raw.replace(/^\s+/,'');
@@ -262,7 +262,7 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
     var reorig = /^origin\s+(\S+)\s+(\S+)\s+(\S+)/;
     var redelta = /^delta\s+(\S+)\s+(\S+)\s+(\S+)/;
     var follows = /data follows/;
-        
+
     for(i = 0; i < lines.length; i++) {
         var line = lines[i];
         if((m = recounts.exec(line)) ) {
@@ -283,12 +283,12 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
                 console.log("Parse error in dx delta matrix");
                 return;
             }
-            
+
             var yunit = parseFloat(m[2]);
             if(parseFloat(m[1]) != 0 || parseFloat(m[3]) != 0) {
                 console.log("Non-orthogonal delta matrix not currently supported in dx format");
             }
-            
+
             i += 1;
             line = lines[i];
             m = redelta.exec(line);
@@ -296,12 +296,12 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
                 console.log("Parse error in dx delta matrix");
                 return;
             }
-            
+
             var zunit = parseFloat(m[3]);
             if(parseFloat(m[1]) != 0 || parseFloat(m[2]) != 0) {
                 console.log("Non-orthogonal delta matrix not currently supported in dx format");
-            }    
-            this.unit = new $3Dmol.Vector3(xunit,yunit,zunit);        
+            }
+            this.unit = new $3Dmol.Vector3(xunit,yunit,zunit);
         }
         else if((m = reorig.exec(line))) {
             var xorig = parseFloat(m[1]);
@@ -330,7 +330,7 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
         return;
 
     var cryst = $3Dmol.Parsers.cube(str).modelData[0].cryst;
-    
+
     var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
 
     var atomsnum = parseFloat(lineArr[0]); //includes sign, which indicates presence of oribital line in header
@@ -360,7 +360,7 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
     var intView = new Int32Array( bin.buffer, 0, 56 );
     var floatView = new Float32Array( bin.buffer, 0, 56 );
     var dv = new DataView( bin.buffer );
-    
+
 
     // 53  MAP         Character string 'MAP ' to identify file type
     header.MAP = String.fromCharCode(
@@ -521,15 +521,17 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
           0, 0, 0, 1
 
       );
-      //include translation in matrix
-      this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+      //include translation in matrix, NXSTART etc are an offset in grid space
+      this.matrix = this.matrix.multiplyMatrices(
+               this.matrix,
               new $3Dmol.Matrix4().makeTranslation(
                       h.NXSTART + h.originX,
                       h.NYSTART + h.originY,
-                      h.NZSTART + h.originZ));
+                      h.NZSTART + h.originZ)
+                      );
       //all translation and scaling done by matrix, so reset origin and unit
       this.origin = new $3Dmol.Vector3(0,0,0);
-      this.unit = new $3Dmol.Vector3(1,1,1); 
+      this.unit = new $3Dmol.Vector3(1,1,1);
       this.size = {x:header.NX, y:header.NY, z:header.NZ};
       this.dimensionorder = [header.MAPC, header.MAPR, header.MAPS];
       var data = new Float32Array(bin.buffer, 1024 + header.NSYMBT);
@@ -551,7 +553,7 @@ $3Dmol.VolumeData.prototype.ccp4.isbinary = true;
 
 
 
-$3Dmol.GLVolumetricRender = (function() {  
+$3Dmol.GLVolumetricRender = (function() {
 
     // interpolation function used from http://hevi.info/do-it-yourself/interpolating-and-array-to-fit-another-size/
     function interpolateArray(data, fitCount) {
@@ -571,18 +573,18 @@ $3Dmol.GLVolumetricRender = (function() {
         newData[fitCount - 1] = data[data.length - 1]; // for new allocation
         return newData;
     }
-    
+
     /**
      * A GLVolumetricRender is a "shape" for representing volumetric data as a density distribution.
-     * 
+     *
      * @constructor $3Dmol.GLVolumetricRender
-     * 
+     *
      * @param {$3Dmol.VolumeData} data - volumetric data
-     * @param {VolumetricRenderSpec} spec - specification of volumetric render 
+     * @param {VolumetricRenderSpec} spec - specification of volumetric render
      * @returns {$3Dmol.GLShape}
      */
     function GLVolumetricRender(data, spec) {
-       
+
         spec = spec || {};
         var transferfn = Object.assign([],spec.transferfn);
         var shapeObj = null;
@@ -601,13 +603,13 @@ $3Dmol.GLVolumetricRender = (function() {
         // create and fill an array of interpolated values per 2 colors
         var pos1, pos2, color1, color2, R, G, B, A, alpha1, alpha2;
         for (let i = 0; i < transferfn.length-1; i++){
-            color1 = $3Dmol.CC.color(transferfn[i].color); 
+            color1 = $3Dmol.CC.color(transferfn[i].color);
             color2 = $3Dmol.CC.color(transferfn[i+1].color);
             alpha1 = transferfn[i].opacity;
             alpha2 = transferfn[i+1].opacity;
             pos1 = Math.floor( (transferfn[i].value - min) * TRANSFER_BUFFER_SIZE / (max - min) );
             pos2 = Math.floor( (transferfn[i+1].value-min) * TRANSFER_BUFFER_SIZE / (max - min) );
-            if (pos1 == pos2) 
+            if (pos1 == pos2)
                 continue;
             R = interpolateArray([color1.r*255, color2.r*255], pos2-pos1);
             G = interpolateArray([color1.g*255, color2.g*255], pos2-pos1);
@@ -620,69 +622,146 @@ $3Dmol.GLVolumetricRender = (function() {
                 transferfunctionbuffer.push(B[j]);
                 transferfunctionbuffer.push(A[j]); // opacity will be added later
             }
-        }        
+        }
 
         transferfunctionbuffer = new Uint8ClampedArray(transferfunctionbuffer);
 
-        var texmatrix = new $3Dmol.Matrix4().identity();
-        var xoff = data.unit.x*data.size.x;
-        var yoff = data.unit.y*data.size.y;
-        var zoff = data.unit.z*data.size.z;
-        //scale doesn't apply to the translation vector, so preapply it
-        texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
-        texmatrix.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
-        var minunit = Math.min(Math.min(data.unit.x,data.unit.y),data.unit.z);
-            
-        //need the bounding box so we can intersect with rays
-        var extent = [ [data.origin.x,data.origin.y,data.origin.z], 
-            [data.origin.x+xoff,data.origin.y+yoff,data.origin.z+zoff]];
-            
-        var maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);
-        //use GLShape to construct box
-        var shape = new $3Dmol.GLShape();
-        
         //need to create transformation matrix that maps model points into
         //texture space
-        //TODO: support non-orthnombic boxes
-        if(data.matrix) {
-          console.log("ERROR: Non-orthonombic boxes (or file formats that specify transformation matrices) are not supported with volumetric rendering yet.");         
-        } else {
-            shape.addBox({corner: data.origin, dimensions: {w: xoff, h: yoff, d: zoff}});
-        }
-        var geo = shape.finalize();
+        // need extent (bounding box dimensions), maxdepth (box diagonal), 
+        // texmatrix (conversion from model to texture coords), minunit,
+        var texmatrix, extent, maxdepth, minunit;
+        // possibly non-orthnormal basis if matrix
+        if(data.matrix){
+            //figure out bounding box of transformed grid
+            let start = new $3Dmol.Vector3(0,0,0);
+            let end = new $3Dmol.Vector3(data.size.x, data.size.y, data.size.z);
+            let unit = new $3Dmol.Vector3(1,1,1);
+            
+            start.applyMatrix4(data.matrix);
+            end.applyMatrix4(data.matrix);
+            unit.applyMatrix4(data.matrix).sub(start);
+            
+            extent = [ [start.x,start.y,start.z], [end.x,end.y,end.z]];
+            
+            //check all corners, these may not be the farthest apart
+            for(let i = 1; i < 7; i++) {
+                end.x = (i&1) ? data.size.x : 0;
+                end.y = (i&2) ? data.size.y : 0;
+                end.z = (i&4) ? data.size.z : 0;
+                end.applyMatrix4(data.matrix);
+                extent[0][0] = Math.min(extent[0][0],end.x);
+                extent[0][1] = Math.min(extent[0][1],end.y);
+                extent[0][2] = Math.min(extent[0][2],end.z);
+                extent[1][0] = Math.max(extent[1][0],end.x);
+                extent[1][1] = Math.max(extent[1][1],end.y);
+                extent[1][2] = Math.max(extent[1][2],end.z);                
+            }
+    
+            let xoff = end.x-start.x;
+            let yoff = end.y-start.y;
+            let zoff = end.z-start.z;
+            maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);
+            
+            minunit = Math.min(Math.min(unit.x,unit.y),unit.z);
+            
+            //invert onto grid, then scale by grid dimensions to get
+            //normalized texture coordinates
+            texmatrix = new $3Dmol.Matrix4().identity().scale({x:data.size.x, y:data.size.y, z:data.size.z});
+            texmatrix = texmatrix.multiplyMatrices(data.matrix, texmatrix);
+            
+            texmatrix = texmatrix.getInverse(texmatrix);
 
+        } else {
+            texmatrix = new $3Dmol.Matrix4().identity();
+            let xoff = data.unit.x*data.size.x;
+            let yoff = data.unit.y*data.size.y;
+            let zoff = data.unit.z*data.size.z;
+           //scale doesn't apply to the translation vector, so preapply it
+            texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
+            texmatrix.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
+            minunit = Math.min(Math.min(data.unit.x,data.unit.y),data.unit.z);
+    
+            //need the bounding box so we can intersect with rays
+            extent = [ [data.origin.x,data.origin.y,data.origin.z],
+                [data.origin.x+xoff,data.origin.y+yoff,data.origin.z+zoff]];
+    
+            maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);            
+        }
+ 
+        //use GLShape to construct box
+        var shape = new $3Dmol.GLShape();
+        shape.addBox({corner: {x: extent[0][0], y: extent[0][1], z: extent[0][2]}, 
+                      dimensions: {w: extent[1][0]-extent[0][0], 
+                                   h: extent[1][1]-extent[0][1], 
+                                   d: extent[1][2]-extent[0][2]}});
+
+        var geo = shape.finalize();
         this.boundingSphere = new $3Dmol.Sphere();
-        this.boundingSphere.center = {x: data.origin.x+xoff/2.0, y: data.origin.y+yoff/2.0, z: data.origin.z+zoff/2.0};
-        this.boundingSphere.radius = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff)/2.0;
-        
+        this.boundingSphere.center = {x: (extent[0][0]+extent[1][0])/2.0, 
+                                      y: (extent[0][1]+extent[1][1])/2.0, 
+                                      z: (extent[0][2]+extent[1][2])/2.0};
+        this.boundingSphere.radius = maxdepth/2;
+
         // volume selectivity based on given coords and distance
         if (spec.coords !== undefined && spec.seldist !== undefined){
-            //TODO: create mask buffer
+            let mask = new Uint8Array(data.data.length);
+            //for each coordinate
+            let d = spec.seldist;
+            let d2 = d*d;
+            for(let i = 0, n = spec.coords.length; i < n; i++) {
+                let c = spec.coords[i];
+                let minx = c.x-d, miny = c.y-d, minz = c.z-d;
+                let maxx = c.x+d, maxy = c.y+d, maxz = c.z+d;
+                if(data.getIndex(minx,miny,minz) >= 0 || data.getIndex(maxx,maxy,maxz) >= 0) {
+                    //bounding box overlaps grid
+                    //iterate over the grid points in the seldist bounding box
+                    //minunit may be inefficient if axes have very different units. oh well.
+                    for(let x = minx; x < maxx; x += minunit) {
+                        for(let y = miny; y < maxy; y += minunit) {
+                            for(let z = minz; z < maxz; z += minunit) {
+                                let idx = data.getIndex(x,y,z);
+                                if(idx >= 0 && !mask[idx]) {
+                                    //if not already masked, check distance
+                                    let distsq = (x-c.x)*(x-c.x)+(y-c.y)*(y-c.y)+(z-c.z)*(z-c.z);
+                                    if(distsq < d2) {
+                                        mask[idx] = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }                                        
+            }
+            //any place mask is zero, make infinite in data
+            for(let i = 0, n = data.data.length; i < n; i++) {
+                if(mask[i] == 0) data.data[i] = Infinity;
+            }
         }
-        
+
         /**
          * Initialize webgl objects for rendering
          * @param {$3Dmol.Object3D} group
-         * 
-         */  
+         *
+         */
         this.globj = function(group) {
 
             if (renderedShapeObj) {
                 group.remove(renderedShapeObj);
                 renderedShapeObj = null;
             }
-            
+
             if(this.hidden)
                 return;
-            
+
             shapeObj = new $3Dmol.Object3D();
             var material = null;
 
             var texture = new $3Dmol.Texture(data, true);
             var transfertexture = new $3Dmol.Texture(transferfunctionbuffer, false);
-            texture.needsUpdate = true; 
+            texture.needsUpdate = true;
             transfertexture.needsUpdate = true;
-            transfertexture.flipY = false;          
+            transfertexture.flipY = false;
 
             material = new $3Dmol.VolumetricMaterial({
                 transferfn: transfertexture,
@@ -693,11 +772,11 @@ $3Dmol.GLVolumetricRender = (function() {
                 maxdepth: maxdepth,
                 texmatrix: texmatrix,
                 unit: minunit,
-                subsamples: subsamples
-            });                         
-            
+                subsamples: subsamples,
+            });
+
             var mesh = new $3Dmol.Mesh(geo, material);
-            shapeObj.add(mesh);            
+            shapeObj.add(mesh);
 
             renderedShapeObj = shapeObj.clone();
             group.add(renderedShapeObj);
@@ -753,4 +832,3 @@ $3Dmol.GLVolumetricRender = (function() {
     return GLVolumetricRender;
 
 }());
-

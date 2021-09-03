@@ -126,18 +126,20 @@ $.ajaxTransport(
    );
  *                        
  */
+
 $3Dmol.createViewer = function(element, config, shared_viewer_resources)
 {
     if(typeof(element) === "string")
-        element = $("#"+element);
+    element = $("#"+element);
     if(!element) return;
-
+    
     config = config || {}; 
     shared_viewer_resources = shared_viewer_resources || {};
-
+    
     //try to create the  viewer
     try {
-        return new $3Dmol.GLViewer(element, config, shared_viewer_resources);
+        var viewer = new $3Dmol.GLViewer(element, config, shared_viewer_resources);
+        return viewer;
     }
     catch(e) {
         throw "error creating viewer: "+e;

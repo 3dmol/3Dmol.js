@@ -110,33 +110,40 @@ $3Dmol.GLModel = (function() {
         "Ni"
     ];
 
+    // prop : It is used to add the option for property in context menu in the 3dmol ui
+    // the code for prop can be found under /ui/ui.js -> UI -> ContextMenu -> setProperties -> submit.ui.on 
+    // gui : It is used to generate forms for different features in the 3dmol ui
+    // the code for gui can be found under /ui/form.js -> Form (Form defination)
+    // floatType : separates integer from float since these are used in 
+    // input validation of the 3dmol ui
     GLModel.validAtomSpecs = {
-        "resn":{type:"string",valid :true}, // Parent residue name
-        "x":{type:"number",valid:false,step:0.1}, // Atom's x coordinate
-        "y":{type:"number",valid:false,step:0.1}, // Atom's y coordinate
-        "z":{type:"number",valid:false,step:0.1}, // Atom's z coordinate
-        "color":{type:"color",gui:true}, // Atom's color, as hex code
-        "surfaceColor":{type:"color",gui:true}, // Hex code for color to be used for surface patch over this atom
-        "elem":{type:"element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
-        "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
-        "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
-        "resi":{type:"number",gui:true}, // Residue number 
+        "resn":{type:"string",valid :true, prop: true, gui: true}, // Parent residue name
+        "x":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's x coordinate
+        "y":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's y coordinate
+        "z":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's z coordinate
+        "color":{type:"color",gui:false}, // Atom's color, as hex code
+        "surfaceColor":{type:"color",gui:false}, // Hex code for color to be used for surface patch over this atom
+        "elem":{type:"element",gui:true, prop: true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
+        "hetflag":{type:"boolean",valid:false, gui:true}, // Set to true if atom is a heteroatom
+        "chain":{type:"string",gui:true, prop: true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+        "resi":{type:"array_range",gui:true}, // Residue number 
         "icode":{type:"number",valid:false,step:0.1},
-        "rescode":{type:"number",valid:false,step:0.1},
+        "rescode":{type:"number",valid:false,step:0.1, prop: true},
         "serial":{type:"number",valid:false,step:0.1}, // Atom's serial id numbermodels
-        "atom":{type:"string",valid:false}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+        "atom":{type:"string",valid:false, gui:true, prop: true}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds":{type:"array",valid:false}, // Array of atom ids this atom is bonded to
         "ss":{type:"string",valid:false}, // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
         "singleBonds":{type:"boolean",valid:false}, // true if this atom forms only single bonds or no bonds at all
         "bondOrder":{type:"array",valid:false}, // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
         "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
-        "b":{type:"number",valid:false,step:0.1}, // Atom b factor data
+        "b":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom b factor data
         "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
-        "clickable":{type:"boolean",valid:false}, // Set this flag to true to enable click selection handling for this atom
+        "clickable":{type:"boolean",valid:false, gui:false}, // Set this flag to true to enable click selection handling for this atom
+        "contextMenuEnabled":{type:"boolean",valid:false, gui:false}, // Set this flag to true to enable click selection handling for this atom
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
-        "reflectivity":{type:"number",gui:true,step:0.1}, //for describing the reflectivity of a model
+        "reflectivity":{type:"number", floatType : true,gui:false,step:0.1}, //for describing the reflectivity of a model
         "altLoc":{type:"invalid",valid:false}, //alternative location, e.g. in PDB
         "sym":{type:'number',gui:false}, //which symmetry
     };
@@ -144,11 +151,11 @@ $3Dmol.GLModel = (function() {
     //type is irrelivent here becuase htey are are invalid
     var validExtras ={  // valid atom specs are ok too
         "model":{type:"string",valid :false}, // a single model or list of models from which atoms should be selected
-        "bonds":{type:"string",valid :false}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
+        "bonds":{type:"number", valid :false, gui:true}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
         "predicate":{type:"string",valid :false}, // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
-        "invert":{type:"string",valid :false}, // if set, inverts the meaning of the selection
-        "byres":{type:"string",valid :false}, // if set, expands the selection to include all atoms of any residue that has any atom selected
-        "expand":{type:"string",valid :false}, // expands the selection to include all atoms within a given distance from the selection
+        "invert":{type:"boolean",valid :false, gui:true}, // if set, inverts the meaning of the selection
+        "byres":{type:"boolean",valid :false, gui:true}, // if set, expands the selection to include all atoms of any residue that has any atom selected
+        "expand":{type:"number",valid :false, gui:false}, // expands the selection to include all atoms within a given distance from the selection
         "within":{type:"string",valid :false}, // intersects the selection with the set of atoms within a given distance from another selection
         "and":{type:"string",valid :false}, // and boolean logic
         "or":{type:"string",valid :false}, // or boolean logic
@@ -158,78 +165,82 @@ $3Dmol.GLModel = (function() {
 
     var validLineSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:true,step:0.1,default:defaultlineWidth},
+        "linewidth":{type:"number", floatType : true,gui:true,step:0.1,default:defaultlineWidth},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validCrossSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:false,step:0.1,default:defaultlineWidth,min:0},//deprecated
+        "linewidth":{type:"number", floatType : true,gui:false,step:0.1,default:defaultlineWidth,min:0},//deprecated
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:1,min:0.1},
-        "scale":{type:"number",gui:true,step:0.1,default:1,min:0},
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0.1},
+        "scale":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validStickSpec = {
         "hidden":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:0.25,min:0.1},
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:0.25,min:0.1},
         "singleBonds":{type:"boolean",gui:true},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validSphereSpec = {
-        "hidden":{type:"boolean",gui:true},
+        "hidden":{type:"boolean",gui:false}, // needed in the new gui it has separate function to hide the spheres
         "singleBonds":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:1.5,min:0},
-        "scale":{type:"number",gui:true,step:0.1,default:1.0,min:0.1}
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:1.5,min:0},
+        "scale":{type:"number", floatType : true,gui:true,step:0.1,default:1.0,min:0.1},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validCartoonSpec = {
         "style":{validItems:["trace","oval","rectangle","parabola","edged"],gui:true},
-        "color":{type:"color",gui:true},
+        "color":{type:"color",gui:true, spectrum : true},
         "arrows":{type:"boolean",gui:true},
         "ribbon":{type:"boolean",gui:true},
         "hidden":{type:"boolean",gui:true},
         "tubes":{type:"boolean",gui:true},
-        "thickness":{type:"number",gui:true,step:0.1,default:1,min:0},
-        "width":{type:"number",gui:true,step:0.1,default:1,min:0},
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "thickness":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "width":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     GLModel.validAtomStyleSpecs = {
-        "line":{validItems:validLineSpec,gui:true}, // draw bonds as lines
-        "cross":{validItems:validCrossSpec,gui:true}, // draw atoms as crossed lines (aka stars)
-        "stick":{validItems:validStickSpec,gui:true}, // draw bonds as capped cylinders
-        "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
-        "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
-        "colorfunc":{validItems:null,valid:false},
-        "clicksphere":{validItems:validSphereSpec} //invisible style for click handling
+        "line":{validItems:validLineSpec,type:"form",gui:true}, // draw bonds as lines
+        "cross":{validItems:validCrossSpec,type:"form",gui:true}, // draw atoms as crossed lines (aka stars)
+        "stick":{validItems:validStickSpec,type:"form",gui:true}, // draw bonds as capped cylinders
+        "sphere":{validItems:validSphereSpec,type:"form",gui:true}, // draw atoms as spheres
+        "cartoon":{validItems:validCartoonSpec,type:"form",gui:true}, // draw cartoon representation of secondary structure
+        "colorfunc":{validItems:null,type:"js",valid:false},
+        "clicksphere":{validItems:validSphereSpec,type:"form"} //invisible style for click handling
     };
 
     GLModel.validSurfaceSpecs = {
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.01,default:1,min:0,max:1},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "voldata":{type:"number",gui:false},
-        "volscheme":{type:"number",gui:false},
+        "voldata":{type:"number", floatType : true,gui:false},
+        "volscheme":{type:"number", floatType : true,gui:false},
         "map":{type:"number",gui:false}
     };
 
     GLModel.validLabelResSpecs = {
         "font":{type:"string",gui:true},
-        "fontSize":{type:"number",gui:true,step:1,default:12,min:1},
+        "fontSize":{type:"number", floatType : true,gui:true,step:1,default:12,min:1},
         "fontColor":{type:"color",gui:true},
-        "fontOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
-        "borderThickness":{type:"number",gui:true,step:0.1,default:1,min:0},
+        "fontOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
+        "borderThickness":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
         "borderColor":{type:"color",gui:true},
-        "borderOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "borderOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
         "backgroundColor":{type:"color",gui:true},
-        "backgroundOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "backgroundOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
         "position":{type:"array",valid:false},
         "inFront":{type:"boolean",gui:true},
         "showBackground":{type:"boolean",gui:true},
@@ -2441,6 +2452,35 @@ $3Dmol.GLModel = (function() {
                 if (hover_callback) selected[i].hover_callback = hover_callback;
                 if (unhover_callback) selected[i].unhover_callback = unhover_callback;
 
+            }
+
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
+        };
+
+        /** enable context menu of selected atoms
+         * 
+         * @function $3Dmol.GLModel#enableContextMenu
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
+         */
+         this.enableContextMenu = function(sel, contextMenuEnabled){
+            var s;
+            for (s in sel) {
+                if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure contextMenuEnabled is a boolean
+            contextMenuEnabled = !!contextMenuEnabled;
+            
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].contextMenuEnabled = contextMenuEnabled;
             }
 
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
