@@ -4034,7 +4034,7 @@ $3Dmol.GLViewer = (function() {
          * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
          * @param {function} surfacecallback - function to be called after setting the surface
-         * @return {Promise} promise - Returns a promise that ultimately resovles to the [surfid, GLViewer, style, atomsel, allsel, focus].  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
+         * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -4191,7 +4191,7 @@ $3Dmol.GLViewer = (function() {
                     return Promise.all(promises)
                     .then(function() {
                         surfobj.done = true;
-                        return Promise.resolve([surfid, _viewer, style, atomsel, allsel, focus]);
+                        return Promise.resolve(surfid);
                     });
 
                     // TODO: Asynchronously generate geometryGroups (not separate
@@ -4229,7 +4229,7 @@ $3Dmol.GLViewer = (function() {
                             cnt++;
                             if (cnt == extents.length) {
                                 surfobj.done = true;
-                                resolve([surfid, _viewer, style, atomsel, allsel, focus]); //caller of helper will resolve callback if present
+                                resolve(surfid); //caller of helper will resolve callback if present
                             }
                         };
 
@@ -4258,6 +4258,11 @@ $3Dmol.GLViewer = (function() {
             style = style || {};
             mat = getMatWithStyle(style);
             var surfobj = [];
+            //save configuration of surface
+            surfobj.style = style;
+            surfobj.atomsel = atomsel;
+            surfobj.allsel = allsel;
+            surfobj.focus = focus;
             var promise = null;
             if (symmetries) { //do preprocessing
                 var modelsAtomList = {};
@@ -4302,8 +4307,8 @@ $3Dmol.GLViewer = (function() {
             promise.surfid = surfid;
             
             if(surfacecallback && typeof(surfacecallback) == "function") {
-                promise.then(function(surfaceParam) {
-                    surfacecallback(surfaceParam);
+                promise.then(function(surfid) {
+                    surfacecallback(surfid);
                 });
                 return surfid;
             }
@@ -4330,6 +4335,7 @@ $3Dmol.GLViewer = (function() {
             $3Dmol.adjustVolumeStyle(style);
             if (surfaces[surf]) {
                 var surfArr = surfaces[surf];
+                surfArr.style = style;
                 for (var i = 0; i < surfArr.length; i++) {
                     var mat = surfArr[i].mat = getMatWithStyle(style);
                     surfArr[i].mat.side = $3Dmol.FrontSide;
@@ -4357,6 +4363,15 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
+        /**
+         * Return surface object
+         * @function $3Dmol.GLViewer#getSurface
+         * @param {number} surf - surface id
+         */
+        this.getSurface = function(surf) {
+            return surfaces[surf];
+        };
+        
         /**
          * Remove surface with given ID
          * @function $3Dmol.GLViewer#removeSurface

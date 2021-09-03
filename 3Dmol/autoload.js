@@ -128,7 +128,6 @@ $3Dmol.autoload=function(viewer,callback){
             
             //apply all the selections/styles parsed out above to the passed viewer
             var applyStyles = function(glviewer) {
-                var sel, sty;
                 glviewer.setStyle(select,style);
 
                 if(showUI){
@@ -136,28 +135,27 @@ $3Dmol.autoload=function(viewer,callback){
                 }
 
                 for(i = 0; i < selectstylelist.length; i++) {
-                    sel = selectstylelist[i][0] || {};
-                    sty = selectstylelist[i][1] || {"line":{}};
+                    let sel = selectstylelist[i][0] || {};
+                    let sty = selectstylelist[i][1] || {"line":{}};
                     glviewer.setStyle(sel, sty);
                     if(showUI){
                         glviewer.ui.loadSelectionStyle(sel, sty);
                     }
                 }
                 for(i = 0; i < surfaces.length; i++) {
-                    sel = surfaces[i][0] || {};
-                    sty = surfaces[i][1] || {};
+                    let sel = surfaces[i][0] || {};
+                    let sty = surfaces[i][1] || {};
+                    let viewer = glviewer;
 
                     if(showUI){
-                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel).then((param)=>{
-                            var surfid = param[0];
-                            var viewer = param[1];
-                            var style = param[2];
-                            var atomSel = param[3];
-                            // var allsel = param[4];
-                            // var focus = param[5];
-
-                            viewer.ui.loadSurface("VDW", atomSel, style, surfid);
-                        });
+                        //seemingly unnecessary capturing of values due to jshint
+                        //not understanding let?
+                        let doload = function($3D, viewer, sel, sty) {
+                            viewer.addSurface($3D.SurfaceType.VDW, sty, sel, sel).then((surfid)=>{
+                                viewer.ui.loadSurface("VDW", sel, sty, surfid);
+                            });
+                        };
+                        doload($3Dmol, viewer, sel, sty);                 
                     }
                     else {
                         glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
@@ -165,8 +163,8 @@ $3Dmol.autoload=function(viewer,callback){
                     
                 }
                 for(i = 0; i < labels.length; i++) {
-                    sel = labels[i][0] || {};
-                    sty = labels[i][1] || {};
+                    let sel = labels[i][0] || {};
+                    let sty = labels[i][1] || {};
                     glviewer.addResLabels(sel, sty);
                 }               
                 
