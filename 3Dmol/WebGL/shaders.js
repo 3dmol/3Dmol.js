@@ -910,7 +910,6 @@ $3Dmol.ShaderLib = {
             "uniform mat4 textmat;",
             "uniform mat4 projinv;",
             "uniform mat4 projectionMatrix;",
-            "uniform mat4 textmap;",
 
             "uniform float step;",
             "uniform float subsamples;",
@@ -955,8 +954,6 @@ $3Dmol.ShaderLib = {
             "      ptdepth = ((gl_DepthRange.diff * ptdepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
             "      if(ptdepth > depth) break;",
             "      pt = textmat*pt;",
-            // Adding texture mapping so that basis vectors are followed
-            "      pt = textmap*pt;",
             // "      pt /= pt.w;",
             "      if(pt.x >= -0.01 && pt.y >= -0.01 && pt.z >= -0.01 && pt.x <= 1.01 && pt.y <= 1.01 && pt.z <= 1.01) {",
             "         seengood = true;",
@@ -1010,7 +1007,6 @@ $3Dmol.ShaderLib = {
             maxdepth: {type: 'f',value: 100.0}, //how far to step along ray before stopping
             subsamples: { type: 'f', value: 5.0}, //how many substeps to take
             textmat: { type: 'mat4', value: []},
-            textmap: { type: 'mat4', value: []}, // texture map matrix: tmm
             projinv: { type: 'mat4', value: []},
             transfermin: {type: 'f', value: -0.2 },
             transfermax: {type: 'f', value: 0.2},

@@ -555,7 +555,6 @@ $3Dmol.VolumetricMaterial = function(parameters) {
     this.transfermin = -1.0;
     this.transfermax = 1.0;
     this.subsamples = 5.0;
-    this.textmap = null;
 
     // this.fog = true; // TODO: to integrate the new shader with the fog stuff
 

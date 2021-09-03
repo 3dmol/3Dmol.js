@@ -521,12 +521,14 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
           0, 0, 0, 1
 
       );
-      //include translation in matrix
-      this.matrix = this.matrix.multiplyMatrices(this.matrix,
+      //include translation in matrix, NXSTART etc are an offset in grid space
+      this.matrix = this.matrix.multiplyMatrices(
+               this.matrix,
               new $3Dmol.Matrix4().makeTranslation(
                       h.NXSTART + h.originX,
                       h.NYSTART + h.originY,
-                      h.NZSTART + h.originZ));
+                      h.NZSTART + h.originZ)
+                      );
       //all translation and scaling done by matrix, so reset origin and unit
       this.origin = new $3Dmol.Vector3(0,0,0);
       this.unit = new $3Dmol.Vector3(1,1,1);
@@ -624,93 +626,117 @@ $3Dmol.GLVolumetricRender = (function() {
 
         transferfunctionbuffer = new Uint8ClampedArray(transferfunctionbuffer);
 
-        var texmatrix = new $3Dmol.Matrix4().identity();
-        var xoff = data.unit.x*data.size.x;
-        var yoff = data.unit.y*data.size.y;
-        var zoff = data.unit.z*data.size.z;
-
-        // var reset_origin = new $3Dmol.Vector3();
-        if(data.matrix){
-          data.basis = [
-            new $3Dmol.Vector3(data.matrix.elements[0], data.matrix.elements[4], data.matrix.elements[8]).multiplyScalar(data.size.x),
-            new $3Dmol.Vector3(data.matrix.elements[1], data.matrix.elements[5], data.matrix.elements[9]).multiplyScalar(data.size.y),
-            new $3Dmol.Vector3(data.matrix.elements[2], data.matrix.elements[6], data.matrix.elements[10]).multiplyScalar(data.size.z)
-          ];
-
-          // console.log("data.basis:",data.basis)
-          var corners = [
-            new $3Dmol.Vector3(0,0,0),
-            data.basis[0],
-            data.basis[1],
-            data.basis[2],
-            new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[1]),
-            new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[2]),
-            new $3Dmol.Vector3().addVectors(data.basis[1], data.basis[2]),
-            new $3Dmol.Vector3().addVectors(new $3Dmol.Vector3().addVectors(data.basis[0], data.basis[1]), data.basis[2]),
-          ];
-
-          var xmin = corners[0].x;
-          var ymin = corners[0].y;
-          var zmin = corners[0].z;
-
-          var xmax = corners[0].x;
-          var ymax = corners[0].y;
-          var zmax = corners[0].z;
-
-          for(var i=1; i<8; i++){
-            xmin = (xmin > corners[i].x ) ? corners[i].x : xmin;
-            ymin = (ymin > corners[i].y ) ? corners[i].y : ymin;
-            zmin = (zmin > corners[i].z ) ? corners[i].z : zmin;
-
-            xmax = (xmax < corners[i].x ) ? corners[i].x : xmax;
-            ymax = (ymax < corners[i].y ) ? corners[i].y : ymax;
-            zmax = (zmax < corners[i].z ) ? corners[i].z : zmax;
-          }
-
-          xoff = (xmax - xmin) ;
-          yoff = (ymax - ymin) ;
-          zoff = (zmax - zmin) ;
-
-        }
-        //scale doesn't apply to the translation vector, so preapply it
-        texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
-        texmatrix.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
-        var minunit = Math.min(Math.min(data.unit.x,data.unit.y),data.unit.z);
-
-        //need the bounding box so we can intersect with rays
-        var extent = [ [data.origin.x,data.origin.y,data.origin.z],
-            [data.origin.x+xoff,data.origin.y+yoff,data.origin.z+zoff]];
-
-        var maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);
-        //use GLShape to construct box
-        var shape = new $3Dmol.GLShape();
-
         //need to create transformation matrix that maps model points into
         //texture space
-        //TODO: support non-orthnombic boxes
-        shape.addBox({corner: data.origin, dimensions: {w: xoff, h: yoff, d: zoff}});
+        // need extent (bounding box dimensions), maxdepth (box diagonal), 
+        // texmatrix (conversion from model to texture coords), minunit,
+        var texmatrix, extent, maxdepth, minunit;
+        // possibly non-orthnormal basis if matrix
+        if(data.matrix){
+            //figure out bounding box of transformed grid
+            let start = new $3Dmol.Vector3(0,0,0);
+            let end = new $3Dmol.Vector3(data.size.x, data.size.y, data.size.z);
+            let unit = new $3Dmol.Vector3(1,1,1);
+            
+            start.applyMatrix4(data.matrix);
+            end.applyMatrix4(data.matrix);
+            unit.applyMatrix4(data.matrix).sub(start);
+            
+            extent = [ [start.x,start.y,start.z], [end.x,end.y,end.z]];
+            
+            //check all corners, these may not be the farthest apart
+            for(let i = 1; i < 7; i++) {
+                end.x = (i&1) ? data.size.x : 0;
+                end.y = (i&2) ? data.size.y : 0;
+                end.z = (i&4) ? data.size.z : 0;
+                end.applyMatrix4(data.matrix);
+                extent[0][0] = Math.min(extent[0][0],end.x);
+                extent[0][1] = Math.min(extent[0][1],end.y);
+                extent[0][2] = Math.min(extent[0][2],end.z);
+                extent[1][0] = Math.max(extent[1][0],end.x);
+                extent[1][1] = Math.max(extent[1][1],end.y);
+                extent[1][2] = Math.max(extent[1][2],end.z);                
+            }
+    
+            let xoff = end.x-start.x;
+            let yoff = end.y-start.y;
+            let zoff = end.z-start.z;
+            maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);
+            
+            minunit = Math.min(Math.min(unit.x,unit.y),unit.z);
+            
+            //invert onto grid, then scale by grid dimensions to get
+            //normalized texture coordinates
+            texmatrix = new $3Dmol.Matrix4().identity().scale({x:data.size.x, y:data.size.y, z:data.size.z});
+            texmatrix = texmatrix.multiplyMatrices(data.matrix, texmatrix);
+            
+            texmatrix = texmatrix.getInverse(texmatrix);
 
-        var textmap =new $3Dmol.Matrix4().identity();
-        if(data.matrix) {
-          textmap = new $3Dmol.Matrix4(
-            data.basis[0].x/2, data.basis[0].y/2, data.basis[0].z/2, 0,
-            data.basis[1].x/2, data.basis[1].y/2, data.basis[1].z/2, 0,
-            data.basis[2].x/2, data.basis[2].y/2, data.basis[2].z/2, 0,
-            0, 0, 0, 1); // textture map matrix : tmm
-          // textmap.makeTranslation(reset_origin.x, reset_origin.y, reset_origin.z);
-          textmap.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
-          textmap = new $3Dmol.Matrix4().getInverse(textmap);
         } else {
+            texmatrix = new $3Dmol.Matrix4().identity();
+            let xoff = data.unit.x*data.size.x;
+            let yoff = data.unit.y*data.size.y;
+            let zoff = data.unit.z*data.size.z;
+           //scale doesn't apply to the translation vector, so preapply it
+            texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
+            texmatrix.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
+            minunit = Math.min(Math.min(data.unit.x,data.unit.y),data.unit.z);
+    
+            //need the bounding box so we can intersect with rays
+            extent = [ [data.origin.x,data.origin.y,data.origin.z],
+                [data.origin.x+xoff,data.origin.y+yoff,data.origin.z+zoff]];
+    
+            maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);            
         }
-        var geo = shape.finalize();
+ 
+        //use GLShape to construct box
+        var shape = new $3Dmol.GLShape();
+        shape.addBox({corner: {x: extent[0][0], y: extent[0][1], z: extent[0][2]}, 
+                      dimensions: {w: extent[1][0]-extent[0][0], 
+                                   h: extent[1][1]-extent[0][1], 
+                                   d: extent[1][2]-extent[0][2]}});
 
+        var geo = shape.finalize();
         this.boundingSphere = new $3Dmol.Sphere();
-        this.boundingSphere.center = {x: data.origin.x+xoff/2.0, y: data.origin.y+yoff/2.0, z: data.origin.z+zoff/2.0};
-        this.boundingSphere.radius = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff)/2.0;
+        this.boundingSphere.center = {x: (extent[0][0]+extent[1][0])/2.0, 
+                                      y: (extent[0][1]+extent[1][1])/2.0, 
+                                      z: (extent[0][2]+extent[1][2])/2.0};
+        this.boundingSphere.radius = maxdepth/2;
 
         // volume selectivity based on given coords and distance
         if (spec.coords !== undefined && spec.seldist !== undefined){
-            //TODO: create mask buffer
+            let mask = new Uint8Array(data.data.length);
+            //for each coordinate
+            let d = spec.seldist;
+            let d2 = d*d;
+            for(let i = 0, n = spec.coords.length; i < n; i++) {
+                let c = spec.coords[i];
+                let minx = c.x-d, miny = c.y-d, minz = c.z-d;
+                let maxx = c.x+d, maxy = c.y+d, maxz = c.z+d;
+                if(data.getIndex(minx,miny,minz) >= 0 || data.getIndex(maxx,maxy,maxz) >= 0) {
+                    //bounding box overlaps grid
+                    //iterate over the grid points in the seldist bounding box
+                    //minunit may be inefficient if axes have very different units. oh well.
+                    for(let x = minx; x < maxx; x += minunit) {
+                        for(let y = miny; y < maxy; y += minunit) {
+                            for(let z = minz; z < maxz; z += minunit) {
+                                let idx = data.getIndex(x,y,z);
+                                if(idx >= 0 && !mask[idx]) {
+                                    //if not already masked, check distance
+                                    let distsq = (x-c.x)*(x-c.x)+(y-c.y)*(y-c.y)+(z-c.z)*(z-c.z);
+                                    if(distsq < d2) {
+                                        mask[idx] = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }                                        
+            }
+            //any place mask is zero, make infinite in data
+            for(let i = 0, n = data.data.length; i < n; i++) {
+                if(mask[i] == 0) data.data[i] = Infinity;
+            }
         }
 
         /**
@@ -747,7 +773,6 @@ $3Dmol.GLVolumetricRender = (function() {
                 texmatrix: texmatrix,
                 unit: minunit,
                 subsamples: subsamples,
-                textmap: textmap
             });
 
             var mesh = new $3Dmol.Mesh(geo, material);

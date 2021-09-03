@@ -268,7 +268,7 @@ $3Dmol.StateManager = (function(){
         
       }
 
-      this.ui.tools.contextMenu.show(x, y, atom, atomExist);    
+      if(this.ui) this.ui.tools.contextMenu.show(x, y, atom, atomExist);    
     }
 
     /**
@@ -340,7 +340,9 @@ $3Dmol.StateManager = (function(){
      * @param {Boolean} processContextMenu Specify the need to process the values in the context menu
      */
     this.exitContextMenu = function(processContextMenu = false){
-      this.ui.tools.contextMenu.hide(processContextMenu);
+        if(this.ui) {
+            this.ui.tools.contextMenu.hide(processContextMenu);
+        }
     }
 
     /**
@@ -509,7 +511,7 @@ $3Dmol.StateManager = (function(){
     }
 
     canvas.on('click', ()=>{
-      if(this.ui.tools.contextMenu.hidden == false){
+      if(this.ui && this.ui.tools.contextMenu.hidden == false){
         this.ui.tools.contextMenu.hide();
       }
     });

@@ -816,8 +816,6 @@ $3Dmol.Renderer = function(parameters) {
                 _gl.uniformMatrix4fv(p_uniforms.textmat, false, _textureMatrix.elements);
                 _gl.uniformMatrix4fv(p_uniforms.projinv, false, _projInverse.elements);
 
-                _gl.uniformMatrix4fv(p_uniforms.textmap, false, object.material.textmap.elements);
-
                 //  need the resolution (step size of ray in viewer coordinates)
                 let invscale = Math.min(Math.min(_direction.x,_direction.y),_direction.z);
                 m_uniforms.step.value = object.material.unit*invscale;
