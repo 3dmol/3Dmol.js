@@ -2877,7 +2877,16 @@ $3Dmol.GLModel = (function() {
     * Set coordinates for the atoms from provided trajectory file. 
     * @function $3Dmol.GLModel#setCoordinates
     * @param {string} str - contains the data of the file
-    * @param {string} format - contains the format of the file
+    * @param {string} format - contains the format of the file (mdcrd, inpcrd, pdb, netcdf, or array).  Arrays should be TxNx3 where T is the number of timesteps and N the number of atoms.
+      @example
+         let m = viewer.addModel()  //create an empty model
+         m.addAtoms([{x:0,y:0,z:0,elem:'C'},{x:2,y:0,z:0,elem:'C'}]) //provide a list of dictionaries representing the atoms
+         viewer.setStyle({'sphere':{}})
+         m.setCoordinates([[[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]], [[0.0, 0.0, 0.0], [2.8888888359069824, 0.0, 0.0]], [[0.0, 0.0, 0.0], [3.777777671813965, 0.0, 0.0]], [[0.0, 0.0, 0.0], [4.666666507720947, 0.0, 0.0]], [[0.0, 0.0, 0.0], [5.55555534362793, 0.0, 0.0]], [[0.0, 0.0, 0.0], [6.44444465637207, 0.0, 0.0]], [[0.0, 0.0, 0.0], [7.333333492279053, 0.0, 0.0]], [[0.0, 0.0, 0.0], [8.222222328186035, 0.0, 0.0]], [[0.0, 0.0, 0.0], [9.11111068725586, 0.0, 0.0]], [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]],'array');
+         viewer.animate({loop: "forward",reps: 1});
+         viewer.zoomTo();
+         viewer.zoom(0.5);
+         viewer.render();  
     */
 
         this.setCoordinates = function(str, format) {
@@ -2896,7 +2905,7 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
                 }
             }
-            var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":""};
+            var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":"","array":""};
             if (supportedFormats.hasOwnProperty(format)) {
                 frames = [];
                 var atomCount = atoms.length;
@@ -2966,6 +2975,8 @@ $3Dmol.GLModel = (function() {
             var reader = new netcdfjs(data);
             values = [].concat.apply([],reader.getDataVariable('coordinates'));
 
+        } else if (format == "array" || Array.isArray(data)) {
+            return data.flat(2);  
         } else {
             let index = data.indexOf("\n"); // remove the first line containing title
             if(format == 'inpcrd') {

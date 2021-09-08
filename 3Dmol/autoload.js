@@ -23,7 +23,7 @@ $3Dmol.autoload=function(viewer,callback){
             }
 
             if(viewerdiv.data('ui'))
-                showUI = viewerdiv.data('ui');
+                showUI = true;
 
             type = null;
             if (viewerdiv.data("pdb")) {
@@ -187,6 +187,7 @@ $3Dmol.autoload=function(viewer,callback){
 
                 } else {
                     glviewer.setBackgroundColor(bgcolor, bgalpha);
+                    if(showUI) glviewer.ui.initiateUI();
                 } 
             } catch ( error ) {
                 console.log(error);

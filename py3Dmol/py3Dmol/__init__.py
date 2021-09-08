@@ -30,6 +30,14 @@ def using_ipython(func):
 
     return inner
 
+def tostr(arg):
+    '''convert an argument to javascript string,
+    can handle top-level numpy/torch arrays'''
+    try:
+        return json.dumps(arg)
+    except TypeError:
+        return json.dumps(arg.tolist()) #numpy arrays and torch tensor
+        
 class view(object):
     '''A class for constructing embedded 3Dmol.js views in ipython notebooks.
        The results are completely static which means there is no need for there
@@ -197,13 +205,13 @@ if(warn) {
             $('#img_{0}').attr('src', png)
             </script>'''.format(self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
-
+        
     class model(object):
       '''Wrapper for referencing a model within a viewer'''
       def __init__(self, viewer, accesscmd):
         self.accesscmd = accesscmd
         self.viewer = viewer
-
+        
       def __getattr__(self,name):
         '''auto-instantiate javascript calls through model'''
         if name.startswith('_'): #object to ipython canary functions
@@ -212,7 +220,7 @@ if(warn) {
         def makejs(*args,**kwargs):
           cmd = '\t%s.%s(' % (self.accesscmd,name);
           for arg in args:
-              cmd += '%s,' % json.dumps(arg)
+              cmd += '%s,' % tostr(arg)
           cmd = cmd.rstrip(',')
           cmd += ');\n';
 
@@ -229,7 +237,7 @@ if(warn) {
               raise ValueError("Incorrectly formated viewer argument.  Must specify row and column",self.viewergrid)
           cmd = '\tviewergrid_UNIQUEID[%d][%d].getModel(' % (coords[0],coords[1]);
           for arg in args:
-              cmd += '%s,' % json.dumps(arg)
+              cmd += '%s,' % tostr(arg)
           cmd = cmd.rstrip(',')
           cmd += ')';
         else:
@@ -237,7 +245,7 @@ if(warn) {
       else:
         cmd = '\tviewer_UNIQUEID.getModel(';
         for arg in args:
-            cmd += '%s,' % json.dumps(arg)
+            cmd += '%s,' % tostr(arg)
         cmd = cmd.rstrip(',')
         cmd += ')';
       return self.model(self,cmd)
@@ -246,7 +254,7 @@ if(warn) {
         '''auto-instantiate javascript calls based on whatever the user provided'''
         if name.startswith('_'): #object to ipython canary functions
             raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
-
+            
         def makejs(*args,**kwargs):
             if self.viewergrid:
                 if kwargs and 'viewer' in kwargs:
@@ -255,7 +263,7 @@ if(warn) {
                         raise ValueError("Incorrectly formated viewer argument.  Must specify row and column",self.viewergrid)
                     cmd = '\tviewergrid_UNIQUEID[%d][%d].%s(' % (coords[0],coords[1],name);
                     for arg in args:
-                        cmd += '%s,' % json.dumps(arg)
+                        cmd += '%s,' % tostr(arg)
                     cmd = cmd.rstrip(',')
                     cmd += ');\n';
                 else: #apply to every viewer
@@ -264,13 +272,13 @@ if(warn) {
                         for c in range(self.viewergrid[1]):
                             cmd += '\tviewergrid_UNIQUEID[%d][%d].%s(' % (r,c,name);
                             for arg in args:
-                                cmd += '%s,' % json.dumps(arg)
+                                cmd += '%s,' % tostr(arg)
                             cmd = cmd.rstrip(',')
                             cmd += ');\n';
             else:
                 cmd = '\tviewer_UNIQUEID.%s(' % name;
                 for arg in args:
-                    cmd += '%s,' % json.dumps(arg)
+                    cmd += '%s,' % tostr(arg)
                 cmd = cmd.rstrip(',')
                 cmd += ');\n';
 
