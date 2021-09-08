@@ -2857,7 +2857,7 @@ $3Dmol.GLModel = (function() {
             if(box) setupDFS();
             
             return new Promise(function(resolve,reject){
-                if(!url.startsWith('http://')) url = 'http://'+url;
+                if(!url.startsWith('http')) url = 'http://'+url;
                 $.get(url+"/traj/numframes/"+path,function(numFrames){
                     if (!isNaN(parseInt(numFrames))) {
                         frames.push(atoms);
