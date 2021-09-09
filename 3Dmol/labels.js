@@ -188,7 +188,8 @@ $3Dmol.Label.prototype = {
                     
             if(style.backgroundGradient) {
                let gradient = this.context.createLinearGradient(0,height/2, width,height/2);
-               let minmax = style.backgroundGradient.range();
+               let g = $3Dmol.Gradient.getGradient(style.backgroundGradient);
+               let minmax = g.range();
                let min = -1;
                let max = 1;
                if(minmax) {
@@ -197,7 +198,7 @@ $3Dmol.Label.prototype = {
                }
                let d = max-min;
                for(let i = 0; i < 1.01; i += 0.1) {
-                 let c = getColor(style.backgroundGradient.valueToHex(min+d*i));
+                 let c = getColor(g.valueToHex(min+d*i));
                  let cname = "rgba("+c.r+","+c.g+","+c.b+","+c.a+")";
                  gradient.addColorStop(i, cname);
                }

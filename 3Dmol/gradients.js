@@ -258,6 +258,8 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
 //map from names to gradient constructors
 $3Dmol.Gradient.builtinGradients = {
     'rwb': $3Dmol.Gradient.RWB,
+    'RWB':  $3Dmol.Gradient.RWB, 
     'roygb': $3Dmol.Gradient.ROYGB,
+    'ROYGB': $3Dmol.Gradient.ROYGB,
     'sinebow': $3Dmol.Gradient.Sinebow
 };
