@@ -96,15 +96,17 @@ $3Dmol.Gradient.RWB = function(min, max, mid) {
         var scale, color;
 
         //scale bottom from red to white
-        if (val <= middle) {
+        if (val < middle) {
             scale = Math.floor(255 * Math.sqrt((val - lo) / (middle - lo)));
             color = 0xff0000 + 0x100 * scale + scale;
             return color;
         }
-        else { //form white to blue
+        else if(val > middle){ //form white to blue
             scale = Math.floor(255 * Math.sqrt((1 - (val - middle) / (hi - middle))));
             color = 0x10000 * scale + 0x100 * scale + 0xff;
             return color;
+        } else { //val == middle
+            return 0xffffff;
         }
     };
 
