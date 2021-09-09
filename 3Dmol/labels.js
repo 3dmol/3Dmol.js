@@ -185,6 +185,24 @@ $3Dmol.Label.prototype = {
             this.context.strokeStyle = "rgba(" + borderColor.r + ","
                     + borderColor.g + "," + borderColor.b + ","
                     + borderColor.a + ")";
+                    
+            if(style.backgroundGradient) {
+               let gradient = this.context.createLinearGradient(0,height/2, width,height/2);
+               let minmax = style.backgroundGradient.range();
+               let min = -1;
+               let max = 1;
+               if(minmax) {
+                 min = minmax[0];
+                 max = minmax[1];
+               }
+               let d = max-min;
+               for(let i = 0; i < 1.01; i += 0.1) {
+                 let c = getColor(style.backgroundGradient.valueToHex(min+d*i));
+                 let cname = "rgba("+c.r+","+c.g+","+c.b+","+c.a+")";
+                 gradient.addColorStop(i, cname);
+               }
+               this.context.fillStyle = gradient;
+            }
 
             this.context.lineWidth = borderThickness;
             if(showBackground) {
