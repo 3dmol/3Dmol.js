@@ -107,8 +107,9 @@ $3Dmol.GLViewer = (function() {
             rows:config.rows,
             cols:config.cols,
             canvas:config.canvas,
-            containerWidth:WIDTH,
-            containerHeight:HEIGHT,
+            //cannot initialize with zero size
+            containerWidth:WIDTH || 1,
+            containerHeight:HEIGHT || 1,
         });
         renderer.domElement.style.width = "100%";
         renderer.domElement.style.height = "100%";
@@ -117,7 +118,7 @@ $3Dmol.GLViewer = (function() {
         renderer.domElement.style.top = "0px";
         renderer.domElement.style.left = "0px";
         renderer.domElement.style.zIndex = "0";
-
+        
         var row = config.row;
         var col = config.col;
         var cols = config.cols;
@@ -126,6 +127,7 @@ $3Dmol.GLViewer = (function() {
         var control_all = config.control_all;
 
         var ASPECT =renderer.getAspect(WIDTH,HEIGHT);
+        
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
         camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
