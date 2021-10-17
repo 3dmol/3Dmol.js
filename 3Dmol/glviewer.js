@@ -97,27 +97,33 @@ $3Dmol.GLViewer = (function() {
         var fov = 20;
 
         var linkedViewers = [];
-        var renderer = new $3Dmol.Renderer({
-            antialias : config.antialias,
-            preserveDrawingBuffer: true, //so we can export images
-            premultipliedAlpha : false,/* more traditional compositing with background */
-            id:config.id,
-            row:config.row,
-            col:config.col,
-            rows:config.rows,
-            cols:config.cols,
-            canvas:config.canvas,
-            //cannot initialize with zero size
-            containerWidth:WIDTH || 1,
-            containerHeight:HEIGHT || 1,
-        });
-        renderer.domElement.style.width = "100%";
-        renderer.domElement.style.height = "100%";
-        renderer.domElement.style.padding = "0";
-        renderer.domElement.style.position = "absolute"; //TODO: get rid of this
-        renderer.domElement.style.top = "0px";
-        renderer.domElement.style.left = "0px";
-        renderer.domElement.style.zIndex = "0";
+        var renderer = null;
+        
+        function setupRenderer() {
+
+            renderer = new $3Dmol.Renderer({
+                antialias : config.antialias,
+                preserveDrawingBuffer: true, //so we can export images
+                premultipliedAlpha : false,/* more traditional compositing with background */
+                id:config.id,
+                row:config.row,
+                col:config.col,
+                rows:config.rows,
+                cols:config.cols,
+                canvas:config.canvas,
+                //cannot initialize with zero size
+                containerWidth:WIDTH || 1,
+                containerHeight:HEIGHT || 1,
+            });
+            renderer.domElement.style.width = "100%";
+            renderer.domElement.style.height = "100%";
+            renderer.domElement.style.padding = "0";
+            renderer.domElement.style.position = "absolute"; //TODO: get rid of this
+            renderer.domElement.style.top = "0px";
+            renderer.domElement.style.left = "0px";
+            renderer.domElement.style.zIndex = "0";
+        }
+        setupRenderer();
         
         var row = config.row;
         var col = config.col;
@@ -1092,11 +1098,26 @@ $3Dmol.GLViewer = (function() {
         this.resize = function() {
             WIDTH = getWidth();
             HEIGHT = getHeight();
+            let regen = false;
+            if(renderer.isLost() && WIDTH > 0 && HEIGHT > 0) {
+                //create new context
+                container.children('canvas').remove(); //remove existing
+                setupRenderer();
+                initContainer(container);
+                regen = true;
+            }
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
-            show();
+            
+            if(regen) { //restored rendere, need to regenerate scene
+                let options =  renderer.supportedExtensions();
+                options.regen = true;
+                _viewer.render(null,options);
+            } else {
+                show();
+            }
 
             // UI Edition 
             _stateManager.updateUI();
@@ -1235,6 +1256,9 @@ $3Dmol.GLViewer = (function() {
 
             spinInterval = setInterval(
                 function(){
+                    if(!viewer.getCanvas().isConnected && renderer.isLost()) {
+                        clearInterval(spinInterval);
+                    }
                     viewer.rotate(1 * speed,axis);
                 }, 25);
 
