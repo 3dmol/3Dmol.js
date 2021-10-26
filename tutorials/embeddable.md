@@ -12,6 +12,7 @@ The code below is all that is needed to create the displayed viewer.
 
 The contents of the viewer can be set and manipulated through the use of `data-` tags, as shown above.  Supported tags include:
  - **data-pdb** The value describes a PDB ID to be loaded into the viewer.
+ - **data-cid** The value describes a PubChem compound id to be loaded into the viewer.
  - **data-href** The value is a URL to a molecular data file.
  - **data-element** The value is the id of an HTML element on the current page that has molecular data embedded in it.
  - **data-type** The value is the file format (default pdb; can be pdb, sdf, xyz, mol2, or cube).  
