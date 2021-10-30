@@ -2,7 +2,8 @@
 body{
     overflow-x:hidden;
     background-color: lightgray;
-    margin:0 auto;
+    margin: 0px;
+    margin-left: 5px;
     padding:0px;
 }
 
