@@ -50,7 +50,8 @@ $3Dmol.ShaderUtils = {
      "    vec3 color = abs(vColor);",
      "    vec3 pos = cposition;",
      "    vec3 p = pos;", //ray point
-     "    vec3 v = normalize(pos);", //ray normal
+     "    vec3 v = vec3(0.0,0.0,-1.0);", //ray normal - orthographic
+     "    if(projectionMatrix[3][3] == 0.0) v = normalize(pos);", //ray normal - perspective
      "    vec3 pa = p1;", //cyl start
      "    vec3 va = normalize(p2-p1);", //cyl norm
      "    vec3 tmp1 = v-(dot(v,va)*va);",
@@ -73,7 +74,7 @@ $3Dmol.ShaderUtils = {
      "    vec3 norm;",
      "    if( dotp1 < 0.0 || dotp2 > 0.0) {", //(p-c)^2 + 2(p-c)vt +v^2+t^2 - r^2 = 0
      "       vec3 cp;",
-     "       if( dotp1 < 0.0) {" +
+     "       if( dotp1 < 0.0) { " +
      //"        if(vColor.x < 0.0 ) discard;", //color sign bit indicates if we should cap or not
      "        cp = p1;",
      "       } else {",
@@ -90,8 +91,8 @@ $3Dmol.ShaderUtils = {
      "       posT = (-B+sqrtDet)/(2.0);",
      "       negT = (-B-sqrtDet)/(2.0);",
      "       float t = min(posT,negT);",
-     "       qi = p+v*t;",
-     "       norm = normalize(qi-cp);",
+     "       qi = p+v*t; ",
+     "       norm = normalize(qi-cp); ",
      "    } else {",
      "       norm = normalize(qi-(dotp1*va + p1));",
      "    }",
@@ -597,13 +598,21 @@ $3Dmol.ShaderLib = {
 "    vec3 n = normalize(mvPosition.xyz);",
 //intersect with the plane defined by the camera looking at the billboard point
 "    if(color.z >= 0.0) {", //p1
-"       vec3 pnorm = normalize(p1);",
-"       float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
-"       mvPosition.xyz = p1+t*pnorm;",
+"       if(projectionMatrix[3][3] == 0.0) {", //perspective
+"         vec3 pnorm = normalize(p1);",
+"         float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
+"         mvPosition.xyz = p1+t*pnorm;",
+"       } else {", //orthographic
+"         mvPosition.xyz = p1;",
+"       }",
 "    } else {",
-"       vec3 pnorm = normalize(p2);",
-"       float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);",
-"       mvPosition.xyz = p2+t*pnorm;",
+"      if(projectionMatrix[3][3] == 0.0) {", //perspective
+"         vec3 pnorm = normalize(p2);",
+"         float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);",
+"         mvPosition.xyz = p2+t*pnorm;",
+"       } else {", //orthographic
+"         mvPosition.xyz = p2;",
+"       }",
 "       mult *= -1.0;",
 "    }",
 "    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius;",

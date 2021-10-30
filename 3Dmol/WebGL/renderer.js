@@ -800,12 +800,7 @@ $3Dmol.Renderer = function(parameters) {
                 m_uniforms.outlineColor.value = material.outlineColor;
                 m_uniforms.outlineWidth.value = material.outlineWidth;
                 m_uniforms.outlinePushback.value = material.outlinePushback;
-            } else if (material.shaderID === "sphereimposter") {
-                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false,
-                        camera.matrixWorldInverse.elements);
-                m_uniforms.directionalLightColor.value = _lights.directional.colors;
-                m_uniforms.directionalLightDirection.value = _lights.directional.positions;
-            } else if (material.shaderID === "volumetric") {
+            }  else if (material.shaderID === "volumetric") {
 
                 //need a matrix that maps back from model coordinates to texture coordinates
                 //  textureMat*modelInv*position

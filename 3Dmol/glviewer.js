@@ -678,8 +678,9 @@ $3Dmol.GLViewer = (function() {
          *
          * @function $3Dmol.GLViewer#setCameraParameters
          * @param {parameters} - new camera parameters, with possible fields
-         *                       being fov for the field of view and z for the
-         *                       distance to the origin.
+         *                       being fov for the field of view, z for the
+         *                       distance to the origin, and orthographic (boolean)
+         *                       for kind of projection (default false).
          * @example
           $.get("data/set1_122_complex.mol2", function(data) {
                 var m = viewer.addModel(data);
@@ -698,6 +699,9 @@ $3Dmol.GLViewer = (function() {
             if (parameters.z !== undefined) {
                 CAMERA_Z = parameters.z;
                 camera.z = CAMERA_Z;
+            }
+            if (parameters.orthographic !== undefined) {
+                camera.ortho = parameters.orthographic ;
             }
         };
 
@@ -2113,10 +2117,11 @@ $3Dmol.GLViewer = (function() {
             slabNear = -maxD / 1.9;
             slabFar = maxD / 2;
 
-            //if we are selecting everything, do not slab
+            //if we are selecting everything, have ver permissive slab
+            //can't do "infinity" size since this will break orthographic 
             if(Object.keys(sel).length === 0) {
-                slabNear = -999999;
-                slabFar = 999999;
+                slabNear = Math.min(-maxD*2,-50);
+                slabFar = Math.max(maxD*2,50);
             }
 
             // keep at least this much space in view
