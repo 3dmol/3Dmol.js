@@ -2322,7 +2322,7 @@ $3Dmol.GLModel = (function() {
             
             //if type is just a string, promote it to an object
             if(typeof(style) === 'string') {
-                style = {[style]:{}};
+                style = $3Dmol.specStringToObject(style);
             }
             // report to console if this is not a valid selector
             var s;
