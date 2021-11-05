@@ -2320,6 +2320,10 @@ $3Dmol.GLModel = (function() {
                 sel = {};
             }
             
+            //if type is just a string, promote it to an object
+            if(typeof(style) === 'string') {
+                style = {[style]:{}};
+            }
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
