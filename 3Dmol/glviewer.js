@@ -4251,8 +4251,8 @@ $3Dmol.GLViewer = (function() {
                                 if (worker && worker.terminate) {
                                     worker.terminate();
                                 }
-                            })
-                        }
+                            });
+                        };
 
                         var rfunction = function(event) {
                             var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
