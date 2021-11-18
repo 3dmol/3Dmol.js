@@ -49,11 +49,11 @@ $3Dmol.GLViewer = (function() {
         var fixed_labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
-        var contextMenuEnabledAtoms = []; // atoms with context menu 
+        var contextMenuEnabledAtoms = []; // atoms with context menu
         var current_hover = null;
         var hoverDuration = 500;
         var viewer_frame = 0;
-        
+
         if(config.hoverDuration != undefined) {
             hoverDuration = config.hoverDuration;
         }
@@ -98,7 +98,7 @@ $3Dmol.GLViewer = (function() {
 
         var linkedViewers = [];
         var renderer = null;
-        
+
         function setupRenderer() {
 
             renderer = new $3Dmol.Renderer({
@@ -124,7 +124,7 @@ $3Dmol.GLViewer = (function() {
             renderer.domElement.style.zIndex = "0";
         }
         setupRenderer();
-        
+
         var row = config.row;
         var col = config.col;
         var cols = config.cols;
@@ -133,7 +133,7 @@ $3Dmol.GLViewer = (function() {
         var control_all = config.control_all;
 
         var ASPECT =renderer.getAspect(WIDTH,HEIGHT);
-        
+
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
         camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
@@ -395,7 +395,7 @@ $3Dmol.GLViewer = (function() {
             }
         };
 
-        
+
 
         //set current_hover to sel (which can be null), calling appropraite callbacks
         var setHover = function(selected, event) {
@@ -547,7 +547,7 @@ $3Dmol.GLViewer = (function() {
         // this event is bound to the body element, not the container,
         // so no need to put it inside initContainer()
         $('body').on('mouseup touchend', function(ev) {
-            // handle touch 
+            // handle touch
             touchHold = false;
 
             // handle selection
@@ -705,7 +705,7 @@ $3Dmol.GLViewer = (function() {
             }
         };
 
-        
+
 
         var mouseButton;
         var _handleMouseDown = this._handleMouseDown = function(ev) {
@@ -742,7 +742,7 @@ $3Dmol.GLViewer = (function() {
                     }
                     else {
                         // console.log('Touch hold ended earlier');
-    
+
                     }
                 }
             }, 1000);
@@ -777,7 +777,7 @@ $3Dmol.GLViewer = (function() {
             rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
             show();
 
-            // Exiting context menu on next mouse event 
+            // Exiting context menu on next mouse event
             _stateManager.exitContextMenu();
         };
         /**
@@ -910,7 +910,7 @@ $3Dmol.GLViewer = (function() {
                 selected = intersects[0].clickable;
                 // console.log('intersects and selected', selected);
             }
-            
+
             var offset = canvasOffset();
             var x = mouseStartX - offset.left;
             var y = mouseStartY - offset.top;
@@ -933,7 +933,7 @@ $3Dmol.GLViewer = (function() {
                 var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
                 handleContextMenuSelection(mouseX, mouseY, _viewer, ev);
             }
-            
+
         };
 
         var initContainer = function(element) {
@@ -953,7 +953,7 @@ $3Dmol.GLViewer = (function() {
 
                 glDOM.on("contextmenu", _handleContextMenu);
             }
-            
+
         };
         initContainer(container);
 
@@ -1114,7 +1114,7 @@ $3Dmol.GLViewer = (function() {
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
-            
+
             if(regen) { //restored rendere, need to regenerate scene
                 let options =  renderer.supportedExtensions();
                 options.regen = true;
@@ -1123,7 +1123,7 @@ $3Dmol.GLViewer = (function() {
                 show();
             }
 
-            // UI Edition 
+            // UI Edition
             _stateManager.updateUI();
             return this;
         };
@@ -2118,7 +2118,7 @@ $3Dmol.GLViewer = (function() {
             slabFar = maxD / 2;
 
             //if we are selecting everything, have ver permissive slab
-            //can't do "infinity" size since this will break orthographic 
+            //can't do "infinity" size since this will break orthographic
             if(Object.keys(sel).length === 0) {
                 slabNear = Math.min(-maxD*2,-50);
                 slabFar = Math.max(maxD*2,50);
@@ -3259,7 +3259,7 @@ $3Dmol.GLViewer = (function() {
                 that.render();
                 if(!that.getCanvas().isConnected && renderer.isLost()) {
                     //we no longer exist
-                    that.stopAnimate();                    
+                    that.stopAnimate();
                 }
                 else if (++displayCount == displayMax || !that.isAnimated()) {
                     clearTimeout(intervalID);
@@ -4245,6 +4245,15 @@ $3Dmol.GLViewer = (function() {
                     return new Promise(function(resolve,reject) {
                         var cnt = 0;
 
+                        var releaseMemory = function () {
+                            if (!workers || !workers.length) return;
+                            workers.forEach(function (worker) {
+                                if (worker && worker.terminate) {
+                                    worker.terminate();
+                                }
+                            })
+                        }
+
                         var rfunction = function(event) {
                             var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
                                                            faceArr:event.data.faces});
@@ -4260,11 +4269,13 @@ $3Dmol.GLViewer = (function() {
                             cnt++;
                             if (cnt == extents.length) {
                                 surfobj.done = true;
+                                releaseMemory();
                                 resolve(surfid); //caller of helper will resolve callback if present
                             }
                         };
 
                         var efunction = function(event) {
+                            releaseMemory();
                             console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
                             reject(event);
                         };
@@ -4336,7 +4347,7 @@ $3Dmol.GLViewer = (function() {
             }
             surfaces[surfid] = surfobj;
             promise.surfid = surfid;
-            
+
             if(surfacecallback && typeof(surfacecallback) == "function") {
                 promise.then(function(surfid) {
                     surfacecallback(surfid);
@@ -4402,7 +4413,7 @@ $3Dmol.GLViewer = (function() {
         this.getSurface = function(surf) {
             return surfaces[surf];
         };
-        
+
         /**
          * Remove surface with given ID
          * @function $3Dmol.GLViewer#removeSurface
@@ -4595,10 +4606,10 @@ $3Dmol.GLViewer = (function() {
         this.setDefaultCartoonQuality = function(val) {
             config.cartoonQuality = val;
         };
-        
+
         this.ui = {};
 
-        // State Management function 
+        // State Management function
         /**
          * Calls StateManager to add selection and style on the ui
          * @function $3Dmol.GLViewer#ui.loadSelectionStyle
@@ -4611,7 +4622,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Calls StateManager to add surface and selection on the ui
-         * 
+         *
          * @function $3Dmol.GLViewer#ui.loadSurface
          * @param {String} surfaceType Name of the surface type
          * @param {AtomSelectionSpec} sel Atom Selection Spec
@@ -4624,14 +4635,14 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Sets the name of the file as title in the ui
-         * 
+         *
          * @function $3Dmol.GlViewer#ui.setModelTitle
          * @param {String} title Name of file loaded
          */
         this.ui.setModelTitle = function(title){
             _stateManager.setModelTitle(title);
         };
-        
+
         /**
          * Calls StateManager to start the
          * @function $3Dmol.GLViewer#ui.initiateUI
