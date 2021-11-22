@@ -1053,6 +1053,34 @@ $3Dmol.GLShape = (function() {
 
         };
 
+        //*****BFM Add cone, copied from cylinder
+        this.addCone = function(coneSpec) {
+            coneSpec.start = coneSpec.start || {};
+            coneSpec.end = coneSpec.end || {};
+
+            var start = new $3Dmol.Vector3(coneSpec.start.x || 0,
+                        coneSpec.start.y || 0, coneSpec.start.z || 0);
+            var end = new $3Dmol.Vector3(coneSpec.end.x,
+                        coneSpec.end.y || 0, coneSpec.end.z || 0);
+            if(typeof(end.x) == 'undefined') end.x = 3; //show something even if undefined
+
+            var radius = coneSpec.radius || 0.1;
+            var color = $3Dmol.CC.color(coneSpec.color);
+
+            // No intersection support
+            // this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(start, end, radius));
+
+            $3Dmol.GLDraw.drawCone(geo, start, end, radius, color);
+
+            var centroid = new $3Dmol.Vector3();
+            components.push({
+                centroid : centroid.addVectors(start,end).multiplyScalar(0.5)
+            });
+            var geoGroup = geo.updateGeoGroup(0);
+            updateBoundingFromPoints(this.boundingSphere, components,
+                        geoGroup.vertexArray);
+        };
+
         /**
          * Creates a line shape
          * @function $3Dmol.GLShape#addLine         
