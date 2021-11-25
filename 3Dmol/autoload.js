@@ -9,7 +9,7 @@ $3Dmol.autoload=function(viewer,callback){
     if ($3Dmol.autoinit) {
         viewer =(viewer!= undefined) ? viewer :null;
         
-        $3Dmol.viewers = {};
+        $3Dmol.viewers = {}
         var nviewers = 0;
         $(".viewer_3Dmoljs").each( function() {
             var viewerdiv = $(this);
