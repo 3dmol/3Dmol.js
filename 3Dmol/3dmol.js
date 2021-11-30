@@ -381,7 +381,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 }).catch(function(){
                     //if mmtf server is being annoying, fallback to text
                     pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
-                    uri = pdbUri + query + "." + type;
+                    uri = pdbUri + query + ".pdb";
                     console.log("falling back to pdb format");
                     $.get(uri, function(ret) {
                         handler(ret);
