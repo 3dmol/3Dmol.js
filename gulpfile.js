@@ -48,7 +48,8 @@ function check() {
 		    'MMTF': false,
 		    'TextDecoder': false,
 	            'define':false}}))
-    .pipe(jshint.reporter('default'));
+    .pipe(jshint.reporter('default'))
+    .pipe(jshint.reporter('fail'));
 }
 
 function domin(srcs, name) {
