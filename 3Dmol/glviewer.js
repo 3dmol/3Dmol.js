@@ -3222,7 +3222,7 @@ $3Dmol.GLViewer = (function() {
             var startFrame = typeof options.startFrame === 'number' ? options.startFrame : 0;
             var currFrame = startFrame;
 
-            var numFramesToAnimate = loop === "backward" ? startFrame : loop === "forward";
+            var numFramesToAnimate = loop === "backward" ? startFrame : mostFrames - startFrame;
 
             var inc = 1;
             if (options.step) {
