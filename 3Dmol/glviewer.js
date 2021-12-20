@@ -3198,11 +3198,9 @@ $3Dmol.GLViewer = (function() {
         /**
          * Animate all models in viewer from their respective frames
          * @function $3Dmol.GLViewer#animate
-         * @param {Object} options - can specify interval (speed of animation), loop (direction
-         * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), and reps (numer of repetitions, 0 indicates infinite loop)
-         *
+         * @param {Object} options - can specify interval (speed of animation), loop (direction of looping, 'backward', 'forward' or 'backAndForth'),
+         * step interval between frames ('step'), reps (number of repetitions, 0 indicates infinite loop), and startFrame (number indicating frame to start at).
          */
-
         this.animate = function(options) {
             incAnim();
             var interval = 100;
@@ -3220,14 +3218,19 @@ $3Dmol.GLViewer = (function() {
             }
             var mostFrames = this.getNumFrames();
             var that = this;
-            var currFrame = 0;
+
+            var startFrame = typeof options.startFrame === 'number' ? options.startFrame : 0;
+            var currFrame = startFrame;
+
+            var numFramesToAnimate = loop === "backward" ? startFrame : loop === "forward";
+
             var inc = 1;
             if (options.step) {
                 inc = options.step;
                 reps /= inc;
             }
             var displayCount = 0;
-            var displayMax = mostFrames * reps;
+            var displayMax = numFramesToAnimate * reps;
             var time = new Date();
             var resolve, intervalID;
             var display = function(direction) {
