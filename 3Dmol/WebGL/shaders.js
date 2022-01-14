@@ -601,7 +601,7 @@ $3Dmol.ShaderLib = {
 "       if(projectionMatrix[3][3] == 0.0) {", //perspective
 "         vec3 pnorm = normalize(p1);",
 "         float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
-"         mvPosition.xyz = p1+t*pnorm;",
+"         mvPosition.xyz = p1+t*pnorm;", 
 "       } else {", //orthographic
 "         mvPosition.xyz = p1;",
 "       }",
@@ -612,12 +612,12 @@ $3Dmol.ShaderLib = {
 "         mvPosition.xyz = p2+t*pnorm;",
 "       } else {", //orthographic
 "         mvPosition.xyz = p2;",
-"       }",
+"       }", 
 "       mult *= -1.0;",
 "    }",
 "    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius;",
 "    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius;",
-"    mvPosition.xy +=  mult*(cr + doublecr).xy;",
+"    mvPosition.xyz +=  mult*(cr + doublecr).xyz;",
 "    cposition = mvPosition.xyz;",
 "    gl_Position = projectionMatrix * mvPosition;",
 "    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
