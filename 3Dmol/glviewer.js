@@ -4330,7 +4330,7 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        promises.push(addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]));
+                        promises.push(addSurfaceHelper(surfobj[surfobj.length-1], modelsAtomList[n], modelsAtomsToShow[n]));
                     }
                 }
                 promise = Promise.all(promises);
