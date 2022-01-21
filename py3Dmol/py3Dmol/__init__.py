@@ -53,7 +53,7 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.org/doc/$3Dmol.GLViewer.html
     '''
-    def __init__(self,width=640,height=480,query='',viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://3dmol.org/build/3Dmol.js'):
+    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://3dmol.org/build/3Dmol.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
@@ -205,6 +205,18 @@ if(warn) {
             $('#img_{0}').attr('src', png)
             </script>'''.format(self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
+    
+    @using_ipython
+    def apng(self, nframes=1):
+        '''output animated image of viewer, which must already be instantiated. nframes changes will be captured.'''
+        if not self.uniqueid:
+            raise AssertionError('Must instantiate viewer before generating animated image.')
+        script = '''<img id="img_{0}">
+            <script>
+            var png = viewer_{0}.apngURI({1})
+            $('#img_{0}').attr('src', png)
+            </script>'''.format(self.uniqueid,nframes)
+        return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})    
         
     class model(object):
       '''Wrapper for referencing a model within a viewer'''

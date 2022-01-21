@@ -36,6 +36,7 @@
     "jquery": "^3.6.0",
     "netcdfjs": "^1.0.0",
     "pako": "^2.0.4",
-    "yargs-parser": "^20.2.9"
+    "yargs-parser": "^20.2.9",
+    "upng-js": "^2.1.0"
   }
 }

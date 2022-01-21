@@ -9,7 +9,7 @@ del = require('del');
 jsdoc = require('gulp-jsdoc3');
 
 coresrc = ['3Dmol/3dmol.js','3Dmol/WebGL/math.js','3Dmol/WebGL/shapes.js','3Dmol/WebGL/core.js','3Dmol/WebGL/**.js','3Dmol/**.js','!3Dmol/SurfaceWorker.js','3Dmol/SurfaceWorker.js'];
-extsrc = ['js/mmtf.js','node_modules/pako/dist/pako_inflate.js','node_modules/netcdfjs/dist/netcdfjs.js'];
+extsrc = ['js/mmtf.js','node_modules/pako/dist/pako.js','node_modules/netcdfjs/dist/netcdfjs.js','node_modules/upng-js/UPNG.js'];
 uisrc = ['3Dmol/ui/ui.js', '3Dmol/ui/state.js', '3Dmol/ui/icon.js', '3Dmol/ui/form.js', '3Dmol/ui/defaultValues.js'];
 jqsrc = ['node_modules/jquery/dist/jquery.js'];
 
@@ -37,6 +37,7 @@ function check() {
 		    'module':false,
 		    'Blob':false,
 		    'pako':false,
+		    'UPNG':false,
 		    'netcdfjs':false,
 		    'XMLHttpRequest':false,
 		    'alert':false,
@@ -47,6 +48,7 @@ function check() {
 		    'Worker': false,
 		    'MMTF': false,
 		    'TextDecoder': false,
+		    'FileReader': false,
 	            'define':false}}))
     .pipe(jshint.reporter('default'))
     .pipe(jshint.reporter('fail'));

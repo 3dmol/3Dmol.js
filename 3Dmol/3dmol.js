@@ -312,6 +312,17 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var uri = "";
     var promise = null;
     var m = viewer.addModel();
+    
+    if (query.indexOf(':') < 0) {
+        //no type specifier, guess
+        if(query.length == 4) {
+            query = 'pdb:'+query;
+        } else if(!isNaN(query)) {
+            query = 'cid:'+query;
+        } else {
+            query = 'url:'+query;
+        }
+    }
     if (query.substr(0, 5) === 'mmtf:') {
         pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
