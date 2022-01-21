@@ -788,6 +788,58 @@ $3Dmol.GLViewer = (function() {
         this.pngURI = function() {
             return this.getCanvas().toDataURL('image/png');
         };
+        
+        /**
+         * Return a promise that resolves to an animated PNG image URI of 
+         viewer contents (base64 encoded) for nframes of viewer changes.
+         * @function $3Dmol.GLViewer#apngURI
+         * @return {Promise}
+         */
+        this.apngURI = function(nframes) {
+            let viewer = this;
+            nframes = nframes ? nframes : 1;
+            return new Promise(function (resolve) {
+                let framecnt = 0;
+                let oldcb = viewChangeCallback;
+                let bufpromise = [];
+                let delays = [];
+                let lasttime = Date.now();
+                viewChangeCallback = function() {
+                    delays.push(Date.now()-lasttime);
+                    lasttime = Date.now();
+                    bufpromise.push(new Promise(resolve => {
+                        viewer.getCanvas().toBlob(function(blob) {
+                            blob.arrayBuffer().then(resolve);
+                        }, "image/png");
+                    }));
+                    framecnt += 1;
+                    if(framecnt == nframes) {
+                         viewChangeCallback = oldcb;
+                        
+                         Promise.all(bufpromise).then((buffers) => {                                
+                            //convert to apng
+                            let rgbas = [];
+                            //have to convert png to rgba, before creating the apng
+                            for(let i = 0; i < buffers.length; i++) {
+                                let img = UPNG.decode(buffers[i]);
+                                rgbas.push(UPNG.toRGBA8(img)[0]);
+                            }
+                            let width = viewer.getCanvas().width;
+                            let height = viewer.getCanvas().height;
+                            let apng = UPNG.encode(rgbas, width, height, 0, delays);
+                            let blob = new Blob([apng],{type : 'image/png'});
+                            let fr = new FileReader();
+                            fr.onload = function(e) {
+                                resolve(e.target.result);
+                            };
+                            fr.readAsDataURL(blob);
+                        });
+                    }
+                };
+            });
+            
+        };
+        
 
         /**
          * Return underlying canvas element.
