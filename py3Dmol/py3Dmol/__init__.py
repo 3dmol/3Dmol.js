@@ -213,8 +213,8 @@ if(warn) {
             raise AssertionError('Must instantiate viewer before generating animated image.')
         script = '''<img id="img_{0}">
             <script>
-            var png = viewer_{0}.apngURI({1})
-            $('#img_{0}').attr('src', png)
+            viewer_{0}.apngURI({1}).then(png => {{
+            $('#img_{0}').attr('src', png); }});
             </script>'''.format(self.uniqueid,nframes)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})    
         

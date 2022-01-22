@@ -657,6 +657,14 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
 
 //hackish way to work with requirejs - doesn't actually work yet
 //since we don't use the require optimizer to combine modules
+if(typeof(_3dmol_saved_define) !== 'undefined') {
+    /** When pulling in external sources, disable amd to ensure they
+     * populate the global namespace as expected.  Restore it so code
+     * using amd still works. */
+    /*global _3dmol_saved_define, _3dmol_saved_require, define:true, require:true */
+    define = _3dmol_saved_define;
+    require = _3dmol_saved_require;
+}
 if( typeof(define) === 'function' && define.amd) {
     define('$3Dmol',[], function() { return $3Dmol; });
 }
