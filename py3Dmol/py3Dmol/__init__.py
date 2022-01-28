@@ -66,7 +66,12 @@ class view(object):
         divid = "3dmolviewer_UNIQUEID"
         warnid = "3dmolwarning_UNIQUEID"
         self.uniqueid = None
-        self.startjs = '''<div id="%s"  style="position: relative; width: %dpx; height: %dpx">
+        #convert numerical width/height to pixels
+        if type(width) == int:
+            width = '%dpx'%width
+        if type(height) == int:
+            height = '%dpx'%height
+        self.startjs = '''<div id="%s"  style="position: relative; width: %s; height: %s">
         <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab (or JavaScript failed to load for some other reason).  You need to install the 3dmol extension: <br>
         <tt>jupyter labextension install jupyterlab_3dmol</tt></p>
         </div>\n''' % (divid,width,height,warnid)
@@ -264,7 +269,7 @@ if(warn) {
 
     def __getattr__(self,name):
         '''auto-instantiate javascript calls based on whatever the user provided'''
-        if name.startswith('_'): #object to ipython canary functions
+        if name.startswith('_') or name == 'getdoc': #object to ipython canary functions
             raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
             
         def makejs(*args,**kwargs):
