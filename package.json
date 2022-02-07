@@ -10,6 +10,7 @@
   "homepage": "http://3dmol.csb.pitt.edu",
   "devDependencies": {
     "del": "^6.0.0",
+    "glcheck": "^0.3.5",
     "glob-parent": "^5.1.2",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
@@ -27,6 +28,10 @@
   },
   "scripts": {
     "build": "gulp",
+    "test": "npm run test:generate:glcheck && npm run test:glcheck",
+    "test:glcheck":"npx glcheck --config ./glcheck-tests/glcheck.config.json",
+    "test:generate:glcheck": "python3 ./generate_glcheck_render_tests.py",
+
     "prepare": "npm run build"
   },
   "license": "BSD-3-Clause",
@@ -36,7 +41,7 @@
     "jquery": "^3.6.0",
     "netcdfjs": "^1.0.0",
     "pako": "^2.0.4",
-    "yargs-parser": "^20.2.9",
-    "upng-js": "^2.1.0"
+    "upng-js": "^2.1.0",
+    "yargs-parser": "^20.2.9"
   }
 }

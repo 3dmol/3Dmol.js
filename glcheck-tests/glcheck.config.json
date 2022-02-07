@@ -1,0 +1,5 @@
+{
+    "renderTests": "glcheck-tests/render-tests/*.html",
+    "renderTimeout": 30000,
+    "saveRenderFailures": true
+}
