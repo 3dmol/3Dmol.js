@@ -28,10 +28,10 @@
   },
   "scripts": {
     "build": "gulp",
-    "test": "npm run test:generate:glcheck && npm run test:glcheck",
+    "test": "npm run generate:glcheck && npm run test:glcheck && npm run coverage:glcheck",
     "test:glcheck":"npx glcheck --config ./glcheck-tests/glcheck.config.json",
-    "test:generate:glcheck": "python3 ./generate_glcheck_render_tests.py",
-
+    "generate:glcheck": "python3 ./generate_glcheck_render_tests.py",
+    "coverage:glcheck": "npx nyc report --reporter html --reporter text -t .nyc_output --report-dir .nyc_output",
     "prepare": "npm run build"
   },
   "license": "BSD-3-Clause",

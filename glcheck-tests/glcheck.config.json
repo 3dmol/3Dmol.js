@@ -1,5 +1,6 @@
 {
     "renderTests": "glcheck-tests/render-tests/*.html",
     "renderTimeout": 30000,
-    "saveRenderFailures": true
+    "saveRenderFailures": true,
+    "coverageFiles": "glcheck-tests/render-tests/assets/3Dmol.js"
 }
