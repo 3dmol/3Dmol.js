@@ -24,14 +24,15 @@
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
     "jsdoc": "^3.6.7",
-    "jshint": "^2.13.1"
+    "jshint": "^2.13.1",
+    "puppeteer": "^13.2.0"
   },
   "scripts": {
     "build": "gulp",
     "test": "npm run generate:glcheck && npm run test:glcheck && npm run coverage:glcheck",
-    "test:glcheck":"npx glcheck --config ./glcheck-tests/glcheck.config.json",
+    "test:glcheck": "rm -rf ./glcheck-tests/render-failures && npx glcheck --config ./glcheck-tests/glcheck.config.json",
     "generate:glcheck": "python3 ./generate_glcheck_render_tests.py",
-    "coverage:glcheck": "npx nyc report --reporter html --reporter text -t .nyc_output --report-dir .nyc_output",
+    "coverage:glcheck": "npx nyc report --reporter html --reporter text --report-dir glcheck-coverage",
     "prepare": "npm run build"
   },
   "license": "BSD-3-Clause",

@@ -61,7 +61,7 @@ f"""
 <html lang="en">
     <head>
         <title>{example.name}</title>
-        <script src="./assets/3Dmol.js"></script>         
+        <script src="./assets/3Dmol-min.js"></script>         
     </head>
     <body style="margin:0;padding:0">
         {"".join([f"<script>{preproc_src(pre)}</script>" for pre in example.prescripts])}
