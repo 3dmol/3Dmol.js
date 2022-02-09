@@ -23,16 +23,20 @@
     "gulp-shell": "^0.8.0",
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
-    "jsdoc": "^3.6.7",
+    "jsdoc": "^3.6.10",
     "jshint": "^2.13.1",
-    "puppeteer": "^13.2.0"
+    "puppeteer": "^13.2.0",
+    "tsd-jsdoc": "^2.5.0"
   },
   "scripts": {
     "build": "gulp",
-    "test": "npm run generate:glcheck && npm run test:glcheck && npm run coverage:glcheck",
-    "test:glcheck": "rm -rf ./glcheck-tests/render-failures && npx glcheck --config ./glcheck-tests/glcheck.config.json",
+    "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
+    "test": "npm run glcheck",
+    "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck && npm run coverage:glcheck",
+    "test:glcheck": "npx glcheck --config ./glcheck-tests/glcheck.config.json",
+    "clean:glcheck": "rm -rf ./glcheck-tests/render-failures",
     "generate:glcheck": "python3 ./generate_glcheck_render_tests.py",
-    "coverage:glcheck": "npx nyc report --reporter html --reporter text --report-dir glcheck-coverage",
+    "coverage:glcheck": "npx nyc report --reporter html --report-dir ./glcheck-tests/coverage",
     "prepare": "npm run build"
   },
   "license": "BSD-3-Clause",

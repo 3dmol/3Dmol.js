@@ -17,6 +17,6 @@
            seldist: 3.0                                   
         });
                                                      
-      viewer.render();
+      viewer.render(callback);
     });
 });
