@@ -11,6 +11,7 @@ package-lock.json  #suppose to commit, but triggers security warning on github
 /assets
 /'design concepts'
 .nyc_output
+.vscode
 
 
 #Ignoring Virtual Environments for the Active Learning Environment Project

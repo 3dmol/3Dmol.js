@@ -1,6 +1,0 @@
-{
-    "renderTests": "glcheck-tests/render-tests/*.html",
-    "renderTimeout": 30000,
-    "saveRenderFailures": true,
-    "coverageFiles": "glcheck-tests/render-tests/assets/*"
-}
