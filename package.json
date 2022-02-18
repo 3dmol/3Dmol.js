@@ -10,6 +10,11 @@
   "homepage": "http://3dmol.csb.pitt.edu",
   "devDependencies": {
     "del": "^6.0.0",
+    "eslint": "^8.9.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
     "glob-parent": "^5.1.2",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
@@ -23,7 +28,8 @@
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
     "jsdoc": "^3.6.7",
-    "jshint": "^2.13.1"
+    "jshint": "^2.13.1",
+    "prettier": "^2.5.1"
   },
   "scripts": {
     "build": "gulp",
@@ -36,7 +42,7 @@
     "jquery": "^3.6.0",
     "netcdfjs": "^1.0.0",
     "pako": "^2.0.4",
-    "yargs-parser": "^20.2.9",
-    "upng-js": "^2.1.0"
+    "upng-js": "^2.1.0",
+    "yargs-parser": "^20.2.9"
   }
 }
