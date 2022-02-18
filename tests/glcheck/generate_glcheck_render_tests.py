@@ -56,10 +56,10 @@ copytree(testStructsSrcDir, structAssetDir)
 
 for file in testsys.files:
     for example in file.examples:
-        if example.name in blacklist:
-            continue
         if example.name.find("Users") != -1:
             example.name = example.name[example.name.find("js_"):]
+        if example.name in blacklist:
+            continue
         with open(pathjoin(generationTargetDir, f"{example.name}.html"), "w") as f:
             f.write(
 f"""
@@ -76,7 +76,12 @@ f"""
         <script>
             var callback = function() {{ window.glcheck_renderDone = true;}};
             {preproc_src(example.script)}
-            {"window.glcheck_renderDone = true;" if example.script.find("callback") == -1 else ""}
+            {
+                "window.glcheck_renderDone = true;" 
+                if example.script.find("callback") == -1 
+                or example.prescripts and example.prescripts.find("callback") == -1 
+                else ""
+            }
         </script>        
     </body>
 </html>

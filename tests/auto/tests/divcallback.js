@@ -6,7 +6,7 @@
         viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
         viewer.zoomTo();
         viewer.zoom(.75);
-        viewer.render();
+        viewer.render(callback);
     },'text');
 };
 */
