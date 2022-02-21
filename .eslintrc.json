@@ -6,7 +6,8 @@
     },
     "extends": [
         "airbnb-base",
-        "prettier/prettier:recomended"
+        //"prettier/prettier:recomended"
+        "prettier"
     ],
     "parserOptions": {
         "ecmaVersion": "latest"
