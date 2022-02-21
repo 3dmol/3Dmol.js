@@ -10,8 +10,8 @@
   "homepage": "http://3dmol.csb.pitt.edu",
   "jest": {
     "testRegex": [
-      "./*.test.js",
-      "./*.test.ts"
+      "./*\.test.js",
+      "./*\.test.ts"
     ]
   },
   "devDependencies": {
