@@ -1,16 +1,17 @@
 name: glcheck
-on: [push, pull_request, workflow_dispatch]
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+  
 jobs:
   glcheck:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@2.4.0
-      - uses: actions/setup-node@v2.5.1
-      - uses: actions/setup-python@2.3.2
-      - run: python ./generate_glcheck_render_tests.py
+      - run: npm install
+      - run: npm run build
       - run: npm run test
-      - uses: tj-actions/coverage-badge-js@v1.3
-        with:
-          # Path to a coverage report file
-          report_path: .nyc_output/out.json
   
