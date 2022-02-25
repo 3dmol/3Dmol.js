@@ -57,7 +57,7 @@ copytree(testStructsSrcDir, structAssetDir)
 for file in testsys.files:
     for example in file.examples:
         if example.name.find("Users") != -1:
-            example.name = example.name[example.name.find("js_"):]
+            example.name = example.name[example.name.rfind("js_"):]
         if example.name in blacklist:
             continue
         with open(pathjoin(generationTargetDir, f"{example.name}.html"), "w") as f:
