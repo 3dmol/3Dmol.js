@@ -3,14 +3,14 @@ on:
   pull_request:
     branches: [master]
   push:
-    branches: [master]
+    branches: [master, feature-glcheck]
   workflow_dispatch:
   
 jobs:
   glcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@2.4.0
+      - uses: actions/checkout@v2
       - run: npm install
       - run: npm run build
       - run: npm run test
