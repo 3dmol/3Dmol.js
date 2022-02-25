@@ -1,6 +1,6 @@
 # TODO: determine if these are test fails
 questinable_tests = [
-    "glmodel_js_setCoordinates"
+    "js_setCoordinates"
 ]
 
 # animations:
@@ -8,10 +8,10 @@ animation_failure = [
     "animatelabels",
     "animatereslabels",
     "animateshapes",
-    "js_glviewer_js_addModelsAsFrames",
-    "js_glviewer_js_zoom",
-    "js_glviewer_js_zoomTo",
-    "js_glmodel_js_setCoordinates",
+    "js_addModelsAsFrames",
+    "js_zoom",
+    "js_zoomTo",
+    "js_setCoordinates",
     "test90",
     "testvibratearrows",
     "testvibrateboth",
@@ -80,9 +80,9 @@ incorectly_folded = [
 
 # Massive size difference: 
 size_issues = [
-    "js_glviewer_js_addLabel",
+    "js_addLabel",
     "test55",
-    #"testmulticif"
+    "testmulticif"
 ]
 
 # Dark/thicker part of line doesn't render correctly:
