@@ -15,6 +15,7 @@ animation_failure = [
     "test90",
     "testvibratearrows",
     "testvibrateboth",
+    "testmulticif"
 ]
 
 # Does not render at all: 
