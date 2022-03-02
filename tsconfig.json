@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "strict": true,
+        "module": "ES6",
+        "lib": [
+            "es6",
+            "dom"
+        ]
+    },
+    "include": [
+        "3Dmol/**/*.js",
+    ],
+    "exclude": [
+        "node_modules",
+    ]
+}

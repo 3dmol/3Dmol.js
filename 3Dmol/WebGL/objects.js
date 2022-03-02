@@ -5,27 +5,27 @@
 
 //Line Object
 /** @constructor */
-$3Dmol.Line = function (geometry, material, type) {
+export function Line(geometry, material, type) {
 
-    $3Dmol.Object3D.call(this);
+    Object3D.call(this);
 
     this.geometry = geometry;
         //TODO: update material and type to webgl
-    this.material = (material !== undefined) ? material : new $3Dmol.LineBasicMaterial( { color: Math.random() * 0xffffff } );
-    this.type = (type !== undefined) ? type : $3Dmol.LineStrip;
+    this.material = (material !== undefined) ? material : new LineBasicMaterial( { color: Math.random() * 0xffffff } );
+    this.type = (type !== undefined) ? type : LineStrip;
 
 };
 
-$3Dmol.LineStrip = 0;
-$3Dmol.LinePieces = 1;
+export var LineStrip = 0;
+export var LinePieces = 1;
 
-$3Dmol.Line.prototype = Object.create($3Dmol.Object3D.prototype);
+Line.prototype = Object.create(Object3D.prototype);
 
-$3Dmol.Line.prototype.clone = function (object) {
+Line.prototype.clone = function (object) {
 
-    if (object === undefined) object = new $3Dmol.Line(this.geometry, this.material, this.type);
+    if (object === undefined) object = new Line(this.geometry, this.material, this.type);
 
-    $3Dmol.Object3D.prototype.clone.call(this, object);
+    Object3D.prototype.clone.call(this, object);
 
     return object;
 
@@ -34,22 +34,22 @@ $3Dmol.Line.prototype.clone = function (object) {
 
 //Mesh Object
 /** @constructor */
-$3Dmol.Mesh = function(geometry, material) {
+export function Mesh(geometry, material) {
 
-    $3Dmol.Object3D.call(this);
+    Object3D.call(this);
 
     this.geometry = geometry;
-    this.material = (material !== undefined) ? material : new $3Dmol.MeshBasicMaterial( { color: Math.random() * 0xffffff, wireframe: true } );
+    this.material = (material !== undefined) ? material : new MeshBasicMaterial( { color: Math.random() * 0xffffff, wireframe: true } );
 
 };
 
-$3Dmol.Mesh.prototype = Object.create($3Dmol.Object3D.prototype);
+Mesh.prototype = Object.create(Object3D.prototype);
 
-$3Dmol.Mesh.prototype.clone = function (object) {
+Mesh.prototype.clone = function (object) {
 
-    if (object === undefined) object = new $3Dmol.Mesh(this.geometry, this.material);
+    if (object === undefined) object = new Mesh(this.geometry, this.material);
 
-    $3Dmol.Object3D.prototype.clone.call(this, object);
+    Object3D.prototype.clone.call(this, object);
 
     return object;
 
@@ -58,20 +58,20 @@ $3Dmol.Mesh.prototype.clone = function (object) {
 
 //Sprite object
 /** @constructor */
-$3Dmol.Sprite = function(material) {
+export function Sprite(material) {
     
-    $3Dmol.Object3D.call(this);
+    Object3D.call(this);
     
-    this.material = (material !== undefined) ? material : new $3Dmol.SpriteMaterial();
+    this.material = (material !== undefined) ? material : new SpriteMaterial();
 
     this.rotation3d = this.rotation;
     this.rotation = 0;
     
 };
 
-$3Dmol.Sprite.prototype = Object.create($3Dmol.Object3D.prototype);
+Sprite.prototype = Object.create(Object3D.prototype);
 
-$3Dmol.Sprite.prototype.updateMatrix = function() {
+Sprite.prototype.updateMatrix = function() {
     
     this.matrix.setPosition(this.position);
     
@@ -85,12 +85,12 @@ $3Dmol.Sprite.prototype.updateMatrix = function() {
     
 };
 
-$3Dmol.Sprite.prototype.clone = function(object) {
+Sprite.prototype.clone = function(object) {
     
     if (object === undefined)
-        object = new $3Dmol.Sprite(this.material);
+        object = new Sprite(this.material);
     
-    $3Dmol.Object3D.prototype.clone.call(this, object);
+    Object3D.prototype.clone.call(this, object);
     
     return object;
     

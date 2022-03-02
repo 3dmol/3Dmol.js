@@ -1,17 +1,24 @@
+// @ts-check
 
-$3Dmol.Light = function(hex, intensity) {
-    
-    $3Dmol.Object3D.call(this);
-    
-    this.color = new $3Dmol.Color(hex);
-    this.position = new $3Dmol.Vector3( 0, 1, 0 );
-    this.target = new $3Dmol.Object3D();
+import { Color, Object3D } from "./core";
+import { Vector3 } from "./math";
 
-    this.intensity = ( intensity !== undefined ) ? intensity : 1;
 
-    this.castShadow = false;
-    this.onlyShadow = false;
-    
+export class Light {
+    constructor(hex, intensity) {
+        
+        Object3D.call(this);
+        
+        this.color = new Color(hex);
+        this.position = new Vector3( 0, 1, 0 );
+        this.target = new Object3D();
+
+        this.intensity = ( intensity !== undefined ) ? intensity : 1;
+
+        this.castShadow = false;
+        this.onlyShadow = false;
+        
+    }
 };
 
-$3Dmol.Light.prototype = Object.create($3Dmol.Object3D.prototype);
+Light.prototype = Object.create(Object3D.prototype);

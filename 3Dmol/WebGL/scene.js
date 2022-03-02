@@ -2,9 +2,9 @@
  * Scene class
  */
 /** @constructor */
-$3Dmol.Scene = function() {
+export function Scene() {
     
-    $3Dmol.Object3D.call(this);
+    Object3D.call(this);
     
     this.fog = null;
     
@@ -21,12 +21,12 @@ $3Dmol.Scene = function() {
     
 };
 
-$3Dmol.Scene.prototype = Object.create($3Dmol.Object3D.prototype);
+Scene.prototype = Object.create(Object3D.prototype);
 
-$3Dmol.Scene.prototype.__addObject = function(object) {
+Scene.prototype.__addObject = function(object) {
     
     //Directional Lighting
-    if (object instanceof $3Dmol.Light) {
+    if (object instanceof Light) {
         
         if (this.__lights.indexOf(object) === -1)
             this.__lights.push(object);
@@ -62,10 +62,10 @@ $3Dmol.Scene.prototype.__addObject = function(object) {
     
 };
 
-$3Dmol.Scene.prototype.__removeObject = function(object) {
+Scene.prototype.__removeObject = function(object) {
     
     var idx;
-    if (object instanceof $3Dmol.Light) {
+    if (object instanceof Light) {
         
         idx = this.__lights.indexOf(object);
         
@@ -107,19 +107,19 @@ $3Dmol.Scene.prototype.__removeObject = function(object) {
  */
 
 /** @constructor */
-$3Dmol.Fog = function ( hex, near, far ) {
+export function Fog( hex, near, far ) {
 
     this.name = '';
 
-    this.color = new $3Dmol.Color( hex );
+    this.color = new Color( hex );
 
     this.near = ( near !== undefined ) ? near : 1;
     this.far = ( far !== undefined ) ? far : 1000;
 
 };
 
-$3Dmol.Fog.prototype.clone = function () {
+Fog.prototype.clone = function () {
 
-    return new $3Dmol.Fog( this.color.getHex(), this.near, this.far );
+    return new Fog( this.color.getHex(), this.near, this.far );
 
 };

@@ -1,8 +1,19 @@
+// @ts-check
+
+import { Camera } from "./camera";
+import { Color } from "./core";
+import { SpritePlugin } from "./extras";
+import { Light } from "./lights";
+import { MeshOutlineMaterial, NearestFilter, RGBAFormat, SphereImposterOutlineMaterial, StickImposterOutlineMaterial, UnsignedByteType } from "./materials";
+import { Matrix3, Matrix4, Vector3 } from "./math";
+import { Line, Mesh, Sprite } from "./objects";
+import { ShaderLib, ShaderUtils } from "./shaders";
+
 /**
  * Simplified webGL renderer
  */
 
-$3Dmol.Renderer = function(parameters) {
+export function Renderer(parameters) {
 
     parameters = parameters || {};
     this.row = parameters.row;
@@ -19,12 +30,12 @@ $3Dmol.Renderer = function(parameters) {
             : true, _antialias = parameters.antialias !== undefined ? parameters.antialias
             : false, _stencil = parameters.stencil !== undefined ? parameters.stencil
             : true, _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
-            : false, _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(
-            parameters.clearColor) : new $3Dmol.Color(0x000000),
+            : false, _clearColor = parameters.clearColor !== undefined ? new Color(
+            parameters.clearColor) : new Color(0x000000),
              _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0,
-            _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters.outline),
-            _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters.outline),
-            _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters.outline),
+            _outlineMaterial = new MeshOutlineMaterial(parameters.outline),
+            _outlineSphereImposterMaterial = new SphereImposterOutlineMaterial(parameters.outline),
+            _outlineStickImposterMaterial = new StickImposterOutlineMaterial(parameters.outline),
             _outlineEnabled = !!parameters.outline
             ;
     this.domElement = _canvas;
@@ -83,14 +94,14 @@ $3Dmol.Renderer = function(parameters) {
     _enabledAttributes = {},
 
     // camera matrices cache
-    _projScreenMatrix = new $3Dmol.Matrix4(),
-    _vector3 = new $3Dmol.Vector3(),
+    _projScreenMatrix = new Matrix4(),
+    _vector3 = new Vector3(),
 
-    _worldInverse = new $3Dmol.Matrix4(),
-    _projInverse = new $3Dmol.Matrix4(),
-    _textureMatrix = new $3Dmol.Matrix4(),
+    _worldInverse = new Matrix4(),
+    _projInverse = new Matrix4(),
+    _textureMatrix = new Matrix4(),
     // light arrays cache
-    _direction = new $3Dmol.Vector3(),
+    _direction = new Vector3(),
     _lightsNeedUpdate = true,
 
     _lights = {
@@ -124,7 +135,7 @@ $3Dmol.Renderer = function(parameters) {
 
     };
 
-    var sprites = new $3Dmol.SpritePlugin();
+    var sprites = new SpritePlugin();
 
     //screensshader related variables
     var _screenshader = null;
@@ -177,9 +188,9 @@ $3Dmol.Renderer = function(parameters) {
     };
 
     this.enableOutline = function(parameters) {
-        _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters);
-        _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters);
-        _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters);
+        _outlineMaterial = new MeshOutlineMaterial(parameters);
+        _outlineSphereImposterMaterial = new SphereImposterOutlineMaterial(parameters);
+        _outlineStickImposterMaterial = new StickImposterOutlineMaterial(parameters);
         _outlineEnabled = true;
     };
 
@@ -256,8 +267,8 @@ $3Dmol.Renderer = function(parameters) {
 
     this.setMaterialFaces = function(material, reflected) {
 
-        var doubleSided = material.side === $3Dmol.DoubleSide;
-        var flipSided = material.side === $3Dmol.BackSide;
+        var doubleSided = material.side === DoubleSide;
+        var flipSided = material.side === BackSide;
 
         if(!material.imposter) //ignore reflection with imposters
             flipSided = reflected ? !flipSided : flipSided;
@@ -707,10 +718,10 @@ $3Dmol.Renderer = function(parameters) {
 
         if (shaderID) {
 
-            var shader = $3Dmol.ShaderLib[shaderID];
+            var shader = ShaderLib[shaderID];
             material.vertexShader = shader.vertexShader;
             material.fragmentShader = shader.fragmentShader;
-            material.uniforms = $3Dmol.ShaderUtils.clone(shader.uniforms);
+            material.uniforms = ShaderUtils.clone(shader.uniforms);
             // TODO: set material uniforms to shader uniform variables
 
         }
@@ -953,7 +964,7 @@ $3Dmol.Renderer = function(parameters) {
         var faceCount, lineCount;
         // lambert shaders - draw triangles
         // TODO: make sure geometryGroup's face count is setup correctly
-        if (object instanceof $3Dmol.Mesh) {
+        if (object instanceof Mesh) {
 
             if (material.shaderID === "instanced") {
                 var sphereGeometryGroup = material.sphere.geometryGroups[0];
@@ -1016,7 +1027,7 @@ $3Dmol.Renderer = function(parameters) {
         }
 
         // basic shaders - draw lines
-        else if (object instanceof $3Dmol.Line) {
+        else if (object instanceof Line) {
             lineCount = geometryGroup.vertices;
 
             setLineWidth(material.linewidth);
@@ -1098,10 +1109,10 @@ $3Dmol.Renderer = function(parameters) {
 
     this.render = function(scene, camera, forceClear) {
 
-        if (camera instanceof $3Dmol.Camera === false) {
+        if (camera instanceof Camera === false) {
 
             console
-                    .error('$3Dmol.Renderer.render: camera is not an instance of $3Dmol.Camera.');
+                    .error('Renderer.render: camera is not an instance of Camera.');
             return;
 
         }
@@ -1310,7 +1321,7 @@ $3Dmol.Renderer = function(parameters) {
         _fb = _gl.createFramebuffer();
 
         // build screenshader
-        var screenshader = $3Dmol.ShaderLib.screen;
+        var screenshader = ShaderLib.screen;
 
         _screenshader = buildProgram(screenshader.fragmentShader,
             screenshader.vertexShader, screenshader.uniforms, {});
@@ -1418,8 +1429,8 @@ $3Dmol.Renderer = function(parameters) {
 
             object.__webglInit = true;
 
-            object._modelViewMatrix = new $3Dmol.Matrix4();
-            object._normalMatrix = new $3Dmol.Matrix3();
+            object._modelViewMatrix = new Matrix4();
+            object._normalMatrix = new Matrix3();
 
             if (object.geometry !== undefined
                     && object.geometry.__webglInit === undefined) {
@@ -1429,7 +1440,7 @@ $3Dmol.Renderer = function(parameters) {
 
             }
 
-            if (object instanceof $3Dmol.Mesh || object instanceof $3Dmol.Line) {
+            if (object instanceof Mesh || object instanceof Line) {
                 geometry = object.geometry;
                 material = object.material;
 
@@ -1443,13 +1454,13 @@ $3Dmol.Renderer = function(parameters) {
 
                     if (!geometryGroup.__webglVertexBuffer) {
 
-                        if (object instanceof $3Dmol.Mesh) {
+                        if (object instanceof Mesh) {
                             createMeshBuffers(geometryGroup);
                             geometry.elementsNeedUpdate = true;
                             geometry.normalsNeedUpdate = true;
                         }
 
-                        else if (object instanceof $3Dmol.Line)
+                        else if (object instanceof Line)
                             createLineBuffers(geometryGroup);
 
                         geometry.verticesNeedUpdate = true;
@@ -1465,7 +1476,7 @@ $3Dmol.Renderer = function(parameters) {
 
         if (!object.__webglActive) {
 
-            if (object instanceof $3Dmol.Mesh || object instanceof $3Dmol.Line) {
+            if (object instanceof Mesh || object instanceof Line) {
 
                 geometry = object.geometry;
 
@@ -1478,7 +1489,7 @@ $3Dmol.Renderer = function(parameters) {
             }
 
             // Sprite
-            else if (object instanceof $3Dmol.Sprite)
+            else if (object instanceof Sprite)
                 scene.__webglSprites.push(object);
 
             object.__webglActive = true;
@@ -1491,7 +1502,7 @@ $3Dmol.Renderer = function(parameters) {
 
         var geometry = object.geometry, geometryGroup;
 
-        if (object instanceof $3Dmol.Mesh || object instanceof $3Dmol.Line) {
+        if (object instanceof Mesh || object instanceof Line) {
 
             for (var g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
 
@@ -1517,10 +1528,10 @@ $3Dmol.Renderer = function(parameters) {
 
     function removeObject(object, scene) {
 
-        if (object instanceof $3Dmol.Mesh || object instanceof $3Dmol.Line)
+        if (object instanceof Mesh || object instanceof Line)
             removeInstances(scene.__webglObjects, object);
 
-        else if (object instanceof $3Dmol.Sprite)
+        else if (object instanceof Sprite)
             removeInstancesDirect(scene.__webglSprites, object);
 
         object.__webglActive = false;
@@ -1811,11 +1822,11 @@ $3Dmol.Renderer = function(parameters) {
 
     function paramToGL(p) {
 
-        if (p === $3Dmol.UnsignedByteType)
+        if (p === UnsignedByteType)
             return _gl.UNSIGNED_BYTE;
-        if (p === $3Dmol.RGBAFormat)
+        if (p === RGBAFormat)
             return _gl.RGBA;
-        if (p === $3Dmol.NearestFilter)
+        if (p === NearestFilter)
             return _gl.NEAREST;
 
         return 0;
@@ -1839,7 +1850,7 @@ $3Dmol.Renderer = function(parameters) {
             intensity = light.intensity;
             distance = light.distance;
 
-            if (light instanceof $3Dmol.Light) {
+            if (light instanceof Light) {
 
                 dirCount++;
 

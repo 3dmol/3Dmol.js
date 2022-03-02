@@ -1,21 +1,24 @@
+// @ts-check
 //Intersection sphere and box shapes.  
+
+import { Vector3 } from "./math";
 
 
 //Intersection sphere for sphere, stick render
 /** @constructor */
-$3Dmol.Sphere = function(center, radius) {
+export function Sphere(center, radius) {
 
     this.center = (center !== undefined) ? 
-        center : new $3Dmol.Vector3();
+        center : new Vector3();
         
     this.radius = (radius !== undefined) ?
         radius : 0;
         
 };
 
-$3Dmol.Sphere.prototype = {
+Sphere.prototype = {
     
-    constructor : $3Dmol.Sphere,
+    constructor : Sphere,
     
     set : function(center, radius) {
         
@@ -60,7 +63,7 @@ $3Dmol.Sphere.prototype = {
        
     clone : function() {
         
-        return new $3Dmol.Sphere().copy(this);
+        return new Sphere().copy(this);
         
     }
 
@@ -69,24 +72,24 @@ $3Dmol.Sphere.prototype = {
 
 //Bounding cylinder for stick render  
 /** @constructor */
-$3Dmol.Cylinder = function(c1, c2, radius) {
+export function Cylinder(c1, c2, radius) {
 
     this.c1 = (c1 !== undefined) ?
-        c1 : new $3Dmol.Vector3();
+        c1 : new Vector3();
 
     this.c2 = (c2 !== undefined) ?
-        c2 : new $3Dmol.Vector3();
+        c2 : new Vector3();
         
-    this.direction = new $3Dmol.Vector3().subVectors(this.c2, this.c1).normalize();
+    this.direction = new Vector3().subVectors(this.c2, this.c1).normalize();
 
     this.radius = (radius !== undefined) ?
         radius : 0;
     
 };
 
-$3Dmol.Cylinder.prototype = {
+Cylinder.prototype = {
 
-    constructor : $3Dmol.Cylinder,
+    constructor : Cylinder,
 
     copy : function(cylinder) {
 
@@ -101,7 +104,7 @@ $3Dmol.Cylinder.prototype = {
     
     lengthSq : function() {
     
-        var vector = new $3Dmol.Vector3();
+        var vector = new Vector3();
         
         return function(){
             return vector.subVectors(this.c2, this.c1).lengthSq();
@@ -126,22 +129,22 @@ $3Dmol.Cylinder.prototype = {
 
 //plane specified by three points
 /** @constructor */
-$3Dmol.Triangle = function(a, b, c){
+export function Triangle(a, b, c){
    
     this.a = (a !== undefined) ?
-        a : new $3Dmol.Vector3();
+        a : new Vector3();
 
     this.b = (b !== undefined) ?
-        b : new $3Dmol.Vector3();
+        b : new Vector3();
     
     this.c = (c !== undefined) ?
-        c : new $3Dmol.Vector3();   
+        c : new Vector3();   
   
 };
 
-$3Dmol.Triangle.prototype = {
+Triangle.prototype = {
 
-    constructor : $3Dmol.Triangle,
+    constructor : Triangle,
     
     copy : function(triangle) {
         
@@ -165,7 +168,7 @@ $3Dmol.Triangle.prototype = {
     
     getNormal : function() {
         
-        var v1 = new $3Dmol.Vector3();
+        var v1 = new Vector3();
         
         return function() {
             

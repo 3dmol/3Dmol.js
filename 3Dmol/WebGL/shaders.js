@@ -1,6 +1,6 @@
 
 
-$3Dmol.ShaderUtils = {
+export const ShaderUtils = {
 
     clone: function ( uniforms_src ) {
 
@@ -12,7 +12,7 @@ $3Dmol.ShaderUtils = {
 
             var srcValue = uniforms_src[u].value;
 
-            if (srcValue instanceof $3Dmol.Color)
+            if (srcValue instanceof Color)
                 uniforms_clone[u].value = srcValue.clone();
             else if (typeof srcValue === "number")
                 uniforms_clone[u].value = srcValue;
@@ -103,7 +103,7 @@ $3Dmol.ShaderUtils = {
     ].join("\n")
 };
 
-$3Dmol.ShaderLib = {
+export const ShaderLib = {
     'basic' : {
         fragmentShader : [
 "uniform mat4 viewMatrix;",
@@ -153,7 +153,7 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000}
         }
@@ -241,7 +241,7 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
             directionalLightColor: { type: 'fv', value: [] },
@@ -327,7 +327,7 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
             directionalLightColor: { type: 'fv', value: [] },
@@ -415,7 +415,7 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
             directionalLightColor: { type: 'fv', value: [] },
@@ -469,8 +469,8 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
-            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            outlineColor: { type: 'c', value: new Color(0.0, 0.0, 0.0) },
+            fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
             outlineWidth: { type: 'f', value: 0.1 },
@@ -543,8 +543,8 @@ $3Dmol.ShaderLib = {
 
        uniforms : {
            opacity: { type: 'f', value: 1.0 },
-           outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
-           fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+           outlineColor: { type: 'c', value: new Color(0.0, 0.0, 0.0) },
+           fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
            fogNear: { type: 'f', value: 1.0 },
            fogFar: { type: 'f', value: 2000},
            outlineWidth: { type: 'f', value: 0.1 },
@@ -554,7 +554,7 @@ $3Dmol.ShaderLib = {
    },
    //stick imposters
    'stickimposter' : {
-      fragmentShader : [$3Dmol.ShaderUtils.stickimposterFragmentShader,
+      fragmentShader : [ShaderUtils.stickimposterFragmentShader,
     "    float dotProduct = dot( norm, vLight );",
     "    vec3 light = vec3( max( dotProduct, 0.0 ) );",
     "    gl_FragColor = vec4(light*color, opacity*opacity );",
@@ -628,7 +628,7 @@ $3Dmol.ShaderLib = {
 
        uniforms : {
            opacity: { type: 'f', value: 1.0 },
-           fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+           fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
            fogNear: { type: 'f', value: 1.0 },
            fogFar: { type: 'f', value: 2000},
            directionalLightColor: { type: 'fv', value: [] },
@@ -638,7 +638,7 @@ $3Dmol.ShaderLib = {
    },
    //stick imposter outlines
    'stickimposteroutline' : {
-      fragmentShader : $3Dmol.ShaderUtils.stickimposterFragmentShader + 'gl_FragColor = vec4(color,1.0);}',
+      fragmentShader : ShaderUtils.stickimposterFragmentShader + 'gl_FragColor = vec4(color,1.0);}',
       vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -706,10 +706,10 @@ $3Dmol.ShaderLib = {
 
        uniforms : {
            opacity: { type: 'f', value: 1.0 },
-           fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+           fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
            fogNear: { type: 'f', value: 1.0 },
            fogFar: { type: 'f', value: 2000},
-           outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
+           outlineColor: { type: 'c', value: new Color(0.0, 0.0, 0.0) },
            outlineWidth: { type: 'f', value: 0.1 },
            outlinePushback: { type: 'f', value: 1.0 },
        }
@@ -801,7 +801,7 @@ $3Dmol.ShaderLib = {
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
-            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
             directionalLightColor: { type: 'fv', value: [] },
@@ -1006,7 +1006,7 @@ $3Dmol.ShaderLib = {
 
         uniforms: {
             opacity: { type: 'f', value: 1.0 },
-            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
+            fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
             fogFar: { type: 'f', value: 2000},
             data: { type: 'i', value: 3 },

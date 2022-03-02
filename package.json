@@ -1,5 +1,8 @@
 {
   "name": "3dmol",
+  "source": "3dmol/3dmol.js",
+  "main": "build/3Dmol-min.js",
+  "module": "build/3Dmol-es.js",
   "version": "1.8.0",
   "description": "Object oriented Javascript molecular visualization library",
   "repository": {
@@ -24,12 +27,16 @@
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
     "jsdoc": "^3.6.10",
-    "jshint": "^2.13.1"
+    "jshint": "^2.13.1",
+    "parcel": "^2.3.2"
   },
   "scripts": {
-    "build": "gulp",
+    "build": "parcel",
+    "doc": "gulp doc",
+    "lint": "gulp lint",
+    "gulp:test": "gulp test",
     "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
-    "test": "npm run glcheck",
+    "test": "npm run glcheck && npm run gulp:test",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
@@ -38,7 +45,6 @@
     "prepare": "npm run build"
   },
   "license": "BSD-3-Clause",
-  "main": "build/3Dmol-min.js",
   "dependencies": {
     "ini": "^2.0.0",
     "jquery": "^3.6.0",

@@ -1,11 +1,14 @@
+// @ts-check
 //Render plugins go here
+
+import { ShaderLib } from "./shaders";
 
 /**
  * Sprite render plugin
- * @this {$3Dmol.SpritePlugin}
+ * @this {SpritePlugin}
  */
 
-$3Dmol.SpritePlugin = function () {
+export function SpritePlugin() {
 
     var _gl, _renderer, _precision, _sprite = {};
 
@@ -47,7 +50,7 @@ $3Dmol.SpritePlugin = function () {
         _gl.bindBuffer( _gl.ELEMENT_ARRAY_BUFFER, _sprite.elementBuffer );
         _gl.bufferData( _gl.ELEMENT_ARRAY_BUFFER, _sprite.faces, _gl.STATIC_DRAW );
 
-        _sprite.program = createProgram( $3Dmol.ShaderLib.sprite, _precision );
+        _sprite.program = createProgram( ShaderLib.sprite, _precision );
 
         _sprite.attributes = {};
         _sprite.uniforms = {};
