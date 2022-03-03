@@ -1,6 +1,7 @@
 # TODO: determine if these are test fails
 questinable_tests = [
-    "js_setCoordinates"
+    "js_setCoordinates",
+    "testwaterzoom"
 ]
 
 # animations:
