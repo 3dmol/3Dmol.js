@@ -1,7 +1,6 @@
 # TODO: determine if these are test fails
 questinable_tests = [
-    "js_setCoordinates",
-    "testwaterzoom"
+    "js_setCoordinates"
 ]
 
 # animations:
@@ -26,7 +25,8 @@ no_render = [
     "test2", 
     "test3", 
     "test5", 
-    "test6"
+    "test6",
+    "testwaterzoom"
 ]
 
 # Missing numbers:
