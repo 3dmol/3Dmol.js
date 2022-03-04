@@ -39,7 +39,7 @@
   "scripts": {
     "build": "gulp",
     "prepare": "npm run build",
-    "test": "jest" 
+    "test": "npx jest" 
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",
