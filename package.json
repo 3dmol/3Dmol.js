@@ -10,7 +10,7 @@
   "homepage": "http://3dmol.csb.pitt.edu",
   "devDependencies": {
     "del": "^6.0.0",
-    "glcheck": "^0.3.5",
+    "glcheck": "3dmol/glcheck#master",
     "glob-parent": "^5.1.2",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",

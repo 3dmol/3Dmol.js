@@ -138,7 +138,7 @@ class File():
                 name=""
             exmp=text[i+8:smallest_next]
             exmp=exmp.replace('*','')
-            filename=filename.replace("3Dmol/","").lstrip('.').lstrip('/')
+            filename=re.sub(r'.*/3Dmol/',"",filename)
             flname=filename+"_"+name
             
             flname=flname.replace(".","_")
