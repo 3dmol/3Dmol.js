@@ -183,7 +183,7 @@ $3Dmol.autoload=function(viewer,callback){
                     if(config.backgroundColor === undefined) config.backgroundColor = bgcolor;
                     if(config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;                     
                     config.ui = showUI;
-                    glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, config);
+                    glviewer = $3Dmol.viewers[this.id || nviewers+=1] = $3Dmol.createViewer(viewerdiv, config);
 
                 } else {
                     glviewer.setBackgroundColor(bgcolor, bgalpha);
