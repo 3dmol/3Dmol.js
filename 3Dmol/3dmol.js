@@ -1,6 +1,6 @@
 
-//This defines the $3Dmol object which is used to create viewers
-//and configure system-wide settings
+// This defines the $3Dmol object which is used to create viewers
+// and configure system-wide settings
 
 /** 
  * All of the functionality of $3Dmol.js is contained within the
@@ -8,14 +8,14 @@
  * @namespace */
 $3Dmol = (function(window) {
     
-    var my = window.$3Dmol || {};
+    const my = window.$3Dmol || {};
     
     return my;
 
 })(window);
 
-if ( typeof module === "object" && typeof module.exports === "object" ) { 
-	//for node.js exporting
+if ( typeof module == "object" && typeof module.exports == "object" ) { 
+	// for node.js exporting
 	module.exports = $3Dmol; 
 }
 
@@ -61,24 +61,24 @@ if (!String.prototype.endsWith) {
 // use this transport for "binary" data type
 $.ajaxTransport(
                "+binary",
-               function(options, originalOptions, jqXHR) {
+               (options, originalOptions, jqXHR) => {
                    // check for conditions and support for blob / arraybuffer response type
-                   if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || 
+                   if (window.FormData && ((options.dataType && (options.dataType === 'binary')) || 
                            (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || 
                                    (window.Blob && options.data instanceof Blob))))) {
                        return {
                            // create new XMLHttpRequest
-                           send : function(headers, callback) {
+                           send(headers, callback) {
                                // setup all variables
-                               var xhr = new XMLHttpRequest(), url = options.url, type = options.type, async = options.async || true,
+                               const xhr = new XMLHttpRequest(); const {url} = options; const {type} = options; const async = options.async || true;
                                // blob or arraybuffer. Default is blob
-                               dataType = options.responseType || "blob", 
-                                           data = options.data || null, 
-                                           username = options.username || null, 
-                                           password = options.password || null;
+                               const dataType = options.responseType || "blob"; 
+                                           let data = options.data || null; 
+                                           const username = options.username || null; 
+                                           const password = options.password || null;
 
-                               var xhrret = function() {
-                                   var data = {};
+                               const xhrret = function() {
+                                   data = {};
                                    data[options.dataType] = xhr.response;
                                    // make callback and send data
                                    callback(xhr.status, xhr.statusText,
@@ -94,14 +94,14 @@ $.ajaxTransport(
                                        password);
 
                                // setup custom headers
-                               for ( var i in headers) {
+                               for ( const i in headers) {
                                    xhr.setRequestHeader(i, headers[i]);
                                }
 
                                xhr.responseType = dataType;
                                xhr.send(data);
                            },
-                           abort : function() {
+                           abort() {
                                jqXHR.abort();
                            }
                        };
@@ -114,7 +114,7 @@ $.ajaxTransport(
  @function $3Dmol.createViewer
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer configuration
- * @param {Object} shared_viewer_resources shared resources between viewers' renderers
+ * @param {Object} sharedViewerResources shared resources between viewers' renderers
  * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
  * @example
    var viewer = $3Dmol.createViewer(
@@ -127,25 +127,26 @@ $.ajaxTransport(
  *                        
  */
 
-$3Dmol.createViewer = function(element, config, shared_viewer_resources)
+$3Dmol.createViewer = function(element, config, sharedViewerResources)
 {
-    if(typeof(element) === "string")
-    element = $("#"+element);
+    if(typeof(element) == "string")
+    element = $(`#${element}`);
     if(!element) return;
     
     config = config || {}; 
-    shared_viewer_resources = shared_viewer_resources || {};
+    sharedViewerResources = sharedViewerResources || {};
     
-    //try to create the  viewer
+    // try to create the  viewer
     try {
-        var viewer = new $3Dmol.GLViewer(element, config, shared_viewer_resources);
+        const viewer = new $3Dmol.GLViewer(element, config, sharedViewerResources);
         return viewer;
     }
     catch(e) {
-        throw "error creating viewer: "+e;
+        // throw `error creating viewer: ${e}`;
+        throw new Error("error creating viewer");// how to have a message like what the previous line does
     }
     
-    return null;
+    // return null;
 };
 
 /**
@@ -153,7 +154,7 @@ $3Dmol.createViewer = function(element, config, shared_viewer_resources)
  @function $3Dmol.createViewerGrid
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {GridSpec} config - grid configuration
- * @param {ViewerGridSpec} viewer_config - Viewer specification to apply to all subviewers
+ * @param {ViewerGridSpec} viewerConfig - Viewer specification to apply to all subviewers
  * @return [[$3Dmol.GLViewer]] 2D array of GLViewers
  * @example                    
    var viewers = $3Dmol.createViewerGrid(
@@ -194,40 +195,41 @@ $3Dmol.createViewer = function(element, config, shared_viewer_resources)
    });
      
  */
-$3Dmol.createViewerGrid  = function(element,config,viewer_config){
-    if(typeof(element) === "string")
-        element = $("#"+element);
+$3Dmol.createViewerGrid  = function(element,config,viewerConfig){
+    if(typeof(element) == "string")
+        element = $(`#${element}`);
     if(!element) return;
 
     config = config || {}; 
-    viewer_config = viewer_config || {};
+    viewerConfig = viewerConfig || {};
     
-    var viewers = [];
-    //create canvas
-    var canvas = document.createElement('canvas');
+    const viewers = [];
+    // create canvas
+    const canvas = document.createElement('canvas');
 
-    viewer_config.rows = config.rows;
-    viewer_config.cols = config.cols;
-    viewer_config.control_all = config.control_all != undefined ? config.control_all : false;
+    viewerConfig.rows = config.rows;
+    viewerConfig.cols = config.cols;
+    viewerConfig.control_all = config.control_all !== undefined ? config.control_all : false;
     $(element).append($(canvas));
 
-      //try to create the  viewer
+      // try to create the  viewer
     try {  
-      for(var r =0;r<config.rows;r++){
-        var row = [];
-        for(var c = 0;c<config.cols;c++){
-          viewer_config.row = r;
-          viewer_config.col = c;
-          viewer_config.canvas = canvas;
-          viewer_config.viewers = viewers;
-          viewer_config.control_all = config.control_all;
-          var viewer = $3Dmol.createViewer(element, viewer_config);
+      for(let r =0;r<config.rows;r++){
+        const row = [];
+        for(let c = 0;c<config.cols;c++){
+          viewerConfig.row = r;
+          viewerConfig.col = c;
+          viewerConfig.canvas = canvas;
+          viewerConfig.viewers = viewers;
+          viewerConfig.control_all = config.control_all;
+          const viewer = $3Dmol.createViewer(element, viewerConfig);
           row.push(viewer);
         }
-        viewers.unshift(row); //compensate for weird ordering in renderer
+        viewers.unshift(row); // compensate for weird ordering in renderer
       }
     }catch(e) {
-        throw "error creating viewer grid: "+e;
+        // throw `error creating viewer grid: ${e}`;
+        throw new Error("error creating viewer grid");
     }
     
     return viewers;
@@ -250,25 +252,25 @@ $3Dmol.viewers = {};
  * @return {Promise}
  */ 
 $3Dmol.getbin = function(uri, callback, request,postdata) {
-    var promise = new Promise(function(resolve, reject) {
+    const promise = new Promise((resolve, reject) => {
         
-        request = (request == undefined)?"GET":request;
+        request = (request === undefined)?"GET":request;
         $.ajax({url:uri, 
             dataType: "binary",
             method: request,
             data: postdata,
             responseType: "arraybuffer",
             processData: false})
-        .done(function(ret) {
+        .done((ret) => {
             resolve(ret);
         })
-        .fail(function(e,txt) { 
+        .fail((e,txt) => { 
             console.log(txt);
             reject();
         });
     });
     if (callback) return promise.then(callback);
-    else return promise;
+    return promise;
 };
 
 /**
@@ -277,11 +279,11 @@ $3Dmol.getbin = function(uri, callback, request,postdata) {
  * @param {string} base64 encoded string
  */
 $3Dmol.base64ToArray = function(base64) {
-    var binary_string =  window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array( len );
-    for (var i = 0; i < len; i++)        {
-        bytes[i] = binary_string.charCodeAt(i);
+    const binaryString =  window.atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array( len );
+    for (let i = 0; i < len; i++)        {
+        bytes[i] = binaryString.charCodeAt(i);
     }
     return bytes;
 };
@@ -306,123 +308,123 @@ $3Dmol.base64ToArray = function(base64) {
     });
  */ 
 $3Dmol.download = function(query, viewer, options, callback) {
-    var type = "";
-    var pdbUri = "";
-    var mmtfUri = "";
-    var uri = "";
-    var promise = null;
-    var m = viewer.addModel();
+    let type = "";
+    let pdbUri = "";
+    let mmtfUri = "";
+    let uri = "";
+    let promise = null;
+    const m = viewer.addModel();
     
     if (query.indexOf(':') < 0) {
-        //no type specifier, guess
-        if(query.length == 4) {
-            query = 'pdb:'+query;
+        // no type specifier, guess
+        if(query.length === 4) {
+            query = `pdb:${query}`;
         } else if(!isNaN(query)) {
-            query = 'cid:'+query;
+            query = `cid:${query}`;
         } else {
-            query = 'url:'+query;
+            query = `url:${query}`;
         }
     }
     if (query.substr(0, 5) === 'mmtf:') {
         pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
         uri = pdbUri + query;        
-        if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
-                //when fetch directly from pdb, trust structure annotations
+        if(options && typeof options.noComputeSecondaryStructure == 'undefined') {
+                // when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
         }
-        promise = new Promise(function(resolve) {
+        promise = new Promise((resolve) => {
             $3Dmol.getbin(uri)
-            .then(function(ret) {
+            .then((ret) => {
                 m.addMolData(ret, 'mmtf',options);
                 viewer.zoomTo();
                 viewer.render();
                 resolve(m);
-            },function() {console.log("fetch of "+uri+" failed.");});
+            },() => {console.log(`fetch of ${uri} failed.`);});
         });
     }
     else {
         if (query.substr(0, 4) === 'pdb:') {
             type = 'mmtf';
             if(options && options.format) {
-                type = options.format; //can override and require pdb
+                type = options.format; // can override and require pdb
             }
             
-            if(options && typeof options.noComputeSecondaryStructure === 'undefined') {
-                //when fetch directly from pdb, trust structure annotations
+            if(options && typeof options.noComputeSecondaryStructure == 'undefined') {
+                // when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
             }
             query = query.substr(4).toUpperCase();
             if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                alert("Wrong PDB ID"); return;
             }
-            if(type == 'mmtf') {
+            if(type === 'mmtf') {
                 mmtfUri = options && options.mmtfUri ? options.mmtfUri : 'https://mmtf.rcsb.org/v1.0/full/';
                 uri = mmtfUri + query.toUpperCase();
             }
             else  {
                 pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
-                uri = pdbUri + query + "." + type;
+                uri = `${pdbUri + query  }.${  type}`;
             }
     
-        } else if (query.substr(0, 4) == 'cid:') {
+        } else if (query.substr(0, 4) === 'cid:') {
             type = "sdf";
             query = query.substr(4);
             if (!query.match(/^[0-9]+$/)) {
                alert("Wrong Compound ID"); return;
             }
-            uri = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query + 
-              "/SDF?record_type=3d";
-        } else if (query.substr(0,4) == 'url:') {
+            uri = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${  query  
+              }/SDF?record_type=3d`;
+        } else if (query.substr(0,4) === 'url:') {
             uri = query.substr(4);
             type = uri;
         }
     
-        var handler = function(ret) {
+        const handler = function(ret) {
             m.addMolData(ret, type, options);
             viewer.zoomTo();
             viewer.render();
         };
-        promise = new Promise(function(resolve) {
-            if(type == 'mmtf') { //binary data
+        promise = new Promise((resolve) => {
+            if(type === 'mmtf') { // binary data
                 $3Dmol.getbin(uri)
-                .then(function(ret) {
+                .then((ret) => {
                     handler(ret);
                     resolve(m);
-                }).catch(function(){
-                    //if mmtf server is being annoying, fallback to text
+                }).catch(()=> {
+                    // if mmtf server is being annoying, fallback to text
                     pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
-                    uri = pdbUri + query + ".pdb";
+                    uri = `${pdbUri + query  }.pdb`;
                     console.log("falling back to pdb format");
-                    $.get(uri, function(ret) {
+                    $.get(uri, (ret) => {
                         handler(ret);
                         resolve(m);
-                    }).fail(function(e) {
+                    }).fail((e) => {
                        handler("");
                        resolve(m);
-                       console.log("fetch of "+uri+" failed: "+e.statusText);
+                       console.log(`fetch of ${uri} failed: ${e.statusText}`);
                        });
-                }); //an error msg has already been printed
+                }); // an error msg has already been printed
             }
             else {        
-               $.get(uri, function(ret) {
+               $.get(uri, (ret) => {
                    handler(ret);
                    resolve(m);
-               }).fail(function(e) {
+               }).fail((e) => {
                    handler("");
                    resolve(m);
-                   console.log("fetch of "+uri+" failed: "+e.statusText);
+                   console.log(`fetch of ${uri} failed: ${e.statusText}`);
                });
             }
         });
     }
     if (callback) {
-        promise.then(function(m){
+        promise.then((m)=> {
             callback(m);
         });
         return m;
     }
-    else return promise;
+    return promise;
 };
        
 
@@ -438,7 +440,7 @@ $3Dmol.SurfaceType = {
 };
 
 
-//Miscellaneous functions and classes - to be incorporated into $3Dmol proper
+// Miscellaneous functions and classes - to be incorporated into $3Dmol proper
 /**
  * 
  * @param {$3Dmol.Geometry} geometry
@@ -447,7 +449,7 @@ $3Dmol.SurfaceType = {
  */
 $3Dmol.mergeGeos = function(geometry, mesh) {
     
-    var meshGeo = mesh.geometry;
+    const meshGeo = mesh.geometry;
     
     if (meshGeo === undefined) 
         return;
@@ -492,62 +494,62 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
  * @returns {Object}
  */
 $3Dmol.specStringToObject = function(str) {
-    if(typeof(str) === "object") {
-        return str; //not string, assume was converted already
+    if(typeof(str) == "object") {
+        return str; // not string, assume was converted already
     }
-    else if(typeof(str) === "undefined" || str == null) {
+    if(typeof(str) == "undefined" || str == null) {
         return str; 
     }
     
-    str = str.replace(/%7E/,'~'); //copy/pasting urls sometimes does this
-    //convert things that look like numbers into numbers
-    var massage = function(val) {
+    str = str.replace(/%7E/,'~'); // copy/pasting urls sometimes does this
+    // convert things that look like numbers into numbers
+    const massage = function(val) {
         if($3Dmol.isNumeric(val)) {
-           //hexadecimal does not parse as float
-           if(Math.floor(parseFloat(val)) == parseInt(val)) {
+           // hexadecimal does not parse as float
+           if(Math.floor(parseFloat(val)) === parseInt(val)) {
               return parseFloat(val);
            }
-           else if(val.indexOf('.') >= 0) {
+           if(val.indexOf('.') >= 0) {
                return parseFloat(val); // ".7" for example, does not parseInt
            }
-           else{
+           
                return parseInt(val);
-           }
+           
         }
-        //boolean conversions
-        else if(val === 'true') {
+        // boolean conversions
+        if(val === 'true') {
             return true;
         }
-        else if(val === 'false') {
+        if(val === 'false') {
             return false;
         }
         return val;
     };
     
-    var ret = {};
+    const ret = {};
     if(str === 'all') return ret;
-    var fields = str.split(';');
-    for(var i = 0; i < fields.length; i++) {
-        var fv = fields[i].split(':');
-        var f = fv[0];
-        var val = {};
-        var vstr = fv[1];
+    const fields = str.split(';');
+    for(let i = 0; i < fields.length; i++) {
+        const fv = fields[i].split(':');
+        const f = fv[0];
+        let val = {};
+        let vstr = fv[1];
         if(vstr) {
             vstr = vstr.replace(/~/g,"=");
             if(vstr.indexOf('=') !== -1) {
-                //has key=value pairs, must be object
-                var kvs = vstr.split(',');
-                for(var j = 0; j < kvs.length; j++) {
-                    var kv = kvs[j].split('=',2);
+                // has key=value pairs, must be object
+                const kvs = vstr.split(',');
+                for(let j = 0; j < kvs.length; j++) {
+                    const kv = kvs[j].split('=',2);
                     val[kv[0]] = massage(kv[1]);
                 }
             }
             else if(vstr.indexOf(',') !== -1) {
-                //has multiple values, must list
+                // has multiple values, must list
                 val = vstr.split(',');
             }
             else {
-                val = massage(vstr); //value itself
+                val = massage(vstr); // value itself
             }
         }
         ret[f] = val;
@@ -563,8 +565,8 @@ $3Dmol.specStringToObject = function(str) {
  * @return {Array}
  */
 $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
-    var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
-    var includeSym = !ignoreSymmetries;
+    let xmin; let ymin; let zmin; let xmax; let ymax; let zmax; let xsum; let ysum; let zsum; let cnt;
+    const includeSym = !ignoreSymmetries;
 
     xmin = ymin = zmin = 9999;
     xmax = ymax = zmax = -9999;
@@ -572,12 +574,12 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
     
     if (atomlist.length === 0)
         return [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-    for (var i = 0; i < atomlist.length; i++) {
-        var atom = atomlist[i];
-        if (typeof atom === 'undefined' || !isFinite(atom.x) ||
+    for (let i = 0; i < atomlist.length; i++) {
+        const atom = atomlist[i];
+        if (typeof atom == 'undefined' || !isFinite(atom.x) ||
                 !isFinite(atom.y) || !isFinite(atom.z))
             continue;
-        cnt++;
+        cnt+=1;
         xsum += atom.x;
         ysum += atom.y;
         zsum += atom.z;
@@ -590,8 +592,8 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
         zmax = (zmax > atom.z) ? zmax : atom.z;
         
         if (atom.symmetries && includeSym) {
-            for (var n = 0; n < atom.symmetries.length; n++) {
-                cnt++;
+            for (let n = 0; n < atom.symmetries.length; n++) {
+                cnt+=1;
                 xsum += atom.symmetries[n].x;
                 ysum += atom.symmetries[n].y;
                 zsum += atom.symmetries[n].z;
@@ -610,10 +612,10 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
 };
 
 
-//return the value of an atom property prop, or null if non existent
+// return the value of an atom property prop, or null if non existent
 // looks first in properties, then in the atom itself
 $3Dmol.getAtomProperty = function(atom, prop) {
-    var val = null;
+    let val = null;
     if (atom.properties &&
             typeof (atom.properties[prop]) != "undefined") {
         val = atom.properties[prop];
@@ -630,12 +632,12 @@ $3Dmol.getAtomProperty = function(atom, prop) {
 * @return {Array} - [min, max] values
 */
 $3Dmol.getPropertyRange = function (atomlist, prop) {
-    var min = Number.POSITIVE_INFINITY;
-    var max = Number.NEGATIVE_INFINITY;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
 
-    for (var i = 0, n = atomlist.length; i < n; i++) {
-        var atom = atomlist[i];
-        var val = $3Dmol.getAtomProperty(atom, prop);
+    for (let i = 0, n = atomlist.length; i < n; i++) {
+        const atom = atomlist[i];
+        const val = $3Dmol.getAtomProperty(atom, prop);
         
         if(val != null) {
             if (val < min)
@@ -655,18 +657,18 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
     return [ min, max ];
 };
 
-//hackish way to work with requirejs - doesn't actually work yet
-//since we don't use the require optimizer to combine modules
-if(typeof(_3dmol_saved_define) !== 'undefined') {
+// hackish way to work with requirejs - doesn't actually work yet
+// since we don't use the require optimizer to combine modules
+if(typeof(_3dmolSavedDefine) != 'undefined') {
     /** When pulling in external sources, disable amd to ensure they
      * populate the global namespace as expected.  Restore it so code
      * using amd still works. */
-    /*global _3dmol_saved_define, _3dmol_saved_require, define:true, require:true */
-    define = _3dmol_saved_define;
-    require = _3dmol_saved_require;
+    /* global _3dmolSavedDefine, _3dmolSavedRequire, define:true, require:true */
+    define = _3dmolSavedDefine;
+    require = _3dmolSavedRequire;
 }
-if( typeof(define) === 'function' && define.amd) {
-    define('$3Dmol',[], function() { return $3Dmol; });
+if( typeof(define) == 'function' && define.amd) {
+    define('$3Dmol',[], () => $3Dmol);
 }
 
 /* StereoViewer for stereoscopic viewing
@@ -676,12 +678,12 @@ if( typeof(define) === 'function' && define.amd) {
 */
 
 $3Dmol.createStereoViewer = function(element) {
-    var that = this;
-    if(typeof(element) === "string")
-        element = $("#"+element);
+    const that = this;
+    if(typeof(element) == "string")
+        element = $(`#${element}`);
     if(!element) return;
     
-    var viewers = $3Dmol.createViewerGrid(element, {rows: 1, cols: 2, control_all: true});
+    const viewers = $3Dmol.createViewerGrid(element, {rows: 1, cols: 2, control_all: true});
     
     this.glviewer1 = viewers[0][0];
     this.glviewer2 = viewers[0][1];
@@ -692,24 +694,22 @@ $3Dmol.createStereoViewer = function(element) {
     this.glviewer1.linkViewer(this.glviewer2);
     this.glviewer2.linkViewer(this.glviewer1);
 
-    var methods = Object.getOwnPropertyNames(this.glviewer1) //get all methods of glviewer object
-    .filter(function(property) {
-        return typeof that.glviewer1[property] == 'function';
-    });
+    const methods = Object.getOwnPropertyNames(this.glviewer1) // get all methods of glviewer object
+    .filter((property) => typeof that.glviewer1[property] == 'function');
 
-    for (var i = 0; i < methods.length; i++) { //create methods of the same name
+    for (let i = 0; i < methods.length; i++) { // create methods of the same name
         this[methods[i]] = (function(method){
             return function(){
-                var m1=this.glviewer1[method].apply(this.glviewer1,arguments);
-                var m2=this.glviewer2[method].apply(this.glviewer2,arguments);
+                const m1=this.glviewer1[method].apply(this.glviewer1,arguments);
+                const m2=this.glviewer2[method].apply(this.glviewer2,arguments);
                 return [m1,m2];
             };
         })(methods[i]);
     }
     
-    //special cased methods
-    this.setCoordinates = function (models, data, format) { //for setting the coordinates of the models
-        for (var i = 0; i < models.length; i++) {
+    // special cased methods
+    this.setCoordinates = function (models, data, format) { // for setting the coordinates of the models
+        for (let i = 0; i < models.length; i++) {
             models[i].setCoordinates(data, format);
         }
     };
@@ -726,35 +726,36 @@ $3Dmol.createStereoViewer = function(element) {
         this.glviewer1.render();
         this.glviewer2.render();
         if(callback) {
-            callback(this); //call only once
+            callback(this); // call only once
         }
     };
     
     this.getCanvas = function() {
-        return this.glviewer1.getCanvas(); //same for both
+        return this.glviewer1.getCanvas(); // same for both
     };
 
 };
 
-//simplified version of $.extend
+// simplified version of $.extend
 $3Dmol.extend = function (obj1, src1) {
-    for (var key in src1) {
-        if(src1.hasOwnProperty(key) && src1[key] !== undefined) {
+    for (const key in src1) {
+        // if(src1.hasOwnProperty(key) && src1[key] !== undefined) {
+        if(Object.prototype.hasOwnProperty.call(src1,key) && src1[key] !== undefined){
             obj1[key] = src1[key];            
         }
     }   
     return obj1;
 }; 
 
-//deep copy, cannot deal with circular refs; undefined input becomes an empty object
-//https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
+// deep copy, cannot deal with circular refs; undefined input becomes an empty object
+// https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
 $3Dmol.deepCopy = function(inObject)  {
-  let outObject, value, key;
+  let outObject; let value; let key;
 
-  if ( inObject == undefined) {
+  if ( inObject === undefined) {
     return {};
   }
-  if (typeof inObject !== "object" || inObject === null) {
+  if (typeof inObject != "object" || inObject == null) {
     return inObject; // Return the value if inObject is not an object
   }
 
@@ -772,13 +773,13 @@ $3Dmol.deepCopy = function(inObject)  {
 
 $3Dmol.isNumeric = function( obj ) {
 
-    var type = typeof( obj );
+    const type = typeof( obj );
     return ( type === "number" || type === "string" ) &&
         !isNaN( obj - parseFloat( obj ) );
 };
 
 $3Dmol.isEmptyObject = function( obj ) {
-    var name;
+    let name;
     for ( name in obj ) {
         return false;
     }
@@ -786,10 +787,10 @@ $3Dmol.isEmptyObject = function( obj ) {
 };
 
 $3Dmol.makeFunction = function(callback) {
-    //for py3dmol let users provide callback as string
-    if (callback && typeof callback === "string") {
+    // for py3dmol let users provide callback as string
+    if (callback && typeof callback == "string") {
     /* jshint ignore:start */
-        callback = eval("("+callback+")");
+        callback = eval(`(${callback})`);
     /* jshint ignore:end */
     }
     // report to console if callback is not a valid function
@@ -799,7 +800,7 @@ $3Dmol.makeFunction = function(callback) {
     return callback;
 };
 
-//standardize voldata/volscheme in style
+// standardize voldata/volscheme in style
 $3Dmol.adjustVolumeStyle = function(style) {
     if(style) {
         if(style.volformat && !(style.voldata instanceof $3Dmol.VolumeData)) {

@@ -6,10 +6,35 @@
     },
     "extends": [
         "airbnb-base",
-        //"prettier/prettier:recomended"
         "prettier"
     ],
     "parserOptions": {
         "ecmaVersion": "latest"
+    },
+    "rules": {
+        "no-extend-native": ["error", {"exceptions": ["String"]}],
+        "guard-for-in":"off",
+        "no-restricted-syntax":"off",
+        "consistent-return":"warn", 
+        "no-param-reassign":"warn",
+        "no-plusplus":["error", {"allowForLoopAfterthoughts": true}],
+        "no-restricted-globals":"warn",
+        "eqeqeq":["error", "smart"],
+        "no-shadow":"warn",
+        "no-useless-escape":"warn",
+        "radix":"warn",
+        "no-multi-assign":["error", {"ignoreNonDeclaration":true}],
+        "no-continue":"warn",
+        "no-redeclare":["error", {"builtinGlobals": false}],
+        "no-unused-vars":"warn",
+        "prefer-destructuring":"warn",
+        "prefer-spread":"warn", "prefer-rest-params":"warn",
+        "no-unreachable-loop":["error", {"ignore":["ForInStatement"]}],// ignore all for-in loops
+        "no-eval":"warn" // prevent using eval
+
+    },
+    "globals":{
+        "$3Dmol": "writable",
+        "$": false
     }
 }
