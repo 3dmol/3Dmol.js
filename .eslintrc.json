@@ -31,8 +31,9 @@
         "prefer-spread":"warn", "prefer-rest-params":"warn",
         "no-unreachable-loop":["error", {"ignore":["ForInStatement"]}],// ignore all for-in loops
         "no-eval":"warn", // prevent using eval
-        "no-self-assign":["error", {"props": false}]
-
+        "no-self-assign":["error", {"props": false}],
+        "prefer-const":"warn",
+        "no-prototype-builtins":"warn"
     },
     "globals":{
         "$3Dmol": "writable",

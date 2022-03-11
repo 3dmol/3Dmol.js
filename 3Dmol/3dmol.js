@@ -739,8 +739,8 @@ $3Dmol.createStereoViewer = function(element) {
 // simplified version of $.extend
 $3Dmol.extend = function (obj1, src1) {
     for (const key in src1) {
-        // if(src1.hasOwnProperty(key) && src1[key] !== undefined) {
-        if(Object.prototype.hasOwnProperty.call(src1,key) && src1[key] !== undefined){
+         if(src1.hasOwnProperty(key) && src1[key] !== undefined) {
+        // if(Object.prototype.hasOwnProperty.call(src1,key) && src1[key] !== undefined){ // use Object.prototype
             obj1[key] = src1[key];            
         }
     }   
@@ -760,6 +760,7 @@ $3Dmol.deepCopy = function(inObject)  {
   }
 
   // Create an array or object to hold the values
+  // eslint-disable-next-line prefer-const
   outObject = Array.isArray(inObject) ? [] : {};
 
   for (key in inObject) {
